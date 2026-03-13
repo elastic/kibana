@@ -158,7 +158,7 @@ export const useAgentBuilderIntegration = ({
       const editor = editorRef.current;
       const currentYaml = editor?.getModel()?.getValue() ?? '';
 
-      agentBuilder.openConversationFlyout({
+      agentBuilder.openChat({
         initialMessage: options?.initialMessage,
         autoSendInitialMessage: options?.autoSendInitialMessage,
         attachments: [

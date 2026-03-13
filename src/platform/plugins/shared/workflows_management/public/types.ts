@@ -43,7 +43,7 @@ export interface AgentBuilderChatEvent {
 }
 
 export interface AgentBuilderPluginStartContract {
-  openConversationFlyout: (options?: {
+  openChat: (options?: {
     sessionTag?: string;
     agentId?: string;
     initialMessage?: string;
@@ -55,7 +55,7 @@ export interface AgentBuilderPluginStartContract {
       schema: unknown;
       handler: (params: unknown) => void | Promise<void>;
     }>;
-  }) => { flyoutRef: { close: () => void } };
+  }) => { chatRef: { close: () => void } };
   attachments: {
     addAttachmentType: (type: string, definition: unknown) => void;
   };

@@ -55,13 +55,13 @@ Use this skill when the user wants to:
 - **list_workflows**: List workflows in the user's environment
 - **get_workflow**: Retrieve a specific workflow by ID
 
-### Edit Tools (use when a \`workflow.yaml\` attachment is present)
-- **workflow_insert_step**: Insert a new step at the end of the steps list
-- **workflow_modify_step**: Replace an entire step by name
-- **workflow_modify_step_property**: Modify a single property of a step
-- **workflow_modify_property**: Modify a top-level workflow property (name, description, triggers, etc.)
-- **workflow_delete_step**: Delete a step by name
-- **workflow_replace_yaml**: Replace the entire workflow YAML (use sparingly, prefer surgical edits)
+### Edit Tools
+- **workflow_replace_yaml**: Replace the entire workflow YAML, or **create a new workflow from scratch** when no \`workflow.yaml\` attachment exists. Use this to create new workflows.
+- **workflow_insert_step**: Insert a new step at the end of the steps list (requires existing attachment)
+- **workflow_modify_step**: Replace an entire step by name (requires existing attachment)
+- **workflow_modify_step_property**: Modify a single property of a step (requires existing attachment)
+- **workflow_modify_property**: Modify a top-level workflow property (requires existing attachment)
+- **workflow_delete_step**: Delete a step by name (requires existing attachment)
 
 ## Core Instructions
 
@@ -221,6 +221,7 @@ When using edit tools:
 5. For multi-step changes, call multiple edit tools — each creates a separate proposal
 6. Each edit tool reads the current YAML from the \`workflow.yaml\` attachment and updates it,
    so sequential tool calls within a round see each other's changes
+7. After edits, you can render the workflow.yaml attachment with <render_attachment id="{attachmentId}"/> to show the user the current complete YAML
 
 ### Best Practices
 

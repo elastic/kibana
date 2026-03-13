@@ -95,8 +95,13 @@ export class WorkflowsPlugin
         .onStart<{ agentBuilder: AgentBuilderPluginStartContract }>('agentBuilder')
         .then(async ({ agentBuilder }) => {
           if (agentBuilder.found) {
+            const [coreStart] = await core.getStartServices();
             const { registerWorkflowAttachmentRenderers } = await aiIntegrationModule;
-            registerWorkflowAttachmentRenderers(agentBuilder.contract.attachments);
+            registerWorkflowAttachmentRenderers(agentBuilder.contract.attachments, {
+              http: coreStart.http,
+              notifications: coreStart.notifications,
+              application: coreStart.application,
+            });
             return agentBuilder.contract;
           }
           return undefined;

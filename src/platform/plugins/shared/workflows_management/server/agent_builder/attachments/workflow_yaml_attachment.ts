@@ -164,11 +164,17 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     `The workflow YAML and any validation errors are shown in the attachment content — do NOT call attachment_read to re-read them.\n\n` +
     `## Editing Rules\n\n` +
     `- Use edit tools to propose changes. NEVER paste full YAML into your response text.\n` +
-    `- Each edit tool returns a diffAttachmentId — render it with <render_attachment id="{diffAttachmentId}"/>\n` +
+    `- Each edit tool returns diffAttachmentId, attachmentId, and attachmentVersion\n` +
+    `- Render the diff with <render_attachment id="{diffAttachmentId}"/>\n` +
+    `- Render the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/> — the version attribute is required so the UI shows the latest content\n` +
     `- Edit tools auto-validate the result and return a \`validation\` field — no need to call validate_workflow separately after edits.\n` +
     `- Prefer surgical edits (workflow_modify_step, workflow_modify_step_property) over workflow_replace_yaml\n` +
     `- Use get_step_definitions to look up step type schemas when needed\n` +
     `- Use get_examples to find working workflow patterns\n\n` +
+    `## Rendering\n\n` +
+    `- The workflow.yaml attachment is rendered in chat as a YAML code preview with a Save button.\n` +
+    `- You can render it with <render_attachment id="{attachmentId}"/> where {attachmentId} is the workflow.yaml attachment ID.\n` +
+    `- After making edits, render the updated workflow.yaml attachment with the version from the tool result: <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>. The version attribute ensures the UI displays the latest content.\n\n` +
     `## Workflow YAML Structure\n\n` +
     `\`\`\`yaml\nversion: '1'\nname: Workflow Name\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n  - name: step_name\n    type: step_type\n    with:\n      param1: value1\n\`\`\`\n\n` +
     `## Common Step Properties\n\n` +
