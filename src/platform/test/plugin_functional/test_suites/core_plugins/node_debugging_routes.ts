@@ -31,10 +31,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       });
 
       it('returns 200 and valid JSON profile with duration query param', async () => {
-        const response = await supertest
-          .get(cpuProfilePath)
-          .query({ duration: 1 })
-          .expect(200);
+        const response = await supertest.get(cpuProfilePath).query({ duration: 1 }).expect(200);
         expect(response.body).to.be.an('object');
         expect(response.body).to.have.property('nodes');
         expect(response.body.nodes).to.be.an('array');
@@ -54,10 +51,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       });
 
       it('returns 200 and valid JSON sampling profile with duration query param', async () => {
-        const response = await supertest
-          .get(memoryProfilePath)
-          .query({ duration: 1 })
-          .expect(200);
+        const response = await supertest.get(memoryProfilePath).query({ duration: 1 }).expect(200);
         expect(response.body).to.be.an('object');
         expect(response.body).to.have.property('head');
         expect(response.body).to.have.property('samples');
