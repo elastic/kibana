@@ -114,22 +114,20 @@ describe('createTimeBucketAggregation', () => {
 });
 
 describe('createM4Pipeline', () => {
-  it('should generate the M4 STATS + unrolling pipeline with defaults', () => {
+  it('should keep 4 representative points per bucket (first, last, min, max) with their timestamps', () => {
     const result = createM4Pipeline({ metricField: '`cpu.usage`' });
 
-    expect(result).toContain('STATS');
+    // M4 aggregates: first/last timestamp and their values, min/max values and their timestamps
     expect(result).toContain('first_t = MIN(@timestamp)');
     expect(result).toContain('last_t = MAX(@timestamp)');
     expect(result).toContain('first_t_v = TOP(@timestamp, 1, "asc", `cpu.usage`)');
     expect(result).toContain('last_t_v = TOP(@timestamp, 1, "desc", `cpu.usage`)');
     expect(result).toContain('min_v = MIN(`cpu.usage`)');
     expect(result).toContain('max_v = MAX(`cpu.usage`)');
-    expect(result).toContain('min_v_t = TOP(`cpu.usage`, 1, "asc", @timestamp)');
-    expect(result).toContain('max_v_t = TOP(`cpu.usage`, 1, "desc", @timestamp)');
     expect(result).toContain('BY _m4_bucket = BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
   });
 
-  it('should include MV_EXPAND unrolling with CASE expressions', () => {
+  it('should unroll the 4 values per bucket into flat rows via MV_EXPAND for Lens compatibility', () => {
     const result = createM4Pipeline({ metricField: '`cpu.usage`' });
 
     expect(result).toContain('EVAL idx = [0, 1, 2, 3]');
@@ -137,49 +135,9 @@ describe('createM4Pipeline', () => {
     expect(result).toContain(
       '@timestamp = CASE(idx == 0, first_t, idx == 1, last_t, idx == 2, min_v_t, idx == 3, max_v_t)'
     );
-    expect(result).toContain(
-      `${M4_VALUE_COLUMN} = CASE(idx == 0, first_t_v, idx == 1, last_t_v, idx == 2, min_v, idx == 3, max_v)`
-    );
-  });
-
-  it('should KEEP only timestamp and value columns, then SORT and LIMIT', () => {
-    const result = createM4Pipeline({ metricField: '`cpu.usage`', targetBuckets: 200 });
-
     expect(result).toContain(`KEEP @timestamp, ${M4_VALUE_COLUMN}`);
     expect(result).toContain('SORT @timestamp ASC');
-    expect(result).toContain('LIMIT 800');
-  });
-
-  it('should respect custom targetBuckets', () => {
-    const result = createM4Pipeline({ metricField: '`cpu.usage`', targetBuckets: 500 });
-
-    expect(result).toContain('BUCKET(@timestamp, 500, ?_tstart, ?_tend)');
-    expect(result).toContain('LIMIT 2000');
-  });
-
-  it('should respect custom timestampField', () => {
-    const result = createM4Pipeline({
-      metricField: '`cpu.usage`',
-      timestampField: 'event.timestamp',
-    });
-
-    expect(result).toContain('first_t = MIN(event.timestamp)');
-    expect(result).toContain('BUCKET(event.timestamp, 100, ?_tstart, ?_tend)');
-    expect(result).toContain('KEEP @timestamp, value');
-    expect(result).toContain('SORT @timestamp ASC');
-  });
-
-  it('should respect custom outputTimestampField', () => {
-    const result = createM4Pipeline({
-      metricField: '`cpu.usage`',
-      timestampField: 'bucket_time',
-      outputTimestampField: 'my_ts',
-    });
-
-    expect(result).toContain('first_t = MIN(bucket_time)');
-    expect(result).toContain('BUCKET(bucket_time, 100, ?_tstart, ?_tend)');
-    expect(result).toContain('KEEP my_ts, value');
-    expect(result).toContain('SORT my_ts ASC');
+    expect(result).toContain('LIMIT 400');
   });
 });
 

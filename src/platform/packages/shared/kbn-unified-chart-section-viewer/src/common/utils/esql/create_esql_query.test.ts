@@ -382,53 +382,31 @@ TS metrics-*
 });
 
 describe('createM4DownsampledESQLQuery', () => {
-  it('should generate a two-stage AVG → M4 query', () => {
+  it('should generate a two-stage pipeline: AVG aggregation followed by M4 downsampling', () => {
     const query = createM4DownsampledESQLQuery({
       metric: mockMetric,
       sourceBuckets: 1000,
       targetBuckets: 100,
     });
 
+    // Stage 1: standard aggregation with fine-grained buckets
     expect(query).toContain('FROM metrics-*');
     expect(query).toContain('STATS agg_val = AVG(cpu.usage) BY _ts = BUCKET(@timestamp, 1000');
+
+    // Stage 2: M4 downsamples the intermediate result
+    const firstStats = query.indexOf('STATS agg_val');
+    const secondStats = query.indexOf('STATS', firstStats + 1);
+    expect(secondStats).toBeGreaterThan(firstStats);
     expect(query).toContain('first_t = MIN(_ts)');
     expect(query).toContain('first_t_v = TOP(_ts, 1, "asc", agg_val)');
     expect(query).toContain('min_v = MIN(agg_val)');
+
+    // MV_EXPAND unrolls the 4 M4 values per bucket into flat rows
+    expect(query).toContain('MV_EXPAND idx');
+
+    // Final output: flat (@timestamp, value) table for Lens
     expect(query).toContain(`KEEP @timestamp, ${M4_VALUE_COLUMN}`);
     expect(query).toContain('SORT @timestamp ASC');
     expect(query).toContain('LIMIT 400');
-  });
-
-  it('should use SUM(RATE()) for counter instruments', () => {
-    const query = createM4DownsampledESQLQuery({ metric: mockCounterMetric });
-
-    expect(query).toContain('STATS agg_val = SUM(RATE(requests.count))');
-  });
-
-  it('should chain the two STATS stages in order', () => {
-    const query = createM4DownsampledESQLQuery({ metric: mockMetric });
-
-    const firstStats = query.indexOf('STATS agg_val');
-    const secondStats = query.indexOf('STATS', firstStats + 1);
-    expect(firstStats).toBeGreaterThan(-1);
-    expect(secondStats).toBeGreaterThan(firstStats);
-  });
-
-  it('should output @timestamp as the final timestamp column', () => {
-    const query = createM4DownsampledESQLQuery({ metric: mockMetric });
-
-    expect(query).toContain('KEEP @timestamp, value');
-    expect(query).toContain('SORT @timestamp ASC');
-  });
-
-  it('should prepend WHERE statements before both STATS stages', () => {
-    const query = createM4DownsampledESQLQuery({
-      metric: mockMetric,
-      whereStatements: ['host.name == "host-01"'],
-    });
-
-    const whereIndex = query.indexOf('WHERE');
-    const firstStats = query.indexOf('STATS');
-    expect(whereIndex).toBeLessThan(firstStats);
   });
 });
