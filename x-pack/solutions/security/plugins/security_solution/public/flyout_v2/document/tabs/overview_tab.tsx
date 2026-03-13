@@ -8,8 +8,9 @@
 import React, { memo } from 'react';
 import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue, type DataTableRecord } from '@kbn/discover-utils';
 import { AboutSection } from '../components/about_section';
+import { AiSummarySection } from '../components/ai_summary_section';
 import { InvestigationSection } from '../components/investigation_section';
 import { VisualizationsSection } from '../components/visualizations_section';
 import type { ResolverCellActionRenderer } from '../../../resolver/types';
@@ -34,8 +35,16 @@ export interface OverviewTabProps {
  * Overview view displayed in the document details expandable flyout right section
  */
 export const OverviewTab = memo(({ hit, renderCellActions }: OverviewTabProps) => {
+  const isAlert = (getFieldValue(hit, 'event.kind') as string) === 'signal';
+
   return (
     <EuiPanel hasBorder={false} hasShadow={false} aria-label={OVERVIEW_ARIA_LABEL}>
+      {isAlert ? (
+        <>
+          <AiSummarySection hit={hit} />
+          <EuiHorizontalRule margin="m" />
+        </>
+      ) : null}
       <AboutSection hit={hit} />
       <EuiHorizontalRule margin="m" />
       <InvestigationSection hit={hit} />

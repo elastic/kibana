@@ -9,8 +9,8 @@ import React, { memo, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { type PromptContext } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
-import { AlertSummary } from './alert_summary';
-import { AlertSummaryOptionsMenu } from './settings_menu';
+import { AlertSummary } from '../../../flyout_v2/document/components/alert_summary';
+import { AlertSummaryOptionsMenu } from '../../../flyout_v2/document/components/alert_summary_options_menu';
 import { useKibana } from '../../../common/lib/kibana';
 import { useEaseDetailsContext } from '../context';
 import { useDefaultAIConnectorId } from '../../../common/hooks/use_default_ai_connector_id';
@@ -39,7 +39,7 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
     application: { capabilities },
   } = useKibana().services;
 
-  const { eventId, showAnonymizedValues } = useEaseDetailsContext();
+  const { eventId, setShowAnonymizedValues, showAnonymizedValues } = useEaseDetailsContext();
   const { defaultConnectorId, isLoading: isLoadingDefaultConnectorId } = useDefaultAIConnectorId();
 
   const canSeeAdvancedSettings = capabilities.management.kibana.settings ?? false;
@@ -64,7 +64,11 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AlertSummaryOptionsMenu hasAlertSummary={hasAlertSummary} />
+          <AlertSummaryOptionsMenu
+            hasAlertSummary={hasAlertSummary}
+            showAnonymizedValues={showAnonymizedValues}
+            setShowAnonymizedValues={setShowAnonymizedValues}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

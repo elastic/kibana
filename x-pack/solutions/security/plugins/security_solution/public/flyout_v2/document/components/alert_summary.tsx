@@ -23,9 +23,9 @@ import { ConnectorMissingCallout } from './connector_missing_callout';
 import { useAlertSummary } from '../hooks/use_alert_summary';
 import { MessageText } from './message_text';
 
-export const ALERT_SUMMARY_TEST_ID = 'ease-alert-flyout-alert-summary';
-export const GENERATE_INSIGHTS_BUTTON_TEST_ID = 'ease-alert-flyout-generate-insights-button';
-export const REGENERATE_INSIGHTS_BUTTON_TEST_ID = 'ease-alert-flyout-regenerate-insights-button';
+export const ALERT_SUMMARY_TEST_ID = 'alert-flyout-alert-summary';
+export const GENERATE_INSIGHTS_BUTTON_TEST_ID = 'alert-flyout-generate-insights-button';
+export const REGENERATE_INSIGHTS_BUTTON_TEST_ID = 'alert-flyout-regenerate-insights-button';
 
 const RECOMMENDED_ACTIONS = i18n.translate(
   'xpack.securitySolution.alertSummary.recommendedActions',
@@ -71,7 +71,7 @@ export interface AlertSummaryProps {
 }
 
 /**
- * Component generating the AI summary for the visualized alert and showing in the alert summary section of EASE flyout.
+ * Component generating the AI summary for the visualized alert and showing in an AI summary section.
  */
 export const AlertSummary = memo(
   ({

@@ -11,11 +11,33 @@ import type { History } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import type { Store } from 'redux';
 import { Provider } from 'react-redux';
+import useObservable from 'react-use/lib/useObservable';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { AssistantProvider as ElasticAssistantProvider } from '@kbn/elastic-assistant';
 import type { StartServices } from '../../../types';
 import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
+
+const AssistantFlyoutProvider = ({
+  children,
+  services,
+}: {
+  children: ReactNode;
+  services: StartServices;
+}) => {
+  const assistantContextValue = useObservable(
+    services.elasticAssistantSharedState.assistantContextValue.getAssistantContextValue$()
+  );
+
+  if (!assistantContextValue) {
+    return null;
+  }
+
+  return (
+    <ElasticAssistantProvider value={assistantContextValue}>{children}</ElasticAssistantProvider>
+  );
+};
 
 export const flyoutProviders = ({
   services,
@@ -44,7 +66,9 @@ export const flyoutProviders = ({
         getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
       >
         <Provider store={store}>
-          <ReactQueryClientProvider>{flyoutContent}</ReactQueryClientProvider>
+          <ReactQueryClientProvider>
+            <AssistantFlyoutProvider services={services}>{flyoutContent}</AssistantFlyoutProvider>
+          </ReactQueryClientProvider>
         </Provider>
       </CellActionsProvider>
     </KibanaContextProvider>

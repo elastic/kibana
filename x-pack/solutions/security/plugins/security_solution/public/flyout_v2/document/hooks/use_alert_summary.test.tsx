@@ -19,6 +19,7 @@ jest.mock(
 );
 jest.mock('./use_fetch_alert_summary');
 jest.mock('./use_bulk_update_alert_summary');
+
 const promptContext: PromptContext = {
   category: 'alert',
   description: 'Alert summary',
@@ -30,6 +31,7 @@ const promptContext: PromptContext = {
   tooltip: '_tooltip',
   replacements: { 'host.name': '12345' },
 };
+
 describe('useAlertSummary', () => {
   const mockSendMessage = jest.fn();
   const mockAbortStream = jest.fn();

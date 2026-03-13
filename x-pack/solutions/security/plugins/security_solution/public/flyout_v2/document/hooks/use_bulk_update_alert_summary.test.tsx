@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react';
+
+import { act, renderHook } from '@testing-library/react';
 import { useBulkUpdateAlertSummary } from './use_bulk_update_alert_summary';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 

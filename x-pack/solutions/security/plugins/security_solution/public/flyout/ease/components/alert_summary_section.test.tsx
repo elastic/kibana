@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { useEaseDetailsContext } from '../context';
 import { TestProviders } from '../../../common/mock';
 import { ALERT_SUMMARY_SECTION_TEST_ID, AlertSummarySection } from './alert_summary_section';
-import { ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID } from './settings_menu';
+import { ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID } from '../../../flyout_v2/document/components/alert_summary_options_menu';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 
 jest.mock('../../../common/hooks/use_ai_connectors', () => ({
@@ -63,7 +63,8 @@ describe('AlertSummarySection', () => {
     (useEaseDetailsContext as jest.Mock).mockReturnValue({
       eventId: 'eventId',
       dataFormattedForFieldBrowser: [],
-      showAnonymizedValues: jest.fn(),
+      showAnonymizedValues: false,
+      setShowAnonymizedValues: jest.fn(),
     });
     const getPromptContext = jest.fn();
 

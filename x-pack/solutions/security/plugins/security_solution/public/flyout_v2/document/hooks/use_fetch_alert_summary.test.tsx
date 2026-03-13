@@ -15,10 +15,12 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
 }));
+
 const args = {
   alertId: '12345',
   connectorId: '67890',
 };
+
 const createWrapper = () => {
   const queryClient = new QueryClient();
   // eslint-disable-next-line react/display-name
@@ -26,9 +28,11 @@ const createWrapper = () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
+
 const mockAlertSummary = {
   summary: "CPU utilization for host 'prod-web-01' exceeded 90% threshold, reaching 95%.",
 };
+
 describe('useFetchAlertSummary', () => {
   const mockHttp = {
     fetch: jest.fn(),
