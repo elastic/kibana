@@ -21,18 +21,19 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/logging'
   - '@kbn/features-plugin'
+  - '@kbn/management-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/storage-adapter'
   - '@kbn/es-errors'
   - '@kbn/evals-common'
   - '@kbn/i18n'
-  - '@kbn/react-kibana-context-render'
   - '@kbn/react-query'
   - '@kbn/shared-ux-router'
   - '@kbn/i18n-react'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/code-editor'
+  - '@kbn/react-kibana-context-theme'
 tags:
   - plugin
   - prod
