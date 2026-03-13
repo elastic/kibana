@@ -73,7 +73,7 @@ export function SloAlertsWrapper({
   }, [isSummaryLoaded, isTableLoaded, onRenderComplete]);
   const handleGoToAlertsClick = () => {
     const kuery = slos
-      .map((slo) => `(slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}")`)
+      .map((slo) => `(slo.id:"${slo.slo_id}" and slo.instanceId:"${slo.slo_instance_id}")`)
       .join(' or ');
 
     navigateToUrl(

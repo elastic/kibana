@@ -12,7 +12,7 @@ import type { SloItem } from '../types';
 
 export function SloIncludedCount({ slos }: { slos: SloItem[] }) {
   const { data: sloList } = useFetchSloList({
-    kqlQuery: slos.map((slo) => `slo.id:${slo.id}`).join(' or '),
+    kqlQuery: slos.map((slo) => `slo.id:${slo.slo_id}`).join(' or '),
     perPage: 0,
   });
 

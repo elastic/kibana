@@ -25,25 +25,26 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { SloSelector } from './slo_selector';
-import type { EmbeddableSloProps, SloItem } from './types';
+import type { AlertsCustomState, SloItem } from './types';
 
 interface SloConfigurationProps {
-  initialInput?: EmbeddableSloProps;
-  onCreate: (props: EmbeddableSloProps) => void;
+  initialInput?: AlertsCustomState;
+  onCreate: (props: AlertsCustomState) => void;
   onCancel: () => void;
 }
 
 export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
   const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(
-    initialInput?.showAllGroupByInstances ?? false
+    initialInput?.show_all_group_by_instances ?? false
   );
   const [selectedSlos, setSelectedSlos] = useState(initialInput?.slos ?? []);
 
   const [hasError, setHasError] = useState(false);
 
-  const onConfirmClick = () => onCreate({ slos: selectedSlos, showAllGroupByInstances });
+  const onConfirmClick = () =>
+    onCreate({ slos: selectedSlos, show_all_group_by_instances: showAllGroupByInstances });
 
-  const hasGroupBy = selectedSlos?.some((slo) => slo.instanceId !== ALL_VALUE);
+  const hasGroupBy = selectedSlos?.some((slo) => slo.slo_instance_id !== ALL_VALUE);
 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'alertsConfigurationFlyout',
@@ -78,10 +79,10 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
                 if (Array.isArray(slos)) {
                   setSelectedSlos(
                     slos?.map((slo) => ({
-                      id: slo?.id,
-                      instanceId: slo?.instanceId,
-                      name: slo?.name,
-                      groupBy: slo?.groupBy,
+                      slo_id: slo?.id ?? '',
+                      slo_instance_id: slo?.instanceId ?? '',
+                      name: slo?.name ?? '',
+                      group_by: [slo?.groupBy].flat().filter(Boolean) as string[],
                     })) as SloItem[]
                   );
                 }

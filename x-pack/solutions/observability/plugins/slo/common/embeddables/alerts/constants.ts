@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+
 //
 // Do not change constant value - part of public REST APIs
 //
 export const SLO_ALERTS_EMBEDDABLE_ID = 'slo_alerts';
 
 export const ADD_SLO_ALERTS_ACTION_ID = 'CREATE_SLO_ALERTS_EMBEDDABLE';
+export const SLO_ALERTS_SUPPORTED_TRIGGERS = [ON_OPEN_PANEL_MENU];
