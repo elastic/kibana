@@ -80,6 +80,8 @@ Formatting Requirements:
 
 export const ENTITY_PROMPT = `Investigate the entity and suggest next steps.`;
 
+export const LEAD_ATTACHMENT_PROMPT = `Analyze this hunting lead using the evidence already gathered by the lead generation engine. The attached lead contains entity risk scores, alert severity counts, observation details, and investigation recommendations that have already been collected. Summarize the threat, present the key findings per entity, assess overall severity, and recommend concrete next steps for investigation. Do not re-query for data that is already provided in the lead.`;
+
 export const RULE_EXPLORATION_ATTACHMENT_PROMPT = `
 Analyze the attached Security detection rule and provide actionable insights.
 
