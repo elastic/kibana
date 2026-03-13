@@ -7,12 +7,10 @@ set -euo pipefail
 (buildkite-agent pipeline upload .buildkite/pipelines/pull_request/store_moon_cache.yml > /dev/null \
  && echo "Uploaded cache-warmup step" >&2) || echo "Failed to upload cache-warmup step" >&2
 
-# Prepare ts-node calls to use dependencies from .buildkite/node_modules
-export NODE_PATH="$(pwd)/.buildkite/node_modules"
-export TS_NODE_TRANSPILE_ONLY=true
-
+# npm deps from .buildkite/node_modules instead of accidentally depending on the kibana/node_modules
 set +e
-ts-node .buildkite/scripts/pipelines/pull_request/pipeline.ts
+NODE_PATH="$(pwd)/.buildkite/node_modules" ts-node --transpile-only \
+  .buildkite/scripts/pipelines/pull_request/pipeline.ts
 pipeline_status=$?
 
 if [[ $pipeline_status -ne 0 ]]; then
