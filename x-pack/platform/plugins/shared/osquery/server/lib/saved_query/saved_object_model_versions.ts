@@ -31,7 +31,6 @@ export const savedQueryModelVersion2: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: savedQuerySchemaV2.extends({}, { unknowns: 'ignore' }),
-    create: savedQuerySchemaV2,
   },
 };
 
@@ -62,7 +61,6 @@ export const packSavedObjectModelVersion2: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: packSchemaV2.extends({}, { unknowns: 'ignore' }),
-    create: packSchemaV2,
   },
 };
 
