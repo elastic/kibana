@@ -50,7 +50,7 @@ const NameFieldComponent: React.FC<NameFieldProps> = ({ euiFieldProps }) => {
         value={value}
         name={fieldName}
         fullWidth
-        data-test-subj="input"
+        data-test-subj="packNameInput"
         {...euiFieldProps}
       />
     </EuiFormRow>

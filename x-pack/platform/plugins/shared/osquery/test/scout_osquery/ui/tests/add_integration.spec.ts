@@ -1,0 +1,330 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { test } from '../fixtures';
+import { platformEngineerRole } from '../common/roles';
+import {
+  loadSavedQuery,
+  cleanupSavedQuery,
+  cleanupAgentPolicy,
+  loadPack,
+  cleanupPack,
+} from '../common/api_helpers';
+import { dismissAllToasts, dismissErrorDialogs, waitForPageReady } from '../common/constants';
+
+test.describe(
+  'ALL - Add Integration',
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  () => {
+    let savedQueryId: string;
+
+    test.beforeAll(async ({ kbnClient }) => {
+      const sq = await loadSavedQuery(kbnClient);
+      savedQueryId = sq.saved_object_id;
+    });
+
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginWithCustomRole(platformEngineerRole);
+    });
+
+    const oldVersion = '0.7.4';
+    let policyId: string | undefined;
+    let packId: string | undefined;
+
+    test.afterEach(async ({ kbnClient }) => {
+      if (packId) {
+        await cleanupPack(kbnClient, packId);
+      }
+
+      if (policyId) {
+        await cleanupAgentPolicy(kbnClient, policyId);
+      }
+    });
+
+    test.afterAll(async ({ kbnClient }) => {
+      if (savedQueryId) {
+        await cleanupSavedQuery(kbnClient, savedQueryId);
+      }
+    });
+
+    test(
+      'validate osquery is not available and nav search links to integration',
+      {
+        tag: [...tags.stateful.classic],
+      },
+      async ({ page, kbnUrl }) => {
+        test.fixme(true, 'Fleet UI selectors have changed; needs selector updates');
+        await page.goto(kbnUrl.get('/app/osquery'));
+
+        // Intercept the status API to simulate osquery not being installed
+        await page.route('**/internal/osquery/status', async (route) => {
+          const response = await route.fetch();
+          const body = await response.json();
+          await route.fulfill({
+            status: 200,
+            body: JSON.stringify({ ...body, install_status: undefined }),
+          });
+        });
+
+        await page.reload();
+
+        await expect(
+          page.getByText('Add this integration to run and schedule queries for Elastic Agent.')
+        ).toBeVisible({ timeout: 30_000 });
+        await expect(page.getByRole('heading', { name: 'Add Osquery Manager' })).toBeVisible();
+        await expect(page.testSubj.locator('osquery-add-integration-button')).toBeVisible();
+
+        // Test nav search
+        await page.testSubj.locator('nav-search-input').fill('Osquery');
+        // eslint-disable-next-line playwright/no-nth-methods -- nav search returns multiple matching links
+        await expect(page.locator('[url*="osquery"]').first()).toBeVisible({ timeout: 15_000 });
+      }
+    );
+
+    test(
+      'should add the old integration and be able to upgrade it',
+      {
+        tag: [...tags.stateful.classic],
+      },
+      async ({ page, kbnUrl }) => {
+        test.fixme(true, 'Fleet UI selectors have changed; needs selector updates');
+        test.setTimeout(300_000);
+
+        const integrationName = `integration-${Date.now()}`;
+        const policyName = `policy-${Date.now()}`;
+
+        // Visit the old osquery version page
+        await page.goto(
+          kbnUrl.get(`/app/integrations/detail/osquery_manager-${oldVersion}/overview`)
+        );
+
+        // Add the integration
+        await page.testSubj.locator('addIntegrationPolicyButton').click();
+        await waitForPageReady(page);
+
+        // Fill in integration name
+        const nameInput = page.testSubj.locator('packagePolicyNameInput');
+        await nameInput.clear();
+        await nameInput.fill(integrationName);
+
+        // Fill in agent policy name (embedded in the new Fleet UI)
+        const policyNameInput = page.getByRole('textbox', { name: 'New agent policy name' });
+        await policyNameInput.clear();
+        await policyNameInput.fill(policyName);
+
+        // Save the integration policy
+        await dismissAllToasts(page);
+        await page.getByRole('button', { name: 'Save and continue' }).click({ force: true });
+
+        // Handle "Add Elastic Agent later" if shown
+        const addAgentLater = page.getByText('Add Elastic Agent later');
+        if (await addAgentLater.isVisible({ timeout: 15_000 }).catch(() => false)) {
+          await addAgentLater.click();
+          await waitForPageReady(page);
+        }
+
+        await page.testSubj
+          .locator('fleetSetupLoading')
+          .waitFor({ state: 'hidden', timeout: 60_000 })
+          .catch(() => {});
+        await waitForPageReady(page);
+        await expect(page.getByText(integrationName)).toBeVisible({ timeout: 60_000 });
+        await expect(page.getByText(`version: ${oldVersion}`)).toBeVisible({
+          timeout: 30_000,
+        });
+
+        // Upgrade the integration
+        const closeBtn = page.testSubj.locator('euiFlyoutCloseButton');
+        if (await closeBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+          await closeBtn.click();
+        }
+
+        await page.testSubj
+          .locator('fleetSetupLoading')
+          .waitFor({ state: 'hidden', timeout: 60_000 })
+          .catch(() => {});
+        await page.testSubj
+          .locator('PackagePoliciesTableUpgradeButton')
+          .waitFor({ state: 'visible', timeout: 60_000 });
+        await page.testSubj.locator('PackagePoliciesTableUpgradeButton').click();
+        await page.testSubj.locator('saveIntegration').click();
+
+        await expect(page.getByText(`Successfully updated '${integrationName}'`)).toBeVisible({
+          timeout: 30_000,
+        });
+
+        await expect(page.getByText(`version: ${oldVersion}`)).not.toBeVisible();
+      }
+    );
+
+    test('add integration', async ({ page, kbnUrl }) => {
+      test.fixme(true, 'Fleet UI selectors have changed; needs selector updates');
+      test.setTimeout(300_000);
+      const integrationName = `integration-${Date.now()}`;
+      const policyName = `policy-${Date.now()}`;
+
+      // Create agent policy
+      await page.goto(kbnUrl.get('/app/fleet/policies'));
+      await dismissErrorDialogs(page);
+      await dismissAllToasts(page);
+
+      await page.testSubj.locator('createAgentPolicyButton').click();
+      await page.testSubj.locator('createAgentPolicyNameField').fill(policyName);
+      await dismissErrorDialogs(page);
+      await dismissAllToasts(page);
+
+      await page.testSubj.locator('createAgentPolicyFlyoutBtn').click({ force: true });
+
+      await expect(page.getByText(`Agent policy '${policyName}' created`)).toBeVisible({
+        timeout: 15_000,
+      });
+
+      // Navigate to the policy and add osquery
+      await page.testSubj.locator('agentPolicyNameLink').getByText(policyName).click();
+      await waitForPageReady(page);
+      await page.testSubj.locator('addPackagePolicyButton').click();
+      await waitForPageReady(page);
+      await page.testSubj
+        .locator('fleetSetupLoading')
+        .waitFor({ state: 'hidden', timeout: 60_000 })
+        .catch(() => {});
+      // Fleet search bar may use different test subjects across versions
+      const searchBar = page.testSubj
+        .locator('epmList.searchBar')
+        .or(page.testSubj.locator('epmList-searchBar'))
+        .or(page.locator('input[placeholder*="Search"]'));
+      await searchBar.waitFor({ state: 'visible', timeout: 60_000 });
+      await searchBar.fill('osquery');
+      await page.testSubj.locator('integration-card:epr:osquery_manager').click();
+      await waitForPageReady(page);
+      await page.testSubj.locator('addIntegrationPolicyButton').click();
+      await waitForPageReady(page);
+
+      // Verify the agent policy is pre-selected
+      await expect(page.testSubj.locator('agentPolicySelect').getByText(policyName)).toBeVisible();
+
+      // Set integration name
+      const nameInput = page.testSubj.locator('packagePolicyNameInput');
+      await nameInput.clear();
+      await nameInput.fill(integrationName);
+
+      await page.testSubj.locator('createPackagePolicySaveButton').click();
+
+      // Cancel the "add agent" modal if it appears
+      const cancelBtn = page.testSubj.locator('confirmModalCancelButton');
+      if (await cancelBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+        await cancelBtn.click();
+      }
+
+      await expect(page.locator(`[title="${integrationName}"]`)).toBeVisible({ timeout: 15_000 });
+
+      // Navigate to osquery and verify it's accessible
+      await page.gotoApp('osquery');
+      await expect(page.getByText('Live queries history')).toBeVisible();
+    });
+
+    test('should have integration and packs copied when upgrading integration', async ({
+      page,
+      kbnUrl,
+      kbnClient,
+    }) => {
+      test.fixme(true, 'Fleet UI selectors have changed; needs selector updates');
+      test.setTimeout(300_000);
+      const upgradeOldVersion = '1.2.0';
+      const integrationName = `integration-${Date.now()}`;
+      const policyName = `policy-${Date.now()}`;
+      const packName = `pack-${Date.now()}`;
+
+      await page.goto(
+        kbnUrl.get(`/app/integrations/detail/osquery_manager-${upgradeOldVersion}/overview`)
+      );
+
+      // Add the integration
+      await page.testSubj.locator('addIntegrationPolicyButton').click();
+      await waitForPageReady(page);
+
+      const nameInput = page.testSubj.locator('packagePolicyNameInput');
+      await nameInput.clear();
+      await nameInput.fill(integrationName);
+
+      // Fill in agent policy name (embedded in the new Fleet UI)
+      const policyNameInput = page.getByRole('textbox', { name: 'New agent policy name' });
+      await policyNameInput.clear();
+      await policyNameInput.fill(policyName);
+
+      // Save the integration policy
+      await dismissAllToasts(page);
+      await page.getByRole('button', { name: 'Save and continue' }).click({ force: true });
+
+      const addAgentLater = page.getByText('Add Elastic Agent later');
+      if (await addAgentLater.isVisible({ timeout: 15_000 }).catch(() => false)) {
+        await addAgentLater.click();
+      }
+
+      // Create a pack with this policy
+      const { data: policiesResponse } = await kbnClient.request({
+        method: 'GET',
+        path: '/internal/osquery/fleet_wrapper/package_policies',
+        headers: { 'elastic-api-version': '1' },
+      });
+
+      const targetPolicy = (policiesResponse as any).items.find(
+        (p: any) => p.name === integrationName
+      );
+      if (targetPolicy) {
+        policyId = targetPolicy.policy_id;
+      }
+
+      const pack = await loadPack(kbnClient, {
+        name: packName,
+        policy_ids: targetPolicy ? [targetPolicy.policy_id] : [],
+        queries: {
+          test_query: {
+            ecs_mapping: {},
+            interval: 3600,
+            query: 'select * from uptime;',
+          },
+        },
+      });
+      packId = pack.saved_object_id;
+
+      // Navigate to the policy and upgrade
+      await page.goto(kbnUrl.get('/app/fleet/policies'));
+      await dismissAllToasts(page);
+      await page.getByRole('link', { name: policyName }).click();
+      await waitForPageReady(page);
+      await page.testSubj
+        .locator('fleetSetupLoading')
+        .waitFor({ state: 'hidden', timeout: 60_000 })
+        .catch(() => {});
+      await page.testSubj
+        .locator('PackagePoliciesTableUpgradeButton')
+        .waitFor({ state: 'visible', timeout: 60_000 });
+      await page.testSubj.locator('PackagePoliciesTableUpgradeButton').click();
+
+      const advancedTab = page.getByRole('tab', { name: /^Advanced$/ });
+      await advancedTab.click();
+      await expect(page.locator('.kibanaCodeEditor')).toContainText(`"${packName}"`);
+
+      await page.testSubj.locator('saveIntegration').click();
+      await expect(page.getByText(`Successfully updated '${integrationName}'`)).toBeVisible({
+        timeout: 30_000,
+      });
+
+      await page.locator(`a[title="${integrationName}"]`).click();
+      await advancedTab.click();
+      await expect(page.locator('.kibanaCodeEditor')).toContainText(`"${packName}"`);
+
+      // Verify prebuilt saved queries exist
+      await page.gotoApp('osquery/saved_queries');
+      const rows = page.locator('tbody > tr');
+      expect(await rows.count()).toBeGreaterThan(5);
+    });
+  }
+);

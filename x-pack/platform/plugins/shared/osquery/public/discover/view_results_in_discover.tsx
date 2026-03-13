@@ -127,7 +127,13 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
-      <EuiButtonEmpty size="xs" iconType="discoverApp" href={discoverUrl} target="_blank">
+      <EuiButtonEmpty
+        size="xs"
+        iconType="discoverApp"
+        href={discoverUrl}
+        target="_blank"
+        data-test-subj="viewInDiscover"
+      >
         {VIEW_IN_DISCOVER}
       </EuiButtonEmpty>
     );
@@ -141,6 +147,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
         href={discoverUrl}
         target="_blank"
         isDisabled={!actionId || !discoverUrl.length}
+        data-test-subj="viewInDiscover"
       />
     </EuiToolTip>
   );

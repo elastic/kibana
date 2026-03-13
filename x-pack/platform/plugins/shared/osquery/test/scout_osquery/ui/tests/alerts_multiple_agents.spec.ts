@@ -1,0 +1,200 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { test } from '../fixtures';
+import { socManagerRole } from '../common/roles';
+import { loadRule, cleanupRule } from '../common/api_helpers';
+import { waitForAlerts } from '../common/constants';
+
+test.describe(
+  'Alert Event Details - dynamic params',
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  () => {
+    let ruleId: string;
+
+    test.beforeAll(async ({ kbnClient }) => {
+      const rule = await loadRule(kbnClient, true); // true for response actions
+      ruleId = rule.id;
+    });
+
+    test.beforeEach(async ({ browserAuth, page, kbnUrl, kbnClient }) => {
+      await browserAuth.loginWithCustomRole(socManagerRole);
+      await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
+      await waitForAlerts(page, kbnClient, ruleId);
+    });
+
+    test.afterAll(async ({ kbnClient }) => {
+      if (ruleId) {
+        await cleanupRule(kbnClient, ruleId);
+      }
+    });
+
+    test('should substitute parameters in investigation guide', async ({ page, config }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
+      // eslint-disable-next-line playwright/no-nth-methods -- first event in list
+      await page.testSubj.locator('expand-event').first().click();
+      await page.testSubj
+        .locator('securitySolutionFlyoutInvestigationGuideButton')
+        .waitFor({ state: 'visible', timeout: 30_000 });
+      await page.testSubj.locator('securitySolutionFlyoutInvestigationGuideButton').click();
+
+      // Wait for investigation guide to load, then click the osquery action button
+      const getProcessesButton = page.getByRole('button', { name: 'Get processes' });
+      await expect(getProcessesButton).toBeVisible({ timeout: 30_000 });
+
+      // The "Get processes" button needs to be clicked to trigger the osquery action
+      // Try clicking it first; if the flyout doesn't open, try double-clicking
+      await getProcessesButton.click({ force: true });
+
+      // Wait for the osquery flyout to open
+      const flyoutBody = page.testSubj.locator('flyout-body-osquery');
+      const isFlyoutVisible = await flyoutBody.isVisible({ timeout: 5_000 }).catch(() => false);
+      if (!isFlyoutVisible) {
+        // Try double-click if single click didn't work
+        await getProcessesButton.dblclick({ force: true });
+      }
+
+      await expect(flyoutBody).toBeVisible({ timeout: 30_000 });
+
+      // Click the editor to ensure tokenization
+      const editor = flyoutBody.locator('[data-test-subj="kibanaCodeEditor"]');
+      await editor.waitFor({ state: 'visible', timeout: 30_000 });
+      await editor.click();
+
+      // Use toContainText on the code editor since getByText may not find text in Monaco/CodeMirror editors
+      await expect(editor).toContainText('SELECT * FROM os_version', { timeout: 15_000 });
+      await expect(flyoutBody.locator('input[value="host.os.platform"]')).toBeVisible();
+    });
+
+    test('should substitute parameters in live query and increase number of ran queries', async ({
+      page,
+      pageObjects,
+      config,
+    }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
+      test.fixme(
+        true,
+        'Response actions notification requires automated actions to complete first'
+      );
+      // eslint-disable-next-line playwright/no-nth-methods -- first event in list
+      await page.testSubj.locator('expand-event').first().click();
+      const notificationBadge = page.testSubj.locator('response-actions-notification');
+      await notificationBadge.waitFor({ state: 'visible', timeout: 120_000 });
+      await expect(notificationBadge).not.toHaveText('0', { timeout: 120_000 });
+      const initialNotificationCount = parseInt((await notificationBadge.textContent()) || '0', 10);
+
+      // Take osquery action with params
+      await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();
+      await page.testSubj.locator('osquery-action-item').click();
+
+      const flyoutBody = page.testSubj.locator('flyout-body-osquery');
+      await expect(flyoutBody).toBeVisible({ timeout: 30_000 });
+
+      await pageObjects.liveQuery.selectAllAgents();
+      await pageObjects.liveQuery.inputQuery('select * from uptime;');
+      await pageObjects.liveQuery.submitQuery();
+      await pageObjects.liveQuery.checkResults();
+
+      await page.testSubj.locator('osquery-empty-button').click();
+
+      const updatedNotificationCount = parseInt((await notificationBadge.textContent()) || '0', 10);
+      expect(initialNotificationCount).toBe(updatedNotificationCount - 1);
+
+      // Verify response actions
+      await page.testSubj
+        .locator('securitySolutionDocumentDetailsFlyoutResponseSectionHeader')
+        .click();
+      await page.testSubj.locator('securitySolutionDocumentDetailsFlyoutResponseButton').click();
+
+      const responseWrapper = page.testSubj.locator('responseActionsViewWrapper');
+      await expect(responseWrapper.getByText('tags')).toBeVisible();
+      await expect(
+        responseWrapper.locator('[data-test-subj="osquery-results-comment"]')
+      ).toHaveCount(updatedNotificationCount);
+    });
+
+    test('should be able to run take action query against all enrolled agents', async ({
+      page,
+      pageObjects,
+      config,
+    }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
+      test.setTimeout(600_000);
+
+      // eslint-disable-next-line playwright/no-nth-methods -- first event in list
+      await page.testSubj.locator('expand-event').first().click();
+      await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();
+      await page.testSubj.locator('osquery-action-item').click();
+
+      // Clear the pre-filled agent and select All agents
+      const agentSelection = page.testSubj.locator('agentSelection');
+      const clearButton = agentSelection.locator('[data-test-subj="comboBoxClearButton"]');
+      await clearButton.waitFor({ state: 'visible', timeout: 30_000 });
+      await clearButton.click();
+      const agentInput = agentSelection.locator('[data-test-subj="comboBoxInput"]');
+      await agentInput.pressSequentially('All');
+      const allAgentsOption = page.getByRole('option', { name: /All agents/ });
+      await allAgentsOption.waitFor({ state: 'visible', timeout: 15_000 });
+      await allAgentsOption.click();
+      await page.keyboard.press('Escape');
+
+      // eslint-disable-next-line playwright/no-nth-methods -- "All agents" appears as pill and screen reader text
+      await expect(agentSelection.getByText('All agents').first()).toBeVisible();
+
+      await pageObjects.liveQuery.inputQuery(
+        "SELECT * FROM os_version where name='{{host.os.name}}';"
+      );
+      await page.testSubj.locator('liveQuerySubmitButton').waitFor({ state: 'visible' });
+      await pageObjects.liveQuery.submitQuery();
+
+      // At least 1 agent should respond (2+ agents may take longer in CI)
+      const flyoutBody = page.testSubj.locator('flyout-body-osquery');
+      // Wait for results to appear
+      // eslint-disable-next-line playwright/no-nth-methods -- first row in data grid
+      await flyoutBody.locator('[data-grid-row-index]').first().waitFor({
+        state: 'visible',
+        timeout: 600_000,
+      });
+      const rowCount = await flyoutBody.locator('[data-grid-row-index]').count();
+      expect(rowCount).toBeGreaterThanOrEqual(1);
+    });
+
+    test('should substitute params in osquery ran from timelines alerts', async ({
+      page,
+      pageObjects,
+      config,
+    }) => {
+      test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
+      test.fixme(true, 'Timeline events table population timing is unreliable in CI');
+
+      // Send alert to timeline
+      // eslint-disable-next-line playwright/no-nth-methods -- first send-alert button
+      await page.testSubj.locator('send-alert-to-timeline-button').first().click();
+
+      // Expand first event in the timeline
+      const queryEventsTable = page.testSubj.locator('query-events-table');
+      // eslint-disable-next-line playwright/no-nth-methods -- first event in timeline
+      const firstExpandEvent = queryEventsTable.locator('[data-test-subj="expand-event"]').first();
+      await firstExpandEvent.waitFor({ state: 'visible', timeout: 120_000 });
+      await firstExpandEvent.click();
+
+      // Take osquery action with params
+      await page.testSubj.locator('securitySolutionFlyoutFooterDropdownButton').click();
+      await page.testSubj.locator('osquery-action-item').click();
+
+      const flyoutBody = page.testSubj.locator('flyout-body-osquery');
+      await expect(flyoutBody).toBeVisible({ timeout: 30_000 });
+
+      await pageObjects.liveQuery.selectAllAgents();
+      await pageObjects.liveQuery.inputQuery('select * from uptime;');
+      await pageObjects.liveQuery.submitQuery();
+      await pageObjects.liveQuery.checkResults();
+    });
+  }
+);

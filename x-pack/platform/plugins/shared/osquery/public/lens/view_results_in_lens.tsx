@@ -81,7 +81,13 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
-      <EuiButtonEmpty size="xs" iconType="lensApp" onClick={handleClick} isDisabled={isDisabled}>
+      <EuiButtonEmpty
+        size="xs"
+        iconType="lensApp"
+        onClick={handleClick}
+        isDisabled={isDisabled}
+        data-test-subj="viewInLens"
+      >
         {VIEW_IN_LENS}
       </EuiButtonEmpty>
     );
@@ -95,6 +101,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
         onClick={handleClick}
         aria-label={VIEW_IN_LENS}
         isDisabled={isDisabled}
+        data-test-subj="viewInLens"
       />
     </EuiToolTip>
   );
