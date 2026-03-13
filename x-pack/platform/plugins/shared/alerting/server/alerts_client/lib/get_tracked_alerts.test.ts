@@ -14,7 +14,6 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
-  ALERT_STATUS_DELAYED,
   ALERT_UUID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -162,22 +161,6 @@ describe('get_tracked_alerts', () => {
 
       expect(tracked.recovered['uuid-2']).toBeDefined();
       expect(tracked.active['uuid-2']).toBeUndefined();
-    });
-
-    it('populates delayed alerts', () => {
-      const tracked = createEmptyTrackedAlerts<{}>();
-      const hit = makeHit({
-        uuid: 'uuid-3',
-        instanceId: 'alert-3',
-        status: ALERT_STATUS_DELAYED,
-        executionUuid: 'exec-1',
-      });
-
-      populateTrackedAlerts(tracked, [hit as SearchResult<RuleAlertData>['hits'][number]]);
-
-      expect(tracked.delayed['uuid-3']).toBeDefined();
-      expect(tracked.active['uuid-3']).toBeUndefined();
-      expect(tracked.recovered['uuid-3']).toBeUndefined();
     });
 
     it('handles multiple hits', () => {

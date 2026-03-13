@@ -15,7 +15,6 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
-  ALERT_STATUS_DELAYED,
   ALERT_UUID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -197,9 +196,6 @@ export function populateTrackedAlerts<AlertData extends RuleAlertData>(
     }
     if (status === ALERT_STATUS_RECOVERED) {
       trackedAlerts.recovered[alertUuid] = alertHit;
-    }
-    if (status === ALERT_STATUS_DELAYED) {
-      trackedAlerts.delayed[alertUuid] = alertHit;
     }
     trackedAlerts.indices[alertUuid] = hit._index;
     trackedAlerts.seqNo[alertUuid] = hit._seq_no;
