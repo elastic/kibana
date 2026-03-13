@@ -119,16 +119,21 @@ export const useAgentBuilderRuleCreation = ({
     [defineStepForm, aboutStepForm, scheduleStepForm, actionsStepForm, addSuccess]
   );
 
+  const updateFormFromChatRef = useRef(updateFormFromChat);
+  updateFormFromChatRef.current = updateFormFromChat;
+  const addRuleAttachmentRef = useRef(addRuleAttachment);
+  addRuleAttachmentRef.current = addRuleAttachment;
+
   useEffect(() => {
     const subscription = aiCreatedRule$.subscribe((rule) => {
       if (rule) {
-        updateFormFromChat(rule);
-        addRuleAttachment(rule, rule.name);
+        updateFormFromChatRef.current(rule);
+        addRuleAttachmentRef.current(rule, rule.name);
         clearAiCreatedRule();
       }
     });
     return () => subscription.unsubscribe();
-  }, [updateFormFromChat, addRuleAttachment]);
+  }, []);
 
   useEffect(() => {
     if (
