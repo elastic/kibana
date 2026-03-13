@@ -336,6 +336,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     for (const [col, setting] of Object.entries(osqueryColumnDisplaySettings)) {
       mergedColumns[col] = { ...setting };
     }
+
     for (const [col, setting] of Object.entries(gridSettings.columns ?? {})) {
       mergedColumns[col] = { ...mergedColumns[col], ...setting };
     }
@@ -385,7 +386,9 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         }
       }
     };
+
     allResultsData.edges.slice(0, 5).forEach((edge) => collectPaths(edge._source));
+
     return names;
   }, [allResultsData?.edges]);
 
@@ -394,8 +397,10 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     if (!dataView) return;
     if (!sourceFieldNames) {
       setFilteredDataView(dataView);
+
       return;
     }
+
     const spec = dataView.toSpec();
     // Strip id so dataViews.create() doesn't return the cached full DataView
     spec.id = undefined;
