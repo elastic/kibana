@@ -17,10 +17,10 @@ This package wraps `tsc --build` and adds several performance features on top:
   but by how many projects would need rebuilding in total (including all transitive dependents).
   A foundational package touched by just one commit can cascade into hundreds of dependent
   rebuilds, so raw stale count is a poor signal. When the effective rebuild count exceeds the
-  threshold, the CLI finds the best available GCS archive and runs a second `git diff` to check
-  how many projects would still be stale *after* a restore. The restore only happens if it
-  genuinely reduces the work — so changing a foundational package intentionally does not trigger
-  a pointless 2-minute download.
+  threshold (currently 10 projects; not configurable), the CLI finds the best available GCS
+  archive and runs a second `git diff` to check how many projects would still be stale *after*
+  a restore. The restore only happens if it genuinely reduces the work — so changing a
+  foundational package intentionally does not trigger a pointless 2-minute download.
 
 - **Fail-fast pass**: When running locally without a project filter, the CLI first type-checks
   only the projects containing locally modified files (~10-15 s), giving immediate feedback
@@ -70,9 +70,9 @@ On each run the CLI goes through the following steps:
    expand via BFS over the reverse dependency graph to compute the *effective rebuild count*
    (directly stale projects plus all transitive dependents).
 
-3. **Decide on restore**: If the effective rebuild count is within the threshold, proceed with
-   the local artifacts — `tsc` will handle the small set of stale projects incrementally.
-   If it exceeds the threshold:
+3. **Decide on restore**: If the effective rebuild count is within the threshold (10 projects),
+   proceed with the local artifacts — `tsc` will handle the small set of stale projects
+   incrementally. If it exceeds the threshold:
    - Find the best available GCS archive SHA (most recent ancestor present in the bucket).
    - Run a second `git diff <gcsSha>..HEAD` and compute the effective rebuild count from
      that baseline. This is a cheap local operation — no download yet.
