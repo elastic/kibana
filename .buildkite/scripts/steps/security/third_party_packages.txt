@@ -34,3 +34,4 @@ simple-statistics
 monaco-promql
 oxlint
 react-element-to-jsx-string
+react-day-picker
