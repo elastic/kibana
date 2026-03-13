@@ -10,13 +10,3 @@
 import { regenerateMoonProjects } from './cli/regenerate_moon_projects';
 
 export { regenerateMoonProjects };
-export { runListAffected } from './cli/run_list_affected';
-export {
-  getAffectedPackages,
-  filterFilesByAffectedPackages,
-  findPackageForPath,
-  getPackageLookup,
-  getAffectedPackagesGit,
-  getAffectedPackagesMoon,
-} from './affected';
-export type { AffectedPackagesConfig, AffectedPackagesLog } from './affected';

@@ -9,42 +9,47 @@
 
 import { execSync } from 'child_process';
 import * as path from 'path';
-import jsYaml from 'js-yaml';
-
-import { getKibanaDir, readFile, readJsonWithComments } from '../util';
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
+import * as JSON5 from 'json5';
+import { getKibanaDir } from '../utils';
 import { getPackageLookup, findPackageForPath } from './package_lookup';
 
-function getRepoRoot(): string {
-  return getKibanaDir();
-}
+const REPO_ROOT = getKibanaDir();
 
-function parseYaml(content: string): unknown {
-  return jsYaml.load(content);
+/**
+ * Parse a JSON5/JSONC file (like tsconfig.json) that may contain comments and trailing commas
+ */
+function parseJsoncFile(filePath: string): any {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    return JSON5.parse(content);
+  } catch (error) {
+    return null;
+  }
 }
 
 /**
  * Get dependencies for a package from its moon.yml or tsconfig.json
  */
 function getDependenciesForPackage(packageDir: string): string[] {
-  const moonYmlPath = path.join(getRepoRoot(), packageDir, 'moon.yml');
+  // Try to read dependencies from moon.yml first
+  const moonYmlPath = path.join(REPO_ROOT, packageDir, 'moon.yml');
   try {
-    const moonYmlContent = readFile(moonYmlPath);
-    const moonConfig = parseYaml(moonYmlContent) as { dependsOn?: string[] };
+    const moonYmlContent = fs.readFileSync(moonYmlPath, 'utf8');
+    const moonConfig = yaml.load(moonYmlContent) as any;
     if (moonConfig?.dependsOn && Array.isArray(moonConfig.dependsOn)) {
       return moonConfig.dependsOn;
     }
-  } catch {
+  } catch (error) {
     // moon.yml doesn't exist or can't be read, try tsconfig
   }
 
-  const tsconfigPath = path.join(getRepoRoot(), packageDir, 'tsconfig.json');
-  try {
-    const tsconfig = readJsonWithComments(tsconfigPath) as { kbn_references?: string[] };
-    if (tsconfig?.kbn_references && Array.isArray(tsconfig.kbn_references)) {
-      return tsconfig.kbn_references;
-    }
-  } catch {
-    // tsconfig doesn't exist or can't be read
+  // Fallback to tsconfig.json kbn_references
+  const tsconfigPath = path.join(REPO_ROOT, packageDir, 'tsconfig.json');
+  const tsconfig = parseJsoncFile(tsconfigPath);
+  if (tsconfig?.kbn_references && Array.isArray(tsconfig.kbn_references)) {
+    return tsconfig.kbn_references;
   }
 
   return [];
@@ -57,10 +62,12 @@ function buildDownstreamDependencyGraph(): Map<string, Set<string>> {
   const downstreamMap = new Map<string, Set<string>>();
   const packageLookup = getPackageLookup();
 
+  // Initialize empty sets for all packages
   for (const packageName of packageLookup.values()) {
     downstreamMap.set(packageName, new Set<string>());
   }
 
+  // For each package, add it to the downstream set of all its dependencies
   for (const [packageDir, packageName] of packageLookup.entries()) {
     const dependencies = getDependenciesForPackage(packageDir);
     for (const depId of dependencies) {
@@ -80,6 +87,8 @@ function buildDownstreamDependencyGraph(): Map<string, Set<string>> {
 function getDownstreamDependents(packageIds: Set<string>): Set<string> {
   const downstreamMap = buildDownstreamDependencyGraph();
   const result = new Set<string>(packageIds);
+
+  // Deep traversal: keep adding dependents until no new ones are found
   const queue = Array.from(packageIds);
   const visited = new Set<string>(packageIds);
 
@@ -102,13 +111,14 @@ function getDownstreamDependents(packageIds: Set<string>): Set<string> {
 }
 
 /**
- * Git-based strategy: get affected packages by mapping changed files to packages.
+ * Git-based strategy: Get affected packages by mapping changed files to packages
  */
 export function getAffectedPackagesGit(mergeBase: string, includeDownstream: boolean): Set<string> {
+  // Get changed files from git
   const output = execSync(`git diff --name-only ${mergeBase} HEAD`, {
-    cwd: getRepoRoot(),
+    cwd: REPO_ROOT,
     encoding: 'utf8',
-    maxBuffer: 10 * 1024 * 1024,
+    maxBuffer: 10 * 1024 * 1024, // 10MB buffer
   });
 
   const changedFiles = output
@@ -116,6 +126,7 @@ export function getAffectedPackagesGit(mergeBase: string, includeDownstream: boo
     .map((line) => line.trim())
     .filter(Boolean);
 
+  // Map files to packages
   const directlyAffectedPackages = new Set<string>();
   for (const file of changedFiles) {
     const pkgId = findPackageForPath(file);
@@ -124,6 +135,7 @@ export function getAffectedPackagesGit(mergeBase: string, includeDownstream: boo
     }
   }
 
+  // Get downstream dependents if requested
   return includeDownstream
     ? getDownstreamDependents(directlyAffectedPackages)
     : directlyAffectedPackages;
