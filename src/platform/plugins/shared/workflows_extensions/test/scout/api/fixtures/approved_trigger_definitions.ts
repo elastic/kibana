@@ -26,4 +26,9 @@
  * To get the schemaHash for a trigger: run the server, then GET internal/workflows_extensions/trigger_definitions
  * and copy the schemaHash from the response for the trigger id.
  */
-export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [];
+export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
+  {
+    id: 'workflows.executionFailed',
+    schemaHash: 'f284de60a7da64400ff056d83a98cea53672a28621fd8e7f0b4f2deab2b34318',
+  },
+];
