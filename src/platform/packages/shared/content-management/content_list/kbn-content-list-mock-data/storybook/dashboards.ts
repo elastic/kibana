@@ -53,9 +53,7 @@ export const MOCK_DASHBOARDS: DashboardMockItem[] = [
     id: 'dashboard-002',
     type: 'dashboard',
     updatedAt: '2025-11-10T08:15:00.000Z',
-    updatedBy: 'u_jane_doe',
     createdAt: '2025-09-15T11:30:00.000Z',
-    createdBy: 'u_admin_local',
     attributes: {
       title: '[Security] Detection Rule Monitoring',
       description: 'Monitor the health and performance of detection rules',
@@ -105,7 +103,6 @@ export const MOCK_DASHBOARDS: DashboardMockItem[] = [
     type: 'dashboard',
     updatedAt: '2025-11-01T12:00:00.000Z',
     createdAt: '2025-06-01T10:00:00.000Z',
-    createdBy: 'u_admin_local',
     attributes: {
       title: 'Infrastructure Overview',
       description: 'Server and container metrics overview',

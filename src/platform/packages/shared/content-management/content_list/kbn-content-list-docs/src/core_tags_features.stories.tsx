@@ -15,7 +15,12 @@ import type { ContentListItem } from '@kbn/content-list-provider';
 import { ContentListTable } from '@kbn/content-list-table';
 import { ContentListFooter } from '@kbn/content-list-footer';
 import { ContentListToolbar } from '@kbn/content-list-toolbar';
-import { createStoryFindItems, mockTagsService, StateDiagnosticPanel } from './stories_helpers';
+import {
+  createStoryFindItems,
+  createTagsFilterConfig,
+  mockTagsService,
+  StateDiagnosticPanel,
+} from './stories_helpers';
 
 // =============================================================================
 // Storybook Meta
@@ -82,7 +87,7 @@ const TagsFeaturesWrapper = () => {
         ],
       },
       pagination: { initialPageSize: 20 },
-      tags: true as const,
+      tags: createTagsFilterConfig(mockTagsService),
     }),
     []
   );

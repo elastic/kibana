@@ -13,6 +13,7 @@ import { ContentListProvider, useContentListConfig } from './provider';
 import type { ContentListProviderProps } from './provider';
 import type { FindItemsResult, FindItemsParams } from '../datasource';
 import type { ContentListItem } from '../item';
+import { isFilterFeatureConfig, type FilterFeatureConfig } from '../features';
 import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 
 describe('ContentListProvider', () => {
@@ -253,6 +254,83 @@ describe('ContentListProvider', () => {
       });
 
       expect(result.current.features).toEqual(features);
+    });
+  });
+
+  describe('auto-build FilterFeatureConfig for tags', () => {
+    const mockTagsService: ContentManagementTagsServices = {
+      getTagList: () => [
+        { id: 'tag-1', name: 'Production', description: 'Prod', color: '#FF0000', managed: false },
+        { id: 'tag-2', name: 'Development', description: 'Dev', color: '#00FF00', managed: false },
+      ],
+    };
+
+    it('auto-builds a FilterFeatureConfig when services.tags is provided', () => {
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({ services: { tags: mockTagsService } }),
+      });
+
+      expect(isFilterFeatureConfig(result.current.features.tags)).toBe(true);
+    });
+
+    it('auto-built getMetadata returns tag facets from getTagList', async () => {
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({ services: { tags: mockTagsService } }),
+      });
+
+      const config = result.current.features.tags as FilterFeatureConfig;
+      const facets = await config.getMetadata({ filters: {} });
+
+      expect(facets).toHaveLength(2);
+      expect(facets[0]).toEqual(expect.objectContaining({ key: 'tag-1', label: 'Production' }));
+      expect(facets[1]).toEqual(expect.objectContaining({ key: 'tag-2', label: 'Development' }));
+    });
+
+    it('auto-built facets omit counts (no access to item set)', async () => {
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({ services: { tags: mockTagsService } }),
+      });
+
+      const config = result.current.features.tags as FilterFeatureConfig;
+      const facets = await config.getMetadata({ filters: {} });
+
+      for (const facet of facets) {
+        expect(facet.count).toBeUndefined();
+      }
+    });
+
+    it('does not auto-build when features.tags is explicitly false', () => {
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          features: { tags: false },
+          services: { tags: mockTagsService },
+        }),
+      });
+
+      expect(result.current.features.tags).toBe(false);
+    });
+
+    it('preserves an explicit FilterFeatureConfig for tags', () => {
+      const customConfig: FilterFeatureConfig = {
+        getMetadata: jest.fn().mockResolvedValue([]),
+      };
+
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({
+          features: { tags: customConfig },
+          services: { tags: mockTagsService },
+        }),
+      });
+
+      expect(result.current.features.tags).toBe(customConfig);
+    });
+
+    it('does not auto-build when no tags service is provided', () => {
+      const { result } = renderHook(() => useContentListConfig(), {
+        wrapper: createWrapper({ features: { tags: true } }),
+      });
+
+      expect(isFilterFeatureConfig(result.current.features.tags)).toBe(false);
     });
   });
 

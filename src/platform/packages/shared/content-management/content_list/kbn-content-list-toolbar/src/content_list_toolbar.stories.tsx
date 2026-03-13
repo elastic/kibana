@@ -34,12 +34,15 @@ import type {
   FindItemsParams,
   FindItemsResult,
   ContentListServices,
+  FilterFeatureConfig,
 } from '@kbn/content-list-provider';
 import {
   MOCK_DASHBOARDS,
+  MOCK_USER_PROFILES,
   createMockFindItems,
   extractTagIds,
   mockTagsService,
+  mockUserProfileServices,
 } from '@kbn/content-list-mock-data/storybook';
 import { ContentListToolbar } from './content_list_toolbar';
 
@@ -76,11 +79,42 @@ const createStoryFindItems = (options?: { delay?: number }) => {
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
         tags: extractTagIds(item.references),
+        createdBy: item.createdBy,
+        managed: item.managed,
       })),
       total: result.total,
       counts: result.counts,
     };
   };
+};
+
+/**
+ * Creates a `FilterFeatureConfig` for the tags filter backed by `mockTagsService`.
+ * Returns all tags as facets without counts (counts require the client strategy cache).
+ */
+const tagsFilterConfig: FilterFeatureConfig = {
+  getMetadata: async () =>
+    mockTagsService.getTagList().map((tag) => ({
+      key: tag.id ?? tag.name,
+      label: tag.name,
+      data: { color: tag.color, description: tag.description },
+    })),
+};
+
+/**
+ * Creates a `FilterFeatureConfig` for the `createdBy` filter backed by `mockUserProfileServices`.
+ * Resolves all known mock profiles so the popover always shows the full mock creator list.
+ */
+const createdByFilterConfig: FilterFeatureConfig = {
+  getMetadata: async () => {
+    const allUids = MOCK_USER_PROFILES.map((p) => p.uid);
+    const profiles = await mockUserProfileServices.bulkGetUserProfiles(allUids);
+    return profiles.map((profile) => ({
+      key: profile.uid,
+      label: profile.user.full_name ?? profile.user.username,
+      data: { kind: 'user', user: profile.user, avatar: profile.data?.avatar },
+    }));
+  },
 };
 
 // =============================================================================
@@ -283,6 +317,7 @@ interface PlaygroundArgs {
   hasSorting: boolean;
   hasPagination: boolean;
   hasTags: boolean;
+  hasCreatedBy: boolean;
   useDeclarativeConfig: boolean;
   showDiagnostics: boolean;
 }
@@ -321,17 +356,24 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
           }
         : (false as const),
       pagination: args.hasPagination ? { initialPageSize: 10 } : (false as const),
-      tags: args.hasTags,
+      tags: args.hasTags ? tagsFilterConfig : false,
+      createdBy: args.hasCreatedBy ? createdByFilterConfig : false,
     }),
-    [args.hasSorting, args.hasPagination, args.hasTags]
+    [args.hasSorting, args.hasPagination, args.hasTags, args.hasCreatedBy]
   );
 
-  const services: ContentListServices | undefined = useMemo(
-    () => (args.hasTags ? { tags: mockTagsService } : undefined),
-    [args.hasTags]
-  );
+  const services: ContentListServices | undefined = useMemo(() => {
+    const s: Partial<ContentListServices> = {};
+    if (args.hasTags) {
+      s.tags = mockTagsService;
+    }
+    if (args.hasCreatedBy) {
+      s.userProfile = mockUserProfileServices;
+    }
+    return Object.keys(s).length > 0 ? (s as ContentListServices) : undefined;
+  }, [args.hasTags, args.hasCreatedBy]);
 
-  const key = `${args.hasSorting}-${args.hasPagination}-${args.hasTags}-${args.useDeclarativeConfig}`;
+  const key = `${args.hasSorting}-${args.hasPagination}-${args.hasTags}-${args.hasCreatedBy}-${args.useDeclarativeConfig}`;
 
   const { Filters } = ContentListToolbar;
 
@@ -367,6 +409,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
           <ContentListToolbar>
             <Filters>
               <Filters.Tags />
+              <Filters.CreatedBy />
               <Filters.Sort />
             </Filters>
           </ContentListToolbar>
@@ -410,6 +453,7 @@ export const Toolbar: PlaygroundStory = {
     hasSorting: true,
     hasPagination: true,
     hasTags: true,
+    hasCreatedBy: false,
     showDiagnostics: true,
     entityName: 'dashboard',
     entityNamePlural: 'dashboards',
@@ -449,6 +493,11 @@ export const Toolbar: PlaygroundStory = {
     hasTags: {
       control: 'boolean',
       description: 'Enable tag filtering. Provides a mock tags service with 8 tags.',
+      table: { category: 'Features' },
+    },
+    hasCreatedBy: {
+      control: 'boolean',
+      description: 'Enable the Created By filter popover. Provides a mock user profile service.',
       table: { category: 'Features' },
     },
     showDiagnostics: {

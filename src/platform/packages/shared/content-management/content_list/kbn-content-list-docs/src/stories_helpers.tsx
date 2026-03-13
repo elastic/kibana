@@ -28,17 +28,25 @@ import {
   useContentListPagination,
   useContentListConfig,
 } from '@kbn/content-list-provider';
-import type { FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
+import type {
+  FindItemsParams,
+  FindItemsResult,
+  FilterFeatureConfig,
+  UserProfileService,
+} from '@kbn/content-list-provider';
 import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
+import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 import {
   MOCK_DASHBOARDS,
+  MOCK_USER_PROFILES,
   createMockFindItems,
   createMockFavoritesClient,
   extractTagIds,
   mockTagsService,
+  mockUserProfileServices,
 } from '@kbn/content-list-mock-data';
 
-export { mockTagsService, createMockFavoritesClient };
+export { mockTagsService, createMockFavoritesClient, mockUserProfileServices };
 
 // =============================================================================
 // Mock Data
@@ -117,12 +125,61 @@ export const createStoryFindItems = (options?: {
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
         tags: extractTagIds(item.references),
+        createdBy: item.createdBy,
+        managed: item.managed,
       })),
       total: result.total,
       counts: result.counts,
     };
   };
 };
+
+// =============================================================================
+// FilterFeatureConfig factories
+// =============================================================================
+
+/**
+ * Creates a `FilterFeatureConfig` for the tags filter backed by a
+ * `ContentManagementTagsServices` instance.
+ *
+ * Returns all tags as facets without item counts (counts require the client
+ * strategy item cache, which is only available in `ContentListClientProvider`).
+ * Suitable for stories that use the base `ContentListProvider` directly.
+ */
+export const createTagsFilterConfig = (
+  tagsService: ContentManagementTagsServices
+): FilterFeatureConfig => ({
+  getMetadata: async () => {
+    const tags = tagsService.getTagList?.() ?? [];
+    return tags.map((tag) => ({
+      key: tag.id ?? tag.name,
+      label: tag.name,
+      data: { color: tag.color, description: tag.description },
+    }));
+  },
+});
+
+/**
+ * Creates a `FilterFeatureConfig` for the `createdBy` filter backed by a
+ * `UserProfileService` instance.
+ *
+ * Uses the full `MOCK_USER_PROFILES` list to resolve known UIDs so the story
+ * popover always shows the complete set of mock creators with avatars.
+ * Suitable for stories that use the base `ContentListProvider` directly.
+ */
+export const createCreatedByFilterConfig = (
+  userProfileService: UserProfileService
+): FilterFeatureConfig => ({
+  getMetadata: async () => {
+    const allUids = MOCK_USER_PROFILES.map((p) => p.uid);
+    const profiles = await userProfileService.bulkGetUserProfiles(allUids);
+    return profiles.map((profile) => ({
+      key: profile.uid,
+      label: profile.user.full_name ?? profile.user.username,
+      data: { kind: 'user', user: profile.user, avatar: profile.data?.avatar },
+    }));
+  },
+});
 
 // =============================================================================
 // JSX Serialization

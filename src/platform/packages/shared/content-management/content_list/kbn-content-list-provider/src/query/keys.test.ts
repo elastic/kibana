@@ -85,6 +85,50 @@ describe('contentListKeys', () => {
     });
   });
 
+  describe('filterMetadata', () => {
+    it('includes base key, filterMetadata identifier, filterId, and filters', () => {
+      const filters = { starredOnly: true };
+      const key = contentListKeys.filterMetadata('dashboard-listing', 'createdBy', filters);
+
+      expect(key).toEqual([
+        'content-list',
+        'dashboard-listing',
+        'filterMetadata',
+        'createdBy',
+        filters,
+      ]);
+    });
+
+    it('creates unique keys for different filterIds', () => {
+      const filters = {};
+      const key1 = contentListKeys.filterMetadata('my-scope', 'createdBy', filters);
+      const key2 = contentListKeys.filterMetadata('my-scope', 'tag', filters);
+
+      expect(key1).not.toEqual(key2);
+    });
+
+    it('creates unique keys for different filters', () => {
+      const key1 = contentListKeys.filterMetadata('my-scope', 'createdBy', {});
+      const key2 = contentListKeys.filterMetadata('my-scope', 'createdBy', { starredOnly: true });
+
+      expect(key1).not.toEqual(key2);
+    });
+
+    it('creates unique keys for different scopes', () => {
+      const key1 = contentListKeys.filterMetadata('scope-a', 'createdBy', {});
+      const key2 = contentListKeys.filterMetadata('scope-b', 'createdBy', {});
+
+      expect(key1).not.toEqual(key2);
+    });
+
+    it('filterMetadata key starts with all key components', () => {
+      const allKey = contentListKeys.all('my-scope');
+      const metaKey = contentListKeys.filterMetadata('my-scope', 'createdBy', {});
+
+      expect(metaKey.slice(0, allKey.length)).toEqual([...allKey]);
+    });
+  });
+
   describe('key hierarchy', () => {
     it('items key starts with all key components', () => {
       const allKey = contentListKeys.all('my-scope');

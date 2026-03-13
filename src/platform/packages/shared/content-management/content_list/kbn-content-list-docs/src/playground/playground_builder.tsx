@@ -33,6 +33,7 @@ import {
   createMockFavoritesClient,
   createStoryFindItems,
   mockTagsService,
+  mockUserProfileServices,
   toJsx,
 } from '../stories_helpers';
 import { BuilderPanel } from './builder_panel';
@@ -122,6 +123,8 @@ const usePreview = (state: PlaygroundState) => {
   // Starred columns and filters render silently empty without it.
   const hasStarred = features.starred;
 
+  const hasCreatedBy = features.createdBy;
+
   // Memoized before `dataSource` so both the provider and findItems share the same
   // in-memory favorites set — starring an item is immediately reflected when the
   // `starredOnly` filter is toggled.
@@ -157,6 +160,7 @@ const usePreview = (state: PlaygroundState) => {
       search: features.search ? {} : (false as const),
       tags: hasTags ? true : (false as const),
       starred: hasStarred ? true : (false as const),
+      createdBy: hasCreatedBy ? true : (false as const),
     }),
     [
       features.sorting,
@@ -166,6 +170,7 @@ const usePreview = (state: PlaygroundState) => {
       sortFields,
       hasTags,
       hasStarred,
+      hasCreatedBy,
     ]
   );
 
@@ -202,6 +207,8 @@ const usePreview = (state: PlaygroundState) => {
             return <Column.Name key={col.instanceId} {...cleanProps} />;
           case 'updatedAt':
             return <Column.UpdatedAt key={col.instanceId} {...cleanProps} />;
+          case 'createdBy':
+            return <Column.CreatedBy key={col.instanceId} {...cleanProps} />;
           case 'type': {
             const { columnTitle, ...rest } = cleanProps;
             return (
@@ -249,48 +256,32 @@ const usePreview = (state: PlaygroundState) => {
   );
 
   const toolbarElement = useMemo(() => {
-    // Always render explicit Filters children so the toolbar shows exactly what
-    // the user has configured. Falling back to framework defaults would include
-    // the starred filter whenever supports.starred is true, even if the user
-    // hasn't added Filters.Starred.
-    const filterParts =
-      toolbar.filters.length > 0
-        ? toolbar.filters.map((f) => {
-            if (f.type === 'starred') {
-              return (
-                <React.Fragment key={f.instanceId}>
-                  <Filters.Starred />
-                </React.Fragment>
-              );
-            }
-            if (f.type === 'sort') {
-              return (
-                <React.Fragment key={f.instanceId}>
-                  <Filters.Sort />
-                </React.Fragment>
-              );
-            }
-            if (f.type === 'tags') {
-              return (
-                <React.Fragment key={f.instanceId}>
-                  <Filters.Tags />
-                </React.Fragment>
-              );
-            }
-            return null;
-          })
-        : [
-            <React.Fragment key="sort">
-              <Filters.Sort />
-            </React.Fragment>,
-          ];
+    const filterParts = toolbar.filters.map((f) => {
+      if (f.type === 'starred' && features.starred) {
+        return <Filters.Starred key={f.instanceId} />;
+      }
+      if (f.type === 'sort' && features.sorting) {
+        return <Filters.Sort key={f.instanceId} />;
+      }
+      if (f.type === 'tags' && features.tagging) {
+        return <Filters.Tags key={f.instanceId} />;
+      }
+      if (f.type === 'createdBy' && features.createdBy) {
+        return <Filters.CreatedBy key={f.instanceId} />;
+      }
+      return null;
+    });
+
+    if (filterParts.length === 0) {
+      return <ContentListToolbar />;
+    }
 
     return (
       <ContentListToolbar>
         <Filters>{filterParts}</Filters>
       </ContentListToolbar>
     );
-  }, [toolbar.filters]);
+  }, [toolbar.filters, features.starred, features.sorting, features.tagging, features.createdBy]);
 
   const tableTitle = `${provider.entityPlural} table`;
 
@@ -302,8 +293,11 @@ const usePreview = (state: PlaygroundState) => {
     if (hasStarred && favoritesClient) {
       s.favorites = favoritesClient;
     }
+    if (hasCreatedBy) {
+      s.userProfile = mockUserProfileServices;
+    }
     return Object.keys(s).length > 0 ? s : undefined;
-  }, [hasTags, hasStarred, favoritesClient]);
+  }, [hasTags, hasStarred, favoritesClient, hasCreatedBy]);
 
   const providerProps = useMemo(
     () => ({
@@ -381,16 +375,6 @@ export const PlaygroundBuilder = () => {
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
       {
-        id: 'about',
-        name: 'About',
-        content: (
-          <>
-            <EuiSpacer size="m" />
-            <EuiMarkdownFormat textSize="s">{INSTRUCTIONS_MD}</EuiMarkdownFormat>
-          </>
-        ),
-      },
-      {
         id: 'preview',
         name: 'Preview',
         content: (
@@ -411,6 +395,16 @@ export const PlaygroundBuilder = () => {
             <EuiCodeBlock language="tsx" fontSize="s" paddingSize="s" overflowHeight={300}>
               {jsx}
             </EuiCodeBlock>
+          </>
+        ),
+      },
+      {
+        id: 'about',
+        name: 'About',
+        content: (
+          <>
+            <EuiSpacer size="m" />
+            <EuiMarkdownFormat textSize="s">{INSTRUCTIONS_MD}</EuiMarkdownFormat>
           </>
         ),
       },

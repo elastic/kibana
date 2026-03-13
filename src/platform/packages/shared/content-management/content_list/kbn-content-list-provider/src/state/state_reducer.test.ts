@@ -755,6 +755,223 @@ describe('state_reducer', () => {
     });
   });
 
+  describe('TOGGLE_USER_FILTER', () => {
+    it('adds a UID to include when not present', () => {
+      const initialState = createInitialState();
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'u_123', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.user).toEqual({ include: ['u_123'], exclude: [] });
+      expect(newState.search.queryText).toContain('jane@elastic.co');
+    });
+
+    it('removes a UID from include when already present', () => {
+      const state = reducer(createInitialState(), {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'u_123', queryValue: 'jane@elastic.co' },
+      });
+      expect(state.filters.user?.include).toContain('u_123');
+
+      const newState = reducer(state, {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'u_123', queryValue: 'jane@elastic.co' },
+      });
+
+      expect(newState.filters.user).toBeUndefined();
+      expect(newState.search.queryText).not.toContain('jane@elastic.co');
+    });
+
+    it('adds multiple UIDs to include', () => {
+      let state = createInitialState();
+      state = reducer(state, {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'u_1', queryValue: 'alice@elastic.co' },
+      });
+      state = reducer(state, {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'u_2', queryValue: 'bob@elastic.co' },
+      });
+
+      expect(state.filters.user?.include).toEqual(['u_1', 'u_2']);
+      expect(state.search.queryText).toContain('alice@elastic.co');
+      expect(state.search.queryText).toContain('bob@elastic.co');
+    });
+
+    it('resets page index and clears selection', () => {
+      const initialState = createInitialState({
+        page: { index: 3, size: 20 },
+        selection: { selectedIds: ['item-1'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'u_1', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.page.index).toBe(0);
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
+
+    it('preserves non-user filters', () => {
+      const initialState = createInitialState({
+        filters: { search: 'my query', tag: { include: ['t1'] } },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'u_1', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.search).toBe('my query');
+      expect(newState.filters.tag).toEqual({ include: ['t1'] });
+    });
+
+    it('preserves negated createdBy clauses when adding an include', () => {
+      const initialState = createInitialState({
+        search: { queryText: '-createdBy:bob@elastic.co' },
+        filters: { user: { include: [], exclude: ['u_bob'] } },
+      });
+
+      const newState = reducer(initialState, {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'u_jane', queryValue: 'jane@elastic.co' },
+      });
+
+      expect(newState.filters.user?.include).toEqual(['u_jane']);
+      expect(newState.filters.user?.exclude).toEqual(['u_bob']);
+      expect(newState.search.queryText).toContain('jane@elastic.co');
+      expect(newState.search.queryText).toContain('bob@elastic.co');
+    });
+
+    it('removes a UID from exclude when toggling an excluded UID', () => {
+      const initialState = createInitialState({
+        search: { queryText: 'createdBy:jane@elastic.co -createdBy:bob@elastic.co' },
+        filters: { user: { include: ['u_jane'], exclude: ['u_bob'] } },
+      });
+
+      const newState = reducer(initialState, {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'u_bob', queryValue: 'bob@elastic.co' },
+      });
+
+      expect(newState.filters.user?.include).toEqual(['u_jane']);
+      expect(newState.filters.user?.exclude).toEqual([]);
+      expect(newState.search.queryText).toContain('jane@elastic.co');
+      expect(newState.search.queryText).not.toMatch(/-createdBy/);
+    });
+  });
+
+  describe('SET_USER_FILTER', () => {
+    it('sets the user filter wholesale', () => {
+      const initialState = createInitialState();
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_USER_FILTER,
+        payload: { include: ['u_1', 'u_2'], exclude: [] },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.user).toEqual({ include: ['u_1', 'u_2'], exclude: [] });
+    });
+
+    it('clears the user filter when payload is undefined', () => {
+      const initialState = createInitialState({
+        filters: { user: { include: ['u_1'], exclude: [] } },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_USER_FILTER,
+        payload: undefined,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.user).toBeUndefined();
+    });
+
+    it('resets page index and clears selection', () => {
+      const initialState = createInitialState({
+        page: { index: 2, size: 20 },
+        selection: { selectedIds: ['item-1'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_USER_FILTER,
+        payload: { include: ['u_1'], exclude: [] },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.page.index).toBe(0);
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
+
+    it('preserves non-user filters', () => {
+      const initialState = createInitialState({
+        filters: { search: 'test', tag: { include: ['t1'] } },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_USER_FILTER,
+        payload: { include: ['u_1'], exclude: [] },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.search).toBe('test');
+      expect(newState.filters.tag).toEqual({ include: ['t1'] });
+    });
+  });
+
+  describe('SET_SEARCH preserves user filter', () => {
+    it('preserves existing filters.user when SET_SEARCH fires', () => {
+      const initialState = createInitialState({
+        filters: { search: 'old', user: { include: ['u_1'], exclude: [] } },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'new query', filters: { search: 'new query' } },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.search).toBe('new query');
+      expect(newState.filters.user).toEqual({ include: ['u_1'], exclude: [] });
+    });
+
+    it('keeps filters.user undefined when it was not set', () => {
+      const initialState = createInitialState();
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'test', filters: { search: 'test' } },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.user).toBeUndefined();
+    });
+  });
+
+  describe('CLEAR_FILTERS clears user filter', () => {
+    it('clears filters.user along with everything else', () => {
+      const initialState = createInitialState({
+        filters: { search: 'test', user: { include: ['u_1'], exclude: [] } },
+        search: { queryText: 'test createdBy:jane@elastic.co' },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.user).toBeUndefined();
+      expect(newState.search.queryText).toBe('');
+    });
+  });
+
   describe('unknown action', () => {
     it('returns current state for unknown action types', () => {
       const initialState = createInitialState();

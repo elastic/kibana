@@ -12,10 +12,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Query } from '@elastic/eui';
 import {
   ContentListProvider,
+  contentListQueryClient,
   type FindItemsResult,
   type FindItemsParams,
+  type FilterFeatureConfig,
+  type ContentListServices,
 } from '@kbn/content-list-provider';
-import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 import { TagFilterRenderer } from './tag_filter_renderer';
 
 const mockTags = [
@@ -47,18 +49,31 @@ const mockFindItems = jest.fn(
   })
 );
 
-const mockTagsService: ContentManagementTagsServices = {
-  getTagList: () => mockTags,
-};
+/**
+ * Build a `FilterFeatureConfig` for tags that returns tag facets (optionally with counts).
+ */
+const createTagsFilterConfig = (counts?: Record<string, number>): FilterFeatureConfig => ({
+  getMetadata: async () =>
+    mockTags.map((tag) => ({
+      key: tag.id,
+      label: tag.name,
+      count: counts?.[tag.id],
+      data: tag,
+    })),
+});
 
-const createWrapper = (options?: { tagsService?: ContentManagementTagsServices }) => {
-  const { tagsService } = options ?? {};
+const createWrapper = (options?: {
+  tagsFeatureConfig?: FilterFeatureConfig;
+  services?: ContentListServices;
+}) => {
+  const { tagsFeatureConfig, services } = options ?? {};
   return ({ children }: { children: React.ReactNode }) => (
     <ContentListProvider
       id="test-list"
       labels={{ entity: 'item', entityPlural: 'items' }}
       dataSource={{ findItems: mockFindItems }}
-      services={tagsService ? { tags: tagsService } : undefined}
+      features={tagsFeatureConfig ? { tags: tagsFeatureConfig } : {}}
+      services={services}
     >
       {children}
     </ContentListProvider>
@@ -68,17 +83,18 @@ const createWrapper = (options?: { tagsService?: ContentManagementTagsServices }
 describe('TagFilterRenderer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    contentListQueryClient.clear();
   });
 
   it('renders the tag filter button', () => {
     render(<TagFilterRenderer query={Query.parse('')} />, {
-      wrapper: createWrapper({ tagsService: mockTagsService }),
+      wrapper: createWrapper({ tagsFeatureConfig: createTagsFilterConfig() }),
     });
 
     expect(screen.getByText('Tags')).toBeInTheDocument();
   });
 
-  it('renders nothing when tags service is not available', () => {
+  it('renders nothing when no tags feature config is provided', () => {
     const { container } = render(<TagFilterRenderer query={Query.parse('')} />, {
       wrapper: createWrapper(),
     });
@@ -86,21 +102,23 @@ describe('TagFilterRenderer', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('shows tag options when popover is opened', () => {
+  it('shows tag options when popover is opened', async () => {
     render(<TagFilterRenderer query={Query.parse('')} />, {
-      wrapper: createWrapper({ tagsService: mockTagsService }),
+      wrapper: createWrapper({ tagsFeatureConfig: createTagsFilterConfig() }),
     });
 
     fireEvent.click(screen.getByText('Tags'));
 
-    expect(screen.getByText('Production')).toBeInTheDocument();
-    expect(screen.getByText('Development')).toBeInTheDocument();
-    expect(screen.getByText('Archived')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Production')).toBeInTheDocument();
+      expect(screen.getByText('Development')).toBeInTheDocument();
+      expect(screen.getByText('Archived')).toBeInTheDocument();
+    });
   });
 
-  it('shows modifier hint text in the footer', () => {
+  it('shows modifier hint text in the footer', async () => {
     render(<TagFilterRenderer query={Query.parse('')} />, {
-      wrapper: createWrapper({ tagsService: mockTagsService }),
+      wrapper: createWrapper({ tagsFeatureConfig: createTagsFilterConfig() }),
     });
 
     fireEvent.click(screen.getByText('Tags'));
@@ -108,14 +126,16 @@ describe('TagFilterRenderer', () => {
     expect(screen.getByText(/\+ click exclude/)).toBeInTheDocument();
   });
 
-  it('calls `onChange` when a tag option is clicked', () => {
+  it('calls `onChange` when a tag option is clicked', async () => {
     const onChange = jest.fn();
 
     render(<TagFilterRenderer query={Query.parse('')} onChange={onChange} />, {
-      wrapper: createWrapper({ tagsService: mockTagsService }),
+      wrapper: createWrapper({ tagsFeatureConfig: createTagsFilterConfig() }),
     });
 
     fireEvent.click(screen.getByText('Tags'));
+
+    await waitFor(() => screen.getByText('Production'));
     fireEvent.click(screen.getByText('Production'));
 
     expect(onChange).toHaveBeenCalledTimes(1);
@@ -123,40 +143,45 @@ describe('TagFilterRenderer', () => {
     expect(updatedQuery.text).toContain('Production');
   });
 
-  it('reflects include state from query prop', () => {
+  it('reflects include state from query prop', async () => {
     const query = Query.parse('').addOrFieldValue('tag', 'Production', true, 'eq');
 
     render(<TagFilterRenderer query={query} />, {
-      wrapper: createWrapper({ tagsService: mockTagsService }),
+      wrapper: createWrapper({ tagsFeatureConfig: createTagsFilterConfig() }),
     });
 
     fireEvent.click(screen.getByText('Tags'));
 
-    const productionOption = screen.getByTestId('tag-searchbar-option-tag-1');
-    expect(productionOption).toBeInTheDocument();
+    await waitFor(() => {
+      const productionOption = screen.getByTestId('tag-searchbar-option-tag-1');
+      expect(productionOption).toBeInTheDocument();
+    });
   });
 
-  it('renders tag options with health indicator colors', () => {
+  it('renders tag options with health indicator colors', async () => {
     render(<TagFilterRenderer query={Query.parse('')} />, {
-      wrapper: createWrapper({ tagsService: mockTagsService }),
+      wrapper: createWrapper({ tagsFeatureConfig: createTagsFilterConfig() }),
     });
 
     fireEvent.click(screen.getByText('Tags'));
 
-    expect(screen.getByTestId('tag-searchbar-option-tag-1')).toBeInTheDocument();
-    expect(screen.getByTestId('tag-searchbar-option-tag-2')).toBeInTheDocument();
-    expect(screen.getByTestId('tag-searchbar-option-tag-3')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('tag-searchbar-option-tag-1')).toBeInTheDocument();
+      expect(screen.getByTestId('tag-searchbar-option-tag-2')).toBeInTheDocument();
+      expect(screen.getByTestId('tag-searchbar-option-tag-3')).toBeInTheDocument();
+    });
   });
 
-  it('removes a tag from the query when clicking an already-included tag', () => {
+  it('removes a tag from the query when clicking an already-included tag', async () => {
     const query = Query.parse('').addOrFieldValue('tag', 'Production', true, 'eq');
     const onChange = jest.fn();
 
     render(<TagFilterRenderer query={query} onChange={onChange} />, {
-      wrapper: createWrapper({ tagsService: mockTagsService }),
+      wrapper: createWrapper({ tagsFeatureConfig: createTagsFilterConfig() }),
     });
 
     fireEvent.click(screen.getByText('Tags'));
+    await waitFor(() => screen.getByText('Production'));
     fireEvent.click(screen.getByText('Production'));
 
     expect(onChange).toHaveBeenCalledTimes(1);
@@ -164,41 +189,81 @@ describe('TagFilterRenderer', () => {
     expect(updatedQuery.text).not.toContain('Production');
   });
 
-  describe('tag counts from FindItemsResult', () => {
-    it('displays counts keyed by tag ID', async () => {
-      // Return counts.tag keyed by tag ID.
-      const mockFindItemsWithCounts = jest.fn(
-        async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-          items: [
-            { id: 'item-1', title: 'Item 1', tags: ['tag-1', 'tag-2'] },
-            { id: 'item-2', title: 'Item 2', tags: ['tag-1'] },
-          ],
-          total: 2,
-          counts: { tag: { 'tag-1': 2, 'tag-2': 1 } },
-        })
-      );
+  describe('tag counts from getMetadata', () => {
+    it('displays counts provided by FilterFeatureConfig.getMetadata', async () => {
+      const counts = { 'tag-1': 2, 'tag-2': 1 };
 
-      const WrapperWithCounts = ({ children }: { children: React.ReactNode }) => (
-        <ContentListProvider
-          id="test-with-counts"
-          labels={{ entity: 'item', entityPlural: 'items' }}
-          dataSource={{ findItems: mockFindItemsWithCounts }}
-          services={{ tags: mockTagsService }}
-        >
-          {children}
-        </ContentListProvider>
-      );
-
-      render(<TagFilterRenderer query={Query.parse('')} />, { wrapper: WrapperWithCounts });
+      render(<TagFilterRenderer query={Query.parse('')} />, {
+        wrapper: createWrapper({ tagsFeatureConfig: createTagsFilterConfig(counts) }),
+      });
 
       fireEvent.click(screen.getByText('Tags'));
 
-      // Counts render as badge text next to each tag name. Wait for query to resolve.
-      // tag-1 → 'Production' should show count 2, tag-2 → 'Development' should show count 1.
       await waitFor(() => {
         expect(screen.getByText('2')).toBeInTheDocument();
         expect(screen.getByText('1')).toBeInTheDocument();
       });
+    });
+
+    it('shows no count badge when count is omitted from a facet', async () => {
+      // Only tag-1 has a count; tag-2 and tag-3 have none.
+      const counts = { 'tag-1': 5 };
+
+      render(<TagFilterRenderer query={Query.parse('')} />, {
+        wrapper: createWrapper({ tagsFeatureConfig: createTagsFilterConfig(counts) }),
+      });
+
+      fireEvent.click(screen.getByText('Tags'));
+
+      await waitFor(() => {
+        expect(screen.getByText('5')).toBeInTheDocument();
+      });
+
+      // tag-2 and tag-3 names appear but without a count badge.
+      expect(screen.getByText('Development')).toBeInTheDocument();
+      expect(screen.queryByText('0')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('plain ContentListProvider with services.tags (no explicit FilterFeatureConfig)', () => {
+    const mockTagsService = {
+      getTagList: () => mockTags,
+    };
+
+    it('renders the tag filter button when only services.tags is provided', () => {
+      render(<TagFilterRenderer query={Query.parse('')} />, {
+        wrapper: createWrapper({ services: { tags: mockTagsService } }),
+      });
+
+      expect(screen.getByText('Tags')).toBeInTheDocument();
+    });
+
+    it('shows tag options when popover is opened with services.tags only', async () => {
+      render(<TagFilterRenderer query={Query.parse('')} />, {
+        wrapper: createWrapper({ services: { tags: mockTagsService } }),
+      });
+
+      fireEvent.click(screen.getByText('Tags'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Production')).toBeInTheDocument();
+        expect(screen.getByText('Development')).toBeInTheDocument();
+        expect(screen.getByText('Archived')).toBeInTheDocument();
+      });
+    });
+
+    it('calls onChange when a tag is selected with services.tags only', async () => {
+      const onChange = jest.fn();
+
+      render(<TagFilterRenderer query={Query.parse('')} onChange={onChange} />, {
+        wrapper: createWrapper({ services: { tags: mockTagsService } }),
+      });
+
+      fireEvent.click(screen.getByText('Tags'));
+      await waitFor(() => screen.getByText('Production'));
+      fireEvent.click(screen.getByText('Production'));
+
+      expect(onChange).toHaveBeenCalledTimes(1);
     });
   });
 });
