@@ -261,6 +261,7 @@ export const getAxiosInstanceWithAuth = ({
               },
             },
             connectorTokenClient,
+            tokenEndpointAuthMethod: opts.tokenEndpointAuthMethod,
           });
         },
         logger,
