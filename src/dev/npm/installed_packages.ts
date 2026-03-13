@@ -62,7 +62,9 @@ function readModuleInfo(
   const keyParts = pkgAndVersion.split('@');
   const name = keyParts.slice(0, -1).join('@');
   const version = keyParts[keyParts.length - 1];
-  const override = options.licenseOverrides && options.licenseOverrides[pkgAndVersion];
+  const override =
+    options.licenseOverrides &&
+    (options.licenseOverrides[pkgAndVersion] || options.licenseOverrides[name]);
 
   return {
     name,

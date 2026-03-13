@@ -26,6 +26,7 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 import type { MetricField } from '../../types';
 import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
+import { MetricTypeBadge } from './metric_type_badge';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
 
 interface OverviewTabProps {
@@ -120,9 +121,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
               i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
                 defaultMessage: 'Metric type',
               }),
-              <div>
-                <EuiBadge>{metric.metricTypes?.[0] ?? ''}</EuiBadge>
-              </div>,
+              <MetricTypeBadge instrument={metric.metricTypes?.[0]} />,
               'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
             ),
           ]
