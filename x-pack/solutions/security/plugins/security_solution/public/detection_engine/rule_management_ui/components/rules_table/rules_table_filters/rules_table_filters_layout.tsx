@@ -13,7 +13,6 @@ import {
   EuiIcon,
   EuiResizableContainer,
   EuiSpacer,
-  useEuiTheme,
 } from '@elastic/eui';
 import {
   RULES_TABLE_FILTERS_MAIN_PANEL_MIN_WIDTH_PERCENT,
@@ -39,7 +38,6 @@ export interface RulesTableFiltersLayoutProps {
 
 export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
   function RulesTableFiltersLayout({ searchBar, sidebarContent, children, onClearFilters }) {
-    const { euiTheme } = useEuiTheme();
     const [sidebarWidthPercent, setSidebarWidthPercent] = useState(
       RULES_TABLE_FILTERS_SIDEBAR_DEFAULT_WIDTH_PERCENT
     );
@@ -120,7 +118,7 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
               minSize={`${RULES_TABLE_FILTERS_MAIN_PANEL_MIN_WIDTH_PERCENT}%`}
               scrollable={true}
               paddingSize="m"
-              style={{ paddingBottom: 0 }}
+              style={{ paddingBottom: 0, minHeight: 400 }}
               data-test-subj="rulesTableFiltersMainContent"
             >
               <EuiSpacer />

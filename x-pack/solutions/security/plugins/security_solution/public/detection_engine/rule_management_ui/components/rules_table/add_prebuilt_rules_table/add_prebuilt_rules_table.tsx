@@ -22,8 +22,10 @@ import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { RulesTableFiltersLayout } from '../rules_table_filters/rules_table_filters_layout';
 import { AddPrebuiltRulesTableNoItemsMessage } from './add_prebuilt_rules_no_items_message';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
-import { AddPrebuiltRulesTableSearchBar } from './add_prebuilt_rules_table_filters';
-import { AddPrebuiltRulesTableFiltersSidebarContent } from './add_prebuilt_rules_table_filters';
+import {
+  AddPrebuiltRulesTableSearchBar,
+  AddPrebuiltRulesTableFiltersSidebarContent,
+} from './add_prebuilt_rules_table_filters';
 import { useAddPrebuiltRulesTableColumns } from './use_add_prebuilt_rules_table_columns';
 
 /**

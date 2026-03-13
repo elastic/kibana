@@ -53,12 +53,10 @@ const AddRulesPageComponent: React.FC = () => {
       <MissingDetectionsPrivilegesCallOut />
 
       <AddPrebuiltRulesTableContextProvider>
-        <SecuritySolutionPageWrapper>
-          <HeaderPage title={i18n.PAGE_TITLE}>
-            <AddPrebuiltRulesHeaderButtons />
-          </HeaderPage>
-          <AddPrebuiltRulesTable />
-        </SecuritySolutionPageWrapper>
+        <HeaderPage title={i18n.PAGE_TITLE}>
+          <AddPrebuiltRulesHeaderButtons />
+        </HeaderPage>
+        <AddPrebuiltRulesTable />
       </AddPrebuiltRulesTableContextProvider>
 
       <SpyRoute pageName={SecurityPageName.rulesAdd} />

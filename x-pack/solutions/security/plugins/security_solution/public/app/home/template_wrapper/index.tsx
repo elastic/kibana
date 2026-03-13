@@ -6,7 +6,6 @@
  */
 
 import React, { type ReactNode, useMemo } from 'react';
-import classNames from 'classnames';
 import styled from 'styled-components';
 import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
@@ -41,8 +40,6 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
     background-color: ${({ theme }) => theme.colors.emptyShade};
   }
 
-  .securityPageWrapper--noBottomPadding {
-    padding-bottom: 0 !important;
   }
 
     .${IS_DRAGGING_CLASS_NAME} & {
@@ -57,15 +54,10 @@ export type SecuritySolutionTemplateWrapperProps = Omit<KibanaPageTemplateProps,
    * Combined with isEmptyState, this prop allows complete override of the empty page
    */
   emptyPageBody?: ReactNode;
-  /**
-   * When true, the section content area has no bottom padding (e.g. for full-height sidebars).
-   * Callers must add bottom padding to the main content so the page footer (e.g. table pagination) does not touch the bottom.
-   */
-  noSectionBottomPadding?: boolean;
 };
 
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateWrapperProps> =
-  React.memo(({ children, noSectionBottomPadding, ...rest }) => {
+  React.memo(({ children, ...rest }) => {
     const solutionNavProps = useSecuritySolutionNavigation();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
@@ -102,10 +94,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
           <>
             <GlobalKQLHeader />
             <KibanaPageTemplate.Section
-              className={classNames(
-                'securityPageWrapper',
-                noSectionBottomPadding && 'securityPageWrapper--noBottomPadding'
-              )}
+              className="securityPageWrapper"
               data-test-subj="pageContainer"
               paddingSize={rest.paddingSize ?? 'l'}
               alignment="top"
