@@ -84,6 +84,22 @@ Whenever you encounter any of below mentioned test conditions, it indicates sequ
 - com.q1labs.semsources.cre.tests.CauseAndEffect_Test
 
 
+### QID Map Entry Tests
+
+QID Map Entry tests check for certain QIDs in the events. QIDs are unique identifiers for specific types of events in QRadar.
+
+#### How to identify QID Map Entry dependencies:
+
+  - QID Map Entry tests can be extracted from test conditions "com.q1labs.semsources.cre.tests.QID_Test".
+  - They are often mentioned in human-readable test descriptions in \`text\` tags, e.g., "when the event QID is one of the following (QID1) QID name1,(QID2) QID name2,(QID3) QID name3 ". We need to make note of QID names i.e. QID name1, QID name2, QID name3.
+
+
+#### How to resolve QID Map Entry test conditions:
+
+- QID map entry must be called as Event category. Downstream system does not understand QIDs but it understands event categories. Your final output should be "Check if event category is <QID name1>, <QID name2> and <QID name3>". This is extremely important otherwise the downstream system will not understand the output and it will fail.
+- No tools are needed to resolve QIDs. Just QID names are sufficient.
+- Leave a message for downstream system that these "event category" names are only for indication purposes and it is recommended NOT to use them verbatim in the final output.
+
 ### Event or Flow Payload Tests
 
 Event or Flow Payload tests check for certain strings, patterns within the complete event or flow payload/documents. It is important to mention that we are looking at all the fields in the complete event.
