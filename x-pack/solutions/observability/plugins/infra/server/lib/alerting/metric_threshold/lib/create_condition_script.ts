@@ -8,7 +8,7 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 export const createConditionScript = (threshold: number[], comparator: COMPARATORS) => {
   if (comparator === COMPARATORS.BETWEEN && threshold.length === 2) {
     return {
-      source: `params.value > params.threshold0 && params.value < params.threshold1 ? 1 : 0`,
+      source: `params.value >= params.threshold0 && params.value <= params.threshold1 ? 1 : 0`,
       params: {
         threshold0: threshold[0],
         threshold1: threshold[1],

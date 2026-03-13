@@ -16,7 +16,7 @@ export const createConditionScript = (
   const threshold = conditionThresholds.map((n) => convertMetricValue(metric, n));
   if (comparator === COMPARATORS.BETWEEN && threshold.length === 2) {
     return {
-      source: `params.value > params.threshold0 && params.value < params.threshold1 ? 1 : 0`,
+      source: `params.value >= params.threshold0 && params.value <= params.threshold1 ? 1 : 0`,
       params: {
         threshold0: threshold[0],
         threshold1: threshold[1],
