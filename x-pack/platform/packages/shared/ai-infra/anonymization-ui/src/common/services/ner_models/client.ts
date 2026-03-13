@@ -25,7 +25,11 @@ interface NerModelsHttpService {
 
 export const createNerModelsClient = ({ fetch }: NerModelsHttpService): NerModelsClient => ({
   getTrainedModelStats: (modelId: string) =>
-    fetch<TrainedModelStatsResponse>(`/_ml/trained_models/${encodeURIComponent(modelId)}/_stats`, {
-      method: 'GET',
-    }),
+    fetch<TrainedModelStatsResponse>(
+      `/internal/ml/trained_models/${encodeURIComponent(modelId)}/_stats`,
+      {
+        method: 'GET',
+        version: '1',
+      }
+    ),
 });

@@ -14,8 +14,9 @@ describe('createNerModelsClient', () => {
 
     await client.getTrainedModelStats('my model/1');
 
-    expect(fetch).toHaveBeenCalledWith('/_ml/trained_models/my%20model%2F1/_stats', {
+    expect(fetch).toHaveBeenCalledWith('/internal/ml/trained_models/my%20model%2F1/_stats', {
       method: 'GET',
+      version: '1',
     });
   });
 });

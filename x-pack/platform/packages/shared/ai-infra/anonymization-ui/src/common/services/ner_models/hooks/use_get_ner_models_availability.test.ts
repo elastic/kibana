@@ -54,4 +54,42 @@ describe('useGetNerModelsAvailability', () => {
 
     await expect(query.queryFn()).resolves.toEqual(['model-a']);
   });
+
+  it('does not mark model as unavailable when stats request is unauthorized', async () => {
+    getTrainedModelStats.mockRejectedValue({ statusCode: 403 });
+
+    const query = useGetNerModelsAvailability({
+      client,
+      modelIds: ['model-a'],
+      enabled: true,
+    }) as {
+      queryFn: () => Promise<unknown>;
+    };
+
+    await expect(query.queryFn()).resolves.toEqual([]);
+  });
+
+  it('treats fully allocated deployments as available', async () => {
+    getTrainedModelStats.mockResolvedValue({
+      trained_model_stats: [
+        {
+          deployment_stats: {
+            allocation_status: {
+              state: 'fully_allocated',
+            },
+          },
+        },
+      ],
+    });
+
+    const query = useGetNerModelsAvailability({
+      client,
+      modelIds: ['model-a'],
+      enabled: true,
+    }) as {
+      queryFn: () => Promise<unknown>;
+    };
+
+    await expect(query.queryFn()).resolves.toEqual([]);
+  });
 });
