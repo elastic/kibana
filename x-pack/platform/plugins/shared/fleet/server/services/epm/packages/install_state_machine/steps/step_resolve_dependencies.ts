@@ -158,7 +158,7 @@ async function verifyPackageDependencies(
   soClient: SavedObjectsClientContract,
   packageInfo: InstallablePackage
 ) {
-  const dependants = await getDependantsPackages(soClient, packageInfo.name);
+  const dependants = await getDependantPackages(soClient, packageInfo.name);
 
   await pMap(
     dependants,
@@ -235,7 +235,7 @@ async function buildDependencies(
     } else if (!semverSatisfies(installation.version, requiredVersion)) {
       // Package installed but version doesn't satisfy constraint - need to update
       // Get all dependants to collect their version constraints
-      const dependants = await getDependantsPackages(soClient, name);
+      const dependants = await getDependantPackages(soClient, name);
 
       const versionConstraints = dependants.reduce(
         (acc, curr) => {
@@ -296,7 +296,7 @@ async function getCompatibleVersion(
   const allAvailableVersions = res.sort((a, b) => semverRcompare(a.version, b.version));
 
   const compatible = allAvailableVersions.find((registryPackage) =>
-    versionConstrains.every((constrain) => semverSatisfies(registryPackage.version, constrain))
+    versionConstrains.every((constraint) => semverSatisfies(registryPackage.version, constraint))
   );
   if (compatible) {
     return compatible.version;
@@ -307,7 +307,7 @@ async function getCompatibleVersion(
   );
 }
 
-async function getDependantsPackages(soClient: SavedObjectsClientContract, pkgName: string) {
+async function getDependantPackages(soClient: SavedObjectsClientContract, pkgName: string) {
   const dependants = (
     await getInstalledPackageSavedObjects(soClient, {
       dependencyPackageName: pkgName,
