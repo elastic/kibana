@@ -2679,6 +2679,19 @@
       "labels": ["Team:streams-program", "release_note:skip", "backport:all-open"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
+    },
+    {
+      "groupName": "react-day-picker",
+      "matchDepNames": ["react-day-picker"],
+      "reviewers": ["team:eui-team"],
+      "matchBaseBranches": ["main"],
+      "labels": [
+        "Team:EUI",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
     }
   ],
   "customManagers": [
