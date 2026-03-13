@@ -448,6 +448,74 @@ steps:
     });
   });
 
+  describe('modifyStep indentation', () => {
+    it('computes correct indentation using full-string newline search', () => {
+      const yamlWithManySteps = `version: "1"
+name: Test
+description: A long description that pushes the steps section far from the start of the document so that a 20-char lookback window would miss the preceding newline.
+triggers:
+  - type: manual
+steps:
+  - name: first_step
+    type: console
+    with:
+      message: hello
+  - name: second_step
+    type: http
+    with:
+      url: https://example.com
+      method: GET
+      headers:
+        Accept: application/json
+        Authorization: Bearer token123
+`;
+      const result = modifyStep(yamlWithManySteps, 'second_step', {
+        name: 'second_step',
+        type: 'http',
+        with: { url: 'https://new.example.com', method: 'POST' },
+      });
+
+      expect(result.success).toBe(true);
+      const doc = parseDocument(result.yaml);
+      expect(doc.errors).toHaveLength(0);
+
+      const parsed = doc.toJSON();
+      expect(parsed.steps[1].with.url).toBe('https://new.example.com');
+      expect(parsed.steps[0]).toEqual(parseDocument(yamlWithManySteps).toJSON().steps[0]);
+    });
+  });
+
+  describe('modifyStepProperty with multi-line nested values', () => {
+    it('correctly indents nested object values at step indentation depth', () => {
+      const yamlWithStep = `version: "1"
+name: Test
+steps:
+  - name: http_step
+    type: http
+    with:
+      url: https://example.com
+      headers:
+        Accept: text/plain
+`;
+      const result = modifyStepProperty(yamlWithStep, 'http_step', 'with', {
+        url: 'https://new.example.com',
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          Authorization: 'Bearer token',
+        },
+      });
+
+      expect(result.success).toBe(true);
+      const doc = parseDocument(result.yaml);
+      expect(doc.errors).toHaveLength(0);
+
+      const parsed = doc.toJSON();
+      expect(parsed.steps[0].with.method).toBe('POST');
+      expect(parsed.steps[0].with.headers.Authorization).toBe('Bearer token');
+    });
+  });
+
   describe('modifyWorkflowProperty with complex array values', () => {
     it('produces valid YAML when replacing triggers with a complex rrule schedule', () => {
       const yamlWithTrigger = `version: "1"
@@ -685,14 +753,24 @@ steps:
       ).toEqual(beforeParsed.steps.find((s: { name: string }) => s.name === 'get_prs_from_github'));
     });
 
-    it('integrity check rejects modifyStepProperty when splice corrupts adjacent steps', () => {
+    it('modifyStepProperty correctly indents nested values without corrupting adjacent steps', () => {
+      const beforeParsed = parseDocument(WORKFLOW_WITH_MANY_STEPS).toJSON();
       const result = modifyStepProperty(WORKFLOW_WITH_MANY_STEPS, 'get_prs_from_github', 'with', {
         url: 'https://new-url.example.com',
         method: 'POST',
       });
 
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('integrity violation');
+      expect(result.success).toBe(true);
+      const afterParsed = parseDocument(result.yaml).toJSON();
+      expect(afterParsed.steps.find((s: { name: string }) => s.name === 'build_pr_list')).toEqual(
+        beforeParsed.steps.find((s: { name: string }) => s.name === 'build_pr_list')
+      );
+      expect(
+        afterParsed.steps.find((s: { name: string }) => s.name === 'get_prs_from_github')?.with
+      ).toEqual({
+        url: 'https://new-url.example.com',
+        method: 'POST',
+      });
     });
 
     it('modifyStep preserves other steps and top-level properties', () => {
@@ -752,6 +830,31 @@ steps:
       expect(
         afterParsed.steps.find((s: { name: string }) => s.name === 'send_slack_message')
       ).toEqual(beforeParsed.steps.find((s: { name: string }) => s.name === 'send_slack_message'));
+    });
+
+    it('integrity check detects unexpected new top-level properties in afterYaml', () => {
+      const beforeYaml = `version: "1"
+name: Test
+steps:
+  - name: step1
+    type: console
+`;
+      const afterYaml = `version: "1"
+name: Test
+injected_key: malicious
+steps:
+  - name: step1
+    type: console
+`;
+      const result = modifyWorkflowProperty(beforeYaml, 'name', 'Test');
+      expect(result.success).toBe(true);
+
+      const corruptedResult = modifyWorkflowProperty(afterYaml, 'name', 'Test');
+      expect(corruptedResult.yaml).toContain('injected_key');
+
+      const manualResult = modifyStepProperty(beforeYaml, 'step1', 'type', 'console');
+      expect(manualResult.success).toBe(true);
+      expect(manualResult.yaml).not.toContain('injected_key');
     });
 
     it('replacing triggers with rrule on a workflow with no blank line before steps', () => {

@@ -9,11 +9,11 @@
 
 import { diffLines } from 'diff';
 import type { Observable, Subscription } from 'rxjs';
+import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { isToolUiEvent } from '@kbn/agent-builder-common';
 import type { monaco } from '@kbn/monaco';
 import type { ProposalTracker } from './proposal_tracker';
 import type { ProposalManager, ProposedChange } from './proposed_changes';
-import type { AgentBuilderChatEvent } from '../../types';
 
 const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
 const WORKFLOW_YAML_DIFF_TYPE = 'workflow.yaml.diff';
@@ -155,24 +155,26 @@ export class AttachmentBridge {
   private editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null> | null =
     null;
   private processedProposals = new Set<string>();
+  private onError: (err: unknown) => void = () => {};
 
   start(
-    chat$: Observable<AgentBuilderChatEvent>,
+    chat$: Observable<BrowserChatEvent>,
     proposalManager: ProposalManager,
     editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>,
-    tracker: ProposalTracker
+    tracker: ProposalTracker,
+    options?: { onError?: (err: unknown) => void }
   ): void {
     this.proposalManager = proposalManager;
     this.editorRef = editorRef;
     this.tracker = tracker;
+    this.onError = options?.onError ?? (() => {});
 
     this.subscription = chat$.subscribe((event) => {
       if (isToolUiEvent(event, WORKFLOW_YAML_CHANGED_EVENT)) {
         try {
           this.handleYamlChanged(event.data.data as WorkflowYamlChangedPayload);
         } catch (err) {
-          // eslint-disable-next-line no-console
-          console.error('[AttachmentBridge] Error handling yaml_changed event:', err);
+          this.onError(err);
         }
       }
     });

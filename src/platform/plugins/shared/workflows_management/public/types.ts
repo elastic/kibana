@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  AttachmentServiceStartContract,
+  EventsServiceStartContract,
+  ToolServiceStartContract,
+} from '@kbn/agent-builder-browser';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -22,6 +28,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import type { TelemetryServiceClient } from './common/lib/telemetry/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPublicPluginSetup {}
@@ -30,25 +37,18 @@ export interface WorkflowsPublicPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
-import type { TelemetryServiceClient } from './common/lib/telemetry/types';
-
 /**
  * Lightweight interface for the Agent Builder plugin's public start contract.
  * Defined here instead of importing from the plugin directly to avoid circular
  * dependencies (workflowsManagement uses runtimePluginDependencies).
  */
-export interface AgentBuilderChatEvent {
-  type: string;
-  data: Record<string, unknown>;
-}
-
 export interface AgentBuilderPluginStartContract {
   openChat: (options?: {
     sessionTag?: string;
     agentId?: string;
     initialMessage?: string;
     autoSendInitialMessage?: boolean;
-    attachments?: Array<{ type: string; data: Record<string, unknown> }>;
+    attachments?: AttachmentInput[];
     browserApiTools?: Array<{
       id: string;
       description: string;
@@ -56,13 +56,10 @@ export interface AgentBuilderPluginStartContract {
       handler: (params: unknown) => void | Promise<void>;
     }>;
   }) => { chatRef: { close: () => void } };
-  attachments: {
-    addAttachmentType: (type: string, definition: unknown) => void;
-  };
-  events: {
-    chat$: import('rxjs').Observable<AgentBuilderChatEvent>;
-  };
-  addAttachment: (attachment: { id?: string; type: string; data: Record<string, unknown> }) => void;
+  tools: ToolServiceStartContract;
+  attachments: AttachmentServiceStartContract;
+  events: EventsServiceStartContract;
+  addAttachment: (attachment: AttachmentInput) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -83,9 +80,9 @@ export interface WorkflowsPublicPluginStartDependencies {
 
 export interface WorkflowsPublicPluginStartAdditionalServices {
   storage: Storage;
+  agentBuilder?: AgentBuilderPluginStartContract;
   workflowsManagement: {
     telemetry: TelemetryServiceClient;
-    agentBuilder?: AgentBuilderPluginStartContract;
   };
 }
 

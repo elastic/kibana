@@ -10,6 +10,7 @@
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import type { Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { CodeEditor } from '@kbn/code-editor';
 import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
@@ -286,16 +287,20 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
     }
   ) => ReactNode;
 } => {
-  // Track current app context via observables for page detection.
-  // The subscription lives for the lifetime of the Kibana app instance.
   let currentAppId: string | undefined;
   let currentLocation = '';
-  combineLatest([application.currentAppId$, application.currentLocation$]).subscribe(
-    ([appId, location]) => {
+  let appContextSub: Subscription | undefined;
+  const trackAppContext = () => {
+    appContextSub?.unsubscribe();
+    appContextSub = combineLatest([
+      application.currentAppId$,
+      application.currentLocation$,
+    ]).subscribe(([appId, location]) => {
       currentAppId = appId;
       currentLocation = location;
-    }
-  );
+    });
+  };
+  trackAppContext();
 
   const isOnWorkflowPage = (workflowId: string): boolean =>
     currentAppId === PLUGIN_ID && currentLocation.includes(workflowId);

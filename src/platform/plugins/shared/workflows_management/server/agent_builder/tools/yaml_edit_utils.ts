@@ -142,9 +142,14 @@ const findCorruptedProperty = (
   afterJson: Record<string, unknown>,
   skipKeys: Set<string>
 ): string | undefined => {
-  return Object.keys(beforeJson)
+  const changed = Object.keys(beforeJson)
     .filter((key) => !skipKeys.has(key))
     .find((key) => JSON.stringify(beforeJson[key]) !== JSON.stringify(afterJson[key]));
+  if (changed) return changed;
+
+  return Object.keys(afterJson)
+    .filter((key) => !skipKeys.has(key))
+    .find((key) => !(key in beforeJson));
 };
 
 const findCorruptedStep = (
@@ -278,10 +283,9 @@ export const modifyStep = (
 
   const indentUnit = detectIndent(yaml);
 
-  const leadingWhitespace = yaml.slice(range[0] - 20 > 0 ? range[0] - 20 : 0, range[0]);
-  const lastNewline = leadingWhitespace.lastIndexOf('\n');
-  const currentIndent = lastNewline >= 0 ? leadingWhitespace.length - lastNewline - 1 : range[0];
-  const depth = Math.round(currentIndent / indentUnit);
+  const lastNewline = yaml.lastIndexOf('\n', range[0] - 1);
+  const currentIndent = lastNewline >= 0 ? range[0] - lastNewline - 1 : range[0];
+  const depth = Math.floor(currentIndent / indentUnit);
 
   const stepYaml = stringifyValue(updatedStep, indentUnit, depth);
   const replacement = `${stepYaml.trimEnd()}\n`;
@@ -312,7 +316,10 @@ export const modifyStepProperty = (
   if (pair && pair.value && (pair.value as { range?: unknown }).range) {
     const valRange = nodeRange(pair.value as { range?: [number, number, number] | null });
     if (valRange) {
-      const valStr = stringifyValue(value, indentUnit, 0).trimEnd();
+      const precedingNewline = yaml.lastIndexOf('\n', valRange[0] - 1);
+      const valueIndent = precedingNewline >= 0 ? valRange[0] - precedingNewline - 1 : valRange[0];
+      const depth = Math.floor(valueIndent / indentUnit);
+      const valStr = stringifyValue(value, indentUnit, depth).trimEnd();
       return checkedResult(yaml, spliceYaml(yaml, valRange[0], valRange[1], `${valStr}\n`), scope);
     }
   }
@@ -403,7 +410,7 @@ export const modifyWorkflowProperty = (
       const leadingWs = yaml.slice(Math.max(0, valRange[0] - 40), valRange[0]);
       const nl = leadingWs.lastIndexOf('\n');
       const valueIndent = nl >= 0 ? leadingWs.length - nl - 1 : 0;
-      const depth = Math.round(valueIndent / indentUnit);
+      const depth = Math.floor(valueIndent / indentUnit);
       const valStr = stringifyValue(value, indentUnit, depth).trimEnd();
       return checkedResult(yaml, spliceYaml(yaml, valRange[0], valRange[1], `${valStr}\n`), scope);
     }
