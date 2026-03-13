@@ -11,11 +11,10 @@ import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
 export interface UseOnboardingApiOptions {
-  connectorId?: string;
   saveQueries?: boolean;
 }
 
-export function useOnboardingApi({ connectorId, saveQueries = true }: UseOnboardingApiOptions) {
+export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions = {}) {
   const {
     dependencies: {
       start: {
@@ -42,7 +41,6 @@ export function useOnboardingApi({ connectorId, saveQueries = true }: UseOnboard
                 action: 'schedule' as const,
                 from,
                 to,
-                connectorId,
               },
             },
           }
@@ -91,6 +89,6 @@ export function useOnboardingApi({ connectorId, saveQueries = true }: UseOnboard
         );
       },
     }),
-    [connectorId, saveQueries, signal, streamsRepositoryClient]
+    [saveQueries, signal, streamsRepositoryClient]
   );
 }

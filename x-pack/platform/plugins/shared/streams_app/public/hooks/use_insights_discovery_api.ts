@@ -9,7 +9,7 @@ import { useAbortController } from '@kbn/react-hooks';
 import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 
-export function useInsightsDiscoveryApi(connectorId?: string) {
+export function useInsightsDiscoveryApi() {
   const {
     dependencies: {
       start: {
@@ -28,7 +28,6 @@ export function useInsightsDiscoveryApi(connectorId?: string) {
           params: {
             body: {
               action: 'schedule',
-              connectorId,
               ...(streamNames && streamNames.length > 0 ? { streamNames } : {}),
             },
           },
@@ -60,6 +59,6 @@ export function useInsightsDiscoveryApi(connectorId?: string) {
         });
       },
     }),
-    [connectorId, signal, streamsRepositoryClient]
+    [signal, streamsRepositoryClient]
   );
 }

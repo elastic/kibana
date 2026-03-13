@@ -14,6 +14,7 @@ import {
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
+import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
@@ -22,7 +23,6 @@ import { generateSignificantEventDefinitions } from '../../significant_events/ge
 import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_found_error';
 
 export interface SignificantEventsQueriesGenerationTaskParams {
-  connectorId: string;
   start: number;
   end: number;
   sampleDocsSize?: number;
@@ -47,8 +47,8 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, sampleDocsSize, streamName, _task } = runContext
-                .taskInstance.params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
+              const { start, end, sampleDocsSize, streamName, _task } = runContext.taskInstance
+                .params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
 
               const {
                 taskClient,
@@ -57,9 +57,20 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 soClient,
                 featureClient,
                 scopedClusterClient,
+                modelSettingsClient,
+                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
+
+              const taskLogger = taskContext.logger.get('significant_events_queries_generation');
+              const settings = await modelSettingsClient.getSettings();
+              const connectorId = await resolveConnectorId({
+                connectorId: settings.connectorIdRuleGeneration,
+                uiSettingsClient,
+                logger: taskLogger,
+              });
+              taskLogger.debug(`Using connector ${connectorId} for rule generation`);
 
               try {
                 const stream = await streamsClient.getStream(streamName);
@@ -102,7 +113,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 await taskClient.complete<
                   SignificantEventsQueriesGenerationTaskParams,
                   SignificantEventsQueriesGenerationResult
-                >(_task, { connectorId, start, end, sampleDocsSize, streamName }, result);
+                >(_task, { start, end, sampleDocsSize, streamName }, result);
               } catch (error) {
                 if (isDefinitionNotFoundError(error)) {
                   taskContext.logger.debug(
@@ -131,7 +142,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 await taskClient.fail<SignificantEventsQueriesGenerationTaskParams>(
                   _task,
-                  { connectorId, start, end, sampleDocsSize, streamName },
+                  { start, end, sampleDocsSize, streamName },
                   errorMessage
                 );
 

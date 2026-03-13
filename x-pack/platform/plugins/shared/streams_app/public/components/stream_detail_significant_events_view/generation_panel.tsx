@@ -18,9 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AssetImage } from '../asset_image';
-import { ConnectorListButtonBase } from '../connector_list_button/connector_list_button';
 import type { Flow } from './add_significant_event_flyout/types';
-import type { AIFeatures } from '../../hooks/use_ai_features';
 
 export function SignificantEventsGenerationPanel({
   onGenerateSuggestionsClick,
@@ -28,14 +26,12 @@ export function SignificantEventsGenerationPanel({
   isGeneratingQueries,
   isSavingManualEntry,
   selectedFlow,
-  aiFeatures,
 }: {
   onManualEntryClick: () => void;
   onGenerateSuggestionsClick: () => void;
   isGeneratingQueries: boolean;
   isSavingManualEntry: boolean;
   selectedFlow?: Flow;
-  aiFeatures: AIFeatures | null;
 }) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -75,22 +71,20 @@ export function SignificantEventsGenerationPanel({
           <EuiSpacer size="s" />
 
           <EuiFlexItem>
-            <ConnectorListButtonBase
-              buttonProps={{
-                iconType: 'sparkles',
-                isLoading: isGeneratingQueries,
-                isDisabled: isGeneratingQueries || isSavingManualEntry,
-                onClick: onGenerateSuggestionsClick,
-                'data-test-subj': 'significant_events_generate_suggestions_button',
-                children: i18n.translate(
-                  'xpack.streams.significantEvents.significantEventsGenerationPanel.generateSuggestionsButtonLabel',
-                  {
-                    defaultMessage: 'Generate suggestions',
-                  }
-                ),
-              }}
-              aiFeatures={aiFeatures}
-            />
+            <EuiButton
+              iconType="sparkles"
+              isLoading={isGeneratingQueries}
+              isDisabled={isGeneratingQueries || isSavingManualEntry}
+              onClick={onGenerateSuggestionsClick}
+              data-test-subj="significant_events_generate_suggestions_button"
+            >
+              {i18n.translate(
+                'xpack.streams.significantEvents.significantEventsGenerationPanel.generateSuggestionsButtonLabel',
+                {
+                  defaultMessage: 'Generate suggestions',
+                }
+              )}
+            </EuiButton>
           </EuiFlexItem>
         </EuiPanel>
       </EuiFlexItem>
