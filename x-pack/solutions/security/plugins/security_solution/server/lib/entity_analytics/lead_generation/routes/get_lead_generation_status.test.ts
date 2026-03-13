@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { getLeadGenerationStatusRoute } from './get_lead_generation_status';
 import { LEAD_GENERATION_STATUS_URL } from '../../../../../common/entity_analytics/lead_generation/constants';
 import {
@@ -19,22 +20,31 @@ jest.mock('../lead_data_client', () => ({
   createLeadDataClient: () => ({ getStatus: mockGetStatus }),
 }));
 
+jest.mock('../tasks', () => ({
+  getLeadGenerationTaskId: (spaceId: string) =>
+    `entity_analytics:lead_generation:engine:${spaceId}:1.0.0`,
+}));
+
 describe('getLeadGenerationStatusRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: ReturnType<typeof requestContextMock.convertContext>;
   const logger = loggingSystemMock.createLogger();
+  let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
+  let getStartServicesMock: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     server = serverMock.create();
     const { clients } = requestContextMock.createTools();
     context = requestContextMock.convertContext(requestContextMock.create({ ...clients }));
-    getLeadGenerationStatusRoute(server.router, logger);
+    mockTaskManagerStart = taskManagerMock.createStart();
+    getStartServicesMock = jest.fn().mockResolvedValue([{}, { taskManager: mockTaskManagerStart }]);
+    getLeadGenerationStatusRoute(server.router, logger, getStartServicesMock);
   });
 
-  it('returns 200 with engine status', async () => {
+  it('returns 200 with engine status when task exists (isEnabled: true)', async () => {
     mockGetStatus.mockResolvedValueOnce({
-      isEnabled: false,
+      isEnabled: true,
       indexExists: true,
       totalLeads: 42,
       lastRun: '2026-03-10T00:00:00.000Z',
@@ -47,12 +57,28 @@ describe('getLeadGenerationStatusRoute', () => {
 
     const response = await server.inject(request, context);
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual({
+    expect(response.body.isEnabled).toBe(true);
+    expect(mockGetStatus).toHaveBeenCalledWith({ isEnabled: true });
+  });
+
+  it('returns isEnabled: false when task does not exist', async () => {
+    mockTaskManagerStart.get.mockRejectedValueOnce(new Error('Not found'));
+    mockGetStatus.mockResolvedValueOnce({
       isEnabled: false,
       indexExists: true,
-      totalLeads: 42,
-      lastRun: '2026-03-10T00:00:00.000Z',
+      totalLeads: 10,
+      lastRun: '2026-03-09T00:00:00.000Z',
     });
+
+    const request = requestMock.create({
+      method: 'get',
+      path: LEAD_GENERATION_STATUS_URL,
+    });
+
+    const response = await server.inject(request, context);
+    expect(response.status).toEqual(200);
+    expect(response.body.isEnabled).toBe(false);
+    expect(mockGetStatus).toHaveBeenCalledWith({ isEnabled: false });
   });
 
   it('returns 500 on error', async () => {

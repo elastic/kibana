@@ -16,15 +16,9 @@ import { GENERATE_LEADS_URL } from '../../../../../common/entity_analytics/lead_
 import { generateLeadsRequestSchema } from '../../../../../common/entity_analytics/lead_generation/types';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
-import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
-import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
-import { createRiskScoreModule } from '../observation_modules/risk_score_module';
-import { createTemporalStateModule } from '../observation_modules/temporal_state_module';
-import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
-import { createEntityRetriever } from '../entity_retriever';
-import { createLeadDataClient } from '../lead_data_client';
+import { runLeadGenerationPipeline } from '../run_pipeline';
 
 export const generateLeadsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -62,10 +56,7 @@ export const generateLeadsRoute = (
 
           const { connectorId } = request.body;
 
-          // Fire-and-forget: run the pipeline in the background, return executionUuid immediately
           (async () => {
-            const routeStart = Date.now();
-
             try {
               let chatModel: InferenceChatModel | undefined;
               if (connectorId) {
@@ -90,67 +81,14 @@ export const generateLeadsRoute = (
                 }
               }
 
-              const retriever = createEntityRetriever({ esClient, logger, spaceId });
-              const fetchStart = Date.now();
-              const leadEntities = await retriever.fetchAllEntities();
-              logger.info(
-                `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
-                  leadEntities.length
-                } records)`
-              );
-
-              if (leadEntities.length === 0) {
-                logger.info(
-                  `[LeadGeneration] No entities found — skipping generation (executionUuid=${executionUuid})`
-                );
-                return;
-              }
-
-              const engine = createLeadGenerationEngine({ logger });
-              engine.registerModule(createRiskScoreModule({ esClient, logger, spaceId }));
-              engine.registerModule(createTemporalStateModule({ esClient, logger, spaceId }));
-              engine.registerModule(
-                createBehavioralAnalysisModule({
-                  esClient,
-                  logger,
-                  alertsIndexPattern: getAlertsIndex(spaceId),
-                })
-              );
-
-              const generateStart = Date.now();
-              const leads = await engine.generateLeads(leadEntities, { chatModel });
-              logger.info(
-                `[LeadGeneration][Telemetry] Engine pipeline: ${Date.now() - generateStart}ms (${
-                  leads.length
-                } leads)`
-              );
-
-              const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
-              const persistStart = Date.now();
-
-              const leadsWithMeta = leads.map((lead) => ({
-                ...lead,
-                status: 'active' as const,
-                executionUuid,
-                sourceType: 'adhoc' as const,
-              }));
-
-              await leadDataClient.createLeads({
-                leads: leadsWithMeta,
+              await runLeadGenerationPipeline({
+                esClient,
+                logger,
+                spaceId,
+                chatModel,
                 executionId: executionUuid,
                 sourceType: 'adhoc',
               });
-
-              logger.info(
-                `[LeadGeneration][Telemetry] Persistence: ${Date.now() - persistStart}ms (${
-                  leads.length
-                } leads to adhoc index)`
-              );
-              logger.info(
-                `[LeadGeneration][Telemetry] Total pipeline: ${
-                  Date.now() - routeStart
-                }ms (executionUuid=${executionUuid})`
-              );
             } catch (pipelineError) {
               logger.error(
                 `[LeadGeneration] Background generation failed (executionUuid=${executionUuid}): ${pipelineError}`

@@ -23,9 +23,9 @@ export const registerLeadGenerationRoutes = ({
   generateLeadsRoute(router, logger, getStartServices);
   getLeadsRoute(router, logger);
   getLeadByIdRoute(router, logger);
-  getLeadGenerationStatusRoute(router, logger);
+  getLeadGenerationStatusRoute(router, logger, getStartServices);
   dismissLeadRoute(router, logger);
   bulkUpdateLeadsRoute(router, logger);
-  enableLeadGenerationRoute(router, logger);
-  disableLeadGenerationRoute(router, logger);
+  enableLeadGenerationRoute(router, logger, getStartServices);
+  disableLeadGenerationRoute(router, logger, getStartServices);
 };

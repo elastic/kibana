@@ -45,3 +45,14 @@ export type {
   ObservationSeverity,
 } from './types';
 export { DEFAULT_ENGINE_CONFIG } from './types';
+export {
+  runLeadGenerationPipeline,
+  type RunPipelineParams,
+  type RunPipelineResult,
+} from './run_pipeline';
+export {
+  registerLeadGenerationTask,
+  startLeadGenerationTask,
+  removeLeadGenerationTask,
+  getLeadGenerationTaskId,
+} from './tasks';
