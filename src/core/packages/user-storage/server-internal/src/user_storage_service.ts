@@ -34,7 +34,7 @@ export class UserStorageService {
   private readonly definitions = new Map<string, UserStorageDefinition>();
   private readonly logger: Logger;
 
-  constructor(private readonly coreContext: CoreContext) {
+  constructor(coreContext: CoreContext) {
     this.logger = coreContext.logger.get('user-storage');
   }
 
