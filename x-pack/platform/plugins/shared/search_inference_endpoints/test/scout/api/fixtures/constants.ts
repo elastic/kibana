@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout';
+
 export const API_PATH = '/internal/search_inference_endpoints/settings';
 export const API_VERSION = '1';
 
@@ -14,14 +16,10 @@ export const COMMON_HEADERS = {
   'elastic-api-version': API_VERSION,
 };
 
-export const ROLE_ALL = {
-  kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
-};
-
-export const ROLE_FEATURE_ONLY = {
+export const ROLE_FEATURE_ONLY: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['*'], privileges: ['all'] }],
+  },
   kibana: [{ base: [], feature: { searchInferenceEndpoints: ['all'] }, spaces: ['*'] }],
-};
-
-export const ROLE_NO_ACCESS = {
-  kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['*'] }],
 };

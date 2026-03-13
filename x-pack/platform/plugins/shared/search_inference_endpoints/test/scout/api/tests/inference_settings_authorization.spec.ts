@@ -8,31 +8,25 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import {
-  API_PATH,
-  COMMON_HEADERS,
-  ROLE_ALL,
-  ROLE_FEATURE_ONLY,
-  ROLE_NO_ACCESS,
-} from '../fixtures/constants';
+import { API_PATH, COMMON_HEADERS, ROLE_FEATURE_ONLY } from '../fixtures/constants';
 
 apiTest.describe(
   'inference_settings - authorization',
   { tag: [...tags.deploymentAgnostic] },
   () => {
     let featureHeaders: Record<string, string>;
-    let noAccessHeaders: Record<string, string>;
+    let viewerHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth }) => {
-      const adminCredentials = await samlAuth.asInteractiveUser(ROLE_ALL);
+      const adminCredentials = await samlAuth.asInteractiveUser('admin');
       adminHeaders = { ...adminCredentials.cookieHeader, ...COMMON_HEADERS };
 
       const featureCredentials = await samlAuth.asInteractiveUser(ROLE_FEATURE_ONLY);
       featureHeaders = { ...featureCredentials.cookieHeader, ...COMMON_HEADERS };
 
-      const noAccessCredentials = await samlAuth.asInteractiveUser(ROLE_NO_ACCESS);
-      noAccessHeaders = { ...noAccessCredentials.cookieHeader, ...COMMON_HEADERS };
+      const viewerCredentials = await samlAuth.asInteractiveUser('viewer');
+      viewerHeaders = { ...viewerCredentials.cookieHeader, ...COMMON_HEADERS };
     });
 
     apiTest.afterEach(async ({ apiClient }) => {
@@ -72,7 +66,7 @@ apiTest.describe(
 
     apiTest('unauthorized user GET should return 403', async ({ apiClient }) => {
       const response = await apiClient.get(API_PATH, {
-        headers: noAccessHeaders,
+        headers: viewerHeaders,
       });
 
       expect(response).toHaveStatusCode(403);
@@ -80,7 +74,7 @@ apiTest.describe(
 
     apiTest('unauthorized user PUT should return 403', async ({ apiClient }) => {
       const response = await apiClient.put(API_PATH, {
-        headers: noAccessHeaders,
+        headers: viewerHeaders,
         body: {
           features: [
             {

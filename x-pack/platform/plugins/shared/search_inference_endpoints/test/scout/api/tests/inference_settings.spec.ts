@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_PATH, COMMON_HEADERS, ROLE_ALL } from '../fixtures/constants';
+import { API_PATH, COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'inference_settings - authorized user',
@@ -17,7 +17,7 @@ apiTest.describe(
     let authHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth }) => {
-      const credentials = await samlAuth.asInteractiveUser(ROLE_ALL);
+      const credentials = await samlAuth.asInteractiveUser('admin');
       authHeaders = { ...credentials.cookieHeader, ...COMMON_HEADERS };
     });
 

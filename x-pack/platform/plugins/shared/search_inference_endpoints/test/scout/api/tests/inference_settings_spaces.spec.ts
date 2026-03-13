@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_PATH, COMMON_HEADERS, ROLE_ALL } from '../fixtures/constants';
+import { API_PATH, COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'inference_settings - space isolation',
@@ -22,7 +22,7 @@ apiTest.describe(
     const spaceApiPath = (spaceId: string) => `/s/${spaceId}${API_PATH}`;
 
     apiTest.beforeAll(async ({ samlAuth, apiServices }) => {
-      const credentials = await samlAuth.asInteractiveUser(ROLE_ALL);
+      const credentials = await samlAuth.asInteractiveUser('admin');
       authHeaders = { ...credentials.cookieHeader, ...COMMON_HEADERS };
 
       await apiServices.spaces.create({ id: SPACE_A, name: 'Space A', disabledFeatures: [] });
