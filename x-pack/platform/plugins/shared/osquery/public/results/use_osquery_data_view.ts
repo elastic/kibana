@@ -27,7 +27,7 @@ export const useOsqueryDataView = (
   const { skip = false } = options;
   const dataViews = useKibana().services.data.dataViews;
 
-  const { data, isLoading, error } = useQuery<DataView | undefined, Error>(
+  const { data, isLoading, isFetching, error } = useQuery<DataView | undefined, Error>(
     ['osqueryResultsDataView'],
     async () => {
       let dataView: DataView | undefined;
@@ -77,7 +77,7 @@ export const useOsqueryDataView = (
 
   return {
     dataView: data,
-    isLoading,
+    isLoading: isLoading && isFetching,
     error: error ?? null,
   };
 };

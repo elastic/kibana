@@ -48,10 +48,7 @@ export const useResultsFiltering = (
     return undefined;
   }, [enabled, query]);
 
-  const activeFilters = useMemo(
-    () => filters.filter((f) => !f.meta?.disabled),
-    [filters]
-  );
+  const activeFilters = useMemo(() => filters.filter((f) => !f.meta?.disabled), [filters]);
 
   const filtersForSuggestions = useMemo<Filter[]>(() => {
     if (isScheduled) {

@@ -70,9 +70,7 @@ export const buildResultsQuery = ({
   }
 
   const esFilterClauses =
-    parsedEsFilters.length > 0
-      ? buildQueryFromFilters(parsedEsFilters, undefined).filter
-      : [];
+    parsedEsFilters.length > 0 ? buildQueryFromFilters(parsedEsFilters, undefined).filter : [];
 
   const filterQuery = [...timeRangeFilter, kqlFilterClause, ...esFilterClauses];
 
