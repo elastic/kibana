@@ -58,7 +58,6 @@ export async function requestOAuthToken<T>(
       ? { username: clientId, password: clientSecret }
       : undefined;
 
-  console.log({ basicAuth });
   const res = await request({
     axios: axiosInstance,
     url: tokenUrl,
