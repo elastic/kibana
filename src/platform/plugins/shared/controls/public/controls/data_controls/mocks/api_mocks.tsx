@@ -10,14 +10,14 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-
-import type { OptionsListDisplaySettings, OptionsListSortingType } from '@kbn/controls-schemas';
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
-import { initializeSelectionsManager } from '../options_list_control/selections_manager';
-import type { DSLOptionsListComponentApi } from '../options_list_control/types';
-import { initializeTemporayStateManager } from '../options_list_control/temporay_state_manager';
-import { initializeEditorStateManager } from '../options_list_control/editor_state_manager';
+import type { OptionsListDisplaySettings, OptionsListSortingType } from '@kbn/controls-schemas';
+
 import { initializeLabelManager } from '../../control_labels';
+import { initializeEditorStateManager } from '../options_list_control/editor_state_manager';
+import { initializeSelectionsManager } from '../options_list_control/selections_manager';
+import { initializeTemporayStateManager } from '../options_list_control/temporay_state_manager';
+import type { DSLOptionsListComponentApi } from '../options_list_control/types';
 
 export const getOptionsListContextMock = () => {
   const editorStateManager = initializeEditorStateManager(DEFAULT_DSL_OPTIONS_LIST_STATE);
