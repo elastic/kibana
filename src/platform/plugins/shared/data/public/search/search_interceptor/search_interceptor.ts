@@ -118,6 +118,7 @@ export class SearchInterceptor {
     MAX_CACHE_ITEMS,
     MAX_CACHE_SIZE_MB
   );
+  private cachedProtocol?: string;
 
   /**
    * Observable that emits when the number of pending requests changes.
@@ -163,11 +164,46 @@ export class SearchInterceptor {
         this.searchTimeout = timeout;
       })
     );
+
+    // Detect HTTP protocol as soon as possible
+    this.detectProtocol();
+  }
+
+  /**
+   * Detects the HTTP protocol (HTTP/1.1 or HTTP/2) using the Performance API
+   * and caches the result for later use.
+   * @internal
+   */
+  private async detectProtocol() {
+    try {
+      const response = await this.deps.http.get('/internal/data/_status', {
+        version: '1',
+        asResponse: true,
+      });
+      const url = response.response?.url;
+      if (url) {
+        const entries = performance.getEntriesByName(url);
+        const entry = entries[entries.length - 1] as PerformanceResourceTiming | undefined;
+        if (entry?.nextHopProtocol) {
+          this.cachedProtocol = entry.nextHopProtocol;
+        }
+      }
+    } catch (e) {
+      // Silently fail - protocol detection is not critical
+    }
   }
 
   public stop() {
     this.responseCache.clear();
     this.uiSettingsSubs.forEach((s) => s.unsubscribe());
+  }
+
+  /**
+   * Returns the detected HTTP protocol (e.g., 'h2' for HTTP/2, 'http/1.1' for HTTP/1.1).
+   * Returns undefined if protocol detection hasn't completed or failed.
+   */
+  public getProtocol(): string | undefined {
+    return this.cachedProtocol;
   }
 
   /*
