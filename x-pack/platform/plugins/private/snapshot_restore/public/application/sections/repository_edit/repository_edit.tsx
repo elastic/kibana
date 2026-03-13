@@ -19,7 +19,7 @@ import type { Section } from '../../constants';
 import { BASE_PATH } from '../../constants';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
-import { editRepository, useLoadRepository } from '../../services/http';
+import { editRepository, useLoadRepositories, useLoadRepository } from '../../services/http';
 import { useDefaultRepository } from '../../services/use_default_repository';
 import { useDecodedParams } from '../../lib';
 
@@ -34,6 +34,8 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   const { name } = useDecodedParams<MatchParams>();
   const section = 'repositories' as Section;
   const { defaultRepository, setDefaultRepository } = useDefaultRepository();
+  const { data: repositoriesData } = useLoadRepositories();
+  const isOnlyRepository = (repositoriesData?.repositories?.length ?? 0) <= 1;
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -201,7 +203,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         clearSaveError={clearSaveError}
         onSave={onSave}
         isDefaultRepository={isDefaultRepository}
-        isFirstRepository={false}
+        isFirstRepository={isOnlyRepository}
         onToggleDefault={setIsDefaultRepository}
       />
     </EuiPageSection>
