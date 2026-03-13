@@ -15,12 +15,6 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import { useGetFieldsData } from './use_get_fields_data';
 
-jest.mock(
-  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
-  () => ({
-    useAlertsPrivileges: () => ({ hasAlertsRead: true }),
-  })
-);
 jest.mock('../../../../common/hooks/use_space_id');
 jest.mock('../../../../common/utils/route/use_route_spy');
 jest.mock('../../../../sourcerer/containers');
@@ -77,7 +71,6 @@ describe('useEventDetails', () => {
     expect(hookResult.result.current.dataFormattedForFieldBrowser).toEqual([]);
     expect(hookResult.result.current.getFieldsData('test')).toEqual('test');
     expect(hookResult.result.current.loading).toEqual(false);
-    expect(hookResult.result.current.missingAlertsPrivilege).toEqual(false);
     expect(hookResult.result.current.refetchFlyoutData()).toEqual(undefined);
     expect(hookResult.result.current.searchHit).toEqual({});
   });

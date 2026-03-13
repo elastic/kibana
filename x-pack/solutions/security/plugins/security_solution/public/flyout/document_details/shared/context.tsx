@@ -18,6 +18,8 @@ import { useBasicDataFromDetailsData } from './hooks/use_basic_data_from_details
 import type { DocumentDetailsProps } from './types';
 import type { GetFieldsData } from './hooks/use_get_fields_data';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { isAlertsIndex } from '../../shared/utils/document_utils';
 
 export interface DocumentDetailsContext {
   /**
@@ -100,16 +102,17 @@ export const DocumentDetailsProvider = memo(
     isPreviewMode,
     children,
   }: DocumentDetailsProviderProps) => {
+    const { hasAlertsRead } = useAlertsPrivileges();
+    const missingAlertsPrivilege = !hasAlertsRead && isAlertsIndex(indexName);
     const {
       browserFields,
       dataAsNestedObject,
       dataFormattedForFieldBrowser,
       getFieldsData,
       loading,
-      missingAlertsPrivilege,
       refetchFlyoutData,
       searchHit,
-    } = useEventDetails({ eventId: id, indexName });
+    } = useEventDetails({ eventId: id, indexName, skip: missingAlertsPrivilege });
 
     const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const { rule: maybeRule } = useRuleWithFallback(ruleId);
