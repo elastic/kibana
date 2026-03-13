@@ -284,7 +284,7 @@ export class AutomaticImportService {
 
   public async approveIntegration(params: ApproveIntegrationParams): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { integrationId, authenticatedUser, version } = params;
+    const { integrationId, authenticatedUser, version, categories } = params;
 
     const existing = await this.savedObjectService.getIntegration(integrationId);
 
@@ -321,6 +321,7 @@ export class AutomaticImportService {
       status: TASK_STATUSES.approved,
       metadata: {
         ...existing.metadata,
+        ...(categories ? { categories } : {}),
       },
       changelog: [changelogEntry, ...(existing.changelog ?? [])],
     };
