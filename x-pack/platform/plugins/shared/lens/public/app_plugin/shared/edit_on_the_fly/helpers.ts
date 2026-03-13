@@ -75,7 +75,11 @@ export const getGridAttrs = async (
       : await getESQLAdHocDataview({
           dataViewsService: data.dataViews,
           query: query.esql,
-          options: { skipFetchFields: true },
+          // The ad-hoc DataView spec in the document may lack a timeFieldName
+          // (e.g. when built via config builder API transforms).
+          // Force a fresh instance so the time field is resolved via HTTP.
+          // This is a workaround to avoid the issue described in https://github.com/elastic/kibana/issues/255311
+          options: { skipFetchFields: true, createNewInstanceEvenIfCachedOneAvailable: true },
           http,
         });
 
