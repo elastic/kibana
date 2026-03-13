@@ -2389,6 +2389,25 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
+
+      test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK recovers after unavailable_shards_exception retry', () => {
+        // First call: unavailable_shards_exception triggers retry
+        const errorRes: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.left({
+          type: 'unavailable_shards_exception' as const,
+          message: 'Not enough active copies to meet shard count of [ALL]',
+        });
+        const retryState = model(reindexSourceToTempIndexBulkState, errorRes);
+        expect(retryState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_INDEX_BULK');
+        expect(retryState.retryCount).toEqual(1);
+
+        // Second call: success after shards become available
+        const successRes: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> =
+          Either.right('bulk_index_succeeded');
+        const recoveredState = model(retryState as State, successRes);
+        expect(recoveredState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
+        expect(recoveredState.retryCount).toEqual(0);
+        expect(recoveredState.retryDelay).toEqual(0);
+      });
     });
 
     describe('SET_TEMP_WRITE_BLOCK', () => {
@@ -3096,6 +3115,28 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
+      });
+
+      test('TRANSFORMED_DOCUMENTS_BULK_INDEX recovers after unavailable_shards_exception retry', () => {
+        // First call: unavailable_shards_exception triggers retry
+        const errorRes: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.left({
+          type: 'unavailable_shards_exception' as const,
+          message: 'Not enough active copies to meet shard count of [ALL]',
+        });
+        const retryState = model(transformedDocumentsBulkIndexState, errorRes);
+        expect(retryState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
+        expect(retryState.retryCount).toEqual(1);
+
+        // Second call: success after shards become available, last batch
+        const successRes: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> =
+          Either.right('bulk_index_succeeded');
+        const recoveredState = model(
+          { ...(retryState as State), currentBatch: 1 } as State,
+          successRes
+        );
+        expect(recoveredState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_READ');
+        expect(recoveredState.retryCount).toEqual(0);
+        expect(recoveredState.retryDelay).toEqual(0);
       });
     });
 
