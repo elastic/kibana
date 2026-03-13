@@ -99,6 +99,13 @@ export class MonitorIntegrationHealthApi {
       const locations = so.attributes[ConfigKey.LOCATIONS] ?? [];
       const privateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
+      // Status checks are ordered by root-cause severity (most fundamental first).
+      // Only the first matching status is returned per location — downstream issues
+      // (e.g. agent_policy_mismatch) are moot when a more fundamental problem exists
+      // (e.g. the agent policy itself is missing).
+      //
+      // Priority: missing_location > missing_agent_policy > missing_package_policy
+      //           > agent_policy_mismatch > healthy
       const locationStatuses: LocationHealthStatus[] = privateLocations.map((loc) => {
         const existingPrivateLocation = allPrivateLocationsMap.get(loc.id);
         const newFormatPolicyId = privateLocationAPI.getPolicyId(
