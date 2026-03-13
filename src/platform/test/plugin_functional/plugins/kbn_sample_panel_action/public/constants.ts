@@ -7,16 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
-
-export const createSamplePanelLink = (): Action =>
-  createAction({
-    id: SAMPLE_PANEL_LINK,
-    type: SAMPLE_PANEL_LINK,
-    getDisplayName: () => 'Sample panel Link',
-    execute: async () => {
-      window.location.href = 'https://example.com/kibana/test';
-    },
-    getHref: async () => 'https://example.com/kibana/test',
-  });
+export const SAMPLE_PANEL_ACTION = 'samplePanelAction';
+export const SAMPLE_PANEL_LINK = 'samplePanelLink';
