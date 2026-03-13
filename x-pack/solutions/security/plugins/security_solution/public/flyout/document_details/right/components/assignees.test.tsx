@@ -47,11 +47,6 @@ const renderAssignees = (
   onAssigneesUpdated = jest.fn(),
   showAssignees = true
 ) => {
-  const assignedProfiles = mockUserProfiles.filter((user) => alertAssignees.includes(user.uid));
-  (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
-    isLoading: false,
-    data: assignedProfiles,
-  });
   return render(
     <TestProviders>
       <Assignees
@@ -86,6 +81,13 @@ describe('<Assignees />', () => {
   });
 
   it('should render component', () => {
+    const assignees = ['user-id-1'];
+    const assignedProfiles = mockUserProfiles.filter((user) => assignees.includes(user.uid));
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: assignedProfiles,
+    });
+
     const { getByTestId } = renderAssignees();
 
     expect(getByTestId(USERS_AVATARS_PANEL_TEST_ID)).toBeInTheDocument();
@@ -95,6 +97,12 @@ describe('<Assignees />', () => {
 
   it('should render assignees avatars', () => {
     const assignees = ['user-id-1', 'user-id-2'];
+    const assignedProfiles = mockUserProfiles.filter((user) => assignees.includes(user.uid));
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: assignedProfiles,
+    });
+
     const { getByTestId, queryByTestId } = renderAssignees('test-event', assignees);
 
     expect(getByTestId(USER_AVATAR_ITEM_TEST_ID('user1'))).toBeInTheDocument();
@@ -105,6 +113,12 @@ describe('<Assignees />', () => {
 
   it('should render badge with assignees count in case there are more than two users assigned to an alert', () => {
     const assignees = ['user-id-1', 'user-id-2', 'user-id-3'];
+    const assignedProfiles = mockUserProfiles.filter((user) => assignees.includes(user.uid));
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: assignedProfiles,
+    });
+
     const { getByTestId, queryByTestId } = renderAssignees('test-event', assignees);
 
     const assigneesCountBadge = getByTestId(USERS_AVATARS_COUNT_BADGE_TEST_ID);
@@ -118,11 +132,6 @@ describe('<Assignees />', () => {
 
   it('should call assignees update functionality with the right arguments', () => {
     const assignedProfiles = [mockUserProfiles[0], mockUserProfiles[1]];
-    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
-      isLoading: false,
-      data: assignedProfiles,
-    });
-
     const assignees = assignedProfiles.map((assignee) => assignee.uid);
     const { getByTestId, getByText } = renderAssignees('test-event', assignees);
 
@@ -149,6 +158,12 @@ describe('<Assignees />', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
 
     const assignees = ['user-id-1', 'user-id-2'];
+    const assignedProfiles = mockUserProfiles.filter((user) => assignees.includes(user.uid));
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: assignedProfiles,
+    });
+
     const { getByTestId } = renderAssignees('test-event', assignees);
 
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
@@ -159,6 +174,12 @@ describe('<Assignees />', () => {
     (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => false });
 
     const assignees = ['user-id-1', 'user-id-2'];
+    const assignedProfiles = mockUserProfiles.filter((user) => assignees.includes(user.uid));
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: assignedProfiles,
+    });
+
     const { getByTestId } = renderAssignees('test-event', assignees);
 
     expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
@@ -167,6 +188,12 @@ describe('<Assignees />', () => {
 
   it('should render empty tag in when showAssignees is false', () => {
     const assignees = ['user-id-1', 'user-id-2'];
+    const assignedProfiles = mockUserProfiles.filter((user) => assignees.includes(user.uid));
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: assignedProfiles,
+    });
+
     const { getByTestId, queryByTestId } = renderAssignees(
       'test-event',
       assignees,
