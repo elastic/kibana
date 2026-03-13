@@ -9315,7 +9315,7 @@
             "label": "legendDisplay",
             "description": [],
             "signature": [
-              "\"default\" | \"show\" | \"hide\""
+              "\"show\" | \"default\" | \"hide\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
             "lineNumber": 37,
