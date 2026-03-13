@@ -2064,5 +2064,34 @@ describe('migration actions', () => {
           }
       `);
     });
+    it('resolves left with a retryable error when shards are not all active', async () => {
+      // Create an index with 1 replica on a single-node cluster.
+      // The replica shard will remain unassigned, so wait_for_active_shards: 'all' will fail.
+      // Depending on ES version, this surfaces as either:
+      // - a retryable_es_client_error (timeout waiting for shards at the transport level)
+      // - an unavailable_shards_exception (in bulk response items when shards fail mid-operation)
+      // Both are handled as retryable by the migration framework.
+      await client.indices.create({
+        index: 'index_with_unavailable_shards',
+        settings: {
+          number_of_replicas: 1,
+          auto_expand_replicas: 'false',
+        },
+        mappings: { properties: {} },
+      });
+
+      const newDocs = [{ _source: { title: 'doc 1' } }] as unknown as SavedObjectsRawDoc[];
+
+      const result = await bulkOverwriteTransformedDocuments({
+        client,
+        index: 'index_with_unavailable_shards',
+        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
+        refresh: 'wait_for',
+      })();
+
+      expect(Either.isLeft(result)).toBe(true);
+      const leftType = (result as Either.Left<any>).left.type;
+      expect(['retryable_es_client_error', 'unavailable_shards_exception']).toContain(leftType);
+    });
   });
 });
