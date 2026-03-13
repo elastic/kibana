@@ -291,6 +291,10 @@ export function generateEsqlQuery(
   }
 
   // Process buckets
+  // Filters bucket uses toESQL (FORK + EVAL mapping _fork to filter labels);
+  // pipeline steps applied before STATS
+  let forkCommand: string | null = null;
+  let forkLabelEval: string | null = null;
   const resolvedBucketExprs = new Map<number, string>();
   const bucketsResult: EsqlConversion[] = bucketEsAggsEntries.map(([colId, col], index) => {
     const def = operationDefinitionMap[col.operationType];
@@ -362,8 +366,11 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    const esAggsId = rawResult.template;
-    resolvedBucketExprs.set(index, esAggsId);
+    if ('forkCommand' in rawResult && rawResult.forkCommand) {
+      const forkResult = rawResult as { forkCommand: string; forkLabelEval?: string };
+      forkCommand = forkResult.forkCommand;
+      forkLabelEval = forkResult.forkLabelEval ?? null;
+    }
 
     const format =
       // 1. User-configured format in Lens (highest priority)
@@ -379,6 +386,8 @@ export function generateEsqlQuery(
       // 3. Field's default format from data view (buckets don't need fallback)
       undefined;
 
+    const esAggsId = rawResult.template;
+    resolvedBucketExprs.set(index, esAggsId);
     esAggsIdMap[esAggsId] = createEsAggsIdMapEntry({
       col,
       colId,
@@ -411,8 +420,16 @@ export function generateEsqlQuery(
   const validBuckets = bucketsResult.map((b) => b.esql);
 
   if (validBuckets.length > 0) {
+    // Filters bucket: add FORK then EVAL (map _fork to filter labels), then STATS BY filter
+    if (forkCommand !== null) {
+      queryParts.push(forkCommand);
+    }
+    if (forkLabelEval !== null) {
+      queryParts.push(`EVAL ${forkLabelEval}`);
+    }
     if (validMetrics.length > 0) {
-      const statsBody = `${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`;
+      const byClause = validBuckets.join(', ');
+      const statsBody = `${validMetrics.join(', ')} BY ${byClause}`;
       queryParts.push(`STATS ${statsBody}`);
     }
 

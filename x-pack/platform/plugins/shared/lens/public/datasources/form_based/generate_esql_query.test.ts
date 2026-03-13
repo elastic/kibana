@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
+import type {
+  DateHistogramIndexPatternColumn,
+  FiltersIndexPatternColumn,
+} from '@kbn/lens-common';
 import { generateEsqlQuery } from './generate_esql_query';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import { defaultUiSettingsGet } from './__mocks__/ui_settings';
@@ -367,6 +370,71 @@ describe('generateEsqlQuery', () => {
         // eslint-disable-next-line prettier/prettier
           'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) WHERE KQL(\"geo.src:\\\"US\\\"\") BY BUCKET(order_date, 30 minutes)'
       );
+    }
+  });
+
+  it('should produce valid esql for breakdown by filters (date histogram + filters bucket + count)', () => {
+    const result = generateEsqlQuery(
+      [
+        [
+          '1',
+          {
+            operationType: 'date_histogram',
+            sourceField: 'order_date',
+            label: 'Date histogram',
+            dataType: 'date',
+            isBucketed: true,
+            interval: 'auto',
+          },
+        ],
+        [
+          '2',
+          {
+            operationType: 'filters',
+            label: 'Filters',
+            dataType: 'string',
+            isBucketed: true,
+            params: {
+              filters: [
+                { label: 'US', input: { query: 'geo.src:"US"', language: 'kuery' as const } },
+                { label: 'EU', input: { query: 'geo.dest:"EU"', language: 'kuery' as const } },
+              ],
+            },
+          } as FiltersIndexPatternColumn,
+        ],
+        [
+          '3',
+          {
+            operationType: 'count',
+            sourceField: 'records',
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        ],
+      ],
+      mockLayer,
+      mockIndexPattern,
+      uiSettings,
+      mockDateRange,
+      new Date()
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.esql).toContain('FROM myIndexPattern');
+      // Filters use FORK, then EVAL to map _fork to filter labels, then STATS BY filter
+      expect(result.esql).toContain('FORK');
+      expect(result.esql).toContain('WHERE KQL(');
+      expect(result.esql).toContain('geo.src:"US"');
+      expect(result.esql).toContain('geo.dest:"EU"');
+      expect(result.esql).toContain('EVAL');
+      expect(result.esql).toContain('`filter` = CASE(');
+      expect(result.esql).toContain('_fork == "fork1"');
+      expect(result.esql).toContain('"US"');
+      expect(result.esql).toContain('"EU"');
+      expect(result.esql).toContain('STATS COUNT(*) BY BUCKET(order_date, 30 minutes), filter');
+      expect(result.esql).toContain('COUNT(*)');
     }
   });
 });

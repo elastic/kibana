@@ -12,6 +12,7 @@ import { EuiFormRow, EuiLink, htmlIdGenerator, useEuiTheme } from '@elastic/eui'
 import type { Query } from '@kbn/es-query';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { queryFilterToAst } from '@kbn/data-plugin/common';
+import { esql } from '@elastic/esql';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   NewBucketButton,
@@ -27,10 +28,12 @@ import type {
   IndexPattern,
 } from '@kbn/lens-common';
 import { updateColumnParam } from '../../layer_helpers';
-import type { OperationDefinition } from '..';
+import type { OperationDefinition, ESQLFiltersForkResult } from '..';
 import { FilterPopover } from './filter_popover';
 import { isColumnOfType } from '../helpers';
 import { draggablePopoverButtonStyles } from '../styles';
+
+const FORK_MAX_BRANCHES = 8;
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';
@@ -120,6 +123,37 @@ export const filtersOperation: OperationDefinition<
       schema: 'segment',
       filters: (validFilters?.length > 0 ? validFilters : [defaultFilter]).map(queryFilterToAst),
     }).toAst();
+  },
+
+  toESQL: (column): ESQLFiltersForkResult | undefined => {
+    const filters = column.params.filters;
+    if (!filters?.length) return undefined;
+    const validFilters = filters.filter((f: Filter) => {
+      if (!f.input || typeof f.input.query !== 'string') return false;
+      return f.input.language === 'kuery' || f.input.language === 'lucene';
+    });
+    if (validFilters.length === 0) return undefined;
+    if (validFilters.length > FORK_MAX_BRANCHES) return undefined;
+    const branchClauses = validFilters.map((f: Filter) => {
+      const cmd = f.input!.language === 'kuery' ? 'KQL' : 'QSTR';
+      const query = f.input!.query.replace(/"""/g, '').trim();
+      return `(WHERE ${cmd}(${esql.str(query)}))`;
+    });
+    const forkCommand = `FORK ${branchClauses.join(' ')}`;
+    const labels = validFilters.map((f: Filter) => {
+      if (typeof f.label === 'string' && f.label.trim()) {
+        return f.label.trim();
+      }
+      const query = (f.input!.query || '').trim();
+      const quoted = /:\s*"([^"]*)"/.exec(query);
+      const unquoted = /:\s*(.+)$/.exec(query);
+      return (quoted?.[1] ?? unquoted?.[1]?.trim() ?? query) || filtersDefaultLabel;
+    });
+    const caseClauses = labels
+      .map((label, i) => `_fork == "fork${i + 1}", ${esql.str(label)}`)
+      .join(', ');
+    const forkLabelEval = `\`filter\` = CASE(${caseClauses})`;
+    return { template: 'filter', forkCommand, forkLabelEval };
   },
 
   paramEditor: ({ layer, columnId, currentColumn, indexPattern, paramEditorUpdater }) => {
