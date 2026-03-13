@@ -10,14 +10,13 @@ import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import type { ResolverCellActionRenderer } from '../../../resolver/types';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
 import { OverviewTab } from './overview_tab';
-import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FlyoutMissingAlertsPrivilege } from '../../../flyout/shared/components/flyout_missing_alerts_privilege';
+import { isAlert } from '../../../flyout/shared/utils/document_utils';
 
 const DATA_VIEW_ERROR = i18n.translate(
   'xpack.securitySolution.analyzer.eventOverviewFlyout.dataViewError',
@@ -39,11 +38,6 @@ const FETCH_ERROR = i18n.translate(
     defaultMessage: 'Unable to fetch document details.',
   }
 );
-
-function isAlertHit(hit: DataTableRecord): boolean {
-  const eventIndex = (hit.raw as { _index?: string })?._index;
-  return eventIndex != null && eventIndex.includes(DEFAULT_ALERTS_INDEX);
-}
 
 export interface OverviewTabWrapperProps {
   /**
@@ -83,7 +77,7 @@ export const OverviewTabWrapper = memo(
     });
 
     const { hasAlertsRead } = useAlertsPrivileges();
-    const missingAlertsPrivilege = hit && isAlertHit(hit) && !hasAlertsRead;
+    const missingAlertsPrivilege = hit && isAlert(hit) && !hasAlertsRead;
 
     if (isDataViewLoading) {
       return (
