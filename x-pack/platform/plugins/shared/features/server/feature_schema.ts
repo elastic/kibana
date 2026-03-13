@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// codeql[js/kibana/unbounded-array-in-schema] Arrays validate plugin feature configs from registerKibanaFeature/registerElasticsearchFeature, not user HTTP input
 import { schema } from '@kbn/config-schema';
 
 import { difference } from 'lodash';
