@@ -453,7 +453,17 @@ export const ManageIntegrationsTable: React.FC<{
         render: (item: CreatedIntegrationRow) => {
           if (item.status === 'approved') {
             return (
-              <EuiBadge color="hollow" style={{ color: euiTheme.colors.textSubdued }}>
+              <EuiBadge
+                color="hollow"
+                style={{
+                  color: euiTheme.colors.backgroundFilledText,
+                  borderRadius: euiTheme.border.radius.small,
+                  border: `1px solid ${euiTheme.colors.borderBasePlain}`,
+                  padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
+                  fontFamily: euiTheme.font.family,
+                  fontWeight: euiTheme.font.weight.regular,
+                }}
+              >
                 <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
                     <EuiIcon
@@ -553,7 +563,13 @@ export const ManageIntegrationsTable: React.FC<{
       installToCluster,
       automaticImportVTwo?.components.DataStreamResultsFlyout,
       euiTheme.colors.backgroundLightText,
-      euiTheme.colors.textSubdued,
+      euiTheme.colors.backgroundFilledText,
+      euiTheme.colors.borderBasePlain,
+      euiTheme.border.radius.small,
+      euiTheme.font.family,
+      euiTheme.font.weight.regular,
+      euiTheme.size.xs,
+      euiTheme.size.s,
       userProfiles,
     ]
   );
