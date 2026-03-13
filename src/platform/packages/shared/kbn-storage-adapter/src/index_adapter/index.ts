@@ -284,14 +284,17 @@ export class StorageIndexAdapter<
     return await cb();
   }
 
-  private search: StorageClientSearch<TApplicationType> = async (request) => {
+  private search: StorageClientSearch<TApplicationType> = async (request, transportOptions) => {
     return (await wrapEsCall(
       this.esClient
-        .search({
-          ...request,
-          index: this.getSearchIndexPattern(),
-          allow_no_indices: true,
-        })
+        .search(
+          {
+            ...request,
+            index: this.getSearchIndexPattern(),
+            allow_no_indices: true,
+          },
+          transportOptions
+        )
         .then((response) => {
           return {
             ...response,
@@ -328,20 +331,22 @@ export class StorageIndexAdapter<
     )) as unknown as ReturnType<StorageClientSearch<TApplicationType>>;
   };
 
-  private index: StorageClientIndex<TApplicationType> = async ({
-    id,
-    refresh = 'wait_for',
-    ...request
-  }): Promise<StorageClientIndexResponse> => {
+  private index: StorageClientIndex<TApplicationType> = async (
+    { id, refresh = 'wait_for', ...request },
+    transportOptions
+  ): Promise<StorageClientIndexResponse> => {
     const attemptIndex = async (): Promise<IndexResponse> => {
       const indexResponse = await wrapEsCall(
-        this.esClient.index({
-          ...request,
-          id,
-          refresh,
-          index: this.getWriteTarget(),
-          require_alias: true,
-        })
+        this.esClient.index(
+          {
+            ...request,
+            id,
+            refresh,
+            index: this.getWriteTarget(),
+            require_alias: true,
+          },
+          transportOptions
+        )
       );
 
       return indexResponse;
@@ -354,12 +359,10 @@ export class StorageIndexAdapter<
     });
   };
 
-  private bulk: StorageClientBulk<TApplicationType> = ({
-    operations,
-    refresh = 'wait_for',
-    throwOnFail = false,
-    ...request
-  }): Promise<StorageClientBulkResponse> => {
+  private bulk: StorageClientBulk<TApplicationType> = (
+    { operations, refresh = 'wait_for', throwOnFail = false, ...request },
+    transportOptions
+  ): Promise<StorageClientBulkResponse> => {
     if (operations.length === 0) {
       this.logger.debug(`Bulk request with 0 operations is a noop`);
       return Promise.resolve({
@@ -389,13 +392,16 @@ export class StorageIndexAdapter<
 
     const attemptBulk = async () => {
       return wrapEsCall(
-        this.esClient.bulk({
-          ...request,
-          refresh,
-          operations: bulkOperations,
-          index: this.getWriteTarget(),
-          require_alias: true,
-        })
+        this.esClient.bulk(
+          {
+            ...request,
+            refresh,
+            operations: bulkOperations,
+            index: this.getWriteTarget(),
+            require_alias: true,
+          },
+          transportOptions
+        )
       );
     };
 
@@ -449,11 +455,10 @@ export class StorageIndexAdapter<
     };
   };
 
-  private delete: StorageClientDelete = async ({
-    id,
-    refresh = 'wait_for',
-    ...request
-  }): Promise<StorageClientDeleteResponse> => {
+  private delete: StorageClientDelete = async (
+    { id, refresh = 'wait_for', ...request },
+    transportOptions
+  ): Promise<StorageClientDeleteResponse> => {
     this.logger.debug(`Deleting document with id ${id}`);
     const searchResponse = await this.search({
       track_total_hits: false,
@@ -475,12 +480,15 @@ export class StorageIndexAdapter<
 
     if (document) {
       await wrapEsCall(
-        this.esClient.delete({
-          ...request,
-          refresh,
-          id,
-          index: document._index,
-        })
+        this.esClient.delete(
+          {
+            ...request,
+            refresh,
+            id,
+            index: document._index,
+          },
+          transportOptions
+        )
       );
 
       return { acknowledged: true, result: 'deleted' };
@@ -489,24 +497,30 @@ export class StorageIndexAdapter<
     return { acknowledged: true, result: 'not_found' };
   };
 
-  private get: StorageClientGet<TApplicationType> = async ({ id, ...request }) => {
-    const response = await this.search({
-      track_total_hits: false,
-      size: 1,
-      terminate_after: 1,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                _id: id,
+  private get: StorageClientGet<TApplicationType> = async (
+    { id, ...request },
+    transportOptions
+  ) => {
+    const response = await this.search(
+      {
+        track_total_hits: false,
+        size: 1,
+        terminate_after: 1,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  _id: id,
+                },
               },
-            },
-          ],
+            ],
+          },
         },
+        ...request,
       },
-      ...request,
-    });
+      transportOptions
+    );
 
     const hit: SearchHit = response.hits.hits[0];
 
