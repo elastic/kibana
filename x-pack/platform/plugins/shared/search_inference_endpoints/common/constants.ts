@@ -29,6 +29,7 @@ export const MODEL_SETTINGS_SECTION_TITLE = i18n.translate(
 
 export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
 export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';
+export const INFERENCE_SETTINGS_QUERY_KEY = 'inferenceSettingsQueryKey';
 export const MODEL_SETTINGS_FEATURE_FLAG_ID = 'searchInferenceEndpoints:modelSettingsEnabled';
 
 export const INFERENCE_SETTINGS_SO_TYPE = 'inference-settings';
