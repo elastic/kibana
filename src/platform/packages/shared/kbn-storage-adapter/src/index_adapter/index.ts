@@ -22,6 +22,7 @@ import { isResponseError } from '@kbn/es-errors';
 import { last, mapValues, padStart } from 'lodash';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
+import type { TransportRequestOptions } from '@elastic/transport';
 import type {
   IndexStorageSettings,
   StorageClientBulkResponse,
@@ -38,6 +39,7 @@ import type {
   StorageClientClean,
   StorageClientCleanResponse,
   InternalIStorageClient,
+  StorageTransportOptions,
 } from '../..';
 import { getSchemaVersion } from '../get_schema_version';
 import type { StorageMappingProperty } from '../../types';
@@ -94,6 +96,12 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
     caughtError.stack += error.stack;
     throw caughtError;
   });
+}
+
+function optionalTransportArgs(
+  transportOptions?: StorageTransportOptions
+): [] | [TransportRequestOptions] {
+  return transportOptions ? [transportOptions] : [];
 }
 
 export interface StorageIndexAdapterOptions<TApplicationType> {
@@ -285,16 +293,14 @@ export class StorageIndexAdapter<
   }
 
   private search: StorageClientSearch<TApplicationType> = async (request, transportOptions) => {
+    const searchRequest = {
+      ...request,
+      index: this.getSearchIndexPattern(),
+      allow_no_indices: true,
+    };
     return (await wrapEsCall(
       this.esClient
-        .search(
-          {
-            ...request,
-            index: this.getSearchIndexPattern(),
-            allow_no_indices: true,
-          },
-          transportOptions
-        )
+        .search(searchRequest, ...optionalTransportArgs(transportOptions))
         .then((response) => {
           return {
             ...response,
@@ -345,7 +351,7 @@ export class StorageIndexAdapter<
             index: this.getWriteTarget(),
             require_alias: true,
           },
-          transportOptions
+          ...optionalTransportArgs(transportOptions)
         )
       );
 
@@ -400,7 +406,7 @@ export class StorageIndexAdapter<
             index: this.getWriteTarget(),
             require_alias: true,
           },
-          transportOptions
+          ...optionalTransportArgs(transportOptions)
         )
       );
     };
@@ -487,7 +493,7 @@ export class StorageIndexAdapter<
             id,
             index: document._index,
           },
-          transportOptions
+          ...optionalTransportArgs(transportOptions)
         )
       );
 

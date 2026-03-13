@@ -168,9 +168,6 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
 
     await client.search({ track_total_hits: false, size: 10, query: { match_all: {} } });
 
-    expect(esClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'test_index' }),
-      undefined
-    );
+    expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ index: 'test_index' }));
   });
 });
