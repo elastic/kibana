@@ -42,6 +42,7 @@
     "@kbn/lens-plugin",
     "@kbn/es-query",
     "@kbn/utility-types",
+    "@kbn/visualization-utils",
     "@kbn/i18n",
     "@kbn/std",
     "@kbn/core-ui-settings-browser",

@@ -33,6 +33,11 @@ import {
   missingSortBeforeLimit,
   hasOnlySourceCommand,
   hasTimeseriesInfoCommand,
+  hasChangePointCommand,
+  getChangePointOutputColumnNames,
+  getSourceQueryBeforeChangePoint,
+  getForkWithChangePoint,
+  getSourceQueriesFromForkWithChangePoint,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -1116,6 +1121,139 @@ describe('esql query helpers', () => {
 
     it('should return false when query does not contain METRICS_INFO or TS_INFO', () => {
       expect(hasTimeseriesInfoCommand('FROM index | STATS count()')).toBe(false);
+    });
+  });
+
+  describe('hasChangePointCommand', () => {
+    it('should return false for undefined or empty esql', () => {
+      expect(hasChangePointCommand(undefined)).toBe(false);
+      expect(hasChangePointCommand('')).toBe(false);
+    });
+
+    it('should return false when query has no CHANGE_POINT command', () => {
+      expect(hasChangePointCommand('FROM index | STATS count = COUNT(*)')).toBe(false);
+      expect(hasChangePointCommand('FROM index | WHERE field > 0')).toBe(false);
+    });
+
+    it('should return true when query contains CHANGE_POINT command', () => {
+      expect(hasChangePointCommand('FROM a | CHANGE_POINT value')).toBe(true);
+      expect(hasChangePointCommand('FROM a | CHANGE_POINT value ON key')).toBe(true);
+      expect(
+        hasChangePointCommand(
+          'FROM a | STATS count = COUNT(*) BY bucket | CHANGE_POINT count ON bucket'
+        )
+      ).toBe(true);
+    });
+
+    it('should return true when CHANGE_POINT is inside FORK branches', () => {
+      const forkQuery = `FROM gallery-*
+| FORK
+  ( WHERE referer == "http://domainsigma.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
+  ( WHERE referer == "https://www.google.com/" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
+| WHERE type IS NOT NULL
+| KEEP provider, bucket, avg_bytes, type, pvalue`;
+      expect(hasChangePointCommand(forkQuery)).toBe(true);
+    });
+  });
+
+  describe('getChangePointOutputColumnNames', () => {
+    it('should return undefined for undefined or when no CHANGE_POINT command', () => {
+      expect(getChangePointOutputColumnNames(undefined)).toBeUndefined();
+      expect(getChangePointOutputColumnNames('FROM index')).toBeUndefined();
+    });
+
+    it('should return default type and pvalue column names when AS is not used', () => {
+      const result = getChangePointOutputColumnNames('FROM a | CHANGE_POINT value');
+      expect(result).toEqual({ typeColumn: 'type', pvalueColumn: 'pvalue' });
+    });
+
+    it('should return custom column names when AS type_name, pvalue_name is used', () => {
+      const result = getChangePointOutputColumnNames(
+        'FROM a | CHANGE_POINT value AS change_type, p_value'
+      );
+      expect(result?.typeColumn).toBe('change_type');
+      expect(result?.pvalueColumn).toBe('p_value');
+    });
+
+    it('should return column names when CHANGE_POINT is inside FORK branches', () => {
+      const forkQuery = `FROM gallery-*
+| FORK
+  ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
+| WHERE type IS NOT NULL`;
+      const result = getChangePointOutputColumnNames(forkQuery);
+      expect(result).toEqual({ typeColumn: 'type', pvalueColumn: 'pvalue' });
+    });
+  });
+
+  describe('getSourceQueryBeforeChangePoint', () => {
+    it('should return undefined for undefined or when no CHANGE_POINT command', () => {
+      expect(getSourceQueryBeforeChangePoint(undefined)).toBeUndefined();
+      expect(getSourceQueryBeforeChangePoint('FROM index')).toBeUndefined();
+    });
+
+    it('should return query before CHANGE_POINT when CHANGE_POINT is present', () => {
+      expect(getSourceQueryBeforeChangePoint('FROM a | CHANGE_POINT value')).toBe('FROM a');
+      expect(
+        getSourceQueryBeforeChangePoint(
+          'FROM a | STATS count = COUNT(*) BY bucket | CHANGE_POINT count ON bucket'
+        )
+      ).toBe('FROM a | STATS count = COUNT(*) BY bucket');
+    });
+
+    it('should return undefined when CHANGE_POINT is the first command', () => {
+      expect(getSourceQueryBeforeChangePoint('CHANGE_POINT value')).toBeUndefined();
+    });
+  });
+
+  describe('getForkWithChangePoint', () => {
+    it('should return undefined for undefined or when no FORK', () => {
+      expect(getForkWithChangePoint(undefined)).toBeUndefined();
+      expect(getForkWithChangePoint('FROM a | CHANGE_POINT value')).toBeUndefined();
+    });
+
+    it('should return undefined when FORK has no CHANGE_POINT in branches', () => {
+      const forkQuery = 'FROM a | FORK ( WHERE x == 1 | STATS c = COUNT(*) )';
+      expect(getForkWithChangePoint(forkQuery)).toBeUndefined();
+    });
+
+    it('should return fork command and index when CHANGE_POINT is inside a FORK branch', () => {
+      const forkQuery = `FROM gallery-*
+| FORK
+  ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
+| WHERE type IS NOT NULL`;
+      const result = getForkWithChangePoint(forkQuery);
+      expect(result).toBeDefined();
+      expect(result?.forkCommand.name).toBe('fork');
+      expect(result?.forkIndex).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  describe('getSourceQueriesFromForkWithChangePoint', () => {
+    it('should return undefined for undefined or when no FORK with CHANGE_POINT', () => {
+      expect(getSourceQueriesFromForkWithChangePoint(undefined)).toBeUndefined();
+      expect(
+        getSourceQueriesFromForkWithChangePoint('FROM a | CHANGE_POINT value')
+      ).toBeUndefined();
+    });
+
+    it('should return source query per branch when CHANGE_POINT is inside FORK', () => {
+      const forkQuery = `FROM gallery-*
+| FORK
+  ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
+  ( WHERE referer == "http://b.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
+| WHERE type IS NOT NULL`;
+      const result = getSourceQueriesFromForkWithChangePoint(forkQuery);
+      expect(result).toBeDefined();
+      expect(result).toHaveLength(2);
+      expect(result![0].branchLabel).toBe('http://a.com');
+      expect(result![0].branchIndex).toBe(0);
+      expect(result![0].sourceQuery).toContain('FROM gallery-*');
+      expect(result![0].sourceQuery).toContain('WHERE referer == "http://a.com"');
+      expect(result![0].sourceQuery).toContain('STATS avg_bytes');
+      expect(result![0].sourceQuery).not.toContain('CHANGE_POINT');
+      expect(result![1].branchLabel).toBe('http://b.com');
+      expect(result![1].branchIndex).toBe(1);
+      expect(result![1].sourceQuery).toContain('WHERE referer == "http://b.com"');
     });
   });
 });

@@ -68,6 +68,14 @@ export {
   isComputedColumn,
   getQuerySummary,
   getEsqlControls,
+  hasChangePointCommand,
+  getChangePointOutputColumnNames,
+  getSourceQueryBeforeChangePoint,
+  // TODO: FORK command specific code needs to be updated once CHANGE_POINT BY command is available
+  getSourceQueriesFromForkWithChangePoint,
+  getForkWithChangePoint,
+  getBranchLabelFromForkBranch,
+  type ForkBranchSourceQuery,
   type ESQLStatsQueryMeta,
 } from './src';
 
