@@ -86,7 +86,7 @@ describe('updateCaseStepDefinition', () => {
     });
   });
 
-  it('returns translated error when update call throws', async () => {
+  it('returns original error when update call throws', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const bulkUpdate = jest.fn().mockRejectedValue(new Error('update failed'));
     const getCasesClient = jest.fn().mockResolvedValue({
@@ -96,11 +96,7 @@ describe('updateCaseStepDefinition', () => {
 
     const result = await definition.handler(createContext(input));
 
-    expect(result.error).toEqual(
-      expect.objectContaining({
-        message: 'Case "case-1" could not be updated.',
-      })
-    );
+    expect(result.error).toEqual(expect.objectContaining({ message: 'update failed' }));
   });
 
   it('normalizes updates for bulk patch requests', async () => {
@@ -142,7 +138,7 @@ describe('updateCaseStepDefinition', () => {
     });
   });
 
-  it('returns translated error when case fetch fails', async () => {
+  it('returns original error when case fetch fails', async () => {
     const get = jest.fn().mockRejectedValue(new Error('get failed'));
     const bulkUpdate = jest.fn();
     const getCasesClient = jest.fn().mockResolvedValue({
@@ -153,11 +149,7 @@ describe('updateCaseStepDefinition', () => {
     const result = await definition.handler(createContext(input));
 
     expect(bulkUpdate).not.toHaveBeenCalled();
-    expect(result.error).toEqual(
-      expect.objectContaining({
-        message: 'Case "case-1" could not be updated.',
-      })
-    );
+    expect(result.error).toEqual(expect.objectContaining({ message: 'get failed' }));
   });
 
   it('returns translated error when updated case is missing from response', async () => {
@@ -195,7 +187,7 @@ describe('updateCaseStepDefinition', () => {
     });
   });
 
-  it('returns translated error when push fails', async () => {
+  it('returns original error when push fails', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const bulkUpdate = jest.fn().mockResolvedValue([createCaseResponseFixture]);
     const push = jest.fn().mockRejectedValue(new Error('push failed'));
@@ -206,10 +198,6 @@ describe('updateCaseStepDefinition', () => {
 
     const result = await definition.handler(createContext(input, { 'push-case': true }));
 
-    expect(result.error).toEqual(
-      expect.objectContaining({
-        message: 'Case "case-1" could not be updated.',
-      })
-    );
+    expect(result.error).toEqual(expect.objectContaining({ message: 'push failed' }));
   });
 });
