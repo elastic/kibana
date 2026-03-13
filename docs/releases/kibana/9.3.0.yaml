@@ -1,0 +1,6665 @@
+﻿products:
+- product: kibana
+  target: 9.3.0
+  repo: kibana
+hide-features:
+- test_feature1
+entries:
+- file:
+    name: 238646.yaml
+    checksum: 43bf0846eeb1363b4c697cbdaf2438344d327b56
+  type: feature
+  title: Edit feature condition and add feature discover url
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "238646"
+  issues:
+  - https://github.com/elastic/kibana/issues/238178
+- file:
+    name: 244072.yaml
+    checksum: 186d612d19a18c671913dc0d1dabe558f5e1f3ad
+  type: bug-fix
+  title: Fixes the API Creation Flyout sizing issue
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Search
+  pr: "244072"
+  issues:
+  - https://github.com/elastic/search-team/issues/11838
+- file:
+    name: 245819.yaml
+    checksum: 3654435eb3a0ff4b94955a3da3540d92a56d86d3
+  type: enhancement
+  title: add agent internal yaml settings
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "245819"
+  issues:
+  - https://github.com/elastic/kibana/issues/244428
+- file:
+    name: 242325.yaml
+    checksum: 59e03744a0fd6ca553381972b3b5d5e04b3495d1
+  type: bug-fix
+  title: Fix auto extraction in event bulk actions
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "242325"
+- file:
+    name: 233289.yaml
+    checksum: fd8d3876e453a9dda7ba87ae1af6f0560e198443
+  type: deprecation
+  title: Filter endpoint list exceptions  in DE logic
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "233289"
+- file:
+    name: 249302.yaml
+    checksum: 7bee74a9cb537930b8f37202650fd6833ddd289a
+  type: bug-fix
+  title: Fixes filtering out null values from the Discover histogram legend in ES|QL mode.
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "249302"
+  issues:
+  - https://github.com/elastic/kibana/issues/246905
+- file:
+    name: 239000.yaml
+    checksum: 74b7eb3415db6be63701b84a8122f6fd18c18786
+  type: bug-fix
+  title: Fix auto extract observables in EASE
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "239000"
+- file:
+    name: 239450.yaml
+    checksum: b8d757a064a824678ef0f95fe2f423fd35317bcf
+  type: enhancement
+  title: Add kibana.alert.index_pattern to all alerts
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "239450"
+- file:
+    name: 245321.yaml
+    checksum: 5001367b75bd60423785dca47f47e3ffbddb58eb
+  type: enhancement
+  title: Expand search in all cases page
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "245321"
+- file:
+    name: 241227.yaml
+    checksum: eb9cb1726999ed08c9d27a308598d92f464b13ad
+  type: feature
+  title: Support subqueries in AST
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "241227"
+- file:
+    name: 247465.yaml
+    checksum: 6bfe969f2ea26ea50fb6d70d72957947bbbf4b73
+  type: enhancement
+  title: Alert deletion feature is now GA.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "247465"
+  issues:
+  - https://github.com/elastic/kibana/issues/247140
+- file:
+    name: 240420.yaml
+    checksum: eaf4a0a3cb3dd72eb75145ad28bd18a129fa5828
+  type: bug-fix
+  title: review of action response codes
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "240420"
+- file:
+    name: 246777.yaml
+    checksum: 4ff0a2934f9c10e22177f91df3d334d2be993057
+  type: enhancement
+  title: Search Homepage design is updated.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Search
+  pr: "246777"
+- file:
+    name: 243826.yaml
+    checksum: 0b42bb3b5f5e336b667f9f9048e3d4e342532d16
+  type: bug-fix
+  title: "\U0001F30A [Streams] \U0001F41E Prevent retention page crash for certain ILM policies"
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Fixes a crash on UI Streams > retention page when a stream has defined an index lifecycle (ILM) policy that omits expected lifecycle phases or all of it phases starts at `0`.
+  areas:
+  - Management
+  pr: "243826"
+  issues:
+  - https://github.com/elastic/kibana/issues/243688
+- file:
+    name: 236863.yaml
+    checksum: 7a409680fefe6bb633208fecb57b4b19841b0cfd
+  type: bug-fix
+  title: '- Connector api update'
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "236863"
+- file:
+    name: 250532.yaml
+    checksum: cece7d7d88f185f2cd73d8fc9b1e3230a33ab20a
+  type: bug-fix
+  title: 'File upload: Fixes file preview occasional corruption'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "250532"
+- file:
+    name: 238200.yaml
+    checksum: af735b80a7b6790835450e17bb99cb0d135c9bfb
+  type: bug-fix
+  title: Add 10s request timeout to ES|QL query execution
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "238200"
+  issues:
+  - https://github.com/elastic/kibana/issues/234135
+- file:
+    name: 244967.yaml
+    checksum: 968f70bc060e3ba2fe3f55345513e4cb1e7125ee
+  type: bug-fix
+  title: Intersect allowed and authorized types
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Platform
+  - Kibana security
+  - Discover
+  pr: "244967"
+- file:
+    name: 241266.yaml
+    checksum: b3f860f4507778a7e6986d65c374453c9aafa0c8
+  type: bug-fix
+  title: Fix invalid state for wired streams toggle
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "241266"
+  issues:
+  - https://github.com/elastic/kibana/issues/240450
+- file:
+    name: 236635.yaml
+    checksum: f3ee9a34e480beca370dbb0b588a86c89a0ff905
+  type: enhancement
+  title: Replace current doc count chart by RED metrics
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "236635"
+  issues:
+  - https://github.com/elastic/kibana/issues/236002
+- file:
+    name: 242036.yaml
+    checksum: 0cd3ccaa5ce9dc66e3b020d6eb687c99956d8fae
+  type: bug-fix
+  title: Fix deselecting (blank) option from options list
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "242036"
+  issues:
+  - https://github.com/elastic/kibana/issues/241750
+- file:
+    name: 247721.yaml
+    checksum: 1a550ce21fc11e6df19b1f7f6988f6c0c288b9a8
+  type: bug-fix
+  title: Fix link's color contrast
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "247721"
+  issues:
+  - https://github.com/elastic/kibana/issues/242181
+- file:
+    name: 243298.yaml
+    checksum: 292aaf8a98f7bf8823c9df7df12929ed9ffddd53
+  type: feature
+  title: Adds ELSER in EIS as a model option for the Observability and Search AI Assistant Knowledge Base
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "243298"
+  issues:
+  - https://github.com/elastic/obs-ai-assistant-team/issues/314
+- file:
+    name: 237970.yaml
+    checksum: 259ba1f68d2fceeff3fc7a2e6d839626d98c8b7b
+  type: bug-fix
+  title: Fixing colors of icons for sidenav
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "237970"
+- file:
+    name: 238555.yaml
+    checksum: 0ce258b74d6b7cea73ed3c2327d9f3127769902c
+  type: feature
+  title: '- Enable cases numerical id service'
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "238555"
+- file:
+    name: 248657.yaml
+    checksum: 4229071cbbc19d3c16ca4746d9bbf665fff3ad09
+  type: bug-fix
+  title: Fixed an issue with agents count not updating in homepage
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Search
+  pr: "248657"
+- file:
+    name: 241026.yaml
+    checksum: e877af4b2a8c393546095d97c53396e4d817defb
+  type: bug-fix
+  title: Fix overlapping components in the Observability AI Assistant flyout for small screen sizes.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "241026"
+  issues:
+  - https://github.com/elastic/kibana/issues/235936
+- file:
+    name: 249379.yaml
+    checksum: 11068143365a64e86a1cc30b854b0c0c23bd9f77
+  type: enhancement
+  title: 'Preconfigured Connectors: adds new connectors'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Machine learning
+  - Data ingestion and Fleet
+  - Elastic Observability solution
+  pr: "249379"
+- file:
+    name: 245423.yaml
+    checksum: a2791b7ce7925c60b745506ef9dc091347eab266
+  type: enhancement
+  title: Slack connector can be configured to send messages to any channel using channel names.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "245423"
+- file:
+    name: 245248.yaml
+    checksum: 1c056d7bb02ddbda30145130b50b887b7651007a
+  type: enhancement
+  title: Improve attachment filters with multi-type selection, server-side filtering, and suggestions limit
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "245248"
+  issues:
+  - https://github.com/elastic/kibana/issues/244883
+  - https://github.com/elastic/kibana/issues/243746
+- file:
+    name: 248495.yaml
+    checksum: fbcb8de6211e4f2136de3e77291bfa52c9972d09
+  type: bug-fix
+  title: Fix "Search entire time range" for date nanos
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "248495"
+  issues:
+  - https://github.com/elastic/kibana/issues/246006
+- file:
+    name: 245161.yaml
+    checksum: af924b56ba9559419d76d0f415c4cb87b01a18f6
+  type: enhancement
+  title: Adding error marks to unified trace waterfall
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "245161"
+- file:
+    name: 241440.yaml
+    checksum: 5edb00365a2faba833711a2789be4e775ebe82a8
+  type: bug-fix
+  title: Fix truncation for longer text in table
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "241440"
+  issues:
+  - https://github.com/elastic/kibana/issues/238831
+- file:
+    name: 249973.yaml
+    checksum: 5a201eb0d63deb5d98d859ab9c5d65a73ab71c0f
+  type: bug-fix
+  title: Revert change removing infra UI custom dashboards
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "249973"
+  issues:
+  - https://github.com/elastic/kibana/issues/249768
+- file:
+    name: 237784.yaml
+    checksum: 3a12749bd92dbfedcb1792ea9d237905e20d2ef7
+  type: bug-fix
+  title: 'Disable max attempts for private locations sync task '
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "237784"
+- file:
+    name: 241944.yaml
+    checksum: 5a3ad07afaa05ed8bf326a963137d47531213d40
+  type: bug-fix
+  title: Only take tags-changes into account when connector supports them
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "241944"
+- file:
+    name: 241047.yaml
+    checksum: 6fed891ab26d988cb53bc29a42560bb4892b4668
+  type: bug-fix
+  title: Simplify metrics profile resolution by removing index pattern and time series validation
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "241047"
+  issues:
+  - https://github.com/elastic/kibana/issues/239752
+- file:
+    name: 243353.yaml
+    checksum: 6b0c3ef52f5587982581ae74dc745b3966ea80a0
+  type: enhancement
+  title: Added a warning when deleting API keys currently in use by alerting rules.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Kibana security
+  - Elastic Observability solution
+  pr: "243353"
+- file:
+    name: 237911.yaml
+    checksum: e57fe7278f1ed191e7923520d6e000b8724b86f7
+  type: enhancement
+  title: Fix grouping in alerts table
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237911"
+- file:
+    name: 244183.yaml
+    checksum: ac7871b957bf3e2d55f862151cc587ccb6f4f449
+  type: bug-fix
+  title: 'Anomaly Explorer: Do not clear cell selection after hiding the alerts table popover'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "244183"
+  issues:
+  - https://github.com/elastic/kibana/issues/243331
+- file:
+    name: 242954.yaml
+    checksum: ca90646431689f09049a3f82c9faf383b9fd47b5
+  type: bug-fix
+  title: Fix infinite loading of roles on edit spaces screen
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana security
+  pr: "242954"
+  issues:
+  - https://github.com/elastic/kibana/issues/242773
+- file:
+    name: 245792.yaml
+    checksum: f36c1a909a43649984783999999d88bae2b91636
+  type: enhancement
+  title: Add example plugin tests
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "245792"
+- file:
+    name: 244880.yaml
+    checksum: 101c28802e880e7ac36bfac56ae117efa4ef7f1b
+  type: enhancement
+  title: Improve attachments feature with details flyout and better UX
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "244880"
+  issues:
+  - https://github.com/elastic/kibana/issues/243751
+- file:
+    name: 236880.yaml
+    checksum: 81f0999a793e1c164e6a0394c834abd3289fe7fc
+  type: enhancement
+  title: Add View in discover button in alert details page for infra rules
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "236880"
+  issues:
+  - https://github.com/elastic/kibana/issues/233815
+- file:
+    name: 239626.yaml
+    checksum: aa44b3515262257bc445cd97956c0a6cd264a03c
+  type: enhancement
+  title: Adds new temperature parameter to AI Connector config schema
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  - Data ingestion and Fleet
+  pr: "239626"
+- file:
+    name: 246794.yaml
+    checksum: 07214d06b7aa3ce3f779523abd4a4fcb75470c29
+  type: bug-fix
+  title: Fix MITRE coverage overview page filter display bug
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246794"
+- file:
+    name: 244480.yaml
+    checksum: 6c6df5804c7f2f6e9cadeaa519d36c7fc36fbf0d
+  type: enhancement
+  title: Lookup index editor - New layout and controls
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "244480"
+- file:
+    name: 245784.yaml
+    checksum: ce93efa0ad879e14a79e9ec5a95aca8bc511e0ea
+  type: enhancement
+  title: Add dashboard suggestions for 'ECS' K8s and OTel Dashboards when selecting 'pods' in Infra Inventory UI
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "245784"
+  issues:
+  - https://github.com/elastic/kibana/issues/237320
+- file:
+    name: 242780.yaml
+    checksum: f13ffd93dbe43c8faac0d37d20a23bec7eebfe27
+  type: bug-fix
+  title: Fix print mode regression in Dashboard
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "242780"
+  issues:
+  - https://github.com/elastic/kibana/issues/242741
+- file:
+    name: 236992.yaml
+    checksum: 6e260334bd0639b694cf91cfd7674c614fc9209a
+  type: enhancement
+  title: Add CSPM Cloud Connector Usage Statistics Collection
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "236992"
+  issues:
+  - https://github.com/elastic/security-team/issues/14106
+- file:
+    name: 241006.yaml
+    checksum: 50a32022924e51bd8e7e3c2b7384d835c2a1a935
+  type: enhancement
+  title: 'Data Visualizer: Improves display of long fields values in top values list'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "241006"
+  issues:
+  - https://github.com/elastic/kibana/issues/213732
+- file:
+    name: 247351.yaml
+    checksum: 3ef342e5e3f10efd9e3f0ea6f5285cb431dcccbb
+  type: bug-fix
+  title: use exact match in createdBy notes filter
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247351"
+- file:
+    name: 244984.yaml
+    checksum: a98efe348723c27a93fa2b7511c4121880da5032
+  type: bug-fix
+  title: Fix Discover trace waterfall behavior with duplicate spans
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "244984"
+  issues:
+  - https://github.com/elastic/kibana/issues/244238
+- file:
+    name: 243312.yaml
+    checksum: 5a31348311cee502a61dfa51721768b9a24e030e
+  type: enhancement
+  title: Add context-aware suggestion ordering with categorization
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "243312"
+- file:
+    name: 243105.yaml
+    checksum: ed9dd5c07c588e0d45ccafcdce28c9b8f8d1045a
+  type: bug-fix
+  title: '* Adds retry behavior for `/api/fleet/agents` when transient issues with ES are encountered.'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "243105"
+- file:
+    name: 236906.yaml
+    checksum: 4b4b5bcc098a6fb4d4d1e453b2324b58fd87e488
+  type: enhancement
+  title: replace node label and detail labels tooltips with popovers
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "236906"
+- file:
+    name: 244228.yaml
+    checksum: 1743ab409fd2d5f553cdb6486266001050257281
+  type: enhancement
+  title: Disable conflicting actions in partitioning tab
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "244228"
+  issues:
+  - https://github.com/elastic/kibana/issues/242257
+- file:
+    name: 245439.yaml
+    checksum: 48cbdc2796623969b7f7341d37c3f4fc08dc3a19
+  type: bug-fix
+  title: Manual ingest pipeline script validation
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "245439"
+  issues:
+  - https://github.com/elastic/observability-error-backlog/issues/314
+  - https://github.com/elastic/observability-error-backlog/issues/315
+  - https://github.com/elastic/observability-error-backlog/issues/317
+  - https://github.com/elastic/observability-error-backlog/issues/320
+- file:
+    name: 242313.yaml
+    checksum: a1d1497dcfdef69e17527bac69d98fa959148094
+  type: bug-fix
+  title: Fix rule link in timeline's flyout
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242313"
+- file:
+    name: 245205.yaml
+    checksum: 0168373e1e951a79bd2b137816ab064095dcdecc
+  type: enhancement
+  title: Add security agents to onechat
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245205"
+- file:
+    name: 239431.yaml
+    checksum: 34227a6558d0228b4b77390cb0cd411f61ba6a20
+  type: bug-fix
+  title: Fixes a bug in Lens that incorrectly assigned unsaved (ad-hoc) dataview references.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "239431"
+  issues:
+  - https://github.com/elastic/kibana/issues/239430
+- file:
+    name: 235392.yaml
+    checksum: 0e2a426f044c3bf20199bec31dab863d3d3e0a45
+  type: bug-fix
+  title: Fix dependencies / service map for `txn == exit-span` use cases
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "235392"
+- file:
+    name: 239098.yaml
+    checksum: e9fca53f11405169fd89a0fcea854811bf41ad6a
+  type: enhancement
+  title: Enhanced the error message to include detailed information about why the role is considered malformed.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana security
+  pr: "239098"
+- file:
+    name: 240011.yaml
+    checksum: 198f35fca4dbd645a18d9c0cde3228c4a2b3d8e6
+  type: bug-fix
+  title: Add FORK with KEEP/STATS in the transformational commands
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "240011"
+- file:
+    name: 245706.yaml
+    checksum: eacb1a326d737487cdc9ad1656144c29b6824746
+  type: bug-fix
+  title: Fix ECS-incompatible value in the logs
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Platform
+  pr: "245706"
+- file:
+    name: 243406.yaml
+    checksum: 801a13f3a02cfa5f25aa61b385e26aa7a9dc2a7f
+  type: enhancement
+  title: Improve error messaging when expensive queries are disabled in Streams schema editor
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "243406"
+  issues:
+  - https://github.com/elastic/kibana/issues/243161
+- file:
+    name: 243543.yaml
+    checksum: c09c725f02b68c35c17892ee9153c0be56f6664b
+  type: enhancement
+  title: save selected prevalence time to local storage
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243543"
+- file:
+    name: 242581.yaml
+    checksum: d38a5c6b728d59e67453bcb0834cfe1984766374
+  type: bug-fix
+  title: Child stream input validation
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "242581"
+  issues:
+  - https://github.com/elastic/kibana/issues/243566
+  - https://github.com/elastic/streams-program/issues/623
+  - https://github.com/elastic/observability-error-backlog/issues/318
+  - https://github.com/elastic/observability-error-backlog/issues/319
+  - https://github.com/elastic/kibana/issues/242254
+- file:
+    name: 242978.yaml
+    checksum: 397dd316044ca256754823aa0b6534763d29330d
+  type: bug-fix
+  title: Revert "[SLO] Fix issue where filters do not apply to overview stats"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "242978"
+- file:
+    name: 250047.yaml
+    checksum: 93ab2f55c1961298ac003c24d63dde9e843699c2
+  type: bug-fix
+  title: Fix filtering by multiline string fields
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "250047"
+  issues:
+  - https://github.com/elastic/kibana/issues/243347
+- file:
+    name: 239888.yaml
+    checksum: 44831381196161fb6761a81b0131561e311e2dbe
+  type: bug-fix
+  title: 'Reduce re-renders on resize and items change '
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana platform
+  pr: "239888"
+  issues:
+  - https://github.com/elastic/kibana/issues/239331
+- file:
+    name: 240913.yaml
+    checksum: 9531f09e7b4baef6021b5f5cf21e12a856eb3fa8
+  type: bug-fix
+  title: Ensures all auth fields show up correctly
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "240913"
+- file:
+    name: 242187.yaml
+    checksum: c5b1836b873b3cbcec80748018008826ba944125
+  type: enhancement
+  title: 'Inference endpoints creation: adds custom header support'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "242187"
+- file:
+    name: 240155.yaml
+    checksum: 658ca3151bfabdf4f8a3e554b139e7d41cd02584
+  type: bug-fix
+  title: Improve all cases table loading to prevent flashing
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "240155"
+- file:
+    name: 246081.yaml
+    checksum: 2ec038364b61628242c75874840d53f00dd520a8
+  type: bug-fix
+  title: use same dataview in analyzer preview as was selected in analyzer component
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246081"
+- file:
+    name: 237654.yaml
+    checksum: 28895c0b54a6e97f412bb843b5c5d452421a11f9
+  type: bug-fix
+  title: pass retriever query via body param instead of query in JS tutorial
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Fixes an issue where the retriever query copied from the "Search your data" JavaScript tutorial fails with a `parsing_exception` when passed via the query parameter in the Node.js Elasticsearch client. Retriever queries must be passed via the body parameter to ensure they are serialized correctly.
+  areas:
+  - Search
+  pr: "237654"
+- file:
+    name: 247669.yaml
+    checksum: 6c791bbaa5131bee7a74cbea5ef9ce2a1067fcaf
+  type: bug-fix
+  title: Add No data behavior options
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "247669"
+  issues:
+  - https://github.com/elastic/kibana/issues/247418
+- file:
+    name: 244550.yaml
+    checksum: 13a4b8e189e849d2e070839b5881f69806872053
+  type: enhancement
+  title: Redesign of the file upload section of the lookup join flyout
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "244550"
+- file:
+    name: 241928.yaml
+    checksum: e683291e6d1ca9c55e75520d9e303152b0602046
+  type: enhancement
+  title: Allow users to edit schedule config.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "241928"
+  issues:
+  - https://github.com/elastic/kibana-team/issues/2083
+- file:
+    name: 244012.yaml
+    checksum: 7c6e3d9fb1d2a5b517243846dff33c5c59e29aa5
+  type: bug-fix
+  title: Improve IBM error message
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "244012"
+- file:
+    name: 243387.yaml
+    checksum: 0123d98eb119c5d2b7989fb7ec896517e3c57e21
+  type: bug-fix
+  title: Fix response actions API (for Elastic Defend agent types) not sending action to more than 10 agents
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243387"
+- file:
+    name: 237496.yaml
+    checksum: e6dfa5d7fc57e63f2da09408e01c86267c5d0cd6
+  type: bug-fix
+  title: Allow partial matches on rule name when searching installed rules.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237496"
+- file:
+    name: 245253.yaml
+    checksum: 41870ae11be68f9d1e2745e1f06c868958d2aeb4
+  type: bug-fix
+  title: Fixes an issue that caused the Security alerts table to not update columns correctly when switching view mode
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "245253"
+  issues:
+  - https://github.com/elastic/kibana/issues/245257
+- file:
+    name: 237479.yaml
+    checksum: 98abb35eb7c44f1f95d87a57f56761474cddeb59
+  type: bug-fix
+  title: Fix recover alert while monitor is down
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "237479"
+  issues:
+  - https://github.com/elastic/kibana/issues/237480
+- file:
+    name: 247002.yaml
+    checksum: bcb16f655d41cb546c1942f4956092fa8eff4646
+  type: bug-fix
+  title: Changes placement of `Migrations` and `Inventory` in Security Solution Nav
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247002"
+  issues:
+  - https://github.com/elastic/security-team/issues/15065
+- file:
+    name: 240728.yaml
+    checksum: bd3518c323a6802100882e7252c2c4b4ef2582ee
+  type: bug-fix
+  title: Show labels after saving edits while staying on Vector tiles (…
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: '**Fix:** Labels in the **Create index** flow now render with the default **Use vector tiles** scaling as soon as label styling is applied (or after save), without requiring a scaling toggle.'
+  areas:
+  - Dashboards and Visualizations
+  pr: "240728"
+  issues:
+  - https://github.com/elastic/kibana/issues/240727
+- file:
+    name: 240883.yaml
+    checksum: cf5996fca6b55fb2c620e206109538c9ae0eff7f
+  type: bug-fix
+  title: Fix wrapping issues in Processing and Streams partitions AI suggestions
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "240883"
+  issues:
+  - https://github.com/elastic/kibana/issues/238630
+- file:
+    name: 244481.yaml
+    checksum: b12042f0b9b257ab113a4e48cf1b29e485c75f87
+  type: enhancement
+  title: Ensure Infra Inventory UIs reflect supported schemas
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "244481"
+  issues:
+  - https://github.com/elastic/kibana/issues/237319
+- file:
+    name: 242105.yaml
+    checksum: a7fd0ffe11b478e5a5657a62ad8ecdc7b58a7e42
+  type: feature
+  title: Enable by default
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Querying and filtering
+  - Discover
+  - Elastic Observability solution
+  pr: "242105"
+  issues:
+  - https://github.com/elastic/kibana/issues/236543
+- file:
+    name: 246453.yaml
+    checksum: c4f0409d9515f241626d8bf266e43ec908c23cd0
+  type: bug-fix
+  title: Add max character validation to the email connector params and config
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "246453"
+- file:
+    name: 245506.yaml
+    checksum: e63e74d88d4e0849721adfd1a25ed71163cc897e
+  type: bug-fix
+  title: Disable geopoint mapping in the processing preview
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "245506"
+- file:
+    name: 242369.yaml
+    checksum: 9c7e992a7b26fe742a031cef86f6edee9cc8e393
+  type: enhancement
+  title: Wrap the fork subcommands inside the parens node
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "242369"
+- file:
+    name: 241115.yaml
+    checksum: ee2b940addc78c3c29d3c864162efd2fef5f4e4c
+  type: bug-fix
+  title: Add proxy ssl options to download sources
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "241115"
+  issues:
+  - https://github.com/elastic/kibana/issues/235050
+- file:
+    name: 243597.yaml
+    checksum: 01be73e8be24354e4b3f8195dfc7fd96644663e5
+  type: feature
+  title: Add Attachments API
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "243597"
+  issues:
+  - https://github.com/elastic/kibana/issues/243472
+  - https://github.com/elastic/kibana/issues/243476
+- file:
+    name: 246150.yaml
+    checksum: 61ced1d6488e6fe8ee776ace5caadc6acbf036ee
+  type: bug-fix
+  title: Fix timeline action shown in alerts table bulk actions without proper privilege
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246150"
+- file:
+    name: 243217.yaml
+    checksum: 18686ebb31f0d253d5a59d4d77216c05058e08c2
+  type: bug-fix
+  title: Fix KPIs subtitle logic
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "243217"
+- file:
+    name: 242406.yaml
+    checksum: 42ece5a0b05b1d32c1755daa2dc4b265be6b2768
+  type: bug-fix
+  title: Fix package icons loading
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "242406"
+  issues:
+  - https://github.com/elastic/kibana/issues/111088
+- file:
+    name: 239631.yaml
+    checksum: 46d0e670c640cb1c234f163083c9f4ae45053972
+  type: bug-fix
+  title: Fixes fleet policy name uniqueness not being consistently enforced across spaces when name or space changes occur
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "239631"
+- file:
+    name: 240342.yaml
+    checksum: cbba3b54bbd757e473cc390bb1ebda3cf519b14b
+  type: bug-fix
+  title: '* Allows fleet setup retries on start in all environments'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "240342"
+- file:
+    name: 242847.yaml
+    checksum: 5df3e39794aad55071f023a1bae03f27263aa17f
+  type: bug-fix
+  title: Verify the alert exists before muting
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "242847"
+  issues:
+  - https://github.com/elastic/response-ops-team/issues/472
+- file:
+    name: 237947.yaml
+    checksum: 3f40bd360c5b7a3a5720ebd008657fc511298468
+  type: bug-fix
+  title: Prioritize connector defaultModel over stored conversation model
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237947"
+- file:
+    name: 246941.yaml
+    checksum: 76c79d4f43a5f58c558477e88427426eea49eb0c
+  type: bug-fix
+  title: Should be able to complete all quickly opened tabs
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "246941"
+  issues:
+  - https://github.com/elastic/kibana/issues/246406
+- file:
+    name: 237382.yaml
+    checksum: 1de55d763fcfc437b2408fb6f447c22453c79891
+  type: bug-fix
+  title: fix panels in sections from URL state are not transformed
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "237382"
+  issues:
+  - https://github.com/elastic/kibana/issues/237375
+- file:
+    name: 244356.yaml
+    checksum: 4089ef0fcc4732bea5750ba8a40045c2ab9a9319
+  type: enhancement
+  title: Add classic streams geo point field type support
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "244356"
+- file:
+    name: 241912.yaml
+    checksum: ec8d36fa34265658330572dc6028a890bc2bfded
+  type: enhancement
+  title: Subquery Autocomplete Support With Context Awareness And Nesting Restrictions
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "241912"
+- file:
+    name: 245025.yaml
+    checksum: 27848bf62da2b1484ce3abe87e23808b1f371830
+  type: feature
+  title: Custom global ingest pipeline can be configured on SLO rollup data.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "245025"
+  issues:
+  - https://github.com/elastic/kibana/issues/244386
+- file:
+    name: 237875.yaml
+    checksum: bc3fe87116389c58d036e738c5cdf41b67478ed9
+  type: bug-fix
+  title: Fix error when deleting orphaned integration policies
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "237875"
+  issues:
+  - https://github.com/elastic/kibana/issues/237700
+- file:
+    name: 233836.yaml
+    checksum: e2e4fe099dccef53cb4257e12b2ed4bd0909280a
+  type: bug-fix
+  title: Fix Metadata filtering is confusing/broken when typing "OR" in host view
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "233836"
+- file:
+    name: 238811.yaml
+    checksum: 25fded42ce85dc1794173a30a6da17c817ffada2
+  type: bug-fix
+  title: Fix error when Observability AI Assistant is disabled
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "238811"
+  issues:
+  - https://github.com/elastic/kibana/issues/238809
+- file:
+    name: 238542.yaml
+    checksum: eb3bb59bd8a290ff360c90a327c0bf89f52037f8
+  type: bug-fix
+  title: '* Fixes on integration policy upgrade:'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "238542"
+- file:
+    name: 248586.yaml
+    checksum: df11fdc02d381a99df816f88a5e20eeb54216082
+  type: bug-fix
+  title: Cloned managed ilm policies shouldn't be marked as managed
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "248586"
+  issues:
+  - https://github.com/elastic/kibana/issues/248524
+- file:
+    name: 242922.yaml
+    checksum: 706e6221233ae5ac0a6abee0effe92f718c2c410
+  type: feature
+  title: Add email cc, bcc, subject and message fields to scheduled reports email
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: 'Adds new fields to the schedule export form email notification section:  cc and bcc recipients, subject and message with Mustache templating support'
+  areas:
+  - Alerting
+  pr: "242922"
+  issues:
+  - https://github.com/elastic/kibana-team/issues/2084
+- file:
+    name: 242467.yaml
+    checksum: 404cbae4fed2c94be99be6873233df5e6520a220
+  type: enhancement
+  title: Add cross-tab syncing to PersistedLog
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana platform
+  pr: "242467"
+- file:
+    name: 237588.yaml
+    checksum: d0b6a84b13a3cac8f40f712135fd370e2603a1bf
+  type: bug-fix
+  title: Fix files management flyout crashing
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana platform
+  pr: "237588"
+- file:
+    name: 237072.yaml
+    checksum: 7a105cd92d3f91959181de94d6fd9e07b31016f0
+  type: bug-fix
+  title: Improving trained models list performance
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "237072"
+  issues:
+  - https://github.com/elastic/kibana/issues/235344
+- file:
+    name: 243333.yaml
+    checksum: 7e03cd743567ee7477b90463f878e3cb2fe45eec
+  type: enhancement
+  title: auto migrate component template ilms in setup task
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "243333"
+  issues:
+  - https://github.com/elastic/ingest-dev/issues/6083
+- file:
+    name: 239596.yaml
+    checksum: b194ef4361a4852602ecd376b43652b20d2aab6b
+  type: bug-fix
+  title: 'Pod datails: Fix cpu query by changing the gap policy to include zeros'
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "239596"
+  issues:
+  - https://github.com/elastic/kibana/issues/239589
+- file:
+    name: 246664.yaml
+    checksum: 15115ec06aff183e65c53c41fb7863ccec554314
+  type: bug-fix
+  title: Fix default app state handling when detecting unsaved changes
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "246664"
+  issues:
+  - https://github.com/elastic/kibana/issues/246798
+- file:
+    name: 241908.yaml
+    checksum: 4d846fdf3336d558a0810b69644fac55770ae065
+  type: enhancement
+  title: Make 'sampling_rate' agent central config options available to …
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "241908"
+- file:
+    name: 239806.yaml
+    checksum: 0b82e9198e9e42f047148cdafd0ffaeeb757607c
+  type: enhancement
+  title: Adds new temperature parameter to AI Connector and OpenAI, Bedrock, Gemini connectors
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "239806"
+- file:
+    name: 241637.yaml
+    checksum: 070ac7b4dbd437dffda63be4689674a5eb90a4a0
+  type: enhancement
+  title: Index editor - Allow selecting column type
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "241637"
+  issues:
+  - https://github.com/elastic/kibana/issues/240784
+- file:
+    name: 239555.yaml
+    checksum: 1eb52dbc8af94eeb198ffb33c1f986e6cb93f3f5
+  type: bug-fix
+  title: 'GenAI Settings: Reflect selected `AI Assistants Visibility` value from header selector on the Settings page'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Machine learning
+  - Elastic Observability solution
+  pr: "239555"
+  issues:
+  - https://github.com/elastic/kibana/issues/236804
+- file:
+    name: 243574.yaml
+    checksum: 13fb9f60d367bb6f2d5e1249f1c935d85cda403a
+  type: enhancement
+  title: Security attachments in Agent Builder
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  - Elastic Security solution
+  - Elastic Observability solution
+  pr: "243574"
+- file:
+    name: 241119.yaml
+    checksum: db0a4c2a0fb961dc940be47161912149ce9cb3ba
+  type: enhancement
+  title: "\U0001F30A [Streams]: Adding autocomplete for values"
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: In Streams, value autocomplete is now available in the Partitioning and Processing tabs. This means when users are configuring stream partitions or processing rules, typing in a field value will trigger suggestions, helping them find matching values more quickly and with less manual lookup.
+  areas:
+  - Management
+  pr: "241119"
+- file:
+    name: 242365.yaml
+    checksum: 0143cf9a7bc5f70009af6d6ca6248b2e2e8473b4
+  type: bug-fix
+  title: add encoding of cloudFormation url params
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  - Elastic Security solution
+  pr: "242365"
+- file:
+    name: 243827.yaml
+    checksum: 1f17720cde1e162c2d418eab8b4b5fe811e9fa73
+  type: enhancement
+  title: Removes median line length categorization check
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "243827"
+  issues:
+  - https://github.com/elastic/kibana/issues/243822
+- file:
+    name: 239144.yaml
+    checksum: 6b8f529b8abedfbc70552c113bdb5f4f2d704867
+  type: enhancement
+  title: Removes `AI Assistants Settings` privilege
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Machine learning
+  - Elastic Observability solution
+  pr: "239144"
+- file:
+    name: 239685.yaml
+    checksum: 7fab49e165f0adc4a24a7e3c5f50dcf5d81fa5c4
+  type: enhancement
+  title: Applies the breakdown first and then the date_histogram
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "239685"
+  issues:
+  - https://github.com/elastic/kibana/issues/239628
+- file:
+    name: 239113.yaml
+    checksum: 63795a965ef71b88ccaf8a63f416b7f1818c90c2
+  type: bug-fix
+  title: Fixes layout of fields in Overview and Notifications pages
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "239113"
+- file:
+    name: 241153.yaml
+    checksum: ca344d272c3f3f4fc496a96e7dc8a12392e6cda6
+  type: bug-fix
+  title: Fix entity flyout Risk contributions tab link
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241153"
+- file:
+    name: 239661.yaml
+    checksum: 40f6a41a2817fff038476f5523c88ba7b6baa9a0
+  type: bug-fix
+  title: generic entity popover showing entity EngineMetadata.type is missing
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239661"
+- file:
+    name: 239724.yaml
+    checksum: 1cec19365534bdd230a623d2cfa73f7d9135a973
+  type: bug-fix
+  title: Hide filtering capabilities in Hosts Metrics
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "239724"
+- file:
+    name: 246679.yaml
+    checksum: 30ed4d16508ab55e73fcb6229afe96ad29ddef12
+  type: bug-fix
+  title: Truncate text for value list column in value list modal
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246679"
+- file:
+    name: 239266.yaml
+    checksum: e0027b8f1c4abae26ee399e0d9d56774c3614209
+  type: enhancement
+  title: Supports multi values variables in MV_CONTAINS
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "239266"
+  issues:
+  - https://github.com/elastic/kibana/issues/237228
+- file:
+    name: 245002.yaml
+    checksum: d9dc8795cc87f9f58dd4c717743d12cca3650b9a
+  type: enhancement
+  title: Persist analyzer dataview in local storage
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245002"
+- file:
+    name: 247880.yaml
+    checksum: 0800ebf07f29c93e2b161696fbec1ca35201a9f4
+  type: bug-fix
+  title: Fixes validation error with maintenance windows on lightweight synthetics monitors.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "247880"
+  issues:
+  - https://github.com/elastic/kibana/issues/243422
+- file:
+    name: 243656.yaml
+    checksum: 1688a68e256c5c1b1e609342ee898d9e9b3d8ca4
+  type: bug-fix
+  title: Remove mentions of template snippets (Mustache Templates) from descriptions.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "243656"
+- file:
+    name: 236756.yaml
+    checksum: b078236ff0f8d52a7d0da16e40e93582ad257c4f
+  type: bug-fix
+  title: Fix alerts page controls
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "236756"
+  issues:
+  - https://github.com/elastic/kibana/issues/231286
+- file:
+    name: 247615.yaml
+    checksum: e808cf60457e2719a4f871344deec38ac7d4caec
+  type: bug-fix
+  title: 'Data Visualizer: fixes display of map view for small screen sizes'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "247615"
+  issues:
+  - https://github.com/elastic/kibana/issues/242007
+- file:
+    name: 247992.yaml
+    checksum: cebae2a7d889c040e83851d75291913bec1fecae
+  type: bug-fix
+  title: Encode search term in cases page
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "247992"
+- file:
+    name: 244202.yaml
+    checksum: 7be7d64f8abb13929e7724a5c10c1aff58f8e425
+  type: enhancement
+  title: Allow users to enable scheduled reports
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "244202"
+  issues:
+  - https://github.com/elastic/kibana-team/issues/2082
+- file:
+    name: 236994.yaml
+    checksum: 3d9d1cf5a5a7c6a0fa79d591ffc20a3712c0dfd3
+  type: bug-fix
+  title: 233750 msi commands
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "236994"
+  issues:
+  - https://github.com/elastic/kibana/issues/233750
+- file:
+    name: 248221.yaml
+    checksum: dc3b78083dbcf7a454c50cab72f5bf8a33f921b6
+  type: bug-fix
+  title: Disable rule summary button when user lacks all rule privileges
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "248221"
+- file:
+    name: 241779.yaml
+    checksum: 4cddfec5e62af352aaf713d3f32a3d82a8871de5
+  type: enhancement
+  title: Improve layout for custom inference endpoint
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "241779"
+- file:
+    name: 247707.yaml
+    checksum: b918a407f21d042f88dde388e5245465eb22a042
+  type: bug-fix
+  title: Encode URL Components for entities
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247707"
+  issues:
+  - https://github.com/elastic/kibana/issues/247706
+- file:
+    name: 245690.yaml
+    checksum: bbd5da1c9ff5d02e1a622b8c6e3b1eb031b46f22
+  type: feature
+  title: Ability to bulk mute/unmute alerts
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Alerting
+  - Elastic Observability solution
+  pr: "245690"
+  issues:
+  - https://github.com/elastic/kibana/issues/242919
+- file:
+    name: 237055.yaml
+    checksum: 77ee12280c3b36d28dd15ce979738d104abf0c77
+  type: bug-fix
+  title: Fix privileges for reindexing indices
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: 'Fixes privilege requirements when reindexing indices via Upgrade Assistant. Previously, the "superuser" role was required. Now "cluster: manage" and "all" privileges for the relevant indices are sufficient.'
+  areas:
+  - Management
+  pr: "237055"
+- file:
+    name: 235984.yaml
+    checksum: 4f10c0b4b20e4fe666a46c0a5a37391e4da26eb6
+  type: enhancement
+  title: Updated Observability Serverless side nav
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "235984"
+- file:
+    name: 243416.yaml
+    checksum: 2d4adadc8d1fddaaf9743ede77d1d6364787e5b9
+  type: deprecation
+  title: Show callout for deprecated (in-use) ILM policies
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: The `logs`, `metrics`, and `synthetics` ILM policies have been deprecated and replaced with `{name}@lifecycle`. If using a deprecated ILM policy with a component template, the user will see a callout in Fleet > Data Streams with instructions on how to migrate to the new lifecycle policy.
+  areas:
+  - Data ingestion and Fleet
+  pr: "243416"
+  issues:
+  - https://github.com/elastic/ingest-dev/issues/6084
+- file:
+    name: 242207.yaml
+    checksum: fb173c62cf4128930e25453dcdff9cc64bc7b344
+  type: enhancement
+  title: Add rows per page selector to tools, agents, and agent tools selection
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "242207"
+- file:
+    name: 237612.yaml
+    checksum: 98b15323c4617f197516e9ad1e0894ff35c17752
+  type: enhancement
+  title: Remove global empty state redirect
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Users will now land on the Elasticsearch home page by default instead of being redirected to the create index page. This ensures immediate access to tutorials and educational content, improving discoverability of Kibana features while removing the previous global empty state redirect.
+  areas:
+  - Search
+  pr: "237612"
+- file:
+    name: 245311.yaml
+    checksum: ae98b9c7f051869d9e8c3ffabedf090dfd00c4be
+  type: feature
+  title: Deprecate feature flag (part 1 of 2)
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Adds a new getting started page within the Elasticsearch solution which offers hands on feature tutorials. This page defaults as the initial destination for users creating a new Elasticsearch project.
+  areas:
+  - Search
+  pr: "245311"
+  issues:
+  - https://github.com/elastic/kibana/issues/244961
+  - https://github.com/elastic/kibana/issues/244715
+  - https://github.com/elastic/kibana/issues/244716
+- file:
+    name: 247052.yaml
+    checksum: dc66c0899f5c7743b80ea3864bb8691a786e6674
+  type: bug-fix
+  title: Error rate chart warning on first load
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "247052"
+  issues:
+  - https://github.com/elastic/kibana/issues/243209
+- file:
+    name: 245080.yaml
+    checksum: 0ef81a32d14670f662196a4cf1ba742b737dcfee
+  type: feature
+  title: Add integration knowledge opt out UI setting and enable feature flag
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "245080"
+  issues:
+  - https://github.com/elastic/ingest-dev/issues/6276
+- file:
+    name: 240778.yaml
+    checksum: a8c7ef11a923d9aef8ed78869d02ae80898c5b83
+  type: enhancement
+  title: Provides a better message feedback into the collapsed Processors/Conditions for the user
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "240778"
+  issues:
+  - https://github.com/elastic/kibana/issues/237454
+- file:
+    name: 239122.yaml
+    checksum: 1a27755079a61c01ecb718cc61867481b4e79ee9
+  type: bug-fix
+  title: Check for integrations permissions before loading component
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239122"
+- file:
+    name: 241240.yaml
+    checksum: d515cd6ef04ffccf7da32da60ff074acc42a0b5a
+  type: bug-fix
+  title: Fix Security Assistant regenerate button
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241240"
+- file:
+    name: 246090.yaml
+    checksum: b17349b65dfda3a84748328f790561d8ae0d33b0
+  type: enhancement
+  title: 'Enhances the copy behavior by providing clear visual confirmation:'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Search
+  pr: "246090"
+- file:
+    name: 243841.yaml
+    checksum: 2991007e8af730410c6f325f1f059d8a2a3b66b0
+  type: feature
+  title: Added the possibility to search scheduled reports by title and creator.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "243841"
+  issues:
+  - https://github.com/elastic/kibana-team/issues/2235
+  - https://github.com/elastic/kibana-team/issues/2234
+- file:
+    name: 247678.yaml
+    checksum: bfb3adf941ff593fde40d5eda77493eb98d8e84f
+  type: bug-fix
+  title: fixes "Rule settings pop-up remain open on clicking 'Save' button after enabling/ disabling auto gap fill."
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247678"
+- file:
+    name: 246069.yaml
+    checksum: 63bd124e0e1c6157d6bd1dfd0aaa0708ee1c8b47
+  type: bug-fix
+  title: Fix case sensitivity of fields in role page
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Fixes an issue where fields were not case-sensitive in Kibana's user interface for creating and updating roles, though fields are case-sensitive in Elasticsearch.
+  areas:
+  - Kibana security
+  pr: "246069"
+  issues:
+  - https://github.com/elastic/kibana/issues/244000
+- file:
+    name: 243791.yaml
+    checksum: e80a2c53aae80855f8b016a2140c6a2ef07c6bd3
+  type: bug-fix
+  title: Fixed a case of keyboard focus getting trapped in pages using document preview.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Search
+  pr: "243791"
+- file:
+    name: 237829.yaml
+    checksum: 084e21fc1aae26cefd8013904dafa951ba198071
+  type: feature
+  title: Enable the risk score reset feature
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237829"
+- file:
+    name: 241313.yaml
+    checksum: a788b3d5f2a2c371e4c46aea224ea604acc4633d
+  type: bug-fix
+  title: "\U0001F30A Streams: Speed up field simulation"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "241313"
+- file:
+    name: 244280.yaml
+    checksum: d6867e108ade242ef8f00e017339a916bed423f3
+  type: enhancement
+  title: Precise validation and autocomplete for CASE
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "244280"
+- file:
+    name: 248020.yaml
+    checksum: 0b6d4ecd28e27e2f7b759dab54f6e920a52158bf
+  type: bug-fix
+  title: "Fix API doesn't use an associated conversation's system prompt "
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "248020"
+  issues:
+  - https://github.com/elastic/kibana/issues/229386
+- file:
+    name: 237038.yaml
+    checksum: bd9adf6538bccb611901f90b8dbe9e1901d4842e
+  type: enhancement
+  title: Populate  the `entity.attributes.Privileged` field in the Entity store for users
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237038"
+- file:
+    name: 240806.yaml
+    checksum: 7b5ea5259ed289bfdee7fdecad6aa26157a0143e
+  type: bug-fix
+  title: 'Fix layout issues for markdown embeddables in small panels '
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "240806"
+- file:
+    name: 238355.yaml
+    checksum: acc2212e7e75d68ca2a7911cad38628f338004ae
+  type: bug-fix
+  title: Improve list error handling
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Fixes an error in the **Visualize Listing** page in which an error in the vis could cause the entire page to error. This improves the error handling to make it easier to identity which visualization is causing the problem in order to address it.
+  areas:
+  - Dashboards and Visualizations
+  pr: "238355"
+  issues:
+  - https://github.com/elastic/kibana/issues/238351
+- file:
+    name: 242909.yaml
+    checksum: 6640d626b512e2a45db535a2d348beec827264a3
+  type: feature
+  title: Supports chain controls
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "242909"
+  issues:
+  - https://github.com/elastic/kibana/issues/238473
+- file:
+    name: 241108.yaml
+    checksum: bc249c869bcea1071e5d66c480df5077205bc08e
+  type: bug-fix
+  title: Table Pagination Not Working as Expected
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241108"
+- file:
+    name: 249168.yaml
+    checksum: 699986387540b17f2051f5ddf70538215818ced1
+  type: bug-fix
+  title: Fix bug when adding to an index template
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "249168"
+- file:
+    name: 246788.yaml
+    checksum: 8e616d37c98c61b8284a94292e9c24ba20731d4c
+  type: feature
+  title: Removes Technical Preview from docs for the public Attack Discovery and Attack Discovery Schedules APIs
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246788"
+- file:
+    name: 238197.yaml
+    checksum: b1552c0a3634952f1fc2705f3bb45705ee0ebd9f
+  type: feature
+  title: Added support for deleting export schedules
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "238197"
+- file:
+    name: 245736.yaml
+    checksum: 0a770ee8ed10ee91d6ca9aed83c1a692a097b1af
+  type: bug-fix
+  title: Edit default alerts flow breaks if default rules are not defined
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "245736"
+- file:
+    name: 248939.yaml
+    checksum: ff662a9426541cf17ddc8e382e2194fdee150fe7
+  type: bug-fix
+  title: Fixes broken links from View In Context Modal to Discover which was not respecting the DateRange
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "248939"
+- file:
+    name: 246024.yaml
+    checksum: 1d6bbd0f735c517495b91b07c2b95cd834f52c66
+  type: enhancement
+  title: Toggle Icon type for add/remove field column
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "246024"
+  issues:
+  - https://github.com/elastic/kibana/issues/238802
+- file:
+    name: 236849.yaml
+    checksum: d94590943c3b7902b592a5f7dc66d029c20fad51
+  type: feature
+  title: Adds Security ML modules for GCP Audit and Azure Activity Logs
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "236849"
+- file:
+    name: 226849.yaml
+    checksum: 28e02e7dc2a8193a11a532913a70bd1ef82fe329
+  type: bug-fix
+  title: 'Alerting: Escape URL-like string from being displayed as links'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "226849"
+  issues:
+  - https://github.com/elastic/kibana/issues/202507
+- file:
+    name: 239315.yaml
+    checksum: d2bda623ed055c2428b2d910d1daeb126aeedf25
+  type: bug-fix
+  title: Displays the available options when editing an existing variable control
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "239315"
+- file:
+    name: 247398.yaml
+    checksum: c41d7cb63be7fa0ef7cc878c4b1c85b669e0d63c
+  type: feature
+  title: Adds capability for rolling back a recent upgrade of a Fleet-managed Elastic Agent upgrade using Fleet UI or API.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "247398"
+  issues:
+  - https://github.com/elastic/ingest-dev/issues/6212
+- file:
+    name: 246073.yaml
+    checksum: 542ac99140ed160aa2e69bcd0701aefce9f2021b
+  type: feature
+  title: Set heap limit to min(60%, 4gb) for containers if unset
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Containers now set the default Node.js heap to 75% of available memory up to a maximum of 4096mb.  Previously this was set to 50%.
+  areas:
+  - Operations
+  pr: "246073"
+- file:
+    name: 246589.yaml
+    checksum: 721e7452a88d7f3d6d95233bc0acefc4a30eb44a
+  type: bug-fix
+  title: Fix the issue related to token count
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Fixes token count display showing "NaN" in Search Playground by preserving message annotations across the AI SDK v5 stream.
+  areas:
+  - Search
+  pr: "246589"
+- file:
+    name: 244808.yaml
+    checksum: 6e6871d8fc419c542a28acfba63704a6d4df61a5
+  type: enhancement
+  title: Add UI Streams Tour
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "244808"
+- file:
+    name: 238945.yaml
+    checksum: 6b616fc64963034ce434d110ad62204cbfe1d14e
+  type: bug-fix
+  title: Fix missing fields when using combined filters with `ignoreFilterIfFieldNotInIndex` UI setting
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "238945"
+- file:
+    name: 238816.yaml
+    checksum: e0c59cbd6bda11dc062884377a952353f7527f10
+  type: bug-fix
+  title: Update `nodemailer`
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "238816"
+- file:
+    name: 238284.yaml
+    checksum: e76caef6e8995d93a8a3cf8440fff290249e9f07
+  type: bug-fix
+  title: Show error text when fields are invalid
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Fixes an issue in the RAG Playground where invalid fields displayed red styling but no error message. Error text is now shown to help users identify and correct form issues.
+  areas:
+  - Search
+  pr: "238284"
+- file:
+    name: 237464.yaml
+    checksum: 845a8c29555ebc0b0894497475edd2018441cdb5
+  type: bug-fix
+  title: Enable storing secrets in Fleet Server Host config if fleet-server is running at a minimum supported version.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "237464"
+  issues:
+  - https://github.com/elastic/kibana/issues/237404
+- file:
+    name: 248169.yaml
+    checksum: 5fe142d0b713bc68f739f935c3631a3d9d07c727
+  type: bug-fix
+  title: Fix timestamp override for ES|QL CSV scheduled reports with relative time ranges
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "248169"
+  issues:
+  - https://github.com/elastic/kibana/issues/245281
+- file:
+    name: 239883.yaml
+    checksum: 6dfd18633b7f2997540018f8b54bb655712e05d6
+  type: enhancement
+  title: 'Anomaly Detection: Adds feedback button to the Anomaly Explorer and Single Metric Viewer'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "239883"
+- file:
+    name: 242134.yaml
+    checksum: 3a4650c555c491e8a5009dc92371b98045a2c5f8
+  type: feature
+  title: Show field data type in partitioning UI
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "242134"
+- file:
+    name: 240735.yaml
+    checksum: ae9c0f06451e15bd0d57da818e1a85f9405629a6
+  type: enhancement
+  title: Support Expressions in Lookup Join Autocomplete
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "240735"
+- file:
+    name: 249450.yaml
+    checksum: d0886285c1aa043ec75a099d8bbfc853523d017d
+  type: bug-fix
+  title: Replace custom header with lens highlight implementation
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "249450"
+- file:
+    name: 238840.yaml
+    checksum: 30a4d3a106fb2d9e17574cd7584556257965deb8
+  type: enhancement
+  title: Add `xpack.fleet.experimentalFeatures` config setting
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "238840"
+- file:
+    name: 248187.yaml
+    checksum: 2b296c0f812ddc70e15938a2c8684e348be5e4d1
+  type: bug-fix
+  title: Fixes counter metric fields missing in Anomaly detection dropdown
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "248187"
+- file:
+    name: 246208.yaml
+    checksum: a40c315116275a6cc5e6543ae8d3fb3b3ea5eec5
+  type: bug-fix
+  title: Small fixes for onboarding
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "246208"
+  issues:
+  - https://github.com/elastic/observability-error-backlog/issues/393
+  - https://github.com/elastic/observability-error-backlog/issues/394
+  - https://github.com/elastic/observability-error-backlog/issues/380
+  - https://github.com/elastic/observability-error-backlog/issues/385
+- file:
+    name: 244665.yaml
+    checksum: 4fc5789272d36723f8e37fa1079d608e7edf51b4
+  type: feature
+  title: New "Similar errors" section with Occurrences chart
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "244665"
+- file:
+    name: 243266.yaml
+    checksum: 91fc156114866c659ee3a095954f37eec736ad78
+  type: bug-fix
+  title: Update system prompt title for generic deployments
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "243266"
+  issues:
+  - https://github.com/elastic/kibana/issues/243268
+- file:
+    name: 244059.yaml
+    checksum: 2da3b73ac238afecef02ca697b34be1b77ccd995
+  type: bug-fix
+  title: 'Inference/AI Connector and Inference endpoint creation:  ensures deleted text in form is not sent as empty string'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "244059"
+  issues:
+  - https://github.com/elastic/kibana/issues/242943
+- file:
+    name: 242027.yaml
+    checksum: 1799a6978b1fa36e543124e097cc34a0b03710cb
+  type: bug-fix
+  title: 'Timeline: ESQL query editor showing on fullScreen mode'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242027"
+  issues:
+  - https://github.com/elastic/kibana/issues/225998
+- file:
+    name: 244389.yaml
+    checksum: 1e950c9e2f22a1af4b22ee436d7ba36aa3587212
+  type: enhancement
+  title: 'Add span links badge to Unified trace waterfall #244051 Open'
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "244389"
+  issues:
+  - https://github.com/elastic/kibana/issues/244051
+- file:
+    name: 242748.yaml
+    checksum: 2b55239638e3954ff8c127f8b8d0bba81b6e6134
+  type: enhancement
+  title: Support new exponential_histogram ES Field type
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "242748"
+- file:
+    name: 244366.yaml
+    checksum: fbb52d968aa3da281fb76c628863e844b9db0507
+  type: enhancement
+  title: Better handling of missing stream
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "244366"
+  issues:
+  - https://github.com/elastic/kibana/issues/243344
+- file:
+    name: 241164.yaml
+    checksum: a7a19359cf3ff8d8bdaf25edfc324b37f7cd7d44
+  type: bug-fix
+  title: 'Fix: custom links clears filter values when new field is selected or deleted'
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "241164"
+  issues:
+  - https://github.com/elastic/kibana/issues/237014
+- file:
+    name: 247376.yaml
+    checksum: 807ffa21e4cb665f556c441c8dce69971294505f
+  type: bug-fix
+  title: Fix console state persisting across journey steps
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "247376"
+- file:
+    name: 249016.yaml
+    checksum: ac4ae5b3d2e4c9208d2c5349c809635c16d5b9ed
+  type: bug-fix
+  title: Fix Stack Monitoring Recent Log Entries timestamps to respect Kibana's time zone setting (`dateFormat:tz`).
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Monitoring
+  pr: "249016"
+  issues:
+  - https://github.com/elastic/kibana/issues/120292
+- file:
+    name: 245259.yaml
+    checksum: 24e7c1bf3929fe86c649d6ef8e7617099da1326c
+  type: enhancement
+  title: Adds Integration Knowledge platform tool
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245259"
+- file:
+    name: 242436.yaml
+    checksum: 603f1b2f5a0677a994b412664d85f61c9bc1be79
+  type: bug-fix
+  title: Default semantic text endpoint select input to ELSER in EIS
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: .`elser-2-elastic` (ELSER in EIS) is now automatically selected as the default inference endpoint when adding semantic text fields. The `SelectInferenceId` component has been refactored for clarity and stability, resolving a console warning and improving popover and flyout state handling.
+  areas:
+  - Search
+  pr: "242436"
+- file:
+    name: 242123.yaml
+    checksum: cefea88f0f2788ce6334cb31dd98ab5c604239cb
+  type: enhancement
+  title: Simplified search visor
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "242123"
+  issues:
+  - https://github.com/elastic/kibana/issues/220050
+- file:
+    name: 240535.yaml
+    checksum: 9d5e71941a7bea06a4be94fb1b4ac9ec12d3ebdc
+  type: enhancement
+  title: Users can now view the SLO associated with a burn rate rule from the rule details page.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "240535"
+  issues:
+  - https://github.com/elastic/kibana/issues/238022
+- file:
+    name: 248943.yaml
+    checksum: fc899d64066ae40719a30a121765695a4accb450
+  type: bug-fix
+  title: Fix EIS OpenAI GPT-OSS 120B reasoning error
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "248943"
+  issues:
+  - https://github.com/elastic/search-team/issues/12401
+- file:
+    name: 247531.yaml
+    checksum: 272d1196c13019279c37fb414cfb273f5cdd2dd5
+  type: bug-fix
+  title: Fix trace links calculating date range incorrectly
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "247531"
+  issues:
+  - https://github.com/elastic/kibana/issues/231116
+- file:
+    name: 243821.yaml
+    checksum: d609324cfee761a4b682a029d9bcab246a1b4a9a
+  type: feature
+  title: Add synthetics params read sub feature privilege
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "243821"
+  issues:
+  - https://github.com/elastic/kibana/issues/243902
+- file:
+    name: 246770.yaml
+    checksum: 91f80accc0f55cefd406d80ea321e68df7e37135
+  type: enhancement
+  title: Updates kibana MITRE data to `v18.1`
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246770"
+- file:
+    name: 243572.yaml
+    checksum: 6e53798fce0b2eb4d8391ae0b3597903d0f81a59
+  type: bug-fix
+  title: Use max_value instead of infinity
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "243572"
+  issues:
+  - https://github.com/elastic/kibana/issues/243364
+- file:
+    name: 243437.yaml
+    checksum: 1e1457f0e8706483e3ab9ae842e1ba96cf1b4fda
+  type: bug-fix
+  title: Show AI log assistant with fallback message fields
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "243437"
+  issues:
+  - https://github.com/elastic/kibana/issues/243436
+- file:
+    name: 239768.yaml
+    checksum: 8bc2859e23496df160fbf50a4a46611fb3124fe0
+  type: bug-fix
+  title: 'Fix: Add styling to handle the text overflow'
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Fixed data preview metadata popup visual issues when ID is too long. Added a tooltip and copy button to improve user experience.
+  areas:
+  - Search
+  pr: "239768"
+- file:
+    name: 246265.yaml
+    checksum: cd25573b5fc651ca10db3b205fe435fa820fe3de
+  type: enhancement
+  title: Add search in attachment tab
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "246265"
+- file:
+    name: 245449.yaml
+    checksum: 7b8e827464841c6c17aae349a9021bbf07603b4f
+  type: bug-fix
+  title: fix alert flyout threat intelligence section not showing multiple values
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245449"
+- file:
+    name: 240132.yaml
+    checksum: fd04460923aacf191dc95ee64b4622d0cdb45e24
+  type: bug-fix
+  title: A11y - Fix missing announcements in form row
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "240132"
+- file:
+    name: 240077.yaml
+    checksum: 3794705e46d2b13beb7d1adc1e16352e377c9359
+  type: bug-fix
+  title: exclude stale SLOs from group by stats
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "240077"
+  issues:
+  - https://github.com/elastic/kibana/issues/240075
+- file:
+    name: 239504.yaml
+    checksum: 2822a5fb10f279cb6fba8e2e20a08e726dc4854c
+  type: bug-fix
+  title: Add manual focus to action buttons' actions
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "239504"
+  issues:
+  - https://github.com/elastic/kibana/issues/195073
+  - https://github.com/elastic/kibana/issues/195021
+  - https://github.com/elastic/kibana/issues/195024
+- file:
+    name: 243134.yaml
+    checksum: ed16488793805cedd1464c74485aaa9958d02ee2
+  type: bug-fix
+  title: fix Can not save Dashboard after switching a Dashboard Link to an External Link
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "243134"
+  issues:
+  - https://github.com/elastic/kibana/issues/242969
+- file:
+    name: 241109.yaml
+    checksum: 784e866bcca4ff04149b1ccdef05a788abba2416
+  type: enhancement
+  title: Makes update space APIs public
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "241109"
+- file:
+    name: 239791.yaml
+    checksum: fb1e19120d780529f23a0f3be72f2858ec7fee32
+  type: bug-fix
+  title: Fix error when selecting "(blank)" value in options list
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "239791"
+  issues:
+  - https://github.com/elastic/kibana/issues/239735
+- file:
+    name: 242119.yaml
+    checksum: a974458c7836e59503f6e6b9ea44b884cd7acb50
+  type: enhancement
+  title: Hide document match filter controls for users without manage privileges
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "242119"
+  issues:
+  - https://github.com/elastic/kibana/issues/238047
+- file:
+    name: 243708.yaml
+    checksum: c20c684cacb521638cb642dd17553a10806a928a
+  type: enhancement
+  title: One Attachments tab
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "243708"
+- file:
+    name: 244188.yaml
+    checksum: 5e944308c73a5018028e37720e1593aa7e2873e8
+  type: bug-fix
+  title: Catch connector errors but do not interrupt the case creation flow
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "244188"
+- file:
+    name: 239400.yaml
+    checksum: fcb380e34160a64a7708cdcaa47c6c8af5507a7c
+  type: bug-fix
+  title: Add missing aria-label to BetaBadge component
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "239400"
+  issues:
+  - https://github.com/elastic/kibana/issues/221525
+- file:
+    name: 238354.yaml
+    checksum: b58f3b85fcfadc573888bf9479c38f41f039ea05
+  type: bug-fix
+  title: update the name of the Security solution default and Security solution alerts data views when needed
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "238354"
+- file:
+    name: 246418.yaml
+    checksum: 26edc49fae2a8c0b494d8c84cc6c5a107fa4c6a5
+  type: enhancement
+  title: Add server configuration setting for disabling the auto install of endpoint rule on policy create
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246418"
+- file:
+    name: 240411.yaml
+    checksum: 4ad1ded8f7c3bf4f6ef9933063e2e61796d5acf8
+  type: bug-fix
+  title: Copy alert states to payload
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "240411"
+- file:
+    name: 240104.yaml
+    checksum: 54e9d4cae1627e9405f2f8363320c2d58a7f5ef5
+  type: bug-fix
+  title: Hide non-trace services in service map
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "240104"
+  issues:
+  - https://github.com/elastic/kibana/issues/230839
+- file:
+    name: 244405.yaml
+    checksum: 94f49285bbfd87e1af13c8699918a99af5e83551
+  type: bug-fix
+  title: wrong time zone applied when CSV report has local date comparison
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "244405"
+  issues:
+  - https://github.com/elastic/kibana/issues/238152
+- file:
+    name: 239070.yaml
+    checksum: 6040730c6e59d0f0c32bbd5c7ba42d762dbc8f41
+  type: enhancement
+  title: Generate significant events from Advanced tab and UI improvements
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "239070"
+- file:
+    name: 247696.yaml
+    checksum: 182ab13e812a8e954173ebc0311472ae0dbe810c
+  type: bug-fix
+  title: Improve anonymization error messages when NER model is not available
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "247696"
+  issues:
+  - https://github.com/elastic/kibana/issues/229200
+- file:
+    name: 239709.yaml
+    checksum: 8805b5fcc9b60956d9761c6737879b6241940b36
+  type: bug-fix
+  title: Onboarding Integrations list is not fetched for all pages
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239709"
+- file:
+    name: 237202.yaml
+    checksum: bab5d6e08f0aba1fd748c31fd2f8059b31db244d
+  type: bug-fix
+  title: Fixes the AI Assistant button tooltip by closing the tooltip (on mouse out) when the button is not being hovered.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "237202"
+  issues:
+  - https://github.com/elastic/kibana/issues/237336
+- file:
+    name: 239436.yaml
+    checksum: 5f8164026b591359c0d3c74eba8bcd4e5be53acd
+  type: feature
+  title: Add free-text popup to `runscript` argument that provides input to the selected script
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239436"
+- file:
+    name: 236110.yaml
+    checksum: d15c0c02724e2ac7fc897467e0902252f7c77cf6
+  type: bug-fix
+  title: support multiple values in IOC flyout table tab
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "236110"
+  issues:
+  - https://github.com/elastic/kibana/issues/227161
+- file:
+    name: 249108.yaml
+    checksum: c00ba198b313fd11b317d7d9a816c432fdafb07f
+  type: bug-fix
+  title: Add maxQueue backpressure to anonymization regex worker pool
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "249108"
+- file:
+    name: 244151.yaml
+    checksum: 7e7b831469a06f68c10bdaa6fdb8e0dd23308b97
+  type: bug-fix
+  title: avoid JVM metric conflicts with explicit cast
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "244151"
+- file:
+    name: 243047.yaml
+    checksum: dd0acd0de48e10b65e7004177e8a0cdf8c0545ff
+  type: enhancement
+  title: Suggest adding curly braces after the WITH keyword for Rerank and Completion
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "243047"
+- file:
+    name: 245890.yaml
+    checksum: 34d51c0873627b90cdc6d86e54df792ee872dbe7
+  type: enhancement
+  title: Show multi-fields in the DocViewer by default
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "245890"
+  issues:
+  - https://github.com/elastic/kibana/issues/240103
+- file:
+    name: 239748.yaml
+    checksum: 6fed41c67282efe93c079cb76b7faf85c64ae179
+  type: bug-fix
+  title: The schedule can not be created with the case as the connector type (#238587)
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239748"
+- file:
+    name: 242441.yaml
+    checksum: f87d186884b827fe3d5ee54c2279243bd068ecd5
+  type: enhancement
+  title: Show user readable output for MDE runscript response action
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242441"
+- file:
+    name: 237812.yaml
+    checksum: ac477c6ea61bfe17f2405a537fd5bf574d72e837
+  type: bug-fix
+  title: 'fix: Add sync check for saved objects for trained models.'
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Index management mappings editor now syncs model deployment status correctly. This fixes a case where user couldn't save `semantic_text` fields during deployment without forcing.
+  areas:
+  - Search
+  pr: "237812"
+- file:
+    name: 241451.yaml
+    checksum: 909741d43eec683451bb92df8352d491ebf22437
+  type: feature
+  title: Add subqueries support for walker and visitor
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "241451"
+- file:
+    name: 246510.yaml
+    checksum: 78deddeb9d21ffd95a133842d4d1bd7eae48944c
+  type: enhancement
+  title: Add badge sync to unified trace waterfall
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "246510"
+- file:
+    name: 241390.yaml
+    checksum: 89fc50baf801cb0bb415fa0cc366b4b3419111e1
+  type: bug-fix
+  title: 'Fix Agent-Based Failing to produce data '
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241390"
+- file:
+    name: 246005.yaml
+    checksum: c30cf424cb6b8c2dcd2341b55b22fdca4dbdff36
+  type: feature
+  title: Upgrade osquery manager schemas to ecs 9.2.0 and osquery 5.19.0
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246005"
+- file:
+    name: 248762.yaml
+    checksum: e95c43fed4acf4cac6e2272677e701dd8f757c75
+  type: bug-fix
+  title: Use monitor query id for project monitors package policies !!
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "248762"
+- file:
+    name: 241369.yaml
+    checksum: 5cb239e2881606f5e644a5b71430774f9406486b
+  type: feature
+  title: Add timezone and locale parameters to Streamlang
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "241369"
+  issues:
+  - https://github.com/elastic/streams-program/issues/583
+- file:
+    name: 234793.yaml
+    checksum: 947ed24f55ca05d028b5fcd0912abee3d00d55a4
+  type: enhancement
+  title: Adds `customized_fields` and `has_base_version` fields to `rule_source` object schema
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "234793"
+- file:
+    name: 237500.yaml
+    checksum: 04a4897ed383d4483e43c842c2b5ee4337623f51
+  type: bug-fix
+  title: Update useAnyOfApmParams to include mobile services
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "237500"
+  issues:
+  - https://github.com/elastic/kibana/issues/237281
+- file:
+    name: 247252.yaml
+    checksum: 1dd368463df470c10725451524cdb6cd3660ad46
+  type: enhancement
+  title: Minor cleanup in trace waterfall tests
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "247252"
+- file:
+    name: 241040.yaml
+    checksum: 8013f1c812c675d82ddc4e1acc581e33ca37c3e7
+  type: enhancement
+  title: remove workflow execution details from tool calls
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Changes the output of Agent Builder tools based on Workflows. This optimizes workflow output to consume fewer LLM tokens, and can improve your Agent performance and reliability.
+  pr: "241040"
+- file:
+    name: 248631.yaml
+    checksum: d8613728b8fa81e184a2eedf928c9f74ec0bb919
+  type: bug-fix
+  title: Fix the missing service environment in the custom links
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "248631"
+  issues:
+  - https://github.com/elastic/kibana/issues/248623
+- file:
+    name: 238533.yaml
+    checksum: d7c0e1ea8842bb18add04338c39d968176d996e4
+  type: enhancement
+  title: Add agent id as default observables type
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "238533"
+- file:
+    name: 236653.yaml
+    checksum: 313f3e55fc18361dd6e696db54ab5b27294026cc
+  type: bug-fix
+  title: Fix bug with kibana tool when using a proxy
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "236653"
+  issues:
+  - https://github.com/elastic/kibana/issues/240349
+- file:
+    name: 245238.yaml
+    checksum: 1bfe8f484f1ebdf8539b34efad04247e7198cdeb
+  type: bug-fix
+  title: 'fix(security,uiam): bump UIAM containers health check timeouts and populate UIAM shared secret for Elasticsearch'
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "245238"
+- file:
+    name: 244350.yaml
+    checksum: ff3572e4ff16b41b07b4952f11d7c199e8c60228
+  type: bug-fix
+  title: 'Allow spaces in file paths in Observables #219805'
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "244350"
+- file:
+    name: 242791.yaml
+    checksum: c62bbe1f8ba3b01262ac9ea6294446b7bfb4045d
+  type: enhancement
+  title: 'Preconfigured Connectors: adds new connectors and updates existing one'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Machine learning
+  - Data ingestion and Fleet
+  - Elastic Observability solution
+  pr: "242791"
+- file:
+    name: 240804.yaml
+    checksum: d74f390ff8129cb41e516f04231772af00c3f095
+  type: enhancement
+  title: 'Use flyout toolbar for visualization configuration: appearance, titles and text, axis, and legend settings'
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: In **dashboard visualization in-line editing** and **Lens workspace**, the 'Appearance', 'Titles and text', 'Axis', and 'Legend' settings have been moved from a popover into a dedicated flyout panel.
+  areas:
+  - Dashboards and Visualizations
+  pr: "240804"
+  issues:
+  - https://github.com/elastic/kibana/issues/238794
+- file:
+    name: 249776.yaml
+    checksum: b9cbbf4cddcf84a869b711dd5b1ba6a70d6a63f8
+  type: bug-fix
+  title: Use the Observability Agent in AI Insights and flyout config
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "249776"
+  issues:
+  - https://github.com/elastic/obs-ai-team/issues/469
+- file:
+    name: 241346.yaml
+    checksum: d25cd4be8c97c3a730988c8559be19fdc65a70b1
+  type: enhancement
+  title: Attack discovery prompt improvements
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241346"
+- file:
+    name: 248167.yaml
+    checksum: 6be7eff353c20bf3464a3e83bb23c69c981a7fcd
+  type: bug-fix
+  title: Fixes broken Data Visualizer & AIOps navigation breadcrumbs / sidebar in solutions
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Machine learning
+  - Elastic Observability solution
+  pr: "248167"
+- file:
+    name: 245539.yaml
+    checksum: 8907866fc284066e2994b8d8ad29c25679af77e3
+  type: bug-fix
+  title: Fix "now" and mixed format date handling in share modal
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana platform
+  pr: "245539"
+- file:
+    name: 241080.yaml
+    checksum: 92ba525761e5f61f41832de0c08785696a9d2b67
+  type: bug-fix
+  title: Hide non-trace services in Service Inventory
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "241080"
+  issues:
+  - https://github.com/elastic/kibana/issues/240020
+- file:
+    name: 247695.yaml
+    checksum: 50d1f794ea266638734e8f4344fa25573bcb8832
+  type: bug-fix
+  title: fixes "Tooltip info for status tags not displayed on Gap fill scheduler logs flyout"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247695"
+- file:
+    name: 244543.yaml
+    checksum: 1455e80055f3a1539ce8838d71ea97dfa22ae32d
+  type: bug-fix
+  title: Fix stale submitting
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "244543"
+- file:
+    name: 245647.yaml
+    checksum: b61ad8ef02da584b92ecccbd7e95542dadf03d12
+  type: bug-fix
+  title: Gemini Connector configuration updates
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245647"
+- file:
+    name: 240279.yaml
+    checksum: dae53ee881c910c99ac2574319429edddab4a3cd
+  type: bug-fix
+  title: Fix URL in Disk Usage alerting rule
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Monitoring
+  pr: "240279"
+- file:
+    name: 243906.yaml
+    checksum: 41a7c4f4a6181d41028fc7fcafdfaf976844d237
+  type: bug-fix
+  title: Account for max headroom setting when showing low watermark warning
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Fixes case where upgrade assistant would incorrectly warn about node breaching low watermark despite max headroom setting.
+  areas:
+  - Management
+  pr: "243906"
+  issues:
+  - https://github.com/elastic/kibana/issues/240002
+- file:
+    name: 238731.yaml
+    checksum: 9df1c344bbef8abae4505781cd8e0b6cb8163240
+  type: bug-fix
+  title: fix Adhoc dataviews from ES|QL charts are being filtered out in the KQL search bar
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "238731"
+  issues:
+  - https://github.com/elastic/kibana/issues/236288
+- file:
+    name: 243855.yaml
+    checksum: 118d3c85240ce118e1125bd875f81181ba4fac0a
+  type: enhancement
+  title: Disable flapping per rule - schema only changes
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "243855"
+- file:
+    name: 243013.yaml
+    checksum: 5f52880a205b89786372b7fbc8d75206bcf5a9f7
+  type: bug-fix
+  title: Revert show transform errors accross all slo pages
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "243013"
+- file:
+    name: 243443.yaml
+    checksum: 889cd8cc8e5eebabd03f41f6d3b7379325834bea
+  type: bug-fix
+  title: use long expiration for upgrade agents
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "243443"
+- file:
+    name: 247284.yaml
+    checksum: f06fca6ed4b563bbee53858b51508bb5778a601a
+  type: bug-fix
+  title: Use unicode escaping to prevent Agent from interpreting JS template literals as policy variables
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "247284"
+- file:
+    name: 244017.yaml
+    checksum: ee2dcc1f6f7d98e930629dda1bcc848c545549b1
+  type: bug-fix
+  title: 'kibana tool: Add auth header to request'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "244017"
+- file:
+    name: 246180.yaml
+    checksum: e6d5b5e3064a9a8e3a340441102edd517c30612d
+  type: bug-fix
+  title: Fix Integration card in 'manage data sources' always shows 'no data stream' warning
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246180"
+- file:
+    name: 237169.yaml
+    checksum: 7ce494f73571d454b604f09cf1c047d514867de7
+  type: bug-fix
+  title: fixs controls cause double fetch
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "237169"
+  issues:
+  - https://github.com/elastic/kibana/issues/237147
+- file:
+    name: 241096.yaml
+    checksum: 9fa0e0974e5f655359551dbf84082861cfda9088
+  type: bug-fix
+  title: omit system properties when syncing ingest pipelines
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "241096"
+  issues:
+  - https://github.com/elastic/kibana/issues/230188
+- file:
+    name: 243802.yaml
+    checksum: 021e98b1de57cdbf760edd64d4c48fd78389e2df
+  type: bug-fix
+  title: Fixes a case on Index management page where screen reader text was different than visible one.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Search
+  pr: "243802"
+- file:
+    name: 242442.yaml
+    checksum: 96cfbbc4f6067b0120ffbc33b40ed65656c5f53c
+  type: bug-fix
+  title: fix 'sync colors' and 'sync tooltips' must be ON by default
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "242442"
+  issues:
+  - https://github.com/elastic/kibana/issues/242373
+- file:
+    name: 247355.yaml
+    checksum: 45138cfbc334bb615c08aa66db2a7cd99fecea05
+  type: bug-fix
+  title: Fixes on Onboarding screen with READ Rules Privs.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247355"
+- file:
+    name: 224552.yaml
+    checksum: cea58288ceae88ca0199731a3b2282af90660544
+  type: feature
+  title: 'Feature branch '
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Kibana Dashboards now support ownership and "write_restricted" mode. Users can now keep dashboards publicly editable or in a write-restricted state until they are ready to publish, giving them more control over who can edit their dashboards, regardless of broader space permissions.
+  feature-id: test_feature1
+  areas:
+  - Dashboards and Visualizations
+  pr: https://github.com/elastic/kibana/pull/224552
+  issues:
+  - https://github.com/elastic/kibana-team/issues/808
+- file:
+    name: 245554.yaml
+    checksum: 32b1b045cfbc837d8146dbec2ccd25dc8bca41cc
+  type: enhancement
+  title: Supports filtering for multivalue fields
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  - ES|QL
+  pr: "245554"
+  issues:
+  - https://github.com/elastic/kibana/issues/195748
+- file:
+    name: 242045.yaml
+    checksum: 9dbadb76d511e6aa0a13ca0685f6db3c75eafae4
+  type: bug-fix
+  title: Fix top n popover overlapping new case flyout
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242045"
+- file:
+    name: 247617.yaml
+    checksum: 8d61d284e78050e22b3f246210b62c6920377b32
+  type: bug-fix
+  title: disable delete for read-only users and improve error message
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247617"
+- file:
+    name: 243711.yaml
+    checksum: 194d50edbcad67c9c264a707087c092cf5989517
+  type: enhancement
+  title: align graph visualization with ECS entity namespace fields for actor and target identification
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243711"
+- file:
+    name: 228875.yaml
+    checksum: 40668804010425da879a5b83ece15e22f75b4bbf
+  type: enhancement
+  title: Fleet agent list table now persists state of filters while navigating within a session.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "228875"
+  issues:
+  - https://github.com/elastic/ingest-dev/issues/5213
+- file:
+    name: 248761.yaml
+    checksum: ca8f03f37ff99171cdb1f986b37efac0f0330324
+  type: bug-fix
+  title: Fix duplicate test result hit on monitor status heatmap
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  description: Fixes issue where synthetics test results show up duplicated on the monitor status heat map (for higher granularity columns)
+  areas:
+  - Elastic Observability solution
+  pr: "248761"
+  issues:
+  - https://github.com/elastic/sdh-synthetics/issues/254
+  - https://github.com/elastic/kibana/issues/248754
+- file:
+    name: 237796.yaml
+    checksum: 87d79a2025c656f05922a7a641dafee449afb29b
+  type: bug-fix
+  title: TelemetryConfigWatcher auth fix
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  description: Fixes the 'missing authentication credentials' issue in `TelemetryConfigWatcher` and `PolicyWatcher`, which should result in less warning log entries in the Security Solution plugin.
+  areas:
+  - Elastic Security solution
+  pr: "237796"
+- file:
+    name: 246440.yaml
+    checksum: e2d59418926e7cce27ade3803ce3929dc296a43f
+  type: enhancement
+  title: Alert workflow tags will be viewable on the overview tab of the alert details flyout
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "246440"
+  issues:
+  - https://github.com/elastic/kibana/issues/246436
+- file:
+    name: 243642.yaml
+    checksum: f57f64d2bc9231bb9fbed77811c07a1384b0258b
+  type: bug-fix
+  title: ignore resource_already_exists_exception for value list creation hook
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243642"
+- file:
+    name: 245329.yaml
+    checksum: 51a30318800d5a66a42a9df224baa26225193ed7
+  type: feature
+  title: Introduces a connector for web search via Brave Search
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "245329"
+- file:
+    name: 239634.yaml
+    checksum: 94a9efbcca521036ea4ea9e36bc6d0f24c158451
+  type: feature
+  title: Extracts Rules/Alerts/Exceptions permission to new Rules feature privileges
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  description: Rules feature privileges are added to ESS. Access to Rules may now be explicitly set on both ESS and Serverless for user roles.
+  areas:
+  - Data ingestion and Fleet
+  - Elastic Security solution
+  pr: "239634"
+- file:
+    name: 241297.yaml
+    checksum: eaddf82bbca1b193627b1cb313fa7cb64242beaf
+  type: enhancement
+  title: 'File upload: Adds ability to cancel file upload'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "241297"
+  issues:
+  - https://github.com/elastic/kibana/issues/238706
+- file:
+    name: 248235.yaml
+    checksum: 9b78f7ad8fdd05e09e4280bf98d271055080effb
+  type: enhancement
+  title: Improves memory usage in Fleet setup by deferring package reinstalls to async tasks.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "248235"
+- file:
+    name: 238072.yaml
+    checksum: d8bc2a1ccfda98ca15b0149c018cb5f9bf022baa
+  type: enhancement
+  title: 'The webhook connector now allows the following HTTP request methods: POST(default), PUT, PATCH, GET, or DELETE.'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "238072"
+  issues:
+  - https://github.com/elastic/kibana/issues/236398
+- file:
+    name: 243496.yaml
+    checksum: 57892d7dc7f07e1532e29e28b12b925dcd7e267d
+  type: bug-fix
+  title: Fix empty Dashboard selector
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "243496"
+  issues:
+  - https://github.com/elastic/kibana/issues/243350
+- file:
+    name: 241825.yaml
+    checksum: ee09e07e95f1b24990009201115e5ce9fca5be21
+  type: feature
+  title: Show field data types in Processing table and step editor
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "241825"
+  issues:
+  - https://github.com/elastic/kibana/issues/240954
+- file:
+    name: 242136.yaml
+    checksum: a2f83370c1b347cfc20340d2aa699334646cd452
+  type: bug-fix
+  title: Fixes public update space APIs
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "242136"
+- file:
+    name: 242423.yaml
+    checksum: a317126943d1c9bd16932c89800bb3c54a31d62e
+  type: feature
+  title: " [Obs Agent] Add observability tools for log and metric change point analysis"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "242423"
+  issues:
+  - https://github.com/elastic/obs-ai-assistant-team/issues/384
+  - https://github.com/elastic/obs-ai-team/issues/449
+- file:
+    name: 238547.yaml
+    checksum: e2bb3c20bd816848c70addae0f85dc35f3fdeaff
+  type: enhancement
+  title: CDR Data View versioning and migration logic
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "238547"
+  issues:
+  - https://github.com/elastic/kibana/issues/234835
+- file:
+    name: 246088.yaml
+    checksum: 0b4b25eeb72e3bf820cbf43b7305537b8c38b1d9
+  type: bug-fix
+  title: Only update relevant monitors where maintenance windows exists
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  description: Only update Synthetics package policies that use maintenance windows when maintenance windows are updated or deleted. Prevents extra Synthetics package policies from being updated when maintenance windows are updated or deleted, even if the monitor itself does not use maintenance windows.
+  areas:
+  - Elastic Observability solution
+  pr: "246088"
+  issues:
+  - https://github.com/elastic/kibana/issues/245866
+- file:
+    name: 238394.yaml
+    checksum: aa75a4c05715cbc13051cf8367f0fa883af5104d
+  type: bug-fix
+  title: Improve performance of clustering
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "238394"
+- file:
+    name: 242161.yaml
+    checksum: 085db8902c5d51b7a4a91f51944104e4e8d49a40
+  type: feature
+  title: Add Drop processor
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "242161"
+  issues:
+  - https://github.com/elastic/streams-program/issues/497
+- file:
+    name: 239993.yaml
+    checksum: 46293e35a79c90d966ad079e14816adfa99e471e
+  type: enhancement
+  title: Add origin configuration to authc providers
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Adds the ability to specify the origin(s) where an authentication provider will appear to users in the Login Selector UI.
+  areas:
+  - Kibana security
+  pr: "239993"
+- file:
+    name: 239205.yaml
+    checksum: 0e98f45d86e38979727ec97006e54e2dd09596bf
+  type: bug-fix
+  title: removing unecessary _source from query as we use fields
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "239205"
+- file:
+    name: 236959.yaml
+    checksum: da791e5f99cb8d06c8b3cdb5a3c33108e16e2355
+  type: enhancement
+  title: Add missing settings to set up Elastic Agent > Fleet Server SSL support
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "236959"
+  issues:
+  - https://github.com/elastic/kibana/issues/233753
+- file:
+    name: 241921.yaml
+    checksum: 886d9b2902950c2b5da85a73faa1ef5b32ffff4d
+  type: enhancement
+  title: Supports subqueries in our apps
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  - ES|QL
+  pr: "241921"
+  issues:
+  - https://github.com/elastic/kibana/issues/237401
+- file:
+    name: 248203.yaml
+    checksum: b95caba197f3569de59b6f0437f1f1986dd22c8e
+  type: bug-fix
+  title: Prevent loss of UI state in signal-specific Discover fly-out tabs when refreshing a query
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "248203"
+  issues:
+  - https://github.com/elastic/kibana/issues/248047
+- file:
+    name: 241188.yaml
+    checksum: f31a204c72b5b5a99400ae341671086c05a71f34
+  type: bug-fix
+  title: 'Anthropic Connector: ensure max tokens parameter is passed as expected by service'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "241188"
+  issues:
+  - https://github.com/elastic/kibana/issues/241142
+- file:
+    name: 241022.yaml
+    checksum: 9115eaf0b9c7517ca857b759af1bceadd515cd82
+  type: bug-fix
+  title: Fix threshold rule logic with no group by fields defined
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241022"
+- file:
+    name: 245718.yaml
+    checksum: cfc7ede7d9234ce96ded0c91d8d0e08d41da8d60
+  type: bug-fix
+  title: Update solution nav tour copy
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Fixes the grammatical issues in the Solution Nav tour and simplifies the content by replacing multiple links with one link
+  areas:
+  - Search
+  pr: "245718"
+- file:
+    name: 244109.yaml
+    checksum: db6e78571d8c3f41255e9096a1b931a60b80621c
+  type: bug-fix
+  title: 'Log Rate Analysis: Optimizes & Re-enables text field analysis in contextual insights'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "244109"
+  issues:
+  - https://github.com/elastic/kibana/issues/235562
+- file:
+    name: 243766.yaml
+    checksum: d8458acfd20b6deecd68d57b063fcb2c8bff6d57
+  type: bug-fix
+  title: "\U0001F41E Fix Cell Actions populate undefined with empty cells"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "243766"
+  issues:
+  - https://github.com/elastic/kibana/issues/242695
+- file:
+    name: 244559.yaml
+    checksum: 2081c0391df551a7f1a0cadb5683ad6c9405fca3
+  type: bug-fix
+  title: Handle alias resolution when checking lock index mappings
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "244559"
+- file:
+    name: 246421.yaml
+    checksum: ad15d91ffc8a79777a6aba958de002495c1e4e96
+  type: enhancement
+  title: Computed suggestions for expression
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "246421"
+- file:
+    name: 245523.yaml
+    checksum: ef02880415c04a3c5550a38c831e9bc953dc616c
+  type: enhancement
+  title: Don't make redundant requests when breakdown or chart interval changes
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "245523"
+  issues:
+  - https://github.com/elastic/kibana/issues/211605
+- file:
+    name: 249500.yaml
+    checksum: ee7702170b5213fc9f4b2fc12259a26ebd261619
+  type: bug-fix
+  title: Removes the Technical preview badge for privileged access detection package
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "249500"
+- file:
+    name: 241425.yaml
+    checksum: 39b93e34b3ec77be7f1f9eecf3c8b966862b99ce
+  type: bug-fix
+  title: Improved error handling for tool response
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "241425"
+  issues:
+  - https://github.com/elastic/kibana/issues/234193
+- file:
+    name: 242788.yaml
+    checksum: 97292b3d625ced745f63aa5b8fbaae13944a93a8
+  type: bug-fix
+  title: Silence URL restore errors for Discover & Dashboards
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "242788"
+  issues:
+  - https://github.com/elastic/kibana/issues/242783
+- file:
+    name: 244719.yaml
+    checksum: daca91678f758148e2bc5745514605ba9a7cc473
+  type: feature
+  title: Gap auto fill scheduler UI and API
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "244719"
+- file:
+    name: 240023.yaml
+    checksum: 11999eada564ebe3e7a734cc7ad897f9dc35c45e
+  type: feature
+  title: Support convert processor for stream data processing
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "240023"
+  issues:
+  - https://github.com/elastic/streams-program/issues/498
+- file:
+    name: 240189.yaml
+    checksum: bd56c6ebe8f602c6c55c12d6a91b189e39165d63
+  type: bug-fix
+  title: 'Inference endpoints UI: Ensures list loads when provider is custom'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "240189"
+- file:
+    name: 238879.yaml
+    checksum: 079c22a3aa0100563451245e8c62e3b6ab8f8a06
+  type: bug-fix
+  title: " [ObsUX] Fix bottom gap while loading data"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "238879"
+  issues:
+  - https://github.com/elastic/kibana/issues/229666
+- file:
+    name: 246773.yaml
+    checksum: f58dab1494b54b6801dc77688f1d2f835094871d
+  type: bug-fix
+  title: Fix handling quote as dead key
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "246773"
+  issues:
+  - https://github.com/elastic/kibana/issues/136674
+- file:
+    name: 243571.yaml
+    checksum: 27a01fa586a421ab65b5fd5d6dafeb2a33f71ae7
+  type: enhancement
+  title: save selected threat intelligence time to local storage
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243571"
+- file:
+    name: 248917.yaml
+    checksum: 7ca79ed90b296380f97b41dcf2c711abf6bc0f52
+  type: bug-fix
+  title: Add check to ensure ESQL is valid before matching Metrics profile
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "248917"
+  issues:
+  - https://github.com/elastic/kibana/issues/248505
+- file:
+    name: 235162.yaml
+    checksum: bf70879792ad777178b9827717316f2a7795745b
+  type: enhancement
+  title: Displays inline suggestions
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "235162"
+  issues:
+  - https://github.com/elastic/kibana/issues/199599
+- file:
+    name: 249644.yaml
+    checksum: d04d4ed5decdc101d920e0ee5089c02712d0d32f
+  type: bug-fix
+  title: Fix Reporting
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "249644"
+  issues:
+  - https://github.com/elastic/kibana/issues/249613
+- file:
+    name: 241274.yaml
+    checksum: a5c9048b8852d7edf4044117eee9ce00b4a5a17f
+  type: enhancement
+  title: 'Anomaly Detection: Adds an action to create an anomaly detection alerting rule'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "241274"
+  issues:
+  - https://github.com/elastic/kibana/issues/239946
+- file:
+    name: 238707.yaml
+    checksum: 9d3d2d7f4495b300fdb67e5ec662b1557edc35e6
+  type: bug-fix
+  title: Fix threshold source event
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "238707"
+- file:
+    name: 245373.yaml
+    checksum: c15b073edf1b7c1b24d5085ae7749f5178e041b3
+  type: feature
+  title: Add a 'Find Alert Rule Templates' API and use it to power showing installed templates in the create rule modal.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "245373"
+  issues:
+  - https://github.com/elastic/kibana-team/issues/2417
+  - https://github.com/elastic/kibana-team/issues/2104
+- file:
+    name: 247964.yaml
+    checksum: 9cb3d931e2148a4dee6a2b4e61e696b0a45cec57
+  type: bug-fix
+  title: Change alert suppression icon
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247964"
+- file:
+    name: 245261.yaml
+    checksum: d3e4781028e420163de56128d6a80e48cce0c4ab
+  type: enhancement
+  title: API Keys management page now defaults to showing personal API Keys only
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana security
+  pr: "245261"
+  issues:
+  - https://github.com/elastic/kibana/issues/245255
+- file:
+    name: 243423.yaml
+    checksum: 3041d8be0cbe502f9b2ad76c864ffd4f04812517
+  type: bug-fix
+  title: Add refusal field to assistant conversations
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "243423"
+- file:
+    name: 242377.yaml
+    checksum: 297c91eecaea3cff492e0b57379bf2743253979a
+  type: feature
+  title: "\U0001F30A Dissect suggestions"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "242377"
+- file:
+    name: 249311.yaml
+    checksum: e9290f1c5ad147c8ac70c7efbc029aa590346964
+  type: bug-fix
+  title: make static-lookup formatter work with aggregated boolean fields
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "249311"
+  issues:
+  - https://github.com/elastic/kibana/issues/100832
+- file:
+    name: 249891.yaml
+    checksum: be4696486fb86a14538ad4715d3abcdf9e385b90
+  type: bug-fix
+  title: Schedules fail to run due to internal Elastic Managed LLM connector changes
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "249891"
+- file:
+    name: 247533.yaml
+    checksum: c76c212d276808b53877bd89fe218876f6d0ff56
+  type: bug-fix
+  title: 'unskip flaky test: retrieve_elastic_doc '
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "247533"
+  issues:
+  - https://github.com/elastic/kibana/issues/246370
+  - https://github.com/elastic/kibana/issues/246371
+  - https://github.com/elastic/kibana/issues/246360
+  - https://github.com/elastic/kibana/issues/246824
+- file:
+    name: 238710.yaml
+    checksum: 3533c1d37ac299f93cacb2d3eba19b1e4b724071
+  type: enhancement
+  title: Adds support for headers in the OpenAI integration
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "238710"
+  issues:
+  - https://github.com/elastic/kibana/issues/235687
+- file:
+    name: 240472.yaml
+    checksum: ab6bcdc76c8f58df0243d3b6c66fb95a8a34af07
+  type: bug-fix
+  title: Fixed infinite loop bug in investigation guide editor
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "240472"
+- file:
+    name: 244962.yaml
+    checksum: 961d61edee3eb19028095a159102439f9c33e7a7
+  type: enhancement
+  title: 'Inference/AI Connector and Inference endpoint creation providers: adds icon for Groq'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "244962"
+  issues:
+  - https://github.com/elastic/kibana/issues/243696
+- file:
+    name: 249716.yaml
+    checksum: b3e58bc1b1b5a5e99a7946578f745c255eabdbb7
+  type: bug-fix
+  title: Prevent editing feature of significant event queries
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "249716"
+- file:
+    name: 248804.yaml
+    checksum: dc80775d266b93776bb6a0b1f06bd086d2afd598
+  type: bug-fix
+  title: Fixes an issue with share modal where all time ranges were being shared as absolute.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana platform
+  pr: "248804"
+  issues:
+  - https://github.com/elastic/kibana/issues/246977
+- file:
+    name: 240537.yaml
+    checksum: 3f734e024bd8d0df982f87a2044c6faea2776ebd
+  type: bug-fix
+  title: removing preventing save a Timeline with an adhoc dataview
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "240537"
+- file:
+    name: 247564.yaml
+    checksum: 07615e73cab56de85dcc552ee1947951a51ad5ac
+  type: bug-fix
+  title: Fix related dashboards for ES Query and other stack rules supported in observability
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "247564"
+  issues:
+  - https://github.com/elastic/kibana/issues/247563
+- file:
+    name: 239228.yaml
+    checksum: 6689c55bbe17ef1e9e0f7bde54a874277f448ca9
+  type: bug-fix
+  title: Pause fetch until initialized
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "239228"
+- file:
+    name: 239879.yaml
+    checksum: 7603ad023a9b6e394a6b109532c37a169a47cd6b
+  type: enhancement
+  title: Moves the Lens visualization toolbar from the workspace section to the config panel.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "239879"
+  issues:
+  - https://github.com/elastic/kibana/issues/239719
+- file:
+    name: 240409.yaml
+    checksum: 8631e4b641af4f3cc7f3d4558eb97124ab2390f4
+  type: bug-fix
+  title: Update the "Open in Discover" query in the related Logs section of the Overview tab
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "240409"
+- file:
+    name: 245488.yaml
+    checksum: 16f9d5aaf67b0d1d4ce3b7230cfecee5e8777d78
+  type: feature
+  title: Enable process descendants for trusted apps feature flag
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245488"
+- file:
+    name: 244626.yaml
+    checksum: f83e4348048704d3d6aaa279bfd434b606618561
+  type: enhancement
+  title: Add targeted EIS callouts and tours for ECH/Serverless users in Kibana
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Targeted EIS callouts and guided tours have been added to Kibana for ECH/Serverless users to improve discoverability of Elastic Inference Service endpoints. Users can dismiss callouts and tours, which will not reappear after dismissal.
+  areas:
+  - Search
+  pr: "244626"
+- file:
+    name: 236519.yaml
+    checksum: 67063e0d5854f15ca5e06c3260b985e2115aa89c
+  type: bug-fix
+  title: Separate sync alert and auto-extract updates in activity
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "236519"
+- file:
+    name: 242208.yaml
+    checksum: ba7b6f90a67a129105e37a7ddc03807f6598e022
+  type: enhancement
+  title: Add unified rules list
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "242208"
+  issues:
+  - https://github.com/elastic/kibana/issues/239815
+- file:
+    name: 238679.yaml
+    checksum: bc117b25c265353728f47c149c59cc70b8f1dfc2
+  type: bug-fix
+  title: Can not change migration when translating rules (#233640)
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "238679"
+  issues:
+  - https://github.com/elastic/kibana/issues/233640
+- file:
+    name: 244364.yaml
+    checksum: 921800bd849df5b60dac79d7fa9676ca2b1c3a7c
+  type: bug-fix
+  title: Serialize meta.error if it is an instance of Error in JSON layout
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: 'Fixes serialization of meta.error in JSON layouts: if the error is an Error instance, only message, name, and stack will be included — additional fields will no longer pollute the logs.'
+  pr: "244364"
+- file:
+    name: 241473.yaml
+    checksum: f410ccc10a5d6f968428427a33ba18beb92bbbe1
+  type: feature
+  title: Support subqueries in pretty printer
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "241473"
+- file:
+    name: 244221.yaml
+    checksum: ebea8f6196087e1e2209106503d9a98b8a58a2fa
+  type: enhancement
+  title: "\U0001F30A Streams: Disallow invalid stuff"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "244221"
+  issues:
+  - https://github.com/elastic/streams-program/issues/454
+- file:
+    name: 246089.yaml
+    checksum: e12b16be64b3ce01a8874b749d58f4df6aa2e829
+  type: enhancement
+  title: 'Agent Builder: UI Settings, RBAC, Navigation & Tour'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246089"
+- file:
+    name: 246123.yaml
+    checksum: 3a3e5041ed975791bbe94e1c6776f222f1029794
+  type: enhancement
+  title: Adds support for searching rules by their actions' params via API
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "246123"
+  issues:
+  - https://github.com/elastic/response-ops-team/issues/339
+- file:
+    name: 237575.yaml
+    checksum: 1817422cdee48a577b12cfd5e826b8f570649d76
+  type: bug-fix
+  title: This is a serverless feature, so this bug was only affecting serverless. Let's mention it only there
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "237575"
+- file:
+    name: 239992.yaml
+    checksum: ea6d50a420418b6ff39200187257bb02730b2001
+  type: bug-fix
+  title: fix unable to reset unsaved change when enabling timeRestore and setting time range
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "239992"
+  issues:
+  - https://github.com/elastic/kibana/issues/239962
+- file:
+    name: 240761.yaml
+    checksum: 6c1e6873c393a24f0c5ade2b3c4ac3aacdef5aa9
+  type: feature
+  title: Support integrations rollback to previous versions
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "240761"
+  issues:
+  - https://github.com/elastic/ingest-dev/issues/6183
+- file:
+    name: 245975.yaml
+    checksum: 47ef60faf7a80e2435bfa60a845f325d3500c72e
+  type: enhancement
+  title: Add classic stream creation flyout to Streams page
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Adds a new flyout to create classic streams directly from the Streams page. The UI includes validation to prevent duplicate stream names and detect index template priority conflicts and ensuring streams are created with the expected configuration.
+  areas:
+  - Management
+  pr: "245975"
+  issues:
+  - https://github.com/elastic/kibana/issues/241646
+- file:
+    name: 237871.yaml
+    checksum: 2d735ced1fd04be72ba8b9df69b20c79c09be8c6
+  type: enhancement
+  title: Use ESQL for calculating risk scores
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237871"
+- file:
+    name: 239245.yaml
+    checksum: fbbbc8cad874e1212e0a7c451ca47c43b16bf1a5
+  type: bug-fix
+  title: Deselect current selection after index pattern updated
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239245"
+- file:
+    name: 241824.yaml
+    checksum: 4903a7e460575e38efde2b52a3284d3ba91154df
+  type: bug-fix
+  title: "\U0001F30A Streams: Fix simulation of geo points"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "241824"
+  issues:
+  - https://github.com/elastic/kibana/issues/239876
+- file:
+    name: 236919.yaml
+    checksum: d26beb67a061eba61818e38fd8544a88e200da6c
+  type: enhancement
+  title: add ingest pipeline processor template suggestions to manual ingest pipeline processor editor
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "236919"
+- file:
+    name: 245888.yaml
+    checksum: ee59b4938f458c3f6cf2747df122ae557689813c
+  type: enhancement
+  title: show session view in full height
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245888"
+- file:
+    name: 247968.yaml
+    checksum: fb6bdec2292997541953c44cf3939b92d9917c0e
+  type: bug-fix
+  title: Fix query drafts when switching tabs
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "247968"
+  issues:
+  - https://github.com/elastic/kibana/issues/246896
+- file:
+    name: 249833.yaml
+    checksum: 5cf5f9a3bb177c7afff364d84bd416c606e1fb93
+  type: bug-fix
+  title: Fix query sync on save and add debounce for preview chart
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "249833"
+- file:
+    name: 244978.yaml
+    checksum: 447006e95b7798da3941dd0c3ec8de4feb860057
+  type: feature
+  title: 'feat(slo): Add index sorting on SLI and split per day'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  description: SLI rolled-up data for SLO is split daily instead of monthly by default. Override is possible through a global custom pipeline.
+  areas:
+  - Elastic Observability solution
+  pr: "244978"
+  issues:
+  - https://github.com/elastic/kibana/issues/244697
+  - https://github.com/elastic/kibana/issues/244678
+- file:
+    name: 246945.yaml
+    checksum: 1693337101da30c93475abdbde0e4fe487c7a6fd
+  type: bug-fix
+  title: Metric explorer search bar issue on some screen sizes
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "246945"
+  issues:
+  - https://github.com/elastic/kibana/issues/152319
+- file:
+    name: 244997.yaml
+    checksum: dfd80e5c70cfa83aba3e486183a378e6c49330ca
+  type: bug-fix
+  title: Add consecutiveMatches to action context
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "244997"
+- file:
+    name: 248326.yaml
+    checksum: 6391976d745379c34e33074519dadd583addc885
+  type: enhancement
+  title: Adds timeout parameter to InferenceChatModel
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "248326"
+- file:
+    name: 243439.yaml
+    checksum: 2863c3ef74ff3b21b0808b3cd359183ae7de3c59
+  type: enhancement
+  title: Allows basic filtering in ES|QL charts
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Platform
+  - Dashboards and Visualizations
+  pr: "243439"
+- file:
+    name: 241812.yaml
+    checksum: 27653a1ac44549ca24f0bb01e55a6f82fdcda0d1
+  type: bug-fix
+  title: Fix the "Values" dropdown visualizing incorrectly on smaller screens
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "241812"
+  issues:
+  - https://github.com/elastic/kibana/issues/239348
+- file:
+    name: 244893.yaml
+    checksum: bd55e1548f4c76ddeedae16c14bed9ca4080c718
+  type: enhancement
+  title: Empty state for Partitioning tab
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "244893"
+  issues:
+  - https://github.com/elastic/streams-program/issues/621
+- file:
+    name: 246841.yaml
+    checksum: bbfca2eec0140d3a3eac978b1bab07138890dfc1
+  type: bug-fix
+  title: Fixing anomaly chart empty query bug
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "246841"
+- file:
+    name: 241516.yaml
+    checksum: 321e516be79590054d704a8589f83f9abedd2c2a
+  type: bug-fix
+  title: Disable custom suggestion on embedded console
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "241516"
+- file:
+    name: 238435.yaml
+    checksum: df210acd1e00d4fb47db545f414127bbc73b04a1
+  type: bug-fix
+  title: Add Jira's `otherFields` JSON editor to case creation flow
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "238435"
+  issues:
+  - https://github.com/elastic/kibana/issues/237226
+- file:
+    name: 236978.yaml
+    checksum: 833f9d171a63bad33f30b8504a3ce143cc610c04
+  type: enhancement
+  title: 'feat: add metrics dashboard for non EDOT agents in the otel native ingestion path'
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "236978"
+- file:
+    name: 246050.yaml
+    checksum: ab137620faa4d37cb5afd98f6e7c4b8348f3dea9
+  type: feature
+  title: Math Processor
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "246050"
+- file:
+    name: 247641.yaml
+    checksum: f3dc7936cbff2fae878310580b1dd19f63390814
+  type: bug-fix
+  title: Disable ES|QL field stats for TS command
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "247641"
+- file:
+    name: 239418.yaml
+    checksum: 71e4fe4763580fd19aab77927bb9f0a4d7e8fc7e
+  type: bug-fix
+  title: Fix layout of SLO management page combo box filter
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "239418"
+- file:
+    name: 237611.yaml
+    checksum: a8bee7cd0f838b1e19c826b5bb58ad54c623b565
+  type: bug-fix
+  title: Introduced a separate error for empty login attempt with `saml/oidc` providers.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana security
+  pr: "237611"
+- file:
+    name: 248259.yaml
+    checksum: 6af8120b379249ce2fc3ec79dd350a9031a5a970
+  type: bug-fix
+  title: 'Installation review pagination: Frontend'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "248259"
+- file:
+    name: 239176.yaml
+    checksum: c795ae42d0e694a645556328a7c46351f8bf8625
+  type: enhancement
+  title: Moves the Lens visualization toolbar in the edit flyout from the visualization parameters section to the flyout header.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "239176"
+  issues:
+  - https://github.com/elastic/kibana/issues/239483
+- file:
+    name: 242592.yaml
+    checksum: 6e2f4ac85b8f2192685d45ac470e7a3187f7c062
+  type: enhancement
+  title: 'fix csp-agnostic regressions '
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242592"
+- file:
+    name: 240517.yaml
+    checksum: 1e98761d82e837cc2e4ee2c0c75031f0901d37f5
+  type: bug-fix
+  title: Fixes react-query id collision
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "240517"
+- file:
+    name: 239822.yaml
+    checksum: ad2ed2891d8fa748d333a0add9e732730ae34b12
+  type: bug-fix
+  title: Fix search session restoration bug
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "239822"
+- file:
+    name: 243511.yaml
+    checksum: a0ad7485aeb4ce7ae6023e2ef6372796f4029d38
+  type: feature
+  title: Enable Value Reports in ESS
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243511"
+- file:
+    name: 245979.yaml
+    checksum: 9dc07ee91e288442e86d4bec71f35dbc6e298708
+  type: enhancement
+  title: Improve Primary Metric editor by removing "Supporting visualization" title
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Removed the "Supporting visualization" section heading from the Primary Metric editor. All configuration options remain fully accessible in the same location under "Appearance". The "Type" field has been renamed to "Background chart" and the "Panel" option has been renamed to "None".
+  areas:
+  - Dashboards and Visualizations
+  pr: "245979"
+- file:
+    name: 243792.yaml
+    checksum: 5df2167f74a211c0c39aaba74247a4aa503ca91d
+  type: feature
+  title: Edit tags UI
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  description: Users can now manually add workflow tags directly to alerts (see [this PR as well](https://github.com/elastic/kibana/pull/244251))
+  pr: "243792"
+  issues:
+  - https://github.com/elastic/kibana/issues/240376
+- file:
+    name: 243638.yaml
+    checksum: 6fc92e48e87eb67d88d23f05bb7b81783efa4e86
+  type: bug-fix
+  title: 'Handle missing `error.id` '
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "243638"
+  issues:
+  - https://github.com/elastic/kibana/issues/213347
+- file:
+    name: 241081.yaml
+    checksum: f83487850f089937da9315c361b0a3a7c4477644
+  type: enhancement
+  title: Making the Expression Suggestor More Semantically Intelligent
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "241081"
+- file:
+    name: 243950.yaml
+    checksum: 8cc466f236a08fcecce75f0c35b73e92ad5b9dad
+  type: feature
+  title: 'Processing: Suggest ingest pipeline'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "243950"
+  issues:
+  - https://github.com/elastic/streams-program/issues/256
+- file:
+    name: 244903.yaml
+    checksum: ee140fa7a2ef0b4376fed150e6277799b1559b75
+  type: enhancement
+  title: String-Only Suggestions for Like and RLike Operators
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "244903"
+- file:
+    name: 246197.yaml
+    checksum: 2f2adc625aaf691c244f662e5745abbd2ef3d56c
+  type: enhancement
+  title: Linux now supports populate_file_data advanced option which enables entropy and header_bytes fields in file events.
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "246197"
+- file:
+    name: 243326.yaml
+    checksum: 4cb3123488d5c58e0f9e3434bddd0fdce53bf591
+  type: bug-fix
+  title: fix retrying stuck agents in auto upgrade logic
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "243326"
+  issues:
+  - https://github.com/elastic/ingest-dev/issues/6421
+- file:
+    name: 237972.yaml
+    checksum: 27c1bab4dfd8c99b7fa220d6049263e1a5c950f4
+  type: bug-fix
+  title: Adds unique accessible labels for Show top field values buttons
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana platform
+  - Machine learning
+  pr: "237972"
+- file:
+    name: 247689.yaml
+    checksum: 275723d943815ad5ee4cc1c06f578e1dd7162949
+  type: bug-fix
+  title: Fix missing spans in trace in discover
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "247689"
+- file:
+    name: 242171.yaml
+    checksum: 366c244d6585d3b9d46935c69f6dd7a29a8315f4
+  type: bug-fix
+  title: Changing `must_not` filter to `must` for risk scoring filter
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242171"
+- file:
+    name: 246077.yaml
+    checksum: afebd87d5cc5f1cc51311c405305da30c06278c9
+  type: bug-fix
+  title: 'Anomaly Detection result views: ensures chart tooltips are always shown correctly'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "246077"
+  issues:
+  - https://github.com/elastic/kibana/issues/245852
+- file:
+    name: 245030.yaml
+    checksum: 5df75bc1f6a0c84301893807dbee53e2442b8c61
+  type: bug-fix
+  title: Standardize how to log errors
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245030"
+- file:
+    name: 238629.yaml
+    checksum: fab2a20b0379dfec500f62c689d4675bdfa787f3
+  type: bug-fix
+  title: Fix "package not found" error when skipping cloud onboarding for a prerelease package
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "238629"
+  issues:
+  - https://github.com/elastic/kibana/issues/236750
+- file:
+    name: 248481.yaml
+    checksum: bf55e34ae905ef088fea3eea8585212686386f2d
+  type: bug-fix
+  title: Fixes incorrect pagination count in Security Solution Notes tab that showed "1-0 of 0" when no notes exist.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "248481"
+- file:
+    name: 246889.yaml
+    checksum: a59c750237a600c84b72b19cd37474fde4eb2a5d
+  type: bug-fix
+  title: Fix Entity Highlight API return wrong vulnerabilities data
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246889"
+- file:
+    name: 242761.yaml
+    checksum: caecd558dbf33c96a0fabf7687d53fffaf8b0ef3
+  type: bug-fix
+  title: Fixed an issue where the SLOs page could potentially cause inconsistent browser back button behavior.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "242761"
+- file:
+    name: 240475.yaml
+    checksum: fe18c48d125db14bd58c46f7b026f95517593188
+  type: bug-fix
+  title: Fixes Agents & Playground icons in the solution side navigation to render correctly when using dark mode
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Search
+  pr: "240475"
+- file:
+    name: 242673.yaml
+    checksum: be233b4f54a35e02b8edeefd082144ca246799d6
+  type: bug-fix
+  title: Charts not filtering by host.name fix
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "242673"
+  issues:
+  - https://github.com/elastic/kibana/issues/242665
+- file:
+    name: 238890.yaml
+    checksum: 0abb45ea71efe3ee7a07691d1c499661df92c471
+  type: bug-fix
+  title: Fixes `ignore_above` mapping for `flattened` fields
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "238890"
+  issues:
+  - https://github.com/elastic/kibana/issues/223245
+- file:
+    name: 238740.yaml
+    checksum: 06908ab61fa4f93a820d5bcb61574bf01d31bcb7
+  type: bug-fix
+  title: Fix artifacts spaces migration (`v9.1`) to ensure all artifacts are processed
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "238740"
+  issues:
+  - https://github.com/elastic/kibana/issues/238711
+- file:
+    name: 239501.yaml
+    checksum: ca80bce7a14214a4225dc223f9e1a0e892eae2b7
+  type: bug-fix
+  title: Only return valid queries for sig events
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "239501"
+- file:
+    name: 238869.yaml
+    checksum: 1771bafd7cd96df72ea62bebde5b5e6933c734e6
+  type: enhancement
+  title: IBM Resilient form improvements
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "238869"
+- file:
+    name: 236524.yaml
+    checksum: 49dc7ef7137db4bf68a47fc4c50eed18838da2d1
+  type: bug-fix
+  title: Enable auto-extraction by default and add user actions for observable actions
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "236524"
+- file:
+    name: 243131.yaml
+    checksum: 79a5f4b28c756592d05f9c456217a94a7474b28c
+  type: feature
+  title: Drop processor UI
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "243131"
+  issues:
+  - https://github.com/elastic/streams-program/issues/613
+- file:
+    name: 246763.yaml
+    checksum: 13c69471ef7b4da6f8f3f004e130bbcde705a4f7
+  type: bug-fix
+  title: Update AD matchers to use SID-derived privileged group field (entityanalytics_ad.user.privileged_group_member)
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246763"
+- file:
+    name: 243998.yaml
+    checksum: ed793c68c4be491df5987728fb2007edac3754c3
+  type: enhancement
+  title: Add  custom processor description
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "243998"
+- file:
+    name: 236318.yaml
+    checksum: 6b132c797e85d0cf9d03373fe86e3e2315276ce9
+  type: enhancement
+  title: UI and API changes for process descendants in trusted apps
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "236318"
+- file:
+    name: 244924.yaml
+    checksum: 59223d42f5f0612444125f9caf5188caa435d02a
+  type: feature
+  title: Adds Support for QRadar Reference Sets as Lookups
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "244924"
+  issues:
+  - https://github.com/elastic/security-team/issues/14588
+- file:
+    name: 237509.yaml
+    checksum: 5a5e01a65f10d047927aad294818bfdea99e0936
+  type: bug-fix
+  title: Fixes an issue where form fields were resetting automatically when editing ingest pipeline settings.
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "237509"
+  issues:
+  - https://github.com/elastic/kibana/issues/196663
+- file:
+    name: 244532.yaml
+    checksum: 6e227aa295e76d66a95f0ad56d0bcfae49289983
+  type: feature
+  title: 'Agent Builder: Opt-in flow'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Machine learning
+  - Elastic Observability solution
+  pr: "244532"
+- file:
+    name: 247060.yaml
+    checksum: 7d9038294466324d7aa6877a1de400ea61c311ba
+  type: bug-fix
+  title: Handle special characters in ESQL query for risk scoring
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247060"
+- file:
+    name: 238078.yaml
+    checksum: 59b497bfc27f9cdfa6cf502333406cb7ff8bb98d
+  type: enhancement
+  title: Add deployment name to breadcrumbs in ECH
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana platform
+  pr: "238078"
+- file:
+    name: 240930.yaml
+    checksum: 4adcc97fa10b33709a445eb44f7fd951098c2f3f
+  type: enhancement
+  title: Lookup join ON expressions client side validation
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "240930"
+  issues:
+  - https://github.com/elastic/kibana/issues/236939
+- file:
+    name: 239188.yaml
+    checksum: 2e37d1a716d2f1f1f814b04e0f804d4a5593cf1b
+  type: enhancement
+  title: Improve processing warnings
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "239188"
+- file:
+    name: 238326.yaml
+    checksum: 0f0d68de45176cddff2d9da7bc6043c471c339ed
+  type: bug-fix
+  title: Use runWithCache for fleet bulk operations !!
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "238326"
+- file:
+    name: 247152.yaml
+    checksum: 9392911024543a8f7cee1d500ac30e108aae0a4f
+  type: bug-fix
+  title: Fix createAuditEvents always returning failure as outcome
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana platform
+  pr: "247152"
+- file:
+    name: 240228.yaml
+    checksum: 94f4a22d58cd590cd670f300f4bd7da59aaa6eaa
+  type: bug-fix
+  title: Sanitize lookup names for index creation
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "240228"
+- file:
+    name: 238849.yaml
+    checksum: a5a8a3bd9eed72320a085e68e80865c16ae4e251
+  type: bug-fix
+  title: Rule condition chart parser replaces metric names inside filter values (e.g., A in "Accounts")
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "238849"
+  issues:
+  - https://github.com/elastic/kibana/issues/238846
+- file:
+    name: 240506.yaml
+    checksum: 9ac329d6551ae7183d5d3daaf972def31dec2911
+  type: bug-fix
+  title: Fixes index names causing incompatible cluster error when product docs are installed with for multiple Inference IDs
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "240506"
+- file:
+    name: 242612.yaml
+    checksum: df2be529550665d0d8aaed79d9399c5eaaa5f3a9
+  type: enhancement
+  title: Add fleet policy revisions cleanup task
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: '* Adds the background task `FleetPolicyRevisionsCleanupTask` which removes excess policy revisions from the `.fleet-policies` index'
+  areas:
+  - Data ingestion and Fleet
+  pr: "242612"
+- file:
+    name: 242487.yaml
+    checksum: 4cf3f608b51a1ecb797c8ae53c870bdc62a4461d
+  type: enhancement
+  title: Export as x language
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Improves the Console UI to make key actions more intuitive. The Play button is now more prominent, a new "Copy to language" button provides quick access to export the selected command in the user's preferred coding language, and the context menu has been updated to allow users to set a default language preference. These enhancements improve the discoverability of both query execution and export.
+  areas:
+  - Search
+  pr: "242487"
+- file:
+    name: 245712.yaml
+    checksum: 7bb91aafdd5a16f5c3bcf33daa7991078291d03a
+  type: bug-fix
+  title: ensure we render analyzer only when the dataView is ready
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245712"
+- file:
+    name: 239063.yaml
+    checksum: be242021648464bb88d34b5b623e71e339299705
+  type: bug-fix
+  title: Fix KEEP behavior in ESQL when a query initially returns no results
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "239063"
+  issues:
+  - https://github.com/elastic/kibana/issues/232427
+- file:
+    name: 242891.yaml
+    checksum: ab783226a051df26b0f28a5e9d0f809363b2a259
+  type: enhancement
+  title: Auto scroll to Suggestions / Regenerate panels
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "242891"
+  issues:
+  - https://github.com/elastic/kibana/issues/242256
+- file:
+    name: 246978.yaml
+    checksum: 78263b8a6b3e9542d5e86e7e506244629a1fe7b2
+  type: enhancement
+  title: Prepare Monitoring Entity Source CRUD APIs for GA
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246978"
+  issues:
+  - https://github.com/elastic/security-team/issues/15098
+- file:
+    name: 237211.yaml
+    checksum: f7bc03557f4cde0bdf49e748e0c8b0e1a92b70c6
+  type: enhancement
+  title: Top Nav Save Menu
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "237211"
+  issues:
+  - https://github.com/elastic/kibana/issues/192630
+- file:
+    name: 248462.yaml
+    checksum: 6947ffaf31285d4ef8a6f7ce1b8277cf183a01e5
+  type: bug-fix
+  title: 'Fix: Only run ML saved object check if saving semantic text mapping'
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Fixes an issue when running Elasticsearch with a Basic license, where users might encounter errors when updating index mappings, even when adding non-ML field types. This issue has been resolved so that mapping updates now work as expected, while advanced semantic text features continue to require the appropriate license.
+  areas:
+  - Search
+  pr: "248462"
+- file:
+    name: 242595.yaml
+    checksum: 30125f1328bd77eb4f33ba5c7ff8458e1dbeaba2
+  type: enhancement
+  title: Add new gap fill status for rules
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242595"
+- file:
+    name: 245250.yaml
+    checksum: 60e2728487f0211e2c7766c11051915c92a3eceb
+  type: enhancement
+  title: Validate space ownership when unlinking attachments
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "245250"
+  issues:
+  - https://github.com/elastic/kibana/issues/243974
+- file:
+    name: 242346.yaml
+    checksum: eb9b02d33c0be57376805a66aab0e0abcc9fd261
+  type: feature
+  title: Show partial results after search has been canceled
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Querying and filtering
+  - Platform
+  - Discover
+  pr: "242346"
+  issues:
+  - https://github.com/elastic/kibana/issues/205783
+  - https://github.com/elastic/kibana/issues/215950
+- file:
+    name: 237952.yaml
+    checksum: 0960c14509b901968e78fb69ce2beb3c91a78557
+  type: bug-fix
+  title: Fix @custom component template creation
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Fixed a bug in component template creation flow where a new component template with `@custom` suffix in name would lead to updating mappings of all unrelated data-streams and a popup would appear asking to rollover conflicting ones.
+  areas:
+  - Management
+  pr: "237952"
+- file:
+    name: 239366.yaml
+    checksum: ef015bb1cd327cd5494837b65c80eb0258daaa31
+  type: bug-fix
+  title: Remove `autoFocus` to preserve proper focus when modal closed
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "239366"
+  issues:
+  - https://github.com/elastic/kibana/issues/205689
+- file:
+    name: 249434.yaml
+    checksum: d6e12b5aab15b8754bb50c9b49d0eb6b435d3762
+  type: bug-fix
+  title: Fix incorrect dependencies stats
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "249434"
+  issues:
+  - https://github.com/elastic/kibana/issues/249609
+- file:
+    name: 240750.yaml
+    checksum: 50e2c668a28b08013052be7121e85da8c42fdcb9
+  type: bug-fix
+  title: Fixes `template_path` asset selection for some cases of integration packages
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "240750"
+- file:
+    name: 248360.yaml
+    checksum: 1b48a81b70706993acd7bfc8812c36e3a795eb4d
+  type: enhancement
+  title: '"Steps" configuration options for infrastructure inventory metrics'
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "248360"
+  issues:
+  - https://github.com/elastic/kibana/issues/248382
+- file:
+    name: 247996.yaml
+    checksum: a5c67bc78d9e073b784ab8d342f70a9ab13aaa7d
+  type: bug-fix
+  title: Update total event in ES document when attaching an event
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "247996"
+- file:
+    name: 237840.yaml
+    checksum: 9d47e1c4c75fa0463f6104365a6bf4972e720a08
+  type: bug-fix
+  title: "\U0001F41E [Dataset Quality] Flyout rendering issue"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "237840"
+  issues:
+  - https://github.com/elastic/kibana/issues/235208
+- file:
+    name: 240992.yaml
+    checksum: 8d24b75cb0cf4e4528b24482f2ffc4bbbc91d7e8
+  type: bug-fix
+  title: Align "Members" link across solutions
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Kibana platform
+  - Elastic Observability solution
+  pr: "240992"
+- file:
+    name: 244251.yaml
+    checksum: da2ee0f2318c0e55316736bfcac88ac7db37d7e0
+  type: enhancement
+  title: Users can now view and filter by workflow tags manually added to alerts
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Alerting
+  - Elastic Observability solution
+  pr: "244251"
+  issues:
+  - https://github.com/elastic/kibana/issues/240377
+  - https://github.com/elastic/kibana/issues/240376
+- file:
+    name: 237790.yaml
+    checksum: a657d2f629ac0cb0b723e87e07d2c021f60c27c1
+  type: feature
+  title: Adds a functionality for removing root privilege from Fleet managed agents if applicable.
+  products:
+  - product: kibana
+    target: 9.3.0
+  feature-id: test_feature3
+  areas:
+  - Data ingestion and Fleet
+  pr: "237790"
+  issues:
+  - https://github.com/elastic/kibana/issues/221891
+  - https://github.com/elastic/kibana/issues/221892
+- file:
+    name: 243351.yaml
+    checksum: 6c7a56abb537b9a080fd838de85d4b205cec828e
+  type: bug-fix
+  title: Fix favicon CSS specifity
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana platform
+  pr: "243351"
+- file:
+    name: 246041.yaml
+    checksum: 73f836111bcb9355e40c55e6cd1fbd4e23258900
+  type: bug-fix
+  title: Add table caption for empty top categories in logs category table
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "246041"
+  issues:
+  - https://github.com/elastic/kibana/issues/212406
+- file:
+    name: 236343.yaml
+    checksum: a26a75ec292ab9c4651262a12e3d230235435ed0
+  type: enhancement
+  title: support expressions in functions
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "236343"
+  issues:
+  - https://github.com/elastic/kibana/issues/216492
+  - https://github.com/elastic/kibana/issues/239467
+- file:
+    name: 242452.yaml
+    checksum: 73c3f534c590acc8caf20ec0ec87b7bf162b2c98
+  type: bug-fix
+  title: Fix squished Apple icon on Auto Detect flow cards
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "242452"
+  issues:
+  - https://github.com/elastic/kibana/issues/242234
+- file:
+    name: 241911.yaml
+    checksum: 20f91a260197f9d0d75e01785b2c1727303dc07d
+  type: bug-fix
+  title: Correct esql query column names using selected index mappings
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  pr: "241911"
+- file:
+    name: 241157.yaml
+    checksum: d338ff16b4e68d608ec25cece0a26ccdf02e094e
+  type: bug-fix
+  title: Removes default fallback region for Bedrock Connector
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "241157"
+- file:
+    name: 243869.yaml
+    checksum: 2deaa4e9905713354e34210af4c331d96a730bca
+  type: bug-fix
+  title: Fixes a bug preventing IDP initiated login with multiple OIDC providers
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana security
+  pr: "243869"
+  issues:
+  - https://github.com/elastic/kibana/issues/190177
+- file:
+    name: 246386.yaml
+    checksum: b71f42782f878469430bfd6772c5d421089dd4b1
+  type: bug-fix
+  title: Replace `host.hostname` with `host.name` in Infrastructure tab
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "246386"
+  issues:
+  - https://github.com/elastic/kibana/issues/246375
+- file:
+    name: 245545.yaml
+    checksum: d32bf752e7b16a606d593316444bcacfbdc4d244
+  type: enhancement
+  title: Add “Copy as Markdown” option for selected results
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "245545"
+  issues:
+  - https://github.com/elastic/kibana/issues/239689
+- file:
+    name: 247082.yaml
+    checksum: 0701ad46c0141e7ce44f7262266e48e3e5ef1126
+  type: enhancement
+  title: Add abort support and silent mode for stream description generation
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "247082"
+- file:
+    name: 246410.yaml
+    checksum: 20d14b0ab5c96f20945c86af3e5942cd8bca1049
+  type: bug-fix
+  title: 'Anomaly detection: Fixes creating new jobs from Discover sessions with no data view'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "246410"
+  issues:
+  - https://github.com/elastic/kibana/issues/244199
+- file:
+    name: 237046.yaml
+    checksum: dadc55bb8647217f52d51a2522f6374c421ae622
+  type: bug-fix
+  title: 'Single Metric Viewer: fixes partition field settings errors in the dashboard panel '
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "237046"
+  issues:
+  - https://github.com/elastic/kibana/issues/236819
+- file:
+    name: 244092.yaml
+    checksum: c3ca0c507d87c05f3a3c7b7c88d129e8daf1a100
+  type: feature
+  title: Add SLO attachments and migrate UI to attachments API
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "244092"
+  issues:
+  - https://github.com/elastic/kibana/issues/243480
+  - https://github.com/elastic/kibana/issues/243475
+- file:
+    name: 237504.yaml
+    checksum: 04f5eee483695e0070f760fa45495dcb72ddc8ff
+  type: bug-fix
+  title: Do not create default alerts if connectors are not defined
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "237504"
+- file:
+    name: 246017.yaml
+    checksum: c2c1113f449c6bab2bca2bb376e1b66361ad713e
+  type: bug-fix
+  title: Fix the alert history chart background color in dark mode
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "246017"
+- file:
+    name: 245441.yaml
+    checksum: 8a8e4bec14a836aeb9b400dc04942844e696a236
+  type: bug-fix
+  title: Default Rule creation
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "245441"
+  issues:
+  - https://github.com/elastic/kibana/issues/241396
+- file:
+    name: 247885.yaml
+    checksum: 100662358ab2fcd11a998144565d71e65a480a83
+  type: bug-fix
+  title: Fixes the icon in the "Elastic documentation not available" callout in AI Assistant Settings.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "247885"
+  issues:
+  - https://github.com/elastic/kibana/issues/247882
+- file:
+    name: 241052.yaml
+    checksum: aef5a9ef6b4ab5d6575633475e42c7731f724c36
+  type: bug-fix
+  title: Fix infinite-looping bug related to bootstrapping lists resources
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241052"
+- file:
+    name: 249032.yaml
+    checksum: aa1534ae33955b5e78d0ae8b1462acf1ab8a6398
+  type: bug-fix
+  title: Wrong Number Users Displayed CSV Bug
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "249032"
+- file:
+    name: 241402.yaml
+    checksum: d064c8577dfb93efa45ac27ede10823c7bbef942
+  type: bug-fix
+  title: Fixes the autocomplete of timeseries sources after comma
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "241402"
+- file:
+    name: 245857.yaml
+    checksum: f86b97a638289c24a54983a4da9d2385ded8cadd
+  type: enhancement
+  title: show analyzer in full height
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245857"
+- file:
+    name: 242691.yaml
+    checksum: 82b343276267cd38ee61abfb55ff71f7d35dce3b
+  type: bug-fix
+  title: fix docker image in Add agent k8s manifest
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "242691"
+  issues:
+  - https://github.com/elastic/kibana/issues/242560
+- file:
+    name: 242557.yaml
+    checksum: 8906d4edbdf79c1b0889c02594a4916dbc89d459
+  type: bug-fix
+  title: 'Data frame analytics: Fixes wizard for data view with runtime fields'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "242557"
+  issues:
+  - https://github.com/elastic/kibana/issues/242481
+- file:
+    name: 239222.yaml
+    checksum: 2d201992fb88616df7d60939b5604d889503390c
+  type: bug-fix
+  title: Fixes a bug in the Lens Table that broke **click to filter** on table rows when any column is used as a formula.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "239222"
+  issues:
+  - https://github.com/elastic/kibana/issues/239170
+- file:
+    name: 243311.yaml
+    checksum: 010ae78d1eaa4ea106330eef5dda267e1a458dea
+  type: feature
+  title: Changes for threat hunting UI
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243311"
+- file:
+    name: 241992.yaml
+    checksum: e481f513b1b0ded12a74051330233f63c15ecdee
+  type: enhancement
+  title: Use type@lifecycle ILMs for new package installs
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "241992"
+  issues:
+  - https://github.com/elastic/ingest-dev/issues/6082
+- file:
+    name: 237494.yaml
+    checksum: 352318f75632052008d913554b59f4ff44f21f79
+  type: bug-fix
+  title: Add Background Search nav item to ECH o11y nav
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  pr: "237494"
+- file:
+    name: 241212.yaml
+    checksum: 965982f63d503c0b70552281f0a84f408df75935
+  type: bug-fix
+  title: 'Anthropic endpoint creation: ensures max tokens parameter is passed as expected'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "241212"
+- file:
+    name: 236051.yaml
+    checksum: f64a85c0b1c080d6a3cece729dc265c6c1885f0c
+  type: bug-fix
+  title: Fix cannot remove operator after selection in exception builder
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "236051"
+- file:
+    name: 242310.yaml
+    checksum: c0c7850133396e86dbc5cc43b344444028fdf6bc
+  type: feature
+  title: Replace processor
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "242310"
+- file:
+    name: 241029.yaml
+    checksum: 4ecbfd7e950a6c2da34b41361f134e34e9b81b58
+  type: enhancement
+  title: Enforce object_src in our CSP
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Enforces the `object_src 'none'` directive in Kibana's Content Security Policy. Introduces a new `csp.object_src` configuration option to control its behavior.
+  areas:
+  - Kibana security
+  pr: "241029"
+  issues:
+  - https://github.com/elastic/kibana/issues/241024
+- file:
+    name: 239824.yaml
+    checksum: 9145d505bab444ffca5c1628879effc4bdcf19ee
+  type: bug-fix
+  title: Fixes Knowledge base model label in AI Assistant Setttings
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "239824"
+  issues:
+  - https://github.com/elastic/kibana/issues/235256
+- file:
+    name: 241195.yaml
+    checksum: 3887a604db34b2b8d948259de177844f3194c286
+  type: bug-fix
+  title: Update Metrics Experience routes to delegate authorization to Elasticsearch
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "241195"
+  issues:
+  - https://github.com/elastic/kibana/issues/241159
+- file:
+    name: 237713.yaml
+    checksum: 543c919d89d66bfaf0c34f6accba4c8e26735943
+  type: feature
+  title: Add file download relative URI to response actions that provide file output
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237713"
+- file:
+    name: 246129.yaml
+    checksum: 521be84e93ed00bf697bff2c77ef2581b473aea3
+  type: bug-fix
+  title: Taking bulk actions on Stream Features now requires the `manage` permission for the Kibana Streams feature.
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "246129"
+- file:
+    name: 248072.yaml
+    checksum: ea3462c671e6a6ae404f8f5e24f77b74ec9484d0
+  type: bug-fix
+  title: Disabled 'API keys' button on Elasticsearch homepage when logged in user have insufficient permissions.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Search
+  pr: "248072"
+- file:
+    name: 237085.yaml
+    checksum: 8250475ca0f1e1417ac2be8d78a555d4f26b0663
+  type: enhancement
+  title: aware of new .integration_knowledge* system index
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "237085"
+  issues:
+  - https://github.com/elastic/obs-ai-assistant-team/issues/357
+- file:
+    name: 244285.yaml
+    checksum: c4f634a50e1552ed716da30416218a3df0c28513
+  type: enhancement
+  title: "\U0001F30A Streams: Allow permission per space"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "244285"
+- file:
+    name: 245882.yaml
+    checksum: b14c23315d7c60efef5995eff250b05a1d12b8ae
+  type: enhancement
+  title: Scheduled exports is GA.
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "245882"
+  issues:
+  - https://github.com/elastic/kibana/issues/245830
+- file:
+    name: 240100.yaml
+    checksum: 99525f353c8984262663f78294d04e65ec202599
+  type: enhancement
+  title: Enable alerts filtering with KQL bar
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "240100"
+  issues:
+  - https://github.com/elastic/kibana/issues/136392
+- file:
+    name: 245752.yaml
+    checksum: d386e3fb8f561bcd40cf822aacb670b4e430eaad
+  type: bug-fix
+  title: Fix Discover tab initialization
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Discover
+  pr: "245752"
+  issues:
+  - https://github.com/elastic/kibana/issues/245754
+- file:
+    name: 237528.yaml
+    checksum: 50952a236e2a44e1cd2f9499316fa8df54358107
+  type: enhancement
+  title: '"Show agentless resources" toggle added to Fleet > Settings for debugging and diagnostics purposes.'
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "237528"
+  issues:
+  - https://github.com/elastic/ingest-dev/issues/5932
+- file:
+    name: 241623.yaml
+    checksum: 13fbd7e5f0835f9e2916ad2c372ddc9e581b8736
+  type: bug-fix
+  title: Show warnings on sync integrations UI when referencing other entities
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  pr: "241623"
+  issues:
+  - https://github.com/elastic/kibana/issues/234392
+- file:
+    name: 244134.yaml
+    checksum: 1e88d771ffaf5d6dc271bdd32fdae9494157ce82
+  type: bug-fix
+  title: Add managed field to dataViewSpecSchema
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "244134"
+- file:
+    name: 241336.yaml
+    checksum: 6251b602299240a8404d2de2e2f07f21fc1ae0da
+  type: bug-fix
+  title: adding missing fields to transaction
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "241336"
+  issues:
+  - https://github.com/elastic/kibana/issues/233880
+- file:
+    name: 242263.yaml
+    checksum: 16bd01fa47fc7a410d6b35f6bc71fab62b9ae2c6
+  type: bug-fix
+  title: Fixes import and improves validation for Anomaly Detection and Data Frame Analytics jobs
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "242263"
+- file:
+    name: 249751.yaml
+    checksum: ceb7cf5610abebfaeb6351a9efe9e60c7c386a2e
+  type: bug-fix
+  title: Fix monitoring breadcrumbs for solution view
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "249751"
+- file:
+    name: 239453.yaml
+    checksum: 199742b6ff984237339a396c5c2467b32782e544
+  type: bug-fix
+  title: Fix Index Entry form field suggestions for nested and multi-fields
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239453"
+- file:
+    name: 241048.yaml
+    checksum: 18d184e8d4e41ab1c1eba2f149057b78e9b5c903
+  type: enhancement
+  title: Make 'opamp_polling_interval' and 'sampling_rate' agent config vars available to EDOT Node.js
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "241048"
+- file:
+    name: 241662.yaml
+    checksum: 6cd361ea20410313abddba326312a046b68eb66a
+  type: bug-fix
+  title: Escape special characters when creating ESQL query for Lens charts
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "241662"
+  issues:
+  - https://github.com/elastic/kibana/issues/241151
+- file:
+    name: 249317.yaml
+    checksum: 65fd49ba634829ae632ebaeaf35d2ce27ae30e12
+  type: bug-fix
+  title: Updates packetbeat dns tunneling datafeed to include runtime mappings
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "249317"
+- file:
+    name: 247309.yaml
+    checksum: 0bd03d88c57b0ff4daa8ba500455ecdb0d8f25f6
+  type: bug-fix
+  title: Fix compound filters showing unsaved changes on dashboard load
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "247309"
+  issues:
+  - https://github.com/elastic/kibana/issues/234957
+- file:
+    name: 238038.yaml
+    checksum: fa3360fa892c44563ce72f57ca76523c52c60d78
+  type: bug-fix
+  title: fix graph not rendering when switching tabs or refreshing the page
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "238038"
+- file:
+    name: 243608.yaml
+    checksum: a18db20a5d8b8dfe1cb6cb0a83dfe80a9e87472f
+  type: enhancement
+  title: Improve "Supporting visualization" section
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: 'The color settings in the Primary Metric editor have been reorganized and renamed. For numeric metrics, the "Color by value" and "Color mapping" / "Color" settings are now located under the chart type field. The settings have been renamed as follows: "Color by value" is now "Color mode", "Color mapping" is now "Dynamic color mapping", and "Color" is now "Select color".'
+  areas:
+  - Dashboards and Visualizations
+  pr: "243608"
+  issues:
+  - https://github.com/elastic/kibana/issues/234901
+- file:
+    name: 242019.yaml
+    checksum: d2c2f8fc9ea3323391c907bfac14258ef95ffe06
+  type: bug-fix
+  title: "\U0001F30A Streams: Decouple streams AI features from observability ai assistant"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "242019"
+  issues:
+  - https://github.com/elastic/kibana/issues/241450
+- file:
+    name: 242275.yaml
+    checksum: 2b54da46f05de81ef8fd6e73e0fc8d01c47a6516
+  type: bug-fix
+  title: Fixes a bug that caused the alerts tables pagination to be stuck in the Rule pages
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "242275"
+  issues:
+  - https://github.com/elastic/kibana/issues/241593
+- file:
+    name: 242127.yaml
+    checksum: 8f070b4534a8a3ff8f2ab69b4d9591eb33183577
+  type: bug-fix
+  title: Use the real dimensions when taking a screenshot
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Alerting
+  pr: "242127"
+- file:
+    name: 237477.yaml
+    checksum: 90a1a0441dc5e42b3a5704c31d4f4bed841514e2
+  type: bug-fix
+  title: Soften validation on filter schema
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  - Discover
+  pr: "237477"
+  issues:
+  - https://github.com/elastic/kibana/issues/237472
+- file:
+    name: 240819.yaml
+    checksum: 9ed872f097bd620a7d444b85796220ee0ddd801f
+  type: feature
+  title: Add `isStream` param to chat/complete endpoint to support non-streaming responses
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Elastic Observability solution
+  pr: "240819"
+  issues:
+  - https://github.com/elastic/kibana/issues/239439
+- file:
+    name: 246021.yaml
+    checksum: 29030d30f7dba76781fea72c295511980e058b8e
+  type: enhancement
+  title: Add deactivate_all_instrumentations, deactivate_instrumentations, send_logs, send_metrics and send_traces agent configuration settings for EDOT PHP
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "246021"
+- file:
+    name: 242598.yaml
+    checksum: bd1e71d782a41bc37b951429f7bead4e18042159
+  type: enhancement
+  title: Builtin Product documentation tool
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242598"
+- file:
+    name: 241567.yaml
+    checksum: 518915775ce1db7a4acbb055ae663d8683686696
+  type: enhancement
+  title: Add Subquery Support for Columns After and Validation
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "241567"
+- file:
+    name: 245174.yaml
+    checksum: dcd89de0117ef64cf8c3dfea6385ce301cca8556
+  type: enhancement
+  title: Agent actions menu redesign
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Redesigned single and bulk agent actions menus in Fleet. Commonly used actions are organized at the top level of the menus, while other actions are now organized into nested menus by use-case.
+  areas:
+  - Data ingestion and Fleet
+  pr: "245174"
+  issues:
+  - https://github.com/elastic/kibana/issues/238091
+- file:
+    name: 237070.yaml
+    checksum: c7da0007aa6366e3dcf7e7d26efb4955e8f9b033
+  type: enhancement
+  title: Discover to dashboard with controls, saving the histogram
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Sharing
+  - Discover
+  - ES|QL
+  pr: "237070"
+  issues:
+  - https://github.com/elastic/kibana/issues/235477
+- file:
+    name: 242166.yaml
+    checksum: 0958f6a58a7d166026dfcc216fb6075e052c023e
+  type: enhancement
+  title: Add support for subqueries in FROM clauses across tools
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "242166"
+- file:
+    name: 237436.yaml
+    checksum: bbda3ab8d4f7e3cfb8ae0bda50e9b9126a3031d9
+  type: enhancement
+  title: Enable privileged user monitoring advanced setting by default
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237436"
+- file:
+    name: 240272.yaml
+    checksum: e07c7841b2da41be8e33bb27dd4850a897670057
+  type: enhancement
+  title: Create Cloud Connector usage collector in Asset Inventory
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "240272"
+  issues:
+  - https://github.com/elastic/security-team/issues/14116
+  - https://github.com/elastic/security-team/issues/11085
+- file:
+    name: 235372.yaml
+    checksum: 3423b2fb5ba44ba41e70b54fed1ec4a47eb332a8
+  type: enhancement
+  title: Display layers as tabs instead of vertically stacked panels
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: The Lens configuration flyout has been redesigned to display layers as tabs instead of vertically stacked panels. Layer actions (clone, remove, save) are now accessible through a menu in each tab, improving the editing experience when working with multiple data layers, annotations, and reference lines.
+  areas:
+  - Dashboards and Visualizations
+  pr: "235372"
+- file:
+    name: 246871.yaml
+    checksum: 5ff493c307af6acee9ed435c103c273462194992
+  type: bug-fix
+  title: Fixes not recognized GROK patterns
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - ES|QL
+  pr: "246871"
+  issues:
+  - https://github.com/elastic/kibana/issues/246803
+- file:
+    name: 246934.yaml
+    checksum: a3c1c87ab19ba141101dcadb80ea22abc414d34f
+  type: bug-fix
+  title: Fix Processing, field name autocomplete not working on new fields
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: observability
+    target: 9.3.0
+  areas:
+  - Management
+  pr: "246934"
+  issues:
+  - https://github.com/elastic/kibana/issues/246680
+- file:
+    name: 237174.yaml
+    checksum: ae7d6f568596c4948f64b5b770056e8e77f0383a
+  type: bug-fix
+  title: Fix tool calling unavailable tools
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Machine learning
+  pr: "237174"
+  issues:
+  - https://github.com/elastic/kibana/issues/231830
+- file:
+    name: 237877.yaml
+    checksum: 9d19b9b5b0f146eb25273b463394ea49e37b01d6
+  type: bug-fix
+  title: Announce changes when resetting terms in synonyms panel
+  products:
+  - product: kibana
+    target: 9.3.0
+  description: Fixes an accessibility issue where resetting changes or removing all terms in the Synonyms panel was not announced by screen readers. VoiceOver users on Safari will now hear updates when terms are reset.
+  areas:
+  - Search
+  pr: "237877"
+- file:
+    name: 245532.yaml
+    checksum: 1631303dcb6cdf6eb96dc98682aed43b992d6339
+  type: feature
+  title: Update entity highlight UI to align with new design
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245532"
+- file:
+    name: 241571.yaml
+    checksum: 4ab9562294e85493bbb8f082902a2d4615c86da1
+  type: enhancement
+  title: Make Elastic logo click open custom home page in solution view
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Kibana platform
+  pr: "241571"
+- file:
+    name: 238901.yaml
+    checksum: 1e435258d1caeefc77a54ed9420dfaa40474d1a7
+  type: bug-fix
+  title: Fix metric color assignment when breakdown and a max dimension are defined
+  products:
+  - product: kibana
+    target: 9.3.0
+  areas:
+  - Dashboards and Visualizations
+  pr: "238901"
+  issues:
+  - https://github.com/elastic/kibana/issues/238885
+- file:
+    name: 245924.yaml
+    checksum: 5f0cb4d417d25654a2653c72181b69e490a294f1
+  type: bug-fix
+  title: The API for retrieving gap summaries has been limited to 100 `rule_id`s per request.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245924"
+- file:
+    name: 243409.yaml
+    checksum: 5c0a474ff5cd2fdbc775edd783fdcd3e567ccafd
+  type: enhancement
+  title: Add time range to all cases
+  products:
+  - product: kibana
+    target: 9.3.0
+  pr: "243409"

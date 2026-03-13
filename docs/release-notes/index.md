@@ -21,6 +21,12 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+:::{changelog} /releases/kibana
+:subsections:
+:config: /changelog.yml
+:product: kibana
+:::
+
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 

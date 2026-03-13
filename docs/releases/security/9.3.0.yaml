@@ -1,0 +1,1373 @@
+﻿products:
+- product: security
+  target: 9.3.0
+  repo: kibana
+entries:
+- file:
+    name: 233289.yaml
+    checksum: fd8d3876e453a9dda7ba87ae1af6f0560e198443
+  type: deprecation
+  title: Filter endpoint list exceptions  in DE logic
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "233289"
+- file:
+    name: 240420.yaml
+    checksum: eaf4a0a3cb3dd72eb75145ad28bd18a129fa5828
+  type: bug-fix
+  title: review of action response codes
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "240420"
+- file:
+    name: 237911.yaml
+    checksum: e57fe7278f1ed191e7923520d6e000b8724b86f7
+  type: enhancement
+  title: Fix grouping in alerts table
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237911"
+- file:
+    name: 246794.yaml
+    checksum: 07214d06b7aa3ce3f779523abd4a4fcb75470c29
+  type: bug-fix
+  title: Fix MITRE coverage overview page filter display bug
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246794"
+- file:
+    name: 236992.yaml
+    checksum: 6e260334bd0639b694cf91cfd7674c614fc9209a
+  type: enhancement
+  title: Add CSPM Cloud Connector Usage Statistics Collection
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "236992"
+  issues:
+  - https://github.com/elastic/security-team/issues/14106
+- file:
+    name: 247351.yaml
+    checksum: 3ef342e5e3f10efd9e3f0ea6f5285cb431dcccbb
+  type: bug-fix
+  title: use exact match in createdBy notes filter
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247351"
+- file:
+    name: 236906.yaml
+    checksum: 4b4b5bcc098a6fb4d4d1e453b2324b58fd87e488
+  type: enhancement
+  title: replace node label and detail labels tooltips with popovers
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "236906"
+- file:
+    name: 242313.yaml
+    checksum: a1d1497dcfdef69e17527bac69d98fa959148094
+  type: bug-fix
+  title: Fix rule link in timeline's flyout
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242313"
+- file:
+    name: 245205.yaml
+    checksum: 0168373e1e951a79bd2b137816ab064095dcdecc
+  type: enhancement
+  title: Add security agents to onechat
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245205"
+- file:
+    name: 243543.yaml
+    checksum: c09c725f02b68c35c17892ee9153c0be56f6664b
+  type: enhancement
+  title: save selected prevalence time to local storage
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243543"
+- file:
+    name: 246081.yaml
+    checksum: 2ec038364b61628242c75874840d53f00dd520a8
+  type: bug-fix
+  title: use same dataview in analyzer preview as was selected in analyzer component
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246081"
+- file:
+    name: 243387.yaml
+    checksum: 0123d98eb119c5d2b7989fb7ec896517e3c57e21
+  type: bug-fix
+  title: Fix response actions API (for Elastic Defend agent types) not sending action to more than 10 agents
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243387"
+- file:
+    name: 237496.yaml
+    checksum: e6dfa5d7fc57e63f2da09408e01c86267c5d0cd6
+  type: bug-fix
+  title: Allow partial matches on rule name when searching installed rules.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237496"
+- file:
+    name: 247002.yaml
+    checksum: bcb16f655d41cb546c1942f4956092fa8eff4646
+  type: bug-fix
+  title: Changes placement of `Migrations` and `Inventory` in Security Solution Nav
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247002"
+  issues:
+  - https://github.com/elastic/security-team/issues/15065
+- file:
+    name: 246150.yaml
+    checksum: 61ced1d6488e6fe8ee776ace5caadc6acbf036ee
+  type: bug-fix
+  title: Fix timeline action shown in alerts table bulk actions without proper privilege
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246150"
+- file:
+    name: 237947.yaml
+    checksum: 3f40bd360c5b7a3a5720ebd008657fc511298468
+  type: bug-fix
+  title: Prioritize connector defaultModel over stored conversation model
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237947"
+- file:
+    name: 242365.yaml
+    checksum: 0143cf9a7bc5f70009af6d6ca6248b2e2e8473b4
+  type: bug-fix
+  title: add encoding of cloudFormation url params
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Data ingestion and Fleet
+  - Elastic Security solution
+  pr: "242365"
+- file:
+    name: 241153.yaml
+    checksum: ca344d272c3f3f4fc496a96e7dc8a12392e6cda6
+  type: bug-fix
+  title: Fix entity flyout Risk contributions tab link
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241153"
+- file:
+    name: 239661.yaml
+    checksum: 40f6a41a2817fff038476f5523c88ba7b6baa9a0
+  type: bug-fix
+  title: generic entity popover showing entity EngineMetadata.type is missing
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239661"
+- file:
+    name: 246679.yaml
+    checksum: 30ed4d16508ab55e73fcb6229afe96ad29ddef12
+  type: bug-fix
+  title: Truncate text for value list column in value list modal
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246679"
+- file:
+    name: 245002.yaml
+    checksum: d9dc8795cc87f9f58dd4c717743d12cca3650b9a
+  type: enhancement
+  title: Persist analyzer dataview in local storage
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245002"
+- file:
+    name: 236756.yaml
+    checksum: b078236ff0f8d52a7d0da16e40e93582ad257c4f
+  type: bug-fix
+  title: Fix alerts page controls
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "236756"
+  issues:
+  - https://github.com/elastic/kibana/issues/231286
+- file:
+    name: 248221.yaml
+    checksum: dc3b78083dbcf7a454c50cab72f5bf8a33f921b6
+  type: bug-fix
+  title: Disable rule summary button when user lacks all rule privileges
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "248221"
+- file:
+    name: 247707.yaml
+    checksum: b918a407f21d042f88dde388e5245465eb22a042
+  type: bug-fix
+  title: Encode URL Components for entities
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247707"
+  issues:
+  - https://github.com/elastic/kibana/issues/247706
+- file:
+    name: 239122.yaml
+    checksum: 1a27755079a61c01ecb718cc61867481b4e79ee9
+  type: bug-fix
+  title: Check for integrations permissions before loading component
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239122"
+- file:
+    name: 241240.yaml
+    checksum: d515cd6ef04ffccf7da32da60ff074acc42a0b5a
+  type: bug-fix
+  title: Fix Security Assistant regenerate button
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241240"
+- file:
+    name: 247678.yaml
+    checksum: bfb3adf941ff593fde40d5eda77493eb98d8e84f
+  type: bug-fix
+  title: fixes "Rule settings pop-up remain open on clicking 'Save' button after enabling/ disabling auto gap fill."
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247678"
+- file:
+    name: 237829.yaml
+    checksum: 084e21fc1aae26cefd8013904dafa951ba198071
+  type: feature
+  title: Enable the risk score reset feature
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237829"
+- file:
+    name: 248020.yaml
+    checksum: 0b6d4ecd28e27e2f7b759dab54f6e920a52158bf
+  type: bug-fix
+  title: "Fix API doesn't use an associated conversation's system prompt "
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "248020"
+  issues:
+  - https://github.com/elastic/kibana/issues/229386
+- file:
+    name: 237038.yaml
+    checksum: bd9adf6538bccb611901f90b8dbe9e1901d4842e
+  type: enhancement
+  title: Populate  the `entity.attributes.Privileged` field in the Entity store for users
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237038"
+- file:
+    name: 241108.yaml
+    checksum: bc249c869bcea1071e5d66c480df5077205bc08e
+  type: bug-fix
+  title: Table Pagination Not Working as Expected
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241108"
+- file:
+    name: 246788.yaml
+    checksum: 8e616d37c98c61b8284a94292e9c24ba20731d4c
+  type: feature
+  title: Removes Technical Preview from docs for the public Attack Discovery and Attack Discovery Schedules APIs
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246788"
+- file:
+    name: 242027.yaml
+    checksum: 1799a6978b1fa36e543124e097cc34a0b03710cb
+  type: bug-fix
+  title: 'Timeline: ESQL query editor showing on fullScreen mode'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242027"
+  issues:
+  - https://github.com/elastic/kibana/issues/225998
+- file:
+    name: 245259.yaml
+    checksum: 24e7c1bf3929fe86c649d6ef8e7617099da1326c
+  type: enhancement
+  title: Adds Integration Knowledge platform tool
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245259"
+- file:
+    name: 246770.yaml
+    checksum: 91f80accc0f55cefd406d80ea321e68df7e37135
+  type: enhancement
+  title: Updates kibana MITRE data to `v18.1`
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246770"
+- file:
+    name: 245449.yaml
+    checksum: 7b8e827464841c6c17aae349a9021bbf07603b4f
+  type: bug-fix
+  title: fix alert flyout threat intelligence section not showing multiple values
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245449"
+- file:
+    name: 238354.yaml
+    checksum: b58f3b85fcfadc573888bf9479c38f41f039ea05
+  type: bug-fix
+  title: update the name of the Security solution default and Security solution alerts data views when needed
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "238354"
+- file:
+    name: 246418.yaml
+    checksum: 26edc49fae2a8c0b494d8c84cc6c5a107fa4c6a5
+  type: enhancement
+  title: Add server configuration setting for disabling the auto install of endpoint rule on policy create
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246418"
+- file:
+    name: 239709.yaml
+    checksum: 8805b5fcc9b60956d9761c6737879b6241940b36
+  type: bug-fix
+  title: Onboarding Integrations list is not fetched for all pages
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239709"
+- file:
+    name: 239436.yaml
+    checksum: 5f8164026b591359c0d3c74eba8bcd4e5be53acd
+  type: feature
+  title: Add free-text popup to `runscript` argument that provides input to the selected script
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239436"
+- file:
+    name: 236110.yaml
+    checksum: d15c0c02724e2ac7fc897467e0902252f7c77cf6
+  type: bug-fix
+  title: support multiple values in IOC flyout table tab
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "236110"
+  issues:
+  - https://github.com/elastic/kibana/issues/227161
+- file:
+    name: 239748.yaml
+    checksum: 6fed41c67282efe93c079cb76b7faf85c64ae179
+  type: bug-fix
+  title: The schedule can not be created with the case as the connector type (#238587)
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239748"
+- file:
+    name: 242441.yaml
+    checksum: f87d186884b827fe3d5ee54c2279243bd068ecd5
+  type: enhancement
+  title: Show user readable output for MDE runscript response action
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242441"
+- file:
+    name: 241390.yaml
+    checksum: 89fc50baf801cb0bb415fa0cc366b4b3419111e1
+  type: bug-fix
+  title: 'Fix Agent-Based Failing to produce data '
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241390"
+- file:
+    name: 246005.yaml
+    checksum: c30cf424cb6b8c2dcd2341b55b22fdca4dbdff36
+  type: feature
+  title: Upgrade osquery manager schemas to ecs 9.2.0 and osquery 5.19.0
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246005"
+- file:
+    name: 234793.yaml
+    checksum: 947ed24f55ca05d028b5fcd0912abee3d00d55a4
+  type: enhancement
+  title: Adds `customized_fields` and `has_base_version` fields to `rule_source` object schema
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "234793"
+- file:
+    name: 241346.yaml
+    checksum: d25cd4be8c97c3a730988c8559be19fdc65a70b1
+  type: enhancement
+  title: Attack discovery prompt improvements
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241346"
+- file:
+    name: 247695.yaml
+    checksum: 50d1f794ea266638734e8f4344fa25573bcb8832
+  type: bug-fix
+  title: fixes "Tooltip info for status tags not displayed on Gap fill scheduler logs flyout"
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247695"
+- file:
+    name: 245647.yaml
+    checksum: b61ad8ef02da584b92ecccbd7e95542dadf03d12
+  type: bug-fix
+  title: Gemini Connector configuration updates
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245647"
+- file:
+    name: 246180.yaml
+    checksum: e6d5b5e3064a9a8e3a340441102edd517c30612d
+  type: bug-fix
+  title: Fix Integration card in 'manage data sources' always shows 'no data stream' warning
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246180"
+- file:
+    name: 247355.yaml
+    checksum: 45138cfbc334bb615c08aa66db2a7cd99fecea05
+  type: bug-fix
+  title: Fixes on Onboarding screen with READ Rules Privs.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247355"
+- file:
+    name: 242045.yaml
+    checksum: 9dbadb76d511e6aa0a13ca0685f6db3c75eafae4
+  type: bug-fix
+  title: Fix top n popover overlapping new case flyout
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242045"
+- file:
+    name: 247617.yaml
+    checksum: 8d61d284e78050e22b3f246210b62c6920377b32
+  type: bug-fix
+  title: disable delete for read-only users and improve error message
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247617"
+- file:
+    name: 243711.yaml
+    checksum: 194d50edbcad67c9c264a707087c092cf5989517
+  type: enhancement
+  title: align graph visualization with ECS entity namespace fields for actor and target identification
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243711"
+- file:
+    name: 237796.yaml
+    checksum: 87d79a2025c656f05922a7a641dafee449afb29b
+  type: bug-fix
+  title: TelemetryConfigWatcher auth fix
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  description: Fixes the 'missing authentication credentials' issue in `TelemetryConfigWatcher` and `PolicyWatcher`, which should result in less warning log entries in the Security Solution plugin.
+  areas:
+  - Elastic Security solution
+  pr: "237796"
+- file:
+    name: 243642.yaml
+    checksum: f57f64d2bc9231bb9fbed77811c07a1384b0258b
+  type: bug-fix
+  title: ignore resource_already_exists_exception for value list creation hook
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243642"
+- file:
+    name: 239634.yaml
+    checksum: 94a9efbcca521036ea4ea9e36bc6d0f24c158451
+  type: feature
+  title: Extracts Rules/Alerts/Exceptions permission to new Rules feature privileges
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  description: Rules feature privileges are added to ESS. Access to Rules may now be explicitly set on both ESS and Serverless for user roles.
+  areas:
+  - Data ingestion and Fleet
+  - Elastic Security solution
+  pr: "239634"
+- file:
+    name: 238547.yaml
+    checksum: e2bb3c20bd816848c70addae0f85dc35f3fdeaff
+  type: enhancement
+  title: CDR Data View versioning and migration logic
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "238547"
+  issues:
+  - https://github.com/elastic/kibana/issues/234835
+- file:
+    name: 241022.yaml
+    checksum: 9115eaf0b9c7517ca857b759af1bceadd515cd82
+  type: bug-fix
+  title: Fix threshold rule logic with no group by fields defined
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241022"
+- file:
+    name: 249500.yaml
+    checksum: ee7702170b5213fc9f4b2fc12259a26ebd261619
+  type: bug-fix
+  title: Removes the Technical preview badge for privileged access detection package
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "249500"
+- file:
+    name: 244719.yaml
+    checksum: daca91678f758148e2bc5745514605ba9a7cc473
+  type: feature
+  title: Gap auto fill scheduler UI and API
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "244719"
+- file:
+    name: 243571.yaml
+    checksum: 27a01fa586a421ab65b5fd5d6dafeb2a33f71ae7
+  type: enhancement
+  title: save selected threat intelligence time to local storage
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243571"
+- file:
+    name: 238707.yaml
+    checksum: 9d3d2d7f4495b300fdb67e5ec662b1557edc35e6
+  type: bug-fix
+  title: Fix threshold source event
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "238707"
+- file:
+    name: 247964.yaml
+    checksum: 9cb3d931e2148a4dee6a2b4e61e696b0a45cec57
+  type: bug-fix
+  title: Change alert suppression icon
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247964"
+- file:
+    name: 249891.yaml
+    checksum: be4696486fb86a14538ad4715d3abcdf9e385b90
+  type: bug-fix
+  title: Schedules fail to run due to internal Elastic Managed LLM connector changes
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "249891"
+- file:
+    name: 240537.yaml
+    checksum: 3f734e024bd8d0df982f87a2044c6faea2776ebd
+  type: bug-fix
+  title: removing preventing save a Timeline with an adhoc dataview
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "240537"
+- file:
+    name: 245488.yaml
+    checksum: 16f9d5aaf67b0d1d4ce3b7230cfecee5e8777d78
+  type: feature
+  title: Enable process descendants for trusted apps feature flag
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245488"
+- file:
+    name: 238679.yaml
+    checksum: bc117b25c265353728f47c149c59cc70b8f1dfc2
+  type: bug-fix
+  title: Can not change migration when translating rules (#233640)
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "238679"
+  issues:
+  - https://github.com/elastic/kibana/issues/233640
+- file:
+    name: 246089.yaml
+    checksum: e12b16be64b3ce01a8874b749d58f4df6aa2e829
+  type: enhancement
+  title: 'Agent Builder: UI Settings, RBAC, Navigation & Tour'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246089"
+- file:
+    name: 237871.yaml
+    checksum: 2d735ced1fd04be72ba8b9df69b20c79c09be8c6
+  type: enhancement
+  title: Use ESQL for calculating risk scores
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237871"
+- file:
+    name: 239245.yaml
+    checksum: fbbbc8cad874e1212e0a7c451ca47c43b16bf1a5
+  type: bug-fix
+  title: Deselect current selection after index pattern updated
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239245"
+- file:
+    name: 245888.yaml
+    checksum: ee59b4938f458c3f6cf2747df122ae557689813c
+  type: enhancement
+  title: show session view in full height
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245888"
+- file:
+    name: 248259.yaml
+    checksum: 6af8120b379249ce2fc3ec79dd350a9031a5a970
+  type: bug-fix
+  title: 'Installation review pagination: Frontend'
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "248259"
+- file:
+    name: 242592.yaml
+    checksum: 6e2f4ac85b8f2192685d45ac470e7a3187f7c062
+  type: enhancement
+  title: 'fix csp-agnostic regressions '
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242592"
+- file:
+    name: 240517.yaml
+    checksum: 1e98761d82e837cc2e4ee2c0c75031f0901d37f5
+  type: bug-fix
+  title: Fixes react-query id collision
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "240517"
+- file:
+    name: 243511.yaml
+    checksum: a0ad7485aeb4ce7ae6023e2ef6372796f4029d38
+  type: feature
+  title: Enable Value Reports in ESS
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243511"
+- file:
+    name: 242171.yaml
+    checksum: 366c244d6585d3b9d46935c69f6dd7a29a8315f4
+  type: bug-fix
+  title: Changing `must_not` filter to `must` for risk scoring filter
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242171"
+- file:
+    name: 245030.yaml
+    checksum: 5df75bc1f6a0c84301893807dbee53e2442b8c61
+  type: bug-fix
+  title: Standardize how to log errors
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245030"
+- file:
+    name: 248481.yaml
+    checksum: bf55e34ae905ef088fea3eea8585212686386f2d
+  type: bug-fix
+  title: Fixes incorrect pagination count in Security Solution Notes tab that showed "1-0 of 0" when no notes exist.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "248481"
+- file:
+    name: 246889.yaml
+    checksum: a59c750237a600c84b72b19cd37474fde4eb2a5d
+  type: bug-fix
+  title: Fix Entity Highlight API return wrong vulnerabilities data
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246889"
+- file:
+    name: 238740.yaml
+    checksum: 06908ab61fa4f93a820d5bcb61574bf01d31bcb7
+  type: bug-fix
+  title: Fix artifacts spaces migration (`v9.1`) to ensure all artifacts are processed
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "238740"
+  issues:
+  - https://github.com/elastic/kibana/issues/238711
+- file:
+    name: 246763.yaml
+    checksum: 13c69471ef7b4da6f8f3f004e130bbcde705a4f7
+  type: bug-fix
+  title: Update AD matchers to use SID-derived privileged group field (entityanalytics_ad.user.privileged_group_member)
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246763"
+- file:
+    name: 236318.yaml
+    checksum: 6b132c797e85d0cf9d03373fe86e3e2315276ce9
+  type: enhancement
+  title: UI and API changes for process descendants in trusted apps
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "236318"
+- file:
+    name: 244924.yaml
+    checksum: 59223d42f5f0612444125f9caf5188caa435d02a
+  type: feature
+  title: Adds Support for QRadar Reference Sets as Lookups
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "244924"
+  issues:
+  - https://github.com/elastic/security-team/issues/14588
+- file:
+    name: 247060.yaml
+    checksum: 7d9038294466324d7aa6877a1de400ea61c311ba
+  type: bug-fix
+  title: Handle special characters in ESQL query for risk scoring
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "247060"
+- file:
+    name: 240228.yaml
+    checksum: 94f4a22d58cd590cd670f300f4bd7da59aaa6eaa
+  type: bug-fix
+  title: Sanitize lookup names for index creation
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "240228"
+- file:
+    name: 245712.yaml
+    checksum: 7bb91aafdd5a16f5c3bcf33daa7991078291d03a
+  type: bug-fix
+  title: ensure we render analyzer only when the dataView is ready
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245712"
+- file:
+    name: 246978.yaml
+    checksum: 78263b8a6b3e9542d5e86e7e506244629a1fe7b2
+  type: enhancement
+  title: Prepare Monitoring Entity Source CRUD APIs for GA
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "246978"
+  issues:
+  - https://github.com/elastic/security-team/issues/15098
+- file:
+    name: 242595.yaml
+    checksum: 30125f1328bd77eb4f33ba5c7ff8458e1dbeaba2
+  type: enhancement
+  title: Add new gap fill status for rules
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242595"
+- file:
+    name: 241911.yaml
+    checksum: 20f91a260197f9d0d75e01785b2c1727303dc07d
+  type: bug-fix
+  title: Correct esql query column names using selected index mappings
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  pr: "241911"
+- file:
+    name: 241052.yaml
+    checksum: aef5a9ef6b4ab5d6575633475e42c7731f724c36
+  type: bug-fix
+  title: Fix infinite-looping bug related to bootstrapping lists resources
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "241052"
+- file:
+    name: 249032.yaml
+    checksum: aa1534ae33955b5e78d0ae8b1462acf1ab8a6398
+  type: bug-fix
+  title: Wrong Number Users Displayed CSV Bug
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "249032"
+- file:
+    name: 245857.yaml
+    checksum: f86b97a638289c24a54983a4da9d2385ded8cadd
+  type: enhancement
+  title: show analyzer in full height
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245857"
+- file:
+    name: 243311.yaml
+    checksum: 010ae78d1eaa4ea106330eef5dda267e1a458dea
+  type: feature
+  title: Changes for threat hunting UI
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "243311"
+- file:
+    name: 236051.yaml
+    checksum: f64a85c0b1c080d6a3cece729dc265c6c1885f0c
+  type: bug-fix
+  title: Fix cannot remove operator after selection in exception builder
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "236051"
+- file:
+    name: 237713.yaml
+    checksum: 543c919d89d66bfaf0c34f6accba4c8e26735943
+  type: feature
+  title: Add file download relative URI to response actions that provide file output
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237713"
+- file:
+    name: 239453.yaml
+    checksum: 199742b6ff984237339a396c5c2467b32782e544
+  type: bug-fix
+  title: Fix Index Entry form field suggestions for nested and multi-fields
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "239453"
+- file:
+    name: 238038.yaml
+    checksum: fa3360fa892c44563ce72f57ca76523c52c60d78
+  type: bug-fix
+  title: fix graph not rendering when switching tabs or refreshing the page
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "238038"
+- file:
+    name: 242598.yaml
+    checksum: bd1e71d782a41bc37b951429f7bead4e18042159
+  type: enhancement
+  title: Builtin Product documentation tool
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "242598"
+- file:
+    name: 237436.yaml
+    checksum: bbda3ab8d4f7e3cfb8ae0bda50e9b9126a3031d9
+  type: enhancement
+  title: Enable privileged user monitoring advanced setting by default
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "237436"
+- file:
+    name: 240272.yaml
+    checksum: e07c7841b2da41be8e33bb27dd4850a897670057
+  type: enhancement
+  title: Create Cloud Connector usage collector in Asset Inventory
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "240272"
+  issues:
+  - https://github.com/elastic/security-team/issues/14116
+  - https://github.com/elastic/security-team/issues/11085
+- file:
+    name: 245532.yaml
+    checksum: 1631303dcb6cdf6eb96dc98682aed43b992d6339
+  type: feature
+  title: Update entity highlight UI to align with new design
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245532"
+- file:
+    name: 245924.yaml
+    checksum: 5f0cb4d417d25654a2653c72181b69e490a294f1
+  type: bug-fix
+  title: The API for retrieving gap summaries has been limited to 100 `rule_id`s per request.
+  products:
+  - product: kibana
+    target: 9.3.0
+  - product: security
+    target: 9.3.0
+  areas:
+  - Elastic Security solution
+  pr: "245924"
