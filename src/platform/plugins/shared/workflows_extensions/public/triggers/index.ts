@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { workflowExecutionFailedPublicTriggerDefinition } from './workflow_execution_failed';
 import type { PublicTriggerRegistry } from '../trigger_registry';
 
 export const registerInternalTriggerDefinitions = (
   triggerRegistry: PublicTriggerRegistry
 ): void => {
-  triggerRegistry.register(workflowExecutionFailedPublicTriggerDefinition);
+  triggerRegistry.register(() =>
+    import('./workflow_execution_failed').then(
+      (m) => m.workflowExecutionFailedPublicTriggerDefinition
+    )
+  );
 };

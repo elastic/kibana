@@ -72,8 +72,9 @@ export class WorkflowsExtensionsPublicPlugin
       hasTriggerDefinition: (triggerId: string) => {
         return this.triggerRegistry.has(triggerId);
       },
-      isReady: () => {
-        return this.stepRegistry.whenReady();
+      isReady: async () => {
+        await this.stepRegistry.whenReady();
+        await this.triggerRegistry.whenReady();
       },
     };
   }
