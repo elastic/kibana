@@ -413,7 +413,7 @@ export class AttachmentService {
           this.context.persistableStateAttachmentTypeRegistry
         );
 
-        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
+        const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
           transformedAttachment.attributes
         );
 
@@ -652,33 +652,48 @@ export class AttachmentService {
   }): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to find comments`);
-      const res =
-        await this.context.unsecuredSavedObjectsClient.find<AttachmentPersistedAttributes>({
-          sortField: defaultSortField,
-          ...options,
-          type: CASE_COMMENT_SAVED_OBJECT,
-        });
+
+      const savedObjectType = getAttachmentSavedObjectType(this.context.config);
+      const types: string[] =
+        savedObjectType === CASE_ATTACHMENT_SAVED_OBJECT
+          ? [CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT]
+          : [CASE_COMMENT_SAVED_OBJECT];
+
+      const res = await this.context.unsecuredSavedObjectsClient.find<
+        AttachmentPersistedAttributes | UnifiedAttachmentAttributes
+      >({
+        sortField: defaultSortField,
+        ...options,
+        type: types,
+      });
 
       const validatedAttachments: Array<SavedObjectsFindResult<AttachmentTransformedAttributes>> =
         [];
 
       for (const so of res.saved_objects) {
-        const transformedAttachment = injectAttachmentSOAttributesFromRefs(
-          so,
-          this.context.persistableStateAttachmentTypeRegistry
-          // casting here because injectAttachmentSOAttributesFromRefs returns a SavedObject but we need a SavedObjectsFindResult
-          // which has the score in it. The score is returned but the type is not correct
-        ) as SavedObjectsFindResult<AttachmentTransformedAttributes>;
+        if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
+          const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
+          validatedAttachments.push(
+            Object.assign(so, {
+              attributes: validatedAttributes,
+            }) as SavedObjectsFindResult<AttachmentTransformedAttributes>
+          );
+        } else {
+          const transformedAttachment = injectAttachmentSOAttributesFromRefs(
+            so as SavedObjectsFindResult<AttachmentPersistedAttributes>,
+            this.context.persistableStateAttachmentTypeRegistry
+          ) as SavedObjectsFindResult<AttachmentTransformedAttributes>;
 
-        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-          transformedAttachment.attributes
-        );
+          const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+            transformedAttachment.attributes
+          );
 
-        validatedAttachments.push(
-          Object.assign(transformedAttachment, {
-            attributes: validatedAttributes,
-          })
-        );
+          validatedAttachments.push(
+            Object.assign(transformedAttachment, {
+              attributes: validatedAttributes,
+            })
+          );
+        }
       }
 
       return Object.assign(res, { saved_objects: validatedAttachments });

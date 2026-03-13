@@ -90,7 +90,9 @@ export const convertCaseResolveToCamelCase = (res: CaseResolveResponse): Resolve
   };
 };
 
-export const convertAttachmentsToCamelCase = (attachments: Attachment[]): AttachmentUI[] => {
+export const convertAttachmentsToCamelCase = (
+  attachments: Array<Attachment | AttachmentRequestV2>
+): AttachmentUI[] => {
   return attachments.map((attachment) => convertAttachmentToCamelCase(attachment));
 };
 

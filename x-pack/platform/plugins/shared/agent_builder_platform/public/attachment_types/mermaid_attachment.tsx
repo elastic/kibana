@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { MermaidAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   ActionButtonType,
@@ -23,6 +24,7 @@ import {
   type AttachmentUIDefinition,
   type AttachmentRenderProps,
 } from '@kbn/agent-builder-browser/attachments';
+import { MERMAID_CASE_ATTACHMENT_TYPE } from '../../common/constants/cases';
 
 let mermaidIdCounter = 0;
 
@@ -156,40 +158,92 @@ const MermaidCanvasContent: React.FC<AttachmentRenderProps<MermaidAttachment>> =
   </div>
 );
 
-export const mermaidAttachmentDefinition: AttachmentUIDefinition<MermaidAttachment> = {
-  getLabel: (attachment) =>
-    attachment.data.title ??
-    i18n.translate('xpack.agentBuilderPlatform.attachments.mermaid.label', {
-      defaultMessage: 'Mermaid diagram',
-    }),
-  getIcon: () => 'visVega',
-  renderInlineContent: (props) => <MermaidInlineContent {...props} />,
-  renderCanvasContent: (props) => <MermaidCanvasContent {...props} />,
-  getActionButtons: ({ attachment, openCanvas }) => {
-    const buttons: ActionButton[] = [
-      {
-        label: i18n.translate('xpack.agentBuilderPlatform.attachments.mermaid.copy', {
-          defaultMessage: 'Copy',
-        }),
-        icon: 'copy',
-        type: ActionButtonType.PRIMARY,
-        handler: async () => {
-          await navigator.clipboard.writeText(attachment.data.content);
-        },
-      },
-    ];
+interface MermaidAttachmentFactoryDeps {
+  http?: HttpStart;
+  notifications?: NotificationsStart;
+}
 
-    if (openCanvas) {
-      buttons.push({
-        label: i18n.translate('xpack.agentBuilderPlatform.attachments.mermaid.expand', {
-          defaultMessage: 'Expand',
-        }),
-        icon: 'expand',
-        type: ActionButtonType.SECONDARY,
-        handler: openCanvas,
-      });
+export const createMermaidAttachmentDefinition = ({
+  http,
+  notifications,
+}: MermaidAttachmentFactoryDeps): AttachmentUIDefinition<MermaidAttachment> => {
+  const addToCase = async (attachment: MermaidAttachment) => {
+    if (!http) {
+      return;
     }
 
-    return buttons;
-  },
+    const { AddToCasePicker } = await import('./add_to_case_picker');
+    const { default: ReactDOM } = await import('react-dom');
+
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const cleanup = () => {
+      ReactDOM.unmountComponentAtNode(container);
+      container.remove();
+    };
+
+    ReactDOM.render(
+      <AddToCasePicker
+        http={http}
+        notifications={notifications}
+        mermaidContent={attachment.data.content}
+        mermaidTitle={attachment.data.title}
+        attachmentType={MERMAID_CASE_ATTACHMENT_TYPE}
+        onClose={cleanup}
+      />,
+      container
+    );
+  };
+
+  return {
+    getLabel: (attachment) =>
+      attachment.data.title ??
+      i18n.translate('xpack.agentBuilderPlatform.attachments.mermaid.label', {
+        defaultMessage: 'Mermaid diagram',
+      }),
+    getIcon: () => 'visVega',
+    renderInlineContent: (props) => <MermaidInlineContent {...props} />,
+    renderCanvasContent: (props) => <MermaidCanvasContent {...props} />,
+    getActionButtons: ({ attachment, openCanvas }) => {
+      const buttons: ActionButton[] = [
+        {
+          label: i18n.translate('xpack.agentBuilderPlatform.attachments.mermaid.copy', {
+            defaultMessage: 'Copy',
+          }),
+          icon: 'copy',
+          type: ActionButtonType.PRIMARY,
+          handler: async () => {
+            await navigator.clipboard.writeText(attachment.data.content);
+          },
+        },
+      ];
+
+      if (openCanvas) {
+        buttons.push({
+          label: i18n.translate('xpack.agentBuilderPlatform.attachments.mermaid.expand', {
+            defaultMessage: 'Expand',
+          }),
+          icon: 'expand',
+          type: ActionButtonType.SECONDARY,
+          handler: openCanvas,
+        });
+      }
+
+      if (http) {
+        buttons.push({
+          label: i18n.translate('xpack.agentBuilderPlatform.attachments.mermaid.addToCase', {
+            defaultMessage: 'Add to case',
+          }),
+          icon: 'folderOpen',
+          type: ActionButtonType.OVERFLOW,
+          handler: () => {
+            addToCase(attachment);
+          },
+        });
+      }
+
+      return buttons;
+    },
+  };
 };

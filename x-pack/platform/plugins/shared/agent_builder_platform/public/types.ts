@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
@@ -14,9 +15,12 @@ export interface AgentBuilderPlatformPluginSetup {}
 
 export interface AgentBuilderPlatformPluginStart {}
 
-export interface PluginSetupDependencies {}
+export interface PluginSetupDependencies {
+  cases?: CasesPublicSetup;
+}
 
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   share: SharePluginStart;
+  cases?: CasesPublicStart;
 }

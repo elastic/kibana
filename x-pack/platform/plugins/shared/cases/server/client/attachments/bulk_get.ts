@@ -22,6 +22,7 @@ import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import type { AttachmentAttributes } from '../../../common/types/domain';
+import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
 
 type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>;
 
@@ -50,11 +51,18 @@ export async function bulkGet(
     const { validAttachments, attachmentsWithErrors, invalidAssociationAttachments } =
       partitionAttachments(caseID, attachments);
 
+    const [unifiedAttachments, legacyAttachments] = partition(
+      validAttachments,
+      (so) => so.type === CASE_ATTACHMENT_SAVED_OBJECT
+    );
+
     const { authorized: authorizedAttachments, unauthorized: unauthorizedAttachments } =
-      await authorization.getAndEnsureAuthorizedEntities({
-        savedObjects: validAttachments,
-        operation: Operations.bulkGetAttachments,
-      });
+      legacyAttachments.length > 0
+        ? await authorization.getAndEnsureAuthorizedEntities({
+            savedObjects: legacyAttachments,
+            operation: Operations.bulkGetAttachments,
+          })
+        : { authorized: [] as AttachmentSavedObject[], unauthorized: [] as AttachmentSavedObject[] };
 
     const errors = constructErrors({
       associationErrors: invalidAssociationAttachments,
@@ -63,8 +71,15 @@ export async function bulkGet(
       caseId: caseID,
     });
 
+    const flattenedLegacy = flattenCommentSavedObjects(authorizedAttachments);
+    const flattenedUnified = unifiedAttachments.map((so) => ({
+      id: so.id,
+      version: so.version ?? '0',
+      ...so.attributes,
+    }));
+
     const res = {
-      attachments: flattenCommentSavedObjects(authorizedAttachments),
+      attachments: [...flattenedLegacy, ...flattenedUnified],
       errors,
     };
 

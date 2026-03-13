@@ -15,6 +15,7 @@ import type {
   PluginStartDependencies,
 } from '../types';
 import { casesTool } from './cases/cases';
+import { addCaseAttachmentTool } from './cases/add_case_attachment';
 import { getDocumentByIdTool } from './get_document_by_id';
 import { getIndexMappingsTool } from './get_index_mapping';
 import { listIndicesTool } from './list_indices';
@@ -46,6 +47,7 @@ export const registerTools = ({
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
     casesTool(coreSetup),
+    addCaseAttachmentTool(coreSetup),
   ];
 
   if (setupDeps.workflowsManagement) {

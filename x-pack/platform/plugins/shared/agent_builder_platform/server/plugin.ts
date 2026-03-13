@@ -17,6 +17,7 @@ import type {
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
 import { registerSkills } from './skills';
+import { registerCasesMermaidAttachment } from './cases/register_cases_attachments';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -27,7 +28,6 @@ export class AgentBuilderPlatformPlugin
       PluginStartDependencies
     >
 {
-  // @ts-expect-error unused for now
   private logger: Logger;
   // @ts-expect-error unused for now
   private config: AgentBuilderConfig;
@@ -50,6 +50,10 @@ export class AgentBuilderPlatformPlugin
       setupDeps,
     });
     registerSkills(setupDeps.agentBuilder);
+
+    if (setupDeps.cases) {
+      registerCasesMermaidAttachment(setupDeps.cases, this.logger);
+    }
 
     return {};
   }

@@ -8,7 +8,6 @@
 import { AttachmentType } from '../../../common/types/domain';
 import {
   COMMENT_ATTACHMENT_TYPE,
-  VALID_ATTACHMENT_TYPES,
   LEGACY_TO_UNIFIED_MAP,
 } from '../../../common/constants/attachments';
 import type {
@@ -26,11 +25,11 @@ export {
 
 /**
  * Converts a legacy attachment type to its unified type.
+ * Known legacy types are mapped via LEGACY_TO_UNIFIED_MAP.
+ * Custom unified types (registered via the unified attachment registry)
+ * pass through unchanged — they are validated by the registry later.
  */
 export function toUnifiedAttachmentType(type: string): string {
-  if (!VALID_ATTACHMENT_TYPES.has(type)) {
-    throw new Error(`Invalid attachment type: ${type}`);
-  }
   const unified = LEGACY_TO_UNIFIED_MAP[type];
   if (unified) {
     return unified;

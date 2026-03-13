@@ -29,6 +29,7 @@ export const platformCoreTools = {
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
+  addCaseAttachment: platformCoreTool('add_case_attachment'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
 } as const;
 

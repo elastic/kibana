@@ -11,12 +11,13 @@ import type {
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
-import type { CasesServerStart } from '@kbn/cases-plugin/server';
+import type { CasesServerSetup, CasesServerStart } from '@kbn/cases-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export interface PluginSetupDependencies {
   workflowsManagement?: WorkflowsServerPluginSetup;
   agentBuilder: AgentBuilderPluginSetup;
+  cases?: CasesServerSetup;
 }
 
 export interface PluginStartDependencies {

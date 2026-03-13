@@ -5,23 +5,31 @@
  * 2.0.
  */
 
+import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createEsqlAttachmentDefinition } from './esql_attachment';
 import { textAttachmentDefinition } from './text_attachment';
 import { screenContextAttachmentDefinition } from './screen_context_attachment';
-import { mermaidAttachmentDefinition } from './mermaid_attachment';
+import { createMermaidAttachmentDefinition } from './mermaid_attachment';
 
 export const registerAttachmentUiDefinitions = ({
   attachments,
   locators,
+  http,
+  notifications,
 }: {
   attachments: AttachmentServiceStartContract;
   locators: ILocatorClient;
+  http: HttpStart;
+  notifications: NotificationsStart;
 }) => {
   attachments.addAttachmentType(AttachmentType.text, textAttachmentDefinition);
   attachments.addAttachmentType(AttachmentType.screenContext, screenContextAttachmentDefinition);
   attachments.addAttachmentType(AttachmentType.esql, createEsqlAttachmentDefinition({ locators }));
-  attachments.addAttachmentType(AttachmentType.mermaid, mermaidAttachmentDefinition);
+  attachments.addAttachmentType(
+    AttachmentType.mermaid,
+    createMermaidAttachmentDefinition({ http, notifications })
+  );
 };

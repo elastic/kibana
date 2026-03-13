@@ -32,7 +32,7 @@ import {
   AttachmentType,
 } from '../../../common/types/domain';
 
-import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
@@ -591,8 +591,12 @@ export class CaseCommentModel {
       const totalAlerts = countAlertsForID({ comments, id: this.caseInfo.id }) ?? 0;
       const totalEvents = countEventsForID({ comments }) ?? 0;
 
+      const legacyComments = comments.saved_objects.filter(
+        (so) => so.type === CASE_COMMENT_SAVED_OBJECT
+      );
+
       const caseResponse = {
-        comments: flattenCommentSavedObjects(comments.saved_objects),
+        comments: flattenCommentSavedObjects(legacyComments),
         totalAlerts,
         totalEvents,
         ...this.formatForEncoding(comments.total),

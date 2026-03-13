@@ -13,6 +13,7 @@ import type {
   PluginStartDependencies,
 } from './types';
 import { registerAttachmentUiDefinitions } from './attachment_types';
+import { registerMermaidCasesAttachment } from './cases/register_mermaid_cases_attachment';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -27,6 +28,10 @@ export class AgentBuilderPlatformPlugin
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>,
     setupDeps: PluginSetupDependencies
   ): AgentBuilderPlatformPluginSetup {
+    if (setupDeps.cases) {
+      registerMermaidCasesAttachment(setupDeps.cases);
+    }
+
     return {};
   }
 
@@ -36,6 +41,8 @@ export class AgentBuilderPlatformPlugin
     registerAttachmentUiDefinitions({
       attachments: agentBuilder.attachments,
       locators: share.url.locators,
+      http: coreStart.http,
+      notifications: coreStart.notifications,
     });
 
     return {};

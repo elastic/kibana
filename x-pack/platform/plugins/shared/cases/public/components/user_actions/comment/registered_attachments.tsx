@@ -26,6 +26,7 @@ import { AttachmentActionType } from '../../../client/attachment_framework/types
 import { UserActionTimestamp } from '../timestamp';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import type { Attachment } from '../../../../common/types/domain';
+import type { UnifiedAttachment } from '../../../../common/types/domain/attachment/v2';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import {
@@ -76,7 +77,7 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
 });
 
 export const createRegisteredAttachmentUserActionBuilder = <
-  C extends Attachment,
+  C extends Attachment | UnifiedAttachment,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   R extends AttachmentTypeRegistry<AttachmentType<any>>
 >({
