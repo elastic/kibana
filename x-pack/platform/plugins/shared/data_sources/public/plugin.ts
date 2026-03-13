@@ -19,6 +19,7 @@ import type {
   DataSourcesPluginStart,
   DataSourcesPluginStartDependencies,
 } from './types';
+import { createExtractStepDefinition } from './steps/extract/extract_step';
 
 export class DataSourcesPlugin
   implements
@@ -31,12 +32,18 @@ export class DataSourcesPlugin
 {
   constructor(context: PluginInitializerContext) {}
   setup(
-    core: CoreSetup<DataSourcesPluginStartDependencies, DataSourcesPluginStart>
+    core: CoreSetup<DataSourcesPluginStartDependencies, DataSourcesPluginStart>,
+    plugins: DataSourcesPluginSetupDependencies
   ): DataSourcesPluginSetup {
     const isDataSourcesEnabled = core.settings.client.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID);
     if (isDataSourcesEnabled) {
       registerApp({ core });
     }
+
+    if (plugins.workflowsExtensions) {
+      plugins.workflowsExtensions.registerStepDefinition(createExtractStepDefinition(core));
+    }
+
     return {};
   }
   start(core: CoreStart): DataSourcesPluginStart {

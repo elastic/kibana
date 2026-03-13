@@ -6,18 +6,33 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { SourcesList } from '../features/sources_list';
 import { SourceSelectionFlyout } from '../features/add_source/source_selection_flyout';
+import { SettingsPage } from './settings_page';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useAddConnectorFlyout } from '../hooks/use_add_connector_flyout';
 import type { Connector } from '../../types/connector';
 
+type TabId = 'sources' | 'settings';
+
+const TABS: Array<{ id: TabId; label: string }> = [
+  {
+    id: 'sources',
+    label: i18n.translate('xpack.dataSources.tabs.sources', { defaultMessage: 'Sources' }),
+  },
+  {
+    id: 'settings',
+    label: i18n.translate('xpack.dataSources.tabs.settings', { defaultMessage: 'Settings' }),
+  },
+];
+
 export const SourcesPage: React.FC = () => {
   useBreadcrumbs([]);
 
+  const [activeTab, setActiveTab] = useState<TabId>('sources');
   const [showSelectionFlyout, setShowSelectionFlyout] = useState(false);
 
   const { openFlyout: openAddSourceFlyout, flyout: addSourceFlyout } = useAddConnectorFlyout();
@@ -29,8 +44,6 @@ export const SourcesPage: React.FC = () => {
   const handleSourceSelected = useCallback(
     (source: Connector) => {
       setShowSelectionFlyout(false);
-      // source.type is the stack connector actionTypeId (e.g., ".github") used by triggersActionsUi
-      // source.id is the data source identifier (e.g., "github") used by our API
       openAddSourceFlyout(source.type, source.id);
     },
     [openAddSourceFlyout]
@@ -45,20 +58,24 @@ export const SourcesPage: React.FC = () => {
         description={i18n.translate('xpack.dataSources.pageDescription', {
           defaultMessage: 'Connect your data to power your agents and indices.',
         })}
-        rightSideItems={[
-          <EuiButton
-            key="addDataSource"
-            iconType="plusInCircle"
-            color="primary"
-            fill
-            onClick={handleAddSource}
-            data-test-subj="addDataSourceButton"
-          >
-            {i18n.translate('xpack.dataSources.addSourceButton', {
-              defaultMessage: 'Add data source',
-            })}
-          </EuiButton>,
-        ]}
+        rightSideItems={
+          activeTab === 'sources'
+            ? [
+                <EuiButton
+                  key="addDataSource"
+                  iconType="plusInCircle"
+                  color="primary"
+                  fill
+                  onClick={handleAddSource}
+                  data-test-subj="addDataSourceButton"
+                >
+                  {i18n.translate('xpack.dataSources.addSourceButton', {
+                    defaultMessage: 'Add data source',
+                  })}
+                </EuiButton>,
+              ]
+            : []
+        }
         css={({ euiTheme }) => ({
           backgroundColor: euiTheme.colors.backgroundBasePlain,
           borderBlockEnd: 'none',
@@ -66,7 +83,20 @@ export const SourcesPage: React.FC = () => {
       />
 
       <KibanaPageTemplate.Section>
-        <SourcesList />
+        <EuiTabs>
+          {TABS.map((tab) => (
+            <EuiTab
+              key={tab.id}
+              isSelected={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              data-test-subj={`dataSourcesTab-${tab.id}`}
+            >
+              {tab.label}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+        <EuiSpacer size="l" />
+        {activeTab === 'sources' ? <SourcesList /> : <SettingsPage />}
       </KibanaPageTemplate.Section>
 
       {showSelectionFlyout && (

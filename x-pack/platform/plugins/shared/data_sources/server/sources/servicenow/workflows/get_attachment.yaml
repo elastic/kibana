@@ -17,27 +17,15 @@ steps:
     with:
       sysId: "${{ inputs.sys_id }}"
   - name: extract-content
-    type: elasticsearch.request
+    type: extraction.extract
     with:
-      method: POST
-      path: /_ingest/pipeline/_simulate
-      body:
-        pipeline:
-          processors:
-            - attachment:
-                field: data
-                indexed_chars: -1
-                remove_binary: true
-        docs:
-          - _id: "${{ inputs.sys_id }}"
-            _source:
-              filename: "${{ steps.download-attachment.output.fileName }}"
-              data: "${{ steps.download-attachment.output.base64 }}"
+      content: "${{ steps.download-attachment.output.base64 }}"
+      filename: "${{ steps.download-attachment.output.fileName }}"
+      doc_id: "${{ inputs.sys_id }}"
   - name: set-result
     type: data.set
     with:
       result:
         fileName: "${{ steps.download-attachment.output.fileName }}"
-        contentType: "${{ steps.download-attachment.output.contentType }}"
-        content: "${{ steps.extract-content.output.docs[0].doc._source.attachment.content }}"
-        contentLength: "${{ steps.extract-content.output.docs[0].doc._source.attachment.content_length }}"
+        contentType: "${{ steps.extract-content.output.content_type }}"
+        content: "${{ steps.extract-content.output.content }}"
