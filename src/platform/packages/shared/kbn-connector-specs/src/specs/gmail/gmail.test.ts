@@ -35,9 +35,10 @@ describe('GmailConnector', () => {
   });
 
   describe('actions', () => {
-    it('exposes searchMessages, getMessage, listMessages actions', () => {
+    it('exposes searchMessages, getMessage, getAttachment, listMessages actions', () => {
       expect(GmailConnector.actions.searchMessages).toBeDefined();
       expect(GmailConnector.actions.getMessage).toBeDefined();
+      expect(GmailConnector.actions.getAttachment).toBeDefined();
       expect(GmailConnector.actions.listMessages).toBeDefined();
     });
   });
@@ -166,6 +167,36 @@ describe('GmailConnector', () => {
       await expect(
         GmailConnector.actions.getMessage.handler(mockContext, { messageId: 'msg-1' })
       ).rejects.toThrow('timeout');
+    });
+  });
+
+  describe('getAttachment', () => {
+    it('should fetch attachment by messageId and attachmentId', async () => {
+      const mockResponse = { data: { data: 'base64urlEncodedContent' } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await GmailConnector.actions.getAttachment.handler(mockContext, {
+        messageId: 'msg-1',
+        attachmentId: 'ANGjdJ1',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        `${GMAIL_API_BASE}/messages/msg-1/attachments/ANGjdJ1`
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw Gmail API error when present', async () => {
+      mockClient.get.mockRejectedValue({
+        response: { data: { error: { code: 404, message: 'Attachment not found' } } },
+      });
+
+      await expect(
+        GmailConnector.actions.getAttachment.handler(mockContext, {
+          messageId: 'msg-1',
+          attachmentId: 'bad-att-id',
+        })
+      ).rejects.toThrow('Gmail API error (404): Attachment not found');
     });
   });
 

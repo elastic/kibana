@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
@@ -21,7 +20,9 @@ function throwGmailError(error: unknown): void {
   };
   const gmailError = axiosError.response?.data?.error;
   if (gmailError) {
-    throw new Error(`Gmail API error (${gmailError.code}): ${gmailError.message ?? 'Unknown'}`);
+    throw new Error(
+      `Gmail API error (${gmailError.code ?? 'unknown'}): ${gmailError.message ?? 'Unknown'}`
+    );
   }
 }
 
@@ -29,9 +30,7 @@ export const GmailConnector: ConnectorSpec = {
   metadata: {
     id: '.gmail',
     displayName: 'Gmail',
-    description: i18n.translate('core.kibanaConnectorSpecs.gmail.metadata.description', {
-      defaultMessage: 'Search and read emails from Gmail',
-    }),
+    description: 'Search and read emails from Gmail',
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
   },
@@ -117,6 +116,35 @@ export const GmailConnector: ConnectorSpec = {
         }
       },
     },
+    getAttachment: {
+      isTool: true,
+      input: z.object({
+        messageId: z
+          .string()
+          .min(1, { message: 'messageId is required to retrieve an attachment' })
+          .describe(
+            'Required. The Gmail message ID (from getMessage or search/list). Get attachment IDs from getMessage with format "full" — see payload.parts[].body.attachmentId.'
+          ),
+        attachmentId: z
+          .string()
+          .min(1, { message: 'attachmentId is required to retrieve an attachment' })
+          .describe(
+            'Required. The attachment ID from the message. Call getMessage with format "full" and read payload.parts[].body.attachmentId (and parts[].filename for the file name).'
+          ),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as { messageId: string; attachmentId: string };
+        try {
+          const response = await ctx.client.get(
+            `${GMAIL_API_BASE}/messages/${typedInput.messageId}/attachments/${typedInput.attachmentId}`
+          );
+          return response.data;
+        } catch (error: unknown) {
+          throwGmailError(error);
+          throw error;
+        }
+      },
+    },
     listMessages: {
       isTool: true,
       input: z.object({
@@ -159,26 +187,27 @@ export const GmailConnector: ConnectorSpec = {
     },
   },
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.gmail.test.description', {
-      defaultMessage: 'Verifies Gmail connection by fetching user profile',
-    }),
+    description: 'Verifies Gmail connection by fetching user profile',
     handler: async (ctx) => {
       ctx.log.debug('Gmail test handler');
       try {
         const response = await ctx.client.get(`${GMAIL_API_BASE}/profile`);
         if (response.status !== 200) {
-          return { ok: false, message: 'Failed to connect to Gmail API' };
+          return {
+            ok: false,
+            message: 'Failed to connect to Gmail API',
+          };
         }
+        const emailAddress = response.data?.emailAddress ?? 'user';
         return {
           ok: true,
-          message: `Successfully connected to Gmail as ${response.data?.emailAddress ?? 'user'}`,
+          message: `Successfully connected to Gmail as ${emailAddress}`,
         };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return {
           ok: false,
-          message: `Failed to connect to Gmail API: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
+          message: `Failed to connect to Gmail API: ${errorMessage}`,
         };
       }
     },

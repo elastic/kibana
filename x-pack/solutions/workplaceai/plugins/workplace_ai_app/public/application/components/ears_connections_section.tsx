@@ -60,7 +60,7 @@ function getEARSAuthUrl(
 
   const params = new URLSearchParams();
   params.set('scope', GOOGLE_SCOPES.join(','));
-  params.set('callback_uri', `${kibanaBasePath}/app/workplace_ai`);
+  params.set('callback_uri', callbackUri);
   if (pkceCodeVerifier) {
     params.set('pkce_challenge', calculateCodeChallenge(pkceCodeVerifier));
     params.set('pkce_method', 'S256');
@@ -69,8 +69,9 @@ function getEARSAuthUrl(
     params.set('state', state);
   }
 
-  const authUrl = earsUrl
-    ? `${earsUrl}/${EarsOAuthProvider.Google}/oauth/authorize?${params.toString()}`
+  const baseUrl = earsUrl?.replace(/\/$/, '') ?? '';
+  const authUrl = baseUrl
+    ? `${baseUrl}/v1/${EarsOAuthProvider.Google}/oauth/authorize?${params.toString()}`
     : undefined;
 
   return authUrl;
@@ -219,7 +220,7 @@ export const EarsConnectionsSection: React.FC = () => {
     setUserInfoError(null);
     setEarsError(null);
     const base = basePath ? basePath.replace(/\/$/, '') : window.location.origin;
-    window.location.assign(`${base}/app/workplace_ai`);
+    window.history.replaceState(null, '', `${base}/app/workplace_ai`);
   };
 
   const handleRevokeToken = async () => {
@@ -431,21 +432,33 @@ export const EarsConnectionsSection: React.FC = () => {
                       <EuiFlexGroup alignItems="center" gutterSize="m">
                         <EuiFlexItem grow={false}>
                           <EuiText size="s" color="subdued">
-                            {accessToken.length > 24
-                              ? `${accessToken.slice(0, 24)}...`
-                              : accessToken}
+                            {accessToken.length > 24 ? `...${accessToken.slice(-10)}` : '••••••••'}
                           </EuiText>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiCopy textToCopy={accessToken}>
-                            {(copy) => (
-                              <EuiButton size="s" onClick={copy} iconType="copy">
-                                <FormattedMessage
-                                  id="xpack.workplaceai.gettingStarted.earsSection.copyToken"
-                                  defaultMessage="Copy"
-                                />
-                              </EuiButton>
-                            )}
+                            {(copy) => {
+                              const handleCopyClick = () => {
+                                const confirmMessage = i18n.translate(
+                                  'xpack.workplaceai.gettingStarted.earsSection.copyTokenConfirm',
+                                  {
+                                    defaultMessage:
+                                      'This will copy the full access token to your clipboard. Continue?',
+                                  }
+                                );
+                                if (window.confirm(confirmMessage)) {
+                                  copy();
+                                }
+                              };
+                              return (
+                                <EuiButton size="s" onClick={handleCopyClick} iconType="copy">
+                                  <FormattedMessage
+                                    id="xpack.workplaceai.gettingStarted.earsSection.copyToken"
+                                    defaultMessage="Copy"
+                                  />
+                                </EuiButton>
+                              );
+                            }}
                           </EuiCopy>
                         </EuiFlexItem>
                       </EuiFlexGroup>

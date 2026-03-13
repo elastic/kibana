@@ -1,7 +1,7 @@
 ---
 navigation_title: "Gmail"
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/gmail-action-type.html
+type: reference
+description: "Use the Gmail connector to search and read emails from Gmail in Workplace AI and Agent Builder."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -9,11 +9,11 @@ applies_to:
 
 # Gmail connector [gmail-action-type]
 
-The Gmail connector enables searching and reading emails from Gmail via the Gmail API.
+The Gmail connector connects to the Gmail API and enables federated search of email in Workplace AI and Agent Builder. You configure a Bearer token (Google OAuth 2.0 access token) when creating the connector.
 
 ## Create connectors in {{kib}} [define-gmail-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
+You can create a Gmail connector in **{{stack-manage-app}} > {{connectors-ui}}** or when adding a Gmail data source.
 
 ### Connector configuration [gmail-connector-configuration]
 
@@ -26,24 +26,22 @@ Bearer Token
 
 You can test connectors when creating or editing the connector in {{kib}}. The test verifies connectivity by fetching the authenticated user's profile from the Gmail API.
 
-The Gmail connector has the following actions:
+## Available actions [gmail-available-actions]
 
-Search messages
-:   Search for messages using Gmail search syntax.
-    - **query** (optional): Gmail search query (e.g. `from:user@example.com`, `is:unread`, `subject:report`, `after:2024/01/01`, `has:attachment`).
-    - **maxResults** (optional): Maximum number of messages to return (1–100). Defaults to 50.
-    - **pageToken** (optional): Pagination token from a previous response.
+| Action | Description |
+|--------|-------------|
+| Search messages | Search for messages using Gmail search syntax. Parameters: `query` (optional), `maxResults` (optional, default 10, max 100), `pageToken` (optional). |
+| List messages | List message IDs, optionally filtered by label. Parameters: `maxResults` (optional, default 10, max 100), `pageToken` (optional), `labelIds` (optional, e.g. INBOX, SENT). |
+| Get message | Retrieve a single message by ID. Parameters: `messageId` (required), `format` (optional: `minimal` for headers only, `full` for body and attachment metadata, `raw` for RFC 2822; default `minimal`). Use `full` to get attachment IDs in `payload.parts[].body.attachmentId`. |
+| Get attachment | Retrieve one attachment's content by message ID and attachment ID. Parameters: `messageId` (required), `attachmentId` (required). Get attachment IDs from get message with format `full`. Returns `data` (base64url-encoded content). |
 
-Get message
-:   Retrieve a single message by ID with full headers and body.
-    - **messageId** (required): The ID of the message to retrieve.
-    - **format** (optional): `minimal` (headers only), `full` (default), or `raw` (RFC 2822).
+**Search messages** supports Gmail search operators such as `from:`, `to:`, `subject:`, `is:unread`, `is:read`, `after:YYYY/MM/DD`, `newer_than:Nd`, and `has:attachment`. Prefer narrow queries to keep responses small.
 
-List messages
-:   List messages, optionally filtered by label.
-    - **maxResults** (optional): Maximum number of messages to return (1–100). Defaults to 50.
-    - **pageToken** (optional): Pagination token from a previous response.
-    - **labelIds** (optional): Array of label IDs (e.g. INBOX, SENT).
+**Attachments:** Call get message with format `full` to receive `payload.parts` with `body.attachmentId` and `filename` for each attachment. Then call get attachment with that message ID and attachment ID to fetch the attachment content (base64url-encoded).
+
+## Connector networking configuration [gmail-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 ## Get API credentials [gmail-api-credentials]
 
@@ -55,4 +53,6 @@ To use the Gmail connector, you need a Google OAuth 2.0 access token with Gmail 
 4. In **Step 2 - Exchange authorization code for tokens**, click **Exchange authorization code for tokens**.
 5. Copy the **Access token** and use it as the Bearer token when creating or activating the Gmail data source in Kibana.
 
-The token expires after a short time (e.g. one hour). For long-lived access, use a refresh token flow or re-authorize as needed.
+::::{note}
+OAuth 2.0 Playground tokens expire after a short time (for example, one hour). For long-lived access, use a refresh token flow or re-authorize as needed. Refer to the [Google Identity documentation](https://developers.google.com/identity/protocols/oauth2) for details.
+::::
