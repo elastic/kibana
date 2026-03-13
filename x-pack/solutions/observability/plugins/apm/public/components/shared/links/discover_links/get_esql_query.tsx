@@ -135,7 +135,9 @@ export const getESQLQuery = ({
     query = query.pipe`WHERE KQL(${kuery})`;
   }
 
-  query = query.sort([AT_TIMESTAMP, sortDirection ?? 'DESC']);
+  if (sortDirection) {
+    query = query.sort([AT_TIMESTAMP, sortDirection]);
+  }
 
   return query.print();
 };

@@ -110,8 +110,7 @@ describe('getESQLQuery', () => {
         ],
       });
 
-      expect(result).toContain('FROM shared-index-*');
-      expect(result).toContain('SORT @timestamp DESC');
+      expect(result).toBe('FROM shared-index-*');
     });
 
     it('should use defaultValue when savedValue is not set', () => {
@@ -381,15 +380,14 @@ describe('getESQLQuery', () => {
       expect(result).toContain(`\`${TRANSACTION_NAME}\` == "GET /api/users"`);
     });
 
-    it('should return FROM clause with default SORT @timestamp DESC when no params are provided', () => {
+    it('should return only FROM clause when no params are provided', () => {
       const result = getESQLQuery({
         indexType: 'traces',
         params: {},
         indexSettings: createMockIndexSettings(),
       });
 
-      expect(result).toContain(`FROM ${MOCK_TRACES_INDEX}`);
-      expect(result).toContain('SORT @timestamp DESC');
+      expect(result).toBe(`FROM ${MOCK_TRACES_INDEX}`);
     });
   });
 
@@ -415,14 +413,14 @@ describe('getESQLQuery', () => {
       expect(result).toContain('SORT @timestamp DESC');
     });
 
-    it('should default to SORT @timestamp DESC when sortDirection is not provided', () => {
+    it('should not add SORT when sortDirection is not provided', () => {
       const result = getESQLQuery({
         indexType: 'traces',
         params: { traceId: 'trace-789' },
         indexSettings: createMockIndexSettings(),
       });
 
-      expect(result).toContain('SORT @timestamp DESC');
+      expect(result).not.toContain('SORT');
     });
 
     it('should place SORT after all WHERE clauses and KQL', () => {
@@ -439,6 +437,42 @@ describe('getESQLQuery', () => {
       const sortIndex = result!.indexOf('SORT');
       const kqlIndex = result!.indexOf('KQL');
       expect(sortIndex).toBeGreaterThan(kqlIndex);
+    });
+
+    it('should add SORT @timestamp DESC with service and transaction filters', () => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: {
+          serviceName: 'my-service',
+          environment: 'production',
+          transactionName: 'GET /api/users',
+          transactionType: 'request',
+          sortDirection: 'DESC',
+        },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
+      expect(result).toContain(`\`${SERVICE_ENVIRONMENT}\` == "production"`);
+      expect(result).toContain(`\`${TRANSACTION_NAME}\` == "GET /api/users"`);
+      expect(result).toContain(`\`${TRANSACTION_TYPE}\` == "request"`);
+      expect(result).toContain('SORT @timestamp DESC');
+    });
+
+    it('should add SORT @timestamp DESC for error index queries', () => {
+      const result = getESQLQuery({
+        indexType: 'error',
+        params: {
+          serviceName: 'my-service',
+          errorGroupId: 'error-123',
+          sortDirection: 'DESC',
+        },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).toContain(`\`${ERROR_GROUP_ID}\` == "error-123"`);
+      expect(result).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
+      expect(result).toContain('SORT @timestamp DESC');
     });
   });
 });
