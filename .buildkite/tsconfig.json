@@ -5,8 +5,7 @@
     "types": ["node", "jest"],
     "paths": {
       "#pipeline-utils": [".buildkite/pipeline-utils/index.ts"],
-      "#pipeline-utils/*": [".buildkite/pipeline-utils/*"],
-      "tslib": [".buildkite/node_modules/tslib"]
+      "#pipeline-utils/*": [".buildkite/pipeline-utils/*"]
     }
   },
   "include": [
