@@ -486,15 +486,19 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id="srRepositoryDetailsFlyoutTitle" data-test-subj="title">
-            {repositoryName}
-            {isDefaultRepository ? (
-              <EuiBadge style={{ marginLeft: '8px' }}>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryDetails.defaultRepositoryBadgeLabel"
-                  defaultMessage="Default"
-                />
-              </EuiBadge>
-            ) : null}
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+              <EuiFlexItem grow={false}>{repositoryName}</EuiFlexItem>
+              {isDefaultRepository ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.repositoryDetails.defaultRepositoryBadgeLabel"
+                      defaultMessage="Default"
+                    />
+                  </EuiBadge>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
