@@ -6,25 +6,25 @@
  */
 
 import { renderHook } from '@testing-library/react';
-
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { usePrevalence } from './use_prevalence';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
+import { mockSearchHit } from '../../../flyout/document_details/shared/mocks/mock_search_hit';
 import { useHighlightedFields } from './use_highlighted_fields';
 import {
   FIELD_NAMES_AGG_KEY,
   HOSTS_AGG_KEY,
   useFetchPrevalence,
   USERS_AGG_KEY,
-} from './use_fetch_prevalence';
+} from '../../../flyout/document_details/shared/hooks/use_fetch_prevalence';
 
 jest.mock('./use_highlighted_fields');
-jest.mock('./use_fetch_prevalence');
+jest.mock('../../../flyout/document_details/shared/hooks/use_fetch_prevalence');
 
 const interval = {
   from: 'now-30d',
   to: 'now',
 };
-const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
+const hit = buildDataTableRecord(mockSearchHit as EsHitRecord);
 const investigationFields = ['host.name', 'user.name'];
 
 describe('usePrevalence', () => {
@@ -40,9 +40,7 @@ describe('usePrevalence', () => {
       data: undefined,
     });
 
-    const hookResult = renderHook(() =>
-      usePrevalence({ interval, dataFormattedForFieldBrowser, investigationFields })
-    );
+    const hookResult = renderHook(() => usePrevalence({ interval, hit, investigationFields }));
 
     expect(hookResult.result.current.loading).toEqual(true);
     expect(hookResult.result.current.error).toEqual(false);
@@ -61,9 +59,7 @@ describe('usePrevalence', () => {
       data: undefined,
     });
 
-    const hookResult = renderHook(() =>
-      usePrevalence({ interval, dataFormattedForFieldBrowser, investigationFields })
-    );
+    const hookResult = renderHook(() => usePrevalence({ interval, hit, investigationFields }));
 
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(true);
@@ -115,9 +111,7 @@ describe('usePrevalence', () => {
       },
     });
 
-    const hookResult = renderHook(() =>
-      usePrevalence({ interval, dataFormattedForFieldBrowser, investigationFields })
-    );
+    const hookResult = renderHook(() => usePrevalence({ interval, hit, investigationFields }));
 
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(false);

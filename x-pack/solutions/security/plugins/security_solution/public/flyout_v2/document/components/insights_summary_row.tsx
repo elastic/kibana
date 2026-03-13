@@ -10,9 +10,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
-import { LeftPanelInsightsTab } from '../../left';
-import { FormattedCount } from '../../../../common/components/formatted_number';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import { FormattedCount } from '../../../common/components/formatted_number';
 
 const LOADING = i18n.translate(
   'xpack.securitySolution.flyout.right.insights.insightSummaryLoadingAriaLabel',
@@ -41,9 +39,9 @@ export interface InsightsSummaryRowProps {
    */
   value: number | ReactElement;
   /**
-   * Optional parameter used to know which subtab to navigate to when the user clicks on the button
+   * Callback to execute when the user clicks on the details button
    */
-  expandedSubTab?: string;
+  onShowDetails?: () => void;
   /**
    *  Prefix data-test-subj because this component will be used in multiple places
    */
@@ -61,14 +59,9 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
   error = false,
   value,
   text,
-  expandedSubTab,
+  onShowDetails,
   'data-test-subj': dataTestSubj,
 }) => {
-  const onClick = useNavigateToLeftPanel({
-    tab: LeftPanelInsightsTab,
-    subTab: expandedSubTab,
-  });
-
   const textDataTestSubj = useMemo(() => `${dataTestSubj}Text`, [dataTestSubj]);
   const loadingDataTestSubj = useMemo(() => `${dataTestSubj}Loading`, [dataTestSubj]);
 
@@ -82,7 +75,8 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
           <EuiBadge color="hollow">
             <EuiButtonEmpty
               aria-label={BUTTON}
-              onClick={onClick}
+              onClick={onShowDetails}
+              disabled={!onShowDetails}
               flush={'both'}
               size="xs"
               data-test-subj={buttonDataTestSubj}
@@ -95,7 +89,7 @@ export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({
         )}
       </>
     );
-  }, [dataTestSubj, onClick, value]);
+  }, [dataTestSubj, onShowDetails, value]);
 
   if (loading) {
     return (

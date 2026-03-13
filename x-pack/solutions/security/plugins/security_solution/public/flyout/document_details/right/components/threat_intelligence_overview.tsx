@@ -13,7 +13,7 @@ import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
-import { InsightsSummaryRow } from './insights_summary_row';
+import { InsightsSummaryRow } from '../../../../flyout_v2/document/components/insights_summary_row';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
   INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID,
@@ -81,6 +81,11 @@ export const ThreatIntelligenceOverview: FC = () => {
     dataFormattedForFieldBrowser,
   });
 
+  const navigateToThreatIntelligence = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: THREAT_INTELLIGENCE_TAB_ID,
+  });
+
   const link = useMemo(
     () => ({
       callback: goToThreatIntelligenceTab,
@@ -140,13 +145,13 @@ export const ThreatIntelligenceOverview: FC = () => {
         <InsightsSummaryRow
           text={threatMatchCountText}
           value={threatMatchesCount}
-          expandedSubTab={THREAT_INTELLIGENCE_TAB_ID}
+          onShowDetails={navigateToThreatIntelligence}
           data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID}
         />
         <InsightsSummaryRow
           text={threatEnrichmentsCountText}
           value={threatEnrichmentsCount}
-          expandedSubTab={THREAT_INTELLIGENCE_TAB_ID}
+          onShowDetails={navigateToThreatIntelligence}
           data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID}
         />
       </EuiFlexGroup>

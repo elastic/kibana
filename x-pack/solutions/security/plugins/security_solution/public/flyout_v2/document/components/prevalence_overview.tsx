@@ -7,19 +7,16 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../common/constants';
-import { useKibana } from '../../../../common/lib/kibana';
-import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
-import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { PREVALENCE_TEST_ID } from './test_ids';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { LeftPanelInsightsTab } from '../../left';
-import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
+import { usePrevalence } from '../hooks/use_prevalence';
+import { PREVALENCE_TEST_ID } from '../../../flyout/document_details/right/components/test_ids';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../../../flyout/document_details/shared/constants/local_storage';
 
 const UNCOMMON = (
   <FormattedMessage
@@ -68,11 +65,35 @@ const PERCENTAGE_THRESHOLD = 0.1; // we show the prevalence if its value is belo
 const DEFAULT_FROM = 'now-30d';
 const DEFAULT_TO = 'now';
 
+export interface PrevalenceOverviewProps {
+  /**
+   * Document record to display prevalence for
+   */
+  hit: DataTableRecord;
+  /**
+   * User defined fields to highlight (defined on the rule)
+   */
+  investigationFields: string[];
+  /**
+   * Whether to show the navigation icon
+   */
+  showIcon?: boolean;
+  /**
+   * Navigate to prevalence details
+   */
+  onShowPrevalenceDetails: () => void;
+}
+
 /**
  * Prevalence section under Insights section, overview tab.
  * The component fetches the necessary data at once. The loading and error states are handled by the ExpandablePanel component.
  */
-export const PrevalenceOverview: FC = () => {
+export const PrevalenceOverview: FC<PrevalenceOverviewProps> = ({
+  hit,
+  investigationFields,
+  showIcon = true,
+  onShowPrevalenceDetails,
+}) => {
   const { storage, uiSettings, serverless } = useKibana().services;
   const isServerless = !!serverless;
   const isColdAndFrozenTiersExcluded = uiSettings.get<boolean>(
@@ -80,16 +101,8 @@ export const PrevalenceOverview: FC = () => {
   );
   const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE);
 
-  const { dataFormattedForFieldBrowser, investigationFields, isPreviewMode } =
-    useDocumentDetailsContext();
-
-  const goToPrevalenceTab = useNavigateToLeftPanel({
-    tab: LeftPanelInsightsTab,
-    subTab: PREVALENCE_TAB_ID,
-  });
-
   const { loading, error, data } = usePrevalence({
-    dataFormattedForFieldBrowser,
+    hit,
     investigationFields,
     interval: {
       from: timeSavedInLocalStorage?.start || DEFAULT_FROM,
@@ -111,7 +124,7 @@ export const PrevalenceOverview: FC = () => {
 
   const link = useMemo(
     () => ({
-      callback: goToPrevalenceTab,
+      callback: onShowPrevalenceDetails,
       tooltip: (
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.insights.prevalence.prevalenceTooltip"
@@ -119,7 +132,7 @@ export const PrevalenceOverview: FC = () => {
         />
       ),
     }),
-    [goToPrevalenceTab]
+    [onShowPrevalenceDetails]
   );
 
   return (
@@ -132,7 +145,7 @@ export const PrevalenceOverview: FC = () => {
           />
         ),
         link,
-        iconType: !isPreviewMode ? 'arrowStart' : undefined,
+        iconType: showIcon ? 'arrowStart' : undefined,
         headerContent: (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             {!isServerless && (
@@ -168,6 +181,7 @@ export const PrevalenceOverview: FC = () => {
                 </>
               }
               value={<EuiBadge color="warning">{UNCOMMON}</EuiBadge>}
+              onShowDetails={onShowPrevalenceDetails}
               data-test-subj={`${PREVALENCE_TEST_ID}${d.field}`}
               key={`${PREVALENCE_TEST_ID}${d.field}`}
             />
