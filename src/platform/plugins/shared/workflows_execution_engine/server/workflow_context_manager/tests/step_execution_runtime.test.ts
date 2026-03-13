@@ -73,6 +73,8 @@ describe('StepExecutionRuntime', () => {
       load: jest.fn(),
       flush: jest.fn(),
       flushStepChanges: jest.fn(),
+      setLastFailedStepContext: jest.fn(),
+      getLastFailedStepContext: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
     workflowExecutionGraph = {

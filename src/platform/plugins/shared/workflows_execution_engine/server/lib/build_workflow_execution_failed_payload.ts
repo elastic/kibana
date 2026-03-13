@@ -20,7 +20,7 @@ export function buildWorkflowExecutionFailedPayload(
   failedStepContext?: FailedStepContext
 ): WorkflowExecutionFailedEvent {
   const stepId = failedStepContext?.stepId;
-  const stepName = failedStepContext?.stepName ?? stepId;
+  const stepName = failedStepContext?.stepName || stepId;
   const stepExecutionId = failedStepContext?.stepExecutionId;
   const stackTrace = failedStepContext?.stack;
 
