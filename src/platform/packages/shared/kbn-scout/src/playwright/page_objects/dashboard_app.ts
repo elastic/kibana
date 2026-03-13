@@ -34,8 +34,6 @@ export class DashboardApp {
   private readonly dashboardPanel;
 
   // Add panel flow
-  private readonly addTopNavButton;
-  private readonly openAddPanelFlyoutButton;
   private readonly addPanelButton;
   private readonly panelSelectionFlyout;
   private readonly panelSelectionList;
@@ -82,8 +80,6 @@ export class DashboardApp {
     this.dashboardPanel = this.page.testSubj.locator('dashboardPanel');
 
     // Add panel flow
-    this.addTopNavButton = this.page.testSubj.locator('dashboardAddTopNavButton');
-    this.openAddPanelFlyoutButton = this.page.testSubj.locator('dashboardOpenAddPanelFlyoutButton');
     this.addPanelButton = this.page.testSubj.locator('dashboardEditorMenuButton');
     this.panelSelectionFlyout = this.page.testSubj.locator('dashboardPanelSelectionFlyout');
     this.panelSelectionList = this.page.testSubj.locator('dashboardPanelSelectionList');
@@ -135,7 +131,7 @@ export class DashboardApp {
   /** Clicks "Create new dashboard" on the listing page and waits for the editor toolbar to load. */
   async openNewDashboard() {
     await this.page.testSubj.click('newItemButton');
-    await expect(this.addTopNavButton).toBeVisible();
+    await expect(this.addPanelButton).toBeVisible();
   }
 
   private getSettingsFlyout() {
@@ -233,7 +229,6 @@ export class DashboardApp {
   }
 
   async addPanelFromLibrary(...names: string[]) {
-    await this.page.testSubj.click('dashboardAddTopNavButton');
     await this.page.testSubj.click('dashboardAddFromLibraryButton');
     for (let i = 0; i < names.length; i++) {
       if (i > 0) {
@@ -908,8 +903,7 @@ export class DashboardApp {
 
   /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */
   async addNewPanel(panelType: 'ES|QL' | 'Lens' | 'Custom visualization' | 'Maps' | 'Links') {
-    await this.addTopNavButton.click();
-    await this.openAddPanelFlyoutButton.click();
+    await this.addPanelButton.click();
     await this.page.testSubj.click(`create-action-${panelType}`);
     await expect(this.panelSelectionFlyout).toBeHidden();
   }
