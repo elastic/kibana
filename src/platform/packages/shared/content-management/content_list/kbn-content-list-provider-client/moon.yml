@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/content-list-provider'
   - '@kbn/content-management-table-list-view-common'
+  - '@kbn/content-management-favorites-public'
 tags:
   - shared-browser
   - package

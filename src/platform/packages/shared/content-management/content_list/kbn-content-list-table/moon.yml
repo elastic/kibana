@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/content-list-toolbar'
+  - '@kbn/content-management-user-profiles'
 tags:
   - shared-browser
   - package
