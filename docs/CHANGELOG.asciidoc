@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.13>>
 * <<release-notes-8.19.12>>
 * <<release-notes-8.19.11>>
 * <<release-notes-8.19.10>>
@@ -118,6 +119,33 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.13]]
+== {kib} 8.19.13
+
+The 8.19.13 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.13]]
+=== Fixes
+Alerting and cases::
+* Fixes an issue where webhook connector updates failed when the external service returned a 204 (no content) response ({kibana-pull}251090[#251090]).
+Data ingestion and Fleet::
+* Filters out unenrolled agents in the cleanup policy revisions task ({kibana-pull}254899[#254899]).
+Discover::
+* Fixes a rendering issue in the **Attributes** tab on the trace details flyout that caused the UI to become unresponsive ({kibana-pull}255173[#255173]).
+Elastic Observability solution::
+* Passes alerts data view to `buildEsQuery` for correct wildcard queries on keyword fields ({kibana-pull}255225[#255225]).
+* Fixes a crash in APM apps when invalid values were passed to `rangeFrom` and `rangeTo` URL query parameters ({kibana-pull}256887[#256887]).
+* Fixes an error on the SLO burn rate alert details page for suppressed alerts ({kibana-pull}256435[#256435]).
+* Fixes a 500 error and infinite loading on the APM **Error group details** page when the related transaction document is missing the `transaction.sampled` field ({kibana-pull}255788[#255788]).
+Elastic Security solution::
+For the Elastic Security 8.19.13 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Management::
+* Fixes an issue in **Dev Tools Console** where syntax highlighting broke when queries contained accented or non-ASCII characters ({kibana-pull}255649[#255649]).
+* Fixes an issue in **Dev Tools Console** where closing nested braces broke syntax highlighting for subsequent elements ({kibana-pull}255426[#255426]).
+Search::
+* Fixes focus behavior when there are errors in the connector flyout form ({kibana-pull}255770[#255770]).
 
 [[release-notes-8.19.12]]
 == {kib} 8.19.12
