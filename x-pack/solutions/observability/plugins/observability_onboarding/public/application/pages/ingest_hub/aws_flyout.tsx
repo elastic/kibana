@@ -12,8 +12,10 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
+  EuiCard,
   EuiCheckableCard,
   EuiCodeBlock,
   EuiComboBox,
@@ -172,46 +174,46 @@ const AWS_SELECTABLE_SOURCES = [
 
 const CLOUDSHELL_TERMINAL_LINES: Array<{ text: string; delay: number; color?: string }> = [
   { text: '$ export API_KEY=asdf... OTLP_ENDPOINT=asdf... | curl -fsSL http://ela.st/onboard-ecf-aws | bash', delay: 0, color: '#98c379' },
-  { text: '', delay: 300 },
-  { text: '  ✓ Authenticating with Elastic Cloud...', delay: 600, color: '#98c379' },
-  { text: '  ✓ Verifying API key permissions...', delay: 400, color: '#98c379' },
-  { text: '', delay: 200 },
-  { text: '  Discovering AWS log sources in region us-west-2...', delay: 700, color: '#61afef' },
-  { text: '  ├─ CloudWatch Logs      ✓ 14 log groups found', delay: 350, color: '#abb2bf' },
-  { text: '  ├─ CloudTrail           ✓ trail logs enabled', delay: 300, color: '#abb2bf' },
-  { text: '  ├─ S3 Access Logs       ✓ 3 buckets found', delay: 300, color: '#abb2bf' },
-  { text: '  ├─ VPC Flow Logs        ✓ 2 VPCs found', delay: 250, color: '#abb2bf' },
-  { text: '  ├─ Lambda               ✓ 12 functions found', delay: 300, color: '#abb2bf' },
-  { text: '  ├─ GuardDuty            ✓ findings enabled', delay: 250, color: '#abb2bf' },
-  { text: '  ├─ ECS                  ✓ 2 clusters found', delay: 300, color: '#abb2bf' },
-  { text: '  └─ ELB Access Logs      ✓ 4 load balancers found', delay: 300, color: '#abb2bf' },
-  { text: '', delay: 200 },
-  { text: '  Found 8 log sources across 1 region', delay: 400, color: '#e5c07b' },
-  { text: '', delay: 300 },
-  { text: '  Configuring log collection pipelines...', delay: 600, color: '#61afef' },
-  { text: '  ├─ Creating CloudFormation stack elastic-log-forwarder...', delay: 700, color: '#abb2bf' },
-  { text: '  ├─ Deploying log forwarder (v9.2.4)...', delay: 900, color: '#abb2bf' },
-  { text: '  ├─ Setting up S3 bucket notifications...', delay: 500, color: '#abb2bf' },
-  { text: '  ├─ Subscribing to CloudWatch log groups (14 groups)...', delay: 600, color: '#abb2bf' },
-  { text: '  ├─ Enabling VPC Flow Logs export...', delay: 400, color: '#abb2bf' },
-  { text: '  └─ Configuring GuardDuty findings export...', delay: 450, color: '#abb2bf' },
-  { text: '', delay: 200 },
-  { text: '  ✓ Stack elastic-log-forwarder created successfully', delay: 700, color: '#98c379' },
-  { text: '', delay: 300 },
-  { text: '  Sending test data to Elastic Observability...', delay: 600, color: '#61afef' },
-  { text: '  ├─ CloudWatch logs      ✓ streaming (87 events/sec)', delay: 400, color: '#98c379' },
-  { text: '  ├─ S3 access logs       ✓ streaming (34 events/sec)', delay: 350, color: '#98c379' },
-  { text: '  ├─ VPC Flow Logs        ✓ streaming (56 events/sec)', delay: 350, color: '#98c379' },
-  { text: '  ├─ CloudTrail events    ✓ streaming (21 events/sec)', delay: 300, color: '#98c379' },
-  { text: '  ├─ Lambda logs          ✓ streaming (43 events/sec)', delay: 350, color: '#98c379' },
-  { text: '  └─ GuardDuty findings   ✓ streaming (8 events/sec)', delay: 400, color: '#98c379' },
-  { text: '', delay: 200 },
-  { text: '  ══════════════════════════════════════════════════════════', delay: 300, color: '#61afef' },
-  { text: '  ✅ Setup complete! Logs are flowing to Elastic Observability.', delay: 400, color: '#98c379' },
-  { text: '  📊 Dashboards: 23 installed  |  🔔 Alert rules: 8 pre-configured', delay: 300, color: '#e5c07b' },
-  { text: '  ══════════════════════════════════════════════════════════', delay: 200, color: '#61afef' },
-  { text: '', delay: 150 },
-  { text: '  You can now close this window and return to Elastic to view your data.', delay: 400, color: '#abb2bf' },
+  { text: '', delay: 100 },
+  { text: '  ✓ Authenticating with Elastic Cloud...', delay: 200, color: '#98c379' },
+  { text: '  ✓ Verifying API key permissions...', delay: 150, color: '#98c379' },
+  { text: '', delay: 50 },
+  { text: '  Discovering AWS log sources in region us-west-2...', delay: 200, color: '#61afef' },
+  { text: '  ├─ CloudWatch Logs      ✓ 14 log groups found', delay: 100, color: '#abb2bf' },
+  { text: '  ├─ CloudTrail           ✓ trail logs enabled', delay: 80, color: '#abb2bf' },
+  { text: '  ├─ S3 Access Logs       ✓ 3 buckets found', delay: 80, color: '#abb2bf' },
+  { text: '  ├─ VPC Flow Logs        ✓ 2 VPCs found', delay: 80, color: '#abb2bf' },
+  { text: '  ├─ Lambda               ✓ 12 functions found', delay: 80, color: '#abb2bf' },
+  { text: '  ├─ GuardDuty            ✓ findings enabled', delay: 80, color: '#abb2bf' },
+  { text: '  ├─ ECS                  ✓ 2 clusters found', delay: 80, color: '#abb2bf' },
+  { text: '  └─ ELB Access Logs      ✓ 4 load balancers found', delay: 80, color: '#abb2bf' },
+  { text: '', delay: 50 },
+  { text: '  Found 8 log sources across 1 region', delay: 120, color: '#e5c07b' },
+  { text: '', delay: 80 },
+  { text: '  Configuring log collection pipelines...', delay: 200, color: '#61afef' },
+  { text: '  ├─ Creating CloudFormation stack elastic-log-forwarder...', delay: 200, color: '#abb2bf' },
+  { text: '  ├─ Deploying log forwarder (v9.2.4)...', delay: 250, color: '#abb2bf' },
+  { text: '  ├─ Setting up S3 bucket notifications...', delay: 150, color: '#abb2bf' },
+  { text: '  ├─ Subscribing to CloudWatch log groups (14 groups)...', delay: 150, color: '#abb2bf' },
+  { text: '  ├─ Enabling VPC Flow Logs export...', delay: 120, color: '#abb2bf' },
+  { text: '  └─ Configuring GuardDuty findings export...', delay: 120, color: '#abb2bf' },
+  { text: '', delay: 50 },
+  { text: '  ✓ Stack elastic-log-forwarder created successfully', delay: 200, color: '#98c379' },
+  { text: '', delay: 80 },
+  { text: '  Sending test data to Elastic Observability...', delay: 200, color: '#61afef' },
+  { text: '  ├─ CloudWatch logs      ✓ streaming (87 events/sec)', delay: 100, color: '#98c379' },
+  { text: '  ├─ S3 access logs       ✓ streaming (34 events/sec)', delay: 100, color: '#98c379' },
+  { text: '  ├─ VPC Flow Logs        ✓ streaming (56 events/sec)', delay: 100, color: '#98c379' },
+  { text: '  ├─ CloudTrail events    ✓ streaming (21 events/sec)', delay: 80, color: '#98c379' },
+  { text: '  ├─ Lambda logs          ✓ streaming (43 events/sec)', delay: 100, color: '#98c379' },
+  { text: '  └─ GuardDuty findings   ✓ streaming (8 events/sec)', delay: 100, color: '#98c379' },
+  { text: '', delay: 50 },
+  { text: '  ══════════════════════════════════════════════════════════', delay: 80, color: '#61afef' },
+  { text: '  ✅ Setup complete! Logs are flowing to Elastic Observability.', delay: 120, color: '#98c379' },
+  { text: '  📊 Dashboards: 23 installed  |  🔔 Alert rules: 8 pre-configured', delay: 100, color: '#e5c07b' },
+  { text: '  ══════════════════════════════════════════════════════════', delay: 60, color: '#61afef' },
+  { text: '', delay: 50 },
+  { text: '  You can now close this window and return to Elastic to view your data.', delay: 100, color: '#abb2bf' },
 ];
 
 const AWS_LOGS_DASHBOARDS = [
@@ -385,74 +387,144 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
     </>
   );
 
-  const renderCheckingForDataStep = (dashboards: string[], accordionId: string, isComplete?: boolean) => ({
+  const renderCheckingForDataStep = (
+    dashboards: string[],
+    accordionId: string,
+    isComplete?: boolean,
+    onGoToMetrics?: () => void
+  ) => ({
     title: 'Verify your connection',
     status: (isComplete ? 'complete' : 'incomplete') as 'complete' | 'incomplete',
     children: (
       <>
         <EuiText size="s" color="subdued">
-          <p>
-            {isComplete
-              ? 'Your data is successfully flowing into Elastic Observability.'
-              : 'When finished come back and test your connection to see incoming data.'}
-          </p>
+          <p>When finished come back and test your connection to see incoming data.</p>
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiCallOut
-          color={isComplete ? 'success' : 'primary'}
-          css={css`
-            border-radius: ${euiTheme.border.radius.small};
-          `}
-          title={
-            isComplete ? (
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="checkCircle" color="success" />
-                </EuiFlexItem>
-                <EuiFlexItem>Data is flowing successfully</EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
-                </EuiFlexItem>
-                <EuiFlexItem>Establishing connection...</EuiFlexItem>
-              </EuiFlexGroup>
-            )
-          }
-        />
-        <EuiSpacer size="m" />
-        <EuiAccordion
-          id={accordionId}
-          buttonContent={isComplete
-            ? `Dashboards installed (${dashboards.length})`
-            : `Dashboards available once installed (${dashboards.length})`}
-          paddingSize="s"
-          initialIsOpen={isComplete}
-          forceState={isComplete ? 'open' : undefined}
-        >
-          <EuiSpacer size="s" />
-          <EuiPanel color="plain" hasBorder paddingSize="m">
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              {dashboards.map((name, idx) => (
-                <EuiFlexItem key={`${name}-${idx}`}>
+        {isComplete ? (
+          <EuiPanel
+            paddingSize="none"
+            css={css`
+              border-radius: ${euiTheme.border.radius.small};
+              box-shadow: none;
+              overflow: hidden;
+              border: 1px solid ${euiTheme.colors.borderStrongAccentSecondary};
+              padding: 12px;
+            `}
+          >
+            <EuiCallOut
+              color="success"
+              iconType="popper"
+              title="Connection verified. Data is flowing in successfully!"
+              css={css`
+                border-radius: ${euiTheme.border.radius.small};
+                border: none;
+              `}
+            />
+            <EuiSpacer size="m" />
+            <div>
+              <EuiAccordion
+                id={accordionId}
+                arrowSide="right"
+                buttonContent={
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiIcon
-                        type={isComplete ? 'checkCircle' : 'dashedCircle'}
-                        size="s"
-                        color={isComplete ? 'success' : 'subdued'}
-                      />
+                      <EuiBadge color="hollow">{dashboards.length}</EuiBadge>
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiText size="xs">{name}</EuiText>
+                      <EuiText size="s">AWS dashboards installed and ready</EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+                }
+                paddingSize="s"
+              >
+                <EuiSpacer size="s" />
+                <EuiFlexGroup direction="column" gutterSize="xs">
+                  {dashboards.map((name, idx) => (
+                    <EuiFlexItem key={`${name}-${idx}`}>
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type="checkCircle" size="s" color="success" />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="xs">{name}</EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiAccordion>
+            </div>
           </EuiPanel>
-        </EuiAccordion>
+        ) : (
+          <>
+            <EuiCallOut
+              color="primary"
+              css={css`
+                border-radius: ${euiTheme.border.radius.small};
+              `}
+              title={
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>Establishing connection...</EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            />
+            <EuiSpacer size="m" />
+            <EuiAccordion
+              id={accordionId}
+              buttonContent={`Dashboards available once installed (${dashboards.length})`}
+              paddingSize="s"
+            >
+              <EuiSpacer size="s" />
+              <EuiPanel color="plain" hasBorder paddingSize="m">
+                <EuiFlexGroup direction="column" gutterSize="xs">
+                  {dashboards.map((name, idx) => (
+                    <EuiFlexItem key={`${name}-${idx}`}>
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type="dashedCircle" size="s" color="subdued" />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="xs">{name}</EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiAccordion>
+          </>
+        )}
+        {isComplete && onGoToMetrics && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiPanel
+              hasBorder
+              paddingSize="m"
+              css={css`
+                border-radius: ${euiTheme.border.radius.small};
+                box-shadow: none;
+              `}
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="info" color="primary" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    Add AWS metrics to monitor CPU, memory, and service health.
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty size="s" flush="left" onClick={onGoToMetrics}>Set up metrics</EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </>
+        )}
       </>
     ),
   });
@@ -738,7 +810,7 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
             ),
           },
         ]),
-    renderCheckingForDataStep(AWS_LOGS_DASHBOARDS, 'awsLogsDashboardsAccordion', terminalComplete),
+    renderCheckingForDataStep(AWS_LOGS_DASHBOARDS, 'awsLogsDashboardsAccordion', terminalComplete, () => setSelectedTab('metrics')),
   ];
 
   return (
@@ -834,7 +906,20 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
                     </ul>
                   }
                 >
-                  <EuiBadge color="hollow">+ {AWS_ALL_METRIC_SOURCES.length - AWS_METRIC_SOURCES.length}</EuiBadge>
+                  <div
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      width: 40px;
+                      height: 40px;
+                      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                      border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+                      border-radius: 12px;
+                    `}
+                  >
+                    <EuiText size="xs"><strong>+{AWS_ALL_METRIC_SOURCES.length - AWS_METRIC_SOURCES.length}</strong></EuiText>
+                  </div>
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -863,7 +948,20 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
                     </ul>
                   }
                 >
-                  <EuiBadge color="hollow">+ {AWS_ALL_LOG_SOURCES.length - AWS_LOG_SOURCES.length}</EuiBadge>
+                  <div
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      width: 40px;
+                      height: 40px;
+                      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                      border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+                      border-radius: 12px;
+                    `}
+                  >
+                    <EuiText size="xs"><strong>+{AWS_ALL_LOG_SOURCES.length - AWS_LOG_SOURCES.length}</strong></EuiText>
+                  </div>
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
