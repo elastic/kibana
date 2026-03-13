@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState as XYLensState } from '@kbn/lens-common';
+import type { XYPersistedState } from '@kbn/lens-common';
 import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
@@ -70,7 +70,7 @@ const orientationDictionary = {
 function convertAxisSettingsToStateFormat(
   axis: XYState['axis']
 ): Pick<
-  XYLensState,
+  XYPersistedState,
   | 'xTitle'
   | 'yTitle'
   | 'yRightTitle'
@@ -148,10 +148,18 @@ type LayerToDataView = Record<string, string>;
 
 export function buildVisualizationState(
   config: XYState,
-  usedDataViews: LayerToDataView
-): XYLensState {
+  usedDataViews: LayerToDataView,
+  annotationGroupReferences: SavedObjectReference[]
+): XYPersistedState {
   const layers = config.layers
-    .map((layer, index) => buildXYLayer(layer, index, usedDataViews[getIdForLayer(layer, index)]))
+    .map((layer, index) =>
+      buildXYLayer(
+        layer,
+        index,
+        usedDataViews[getIdForLayer(layer, index)],
+        annotationGroupReferences
+      )
+    )
     .filter(nonNullable);
   return {
     preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',
@@ -164,7 +172,7 @@ export function buildVisualizationState(
 }
 
 export function buildVisualizationAPI(
-  config: XYLensState,
+  config: XYPersistedState,
   layers: Record<string, DataSourceStateLayer>,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
@@ -190,7 +198,7 @@ export function buildVisualizationAPI(
   };
 }
 
-function convertFittingToAPIFormat(config: XYLensState): Pick<XYState, 'fitting'> | {} {
+function convertFittingToAPIFormat(config: XYPersistedState): Pick<XYState, 'fitting'> | {} {
   const fittingOptions = {
     ...(config.fittingFunction ? { type: config.fittingFunction.toLowerCase() } : {}),
     ...(config.emphasizeFitting ? { dotted: config.emphasizeFitting } : {}),
@@ -247,7 +255,7 @@ function convertXExtent(extent: AxisExtentConfig | undefined): {
   return {};
 }
 
-function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axis'> | {} {
+function convertAxisSettingsToAPIFormat(config: XYPersistedState): Pick<XYState, 'axis'> | {} {
   const axis: EditableAxisType = {};
 
   const xAxis: XAxisType = stripUndefined({
@@ -356,7 +364,7 @@ function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axi
 }
 
 function buildXYLayerAPI(
-  visualization: XYLensState,
+  visualization: XYPersistedState,
   layers: Record<string, DataSourceStateLayer>,
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],

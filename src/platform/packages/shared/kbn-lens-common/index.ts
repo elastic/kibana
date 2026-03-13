@@ -243,8 +243,21 @@ export type {
   XYLayerConfig,
   ValidXYDataLayerConfig,
   ValidLayer,
-  XYState,
+  XYRuntimeState as XYState,
 } from './visualizations/xy/types';
+export type {
+  XYPersistedAnnotationLayerConfig,
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedLayerConfig,
+  XYPersistedState,
+} from './visualizations/xy/persistence';
+export {
+  isPersistedAnnotationsLayer,
+  isPersistedByReferenceAnnotationsLayer,
+  isPersistedByValueAnnotationsLayer,
+} from './visualizations/xy/persistence';
 export type {
   LensEmbeddableInput,
   TypedLensByValueInput,

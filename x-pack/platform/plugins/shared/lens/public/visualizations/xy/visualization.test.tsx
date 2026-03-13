@@ -15,6 +15,10 @@ import type {
   UserMessage,
   AnnotationGroups,
   DataViewsState,
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedState,
 } from '@kbn/lens-common';
 import type {
   XYState,
@@ -52,12 +56,6 @@ import {
   isByReferenceAnnotationsLayer,
 } from './visualization_helpers';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type {
-  XYPersistedByReferenceAnnotationLayerConfig,
-  XYPersistedByValueAnnotationLayerConfig,
-  XYPersistedLinkedByValueAnnotationLayerConfig,
-  XYPersistedState,
-} from './persistence';
 import { LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS } from '../../user_messages_ids';
 import { KbnPalette } from '@kbn/palettes';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
