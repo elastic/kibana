@@ -126,6 +126,24 @@ export const EditIlmPhasesFlyout = ({
   const lastEmittedOutputRef = useRef<IlmPolicyPhases>(initialPhasesRef.current);
   const pendingOnChangeOutputRef = useRef<IlmPolicyPhases | null>(null);
   const pendingOnChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAppliedInitialPhasesRef = useRef<IlmPolicyPhases>(initialPhases);
+
+  useEffect(() => {
+    if (lastAppliedInitialPhasesRef.current === initialPhases) return;
+    lastAppliedInitialPhasesRef.current = initialPhases;
+
+    // Keep `hook_form_lib`'s defaultValue in sync with the latest draft owned by the parent.
+    // This allows fields to rehydrate correctly if flyout contents are remounted (e.g. push↔overlay).
+    lastEmittedOutputRef.current = initialPhases;
+
+    if (pendingOnChangeTimeoutRef.current) {
+      clearTimeout(pendingOnChangeTimeoutRef.current);
+      pendingOnChangeTimeoutRef.current = null;
+    }
+    pendingOnChangeOutputRef.current = null;
+
+    form.updateFieldValues(initialPhases);
+  }, [form, initialPhases]);
 
   const scheduleOnChangeEmit = useCallback(() => {
     if (pendingOnChangeTimeoutRef.current) {
