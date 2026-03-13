@@ -217,13 +217,13 @@ export const ManageIntegrationsTable: React.FC<{
   );
 
   const approveAndDeployIntegration = useCallback(
-    async (integrationId: string, version: string) => {
+    async (integrationId: string, version: string, categories: string[]) => {
       try {
         await http.post(
           `/api/automatic_import_v2/integrations/${encodeURIComponent(integrationId)}/approve`,
           {
             version: '1',
-            body: JSON.stringify({ version }),
+            body: JSON.stringify({ version, categories }),
           }
         );
 

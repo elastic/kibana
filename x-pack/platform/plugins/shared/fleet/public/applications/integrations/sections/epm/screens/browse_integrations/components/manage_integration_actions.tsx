@@ -40,7 +40,11 @@ export const ManageIntegrationActions: React.FC<{
     onClose: () => void;
   }>;
   onFetchReviewDetails: (integrationId: string) => Promise<ReviewIntegrationDetails>;
-  onApproveAndDeploy: (integrationId: string, version: string) => Promise<void>;
+  onApproveAndDeploy: (
+    integrationId: string,
+    version: string,
+    categories: string[]
+  ) => Promise<void>;
   onDownloadZip?: (integrationId: string) => Promise<void>;
   onInstallToCluster?: (integrationId: string) => Promise<void>;
 }> = ({
