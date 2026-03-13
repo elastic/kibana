@@ -15,8 +15,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 import { ATTACK_DISCOVERY_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
-import { ALERT_DATA_VIEW_ANONYMIZATION_TARGET } from '../../../../agent_builder/helpers';
+import { getAlertDataViewAnonymizationTarget } from '../../../../agent_builder/helpers';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
 
 const DEFAULT_ATTACK_DISCOVERY_ATTACHMENT_LABEL = i18n.translate(
   'xpack.securitySolution.attackDiscovery.agentBuilder.attachmentLabel',
@@ -29,6 +30,7 @@ export const useAttackDiscoveryAttachment = (
   attackDiscovery?: AttackDiscovery | AttackDiscoveryAlert,
   replacements?: Replacements
 ): (() => void) => {
+  const spaceId = useSpaceId();
   const alertAttachment = useMemo(
     () => ({
       attachmentType: SecurityAgentBuilderAttachments.alert,
@@ -41,10 +43,10 @@ export const useAttackDiscoveryAttachment = (
           : '',
         attachmentLabel: attackDiscovery?.title ?? DEFAULT_ATTACK_DISCOVERY_ATTACHMENT_LABEL,
       },
-      anonymizationTarget: ALERT_DATA_VIEW_ANONYMIZATION_TARGET,
+      anonymizationTarget: spaceId ? getAlertDataViewAnonymizationTarget(spaceId) : undefined,
       attachmentPrompt: ATTACK_DISCOVERY_ATTACHMENT_PROMPT,
     }),
-    [attackDiscovery, replacements]
+    [attackDiscovery, replacements, spaceId]
   );
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(alertAttachment);

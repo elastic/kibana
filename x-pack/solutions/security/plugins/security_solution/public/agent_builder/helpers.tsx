@@ -7,13 +7,16 @@
 
 import { pick } from 'lodash';
 
+import type { ChatCompleteAnonymizationTarget } from '@kbn/inference-common';
 import { ESSENTIAL_ALERT_FIELDS } from '../../common';
 import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../common/constants';
 
-export const ALERT_DATA_VIEW_ANONYMIZATION_TARGET = {
+export const getAlertDataViewAnonymizationTarget = (
+  spaceId: string
+): ChatCompleteAnonymizationTarget => ({
   targetType: 'data_view',
-  targetId: DEFAULT_ALERT_DATA_VIEW_ID,
-} as const;
+  targetId: `${DEFAULT_ALERT_DATA_VIEW_ID}-${spaceId}`,
+});
 
 /**
  * Filters raw alert data to only include essential fields and stringifies the result.
