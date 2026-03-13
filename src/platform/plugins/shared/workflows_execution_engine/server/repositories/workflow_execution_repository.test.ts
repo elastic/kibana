@@ -134,11 +134,12 @@ describe('WorkflowExecutionRepository', () => {
 
   describe('updateWorkflowExecution', () => {
     it('should update a workflow execution', async () => {
-      const workflowExecution = { id: '1', status: ExecutionStatus.RUNNING };
+      const encodedId = createEncodedId();
+      const workflowExecution = { id: encodedId, status: ExecutionStatus.RUNNING };
       await repository.updateWorkflowExecution(workflowExecution);
       expect(esClient.update).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        id: '1',
+        index: TEST_BACKING_INDEX,
+        id: encodedId,
         refresh: false,
         doc: workflowExecution,
       });
@@ -147,6 +148,12 @@ describe('WorkflowExecutionRepository', () => {
     it('should throw an error if ID is missing during update', async () => {
       await expect(repository.updateWorkflowExecution({})).rejects.toThrow(
         'Workflow execution ID is required for update'
+      );
+    });
+
+    it('should throw an error if ID cannot be decoded', async () => {
+      await expect(repository.updateWorkflowExecution({ id: 'invalid-plain-id' })).rejects.toThrow(
+        'Failed to decode workflow execution ID'
       );
     });
   });
