@@ -37,6 +37,7 @@ import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   OPEN_FILE_UPLOAD_LITE_TRIGGER,
   CATEGORIZE_FIELD_TRIGGER,
+  REVERSE_CATEGORIZE_FIELD_TRIGGER,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
   SWIM_LANE_SELECTION_TRIGGER,
@@ -269,6 +270,18 @@ export const triggers: { [key: string]: Trigger } = {
     description: i18n.translate('uiActions.triggers.ml.actions.runPatternAnalysis.description', {
       defaultMessage: 'Triggered when user wants to run pattern analysis on a field.',
     }),
+  },
+  [REVERSE_CATEGORIZE_FIELD_TRIGGER]: {
+    id: REVERSE_CATEGORIZE_FIELD_TRIGGER,
+    title: i18n.translate('uiActions.triggers.ml.actions.runReverseCategorization.title', {
+      defaultMessage: 'Run reverse categorization',
+    }),
+    description: i18n.translate(
+      'uiActions.triggers.ml.actions.runReverseCategorization.description',
+      {
+        defaultMessage: 'Triggered when user wants to run reverse categorization on a field.',
+      }
+    ),
   },
   [IN_APP_EMBEDDABLE_EDIT_TRIGGER]: {
     id: IN_APP_EMBEDDABLE_EDIT_TRIGGER,
