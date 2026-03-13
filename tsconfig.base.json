@@ -1636,6 +1636,8 @@
       "@kbn/no-data-page-plugin/*": ["src/platform/plugins/shared/no_data_page/*"],
       "@kbn/node-libs-browser-webpack-plugin": ["src/platform/packages/private/kbn-node-libs-browser-webpack-plugin"],
       "@kbn/node-libs-browser-webpack-plugin/*": ["src/platform/packages/private/kbn-node-libs-browser-webpack-plugin/*"],
+      "@kbn/node-debugging-routes-plugin": ["src/platform/plugins/private/node_debugging_routes"],
+      "@kbn/node-debugging-routes-plugin/*": ["src/platform/plugins/private/node_debugging_routes/*"],
       "@kbn/notifications-plugin": ["x-pack/platform/plugins/shared/notifications"],
       "@kbn/notifications-plugin/*": ["x-pack/platform/plugins/shared/notifications/*"],
       "@kbn/object-utils": ["src/platform/packages/shared/kbn-object-utils"],

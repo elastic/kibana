@@ -26,6 +26,7 @@ export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
     loadTestFile(require.resolve('./history_block'));
     loadTestFile(require.resolve('./http'));
     loadTestFile(require.resolve('./http_versioned'));
+    loadTestFile(require.resolve('./node_debugging_routes'));
     loadTestFile(require.resolve('./dynamic_contract_resolving'));
     loadTestFile(require.resolve('./error_response'));
   });

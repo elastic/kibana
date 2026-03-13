@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/node-debugging-routes-plugin",
+  "owner": ["@elastic/kibana-core"],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "nodeDebuggingRoutes",
+    "server": true,
+    "browser": false
+  }
+}

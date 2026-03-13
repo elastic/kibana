@@ -830,6 +830,7 @@
     "@kbn/newsfeed-test-plugin": "link:src/platform/test/common/plugins/newsfeed",
     "@kbn/no-data-page-plugin": "link:src/platform/plugins/shared/no_data_page",
     "@kbn/node-libs-browser-webpack-plugin": "link:src/platform/packages/private/kbn-node-libs-browser-webpack-plugin",
+    "@kbn/node-debugging-routes-plugin": "link:src/platform/plugins/private/node_debugging_routes",
     "@kbn/notifications-plugin": "link:x-pack/platform/plugins/shared/notifications",
     "@kbn/object-utils": "link:src/platform/packages/shared/kbn-object-utils",
     "@kbn/object-versioning": "link:src/platform/packages/shared/kbn-object-versioning",
