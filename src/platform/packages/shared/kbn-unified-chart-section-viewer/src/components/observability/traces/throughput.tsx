@@ -34,6 +34,7 @@ const ThroughputChartContent = ({
       units: ['count'],
       dataStream: indexes,
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+      dimensionFields: [],
     },
     color,
     seriesType,

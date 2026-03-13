@@ -34,6 +34,7 @@ const LatencyChartContent = ({
       units: ['ms'],
       dataStream: indexes,
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+      dimensionFields: [],
     },
     color,
     seriesType,

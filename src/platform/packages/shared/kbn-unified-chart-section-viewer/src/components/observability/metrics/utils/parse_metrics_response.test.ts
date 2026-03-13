@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { MetricsESQLResponseObject } from '../../../../types';
 import { parseMetricsResponse } from './parse_metrics_response';
 
@@ -33,7 +34,7 @@ describe('parseMetricsResponse', () => {
         data_stream: 'my-index',
         unit: null,
         metric_type: 'gauge',
-        field_type: 'double',
+        field_type: ES_FIELD_TYPES.DOUBLE,
         dimension_fields: ['host.name'],
       },
     ];
@@ -44,7 +45,7 @@ describe('parseMetricsResponse', () => {
           metricName: 'my.metric',
           dataStream: 'my-index',
           metricTypes: ['gauge'],
-          fieldTypes: ['double'],
+          fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: [],
           dimensionFields: ['host.name'],
         },
@@ -58,9 +59,9 @@ describe('parseMetricsResponse', () => {
       {
         metric_name: 'cpu.usage',
         data_stream: 'my-index',
-        unit: 'percent',
+        unit: ['percent'],
         metric_type: 'gauge',
-        field_type: 'double',
+        field_type: ES_FIELD_TYPES.DOUBLE,
         dimension_fields: ['host.name'],
       },
     ];
@@ -71,7 +72,7 @@ describe('parseMetricsResponse', () => {
           metricName: 'cpu.usage',
           dataStream: 'my-index',
           metricTypes: ['gauge'],
-          fieldTypes: ['double'],
+          fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
           dimensionFields: ['host.name'],
         },
@@ -85,9 +86,9 @@ describe('parseMetricsResponse', () => {
       {
         metric_name: 'cpu.usage',
         data_stream: ['stream-a', 'stream-b'],
-        unit: 'percent',
+        unit: ['percent'],
         metric_type: 'gauge',
-        field_type: 'double',
+        field_type: ES_FIELD_TYPES.DOUBLE,
         dimension_fields: 'host.name',
       },
     ];
@@ -98,7 +99,7 @@ describe('parseMetricsResponse', () => {
           metricName: 'cpu.usage',
           dataStream: 'stream-a',
           metricTypes: ['gauge'],
-          fieldTypes: ['double'],
+          fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
           dimensionFields: ['host.name'],
         },
@@ -106,7 +107,7 @@ describe('parseMetricsResponse', () => {
           metricName: 'cpu.usage',
           dataStream: 'stream-b',
           metricTypes: ['gauge'],
-          fieldTypes: ['double'],
+          fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
           dimensionFields: ['host.name'],
         },
@@ -120,9 +121,9 @@ describe('parseMetricsResponse', () => {
       {
         metric_name: 'my.metric',
         data_stream: 'my-index',
-        unit: 'byte',
+        unit: ['bytes'],
         metric_type: 'gauge',
-        field_type: 'double',
+        field_type: ES_FIELD_TYPES.DOUBLE,
         dimension_fields: 'host.name',
       },
     ];
@@ -133,7 +134,7 @@ describe('parseMetricsResponse', () => {
           metricName: 'my.metric',
           dataStream: 'my-index',
           metricTypes: ['gauge'],
-          fieldTypes: ['double'],
+          fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['byte'],
           dimensionFields: ['host.name'],
         },
@@ -147,9 +148,9 @@ describe('parseMetricsResponse', () => {
       {
         metric_name: 'my.metric',
         data_stream: 'my-index',
-        unit: ['byte'],
+        unit: ['bytes'],
         metric_type: ['gauge', 'counter'],
-        field_type: ['double', 'long'],
+        field_type: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
         dimension_fields: ['host.name', 'pod.name'],
       },
     ];
@@ -160,7 +161,7 @@ describe('parseMetricsResponse', () => {
           metricName: 'my.metric',
           dataStream: 'my-index',
           metricTypes: ['gauge', 'counter'],
-          fieldTypes: ['double', 'long'],
+          fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
           units: ['byte'],
           dimensionFields: ['host.name', 'pod.name'],
         },
@@ -174,25 +175,25 @@ describe('parseMetricsResponse', () => {
       {
         metric_name: 'metric.a',
         data_stream: 'ds-1',
-        unit: 'percent',
+        unit: ['percent'],
         metric_type: 'gauge',
-        field_type: 'double',
+        field_type: ES_FIELD_TYPES.DOUBLE,
         dimension_fields: ['host.name', 'pod.name'],
       },
       {
         metric_name: 'metric.b',
         data_stream: 'ds-2',
-        unit: 'byte',
+        unit: ['bytes'],
         metric_type: 'counter',
-        field_type: 'long',
+        field_type: ES_FIELD_TYPES.LONG,
         dimension_fields: ['host.name', 'container.id'],
       },
       {
         metric_name: 'metric.b',
         data_stream: 'ds-2',
-        unit: 'byte',
+        unit: ['bytes'],
         metric_type: 'counter',
-        field_type: 'long',
+        field_type: ES_FIELD_TYPES.LONG,
         dimension_fields: [],
       },
     ];
