@@ -23,6 +23,8 @@ export type Task = ListrTask<TaskContext>['task'];
 
 export type FixtureMap = Record<string, TypeVersionFixtures>;
 
+export type MigrationAlgorithm = 'v2' | 'zdt';
+
 export interface TaskContext {
   gitRev: string;
   serverlessGitRev?: string;
@@ -43,6 +45,9 @@ export interface TaskContext {
   };
   test: boolean; // whether the script is running with TEST data
   fix: boolean;
+  migrationAlgorithms: MigrationAlgorithm[];
+  migrationAlgorithm?: MigrationAlgorithm;
+  migrationKibanaIndex?: string;
 }
 
 export const encryptionOverrides: EncryptedSavedObjectTypeRegistration[] = [

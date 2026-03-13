@@ -8,7 +8,7 @@
  */
 
 import type { ListrTask } from 'listr2';
-import { defaultKibanaIndex, getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
+import { getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import { encryptionOverrides, type Task, type TaskContext } from '../types';
 import { getPreviousVersionType } from '../../migrations';
@@ -16,7 +16,9 @@ import { checkDocuments } from './check_documents';
 import type { FixtureTemplate } from '../../migrations/fixtures';
 
 export const createBaseline: Task = async (ctx, task) => {
-  const { updatedTypes, baselineMappings } = ctx;
+  const { updatedTypes, baselineMappings, migrationKibanaIndex, migrationAlgorithm } = ctx;
+
+  const kibanaIndex = migrationKibanaIndex!;
 
   const previousVersionTypes = updatedTypes.map((type) =>
     getPreviousVersionType({ type, previousMappings: baselineMappings! })
@@ -28,6 +30,8 @@ export const createBaseline: Task = async (ctx, task) => {
     savedObjectsRepository,
   } = await getKibanaMigratorTestKit({
     types: previousVersionTypes,
+    kibanaIndex,
+    settings: { migrations: { algorithm: migrationAlgorithm } },
     encryptionExtensionFactory: ctx.encryptedSavedObjects
       ? (typeRegistry) =>
           ctx.encryptedSavedObjects!.__testCreateDangerousExtension(
@@ -38,22 +42,20 @@ export const createBaseline: Task = async (ctx, task) => {
   });
   const subtasks: ListrTask<TaskContext>[] = [
     {
-      title: `Delete pre-existing '${defaultKibanaIndex}' index`,
+      title: `Delete pre-existing '${kibanaIndex}' index`,
       task: async () => {
-        // TODO the delete operation does not seem to delete the system index
-        // this causes issues when running multiple times with the --server and --client flags
         await client.indices.delete({
-          index: defaultKibanaIndex,
+          index: kibanaIndex,
           ignore_unavailable: true,
         });
       },
     },
     {
-      title: `Create '${defaultKibanaIndex}' index with previous version mappings`,
+      title: `Create '${kibanaIndex}' index with previous version mappings`,
       task: async () => await initSystemIndex(),
     },
     {
-      title: `Populate '${defaultKibanaIndex}' index with previous version objects`,
+      title: `Populate '${kibanaIndex}' index with previous version objects`,
       task: async () => {
         // convert the fixtures into SavedObjectsBulkCreateObject[]
         const allDocs = Object.entries(ctx.fixtures.previous).flatMap(
@@ -71,7 +73,7 @@ export const createBaseline: Task = async (ctx, task) => {
             }));
           }
         );
-        // insert all fixtures in the `.kibana_migrator` SO index
+        // insert all fixtures in the SO index
         await savedObjectsRepository.bulkCreate(allDocs, {
           refresh: 'wait_for',
         });

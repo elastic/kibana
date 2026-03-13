@@ -15,6 +15,8 @@ import { checkDocuments } from './check_documents';
 export const testUpgrade: Task = async (ctx, task) => {
   const { runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
     types: ctx.updatedTypes,
+    kibanaIndex: ctx.migrationKibanaIndex,
+    settings: { migrations: { algorithm: ctx.migrationAlgorithm } },
     encryptionExtensionFactory: ctx.encryptedSavedObjects
       ? (typeRegistry) => ctx.encryptedSavedObjects!.__testCreateDangerousExtension(typeRegistry)
       : undefined,

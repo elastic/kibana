@@ -23,6 +23,8 @@ export const testRollback: Task = async (ctx, task) => {
   const { runMigrations: performRollback, savedObjectsRepository } = await getKibanaMigratorTestKit(
     {
       types: previousVersionTypes,
+      kibanaIndex: ctx.migrationKibanaIndex,
+      settings: { migrations: { algorithm: ctx.migrationAlgorithm } },
       encryptionExtensionFactory: ctx.encryptedSavedObjects
         ? (typeRegistry) =>
             ctx.encryptedSavedObjects!.__testCreateDangerousExtension(
