@@ -239,6 +239,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         );
       }
 
+      this.log.error(error);
       // return a generic 500 to avoid error info / stack trace surfacing
       this.log.error('500 Server Error', formatErrorMeta(500, { request, error }));
       return hapiResponseAdapter.toInternalError();
