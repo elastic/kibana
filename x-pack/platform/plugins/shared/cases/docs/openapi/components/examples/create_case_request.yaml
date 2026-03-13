@@ -15,7 +15,8 @@ value:
       }
     },
     "settings": {
-      "syncAlerts": true
+      "syncAlerts": true,
+      "extractObservables": false
     },
     "owner": "cases",
     "customFields": [
