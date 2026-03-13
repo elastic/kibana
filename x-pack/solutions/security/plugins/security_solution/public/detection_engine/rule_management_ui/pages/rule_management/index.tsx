@@ -173,7 +173,6 @@ const RulesPageContent = () => {
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>
-
       <SpyRoute pageName={SecurityPageName.rules} />
     </>
   );
