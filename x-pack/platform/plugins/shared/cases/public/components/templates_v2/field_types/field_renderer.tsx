@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import type { z } from '@kbn/zod/v4';
 import React, { useMemo } from 'react';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   FormProvider,
   useForm,
@@ -28,7 +29,8 @@ export interface TemplateFieldRendererProps {
 const FieldsRenderer: FC<{
   parsedTemplate: ParsedTemplateDefinition;
   values: Record<string, unknown>;
-}> = ({ parsedTemplate, values }) => {
+  form: FormHook<{}>;
+}> = ({ parsedTemplate, values, form }) => {
   const fieldTypeMap = useMemo(
     () => Object.fromEntries(parsedTemplate.fields.map((f) => [f.name, f.type])),
     [parsedTemplate.fields]
@@ -39,7 +41,7 @@ const FieldsRenderer: FC<{
     [parsedTemplate.fields]
   );
 
-  const [formData] = useFormData({ watch: allFieldPaths });
+  const [formData] = useFormData({ form, watch: allFieldPaths });
 
   const fieldValues = useMemo(() => {
     const extendedFields =
@@ -101,7 +103,7 @@ export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
 
   return (
     <FormProvider form={form}>
-      <FieldsRenderer parsedTemplate={parsedTemplate} values={values} />
+      <FieldsRenderer parsedTemplate={parsedTemplate} values={values} form={form} />
     </FormProvider>
   );
 };
