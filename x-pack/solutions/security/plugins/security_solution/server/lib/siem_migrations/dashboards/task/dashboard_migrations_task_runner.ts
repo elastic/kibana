@@ -38,7 +38,7 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
   DashboardMigrationTaskOutput
 > {
   private retriever: DashboardMigrationsRetriever;
-  protected readonly taskConcurrency = 3;
+  protected readonly taskConcurrency = 2;
 
   constructor(
     public readonly migrationId: string,
