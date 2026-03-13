@@ -168,6 +168,7 @@ export async function loadIndexPatterns({
   adHocDataViews,
   onIndexPatternRefresh,
   http,
+  esqlQueryMap,
 }: {
   dataViews: MinimalDataViewsContract;
   patterns: string[];
@@ -176,6 +177,7 @@ export async function loadIndexPatterns({
   adHocDataViews?: Record<string, DataViewSpec>;
   onIndexPatternRefresh?: () => void;
   http?: HttpStart;
+  esqlQueryMap?: Record<string, string>;
 }) {
   const missingIds = patterns.filter((id) => !cache[id] && !adHocDataViews?.[id]);
   const hasAdHocDataViews = Object.values(adHocDataViews || {}).length > 0;
@@ -211,11 +213,11 @@ export async function loadIndexPatterns({
 
   // Resolve time fields for ESQL data views
   const shouldResolveTimeFields = (spec: DataViewSpec) =>
-    spec.type === 'esql' && !spec.timeFieldName && spec.title;
+    spec.type === 'esql' && !spec.timeFieldName && spec.id;
   const esqlSpecsWithoutTimeField = adHocSpecs.filter((spec) => shouldResolveTimeFields(spec));
   const resolvedEsqlTimeFields: Record<string, string | undefined> =
     esqlSpecsWithoutTimeField.length && http
-      ? await resolveTimeFieldsForEsqlIndexPatterns(esqlSpecsWithoutTimeField, http)
+      ? await resolveTimeFieldsForEsqlIndexPatterns(esqlSpecsWithoutTimeField, http, esqlQueryMap)
       : {};
 
   indexPatterns.push(
@@ -227,7 +229,7 @@ export async function loadIndexPatterns({
 
         // Enrich the ESQL spec with the time field
         const enrichedSpec = { ...spec };
-        const timeField = resolvedEsqlTimeFields[spec.title!];
+        const timeField = spec.id ? resolvedEsqlTimeFields[spec.id] : undefined;
         if (timeField) {
           enrichedSpec.timeFieldName = timeField;
           if (enrichedSpec.id) {
@@ -252,21 +254,35 @@ export async function loadIndexPatterns({
 
 async function resolveTimeFieldsForEsqlIndexPatterns(
   adHocDataViewSpecs: DataViewSpec[],
-  http: HttpStart
+  http: HttpStart,
+  esqlQueryMap?: Record<string, string>
 ): Promise<Record<string, string | undefined>> {
-  if (!adHocDataViewSpecs.length) {
+  if (!adHocDataViewSpecs.length || !esqlQueryMap) {
     return {};
   }
 
-  const uniqueTitles = [...new Set(adHocDataViewSpecs.map((s) => s.title))];
-  const timeFieldsByTitle: Record<string, string | undefined> = {};
+  const timeFieldsById: Record<string, string | undefined> = {};
+
+  // Deduplicate requests -> specs with the same query only need one server call
+  const queryToIds = new Map<string, string[]>();
+  for (const { id } of adHocDataViewSpecs) {
+    if (!id) {
+      continue;
+    }
+    const query = esqlQueryMap?.[id];
+    if (!query) {
+      continue;
+    }
+    const existing = queryToIds.get(query);
+    if (existing) {
+      existing.push(id);
+    } else {
+      queryToIds.set(query, [id]);
+    }
+  }
 
   await Promise.all(
-    uniqueTitles.map(async (title) => {
-      if (!title) {
-        return;
-      }
-      const query = `FROM ${title}`;
+    Array.from(queryToIds.entries()).map(async ([query, ids]) => {
       const response = await http
         .get<{ timeField?: string }>(`${TIMEFIELD_ROUTE}${encodeURIComponent(query)}`)
         .catch((error) => {
@@ -274,11 +290,13 @@ async function resolveTimeFieldsForEsqlIndexPatterns(
           console.error('Failed to fetch the timefield', error);
           return undefined;
         });
-      timeFieldsByTitle[title] = response?.timeField;
+      for (const id of ids) {
+        timeFieldsById[id] = response?.timeField;
+      }
     })
   );
 
-  return timeFieldsByTitle;
+  return timeFieldsById;
 }
 
 export async function ensureIndexPattern({

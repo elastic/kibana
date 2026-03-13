@@ -19,6 +19,7 @@ import {
   type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
 } from '@kbn/event-annotation-common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   Datasource,
   DatasourceMap,
@@ -34,6 +35,7 @@ import type {
   VisualizationState,
   DocumentToExpressionReturnType,
   LensDocument,
+  TextBasedPersistedState,
 } from '@kbn/lens-common';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
 
@@ -112,6 +114,19 @@ const getRefsForAdHocDataViewsFromContext = (
   return adHocDataViewsList.map(({ id, title, name }) => ({ id, title, name }));
 };
 
+function buildEsqlIndexToQueryMap(datasourceStates: DatasourceStates): Record<string, string> {
+  const queryMap: Record<string, string> = {};
+  const textBasedState = datasourceStates.textBased?.state as TextBasedPersistedState | undefined;
+  if (textBasedState?.layers) {
+    for (const layer of Object.values(textBasedState.layers)) {
+      if (layer.index && layer.query && isOfAggregateQueryType(layer.query) && layer.query.esql) {
+        queryMap[layer.index] = layer.query.esql;
+      }
+    }
+  }
+  return queryMap;
+}
+
 export async function initializeDataViews(
   {
     dataViews,
@@ -183,6 +198,8 @@ export async function initializeDataViews(
 
   const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedIndexPatternsIds);
 
+  const esqlQueryMap = buildEsqlIndexToQueryMap(datasourceStates);
+
   const indexPatterns = await loadIndexPatterns({
     dataViews,
     patterns: usedIndexPatternsIds,
@@ -190,6 +207,7 @@ export async function initializeDataViews(
     cache: {},
     adHocDataViews,
     http,
+    esqlQueryMap,
   });
 
   const adHocDataViewsRefs = getRefsForAdHocDataViewsFromContext(
