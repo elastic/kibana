@@ -12,8 +12,6 @@ source .buildkite/scripts/common/util.sh
 
 is_test_execution_step
 
-exit_current_step_if_gate_failed || true
-
 # Upload Scout reporter events after Cypress test execution
 upload_scout_cypress_events() {
   local test_name="${1:-Cypress tests}"

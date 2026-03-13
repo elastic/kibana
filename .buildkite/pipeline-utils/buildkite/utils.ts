@@ -21,10 +21,6 @@ export interface GetPipelineOptions {
   cancelOnGateFailure?: boolean;
 }
 
-export interface MetadataReader {
-  getMetadata(key: string, defaultValue?: string | null): string | null;
-}
-
 function isObj(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x !== null;
 }
@@ -106,28 +102,6 @@ function registerCancelOnGateFailureMetadata(keys: string[]) {
   for (const key of keys) {
     execFileSync('buildkite-agent', ['meta-data', 'set', `cancel_on_gate_failure:${key}`, 'true']);
   }
-}
-
-export function shouldSkipUploaderForGateFailure(
-  metadataReader: MetadataReader,
-  uploaderLabel: string
-): boolean {
-  if (metadataReader.getMetadata('gate_failed', 'false') !== 'true') {
-    return false;
-  }
-
-  const gateFailureSource =
-    metadataReader.getMetadata('gate_failed_label') || metadataReader.getMetadata('gate_failed_by');
-
-  if (gateFailureSource) {
-    console.log(
-      `--- Skipping ${uploaderLabel} because check gate "${gateFailureSource}" has already failed`
-    );
-  } else {
-    console.log(`--- Skipping ${uploaderLabel} because a check gate has already failed`);
-  }
-
-  return true;
 }
 
 export const getPipeline = (filename: string, options?: boolean | GetPipelineOptions) => {

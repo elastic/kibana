@@ -8,9 +8,7 @@ E2E steps (FTR, Scout, Cypress) start as soon as `build` completes. If a gate st
 
 1. **Gate steps** in `base.yml` are tagged with `env: { CHECK_GATE: 'true' }`.
 2. **E2E steps** are registered at pipeline upload time by passing `{ cancelOnGateFailure: true }` to `getPipeline()`, or by calling `bk.setMetadata('cancel_on_gate_failure:<step-key>', 'true')` in dynamic step uploaders.
-3. When a gate step fails permanently, `post_command.sh` records `gate_failed=true` metadata and runs `scripts/steps/gate_failure/cancel.ts`, which reads `cancel_on_gate_failure:*` metadata keys and cancels those steps.
-4. A repo `command` hook short-circuits already-created cancelable steps by checking `gate_failed` and `cancel_on_gate_failure:$BUILDKITE_STEP_KEY` before the step command runs.
-5. Dynamic fanout uploaders still need explicit `gate_failed` checks and must register `cancel_on_gate_failure:*` metadata before `uploadSteps()` so they do not create new work after a gate failure.
+3. When a gate step fails permanently, `post_command.sh` runs `scripts/steps/gate_failure/cancel.ts`, which reads `cancel_on_gate_failure:*` metadata keys and cancels those steps.
 
 ### Important: `step cancel` does not work on group keys
 

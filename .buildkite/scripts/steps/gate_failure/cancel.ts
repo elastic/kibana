@@ -35,7 +35,9 @@ function run(): void {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       const stderr =
-        error instanceof Error && 'stderr' in error ? String((error as NodeJS.ErrnoException & { stderr: unknown }).stderr) : '';
+        error instanceof Error && 'stderr' in error
+          ? String((error as NodeJS.ErrnoException & { stderr: unknown }).stderr)
+          : '';
       const combined = `${message}\n${stderr}`;
       // Steps that already finished (passed, failed, canceled) cannot be canceled again.
       // This is expected in race conditions and not a real failure. We check both the

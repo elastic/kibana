@@ -81,9 +81,6 @@ if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
     if [[ $BUILDKITE_COMMAND_EXIT_STATUS -eq -1 ]]; then
       echo '--- Gate step exited with retryable status -1; skipping cancel-on-gate-failure'
     else
-      buildkite-agent meta-data set gate_failed 'true'
-      buildkite-agent meta-data set gate_failed_by "${BUILDKITE_STEP_KEY:-unknown}"
-      buildkite-agent meta-data set gate_failed_label "${BUILDKITE_LABEL:-${BUILDKITE_STEP_KEY:-unknown}}"
       echo '--- Cancel steps on gate failure'
       .buildkite/scripts/steps/gate_failure/cancel.sh || true
     fi

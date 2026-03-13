@@ -14,5 +14,3 @@ if [[ -d "$cacheDir" ]]; then
   echo "Moving cached snapshots from $cacheDir to .es/cache"
   mv "$cacheDir"/* .es/cache/
 fi
-
-exit_current_step_if_gate_failed || true

@@ -11,12 +11,13 @@ import { execFileSync } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { load as loadYaml } from 'js-yaml';
 
 jest.mock('child_process', () => ({
   execFileSync: jest.fn(),
 }));
 
-import { getPipeline, shouldSkipUploaderForGateFailure } from './utils';
+import { getPipeline } from './utils';
 
 const execFileSyncMock = execFileSync as jest.MockedFunction<typeof execFileSync>;
 
@@ -91,23 +92,22 @@ describe('getPipeline', () => {
     );
 
     // Extract step keys from the manual registration loop in pipeline.ts
-    const manualKeysMatch = pipelineSource.match(
-      /for \(const stepKey of \[([^\]]+)\]\)/s
-    );
+    const manualKeysMatch = pipelineSource.match(/for \(const stepKey of \[([^\]]+)\]\)/s);
     expect(manualKeysMatch).not.toBeNull();
 
     const manualKeys = [...manualKeysMatch![1].matchAll(/'([^']+)'/g)].map(([, key]) => key);
     expect(manualKeys.length).toBeGreaterThan(0);
 
     // Parse base.yml and collect all step keys
-    const { load: loadYaml } = require('js-yaml');
     const baseYml = fs.readFileSync(
       path.resolve(repoRoot, '.buildkite/pipelines/pull_request/base.yml'),
       'utf8'
     );
     const baseDoc = loadYaml(baseYml) as { steps: Array<{ key?: string }> };
     const baseKeys = new Set(
-      baseDoc.steps.filter((s: Record<string, unknown>) => typeof s.key === 'string').map((s: Record<string, unknown>) => s.key)
+      baseDoc.steps
+        .filter((s: Record<string, unknown>) => typeof s.key === 'string')
+        .map((s: Record<string, unknown>) => s.key)
     );
 
     for (const key of manualKeys) {
@@ -138,7 +138,6 @@ describe('getPipeline', () => {
   });
 
   it('has no duplicate step keys across cancelable pipeline files and base.yml', () => {
-    const { load: loadYaml } = require('js-yaml');
     const repoRoot = path.resolve(__dirname, '../../..');
     const pullRequestPipeline = path.resolve(
       __dirname,
@@ -156,9 +155,7 @@ describe('getPipeline', () => {
     ];
 
     // Also include base.yml
-    cancelablePipelines.push(
-      path.resolve(repoRoot, '.buildkite/pipelines/pull_request/base.yml')
-    );
+    cancelablePipelines.push(path.resolve(repoRoot, '.buildkite/pipelines/pull_request/base.yml'));
 
     // These pipeline pairs are in if/else branches in pipeline.ts and can never
     // both be uploaded in the same build, so shared keys are safe.
@@ -183,9 +180,7 @@ describe('getPipeline', () => {
               const existingFile = allKeys.get(step.key as string)!;
               const pair = `${path.basename(existingFile)}:${path.basename(rel)}`;
               if (!mutuallyExclusivePairs.has(pair)) {
-                duplicates.push(
-                  `key "${step.key}" in ${rel} conflicts with ${existingFile}`
-                );
+                duplicates.push(`key "${step.key}" in ${rel} conflicts with ${existingFile}`);
               }
             } else {
               allKeys.set(step.key as string, rel);
@@ -201,59 +196,5 @@ describe('getPipeline', () => {
     }
 
     expect(duplicates).toEqual([]);
-  });
-});
-
-describe('shouldSkipUploaderForGateFailure', () => {
-  const metadataReader = (
-    values: Record<string, string>
-  ): {
-    getMetadata: (key: string, defaultValue?: string | null) => string | null;
-  } => ({
-    getMetadata: (key: string, defaultValue: string | null = null) => values[key] ?? defaultValue,
-  });
-
-  beforeEach(() => {
-    jest.spyOn(console, 'log').mockImplementation(() => undefined);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it('returns false when no gate failure is recorded', () => {
-    expect(
-      shouldSkipUploaderForGateFailure(metadataReader({ gate_failed: 'false' }), 'dynamic fanout')
-    ).toBe(false);
-  });
-
-  it('logs the gate label when skipping', () => {
-    const logSpy = jest.spyOn(console, 'log');
-
-    expect(
-      shouldSkipUploaderForGateFailure(
-        metadataReader({ gate_failed: 'true', gate_failed_label: 'Check Types' }),
-        'dynamic fanout'
-      )
-    ).toBe(true);
-
-    expect(logSpy).toHaveBeenCalledWith(
-      '--- Skipping dynamic fanout because check gate "Check Types" has already failed'
-    );
-  });
-
-  it('falls back to the gate step key when the label is not available', () => {
-    const logSpy = jest.spyOn(console, 'log');
-
-    expect(
-      shouldSkipUploaderForGateFailure(
-        metadataReader({ gate_failed: 'true', gate_failed_by: 'check_types' }),
-        'Scout test fanout'
-      )
-    ).toBe(true);
-
-    expect(logSpy).toHaveBeenCalledWith(
-      '--- Skipping Scout test fanout because check gate "check_types" has already failed'
-    );
   });
 });

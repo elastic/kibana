@@ -24,12 +24,7 @@ import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import SHARDED_JEST_CONFIGS from '../../sharded_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
-import {
-  collectEnvFromLabels,
-  expandAgentQueue,
-  getRequiredEnv,
-  shouldSkipUploaderForGateFailure,
-} from '#pipeline-utils';
+import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
 const SHARD_ANNOTATION_SEP = '||shard=';
 
@@ -382,10 +377,6 @@ export async function pickTestGroupRunOrder() {
     bk.uploadArtifacts('ftr_run_order.json');
   }
 
-  if (shouldSkipUploaderForGateFailure(bk, 'dynamic test fanout')) {
-    return;
-  }
-
   const steps = [
     unit.count > 0
       ? {
@@ -482,10 +473,6 @@ export async function pickTestGroupRunOrder() {
   // does not work on group keys.
   for (const fg of functionalGroups) {
     bk.setMetadata(`cancel_on_gate_failure:${fg.key}`, 'true');
-  }
-
-  if (shouldSkipUploaderForGateFailure(bk, 'dynamic test fanout')) {
-    return;
   }
 
   // upload the step definitions to Buildkite

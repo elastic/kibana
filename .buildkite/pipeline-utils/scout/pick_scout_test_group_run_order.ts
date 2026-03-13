@@ -11,7 +11,7 @@ import Fs from 'fs';
 import { expandAgentQueue } from '../agent_images';
 import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
 import { collectEnvFromLabels } from '../pr_labels';
-import { getRequiredEnv, shouldSkipUploaderForGateFailure } from '#pipeline-utils';
+import { getRequiredEnv } from '#pipeline-utils';
 
 export interface ModuleDiscoveryInfo {
   name: string;
@@ -76,10 +76,6 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     };
   });
 
-  if (shouldSkipUploaderForGateFailure(bk, 'Scout test fanout')) {
-    return;
-  }
-
   const steps = [
     {
       group: 'Scout Configs',
@@ -115,10 +111,6 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   // does not work on group keys.
   for (const { key } of scoutCiRunGroups) {
     bk.setMetadata(`cancel_on_gate_failure:${key}`, 'true');
-  }
-
-  if (shouldSkipUploaderForGateFailure(bk, 'Scout test fanout')) {
-    return;
   }
 
   // upload the step definitions to Buildkite
