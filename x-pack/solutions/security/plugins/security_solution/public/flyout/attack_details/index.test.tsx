@@ -15,6 +15,10 @@ import { useTabs } from './hooks/use_tabs';
 import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useKibana } from '../../common/lib/kibana';
 
+const mockFlyoutNavigation = jest.fn((props: unknown) => (
+  <div data-test-subj="flyoutNavigation">{JSON.stringify(props)}</div>
+));
+
 jest.mock('@kbn/expandable-flyout');
 jest.mock('./context');
 jest.mock('./hooks/use_tabs');
@@ -23,7 +27,7 @@ jest.mock('../../common/lib/kibana');
 jest.mock('./content', () => ({ PanelContent: () => <div data-test-subj="panelContent" /> }));
 jest.mock('./footer', () => ({ PanelFooter: () => <div data-test-subj="panelFooter" /> }));
 jest.mock('../shared/components/flyout_navigation', () => ({
-  FlyoutNavigation: () => <div data-test-subj="flyoutNavigation" />,
+  FlyoutNavigation: (props: unknown) => mockFlyoutNavigation(props),
 }));
 jest.mock('./header', () => ({
   PanelHeader: ({
@@ -90,6 +94,7 @@ describe('AttackDetailsPanel', () => {
     openRightPanel.mockReset();
     openPreviewPanel.mockReset();
     setStorage.mockReset();
+    mockFlyoutNavigation.mockClear();
   });
 
   it('uses preview navigation when rendered in preview mode', () => {
@@ -109,6 +114,9 @@ describe('AttackDetailsPanel', () => {
 
     const { getByTestId } = render(<AttackDetailsPanel />);
     getByTestId('switchTabButton').click();
+    expect(mockFlyoutNavigation.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ isPreviewMode: true })
+    );
 
     expect(openPreviewPanel).toHaveBeenCalledWith({
       id: AttackDetailsRightPanelKey,
@@ -156,6 +164,9 @@ describe('AttackDetailsPanel', () => {
   it('uses right-panel navigation outside preview mode', () => {
     const { getByTestId } = render(<AttackDetailsPanel />);
     getByTestId('switchTabButton').click();
+    expect(mockFlyoutNavigation.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ isPreviewMode: false })
+    );
 
     expect(openRightPanel).toHaveBeenCalledWith({
       id: AttackDetailsRightPanelKey,

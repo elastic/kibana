@@ -69,7 +69,11 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
+      <FlyoutNavigation
+        flyoutIsExpandable={true}
+        expandDetails={expandDetails}
+        isPreviewMode={isPreviewMode}
+      />
       <PanelHeader
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}
