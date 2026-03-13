@@ -401,8 +401,10 @@ export class WorkflowsExecutionEnginePlugin
               );
               span?.end();
 
-              const resolvedStepExecutionsIndex = await stepExecutionRepository.resolveWriteIndex();
-              const resolvedExecutionsIndex = await workflowExecutionRepository.resolveWriteIndex();
+              const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = await Promise.all([
+                stepExecutionRepository.resolveWriteIndex(),
+                workflowExecutionRepository.resolveWriteIndex(),
+              ]);
 
               const workflowExecution: Partial<EsWorkflowExecution> = {
                 id: generateEncodedWorkflowExecutionId({
@@ -540,8 +542,10 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
-      const resolvedStepExecutionsIndex = await stepExecutionRepo.resolveWriteIndex();
-      const resolvedExecutionsIndex = await workflowExecutionRepository.resolveWriteIndex();
+      const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = await Promise.all([
+        stepExecutionRepo.resolveWriteIndex(),
+        workflowExecutionRepository.resolveWriteIndex(),
+      ]);
 
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateEncodedWorkflowExecutionId({
@@ -571,9 +575,6 @@ export class WorkflowsExecutionEnginePlugin
       if (concurrencyGroupKey) {
         workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
       }
-
-      workflowExecution.stepExecutionsIndex = await stepExecutionRepo.resolveWriteIndex();
-      workflowExecution.executionsIndex = await workflowExecutionRepository.resolveWriteIndex();
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
@@ -729,8 +730,10 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.security,
         coreStart.elasticsearch.client
       );
-      const resolvedStepExecutionsIndex = await stepExecutionRepo.resolveWriteIndex();
-      const resolvedExecutionsIndex = await workflowExecutionRepository.resolveWriteIndex();
+      const [resolvedStepExecutionsIndex, resolvedExecutionsIndex] = await Promise.all([
+        stepExecutionRepo.resolveWriteIndex(),
+        workflowExecutionRepository.resolveWriteIndex(),
+      ]);
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateEncodedWorkflowExecutionId({
           indexName: resolvedExecutionsIndex,
