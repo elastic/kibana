@@ -39,7 +39,7 @@ const imageConfigSchema = schema.object({
     ],
     {
       meta: { description: 'How the image should be sized within its container' },
-      defaultValue: DEFAULT_OBJECT_FIT, // CSS spec defaults to fill but embeddable has historically defaulted to contain
+      defaultValue: DEFAULT_OBJECT_FIT,
     }
   ),
 
