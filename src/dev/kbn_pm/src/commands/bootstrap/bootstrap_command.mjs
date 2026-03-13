@@ -53,6 +53,8 @@ export const command = {
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
     --allow-root         Required supplementary flag if you're running bootstrap as root.
+    --no-build           Skip the shared bundle builds (webpack bundles, version extraction). Useful
+                          when you only need internal dependencies linked without a full build.
     --quiet              Prevent logging more than basic success/error messages
   `,
   reportTimings: {
@@ -65,6 +67,7 @@ export const command = {
     const quiet = args.getBooleanValue('quiet') ?? false;
     const vscodeConfig =
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
+    const build = args.getBooleanValue('build') ?? true;
     const forceInstall = args.getBooleanValue('force-install');
     const shouldInstall =
       forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
@@ -111,24 +114,28 @@ export const command = {
     });
 
     await Promise.all([
-      time('extract relevant versions for packages', async () => {
-        log.info('extract relevant versions for packages');
-        await moonRun(':extract-version-dependencies', {
-          pipe: !quiet,
-          quiet,
-          noCache: forceInstall,
-        });
-        log.success('relevant versions extracted for packages');
-      }),
-      time('pre-build webpack bundles for packages', async () => {
-        log.info('pre-build webpack bundles for packages');
-        await moonRun(':build-webpack', {
-          pipe: !quiet,
-          quiet,
-          noCache: forceInstall,
-        });
-        log.success('shared webpack bundles built');
-      }),
+      build
+        ? time('extract relevant versions for packages', async () => {
+            log.info('extract relevant versions for packages');
+            await moonRun(':extract-version-dependencies', {
+              pipe: !quiet,
+              quiet,
+              noCache: forceInstall,
+            });
+            log.success('relevant versions extracted for packages');
+          })
+        : undefined,
+      build
+        ? time('pre-build webpack bundles for packages', async () => {
+            log.info('pre-build webpack bundles for packages');
+            await moonRun(':build-webpack', {
+              pipe: !quiet,
+              quiet,
+              noCache: forceInstall,
+            });
+            log.success('shared webpack bundles built');
+          })
+        : undefined,
       shouldInstall
         ? time('run install scripts', async () => {
             await runInstallScripts(log, { quiet });
