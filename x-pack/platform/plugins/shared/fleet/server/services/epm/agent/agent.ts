@@ -61,6 +61,37 @@ export function getMetaVariables(
 
 export type MetaVariable = ReturnType<typeof getMetaVariables>;
 
+/**
+ * Merges two compiled template objects following these rules:
+ * - Scalars: override wins.
+ * - Maps (plain objects): deep-merged recursively.
+ * - Arrays: base elements first, override appended.
+ */
+export function mergeCompiledTemplates(
+  base: Record<string, any>,
+  override: Record<string, any>
+): Record<string, any> {
+  const result: Record<string, any> = { ...base };
+  for (const [key, overrideValue] of Object.entries(override)) {
+    const baseValue = result[key];
+    if (Array.isArray(baseValue) && Array.isArray(overrideValue)) {
+      result[key] = [...baseValue, ...overrideValue];
+    } else if (
+      baseValue !== null &&
+      overrideValue !== null &&
+      typeof baseValue === 'object' &&
+      typeof overrideValue === 'object' &&
+      !Array.isArray(baseValue) &&
+      !Array.isArray(overrideValue)
+    ) {
+      result[key] = mergeCompiledTemplates(baseValue, overrideValue);
+    } else {
+      result[key] = overrideValue;
+    }
+  }
+  return result;
+}
+
 export function compileTemplate(
   variables: PackagePolicyConfigRecord,
   metaVariable: MetaVariable,
