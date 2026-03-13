@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
-import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const readResponseBodySchema = schema.object({
-  id: schema.string(),
-  data: markdownAttributesSchema,
-  meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
+export default createPlaywrightConfig({
+  testDir: './tests',
 });

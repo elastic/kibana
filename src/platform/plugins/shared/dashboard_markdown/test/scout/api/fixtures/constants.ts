@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
-import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
+/** The base API path for markdown endpoints (no leading slash for apiClient). */
+export const MARKDOWN_API_PATH = 'api/markdown';
 
-export const readResponseBodySchema = schema.object({
-  id: schema.string(),
-  data: markdownAttributesSchema,
-  meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
-});
+/** Common headers for Markdown API requests (internal API version 1) */
+export const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  'elastic-api-version': '1',
+} as const;

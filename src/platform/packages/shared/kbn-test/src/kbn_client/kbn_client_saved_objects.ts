@@ -53,6 +53,7 @@ interface IndexOptions<Attributes> {
   overwrite?: boolean;
   migrationVersion?: MigrationVersion;
   references?: Reference[];
+  space?: string;
 }
 
 interface UpdateOptions<Attributes> extends IndexOptions<Attributes> {
@@ -201,8 +202,12 @@ export class KbnClientSavedObjects {
     this.log.debug('Creating saved object: %j', options);
 
     const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
-      description: 'update saved object',
-      path: options.id
+      description: 'create saved object',
+      path: options.space
+        ? options.id
+          ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}/${options.id}`
+          : uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}`
+        : options.id
         ? uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`
         : uriencode`/internal/ftr/kbn_client_so/${options.type}`,
       query: {
@@ -226,7 +231,9 @@ export class KbnClientSavedObjects {
 
     const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'update saved object',
-      path: uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`,
+      path: options.space
+        ? uriencode`/s/${options.space}/internal/ftr/kbn_client_so/${options.type}/${options.id}`
+        : uriencode`/internal/ftr/kbn_client_so/${options.type}/${options.id}`,
       query: {
         overwrite: options.overwrite,
       },
