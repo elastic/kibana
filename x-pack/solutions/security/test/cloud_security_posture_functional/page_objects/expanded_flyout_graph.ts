@@ -54,6 +54,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly filterBar = this.ctx.getService('filterBar');
+  private readonly browser = this.ctx.getService('browser');
 
   async expandGraph(): Promise<void> {
     await this.testSubjects.click(GRAPH_PREVIEW_TITLE_LINK_TEST_ID);
@@ -207,7 +208,10 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     const filterPreview = await this.filterBar.getFilterEditorPreview();
     expect(filterPreview).to.be(expected);
 
-    await this.filterBar.ensureFieldEditorModalIsClosed();
+    // Close the filter editor by pressing Escape instead of using
+    // ensureFieldEditorModalIsClosed which has a bug when used inside flyouts
+    // (cancelSaveFilter exists in the DOM but is not displayed, causing a timeout)
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
   async clickEditFilter(filterIdx: number): Promise<void> {

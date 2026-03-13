@@ -52,9 +52,25 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
+
+      // Enable asset inventory setting (required for entity store with 'generic' type)
+      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+
+      // Initialize security-solution-default data-view (required by entity store)
+      const dataView = dataViewRouteHelpersFactory(supertest);
+      await dataView.create('security-solution');
+
+      // Initialize entity engine (required for graph visualization)
+      await initEntityEnginesWithRetry({
+        supertest,
+        retry,
+        logger,
+        entityTypes: ['generic'],
+      });
     });
 
     after(async () => {
+      await cleanupEntityStore({ supertest, logger });
       // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
       // Instead we delete all alerts from the index
       await es.deleteByQuery({
