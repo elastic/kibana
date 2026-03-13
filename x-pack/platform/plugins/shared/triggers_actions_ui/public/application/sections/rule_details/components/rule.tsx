@@ -8,6 +8,7 @@
 import React, { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
+import useObservable from 'react-use/lib/useObservable';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
 import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
@@ -77,6 +78,7 @@ export function RuleComponent({
     ruleTypeRegistry,
     actionTypeRegistry,
     getCasesPlugin,
+    chrome,
     data,
     http,
     notifications,
@@ -147,6 +149,15 @@ export function RuleComponent({
     executionStatusTranslations: rulesStatusesTranslationsMapping,
   });
 
+  const solutionNavId = useObservable(chrome.getActiveSolutionNavId$(), null);
+
+  const casesOwner =
+    solutionNavId === 'oblt'
+      ? 'observability'
+      : solutionNavId === 'security'
+      ? 'securitySolution'
+      : 'cases';
+
   const renderRuleAlertList = useCallback(() => {
     if (ruleType.hasAlertsMappings) {
       return (
@@ -161,8 +172,8 @@ export function RuleComponent({
           lastReloadRequestTime={lastReloadRequestTime}
           getAlertFormatter={getAlertFormatter}
           casesConfiguration={{
-            featureId: 'management',
-            owner: ['cases'],
+            featureId: 'not_used',
+            owner: [casesOwner],
           }}
           services={{
             cases,
@@ -180,6 +191,7 @@ export function RuleComponent({
   }, [
     application,
     cases,
+    casesOwner,
     data,
     fieldFormats,
     getAlertFormatter,
