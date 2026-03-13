@@ -8,6 +8,7 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { fromExpression } from '@kbn/interpreter';
+import type { SerializedTimeRange } from '@kbn/presentation-publishing';
 import { CANVAS_APP } from '../../../../common/lib';
 import { decode } from '../../../../common/lib/embeddable_dataurl';
 import type { CanvasElement, CanvasPage } from '../../../../types';
@@ -22,7 +23,11 @@ import {
 } from '../../../state/actions/embeddable';
 import { clearValue } from '../../../state/actions/resolved_args';
 import { embeddableInputToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
-import { embeddableService, presentationUtilService } from '../../../services/kibana_services';
+import {
+  dataService,
+  embeddableService,
+  presentationUtilService,
+} from '../../../services/kibana_services';
 
 export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
   const labsService = presentationUtilService.labsService;
@@ -35,8 +40,24 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
 
   useEffect(() => {
     if (isByValueEnabled && incomingEmbeddables?.length) {
+      const time = dataService.query.timefilter.timefilter.getTime();
+
       // handle each incoming embeddable
       incomingEmbeddables.forEach(({ embeddableId, serializedState: incomingState, type }) => {
+        // Canvas does not provide the global time range
+        // To ensure incoming embeddables have consistent time range from editor,
+        // provide global time range as embeddable state when not provided.
+        const incomingStateWithTimeRange: Required<SerializedTimeRange> = (
+          incomingState as SerializedTimeRange
+        ).time_range
+          ? (incomingState as Required<SerializedTimeRange>)
+          : {
+              ...incomingState,
+              time_range: {
+                from: time.from,
+                to: time.to,
+              },
+            };
         // retrieve existing element
         const originalElement = selectedPage.elements.find(
           ({ id }: CanvasElement) => id === embeddableId
@@ -68,9 +89,9 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
 
           // if type was changed, we should not provide originalInput
           if (originalType !== type) {
-            updatedState = incomingState;
+            updatedState = incomingStateWithTimeRange;
           } else {
-            updatedState = { ...originalState, ...incomingState };
+            updatedState = { ...originalState, ...incomingStateWithTimeRange };
           }
           const expression = embeddableInputToExpression(updatedState, type);
 
@@ -87,7 +108,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
           // select new embeddable element
           dispatch(selectToplevelNodes([embeddableId]));
         } else {
-          const expression = embeddableInputToExpression(incomingState, type);
+          const expression = embeddableInputToExpression(incomingStateWithTimeRange, type);
           dispatch(addElement(selectedPage.id, { expression }));
         }
       });
