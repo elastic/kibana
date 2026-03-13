@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+
+import { getSidebarViewForRoute } from './get_sidebar_view';
+import { ConversationSidebarView } from './views/conversation_view';
+import { AgentSettingsSidebarView } from './views/agent_settings_view';
+import { ManageSidebarView } from './views/manage_view';
+
+const SIDEBAR_WIDTH = 200;
+
+export const UnifiedSidebar: React.FC = () => {
+  const location = useLocation();
+  const { euiTheme } = useEuiTheme();
+  const sidebarView = getSidebarViewForRoute(location.pathname);
+
+  const sidebarStyles = css`
+    width: ${SIDEBAR_WIDTH}px;
+    min-width: ${SIDEBAR_WIDTH}px;
+    height: 100%;
+    padding: ${euiTheme.size.m};
+    border-right: ${euiTheme.border.thin};
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+  `;
+
+  return (
+    <nav css={sidebarStyles} aria-label="Agent Builder navigation">
+      {sidebarView === 'conversation' && <ConversationSidebarView pathname={location.pathname} />}
+      {sidebarView === 'agentSettings' && <AgentSettingsSidebarView pathname={location.pathname} />}
+      {sidebarView === 'manage' && <ManageSidebarView pathname={location.pathname} />}
+    </nav>
+  );
+};
