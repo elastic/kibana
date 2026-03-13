@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type EuiTableActionsColumnType, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { RIGHT_ALIGNMENT } from '@elastic/eui';
 import type { ColumnPreset } from './types';
 
-export const columnPresetActions: ColumnPreset<{
-  actions?: EuiTableActionsColumnType<any>['actions'];
-}> = ({ actions }) => {
+export const columnPresetActions: ColumnPreset = () => {
   return {
     width: '4.5em',
     minWidth: '4.5em',
