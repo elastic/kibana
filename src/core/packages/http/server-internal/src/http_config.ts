@@ -98,7 +98,7 @@ const configSchema = schema.object(
         allowCredentials: schema.boolean({ defaultValue: false }),
         allowOrigin: schema.oneOf(
           [
-            schema.arrayOf(hostURISchema, { minSize: 1 }),
+            schema.arrayOf(hostURISchema, { minSize: 1, maxSize: 100 }),
             schema.arrayOf(schema.literal('*'), { minSize: 1, maxSize: 1 }),
           ],
           {
@@ -174,7 +174,7 @@ const configSchema = schema.object(
           schema.string({
             hostname: true,
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 100 }
         )
       ),
     }),
@@ -187,7 +187,7 @@ const configSchema = schema.object(
       disableProtection: schema.boolean({ defaultValue: false }),
       allowlist: schema.arrayOf(
         schema.string({ validate: match(/^\//, 'must start with a slash') }),
-        { defaultValue: [] }
+        { defaultValue: [], maxSize: 100 }
       ),
     }),
     excludeRoutes: schema.arrayOf(
@@ -213,7 +213,7 @@ const configSchema = schema.object(
     requestId: schema.object(
       {
         allowFromAnyIp: schema.boolean({ defaultValue: false }),
-        ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [] }),
+        ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [], maxSize: 100 }),
       },
       {
         validate(value) {
@@ -256,7 +256,7 @@ const configSchema = schema.object(
 
       /** This should not be configurable in serverless */
       useVersionResolutionStrategyForInternalPaths: offeringBasedSchema({
-        traditional: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        traditional: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 100 }),
         serverless: schema.never(),
       }),
     }),
