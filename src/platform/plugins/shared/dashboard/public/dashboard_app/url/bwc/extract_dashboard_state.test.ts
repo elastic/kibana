@@ -30,7 +30,7 @@ describe('extractDashboardState', () => {
         ...optionalState,
       })
     ).toEqual({
-      ...omit(DEFAULT_DASHBOARD_STATE, 'panels'),
+      ...omit(DEFAULT_DASHBOARD_STATE, ['panels', 'pinned_panels']),
       ...optionalState,
     });
   });
