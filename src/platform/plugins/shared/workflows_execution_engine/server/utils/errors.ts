@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker'],
-  moduleNameMapper: {
-    '^react-day-picker$':
-      '<rootDir>/src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/calendar/__mocks__/react-day-picker.tsx',
-  },
-};
+import type { SerializedError } from '@kbn/workflows';
+
+export function isSerializedError(error: unknown): error is SerializedError {
+  return typeof error === 'object' && error !== null && 'type' in error && 'message' in error;
+}
