@@ -77,6 +77,7 @@ describe('getDatasetIndex', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
+        "esqlQuery": "from test_index | limit 10",
         "index": "test_index",
         "timeFieldName": undefined,
       }
@@ -280,6 +281,7 @@ describe('buildDatasourceStates', () => {
         "usedDataviews": Object {
           "layer_0": Object {
             "dataSourceType": "esql",
+            "esqlQuery": "from test | limit 10",
             "index": "test",
             "timeFieldName": undefined,
             "type": "adHocDataView",
