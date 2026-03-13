@@ -1,9 +1,9 @@
 {
-  "sha1": "eaa397336a152f1c558ac76fa53346230edc77f1",
+  "sha1": "",
   "tests": [
     {
-      "id": "65fe2f541b6ad11-864f48536870f42",
-      "title": "dashboards - create should create a dashboard",
+      "id": "28140fb5d17705d-cb6a0449ea09a5d",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user GET settings should return empty defaults when no settings exist",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -22,14 +22,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 35,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 32,
+        "column": 16
       }
     },
     {
-      "id": "65fe2f541b6ad11-199709156bcdd3f",
-      "title": "dashboards - create can create a dashboard with a specific id",
+      "id": "28140fb5d17705d-0b98e66c9804728",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user PUT settings should create settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -48,14 +48,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
         "line": 54,
-        "column": 10
+        "column": 16
       }
     },
     {
-      "id": "65fe2f541b6ad11-742d7665562ba1c",
-      "title": "dashboards - create can create a dashboard in a defined space",
+      "id": "28140fb5d17705d-9d32affefbde9cf",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user PUT settings should overwrite existing settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -74,14 +74,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 74,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 75,
+        "column": 16
       }
     },
     {
-      "id": "65fe2f541b6ad11-e1850999201863d",
-      "title": "dashboards - create return error if provided id already exists",
+      "id": "28140fb5d17705d-1a9c130e41cad4f",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user PUT settings should persist settings across GET requests",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -100,14 +100,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 93,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 106,
+        "column": 16
       }
     },
     {
-      "id": "65fe2f541b6ad11-f92bd664c9b50a8",
-      "title": "dashboards - create validation - returns error when title is not provided",
+      "id": "28140fb5d17705d-9f7fb88271f449f",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user validation should reject duplicate feature_id values",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -126,14 +126,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 111,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 135,
+        "column": 16
       }
     },
     {
-      "id": "65fe2f541b6ad11-8d4dbb980c8c577",
-      "title": "dashboards - create validation - returns error if panels is not an array",
+      "id": "28140fb5d17705d-cb722c60d97769a",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user validation should reject duplicate endpoints within a feature",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -152,14 +152,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 127,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 149,
+        "column": 16
       }
     },
     {
-      "id": "04c61aca5175965-8cedae59ae599ce",
-      "title": "dashboards - delete should return 404 for a non-existent dashboard",
+      "id": "28140fb5d17705d-37a745f51ebe4aa",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user validation should reject empty feature_id",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -178,14 +178,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/delete_dashboard.spec.ts",
-        "line": 34,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 165,
+        "column": 16
       }
     },
     {
-      "id": "04c61aca5175965-82af63ae1d9919a",
-      "title": "dashboards - delete should return 200 if the dashboard is deleted",
+      "id": "28140fb5d17705d-a497fd5f5e72ada",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user validation should reject empty endpoints array",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -204,14 +204,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/delete_dashboard.spec.ts",
-        "line": 50,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 176,
+        "column": 16
       }
     },
     {
-      "id": "5bad7053ebe10e4-b0be02f38ce4b19",
-      "title": "dashboards - get should return 200 with an existing dashboard",
+      "id": "28140fb5d17705d-a11b74718af3c59",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user validation should reject missing features field",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -230,14 +230,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/get_dashboard.spec.ts",
-        "line": 34,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 187,
+        "column": 16
       }
     },
     {
-      "id": "5bad7053ebe10e4-ebed35738bee962",
-      "title": "dashboards - get should return 404 with a non-existing dashboard",
+      "id": "28140fb5d17705d-e9cf3cce9cd7bb1",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings feature-privileged user GET should return 200",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -256,14 +256,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/get_dashboard.spec.ts",
-        "line": 48,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 217,
+        "column": 14
       }
     },
     {
-      "id": "d188e7edb1b6249-3da446951280e27",
-      "title": "dashboards - search should retrieve a paginated list of dashboards",
+      "id": "28140fb5d17705d-491bf9f46aee79e",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings feature-privileged user PUT should return 200",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -282,14 +282,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 29,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 226,
+        "column": 14
       }
     },
     {
-      "id": "d188e7edb1b6249-e1ba09c19952828",
-      "title": "dashboards - search should narrow results by search",
+      "id": "28140fb5d17705d-9314ce0d2e1d731",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings unauthorized user GET should return 403",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -308,14 +308,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 45,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 254,
+        "column": 14
       }
     },
     {
-      "id": "d188e7edb1b6249-eed3ddc459f9b11",
-      "title": "dashboards - search should allow users to set a per page limit",
+      "id": "28140fb5d17705d-e03eb926a9aef99",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings unauthorized user PUT should return 403",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -334,14 +334,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 62,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 262,
+        "column": 14
       }
     },
     {
-      "id": "d188e7edb1b6249-cd3ae57760d0065",
-      "title": "dashboards - search should allow users to paginate through the list of dashboards",
+      "id": "28140fb5d17705d-56cb60110c0c5c6",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings space isolation settings saved in one space should not be visible in another",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -357,17 +357,19 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 79,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 314,
+        "column": 16
       }
     },
     {
-      "id": "2e698b8125bdc32-c7b1636b298cd21",
-      "title": "dashboards - update should return 200 with an updated dashboard",
+      "id": "28140fb5d17705d-cf3610547f8d68c",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings space isolation settings saved in one space should be readable from the same space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -383,17 +385,19 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 35,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 340,
+        "column": 16
       }
     },
     {
-      "id": "2e698b8125bdc32-1e425d53d08dff0",
-      "title": "dashboards - update should return 404 when updating a non-existent dashboard",
+      "id": "28140fb5d17705d-3a9e367d517a176",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings space isolation each space should maintain its own independent settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -409,64 +413,14 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 52,
-        "column": 10
-      }
-    },
-    {
-      "id": "2e698b8125bdc32-9fabebf4da42d14",
-      "title": "dashboards - update validation - returns error when object is not provided",
-      "expectedStatus": "passed",
-      "tags": [
+        "@cloud-serverless-security_complete",
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 71,
-        "column": 10
-      }
-    },
-    {
-      "id": "2e698b8125bdc32-7e1b6c03b8cfb6a",
-      "title": "dashboards - update validation - returns error if panels is not an array",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 87,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 366,
+        "column": 16
       }
     }
   ]
