@@ -13,6 +13,8 @@ import {
   EuiIcon,
   EuiResizableContainer,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import {
   RULES_TABLE_FILTERS_MAIN_PANEL_MIN_WIDTH_PERCENT,
@@ -81,10 +83,12 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <EuiIcon type="filter" size="m" aria-hidden={true} />
+                          <EuiIcon type="transitionLeftOut" size="xl" aria-hidden={true} />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <span>{i18n.FILTER_SIDEBAR_TITLE}</span>
+                          <EuiTitle size="m">
+                            <span>{i18n.FILTER_SIDEBAR_TITLE}</span>
+                          </EuiTitle>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
@@ -95,7 +99,9 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
                           onClick={onClearFilters}
                           data-test-subj="rulesTableFiltersSidebarClearButton"
                         >
-                          {CLEAR_RULES_TABLE_FILTERS}
+                          <EuiText size="xs" color="subdued">
+                            {CLEAR_RULES_TABLE_FILTERS}
+                          </EuiText>
                         </EuiButtonEmpty>
                       </EuiFlexItem>
                     )}
