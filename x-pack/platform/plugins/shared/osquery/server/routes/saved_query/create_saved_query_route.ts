@@ -16,6 +16,7 @@ import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { StartPlugins } from '../../types';
 import { convertECSMappingToArray } from '../utils';
 import { createSavedQueryRequestSchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
@@ -62,12 +63,14 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           ecs_mapping,
         } = request.body;
 
+        const [, startPlugins] = await osqueryContext.getStartServices();
         const currentUser = await getUserInfo({
           request,
-          security: osqueryContext.security,
+          security: (startPlugins as StartPlugins).security,
           logger: osqueryContext.logFactory.get('savedQuery'),
         });
         const username = currentUser?.username ?? undefined;
+        const profileUid = currentUser?.profile_uid ?? undefined;
 
         const conflictingEntries = await spaceScopedClient.find<SavedQuerySavedObject>({
           type: savedQuerySavedObjectType,
@@ -96,8 +99,10 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
               timeout,
               ecs_mapping: convertECSMappingToArray(ecs_mapping),
               created_by: username,
+              created_by_profile_uid: profileUid,
               created_at: new Date().toISOString(),
               updated_by: username,
+              updated_by_profile_uid: profileUid,
               updated_at: new Date().toISOString(),
             },
             (value) => !isEmpty(value) || isBoolean(value) || isNumber(value)
@@ -110,6 +115,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           {
             created_at: attributes.created_at,
             created_by: attributes.created_by,
+            created_by_profile_uid: attributes.created_by_profile_uid,
             description: attributes.description,
             id: attributes.id,
             removed: attributes.removed,
@@ -121,6 +127,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             query: attributes.query,
             updated_at: attributes.updated_at,
             updated_by: attributes.updated_by,
+            updated_by_profile_uid: attributes.updated_by_profile_uid,
             saved_object_id: savedQuerySO.id,
             ecs_mapping,
           },
