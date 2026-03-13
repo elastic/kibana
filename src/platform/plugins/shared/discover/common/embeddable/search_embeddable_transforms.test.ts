@@ -54,6 +54,7 @@ describe('searchEmbeddableTransforms', () => {
         time_range: { from: 'now-15m', to: 'now' },
         discover_session_id: 'session-123',
         selected_tab_id: undefined,
+        overrides: {},
       });
       expect(mockDrilldownTransforms.transformOut).toHaveBeenCalledWith(state, references);
     });
@@ -130,11 +131,6 @@ describe('searchEmbeddableTransforms', () => {
         type: 'dataView',
         id: 'data-view-1',
       });
-      expect(result.columns).toEqual(result.tabs[0].columns);
-      expect(result.sort).toEqual(result.tabs[0].sort);
-      expect(result.density).toBe(DataGridDensity.COMPACT);
-      expect(result.header_row_height).toBe('auto');
-      expect(result.row_height).toBe('auto');
       expect(mockDrilldownTransforms.transformOut).toHaveBeenCalledWith(state, references);
     });
 
@@ -169,6 +165,7 @@ describe('searchEmbeddableTransforms', () => {
           time_range: { from: 'now-15m', to: 'now' },
           discover_session_id: 'test-saved-object-id',
           selected_tab_id: undefined,
+          overrides: {},
         };
 
         const result =
@@ -178,6 +175,7 @@ describe('searchEmbeddableTransforms', () => {
           title: 'Test Search',
           description: 'Test Description',
           time_range: { from: 'now-15m', to: 'now' },
+          grid: {},
         });
         expect(result.references).toEqual([
           {
@@ -196,6 +194,7 @@ describe('searchEmbeddableTransforms', () => {
           time_range: { from: 'now-1h', to: 'now' },
           discover_session_id: 'session-456',
           selected_tab_id: 'tab-1',
+          overrides: {},
         };
 
         const result =
@@ -205,6 +204,8 @@ describe('searchEmbeddableTransforms', () => {
           title: 'My Search',
           description: 'My description',
           time_range: { from: 'now-1h', to: 'now' },
+          grid: {},
+          selectedTabId: 'tab-1',
         });
         expect(result.references).toEqual([
           {
@@ -253,49 +254,31 @@ describe('searchEmbeddableTransforms', () => {
         expect(mockDrilldownTransforms.transformIn).toHaveBeenCalledWith(apiState);
       });
 
-      it('includes attributes.references so data view ref is stored on dashboard (by-value Classic mode)', () => {
+      it('includes references so data view ref is stored on dashboard (by-value Classic mode)', () => {
         const dataViewRef = {
           name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
           id: 'data-view-id-123',
           type: 'index-pattern',
         };
-        const serializedState: SearchEmbeddableByValueState = {
-          attributes: {
-            title: 'Test Search',
-            description: '',
-            columns: ['_source'],
-            sort: [],
-            grid: {},
-            hideChart: false,
-            isTextBasedQuery: false,
-            kibanaSavedObjectMeta: {
-              searchSourceJSON: '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-            },
-            tabs: [
-              {
-                id: 'tab-1',
-                label: 'Tab 1',
-                attributes: {
-                  kibanaSavedObjectMeta: {
-                    searchSourceJSON:
-                      '{"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-                  },
-                  sort: [],
-                  columns: ['_source'],
-                  grid: {},
-                  hideChart: false,
-                  sampleSize: 100,
-                  isTextBasedQuery: false,
-                },
-              },
-            ],
-            references: [dataViewRef],
-          },
+        const apiState: DiscoverSessionEmbeddableByValueState = {
           title: 'Panel Title',
+          tabs: [
+            {
+              columns: [{ name: '_source' }],
+              sort: [],
+              view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+              density: DataGridDensity.COMPACT,
+              header_row_height: 3,
+              row_height: 3,
+              query: { language: 'kuery', query: '' },
+              filters: [],
+              dataset: { type: 'dataView', id: 'data-view-id-123' },
+            },
+          ],
         };
 
         const result =
-          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(serializedState);
+          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(apiState);
 
         expect(result.references).toContainEqual(dataViewRef);
         expect((result.state as StoredSearchEmbeddableByValueState).attributes).not.toHaveProperty(

@@ -97,6 +97,7 @@ describe('search embeddable transform utils', () => {
         time_range: { from: 'now-15m', to: 'now' },
         discover_session_id: 'session-123',
         selected_tab_id: undefined,
+        overrides: {},
       };
       expect(isByReferenceDiscoverSessionEmbeddableState(state)).toBe(true);
     });
@@ -140,6 +141,7 @@ describe('search embeddable transform utils', () => {
         time_range: { from: 'now-15m', to: 'now' },
         discover_session_id: 'session-123',
         selected_tab_id: undefined,
+        overrides: {},
       });
     });
 
@@ -199,6 +201,7 @@ describe('search embeddable transform utils', () => {
         time_range: { from: 'now-15m', to: 'now' },
         discover_session_id: 'session-456',
         selected_tab_id: undefined,
+        overrides: {},
       };
       const { state, references } = discoverSessionToSavedSearchEmbeddableState(apiState);
       expect(references).toContainEqual({
@@ -342,6 +345,7 @@ describe('search embeddable transform utils', () => {
         time_range: { from: 'now-15m', to: 'now' },
         discover_session_id: 'session-123',
         selected_tab_id: undefined,
+        overrides: {},
       });
     });
   });
@@ -354,6 +358,7 @@ describe('search embeddable transform utils', () => {
         time_range: { from: 'now-15m', to: 'now' },
         discover_session_id: 'session-456',
         selected_tab_id: 'tab-1',
+        overrides: {},
       };
       const result = byReferenceDiscoverSessionToSavedSearchEmbeddableState(apiState);
       expect(result.references).toEqual([
@@ -368,6 +373,7 @@ describe('search embeddable transform utils', () => {
         description: 'My description',
         time_range: { from: 'now-15m', to: 'now' },
         grid: {},
+        selectedTabId: 'tab-1',
       });
     });
   });

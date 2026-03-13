@@ -287,110 +287,113 @@ const dataTableSchema = schema.object(
   { meta: { id: 'discoverSessionEmbeddableDataTableSchema' } }
 );
 
-const panelOverridesSchema = schema.object({
-  columns: schema.maybe(
-    schema.arrayOf(columnSchema, {
-      maxSize: 100,
-      defaultValue: [],
-      meta: {
-        description:
-          'Columns to display in the data table. When set, overrides the referenced saved object (when `discover_session_id` is used) or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "defaultColumns".',
-      },
-    })
-  ),
-  sort: schema.maybe(
-    schema.arrayOf(sortSchema, {
-      maxSize: 100,
-      defaultValue: [],
-      meta: {
-        description:
-          'Sort configuration (field and direction) for the data table. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
-      },
-    })
-  ),
-  density: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal(DataGridDensity.COMPACT),
-        schema.literal(DataGridDensity.EXPANDED),
-        schema.literal(DataGridDensity.NORMAL),
-      ],
-      {
-        defaultValue: DataGridDensity.COMPACT,
+const panelOverridesSchema = schema.object(
+  {
+    columns: schema.maybe(
+      schema.arrayOf(columnSchema, {
+        maxSize: 100,
+        defaultValue: [],
         meta: {
           description:
-            'Data grid row spacing: `compact`, `expanded`, or `normal`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+            'Columns to display in the data table. When set, overrides the referenced saved object (when `discover_session_id` is used) or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "defaultColumns".',
         },
-      }
-    )
-  ),
-  header_row_height: schema.maybe(
-    schema.oneOf(
-      [
-        schema.number({
-          min: 1,
-          max: 5,
-        }),
-        schema.literal('auto'),
-      ],
-      {
-        defaultValue: 3,
+      })
+    ),
+    sort: schema.maybe(
+      schema.arrayOf(sortSchema, {
+        maxSize: 100,
+        defaultValue: [],
         meta: {
           description:
-            'Header row height: number (1–5) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+            'Sort configuration (field and direction) for the data table. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
         },
-      }
-    )
-  ),
-  row_height: schema.maybe(
-    schema.oneOf(
-      [
-        schema.number({
-          min: 1,
-          max: 20,
-        }),
-        schema.literal('auto'),
-      ],
-      {
-        defaultValue: 3,
+      })
+    ),
+    density: schema.maybe(
+      schema.oneOf(
+        [
+          schema.literal(DataGridDensity.COMPACT),
+          schema.literal(DataGridDensity.EXPANDED),
+          schema.literal(DataGridDensity.NORMAL),
+        ],
+        {
+          defaultValue: DataGridDensity.COMPACT,
+          meta: {
+            description:
+              'Data grid row spacing: `compact`, `expanded`, or `normal`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+          },
+        }
+      )
+    ),
+    header_row_height: schema.maybe(
+      schema.oneOf(
+        [
+          schema.number({
+            min: 1,
+            max: 5,
+          }),
+          schema.literal('auto'),
+        ],
+        {
+          defaultValue: 3,
+          meta: {
+            description:
+              'Header row height: number (1–5) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+          },
+        }
+      )
+    ),
+    row_height: schema.maybe(
+      schema.oneOf(
+        [
+          schema.number({
+            min: 1,
+            max: 20,
+          }),
+          schema.literal('auto'),
+        ],
+        {
+          defaultValue: 3,
+          meta: {
+            description:
+              'Data row height: number (1–20) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:rowHeightOption".',
+          },
+        }
+      )
+    ),
+    rows_per_page: schema.maybe(
+      schema.oneOf(
+        [
+          schema.literal(10),
+          schema.literal(25),
+          schema.literal(50),
+          schema.literal(100),
+          schema.literal(250),
+          schema.literal(500),
+        ],
+        {
+          defaultValue: 100,
+          meta: {
+            description:
+              'Number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleRowsPerPage".',
+          },
+        }
+      )
+    ),
+    sample_size: schema.maybe(
+      schema.number({
+        min: 10,
+        max: 10000,
+        defaultValue: 500,
         meta: {
           description:
-            'Data row height: number (1–20) or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:rowHeightOption".',
+            'Number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".',
         },
-      }
-    )
-  ),
-  rows_per_page: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal(10),
-        schema.literal(25),
-        schema.literal(50),
-        schema.literal(100),
-        schema.literal(250),
-        schema.literal(500),
-      ],
-      {
-        defaultValue: 100,
-        meta: {
-          description:
-            'Number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleRowsPerPage".',
-        },
-      }
-    )
-  ),
-  sample_size: schema.maybe(
-    schema.number({
-      min: 10,
-      max: 10000,
-      defaultValue: 500,
-      meta: {
-        description:
-          'Number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".',
-      },
-    })
-  ),
-});
+      })
+    ),
+  },
+  { defaultValue: {} }
+);
 
 const classicTabSchema = schema.allOf([
   dataTableSchema,
@@ -426,7 +429,6 @@ const tabSchema = schema.oneOf([classicTabSchema, esqlTabSchema]);
 const discoverSessionByValueEmbeddableSchema = schema.allOf([
   serializedTitlesSchema,
   serializedTimeRangeSchema,
-  panelOverridesSchema,
   schema.object({
     tabs: schema.arrayOf(tabSchema, {
       minSize: 1,
@@ -442,7 +444,6 @@ const discoverSessionByValueEmbeddableSchema = schema.allOf([
 const discoverSessionByReferenceEmbeddableSchema = schema.allOf([
   serializedTitlesSchema,
   serializedTimeRangeSchema,
-  panelOverridesSchema,
   schema.object({
     discover_session_id: schema.string(),
     selected_tab_id: schema.maybe(
@@ -453,6 +454,7 @@ const discoverSessionByReferenceEmbeddableSchema = schema.allOf([
         },
       })
     ),
+    overrides: panelOverridesSchema,
   }),
 ]);
 

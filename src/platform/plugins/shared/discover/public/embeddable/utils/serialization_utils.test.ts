@@ -155,6 +155,7 @@ describe('Serialization utils', () => {
         description: 'My description',
         discover_session_id: 'savedSearch',
         selected_tab_id: undefined,
+        overrides: {},
       };
 
       const deserializedState = await deserializeState({
@@ -179,7 +180,7 @@ describe('Serialization utils', () => {
         description: 'My description',
         discover_session_id: 'savedSearch',
         selected_tab_id: undefined,
-        sort: [{ name: 'order_date', direction: 'asc' }],
+        overrides: { sort: [{ name: 'order_date', direction: 'asc' }] },
       };
 
       const deserializedState = await deserializeState({
@@ -212,6 +213,7 @@ describe('Serialization utils', () => {
         title: 'test panel title',
         discover_session_id: 'savedSearch',
         selected_tab_id: 'tab-2',
+        overrides: {},
       };
 
       const deserializedState = await deserializeState({
@@ -241,9 +243,10 @@ describe('Serialization utils', () => {
         title: 'test panel title',
         discover_session_id: 'savedSearch',
         selected_tab_id: 'deleted-tab-id',
-        // Stale overrides from the deleted tab
-        columns: [{ name: 'stale-col-a' }],
-        sort: [{ name: 'stale_field', direction: 'asc' }],
+        overrides: {
+          columns: [{ name: 'stale-col-a' }],
+          sort: [{ name: 'stale_field', direction: 'asc' }],
+        },
       };
 
       const deserializedState = await deserializeState({
@@ -272,8 +275,7 @@ describe('Serialization utils', () => {
         title: 'test panel title',
         discover_session_id: 'savedSearch',
         selected_tab_id: 'tab-2',
-        // Dashboard override for columns on top of tab-2
-        columns: [{ name: 'custom-col' }],
+        overrides: { columns: [{ name: 'custom-col' }] },
       };
 
       const deserializedState = await deserializeState({

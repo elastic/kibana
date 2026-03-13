@@ -46,9 +46,9 @@ export const deserializeState = async ({
   discoverServices: DiscoverServices;
 }): Promise<SearchEmbeddableRuntimeState> => {
   const panelState = pick(serializedState, EDITABLE_PANEL_KEYS);
-  const savedObjectOverride = toStoredSearchEmbeddableState(serializedState);
 
   if (isByReferenceDiscoverSessionEmbeddableState(serializedState)) {
+    const savedObjectOverride = toStoredSearchEmbeddableState(serializedState.overrides ?? {});
     // by reference
     const { getDiscoverSession } = discoverServices.savedSearch;
     const session = await getDiscoverSession(serializedState.discover_session_id);
@@ -80,6 +80,8 @@ export const deserializeState = async ({
     };
   } else {
     // by value
+    const [tab] = serializedState.tabs;
+    const savedObjectOverride = toStoredSearchEmbeddableState(tab ?? {});
     const { byValueToSavedSearch } = discoverServices.savedSearch;
 
     const { state: storedState, references } =

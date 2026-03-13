@@ -89,9 +89,9 @@ export function byReferenceSavedSearchToDiscoverSessionEmbeddableState(
   } = storedState;
   return {
     ...otherAttrs,
-    ...fromStoredSearchEmbeddableState(storedState),
     discover_session_id: savedObjectRef.id,
     selected_tab_id: selectedTabId,
+    overrides: fromStoredSearchEmbeddableState(storedState),
   };
 }
 
@@ -104,21 +104,11 @@ export function byReferenceDiscoverSessionToSavedSearchEmbeddableState(
     type: SavedSearchType,
     id: apiState.discover_session_id,
   };
-  const {
-    sort,
-    columns,
-    row_height,
-    sample_size,
-    rows_per_page,
-    header_row_height,
-    density,
-    discover_session_id,
-    selected_tab_id,
-    ...otherAttrs
-  } = apiState;
+  const { discover_session_id, selected_tab_id, overrides, ...otherAttrs } = apiState;
   const state: StoredSearchEmbeddableByReferenceState = {
     ...otherAttrs,
-    ...toStoredSearchEmbeddableState(apiState),
+    ...toStoredSearchEmbeddableState(overrides ?? {}),
+    ...(selected_tab_id != null && { selectedTabId: selected_tab_id }),
   };
   return {
     state,
@@ -144,10 +134,10 @@ export function byValueSavedSearchToDiscoverSessionEmbeddableState(
   } = storedState;
   const [tab] = attributes.tabs ?? extractTabs(attributes).tabs;
   const apiTab = fromStoredTab(tab.attributes, references);
+  const panelOverrides = fromStoredSearchEmbeddableState(storedState);
   return {
     ...otherAttrs,
-    ...fromStoredSearchEmbeddableState(storedState),
-    tabs: [apiTab],
+    tabs: [{ ...apiTab, ...panelOverrides }],
   };
 }
 
@@ -156,20 +146,13 @@ export function byValueDiscoverSessionToSavedSearchEmbeddableState(
   references: SavedObjectReference[] = []
 ): { state: StoredSearchEmbeddableByValueState; references: SavedObjectReference[] } {
   const {
-    sort,
-    columns,
-    row_height,
-    sample_size,
-    rows_per_page,
-    header_row_height,
-    density,
     tabs: [apiTab],
     ...otherAttrs
   } = apiState;
   const { state: tabAttributes, references: tabReferences } = toStoredTab(apiTab);
   const state: StoredSearchEmbeddableByValueState = {
     ...otherAttrs,
-    ...toStoredSearchEmbeddableState(apiState),
+    ...toStoredSearchEmbeddableState(apiTab),
     attributes: {
       ...tabAttributes,
       sort: tabAttributes.sort as SavedSearchAttributes['sort'],
@@ -260,7 +243,7 @@ export function fromStoredSearchEmbeddableState(
     ...(rowHeight && { row_height: fromStoredHeight(rowHeight) }),
     ...(sampleSize && { sample_size: sampleSize }),
     ...(rowsPerPage && {
-      rows_per_page: rowsPerPage as DiscoverSessionEmbeddableState['rows_per_page'],
+      rows_per_page: rowsPerPage as DiscoverSessionPanelOverrides['rows_per_page'],
     }),
     ...(headerRowHeight && { header_row_height: fromStoredHeight(headerRowHeight) }),
     ...(density && { density }),
