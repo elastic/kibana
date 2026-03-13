@@ -28,4 +28,6 @@ export interface AlertDetailsAppSectionProps {
     [SERVICE_ENVIRONMENT]: string;
   }>;
   timeZone: string;
+  /** Passed by observability when present; used to render the service map under the latency panel. */
+  embeddableDeps?: unknown;
 }

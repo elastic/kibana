@@ -316,6 +316,13 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   alertDetailsAppSection?:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
+  /**
+   * Optional section rendered after the main alert details and alerts history.
+   * Receives the same props as alertDetailsAppSection (alert, rule, timeZone, setSources).
+   */
+  alertDetailsTrailingSection?:
+    | React.FunctionComponent<any>
+    | React.LazyExoticComponent<ComponentType<any>>;
   isInternallyManaged?: boolean;
   /**
    * Optional formatter for alert-level context (reason, deep link URL).

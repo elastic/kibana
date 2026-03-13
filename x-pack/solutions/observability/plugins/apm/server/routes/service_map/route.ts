@@ -8,12 +8,24 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
-import type { ServiceMapResponse } from '../../../common/service_map';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
+import type { ServiceMapResponse, ServicesResponse } from '../../../common/service_map';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map/utils';
 import { notifyFeatureUsage } from '../../feature';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
+import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import { getApmSloClient } from '../../lib/helpers/get_apm_slo_client';
+import {
+  getServicesAlerts,
+  type ServiceAlertsResponse,
+} from '../services/get_services/get_service_alerts';
+import type { SloStatus } from '../../../common/service_inventory';
+import {
+  getServicesSloStats,
+  type ServiceSloStatsResponse,
+} from '../services/get_services/get_services_slo_stats';
 import { getServiceMap } from './get_service_map';
 import type { ServiceMapServiceDependencyInfoResponse } from './get_service_map_dependency_node_info';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
@@ -64,7 +76,14 @@ const serviceMapRoute = createApmServerRoute({
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
 
-    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] = await Promise.all([
+    const [
+      mlClient,
+      apmEventClient,
+      serviceGroup,
+      maxNumberOfServices,
+      apmAlertsClient,
+      sloClient,
+    ] = await Promise.all([
       getMlClient(resources),
       getApmEventClient(resources),
       serviceGroupId
@@ -74,6 +93,8 @@ const serviceMapRoute = createApmServerRoute({
           })
         : Promise.resolve(null),
       uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+      getApmAlertsClient(resources),
+      getApmSloClient(resources),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -84,7 +105,7 @@ const serviceMapRoute = createApmServerRoute({
       kuery,
     });
 
-    return getServiceMap({
+    const mapResponse = await getServiceMap({
       mlClient,
       config,
       apmEventClient,
@@ -98,6 +119,64 @@ const serviceMapRoute = createApmServerRoute({
       serviceGroupKuery: serviceGroup?.kuery,
       kuery,
     });
+
+    // Collect all service names that appear on the map (servicesData + from spans), so badges
+    // show for every visible service (e.g. when map is focused on one service, we still show
+    // alerts/SLO for opbeans-go, redis, etc., not just the focused service).
+    const visibleServiceNames = new Set<string>(
+      mapResponse.servicesData.map((s: ServicesResponse): string => s[SERVICE_NAME])
+    );
+    for (const span of mapResponse.spans) {
+      if (span.serviceName) {
+        visibleServiceNames.add(span.serviceName);
+      }
+      if (span.destinationService?.serviceName) {
+        visibleServiceNames.add(span.destinationService.serviceName);
+      }
+    }
+    const serviceNamesForBadges = [...visibleServiceNames].slice(0, 100);
+    if (serviceNamesForBadges.length > 0) {
+      // Badges use the same start/end as the map; no service name filter so we get counts for all visible services.
+      const [alertsResult, sloStatsResult] = await Promise.all([
+        getServicesAlerts({
+          apmAlertsClient,
+          start,
+          end,
+          environment,
+          serviceNames: serviceNamesForBadges,
+          maxNumServices: serviceNamesForBadges.length,
+        }).catch((err: Error): ServiceAlertsResponse => {
+          logger.debug(err?.message ?? 'Failed to fetch alerts for service map badges');
+          return [];
+        }),
+        getServicesSloStats({
+          sloClient,
+          environment,
+          serviceNames: serviceNamesForBadges,
+        }).catch((err: Error): ServiceSloStatsResponse => {
+          logger.debug(err?.message ?? 'Failed to fetch SLO stats for service map badges');
+          return [];
+        }),
+      ]);
+
+      const serviceAlertsCounts: Record<string, number> = {};
+      for (const { serviceName: name, alertsCount } of alertsResult) {
+        serviceAlertsCounts[name] = alertsCount;
+      }
+
+      const serviceSloStats: Record<string, { sloStatus: SloStatus; sloCount: number }> = {};
+      for (const { serviceName: name, sloStatus, sloCount } of sloStatsResult) {
+        serviceSloStats[name] = { sloStatus, sloCount };
+      }
+
+      return {
+        ...mapResponse,
+        serviceAlertsCounts,
+        serviceSloStats,
+      };
+    }
+
+    return mapResponse;
   },
 });
 
