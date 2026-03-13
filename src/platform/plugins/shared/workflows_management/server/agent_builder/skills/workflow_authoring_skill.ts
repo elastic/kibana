@@ -53,6 +53,9 @@ Use this skill when the user wants to:
 - **${workflowTools.modifyProperty}**: Modify a top-level workflow property (requires existing attachment)
 - **${workflowTools.deleteStep}**: Delete a step by name (requires existing attachment)
 
+### Execution Tool
+- **workflow_execute_step**: Execute a single step to verify it works. Safe steps (data transforms, read-only ES queries, console, conditionals) run automatically and return output. Unsafe steps (HTTP, index writes, connectors, AI prompts) return a preview with config and validation instead.
+
 ## Core Instructions
 
 ### Search Examples Before Writing Step YAML
@@ -233,6 +236,16 @@ When using edit tools:
 6. Each edit tool reads the current YAML from the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment and updates it,
    so sequential tool calls within a round see each other's changes
 7. After edits, you can render the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment with <render_attachment id="{attachmentId}"/> to show the user the current complete YAML
+
+### Verifying Steps with workflow_execute_step
+
+After editing a step, use \`workflow_execute_step\` to verify it works:
+
+1. Call \`workflow_execute_step\` with the step name
+2. If the step references previous step outputs, provide \`contextOverride\` with mock data:
+   \`{ "steps": { "previous_step": { "output": { "data": [...] } } } }\`
+3. If the result shows errors, fix the step and re-execute until it succeeds
+4. For unsafe steps (HTTP, connectors, index writes), the tool returns a preview with validation — use this to verify correctness without executing
 
 ### Best Practices
 
