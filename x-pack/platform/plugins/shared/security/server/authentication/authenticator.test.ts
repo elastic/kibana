@@ -1007,7 +1007,7 @@ describe('Authenticator', () => {
         expect(mockSAMLAuthenticationProvider2.login).toHaveBeenCalledWith(
           request,
           loginAttemptValue,
-          mockSessVal.state
+          { ...mockSessVal, provider: { type: 'saml', name: 'saml2' } }
         );
 
         // Presence of the session has precedence over order.
@@ -2839,10 +2839,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalledTimes(1);
-      expect(mockBasicAuthenticationProvider.authenticate).toBeCalledWith(
-        request,
-        mockSessVal.state
-      );
+      expect(mockBasicAuthenticationProvider.authenticate).toBeCalledWith(request, mockSessVal);
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 

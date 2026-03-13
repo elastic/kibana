@@ -99,8 +99,12 @@ export function registerTelemetryConfigRoutes({
     .get({
       access: 'internal',
       path: FetchTelemetryConfigRoute,
-      options: { authRequired: 'optional' },
       security: {
+        authc: {
+          enabled: 'optional',
+          reason:
+            'Telemetry config must be accessible regardless of authentication state to determine opt-in status',
+        },
         authz: {
           enabled: false,
           reason: 'This route is opted out from authorization',

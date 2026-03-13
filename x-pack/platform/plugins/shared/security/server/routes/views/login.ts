@@ -43,6 +43,7 @@ export function defineLoginRoutes({
       security: {
         authc: {
           enabled: 'optional',
+          reason: 'This route can be accessed by both authenticated and unauthenticated users.',
         },
         authz: {
           enabled: false,
