@@ -20,6 +20,7 @@ export const notificationPolicyDestinationSchema = schema.oneOf([
 export const notificationPolicySavedObjectAttributesSchema = schema.object({
   name: schema.string(),
   description: schema.string(),
+  enabled: schema.boolean(),
   destinations: schema.arrayOf(notificationPolicyDestinationSchema),
   matcher: schema.maybe(schema.string()),
   group_by: schema.maybe(schema.arrayOf(schema.string())),
@@ -28,6 +29,7 @@ export const notificationPolicySavedObjectAttributesSchema = schema.object({
       interval: schema.string(),
     })
   ),
+  snoozedUntil: schema.maybe(schema.string()),
   rule_labels: schema.maybe(schema.arrayOf(schema.string())),
   auth: schema.object({
     apiKey: schema.maybe(schema.string()),

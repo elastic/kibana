@@ -68,6 +68,7 @@ function mockNpFindAllDecrypted(spy: jest.SpyInstance, policyIds: string[]) {
       attributes: {
         name: `Policy ${id}`,
         description: `Description for ${id}`,
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
         auth: { apiKey: 'test-api-key', owner: 'elastic', createdByUser: false },
         createdBy: null,

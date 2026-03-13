@@ -15,6 +15,7 @@ export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
   properties: {
     name: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
     description: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
+    enabled: { type: 'boolean' },
     destinations: {
       type: 'object',
       properties: {
@@ -22,6 +23,7 @@ export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
         id: { type: 'keyword' },
       },
     },
+    snoozedUntil: { type: 'date' },
     auth: {
       type: 'object',
       properties: {

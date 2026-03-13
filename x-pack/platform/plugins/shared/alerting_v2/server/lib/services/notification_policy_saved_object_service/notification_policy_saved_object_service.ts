@@ -30,6 +30,10 @@ export type NotificationPolicySavedObjectBulkGetItem =
       error: SavedObjectError;
     };
 
+export type NotificationPolicySavedObjectBulkUpdateItem =
+  | { id: string; version?: string }
+  | { id: string; error: SavedObjectError };
+
 export interface NotificationPolicySavedObjectServiceContract {
   create(params: {
     attrs: NotificationPolicySavedObjectAttributes;
@@ -45,9 +49,15 @@ export interface NotificationPolicySavedObjectServiceContract {
   ): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
   update(params: {
     id: string;
-    attrs: NotificationPolicySavedObjectAttributes;
-    version: string;
+    attrs: Partial<NotificationPolicySavedObjectAttributes>;
+    version?: string;
   }): Promise<{ id: string; version?: string }>;
+  bulkUpdate(params: {
+    objects: Array<{
+      id: string;
+      attrs: Partial<NotificationPolicySavedObjectAttributes>;
+    }>;
+  }): Promise<NotificationPolicySavedObjectBulkUpdateItem[]>;
   findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
   delete(params: { id: string }): Promise<void>;
   find(params: { page: number; perPage: number }): Promise<{
@@ -116,17 +126,45 @@ export class NotificationPolicySavedObjectService
     version,
   }: {
     id: string;
-    attrs: NotificationPolicySavedObjectAttributes;
-    version: string;
+    attrs: Partial<NotificationPolicySavedObjectAttributes>;
+    version?: string;
   }): Promise<{ id: string; version?: string }> {
     const result = await this.client.update<NotificationPolicySavedObjectAttributes>(
       NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
       id,
       attrs,
-      { version }
+      version ? { version } : undefined
     );
 
     return { id: result.id, version: result.version };
+  }
+
+  public async bulkUpdate({
+    objects,
+  }: {
+    objects: Array<{
+      id: string;
+      attrs: Partial<NotificationPolicySavedObjectAttributes>;
+    }>;
+  }): Promise<NotificationPolicySavedObjectBulkUpdateItem[]> {
+    if (objects.length === 0) {
+      return [];
+    }
+
+    const result = await this.client.bulkUpdate<NotificationPolicySavedObjectAttributes>(
+      objects.map(({ id, attrs }) => ({
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        id,
+        attributes: attrs,
+      }))
+    );
+
+    return result.saved_objects.map((savedObject) => {
+      if ('error' in savedObject && savedObject.error) {
+        return { id: savedObject.id, error: savedObject.error };
+      }
+      return { id: savedObject.id, version: savedObject.version };
+    });
   }
 
   public async bulkGetByIds(

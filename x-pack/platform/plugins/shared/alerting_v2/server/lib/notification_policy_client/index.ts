@@ -7,8 +7,11 @@
 
 export { NotificationPolicyClient } from './notification_policy_client';
 export type {
+  BulkActionNotificationPoliciesParams,
+  BulkActionNotificationPoliciesResponse,
   CreateNotificationPolicyParams,
   FindNotificationPoliciesParams,
   FindNotificationPoliciesResponse,
+  SnoozeNotificationPolicyParams,
   UpdateNotificationPolicyParams,
 } from './types';
