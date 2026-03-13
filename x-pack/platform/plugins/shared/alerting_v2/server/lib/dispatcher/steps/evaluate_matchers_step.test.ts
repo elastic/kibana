@@ -149,7 +149,7 @@ describe('evaluateMatchers', () => {
 
   it('skips disabled policies', () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
-    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const rule = createRule({ id: 'r1' });
     const policy = createNotificationPolicy({ id: 'p1', enabled: false });
 
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -159,7 +159,7 @@ describe('evaluateMatchers', () => {
 
   it('skips snoozed policies when snoozedUntil is in the future', () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
-    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const rule = createRule({ id: 'r1' });
     const futureDate = new Date(Date.now() + 3_600_000).toISOString();
     const policy = createNotificationPolicy({ id: 'p1', snoozedUntil: futureDate });
 
@@ -170,7 +170,7 @@ describe('evaluateMatchers', () => {
 
   it('matches policies when snoozedUntil is in the past', () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
-    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const rule = createRule({ id: 'r1' });
     const pastDate = new Date(Date.now() - 3_600_000).toISOString();
     const policy = createNotificationPolicy({ id: 'p1', snoozedUntil: pastDate });
 
@@ -181,7 +181,7 @@ describe('evaluateMatchers', () => {
 
   it('matches enabled policies without snooze', () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
-    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const rule = createRule({ id: 'r1' });
     const policy = createNotificationPolicy({ id: 'p1', enabled: true });
 
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
