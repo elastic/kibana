@@ -55,16 +55,13 @@ function mockRulesBulkGet(
     saved_objects: ruleIds.map((id) => ({
       id,
       type: RULE_SAVED_OBJECT_TYPE,
-      attributes: createRuleSoAttributes({
-        notification_policies: [{ ref: 'policy_456' }],
-        ...overrides,
-      }),
+      attributes: createRuleSoAttributes(overrides),
       references: [],
     })),
   });
 }
 
-function mockNpBulkGetDecrypted(spy: jest.SpyInstance, policyIds: string[]) {
+function mockNpFindAllDecrypted(spy: jest.SpyInstance, policyIds: string[]) {
   spy.mockResolvedValue(
     policyIds.map((id) => ({
       id,
@@ -120,7 +117,7 @@ describe('DispatcherService', () => {
   let rulesSoService: RulesSavedObjectServiceContract;
   let npSoService: NotificationPolicySavedObjectServiceContract;
   let rulesMockSoClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockBulkGetDecryptedByIds: jest.SpyInstance;
+  let mockFindAllDecrypted: jest.SpyInstance;
   let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
 
   beforeEach(() => {
@@ -134,8 +131,8 @@ describe('DispatcherService', () => {
 
     const npMock = createNotificationPolicySavedObjectService();
     npSoService = npMock.notificationPolicySavedObjectService;
-    mockBulkGetDecryptedByIds = npMock.mockBulkGetDecryptedByIds;
-    mockNpBulkGetDecrypted(mockBulkGetDecryptedByIds, ['policy_456']);
+    mockFindAllDecrypted = npMock.mockFindAllDecrypted;
+    mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456']);
 
     mockWfm = createMockWorkflowsManagement();
 
@@ -371,8 +368,8 @@ describe('DispatcherService', () => {
 
       const npMock = createNotificationPolicySavedObjectService();
       npSoService = npMock.notificationPolicySavedObjectService;
-      mockBulkGetDecryptedByIds = npMock.mockBulkGetDecryptedByIds;
-      mockNpBulkGetDecrypted(mockBulkGetDecryptedByIds, ['policy_456']);
+      mockFindAllDecrypted = npMock.mockFindAllDecrypted;
+      mockNpFindAllDecrypted(mockFindAllDecrypted, ['policy_456']);
 
       mockWfm = createMockWorkflowsManagement();
 

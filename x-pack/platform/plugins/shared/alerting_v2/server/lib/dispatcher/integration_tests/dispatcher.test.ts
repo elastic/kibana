@@ -7,12 +7,17 @@
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../../resources/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM, type AlertEvent } from '../../../resources/alert_events';
 import type {
   RuleSavedObjectAttributes,
   NotificationPolicySavedObjectAttributes,
+} from '../../../saved_objects';
+import {
+  RULE_SAVED_OBJECT_TYPE,
+  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../saved_objects';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
@@ -359,12 +364,17 @@ describe('DispatcherService integration tests', () => {
     esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
 
     rulesSoService = new RulesSavedObjectService(
-      (opts) => kibanaServer.coreStart.savedObjects.getUnsafeInternalClient(opts),
+      kibanaServer.coreStart.savedObjects.getUnsafeInternalClient({
+        includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+      }),
       undefined as unknown as SpacesPluginStart
     );
     npSoService = new NotificationPolicySavedObjectService(
-      (opts) => kibanaServer.coreStart.savedObjects.getUnsafeInternalClient(opts),
-      undefined as unknown as SpacesPluginStart
+      kibanaServer.coreStart.savedObjects.getUnsafeInternalClient({
+        includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE],
+      }),
+      undefined as unknown as SpacesPluginStart,
+      undefined as unknown as EncryptedSavedObjectsClient
     );
 
     await waitForDataStreamsReady(esClient, [ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
@@ -390,7 +400,7 @@ describe('DispatcherService integration tests', () => {
     storageService = new StorageService(esClient, mockLoggerService);
     mockWfm = createMockWorkflowsManagement();
 
-    jest.spyOn(npSoService, 'bulkGetDecryptedByIds').mockImplementation(async () => {
+    jest.spyOn(npSoService, 'findAllDecrypted').mockImplementation(async () => {
       const { saved_objects: allPolicies } = await npSoService.find({
         page: 1,
         perPage: 1000,
@@ -705,7 +715,6 @@ async function seedRulesAndPolicies(
     time_field: '@timestamp',
     schedule: { every: '5m' },
     evaluation: { query: { base: 'FROM test' } },
-    notification_policies: [{ ref: NOTIFICATION_POLICY_ID }],
     enabled: true,
     createdBy: null,
     updatedBy: null,
