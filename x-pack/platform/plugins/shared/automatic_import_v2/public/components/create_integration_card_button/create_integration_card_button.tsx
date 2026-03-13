@@ -6,91 +6,89 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiButton, EuiLink, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useKibana } from '../../common/hooks/use_kibana';
 import autoImportIntegrationsImage from '../../common/images/auto_import_integrations.svg';
 
-const useStyles = (borderRadius: string, euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => ({
+const useStyles = (euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => ({
   panel: css`
     background: linear-gradient(
       112.41deg,
       ${euiTheme.colors.backgroundBasePrimary} 3.58%,
       ${euiTheme.colors.backgroundBaseSuccess} 98.48%
     );
-    width: min(100%, 285px);
-    height: 179px;
-    border-radius: 6px;
-    padding: 16px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+    container-type: inline-size;
+    max-width: 240px;
+  `,
+  panelContent: css`
     gap: 12px;
   `,
   title: css`
-    margin: 0;
-    width: 253px;
+    margin: none;
     max-width: 100%;
-    min-height: 24px;
+    word-wrap: break-word;
     font-size: ${euiTheme.font.scale.m};
-    line-height: 24px;
+    line-height: 16px;
     font-weight: ${euiTheme.font.weight.semiBold};
     color: ${euiTheme.colors.title};
   `,
   contentRow: css`
-    width: 253px;
-    max-width: 100%;
-    height: 55px;
-    gap: 16px;
     display: flex;
-    align-items: flex-start;
-    margin: 0 0 12px 0;
+    flex-wrap: nowrap;
+    @container (max-width: 150px) {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  `,
+  imageContainer: css`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   `,
   image: css`
     width: 55px;
     height: 55px;
-    min-width: 55px;
-    display: block;
     object-fit: contain;
   `,
   descriptionContainer: css`
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
-    max-width: 175px;
+    @container (max-width: 200px) {
+      flex-basis: 100%;
+    }
   `,
   descriptionText: css`
-    font-size: ${euiTheme.font.scale.s};
-    line-height: 18px;
     color: ${euiTheme.colors.text};
-    p {
-      margin: 0;
-    }
-    a {
-      white-space: normal;
-      word-break: normal;
-    }
   `,
   ctaButton: css`
-    width: 253px;
-    max-width: 100%;
-    min-width: 96px;
-    height: 32px;
-    padding-left: ${euiTheme.size.s};
-    padding-right: ${euiTheme.size.s};
-    border-radius: ${borderRadius};
     background: ${euiTheme.colors.backgroundLightPrimary};
-    margin-top: auto;
-    .euiButton__content {
-      gap: 4px;
+    @container (max-width: 150px) {
+      min-width: 32px;
+      padding-inline: ${euiTheme.size.s};
+    }
+  `,
+  ctaButtonText: css`
+    @container (max-width: 160px) {
+      display: none;
     }
   `,
 });
+// border-radius: ${borderRadius};
 
 export const CreateIntegrationSideCardButton = React.memo(() => {
   const { getUrlForApp, navigateToUrl } = useKibana().services.application;
   const { euiTheme } = useEuiTheme();
-  const styles = useStyles(String(euiTheme.border.radius.medium ?? '4px'), euiTheme);
+  const styles = useStyles(euiTheme);
 
   const createHref = useMemo(
     () => getUrlForApp('integrations', { path: '/create' }),
@@ -119,63 +117,72 @@ export const CreateIntegrationSideCardButton = React.memo(() => {
   );
 
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder
-      paddingSize="none"
-      data-test-subj="createIntegrationCardButton"
-      css={styles.panel}
-    >
-      <h4 css={styles.title}>
-        <FormattedMessage
-          id="xpack.automaticImportV2.createIntegrationTitle"
-          defaultMessage="Can't find an integration?"
-        />
-      </h4>
-
-      <div css={styles.contentRow}>
-        <img alt="" src={autoImportIntegrationsImage} css={styles.image} />
-        <div css={styles.descriptionContainer}>
-          <EuiText size="xs" css={styles.descriptionText}>
-            <FormattedMessage
-              id="xpack.automaticImportV2.createIntegrationDescription"
-              defaultMessage="Use AI to create a new one or {uploadLink}"
-              values={{
-                uploadLink: (
-                  // eslint-disable-next-line @elastic/eui/href-or-on-click
-                  <EuiLink
-                    href={uploadHref}
-                    onClick={navigateToUpload}
-                    data-test-subj="uploadIntegrationPackageLink"
-                  >
-                    <FormattedMessage
-                      id="xpack.automaticImportV2.createIntegrationUploadLink"
-                      defaultMessage="upload an integration package"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-        </div>
-      </div>
-      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-      <EuiButton
-        color="primary"
-        size="s"
-        iconType="plusCircle"
-        iconSide="left"
-        href={createHref}
-        onClick={navigateToCreate}
-        data-test-subj="createNewIntegrationLink"
-        css={styles.ctaButton}
+    <EuiFlexGroup justifyContent="center">
+      <EuiPanel
+        hasShadow={false}
+        hasBorder
+        data-test-subj="createIntegrationCardButton"
+        css={styles.panel}
       >
-        <FormattedMessage
-          id="xpack.automaticImportV2.createIntegrationButton"
-          defaultMessage="Create new integration"
-        />
-      </EuiButton>
-    </EuiPanel>
+        <EuiFlexGroup direction="column" css={styles.panelContent}>
+          <EuiFlexItem css={styles.title}>
+            <FormattedMessage
+              id="xpack.automaticImportV2.createIntegrationTitle"
+              defaultMessage="Can't find an integration?"
+            />
+          </EuiFlexItem>
+
+          <EuiFlexGroup direction="row" wrap={false} css={styles.contentRow}>
+            <EuiFlexItem grow={false} css={styles.imageContainer}>
+              <img alt="" src={autoImportIntegrationsImage} css={styles.image} />
+            </EuiFlexItem>
+            <EuiFlexItem css={styles.descriptionContainer}>
+              <EuiText size="xs" css={styles.descriptionText}>
+                <FormattedMessage
+                  id="xpack.automaticImportV2.createIntegrationDescription"
+                  defaultMessage="Use AI to create a new one or {uploadLink}"
+                  values={{
+                    uploadLink: (
+                      // eslint-disable-next-line @elastic/eui/href-or-on-click
+                      <EuiLink
+                        href={uploadHref}
+                        onClick={navigateToUpload}
+                        data-test-subj="uploadIntegrationPackageLink"
+                      >
+                        <FormattedMessage
+                          id="xpack.automaticImportV2.createIntegrationUploadLink"
+                          defaultMessage="upload an integration package"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+          <EuiButton
+            color="primary"
+            size="s"
+            iconType="plusCircle"
+            iconSide="left"
+            fullWidth
+            href={createHref}
+            onClick={navigateToCreate}
+            data-test-subj="createNewIntegrationLink"
+            css={styles.ctaButton}
+          >
+            <span css={styles.ctaButtonText}>
+              <FormattedMessage
+                id="xpack.automaticImportV2.createIntegrationButton"
+                defaultMessage="Create integration"
+              />
+            </span>
+          </EuiButton>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </EuiFlexGroup>
   );
 });
 CreateIntegrationSideCardButton.displayName = 'CreateIntegrationCardButton';
