@@ -336,6 +336,9 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       ...(input.hidden !== undefined && { hidden: input.hidden }),
       readonly: input.readonly ?? this.getDefaultReadonly(input.type),
       ...(input.origin !== undefined && { origin: input.origin }),
+      // When created with origin (by-reference), record snapshot time for isStale comparison.
+      // By-value attachments leave this undefined.
+      ...(input.origin !== undefined && { origin_snapshot_at: now }),
     };
 
     this.attachments.set(id, attachment);
@@ -486,6 +489,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     attachment.origin = validatedOrigin;
+    attachment.origin_snapshot_at = new Date().toISOString();
     this.dirty = true;
     this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
     return true;

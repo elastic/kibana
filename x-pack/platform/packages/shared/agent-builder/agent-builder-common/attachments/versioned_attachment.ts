@@ -55,6 +55,13 @@ export interface VersionedAttachment<
    * Undefined for by-value attachments.
    */
   origin?: unknown;
+  /**
+   * When this attachment's content was last captured from the origin (for by-reference attachments),
+   * or when the attachment was stored. ISO 8601 timestamp. Used by isStale to compare with the
+   * origin's last-modified time (e.g. saved object updated_at). Not set when loading from storage
+   * (no backfill); optional.
+   */
+  origin_snapshot_at?: string;
 }
 
 /**
@@ -171,6 +178,7 @@ export const versionedAttachmentSchema = z.object({
   readonly: z.boolean().optional(),
   client_id: z.string().optional(),
   origin: z.unknown().optional(),
+  origin_snapshot_at: z.string().optional(),
 });
 
 export const versionedAttachmentInputSchema = z.object({

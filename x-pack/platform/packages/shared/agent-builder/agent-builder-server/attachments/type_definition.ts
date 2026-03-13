@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { Attachment, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { AttachmentBoundedTool } from './tools';
@@ -46,6 +46,18 @@ export interface AttachmentTypeDefinition<
     origin: TOrigin,
     context: AttachmentResolveContext
   ) => MaybePromise<TContent | undefined>;
+  /**
+   * Optional hook to determine if the attachment's data is behind the referenced origin.
+   * Staleness is supported only when this function is provided; there is no automatic fallback.
+   * It is invoked only for attachments that have a populated `origin`.
+   * Receives the full VersionedAttachment (origin, versions, origin_snapshot_at, id, type, etc.)
+   * so the implementation can compare e.g. origin_snapshot_at with the origin's updated_at.
+   * Return true iff the attachment is stale (behind the origin).
+   */
+  isStale?: (
+    attachment: VersionedAttachment<TType, TContent>,
+    context: AttachmentResolveContext
+  ) => MaybePromise<boolean>;
   /**
    * Optional validation for origin/reference data.
    * Called when an attachment is created with `origin` but no `data`.

@@ -38,6 +38,7 @@ const editorAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.mes
 interface MessageEditorProps {
   messageEditor: MessageEditorInstance;
   onSubmit: () => void;
+  onFocus?: () => void;
   disabled?: boolean;
   placeholder?: string;
   'data-test-subj'?: string;
@@ -46,6 +47,7 @@ interface MessageEditorProps {
 export const MessageEditor: React.FC<MessageEditorProps> = ({
   messageEditor,
   onSubmit,
+  onFocus,
   disabled = false,
   placeholder = '',
   'data-test-subj': dataTestSubj,
@@ -101,6 +103,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         onInput={onChange}
         onCompositionStart={handleCompositionStart}
         onCompositionEnd={handleCompositionEnd}
+        onFocus={onFocus}
         onKeyDown={(event) => {
           if (event.key === keys.ESCAPE) {
             event.stopPropagation();
