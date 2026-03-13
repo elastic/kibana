@@ -36,7 +36,7 @@ jest.mock('../kibana_services', () => ({
   embeddableService: {
     getTransforms: jest.fn((type: string) => {
       switch (type) {
-        case 'lens-dashboard-app':
+        case 'lens':
           return mockLensTransforms;
         case 'visualization':
           return mockVisualizationTransforms;
@@ -81,7 +81,7 @@ describe('transformWorkpadOut', () => {
         title: 'Test lens embeddable',
         savedObjectId: 'test-id',
       });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens-dashboard-app');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens');
       expect(mockLensTransforms.transformOut).toHaveBeenCalledWith(
         { title: 'Test lens embeddable', savedObjectId: 'test-id' },
         [{ id: 'test-id', name: 'savedObjectRef', type: 'lens' }]
@@ -142,7 +142,7 @@ describe('legacy expressions', () => {
         timeRange: DEFAULT_TIME_RANGE,
         savedObjectId: 'lens-id',
       });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens-dashboard-app');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens');
       expect(mockLensTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'savedLens.id' },
         [{ id: 'lens-id', name: 'savedObjectRef', type: 'lens' }]
@@ -161,7 +161,7 @@ describe('legacy expressions', () => {
         title: 'My Lens',
         savedObjectId: 'lens-id',
       });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens-dashboard-app');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens');
       expect(mockLensTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, title: 'My Lens', savedObjectId: 'savedLens.id' },
         [{ id: 'lens-id', name: 'savedObjectRef', type: 'lens' }]
@@ -180,7 +180,7 @@ describe('legacy expressions', () => {
         timeRange: { from: 'now-7d', to: 'now' },
         savedObjectId: 'lens-id',
       });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens-dashboard-app');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens');
       expect(mockLensTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: { from: 'now-7d', to: 'now' }, savedObjectId: 'savedLens.id' },
         [{ id: 'lens-id', name: 'savedObjectRef', type: 'lens' }]
@@ -198,7 +198,7 @@ describe('legacy expressions', () => {
         timeRange: DEFAULT_TIME_RANGE,
         savedObjectId: 'lens-id',
       });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens-dashboard-app');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens');
       expect(mockLensTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'lens-id' },
         []

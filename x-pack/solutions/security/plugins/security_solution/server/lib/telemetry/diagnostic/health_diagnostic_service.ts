@@ -20,6 +20,7 @@ import type {
   AnalyticsServiceStart,
 } from '@kbn/core/server';
 import {
+  PermissionError,
   type HealthDiagnosticQuery,
   type HealthDiagnosticQueryStats,
   type HealthDiagnosticService,
@@ -172,7 +173,11 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
                 message: error.message,
                 reason: error instanceof ValidationError ? error.result : undefined,
               };
-              this.logger.error('Error running query', withErrorMessage(error));
+              if (error instanceof PermissionError) {
+                this.logger.info('Permission error running query.', withErrorMessage(error));
+              } else {
+                this.logger.error('Error running query', withErrorMessage(error));
+              }
               resolve({
                 ...queryStats,
                 failure,
