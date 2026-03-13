@@ -46,6 +46,8 @@ import {
   euiProgressCss,
 } from './results_table_shared';
 
+const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
+
 const CONTROL_COLUMN_IDS = ['openDetails', 'select'];
 const storageInstance = new Storage(localStorage);
 
@@ -555,7 +557,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
               onChangePage={handleServerPageChange}
               itemsPerPage={pagination.pageSize}
               onChangeItemsPerPage={handleServerPageSizeChange}
-              itemsPerPageOptions={[...PAGE_SIZE_OPTIONS]}
+              itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
               showPerPageOptions
             />
           </>
