@@ -10,6 +10,3 @@
 
 ## restore < Node 16 default DNS lookup behavior
 --dns-result-order=ipv4first
-
-## disable ES modules until stable
---no-experimental-require-module

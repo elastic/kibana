@@ -21,6 +21,132 @@
     "functions": [
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.canChangeAgentVisibility",
+        "type": "Function",
+        "tags": [],
+        "label": "canChangeAgentVisibility",
+        "description": [],
+        "signature": [
+          "({ agentId, owner, currentUser, isAdmin, }: { agentId?: string | undefined; owner?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | undefined; currentUser?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | null | undefined; isAdmin: boolean; }) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.canChangeAgentVisibility.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  agentId,\n  owner,\n  currentUser,\n  isAdmin,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+            "lineNumber": 36,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.canChangeAgentVisibility.$1.agentId",
+                "type": "string",
+                "tags": [],
+                "label": "agentId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 37,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.canChangeAgentVisibility.$1.owner",
+                "type": "Object",
+                "tags": [],
+                "label": "owner",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 38,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.canChangeAgentVisibility.$1.currentUser",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "currentUser",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 39,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.canChangeAgentVisibility.$1.isAdmin",
+                "type": "boolean",
+                "tags": [],
+                "label": "isAdmin",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 40,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.createAgentBuilderError",
         "type": "Function",
         "tags": [],
@@ -1225,6 +1351,292 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.hasAgentReadAccess",
+        "type": "Function",
+        "tags": [],
+        "label": "hasAgentReadAccess",
+        "description": [
+          "Legacy agents without a visibility field are treated as Public."
+        ],
+        "signature": [
+          "({ visibility, owner, currentUser, isAdmin, }: { visibility?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentVisibility",
+            "text": "AgentVisibility"
+          },
+          " | undefined; owner?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | undefined; currentUser?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | null | undefined; isAdmin: boolean; }) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.hasAgentReadAccess.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  visibility,\n  owner,\n  currentUser,\n  isAdmin,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+            "lineNumber": 51,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentReadAccess.$1.visibility",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "visibility",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.AgentVisibility",
+                    "text": "AgentVisibility"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 52,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentReadAccess.$1.owner",
+                "type": "Object",
+                "tags": [],
+                "label": "owner",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 53,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentReadAccess.$1.currentUser",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "currentUser",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 54,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentReadAccess.$1.isAdmin",
+                "type": "boolean",
+                "tags": [],
+                "label": "isAdmin",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 55,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.hasAgentWriteAccess",
+        "type": "Function",
+        "tags": [],
+        "label": "hasAgentWriteAccess",
+        "description": [
+          "Legacy agents without a visibility field are treated as Public."
+        ],
+        "signature": [
+          "({ visibility, owner, currentUser, isAdmin, }: { visibility?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentVisibility",
+            "text": "AgentVisibility"
+          },
+          " | undefined; owner?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | undefined; currentUser?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | null | undefined; isAdmin: boolean; }) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.hasAgentWriteAccess.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  visibility,\n  owner,\n  currentUser,\n  isAdmin,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+            "lineNumber": 71,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentWriteAccess.$1.visibility",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "visibility",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.AgentVisibility",
+                    "text": "AgentVisibility"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 72,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentWriteAccess.$1.owner",
+                "type": "Object",
+                "tags": [],
+                "label": "owner",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 73,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentWriteAccess.$1.currentUser",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "currentUser",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 74,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentWriteAccess.$1.isAdmin",
+                "type": "boolean",
+                "tags": [],
+                "label": "isAdmin",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 75,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.hasSkillSelectionWildcard",
         "type": "Function",
         "tags": [],
@@ -1428,6 +1840,103 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.isAgentOwner",
+        "type": "Function",
+        "tags": [],
+        "label": "isAgentOwner",
+        "description": [],
+        "signature": [
+          "({ owner, currentUser, }: { owner?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | undefined; currentUser?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | null | undefined; }) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.isAgentOwner.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  owner,\n  currentUser,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+            "lineNumber": 15,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.isAgentOwner.$1.owner",
+                "type": "Object",
+                "tags": [],
+                "label": "owner",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 16,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.isAgentOwner.$1.currentUser",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "currentUser",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 17,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -3254,7 +3763,7 @@
         "label": "AgentAnswerStepConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 139,
+        "lineNumber": 134,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3272,7 +3781,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 140,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3290,7 +3799,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 144,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3654,7 +4163,7 @@
         "label": "AgentConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 86,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3672,7 +4181,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 87,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3690,7 +4199,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 94,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3715,7 +4224,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 101,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3740,7 +4249,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 106,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3758,7 +4267,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 112,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3783,7 +4292,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 117,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3808,7 +4317,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 122,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3826,7 +4335,7 @@
           "\nDefinition of a agentBuilder agent."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 31,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3841,7 +4350,7 @@
               "\nId of the agent"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 35,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3865,7 +4374,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 39,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3880,7 +4389,7 @@
               "\nHuman-readable name for the agent."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 43,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3895,7 +4404,7 @@
               "\nHuman-readable description for the agent."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 47,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3910,7 +4419,7 @@
               "\nread-only attribute.\nBuilt-in agents are readonly, user-created agent are not."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 51,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3935,7 +4444,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 56,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3960,7 +4469,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 60,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3978,7 +4487,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 64,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3996,7 +4505,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 68,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4014,7 +4523,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 72,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4032,7 +4541,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 76,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4056,7 +4565,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 80,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4072,7 +4581,7 @@
         "label": "AgentResearchStepConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 128,
+        "lineNumber": 123,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4090,7 +4599,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 129,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4108,7 +4617,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 133,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8404,8 +8913,8 @@
         "tags": [],
         "label": "AgentVisibility",
         "description": [],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 20,
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8719,7 +9228,7 @@
           "\"elastic-ai-agent\""
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 29,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -9121,7 +9630,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 150,
+        "lineNumber": 145,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9137,7 +9646,7 @@
           "\nThe type of an agent.\nOnly one type for now, this enum is mostly here for future-proofing."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10293,7 +10802,7 @@
           "[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 157,
+        "lineNumber": 152,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12114,6 +12623,127 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.VISIBILITY_BADGE_COLOR",
+        "type": "Object",
+        "tags": [],
+        "label": "VISIBILITY_BADGE_COLOR",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VISIBILITY_BADGE_COLOR.AgentVisibility.Private",
+            "type": "string",
+            "tags": [],
+            "label": "[AgentVisibility.Private]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VISIBILITY_BADGE_COLOR.AgentVisibility.Shared",
+            "type": "string",
+            "tags": [],
+            "label": "[AgentVisibility.Shared]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VISIBILITY_BADGE_COLOR.AgentVisibility.Public",
+            "type": "string",
+            "tags": [],
+            "label": "[AgentVisibility.Public]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.VISIBILITY_ICON",
+        "type": "Object",
+        "tags": [],
+        "label": "VISIBILITY_ICON",
+        "description": [
+          "Map from agent visibility to the icon used in the UI."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VISIBILITY_ICON.AgentVisibility.Public",
+            "type": "string",
+            "tags": [],
+            "label": "[AgentVisibility.Public]",
+            "description": [],
+            "signature": [
+              "\"globe\""
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VISIBILITY_ICON.AgentVisibility.Shared",
+            "type": "string",
+            "tags": [],
+            "label": "[AgentVisibility.Shared]",
+            "description": [],
+            "signature": [
+              "\"users\""
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VISIBILITY_ICON.AgentVisibility.Private",
+            "type": "string",
+            "tags": [],
+            "label": "[AgentVisibility.Private]",
+            "description": [],
+            "signature": [
+              "\"lock\""
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ]
