@@ -83,6 +83,29 @@ export function initPlugin(router: IRouter, path: string) {
     }
   );
 
+  router.put(
+    {
+      path: `${path}/rest/api/2/issue_no_content_type/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      options: {
+        authRequired: false,
+      },
+      validate: {},
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      return res.custom({ statusCode: 200 });
+    }
+  );
+
   router.get(
     {
       path: `${path}/rest/api/2/issue/{id}`,

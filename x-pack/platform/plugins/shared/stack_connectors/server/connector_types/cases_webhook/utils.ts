@@ -43,8 +43,14 @@ export const throwDescriptiveErrorIfResponseIsNotValid = ({
   const contentType = res.headers['content-type'];
   const data = res.data;
 
-  // If status is 204 and there is no data, we just return
-  if (res.status === 204 && isEmpty(data) && requiredAttributesToBeInTheResponse.length === 0) {
+  // For operations that do not require response fields (e.g. update/comment),
+  // accept successful empty responses even when content-type is missing.
+  if (
+    res.status >= 200 &&
+    res.status < 300 &&
+    isEmpty(data) &&
+    requiredAttributesToBeInTheResponse.length === 0
+  ) {
     return;
   }
 

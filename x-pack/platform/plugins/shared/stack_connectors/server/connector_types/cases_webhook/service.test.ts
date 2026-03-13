@@ -1439,6 +1439,32 @@ describe('Cases webhook service', () => {
         url: 'https://coolsite.net/browse/CK-1',
       });
     });
+
+    it('it should NOT throw if the request is a 200 and is empty without content-type header', async () => {
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: undefined,
+          headers: {},
+          status: 200,
+        })
+      );
+
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+          },
+        })
+      );
+
+      await expect(service.updateIncident(incident)).resolves.toEqual({
+        id: '1',
+        title: 'CK-1',
+        pushedDate: mockTime.toISOString(),
+        url: 'https://coolsite.net/browse/CK-1',
+      });
+    });
   });
 
   describe('createComment', () => {

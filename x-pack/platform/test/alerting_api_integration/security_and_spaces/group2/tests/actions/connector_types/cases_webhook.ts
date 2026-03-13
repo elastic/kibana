@@ -518,6 +518,55 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
 
           expect(result.status).to.eql('ok');
         });
+
+        it('should handle updating an incident when update response is empty and has no content-type', async () => {
+          const customUpdateUrl = `${casesWebhookSimulatorURL}/rest/api/2/issue_no_content_type/{{{external.system.id}}}`;
+
+          const { body: createdAction } = await supertest
+            .post('/api/actions/connector')
+            .set('kbn-xsrf', 'true')
+            .send({
+              name: 'Empty update response test',
+              connector_type_id: '.cases-webhook',
+              config: {
+                ...simulatorConfig,
+                updateIncidentUrl: customUpdateUrl,
+              },
+              secrets,
+            })
+            .expect(200);
+
+          const { body: result } = await supertest
+            .post(`/api/actions/connector/${createdAction.id}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockCasesWebhook.params,
+                subActionParams: {
+                  incident: {
+                    title: 'updated title',
+                    description: 'updated description',
+                    externalId: '123',
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .expect(200);
+
+          const { pushedDate, ...dataWithoutTime } = result.data;
+          result.data = dataWithoutTime;
+
+          expect(result).to.eql({
+            status: 'ok',
+            connector_id: createdAction.id,
+            data: {
+              id: '123',
+              title: 'CK-1',
+              url: `${casesWebhookSimulatorURL}/browse/CK-1`,
+            },
+          });
+        });
       });
 
       after(() => {
