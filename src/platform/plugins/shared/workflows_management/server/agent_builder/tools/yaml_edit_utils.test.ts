@@ -547,8 +547,6 @@ steps:
     });
 
     it('long strings are not re-wrapped by stringify', () => {
-      const longDesc =
-        'A multi-line description that spans\nseveral lines and should be preserved exactly.';
       const yamlWithLong = `version: "1"
 name: Test
 description: >-

@@ -95,5 +95,7 @@ If the proposal is pending, user can accept or decline it from the workflow YAML
 export function registerWorkflowYamlDiffAttachment(
   agentBuilder: AgentBuilderPluginSetupContract
 ): void {
-  agentBuilder.attachments.registerType(workflowYamlDiffAttachmentType);
+  agentBuilder.attachments.registerType(
+    workflowYamlDiffAttachmentType as Parameters<typeof agentBuilder.attachments.registerType>[0]
+  );
 }

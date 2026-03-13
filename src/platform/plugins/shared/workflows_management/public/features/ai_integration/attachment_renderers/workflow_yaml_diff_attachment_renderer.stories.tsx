@@ -243,7 +243,6 @@ const DiffAttachmentStory: React.FC<DiffAttachmentStoryProps> = ({
         <EuiSplitPanel.Inner grow={false} paddingSize="none">
           {workflowYamlDiffAttachmentUiDefinition.renderInlineContent({
             attachment,
-            isSidebar: false,
           })}
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
