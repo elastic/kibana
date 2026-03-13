@@ -509,13 +509,12 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
         {rows.length > 0 ? (
           <>
-            <div css={unifiedTableWrapperCss}>
+            <div css={unifiedTableWrapperCss} data-test-subj="osqueryResultsTable">
               <CellActionsProvider
                 getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
               >
                 <UnifiedDataTable
                   ariaLabelledBy="osquery-results"
-                  data-test-subj="osqueryResultsTable"
                   dataView={dataView}
                   columns={visibleColumns}
                   rows={rows}
