@@ -22,8 +22,6 @@ export class DiscoverApp {
 
   async goto() {
     await this.page.gotoApp('discover');
-    await this.page.waitForLoadState('domcontentloaded');
-    await this.page.waitForLoadingIndicatorHidden();
     await this.waitForDataViewSwitch();
   }
 
