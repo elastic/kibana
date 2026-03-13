@@ -7,9 +7,8 @@
 
 import { type BoundInferenceClient, MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Streams, ProcessingSimulationResponse } from '@kbn/streams-schema';
+import type { FlattenRecord, ProcessingSimulationResponse, Streams } from '@kbn/streams-schema';
 import type { StreamlangDSL, GrokProcessor, DissectProcessor } from '@kbn/streamlang';
-import type { FlattenRecord } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { isOtelStream } from '@kbn/streams-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -267,7 +266,7 @@ export function getUniqueDocumentErrors(simulationResult: ProcessingSimulationRe
   }
 
   // Collect all unique error messages
-  const errorMap = new Map<string, { count: number; type: string; exampleDoc?: any }>();
+  const errorMap = new Map<string, { count: number; type: string; exampleDoc?: FlattenRecord }>();
 
   for (const doc of simulationResult.documents) {
     if (doc.errors && doc.errors.length > 0) {

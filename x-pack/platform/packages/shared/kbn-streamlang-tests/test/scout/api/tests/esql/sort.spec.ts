@@ -174,12 +174,12 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
     expect(esqlResult.documents).toHaveLength(2);
 
     // First doc should have tags sorted (where condition matched)
-    const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
+    const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
     expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] }));
     expect(doc1?.['event.kind']).toBe('test');
 
     // Second doc: where condition not matched, processor doesn't sort
-    const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
+    const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
     expect(doc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
     expect(doc2?.tags).toHaveLength(3);
     expect(doc2?.['event.kind']).toBe('production');
@@ -225,7 +225,7 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
     expect(esqlResult.documents).toHaveLength(2);
 
     // First doc should have sorted_tags created (where condition matched)
-    const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
+    const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
     expect(doc1).toStrictEqual(
       expect.objectContaining({
         tags: ['charlie', 'alpha', 'bravo'], // Original preserved
@@ -235,7 +235,7 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
     expect(doc1?.['event.kind']).toBe('test');
 
     // Second doc should have sorted_tags as empty array (where condition not matched)
-    const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
+    const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
     expect(doc2?.tags).toStrictEqual(expect.arrayContaining(['zulu', 'xray', 'yankee']));
     expect(doc2?.tags).toHaveLength(3);
     expect(doc2).toStrictEqual(expect.objectContaining({ sorted_tags: [] }));
@@ -265,8 +265,8 @@ apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOb
 
     // Both documents should be present
     expect(esqlResult.documents).toHaveLength(2);
-    const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-    const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
+    const doc1 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc1');
+    const doc2 = esqlResult.documents.find((d: Record<string, unknown>) => d.status === 'doc2');
     expect(doc1).toStrictEqual(expect.objectContaining({ tags: ['alpha', 'bravo', 'charlie'] }));
     expect(doc2).toStrictEqual(expect.objectContaining({ tags: null }));
   });

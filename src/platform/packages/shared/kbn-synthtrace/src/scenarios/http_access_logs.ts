@@ -32,7 +32,7 @@
  */
 
 import os from 'os';
-import type { LogDocument } from '@kbn/synthtrace-client';
+import type { LogDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { log } from '@kbn/synthtrace-client';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
@@ -156,7 +156,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       }
 
       // Generate traffic streams based on mode
-      const streams: any[] = [];
+      const streams: Array<SynthtraceGenerator<LogDocument>> = [];
 
       if (finalOpts.mode === 'comprehensive' || finalOpts.mode === 'mixed') {
         // Mixed mode: all traffic patterns with realistic distribution

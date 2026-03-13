@@ -770,28 +770,42 @@ export const isRedactProcessorDefinition = createIsNarrowSchema(
  */
 export type ProcessorType = StreamlangProcessorDefinition['action'];
 
+/** Internal Zod schema structure for extracting processor action from union options */
+interface ZodProcessorSchemaLike {
+  _def?: {
+    schema?: ZodProcessorSchemaLike;
+    left?: ZodProcessorSchemaLike;
+    options?: ZodProcessorSchemaLike[];
+  };
+  shape?: { action?: { value?: ProcessorType } };
+}
+
 /**
  * Get all processor types as a string array (derived from the Zod schema)
  */
 export const processorTypes: ProcessorType[] = (
-  streamlangProcessorSchema._def.options as ReadonlyArray<any>
-).map((schema: any) => {
+  streamlangProcessorSchema._def.options as ReadonlyArray<ZodProcessorSchemaLike>
+).map((schema: ZodProcessorSchemaLike) => {
   // Handle ZodEffects (from .refine()) by unwrapping to get the base schema
-  let baseSchema = '_def' in schema && 'schema' in schema._def ? schema._def.schema : schema;
+  let baseSchema: ZodProcessorSchemaLike =
+    '_def' in schema && schema._def && 'schema' in schema._def ? schema._def.schema! : schema;
 
   // Handle ZodIntersection (from z.intersection()) by getting the left side which contains the action
-  if ('_def' in baseSchema && 'left' in baseSchema._def) {
-    baseSchema = baseSchema._def.left;
+  if ('_def' in baseSchema && baseSchema._def && 'left' in baseSchema._def) {
+    baseSchema = baseSchema._def.left!;
   }
 
   // Handle ZodUnion (from z.union()) by getting the first option's action
   // All options in the union should have the same action value
-  if ('_def' in baseSchema && 'options' in baseSchema._def) {
-    baseSchema = baseSchema._def.options[0];
+  if ('_def' in baseSchema && baseSchema._def && 'options' in baseSchema._def) {
+    baseSchema = baseSchema._def.options![0]!;
   }
 
-  return baseSchema.shape.action.value;
-}) as ProcessorType[];
+  if (!baseSchema.shape?.action?.value) {
+    throw new Error('Unable to extract action from processor schema');
+  }
+  return baseSchema.shape.action.value as ProcessorType;
+});
 
 /**
  * Get the processor type (action) from a processor definition

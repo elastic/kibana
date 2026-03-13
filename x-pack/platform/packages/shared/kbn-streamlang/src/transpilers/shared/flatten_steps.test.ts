@@ -10,9 +10,9 @@ import { flattenSteps } from './flatten_steps';
 
 describe('flattenSteps', () => {
   it('should flatten a flat list of steps', () => {
-    const steps = [
-      { action: 'set', to: 'foo', value: 'bar' } as any,
-      { action: 'rename', from: 'foo', to: 'baz' } as any,
+    const steps: StreamlangStep[] = [
+      { action: 'set', to: 'foo', value: 'bar' },
+      { action: 'rename', from: 'foo', to: 'baz' },
     ];
     expect(flattenSteps(steps)).toEqual([
       { action: 'set', to: 'foo', value: 'bar' },

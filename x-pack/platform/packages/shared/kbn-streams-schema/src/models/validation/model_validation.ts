@@ -12,7 +12,7 @@ import type { Validation } from './validation';
 import { validation } from './validation';
 
 // need explicit keys here to be able to generate Assert types (TS2775)
-export interface ModelValidation<TLeft extends IModel = any, TRight extends TLeft = any> {
+export interface ModelValidation<TLeft extends IModel = IModel, TRight extends TLeft = TLeft> {
   Definition: Validation<TLeft['Definition'], TRight['Definition']>;
   Source: Validation<TLeft['Source'], TRight['Source']>;
   GetResponse: Validation<TLeft['GetResponse'], TRight['GetResponse']>;
@@ -20,8 +20,8 @@ export interface ModelValidation<TLeft extends IModel = any, TRight extends TLef
 }
 
 export function joinValidation<TLeft extends IModel, TRights extends [TLeft, TLeft, ...TLeft[]]>(
-  left: ModelValidation<any, TLeft>,
-  rights: { [K in keyof TRights]: ModelValidation<any, TRights[K]> }
+  left: ModelValidation<IModel, TLeft>,
+  rights: { [K in keyof TRights]: ModelValidation<TLeft, TRights[K]> }
 ): ModelValidation<TLeft, TRights[number]> {
   function join<TKey extends keyof IModel>(key: TKey) {
     return validation(
@@ -61,23 +61,30 @@ export function modelValidation<
   TRightSchema extends ModelSchema,
   TDefaults extends IModel = WithDefaults<TRightSchema>
 >(
-  left: ModelValidation<any, TLeft>,
+  left: ModelValidation<IModel, TLeft>,
   right: TRightSchema
 ): ModelValidation<TLeft, TLeft & TDefaults>;
 
 export function modelValidation(...args: [ModelValidation, ModelSchema] | [ModelSchema]) {
   if (args.length === 1) {
     const right = args[0];
-
-    return modelValidation(
-      {
-        Definition: validation(z.any(), z.looseObject({})),
-        Source: validation(z.any(), z.looseObject({})),
-        GetResponse: validation(z.any(), z.looseObject({})),
-        UpsertRequest: validation(z.any(), z.looseObject({})),
-      },
-      right
-    );
+    const emptyRecord = z.record(z.string(), z.unknown());
+    const emptyValidation = {
+      Definition: validation(
+        emptyRecord as z.ZodType<object>,
+        z.looseObject({}) as z.ZodType<object>
+      ),
+      Source: validation(emptyRecord as z.ZodType<object>, z.looseObject({}) as z.ZodType<object>),
+      GetResponse: validation(
+        emptyRecord as z.ZodType<object>,
+        z.looseObject({}) as z.ZodType<object>
+      ),
+      UpsertRequest: validation(
+        emptyRecord as z.ZodType<object>,
+        z.looseObject({}) as z.ZodType<object>
+      ),
+    };
+    return modelValidation(emptyValidation, right);
   }
 
   const left = mapValues(args[0], (value) => value.right);
@@ -136,9 +143,29 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
             })
             // that should be removed after
             .transform((prev) => {
-              delete prev.name;
-              delete prev.updated_at;
-              delete prev.ingest?.processing?.updated_at;
+              const prevRecord = prev as Record<string, unknown>;
+              const hadIngest = 'ingest' in prevRecord;
+              const hadProcessing =
+                hadIngest &&
+                typeof (prevRecord.ingest as Record<string, unknown>)?.processing !== 'undefined';
+              delete prevRecord.name;
+              delete prevRecord.updated_at;
+              const ingest = prevRecord.ingest as
+                | { processing?: { updated_at?: unknown }; [key: string]: unknown }
+                | undefined;
+              if (ingest?.processing && 'updated_at' in ingest.processing) {
+                delete ingest.processing.updated_at;
+              }
+              if (
+                !hadProcessing &&
+                ingest?.processing &&
+                Object.keys(ingest.processing).length === 0
+              ) {
+                delete ingest.processing;
+              }
+              if (!hadIngest && ingest && Object.keys(ingest).length === 0) {
+                delete prevRecord.ingest;
+              }
               return prev;
             }),
         }),

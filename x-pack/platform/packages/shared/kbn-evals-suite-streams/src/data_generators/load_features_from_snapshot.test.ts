@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import {
   GCS_BUCKET,
   OTEL_DEMO_GCS_BASE_PATH_PREFIX,
@@ -25,7 +26,7 @@ describe('load_features_from_snapshot', () => {
     debug: jest.fn(),
     warning: jest.fn(),
     error: jest.fn(),
-  } as any;
+  } as unknown as ToolingLog;
 
   const gcs = { bucket: GCS_BUCKET, basePathPrefix: OTEL_DEMO_GCS_BASE_PATH_PREFIX };
 
@@ -37,7 +38,7 @@ describe('load_features_from_snapshot', () => {
       search: jest.fn().mockResolvedValue({
         hits: { hits: [] },
       }),
-    } as any);
+    } as unknown as Client);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -76,7 +77,7 @@ describe('load_features_from_snapshot', () => {
     });
 
     const esClient = makeEsClient();
-    (esClient.search as any).mockResolvedValue({
+    (esClient.search as jest.Mock).mockResolvedValue({
       hits: {
         hits: [
           { _source: { uuid: 'u1', id: 'f1', stream_name: 'logs', type: 'entity' } },
@@ -141,13 +142,13 @@ describe('load_features_from_snapshot', () => {
     });
 
     const esClient = makeEsClient();
-    (esClient.search as any).mockRejectedValue(new Error('boom'));
+    (esClient.search as jest.Mock).mockRejectedValue(new Error('boom'));
 
     await expect(
       loadFeaturesFromSnapshot(esClient, log, 'payment-unreachable', gcs, 'logs')
     ).rejects.toThrow('boom');
 
-    expect((esClient.indices.delete as any).mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect((esClient.indices.delete as jest.Mock).mock.calls.length).toBeGreaterThanOrEqual(2);
     expect(esClient.indices.delete).toHaveBeenCalledWith({
       index: FEATURES_TEMP_INDEX,
       ignore_unavailable: true,

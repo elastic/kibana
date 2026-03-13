@@ -13,7 +13,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 describe('simple trace', () => {
   let iterable: SynthtraceGenerator<ApmFields>;
-  let events: Array<Record<string, any>>;
+  let events: Array<Record<string, unknown>>;
 
   beforeEach(() => {
     const javaService = apm.service({
@@ -54,7 +54,7 @@ describe('simple trace', () => {
   it('generates the same data every time', () => {
     expect(events).toMatchSnapshot(
       events.map((event) => {
-        const matchers: Record<string, any> = {};
+        const matchers: Record<string, unknown> = {};
         if (event['transaction.id']) {
           matchers['transaction.id'] = expect.any(String);
         }

@@ -46,7 +46,7 @@ export function isSchema<TSchema extends z.ZodType>(
 
 export function assertsSchema<TSchema extends z.ZodType>(
   schema: TSchema,
-  subject: any
+  subject: unknown
 ): asserts subject is z.output<TSchema> {
   schema.parse(subject);
 }
