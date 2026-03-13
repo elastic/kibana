@@ -90,6 +90,11 @@
     "updatedAt",
     "updatedBy"
   ],
+  "alerting_api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt",
+    "uiamApiKey"
+  ],
   "alerting_notification_policy": [
     "auth",
     "auth.apiKey",
