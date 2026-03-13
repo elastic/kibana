@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load as loadYaml } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 import { cloneDeep, merge } from 'lodash';
@@ -30,7 +30,7 @@ export type YamlRoleDefinitions = Record<
   }
 >;
 
-const roleDefinitions = loadYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as YamlRoleDefinitions;
+const roleDefinitions = parseYaml(readFileSync(ROLES_YAML_FILE_PATH, 'utf8')) as YamlRoleDefinitions;
 
 export type ServerlessSecurityRoles = Record<ServerlessRoleName, Role>;
 
