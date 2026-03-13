@@ -29,6 +29,6 @@
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
     id: 'workflows.executionFailed',
-    schemaHash: 'f284de60a7da64400ff056d83a98cea53672a28621fd8e7f0b4f2deab2b34318',
+    schemaHash: '7e0db4b1784024d1ce3669b8b6719f04be338c22e1853e7dcb1a98aea9f78ed4',
   },
 ];
