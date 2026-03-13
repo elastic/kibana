@@ -101,6 +101,7 @@ export function registerConsumptionRoutes({ router, coreSetup, logger }: RouteDe
                     description:
                       'Cursor for pagination. Pass the search_after value from the previous response.',
                   },
+                  maxSize: 10000,
                 })
               ),
               search: schema.maybe(
@@ -111,6 +112,7 @@ export function registerConsumptionRoutes({ router, coreSetup, logger }: RouteDe
               usernames: schema.maybe(
                 schema.arrayOf(schema.string(), {
                   meta: { description: 'Filter results to conversations by these usernames.' },
+                  maxSize: 10000,
                 })
               ),
               has_warnings: schema.maybe(
