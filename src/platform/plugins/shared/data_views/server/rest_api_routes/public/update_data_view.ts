@@ -40,7 +40,8 @@ const indexPatternUpdateSchema = schema.object({
       schema.object({
         value: schema.string(),
         clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-      })
+      }),
+      { maxSize: 100 }
     )
   ),
   fieldFormats: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
