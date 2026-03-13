@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
+import { exactMatchText, expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -13,6 +13,10 @@ import React from 'react';
 import type { LinuxEventCollectionCardProps } from './linux_event_collection_card';
 import { LinuxEventCollectionCard } from './linux_event_collection_card';
 import { set } from '@kbn/safer-lodash-set';
+import { ExperimentalFeaturesService } from '../../../../../../../common/experimental_features_service';
+import { allowedExperimentalValues } from '../../../../../../../../common';
+
+jest.mock('../../../../../../../common/experimental_features_service');
 
 describe('Policy Linux Event Collection Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').linuxEvents;
@@ -26,7 +30,10 @@ describe('Policy Linux Event Collection Card', () => {
     mockedContext = createAppRootMockRenderer();
 
     // Mock linuxDnsEvents FF as enabled by default
-    mockedContext.setExperimentalFlag({ linuxDnsEvents: true });
+    (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+      ...allowedExperimentalValues,
+      linuxDnsEvents: true,
+    });
 
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
@@ -117,7 +124,7 @@ describe('Policy Linux Event Collection Card', () => {
 
   describe('when linuxDnsEvents feature flag is disabled', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ linuxDnsEvents: false });
+      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue(allowedExperimentalValues);
       // Remove dns field from policy when FF is disabled
       delete formProps.policy.linux.events.dns;
     });
