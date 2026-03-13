@@ -34,6 +34,7 @@ import type {
   SnoozeNotificationPolicyParams,
   UpdateNotificationPolicyParams,
 } from './types';
+import { validateDateString } from './utils';
 
 const resolveActionAttrs = (
   action: NotificationPolicyBulkAction
@@ -283,6 +284,10 @@ export class NotificationPolicyClient {
     id: string,
     stateUpdate: { enabled?: boolean; snoozedUntil?: string | undefined }
   ): Promise<NotificationPolicyResponse> {
+    if (stateUpdate.snoozedUntil) {
+      validateDateString(stateUpdate.snoozedUntil);
+    }
+
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 

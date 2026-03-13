@@ -787,6 +787,19 @@ describe('NotificationPolicyClient', () => {
 
       expect(res.id).toBe('policy-id-snooze');
     });
+
+    it('throws 400 when snoozedUntil is not a valid ISO datetime', async () => {
+      await expect(
+        client.snoozeNotificationPolicy({
+          id: 'policy-id-snooze',
+          snoozedUntil: 'not-a-date',
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
   });
 
   describe('bulkActionNotificationPolicies', () => {
