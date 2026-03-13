@@ -109,6 +109,12 @@ export const MicrosoftTeams: ConnectorSpec = {
       input: ListJoinedTeamsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListJoinedTeamsInput) => {
+        if (ctx.secrets?.authType === 'oauth_client_credentials' && !input?.userId) {
+          throw new Error(
+            'listJoinedTeams requires a userId when using app-only (client credentials) auth. ' +
+              'Provide the userId of the user whose teams you want to list.'
+          );
+        }
         const base = userPath(input?.userId);
         ctx.log.debug('Microsoft Teams listing joined teams');
         const response = await ctx.client.get(
@@ -169,6 +175,12 @@ export const MicrosoftTeams: ConnectorSpec = {
       input: ListChatsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChatsInput) => {
+        if (ctx.secrets?.authType === 'oauth_client_credentials' && !input.userId) {
+          throw new Error(
+            'listChats requires a userId when using app-only (client credentials) auth. ' +
+              'Provide the userId of the user whose chats you want to list.'
+          );
+        }
         const base = userPath(input.userId);
         ctx.log.debug('Microsoft Teams listing chats');
         const response = await ctx.client.get(`https://graph.microsoft.com/v1.0${base}/chats`, {

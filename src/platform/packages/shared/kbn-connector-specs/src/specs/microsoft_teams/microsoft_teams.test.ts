@@ -180,6 +180,39 @@ describe('MicrosoftTeams', () => {
       expect(result).toEqual(mockResponse.data);
     });
 
+    it('should throw when using app-only auth without userId', async () => {
+      const appOnlyContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials' },
+      } as unknown as ActionContext;
+
+      await expect(
+        MicrosoftTeams.actions.listJoinedTeams.handler(appOnlyContext, {})
+      ).rejects.toThrow(
+        'listJoinedTeams requires a userId when using app-only (client credentials) auth.'
+      );
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('should not throw when using app-only auth with userId', async () => {
+      const appOnlyContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials' },
+      } as unknown as ActionContext;
+
+      mockClient.get.mockResolvedValue({
+        data: { value: [{ id: 'team-1', displayName: 'Engineering' }] },
+      });
+
+      await expect(
+        MicrosoftTeams.actions.listJoinedTeams.handler(appOnlyContext, { userId: 'user-abc' })
+      ).resolves.not.toThrow();
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/users/user-abc/joinedTeams',
+        expect.any(Object)
+      );
+    });
+
     it('should propagate API errors', async () => {
       mockClient.get.mockRejectedValue(new Error('Access denied'));
 
@@ -420,6 +453,37 @@ describe('MicrosoftTeams', () => {
 
       const callArgs = mockClient.get.mock.calls[0];
       expect(callArgs[1].params).not.toHaveProperty('$top');
+    });
+
+    it('should throw when using app-only auth without userId', async () => {
+      const appOnlyContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials' },
+      } as unknown as ActionContext;
+
+      await expect(MicrosoftTeams.actions.listChats.handler(appOnlyContext, {})).rejects.toThrow(
+        'listChats requires a userId when using app-only (client credentials) auth.'
+      );
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('should not throw when using app-only auth with userId', async () => {
+      const appOnlyContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials' },
+      } as unknown as ActionContext;
+
+      mockClient.get.mockResolvedValue({
+        data: { value: [{ id: 'chat-1', topic: 'Test', chatType: 'group' }] },
+      });
+
+      await expect(
+        MicrosoftTeams.actions.listChats.handler(appOnlyContext, { userId: 'user-abc' })
+      ).resolves.not.toThrow();
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/users/user-abc/chats',
+        expect.any(Object)
+      );
     });
 
     it('should propagate API errors', async () => {
