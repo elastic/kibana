@@ -14,15 +14,10 @@
  * Use this instead of scattering `[0]` when consuming MetricField array properties.
  */
 
-type MaybeArray<T> = T | T[] | null | undefined;
+export function firstNonNullable<T>(values: T[]): T extends NonNullable<T> ? T : T | undefined {
+  // Find the first element that isn't null or undefined
+  const found = values.find((v) => v != null);
 
-export function getPrimaryValue<T>(value: MaybeArray<T>): T | undefined {
-  if (value == null) {
-    return undefined;
-  }
-  if (Array.isArray(value)) {
-    const first = value.find((v) => v != null);
-    return first as T | undefined;
-  }
-  return value;
+  // We use 'as any' for the final return to satisfy the complex conditional type
+  return found as any;
 }

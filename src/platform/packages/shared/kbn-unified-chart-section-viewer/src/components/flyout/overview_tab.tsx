@@ -42,7 +42,6 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
 
-  console.log('metricItem', metricItem);
   const unitLabel = useMemo(
     () => getUnitLabel({ unit: metricItem.units?.[0] ?? undefined }),
     [metricItem.units]

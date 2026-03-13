@@ -29,7 +29,7 @@ import { Pagination } from '../../pagination';
 import { usePagination } from './hooks';
 import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
-import { getPrimaryValue } from '../../../common/utils';
+import { firstNonNullable } from '../../../common/utils';
 import { extractWhereCommand } from '../../../utils/extract_where_command';
 
 export interface MetricsExperienceGridContentProps
@@ -81,8 +81,8 @@ export const MetricsExperienceGridContent = ({
   const getUserMessages = useCallback(
     (metricItem: ParsedMetricItem) =>
       isLegacyHistogram(
-        getPrimaryValue(metricItem.fieldTypes),
-        getPrimaryValue(metricItem.metricTypes)
+        firstNonNullable(metricItem.fieldTypes),
+        firstNonNullable(metricItem.metricTypes)
       )
         ? LEGACY_HISTOGRAM_USER_MESSAGES
         : undefined,

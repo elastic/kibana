@@ -10,7 +10,7 @@
 import { stats, timeseries, where } from '@kbn/esql-composer';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
-import { getPrimaryValue } from '../get_primary_value';
+import { firstNonNullable } from '../first_null_nullable';
 import type { ParsedMetricItem } from '../../../types';
 
 interface CreateESQLQueryParams {
@@ -36,8 +36,8 @@ export function createESQLQuery({
 }: CreateESQLQueryParams) {
   const { metricName, metricTypes, fieldTypes, dataStream } = metricItem;
   const index = dataStream;
-  const type = getPrimaryValue(fieldTypes);
-  const instrument = getPrimaryValue(metricTypes);
+  const type = firstNonNullable(fieldTypes);
+  const instrument = firstNonNullable(metricTypes);
   const source = timeseries(index);
 
   const whereCommands = whereStatements.flatMap((statement) => {

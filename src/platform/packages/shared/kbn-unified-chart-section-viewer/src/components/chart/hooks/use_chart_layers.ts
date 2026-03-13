@@ -14,7 +14,7 @@ import {
   createMetricAggregation,
   createTimeBucketAggregation,
   getLensMetricFormat,
-  getPrimaryValue,
+  firstNonNullable,
 } from '../../../common/utils';
 
 interface UseChartLayersParams {
@@ -41,9 +41,9 @@ export const useChartLayers = ({
   customFunction,
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
-    const type = getPrimaryValue(metricItem.fieldTypes);
-    const instrument = getPrimaryValue(metricItem.metricTypes);
-    const resolvedUnit = getPrimaryValue(metricItem.units);
+    const type = firstNonNullable(metricItem.fieldTypes);
+    const instrument = firstNonNullable(metricItem.metricTypes);
+    const resolvedUnit = firstNonNullable(metricItem.units);
     const metricField = createMetricAggregation({
       type,
       instrument,
