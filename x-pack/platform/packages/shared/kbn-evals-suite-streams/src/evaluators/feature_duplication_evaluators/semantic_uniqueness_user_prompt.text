@@ -1,0 +1,11 @@
+Evaluate the following feature set for semantic uniqueness:
+
+**Stream name**: {{{stream_name}}}
+
+**Totals**:
+{{{totals}}}
+
+**Unique features by id**:
+{{{unique_features_by_id}}}
+
+Please analyze the features and call the `analyze` tool with your findings.

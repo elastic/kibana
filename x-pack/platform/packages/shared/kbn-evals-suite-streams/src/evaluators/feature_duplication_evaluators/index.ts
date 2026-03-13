@@ -8,75 +8,9 @@
 import { hasSameFingerprint, type BaseFeature } from '@kbn/streams-schema';
 import { uniqBy, uniqWith } from 'lodash';
 import type { BoundInferenceClient } from '@kbn/inference-common';
-
-const SEMANTIC_UNIQUENESS_OUTPUT_SCHEMA = {
-  type: 'object',
-  properties: {
-    k: {
-      type: 'number',
-      description:
-        'Number of semantic clusters you formed — each cluster = one unique real-world concept. K is always <= N (the total number of unique-by-id features provided in the input). (integer)',
-    },
-    explanation: {
-      type: 'string',
-      description:
-        'Your reasoning: list confirmed duplicate clusters with their one-sentence identity statements, and briefly note what drives duplication (id naming instability, overly generic ids, etc.)',
-    },
-    duplicate_clusters: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          ids: {
-            type: 'array',
-            items: { type: 'string' },
-            description: 'Feature ids that form the duplicate cluster',
-          },
-          identity_statement: {
-            type: 'string',
-            description:
-              'One sentence naming the single real-world component or process all members refer to',
-          },
-        },
-        required: ['ids', 'identity_statement'],
-      },
-      description: 'Up to 5 of the largest confirmed duplicate clusters',
-    },
-  },
-  required: ['k', 'explanation', 'duplicate_clusters'],
-} as const;
-
-const ID_CONSISTENCY_OUTPUT_SCHEMA = {
-  type: 'object',
-  properties: {
-    collision_groups: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'string',
-            description: 'The feature id that is a collision',
-          },
-          reason: {
-            type: 'string',
-            description:
-              'One sentence explaining why the variants conflict (e.g. "variant A describes X while variant B describes Y")',
-          },
-        },
-        required: ['id', 'reason'],
-      },
-      description:
-        'Id groups you judge as INCONSISTENT (genuine collisions). Omit groups where variants clearly refer to the same underlying concept, even if wording differs.',
-    },
-    explanation: {
-      type: 'string',
-      description:
-        'Brief summary: note what drives collisions (overly generic ids, type confusion, unstable naming, etc.)',
-    },
-  },
-  required: ['collision_groups', 'explanation'],
-} as const;
+import { executeUntilValid } from '@kbn/inference-prompt-utils';
+import { SemanticUniquenessPrompt } from './semantic_uniqueness_prompt';
+import { IdConsistencyPrompt } from './id_consistency_prompt';
 
 /**
  * Checks that all unique-by-id features are semantically distinct.
@@ -121,42 +55,29 @@ export const createSemanticUniquenessEvaluator = ({
         `${a.type}:${a.subtype ?? ''}:${a.id}`.localeCompare(`${b.type}:${b.subtype ?? ''}:${b.id}`)
       );
 
-    const result = await inferenceClient.output({
-      id: 'semantic_uniqueness_analysis',
-      system: `You are an automated quality-assurance LLM evaluating feature extraction from log streams.
-
-Your task: given a list of features already de-duplicated by id (one representative per unique id), determine whether all unique ids are truly semantically distinct, or whether some are SEMANTIC DUPLICATES — features that refer to the exact same underlying real-world component or fact, even if their ids, titles, or descriptions differ slightly.
-
-Definitions:
-- Only compare features within the same category: type + subtype must match for two features to be considered duplicates.
-- If ambiguous, treat as NOT duplicates.
-- Same technology family ≠ duplicates. Only truly interchangeable features are duplicates.
-- Two features are duplicates only if an operator would consider them interchangeable: knowing one tells you everything knowing the other would.
-
-Burden of proof for each cluster:
-- You must be able to state in one sentence what single real-world thing all members refer to.
-- A valid identity statement names a specific component or process, not a category or domain.
-- If you cannot write the one-sentence identity, the features are NOT duplicates.
-
-Method:
-1. Read the full list of unique features.
-2. Apply the burden-of-proof test before finalising each cluster.
-3. Return K = the number of semantic clusters you formed. K must be <= N (provided in the input as unique_by_id).`,
-      input: JSON.stringify({
+    const response = await executeUntilValid({
+      prompt: SemanticUniquenessPrompt,
+      inferenceClient,
+      input: {
         stream_name: input?.stream_name,
-        totals: {
+        totals: JSON.stringify({
           runs: runs.length,
           total_features: allFeatures.length,
           unique_by_id: uniqueById,
           unique_by_fingerprint: uniqueByFingerprint,
-        },
-        unique_features_by_id: compactUniqueFeatures,
-      }),
-      schema: SEMANTIC_UNIQUENESS_OUTPUT_SCHEMA,
-      retry: { onValidationError: 3 },
+        }),
+        unique_features_by_id: JSON.stringify(compactUniqueFeatures),
+      },
+      finalToolChoice: { function: 'analyze' as const },
+      maxRetries: 3,
+      toolCallbacks: {
+        analyze: async (toolCall) => ({
+          response: toolCall.function.arguments,
+        }),
+      },
     });
 
-    const { k, explanation, duplicate_clusters } = result.output;
+    const { k, explanation, duplicate_clusters } = response.toolCalls[0].function.arguments;
     const score = uniqueById > 0 ? k / uniqueById : 1;
 
     return {
@@ -248,35 +169,28 @@ export const createIdConsistencyEvaluator = ({
       })),
     }));
 
-    const result = await inferenceClient.output({
-      id: 'id_consistency_analysis',
-      system: `You are an automated quality-assurance LLM evaluating feature extraction from log streams.
-
-You are given groups of features that share the same id but were produced with different content across multiple runs on the SAME stream.
-Features with the same id should always represent the same underlying real-world concept. An id collision — the same id used for genuinely different concepts — is a bug.
-
-Definitions:
-- "Consistent": all variants in the group clearly refer to the same underlying concept, even if minor wording or property details differ.
-- "Collision" (inconsistent): the same id is used for different concepts in different runs.
-
-Method:
-- For each id group, decide: consistent or collision.
-- Only include groups in collision_groups that are genuine collisions.
-- M (total ambiguous groups) and trivially_consistent_ids are provided as context; you do not need to report them.`,
-      input: JSON.stringify({
+    const response = await executeUntilValid({
+      prompt: IdConsistencyPrompt,
+      inferenceClient,
+      input: {
         stream_name: input?.stream_name,
-        context: {
+        context: JSON.stringify({
           total_multi_occurrence_ids: totalMultiOccurrence,
           trivially_consistent_ids: triviallyConsistent.length,
           ambiguous_ids_sent_to_llm: ambiguous.length,
-        },
-        id_groups: idGroups,
-      }),
-      schema: ID_CONSISTENCY_OUTPUT_SCHEMA,
-      retry: { onValidationError: 3 },
+        }),
+        id_groups: JSON.stringify(idGroups),
+      },
+      finalToolChoice: { function: 'evaluate' as const },
+      maxRetries: 3,
+      toolCallbacks: {
+        evaluate: async (toolCall) => ({
+          response: toolCall.function.arguments,
+        }),
+      },
     });
 
-    const { collision_groups, explanation } = result.output;
+    const { collision_groups, explanation } = response.toolCalls[0].function.arguments;
 
     const llmConsistent = ambiguous.length - collision_groups.length;
     const finalScore = (triviallyConsistent.length + llmConsistent) / totalMultiOccurrence;
