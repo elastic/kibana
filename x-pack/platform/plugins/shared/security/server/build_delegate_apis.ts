@@ -57,6 +57,7 @@ export const buildSecurityApi = ({
                 request: KibanaRequest,
                 invalidateUiamApiKeyParams: InvalidateUiamAPIKeyParams
               ) => getAuthc().apiKeys.uiam!.invalidate(request, invalidateUiamApiKeyParams),
+              convert: (keys: string[]) => getAuthc().apiKeys.uiam!.convert(keys),
             }
           : null,
       },

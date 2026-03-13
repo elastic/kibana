@@ -10,9 +10,10 @@
 import _ from 'lodash';
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { DynamicStepContextSchema } from '@kbn/workflows';
-import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
+import { DynamicStepContextSchema, WhileContextSchema } from '@kbn/workflows';
+import { isEnterForeach, isEnterWhile, type WorkflowGraph } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod/v4';
+import { getContextSchemaWithTemplateLocals } from './extend_context_with_template_locals';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getNearestStepPath } from './get_nearest_step_path';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
@@ -34,7 +35,8 @@ export function getContextSchemaForPath(
   definition: WorkflowDefinitionForContext,
   workflowGraph: WorkflowGraph,
   path: Array<string | number>,
-  yamlDocument?: Document | null
+  yamlDocument?: Document | null,
+  offset?: number
 ): typeof DynamicStepContextSchema {
   // getWorkflowContextSchema normalizes inputs internally, so it can handle both formats
   // Pass yamlDocument to allow extraction of inputs if definition.inputs is undefined
@@ -45,11 +47,11 @@ export function getContextSchemaForPath(
 
   const nearestStepPath = getNearestStepPath(path);
   if (!nearestStepPath) {
-    return schema;
+    return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
   }
   const nearestStep = _.get(definition, nearestStepPath);
   if (!nearestStep) {
-    return schema;
+    return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
   }
 
   const stepsCollectionSchema = getStepsCollectionSchema(schema, workflowGraph, nearestStep.name);
@@ -68,9 +70,22 @@ export function getContextSchemaForPath(
   );
 
   for (const enrichment of enrichments) {
-    schema = schema.extend({ [enrichment.key]: enrichment.value });
+    schema = schema.extend({
+      [enrichment.key]: enrichment.value,
+    }) as typeof DynamicStepContextSchema;
   }
 
+  return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
+}
+
+function maybeExtendWithTemplateLocals(
+  schema: typeof DynamicStepContextSchema,
+  yamlDocument?: Document | null,
+  offset?: number
+): typeof DynamicStepContextSchema {
+  if (yamlDocument != null && offset !== undefined) {
+    return getContextSchemaWithTemplateLocals(yamlDocument, offset, schema);
+  }
   return schema;
 }
 
@@ -79,7 +94,7 @@ function getStepContextSchemaEnrichmentEntries(
   workflowExecutionGraph: WorkflowGraph,
   stepId: string
 ) {
-  const enrichments: { key: 'foreach'; value: z.ZodType }[] = [];
+  const enrichments: { key: 'foreach' | 'while'; value: z.ZodType }[] = [];
   const stack = workflowExecutionGraph.getNodeStack(stepId);
 
   for (const nodeId of stack) {
@@ -91,6 +106,26 @@ function getStepContextSchemaEnrichmentEntries(
         value: getForeachStateSchema(stepContextSchema, node.configuration),
       });
     }
+
+    if (isEnterWhile(node)) {
+      enrichments.push({
+        key: 'while',
+        value: WhileContextSchema,
+      });
+    }
   }
+
+  // Container steps (while, foreach) are decomposed into enter/exit nodes in the
+  // graph, so getNodeStack for the step name itself returns []. getStepNode
+  // resolves the step name to its enter-* node via prefix lookup. If the step IS
+  // a container, its own scope context should be available (e.g., while.iteration
+  // in the condition field is evaluated per-iteration).
+  const selfNode = workflowExecutionGraph.getStepNode(stepId);
+  if (selfNode) {
+    if (isEnterWhile(selfNode) && !enrichments.some((e) => e.key === 'while')) {
+      enrichments.push({ key: 'while', value: WhileContextSchema });
+    }
+  }
+
   return enrichments;
 }

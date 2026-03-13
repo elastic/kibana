@@ -139,7 +139,7 @@ describe('HTTPAuthenticationProvider', () => {
           )
         );
 
-        expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
+        expectAuthenticateCall(mockOptions.client, request);
 
         expect(request.headers.authorization).toBe(header);
       }
@@ -166,7 +166,7 @@ describe('HTTPAuthenticationProvider', () => {
         )
       );
 
-      expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
+      expectAuthenticateCall(mockOptions.client, request);
 
       expect(request.headers.authorization).toBe(header);
     });
@@ -193,7 +193,7 @@ describe('HTTPAuthenticationProvider', () => {
         )
       );
 
-      expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
+      expectAuthenticateCall(mockOptions.client, request);
 
       expect(request.headers.authorization).toBe(header);
     });
@@ -223,7 +223,7 @@ describe('HTTPAuthenticationProvider', () => {
         )
       );
 
-      expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
+      expectAuthenticateCall(mockOptions.client, request);
 
       expect(request.headers.authorization).toBe(header);
     });
@@ -247,7 +247,7 @@ describe('HTTPAuthenticationProvider', () => {
         AuthenticationResult.notHandled()
       );
 
-      expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
+      expectAuthenticateCall(mockOptions.client, request);
 
       expect(request.headers.authorization).toBe(header);
     });
@@ -278,7 +278,7 @@ describe('HTTPAuthenticationProvider', () => {
           AuthenticationResult.failed(failureReason)
         );
 
-        expectAuthenticateCall(mockOptions.client, { headers: { authorization: header } });
+        expectAuthenticateCall(mockOptions.client, request);
 
         expect(request.headers.authorization).toBe(header);
       }

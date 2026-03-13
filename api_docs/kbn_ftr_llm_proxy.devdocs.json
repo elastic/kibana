@@ -545,6 +545,45 @@
       },
       {
         "parentPluginId": "@kbn/ftr-llm-proxy",
+        "id": "def-common.createMultiToolCallMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "createMultiToolCallMessage",
+        "description": [],
+        "signature": [
+          "(toolCalls: { name: string; args: Record<string, any>; }[]) => Omit<",
+          "ChatCompletionMessage",
+          ", \"refusal\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/utils.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.createMultiToolCallMessage.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "toolCalls",
+            "description": [],
+            "signature": [
+              "{ name: string; args: Record<string, any>; }[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/utils.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-llm-proxy",
         "id": "def-common.createOpenAiChunk",
         "type": "Function",
         "tags": [],

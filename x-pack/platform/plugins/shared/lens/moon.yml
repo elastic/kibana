@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/lens-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/lens-plugin'
+  title: '@kbn/lens-plugin'
   description: Moon project for @kbn/lens-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/lens
+  sourceRoot: x-pack/platform/plugins/shared/lens
 dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/core'
@@ -141,12 +140,14 @@ dependsOn:
   - '@kbn/react-kibana-context-common'
   - '@kbn/control-group-renderer'
   - '@kbn/unified-tabs'
-  - '@kbn/esql-language'
   - '@kbn/cps'
   - '@kbn/kql'
   - '@kbn/core-base-browser-mocks'
   - '@kbn/react-kibana-context-env'
   - '@kbn/scout'
+  - '@kbn/cps-utils'
+  - '@kbn/controls-constants'
+  - '@kbn/presentation-publishing-schemas'
 tags:
   - plugin
   - prod
@@ -163,14 +164,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

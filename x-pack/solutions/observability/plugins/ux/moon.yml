@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ux-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/actionable-obs-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ux-plugin'
+  title: '@kbn/ux-plugin'
   description: Moon project for @kbn/ux-plugin
   channel: ''
   owner: '@elastic/actionable-obs-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/ux
+  sourceRoot: x-pack/solutions/observability/plugins/ux
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -58,6 +57,7 @@ dependsOn:
   - '@kbn/server-route-repository-utils'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-rendering-browser'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -70,17 +70,28 @@ fileGroups:
     - public/**/*
     - server/**/*
     - public/**/*.json
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

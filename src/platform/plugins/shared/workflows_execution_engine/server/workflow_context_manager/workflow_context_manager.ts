@@ -317,6 +317,7 @@ export class WorkflowContextManager {
     const executionId = this.workflowExecutionState.getWorkflowExecution().id;
     const scopeEntries: Array<ScopeEntry> = [];
     const foreachEntries: Array<ScopeEntry> = [];
+    const whileEntries: Array<ScopeEntry> = [];
 
     while (!scopeStack.isEmpty()) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -328,6 +329,9 @@ export class WorkflowContextManager {
       scopeEntries.push({ topFrame, stepExecution });
       if (stepExecution?.stepType === 'foreach') {
         foreachEntries.push({ topFrame, stepExecution });
+      }
+      if (stepExecution?.stepType === 'while') {
+        whileEntries.push({ topFrame, stepExecution });
       }
     }
 
@@ -341,9 +345,39 @@ export class WorkflowContextManager {
 
     // Build foreach context in outer-to-inner order so inner expressions like
     // {{foreach.item}} resolve against the outer foreach context.
-    for (const { stepExecution } of foreachEntries.reverse()) {
+    for (const { stepExecution } of foreachEntries.toReversed()) {
       if (stepExecution) {
-        stepContext.foreach = this.buildForeachContext(stepExecution, stepContext);
+        const foreachCtx = this.buildForeachContext(stepExecution, stepContext);
+        stepContext.foreach = foreachCtx;
+        /**
+         * Merge foreach context into step context so that inner foreach can
+         * access the outer context.
+         */
+        if (stepExecution.stepId && foreachCtx) {
+          if (!stepContext.steps[stepExecution.stepId]) {
+            stepContext.steps[stepExecution.stepId] = {};
+          }
+          const { item, items, index, total } = foreachCtx;
+          Object.assign(stepContext.steps[stepExecution.stepId], { item, items, index, total });
+        }
+      }
+    }
+
+    // Build while context in outer-to-inner order so the last write is the
+    // innermost while scope — {{while.iteration}} resolves to the closest
+    // enclosing while loop.
+    for (const { stepExecution } of whileEntries.toReversed()) {
+      if (stepExecution) {
+        const whileCtx = this.buildWhileContext(stepExecution);
+        stepContext.while = whileCtx;
+        if (stepExecution.stepId && whileCtx) {
+          if (!stepContext.steps[stepExecution.stepId]) {
+            stepContext.steps[stepExecution.stepId] = {};
+          }
+          Object.assign(stepContext.steps[stepExecution.stepId], {
+            iteration: whileCtx.iteration,
+          });
+        }
       }
     }
 
@@ -392,6 +426,12 @@ export class WorkflowContextManager {
       index,
       total,
     };
+  }
+
+  private buildWhileContext(stepExecution: EsWorkflowStepExecution): StepContext['while'] {
+    const whileState = stepExecution.state ?? {};
+    const iteration = typeof whileState.iteration === 'number' ? whileState.iteration : 0;
+    return { iteration };
   }
 
   /**

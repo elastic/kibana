@@ -96,23 +96,6 @@ describe('ScriptsLibrary', () => {
   });
 
   describe('Page elements', () => {
-    it('renders the Scripts Library page', () => {
-      render();
-
-      expect(renderResult.getByTestId('test')).toBeInTheDocument();
-    });
-
-    it('should show the page header', () => {
-      render();
-      const { getByTestId } = renderResult;
-
-      expect(getByTestId('test-header')).toBeInTheDocument();
-      expect(getByTestId('header-page-title').textContent).toEqual('Scripts Library');
-      expect(getByTestId('header-panel-subtitle').textContent).toEqual(
-        'View and manage scripts to upload and execute on Elastic Defend agents.'
-      );
-    });
-
     it('should not show the upload button when user does not have `canWriteScriptsLibrary` privileges', () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: {
@@ -123,24 +106,64 @@ describe('ScriptsLibrary', () => {
 
       render();
       const { queryByTestId } = renderResult;
-      const uploadButton = queryByTestId('test-uploadScriptButton');
+      const uploadButton = queryByTestId('test-upload-script-button');
 
       expect(uploadButton).not.toBeInTheDocument();
     });
 
-    it('should show an empty table when there are no scripts', () => {
+    it('should show an empty state prompt with upload button when no data', () => {
       render();
       const { getByText, getByTestId } = renderResult;
 
-      expect(getByTestId('test-table')).toBeInTheDocument();
-      expect(getByTestId('test-table-record-range-label').textContent).toEqual(
-        'Showing 1-10 of 0 scripts'
+      expect(getByTestId('test-no-data-empty-prompt')).toBeInTheDocument();
+      expect(getByText('Add your first script')).toBeInTheDocument();
+      expect(getByTestId('test-no-data-empty-prompt-upload-button')).toBeInTheDocument();
+    });
+
+    it('should not show upload button when no data and no `canWriteScriptsLibrary` privilege on the empty prompt', () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: {
+          ...getEndpointAuthzInitialStateMock(),
+          canWriteScriptsLibrary: false,
+        },
+      });
+
+      render();
+      const { getByTestId } = renderResult;
+
+      expect(getByTestId('test-no-data-empty-prompt-title-no-entries')).toBeInTheDocument();
+    });
+
+    it('renders the Scripts Library page', () => {
+      render();
+
+      expect(renderResult.getByTestId('test')).toBeInTheDocument();
+    });
+
+    it('should show the page header when data is available and fetched', () => {
+      const scriptId = 'script-1';
+      const script = scriptsGenerator.generate({ id: scriptId });
+      getScriptsListMock([script]);
+
+      render();
+      const { getByTestId } = renderResult;
+
+      expect(getByTestId('test-header')).toBeInTheDocument();
+      expect(getByTestId('header-page-title').textContent).toEqual('Scripts Library');
+      expect(getByTestId('header-panel-subtitle').textContent).toEqual(
+        'View and manage scripts to upload and execute on Elastic Defend agents.'
       );
-      expect(getByText('No scripts found')).toBeInTheDocument();
     });
   });
 
   describe('Interactions (with data)', () => {
+    const scriptId = 'script-1';
+
+    beforeEach(() => {
+      const script = scriptsGenerator.generate({ id: scriptId });
+      getScriptsListMock([script]);
+    });
+
     it('should show an error message when there is an error with fetching scripts', () => {
       (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
@@ -162,10 +185,6 @@ describe('ScriptsLibrary', () => {
     });
 
     it('should show details flyout when clicked on row action `View details` item', () => {
-      const scriptId = 'script-1';
-      const script = scriptsGenerator.generate({ id: scriptId });
-      getScriptsListMock([script]);
-
       render();
 
       const { getByTestId } = renderResult;
@@ -187,11 +206,20 @@ describe('ScriptsLibrary', () => {
       });
     });
 
-    it('should show edit flyout when clicked on row action `Edit` item', () => {
-      const scriptId = 'script-1';
-      const script = scriptsGenerator.generate({ id: scriptId });
-      getScriptsListMock([script]);
+    it('should show create flyout when upload button is clicked from page header', () => {
+      render();
 
+      const { getByTestId } = renderResult;
+      const uploadButton = getByTestId('test-upload-script-button');
+      userEvent.click(uploadButton);
+
+      waitFor(() => {
+        expect(getByTestId('test-endpointScriptFlyout-create')).toBeInTheDocument();
+        expect(history.location.search).toContain('show=create');
+      });
+    });
+
+    it('should show edit flyout when clicked on row action `Edit` item', () => {
       render();
 
       const { getByTestId } = renderResult;
@@ -221,10 +249,6 @@ describe('ScriptsLibrary', () => {
         },
       });
 
-      const scriptId = 'script-1';
-      const script = scriptsGenerator.generate({ id: scriptId });
-      getScriptsListMock([script]);
-
       act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?show=edit&selectedScriptId=${scriptId}`));
       render();
 
@@ -234,19 +258,20 @@ describe('ScriptsLibrary', () => {
   });
 
   describe('Upload button and create flyout', () => {
-    beforeEach(() => {});
-    it('should show create flyout when upload button is clicked', () => {
+    beforeEach(() => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: {
           ...getEndpointAuthzInitialStateMock(),
           canWriteScriptsLibrary: true,
         },
       });
+    });
 
+    it('should show create flyout when upload button is clicked from empty state', () => {
       render();
 
       const { getByTestId } = renderResult;
-      const uploadButton = getByTestId('test-uploadScriptButton');
+      const uploadButton = getByTestId('test-no-data-empty-prompt-upload-button');
       userEvent.click(uploadButton);
 
       waitFor(() => {
@@ -256,13 +281,6 @@ describe('ScriptsLibrary', () => {
     });
 
     it('should show create flyout when navigating to URL with show=create', () => {
-      useUserPrivilegesMock.mockReturnValue({
-        endpointPrivileges: {
-          ...getEndpointAuthzInitialStateMock(),
-          canWriteScriptsLibrary: true,
-        },
-      });
-
       act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?show=create`));
       render();
 
@@ -540,8 +558,18 @@ describe('ScriptsLibrary', () => {
     });
 
     it('should render table with loading state when isFetching is true', () => {
+      const script = scriptsGenerator.generate();
+      getScriptsListMock([script]);
       (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
+        data: {
+          data: [script],
+          page: 1,
+          pageSize: 10,
+          sortDirection: 'asc',
+          sortField: 'name',
+          total: 1,
+        },
         isFetching: true,
         isFetched: true,
       });

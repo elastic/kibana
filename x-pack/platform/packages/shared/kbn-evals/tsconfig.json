@@ -31,5 +31,6 @@
     "@kbn/tracing-utils",
     "@kbn/dev-cli-errors",
     "@kbn/config-schema",
+    "@kbn/evals-common",
   ]
 }

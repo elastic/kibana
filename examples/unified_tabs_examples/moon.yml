@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/unified-tabs-examples-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/unified-tabs-examples-plugin'
+  title: '@kbn/unified-tabs-examples-plugin'
   description: Moon project for @kbn/unified-tabs-examples-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: examples/unified_tabs_examples
+  sourceRoot: examples/unified_tabs_examples
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
