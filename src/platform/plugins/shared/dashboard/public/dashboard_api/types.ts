@@ -180,8 +180,10 @@ export type DashboardApi = CanExpandPanels &
     isEditableByUser: boolean;
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
-    runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
-    runQuickSave: () => Promise<void>;
+    runInteractiveSave: (options?: {
+      showOpenLink?: boolean;
+    }) => Promise<SaveDashboardReturn | undefined>;
+    runQuickSave: (options?: { showOpenLink?: boolean }) => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
