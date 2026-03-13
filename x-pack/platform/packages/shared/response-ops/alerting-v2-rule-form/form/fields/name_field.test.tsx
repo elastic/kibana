@@ -15,16 +15,23 @@ import { createFormWrapper, createTestQueryClient, defaultTestFormValues } from 
 import type { FormValues } from '../types';
 
 describe('NameField', () => {
-  it('renders the name label', () => {
+  it('renders the default name text when no name is provided', () => {
     render(<NameField />, { wrapper: createFormWrapper() });
 
-    expect(screen.getByText('Name')).toBeInTheDocument();
+    expect(screen.getByText('Untitled rule')).toBeInTheDocument();
   });
 
-  it('renders a text input', () => {
+  it('renders as an inline editable title', () => {
     render(<NameField />, { wrapper: createFormWrapper() });
 
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleNameInlineEdit')).toBeInTheDocument();
+  });
+
+  it('renders the inline edit read mode button with pencil icon', () => {
+    render(<NameField />, { wrapper: createFormWrapper() });
+
+    // EuiInlineEditTitle renders a button to activate edit mode
+    expect(screen.getByTestId('euiInlineReadModeButton')).toBeInTheDocument();
   });
 
   it('displays initial value from form context', () => {
@@ -37,23 +44,27 @@ describe('NameField', () => {
 
     render(<NameField />, { wrapper: Wrapper });
 
-    expect(screen.getByRole('textbox')).toHaveValue('My Test Rule');
+    expect(screen.getByText('My Test Rule')).toBeInTheDocument();
   });
 
-  it('updates value when user types', async () => {
+  it('enters edit mode when read mode button is clicked', async () => {
     const user = userEvent.setup();
     render(<NameField />, { wrapper: createFormWrapper() });
 
-    const input = screen.getByRole('textbox');
-    await user.type(input, 'New Rule Name');
+    // Click the inline edit read mode button to enter edit mode
+    const readModeButton = screen.getByTestId('euiInlineReadModeButton');
+    await user.click(readModeButton);
 
-    expect(input).toHaveValue('New Rule Name');
+    // Now a text input should be visible in edit mode
+    await waitFor(() => {
+      expect(screen.getByLabelText('Edit rule name')).toBeInTheDocument();
+    });
   });
 
   it('shows required error when submitted with empty value', async () => {
     const queryClient = createTestQueryClient();
 
-    const WrapperWithSubmit: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const WrapperWithSubmit = ({ children }: { children: React.ReactNode }) => {
       const form = useForm<FormValues>({
         defaultValues: defaultTestFormValues,
       });

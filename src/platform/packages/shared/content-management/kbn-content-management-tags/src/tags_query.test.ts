@@ -29,6 +29,14 @@ describe('useTags', () => {
     managed: false,
   };
 
+  const mockTagMultiWord: Tag = {
+    id: 'tag-multi',
+    name: 'New York',
+    description: 'Multi-word tag name',
+    color: '#0000FF',
+    managed: false,
+  };
+
   const mockItems = [
     {
       id: 'item-1',
@@ -407,6 +415,122 @@ describe('useTags', () => {
       });
 
       expect(updateQuery).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('multi-word tag names', () => {
+    it('adds a multi-word tag to include filter with quoted syntax', () => {
+      const updateQuery = jest.fn();
+      const { result } = renderHook(() =>
+        useTags({
+          query: Query.parse(''),
+          updateQuery,
+          items: mockItems,
+        })
+      );
+
+      act(() => {
+        result.current.toggleIncludeTagFilter(mockTagMultiWord);
+      });
+
+      expect(updateQuery).toHaveBeenCalledTimes(1);
+      const calledQuery = updateQuery.mock.calls[0][0];
+      expect(calledQuery.text).toContain('New York');
+    });
+
+    it('removes a multi-word tag from include filter', () => {
+      const updateQuery = jest.fn();
+      const { result } = renderHook(() =>
+        useTags({
+          query: Query.parse('tag:("New York")'),
+          updateQuery,
+          items: mockItems,
+        })
+      );
+
+      act(() => {
+        result.current.toggleIncludeTagFilter(mockTagMultiWord);
+      });
+
+      expect(updateQuery).toHaveBeenCalledTimes(1);
+      const calledQuery = updateQuery.mock.calls[0][0];
+      expect(calledQuery.text).not.toContain('New York');
+    });
+
+    it('combines multi-word and single-word tags in an OR clause', () => {
+      const updateQuery = jest.fn();
+      const { result } = renderHook(() =>
+        useTags({
+          query: Query.parse('tag:(Important)'),
+          updateQuery,
+          items: mockItems,
+        })
+      );
+
+      act(() => {
+        result.current.toggleIncludeTagFilter(mockTagMultiWord);
+      });
+
+      const calledQuery = updateQuery.mock.calls[0][0];
+      expect(calledQuery.text).toContain('Important');
+      expect(calledQuery.text).toContain('New York');
+    });
+
+    it('adds a multi-word tag to exclude filter', () => {
+      const updateQuery = jest.fn();
+      const { result } = renderHook(() =>
+        useTags({
+          query: Query.parse(''),
+          updateQuery,
+          items: mockItems,
+        })
+      );
+
+      act(() => {
+        result.current.toggleExcludeTagFilter(mockTagMultiWord);
+      });
+
+      expect(updateQuery).toHaveBeenCalledTimes(1);
+      const calledQuery = updateQuery.mock.calls[0][0];
+      expect(calledQuery.text).toContain('New York');
+      expect(calledQuery.text).toContain('-tag:');
+    });
+
+    it('moves a multi-word tag from include to exclude', () => {
+      const updateQuery = jest.fn();
+      const { result } = renderHook(() =>
+        useTags({
+          query: Query.parse('tag:("New York")'),
+          updateQuery,
+          items: mockItems,
+        })
+      );
+
+      act(() => {
+        result.current.toggleExcludeTagFilter(mockTagMultiWord);
+      });
+
+      expect(updateQuery).toHaveBeenCalledTimes(1);
+      const calledQuery = updateQuery.mock.calls[0][0];
+      expect(calledQuery.text).toBe('-tag:("New York")');
+    });
+
+    it('clears multi-word tags along with single-word tags', () => {
+      const updateQuery = jest.fn();
+      const { result } = renderHook(() =>
+        useTags({
+          query: Query.parse('tag:(Important or "New York") -tag:("New York")'),
+          updateQuery,
+          items: mockItems,
+        })
+      );
+
+      act(() => {
+        result.current.clearTagSelection();
+      });
+
+      const calledQuery = updateQuery.mock.calls[0][0];
+      expect(calledQuery.text).toBe('');
     });
   });
 

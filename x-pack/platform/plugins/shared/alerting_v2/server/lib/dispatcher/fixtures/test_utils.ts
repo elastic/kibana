@@ -65,7 +65,7 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
     id: 'rule-1',
     name: 'Test rule',
     description: '',
-    notificationPolicyIds: ['policy-1'],
+    labels: [],
     enabled: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
@@ -81,6 +81,7 @@ export function createNotificationPolicy(
     name: 'Test policy',
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
+    ruleLabels: [],
     ...overrides,
   };
 }

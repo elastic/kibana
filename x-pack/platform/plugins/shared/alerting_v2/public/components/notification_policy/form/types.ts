@@ -26,6 +26,7 @@ export interface NotificationPolicyFormState {
   description: string;
   matcher: string;
   groupBy: string[];
+  ruleLabels: string[];
   frequency: NotificationPolicyFrequency;
   destinations: NotificationPolicyDestination[];
 }

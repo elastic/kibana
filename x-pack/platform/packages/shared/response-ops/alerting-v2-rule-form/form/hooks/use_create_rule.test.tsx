@@ -22,7 +22,6 @@ describe('useCreateRule', () => {
         useCreateRule({
           http,
           notifications,
-          onSuccess,
         }),
       { wrapper: createQueryClientWrapper() }
     );
@@ -76,7 +75,6 @@ describe('useCreateRule', () => {
   it('calls the correct API endpoint', async () => {
     const http = httpServiceMock.createStartContract();
     const notifications = notificationServiceMock.createStartContract();
-    const onSuccess = jest.fn();
 
     http.post.mockResolvedValue({ id: 'rule-123', metadata: { name: 'Test Rule' } });
 
@@ -85,7 +83,6 @@ describe('useCreateRule', () => {
         useCreateRule({
           http,
           notifications,
-          onSuccess,
         }),
       { wrapper: createQueryClientWrapper() }
     );
@@ -102,7 +99,6 @@ describe('useCreateRule', () => {
   it('sends the form data as JSON in the request body', async () => {
     const http = httpServiceMock.createStartContract();
     const notifications = notificationServiceMock.createStartContract();
-    const onSuccess = jest.fn();
 
     http.post.mockResolvedValue({ id: 'rule-123', metadata: { name: 'Test Rule' } });
 
@@ -111,7 +107,6 @@ describe('useCreateRule', () => {
         useCreateRule({
           http,
           notifications,
-          onSuccess,
         }),
       { wrapper: createQueryClientWrapper() }
     );
@@ -139,13 +134,12 @@ describe('useCreateRule', () => {
         useCreateRule({
           http,
           notifications,
-          onSuccess,
         }),
       { wrapper: createQueryClientWrapper() }
     );
 
     await act(async () => {
-      result.current.createRule(validFormData);
+      result.current.createRule(validFormData, { onSuccess });
     });
 
     await waitFor(() => {
@@ -171,13 +165,12 @@ describe('useCreateRule', () => {
         useCreateRule({
           http,
           notifications,
-          onSuccess,
         }),
       { wrapper: createQueryClientWrapper() }
     );
 
     await act(async () => {
-      result.current.createRule(validFormData);
+      result.current.createRule(validFormData, { onSuccess });
     });
 
     await waitFor(() => {
@@ -325,7 +318,6 @@ describe('useCreateRule', () => {
   it('includes all form fields in the request payload', async () => {
     const http = httpServiceMock.createStartContract();
     const notifications = notificationServiceMock.createStartContract();
-    const onSuccess = jest.fn();
 
     http.post.mockResolvedValue({ id: 'rule-456', metadata: { name: 'Complex Rule' } });
 
@@ -334,7 +326,6 @@ describe('useCreateRule', () => {
         useCreateRule({
           http,
           notifications,
-          onSuccess,
         }),
       { wrapper: createQueryClientWrapper() }
     );
@@ -391,11 +382,10 @@ describe('useCreateRule', () => {
   it('maps recovery_policy with condition-only mode using evaluation base query', async () => {
     const http = httpServiceMock.createStartContract();
     const notifications = notificationServiceMock.createStartContract();
-    const onSuccess = jest.fn();
 
     http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Recovery Rule' } });
 
-    const { result } = renderHook(() => useCreateRule({ http, notifications, onSuccess }), {
+    const { result } = renderHook(() => useCreateRule({ http, notifications }), {
       wrapper: createQueryClientWrapper(),
     });
 
@@ -439,11 +429,10 @@ describe('useCreateRule', () => {
   it('maps recovery_policy with full base query when no condition is set', async () => {
     const http = httpServiceMock.createStartContract();
     const notifications = notificationServiceMock.createStartContract();
-    const onSuccess = jest.fn();
 
     http.post.mockResolvedValue({ id: 'rule-790', metadata: { name: 'Full Recovery Rule' } });
 
-    const { result } = renderHook(() => useCreateRule({ http, notifications, onSuccess }), {
+    const { result } = renderHook(() => useCreateRule({ http, notifications }), {
       wrapper: createQueryClientWrapper(),
     });
 
@@ -485,11 +474,10 @@ describe('useCreateRule', () => {
   it('omits recovery_policy query when type is no_breach', async () => {
     const http = httpServiceMock.createStartContract();
     const notifications = notificationServiceMock.createStartContract();
-    const onSuccess = jest.fn();
 
     http.post.mockResolvedValue({ id: 'rule-791', metadata: { name: 'No Breach Rule' } });
 
-    const { result } = renderHook(() => useCreateRule({ http, notifications, onSuccess }), {
+    const { result } = renderHook(() => useCreateRule({ http, notifications }), {
       wrapper: createQueryClientWrapper(),
     });
 

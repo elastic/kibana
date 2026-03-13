@@ -79,13 +79,6 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     })
   ),
 
-  notification_policies: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        ref: schema.string(),
-      })
-    )
-  ),
   // Server-managed fields
   enabled: schema.boolean(),
   createdBy: schema.nullable(schema.string()),

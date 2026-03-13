@@ -13,7 +13,7 @@ import type { FormValues } from '../types';
 
 const DESCRIPTION_ROW_ID = 'ruleV2FormDescriptionField';
 
-export const DescriptionField: React.FC = () => {
+export const DescriptionField = () => {
   const { control, watch } = useFormContext<FormValues>();
   const descriptionValue = watch('metadata.description');
 

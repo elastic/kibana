@@ -358,6 +358,9 @@
             "type": "keyword"
           }
         }
+      },
+      "rule_labels": {
+        "type": "keyword"
       }
     }
   },
@@ -414,10 +417,6 @@
         "enabled": false,
         "type": "object"
       },
-      "notification_policies": {
-        "enabled": false,
-        "type": "object"
-      },
       "recovery_policy": {
         "enabled": false,
         "type": "object"
@@ -469,6 +468,10 @@
         "type": "keyword"
       }
     }
+  },
+  "anonymization-salt": {
+    "dynamic": false,
+    "properties": {}
   },
   "api_key_pending_invalidation": {
     "properties": {
@@ -760,6 +763,9 @@
       "duration": {
         "type": "unsigned_long"
       },
+      "extended_fields": {
+        "type": "flattened"
+      },
       "external_service": {
         "properties": {
           "connector_name": {
@@ -841,6 +847,17 @@
       },
       "tags": {
         "type": "keyword"
+      },
+      "template": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
       },
       "title": {
         "fields": {
@@ -1559,6 +1576,10 @@
       }
     }
   },
+  "entity-store-global-state": {
+    "dynamic": false,
+    "properties": {}
+  },
   "epm-packages": {
     "dynamic": false,
     "properties": {
@@ -1648,6 +1669,10 @@
         "type": "keyword"
       },
       "package_assets": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "pending_upgrade_review": {
         "dynamic": false,
         "properties": {}
       },
@@ -2473,6 +2498,10 @@
       }
     }
   },
+  "inference-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "infra-custom-dashboards": {
     "dynamic": false,
     "properties": {
@@ -3192,8 +3221,8 @@
     "dynamic": false,
     "properties": {
       "content": {
-        "type": "text",
-        "index": false
+        "index": false,
+        "type": "text"
       },
       "description": {
         "type": "text"
@@ -4545,6 +4574,9 @@
     "properties": {
       "attempts": {
         "type": "integer"
+      },
+      "cost": {
+        "type": "keyword"
       },
       "enabled": {
         "type": "boolean"

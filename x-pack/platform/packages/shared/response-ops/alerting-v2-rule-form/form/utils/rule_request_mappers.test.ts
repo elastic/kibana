@@ -222,6 +222,54 @@ describe('rule_request_mappers', () => {
       expect(result.state_transition).toBeUndefined();
     });
 
+    it('maps state_transition with recovering count and timeframe', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        stateTransition: { recoveringCount: 4, recoveringTimeframe: '15m' },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.state_transition).toEqual({
+        recovering_count: 4,
+        recovering_timeframe: '15m',
+      });
+    });
+
+    it('maps state_transition with only recovering count (no timeframe)', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        stateTransition: { recoveringCount: 3 },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.state_transition).toEqual({ recovering_count: 3 });
+      expect(result.state_transition).not.toHaveProperty('recovering_timeframe');
+    });
+
+    it('maps state_transition with both pending and recovering fields', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        kind: 'alert',
+        stateTransition: {
+          pendingCount: 2,
+          recoveringCount: 5,
+          recoveringTimeframe: '10m',
+        },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.state_transition).toEqual({
+        pending_count: 2,
+        recovering_count: 5,
+        recovering_timeframe: '10m',
+      });
+    });
+
     it('strips enabled from metadata (server-managed) but includes description', () => {
       const formValues: FormValues = {
         ...baseFormValues,
@@ -501,6 +549,44 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransition).toEqual({
         pendingCount: 3,
         pendingTimeframe: '10m',
+        recoveringCount: undefined,
+        recoveringTimeframe: undefined,
+      });
+    });
+
+    it('maps state_transition with recovering fields', () => {
+      const rule = {
+        ...baseRuleResponse,
+        state_transition: { recovering_count: 5, recovering_timeframe: '15m' },
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.stateTransition).toEqual({
+        pendingCount: undefined,
+        pendingTimeframe: undefined,
+        recoveringCount: 5,
+        recoveringTimeframe: '15m',
+      });
+    });
+
+    it('maps state_transition with both pending and recovering fields', () => {
+      const rule = {
+        ...baseRuleResponse,
+        state_transition: {
+          pending_count: 2,
+          recovering_count: 4,
+          recovering_timeframe: '20m',
+        },
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.stateTransition).toEqual({
+        pendingCount: 2,
+        pendingTimeframe: undefined,
+        recoveringCount: 4,
+        recoveringTimeframe: '20m',
       });
     });
 

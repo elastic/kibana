@@ -6,61 +6,47 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import { EuiCheckableCard, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 
-const KIND_OPTIONS: Array<{ id: FormValues['kind']; label: string }> = [
-  {
-    id: 'alert',
-    label: i18n.translate('xpack.alertingV2.ruleForm.kindField.alertOption', {
-      defaultMessage: 'Alert',
-    }),
-  },
-  {
-    id: 'signal',
-    label: i18n.translate('xpack.alertingV2.ruleForm.kindField.monitorOption', {
-      defaultMessage: 'Monitor',
-    }),
-  },
-];
+const CARD_ID = 'ruleV2KindField';
 
-export const KindField: React.FC = () => {
+export const KindField = () => {
   const { control } = useFormContext<FormValues>();
 
   return (
     <Controller
       name="kind"
       control={control}
-      render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
-        <EuiFormRow
-          label={i18n.translate('xpack.alertingV2.ruleForm.kindLabel', {
-            defaultMessage: 'Rule kind',
-          })}
-          helpText={i18n.translate('xpack.alertingV2.ruleForm.kindHelpText', {
-            defaultMessage: 'Choose whether this rule creates monitors or alerts.',
-          })}
-          isInvalid={!!error}
-          error={error?.message}
-          fullWidth
-        >
-          <div ref={ref}>
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.alertingV2.ruleForm.kindField.legend', {
-                defaultMessage: 'Rule kind',
+      render={({ field: { value, onChange } }) => {
+        const isChecked = value === 'alert';
+
+        return (
+          <EuiCheckableCard
+            id={CARD_ID}
+            checkableType="checkbox"
+            label={
+              <strong>
+                {i18n.translate('xpack.alertingV2.ruleForm.kindField.checkboxLabel', {
+                  defaultMessage: 'Track active and recovered state over time',
+                })}
+              </strong>
+            }
+            checked={isChecked}
+            onChange={() => onChange(isChecked ? 'signal' : 'alert')}
+            data-test-subj="kindField"
+          >
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.alertingV2.ruleForm.kindField.checkboxDescription', {
+                defaultMessage:
+                  'Enables lifecycle management: the system will track state transitions across alert events for each series, manage episodes, and dispatch to notification policies. Without this, alert events are observation-only records.',
               })}
-              options={KIND_OPTIONS}
-              idSelected={value}
-              onChange={(id) => onChange(id)}
-              buttonSize="m"
-              color="primary"
-              isFullWidth
-              data-test-subj="kindField"
-            />
-          </div>
-        </EuiFormRow>
-      )}
+            </EuiText>
+          </EuiCheckableCard>
+        );
+      }}
     />
   );
 };
