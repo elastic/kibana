@@ -283,7 +283,7 @@ async function buildDependencies(
  */
 async function getCompatibleVersion(
   pkgName: string,
-  versionConstrains: string[],
+  versionConstraints: string[],
   opts?: { prerelease?: boolean }
 ) {
   // load all package versions from registry to find a compatible one
@@ -296,14 +296,14 @@ async function getCompatibleVersion(
   const allAvailableVersions = res.sort((a, b) => semverRcompare(a.version, b.version));
 
   const compatible = allAvailableVersions.find((registryPackage) =>
-    versionConstrains.every((constraint) => semverSatisfies(registryPackage.version, constraint))
+    versionConstraints.every((constraint) => semverSatisfies(registryPackage.version, constraint))
   );
   if (compatible) {
     return compatible.version;
   }
 
   throw new PackageDependencyError(
-    `No compatible version found for ${pkgName} with constraints ${versionConstrains.join(', ')}`
+    `No compatible version found for ${pkgName} with constraints ${versionConstraints.join(', ')}`
   );
 }
 
