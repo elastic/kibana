@@ -28,6 +28,8 @@ import type {
   FindCasesContainingAllAlertsResponse,
   BulkAddObservablesRequest,
   FindCasesContainingAllDocumentsRequest,
+  PatchCaseStats,
+  CasesPatchResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -104,6 +106,7 @@ import {
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
+  decodeCasesWithBulkUpdateStatsResponse,
   constructAssigneesFilter,
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
@@ -374,18 +377,25 @@ export const updateCases = async ({
 }: {
   cases: CaseUpdateRequest[];
   signal?: AbortSignal;
-}): Promise<CasesUI> => {
+}): Promise<{
+  cases: Array<CaseUI & { patchCaseStats: PatchCaseStats }>;
+}> => {
   if (cases.length === 0) {
-    return [];
+    return { cases: [] };
   }
 
-  const response = await KibanaServices.get().http.fetch<Cases>(CASES_URL, {
+  const response = await KibanaServices.get().http.fetch<CasesPatchResponse>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases }),
     signal,
   });
 
-  return convertCasesToCamelCase(decodeCasesResponse(response));
+  const decodedResponse = decodeCasesWithBulkUpdateStatsResponse(response);
+  return {
+    cases: convertArrayToCamelCase(decodedResponse) as Array<
+      CaseUI & { patchCaseStats: PatchCaseStats }
+    >,
+  };
 };
 
 export const replaceCustomField = async ({

@@ -247,3 +247,87 @@ export const OPTIONS = (totalCount: number) =>
 export const MORE_FILTERS_LABEL = i18n.translate('xpack.cases.tableFilters.moreFiltersLabel', {
   defaultMessage: 'More',
 });
+
+export const CLOSE_CASE_MODAL_TITLE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.title',
+  {
+    defaultMessage: 'Select alert close reason',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_LABEL = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reasonLabel',
+  {
+    defaultMessage: 'Reason for closing',
+  }
+);
+
+export const CLOSE_CASE_MODAL_CONFIRM = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.confirmButtonLabel',
+  {
+    defaultMessage: 'Confirm and close case',
+  }
+);
+
+export const CLOSE_CASE_MODAL_CLOSE_BUTTON = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.closeButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reasonSearchPlaceholder',
+  {
+    defaultMessage: 'Reason for closing attached alerts',
+  }
+);
+
+export const CLOSE_CASE_MODAL_DISCLAIMER = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.disclaimer',
+  {
+    defaultMessage: 'Alerts already closed will not be updated',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_CLOSE_WITHOUT_REASON = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.closeWithoutReason',
+  {
+    defaultMessage: 'Close without reason',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_DUPLICATE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.duplicate',
+  {
+    defaultMessage: 'Duplicate',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_FALSE_POSITIVE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.falsePositive',
+  {
+    defaultMessage: 'False Positive',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_TRUE_POSITIVE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.truePositive',
+  {
+    defaultMessage: 'True positive',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_BENIGN_POSITIVE = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.benignPositive',
+  {
+    defaultMessage: 'Benign positive',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_OTHER = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reason.other',
+  {
+    defaultMessage: 'Other',
+  }
+);

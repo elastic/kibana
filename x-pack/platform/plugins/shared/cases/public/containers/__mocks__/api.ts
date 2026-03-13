@@ -111,7 +111,15 @@ export const patchCase = async (
 export const updateCases = async (
   cases: CaseUpdateRequest[],
   signal: AbortSignal
-): Promise<CasesUI> => Promise.resolve(allCases.cases);
+): Promise<{
+  cases: Array<CaseUI & { patchCaseStats: { numberOfAlertsWithStatusSynced: number } }>;
+}> =>
+  Promise.resolve({
+    cases: allCases.cases.map((theCase) => ({
+      ...theCase,
+      patchCaseStats: { numberOfAlertsWithStatusSynced: 0 },
+    })),
+  });
 
 export const createAttachments = async (
   newComment: AttachmentRequest,

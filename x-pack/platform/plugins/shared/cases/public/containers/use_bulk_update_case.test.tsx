@@ -37,7 +37,11 @@ describe('useUpdateCases', () => {
       result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
     });
 
-    await waitFor(() => expect(spy).toHaveBeenCalledWith({ cases: allCases.cases }));
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith({
+        cases: allCases.cases,
+      })
+    );
   });
 
   it('invalidates the queries correctly', async () => {
@@ -71,6 +75,7 @@ describe('useUpdateCases', () => {
     await waitFor(() =>
       expect(addSuccess).toHaveBeenCalledWith({
         title: 'Success title',
+        text: undefined,
         className: 'eui-textBreakWord',
       })
     );

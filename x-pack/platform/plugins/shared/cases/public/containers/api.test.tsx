@@ -764,9 +764,16 @@ describe('Cases API', () => {
   });
 
   describe('updateCases', () => {
+    const casesSnakeWithBulkUpdateStats = casesSnake.map((theCase) => ({
+      ...theCase,
+      patchCaseStats: {
+        numberOfAlertsWithStatusSynced: 0,
+      },
+    }));
+
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(casesSnake);
+      fetchMock.mockResolvedValue(casesSnakeWithBulkUpdateStats);
     });
 
     const data = [
@@ -788,12 +795,45 @@ describe('Cases API', () => {
 
     it('should return correct response should not covert to camel case registered attachments', async () => {
       const resp = await updateCases({ cases: data, signal: abortCtrl.signal });
-      expect(resp).toEqual(cases);
+      expect(resp.cases).toHaveLength(cases.length);
+      expect(resp.cases[0]).toEqual(
+        expect.objectContaining({
+          id: cases[0].id,
+          patchCaseStats: {
+            numberOfAlertsWithStatusSynced: 0,
+          },
+        })
+      );
     });
 
     it('returns an empty array if the cases are empty', async () => {
       const resp = await updateCases({ cases: [], signal: abortCtrl.signal });
-      expect(resp).toEqual([]);
+      expect(resp).toEqual({ cases: [] });
+    });
+
+    it('returns cases with per-case alert status update summary', async () => {
+      fetchMock.mockResolvedValue(casesSnakeWithBulkUpdateStats);
+
+      const resp = await updateCases({
+        cases: data,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ cases: data }),
+        signal: abortCtrl.signal,
+      });
+
+      expect(resp.cases).toHaveLength(cases.length);
+      expect(resp.cases[0]).toEqual(
+        expect.objectContaining({
+          id: cases[0].id,
+          patchCaseStats: {
+            numberOfAlertsWithStatusSynced: 0,
+          },
+        })
+      );
     });
   });
 

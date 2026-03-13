@@ -17,7 +17,7 @@ import {
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
-import { mockCases } from '../../mocks';
+import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
 import { bulkUpdate, getOperationsToAuthorize } from './bulk_update';
@@ -56,6 +56,10 @@ describe('update', () => {
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
       );
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [mockCases[0].id]: 0,
+        [mockCases[1].id]: 0,
+      });
     });
 
     it('notifies an assignee', async () => {
@@ -913,6 +917,9 @@ describe('update', () => {
             "incremental_id": undefined,
             "observables": Array [],
             "owner": "securitySolution",
+            "patchCaseStats": Object {
+              "numberOfAlertsWithStatusSynced": 0,
+            },
             "settings": Object {
               "extractObservables": true,
               "syncAlerts": true,
@@ -961,6 +968,9 @@ describe('update', () => {
             "incremental_id": undefined,
             "observables": Array [],
             "owner": "securitySolution",
+            "patchCaseStats": Object {
+              "numberOfAlertsWithStatusSynced": 0,
+            },
             "settings": Object {
               "extractObservables": true,
               "syncAlerts": true,
@@ -1961,6 +1971,123 @@ describe('update', () => {
       expect(updatedAttributes.time_to_acknowledge).toEqual(expect.any(Number));
       expect(updatedAttributes.time_to_investigate).toEqual(expect.any(Number));
       expect(updatedAttributes.time_to_resolve).toEqual(expect.any(Number));
+    });
+
+    it('propagates closeReason to alerts without persisting it on cases', async () => {
+      const closeReason = 'false_positive';
+      const alertComment = {
+        ...mockCaseComments[3],
+        references: [
+          {
+            ...mockCaseComments[3].references[0],
+            id: mockCases[0].id,
+          },
+        ],
+      };
+
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [alertComment],
+        total: 1,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(1);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status: CaseStatuses.closed,
+              closeReason,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'test-id',
+          index: 'test-index',
+          status: CaseStatuses.closed,
+          closingReason: closeReason,
+        },
+      ]);
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+
+      expect(updatedAttributes).not.toHaveProperty('closeReason');
+    });
+
+    it('returns per-case synced alert count', async () => {
+      const alertComment = {
+        ...mockCaseComments[3],
+        references: [
+          {
+            ...mockCaseComments[3].references[0],
+            id: mockCases[0].id,
+          },
+        ],
+      };
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [alertComment],
+        total: 1,
+        per_page: 10,
+        page: 1,
+      });
+
+      clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(3);
+
+      const result = await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status: CaseStatuses.closed,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          patchCaseStats: {
+            numberOfAlertsWithStatusSynced: 3,
+          },
+        })
+      );
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalled();
+    });
+
+    it('returns zero per-case synced alert count when no alerts are synced', async () => {
+      const result = await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status: CaseStatuses['in-progress'],
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          patchCaseStats: {
+            numberOfAlertsWithStatusSynced: 0,
+          },
+        })
+      );
     });
   });
 });

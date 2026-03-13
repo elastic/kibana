@@ -49,7 +49,14 @@ export interface BuilderParameters {
     parameters: { payload: { description: string } };
   };
   status: {
-    parameters: { payload: { status: CaseStatuses } };
+    parameters: {
+      payload: {
+        status: CaseStatuses;
+        closeReason?: string;
+        syncAlerts?: boolean;
+        syncedAlerts?: number;
+      };
+    };
   };
   severity: {
     parameters: { payload: { severity: CaseSeverity } };
@@ -358,6 +365,11 @@ export interface BuildUserActionsDictParams {
 }
 
 export type UserActionsDict = Record<string, UserActionEvent[]>;
+
+export interface AddSyncedAlertsCountToUserActionsParams {
+  userActionsDict: UserActionsDict;
+  syncedAlertsCountByCaseId: Map<string, number>;
+}
 
 export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
   builtUserActions: UserActionEvent[];
