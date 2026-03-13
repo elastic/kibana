@@ -1120,6 +1120,40 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0].keepAlive).toBe(true);
   });
 
+  test('execute passes signal to the request call', async () => {
+    const controller = new AbortController();
+    const config = {
+      url: 'https://abc.def',
+      authType: AuthType.Basic,
+      hasAuth: true,
+    } as ConnectorTypeConfigType;
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+      },
+      params: {
+        method: 'POST',
+        path: '/my-endpoint',
+        body: 'some data',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+      signal: controller.signal,
+    });
+
+    expect(requestMock.mock.calls[0][0].signal).toBe(controller.signal);
+  });
+
   test('execute returns response with status, statusText, headers, and data', async () => {
     const config = {
       url: 'https://abc.def',

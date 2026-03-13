@@ -179,6 +179,7 @@
     "customFields.value",
     "description",
     "duration",
+    "extended_fields",
     "external_service",
     "external_service.connector_name",
     "external_service.external_id",
@@ -202,6 +203,9 @@
     "severity",
     "status",
     "tags",
+    "template",
+    "template.id",
+    "template.version",
     "title",
     "total_alerts",
     "total_comments",
@@ -420,6 +424,7 @@
     "timestampField",
     "type"
   ],
+  "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
     "es_index_patterns",
@@ -446,6 +451,7 @@
     "latest_install_failed_attempts",
     "name",
     "package_assets",
+    "pending_upgrade_review",
     "previous_version",
     "verification_key_id",
     "verification_status",
@@ -703,6 +709,7 @@
     "title",
     "type"
   ],
+  "inference-settings": [],
   "infra-custom-dashboards": [
     "assetType",
     "dashboardFilterAssetIdEnabled",
@@ -1321,6 +1328,7 @@
   ],
   "task": [
     "attempts",
+    "cost",
     "enabled",
     "ownerId",
     "partition",

@@ -54,7 +54,7 @@ export interface ChromeSetup {
  * ```tsx
  * core.chrome.setHelpExtension({
  *   appName: 'My App',
- *   reactContent: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
+ *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
  * });
  * ```
  *
@@ -84,11 +84,15 @@ export interface ChromeStart {
 
   /**
    * Get an observable of the current badge
+   * @deprecated Badges now render inline with breadcrumbs. Prefer {@link ChromeStart.setBreadcrumbsBadges}.
    */
   getBadge$(): Observable<ChromeBadge | undefined>;
 
   /**
-   * Override the current badge
+   * Override the current badge.
+   * Internally delegates to {@link ChromeStart.setBreadcrumbsBadges} so the badge
+   * renders inline with breadcrumbs in both classic and project layouts.
+   * @deprecated Use {@link ChromeStart.setBreadcrumbsBadges} directly for full control.
    */
   setBadge(badge?: ChromeBadge): void;
 
@@ -227,7 +231,7 @@ export interface ChromeStart {
 
   /**
    * Override the current set of custom help content.
-   * Prefer {@link ChromeHelpExtension.reactContent} over the legacy `content` callback.
+   * Use {@link ChromeHelpExtension.content} to render custom React content below the links.
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 
