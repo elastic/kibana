@@ -20,11 +20,41 @@ const examplesLabel = i18n.translate('kbn-esql-language.esql.autocomplete.exampl
 const MAX_LINE_LENGTH = 30;
 
 /**
+ * Splits a token that exceeds maxLen at delimiter characters
+ * (e.g. `|`, `,`) so it can fit within the available width.
+ */
+function splitLongToken(token: string, maxLen: number): string[] {
+  if (token.length <= maxLen) {
+    return [token];
+  }
+
+  const parts: string[] = [];
+  let current = '';
+
+  for (let i = 0; i < token.length; i++) {
+    current += token[i];
+    const isDelimiter = token[i] === '|' || token[i] === ',';
+    if (isDelimiter && current.length >= maxLen / 2 && i < token.length - 1) {
+      parts.push(current);
+      current = '';
+    }
+  }
+
+  if (current) {
+    parts.push(current);
+  }
+
+  return parts.length > 1 ? parts : [token];
+}
+
+/**
  * Wraps lines that exceed MAX_LINE_LENGTH at word boundaries,
  * indenting continuation lines with two spaces.
- * Lines that are already within the limit are left unchanged.
+ * Tokens without spaces that are still too long are further
+ * split at delimiter characters like `|` and `,`.
  */
-function wrapLines(text: string): string {
+/** @internal exported for testing */
+export function wrapLines(text: string): string {
   return text
     .split('\n')
     .map((line) => {
@@ -36,13 +66,18 @@ function wrapLines(text: string): string {
       const lines: string[] = [];
       let current = '';
 
-      for (const word of words) {
-        const candidate = current ? `${current} ${word}` : word;
-        if (candidate.length > MAX_LINE_LENGTH && current) {
-          lines.push(current);
-          current = `  ${word}`;
-        } else {
-          current = candidate;
+      for (const rawWord of words) {
+        const tokens =
+          rawWord.length > MAX_LINE_LENGTH ? splitLongToken(rawWord, MAX_LINE_LENGTH) : [rawWord];
+
+        for (const word of tokens) {
+          const candidate = current ? `${current} ${word}` : word;
+          if (candidate.length > MAX_LINE_LENGTH && current) {
+            lines.push(current);
+            current = `  ${word}`;
+          } else {
+            current = candidate;
+          }
         }
       }
 
