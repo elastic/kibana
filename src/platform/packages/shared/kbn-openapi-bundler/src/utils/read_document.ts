@@ -9,7 +9,7 @@
 
 import fs from 'fs/promises';
 import { basename, extname } from 'path';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import chalk from 'chalk';
 import { logger } from '../logger';
 import { isPlainObjectType } from './is_plain_object_type';
@@ -44,7 +44,7 @@ async function readFile(filePath: string): Promise<unknown> {
 
 async function readYamlFile(filePath: string): Promise<Record<string, unknown>> {
   const fileContent = await fs.readFile(filePath, { encoding: 'utf8' });
-  const maybeObject = load(fileContent);
+  const maybeObject = parse(fileContent);
 
   if (!isPlainObjectType(maybeObject)) {
     throw new Error(

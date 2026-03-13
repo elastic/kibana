@@ -8,7 +8,8 @@
  */
 
 import fs from 'fs/promises';
-import { dump } from 'js-yaml';
+import { Document, isScalar } from 'yaml';
+import type { Pair } from 'yaml';
 import { dirname } from 'path';
 
 export async function writeYamlDocument(filePath: string, document: unknown): Promise<void> {
@@ -26,23 +27,37 @@ function stringifyToYaml(document: unknown): string {
   try {
     // Disable YAML Anchors https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases
     // It makes YAML much more human readable
-    return dump(document, {
-      noRefs: true,
-      sortKeys: sortYamlKeys,
-      skipInvalid: true, // Skip invalid types like `undefined`
+    const doc = new Document(document, {
+      aliasDuplicateObjects: false,
+      sortMapEntries: sortYamlKeys,
+      strict: false,
     });
+    return doc.toString();
   } catch (e) {
     // Try to stringify with YAML Anchors enabled
-    return dump(document, { noRefs: false, sortKeys: sortYamlKeys, skipInvalid: true });
+    const doc = new Document(document, {
+      aliasDuplicateObjects: true,
+      sortMapEntries: sortYamlKeys,
+      strict: false,
+    });
+    return doc.toString();
   }
 }
 
-function sortYamlKeys(a: string, b: string): number {
-  if (a in FIELDS_ORDER && b in FIELDS_ORDER) {
-    return FIELDS_ORDER[a as CustomOrderedField] - FIELDS_ORDER[b as CustomOrderedField];
+function sortYamlKeys(a: Pair, b: Pair): number {
+  if (!isScalar(a.key) || !isScalar(b.key)) {
+    return 0;
+  }
+  const keyA = a.key.value;
+  const keyB = b.key.value;
+  if (typeof keyA !== 'string' || typeof keyB !== 'string') {
+    return 0;
+  }
+  if (keyA in FIELDS_ORDER && keyB in FIELDS_ORDER) {
+    return FIELDS_ORDER[keyA as CustomOrderedField] - FIELDS_ORDER[keyB as CustomOrderedField];
   }
 
-  return a.localeCompare(b);
+  return keyA.localeCompare(keyB);
 }
 
 const FIELDS_ORDER = {
