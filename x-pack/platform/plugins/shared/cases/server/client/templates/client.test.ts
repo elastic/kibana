@@ -6,7 +6,7 @@
  */
 
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { Operations } from '../../authorization';
+import { Operations, ReadOperations, WriteOperations } from '../../authorization';
 import { createCasesClientMockArgs } from '../mocks';
 import { createTemplatesSubClient } from './client';
 
@@ -54,7 +54,7 @@ describe('TemplatesSubClient', () => {
       await client.getAllTemplates({ page: 1, perPage: 10 });
 
       expect(clientArgs.authorization.getAuthorizationFilter).toHaveBeenCalledWith(
-        Operations.GetAllTemplates
+        Operations[ReadOperations.GetAllTemplates]
       );
     });
 
@@ -86,7 +86,7 @@ describe('TemplatesSubClient', () => {
       await client.getTemplate('template-id-1');
 
       expect(clientArgs.authorization.getAuthorizationFilter).toHaveBeenCalledWith(
-        Operations.GetAllTemplates
+        Operations[ReadOperations.GetAllTemplates]
       );
     });
 
@@ -154,7 +154,7 @@ describe('TemplatesSubClient', () => {
 
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
         expect.objectContaining({
-          operation: Operations.ManageTemplate,
+          operation: Operations[WriteOperations.ManageTemplate],
           entities: expect.arrayContaining([
             expect.objectContaining({ owner: SECURITY_SOLUTION_OWNER }),
           ]),
@@ -195,7 +195,7 @@ describe('TemplatesSubClient', () => {
 
       expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('template-id-1');
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
-        operation: Operations.ManageTemplate,
+        operation: Operations[WriteOperations.ManageTemplate],
         entities: [{ owner: mockTemplateSO.attributes.owner, id: mockTemplateSO.id }],
       });
     });
@@ -239,7 +239,7 @@ describe('TemplatesSubClient', () => {
 
       expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('template-id-1');
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
-        operation: Operations.ManageTemplate,
+        operation: Operations[WriteOperations.ManageTemplate],
         entities: [{ owner: mockTemplateSO.attributes.owner, id: mockTemplateSO.id }],
       });
     });
@@ -279,7 +279,7 @@ describe('TemplatesSubClient', () => {
       await client.getTags();
 
       expect(clientArgs.authorization.getAuthorizationFilter).toHaveBeenCalledWith(
-        Operations.GetAllTemplates
+        Operations[ReadOperations.GetAllTemplates]
       );
     });
 
@@ -305,7 +305,7 @@ describe('TemplatesSubClient', () => {
       await client.getAuthors();
 
       expect(clientArgs.authorization.getAuthorizationFilter).toHaveBeenCalledWith(
-        Operations.GetAllTemplates
+        Operations[ReadOperations.GetAllTemplates]
       );
     });
 

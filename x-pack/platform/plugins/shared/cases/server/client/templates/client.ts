@@ -18,7 +18,7 @@ import type {
   TemplatesFindResponse,
 } from '../../../common/types/api/template/v1';
 import type { CasesClientArgs } from '../types';
-import { Operations } from '../../authorization';
+import { Operations, ReadOperations, WriteOperations } from '../../authorization';
 
 /**
  * API for interacting with templates.
@@ -44,13 +44,13 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
 
   const templatesSubClient: TemplatesSubClient = {
     getAllTemplates: async (params: TemplatesFindRequest) => {
-      await authorization.getAuthorizationFilter(Operations.GetAllTemplates);
+      await authorization.getAuthorizationFilter(Operations[ReadOperations.GetAllTemplates]);
       return templatesService.getAllTemplates(params);
     },
 
     getTemplate: async (templateId: string, version?: string) => {
       const { ensureSavedObjectsAreAuthorized } = await authorization.getAuthorizationFilter(
-        Operations.GetAllTemplates
+        Operations[ReadOperations.GetAllTemplates]
       );
       const result = await templatesService.getTemplate(templateId, version);
       if (result != null) {
@@ -62,7 +62,7 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
     createTemplate: async (input: CreateTemplateInput) => {
       const savedObjectID = SavedObjectsUtils.generateId();
       await authorization.ensureAuthorized({
-        operation: Operations.ManageTemplate,
+        operation: Operations[WriteOperations.ManageTemplate],
         entities: [{ owner: input.owner, id: savedObjectID }],
       });
       return templatesService.createTemplate(input, clientArgs.user.username ?? 'unknown');
@@ -74,7 +74,7 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
         throw Boom.notFound(`Template with id ${templateId} does not exist`);
       }
       await authorization.ensureAuthorized({
-        operation: Operations.ManageTemplate,
+        operation: Operations[WriteOperations.ManageTemplate],
         entities: [{ owner: existing.attributes.owner, id: existing.id }],
       });
       return templatesService.updateTemplate(templateId, input);
@@ -86,19 +86,19 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
         throw Boom.notFound(`Template with id ${templateId} does not exist`);
       }
       await authorization.ensureAuthorized({
-        operation: Operations.ManageTemplate,
+        operation: Operations[WriteOperations.ManageTemplate],
         entities: [{ owner: existing.attributes.owner, id: existing.id }],
       });
       return templatesService.deleteTemplate(templateId);
     },
 
     getTags: async () => {
-      await authorization.getAuthorizationFilter(Operations.GetAllTemplates);
+      await authorization.getAuthorizationFilter(Operations[ReadOperations.GetAllTemplates]);
       return templatesService.getTags();
     },
 
     getAuthors: async () => {
-      await authorization.getAuthorizationFilter(Operations.GetAllTemplates);
+      await authorization.getAuthorizationFilter(Operations[ReadOperations.GetAllTemplates]);
       return templatesService.getAuthors();
     },
   };
