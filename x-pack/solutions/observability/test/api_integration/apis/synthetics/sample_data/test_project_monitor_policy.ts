@@ -8,7 +8,7 @@
 import { type PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
 import { formatMWs } from '@kbn/synthetics-plugin/server/synthetics_service/formatters/formatting_utils';
-import { INSTALLED_VERSION } from '../services/private_location_test_service';
+import { DEFAULT_SYNTHETICS_VERSION } from '../services/private_location_test_service';
 import { getDataStream } from './test_policy';
 
 export const commonVars = (mws?: MaintenanceWindow[]) => ({
@@ -56,7 +56,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
   version: 'WzEzMDksMV0=',
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: namespace || undefined,
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: DEFAULT_SYNTHETICS_VERSION },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   policy_ids: ['46034710-0ba6-11ed-ba04-5f123b9faa8b'],
@@ -551,7 +551,7 @@ export const getTestProjectSyntheticsPolicy = (
   version: 'WzEzMDksMV0=',
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: namespace || undefined,
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: DEFAULT_SYNTHETICS_VERSION },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   policy_ids: ['46034710-0ba6-11ed-ba04-5f123b9faa8b'],
