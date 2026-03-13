@@ -35,6 +35,7 @@ import type { CspStatusCode, IndexDetails } from '@kbn/cloud-security-posture-co
 import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { AlertingPluginSetup } from '@kbn/alerting-plugin/public/plugin';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
@@ -89,6 +90,7 @@ export type CspRequestHandlerContext = CustomRequestHandlerContext<{
   csp: CspApiRequestHandlerContext;
   fleet: FleetRequestHandlerContext['fleet'];
   alerting: AlertingApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
   core: Promise<CoreRequestHandlerContext>;
 }>;
 

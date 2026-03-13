@@ -17,10 +17,10 @@ import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
 
-type MountableSkill = InternalSkillDefinition & { basePath: string };
-
 describe('skills utils', () => {
-  const createMockSkill = (overrides: Partial<MountableSkill> = {}): MountableSkill => ({
+  const createMockSkill = (
+    overrides: Partial<InternalSkillDefinition> = {}
+  ): InternalSkillDefinition => ({
     id: 'test-skill-1',
     name: 'test-skill',
     basePath: 'skills/platform',
@@ -28,6 +28,7 @@ describe('skills utils', () => {
     content: 'This is the skill body content.',
     readonly: true,
     getRegistryTools: () => [],
+    referencedContentCount: 0,
     ...overrides,
   });
 
