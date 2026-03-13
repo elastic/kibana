@@ -16,6 +16,7 @@ import { appContextService } from '../../../../app_context';
 import { type InstallablePackage, SO_SEARCH_LIMIT } from '../../../../../../common';
 import { getInstallation, getInstalledPackageSavedObjects } from '../../get';
 import { installPackage } from '../../install';
+import { removeInstallation } from '../../remove';
 import type { InstallContext } from '../_state_machine_package_install';
 import { fetchList, pkgToPkgKey } from '../../../registry';
 import { withPackageSpan } from '../../utils';
@@ -48,41 +49,108 @@ export async function stepResolveDependencies(context: InstallContext) {
         { prerelease: isPrerelease }
       );
 
-      await pMap(
-        resolvedDependencies,
-        async (dependency) => {
-          if (dependency.status === 'installed') {
-            logger.info(
-              `stepResolveDependencies: dependency ${dependency.name}@${dependency.resolvedVersion} is already installed`
-            );
-            return;
-          } else if (dependency.status === 'to_install') {
-            logger.info(
-              `stepResolveDependencies: installing dependency ${dependency.name}@${dependency.resolvedVersion}`
-            );
-          } else if (dependency.status === 'to_update') {
-            logger.info(
-              `stepResolveDependencies: updating dependency ${dependency.name}@${dependency.resolvedVersion}`
-            );
-          }
-          if (dependency.status === 'to_install' || dependency.status === 'to_update') {
-            await installPackage({
-              installSource: 'registry',
-              savedObjectsClient: context.savedObjectsClient,
-              esClient: context.esClient,
-              pkgkey: pkgToPkgKey({ name: dependency.name, version: dependency.resolvedVersion }),
-              spaceId: context.spaceId,
-              force: context.force,
-              prerelease: isPrerelease,
-            });
-          }
-        },
-        { concurrency: 1 }
-      );
+      const completed: Array<{
+        dependency: ResolvedDependency;
+      }> = [];
+
+      try {
+        await pMap(
+          resolvedDependencies,
+          async (dependency) => {
+            if (dependency.status === 'installed') {
+              logger.info(
+                `stepResolveDependencies: dependency ${dependency.name}@${dependency.resolvedVersion} is already installed`
+              );
+              return;
+            }
+            if (dependency.status === 'to_install') {
+              logger.info(
+                `stepResolveDependencies: installing dependency ${dependency.name}@${dependency.resolvedVersion}`
+              );
+            } else if (dependency.status === 'to_update') {
+              logger.info(
+                `stepResolveDependencies: updating dependency ${dependency.name}@${dependency.resolvedVersion}`
+              );
+            }
+            if (dependency.status === 'to_install' || dependency.status === 'to_update') {
+              await installPackage({
+                installSource: 'registry',
+                savedObjectsClient: context.savedObjectsClient,
+                esClient: context.esClient,
+                pkgkey: pkgToPkgKey({
+                  name: dependency.name,
+                  version: dependency.resolvedVersion,
+                }),
+                spaceId: context.spaceId,
+                force: context.force,
+                prerelease: isPrerelease,
+              });
+              completed.push({ dependency });
+            }
+          },
+          { concurrency: 1 }
+        );
+      } catch (err) {
+        if (completed.length > 0) {
+          await rollbackDependencyInstalls(context, completed, isPrerelease);
+        }
+        throw err;
+      }
     });
   };
 
   await stepBody();
+}
+
+async function rollbackDependencyInstalls(
+  context: InstallContext,
+  completed: Array<{ dependency: ResolvedDependency }>,
+  isPrerelease: boolean
+): Promise<void> {
+  const { logger } = context;
+
+  logger.warn(
+    `stepResolveDependencies: rolling back ${completed.length} dependency install(s)/update(s) after failure`
+  );
+
+  for (let i = completed.length - 1; i >= 0; i--) {
+    const { dependency } = completed[i];
+    try {
+      if (dependency.status === 'to_install') {
+        await removeInstallation({
+          savedObjectsClient: context.savedObjectsClient,
+          pkgName: dependency.name,
+          pkgVersion: dependency.resolvedVersion,
+          esClient: context.esClient,
+          force: true,
+          installSource: 'registry',
+        });
+        logger.info(
+          `stepResolveDependencies: rolled back install of ${dependency.name}@${dependency.resolvedVersion}`
+        );
+      } else if (dependency.status === 'to_update' && dependency.previousVersion) {
+        await installPackage({
+          installSource: 'registry',
+          savedObjectsClient: context.savedObjectsClient,
+          esClient: context.esClient,
+          pkgkey: pkgToPkgKey({
+            name: dependency.name,
+            version: dependency.previousVersion,
+          }),
+          spaceId: context.spaceId,
+          force: true,
+          prerelease: isPrerelease,
+        });
+        logger.info(
+          `stepResolveDependencies: rolled back update of ${dependency.name} to ${dependency.previousVersion}`
+        );
+      }
+    } catch (rollbackErr) {
+      logger.error(
+        `stepResolveDependencies: failed to roll back ${dependency.name}@${dependency.resolvedVersion}: ${rollbackErr}`
+      );
+    }
+  }
 }
 
 async function verifyPackageDependencies(
@@ -116,6 +184,8 @@ interface ResolvedDependency {
   requiredVersion: string;
   resolvedVersion: string;
   status: 'installed' | 'to_update' | 'to_install';
+  /** Set when status is 'to_update'; used for rollback to re-install previous version */
+  previousVersion?: string;
 }
 
 async function buildDependencies(
@@ -192,6 +262,7 @@ async function buildDependencies(
         requiredVersion,
         resolvedVersion,
         status: 'to_update',
+        previousVersion: installation.version,
       });
     } else {
       resolvedDependencies.push({
