@@ -41,34 +41,31 @@ export const createAnalyticsDataViews = async (
 ): Promise<void> => {
   for (const { id, title, name, timeFieldName } of getAnalyticsDataViews(spaceId)) {
     try {
-      const existing = await dataViewsService.get(id).catch(() => null);
-
-      if (existing) {
-        // Reconcile: if the index pattern or time field drifted (e.g. after an
-        // index-naming migration), update the saved object in place.
-        if (existing.getIndexPattern() !== title || existing.timeFieldName !== timeFieldName) {
-          existing.setIndexPattern(title);
-          existing.timeFieldName = timeFieldName;
-          await dataViewsService.createSavedObject(existing, true);
-          logger.info(`Updated cases analytics data view: ${name} in space ${spaceId}`);
-        }
-      } else {
-        // Use createSavedObject directly to avoid createAndSave's setDefault()
-        // call which would override the user's chosen default data view.
-        const dataView = await dataViewsService.create({
-          id,
-          title,
-          name,
-          timeFieldName,
-          managed: true,
-          namespaces: [spaceId],
-          allowNoIndex: true,
-        });
-        await dataViewsService.createSavedObject(dataView, true);
-        logger.info(`Created cases analytics data view: ${name} in space ${spaceId}`);
-      }
+      // Always build a fresh data view with the correct namespaces and call
+      // createSavedObject with override: true (idempotent upsert).
+      //
+      // Avoid the get→reconcile pattern: the dataViewsService is backed by a
+      // cross-namespace internal repository, so `get` may return a data view
+      // whose stored `namespaces` list doesn't match the target space. Passing
+      // that object straight back into `createSavedObject(existing, true)` then
+      // overwrites the SO with the wrong namespace list — effectively deleting
+      // the data view from the space it was supposed to live in.
+      //
+      // Use createSavedObject directly to avoid createAndSave's setDefault()
+      // call which would silently override the user's chosen default data view.
+      const dataView = await dataViewsService.create({
+        id,
+        title,
+        name,
+        timeFieldName,
+        managed: true,
+        namespaces: [spaceId],
+        allowNoIndex: true,
+      });
+      await dataViewsService.createSavedObject(dataView, true);
+      logger.debug(`Provisioned cases analytics data view: ${name} in space ${spaceId}`);
     } catch (error) {
-      logger.error(`Failed to create cases analytics data view "${name}": ${error.message}`);
+      logger.error(`Failed to provision cases analytics data view "${name}": ${error.message}`);
     }
   }
 };
