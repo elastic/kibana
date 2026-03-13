@@ -6,7 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { z } from '@kbn/zod/v4';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
 import type { CreateCaseStepOutput } from '../../../common/workflows/steps/create_case';
 import type { UpdateCaseStepInput } from '../../../common/workflows/steps/update_case';
@@ -65,6 +67,91 @@ export const getErrorMessage = (error: unknown): string => {
   }
 
   return String(error);
+};
+
+/**
+ * Workflows output schemas are generated from OpenAPI and currently model case comments as:
+ * - `alert` or `user` only (no `event`/other attachment types)
+ * - alert `rule` fields as optional strings, not nullable
+ *
+ * The Cases server can still return broader/legacy shapes (for example `event` comments or
+ * `rule: { id: null, name: null }` on alert comments). This helper normalizes those known
+ * mismatches into a schema-compatible shape before we store workflow step output.
+ *
+ * TODO: remove once generated workflow schemas and case response payloads are fully aligned.
+ */
+const normalizeCaseCommentsForWorkflowOutput = (outputCase: unknown): unknown => {
+  if (
+    outputCase == null ||
+    typeof outputCase !== 'object' ||
+    !('comments' in outputCase) ||
+    !Array.isArray(outputCase.comments)
+  ) {
+    return outputCase;
+  }
+
+  return {
+    ...outputCase,
+    comments: outputCase.comments
+      .filter(
+        (comment) =>
+          comment != null &&
+          typeof comment === 'object' &&
+          'type' in comment &&
+          (comment.type === AttachmentType.alert || comment.type === AttachmentType.user)
+      )
+      .map((comment) => {
+        if (
+          comment == null ||
+          typeof comment !== 'object' ||
+          comment.type !== AttachmentType.alert ||
+          !('rule' in comment)
+        ) {
+          return comment;
+        }
+
+        const rule = comment.rule;
+        if (
+          rule != null &&
+          typeof rule === 'object' &&
+          'id' in rule &&
+          'name' in rule &&
+          rule.id == null &&
+          rule.name == null
+        ) {
+          const { rule: _rule, ...commentWithoutRule } = comment;
+          return commentWithoutRule;
+        }
+
+        return comment;
+      }),
+  };
+};
+
+/**
+ * Safe parsing strategy for case outputs in workflow steps:
+ * 1. Attempt parsing the raw case output.
+ * 2. If parsing fails, normalize known schema/runtime drift in comments and parse again.
+ * 3. If it still fails, return normalized output as a non-throwing fallback so workflow
+ *    execution can continue instead of failing on output serialization.
+ */
+export const safeParseCaseForWorkflowOutput = <TCaseSchema extends z.ZodType>(
+  caseSchema: TCaseSchema,
+  outputCase: unknown
+): z.infer<TCaseSchema> => {
+  const parsed = caseSchema.safeParse(outputCase);
+  if (parsed.success) {
+    return parsed.data;
+  }
+
+  const normalizedOutputCase = normalizeCaseCommentsForWorkflowOutput(outputCase);
+  const normalizedParsed = caseSchema.safeParse(normalizedOutputCase);
+  if (normalizedParsed.success) {
+    return normalizedParsed.data;
+  }
+
+  // Last-resort fallback: keep workflow execution moving even if schema/runtime drift remains.
+  return normalizedOutputCase as z.infer<TCaseSchema>;
 };
 
 /**

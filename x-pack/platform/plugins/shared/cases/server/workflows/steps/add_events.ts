@@ -13,37 +13,7 @@ import {
 } from '../../../common/workflows/steps/add_events';
 import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
-import { createCasesStepHandler, withCaseOwner } from './utils';
-
-/**
- * Workflows output parsing uses generated OpenAPI schemas that currently model case comments as
- * only `alert` or `user`. Internally, cases can also include other comment types (for example
- * `event`), which fail discriminated-union parsing. We normalize the response by removing
- * unsupported comment types from the parsed output payload.
- *
- * TODO: remove this once generated workflow output schemas include all supported case comment types.
- */
-const normalizeCommentsForWorkflowOutput = (outputCase: unknown) => {
-  if (
-    outputCase == null ||
-    typeof outputCase !== 'object' ||
-    !('comments' in outputCase) ||
-    !Array.isArray(outputCase.comments)
-  ) {
-    return outputCase;
-  }
-
-  return {
-    ...outputCase,
-    comments: outputCase.comments.filter(
-      (comment) =>
-        comment != null &&
-        typeof comment === 'object' &&
-        'type' in comment &&
-        (comment.type === AttachmentType.alert || comment.type === AttachmentType.user)
-    ),
-  };
-};
+import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
 
 export const addEventsStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -62,8 +32,11 @@ export const addEventsStepDefinition = (
           })),
         });
 
-        const normalizedOutputCase = normalizeCommentsForWorkflowOutput(updatedCase);
-        return addEventsStepCommonDefinition.outputSchema.shape.case.parse(normalizedOutputCase);
+        // Centralized safe-parse + normalization for case-output schema drift in comments.
+        return safeParseCaseForWorkflowOutput(
+          addEventsStepCommonDefinition.outputSchema.shape.case,
+          updatedCase
+        );
       });
     }),
   });

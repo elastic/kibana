@@ -13,7 +13,7 @@ import {
 } from '../../../common/workflows/steps/set_custom_field';
 import type { CasesClient } from '../../client';
 import { SET_CUSTOM_FIELD_FAILED_MESSAGE } from './translations';
-import { createCasesStepHandler } from './utils';
+import { createCasesStepHandler, safeParseCaseForWorkflowOutput } from './utils';
 import { resolveCaseVersion } from './update_case_helpers';
 
 export const setCustomFieldStepDefinition = (
@@ -41,7 +41,10 @@ export const setCustomFieldStepDefinition = (
             includeComments: false,
           });
 
-          return setCustomFieldStepCommonDefinition.outputSchema.shape.case.parse(updatedCase);
+          return safeParseCaseForWorkflowOutput(
+            setCustomFieldStepCommonDefinition.outputSchema.shape.case,
+            updatedCase
+          );
         } catch {
           throw new Error(SET_CUSTOM_FIELD_FAILED_MESSAGE(input.case_id, input.field_name));
         }

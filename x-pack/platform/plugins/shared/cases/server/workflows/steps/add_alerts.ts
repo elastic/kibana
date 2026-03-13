@@ -13,56 +13,7 @@ import {
 } from '../../../common/workflows/steps/add_alerts';
 import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
-import { createCasesStepHandler, withCaseOwner } from './utils';
-
-/**
- * Workflows output parsing uses generated OpenAPI schemas where alert comment `rule` is optional,
- * but `rule.id` and `rule.name` are non-null strings when present. Internally, alert comments can
- * still be represented as `rule: { id: null, name: null }` (legacy attachment shape), which fails
- * that output parsing. We normalize the legacy shape by dropping `rule` when both fields are null.
- *
- * TODO: remove this once schemas are aligned end-to-end (either stop emitting null rule fields
- * in case responses, or update generated response types to allow nullable rule fields).
- */
-const normalizeAlertRuleInCaseOutput = (outputCase: unknown) => {
-  if (
-    outputCase == null ||
-    typeof outputCase !== 'object' ||
-    !('comments' in outputCase) ||
-    !Array.isArray(outputCase.comments)
-  ) {
-    return outputCase;
-  }
-
-  return {
-    ...outputCase,
-    comments: outputCase.comments.map((comment) => {
-      if (
-        comment == null ||
-        typeof comment !== 'object' ||
-        comment.type !== AttachmentType.alert ||
-        !('rule' in comment)
-      ) {
-        return comment;
-      }
-
-      const rule = comment.rule;
-      if (
-        rule != null &&
-        typeof rule === 'object' &&
-        'id' in rule &&
-        'name' in rule &&
-        rule.id == null &&
-        rule.name == null
-      ) {
-        const { rule: _rule, ...commentWithoutRule } = comment;
-        return commentWithoutRule;
-      }
-
-      return comment;
-    }),
-  };
-};
+import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
 
 export const addAlertsStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -85,8 +36,11 @@ export const addAlertsStepDefinition = (
           })),
         });
 
-        const normalizedOutputCase = normalizeAlertRuleInCaseOutput(updatedCase);
-        return addAlertsStepCommonDefinition.outputSchema.shape.case.parse(normalizedOutputCase);
+        // Centralized safe-parse + normalization for case-output schema drift in comments.
+        return safeParseCaseForWorkflowOutput(
+          addAlertsStepCommonDefinition.outputSchema.shape.case,
+          updatedCase
+        );
       });
     }),
   });

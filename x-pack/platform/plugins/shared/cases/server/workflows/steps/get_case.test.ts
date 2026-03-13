@@ -84,4 +84,64 @@ describe('getCaseStepDefinition', () => {
 
     expect(result).toEqual({ error: getError });
   });
+
+  it('returns normalized output when include_comments includes unsupported comment shapes', async () => {
+    const get = jest.fn().mockResolvedValue({
+      ...createCaseResponseFixture,
+      comments: [
+        {
+          id: 'event-comment-id',
+          type: 'event',
+          eventId: ['event-1'],
+          index: ['.ds-logs-*'],
+          owner: createCaseResponseFixture.owner,
+          created_at: '2020-02-19T23:06:33.798Z',
+          created_by: createCaseResponseFixture.created_by,
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+          version: 'WzQ3LDFc',
+        },
+        {
+          id: 'alert-comment-id',
+          type: 'alert',
+          alertId: ['alert-1'],
+          index: ['.alerts-security.alerts-default'],
+          owner: createCaseResponseFixture.owner,
+          rule: { id: null, name: null },
+          created_at: '2020-02-19T23:06:33.798Z',
+          created_by: createCaseResponseFixture.created_by,
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+          version: 'WzQ3LDFc',
+        },
+      ],
+    });
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get },
+    } as unknown as CasesClient);
+    const definition = getCaseStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        include_comments: true,
+      })
+    );
+
+    const outputCase = result.output?.case;
+    if (outputCase == null) {
+      throw new Error('Expected output from get case step');
+    }
+
+    expect(outputCase.comments).toHaveLength(1);
+    expect(outputCase.comments[0]).toMatchObject({
+      id: 'alert-comment-id',
+      type: 'alert',
+    });
+    expect(outputCase.comments[0]).not.toHaveProperty('rule');
+  });
 });

@@ -12,7 +12,11 @@ import { CasePatchRequestRt } from '../../../common/types/api';
 import type { CasesClient } from '../../client';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
-import { createCasesStepHandler, normalizeCaseStepUpdatesForBulkPatch } from './utils';
+import {
+  createCasesStepHandler,
+  normalizeCaseStepUpdatesForBulkPatch,
+  safeParseCaseForWorkflowOutput,
+} from './utils';
 
 type WorkflowUpdatePayload = UpdateCaseStepInput['updates'];
 
@@ -70,7 +74,7 @@ export const updateSingleCase = async (
     throw new Error(UPDATE_CASE_FAILED_MESSAGE(caseId));
   }
 
-  return CaseResponsePropertiesSchema.parse(updatedCase);
+  return safeParseCaseForWorkflowOutput(CaseResponsePropertiesSchema, updatedCase);
 };
 
 export const updateSingleCaseFromInput = <TInput extends CaseIdVersionInput>(

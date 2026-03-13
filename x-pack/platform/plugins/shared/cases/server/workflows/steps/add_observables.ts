@@ -12,7 +12,7 @@ import {
   type AddObservablesStepInput,
 } from '../../../common/workflows/steps/add_observables';
 import type { CasesClient } from '../../client';
-import { createCasesStepHandler } from './utils';
+import { createCasesStepHandler, safeParseCaseForWorkflowOutput } from './utils';
 
 export const addObservablesStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -36,7 +36,10 @@ export const addObservablesStepDefinition = (
           })),
         });
 
-        return addObservablesStepCommonDefinition.outputSchema.shape.case.parse(updatedCase);
+        return safeParseCaseForWorkflowOutput(
+          addObservablesStepCommonDefinition.outputSchema.shape.case,
+          updatedCase
+        );
       }
     ),
   });

@@ -12,7 +12,7 @@ import {
   type GetCaseStepInput,
 } from '../../../common/workflows/steps/get_case';
 import type { CasesClient } from '../../client';
-import { createCasesStepHandler } from './utils';
+import { createCasesStepHandler, safeParseCaseForWorkflowOutput } from './utils';
 
 export const getCaseStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -25,6 +25,9 @@ export const getCaseStepDefinition = (
         includeComments: input.include_comments,
       });
 
-      return getCaseStepCommonDefinition.outputSchema.shape.case.parse(theCase);
+      return safeParseCaseForWorkflowOutput(
+        getCaseStepCommonDefinition.outputSchema.shape.case,
+        theCase
+      );
     }),
   });

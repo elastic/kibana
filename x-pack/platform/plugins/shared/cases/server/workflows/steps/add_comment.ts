@@ -13,7 +13,7 @@ import {
 } from '../../../common/workflows/steps/add_comment';
 import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
-import { createCasesStepHandler, withCaseOwner } from './utils';
+import { createCasesStepHandler, safeParseCaseForWorkflowOutput, withCaseOwner } from './utils';
 
 export const addCommentStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -31,7 +31,10 @@ export const addCommentStepDefinition = (
           },
         });
 
-        return addCommentStepCommonDefinition.outputSchema.shape.case.parse(updatedCase);
+        return safeParseCaseForWorkflowOutput(
+          addCommentStepCommonDefinition.outputSchema.shape.case,
+          updatedCase
+        );
       });
     }),
   });
