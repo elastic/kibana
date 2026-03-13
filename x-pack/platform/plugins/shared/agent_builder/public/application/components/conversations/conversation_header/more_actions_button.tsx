@@ -35,6 +35,8 @@ import { appPaths } from '../../../utils/app_paths';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useConversationId } from '../../../context/conversation/use_conversation_id';
 const fullscreenLabels = {
   actions: i18n.translate('xpack.agentBuilder.conversationActions.actions', {
     defaultMessage: 'More',
@@ -84,6 +86,18 @@ const fullscreenLabels = {
   delete: i18n.translate('xpack.agentBuilder.conversationActions.delete', {
     defaultMessage: 'Delete',
   }),
+  pushToElasticConsole: i18n.translate(
+    'xpack.agentBuilder.conversationActions.pushToElasticConsole',
+    {
+      defaultMessage: 'Push to Elastic Console',
+    }
+  ),
+  pushedToElasticConsole: i18n.translate(
+    'xpack.agentBuilder.conversationActions.pushedToElasticConsole',
+    {
+      defaultMessage: 'Pushed to Elastic Console',
+    }
+  ),
   genAiSettings: i18n.translate('xpack.agentBuilder.conversationActions.genAiSettings', {
     defaultMessage: 'GenAI Settings',
   }),
@@ -124,6 +138,7 @@ interface MoreActionsButtonProps {
 export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameConversation }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isHandoverPending, setIsHandoverPending] = useState(false);
   const hasActiveConversation = useHasActiveConversation();
   const hasPersistedConversation = useHasPersistedConversation();
   const agentId = useAgentId();
@@ -131,6 +146,8 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   const { createAgentBuilderUrl } = useNavigation();
   const { euiTheme } = useEuiTheme();
   const { manageAgents } = useUiPrivileges();
+  const conversationId = useConversationId();
+  const { conversationActions } = useConversationContext();
 
   const {
     services: { application, uiSettings },
@@ -165,6 +182,23 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
             }}
           >
             {fullscreenLabels.rename}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            key="push-to-elastic-console"
+            icon={isHandoverPending ? 'check' : 'push'}
+            size="s"
+            disabled={isHandoverPending}
+            data-test-subj="agentBuilderConversationPushToElasticConsoleButton"
+            onClick={async () => {
+              if (!conversationId) return;
+              closePopover();
+              setIsHandoverPending(true);
+              await conversationActions.requestHandover(conversationId, true);
+            }}
+          >
+            {isHandoverPending
+              ? fullscreenLabels.pushedToElasticConsole
+              : fullscreenLabels.pushToElasticConsole}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="delete"

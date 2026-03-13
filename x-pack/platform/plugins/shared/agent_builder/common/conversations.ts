@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Conversation } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
@@ -16,6 +16,7 @@ export type ConversationCreateRequest = Omit<
 
 export interface ConversationListOptions {
   agentId?: string;
+  handoverRequested?: boolean;
 }
 
 export interface ConversationGetOptions {
@@ -24,4 +25,10 @@ export interface ConversationGetOptions {
 
 export interface ConversationDeleteOptions {
   conversationId: string;
+}
+
+export interface ConversationUpdateOptions {
+  conversationId: string;
+  title?: string;
+  rounds?: ConversationRound[];
 }

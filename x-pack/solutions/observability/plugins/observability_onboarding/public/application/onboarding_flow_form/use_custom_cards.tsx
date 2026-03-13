@@ -55,6 +55,7 @@ export function useCustomCards(
     history,
     `/cloudforwarder/${location.search}`
   );
+  const { href: opencodeUrl } = reactRouterNavigate(history, `/opencode/${location.search}`);
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isManagedOtlpServiceAvailable ? otelApmQuickstartUrl : apmUrl;
@@ -502,6 +503,37 @@ export function useCustomCards(
      * Also visible in dev mode for local development.
      */
     ...(isServerless || isDev ? [cloudforwarderQuickstartCard] : []),
+    ...(isDev
+      ? [
+          {
+            id: 'opencode-quick-start',
+            name: 'opencode-quick-start',
+            type: 'virtual' as const,
+            title: i18n.translate(
+              'xpack.observability_onboarding.packageList.opencodeTitle',
+              { defaultMessage: 'Elastic OpenCode' }
+            ),
+            description: i18n.translate(
+              'xpack.observability_onboarding.packageList.opencodeDescription',
+              {
+                defaultMessage:
+                  'Get connection details for your locally running Elastic OpenCode distribution.',
+              }
+            ),
+            categories: ['observability' as const],
+            icons: [
+              {
+                type: 'eui' as const,
+                src: 'launch',
+              },
+            ],
+            url: opencodeUrl,
+            version: '',
+            integration: '',
+            isQuickstart: true,
+          },
+        ]
+      : []),
   ];
 }
 
