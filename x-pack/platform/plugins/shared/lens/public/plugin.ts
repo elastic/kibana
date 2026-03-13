@@ -372,6 +372,7 @@ export class LensPlugin {
             nowProvider: plugins.data.nowProvider,
             forceDSL,
             eventAnnotationService,
+            http: coreStart.http,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
