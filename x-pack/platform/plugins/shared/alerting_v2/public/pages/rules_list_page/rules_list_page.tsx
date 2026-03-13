@@ -35,7 +35,7 @@ import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
-import { DeleteConfirmationModal } from '../../components/rule/delete_confirmation_modal';
+import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
 import { paths } from '../../constants';
 
 const DEFAULT_PER_PAGE = 20;

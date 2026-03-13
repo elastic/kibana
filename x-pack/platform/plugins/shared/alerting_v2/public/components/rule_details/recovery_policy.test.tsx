@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { RecoveryDescription } from './recovery_description';
+import { RecoveryDescription } from './recovery_policy';
 import type { RuleApiResponse } from '../../services/rules_api';
 
 const wrap = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);

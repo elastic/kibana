@@ -26,10 +26,10 @@ import type { RuleApiResponse } from '../../services/rules_api';
 import { RuleDetailsActionsMenu } from './rule_details_actions_menu';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
-import { RulesDeleteModalConfirmation } from '../common/rules_delete_modal_confirmation';
+import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
 import { RuleHeaderDescription, RuleTitleWithBadges } from './rule_header_description';
 import { ItemValueRuleSummary } from './item_value_rule_summary';
-import { RecoveryDescription } from './recovery_description';
+import { RecoveryPolicy } from './recovery_policy';
 import { EMPTY_VALUE, formatAlertDelay } from './utils';
 
 export interface RuleDetailPageProps {
@@ -62,7 +62,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
 
   const history = useHistory();
   const uiSettings = useService(CoreStart('uiSettings'));
-  const { mutate: deleteRule } = useDeleteRule();
+  const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
 
   const dateFormat = uiSettings.get('dateFormat');
@@ -159,7 +159,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
       title: i18n.translate('xpack.alertingV2.ruleDetails.recovery', {
         defaultMessage: 'Recovery',
       }),
-      description: <RecoveryDescription recoveryPolicy={rule.recovery_policy} />,
+      description: <RecoveryPolicy recoveryPolicy={rule.recovery_policy} />,
     },
     ...(isAlertMode
       ? [
@@ -222,12 +222,6 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
 
   return (
     <>
-      {showDeleteConfirmation && (
-        <RulesDeleteModalConfirmation
-          onConfirm={handleRuleDelete}
-          onCancel={() => setShowDeleteConfirmation(false)}
-        />
-      )}
       <EuiPageHeader
         data-test-subj="ruleDetailsTitle"
         bottomBorder
@@ -340,6 +334,14 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
       />
 
       <EuiSpacer size="l" />
+      {showDeleteConfirmation && (
+        <DeleteConfirmationModal
+          onConfirm={handleRuleDelete}
+          onCancel={() => setShowDeleteConfirmation(false)}
+          ruleName={rule.metadata?.name ?? ''}
+          isLoading={isDeleting}
+        />
+      )}
     </>
   );
 };

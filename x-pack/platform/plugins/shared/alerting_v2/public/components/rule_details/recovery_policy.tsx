@@ -20,11 +20,11 @@ const RECOVERY_TYPE_LABELS: Record<string, string> = {
   }),
 };
 
-interface RecoveryDescriptionProps {
+interface RecoveryPolicyProps {
   recoveryPolicy: RuleApiResponse['recovery_policy'];
 }
 
-export const RecoveryDescription = ({ recoveryPolicy }: RecoveryDescriptionProps) => {
+export const RecoveryPolicy = ({ recoveryPolicy }: RecoveryPolicyProps) => {
   if (!recoveryPolicy) return <>{EMPTY_VALUE}</>;
 
   const typeLabel = RECOVERY_TYPE_LABELS[recoveryPolicy.type] ?? recoveryPolicy.type;
