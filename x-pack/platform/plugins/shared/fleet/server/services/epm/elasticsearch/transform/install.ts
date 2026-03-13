@@ -12,7 +12,7 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniqBy } from 'lodash';
 import pMap from 'p-map';
@@ -210,7 +210,7 @@ const processTransformAssetsPerModule = async (
     }
     const packageAssets = transformsSpecifications.get(transformModuleId);
 
-    const content = load(getAssetFromAssetsMap(transformAssetsMap, path).toString('utf-8'));
+    const content = parse(getAssetFromAssetsMap(transformAssetsMap, path).toString('utf-8'));
 
     // Handling fields.yml and all other files within 'fields' folder
     if (fileName === TRANSFORM_SPECS_TYPES.FIELDS || isFields(path)) {

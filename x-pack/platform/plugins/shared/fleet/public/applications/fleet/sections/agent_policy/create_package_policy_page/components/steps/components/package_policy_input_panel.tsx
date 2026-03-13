@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo, useCallback } from 'react';
+import React, { useState, Fragment, memo, useMemo, useCallback, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,8 +33,10 @@ import type {
   RegistryVarsEntry,
 } from '../../../../../../types';
 import type { PackagePolicyInputValidationResults } from '../../../services';
+import type { YamlParseFn } from '../../../services';
 import { hasInvalidButRequiredVar, countValidationErrors, isAdvancedVar } from '../../../services';
 import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
+import { useYaml } from '../../../../../../../../services';
 
 import type { StreamAdvancedVarsConfig } from './package_policy_input_config';
 import { PackagePolicyInputConfig } from './package_policy_input_config';
@@ -49,6 +51,7 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
 `;
 
 export const shouldShowStreamsByDefault = (
+  parse: YamlParseFn,
   packageInput: RegistryInput,
   packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>,
   packagePolicyInput: NewPackagePolicyInput,
@@ -59,11 +62,12 @@ export const shouldShowStreamsByDefault = (
   }
 
   return (
-    hasInvalidButRequiredVar(packageInput.vars, packagePolicyInput.vars) ||
+    hasInvalidButRequiredVar(parse, packageInput.vars, packagePolicyInput.vars) ||
     packageInputStreams.some(
       (stream) =>
         stream.enabled &&
         hasInvalidButRequiredVar(
+          parse,
           stream.vars,
           packagePolicyInput.streams.find(
             (pkgStream) => stream.data_stream.dataset === pkgStream.data_stream.dataset
@@ -103,17 +107,31 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     const theme = useEuiTheme();
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
-    // Showing streams toggle state
-    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(
-      () =>
-        (isSingleInputAndStreams && packageInfo.type !== 'input') ||
-        shouldShowStreamsByDefault(
-          packageInput,
-          packageInputStreams,
-          packagePolicyInput,
-          defaultDataStreamId
-        )
-    );
+    const yaml = useYaml();
+    // Showing streams toggle state (set when yaml loads so we can validate)
+    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(false);
+    useEffect(() => {
+      if (yaml) {
+        setIsShowingStreams(
+          (isSingleInputAndStreams && packageInfo.type !== 'input') ||
+            shouldShowStreamsByDefault(
+              yaml.parse,
+              packageInput,
+              packageInputStreams,
+              packagePolicyInput,
+              defaultDataStreamId
+            )
+        );
+      }
+    }, [
+      yaml,
+      packageInput,
+      packageInputStreams,
+      packagePolicyInput,
+      defaultDataStreamId,
+      isSingleInputAndStreams,
+      packageInfo.type,
+    ]);
 
     // Hide registry variables based on `hide_in_deployment_modes` value
     const hideRegistryVars = useCallback(

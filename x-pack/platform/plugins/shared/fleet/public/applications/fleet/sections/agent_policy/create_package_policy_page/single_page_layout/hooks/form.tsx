@@ -8,7 +8,6 @@
 import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { load } from 'js-yaml';
 import { isEqual, omit, pick } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -79,6 +78,7 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
+import { useYaml } from '../../../../../../../services';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
@@ -315,6 +315,7 @@ export function useOnSubmit({
 }) {
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
+  const yaml = useYaml();
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
@@ -363,11 +364,11 @@ export function useOnSubmit({
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
     (newPackagePolicy?: NewPackagePolicy) => {
-      if (packageInfo) {
+      if (packageInfo && yaml) {
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          load,
+          yaml.parse,
           spaceSettings
         );
         setValidationResults(newValidationResult);
@@ -375,7 +376,7 @@ export function useOnSubmit({
         return newValidationResult;
       }
     },
-    [packagePolicy, packageInfo, spaceSettings]
+    [packagePolicy, packageInfo, spaceSettings, yaml]
   );
   // Update package policy method
   const updatePackagePolicy = useCallback(
