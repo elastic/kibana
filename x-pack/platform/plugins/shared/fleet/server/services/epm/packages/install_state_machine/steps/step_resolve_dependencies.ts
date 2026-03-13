@@ -32,6 +32,7 @@ export async function stepResolveDependencies(context: InstallContext) {
     await withPackageSpan('Resolving dependencies', async () => {
       // Check installed packages are compatible with dependencies of package to be installed
       if (!context.skipDependencyCheck && !context.force) {
+        logger.debug('Verifying package dependencies are compatible with installed packages');
         await verifyPackageDependencies(
           context.savedObjectsClient,
           context.packageInstallContext.packageInfo
@@ -242,6 +243,13 @@ async function getDependantsPackages(soClient: SavedObjectsClientContract, pkgNa
       sortOrder: 'asc',
     })
   ).saved_objects.filter((obj) => obj.attributes.name !== pkgName);
+  appContextService
+    .getLogger()
+    .debug(
+      `Found installed packages ${dependants
+        .map((obj) => `${obj.attributes.name}@${obj.attributes.version}`)
+        .join(', ')} dependent on ${pkgName}`
+    );
 
   return dependants;
 }

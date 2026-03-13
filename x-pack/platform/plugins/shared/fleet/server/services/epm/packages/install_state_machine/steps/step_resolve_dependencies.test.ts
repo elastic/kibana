@@ -25,14 +25,16 @@ import type { InstallContext } from '../_state_machine_package_install';
 
 import { stepResolveDependencies } from './step_resolve_dependencies';
 
-jest.mock('../../../../app_context', () => ({
-  appContextService: {
-    getExperimentalFeatures: jest.fn(),
-    getLockManagerService: jest.fn().mockReturnValue({
-      withLock: jest.fn((_name: string, fn: () => Promise<void>) => fn()),
-    }),
-  },
-}));
+jest.mock('../../../../app_context', () => {
+  return {
+    appContextService: {
+      getExperimentalFeatures: jest.fn(),
+      getLogger: jest.fn().mockReturnValue({
+        debug: jest.fn(),
+      }),
+    },
+  };
+});
 jest.mock('../../get');
 jest.mock('../../install');
 jest.mock('../../../registry');
@@ -107,7 +109,6 @@ describe('stepResolveDependencies', () => {
 
     expect(mockedWithPackageSpan).not.toHaveBeenCalled();
     expect(mockedGetInstallation).not.toHaveBeenCalled();
-    expect(appContextService.getLockManagerService).not.toHaveBeenCalled();
   });
 
   it('does not run dependency check when skipDependencyCheck is true', async () => {
