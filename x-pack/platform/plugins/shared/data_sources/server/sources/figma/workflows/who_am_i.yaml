@@ -1,0 +1,15 @@
+version: '1'
+name: 'sources.figma.who_am_i'
+description: >
+  Get the currently authenticated Figma user (me). Returns the user's id, handle,
+  email, and profile image URL for the API credentials in use.
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs: []
+steps:
+  - name: who-am-i
+    type: figma.whoAmI
+    connector-id: <%= figma-stack-connector-id %>
+    with: {}
