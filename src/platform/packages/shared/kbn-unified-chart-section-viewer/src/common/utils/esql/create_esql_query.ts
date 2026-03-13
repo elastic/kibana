@@ -7,15 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { stats, timeseries, where } from '@kbn/esql-composer';
+import { from, stats, timeseries, where } from '@kbn/esql-composer';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { MetricField } from '../../../types';
-import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
+import {
+  createMetricAggregation,
+  createTimeBucketAggregation,
+  createM4Pipeline,
+} from './create_aggregation';
 
 interface CreateESQLQueryParams {
   metric: MetricField;
   splitAccessors?: string[];
   whereStatements?: string[];
+  useFrom?: boolean;
+  targetBuckets?: number;
 }
 
 /**
@@ -26,15 +32,19 @@ interface CreateESQLQueryParams {
  * @param metric - The full metric field object, including dimension type information.
  * @param splitAccessors - An array of field names to use as split accessors in the BY clause.
  * @param whereStatements - Optional WHERE clause statements.
+ * @param useFrom - If true, uses FROM instead of TS as the source command.
+ * @param targetBuckets - The desired number of time buckets (defaults to 100).
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({
   metric,
   splitAccessors = [],
   whereStatements = [],
+  useFrom = false,
+  targetBuckets,
 }: CreateESQLQueryParams) {
   const { name: metricField, instrument, index, type } = metric;
-  const source = timeseries(index);
+  const source = useFrom ? from(index) : timeseries(index);
 
   const whereCommands = whereStatements.flatMap((statement) => {
     const trimmed = statement.trim();
@@ -48,7 +58,7 @@ export function createESQLQuery({
         type,
         instrument,
         placeholderName: 'metricField',
-      })} BY ${createTimeBucketAggregation({})}${
+      })} BY ${createTimeBucketAggregation({ targetBuckets })}${
         splitAccessors.length > 0
           ? `, ${splitAccessors.map((field) => sanitazeESQLInput(field)).join(',')}`
           : ''
@@ -60,4 +70,162 @@ export function createESQLQuery({
   );
 
   return queryPipeline.toString();
+}
+
+interface CreateRawESQLQueryParams {
+  metric: MetricField;
+  whereStatements?: string[];
+  limit?: number;
+  timestampField?: string;
+}
+
+export const RAW_DATA_LIMIT = 10000;
+
+/**
+ * Creates an ES|QL query that returns raw, unaggregated data points.
+ *
+ * Used as a baseline to demonstrate the data volume (and latency) of fetching
+ * raw time-series data compared to downsampled (M4) or aggregated (AVG) queries.
+ *
+ * @param metric - The metric field to fetch.
+ * @param whereStatements - Optional WHERE clause statements.
+ * @param limit - Maximum rows to return (defaults to RAW_DATA_LIMIT).
+ * @param timestampField - The timestamp field name (defaults to '@timestamp').
+ * @returns A complete ES|QL query string.
+ */
+export function createRawESQLQuery({
+  metric,
+  whereStatements = [],
+  limit = RAW_DATA_LIMIT,
+  timestampField = '@timestamp',
+}: CreateRawESQLQueryParams): string {
+  const { name: metricField, index } = metric;
+  const source = from(index);
+
+  const whereCommands = whereStatements.flatMap((statement) => {
+    const trimmed = statement.trim();
+    return trimmed.length > 0 ? [where(trimmed)] : [];
+  });
+
+  const basePipeline = whereCommands.length > 0 ? source.pipe(...whereCommands) : source;
+  const escapedMetric = sanitazeESQLInput(metricField) ?? metricField;
+
+  return [
+    basePipeline.toString(),
+    `KEEP ${timestampField}, ${escapedMetric}`,
+    `SORT ${timestampField} ASC`,
+    `LIMIT ${limit}`,
+  ].join('\n  | ');
+}
+
+interface CreateM4ESQLQueryParams {
+  metric: MetricField;
+  whereStatements?: string[];
+  targetBuckets?: number;
+  timestampField?: string;
+}
+
+/**
+ * Creates an ES|QL query that uses the M4 downsampling algorithm.
+ *
+ * M4 preserves the visual shape of a time series at a given pixel resolution
+ * by keeping 4 points per bucket (first, last, min, max) with their timestamps.
+ * The query uses MV_EXPAND to unroll the result into a flat (timestamp, value) table
+ * that Lens can render directly as a line chart.
+ *
+ * M4 does not support split accessors / breakdowns.
+ * Uses FROM instead of TS because the TS command applies implicit time-series
+ * aggregation functions that conflict with MIN/MAX on the timestamp field.
+ *
+ * @param metric - The metric field to downsample.
+ * @param whereStatements - Optional WHERE clause statements.
+ * @param targetBuckets - Number of time buckets (defaults to 100).
+ * @param timestampField - The timestamp field name (defaults to '@timestamp').
+ * @returns A complete ES|QL query string.
+ */
+export function createM4ESQLQuery({
+  metric,
+  whereStatements = [],
+  targetBuckets = 100,
+  timestampField = '@timestamp',
+}: CreateM4ESQLQueryParams): string {
+  const { name: metricField, index } = metric;
+  const source = from(index);
+
+  const whereCommands = whereStatements.flatMap((statement) => {
+    const trimmed = statement.trim();
+    return trimmed.length > 0 ? [where(trimmed)] : [];
+  });
+
+  const basePipeline = whereCommands.length > 0 ? source.pipe(...whereCommands) : source;
+
+  const escapedMetric = sanitazeESQLInput(metricField) ?? metricField;
+
+  const m4Pipeline = createM4Pipeline({
+    metricField: escapedMetric,
+    targetBuckets,
+    timestampField,
+  });
+
+  return `${basePipeline.toString()}\n  | ${m4Pipeline}`;
+}
+
+interface CreateM4DownsampledESQLQueryParams {
+  metric: MetricField;
+  whereStatements?: string[];
+  sourceBuckets?: number;
+  targetBuckets?: number;
+  timestampField?: string;
+}
+
+/**
+ * Creates a two-stage ES|QL query: first aggregates (AVG/SUM(RATE)/etc.)
+ * with fine-grained buckets, then applies M4 downsampling to the result.
+ *
+ * This produces visually identical output to the standard aggregation query
+ * but with far fewer data points, demonstrating M4's compression efficiency.
+ *
+ * Stage 1: STATS <agg>(metric) BY BUCKET(@timestamp, sourceBuckets)  → ~sourceBuckets rows
+ * Stage 2: M4 downsample to targetBuckets                            → ~targetBuckets*4 rows
+ *
+ * @param metric - The metric field to aggregate and downsample.
+ * @param whereStatements - Optional WHERE clause statements.
+ * @param sourceBuckets - Fine-grained bucket count for the initial aggregation (defaults to 1000).
+ * @param targetBuckets - M4 bucket count for downsampling (defaults to 100).
+ * @param timestampField - The timestamp field name (defaults to '@timestamp').
+ * @returns A complete ES|QL query string.
+ */
+export function createM4DownsampledESQLQuery({
+  metric,
+  whereStatements = [],
+  sourceBuckets = 1000,
+  targetBuckets = 100,
+  timestampField = '@timestamp',
+}: CreateM4DownsampledESQLQueryParams): string {
+  const { name: metricField, instrument, index, type } = metric;
+  const source = from(index);
+
+  const whereCommands = whereStatements.flatMap((statement) => {
+    const trimmed = statement.trim();
+    return trimmed.length > 0 ? [where(trimmed)] : [];
+  });
+
+  const basePipeline = whereCommands.length > 0 ? source.pipe(...whereCommands) : source;
+
+  const aggFunction = createMetricAggregation({
+    type,
+    instrument,
+    metricName: metricField,
+  });
+
+  const firstStage = `STATS agg_val = ${aggFunction} BY _ts = BUCKET(${timestampField}, ${sourceBuckets}, ?_tstart, ?_tend)`;
+
+  const m4Stage = createM4Pipeline({
+    metricField: 'agg_val',
+    targetBuckets,
+    timestampField: '_ts',
+    outputTimestampField: timestampField,
+  });
+
+  return `${basePipeline.toString()}\n  | ${firstStage}\n  | ${m4Stage}`;
 }

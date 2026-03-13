@@ -9,7 +9,14 @@
 
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
-import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
@@ -20,9 +27,16 @@ import { MetricInsightsFlyout } from '../../flyout/metrics_insights_flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
-import { createESQLQuery } from '../../../common/utils';
+import {
+  createESQLQuery,
+  createM4DownsampledESQLQuery,
+  M4_VALUE_COLUMN,
+} from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
+
+const AVG_TARGET_BUCKETS = 10000;
+const M4_TARGET_BUCKETS = 100;
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
@@ -35,6 +49,7 @@ export type MetricsGridProps = Pick<
   fields: MetricField[];
   whereStatements?: string[];
   getUserMessages?: (metric: MetricField) => EmbeddableComponentProps['userMessages'];
+  useM4Downsampling?: boolean;
 };
 
 const getItemKey = (metric: MetricField, index: number) => {
@@ -53,6 +68,7 @@ export const MetricsGrid = ({
   discoverFetch$,
   searchTerm,
   getUserMessages,
+  useM4Downsampling,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -112,18 +128,24 @@ export const MetricsGrid = ({
       >
         <EuiFlexGrid
           gutterSize="s"
-          css={css`
-            grid-template-columns: repeat(${Math.min(columns, 4)}, 1fr);
-            @container (max-width: ${euiTheme.breakpoint.xl}px) {
-              grid-template-columns: repeat(${Math.min(columns, 3)}, 1fr);
-            }
-            @container (max-width: ${euiTheme.breakpoint.l}px) {
-              grid-template-columns: repeat(${Math.min(columns, 2)}, 1fr);
-            }
-            @container (max-width: ${euiTheme.breakpoint.s}px) {
-              grid-template-columns: repeat(${Math.min(columns, 1)}, 1fr);
-            }
-          `}
+          css={
+            useM4Downsampling
+              ? css`
+                  grid-template-columns: 1fr;
+                `
+              : css`
+                  grid-template-columns: repeat(${Math.min(columns, 4)}, 1fr);
+                  @container (max-width: ${euiTheme.breakpoint.xl}px) {
+                    grid-template-columns: repeat(${Math.min(columns, 3)}, 1fr);
+                  }
+                  @container (max-width: ${euiTheme.breakpoint.l}px) {
+                    grid-template-columns: repeat(${Math.min(columns, 2)}, 1fr);
+                  }
+                  @container (max-width: ${euiTheme.breakpoint.s}px) {
+                    grid-template-columns: repeat(${Math.min(columns, 1)}, 1fr);
+                  }
+                `
+          }
         >
           {fields.map((metric, index) => {
             const id = getItemKey(metric, index);
@@ -153,6 +175,7 @@ export const MetricsGrid = ({
                   searchTerm={searchTerm}
                   whereStatements={whereStatements}
                   userMessages={getUserMessages ? getUserMessages(metric) : undefined}
+                  useM4Downsampling={useM4Downsampling}
                 />
               </EuiFlexItem>
             );
@@ -189,6 +212,7 @@ interface ChartItemProps
   onViewDetails: (index: number, esqlQuery: string, metric: MetricField) => void;
   whereStatements?: string[];
   userMessages?: EmbeddableComponentProps['userMessages'];
+  useM4Downsampling?: boolean;
 }
 
 const ChartItem = React.memo(
@@ -212,6 +236,7 @@ const ChartItem = React.memo(
     onFocusCell,
     onViewDetails,
     userMessages,
+    useM4Downsampling,
   }: ChartItemProps) => {
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
@@ -219,23 +244,140 @@ const ChartItem = React.memo(
       [euiTheme.colors.vis]
     );
 
-    const esqlQuery = useMemo(() => {
+    const isM4Compatible =
+      useM4Downsampling && metric.instrument !== 'counter' && metric.instrument !== 'histogram';
+
+    const standardQuery = useMemo(() => {
       const isSupported = metric.type !== 'unsigned_long';
-      return isSupported
-        ? createESQLQuery({
-            metric,
-            splitAccessors: dimensions.map((dim) => dim.name),
-            whereStatements,
-          })
-        : '';
-    }, [metric, dimensions, whereStatements]);
+      if (!isSupported) return '';
+
+      return createESQLQuery({
+        metric,
+        splitAccessors: dimensions.map((dim) => dim.name),
+        whereStatements,
+        useFrom: isM4Compatible,
+        targetBuckets: isM4Compatible ? AVG_TARGET_BUCKETS : undefined,
+      });
+    }, [metric, dimensions, whereStatements, isM4Compatible]);
+
+    const m4Query = useMemo(() => {
+      if (!isM4Compatible) return '';
+      const isSupported = metric.type !== 'unsigned_long';
+      if (!isSupported) return '';
+
+      return createM4DownsampledESQLQuery({
+        metric,
+        whereStatements,
+        sourceBuckets: AVG_TARGET_BUCKETS,
+        targetBuckets: M4_TARGET_BUCKETS,
+      });
+    }, [metric, whereStatements, isM4Compatible]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
-    const chartLayers = useChartLayers({ dimensions, metric, color });
-    const handleViewDetailsCallback = useCallback(
-      () => onViewDetails(index, esqlQuery, metric),
-      [index, esqlQuery, metric, onViewDetails]
+    const standardChartLayers = useChartLayers({
+      dimensions,
+      metric,
+      color,
+      seriesType: isM4Compatible ? 'line' : undefined,
+      targetBuckets: isM4Compatible ? AVG_TARGET_BUCKETS : undefined,
+    });
+
+    const m4ChartLayers = useMemo(
+      () => [
+        {
+          type: 'series' as const,
+          seriesType: 'line' as const,
+          xAxis: { field: '@timestamp', type: 'dateHistogram' as const },
+          yAxis: [
+            {
+              value: M4_VALUE_COLUMN,
+              label: metric.name,
+              compactValues: true,
+              seriesColor: color,
+            },
+          ],
+        },
+      ],
+      [metric.name, color]
     );
+
+    const activeQuery = isM4Compatible ? m4Query : standardQuery;
+    const handleViewDetailsCallback = useCallback(
+      () => onViewDetails(index, activeQuery, metric),
+      [index, activeQuery, metric, onViewDetails]
+    );
+
+    const sharedChartProps = {
+      size: isM4Compatible ? ('m' as ChartSize) : size,
+      discoverFetch$,
+      fetchParams,
+      services,
+      onBrushEnd,
+      onFilter,
+      onExploreInDiscoverTab: actions.openInNewTab,
+      extraDisabledActions: [ACTION_OPEN_IN_DISCOVER],
+    };
+
+    if (isM4Compatible) {
+      return (
+        <A11yGridCell
+          id={id}
+          rowIndex={rowIndex}
+          colIndex={colIndex}
+          index={index}
+          isFocused={isFocused}
+          onFocus={onFocusCell}
+        >
+          <EuiFlexGroup gutterSize="none" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <strong>{metric.name}</strong>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <div css={css({ marginBottom: euiTheme.size.xs })}>
+                <EuiBadge color="hollow">
+                  {i18n.translate('metricsExperience.m4Comparison.standardLabel', {
+                    defaultMessage: 'Standard · AVG · {count} data points',
+                    values: { count: AVG_TARGET_BUCKETS.toLocaleString() },
+                  })}
+                </EuiBadge>
+              </div>
+              <Chart
+                {...sharedChartProps}
+                esqlQuery={standardQuery}
+                title={`${metric.name} — Standard`}
+                chartLayers={standardChartLayers}
+                titleHighlight={searchTerm}
+                onViewDetails={handleViewDetailsCallback}
+                userMessages={userMessages}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <div css={css({ marginBottom: euiTheme.size.xs })}>
+                <EuiBadge color="accent">
+                  {i18n.translate('metricsExperience.m4Comparison.m4Label', {
+                    defaultMessage: 'M4 Downsampled · AVG → M4 · {count} data points',
+                    values: { count: (M4_TARGET_BUCKETS * 4).toLocaleString() },
+                  })}
+                </EuiBadge>
+              </div>
+              <Chart
+                {...sharedChartProps}
+                esqlQuery={m4Query}
+                title={`${metric.name} — M4`}
+                chartLayers={m4ChartLayers}
+                titleHighlight={searchTerm}
+                onViewDetails={handleViewDetailsCallback}
+                userMessages={userMessages}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </A11yGridCell>
+      );
+    }
 
     return (
       <A11yGridCell
@@ -247,19 +389,12 @@ const ChartItem = React.memo(
         onFocus={onFocusCell}
       >
         <Chart
-          esqlQuery={esqlQuery}
-          size={size}
-          discoverFetch$={discoverFetch$}
-          fetchParams={fetchParams}
-          services={services}
-          onBrushEnd={onBrushEnd}
-          onFilter={onFilter}
-          onExploreInDiscoverTab={actions.openInNewTab}
-          onViewDetails={handleViewDetailsCallback}
+          {...sharedChartProps}
+          esqlQuery={standardQuery}
           title={metric.name}
-          chartLayers={chartLayers}
+          chartLayers={standardChartLayers}
           titleHighlight={searchTerm}
-          extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+          onViewDetails={handleViewDetailsCallback}
           userMessages={userMessages}
         />
       </A11yGridCell>

@@ -160,3 +160,59 @@ export function createTimeBucketAggregation({
 }) {
   return `BUCKET(${timestampField}, ${targetBuckets}, ?_tstart, ?_tend)`;
 }
+
+export const M4_VALUE_COLUMN = 'value';
+export const M4_TIMESTAMP_COLUMN = '@timestamp';
+
+/**
+ * Creates the M4 downsampling pipeline portion of an ES|QL query.
+ *
+ * M4 preserves visual fidelity by keeping 4 points per time bucket:
+ * first value, last value, min value, and max value — along with their timestamps.
+ * The result is unrolled via MV_EXPAND into a flat (timestamp, value) table
+ * that matches the original signal's visual shape at the given bucket resolution.
+ *
+ * @param metricField - The escaped metric field name.
+ * @param targetBuckets - The desired number of buckets.
+ * @param timestampField - The input timestamp field to bucket and aggregate on.
+ * @param outputTimestampField - The output timestamp column name (defaults to '@timestamp').
+ * @returns The STATS + unrolling pipeline string (without leading pipe).
+ */
+export function createM4Pipeline({
+  metricField,
+  targetBuckets = 100,
+  timestampField = '@timestamp',
+  outputTimestampField = '@timestamp',
+}: {
+  metricField: string;
+  targetBuckets?: number;
+  timestampField?: string;
+  outputTimestampField?: string;
+}): string {
+  const ts = timestampField;
+  const outTs = outputTimestampField;
+  const val = metricField;
+  const bucket = `BUCKET(${ts}, ${targetBuckets}, ?_tstart, ?_tend)`;
+  const limit = targetBuckets * 4;
+
+  return [
+    `STATS`,
+    `    first_t = MIN(${ts}),`,
+    `    last_t = MAX(${ts}),`,
+    `    first_t_v = TOP(${ts}, 1, "asc", ${val}),`,
+    `    last_t_v = TOP(${ts}, 1, "desc", ${val}),`,
+    `    min_v = MIN(${val}),`,
+    `    max_v = MAX(${val}),`,
+    `    min_v_t = TOP(${val}, 1, "asc", ${ts}),`,
+    `    max_v_t = TOP(${val}, 1, "desc", ${ts})`,
+    `  BY _m4_bucket = ${bucket}`,
+    `| EVAL idx = [0, 1, 2, 3]`,
+    `| MV_EXPAND idx`,
+    `| EVAL`,
+    `    ${outTs} = CASE(idx == 0, first_t, idx == 1, last_t, idx == 2, min_v_t, idx == 3, max_v_t),`,
+    `    ${M4_VALUE_COLUMN} = CASE(idx == 0, first_t_v, idx == 1, last_t_v, idx == 2, min_v, idx == 3, max_v)`,
+    `| KEEP ${outTs}, ${M4_VALUE_COLUMN}`,
+    `| SORT ${outTs} ASC`,
+    `| LIMIT ${limit}`,
+  ].join('\n  ');
+}

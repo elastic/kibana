@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { MetricField } from '../../../types';
-import { createESQLQuery } from './create_esql_query';
+import {
+  createESQLQuery,
+  createM4ESQLQuery,
+  createM4DownsampledESQLQuery,
+  createRawESQLQuery,
+} from './create_esql_query';
+import { M4_VALUE_COLUMN } from './create_aggregation';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 const mockMetric: MetricField = {
@@ -377,5 +383,174 @@ TS metrics-*
 `.trim()
       );
     });
+  });
+});
+
+describe('createM4ESQLQuery', () => {
+  it('should generate an M4 query with STATS, MV_EXPAND unrolling, and SORT', () => {
+    const query = createM4ESQLQuery({ metric: mockMetric });
+
+    expect(query).toContain('FROM metrics-*');
+    expect(query).toContain('first_t = MIN(@timestamp)');
+    expect(query).toContain('first_t_v = TOP(@timestamp, 1, "asc", `cpu.usage`)');
+    expect(query).toContain('last_t_v = TOP(@timestamp, 1, "desc", `cpu.usage`)');
+    expect(query).toContain('min_v = MIN(`cpu.usage`)');
+    expect(query).toContain('max_v = MAX(`cpu.usage`)');
+    expect(query).toContain('EVAL idx = [0, 1, 2, 3]');
+    expect(query).toContain('MV_EXPAND idx');
+    expect(query).toContain(`KEEP @timestamp, ${M4_VALUE_COLUMN}`);
+    expect(query).toContain('SORT @timestamp ASC');
+    expect(query).toContain('LIMIT 400');
+  });
+
+  it('should use custom targetBuckets', () => {
+    const query = createM4ESQLQuery({ metric: mockMetric, targetBuckets: 500 });
+
+    expect(query).toContain('BUCKET(@timestamp, 500, ?_tstart, ?_tend)');
+    expect(query).toContain('LIMIT 2000');
+  });
+
+  it('should prepend WHERE statements', () => {
+    const query = createM4ESQLQuery({
+      metric: mockMetric,
+      whereStatements: ['host.name == "host-01"'],
+    });
+
+    expect(query).toContain('WHERE host.name == "host-01"');
+    expect(query).toContain('STATS');
+    const whereIndex = query.indexOf('WHERE');
+    const statsIndex = query.indexOf('STATS');
+    expect(whereIndex).toBeLessThan(statsIndex);
+  });
+
+  it('should ignore empty WHERE statements', () => {
+    const query = createM4ESQLQuery({
+      metric: mockMetric,
+      whereStatements: ['  ', ''],
+    });
+
+    expect(query).not.toContain('WHERE');
+  });
+
+  it('should use the metric index', () => {
+    const query = createM4ESQLQuery({
+      metric: { ...mockMetric, index: 'custom-metrics-*' },
+    });
+
+    expect(query).toContain('FROM custom-metrics-*');
+  });
+
+  it('should properly escape metric field names', () => {
+    const query = createM4ESQLQuery({
+      metric: { ...mockMetric, name: 'system.load.1m' },
+    });
+
+    expect(query).toContain('`system.load.1m`');
+  });
+});
+
+describe('createM4DownsampledESQLQuery', () => {
+  it('should generate a two-stage AVG → M4 query', () => {
+    const query = createM4DownsampledESQLQuery({
+      metric: mockMetric,
+      sourceBuckets: 1000,
+      targetBuckets: 100,
+    });
+
+    expect(query).toContain('FROM metrics-*');
+    expect(query).toContain('STATS agg_val = AVG(cpu.usage) BY _ts = BUCKET(@timestamp, 1000');
+    expect(query).toContain('first_t = MIN(_ts)');
+    expect(query).toContain('first_t_v = TOP(_ts, 1, "asc", agg_val)');
+    expect(query).toContain('min_v = MIN(agg_val)');
+    expect(query).toContain(`KEEP @timestamp, ${M4_VALUE_COLUMN}`);
+    expect(query).toContain('SORT @timestamp ASC');
+    expect(query).toContain('LIMIT 400');
+  });
+
+  it('should use SUM(RATE()) for counter instruments', () => {
+    const query = createM4DownsampledESQLQuery({ metric: mockCounterMetric });
+
+    expect(query).toContain('STATS agg_val = SUM(RATE(requests.count))');
+  });
+
+  it('should chain the two STATS stages in order', () => {
+    const query = createM4DownsampledESQLQuery({ metric: mockMetric });
+
+    const firstStats = query.indexOf('STATS agg_val');
+    const secondStats = query.indexOf('STATS', firstStats + 1);
+    expect(firstStats).toBeGreaterThan(-1);
+    expect(secondStats).toBeGreaterThan(firstStats);
+  });
+
+  it('should output @timestamp as the final timestamp column', () => {
+    const query = createM4DownsampledESQLQuery({ metric: mockMetric });
+
+    expect(query).toContain('KEEP @timestamp, value');
+    expect(query).toContain('SORT @timestamp ASC');
+  });
+
+  it('should prepend WHERE statements before both STATS stages', () => {
+    const query = createM4DownsampledESQLQuery({
+      metric: mockMetric,
+      whereStatements: ['host.name == "host-01"'],
+    });
+
+    const whereIndex = query.indexOf('WHERE');
+    const firstStats = query.indexOf('STATS');
+    expect(whereIndex).toBeLessThan(firstStats);
+  });
+});
+
+describe('createRawESQLQuery', () => {
+  it('should generate a raw query with KEEP, SORT, and LIMIT', () => {
+    const query = createRawESQLQuery({ metric: mockMetric });
+
+    expect(query).toContain('FROM metrics-*');
+    expect(query).toContain('KEEP @timestamp, `cpu.usage`');
+    expect(query).toContain('SORT @timestamp ASC');
+    expect(query).toContain('LIMIT 10000');
+  });
+
+  it('should use a custom limit', () => {
+    const query = createRawESQLQuery({ metric: mockMetric, limit: 5000 });
+
+    expect(query).toContain('LIMIT 5000');
+  });
+
+  it('should prepend WHERE statements', () => {
+    const query = createRawESQLQuery({
+      metric: mockMetric,
+      whereStatements: ['host.name == "host-01"'],
+    });
+
+    expect(query).toContain('WHERE host.name == "host-01"');
+    const whereIndex = query.indexOf('WHERE');
+    const keepIndex = query.indexOf('KEEP');
+    expect(whereIndex).toBeLessThan(keepIndex);
+  });
+
+  it('should ignore empty WHERE statements', () => {
+    const query = createRawESQLQuery({
+      metric: mockMetric,
+      whereStatements: ['  ', ''],
+    });
+
+    expect(query).not.toContain('WHERE');
+  });
+
+  it('should use the metric index', () => {
+    const query = createRawESQLQuery({
+      metric: { ...mockMetric, index: 'custom-metrics-*' },
+    });
+
+    expect(query).toContain('FROM custom-metrics-*');
+  });
+
+  it('should properly escape metric field names', () => {
+    const query = createRawESQLQuery({
+      metric: { ...mockMetric, name: 'system.load.1m' },
+    });
+
+    expect(query).toContain('KEEP @timestamp, `system.load.1m`');
   });
 });
