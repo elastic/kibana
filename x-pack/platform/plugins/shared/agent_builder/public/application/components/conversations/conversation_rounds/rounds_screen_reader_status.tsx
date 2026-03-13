@@ -36,10 +36,10 @@ const useGeneratingAnnouncements = (isActive: boolean) => {
 
     let elapsed = 0;
     let nextDelay = INITIAL_INTERVAL_MS;
-    let timeoutId: ReturnType<typeof setTimeout>;
+    let timeoutId: number;
 
     const scheduleNext = () => {
-      timeoutId = setTimeout(() => {
+      timeoutId = window.setTimeout(() => {
         elapsed += nextDelay;
         setAnnouncement(
           i18n.translate('xpack.agentBuilder.conversationRounds.stillGeneratingAnnouncement', {
