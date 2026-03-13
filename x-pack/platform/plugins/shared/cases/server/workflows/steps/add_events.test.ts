@@ -43,4 +43,45 @@ describe('addEventsStepDefinition', () => {
       ],
     });
   });
+
+  it('drops unsupported event comments from workflow output before parsing', async () => {
+    const eventComment = {
+      id: 'event-comment-id',
+      type: 'event' as const,
+      eventId: ['event-1'],
+      index: ['.ds-logs-*'],
+      owner: createCaseResponseFixture.owner,
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: createCaseResponseFixture.created_by,
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: null,
+      updated_by: null,
+      version: 'WzQ3LDFc',
+    };
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = jest.fn().mockResolvedValue({
+      ...createCaseResponseFixture,
+      comments: [eventComment],
+    });
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get },
+      attachments: { bulkCreate },
+    } as unknown as CasesClient);
+    const definition = addEventsStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({
+        case_id: 'case-1',
+        events: [{ eventId: 'event-1', index: '.ds-logs-*' }],
+      })
+    );
+
+    const outputCase = result.output?.case;
+    if (outputCase == null) {
+      throw new Error('Expected output from add events step');
+    }
+
+    expect(outputCase.comments).toEqual([]);
+  });
 });

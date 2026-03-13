@@ -12,7 +12,6 @@ import {
   type SetDescriptionStepInput,
 } from '../../../common/workflows/steps/set_description';
 import type { CasesClient } from '../../client';
-import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
 import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const setDescriptionStepDefinition = (
@@ -22,7 +21,6 @@ export const setDescriptionStepDefinition = (
     ...setDescriptionStepCommonDefinition,
     handler: createUpdateSingleCaseStepHandler<SetDescriptionStepInput>(
       getCasesClient,
-      (input) => ({ description: input.description }),
-      UPDATE_CASE_FAILED_MESSAGE
+      (input) => ({ description: input.description })
     ),
   });

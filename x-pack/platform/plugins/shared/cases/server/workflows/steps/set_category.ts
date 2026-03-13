@@ -12,7 +12,6 @@ import {
   type SetCategoryStepInput,
 } from '../../../common/workflows/steps/set_category';
 import type { CasesClient } from '../../client';
-import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
 import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const setCategoryStepDefinition = (
@@ -20,9 +19,7 @@ export const setCategoryStepDefinition = (
 ) =>
   createServerStepDefinition({
     ...setCategoryStepCommonDefinition,
-    handler: createUpdateSingleCaseStepHandler<SetCategoryStepInput>(
-      getCasesClient,
-      (input) => ({ category: input.category }),
-      UPDATE_CASE_FAILED_MESSAGE
-    ),
+    handler: createUpdateSingleCaseStepHandler<SetCategoryStepInput>(getCasesClient, (input) => ({
+      category: input.category,
+    })),
   });

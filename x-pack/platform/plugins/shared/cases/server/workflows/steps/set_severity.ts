@@ -12,7 +12,6 @@ import {
   type SetSeverityStepInput,
 } from '../../../common/workflows/steps/set_severity';
 import type { CasesClient } from '../../client';
-import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
 import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const setSeverityStepDefinition = (
@@ -20,9 +19,7 @@ export const setSeverityStepDefinition = (
 ) =>
   createServerStepDefinition({
     ...setSeverityStepCommonDefinition,
-    handler: createUpdateSingleCaseStepHandler<SetSeverityStepInput>(
-      getCasesClient,
-      (input) => ({ severity: input.severity }),
-      UPDATE_CASE_FAILED_MESSAGE
-    ),
+    handler: createUpdateSingleCaseStepHandler<SetSeverityStepInput>(getCasesClient, (input) => ({
+      severity: input.severity,
+    })),
   });

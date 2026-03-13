@@ -11,11 +11,8 @@ import type { UpdateCaseStepInput } from '../../../common/workflows/steps/update
 import { CasePatchRequestRt } from '../../../common/types/api';
 import type { CasesClient } from '../../client';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
-import {
-  createCaseIdOnError,
-  createCasesStepHandler,
-  normalizeCaseStepUpdatesForBulkPatch,
-} from './utils';
+import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
+import { createCasesStepHandler, normalizeCaseStepUpdatesForBulkPatch } from './utils';
 
 type WorkflowUpdatePayload = UpdateCaseStepInput['updates'];
 
@@ -23,7 +20,6 @@ interface UpdateSingleCaseParams {
   caseId: string;
   version?: string;
   updates: WorkflowUpdatePayload;
-  onNotFoundError: Error;
 }
 
 interface PrepareCasePatchParams {
@@ -61,7 +57,7 @@ export const prepareCasePatch = async (
 
 export const updateSingleCase = async (
   client: CasesClient,
-  { caseId, version, updates, onNotFoundError }: UpdateSingleCaseParams
+  { caseId, version, updates }: UpdateSingleCaseParams
 ) => {
   const normalizedCasePatch = await prepareCasePatch(client, { caseId, version, updates });
 
@@ -71,7 +67,7 @@ export const updateSingleCase = async (
 
   const updatedCase = updatedCases.find((updated) => updated.id === caseId);
   if (!updatedCase) {
-    throw onNotFoundError;
+    throw new Error(UPDATE_CASE_FAILED_MESSAGE(caseId));
   }
 
   return CaseResponsePropertiesSchema.parse(updatedCase);
@@ -80,31 +76,22 @@ export const updateSingleCase = async (
 export const updateSingleCaseFromInput = <TInput extends CaseIdVersionInput>(
   client: CasesClient,
   input: TInput,
-  updates: WorkflowUpdatePayload,
-  getErrorMessage: (caseId: string) => string
+  updates: WorkflowUpdatePayload
 ) =>
   updateSingleCase(client, {
     caseId: input.case_id,
     version: input.version,
     updates,
-    onNotFoundError: new Error(getErrorMessage(input.case_id)),
   });
 
 export const createUpdateSingleCaseStepHandler = <TInput extends CaseIdVersionInput>(
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
-  getUpdates: (input: TInput) => WorkflowUpdatePayload,
-  getErrorMessage: (caseId: string) => string
+  getUpdates: (input: TInput) => WorkflowUpdatePayload
 ) =>
-  createCasesStepHandler(
-    getCasesClient,
-    async (client, input: TInput) =>
-      updateSingleCase(client, {
-        caseId: input.case_id,
-        version: input.version,
-        updates: getUpdates(input),
-        onNotFoundError: new Error(getErrorMessage(input.case_id)),
-      }),
-    {
-      onError: createCaseIdOnError<TInput>(getErrorMessage),
-    }
+  createCasesStepHandler(getCasesClient, async (client, input: TInput) =>
+    updateSingleCase(client, {
+      caseId: input.case_id,
+      version: input.version,
+      updates: getUpdates(input),
+    })
   );

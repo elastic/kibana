@@ -12,7 +12,6 @@ import {
   type AssignCaseStepInput,
 } from '../../../common/workflows/steps/assign_case';
 import type { CasesClient } from '../../client';
-import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
 import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const assignCaseStepDefinition = (
@@ -20,9 +19,7 @@ export const assignCaseStepDefinition = (
 ) =>
   createServerStepDefinition({
     ...assignCaseStepCommonDefinition,
-    handler: createUpdateSingleCaseStepHandler<AssignCaseStepInput>(
-      getCasesClient,
-      (input) => ({ assignees: input.assignees }),
-      UPDATE_CASE_FAILED_MESSAGE
-    ),
+    handler: createUpdateSingleCaseStepHandler<AssignCaseStepInput>(getCasesClient, (input) => ({
+      assignees: input.assignees,
+    })),
   });

@@ -12,7 +12,6 @@ import {
   type SetTitleStepInput,
 } from '../../../common/workflows/steps/set_title';
 import type { CasesClient } from '../../client';
-import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
 import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const setTitleStepDefinition = (
@@ -20,9 +19,7 @@ export const setTitleStepDefinition = (
 ) =>
   createServerStepDefinition({
     ...setTitleStepCommonDefinition,
-    handler: createUpdateSingleCaseStepHandler<SetTitleStepInput>(
-      getCasesClient,
-      (input) => ({ title: input.title }),
-      UPDATE_CASE_FAILED_MESSAGE
-    ),
+    handler: createUpdateSingleCaseStepHandler<SetTitleStepInput>(getCasesClient, (input) => ({
+      title: input.title,
+    })),
   });

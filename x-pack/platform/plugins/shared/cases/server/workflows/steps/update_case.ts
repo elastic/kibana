@@ -12,21 +12,15 @@ import {
   type UpdateCaseStepInput,
 } from '../../../common/workflows/steps/update_case';
 import type { CasesClient } from '../../client';
-import { createCaseIdOnError, createCasesStepHandler } from './utils';
-import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
-import { updateSingleCaseFromInput } from './update_case_helpers';
+import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const updateCaseStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
     ...updateCaseStepCommonDefinition,
-    handler: createCasesStepHandler(
+    handler: createUpdateSingleCaseStepHandler<UpdateCaseStepInput>(
       getCasesClient,
-      (client, input: UpdateCaseStepInput) =>
-        updateSingleCaseFromInput(client, input, input.updates, UPDATE_CASE_FAILED_MESSAGE),
-      {
-        onError: createCaseIdOnError<UpdateCaseStepInput>(UPDATE_CASE_FAILED_MESSAGE),
-      }
+      (input) => input.updates
     ),
   });

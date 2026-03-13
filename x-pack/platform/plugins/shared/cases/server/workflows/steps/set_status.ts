@@ -12,7 +12,6 @@ import {
   type SetStatusStepInput,
 } from '../../../common/workflows/steps/set_status';
 import type { CasesClient } from '../../client';
-import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
 import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const setStatusStepDefinition = (
@@ -20,9 +19,7 @@ export const setStatusStepDefinition = (
 ) =>
   createServerStepDefinition({
     ...setStatusStepCommonDefinition,
-    handler: createUpdateSingleCaseStepHandler<SetStatusStepInput>(
-      getCasesClient,
-      (input) => ({ status: input.status }),
-      UPDATE_CASE_FAILED_MESSAGE
-    ),
+    handler: createUpdateSingleCaseStepHandler<SetStatusStepInput>(getCasesClient, (input) => ({
+      status: input.status,
+    })),
   });

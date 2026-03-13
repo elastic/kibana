@@ -55,7 +55,6 @@ export const unassignCaseStepDefinition = (
           caseId: input.case_id,
           version,
           updates: { assignees },
-          onNotFoundError: new Error(UPDATE_CASE_FAILED_MESSAGE(input.case_id)),
         });
       },
       {

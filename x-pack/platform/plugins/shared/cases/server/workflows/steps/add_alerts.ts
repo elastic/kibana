@@ -13,8 +13,7 @@ import {
 } from '../../../common/workflows/steps/add_alerts';
 import { AttachmentType } from '../../../common';
 import type { CasesClient } from '../../client';
-import { ADD_ALERTS_FAILED_MESSAGE } from './translations';
-import { createCaseIdOnError, createCasesStepHandler, withCaseOwner } from './utils';
+import { createCasesStepHandler, withCaseOwner } from './utils';
 
 /**
  * Workflows output parsing uses generated OpenAPI schemas where alert comment `rule` is optional,
@@ -70,30 +69,24 @@ export const addAlertsStepDefinition = (
 ) =>
   createServerStepDefinition({
     ...addAlertsStepCommonDefinition,
-    handler: createCasesStepHandler(
-      getCasesClient,
-      async (client, input: AddAlertsStepInput) => {
-        return withCaseOwner(client, input.case_id, async (owner) => {
-          const updatedCase = await client.attachments.bulkCreate({
-            caseId: input.case_id,
-            attachments: input.alerts.map((alert) => ({
-              type: AttachmentType.alert,
-              alertId: alert.alertId,
-              index: alert.index,
-              owner,
-              rule: {
-                id: alert.rule?.id ?? null,
-                name: alert.rule?.name ?? null,
-              },
-            })),
-          });
-
-          const normalizedOutputCase = normalizeAlertRuleInCaseOutput(updatedCase);
-          return addAlertsStepCommonDefinition.outputSchema.shape.case.parse(normalizedOutputCase);
+    handler: createCasesStepHandler(getCasesClient, async (client, input: AddAlertsStepInput) => {
+      return withCaseOwner(client, input.case_id, async (owner) => {
+        const updatedCase = await client.attachments.bulkCreate({
+          caseId: input.case_id,
+          attachments: input.alerts.map((alert) => ({
+            type: AttachmentType.alert,
+            alertId: alert.alertId,
+            index: alert.index,
+            owner,
+            rule: {
+              id: alert.rule?.id ?? null,
+              name: alert.rule?.name ?? null,
+            },
+          })),
         });
-      },
-      {
-        onError: createCaseIdOnError<AddAlertsStepInput>(ADD_ALERTS_FAILED_MESSAGE),
-      }
-    ),
+
+        const normalizedOutputCase = normalizeAlertRuleInCaseOutput(updatedCase);
+        return addAlertsStepCommonDefinition.outputSchema.shape.case.parse(normalizedOutputCase);
+      });
+    }),
   });

@@ -12,8 +12,7 @@ import {
   type AddObservablesStepInput,
 } from '../../../common/workflows/steps/add_observables';
 import type { CasesClient } from '../../client';
-import { ADD_OBSERVABLES_FAILED_MESSAGE } from './translations';
-import { createCaseIdOnError, createCasesStepHandler } from './utils';
+import { createCasesStepHandler } from './utils';
 
 export const addObservablesStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -38,9 +37,6 @@ export const addObservablesStepDefinition = (
         });
 
         return addObservablesStepCommonDefinition.outputSchema.shape.case.parse(updatedCase);
-      },
-      {
-        onError: createCaseIdOnError<AddObservablesStepInput>(ADD_OBSERVABLES_FAILED_MESSAGE),
       }
     ),
   });

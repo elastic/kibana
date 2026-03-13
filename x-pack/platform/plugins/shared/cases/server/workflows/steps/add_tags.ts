@@ -12,8 +12,7 @@ import {
   type AddTagsStepInput,
 } from '../../../common/workflows/steps/add_tags';
 import type { CasesClient } from '../../client';
-import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
-import { createCaseIdOnError, createCasesStepHandler } from './utils';
+import { createCasesStepHandler } from './utils';
 import { updateSingleCaseFromInput } from './update_case_helpers';
 
 export const addTagsStepDefinition = (
@@ -21,25 +20,18 @@ export const addTagsStepDefinition = (
 ) =>
   createServerStepDefinition({
     ...addTagsStepCommonDefinition,
-    handler: createCasesStepHandler(
-      getCasesClient,
-      async (client, input: AddTagsStepInput) => {
-        const currentCase = await client.cases.get({
-          id: input.case_id,
-          includeComments: false,
-        });
+    handler: createCasesStepHandler(getCasesClient, async (client, input: AddTagsStepInput) => {
+      const currentCase = await client.cases.get({
+        id: input.case_id,
+        includeComments: false,
+      });
 
-        const tags = [...new Set([...(currentCase.tags ?? []), ...input.tags])];
+      const tags = [...new Set([...(currentCase.tags ?? []), ...input.tags])];
 
-        return updateSingleCaseFromInput(
-          client,
-          { ...input, version: currentCase.version },
-          { tags },
-          UPDATE_CASE_FAILED_MESSAGE
-        );
-      },
-      {
-        onError: createCaseIdOnError<AddTagsStepInput>(UPDATE_CASE_FAILED_MESSAGE),
-      }
-    ),
+      return updateSingleCaseFromInput(
+        client,
+        { ...input, version: currentCase.version },
+        { tags }
+      );
+    }),
   });

@@ -12,7 +12,6 @@ import {
   type CloseCaseStepInput,
 } from '../../../common/workflows/steps/close_case';
 import type { CasesClient } from '../../client';
-import { UPDATE_CASE_FAILED_MESSAGE } from './translations';
 import { createUpdateSingleCaseStepHandler } from './update_case_helpers';
 
 export const closeCaseStepDefinition = (
@@ -20,9 +19,7 @@ export const closeCaseStepDefinition = (
 ) =>
   createServerStepDefinition({
     ...closeCaseStepCommonDefinition,
-    handler: createUpdateSingleCaseStepHandler<CloseCaseStepInput>(
-      getCasesClient,
-      () => ({ status: 'closed' }),
-      UPDATE_CASE_FAILED_MESSAGE
-    ),
+    handler: createUpdateSingleCaseStepHandler<CloseCaseStepInput>(getCasesClient, () => ({
+      status: 'closed',
+    })),
   });
