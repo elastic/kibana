@@ -428,10 +428,7 @@ export function generateEsqlQuery(
       queryParts.push(`EVAL ${forkLabelEval}`);
     }
     if (validMetrics.length > 0) {
-      // Wrap only complex bucket expressions in backticks (e.g. BUCKET(...)); simple column names (e.g. filter) stay as-is
-      const byClause = validBuckets
-        .map((b) => (b.includes(' ') || b.includes('(') ? `\`${b}\`` : b))
-        .join(', ');
+      const byClause = validBuckets.join(', ');
       const statsBody = `${validMetrics.join(', ')} BY ${byClause}`;
       queryParts.push(`STATS ${statsBody}`);
     }
