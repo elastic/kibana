@@ -148,9 +148,7 @@ describe('TabbedContent', () => {
 
     await user.click(screen.getByTestId('unifiedTabs_tabsBarMenuButton'));
 
-    const closedTabOption = await screen.findByTestId(
-      'unifiedTabs_tabsMenu_recentlyClosedTab_closed1'
-    );
+    const closedTabOption = screen.getByTestId('unifiedTabs_tabsMenu_recentlyClosedTab_closed1');
     expect(closedTabOption).toBeDisabled();
 
     await user.click(closedTabOption);
@@ -359,7 +357,7 @@ describe('TabbedContent', () => {
 
     await user.click(screen.getByTestId(`unifiedTabs_tabMenuBtn_${tabWithSpecialChars.id}`));
 
-    const duplicateMenuItem = await screen.findByTestId('unifiedTabs_tabMenuItem_duplicate');
+    const duplicateMenuItem = screen.getByTestId('unifiedTabs_tabMenuItem_duplicate');
     await waitFor(() => expect(duplicateMenuItem).toBeEnabled());
     await user.click(duplicateMenuItem);
 
