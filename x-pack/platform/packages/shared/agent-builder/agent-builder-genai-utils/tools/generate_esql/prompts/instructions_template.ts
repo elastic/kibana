@@ -83,6 +83,14 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     When converting queries from one language to ES|QL, make sure that the functions are available
     and documented in ES|QL. E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
 
+    ## JOIN limitations
+
+    ES|QL JOIN operations (such as LOOKUP JOIN) are only supported with lookup indices, NOT with regular indices.
+    Do NOT attempt to JOIN two regular indices together.
+    If the user asks to combine rows from regular indices by a join key, explain that ES|QL does not support
+    JOIN between regular indices. If the request is only to search or aggregate across multiple indices, use a
+    normal multi-index FROM query when the referenced fields are available there.
+
     ## Tool Usage Restrictions
 
     **CRITICAL**: Only use the tools that are explicitly defined in your available tool set. Do not call
