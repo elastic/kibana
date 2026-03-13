@@ -50,7 +50,7 @@ interface EqlStartDependencies {
 export const getEqlFn = ({
   getStartDependencies,
 }: {
-  getStartDependencies: (getKibanaRequest: any) => Promise<EqlStartDependencies>;
+  getStartDependencies: (getKibanaRequest: unknown) => Promise<EqlStartDependencies>;
 }) => {
   const eql: EqlExpressionFunctionDefinition = {
     name,
@@ -103,7 +103,9 @@ export const getEqlFn = ({
 
       if (input) {
         const dataview = args.index ? await dataViews.create({ title: args.index }) : undefined;
-        const esQueryConfigs = getEsQueryConfig(uiSettingsClient as any);
+        const esQueryConfigs = getEsQueryConfig(
+          uiSettingsClient as Parameters<typeof getEsQueryConfig>[0]
+        );
         const query = buildEsQuery(
           dataview,
           input.query || [],

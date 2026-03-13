@@ -8,13 +8,14 @@
  */
 
 import { BaseParamType } from './base';
+import type { AggParamOutput } from './base';
 import { JsonParamType } from './json';
 import type { IAggConfig } from '../agg_config';
 
 describe('JSON', function () {
   const paramName = 'json_test';
   let aggConfig: IAggConfig;
-  let output: Record<string, any>;
+  let output: AggParamOutput;
 
   const initAggParam = (config: Record<string, any> = {}) =>
     new JsonParamType({

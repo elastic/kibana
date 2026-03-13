@@ -12,7 +12,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, defer, finalize, map } from 'rxjs';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
-const defaultIsDuplicate = (oldItem: any, newItem: any) => {
+const defaultIsDuplicate = (oldItem: unknown, newItem: unknown) => {
   return isEqual(oldItem, newItem);
 };
 
@@ -82,7 +82,7 @@ export class PersistedLog<T = any> {
     }
   }
 
-  public add(val: any) {
+  public add(val: T) {
     if (val == null) {
       return this.items;
     }

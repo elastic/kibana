@@ -19,7 +19,7 @@ function makeAgg(emptyAsNull: boolean = false, timeShift?: moment.Duration): IMe
     params: {
       emptyAsNull,
     },
-  } as IMetricAggConfig;
+  } as unknown as IMetricAggConfig;
 }
 
 function getBucket(value: number | undefined, timeShift?: moment.Duration) {

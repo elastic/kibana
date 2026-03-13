@@ -13,16 +13,22 @@ import type { ISearchSource } from '../../../../public';
 import type { IAggConfigs } from '../agg_configs';
 import type { IAggConfig } from '../agg_config';
 
+/** Output object passed to agg param write methods */
+export interface AggParamOutput {
+  params: Record<string, any>;
+  [key: string]: any;
+}
+
 export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   name: string;
   type: string;
   displayName: string;
   required: boolean;
   advanced: boolean;
-  default: any;
+  default: unknown;
   write: (
     aggConfig: TAggConfig,
-    output: Record<string, any>,
+    output: AggParamOutput,
     aggConfigs?: IAggConfigs,
     locals?: Record<string, any>
   ) => void;
@@ -59,7 +65,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
     this.shouldShow = config.shouldShow;
     this.default = config.default;
 
-    const defaultWrite = (aggConfig: TAggConfig, output: Record<string, any>) => {
+    const defaultWrite = (aggConfig: TAggConfig, output: AggParamOutput) => {
       if (aggConfig.params[this.name]) {
         output.params[this.name] = aggConfig.params[this.name] || this.default;
       }
