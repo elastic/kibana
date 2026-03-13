@@ -186,7 +186,12 @@ export function LensEditConfigurationFlyout({
               previousAttrs.references
             )
           : previousAttrs.state.datasourceStates[previousDatasourceId];
-        updatePanelState?.(currentDatasourceState, previousAttrs.state.visualization);
+        updatePanelState?.(
+          currentDatasourceState,
+          previousAttrs.state.visualization,
+          undefined,
+          previousDatasourceId
+        );
       } else {
         updateSuggestion?.(previousAttrs);
       }
