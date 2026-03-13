@@ -271,7 +271,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               <>
                 <EuiCallOut
                   tabIndex={-1}
-                  announceOnMount
                   ref={handleErrorFocus}
                   size="s"
                   color="danger"
