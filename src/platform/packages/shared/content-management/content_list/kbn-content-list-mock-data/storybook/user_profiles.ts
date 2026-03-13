@@ -78,7 +78,7 @@ export const MOCK_USER_PROFILES_MAP: Record<string, UserProfile> = MOCK_USER_PRO
 );
 
 /**
- * Mock user profile service functions for storybook
+ * Mock user profile service functions for storybook.
  */
 const mockGetUserProfile = async (uid: string) => {
   return MOCK_USER_PROFILES_MAP[uid] || { uid, user: { username: uid }, enabled: true, data: {} };
@@ -91,7 +91,30 @@ const mockBulkGetUserProfiles = async (uids: string[]) => {
   );
 };
 
+/**
+ * Mock implementation of `suggestUserProfiles` for storybook.
+ *
+ * Performs a case-insensitive substring match against `full_name`, `email`,
+ * and `username` of the {@link MOCK_USER_PROFILES} list. Returns all matches
+ * (no limit) to keep the mock simple.
+ */
+const mockSuggestUserProfiles = async (name: string): Promise<UserProfile[]> => {
+  if (!name) {
+    return [];
+  }
+  const lower = name.toLowerCase();
+  return MOCK_USER_PROFILES.filter((profile) => {
+    const { full_name: fullName, email, username } = profile.user;
+    return (
+      fullName?.toLowerCase().includes(lower) ||
+      email?.toLowerCase().includes(lower) ||
+      username?.toLowerCase().includes(lower)
+    );
+  });
+};
+
 export const mockUserProfileServices = {
   getUserProfile: mockGetUserProfile,
   bulkGetUserProfiles: mockBulkGetUserProfiles,
+  suggestUserProfiles: mockSuggestUserProfiles,
 };

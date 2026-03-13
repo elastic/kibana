@@ -19,6 +19,7 @@ import {
   createMockFavoritesClient,
   createStoryFindItems,
   mockTagsService,
+  mockUserProfileServices,
   StateDiagnosticPanel,
 } from './stories_helpers';
 
@@ -47,18 +48,20 @@ const { Column, Action } = ContentListTable;
 const { Filters } = ContentListToolbar;
 
 /**
- * Wrapper component for the MS3 "Core + Tags + Starred" story.
+ * Wrapper component for the "Core + Extended" story.
  *
- * MS3 (Dashboards migration) requires Core + Tags + Starred. This story
- * demonstrates the full extended feature set: tag filtering, tag badges in the
- * Name column, the starred toggle filter, and the star icon column.
+ * Demonstrates the full extended feature set: tag filtering, tag badges in the
+ * Name column, the starred toggle filter, the star icon column, and the
+ * `createdBy` user filter with avatar column.
  *
- * Current state of MS3 features:
+ * Current state of extended features:
  * - [x] Tags filter popover — include/exclude, Cmd/Ctrl+click (PR 9)
  * - [x] Tag badges in Name column — click to filter (PR 9)
  * - [x] Search bar ↔ filter sync — `tag:name` parsed to `filters.tag` (PR 9)
  * - [x] Starred column — star icon toggle per row
  * - [x] Starred filter — toggle to show only starred items
+ * - [x] Created By column — user avatar with filter toggle on click
+ * - [x] Created By filter popover — user selection and sentinel values
  */
 const CoreTagsStarredFeaturesWrapper = () => {
   const labels = useMemo(
@@ -93,6 +96,7 @@ const CoreTagsStarredFeaturesWrapper = () => {
       pagination: { initialPageSize: 20 },
       tags: true as const,
       starred: true as const,
+      createdBy: true as const,
     }),
     []
   );
@@ -112,6 +116,7 @@ const CoreTagsStarredFeaturesWrapper = () => {
       <>
         <Column.Starred />
         <Column.Name showDescription showTags showStarred />
+        <Column.CreatedBy />
         <Column.UpdatedAt />
         <Column.Actions>
           <Action.Delete />
@@ -129,12 +134,17 @@ const CoreTagsStarredFeaturesWrapper = () => {
         dataSource={dataSource}
         features={features}
         item={itemConfig}
-        services={{ tags: mockTagsService, favorites: favoritesClient }}
+        services={{
+          tags: mockTagsService,
+          favorites: favoritesClient,
+          userProfile: mockUserProfileServices,
+        }}
       >
         <ContentListToolbar>
           <Filters>
             <Filters.Starred />
             <Filters.Tags />
+            <Filters.CreatedBy />
             <Filters.Sort />
           </Filters>
         </ContentListToolbar>
@@ -152,7 +162,11 @@ const CoreTagsStarredFeaturesWrapper = () => {
       dataSource={dataSource}
       features={features}
       item={itemConfig}
-      services={{ tags: mockTagsService, favorites: favoritesClient }}
+      services={{
+        tags: mockTagsService,
+        favorites: favoritesClient,
+        userProfile: mockUserProfileServices,
+      }}
     >
       <EuiTitle size="s">
         <h2>Core Features + Extended</h2>
@@ -160,9 +174,10 @@ const CoreTagsStarredFeaturesWrapper = () => {
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
         <p>
-          Core + Tags + Starred — the feature set required to migrate Dashboards to Content List.
-          Demonstrates the starred toggle filter and star icon column (backed by{' '}
-          <code>services.favorites</code>), combined with tag filtering and tag badges from MS2.
+          Core + Tags + Starred + Created By — the full extended feature set. Demonstrates the
+          starred toggle filter and star icon column (backed by <code>services.favorites</code>),
+          tag filtering and tag badges, and the Created By avatar column and filter popover (backed
+          by <code>services.userProfile</code>).
         </p>
       </EuiText>
       <EuiSpacer size="m" />
@@ -172,6 +187,7 @@ const CoreTagsStarredFeaturesWrapper = () => {
             <Filters>
               <Filters.Starred />
               <Filters.Tags />
+              <Filters.CreatedBy />
               <Filters.Sort />
             </Filters>
           </ContentListToolbar>
@@ -191,17 +207,18 @@ const CoreTagsStarredFeaturesWrapper = () => {
 };
 
 /**
- * The "Extended" feature set: Core + Tags + Starred.
+ * The "Extended" feature set: Core + Tags + Starred + Created By.
  *
- * Required by the Dashboards migration (MS3). Builds on MS2 (Tags) and adds:
- * - `services.favorites` on the provider wires the favorites client.
- * - `features.starred: true` enables starred state and the `Filters.Starred` preset.
- * - `Column.Starred` renders a star icon toggle in a narrow leading column.
- * - `Filters.Starred` in the toolbar renders a toggle to show only starred items.
+ * Builds on Tags and Starred and adds:
+ * - `services.userProfile` on the provider wires the user profile service.
+ * - `features.createdBy: true` enables the creator filter and column.
+ * - `Column.CreatedBy` renders a user avatar with filter-toggle on click.
+ * - `Filters.CreatedBy` in the toolbar renders a user selection popover.
  *
- * **Try:** Click the star icon in any row to mark it as a favorite. Toggle the
- * "Starred" filter in the toolbar to narrow the list to only starred items.
- * Tag filtering and badge-click-to-filter from MS2 are also active.
+ * **Try:** Click a user avatar in the "Created by" column to filter by that
+ * creator. Open the "Created by" popover to select multiple users, or type
+ * `createdBy:(email)` in the search bar. Sentinel values "managed" and "none"
+ * are also supported.
  */
 export const CoreTagsStarredFeatures: StoryObj = {
   name: 'Core Features + Extended',

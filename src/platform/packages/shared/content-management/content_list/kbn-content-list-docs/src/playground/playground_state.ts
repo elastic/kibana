@@ -11,7 +11,7 @@
 // Types
 // =============================================================================
 
-export type ColumnType = 'name' | 'updatedAt' | 'actions' | 'type' | 'starred';
+export type ColumnType = 'name' | 'updatedAt' | 'createdBy' | 'actions' | 'type' | 'starred';
 
 export interface ActiveColumn {
   instanceId: string;
@@ -28,7 +28,7 @@ export interface ActiveAction {
   type: ActionType;
 }
 
-export type FilterType = 'sort' | 'tags' | 'starred';
+export type FilterType = 'sort' | 'tags' | 'starred' | 'createdBy';
 
 export interface ActiveFilter {
   instanceId: string;
@@ -46,6 +46,8 @@ export interface PlaygroundState {
     pagination: boolean;
     search: boolean;
     starred: boolean;
+    createdBy: boolean;
+    tagging: boolean;
     initialPageSize: number;
   };
   item: {
@@ -124,6 +126,16 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     ],
   },
   {
+    type: 'createdBy',
+    label: 'Column.CreatedBy',
+    allowMultiple: false,
+    defaultProps: {},
+    configurableProps: [
+      { name: 'width', label: 'width', type: 'string', defaultValue: '' },
+      { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
+    ],
+  },
+  {
     type: 'starred',
     label: 'Column.Starred',
     allowMultiple: false,
@@ -146,6 +158,7 @@ export const FILTER_DEFINITIONS: { type: FilterType; label: string }[] = [
   { type: 'starred', label: 'Filters.Starred' },
   { type: 'sort', label: 'Filters.Sort' },
   { type: 'tags', label: 'Filters.Tags' },
+  { type: 'createdBy', label: 'Filters.CreatedBy' },
 ];
 
 export const ACTION_DEFINITIONS: { type: ActionType; label: string }[] = [
@@ -200,13 +213,15 @@ export const INITIAL_STATE: PlaygroundState = {
     pagination: true,
     search: true,
     starred: false,
+    createdBy: false,
+    tagging: false,
     initialPageSize: 10,
   },
   item: {
     getHref: true,
     getEditUrl: false,
-    onEdit: false,
-    onDelete: false,
+    onEdit: true,
+    onDelete: true,
   },
   table: {
     columns: [],

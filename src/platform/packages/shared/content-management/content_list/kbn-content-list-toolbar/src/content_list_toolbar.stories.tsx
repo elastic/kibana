@@ -40,6 +40,7 @@ import {
   createMockFindItems,
   extractTagIds,
   mockTagsService,
+  mockUserProfileServices,
 } from '@kbn/content-list-mock-data/storybook';
 import { ContentListToolbar } from './content_list_toolbar';
 
@@ -76,6 +77,8 @@ const createStoryFindItems = (options?: { delay?: number }) => {
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
         tags: extractTagIds(item.references),
+        createdBy: item.createdBy,
+        managed: item.managed,
       })),
       total: result.total,
       counts: result.counts,
@@ -283,6 +286,7 @@ interface PlaygroundArgs {
   hasSorting: boolean;
   hasPagination: boolean;
   hasTags: boolean;
+  hasCreatedBy: boolean;
   useDeclarativeConfig: boolean;
   showDiagnostics: boolean;
 }
@@ -322,16 +326,23 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
         : (false as const),
       pagination: args.hasPagination ? { initialPageSize: 10 } : (false as const),
       tags: args.hasTags,
+      createdBy: args.hasCreatedBy,
     }),
-    [args.hasSorting, args.hasPagination, args.hasTags]
+    [args.hasSorting, args.hasPagination, args.hasTags, args.hasCreatedBy]
   );
 
-  const services: ContentListServices | undefined = useMemo(
-    () => (args.hasTags ? { tags: mockTagsService } : undefined),
-    [args.hasTags]
-  );
+  const services: ContentListServices | undefined = useMemo(() => {
+    const s: Partial<ContentListServices> = {};
+    if (args.hasTags) {
+      s.tags = mockTagsService;
+    }
+    if (args.hasCreatedBy) {
+      s.userProfile = mockUserProfileServices;
+    }
+    return Object.keys(s).length > 0 ? (s as ContentListServices) : undefined;
+  }, [args.hasTags, args.hasCreatedBy]);
 
-  const key = `${args.hasSorting}-${args.hasPagination}-${args.hasTags}-${args.useDeclarativeConfig}`;
+  const key = `${args.hasSorting}-${args.hasPagination}-${args.hasTags}-${args.hasCreatedBy}-${args.useDeclarativeConfig}`;
 
   const { Filters } = ContentListToolbar;
 
@@ -367,6 +378,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
           <ContentListToolbar>
             <Filters>
               <Filters.Tags />
+              <Filters.CreatedBy />
               <Filters.Sort />
             </Filters>
           </ContentListToolbar>
@@ -410,6 +422,7 @@ export const Toolbar: PlaygroundStory = {
     hasSorting: true,
     hasPagination: true,
     hasTags: true,
+    hasCreatedBy: false,
     showDiagnostics: true,
     entityName: 'dashboard',
     entityNamePlural: 'dashboards',
@@ -449,6 +462,11 @@ export const Toolbar: PlaygroundStory = {
     hasTags: {
       control: 'boolean',
       description: 'Enable tag filtering. Provides a mock tags service with 8 tags.',
+      table: { category: 'Features' },
+    },
+    hasCreatedBy: {
+      control: 'boolean',
+      description: 'Enable the Created By filter popover. Provides a mock user profile service.',
       table: { category: 'Features' },
     },
     showDiagnostics: {
