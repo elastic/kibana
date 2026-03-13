@@ -26,7 +26,7 @@ import {
   alertsRead,
 } from '../../utils/auth/roles';
 import {
-  getMissingSecurityKibanaPrivilegesError,
+  getMissingAlertsReadPrivilegesError,
   getServerlessMissingReadIndexPrivilegesErrorPattern,
 } from '../../utils/privileges_errors';
 import { expectedAttackAlerts, expectedDetectionAlerts } from '../../mocks';
@@ -93,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(403);
 
           expect(body).toEqual(
-            getMissingSecurityKibanaPrivilegesError({
+            getMissingAlertsReadPrivilegesError({
               routeDetails: `POST ${DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL}`,
             })
           );
