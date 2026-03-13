@@ -30,4 +30,5 @@ export * from './specs/one_password/one_password';
 export * from './specs/firecrawl/firecrawl';
 export * from './specs/zoom/zoom';
 export * from './specs/zendesk/zendesk';
+export * from './specs/google_cloud_storage/google_cloud_storage';
 export * from './specs/amazon_s3/amazon_s3';

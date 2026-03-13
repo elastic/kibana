@@ -1,0 +1,123 @@
+version: '1'
+name: 'sources.google_cloud_storage.download'
+description: "Download objects from Google Cloud Storage and extract their readable text content. Use this to read what a file contains. Works with PDFs, Office docs, text files, and other supported formats. Use get_object_metadata instead if you only need file properties (size, type, dates). Files exceeding the size limit are skipped and returned with metadata only. Use rerank when downloading multiple files to surface the most relevant ones."
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: bucket
+    type: string
+    description: Name of the GCS bucket containing the objects
+  - name: objects
+    type: array
+    description: Array of object names/paths to download (e.g. ["reports/jan.pdf", "data/q1.csv"])
+  - name: maximumDownloadSizeBytes
+    type: number
+    required: false
+    default: 768000
+    description: "Maximum file size in bytes to download inline. Files exceeding this limit are skipped and returned with metadata only. Default is 768000 (~750 KB)."
+  - name: rerank
+    type: boolean
+    required: false
+    default: false
+    description: Set to true to rerank results by relevance to rerankQuery. Useful when downloading many documents.
+  - name: topK
+    type: number
+    required: false
+    default: 5
+    description: When rerank is true, return only the top K most relevant documents after reranking.
+  - name: rerankQuery
+    type: string
+    required: false
+    description: The query to rerank documents against. Required when rerank is true.
+steps:
+  - name: init_results
+    type: data.set
+    with:
+      results: []
+  - name: process_objects
+    type: foreach
+    foreach: "${{inputs.objects}}"
+    steps:
+      - name: download_object
+        type: google_cloud_storage.downloadObject
+        connector-id: <%= google_cloud_storage-stack-connector-id %>
+        with:
+          bucket: "${{inputs.bucket}}"
+          object: "${{foreach.item}}"
+          maximumDownloadSizeBytes: ${{inputs.maximumDownloadSizeBytes}}
+      - name: check_has_content
+        type: if
+        condition: "${{steps.download_object.output.hasContent}}"
+        steps:
+          - name: extract_content
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: /_ingest/pipeline/_simulate
+              body:
+                pipeline:
+                  processors:
+                    - attachment:
+                        field: data
+                        indexed_chars: -1
+                        remove_binary: true
+                docs:
+                  - _id: "${{foreach.item}}"
+                    _source:
+                      filename: "${{steps.download_object.output.name}}"
+                      data: "${{steps.download_object.output.content}}"
+          - name: normalize_with_content
+            type: data.set
+            with:
+              normalized:
+                bucket: "${{inputs.bucket}}"
+                object: "${{foreach.item}}"
+                filename: "${{steps.download_object.output.name}}"
+                contentType: "${{steps.download_object.output.contentType}}"
+                size: "${{steps.download_object.output.size}}"
+                content: "${{steps.extract_content.output.docs[0].doc._source.attachment.content}}"
+                content_type: "${{steps.extract_content.output.docs[0].doc._source.attachment.content_type}}"
+        else:
+          - name: normalize_skipped
+            type: data.set
+            with:
+              normalized:
+                bucket: "${{inputs.bucket}}"
+                object: "${{foreach.item}}"
+                filename: "${{steps.download_object.output.name}}"
+                contentType: "${{steps.download_object.output.contentType}}"
+                size: "${{steps.download_object.output.size}}"
+                content: null
+                skipped: true
+                reason: "${{steps.download_object.output.message}}"
+      - name: accumulate_result
+        type: data.set
+        with:
+          results: '${{variables.results | push: variables.normalized}}'
+  - name: conditional_rerank
+    type: if
+    condition: "${{inputs.rerank}}"
+    steps:
+      - name: do_rerank
+        type: search.rerank
+        with:
+          rerank_text: "${{inputs.rerankQuery}}"
+          data: ${{variables.results}}
+          fields:
+            - ["content"]
+          rank_window_size: ${{inputs.topK}}
+      - name: store_reranked
+        type: data.set
+        with:
+          final_results: "${{steps.do_rerank.output}}"
+    else:
+      - name: store_all
+        type: data.set
+        with:
+          final_results: "${{variables.results}}"
+  - name: output_results
+    type: data.set
+    with:
+      results: "${{variables.final_results}}"
