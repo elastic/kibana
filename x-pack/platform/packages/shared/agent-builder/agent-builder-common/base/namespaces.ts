@@ -17,6 +17,7 @@ export const internalNamespaces = {
   observability: 'observability',
   security: 'security',
   workflows: 'platform.workflows',
+  streamsSigEvents: 'platform.streams.sig_events',
 } as const;
 
 /**
@@ -30,6 +31,7 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.platformDashboard, // Owned by dashboard_agent plugin
   internalNamespaces.security,
   internalNamespaces.workflows,
+  internalNamespaces.streamsSigEvents,
 ];
 
 /**

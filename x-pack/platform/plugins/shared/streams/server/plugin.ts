@@ -263,6 +263,10 @@ export class StreamsPlugin
 
     registerFeatureFlags(core, this.logger);
 
+    if (plugins.agentBuilder && this.server) {
+      this.server.agentBuilderSetup = plugins.agentBuilder;
+    }
+
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
         createStreamsGlobalSearchResultProvider(core, this.logger)
@@ -347,6 +351,7 @@ export class StreamsPlugin
       this.server.actions = plugins.actions;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.taskManager = plugins.taskManager;
+      this.server.agentBuilderStart = plugins.agentBuilder;
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
