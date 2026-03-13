@@ -15,12 +15,12 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
+import { getTime, getEsQueryConfig } from '@kbn/data-plugin/public';
 import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
 import { getMetricsExecutionContext } from './execution_context';
-import { getTime, getEsQueryConfig } from '@kbn/data-plugin/public';
 
 export interface FetchMetricsInfoParams {
   esqlQuery: string;
