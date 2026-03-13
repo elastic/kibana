@@ -47,7 +47,8 @@ const actionsStepDataMock = {} as ActionsStepRule;
 const actionTypeRegistryMock = {} as ActionTypeRegistryContract;
 
 jest.mock('../../../../common/lib/kibana');
-(useKibana as jest.Mock).mockReturnValue({
+
+const mockKibanaServices = () => ({
   services: {
     aiRuleCreation: { activateFormSync: mockActivateFormSync },
   },
@@ -78,6 +79,7 @@ jest.mock('../../pages/rule_creation/helpers', () => ({
 describe('AddRuleAttachmentToChatButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue(mockKibanaServices());
   });
 
   it('captures attachment call with expected params', () => {
