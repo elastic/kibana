@@ -8,8 +8,9 @@
  */
 
 import type { Dispatch } from 'react';
-import type { ActiveFilters, FilterCounts } from '../datasource';
+import type { ActiveFilters, FilterCounts, UserFilter } from '../datasource';
 import type { ContentListItem } from '../item';
+import type { CreatorsList } from '../features/filtering/user_profile/types';
 
 /**
  * Action type constants for state reducer.
@@ -21,6 +22,13 @@ export const CONTENT_LIST_ACTIONS = {
   CLEAR_FILTERS: 'CLEAR_FILTERS',
   /** Toggle a value's include/exclude state for any filter dimension, updating filters and query text atomically. */
   TOGGLE_FILTER: 'TOGGLE_FILTER',
+  /**
+   * Toggle a user UID's include state, atomically updating `filters.user` and
+   * the `createdBy:` clause in `search.queryText`.
+   */
+  TOGGLE_USER_FILTER: 'TOGGLE_USER_FILTER',
+  /** Update only the `user` portion of `ActiveFilters`. */
+  SET_USER_FILTER: 'SET_USER_FILTER',
   /** Set sort field and direction. */
   SET_SORT: 'SET_SORT',
   /** Set page index. */
@@ -91,6 +99,13 @@ export interface ContentListClientState {
 export interface ContentListQueryData {
   /** Currently loaded items (transformed for rendering). */
   items: ContentListItem[];
+  /**
+   * Summary of all unique creators from the unfiltered query result.
+   *
+   * Derived before client-side user filtering so the creator list shown in
+   * the filter popover never shrinks when a filter is active.
+   */
+  allCreators: CreatorsList;
   /** Total number of items matching the current query (for pagination). */
   totalItems: number;
   /**
@@ -152,6 +167,24 @@ interface ToggleFilterAction {
   payload: { filterId: string; valueId: string; valueName: string; withModifierKey: boolean };
 }
 
+/**
+ * Toggle a user UID's include state in `filters.user`, updating
+ * `search.queryText` atomically.
+ *
+ * `queryValue` is the display string written to the query bar
+ * (typically the user's email, or `'managed'`/`'none'` for sentinels).
+ */
+interface ToggleUserFilterAction {
+  type: typeof CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER;
+  payload: { uid: string; queryValue: string };
+}
+
+/** Update only the `user` portion of active filters. */
+interface SetUserFilterAction {
+  type: typeof CONTENT_LIST_ACTIONS.SET_USER_FILTER;
+  payload: UserFilter | undefined;
+}
+
 /** Set sort field and direction. */
 interface SetSortAction {
   type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
@@ -167,6 +200,8 @@ export type ContentListAction =
   | SetSearchAction
   | ClearFiltersAction
   | ToggleFilterAction
+  | ToggleUserFilterAction
+  | SetUserFilterAction
   | SetSortAction
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_INDEX; payload: { index: number } }
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_SIZE; payload: { size: number } }

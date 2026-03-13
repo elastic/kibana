@@ -43,11 +43,17 @@ export type TagFilterProps = Record<string, never>;
  */
 export type StarredFilterProps = Record<string, never>;
 
+/**
+ * Props for the {@link CreatedByFilter} declarative component.
+ */
+export type CreatedByFilterProps = Record<string, never>;
+
 /** Preset-to-props mapping for toolbar filters. */
 export interface FilterPresets {
   sort: SortFilterProps;
   tags: TagFilterProps;
   starred: StarredFilterProps;
+  createdBy: CreatedByFilterProps;
 }
 
 /** Context passed to filter `resolve` callbacks. */
@@ -58,6 +64,8 @@ export interface FilterContext {
   hasTags: boolean;
   /** Whether starred filtering is available from the provider. */
   hasStarred: boolean;
+  /** Whether created-by filtering is available from the provider. */
+  hasCreatedBy: boolean;
 }
 
 /** Part factory for toolbar filters. */

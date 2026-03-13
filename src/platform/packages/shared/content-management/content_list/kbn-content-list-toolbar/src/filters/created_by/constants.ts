@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ContentListServices } from './types';
-export type { UserProfileService } from './user_profile';
+export { MANAGED_QUERY_VALUE, NO_CREATOR_QUERY_VALUE } from '@kbn/content-list-provider';

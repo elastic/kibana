@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useReducer, useCallback } from 'react';
+import React, { useMemo, useReducer, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { ContentListClientState, ContentListStateContextValue } from './types';
 import { DEFAULT_FILTERS } from './types';
+import { CREATED_BY_FILTER_ID } from '../datasource';
+import {
+  MANAGED_USER_FILTER,
+  NO_CREATOR_USER_FILTER,
+} from '../features/filtering/user_profile/constants';
+import type { CreatorsList } from '../features/filtering/user_profile/types';
 import { ContentListStateContext } from './use_content_list_state';
 import { useContentListConfig } from '../context';
 import { isSortingConfig, isPaginationConfig, isSearchConfig } from '../features';
@@ -116,12 +122,77 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
   // Expose refetch for manual refresh.
   const refetch = useCallback(() => queryRefetch(), [queryRefetch]);
 
+  // Derive the creator list for the "Created by" filter popover.
+  //
+  // Prefer `counts[CREATED_BY_FILTER_ID]` when available — data sources
+  // should compute these counts BEFORE applying the `createdBy` filter so
+  // the popover always shows the full list of creators for the current
+  // search/tag context (standard faceted-search behavior).
+  //
+  // Fallback: scan `items` when counts are not provided. The accumulator
+  // preserves creators across page navigation but can only learn about
+  // pages the user has visited. Creators on unseen pages will not appear
+  // in the popover until the user navigates there. Data sources that want
+  // a complete creator list should provide `counts.createdBy`.
+  const creatorAccRef = useRef<{
+    uids: Set<string>;
+    hasManaged: boolean;
+    hasNoCreator: boolean;
+    resetKey: string;
+  }>({ uids: new Set(), hasManaged: false, hasNoCreator: false, resetKey: '' });
+
+  const allCreators: CreatorsList = useMemo(() => {
+    const creatorCounts = counts?.[CREATED_BY_FILTER_ID];
+
+    if (creatorCounts) {
+      const uids = Object.keys(creatorCounts).filter(
+        (key) => key !== MANAGED_USER_FILTER && key !== NO_CREATOR_USER_FILTER
+      );
+      return {
+        uids,
+        hasManaged: MANAGED_USER_FILTER in creatorCounts,
+        hasNoCreator: NO_CREATOR_USER_FILTER in creatorCounts,
+      };
+    }
+
+    // Build a reset key from search text and non-user filters so the
+    // accumulator resets when the result set changes but persists across
+    // page changes and user-filter toggles.
+    const { user: _u, ...nonUserFilters } = clientState.filters;
+    const resetKey = `${clientState.search.queryText}\0${JSON.stringify(nonUserFilters)}`;
+
+    const acc = creatorAccRef.current;
+    if (acc.resetKey !== resetKey) {
+      acc.uids = new Set();
+      acc.hasManaged = false;
+      acc.hasNoCreator = false;
+      acc.resetKey = resetKey;
+    }
+
+    for (const item of items) {
+      if (item.managed) {
+        acc.hasManaged = true;
+      } else if (item.createdBy) {
+        acc.uids.add(item.createdBy);
+      } else {
+        acc.hasNoCreator = true;
+      }
+    }
+
+    return {
+      uids: Array.from(acc.uids),
+      hasNoCreator: acc.hasNoCreator,
+      hasManaged: acc.hasManaged,
+    };
+  }, [items, counts, clientState.search.queryText, clientState.filters]);
+
   // Combine client state with query data for unified state interface.
   const contextValue: ContentListStateContextValue = useMemo(
     () => ({
       state: {
         ...clientState,
         items,
+        allCreators,
         totalItems,
         counts,
         isLoading,
@@ -131,7 +202,18 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
       dispatch,
       refetch,
     }),
-    [clientState, items, totalItems, counts, isLoading, isFetching, error, dispatch, refetch]
+    [
+      clientState,
+      items,
+      allCreators,
+      totalItems,
+      counts,
+      isLoading,
+      isFetching,
+      error,
+      dispatch,
+      refetch,
+    ]
   );
 
   return (

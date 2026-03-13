@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ContentListServices } from './types';
-export type { UserProfileService } from './user_profile';
+export { CreatedByFilter, type CreatedByFilterProps } from './created_by';
+export { CreatedByRenderer, type CreatedByRendererProps } from './created_by_renderer';
+export { useCreatedByQueryParser } from './use_created_by_query_parser';

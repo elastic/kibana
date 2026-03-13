@@ -7,22 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { FilterDisplayState, UseContentListFiltersReturn } from './types';
-export { useFilterDisplay } from './use_filter_display';
-export { useContentListFilters } from './use_content_list_filters';
-export { useTagFilterToggle } from './use_tag_filter_toggle';
-export { TAG_FILTER_ID, CREATED_BY_FILTER_ID } from '../../datasource';
-
-export type {
-  CreatorsList,
-  UseContentListUserFilterReturn,
-  UserFilterToggleFn,
-} from './user_profile';
+export type { CreatorsList } from './types';
+export type { UseContentListUserFilterReturn } from './use_content_list_user_filter';
+export type { UserFilterToggleFn } from './use_user_filter_toggle';
+export { useContentListUserFilter } from './use_content_list_user_filter';
+export { useUserFilterToggle } from './use_user_filter_toggle';
 export {
-  useContentListUserFilter,
-  useUserFilterToggle,
   MANAGED_USER_FILTER,
   NO_CREATOR_USER_FILTER,
+  CREATED_BY_FIELD_NAME,
   MANAGED_QUERY_VALUE,
   NO_CREATOR_QUERY_VALUE,
-} from './user_profile';
+} from './constants';
