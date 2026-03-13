@@ -49,7 +49,7 @@ export function AgentBuilderNavControl() {
   const handleClick = useCallback(() => {
     tooltipRef.current?.hideToolTip();
     setTooltipVisible(false);
-    agentBuilder.toggleConversationFlyout(sidebarOptions());
+    agentBuilder.toggleChat(sidebarOptions());
     setIsSidebarOpen((prev) => !prev);
   }, [agentBuilder, sidebarOptions]);
 
@@ -60,7 +60,7 @@ export function AgentBuilderNavControl() {
 
     const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
       if (selection === AIChatExperience.Agent) {
-        agentBuilder.openConversationFlyout(sidebarOptions());
+        agentBuilder.openChat(sidebarOptions());
         setIsSidebarOpen(true);
         aiAssistantManagementSelection.completeOpenChat();
       }

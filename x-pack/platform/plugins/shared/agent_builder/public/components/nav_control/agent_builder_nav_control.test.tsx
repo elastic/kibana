@@ -57,7 +57,7 @@ describe('AgentBuilderNavControl', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'AI Agent' }));
-    expect(toggleConversationFlyout).toHaveBeenCalledTimes(1);
+    expect(toggleChat).toHaveBeenCalledTimes(1);
   });
 
   it('toggles the sidebar on Cmd/Ctrl+; keyboard shortcut', () => {
