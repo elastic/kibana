@@ -13,6 +13,7 @@
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
+import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import { getKibanaUrl } from '../utils';
@@ -286,9 +287,73 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     const response = await fetch(fullUrl, fetchOptions);
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+      const errorBody = await this.readStreamWithLimit(response, {
+        maxBytes: 1024 * 1024,
+        onExceed: 'truncate',
+      });
+      throw new Error(`HTTP ${response.status}: ${errorBody}`);
     }
 
-    return response.json();
+    if (response.status === 204 || response.status === 304) {
+      return {};
+    }
+
+    return this.readResponseBody(response);
+  }
+
+  /**
+   * Reads a fetch Response body as a stream with size enforcement.
+   * Delegates to the shared stream reader with 'throw' behavior on size exceeded.
+   */
+  private async readResponseBody(response: Response): Promise<any> {
+    if (!response.body) {
+      return null;
+    }
+
+    const maxSize = this.getMaxResponseBytes();
+    const text = await this.readStreamWithLimit(response, {
+      maxBytes: maxSize,
+      onExceed: 'throw',
+    });
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  }
+
+  /**
+   * Reads a Response body stream with a byte-size limit.
+   * Two behaviors when the limit is exceeded:
+   *  - 'throw': cancels the stream and throws a ResponseSizeLimitError
+   *  - 'truncate': cancels the stream and returns the data read so far with a truncation marker
+   */
+  private async readStreamWithLimit(
+    response: Response,
+    opts: { maxBytes: number; onExceed: 'throw' | 'truncate' }
+  ): Promise<string> {
+    if (!response.body) return '';
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let totalBytes = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        totalBytes += value.byteLength;
+        if (opts.maxBytes > 0 && totalBytes > opts.maxBytes) {
+          void reader.cancel();
+          if (opts.onExceed === 'throw') {
+            throw new ResponseSizeLimitError(opts.maxBytes, this.step.name);
+          }
+          return `${Buffer.concat(chunks).toString('utf-8')}... [truncated]`;
+        }
+        chunks.push(value);
+      }
+    } finally {
+      reader.releaseLock();
+    }
+    return Buffer.concat(chunks).toString('utf-8');
   }
 }

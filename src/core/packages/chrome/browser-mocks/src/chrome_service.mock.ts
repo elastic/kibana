@@ -34,7 +34,6 @@ const mockComponentDeps = {
   navControls: { left$: of([]), center$: of([]), right$: of([]), extension$: of([]) },
   classic: {
     breadcrumbs$: of([]),
-    badge$: of(undefined),
     recentlyAccessed$: of([]),
     customNavLink$: of(undefined),
   },

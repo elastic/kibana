@@ -8,12 +8,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
+import type {
+  AttachmentPanel,
+  DashboardAttachmentData,
+  LensAttachmentPanel,
+} from '@kbn/dashboard-agent-common';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   isGenericAttachmentPanel,
   type GenericAttachmentPanel,
-  type LensAttachmentPanel,
 } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
@@ -42,7 +45,9 @@ const visualizationAttachmentDataSchema = z.object({
   query: z.string().optional(),
 });
 
-const resolvePanelsFromVisualizationAttachment = (data: unknown): LensAttachmentPanel[] => {
+type ResolvedPanelWithoutGrid = Omit<LensAttachmentPanel, 'grid'>;
+
+const resolvePanelsFromVisualizationAttachment = (data: unknown): ResolvedPanelWithoutGrid[] => {
   const parseResult = visualizationAttachmentDataSchema.safeParse(data);
   if (!parseResult.success) {
     throw new Error('Visualization attachment does not contain a valid visualization payload.');
@@ -65,7 +70,7 @@ const resolvePanelsFromVisualizationAttachment = (data: unknown): LensAttachment
   ];
 };
 
-const resolvePanelsFromAttachment = (type: string, data: unknown): AttachmentPanel[] => {
+const resolvePanelsFromAttachment = (type: string, data: unknown): ResolvedPanelWithoutGrid[] => {
   if (type === AttachmentType.visualization) {
     return resolvePanelsFromVisualizationAttachment(data);
   }
@@ -80,22 +85,22 @@ const resolvePanelsFromAttachment = (type: string, data: unknown): AttachmentPan
  * Supports visualization attachments and dashboard-compatible panel payloads.
  */
 export const resolvePanelsFromAttachments = async ({
-  attachmentIds,
+  attachmentInputs,
   attachments,
   logger,
 }: {
-  attachmentIds?: string[];
+  attachmentInputs?: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>;
   attachments: AttachmentStateManager;
   logger: Logger;
 }): Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }> => {
-  if (!attachmentIds || attachmentIds.length === 0) {
+  if (!attachmentInputs || attachmentInputs.length === 0) {
     return { panels: [], failures: [] };
   }
 
   const panels: AttachmentPanel[] = [];
   const failures: VisualizationFailure[] = [];
 
-  for (const attachmentId of attachmentIds) {
+  for (const { attachmentId, grid } of attachmentInputs) {
     try {
       const attachmentRecord = attachments.getAttachmentRecord(attachmentId);
       if (!attachmentRecord) {
@@ -108,7 +113,7 @@ export const resolvePanelsFromAttachments = async ({
       }
 
       const resolvedPanels = resolvePanelsFromAttachment(attachmentRecord.type, latestVersion.data);
-      panels.push(...resolvedPanels);
+      panels.push(...resolvedPanels.map((panel) => ({ ...panel, grid })));
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       logger.error(
@@ -123,7 +128,7 @@ export const resolvePanelsFromAttachments = async ({
   }
 
   logger.debug(
-    `Resolved ${panels.length} panels from ${attachmentIds.length} attachment references`
+    `Resolved ${panels.length} panels from ${attachmentInputs.length} attachment references`
   );
 
   return { panels, failures };
@@ -149,6 +154,25 @@ const getMarkdownContent = (panel: AttachmentPanel): string | undefined => {
   return typeof content === 'string' ? content : undefined;
 };
 
+const MARKDOWN_GRID_W = 48;
+const MARKDOWN_MIN_H = 4;
+const MARKDOWN_MAX_H = 9;
+
+const estimateMarkdownGridHeight = (content: string): number => {
+  const nonEmptyLines = content.split('\n').filter((line) => line.trim().length > 0).length;
+  return Math.min(MARKDOWN_MAX_H, Math.max(MARKDOWN_MIN_H, nonEmptyLines + 2));
+};
+
+const buildMarkdownGrid = (
+  content: string,
+  existingGrid?: { w: number; h: number; x: number; y: number }
+) => ({
+  w: MARKDOWN_GRID_W,
+  h: estimateMarkdownGridHeight(content),
+  x: existingGrid?.x ?? 0,
+  y: existingGrid?.y ?? 0,
+});
+
 export const upsertMarkdownPanel = (
   panels: AttachmentPanel[],
   markdownContent?: string
@@ -163,6 +187,7 @@ export const upsertMarkdownPanel = (
       type: MARKDOWN_EMBEDDABLE_TYPE,
       panelId: uuidv4(),
       rawConfig: { content: markdownContent },
+      grid: buildMarkdownGrid(markdownContent),
     };
     return {
       panels: [markdownPanel, ...panels],
@@ -185,6 +210,7 @@ export const upsertMarkdownPanel = (
       ...existingMarkdownPanel.rawConfig,
       content: markdownContent,
     },
+    grid: buildMarkdownGrid(markdownContent, existingMarkdownPanel.grid),
   };
   const updatedPanels = [...panels];
   updatedPanels[existingMarkdownPanelIndex] = updatedMarkdownPanel;
