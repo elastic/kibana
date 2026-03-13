@@ -41,6 +41,7 @@ describe('TabsBarMenu', () => {
     items: mockTabs,
     selectedItem: mockTabs[0],
     recentlyClosedItems: mockRecentlyClosedGroup,
+    hasReachedMaxItemsCount: false,
     onSelect: mockOnSelectOpenedTab,
     onSelectRecentlyClosed: mockOnSelectClosedTab,
     onRestoreRecentlyClosedGroup: mockOnRestoreClosedGroup,
@@ -195,6 +196,137 @@ describe('TabsBarMenu', () => {
     await user.click(groupTabItem);
 
     expect(mockOnSelectClosedTab).toHaveBeenCalledWith(mockRecentlyClosedGroup[0]);
+  });
+
+  it('disables recently closed restore entries when the tab limit is reached', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    render(
+      <TabsBarMenu
+        {...defaultProps}
+        hasReachedMaxItemsCount={true}
+        recentlyClosedItems={mockRecentlyClosedSingle}
+      />
+    );
+
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
+    await user.click(menuButton);
+
+    const closedTabOption = await screen.findByTestId(
+      testSubj.recentlyClosedTab(mockRecentlyClosedSingle[0].id)
+    );
+
+    expect(closedTabOption).toBeDisabled();
+
+    await user.hover(closedTabOption);
+
+    expect(
+      await screen.findByText(
+        "You've reached the tab limit. Close a tab to restore recently closed tabs."
+      )
+    ).toBeVisible();
+
+    await user.click(closedTabOption);
+
+    expect(mockOnSelectClosedTab).not.toHaveBeenCalled();
+  });
+
+  it('still shows preview for disabled recently closed entries', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    render(
+      <TabsBarMenu
+        {...defaultProps}
+        hasReachedMaxItemsCount={true}
+        getPreviewData={(item: TabItem) => ({
+          title: `Preview of ${item.label}`,
+          query: { language: 'esql', query: 'SELECT * FROM table' },
+          status: TabStatus.DEFAULT,
+        })}
+        recentlyClosedItems={mockRecentlyClosedSingle}
+      />
+    );
+
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
+    await user.click(menuButton);
+
+    const closedTabOption = await screen.findByTestId(
+      testSubj.recentlyClosedTab(mockRecentlyClosedSingle[0].id)
+    );
+
+    await user.hover(closedTabOption);
+
+    const previewTitle = await screen.findByTestId(
+      `unifiedTabs_tabPreview_title_${mockRecentlyClosedSingle[0].id}`
+    );
+
+    expect(previewTitle).toBeVisible();
+    expect(previewTitle).toHaveTextContent('Preview of Closed Tab 3');
+  });
+
+  it('keeps grouped recently closed entries navigable but disables restore actions at the tab limit', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    render(<TabsBarMenu {...defaultProps} hasReachedMaxItemsCount={true} />);
+
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
+    await user.click(menuButton);
+
+    const groupItem = await screen.findByTestId(
+      testSubj.recentlyClosedGroup(mockRecentlyClosedGroup[0].closedAt)
+    );
+
+    await user.click(groupItem);
+
+    const restoreAllItem = await screen.findByTestId(testSubj.restoreAllTabs);
+    expect(restoreAllItem).toBeDisabled();
+
+    await user.hover(restoreAllItem);
+
+    expect(
+      await screen.findByText(
+        "You've reached the tab limit. Close a tab to restore recently closed tabs."
+      )
+    ).toBeVisible();
+
+    const groupTabItem = await screen.findByTestId(
+      testSubj.recentlyClosedGroupTab(mockRecentlyClosedGroup[0].id)
+    );
+    expect(groupTabItem).toBeDisabled();
+  });
+
+  it('still shows preview for disabled recently closed entries inside a group', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    render(
+      <TabsBarMenu
+        {...defaultProps}
+        hasReachedMaxItemsCount={true}
+        getPreviewData={(item: TabItem) => ({
+          title: `Preview of ${item.label}`,
+          query: { language: 'esql', query: 'SELECT * FROM table' },
+          status: TabStatus.DEFAULT,
+        })}
+      />
+    );
+
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
+    await user.click(menuButton);
+
+    const groupItem = await screen.findByTestId(
+      testSubj.recentlyClosedGroup(mockRecentlyClosedGroup[0].closedAt)
+    );
+    await user.click(groupItem);
+
+    const groupTabItem = await screen.findByTestId(
+      testSubj.recentlyClosedGroupTab(mockRecentlyClosedGroup[0].id)
+    );
+    expect(groupTabItem).toBeDisabled();
+
+    await user.hover(groupTabItem);
+
+    const previewTitle = await screen.findByTestId(
+      `unifiedTabs_tabPreview_title_${mockRecentlyClosedGroup[0].id}`
+    );
+
+    expect(previewTitle).toBeVisible();
+    expect(previewTitle).toHaveTextContent('Preview of Closed Tab 1');
   });
 
   it('does not show recently closed section when array is empty', async () => {

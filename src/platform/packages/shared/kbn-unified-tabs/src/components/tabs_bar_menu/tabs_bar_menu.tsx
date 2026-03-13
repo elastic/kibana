@@ -27,6 +27,7 @@ import {
   EuiTextTruncate,
 } from '@elastic/eui';
 import type {
+  EuiContextMenuItemProps,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
   UseEuiTheme,
@@ -61,6 +62,18 @@ const groupRecentlyClosedItems = (recentlyClosedItems: RecentlyClosedTabItem[]) 
   return [...groups].sort(([a], [b]) => b - a).map(([closedAt, items]) => ({ closedAt, items }));
 };
 
+const getRestoreDisabledTooltipProps = (
+  disabled: boolean
+): Pick<EuiContextMenuItemProps, 'toolTipContent' | 'toolTipProps'> => ({
+  toolTipContent: disabled
+    ? i18n.translate('unifiedTabs.tabsBarMenu.restoreDisabledAtLimit', {
+        defaultMessage:
+          "You've reached the tab limit. Close a tab to restore recently closed tabs.",
+      })
+    : undefined,
+  toolTipProps: { position: 'right' },
+});
+
 interface TabPanelItemParams {
   key: string;
   tab: TabItem;
@@ -69,12 +82,14 @@ interface TabPanelItemParams {
   dataTestSubj: string;
   icon?: string;
   ariaCurrent?: 'true';
+  disabled?: boolean;
 }
 
 export interface TabsBarMenuProps {
   items: TabItem[];
   selectedItem: TabItem | null;
   recentlyClosedItems: RecentlyClosedTabItem[];
+  hasReachedMaxItemsCount: boolean;
   getPreviewData?: (item: TabItem) => TabPreviewData;
   onSelect: (item: TabItem) => Promise<void>;
   onSelectRecentlyClosed: (item: RecentlyClosedTabItem) => Promise<void>;
@@ -87,6 +102,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     items,
     selectedItem,
     recentlyClosedItems,
+    hasReachedMaxItemsCount,
     getPreviewData,
     onSelect,
     onSelectRecentlyClosed,
@@ -126,7 +142,15 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     );
 
     const renderTabPanelItem = useCallback(
-      ({ tab, contents, onClick, dataTestSubj, icon, ariaCurrent }: TabPanelItemParams) => {
+      ({
+        tab,
+        contents,
+        onClick,
+        dataTestSubj,
+        icon,
+        ariaCurrent,
+        disabled = false,
+      }: TabPanelItemParams) => {
         const menuItem = (
           <EuiContextMenuItem
             icon={icon}
@@ -134,6 +158,8 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
             onClick={onClick}
             data-test-subj={dataTestSubj}
             aria-current={ariaCurrent}
+            disabled={disabled}
+            {...getRestoreDisabledTooltipProps(disabled)}
           >
             {contents}
           </EuiContextMenuItem>
@@ -228,6 +254,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
                 onSelectRecentlyClosed(tab);
                 closePopover();
               },
+              disabled: hasReachedMaxItemsCount,
               // Preserve existing test id for single items.
               dataTestSubj: testSubj.recentlyClosedTab(tab.id),
             })
@@ -253,6 +280,8 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               closePopover();
             },
             'data-test-subj': testSubj.restoreAllTabs,
+            disabled: hasReachedMaxItemsCount,
+            ...getRestoreDisabledTooltipProps(hasReachedMaxItemsCount),
           },
           {
             key: 'restoreAllTabsSeparator',
@@ -268,6 +297,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
                 onSelectRecentlyClosed(tab);
                 closePopover();
               },
+              disabled: hasReachedMaxItemsCount,
               dataTestSubj: testSubj.recentlyClosedGroupTab(tab.id),
             })
           ),
@@ -291,6 +321,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
       onSelectRecentlyClosed,
       onRestoreRecentlyClosedGroup,
       closePopover,
+      hasReachedMaxItemsCount,
       menuOpenedAt,
       createTabPanelItem,
     ]);

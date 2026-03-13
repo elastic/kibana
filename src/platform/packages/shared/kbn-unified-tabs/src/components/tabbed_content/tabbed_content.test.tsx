@@ -25,6 +25,7 @@ describe('TabbedContent', () => {
     initialItems,
     initialSelectedItemId,
     recentlyClosedItems = [],
+    maxItemsCount,
     createItem,
     onChanged,
     onEBTEvent,
@@ -33,6 +34,7 @@ describe('TabbedContent', () => {
     initialItems: TabbedContentProps['items'];
     initialSelectedItemId?: TabbedContentProps['selectedItemId'];
     recentlyClosedItems?: TabbedContentProps['recentlyClosedItems'];
+    maxItemsCount?: TabbedContentProps['maxItemsCount'];
     createItem?: TabbedContentProps['createItem'];
     onChanged: TabbedContentProps['onChanged'];
     onEBTEvent: TabbedContentProps['onEBTEvent'];
@@ -50,6 +52,7 @@ describe('TabbedContent', () => {
         items={managedItems}
         selectedItemId={managedSelectedItemId}
         recentlyClosedItems={recentlyClosedItems}
+        maxItemsCount={maxItemsCount}
         createItem={createItem ?? (() => NEW_TAB)}
         getPreviewData={getPreviewDataMock}
         services={servicesMock}
@@ -116,6 +119,47 @@ describe('TabbedContent', () => {
         selectedItem: { id: 'new-1', label: 'Closed Tab 1', restoredFromId: 'closed1' },
       });
     });
+  });
+
+  it('does not restore a recently closed tab when the tab limit has been reached', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const initialItems = [
+      { id: 'tab1', label: 'Tab 1' },
+      { id: 'tab2', label: 'Tab 2' },
+    ];
+    const onChanged = jest.fn();
+    const onEBTEvent = jest.fn();
+    const createItem = jest.fn(() => NEW_TAB);
+    const recentlyClosedItems = [
+      { id: 'closed1', label: 'Closed Tab 1', closedAt: Date.now() - 60_000 },
+    ];
+
+    render(
+      <TabsWrapper
+        initialItems={initialItems}
+        initialSelectedItemId={initialItems[0].id}
+        recentlyClosedItems={recentlyClosedItems}
+        maxItemsCount={initialItems.length}
+        createItem={createItem}
+        onChanged={onChanged}
+        onEBTEvent={onEBTEvent}
+      />
+    );
+
+    await user.click(screen.getByTestId('unifiedTabs_tabsBarMenuButton'));
+
+    const closedTabOption = await screen.findByTestId(
+      'unifiedTabs_tabsMenu_recentlyClosedTab_closed1'
+    );
+    expect(closedTabOption).toBeDisabled();
+
+    await user.click(closedTabOption);
+
+    expect(createItem).not.toHaveBeenCalled();
+    expect(onChanged).not.toHaveBeenCalled();
+    expect(onEBTEvent).not.toHaveBeenCalledWith(
+      expect.objectContaining({ eventName: 'tabSelectRecentlyClosed' })
+    );
   });
 
   it('can create a new tab and sends tabCreated EBT event', async () => {

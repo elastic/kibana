@@ -387,6 +387,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
               items={items}
               selectedItem={selectedItem}
               recentlyClosedItems={recentlyClosedItems}
+              hasReachedMaxItemsCount={hasReachedMaxItemsCount}
               getPreviewData={getPreviewData}
               onSelect={onSelect}
               onSelectRecentlyClosed={onSelectRecentlyClosed}

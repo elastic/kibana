@@ -189,12 +189,19 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const onSelectRecentlyClosed = useCallback(
     async (item: RecentlyClosedTabItem) => {
-      const newItem = createItem();
-      const restoredItem = { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
-      tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
-
       changeState((prevState) => {
-        const nextState = selectRecentlyClosedTab(prevState, restoredItem);
+        if (maxItemsCount && prevState.items.length >= maxItemsCount) {
+          return prevState;
+        }
+
+        const newItem = createItem();
+        const restoredItem = {
+          ...omit(item, 'closedAt'),
+          id: newItem.id,
+          restoredFromId: item.id,
+        };
+
+        tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
 
         onEBTEvent({
           [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
@@ -202,10 +209,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
         });
 
-        return nextState;
+        return selectRecentlyClosedTab(prevState, restoredItem);
       });
     },
-    [changeState, createItem, onEBTEvent]
+    [changeState, createItem, maxItemsCount, onEBTEvent]
   );
 
   const onRestoreRecentlyClosedGroup = useCallback(
