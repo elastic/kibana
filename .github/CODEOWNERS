@@ -610,7 +610,7 @@ src/platform/packages/shared/kbn-rison @elastic/kibana-operations
 src/platform/packages/shared/kbn-router-to-openapispec @elastic/kibana-core
 src/platform/packages/shared/kbn-router-utils @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-rrule @elastic/response-ops
-src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/actionable-obs-team
+src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detection-rule-management @elastic/security-detection-engine @elastic/response-ops @elastic/actionable-obs-team
 src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
 src/platform/packages/shared/kbn-saved-search-component @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-scout @elastic/appex-qa
@@ -957,6 +957,7 @@ x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sha
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-infra/anonymization-common @elastic/workchat-eng @elastic/security-generative-ai @elastic/security-threat-hunting
+x-pack/platform/packages/shared/ai-infra/anonymization-ui @elastic/workchat-eng @elastic/security-generative-ai @elastic/security-threat-hunting
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/search-kibana
 x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/appex-ai-infra
@@ -1188,10 +1189,12 @@ x-pack/solutions/observability/packages/alerting-test-data @elastic/actionable-o
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/actionable-obs-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant @elastic/obs-ai-team
+x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/obs-ai-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/obs-ai-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-presentation-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-synthetics-forge @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli @elastic/observability-ui
 x-pack/solutions/observability/packages/nav-icons @elastic/obs-presentation-team
 x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/obs-ai-team
 x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/obs-ai-team
@@ -1252,6 +1255,7 @@ x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/con
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
+x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
@@ -1924,19 +1928,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/functional/services/transform @elastic/kibana-management
 /x-pack/platform/test/functional_basic/apps/transform/ @elastic/kibana-management
 
-# Operations
-/src/platform/test/package @elastic/kibana-operations
-/src/platform/test/package/roles @elastic/kibana-operations
-/src/platform/test/common/fixtures/plugins/coverage/kibana.json @elastic/kibana-operations
-/src/dev/license_checker/config.ts @elastic/kibana-operations
-/src/dev/ @elastic/kibana-operations
-/src/setup_node_env/ @elastic/kibana-operations
-/src/cli/ @elastic/kibana-operations
-/src/cli_keystore/ @elastic/kibana-operations
-/.github/workflows/ @elastic/kibana-operations
-/.buildkite/ @elastic/kibana-operations
-/.coderabbit.yml @elastic/kibana-operations
-
 # Evals (Buildkite + scripts)
 /.buildkite/pipelines/evals/ @elastic/obs-ai-team @elastic/security-generative-ai
 /.buildkite/scripts/steps/evals/ @elastic/obs-ai-team @elastic/security-generative-ai
@@ -1955,8 +1946,10 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.eslintignore @elastic/kibana-operations
 /src/platform/packages/shared/kbn-lazy-object @elastic/kibana-operations @elastic/observability-ui
 
-# QA - Appex QA
+# QA - AppEx QA
 .buildkite/scout_ci_config.yml @elastic/appex-qa
+/docs/extend/scout.md @elastic/appex-qa
+/docs/extend/scout/** @elastic/appex-qa
 /x-pack/platform/test/index.d.ts @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
@@ -2104,8 +2097,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/serverless/functional/services/ @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/config* @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/ftr_provider_context.d.ts @elastic/appex-qa
-/**/scout/.meta/** @kibanamachine @elastic/appex-qa
-/**/scout_*/.meta/** @kibanamachine @elastic/appex-qa
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
@@ -2382,12 +2373,14 @@ src/platform/packages/shared/kbn-connector-specs/src/connector_icons_map.ts
 src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/github/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_calendar/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
@@ -2433,6 +2426,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/serverless/functional/page_objects/svl_api_keys.ts @elastic/search-kibana
 /x-pack/solutions/search/test/functional_search/ @elastic/search-kibana
 /x-pack/solutions/search/test/api_integration/apis/search_playground/ @elastic/search-kibana
+/x-pack/platform/test/api_integration/apis/search_inference_endpoints/ @elastic/search-kibana
+/x-pack/platform/test/serverless/api_integration/test_suites/search_inference_endpoints/ @elastic/search-kibana
 
 # workplaceai
 /x-pack/solutions/workplaceai/test/serverless/api_integration/configs/config.ts @elastic/search-kibana @elastic/appex-qa
@@ -3203,12 +3198,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
 
-# Moon related configs
-.moon         @elastic/kibana-operations
-src/platform/test/moon.yml @elastic/kibana-operations
-x-pack/platform/test/moon.yml @elastic/kibana-operations
-x-pack/solutions/observability/test/moon.yml @elastic/kibana-operations
-x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
+# Appex QA to own auto-generated scout metadata
+/**/scout/.meta/** @kibanamachine @elastic/appex-qa
+/**/scout_*/.meta/** @kibanamachine @elastic/appex-qa
 
 # These files influence agent behavior and are loaded into every new agent session.
 # Changes here can have repo-wide impact (what instructions/tools/context an agent sees), so require
@@ -3236,6 +3228,22 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 /.agents/skills/kibana-privilege-deprecation/** @elastic/kibana-security
 /.agents/skills/encrypted-saved-objects/** @elastic/kibana-security
 
+# No owner - generated files covered by CI checks
+**/moon.yml
+
+# Operations (last-match override)
+/src/platform/test/package @elastic/kibana-operations
+/src/platform/test/package/roles @elastic/kibana-operations
+/src/platform/test/common/fixtures/plugins/coverage/kibana.json @elastic/kibana-operations
+/src/dev/license_checker/config.ts @elastic/kibana-operations
+/src/dev/ @elastic/kibana-operations
+/src/setup_node_env/ @elastic/kibana-operations
+/src/cli/ @elastic/kibana-operations
+/src/cli_keystore/ @elastic/kibana-operations
+/.github/workflows/ @elastic/kibana-operations
+/.buildkite/ @elastic/kibana-operations
+/.coderabbit.yml @elastic/kibana-operations
+/moon.yml @elastic/kibana-operations
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

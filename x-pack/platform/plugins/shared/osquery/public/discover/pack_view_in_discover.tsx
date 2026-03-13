@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import moment from 'moment-timezone';
 import { usePackQueryLastResults } from '../packs/use_pack_query_last_results';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 import { ViewResultsInDiscoverAction } from './view_results_in_discover';
+import { getPackViewDateWindow } from '../common/pack_view_date_window';
 
 interface PackViewInActionProps {
   item: {
@@ -19,20 +19,30 @@ interface PackViewInActionProps {
     agents: string[];
   };
   actionId?: string;
+  scheduleId?: string;
+  executionCount?: number;
+  timestamp?: string;
 }
-const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({ item }) => {
+const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
+  item,
+  scheduleId,
+  executionCount,
+  timestamp,
+}) => {
+  const isScheduled = !!scheduleId;
   const { action_id: actionId, interval } = item;
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,
     interval,
+    skip: isScheduled,
   });
 
-  const startDate = lastResultsData?.lastResultTime
-    ? moment(lastResultsData.lastResultTime[0]).subtract(interval, 'seconds').toISOString()
-    : `now-${interval}s`;
-  const endDate = lastResultsData?.lastResultTime
-    ? moment(lastResultsData.lastResultTime[0]).toISOString()
-    : 'now';
+  const { startDate, endDate, mode } = getPackViewDateWindow({
+    isScheduled,
+    timestamp,
+    lastResultTime: lastResultsData?.lastResultTime,
+    interval,
+  });
 
   return (
     <ViewResultsInDiscoverAction
@@ -40,7 +50,9 @@ const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({ it
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={lastResultsData?.lastResultTime ? 'absolute' : 'relative'}
+      mode={mode}
+      scheduleId={scheduleId}
+      executionCount={executionCount}
     />
   );
 };

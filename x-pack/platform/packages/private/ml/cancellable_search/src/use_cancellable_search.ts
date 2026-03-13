@@ -6,7 +6,11 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/search-types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { tap } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -17,7 +21,7 @@ export interface UseCancellableSearch {
     ResponseType extends IKibanaSearchResponse
   >(
     requestBody: RequestBody,
-    options?: object
+    options?: ISearchOptions
   ) => Promise<ResponseType | null>;
   cancelRequest: () => void;
   isLoading: boolean;

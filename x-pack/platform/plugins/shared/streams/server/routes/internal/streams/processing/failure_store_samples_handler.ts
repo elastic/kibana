@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
@@ -49,7 +49,7 @@ export interface FailureStoreSamplesParams {
 
 export interface FailureStoreSamplesDeps {
   params: FailureStoreSamplesParams;
-  scopedClusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
 }
@@ -74,7 +74,7 @@ export interface FailureStoreSamplesResponse {
  */
 export const getFailureStoreSamples = async ({
   params,
-  scopedClusterClient,
+  esClient,
   streamsClient,
   fieldsMetadataClient,
 }: FailureStoreSamplesDeps): Promise<FailureStoreSamplesResponse> => {
@@ -88,7 +88,7 @@ export const getFailureStoreSamples = async ({
   // skipping ancestor retrieval entirely.
   if (isDirectChildOfRoot(name)) {
     const failureStoreDocs = await fetchFailureStoreDocuments({
-      scopedClusterClient,
+      esClient,
       streamName: name,
       size,
       start,
@@ -100,7 +100,7 @@ export const getFailureStoreSamples = async ({
   // 2. For deeper nested streams, first fetch failure store documents.
   // If no documents exist, we can return early without fetching ancestors.
   const failureStoreDocs = await fetchFailureStoreDocuments({
-    scopedClusterClient,
+    esClient,
     streamName: name,
     size,
     start,
@@ -134,7 +134,7 @@ export const getFailureStoreSamples = async ({
         documents: failureStoreDocs,
       },
     },
-    scopedClusterClient,
+    esClient,
     streamsClient,
     fieldsMetadataClient,
   });
@@ -166,13 +166,13 @@ function isDirectChildOfRoot(streamName: string): boolean {
  * Optionally filters by time range if start/end are provided.
  */
 async function fetchFailureStoreDocuments({
-  scopedClusterClient,
+  esClient,
   streamName,
   size,
   start,
   end,
 }: {
-  scopedClusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   streamName: string;
   size: number;
   start?: string;
@@ -198,7 +198,7 @@ async function fetchFailureStoreDocuments({
           }
         : undefined;
 
-    const response = await scopedClusterClient.asCurrentUser.search({
+    const response = await esClient.search({
       index: `${streamName}${FAILURE_STORE_SELECTOR}`,
       size,
       sort: [{ '@timestamp': { order: 'desc' } }],
