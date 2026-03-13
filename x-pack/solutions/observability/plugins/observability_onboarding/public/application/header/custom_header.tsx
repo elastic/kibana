@@ -15,6 +15,7 @@ import {
   EuiTitle,
   useEuiShadow,
   useEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { i18n } from '@kbn/i18n';
@@ -41,6 +42,9 @@ export function CustomHeader({
 }: Props) {
   const theme = useEuiTheme();
   const shadow = useEuiShadow('s');
+  const isSmallScreen = useIsWithinBreakpoints(['xs', 's']);
+  const logoSize = isSmallScreen ? 40 : 56;
+  const logoMargin = isSmallScreen ? 8 : 12;
   return (
     <EuiPageTemplate.Section
       css={css`
@@ -72,15 +76,15 @@ export function CustomHeader({
               logo={logo}
               size="xxl"
               css={css`
-                margin: 12px;
-                width: 56px;
-                height: 56px;
+                margin: ${logoMargin}px;
+                width: ${logoSize}px;
+                height: ${logoSize}px;
               `}
             />
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="baseline" gutterSize="m">
+          <EuiFlexGroup alignItems="baseline" gutterSize="m" wrap>
             <EuiTitle size="l">
               <h1>{headlineCopy}</h1>
             </EuiTitle>
