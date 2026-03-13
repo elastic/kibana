@@ -42,7 +42,7 @@ export const sampleOutputData: ControlGroupOutput = {
 export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlState> = {
   initialChildControlState: {
     '0': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
       order: 0,
       width: 'small',
       data_view_id: 'alert-filters-test-dv',
@@ -58,7 +58,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
       },
     },
     '1': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
       order: 1,
       width: 'small',
       data_view_id: 'alert-filters-test-dv',
@@ -74,7 +74,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
       },
     },
     '2': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
       order: 2,
       width: 'small',
       data_view_id: 'alert-filters-test-dv',
@@ -90,7 +90,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
       },
     },
     '3': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
       order: 3,
       width: 'small',
       data_view_id: 'alert-filters-test-dv',
@@ -106,7 +106,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
       },
     },
     '4': {
-      type: 'optionsListControl',
+      type: 'options_list_control',
       order: 4,
       width: 'small',
       data_view_id: 'alert-filters-test-dv',
