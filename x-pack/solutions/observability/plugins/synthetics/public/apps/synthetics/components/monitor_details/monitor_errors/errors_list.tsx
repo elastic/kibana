@@ -16,9 +16,11 @@ import {
   EuiFlexItem,
   EuiBadge,
   useIsWithinMinBreakpoint,
+  EuiLink,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';
+import { css } from '@emotion/react';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import type { Ping, PingState } from '../../../../../../common/runtime_types';
@@ -26,6 +28,7 @@ import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
+import { useSyntheticsSettingsContext } from '../../../contexts';
 
 function isErrorActive(lastError: PingState, currentError: PingState, latestPing?: Ping) {
   return (
@@ -46,12 +49,16 @@ export const ErrorsList = ({
   errorStates,
   upStates,
   loading,
+  showMonitorName = false,
 }: {
   errorStates: PingState[];
   upStates: PingState[];
   loading: boolean;
+  showMonitorName?: boolean;
 }) => {
   const { monitorId: configId } = useParams<{ monitorId: string }>();
+
+  const { basePath } = useSyntheticsSettingsContext();
 
   const checkGroups = useMemo(() => {
     return errorStates.map((error) => error.monitor.check_group!);
@@ -85,10 +92,10 @@ export const ErrorsList = ({
       render: (_value: string, item: PingState) => {
         const link = (
           <ErrorDetailsLink
-            configId={configId}
+            configId={item.config_id}
             stateId={item.state?.id!}
             label={formatter(item.state!.started_at)}
-            locationId={selectedLocation?.id}
+            locationId={item.observer?.name}
           />
         );
 
@@ -112,6 +119,24 @@ export const ErrorsList = ({
         header: false,
       },
     },
+    ...(showMonitorName
+      ? [
+          {
+            field: 'monitor.name',
+            name: 'Monitor name',
+            render: (monName: string, error: PingState) => {
+              return (
+                <EuiLink
+                  data-test-subj="syntheticsColumnsLink"
+                  href={`${basePath}/app/synthetics/monitor/${error.config_id}`}
+                >
+                  {monName}
+                </EuiLink>
+              );
+            },
+          },
+        ]
+      : []),
     ...(isBrowserType
       ? [
           {
@@ -130,7 +155,9 @@ export const ErrorsList = ({
             render: (value: string) => {
               const failedStep = failedSteps.find((step) => step.monitor.check_group === value);
               if (!failedStep) {
-                return <>--</>;
+                return (
+                  <>{i18n.translate('xpack.synthetics.columns.Label', { defaultMessage: '--' })}</>
+                );
               }
               return (
                 <EuiText size="s">
@@ -144,6 +171,9 @@ export const ErrorsList = ({
     {
       field: 'error.message',
       name: ERROR_MESSAGE_LABEL,
+      css: css`
+        max-width: 400px;
+      `,
     },
     {
       field: 'state.duration_ms',
