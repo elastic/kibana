@@ -77,7 +77,7 @@ export const OverviewTabWrapper = memo(
     });
 
     const { hasAlertsRead } = useAlertsPrivileges();
-    const missingAlertsPrivilege = hit && isAlert(hit) && !hasAlertsRead;
+    const missingAlertsPrivilege = !hasAlertsRead && hit && isAlert(hit);
 
     if (isDataViewLoading) {
       return (

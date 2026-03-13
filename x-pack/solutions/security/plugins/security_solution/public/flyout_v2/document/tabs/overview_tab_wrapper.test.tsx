@@ -11,16 +11,26 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { TestProviders } from '../../../common/mock';
 import { OverviewTabWrapper } from './overview_tab_wrapper';
 
 jest.mock('@kbn/unified-doc-viewer-plugin/public');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
+jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 const mockOverviewTab = jest.fn((props: unknown) => <div data-test-subj="overviewTabStub" />);
 jest.mock('./overview_tab', () => ({
   OverviewTab: (props: unknown) => mockOverviewTab(props),
 }));
+
+const createAlertHit = (): DataTableRecord =>
+  ({
+    id: '1',
+    raw: {},
+    flattened: { 'event.kind': 'signal' },
+    isAnchor: false,
+  } as DataTableRecord);
 
 const mockDataView = {
   hasMatchedIndices: () => true,
@@ -43,6 +53,7 @@ describe('EventOverviewFlyoutContent', () => {
       dataView: mockDataView,
     });
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Loading, null, jest.fn()]);
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true });
   });
 
   it('fetches clicked document using document id and index', () => {
@@ -100,5 +111,16 @@ describe('EventOverviewFlyoutContent', () => {
     const { getByTestId } = renderEventOverviewFlyoutContent();
 
     expect(getByTestId('analyzer-event-overview-fetch-error')).toBeInTheDocument();
+  });
+
+  it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
+    const alertHit = createAlertHit();
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, alertHit, jest.fn()]);
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false });
+
+    const { getByTestId, queryByTestId } = renderEventOverviewFlyoutContent();
+
+    expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
+    expect(queryByTestId('overviewTabStub')).not.toBeInTheDocument();
   });
 });
