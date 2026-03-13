@@ -41,10 +41,7 @@ export async function requestOAuthClientCredentialsToken(
     const { clientId, clientSecret, ...rest } = params;
     return await requestOAuthToken<
       Omit<ClientCredentialsOAuthRequestParams, 'clientId' | 'clientSecret'>
-    >(tokenUrl, OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE, configurationUtilities, logger, rest, {
-      username: clientId ?? '',
-      password: clientSecret ?? '',
-    });
+    >(tokenUrl, OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE, configurationUtilities, logger, rest);
   }
 
   return await requestOAuthToken<ClientCredentialsOAuthRequestParams>(
