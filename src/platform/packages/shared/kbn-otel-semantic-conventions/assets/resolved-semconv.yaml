@@ -13411,6 +13411,371 @@ groups:
             - stability
           locally_overridden_fields:
             - requirement_level
+  - id: event.messaging.create.exception
+    type: event
+    brief: |
+      This event represents an exception that occurred during a messaging create operation.
+    note: |
+      This event SHOULD be recorded when an exception occurs during a messaging create operation.
+      Instrumentations SHOULD set the severity to WARN (severity number 13) when recording this event.
+      Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding messaging create span.
+    stability: development
+    attributes:
+      - name: exception.message
+        type: string
+        brief: The exception message.
+        examples:
+          - Division by zero
+          - Can't convert 'int' object to str implicitly
+        requirement_level:
+          conditionally_required: Required if `exception.type` is not set, recommended otherwise.
+        note: |
+          > [!WARNING]
+          >
+          > This attribute may contain sensitive information.
+        stability: stable
+      - name: exception.stacktrace
+        type: string
+        brief: |
+          A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.
+        examples: |
+          Exception in thread "main" java.lang.RuntimeException: Test exception\n at com.example.GenerateTrace.methodB(GenerateTrace.java:13)\n at com.example.GenerateTrace.methodA(GenerateTrace.java:9)\n at com.example.GenerateTrace.main(GenerateTrace.java:5)
+        requirement_level: recommended
+        stability: stable
+      - name: exception.type
+        type: string
+        brief: |
+          The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.
+        examples:
+          - java.net.ConnectException
+          - OSError
+        requirement_level:
+          conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        stability: stable
+    name: messaging.create.exception
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/messaging/events.yaml
+      attributes:
+        exception.message:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        exception.stacktrace:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        exception.type:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+  - id: event.messaging.process.exception
+    type: event
+    brief: |
+      This event represents an exception that occurred during messaging process operations.
+    note: |
+      This event SHOULD be recorded when an exception occurs during messaging process operations.
+      Instrumentations SHOULD set the severity to ERROR (severity number 17) when recording this event.
+      Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding messaging process span.
+    stability: development
+    attributes:
+      - name: exception.message
+        type: string
+        brief: The exception message.
+        examples:
+          - Division by zero
+          - Can't convert 'int' object to str implicitly
+        requirement_level:
+          conditionally_required: Required if `exception.type` is not set, recommended otherwise.
+        note: |
+          > [!WARNING]
+          >
+          > This attribute may contain sensitive information.
+        stability: stable
+      - name: exception.stacktrace
+        type: string
+        brief: |
+          A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.
+        examples: |
+          Exception in thread "main" java.lang.RuntimeException: Test exception\n at com.example.GenerateTrace.methodB(GenerateTrace.java:13)\n at com.example.GenerateTrace.methodA(GenerateTrace.java:9)\n at com.example.GenerateTrace.main(GenerateTrace.java:5)
+        requirement_level: recommended
+        stability: stable
+      - name: exception.type
+        type: string
+        brief: |
+          The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.
+        examples:
+          - java.net.ConnectException
+          - OSError
+        requirement_level:
+          conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        stability: stable
+    name: messaging.process.exception
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/messaging/events.yaml
+      attributes:
+        exception.message:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        exception.stacktrace:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        exception.type:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+  - id: event.messaging.receive.exception
+    type: event
+    brief: |
+      This event represents an exception that occurred during a messaging receive operation.
+    note: |
+      This event SHOULD be recorded when an exception occurs during a messaging receive operation.
+      Instrumentations SHOULD set the severity to WARN (severity number 13) when recording this event.
+      Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding messaging receive span.
+    stability: development
+    attributes:
+      - name: exception.message
+        type: string
+        brief: The exception message.
+        examples:
+          - Division by zero
+          - Can't convert 'int' object to str implicitly
+        requirement_level:
+          conditionally_required: Required if `exception.type` is not set, recommended otherwise.
+        note: |
+          > [!WARNING]
+          >
+          > This attribute may contain sensitive information.
+        stability: stable
+      - name: exception.stacktrace
+        type: string
+        brief: |
+          A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.
+        examples: |
+          Exception in thread "main" java.lang.RuntimeException: Test exception\n at com.example.GenerateTrace.methodB(GenerateTrace.java:13)\n at com.example.GenerateTrace.methodA(GenerateTrace.java:9)\n at com.example.GenerateTrace.main(GenerateTrace.java:5)
+        requirement_level: recommended
+        stability: stable
+      - name: exception.type
+        type: string
+        brief: |
+          The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.
+        examples:
+          - java.net.ConnectException
+          - OSError
+        requirement_level:
+          conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        stability: stable
+    name: messaging.receive.exception
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/messaging/events.yaml
+      attributes:
+        exception.message:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        exception.stacktrace:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        exception.type:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+  - id: event.messaging.send.exception
+    type: event
+    brief: |
+      This event represents an exception that occurred during a messaging send operation.
+    note: |
+      This event SHOULD be recorded when an exception occurs during a messaging send operation.
+      Instrumentations SHOULD set the severity to WARN (severity number 13) when recording this event.
+      Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding messaging send span.
+    stability: development
+    attributes:
+      - name: exception.message
+        type: string
+        brief: The exception message.
+        examples:
+          - Division by zero
+          - Can't convert 'int' object to str implicitly
+        requirement_level:
+          conditionally_required: Required if `exception.type` is not set, recommended otherwise.
+        note: |
+          > [!WARNING]
+          >
+          > This attribute may contain sensitive information.
+        stability: stable
+      - name: exception.stacktrace
+        type: string
+        brief: |
+          A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.
+        examples: |
+          Exception in thread "main" java.lang.RuntimeException: Test exception\n at com.example.GenerateTrace.methodB(GenerateTrace.java:13)\n at com.example.GenerateTrace.methodA(GenerateTrace.java:9)\n at com.example.GenerateTrace.main(GenerateTrace.java:5)
+        requirement_level: recommended
+        stability: stable
+      - name: exception.type
+        type: string
+        brief: |
+          The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.
+        examples:
+          - java.net.ConnectException
+          - OSError
+        requirement_level:
+          conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        stability: stable
+    name: messaging.send.exception
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/messaging/events.yaml
+      attributes:
+        exception.message:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        exception.stacktrace:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        exception.type:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+  - id: event.messaging.settle.exception
+    type: event
+    brief: |
+      This event represents an exception that occurred during a messaging settle operation.
+    note: |
+      This event SHOULD be recorded when an exception occurs during a messaging settle operation.
+      Instrumentations SHOULD set the severity to WARN (severity number 13) when recording this event.
+      Instrumentations MAY provide a configuration option to populate exception events with the attributes captured on the corresponding messaging settle span.
+    stability: development
+    attributes:
+      - name: exception.message
+        type: string
+        brief: The exception message.
+        examples:
+          - Division by zero
+          - Can't convert 'int' object to str implicitly
+        requirement_level:
+          conditionally_required: Required if `exception.type` is not set, recommended otherwise.
+        note: |
+          > [!WARNING]
+          >
+          > This attribute may contain sensitive information.
+        stability: stable
+      - name: exception.stacktrace
+        type: string
+        brief: |
+          A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.
+        examples: |
+          Exception in thread "main" java.lang.RuntimeException: Test exception\n at com.example.GenerateTrace.methodB(GenerateTrace.java:13)\n at com.example.GenerateTrace.methodA(GenerateTrace.java:9)\n at com.example.GenerateTrace.main(GenerateTrace.java:5)
+        requirement_level: recommended
+        stability: stable
+      - name: exception.type
+        type: string
+        brief: |
+          The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.
+        examples:
+          - java.net.ConnectException
+          - OSError
+        requirement_level:
+          conditionally_required: Required if `exception.message` is not set, recommended otherwise.
+        stability: stable
+    name: messaging.settle.exception
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/messaging/events.yaml
+      attributes:
+        exception.message:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        exception.stacktrace:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+        exception.type:
+          source_group: registry.exception
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
   - id: event.rpc.client.call.exception
     type: event
     brief: |
@@ -49703,7 +50068,7 @@ groups:
     type: metric
     brief: Event loop maximum delay.
     note: |
-      Value can be retrieved from value `histogram.max` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.max` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.max
     instrument: gauge
@@ -49719,7 +50084,7 @@ groups:
     type: metric
     brief: Event loop mean delay.
     note: |
-      Value can be retrieved from value `histogram.mean` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.mean` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.mean
     instrument: gauge
@@ -49735,7 +50100,7 @@ groups:
     type: metric
     brief: Event loop minimum delay.
     note: |
-      Value can be retrieved from value `histogram.min` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.min` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.min
     instrument: gauge
@@ -49751,7 +50116,7 @@ groups:
     type: metric
     brief: Event loop 50 percentile delay.
     note: |
-      Value can be retrieved from value `histogram.percentile(50)` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.percentile(50)` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.p50
     instrument: gauge
@@ -49767,7 +50132,7 @@ groups:
     type: metric
     brief: Event loop 90 percentile delay.
     note: |
-      Value can be retrieved from value `histogram.percentile(90)` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.percentile(90)` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.p90
     instrument: gauge
@@ -49783,7 +50148,7 @@ groups:
     type: metric
     brief: Event loop 99 percentile delay.
     note: |
-      Value can be retrieved from value `histogram.percentile(99)` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.percentile(99)` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.p99
     instrument: gauge
@@ -49799,7 +50164,7 @@ groups:
     type: metric
     brief: Event loop standard deviation delay.
     note: |
-      Value can be retrieved from value `histogram.stddev` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf_hooksmonitoreventloopdelayoptions)
+      Value can be retrieved from value `histogram.stddev` of [`perf_hooks.monitorEventLoopDelay([options])`](https://nodejs.org/api/perf_hooks.html#perf-hooksmonitoreventloopdelayoptions)
     stability: development
     metric_name: nodejs.eventloop.delay.stddev
     instrument: gauge
@@ -76466,265 +76831,6 @@ groups:
           locally_overridden_fields:
             - requirement_level
             - sampling_relevant
-  - id: rpc.server
-    type: attribute_group
-    brief: This document defines semantic conventions for remote procedure calls.
-    attributes:
-      - name: client.address
-        type: string
-        brief: Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-        examples:
-          - client.example.com
-          - 10.1.2.80
-          - /tmp/my.sock
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.address` SHOULD represent the client address behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
-      - name: client.port
-        type: int
-        brief: Client port number.
-        examples:
-          - 65123
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
-      - name: error.type
-        type:
-          members:
-            - id: other
-              value: _OTHER
-              brief: |
-                A fallback error value to be used when the instrumentation doesn't define a custom value.
-              stability: stable
-        brief: |
-          Describes a class of error the operation ended with.
-        examples:
-          - DEADLINE_EXCEEDED
-          - java.net.UnknownHostException
-          - '-32602'
-        requirement_level:
-          conditionally_required: If and only if the operation failed.
-        note: |
-          If the RPC fails with an error before status code is returned,
-          `error.type` SHOULD be set to the exception type (its fully-qualified class name, if applicable)
-          or a component-specific, low cardinality error identifier.
-
-          If a response status code is returned and status indicates an error,
-          `error.type` SHOULD be set to that status code. Check system-specific conventions
-          for the details on which values of `rpc.response.status_code` are considered errors.
-
-          The `error.type` value SHOULD be predictable and SHOULD have low cardinality.
-          Instrumentations SHOULD document the list of errors they report.
-
-          If the request has completed successfully, instrumentations SHOULD NOT set
-          `error.type`.
-        stability: stable
-      - name: network.peer.address
-        type: string
-        brief: Peer address of the network connection - IP address or Unix domain socket name.
-        examples:
-          - 10.1.2.80
-          - /tmp/my.sock
-        requirement_level: recommended
-        note: |
-          If a RPC involved multiple network calls (for example retries), the last contacted address SHOULD be used.
-        stability: stable
-      - name: network.peer.port
-        type: int
-        brief: Peer port number of the network connection.
-        examples:
-          - 65123
-        requirement_level:
-          recommended: If `network.peer.address` is set.
-        stability: stable
-      - name: rpc.method
-        type: string
-        brief: The fully-qualified logical name of the method from the RPC interface perspective.
-        examples:
-          - com.example.ExampleService/exampleMethod
-          - EchoService/Echo
-          - _OTHER
-        requirement_level:
-          conditionally_required: if available.
-        sampling_relevant: true
-        note: |
-          The method name MAY have unbounded cardinality in edge or error cases.
-
-          Some RPC frameworks or libraries provide a fixed set of recognized methods
-          for client stubs and server implementations. Instrumentations for such
-          frameworks MUST set this attribute to the original method name only
-          when the method is recognized by the framework or library.
-
-          When the method is not recognized, for example, when the server receives
-          a request for a method that is not predefined on the server, or when
-          instrumentation is not able to reliably detect if the method is predefined,
-          the attribute MUST be set to `_OTHER`. In such cases, tracing
-          instrumentations MUST also set `rpc.method_original` attribute to
-          the original method value.
-
-          If the RPC instrumentation could end up converting valid RPC methods to
-          `_OTHER`, then it SHOULD provide a way to configure the list of recognized
-          RPC methods.
-
-          The `rpc.method` can be different from the name of any implementing
-          method/function.
-          The `code.function.name` attribute may be used to record the fully-qualified
-          method actually executing the call on the server side, or the
-          RPC client stub method on the client side.
-        stability: release_candidate
-      - name: rpc.method_original
-        type: string
-        brief: |
-          The original name of the method used by the client.
-        examples:
-          - com.myservice.EchoService/catchAll
-          - com.myservice.EchoService/unknownMethod
-          - InvalidMethod
-        requirement_level:
-          conditionally_required: If and only if it's different than `rpc.method`.
-        stability: release_candidate
-      - name: rpc.response.status_code
-        type: string
-        brief: Status code of the RPC returned by the RPC server or generated by the client
-        examples:
-          - OK
-          - DEADLINE_EXCEEDED
-          - '-32602'
-        requirement_level:
-          conditionally_required: if available.
-        note: |
-          Usually it represents an error code, but may also represent partial success, warning, or differentiate between various types of successful outcomes.
-          Semantic conventions for individual RPC frameworks SHOULD document what `rpc.response.status_code` means in the context of that system and which values are considered to represent errors.
-        stability: release_candidate
-      - name: server.address
-        type: string
-        brief: |
-          A string identifying a group of RPC server instances request is sent to.
-        examples:
-          - example.com
-          - 10.1.2.80
-          - /tmp/my.sock
-        requirement_level:
-          conditionally_required: If available.
-        sampling_relevant: true
-        note: |
-          May contain a DNS name, an endpoint and path in the service registry, local socket name or an IP address.
-          Semantic conventions for individual RPC systems SHOULD document how to populate this attribute.
-          When address is an IP address, instrumentations SHOULD NOT do a reverse DNS lookup to obtain a DNS name and SHOULD set `server.address` to the provided IP address.
-        stability: stable
-      - name: server.port
-        type: int
-        brief: Server port number.
-        examples:
-          - 80
-          - 8080
-          - 443
-        requirement_level:
-          conditionally_required: if applicable and if `server.address` is set.
-        sampling_relevant: true
-        note: |
-          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
-        stability: stable
-    lineage:
-      provenance:
-        registry_id: main
-        path: /home/weaver/source/rpc/spans.yaml
-      attributes:
-        client.address:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        client.port:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        error.type:
-          source_group: registry.error
-          inherited_fields:
-            - brief
-            - stability
-          locally_overridden_fields:
-            - examples
-            - note
-            - requirement_level
-        network.peer.address:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - stability
-          locally_overridden_fields:
-            - note
-            - requirement_level
-        network.peer.port:
-          source_group: registry.network
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        rpc.method:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - sampling_relevant
-        rpc.method_original:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        rpc.response.status_code:
-          source_group: registry.rpc
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        server.address:
-          source_group: registry.server
-          inherited_fields:
-            - examples
-            - stability
-          locally_overridden_fields:
-            - brief
-            - note
-            - requirement_level
-            - sampling_relevant
-        server.port:
-          source_group: registry.server
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-            - sampling_relevant
   - id: server
     type: attribute_group
     brief: |
@@ -81256,6 +81362,9 @@ groups:
           - 30
           - 1000
         requirement_level: recommended
+        note: |
+          The number of rows returned by the database operation as observed
+          by the instrumentation at the time the span ends.
         stability: development
       - name: db.response.status_code
         type: string
@@ -81459,9 +81568,10 @@ groups:
           inherited_fields:
             - brief
             - examples
-            - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - note
         db.response.status_code:
           source_group: registry.db
           inherited_fields:
@@ -81522,10 +81632,8 @@ groups:
     type: span
     brief: This span describes database client call.
     note: |
-      Instrumentations SHOULD, when possible, record database spans that cover the duration of
-      the corresponding API call as if it was observed by the caller (such as client application).
-      For example, if a transient issue happened and was retried within this database call, the corresponding
-      span should cover the duration of the logical operation with all retries.
+      Instrumentations SHOULD, when possible, record database spans that represent the logical database
+      operation as observed by the caller (such as client application).
 
       When a database client provides higher-level convenience APIs for specific operations
       (e.g., calling a stored procedure), which internally generate and execute a generic query,
@@ -81534,6 +81642,8 @@ groups:
       readily available at the generic query level.
 
       **Span name** is covered in the [Name](/docs/db/database-spans.md#name) section.
+
+      **Span duration** is covered in the [Database client span duration](/docs/db/database-spans.md#database-client-span-duration) section.
 
       **Span kind** SHOULD be `CLIENT`. It MAY be set to `INTERNAL` on spans representing
       in-memory database calls.
@@ -81701,6 +81811,9 @@ groups:
           - 30
           - 1000
         requirement_level: opt_in
+        note: |
+          The number of rows returned by the database operation as observed
+          by the instrumentation at the time the span ends.
         stability: development
       - name: db.response.status_code
         type: string
@@ -82049,9 +82162,9 @@ groups:
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
         db.response.status_code:
           source_group: registry.db
@@ -83058,6 +83171,9 @@ groups:
           - 30
           - 1000
         requirement_level: opt_in
+        note: |
+          The number of rows returned by the database operation as observed
+          by the instrumentation at the time the span ends.
         stability: development
       - name: db.response.status_code
         type: string
@@ -83211,9 +83327,9 @@ groups:
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
         db.response.status_code:
           source_group: registry.db
@@ -83600,6 +83716,9 @@ groups:
           - 30
           - 1000
         requirement_level: opt_in
+        note: |
+          The number of rows returned by the database operation as observed
+          by the instrumentation at the time the span ends.
         stability: development
       - name: db.response.status_code
         type: string
@@ -83751,9 +83870,9 @@ groups:
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
         db.response.status_code:
           source_group: registry.db
@@ -83934,6 +84053,9 @@ groups:
           - 30
           - 1000
         requirement_level: opt_in
+        note: |
+          The number of rows returned by the database operation as observed
+          by the instrumentation at the time the span ends.
         stability: development
       - name: db.response.status_code
         type: string
@@ -84161,9 +84283,9 @@ groups:
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
         db.response.status_code:
           source_group: registry.db
@@ -84413,6 +84535,9 @@ groups:
           - 30
           - 1000
         requirement_level: opt_in
+        note: |
+          The number of rows returned by the database operation as observed
+          by the instrumentation at the time the span ends.
         stability: development
       - name: db.response.status_code
         type: string
@@ -84564,9 +84689,9 @@ groups:
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
         db.response.status_code:
           source_group: registry.db
@@ -85031,6 +85156,9 @@ groups:
           - 30
           - 1000
         requirement_level: opt_in
+        note: |
+          The number of rows returned by the database operation as observed
+          by the instrumentation at the time the span ends.
         stability: development
       - name: db.response.status_code
         type: string
@@ -85183,9 +85311,9 @@ groups:
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
         db.response.status_code:
           source_group: registry.db
@@ -85408,6 +85536,9 @@ groups:
           - 30
           - 1000
         requirement_level: opt_in
+        note: |
+          The number of rows returned by the database operation as observed
+          by the instrumentation at the time the span ends.
         stability: development
       - name: db.response.status_code
         type: string
@@ -85593,9 +85724,9 @@ groups:
           inherited_fields:
             - brief
             - examples
-            - note
             - stability
           locally_overridden_fields:
+            - note
             - requirement_level
         db.response.status_code:
           source_group: registry.db
@@ -96113,26 +96244,6 @@ groups:
       document for details on how to record span status.
     stability: release_candidate
     attributes:
-      - name: client.address
-        type: string
-        brief: Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-        examples:
-          - client.example.com
-          - 10.1.2.80
-          - /tmp/my.sock
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.address` SHOULD represent the client address behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
-      - name: client.port
-        type: int
-        brief: Client port number.
-        examples:
-          - 65123
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
       - name: error.type
         type:
           members:
@@ -96301,24 +96412,6 @@ groups:
         registry_id: main
         path: /home/weaver/source/rpc/spans.yaml
       attributes:
-        client.address:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        client.port:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
         error.type:
           source_group: registry.error
           inherited_fields:
@@ -96691,26 +96784,6 @@ groups:
       document for details on how to record span status.
     stability: development
     attributes:
-      - name: client.address
-        type: string
-        brief: Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-        examples:
-          - client.example.com
-          - 10.1.2.80
-          - /tmp/my.sock
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.address` SHOULD represent the client address behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
-      - name: client.port
-        type: int
-        brief: Client port number.
-        examples:
-          - 65123
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
       - name: error.type
         type:
           members:
@@ -96889,24 +96962,6 @@ groups:
         registry_id: main
         path: /home/weaver/source/rpc/spans.yaml
       attributes:
-        client.address:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        client.port:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
         error.type:
           source_group: registry.error
           inherited_fields:
@@ -97314,26 +97369,6 @@ groups:
       for the details on which values classify as errors.
     stability: release_candidate
     attributes:
-      - name: client.address
-        type: string
-        brief: Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-        examples:
-          - client.example.com
-          - 10.1.2.80
-          - /tmp/my.sock
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.address` SHOULD represent the client address behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
-      - name: client.port
-        type: int
-        brief: Client port number.
-        examples:
-          - 65123
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
       - name: error.type
         type:
           members:
@@ -97524,24 +97559,6 @@ groups:
         registry_id: main
         path: /home/weaver/source/rpc/spans.yaml
       attributes:
-        client.address:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        client.port:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
         error.type:
           source_group: registry.error
           inherited_fields:
@@ -97958,26 +97975,6 @@ groups:
       for the details on which values classify as errors.
     stability: release_candidate
     attributes:
-      - name: client.address
-        type: string
-        brief: Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-        examples:
-          - client.example.com
-          - 10.1.2.80
-          - /tmp/my.sock
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.address` SHOULD represent the client address behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
-      - name: client.port
-        type: int
-        brief: Client port number.
-        examples:
-          - 65123
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
       - name: error.type
         type:
           members:
@@ -98156,24 +98153,6 @@ groups:
         registry_id: main
         path: /home/weaver/source/rpc/spans.yaml
       attributes:
-        client.address:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        client.port:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
         error.type:
           source_group: registry.error
           inherited_fields:
@@ -98531,26 +98510,6 @@ groups:
       are considered errors.
     stability: development
     attributes:
-      - name: client.address
-        type: string
-        brief: Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.
-        examples:
-          - client.example.com
-          - 10.1.2.80
-          - /tmp/my.sock
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.address` SHOULD represent the client address behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
-      - name: client.port
-        type: int
-        brief: Client port number.
-        examples:
-          - 65123
-        requirement_level: recommended
-        note: |
-          When observed from the server side, and when communicating through an intermediary, `client.port` SHOULD represent the client port behind any intermediaries,  for example proxies, if it's available.
-        stability: stable
       - name: error.type
         type:
           members:
@@ -98693,24 +98652,6 @@ groups:
         registry_id: main
         path: /home/weaver/source/rpc/spans.yaml
       attributes:
-        client.address:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
-        client.port:
-          source_group: registry.client
-          inherited_fields:
-            - brief
-            - examples
-            - note
-            - stability
-          locally_overridden_fields:
-            - requirement_level
         error.type:
           source_group: registry.error
           inherited_fields:
@@ -99026,6 +98967,9 @@ groups:
           - 30
           - 1000
         requirement_level: recommended
+        note: |
+          The number of rows returned by the database operation as observed
+          by the instrumentation at the time the span ends.
         stability: development
       - name: db.response.status_code
         type: string
@@ -99373,9 +99317,10 @@ groups:
           inherited_fields:
             - brief
             - examples
-            - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - note
         db.response.status_code:
           source_group: registry.db
           inherited_fields:
@@ -99711,6 +99656,9 @@ groups:
           - 30
           - 1000
         requirement_level: recommended
+        note: |
+          The number of rows returned by the database operation as observed
+          by the instrumentation at the time the span ends.
         stability: development
       - name: db.response.status_code
         type: string
@@ -99821,9 +99769,10 @@ groups:
           inherited_fields:
             - brief
             - examples
-            - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - note
         db.response.status_code:
           source_group: registry.db
           inherited_fields:
@@ -100006,6 +99955,9 @@ groups:
           - 30
           - 1000
         requirement_level: recommended
+        note: |
+          The number of rows returned by the database operation as observed
+          by the instrumentation at the time the span ends.
         stability: development
       - name: db.response.status_code
         type: string
@@ -100136,9 +100088,10 @@ groups:
           inherited_fields:
             - brief
             - examples
-            - note
             - requirement_level
             - stability
+          locally_overridden_fields:
+            - note
         db.response.status_code:
           source_group: registry.db
           inherited_fields:
