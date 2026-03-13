@@ -232,8 +232,8 @@ export class WorkflowsManagementApi {
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
     inputs: Record<string, any>,
-    triggeredBy: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    triggeredBy: string
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
     const context = {

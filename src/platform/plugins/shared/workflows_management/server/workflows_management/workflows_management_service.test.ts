@@ -292,6 +292,64 @@ describe('WorkflowsService', () => {
       );
       expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-123' });
     });
+
+    it('should return results and log warning when closePointInTime throws in finally', async () => {
+      const workflowWithTrigger = {
+        _id: 'workflow-with-trigger',
+        _source: {
+          ...mockWorkflowDocument._source,
+          triggerTypes: ['manual', 'cases.updated'],
+          name: 'Case workflow',
+        },
+      };
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [workflowWithTrigger], total: { value: 1 } },
+        pit_id: 'pit-123',
+      } as any);
+      mockEsClient.closePointInTime.mockRejectedValue(new Error('PIT already closed'));
+
+      const result = await service.getWorkflowsSubscribedToTrigger('cases.updated', 'default');
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        id: 'workflow-with-trigger',
+        name: 'Case workflow',
+        enabled: true,
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringMatching(/Failed to close PIT pit-123:.*PIT already closed/)
+      );
+    });
+
+    it('should stop at MAX_PAGES and log warning when result set exceeds cap', async () => {
+      const createHit = (id: string, updatedAt: string, shardDoc: number) => ({
+        _id: id,
+        _source: {
+          ...mockWorkflowDocument._source,
+          triggerTypes: ['cases.updated'],
+          updated_at: updatedAt,
+        },
+        sort: [updatedAt, shardDoc],
+      });
+      const fullPageHits = Array.from({ length: 1000 }, (_, i) =>
+        createHit(`wf-${i}`, '2025-01-02T00:00:00.000Z', i)
+      );
+      // Return full pages so hasMore stays true; after MAX_PAGES (100) we stop
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: fullPageHits, total: { value: 150000 } },
+        pit_id: 'pit-123',
+      } as any);
+
+      const result = await service.getWorkflowsSubscribedToTrigger('cases.updated', 'default');
+
+      expect(mockEsClient.search).toHaveBeenCalledTimes(100);
+      expect(result).toHaveLength(100000);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /getWorkflowsSubscribedToTrigger truncated at 100 pages \(100000 workflows\) for trigger cases\.updated in space default/
+        )
+      );
+    });
   });
 
   describe('getWorkflows', () => {

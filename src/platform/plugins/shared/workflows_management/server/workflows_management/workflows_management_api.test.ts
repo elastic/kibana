@@ -636,8 +636,8 @@ steps:
         workflow as any,
         spaceId,
         inputs,
-        triggeredBy,
-        mockRequest
+        mockRequest,
+        triggeredBy
       );
 
       expect(mockGetWorkflowsExecutionEngine).toHaveBeenCalled();

@@ -78,7 +78,7 @@ describe('createTriggerEventHandler', () => {
     });
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
 
-    const [workflowArg, spaceIdArg, inputsArg, triggerIdArg, requestArg] =
+    const [workflowArg, spaceIdArg, inputsArg, requestArg, triggerIdArg] =
       scheduleWorkflow.mock.calls[0];
 
     expect(spaceIdArg).toBe(spaceId);
@@ -158,22 +158,22 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({ id: 'wf-1' }),
       'default',
       expect.any(Object),
-      'cases.updated',
-      mockRequest
+      mockRequest,
+      'cases.updated'
     );
     expect(scheduleWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'wf-2' }),
       'default',
       expect.any(Object),
-      'cases.updated',
-      mockRequest
+      mockRequest,
+      'cases.updated'
     );
     expect(scheduleWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'wf-3' }),
       'default',
       expect.any(Object),
-      'cases.updated',
-      mockRequest
+      mockRequest,
+      'cases.updated'
     );
 
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
@@ -213,15 +213,15 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({ id: 'wf-1' }),
       'default',
       expect.any(Object),
-      'cases.updated',
-      mockRequest
+      mockRequest,
+      'cases.updated'
     );
     expect(scheduleWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'wf-2' }),
       'default',
       expect.any(Object),
-      'cases.updated',
-      mockRequest
+      mockRequest,
+      'cases.updated'
     );
   });
 
@@ -257,16 +257,16 @@ describe('createTriggerEventHandler', () => {
           spaceId: 'default',
         }),
       }),
-      'cases.updated',
-      mockRequest
+      mockRequest,
+      'cases.updated'
     );
     expect(scheduleWorkflow).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ id: 'wf-no-condition-2' }),
       'default',
       expect.any(Object),
-      'cases.updated',
-      mockRequest
+      mockRequest,
+      'cases.updated'
     );
   });
 
@@ -304,15 +304,15 @@ describe('createTriggerEventHandler', () => {
       expect.objectContaining({ id: 'wf-valid-1' }),
       'default',
       expect.any(Object),
-      'cases.updated',
-      mockRequest
+      mockRequest,
+      'cases.updated'
     );
     expect(scheduleWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'wf-valid-2' }),
       'default',
       expect.any(Object),
-      'cases.updated',
-      mockRequest
+      mockRequest,
+      'cases.updated'
     );
     expect(scheduleWorkflow).not.toHaveBeenCalledWith(
       expect.objectContaining({ id: 'wf-invalid' }),

@@ -737,6 +737,7 @@ export class WorkflowsService {
     }
 
     const pageSize = 1000;
+    const MAX_PAGES = 100;
     const keepAlive = '1m';
     const indexPattern = `${workflowIndexName}-*`;
     const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
@@ -774,8 +775,11 @@ export class WorkflowsService {
       const allHits: Array<{ _id: string; _source: WorkflowProperties }> = [];
       let searchAfter: estypes.SearchHit['sort'] | undefined;
       let hasMore = true;
+      let pageCount = 0;
+      let total: number | undefined;
 
-      while (hasMore) {
+      while (hasMore && pageCount < MAX_PAGES) {
+        pageCount++;
         const searchResponse = await this.esClient.search<WorkflowProperties>({
           pit: { id: pitId, keep_alive: keepAlive },
           size: pageSize,
@@ -783,17 +787,23 @@ export class WorkflowsService {
           _source,
           query,
           sort,
-          search_after: searchAfter,
+          ...(searchAfter ? { search_after: searchAfter } : {}),
         });
 
         const hits = searchResponse.hits.hits;
+        if (!searchAfter && searchResponse.hits.total != null) {
+          total =
+            typeof searchResponse.hits.total === 'number'
+              ? searchResponse.hits.total
+              : searchResponse.hits.total?.value ?? 0;
+        }
         for (const hit of hits) {
           if (hit._source && hit._id) {
             allHits.push({ _id: hit._id, _source: hit._source as WorkflowProperties });
           }
         }
 
-        hasMore = hits.length >= pageSize;
+        hasMore = total !== undefined ? allHits.length < total : hits.length >= pageSize;
         if (hasMore) {
           const lastHit = hits[hits.length - 1];
           if (!lastHit.sort) {
@@ -807,11 +817,23 @@ export class WorkflowsService {
         }
       }
 
+      if (hasMore && pageCount >= MAX_PAGES) {
+        this.logger.warn(
+          `getWorkflowsSubscribedToTrigger truncated at ${MAX_PAGES} pages (${
+            pageCount * pageSize
+          } workflows) for trigger ${triggerId} in space ${spaceId}`
+        );
+      }
+
       return allHits.map(({ _id, _source: source }) =>
         this.transformStorageDocumentToWorkflowDto(_id, source)
       );
     } finally {
-      await this.esClient.closePointInTime({ id: pitId });
+      try {
+        await this.esClient.closePointInTime({ id: pitId });
+      } catch (closeErr) {
+        this.logger.warn(`Failed to close PIT ${pitId}: ${closeErr}`);
+      }
     }
   }
 
