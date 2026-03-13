@@ -1,0 +1,104 @@
+openapi: 3.0.0
+info:
+  title: Read Rule Execution Results API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/rules/{ruleId}/execution/results:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: ReadRuleExecutionResults
+      summary: Returns unified execution results for a given rule from the AF's execute events in the Event Log.
+      tags:
+        - Rule Execution Log API
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          description: Saved object ID of the rule to get execution results for
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filter:
+                  type: object
+                  description: Filtering criteria for execution results.
+                  properties:
+                    status:
+                      type: array
+                      items:
+                        $ref: '../../model/execution_status.schema.yaml#/components/schemas/RuleExecutionStatus'
+                      default: []
+                      description: Filter by execution status (succeeded, warning, failed). Empty = all statuses.
+                    run_type:
+                      type: array
+                      items:
+                        $ref: '../../model/execution_run_type.schema.yaml#/components/schemas/RuleRunType'
+                      default: []
+                      description: Filter by run type (standard, backfill). Empty = all run types.
+                    from:
+                      type: string
+                      format: date-time
+                      description: Start of the time range (executions that started within this range).
+                    to:
+                      type: string
+                      format: date-time
+                      description: End of the time range (executions that started within this range).
+                  required:
+                    - from
+                    - to
+                sort:
+                  type: object
+                  description: Sorting configuration for execution results.
+                  properties:
+                    field:
+                      $ref: '../../model/unified_execution_result.schema.yaml#/components/schemas/UnifiedExecutionResultSortField'
+                      default: timestamp
+                      description: Field to sort results by.
+                    order:
+                      $ref: '../../../model/sorting.schema.yaml#/components/schemas/SortOrder'
+                      default: desc
+                      description: Sort order (asc or desc).
+                page:
+                  type: integer
+                  default: 1
+                  description: Page number to return.
+                per_page:
+                  type: integer
+                  default: 20
+                  description: Number of results per page.
+              required:
+                - filter
+      responses:
+        200:
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '../../model/unified_execution_result.schema.yaml#/components/schemas/UnifiedExecutionResult'
+                  total:
+                    type: integer
+                    description: Total number of results matching the filter.
+                  page:
+                    type: integer
+                    description: Current page number (echoed from request).
+                  per_page:
+                    type: integer
+                    description: Number of results per page (echoed from request).
+                required:
+                  - events
+                  - total
+                  - page
+                  - per_page

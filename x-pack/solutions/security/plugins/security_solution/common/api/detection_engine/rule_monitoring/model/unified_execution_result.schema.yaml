@@ -1,0 +1,71 @@
+openapi: 3.0.0
+info:
+  title: Unified Execution Result Schema
+  version: not applicable
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    UnifiedExecutionResult:
+      type: object
+      description: |-
+        A single unified rule execution result read from the Alerting Framework's "execute" event
+        in the event log. Contains execution metadata,
+        dynamic metrics, and any errors or warnings that occurred during execution.
+      properties:
+        execution_uuid:
+          type: string
+          description: Unique identifier of this execution.
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the execution event.
+        execution_duration_ms:
+          type: integer
+          description: Total execution duration in milliseconds (converted from event.duration nanoseconds).
+        status:
+          type: string
+          description: |-
+            Final execution status.
+            Values: succeeded, warning, failed.
+        metrics:
+          type: object
+          additionalProperties: true
+          description: |-
+            Dynamic bag of execution metrics. Keys are metric names, values are numbers or strings.
+            The set of metrics may vary by rule type.
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message
+          description: Errors that occurred during execution.
+        warnings:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+            required:
+              - message
+          description: Warnings that occurred during execution.
+      required:
+        - execution_uuid
+        - timestamp
+        - execution_duration_ms
+        - status
+        - metrics
+        - errors
+        - warnings
+
+    UnifiedExecutionResultSortField:
+      type: string
+      description: Fields available for sorting unified execution results.
+      enum:
+        - timestamp
+        - execution_duration_ms
