@@ -25,8 +25,11 @@ import type { CreateTimelineProps } from '../types';
 const { setSelected } = dataTableActions;
 
 export interface UseSendBulkToTimelineProps {
+  /** ID of the data table (e.g. alerts table) used to read selected event IDs and clear selection after sending to timeline. */
   tableId: TableId;
+  /** Start of the time range applied to the timeline when bulk events are sent. */
   from: string;
+  /** End of the time range applied to the timeline when bulk events are sent. */
   to: string;
 }
 
