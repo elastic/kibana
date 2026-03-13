@@ -29,7 +29,8 @@ export const dataViewSpecSchema = schema.object({
       schema.object({
         value: schema.string(),
         clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-      })
+      }),
+      { maxSize: 100 }
     )
   ),
   fields: schema.maybe(schema.recordOf(schema.string(), fieldSpecSchema)),
@@ -52,14 +53,14 @@ export const dataViewSpecSchema = schema.object({
   allowNoIndex: schema.maybe(schema.boolean()),
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSchema)),
   name: schema.maybe(schema.string()),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   allowHidden: schema.maybe(schema.boolean()),
 });
 
 export const dataViewsRuntimeResponseSchema = () =>
   schema.object({
     [SERVICE_KEY]: dataViewSpecSchema,
-    fields: schema.arrayOf(schema.object(fieldSpecSchemaFields)),
+    fields: schema.arrayOf(schema.object(fieldSpecSchemaFields), { maxSize: 50_000 }),
   });
 
 export const indexPatternsRuntimeResponseSchema = () =>
