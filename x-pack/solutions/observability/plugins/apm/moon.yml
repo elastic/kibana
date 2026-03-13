@@ -153,6 +153,7 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/slo-plugin'
   - '@kbn/slo-schema'
+  - '@kbn/lens-embeddable-utils'
 tags:
   - plugin
   - prod

@@ -152,6 +152,7 @@
     "@kbn/kql",
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
+    "@kbn/lens-embeddable-utils",
   ],
   "exclude": ["target/**/*"]
 }

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { isElasticAgentName, isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
-import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
+import { isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
 import { isAWSLambdaAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ServerlessMetrics } from './serverless_metrics';
@@ -17,6 +15,8 @@ import { JsonMetricsDashboard } from './static_dashboard';
 import { hasDashboard } from './static_dashboard/helper';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
+import { DynamicDashboard } from './dynamic_dashboard';
+import { getDynamicDashboard } from './dynamic_dashboard/dashboards';
 
 export function Metrics() {
   const { agentName, runtimeName, serverlessType, telemetrySdkName, telemetrySdkLanguage } =
@@ -24,23 +24,27 @@ export function Metrics() {
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView, apmIndices } = useAdHocApmDataView();
 
+  const indexPattern = apmIndices?.metric ?? dataView?.getIndexPattern() ?? '';
+
+  const dashboardPanels = getDynamicDashboard({
+    agentName,
+    telemetrySdkName,
+    telemetrySdkLanguage,
+  });
+
+  const dynamicDashboardPanels = useMemo(
+    () => dashboardPanels?.(indexPattern),
+    [dashboardPanels, indexPattern]
+  );
+
   const hasDashboardFile = hasDashboard({ agentName, telemetrySdkName, telemetrySdkLanguage });
 
   if (isAWSLambda) {
     return <ServerlessMetrics />;
   }
 
-  if (!hasDashboardFile && !isElasticAgentName(agentName ?? '')) {
-    return (
-      <EuiCallOut
-        announceOnMount
-        title={i18n.translate('xpack.apm.metrics.emptyState.title', {
-          defaultMessage: 'Runtime metrics are not available for this Agent / SDK type.',
-        })}
-        iconType="info"
-        data-test-subj="apmMetricsNoDashboardFound"
-      />
-    );
+  if (dynamicDashboardPanels && dataView) {
+    return <DynamicDashboard panels={dynamicDashboardPanels} dataView={dataView} />;
   }
 
   if (hasDashboardFile && dataView) {
