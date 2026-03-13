@@ -120,7 +120,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     await userEvent.click(ui.getImportButton());
 
     expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-      text: '2 artifacts imported',
+      text: '2 artifacts imported.',
       title: 'Artifact list imported successfully',
       toastLifeTimeMs: 60_000,
     });
