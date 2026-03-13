@@ -39,7 +39,7 @@ const OsqueryResultsFlyoutComponent: React.FC<OsqueryResultsFlyoutProps> = ({
 }) => {
   const flyoutServices = React.useMemo(
     () => ({ toastNotifications, chrome }),
-    [toastNotifications, chrome],
+    [toastNotifications, chrome]
   );
 
   return (

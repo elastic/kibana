@@ -39,18 +39,19 @@ describe('useResultsFiltering', () => {
 
     expect(result.current.query).toEqual({ query: '', language: 'kuery' });
     expect(result.current.filters).toEqual([]);
-    expect(result.current.kuery).toBeUndefined();
+    expect(result.current.userKuery).toBeUndefined();
+    expect(result.current.activeFilters).toEqual([]);
   });
 
-  it('returns undefined kuery when disabled', () => {
+  it('returns undefined userKuery when disabled', () => {
     const { result } = renderHook(() =>
       useResultsFiltering({ ...defaultOptions, enabled: false }, resetPagination)
     );
 
-    expect(result.current.kuery).toBeUndefined();
+    expect(result.current.userKuery).toBeUndefined();
   });
 
-  it('updates kuery on query submit', () => {
+  it('updates userKuery on query submit', () => {
     const { result } = renderHook(() => useResultsFiltering(defaultOptions, resetPagination));
 
     act(() => {
@@ -59,7 +60,7 @@ describe('useResultsFiltering', () => {
       });
     });
 
-    expect(result.current.kuery).toBe('agent.name: "host-1"');
+    expect(result.current.userKuery).toBe('agent.name: "host-1"');
     expect(resetPagination).toHaveBeenCalledTimes(1);
   });
 
@@ -73,7 +74,7 @@ describe('useResultsFiltering', () => {
     expect(result.current.filters).toHaveLength(1);
     expect(result.current.filters[0].meta.negate).toBe(false);
     expect(result.current.filters[0].meta.type).toBe('phrase');
-    expect(result.current.kuery).toBe('agent.name: "test-host"');
+    expect(result.current.activeFilters).toHaveLength(1);
     expect(resetPagination).toHaveBeenCalled();
   });
 
@@ -86,10 +87,10 @@ describe('useResultsFiltering', () => {
 
     expect(result.current.filters).toHaveLength(1);
     expect(result.current.filters[0].meta.negate).toBe(true);
-    expect(result.current.kuery).toBe('NOT agent.name: "test-host"');
+    expect(result.current.activeFilters).toHaveLength(1);
   });
 
-  it('combines query and filters into AND-joined KQL', () => {
+  it('sets userKuery independently of filters', () => {
     const { result } = renderHook(() => useResultsFiltering(defaultOptions, resetPagination));
 
     act(() => {
@@ -102,10 +103,11 @@ describe('useResultsFiltering', () => {
       result.current.handleFilter({ name: 'agent.name' } as DataViewField, 'host-1', '+');
     });
 
-    expect(result.current.kuery).toBe('osquery.name: "users" AND agent.name: "host-1"');
+    expect(result.current.userKuery).toBe('osquery.name: "users"');
+    expect(result.current.activeFilters).toHaveLength(1);
   });
 
-  it('excludes disabled filters from kuery', () => {
+  it('excludes disabled filters from activeFilters', () => {
     const { result } = renderHook(() => useResultsFiltering(defaultOptions, resetPagination));
 
     act(() => {
@@ -121,23 +123,7 @@ describe('useResultsFiltering', () => {
       );
     });
 
-    expect(result.current.kuery).toBeUndefined();
-  });
-
-  it('escapes special KQL characters in values', () => {
-    const { result } = renderHook(() => useResultsFiltering(defaultOptions, resetPagination));
-
-    act(() => {
-      result.current.handleFilter(
-        { name: 'agent.name' } as DataViewField,
-        'test(host):value*',
-        '+'
-      );
-    });
-
-    expect(result.current.kuery).toBeDefined();
-    expect(result.current.kuery).not.toContain('test(host):value*');
-    expect(result.current.kuery).toContain('agent.name:');
+    expect(result.current.activeFilters).toHaveLength(0);
   });
 
   it('provides filtersForSuggestions scoped to actionId', () => {

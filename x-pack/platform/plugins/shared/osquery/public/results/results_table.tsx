@@ -33,6 +33,7 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
+import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
@@ -55,6 +56,11 @@ import { getOsqueryCellRenderers } from './cell_renderers';
 import { OsqueryResultsFlyout } from './results_flyout';
 import { useOsqueryDataView } from './use_osquery_data_view';
 import { useResultsFiltering } from './use_results_filtering';
+import {
+  usePersistedPageSize,
+  PAGE_SIZE_OPTIONS,
+  RESULTS_PAGE_SIZE_STORAGE_KEY,
+} from '../common/use_persisted_page_size';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -164,16 +170,20 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     });
   }, [i18nStart, theme, toasts]);
 
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
+  const [persistedPageSize, setPersistedPageSize] = usePersistedPageSize(
+    RESULTS_PAGE_SIZE_STORAGE_KEY
+  );
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: persistedPageSize });
   const onChangeItemsPerPage = useCallback(
     (pageSize: any) => {
+      setPersistedPageSize(pageSize);
       setPagination((currentPagination) => ({
         ...currentPagination,
         pageSize,
         pageIndex: 0,
       }));
     },
-    [setPagination]
+    [setPersistedPageSize]
   );
   const onChangePage = useCallback(
     (pageIndex: any) => {
@@ -262,7 +272,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const tablePagination = useMemo(
     () => ({
       ...pagination,
-      pageSizeOptions: [10, 50, 100],
+      pageSizeOptions: [...PAGE_SIZE_OPTIONS],
       onChangeItemsPerPage,
       onChangePage,
     }),
@@ -526,7 +536,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
 const LegacyResultsTable = React.memo(ResultsTableComponent);
 
-const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100, 250, 500];
 const CONTROL_COLUMN_IDS = ['openDetails', 'select'];
 const storageInstance = new Storage(localStorage);
 
@@ -549,10 +558,6 @@ const gridStyleOverride = {
   header: 'shade' as const,
   stripes: false,
 };
-
-interface UnifiedDataTableSettings {
-  columns?: Record<string, { width?: number }>;
-}
 
 const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   actionId,
@@ -640,7 +645,10 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const { dataView, isLoading: isDataViewLoading } = useOsqueryDataView();
 
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
+  const [persistedPageSize, setPersistedPageSize] = usePersistedPageSize(
+    RESULTS_PAGE_SIZE_STORAGE_KEY
+  );
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: persistedPageSize });
 
   const [sortingColumns, setSortingColumns] = useState<
     Array<{ id: string; direction: 'asc' | 'desc' }>
@@ -655,7 +663,8 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const {
     query,
     filters,
-    kuery,
+    userKuery,
+    activeFilters,
     filtersForSuggestions,
     handleQuerySubmit,
     handleFiltersUpdated,
@@ -688,7 +697,8 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     startDate,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
-    kuery,
+    userKuery,
+    esFilters: activeFilters,
     isLive,
     sort: sortingColumns.map((col) => ({
       field: col.id,
@@ -725,21 +735,13 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   // --- Unified DataTable: handlers ---
-  // EuiDataGrid appends new sort columns to the end of the list, but the
-  // server API only uses the first sort field. Move newly added columns to
-  // the front so the most recently selected column becomes the primary sort.
   const handleSort = useCallback((newSort: string[][]) => {
-    setSortingColumns((prevCols) => {
-      const prevIds = new Set(prevCols.map((col) => col.id));
-      const added = newSort.filter(([id]) => !prevIds.has(id));
-      const existing = newSort.filter(([id]) => prevIds.has(id));
-      const reordered = [...added, ...existing];
-
-      return reordered.map(([id, direction]) => ({
+    setSortingColumns(
+      newSort.slice(0, 1).map(([id, direction]) => ({
         id,
         direction: direction as 'asc' | 'desc',
-      }));
-    });
+      }))
+    );
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, []);
 
@@ -820,13 +822,17 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     return columns;
   }, [visibleColumns]);
 
-  const mergedGridSettings = useMemo(
-    () => ({
-      ...gridSettings,
-      columns: { ...osqueryColumnDisplaySettings, ...gridSettings.columns },
-    }),
-    [gridSettings, osqueryColumnDisplaySettings]
-  );
+  const mergedGridSettings = useMemo(() => {
+    const mergedColumns: Record<string, { display?: string; width?: number }> = {};
+    for (const [col, setting] of Object.entries(osqueryColumnDisplaySettings)) {
+      mergedColumns[col] = { ...setting };
+    }
+    for (const [col, setting] of Object.entries(gridSettings.columns ?? {})) {
+      mergedColumns[col] = { ...mergedColumns[col], ...setting };
+    }
+
+    return { ...gridSettings, columns: mergedColumns };
+  }, [gridSettings, osqueryColumnDisplaySettings]);
 
   // Server-side pagination
   const totalResults = allResultsData?.total ?? 0;
@@ -845,78 +851,55 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [pagination.pageSize, showPaginationLimitToast]
   );
 
-  const handleServerPageSizeChange = useCallback((pageSize: number) => {
-    setPagination({ pageIndex: 0, pageSize });
-  }, []);
+  const handleServerPageSizeChange = useCallback(
+    (pageSize: number) => {
+      setPersistedPageSize(pageSize);
+      setPagination({ pageIndex: 0, pageSize });
+    },
+    [setPersistedPageSize]
+  );
 
   const SearchBar = unifiedSearch.ui.SearchBar;
-  const indexPatterns = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
-  // Collect all dot-notation field paths present in the result _source documents
   const sourceFieldNames = useMemo(() => {
+    if (!allResultsData?.edges.length) return null;
     const names = new Set<string>();
-    const edges = allResultsData?.edges ?? [];
-    if (!edges.length) return names;
-
-    const collectPaths = (obj: unknown, prefix = '') => {
-      if (!obj || typeof obj !== 'object') return;
+    const MAX_DEPTH = 5;
+    const collectPaths = (obj: unknown, prefix = '', depth = 0) => {
+      if (!obj || typeof obj !== 'object' || depth >= MAX_DEPTH) return;
       for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
         const path = prefix ? `${prefix}.${key}` : key;
         if (value && typeof value === 'object' && !Array.isArray(value)) {
-          collectPaths(value, path);
+          collectPaths(value, path, depth + 1);
         } else {
           names.add(path);
         }
       }
     };
-
-    for (const edge of edges.slice(0, 5)) {
-      if (edge._source) {
-        collectPaths(edge._source);
-      }
-    }
-
+    allResultsData.edges.slice(0, 5).forEach((edge) => collectPaths(edge._source));
     return names;
   }, [allResultsData?.edges]);
 
-  // Filtered data view for SearchBar field suggestions scoped to result columns
-  const searchBarIndexPatterns = useMemo(() => {
-    if (!dataView || !allResultsData?.columns?.length) return indexPatterns;
-
-    const resultFieldNames = new Set<string>();
-
-    resultFieldNames.add('agent.name');
-    resultFieldNames.add('agent.id');
-
-    for (const col of ecsMappingColumns) {
-      resultFieldNames.add(col);
+  const [filteredDataView, setFilteredDataView] = useState(dataView);
+  useEffect(() => {
+    if (!dataView) return;
+    if (!sourceFieldNames) {
+      setFilteredDataView(dataView);
+      return;
     }
-
-    for (const col of allResultsData.columns) {
-      resultFieldNames.add(col);
-      if (col.startsWith('osquery.') && !col.endsWith('.number')) {
-        resultFieldNames.add(`${col}.number`);
-      }
-    }
-
-    for (const name of sourceFieldNames) {
-      resultFieldNames.add(name);
-    }
-
-    const filteredFields = dataView.fields.filter(
-      (field) => resultFieldNames.has(field.name) || field.name === '@timestamp'
+    const spec = dataView.toSpec();
+    // Strip id so dataViews.create() doesn't return the cached full DataView
+    spec.id = undefined;
+    spec.fields = Object.fromEntries(
+      Object.entries(spec.fields ?? {}).filter(([name]) => sourceFieldNames.has(name))
     );
+    dataService.dataViews.create(spec, true).then(setFilteredDataView);
+  }, [dataView, sourceFieldNames, dataService.dataViews]);
 
-    if (filteredFields.length >= dataView.fields.length) return indexPatterns;
-
-    const filteredDataView = {
-      ...dataView,
-      fields: filteredFields,
-      getFieldByName: (name: string) => filteredFields.find((f) => f.name === name),
-    };
-
-    return [filteredDataView] as typeof indexPatterns;
-  }, [dataView, allResultsData?.columns, ecsMappingColumns, sourceFieldNames, indexPatterns]);
+  const searchBarIndexPatterns = useMemo(
+    () => (filteredDataView ? [filteredDataView] : []),
+    [filteredDataView]
+  );
 
   const handleCloseFlyout = useCallback(() => {
     setExpandedDoc(undefined);
@@ -1039,7 +1022,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   onUpdateRowHeight={handleUpdateRowHeight}
                   dataGridDensityState={density}
                   onUpdateDataGridDensity={handleUpdateDensity}
-                  sampleSizeState={allResultsData?.total ?? 0}
+                  sampleSizeState={rows.length}
                   totalHits={allResultsData?.total}
                   services={unifiedDataTableServices}
                   consumer="osquery"
@@ -1058,7 +1041,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
               onChangePage={handleServerPageChange}
               itemsPerPage={pagination.pageSize}
               onChangeItemsPerPage={handleServerPageSizeChange}
-              itemsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+              itemsPerPageOptions={[...PAGE_SIZE_OPTIONS]}
               showPerPageOptions
             />
           </>
@@ -1067,7 +1050,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             <EuiCallOut
               announceOnMount
               title={
-                kuery
+                userKuery || activeFilters.length > 0
                   ? i18n.translate('xpack.osquery.resultsTable.noFilterResults', {
                       defaultMessage: 'No results match your search criteria',
                     })

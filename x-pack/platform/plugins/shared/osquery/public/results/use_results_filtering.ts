@@ -8,7 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Query, Filter } from '@kbn/es-query';
-import { FilterStateStore, escapeKuery } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 
 export interface UseResultsFilteringOptions {
   enabled: boolean;
@@ -21,7 +21,8 @@ export interface UseResultsFilteringOptions {
 export interface UseResultsFilteringResult {
   query: Query;
   filters: Filter[];
-  kuery: string | undefined;
+  userKuery: string | undefined;
+  activeFilters: Filter[];
   filtersForSuggestions: Filter[];
   handleQuerySubmit: (payload: { query?: Query }) => void;
   handleFiltersUpdated: (filters: Filter[]) => void;
@@ -38,46 +39,19 @@ export const useResultsFiltering = (
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [filters, setFilters] = useState<Filter[]>([]);
 
-  const kuery = useMemo(() => {
+  const userKuery = useMemo(() => {
     if (!enabled) return undefined;
-
-    const parts: string[] = [];
-
     if (query.query && typeof query.query === 'string' && query.query.trim()) {
-      parts.push(query.query.trim());
+      return query.query.trim();
     }
 
-    for (const filter of filters) {
-      if (filter.meta?.disabled) continue;
+    return undefined;
+  }, [enabled, query]);
 
-      const { key, params, negate } = filter.meta ?? {};
-      if (!key) continue;
-
-      let filterKql: string | undefined;
-      if (filter.meta?.type === 'phrase' || filter.meta?.type === 'phrases') {
-        const value = (params as { query?: string })?.query ?? params;
-        if (value !== undefined && value !== null) {
-          const escapedValue =
-            typeof value === 'string' ? `"${escapeKuery(value)}"` : String(value);
-          filterKql = `${key}: ${escapedValue}`;
-        }
-      } else if (filter.query) {
-        const q = filter.query as Record<string, Record<string, unknown>>;
-        const matchValue = q?.match?.[key] ?? q?.match_phrase?.[key];
-        if (matchValue !== undefined) {
-          const val = typeof matchValue === 'object' ? (matchValue as any).query : matchValue;
-          const escapedVal = typeof val === 'string' ? `"${escapeKuery(val)}"` : String(val);
-          filterKql = `${key}: ${escapedVal}`;
-        }
-      }
-
-      if (filterKql) {
-        parts.push(negate ? `NOT ${filterKql}` : filterKql);
-      }
-    }
-
-    return parts.length > 0 ? parts.join(' AND ') : undefined;
-  }, [enabled, query, filters]);
+  const activeFilters = useMemo(
+    () => filters.filter((f) => !f.meta?.disabled),
+    [filters]
+  );
 
   const filtersForSuggestions = useMemo<Filter[]>(() => {
     if (isScheduled) {
@@ -182,7 +156,8 @@ export const useResultsFiltering = (
   return {
     query,
     filters,
-    kuery,
+    userKuery,
+    activeFilters,
     filtersForSuggestions,
     handleQuerySubmit,
     handleFiltersUpdated,

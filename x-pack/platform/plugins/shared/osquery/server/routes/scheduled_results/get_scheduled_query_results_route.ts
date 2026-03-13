@@ -52,6 +52,7 @@ export const getScheduledQueryResultsRoute = (
                 schema.oneOf([schema.literal('asc'), schema.literal('desc')])
               ),
               kuery: schema.maybe(schema.string()),
+              esFilters: schema.maybe(schema.string()),
               startDate: schema.maybe(schema.string()),
             }),
           },
@@ -102,6 +103,7 @@ export const getScheduledQueryResultsRoute = (
                 executionCount,
                 factoryQueryType: OsqueryQueries.results,
                 kuery: request.query.kuery,
+                esFilters: request.query.esFilters,
                 startDate: request.query.startDate,
                 pagination: generateTablePaginationOptions(page, pageSize),
                 sort: [

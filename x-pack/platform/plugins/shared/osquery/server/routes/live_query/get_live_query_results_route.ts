@@ -170,6 +170,7 @@ export const getLiveQueryResultsRoute = (
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.results,
                 kuery: request.query.kuery,
+                esFilters: request.query.esFilters,
                 startDate: request.query.startDate,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
