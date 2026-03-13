@@ -985,6 +985,12 @@ export class HttpServer {
               parse,
               timeout: timeout?.payload,
               multipart: true,
+              compression: maxBytes
+                ? {
+                    gzip: { maxOutputLength: maxBytes },
+                    deflate: { maxOutputLength: maxBytes },
+                  }
+                : undefined,
             }
           : undefined,
         timeout: {
