@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import Path from 'path';
 import Fs from 'fs';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import { mapValues } from 'lodash';
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -58,7 +58,7 @@ const getConnectorsFromKibanaDevYml = (): Record<string, AvailableConnector> => 
       return {};
     }
 
-    const parsedConfig = (load(Fs.readFileSync(configPath, 'utf8')) || {}) as Record<
+    const parsedConfig = (parse(Fs.readFileSync(configPath, 'utf8')) || {}) as Record<
       string,
       unknown
     >;
