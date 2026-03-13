@@ -382,6 +382,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         <>
           {selectedTab === AllRulesTabs.monitoring && (
             <>
+              <EuiSpacer />
               <RulesWithGapsOverviewPanel />
               <EuiSpacer />
             </>

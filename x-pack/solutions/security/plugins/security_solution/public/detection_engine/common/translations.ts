@@ -1205,7 +1205,7 @@ export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
 export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.clearRulesTableFilters',
   {
-    defaultMessage: 'Clear filters',
+    defaultMessage: 'Clear',
   }
 );
 

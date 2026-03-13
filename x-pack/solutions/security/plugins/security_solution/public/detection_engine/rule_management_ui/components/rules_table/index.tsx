@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
