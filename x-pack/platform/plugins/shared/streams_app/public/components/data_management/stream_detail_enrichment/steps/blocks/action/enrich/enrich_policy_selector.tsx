@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFormRow, EuiLink, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 
@@ -39,40 +40,50 @@ export const EnrichPolicySelector = () => {
   const createEnrichPolicyUrl = core.application.getUrlForApp('management', {
     path: '/data/index_management/enrich_policies/create',
   });
-
-  if (isFetched && policies.length === 0) {
-    return (
-      <EuiEmptyPrompt
-        title={
-          <h2>
-            {i18n.translate('xpack.streams.enrichPolicySelector.h2.noEnrichPoliciesFoundLabel', {
-              defaultMessage: 'No enrich policies found',
-            })}
-          </h2>
-        }
-        actions={
-          <EuiLink href={createEnrichPolicyUrl} target="_blank">
-            {i18n.translate('xpack.streams.enrichPolicySelector.createEnrichPolicyLinkLabel', {
-              defaultMessage: 'Create enrich policy',
-            })}
-          </EuiLink>
-        }
-      />
-    );
-  }
+  const noPoliciesFound = useMemo(() => {
+    return isFetched && policies.length === 0;
+  }, [isFetched, policies]);
 
   return (
     <Controller
       control={control}
+      rules={{
+        required: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.enrichPolicyRequiredError',
+          { defaultMessage: 'Enrich policy is required' }
+        ),
+      }}
       name="policy_name"
-      render={({ field }) => (
+      render={({ field, fieldState }) => (
         <EuiFormRow
           label={i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.enrichPolicyLabel',
             { defaultMessage: 'Enrich policy' }
           )}
+          isInvalid={fieldState.invalid || noPoliciesFound}
+          error={
+            noPoliciesFound ? (
+              <FormattedMessage
+                id="xpack.streams.enrichPolicySelector.noPoliciesFoundError"
+                defaultMessage="No enrich policies found. {createEnrichPolicyUrl}"
+                values={{
+                  createEnrichPolicyUrl: (
+                    <EuiLink href={createEnrichPolicyUrl} target="_blank">
+                      {i18n.translate(
+                        'xpack.streams.enrichPolicySelector.createEnrichPolicyLinkLabel',
+                        { defaultMessage: 'Create enrich policy' }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            ) : (
+              fieldState.error?.message
+            )
+          }
         >
           <EuiSelect
+            isInvalid={fieldState.invalid || noPoliciesFound}
             hasNoInitialSelection
             options={policies.map((policy) => ({
               text: policy.name,
