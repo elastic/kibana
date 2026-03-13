@@ -147,6 +147,27 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
         fields.push(processor.target_field);
       }
       break;
+    case 'uri_parts': {
+      const prefix = processor.to ?? 'url';
+      const keepOriginal = processor.keep_original ?? true;
+      const outputFields = [
+        'scheme',
+        'domain',
+        'port',
+        'path',
+        'extension',
+        'query',
+        'fragment',
+        'user_info',
+        'username',
+        'password',
+      ];
+      if (keepOriginal) {
+        outputFields.push('original');
+      }
+      outputFields.forEach((suffix) => fields.push(`${prefix}.${suffix}`));
+      break;
+    }
 
     case 'remove':
     case 'remove_by_prefix':
@@ -274,7 +295,10 @@ export function getProcessorOutputType(
 
     case 'network_direction':
       return 'string';
-
+    case 'uri_parts':
+      if (fieldName.endsWith('.port')) {
+        return 'number';
+      }
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -337,6 +361,7 @@ export function getExpectedInputType(
     case 'uppercase':
     case 'lowercase':
     case 'trim':
+    case 'uri_parts':
       if (processor.from === fieldName) {
         return ['string'];
       }
@@ -360,7 +385,6 @@ export function getExpectedInputType(
         return ['string'];
       }
       return null;
-
     case 'sort':
     case 'rename':
     case 'set':
@@ -411,6 +435,7 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
       case 'uppercase':
       case 'lowercase':
       case 'trim':
+      case 'uri_parts':
         if (step.from) fieldsUsed.push(step.from);
         break;
       case 'rename':

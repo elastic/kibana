@@ -23,6 +23,7 @@ import type {
   IngestPipelineUppercaseProcessor,
   IngestPipelineLowercaseProcessor,
   IngestPipelineTrimProcessor,
+  IngestPipelineUriPartsProcessor,
   IngestPipelineJoinProcessor,
   IngestPipelineSplitProcessor,
   IngestPipelineSortProcessor,
@@ -47,6 +48,7 @@ export interface ActionToIngestType {
   uppercase: WithOptionalTracingTag<IngestPipelineUppercaseProcessor>;
   lowercase: WithOptionalTracingTag<IngestPipelineLowercaseProcessor>;
   trim: WithOptionalTracingTag<IngestPipelineTrimProcessor>;
+  uri_parts: WithOptionalTracingTag<IngestPipelineUriPartsProcessor>;
   join: WithOptionalTracingTag<IngestPipelineJoinProcessor>;
   split: WithOptionalTracingTag<IngestPipelineSplitProcessor>;
   sort: WithOptionalTracingTag<IngestPipelineSortProcessor>;

@@ -25,6 +25,7 @@ import type {
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
   TrimProcessor,
+  UriPartsProcessor,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
@@ -71,6 +72,7 @@ import type {
   SplitFormState,
   SortFormState,
   TrimFormState,
+  UriPartsFormState,
   UppercaseFormState,
 } from './types';
 
@@ -90,6 +92,7 @@ export const SPECIALISED_TYPES = [
   'uppercase',
   'lowercase',
   'trim',
+  'uri_parts',
   'join',
   'split',
   'sort',
@@ -277,6 +280,26 @@ const defaultTrimProcessorFormState = (): TrimFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultUriPartsProcessorFormState = (sampleDocs: FlattenRecord[]): UriPartsFormState => ({
+  action: 'uri_parts' as const,
+  from: getDefaultTextField(sampleDocs, [
+    'url.original',
+    'url.full',
+    'url.path',
+    'http.request.referrer',
+    'http.request.url',
+    'http.request.uri',
+    'uri',
+    'url',
+  ]),
+  to: 'url',
+  keep_original: true,
+  remove_if_successful: false,
+  ignore_missing: false,
+  ignore_failure: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultJoinProcessorFormState = (): JoinFormState => ({
   action: 'join' as const,
   from: [],
@@ -357,6 +380,7 @@ const defaultProcessorFormStateByType: Record<
   uppercase: defaultUppercaseProcessorFormState,
   lowercase: defaultLowercaseProcessorFormState,
   trim: defaultTrimProcessorFormState,
+  uri_parts: defaultUriPartsProcessorFormState,
   set: defaultSetProcessorFormState,
   join: defaultJoinProcessorFormState,
   split: defaultSplitProcessorFormState,
@@ -427,6 +451,7 @@ export const getFormStateFromActionStep = (
     step.action === 'uppercase' ||
     step.action === 'lowercase' ||
     step.action === 'trim' ||
+    step.action === 'uri_parts' ||
     step.action === 'join' ||
     step.action === 'split' ||
     step.action === 'sort' ||
@@ -709,6 +734,24 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as TrimProcessor,
+      };
+    }
+
+    if (formState.action === 'uri_parts') {
+      const { from, to, keep_original, remove_if_successful, ignore_failure, ignore_missing } =
+        formState;
+      return {
+        processorDefinition: {
+          action: 'uri_parts',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          keep_original,
+          remove_if_successful,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as UriPartsProcessor,
       };
     }
 
