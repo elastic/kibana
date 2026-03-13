@@ -35,20 +35,18 @@ describe('getOriginatingAppBreadcrumbs', () => {
   });
 
   it('derives listing path by dropping the last segment', () => {
-    getOriginatingAppBreadcrumbs(defaults)[0].onClick!({} as React.MouseEvent<HTMLAnchorElement>);
+    getOriginatingAppBreadcrumbs(defaults)[0].onClick!({} as any);
     expect(navigateToApp).toHaveBeenCalledWith('dashboards', { path: '#/view' });
   });
 
   it('navigates without path when the path has only one segment after hash', () => {
-    getOriginatingAppBreadcrumbs({ ...defaults, originatingPath: '#/list' })[0].onClick!(
-      {} as React.MouseEvent<HTMLAnchorElement>
-    );
+    getOriginatingAppBreadcrumbs({ ...defaults, originatingPath: '#/list' })[0].onClick!({} as any);
     expect(navigateToApp).toHaveBeenCalledWith('dashboards', undefined);
   });
 
   it('trims trailing slashes before computing parent', () => {
     getOriginatingAppBreadcrumbs({ ...defaults, originatingPath: '#/view/abc123/' })[0].onClick!(
-      {} as React.MouseEvent<HTMLAnchorElement>
+      {} as any
     );
     expect(navigateToApp).toHaveBeenCalledWith('dashboards', { path: '#/view' });
   });

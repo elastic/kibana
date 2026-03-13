@@ -340,7 +340,6 @@ export const LensTopNavMenu = ({
     dataViewEditor,
     dataViews: dataViewsService,
   } = useKibana<LensAppServices>().services;
-
   const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   const {
@@ -576,10 +575,7 @@ export const LensTopNavMenu = ({
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
     const showReplaceInDashboard = Boolean(
-      initialContext?.originatingApp === 'dashboards' &&
-        !initialInput?.savedObjectId &&
-        contextFromEmbeddable &&
-        initialContext?.embeddableId
+      !initialInput?.savedObjectId && contextFromEmbeddable && initialContext?.embeddableId
     );
     const showReplaceInCanvas =
       initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
@@ -591,8 +587,7 @@ export const LensTopNavMenu = ({
       !incomingState.originatingPath.includes('/list/');
 
     const showSaveAndReturn =
-      !(showReplaceInDashboard || showReplaceInCanvas) &&
-      Boolean(isComingFromDashboardView || initialContextIsEmbedded);
+      !(showReplaceInDashboard || showReplaceInCanvas) && Boolean(isComingFromDashboardView);
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -865,7 +860,6 @@ export const LensTopNavMenu = ({
     initialContext,
     initialInput?.savedObjectId,
     incomingState,
-    initialContextIsEmbedded,
     activeData,
     isSaveable,
     application,

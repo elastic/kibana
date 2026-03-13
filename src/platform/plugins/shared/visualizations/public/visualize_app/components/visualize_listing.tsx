@@ -292,7 +292,9 @@ export const VisualizeListing = () => {
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
   const closeNewVisModal = useRef(() => {});
-
+  const visualizeLibraryPageTitle = i18n.translate('visualizations.listingPageTitle', {
+    defaultMessage: 'Visualize library',
+  });
   useExecutionContext(executionContext, {
     type: 'application',
     page: 'list',
@@ -323,16 +325,12 @@ export const VisualizeListing = () => {
     } else {
       chrome.setBreadcrumbs([
         {
-          text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-            defaultMessage: 'Visualize library',
-          }),
+          text: visualizeLibraryPageTitle,
         },
       ]);
     }
 
-    chrome.docTitle.change(
-      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize library' })
-    );
+    chrome.docTitle.change(visualizeLibraryPageTitle);
   });
   useUnmount(() => closeNewVisModal.current());
 
@@ -349,21 +347,11 @@ export const VisualizeListing = () => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
-  const visualizeLibraryBreadcrumbTitle = i18n.translate(
-    'visualizations.listing.breadcrumbsTitle',
-    {
-      defaultMessage: 'Visualize library',
-    }
-  );
   const tableViewProps = useTableListViewProps(
     closeNewVisModal,
     listingLimit,
-    visualizeLibraryBreadcrumbTitle
+    visualizeLibraryPageTitle
   );
-
-  const visualizeLibraryTitle = i18n.translate('visualizations.listing.table.listTitle', {
-    defaultMessage: 'Visualize library',
-  });
 
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {
     const calloutMessage = (
@@ -423,7 +411,7 @@ export const VisualizeListing = () => {
                   : () => tableViewProps.editItem?.(item)
               }
               getDetailViewLink={getVisualizeListItemLink}
-              tableCaption={visualizeLibraryTitle}
+              tableCaption={visualizeLibraryPageTitle}
               {...tableViewProps}
               {...propsFromParent}
             />
@@ -437,7 +425,7 @@ export const VisualizeListing = () => {
     application,
     dashboardCapabilities.createNew,
     initialPageSize,
-    visualizeLibraryTitle,
+    visualizeLibraryPageTitle,
     tableViewProps,
     getVisualizeListItemLink,
   ]);
@@ -452,7 +440,7 @@ export const VisualizeListing = () => {
   return (
     <TabbedTableListView
       headingId="visualizeListingHeading"
-      title={visualizeLibraryTitle}
+      title={visualizeLibraryPageTitle}
       tabs={tabs}
       activeTabId={activeTab}
       changeActiveTab={(id) => {

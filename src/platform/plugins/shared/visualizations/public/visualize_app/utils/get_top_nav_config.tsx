@@ -430,7 +430,7 @@ export const getTopNavConfig = (
                 visTypeTitle: vis.type.title,
                 description: visInstance?.panelDescription || vis.description,
                 panelTimeRange: visInstance?.panelTimeRange,
-                isEmbeddable: Boolean(originatingApp),
+                isEmbeddable: isOriginatingFromDashboardPanel,
                 ...(searchFilters && { searchFilters }),
                 ...(searchQuery && { searchQuery }),
               };
