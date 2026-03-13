@@ -8,20 +8,20 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { RecoveryDescription } from './recovery_policy';
+import { RecoveryPolicy } from './recovery_policy';
 import type { RuleApiResponse } from '../../services/rules_api';
 
 const wrap = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
-describe('RecoveryDescription', () => {
+describe('RecoveryPolicy', () => {
   it('renders placeholder when recoveryPolicy is undefined', () => {
-    const { container } = wrap(<RecoveryDescription recoveryPolicy={undefined} />);
+    const { container } = wrap(<RecoveryPolicy recoveryPolicy={undefined} />);
     expect(container).toHaveTextContent('-');
   });
 
   it('renders type label for no_breach policy without query', () => {
     const policy: RuleApiResponse['recovery_policy'] = { type: 'no_breach' };
-    const { container } = wrap(<RecoveryDescription recoveryPolicy={policy} />);
+    const { container } = wrap(<RecoveryPolicy recoveryPolicy={policy} />);
     expect(container).toHaveTextContent('No breach');
   });
 
@@ -30,9 +30,9 @@ describe('RecoveryDescription', () => {
       type: 'query',
       query: { base: 'FROM logs-* | WHERE status = "ok"' },
     };
-    wrap(<RecoveryDescription recoveryPolicy={policy} />);
+    wrap(<RecoveryPolicy recoveryPolicy={policy} />);
     expect(screen.getByText('ESQL recovery query')).toBeInTheDocument();
-    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryQuery')).toHaveTextContent(
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryQueryBase')).toHaveTextContent(
       'FROM logs-* | WHERE status = "ok"'
     );
   });
@@ -42,22 +42,28 @@ describe('RecoveryDescription', () => {
       type: 'query',
       query: { base: 'FROM metrics-*', condition: 'WHERE cpu < 0.5' },
     };
-    wrap(<RecoveryDescription recoveryPolicy={policy} />);
-    const codeBlock = screen.getByTestId('alertingV2RuleDetailsRecoveryQuery');
-    expect(codeBlock).toHaveTextContent('FROM metrics-*');
-    expect(codeBlock).toHaveTextContent('WHERE cpu < 0.5');
+    wrap(<RecoveryPolicy recoveryPolicy={policy} />);
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryQueryBase')).toHaveTextContent(
+      'FROM metrics-*'
+    );
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryQueryCondition')).toHaveTextContent(
+      'WHERE cpu < 0.5'
+    );
   });
 
   it('renders only type label for query policy without actual queries', () => {
     const policy: RuleApiResponse['recovery_policy'] = { type: 'query' };
-    const { container } = wrap(<RecoveryDescription recoveryPolicy={policy} />);
+    const { container } = wrap(<RecoveryPolicy recoveryPolicy={policy} />);
     expect(container).toHaveTextContent('ESQL recovery query');
-    expect(screen.queryByTestId('alertingV2RuleDetailsRecoveryQuery')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2RuleDetailsRecoveryQueryBase')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertingV2RuleDetailsRecoveryQueryCondition')
+    ).not.toBeInTheDocument();
   });
 
   it('falls back to raw type value for unknown types', () => {
     const policy = { type: 'custom_recovery' } as unknown as RuleApiResponse['recovery_policy'];
-    const { container } = wrap(<RecoveryDescription recoveryPolicy={policy} />);
+    const { container } = wrap(<RecoveryPolicy recoveryPolicy={policy} />);
     expect(container).toHaveTextContent('custom_recovery');
   });
 });

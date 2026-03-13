@@ -45,7 +45,7 @@ export const RecoveryPolicy = ({ recoveryPolicy }: RecoveryPolicyProps) => {
           language="esql"
           isCopyable
           paddingSize="m"
-          data-test-subj="alertingV2RuleDetailsRecoveryQuery"
+          data-test-subj="alertingV2RuleDetailsRecoveryQueryBase"
         >
           {recoveryPolicy.query?.base}
         </EuiCodeBlock>
@@ -55,7 +55,7 @@ export const RecoveryPolicy = ({ recoveryPolicy }: RecoveryPolicyProps) => {
           language="esql"
           isCopyable
           paddingSize="m"
-          data-test-subj="alertingV2RuleDetailsRecoveryQuery"
+          data-test-subj="alertingV2RuleDetailsRecoveryQueryCondition"
         >
           {recoveryPolicy.query.condition}
         </EuiCodeBlock>

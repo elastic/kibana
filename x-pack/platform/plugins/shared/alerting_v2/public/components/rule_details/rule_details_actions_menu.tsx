@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { RuleApiResponse } from '../../services/rules_api';
-import { useCloneRule } from '../../hooks/use_clone_rule';
-
+import { paths } from '../../constants';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 
 export interface RuleDetailsActionsMenuProps {
@@ -25,7 +25,8 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
-  const { mutate: cloneRule } = useCloneRule();
+  const { navigateToUrl } = useService(CoreStart('application'));
+  const { basePath } = useService(CoreStart('http'));
   const { mutate: toggleRuleEnabled } = useToggleRuleEnabled();
 
   const deleteButtonStyles = css`
@@ -44,7 +45,7 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
 
   const handleClone = () => {
     setIsPopoverOpen(false);
-    cloneRule(rule);
+    navigateToUrl(basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(rule.id)}`));
   };
 
   const handleDelete = () => {

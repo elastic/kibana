@@ -14,9 +14,6 @@ export const ruleKeys = {
   create: () => [...ruleKeys.all, 'create'] as const,
   update: () => [...ruleKeys.all, 'update'] as const,
   delete: () => [...ruleKeys.all, 'delete'] as const,
-  clone: () => [...ruleKeys.all, 'clone'] as const,
-  enable: () => [...ruleKeys.all, 'enable'] as const,
-  disable: () => [...ruleKeys.all, 'disable'] as const,
 };
 
 export const notificationPolicyKeys = {

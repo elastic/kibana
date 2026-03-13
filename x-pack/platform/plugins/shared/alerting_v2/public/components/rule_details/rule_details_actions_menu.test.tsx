@@ -8,23 +8,18 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { RuleDetailsActionsMenu } from './rule_details_actions_menu';
 import type { RuleApiResponse } from '../../services/rules_api';
 
-const mockCloneRule = jest.fn();
-const mockDisableRule = jest.fn();
-const mockEnableRule = jest.fn();
+const mockToggleRuleEnabled = jest.fn();
+const mockNavigateToUrl = jest.fn();
+const mockUseService = useService as jest.MockedFunction<typeof useService>;
+const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
 
-jest.mock('../../hooks/use_clone_rule', () => ({
-  useCloneRule: () => ({ mutate: mockCloneRule }),
-}));
-
-jest.mock('../../hooks/use_disable_rule', () => ({
-  useDisableRule: () => ({ mutate: mockDisableRule }),
-}));
-
-jest.mock('../../hooks/use_enable_rule', () => ({
-  useEnableRule: () => ({ mutate: mockEnableRule }),
+jest.mock('@kbn/core-di-browser');
+jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
+  useToggleRuleEnabled: () => ({ mutate: mockToggleRuleEnabled }),
 }));
 
 const enabledRule = {
@@ -46,6 +41,16 @@ const renderMenu = (rule: RuleApiResponse, showDeleteConfirmation = jest.fn()) =
 describe('RuleDetailsActionsMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCoreStart.mockImplementation((key: string) => key as never);
+    mockUseService.mockImplementation((service: unknown) => {
+      if (service === 'application') {
+        return { navigateToUrl: mockNavigateToUrl } as never;
+      }
+      if (service === 'http') {
+        return { basePath: { prepend: (url: string) => url } } as never;
+      }
+      return undefined as never;
+    });
   });
 
   it('renders the actions button', () => {
@@ -67,25 +72,27 @@ describe('RuleDetailsActionsMenu', () => {
     expect(screen.queryByTestId('ruleDetailsDisableButton')).not.toBeInTheDocument();
   });
 
-  it('calls disableRule when disable is clicked', () => {
+  it('calls toggleRuleEnabled with enabled=false when disable is clicked', () => {
     renderMenu(enabledRule);
     fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
     fireEvent.click(screen.getByTestId('ruleDetailsDisableButton'));
-    expect(mockDisableRule).toHaveBeenCalledWith({ id: 'rule-1' });
+    expect(mockToggleRuleEnabled).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
   });
 
-  it('calls enableRule when enable is clicked', () => {
+  it('calls toggleRuleEnabled with enabled=true when enable is clicked', () => {
     renderMenu(disabledRule);
     fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
     fireEvent.click(screen.getByTestId('ruleDetailsEnableButton'));
-    expect(mockEnableRule).toHaveBeenCalledWith({ id: 'rule-1' });
+    expect(mockToggleRuleEnabled).toHaveBeenCalledWith({ id: 'rule-1', enabled: true });
   });
 
-  it('calls cloneRule when clone is clicked', () => {
+  it('navigates to create page with cloneFrom query param when clone is clicked', () => {
     renderMenu(enabledRule);
     fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
     fireEvent.click(screen.getByTestId('ruleDetailsCloneButton'));
-    expect(mockCloneRule).toHaveBeenCalledWith(enabledRule);
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+      '/app/management/insightsAndAlerting/alerting_v2/create?cloneFrom=rule-1'
+    );
   });
 
   it('calls showDeleteConfirmation when delete is clicked', () => {
