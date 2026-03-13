@@ -257,6 +257,12 @@ describe('test fetchAll', () => {
       esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
     });
     const query = { esql: 'from foo' };
+
+    // Mock cloneWithFields method for ES|QL query to return a DataView instance
+    const clonedDataView = Object.create(DataView.prototype);
+    Object.assign(clonedDataView, dataViewMock);
+    dataViewMock.cloneWithFields = jest.fn(() => clonedDataView);
+
     deps.internalState.dispatch(
       internalStateActions.updateAppState({
         tabId: deps.getCurrentTab().id,

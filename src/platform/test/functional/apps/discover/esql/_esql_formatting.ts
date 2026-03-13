@@ -140,6 +140,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
+        // Change rowHeight to auto so more fields are shown in the data grid
+        await dataGrid.clickGridSettings();
+        await dataGrid.changeRowHeightValue('Auto');
+        await dataGrid.clickGridSettings();
+
         // Create a computed column that doesn't exist in the data view
         const testQuery =
           'from logstash-* | sort @timestamp | limit 10 | eval custom_bytes = bytes * 2';

@@ -461,11 +461,12 @@ export function getDataStateContainer({
                 return;
               }
 
-              const { esqlQueryColumns } = dataSubjects.documents$.getValue();
+              const { esqlQueryColumns, esqlDataView } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
               const postFetchStateUpdate = defaultProfileState?.getPostFetchState({
                 defaultColumns,
                 esqlQueryColumns,
+                esqlDataView,
               });
 
               if (postFetchStateUpdate) {

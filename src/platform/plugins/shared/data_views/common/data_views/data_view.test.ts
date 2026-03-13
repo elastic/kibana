@@ -857,8 +857,8 @@ describe('IndexPattern', () => {
       });
 
       const fields: Record<string, FieldSpec> = {
-        field1: {
-          name: 'field1',
+        'nested.field.name': {
+          name: 'nested.field.name',
           type: 'string',
           searchable: true,
           aggregatable: false,
@@ -868,7 +868,11 @@ describe('IndexPattern', () => {
       const clonedDataView = dataView.cloneWithFields(fields);
 
       expect(clonedDataView.metaFields).toEqual(['_source', '_id', '_index']);
-      expect(clonedDataView.shortDotsEnable).toBe(true);
+
+      // Verify shortDotsEnable is preserved by checking field displayName behavior
+      // When shortDotsEnable is true, dotted field names should be shortened (e.g., 'nested.field.name' -> 'n.f.name')
+      const clonedField = clonedDataView.fields.getByName('nested.field.name');
+      expect(clonedField?.displayName).toBe('n.f.name');
     });
 
     test('should not mutate the original DataView', () => {
