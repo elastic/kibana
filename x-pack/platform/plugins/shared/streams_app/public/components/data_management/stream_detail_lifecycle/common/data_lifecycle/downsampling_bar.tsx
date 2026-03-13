@@ -79,6 +79,7 @@ export interface DownsamplingBarProps {
   onRemoveStep?: (stepNumber: number) => void;
   onEditStep?: (stepNumber: number, phaseName?: string) => void;
   editedPhaseName?: string;
+  editedDownsampleStepIndex?: number;
   canManageLifecycle: boolean;
   isEditLifecycleFlyoutOpen?: boolean;
 }
@@ -89,6 +90,7 @@ export const DownsamplingBar = ({
   onRemoveStep,
   onEditStep,
   editedPhaseName,
+  editedDownsampleStepIndex,
   canManageLifecycle,
   isEditLifecycleFlyoutOpen,
 }: DownsamplingBarProps) => {
@@ -156,7 +158,11 @@ export const DownsamplingBar = ({
                     onRemoveStep={onRemoveStep}
                     onEditStep={onEditStep}
                     isBeingEdited={Boolean(
-                      editedPhaseName && segment.phaseName && segment.phaseName === editedPhaseName
+                      (editedPhaseName &&
+                        segment.phaseName &&
+                        segment.phaseName === editedPhaseName) ||
+                        (editedDownsampleStepIndex !== undefined &&
+                          segment.stepIndex === editedDownsampleStepIndex)
                     )}
                     canManageLifecycle={canManageLifecycle}
                     isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
