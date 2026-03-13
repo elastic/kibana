@@ -9,20 +9,20 @@
 
 import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import type { MetricField } from '../../types';
+import type { ParsedMetricItem } from '../../types';
 
 interface OverviewTabProps {
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   description?: string;
 }
 
-export const TabTitleAndDescription = ({ metric, description }: OverviewTabProps) => {
+export const TabTitleAndDescription = ({ metricItem, description }: OverviewTabProps) => {
   return (
     <>
       <EuiSpacer />
       <EuiTitle size="xs" data-test-subj="metricsExperienceFlyoutMetricName">
         <strong>
-          <strong>{metric.metricName}</strong>
+          <strong>{metricItem.metricName}</strong>
         </strong>
       </EuiTitle>
 

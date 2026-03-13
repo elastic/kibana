@@ -48,7 +48,7 @@ interface MetricFlyoutBodyProps {
   esqlQuery?: string;
 }
 
-export const MetricFlyoutBody = ({ metric, esqlQuery, description }: MetricFlyoutBodyProps) => {
+export const MetricFlyoutBody = ({ metricItem, esqlQuery, description }: MetricFlyoutBodyProps) => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(tabIds.OVERVIEW);
 
   const onSelectedTabChanged = (id: TabId) => {
@@ -72,10 +72,10 @@ export const MetricFlyoutBody = ({ metric, esqlQuery, description }: MetricFlyou
     <>
       <EuiTabs size="s">{renderTabs()}</EuiTabs>
       {selectedTabId === tabIds.OVERVIEW && (
-        <OverviewTab metric={metric} description={description} />
+        <OverviewTab metricItem={metricItem} description={description} />
       )}
       {selectedTabId === tabIds.ESQL_QUERY && (
-        <EsqlQueryTab esqlQuery={esqlQuery} metric={metric} />
+        <EsqlQueryTab esqlQuery={esqlQuery} metricItem={metricItem} />
       )}
     </>
   );

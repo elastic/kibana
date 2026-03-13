@@ -11,7 +11,6 @@ import type { Filter, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
@@ -32,7 +31,7 @@ export interface ExecuteEsqlParams {
 /**
  * Executes an ES|QL query using the data plugin's search service.
  */
-export async function executeEsqlQuery({
+export async function executeEsqlQuery<TDocument extends object = Record<string, unknown>>({
   esqlQuery,
   search,
   signal,
@@ -41,7 +40,7 @@ export async function executeEsqlQuery({
   filters = [],
   variables,
   uiSettings,
-}: ExecuteEsqlParams): Promise<ESQLSearchResponse> {
+}: ExecuteEsqlParams): Promise<TDocument[]> {
   const esQueryConfig = getEsQueryConfig(uiSettings);
   const timeFilter =
     timeRange && dataView?.timeFieldName
@@ -62,7 +61,7 @@ export async function executeEsqlQuery({
     variables,
   });
 
-  const plainObjects = esqlResultToPlainObjects(response);
+  const plainObjects = esqlResultToPlainObjects<TDocument>(response);
 
   return plainObjects;
 }

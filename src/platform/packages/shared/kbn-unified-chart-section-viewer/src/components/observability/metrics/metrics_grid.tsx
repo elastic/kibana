@@ -13,12 +13,7 @@ import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
-import type {
-  MetricField,
-  Dimension,
-  UnifiedMetricsGridProps,
-  ParsedMetricItem,
-} from '../../../types';
+import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
 import { MetricInsightsFlyout } from '../../flyout/metrics_insights_flyout';
@@ -65,7 +60,7 @@ export const MetricsGrid = ({
   const [expandedMetric, setExpandedMetric] = useState<
     | {
         index: number;
-        metric: MetricField;
+        metricItem: ParsedMetricItem;
         esqlQuery: string;
       }
     | undefined
@@ -82,9 +77,12 @@ export const MetricsGrid = ({
       gridRef,
     });
 
-  const handleViewDetails = useCallback((index: number, esqlQuery: string, metric: MetricField) => {
-    setExpandedMetric({ index, metric, esqlQuery });
-  }, []);
+  const handleViewDetails = useCallback(
+    (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
+      setExpandedMetric({ index, metricItem, esqlQuery });
+    },
+    []
+  );
 
   const handleCloseFlyout = useCallback(() => {
     if (!expandedMetric) {
@@ -166,7 +164,7 @@ export const MetricsGrid = ({
       </A11yGridWrapper>
       {expandedMetric && (
         <MetricInsightsFlyout
-          metric={expandedMetric.metric}
+          metricItem={expandedMetric.metricItem}
           esqlQuery={expandedMetric.esqlQuery}
           onClose={handleCloseFlyout}
         />
@@ -181,7 +179,7 @@ interface ChartItemProps
     'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
   > {
   id: string;
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   index: number;
   size: ChartSize;
   dimensions: Dimension[];
@@ -191,7 +189,7 @@ interface ChartItemProps
   isFocused: boolean;
   searchTerm?: string;
   onFocusCell: (rowIndex: number, colIndex: number) => void;
-  onViewDetails: (index: number, esqlQuery: string, metric: MetricField) => void;
+  onViewDetails: (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => void;
   whereStatements?: string[];
   userMessages?: EmbeddableComponentProps['userMessages'];
 }
@@ -225,8 +223,8 @@ const ChartItem = React.memo(
     );
 
     const esqlQuery = useMemo(() => {
-      const metricType = getPrimaryValue(metricItem.metricTypes);
-      const isSupported = metricType !== 'unsigned_long';
+      const fieldType = getPrimaryValue(metricItem.fieldTypes);
+      const isSupported = fieldType !== 'unsigned_long';
       return isSupported
         ? createESQLQuery({
             metricItem,

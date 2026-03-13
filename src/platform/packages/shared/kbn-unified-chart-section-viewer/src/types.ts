@@ -52,9 +52,9 @@ export type MetricUnit =
 export interface MetricsESQLResponseObject {
   metric_name: string;
   data_stream: string[] | string;
-  unit: string[] | null;
-  metric_type: string[] | string;
-  field_type: string[] | string;
+  unit: MetricUnit[] | null;
+  metric_type: MappingTimeSeriesMetricType[] | MappingTimeSeriesMetricType;
+  field_type: ES_FIELD_TYPES[] | ES_FIELD_TYPES;
   dimension_fields: string[] | string;
 }
 
@@ -68,6 +68,13 @@ export interface ParsedMetricItem {
 }
 
 export interface ParsedMetricsResult {
+  metricItems: ParsedMetricItem[];
+  allDimensions: string[];
+}
+
+export interface MetricsInfoResponse {
+  loading: boolean;
+  error: Error | null;
   metricItems: ParsedMetricItem[];
   allDimensions: string[];
 }

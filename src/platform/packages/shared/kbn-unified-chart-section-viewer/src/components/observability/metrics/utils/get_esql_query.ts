@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function toArray<T>(value: T | T[] | null | undefined): T[] {
-  if (value == null) return [];
-  return Array.isArray(value) ? value : [value];
-}
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+
+export const getEsqlQuery = (query: Query | AggregateQuery | undefined): string | undefined =>
+  query && isOfAggregateQueryType(query) ? query.esql : undefined;

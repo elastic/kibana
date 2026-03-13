@@ -19,8 +19,8 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
+import { getEsqlQuery } from './utils/get_esql_query';
 import { PAGE_SIZE } from '../../../common/constants';
 import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
 import { LEGACY_HISTOGRAM_USER_MESSAGES } from '../../../common/utils/user_messages';
@@ -57,10 +57,7 @@ export const MetricsExperienceGridContent = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const esqlQuery = useMemo(
-    () => (query && isOfAggregateQueryType(query) ? query.esql : undefined),
-    [query]
-  );
+  const esqlQuery = useMemo(() => getEsqlQuery(query), [query]);
 
   const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
 

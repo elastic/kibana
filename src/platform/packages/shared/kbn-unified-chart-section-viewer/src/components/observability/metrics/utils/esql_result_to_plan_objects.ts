@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLSearchResponse } from '@kbn/es-types';
+
 /**
  * Parses ESQL results by combining columns and rows into plain objects.
  * ESQL returns { columns: [{ name, type }, ...], values: [[...], [...], ...] };
@@ -19,9 +21,9 @@
  * // values:  [['host-a', 0.5], ['host-b', 0.8]]
  * // Result: [{ 'host.name': 'host-a', cpu: 0.5 }, { 'host.name': 'host-b', cpu: 0.8 }]
  */
-export function esqlResultToPlainObjects<
-  TDocument extends Record<string, unknown> = Record<string, unknown>
->(result: ESQLSearchResponse): TDocument[] {
+export function esqlResultToPlainObjects<TDocument extends object = Record<string, unknown>>(
+  result: ESQLSearchResponse
+): TDocument[] {
   return result.values.map((row): TDocument => {
     return row.reduce<Record<string, unknown>>((acc, value, index) => {
       const column = result.columns[index];

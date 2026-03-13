@@ -11,18 +11,17 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { Dimension, ParsedMetricItem } from '../../../types';
+import type {
+  Dimension,
+  ParsedMetricItem,
+  MetricsESQLResponseObject,
+  ParsedMetricsResult,
+  MetricsInfoResponse,
+} from '../../../../types';
 import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsResponse } from '../utils/parse_metrics_response';
-
-export interface MetricsInfoResponse {
-  loading: boolean;
-  error: Error | null;
-  metricItems: ParsedMetricItem[];
-  allDimensions: string[];
-}
+import { getEsqlQuery } from '../utils/get_esql_query';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -41,18 +40,16 @@ export function useFetchMetricsData({
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
 }): MetricsInfoResponse {
-  const esql =
-    fetchParams.query && isOfAggregateQueryType(fetchParams.query)
-      ? fetchParams.query.esql
-      : undefined;
-  const shouldFetch =
-    isComponentVisible && !!esql && !!fetchParams.isESQLQuery && !hasTransformationalCommand(esql);
+  const esql = getEsqlQuery(fetchParams.query);
+
+  const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
 
   const [{ value, error, loading }, executeFetch] =
-    useAsyncFn(async (): Promise<ParsedMetricItem | null> => {
+    useAsyncFn(async (): Promise<ParsedMetricsResult | null> => {
       const dimensions = selectedDimensionNames?.map((dimension) => dimension.name);
       const metricsInfoQuery = buildMetricsInfoQuery(esql, dimensions);
-      const result = await executeEsqlQuery({
+
+      const result = await executeEsqlQuery<MetricsESQLResponseObject>({
         esqlQuery: metricsInfoQuery,
         search: services.data.search.search,
         signal: fetchParams.abortController?.signal,
@@ -79,13 +76,6 @@ export function useFetchMetricsData({
 
   useEffect(() => {
     if (!shouldFetch || !fetchParams.dataView) {
-      return;
-    }
-    const dimensions = selectedDimensionNames?.map((dimension) => dimension.name);
-
-    const metricsInfoQuery = buildMetricsInfoQuery(esql, dimensions);
-
-    if (!metricsInfoQuery) {
       return;
     }
     executeFetch();
