@@ -461,7 +461,7 @@ export const ManageIntegrationsTable: React.FC<{
         name: (
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.table.status"
-            defaultMessage="Status"
+            defaultMessage="Analysing Status"
           />
         ),
         render: (status: TaskStatus) => {
@@ -500,7 +500,12 @@ export const ManageIntegrationsTable: React.FC<{
         width: '14%',
       },
       {
-        name: '',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epmList.manageIntegrations.table.approvalStatus"
+            defaultMessage="Approval Status"
+          />
+        ),
         width: '18%',
         render: (item: CreatedIntegrationRow) => {
           if (item.status === 'approved') {

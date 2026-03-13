@@ -136,19 +136,25 @@ export const ManageIntegrationActions: React.FC<{
       {inlineActionType === 'reviewApprove' && (
         <EuiButtonEmpty
           size="xs"
+          color="primary"
           iconType="checkInCircleFilled"
           iconSide="left"
           onClick={openReviewModal}
           style={{
             backgroundColor: euiTheme.colors.backgroundLightPrimary,
-            paddingLeft: euiTheme.size.xs,
-            paddingRight: euiTheme.size.xs,
+            paddingLeft: euiTheme.size.s,
+            paddingRight: euiTheme.size.s,
+            fontFamily: euiTheme.font.family,
+            fontWeight: euiTheme.font.weight.medium,
+            fontSize: '12px',
+            lineHeight: euiTheme.size.l,
+            letterSpacing: '0px',
             whiteSpace: 'nowrap',
           }}
         >
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.actions.reviewApproveInline"
-            defaultMessage="Review and Approve"
+            defaultMessage="Review & approve"
           />
         </EuiButtonEmpty>
       )}
