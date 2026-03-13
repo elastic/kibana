@@ -256,6 +256,40 @@ exports.EcsCustomPropertyMappings = {
                       update_alerts_duration_ms: {
                         type: 'long',
                       },
+                      events_found_count: {
+                        type: 'long',
+                      },
+                      candidate_alerts_count: {
+                        type: 'long',
+                      },
+                      unaccounted_events: {
+                        type: 'long',
+                      },
+                      suppressed_alerts: {
+                        type: 'long',
+                      },
+                    },
+                  },
+                  errors: {
+                    properties: {
+                      '@timestamp': {
+                        type: 'date',
+                      },
+                      message: {
+                        norms: false,
+                        type: 'text',
+                      },
+                    },
+                  },
+                  warnings: {
+                    properties: {
+                      '@timestamp': {
+                        type: 'date',
+                      },
+                      message: {
+                        norms: false,
+                        type: 'text',
+                      },
                     },
                   },
                 },
