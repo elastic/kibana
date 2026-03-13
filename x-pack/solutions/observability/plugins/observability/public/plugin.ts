@@ -278,10 +278,22 @@ export class Plugin
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
     const mount = async (params: AppMountParameters<unknown>) => {
-      // Load application bundle
-      const { renderApp } = await import('./application');
-      // Get start services
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+
+      if (getIsExperimentalFeatureEnabled('unifiedRulesPage')) {
+        const { pathname, search } = params.history.location;
+
+        if (pathname.startsWith(RULES_PATH)) {
+          const suffix = pathname.slice(RULES_PATH.length) || '/';
+          await coreStart.application.navigateToApp('rules', {
+            path: suffix + search,
+            replace: true,
+          });
+          return () => {};
+        }
+      }
+
+      const { renderApp } = await import('./application');
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
       return renderApp({
