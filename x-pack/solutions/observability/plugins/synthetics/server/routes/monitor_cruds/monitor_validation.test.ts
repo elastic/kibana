@@ -280,11 +280,19 @@ describe('validateMonitor', () => {
       });
     });
 
-    it('when browser timeout is less than 30 seconds', () => {
+    it('when browser timeout is less than 30 seconds with private locations', () => {
       const testMonitor = {
         ...testBrowserFields,
         [ConfigKey.SOURCE_INLINE]: 'step()',
         [ConfigKey.TIMEOUT]: '29',
+        [ConfigKey.LOCATIONS]: [
+          {
+            id: 'private-1',
+            label: 'Private Location',
+            geo: { lat: 0, lon: 0 },
+            isServiceManaged: false,
+          },
+        ],
       } as MonitorFields;
       const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
@@ -298,6 +306,21 @@ describe('validateMonitor', () => {
   });
 
   describe('should validate', () => {
+    it('when browser timeout is less than 30 seconds with only public locations', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+        [ConfigKey.TIMEOUT]: '10',
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor, 'default');
+      expect(result).toMatchObject({
+        valid: true,
+        reason: '',
+        details: '',
+        payload: testMonitor,
+      });
+    });
+
     it('when payload is a correct ICMP monitor', () => {
       const testMonitor = testICMPFields as MonitorFields;
       const result = validateMonitor(testMonitor, 'default');

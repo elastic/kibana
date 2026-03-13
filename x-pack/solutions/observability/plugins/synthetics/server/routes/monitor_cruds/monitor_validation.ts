@@ -166,7 +166,11 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
     const timeout = monitorFields[ConfigKey.TIMEOUT];
     if (timeout) {
       const timeoutSeconds = typeof timeout === 'string' ? parseInt(timeout, 10) : timeout;
-      if (timeoutSeconds < HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS) {
+      const hasPrivateLocations = monitorFields.locations?.some((loc) => !loc.isServiceManaged);
+      if (
+        timeoutSeconds < HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS &&
+        hasPrivateLocations
+      ) {
         return {
           valid: false,
           reason: BROWSER_INVALID_TIMEOUT_ERROR,

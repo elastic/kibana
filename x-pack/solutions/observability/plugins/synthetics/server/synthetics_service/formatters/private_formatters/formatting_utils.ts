@@ -87,7 +87,7 @@ export const privateTimeoutFormatter: FormatterFn = (fields) => {
       0,
       timeoutSeconds - HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS
     );
-    return secondsToCronFormatter({ [ConfigKey.TIMEOUT]: adjustedTimeout }, ConfigKey.TIMEOUT);
+    return `${adjustedTimeout}s`;
   }
 
   return secondsToCronFormatter(fields, ConfigKey.TIMEOUT);

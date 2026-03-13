@@ -82,7 +82,7 @@ describe('formatters', () => {
       ).toEqual('30s');
     });
 
-    it('returns null for timeouts less than or equal to the Heartbeat overhead (safeguard against negative timeouts)', () => {
+    it('returns 0s for timeouts less than or equal to the Heartbeat overhead (clamped to zero)', () => {
       expect(
         privateTimeoutFormatter(
           {
@@ -91,7 +91,7 @@ describe('formatters', () => {
           },
           ConfigKey.TIMEOUT
         )
-      ).toEqual(null);
+      ).toEqual('0s');
 
       expect(
         privateTimeoutFormatter(
@@ -101,10 +101,10 @@ describe('formatters', () => {
           },
           ConfigKey.TIMEOUT
         )
-      ).toEqual(null);
+      ).toEqual('0s');
     });
 
-    it('returns null for invalid timeouts', () => {
+    it('returns null for non-numeric timeouts', () => {
       expect(
         privateTimeoutFormatter(
           {
@@ -119,7 +119,7 @@ describe('formatters', () => {
         privateTimeoutFormatter(
           {
             [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
-            [ConfigKey.TIMEOUT]: HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS.toString(),
+            [ConfigKey.TIMEOUT]: 'abc',
           },
           ConfigKey.TIMEOUT
         )
