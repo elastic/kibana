@@ -76,9 +76,9 @@ const baseRule: RuleApiResponse = {
   schedule: { every: '5m', lookback: '10m' },
   evaluation: { query: { base: 'FROM logs-* | STATS count() BY host.name' } },
   createdBy: 'alice@example.com',
-  createdAt: '2026-03-01T00:00:00.000Z',
+  createdAt: '2026-03-01T12:00:00.000Z',
   updatedBy: 'bob@example.com',
-  updatedAt: '2026-03-04T00:00:00.000Z',
+  updatedAt: '2026-03-04T12:00:00.000Z',
 };
 
 const alertRule: RuleApiResponse = {

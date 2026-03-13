@@ -33,6 +33,12 @@ jest.mock('@kbn/alerting-v2-rule-form', () => {
 });
 
 const mockNavigateToUrl = jest.fn();
+const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
+  const path = options?.path ?? '';
+  return `/app/${appId}${path}`;
+});
+const mockSetBreadcrumbs = jest.fn();
+const mockDocTitleChange = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -40,7 +46,10 @@ jest.mock('@kbn/core-di-browser', () => ({
       return { basePath: { prepend: (p: string) => p } };
     }
     if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl };
+      return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
+    }
+    if (token === 'chrome') {
+      return { setBreadcrumbs: mockSetBreadcrumbs, docTitle: { change: mockDocTitleChange } };
     }
     if (token === 'data') {
       return { search: { search: jest.fn() } };
