@@ -199,11 +199,7 @@ describe('WorkflowExecutionState', () => {
       await underTest.flush();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
-        {
-          ...updatedWorkflowExecution,
-          stepExecutionIds: [], // Always includes step execution IDs (empty when no steps)
-        },
-        undefined
+        updatedWorkflowExecution
       );
     });
 
@@ -217,8 +213,7 @@ describe('WorkflowExecutionState', () => {
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'test-workflow-execution-id',
-        }),
-        undefined
+        })
       );
     });
 
@@ -358,8 +353,8 @@ describe('WorkflowExecutionState', () => {
       await underTest.flush(); // second flush with no changes
       await underTest.flush(); // third flush with no changes
 
-      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
-      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledTimes(2); // create the first step execution and then update
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalledTimes(2);
     });
   });
 
