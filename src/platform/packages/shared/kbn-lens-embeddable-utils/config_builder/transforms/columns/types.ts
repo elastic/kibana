@@ -85,4 +85,5 @@ export interface APIAdHocDataView {
   index: string;
   timeFieldName: string | undefined;
   dataSourceType?: string;
+  esqlQuery?: string;
 }
