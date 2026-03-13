@@ -25,7 +25,7 @@ import { validateMaxUserActions } from '../../common/validators';
  * @ignore
  */
 export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs): Promise<Case> => {
-  const { comment, caseId } = addArgs;
+  const { comment, caseId, mode = 'legacy' } = addArgs;
 
   const {
     logger,
@@ -73,7 +73,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
       id: savedObjectID,
     });
 
-    return await updatedModel.encodeWithComments();
+    return await updatedModel.encodeWithComments({ mode });
   } catch (error) {
     throw createCaseError({
       message: `Failed while adding a comment to case id: ${caseId} error: ${error}`,

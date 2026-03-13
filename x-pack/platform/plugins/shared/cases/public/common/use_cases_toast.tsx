@@ -39,7 +39,7 @@ import type { ObservablePost } from '../../common/types/api';
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
   for (const attachment of attachments) {
-    if (attachment.type === AttachmentType.alert) {
+    if (attachment.type === AttachmentType.alert && `alertId` in attachment) {
       // alertId might be an array
       if (Array.isArray(attachment.alertId) && attachment.alertId.length > 1) {
         alertsCount += attachment.alertId.length;

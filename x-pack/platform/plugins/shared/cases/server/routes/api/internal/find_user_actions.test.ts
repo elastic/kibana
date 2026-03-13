@@ -194,6 +194,7 @@ describe('findUserActionsRoute', () => {
         userActionsMockData.userActions[3].comment_id,
       ],
       caseID: 'my_fake_case_id',
+      mode: 'unified',
     });
     expect(response.ok).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -285,6 +286,7 @@ describe('findUserActionsRoute', () => {
         userActionsMockData.userActions[3].comment_id,
       ],
       caseID: 'my_fake_case_id',
+      mode: 'unified',
     });
     expect(response.ok).toHaveBeenCalledWith(
       expect.objectContaining({
