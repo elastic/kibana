@@ -343,6 +343,8 @@ function DiscoverDocumentsComponent({
   const docViewerUiState = useCurrentTabSelector((state) => state.uiState.docViewer);
   const setDocViewerUiState = useCurrentTabAction(internalStateActions.setDocViewerUiState);
 
+  const latestDocViewerUiState = useLatest(docViewerUiState);
+
   const onInitialDocViewerStateChange = useCallback(
     (newDocViewerUiState: Partial<DocViewerRestorableState>) => {
       dispatch(setDocViewerUiState({ docViewerUiState: newDocViewerUiState }));
@@ -387,7 +389,7 @@ function DiscoverDocumentsComponent({
         docViewerRef={docViewerRef}
         docViewerExtensionActions={docViewerExtensionActions}
         onUpdateSelectedTabId={onUpdateSelectedTabId}
-        initialDocViewerState={docViewerUiState}
+        initialDocViewerState={latestDocViewerUiState.current}
         onInitialDocViewerStateChange={onInitialDocViewerStateChange}
       />
     ),
@@ -401,7 +403,7 @@ function DiscoverDocumentsComponent({
       onAddColumnWithTracking,
       docViewerExtensionActions,
       onUpdateSelectedTabId,
-      docViewerUiState,
+      latestDocViewerUiState,
       onInitialDocViewerStateChange,
     ]
   );
@@ -490,6 +492,26 @@ function DiscoverDocumentsComponent({
     internalStateActions.setSelectedCascadeGroups
   );
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+
+  const resolveLeafData = useCallback<NonNullable<CascadedDocumentsContext['resolveLeafData']>>(
+    ({ row }) => cascadedDocumentsFetcher.getCachedDocuments(row.id) ?? null,
+    [cascadedDocumentsFetcher]
+  );
+
+  const cascadeGroupingChangeHandler = useCallback<
+    CascadedDocumentsContext['cascadeGroupingChangeHandler']
+  >(
+    (newSelectedCascadeGroups) => {
+      dispatch(setSelectedCascadeGroups({ selectedCascadeGroups: newSelectedCascadeGroups }));
+    },
+    [dispatch, setSelectedCascadeGroups]
+  );
+
+  const openInNewTab = useCallback<CascadedDocumentsContext['openInNewTab']>(
+    (params) => dispatch(internalStateActions.openInNewTab(params)),
+    [dispatch]
+  );
+
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
       !isCascadedDocumentsVisible(availableCascadeGroups, query) ||
@@ -506,22 +528,22 @@ function DiscoverDocumentsComponent({
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
       viewModeToggle,
-      cascadeGroupingChangeHandler: (newSelectedCascadeGroups) => {
-        dispatch(setSelectedCascadeGroups({ selectedCascadeGroups: newSelectedCascadeGroups }));
-      },
+      resolveLeafData,
+      cascadeGroupingChangeHandler,
       onUpdateESQLQuery,
-      openInNewTab: (params) => dispatch(internalStateActions.openInNewTab(params)),
+      openInNewTab,
     };
   }, [
     availableCascadeGroups,
     cascadedDocumentsFetcher,
-    dispatch,
+    cascadeGroupingChangeHandler,
     esqlVariables,
     onUpdateESQLQuery,
+    openInNewTab,
     query,
     requestParams.timeRangeAbsolute,
+    resolveLeafData,
     selectedCascadeGroups,
-    setSelectedCascadeGroups,
     viewModeToggle,
   ]);
 

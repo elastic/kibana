@@ -91,7 +91,7 @@ export const useGroupedCascadeData = ({
                     const valuesArray = currentValue.map(String);
 
                     if (Array.isArray(existingValue)) {
-                      allValues[identifier] = [...existingValue, ...valuesArray];
+                      existingValue.push(...valuesArray);
                     } else if (isNil(existingValue)) {
                       allValues[identifier] = valuesArray;
                     }
