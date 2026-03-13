@@ -261,7 +261,7 @@ const EditLensConfiguration: FC<
     saveByRef,
     savedObjectId,
     updateByRefInput,
-    navigateToLensEditor,
+    navigateToLensEditor: currentDatasourceId === 'textBased' ? undefined : navigateToLensEditor,
     displayFlyoutHeader,
     hidesSuggestions,
     setCurrentAttributes,
