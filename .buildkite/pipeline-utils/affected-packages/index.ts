@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { doAnyChangesMatch } from '../github';
 import { findPackageForPath } from './package_lookup';
 import { getAffectedPackagesGit } from './strategy_git';
 import { getAffectedPackagesMoon } from './strategy_moon';
@@ -36,7 +35,7 @@ export interface AffectedPackagesConfig {
  * Get configuration from environment variables
  *
  * Environment variables:
- * - AFFECTED_STRATEGY: 'git' | 'moon' | 'disabled' (default: 'git')
+ * - AFFECTED_STRATEGY: 'git' | 'moon' | 'disabled' (default: 'moon')
  * - AFFECTED_DOWNSTREAM: 'true' | 'false' (default: 'true')
  * - AFFECTED_LOGGING: 'true' | 'false' (default: 'true')
  *
@@ -45,7 +44,7 @@ export interface AffectedPackagesConfig {
 function getConfigFromEnv(): AffectedPackagesConfig {
   const strategy = (process.env.AFFECTED_STRATEGY ||
     process.env.JEST_AFFECTED_STRATEGY ||
-    'git') as 'git' | 'moon' | 'disabled';
+    'moon') as 'git' | 'moon' | 'disabled';
   const includeDownstream =
     (process.env.AFFECTED_DOWNSTREAM || process.env.JEST_AFFECTED_DOWNSTREAM) !== 'false';
   const logging = (process.env.AFFECTED_LOGGING || process.env.JEST_AFFECTED_LOGGING) !== 'false';
@@ -55,29 +54,6 @@ function getConfigFromEnv(): AffectedPackagesConfig {
     includeDownstream,
     logging,
   };
-}
-
-/**
- * Check if changes require skipping filtering (e.g., infrastructure changes)
- */
-async function shouldSkipFiltering(): Promise<boolean> {
-  if (process.env.GITHUB_LABELS?.includes('ci:no-selective-tests')) {
-    return true;
-  }
-
-  const criticalPaths = [
-    'scripts/jest.js',
-    'scripts/jest_all.js',
-    'package.json',
-    'yarn.lock',
-    'tsconfig.json',
-    'tsconfig.base.json',
-    '.moon/workspace.yml',
-    '.moon/tasks/tag-jest-unit-tests.yml',
-    'src/platform/packages/shared/kbn-test/',
-  ];
-
-  return doAnyChangesMatch(criticalPaths.map((p) => new RegExp(p)));
 }
 
 /**
@@ -126,10 +102,10 @@ export function filterFilesByAffectedPackages(
  * @param mergeBase - Git commit to compare against (e.g., GITHUB_PR_MERGE_BASE)
  * @returns Set of affected package IDs, or null to skip filtering
  */
-export async function getAffectedPackagesForFiltering(
-  mergeBase: string | undefined
+export async function getAffectedPackages(
+  mergeBase: string | undefined,
+  config: AffectedPackagesConfig = getConfigFromEnv()
 ): Promise<Set<string> | null> {
-  const config = getConfigFromEnv();
   const log = config.logging ? console.warn : () => {};
 
   // Check if filtering is disabled
@@ -146,12 +122,6 @@ export async function getAffectedPackagesForFiltering(
 
   log('--- Detecting Affected Packages');
 
-  // Check if we should skip filtering due to critical changes
-  if (await shouldSkipFiltering()) {
-    log('Critical infrastructure files changed - skipping filtering');
-    return null;
-  }
-
   // Get affected packages
   try {
     const affectedPackages =
@@ -167,53 +137,5 @@ export async function getAffectedPackagesForFiltering(
   } catch (error) {
     console.error('Error during affected package detection:', error);
     return null;
-  }
-}
-
-/**
- * Get affected packages using the configured strategy
- *
- * @param mergeBase - Git commit to compare against
- * @param config - Optional configuration override
- * @returns Set of affected package IDs
- */
-export async function getAffectedPackages(
-  mergeBase: string,
-  config?: Partial<AffectedPackagesConfig>
-): Promise<Set<string>> {
-  const fullConfig = { ...getConfigFromEnv(), ...config };
-
-  if (fullConfig.logging) {
-    console.error(`Using ${fullConfig.strategy} strategy to detect affected packages`);
-    console.error(`Merge base: ${mergeBase}`);
-    console.error(`Include downstream: ${fullConfig.includeDownstream}`);
-  }
-
-  const startTime = Date.now();
-
-  try {
-    let packages: Set<string>;
-
-    if (fullConfig.strategy === 'git') {
-      packages = getAffectedPackagesGit(mergeBase, fullConfig.includeDownstream);
-    } else if (fullConfig.strategy === 'moon') {
-      packages = getAffectedPackagesMoon(mergeBase, fullConfig.includeDownstream);
-    } else {
-      return new Set<string>();
-    }
-
-    const durationMs = Date.now() - startTime;
-
-    if (fullConfig.logging) {
-      console.error(`Found ${packages.size} affected packages in ${durationMs}ms`);
-      if (packages.size > 0 && packages.size <= 20) {
-        console.error('Affected packages:', Array.from(packages).sort().join(', '));
-      }
-    }
-
-    return packages;
-  } catch (error) {
-    console.error(`Failed to get affected packages using ${fullConfig.strategy} strategy:`, error);
-    throw error;
   }
 }

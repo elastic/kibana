@@ -24,10 +24,7 @@ import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import SHARDED_JEST_CONFIGS from '../../sharded_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
-import {
-  getAffectedPackagesForFiltering,
-  filterFilesByAffectedPackages,
-} from '../affected-packages';
+import { getAffectedPackages, filterFilesByAffectedPackages } from '../affected-packages';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
 const SHARD_ANNOTATION_SEP = '||shard=';
@@ -226,7 +223,11 @@ export async function pickTestGroupRunOrder() {
   const jestIntegrationConfigs = expandShardedJestConfigs(jestIntegrationConfigsRaw);
 
   // Apply affected package filtering
-  const affectedPackages = await getAffectedPackagesForFiltering(process.env.GITHUB_PR_MERGE_BASE);
+  const affectedPackages = await getAffectedPackages(process.env.GITHUB_PR_MERGE_BASE, {
+    strategy: 'git',
+    includeDownstream: true,
+    logging: false,
+  });
   const filteredJestUnitConfigs = filterFilesByAffectedPackages(jestUnitConfigs, affectedPackages);
   console.warn(
     `Filtering Jest unit tests for affected packages: ${jestUnitConfigs.length} -> ${filteredJestUnitConfigs.length}`
