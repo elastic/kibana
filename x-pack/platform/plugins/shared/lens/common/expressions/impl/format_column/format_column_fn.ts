@@ -57,6 +57,9 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
   columns: input.columns
     .map((col) => {
       if (col.id === columnId) {
+        if (col.meta?.type !== 'number') {
+          return col;
+        }
         if (!parentFormat) {
           if (supportedFormats[format]) {
             const serializedFormat: SerializedFieldFormat = {
