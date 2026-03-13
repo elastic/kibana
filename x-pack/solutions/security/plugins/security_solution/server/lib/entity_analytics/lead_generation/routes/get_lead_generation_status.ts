@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger, StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
@@ -13,12 +13,15 @@ import { LEAD_GENERATION_STATUS_URL } from '../../../../../common/entity_analyti
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import type { StartPlugins } from '../../../../plugin';
 import { createLeadDataClient } from '../lead_data_client';
+import { getLeadGenerationTaskId } from '../tasks';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const getLeadGenerationStatusRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.versioned
     .get({
@@ -44,8 +47,21 @@ export const getLeadGenerationStatusRoute = (
           const spaceId = getSpaceId();
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
+          let isEnabled = false;
+          try {
+            const [, startPlugins] = await getStartServices();
+            const taskManager = startPlugins.taskManager;
+            if (taskManager) {
+              const taskId = getLeadGenerationTaskId(spaceId);
+              await taskManager.get(taskId);
+              isEnabled = true;
+            }
+          } catch {
+            isEnabled = false;
+          }
+
           const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
-          const status = await leadDataClient.getStatus();
+          const status = await leadDataClient.getStatus({ isEnabled });
 
           return response.ok({ body: status });
         } catch (e) {

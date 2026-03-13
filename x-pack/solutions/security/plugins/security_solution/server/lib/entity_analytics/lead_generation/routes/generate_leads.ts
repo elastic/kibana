@@ -62,10 +62,7 @@ export const generateLeadsRoute = (
           const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
           const executionUuid = uuidv4();
 
-          // Fire-and-forget: run the pipeline in the background, return executionUuid immediately
           (async () => {
-            const routeStart = Date.now();
-
             try {
               const fetchStart = Date.now();
               const leadEntities = await fetchAllLeadEntities(crudClient, logger);
@@ -116,16 +113,10 @@ export const generateLeadsRoute = (
                 executionId: executionUuid,
                 sourceType: 'adhoc',
               });
-
               logger.info(
                 `[LeadGeneration][Telemetry] Persistence: ${Date.now() - persistStart}ms (${
                   leads.length
-                } leads to adhoc index)`
-              );
-              logger.info(
-                `[LeadGeneration][Telemetry] Total pipeline: ${
-                  Date.now() - routeStart
-                }ms (executionUuid=${executionUuid})`
+                } leads)`
               );
             } catch (pipelineError) {
               logger.error(
