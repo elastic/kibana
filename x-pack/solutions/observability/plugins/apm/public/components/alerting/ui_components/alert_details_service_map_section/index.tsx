@@ -22,7 +22,6 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
-  TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
 import { ApmEmbeddableContext } from '../../../../embeddable/embeddable_context';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
@@ -84,16 +83,11 @@ export interface AlertDetailsServiceMapSectionProps extends AlertDetailsAppSecti
 // TODO: move this to a shared helper function and make it generic with different fields
 function buildKueryFromAlert(alert: AlertDetailsServiceMapSectionProps['alert']): string {
   const serviceName = alert.fields[SERVICE_NAME];
-  const transactionType = alert.fields[TRANSACTION_TYPE];
   const transactionName = alert.fields[TRANSACTION_NAME];
   const parts: string[] = [];
   if (serviceName != null && String(serviceName).trim() !== '') {
     const v = String(serviceName).replace(/"/g, '\\"');
     parts.push(`service.name: "${v}"`);
-  }
-  if (transactionType != null && String(transactionType).trim() !== '') {
-    const v = String(transactionType).replace(/"/g, '\\"');
-    parts.push(`transaction.type: "${v}"`);
   }
   if (transactionName != null && String(transactionName).trim() !== '') {
     const v = String(transactionName).replace(/"/g, '\\"');
@@ -120,7 +114,8 @@ export function AlertDetailsServiceMapSection({
     return null;
   }
 
-  // 5 min before alert start; 10 min after for long alerts, or through alert end for short ones
+  // Same time range for map and badge requests: 5 min before alert start through alert end (or +10 min if long).
+  // Ensures the open alert’s service shows in the map and its alert badge count includes this alert (when active).
   const { from: rangeFrom, to: rangeTo } = getServiceMapTimeRange(
     String(alertStart),
     alert.fields[ALERT_END] != null ? String(alert.fields[ALERT_END]) : undefined
@@ -148,13 +143,6 @@ export function AlertDetailsServiceMapSection({
     filters.push({
       label: `service.environment: ${env}`,
       field: 'service.environment',
-    });
-  }
-  const transactionType = alert.fields[TRANSACTION_TYPE];
-  if (transactionType != null && String(transactionType).trim() !== '') {
-    filters.push({
-      label: `transaction.type: ${String(transactionType)}`,
-      field: 'transaction.type',
     });
   }
   const transactionName = alert.fields[TRANSACTION_NAME];

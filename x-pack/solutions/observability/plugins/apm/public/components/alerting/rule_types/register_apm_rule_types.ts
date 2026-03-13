@@ -85,9 +85,8 @@ export function registerApmRuleTypes(observabilityRuleTypeRegistry: Observabilit
       errors: [],
     }),
     alertDetailsAppSection: lazy(() => import('../ui_components/alert_details_app_section')),
-    alertDetailsTrailingSection: lazy(
-      () => import('../ui_components/alert_details_service_map_section')
-    ),
+    // Service map is rendered once inside the app section (under latency, before other charts).
+    // No trailing section registered.
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
     defaultRecoveryMessage: transactionDurationRecoveryMessage,

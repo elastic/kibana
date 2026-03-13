@@ -324,39 +324,44 @@ export function AlertDetails() {
               alertTitle={ruleTypeBreached}
             />
           )}
-          {rule && alertDetail.formatted && (
-            <>
-              <AlertDetailsAppSection
-                alert={alertDetail.formatted}
-                rule={rule}
-                timeZone={timeZone}
-                setSources={setSources}
-              />
-              <AlertHistoryChart
-                alert={alertDetail.formatted}
-                rule={rule as unknown as CustomThresholdRule}
-              />
-              <EuiSpacer size="m" />
-              {ruleTypeModel?.alertDetailsTrailingSection &&
-                (() => {
-                  const TrailingSection = ruleTypeModel.alertDetailsTrailingSection!;
-                  const ruleTypeId = alertDetail?.formatted?.fields?.[ALERT_RULE_TYPE_ID];
-                  const embeddableDeps =
-                    typeof ruleTypeId === 'string'
-                      ? services.triggersActionsUi?.getAlertDetailsTrailingSectionDeps?.(ruleTypeId)
-                      : undefined;
-                  return (
-                    <TrailingSection
-                      alert={alertDetail.formatted}
-                      rule={rule}
-                      timeZone={timeZone}
-                      setSources={setSources}
-                      embeddableDeps={embeddableDeps}
-                    />
-                  );
-                })()}
-            </>
-          )}
+          {rule &&
+            alertDetail.formatted &&
+            (() => {
+              const ruleTypeId = alertDetail.formatted?.fields?.[ALERT_RULE_TYPE_ID];
+              const embeddableDeps =
+                typeof ruleTypeId === 'string'
+                  ? services.triggersActionsUi?.getAlertDetailsTrailingSectionDeps?.(ruleTypeId)
+                  : undefined;
+              return (
+                <>
+                  <AlertDetailsAppSection
+                    alert={alertDetail.formatted}
+                    rule={rule}
+                    timeZone={timeZone}
+                    setSources={setSources}
+                    embeddableDeps={embeddableDeps}
+                  />
+                  <AlertHistoryChart
+                    alert={alertDetail.formatted}
+                    rule={rule as unknown as CustomThresholdRule}
+                  />
+                  <EuiSpacer size="m" />
+                  {ruleTypeModel?.alertDetailsTrailingSection &&
+                    (() => {
+                      const TrailingSection = ruleTypeModel.alertDetailsTrailingSection!;
+                      return (
+                        <TrailingSection
+                          alert={alertDetail.formatted}
+                          rule={rule}
+                          timeZone={timeZone}
+                          setSources={setSources}
+                          embeddableDeps={embeddableDeps}
+                        />
+                      );
+                    })()}
+                </>
+              );
+            })()}
         </EuiFlexGroup>
       </>
     ) : (
