@@ -139,9 +139,24 @@ export const handleAgentExecution = async ({
   });
 
   // Generate title (for CREATE) or use existing title (for UPDATE)
+  const deanonymizeTitle =
+    anonymizationEnabled && conversation.replacementsId && deps.inference.deanonymizeText
+      ? async (title: string) => {
+          const namespace =
+            deps.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
+          return deps.inference.deanonymizeText!(namespace, conversation.replacementsId!, title);
+        }
+      : undefined;
+
   const title$ =
     conversation.operation === 'CREATE'
-      ? generateTitle({ chatModel, conversation, nextInput, anonymizationEnabled })
+      ? generateTitle({
+          chatModel,
+          conversation,
+          nextInput,
+          anonymizationEnabled,
+          deanonymizeTitle,
+        })
       : of(conversation.title);
 
   // Persist conversation (optional)

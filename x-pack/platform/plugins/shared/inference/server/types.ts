@@ -160,6 +160,18 @@ export interface InferenceServerStart {
   getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
 
   /**
+   * Deanonymizes a text string by replacing anonymization tokens with their original values
+   * using the replacements document identified by the given namespace and replacementsId.
+   * Returns the original text unchanged if anonymization is disabled or the replacements
+   * document is not found.
+   *
+   * @param namespace - The space namespace the replacements document belongs to
+   * @param replacementsId - The ID of the replacements document
+   * @param text - The text containing anonymization tokens to replace
+   */
+  deanonymizeText?: (namespace: string, replacementsId: string, text: string) => Promise<string>;
+
+  /**
    * Lists available Elasticsearch inference endpoints, optionally filtered by task type.
    *
    * @param taskType - Optional task type to filter by (e.g. 'chat_completion')

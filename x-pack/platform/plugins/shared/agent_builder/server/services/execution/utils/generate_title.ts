@@ -22,11 +22,13 @@ export const generateTitle = ({
   conversation,
   chatModel,
   anonymizationEnabled,
+  deanonymizeTitle,
 }: {
   nextInput: ConverseInput;
   conversation: Conversation;
   chatModel: InferenceChatModel;
   anonymizationEnabled: boolean;
+  deanonymizeTitle?: (title: string) => Promise<string>;
 }): Observable<string> => {
   return defer(async () => {
     try {
@@ -35,6 +37,7 @@ export const generateTitle = ({
         nextInput,
         chatModel,
         replacementsId: anonymizationEnabled ? conversation.replacementsId : undefined,
+        deanonymizeTitle,
       });
     } catch (e) {
       return conversation.title;
@@ -47,11 +50,13 @@ const generateConversationTitle = async ({
   nextInput,
   chatModel,
   replacementsId,
+  deanonymizeTitle,
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   chatModel: InferenceChatModel;
   replacementsId?: string;
+  deanonymizeTitle?: (title: string) => Promise<string>;
 }) => {
   return withActiveInferenceSpan(
     'GenerateTitle',
@@ -88,9 +93,11 @@ Now, generate a title for the following conversation.`,
         anonymization: replacementsId ? { replacementsId } : undefined,
       });
 
-      span?.setAttribute('output.value', title);
+      const resolvedTitle = deanonymizeTitle ? await deanonymizeTitle(title) : title;
 
-      return title;
+      span?.setAttribute('output.value', resolvedTitle);
+
+      return resolvedTitle;
     }
   );
 };
