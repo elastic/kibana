@@ -6,7 +6,11 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { isSkillNotFoundError, isBadRequestError } from '@kbn/agent-builder-common';
+import {
+  isSkillNotFoundError,
+  isBadRequestError,
+  type PersistedSkillCreateRequest,
+} from '@kbn/agent-builder-common';
 import { createClient, type SkillClient } from './client';
 
 const testSpace = 'default';
@@ -39,12 +43,14 @@ interface MockEsClient {
   search: jest.Mock;
   index: jest.Mock;
   delete: jest.Mock;
+  bulk: jest.Mock;
 }
 
 const mockEsClient: MockEsClient = {
   search: jest.fn(),
   index: jest.fn(),
   delete: jest.fn(),
+  bulk: jest.fn(),
 };
 
 jest.mock('./storage', () => ({
@@ -101,7 +107,9 @@ describe('SkillClient', () => {
         name: 'My Skill',
         description: 'A skill description',
         content: 'Skill content body',
+        referenced_content: [],
         tool_ids: [],
+        referenced_content_count: 0,
         created_at: creationDate,
         updated_at: updateDate,
       });
@@ -194,6 +202,111 @@ describe('SkillClient', () => {
     });
   });
 
+  describe('list with summaryOnly', () => {
+    const createMockSummaryDoc = (id: string, refCount: number) => ({
+      _id: `doc-${id}`,
+      _source: {
+        id,
+        name: `Skill ${id}`,
+        space: testSpace,
+        description: `Description for ${id}`,
+        tool_ids: ['tool-a'],
+        created_at: creationDate,
+        updated_at: updateDate,
+      },
+      fields: {
+        referenced_content_count: [refCount],
+      },
+    });
+
+    it('returns skills with empty content and referenced_content_count populated', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 2 },
+          hits: [createMockSummaryDoc('skill-1', 3), createMockSummaryDoc('skill-2', 0)],
+        },
+      });
+
+      const result = await client.list({ summaryOnly: true });
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          id: 'skill-1',
+          name: 'Skill skill-1',
+          description: 'Description for skill-1',
+          tool_ids: ['tool-a'],
+          referenced_content_count: 3,
+          content: '',
+          referenced_content: [],
+        })
+      );
+      expect(result[1].referenced_content_count).toBe(0);
+    });
+
+    it('uses _source exclusion and runtime_mappings in the search request', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { total: { value: 0 }, hits: [] },
+      });
+
+      await client.list({ summaryOnly: true });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: { excludes: ['content', 'referenced_content'] },
+          runtime_mappings: expect.objectContaining({
+            referenced_content_count: expect.objectContaining({
+              type: 'long',
+            }),
+          }),
+          fields: ['referenced_content_count'],
+          track_total_hits: true,
+          size: 1000,
+        })
+      );
+    });
+
+    it('does not use _source exclusion when summaryOnly is not set', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { total: { value: 0 }, hits: [] },
+      });
+
+      await client.list();
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          _source: expect.anything(),
+        })
+      );
+    });
+
+    it('falls back to referenced_content array length when fields are missing', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 1 },
+          hits: [
+            {
+              _id: 'doc-skill-1',
+              _source: {
+                id: 'skill-1',
+                name: 'Skill 1',
+                space: testSpace,
+                description: 'desc',
+                tool_ids: [],
+                created_at: creationDate,
+                updated_at: updateDate,
+              },
+            },
+          ],
+        },
+      });
+
+      const result = await client.list({ summaryOnly: true });
+
+      expect(result[0].referenced_content_count).toBe(0);
+    });
+  });
+
   describe('create', () => {
     it('creates a new skill and returns it', async () => {
       mockEsClient.search
@@ -232,6 +345,73 @@ describe('SkillClient', () => {
 
       expect(isBadRequestError(error)).toBe(true);
       expect(error.message).toContain('already exists');
+    });
+  });
+
+  describe('bulkCreate', () => {
+    const createRequest = (id: string): PersistedSkillCreateRequest => ({
+      id,
+      name: `Skill ${id}`,
+      description: `Description for ${id}`,
+      content: `Content for ${id}`,
+      referenced_content: [],
+      tool_ids: [],
+      plugin_id: 'my-plugin',
+    });
+
+    it('indexes all skills in a single bulk request', async () => {
+      mockEsClient.bulk.mockResolvedValue({ errors: false, items: [], took: 1 });
+
+      const requests = [createRequest('skill-a'), createRequest('skill-b')];
+      const results = await client.bulkCreate(requests);
+
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
+      const bulkCall = mockEsClient.bulk.mock.calls[0][0];
+      expect(bulkCall.throwOnFail).toBe(true);
+      expect(bulkCall.operations).toHaveLength(2);
+
+      expect(bulkCall.operations[0]).toEqual({
+        index: {
+          document: expect.objectContaining({ id: 'skill-a', space: testSpace }),
+        },
+      });
+      expect(bulkCall.operations[1]).toEqual({
+        index: {
+          document: expect.objectContaining({ id: 'skill-b', space: testSpace }),
+        },
+      });
+
+      expect(results).toHaveLength(2);
+      expect(results[0].id).toBe('skill-a');
+      expect(results[0].name).toBe('Skill skill-a');
+      expect(results[0].plugin_id).toBe('my-plugin');
+      expect(results[1].id).toBe('skill-b');
+    });
+
+    it('returns empty array for empty input', async () => {
+      const results = await client.bulkCreate([]);
+
+      expect(results).toEqual([]);
+      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('uses the same creation timestamp for all skills', async () => {
+      mockEsClient.bulk.mockResolvedValue({ errors: false, items: [], took: 1 });
+
+      const requests = [createRequest('skill-a'), createRequest('skill-b')];
+      const results = await client.bulkCreate(requests);
+
+      expect(results[0].created_at).toBe(results[1].created_at);
+      expect(results[0].updated_at).toBe(results[1].updated_at);
+      expect(results[0].created_at).toBe(results[0].updated_at);
+    });
+
+    it('propagates bulk operation errors', async () => {
+      mockEsClient.bulk.mockRejectedValue(new Error('Bulk operation failed'));
+
+      await expect(client.bulkCreate([createRequest('skill-a')])).rejects.toThrow(
+        'Bulk operation failed'
+      );
     });
   });
 
