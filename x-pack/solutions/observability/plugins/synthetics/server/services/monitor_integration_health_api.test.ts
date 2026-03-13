@@ -108,8 +108,7 @@ const buildApi = (overrides: {
   return new MonitorIntegrationHealthApi(
     server,
     savedObjectsClient,
-    monitorConfigRepository,
-    SPACE_ID
+    monitorConfigRepository,    
   );
 };
 
