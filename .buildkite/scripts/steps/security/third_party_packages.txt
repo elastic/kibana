@@ -36,3 +36,4 @@ json-stable-stringify
 apache-arrow
 oxlint
 react-element-to-jsx-string
+react-day-picker
