@@ -105,7 +105,12 @@ const buildApi = (overrides: {
     get: jest.fn(),
   }) as unknown as MonitorConfigRepository;
 
-  return new MonitorIntegrationHealthApi(server, savedObjectsClient, monitorConfigRepository, SPACE_ID);
+  return new MonitorIntegrationHealthApi(
+    server,
+    savedObjectsClient,
+    monitorConfigRepository,
+    SPACE_ID
+  );
 };
 
 describe('MonitorIntegrationHealthApi', () => {
@@ -116,8 +121,7 @@ describe('MonitorIntegrationHealthApi', () => {
       () =>
         ({
           getPolicyId: jest.fn(
-            (config: { origin?: string; id: string }, locId: string) =>
-              `${config.id}-${locId}`
+            (config: { origin?: string; id: string }, locId: string) => `${config.id}-${locId}`
           ),
           getLegacyPolicyIdsForAllSpaces: jest.fn(
             (configId: string, locId: string, spaces: Set<string>) =>
@@ -132,12 +136,14 @@ describe('MonitorIntegrationHealthApi', () => {
               spaces: Set<string>
             ) => {
               const newId = `${config.id}-${locId}`;
-              const hasNewFormatPolicyId =
-                existingPolicies?.some((p) => p.id === newId) ?? false;
+              const hasNewFormatPolicyId = existingPolicies?.some((p) => p.id === newId) ?? false;
               const legacyPrefix = `${config.id}-${locId}-`;
               const legacyPolicyIds =
                 existingPolicies
-                  ?.filter((p) => p.id.startsWith(legacyPrefix) && spaces.has(p.id.slice(legacyPrefix.length)))
+                  ?.filter(
+                    (p) =>
+                      p.id.startsWith(legacyPrefix) && spaces.has(p.id.slice(legacyPrefix.length))
+                  )
                   .map((p) => p.id) ?? [];
               return {
                 hasNewFormatPolicyId,
@@ -605,10 +611,12 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const newPolicyId = 'mon-1-priv-loc-1';
       const legacyPolicyId = `mon-1-priv-loc-1-${SPACE_ID}`;
-      const fleetGetByIDs = jest.fn().mockResolvedValue([
-        createPackagePolicy(newPolicyId, ['agent-policy-1']),
-        createPackagePolicy(legacyPolicyId, ['agent-policy-1']),
-      ]);
+      const fleetGetByIDs = jest
+        .fn()
+        .mockResolvedValue([
+          createPackagePolicy(newPolicyId, ['agent-policy-1']),
+          createPackagePolicy(legacyPolicyId, ['agent-policy-1']),
+        ]);
 
       const api = buildApi({
         monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
