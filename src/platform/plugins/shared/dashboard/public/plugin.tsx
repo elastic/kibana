@@ -73,6 +73,7 @@ import {
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { dashboardExportProvider } from './dashboard_app/top_nav/share/dashboard_export_provider';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
@@ -178,6 +179,8 @@ export class DashboardPlugin
           },
         })
       );
+
+      share.registerShareIntegration('dashboard', dashboardExportProvider());
     }
 
     const {

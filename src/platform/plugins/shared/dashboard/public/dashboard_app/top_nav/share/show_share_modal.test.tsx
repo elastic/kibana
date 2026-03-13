@@ -14,6 +14,7 @@ import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal } from './show_share_modal';
 import type { AccessControlClient } from '@kbn/content-management-access-control-public';
 import type { SavedObjectAccessControl } from '@kbn/core/server';
+import type { DashboardApi } from '../../../dashboard_api/types';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard_v2" app is not available', () => {
@@ -78,6 +79,12 @@ describe('ShowShareModal', () => {
     isManaged: false,
     getCurrentUser: jest.fn().mockResolvedValue({} as { uid: string }),
     getActiveSpace: jest.fn().mockResolvedValue({ name: 'default' }),
+    dashboardApi: {
+      savedObjectId$: { getValue: jest.fn() },
+      viewMode$: { getValue: jest.fn() },
+      hasUnsavedChanges$: { getValue: jest.fn() },
+      getSerializedState: jest.fn(),
+    } as unknown as DashboardApi,
   };
 
   it('locatorParams is missing all unsaved state when none is given', () => {

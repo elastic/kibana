@@ -17,6 +17,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { topNavStrings } from '../../_dashboard_app_strings';
 import type { DashboardLocatorParams } from '../../../../common';
+import type { DashboardApi } from '../../../dashboard_api/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { dataService, shareService } from '../../../services/kibana_services';
 import { logger } from '../../../services/logger';
@@ -112,9 +113,14 @@ export function getExportObjectTypeMeta() {
 /**
  * Builds sharingData for export operations.
  */
-export function buildExportSharingData(title: string, locatorParams: DashboardLocatorParams) {
+export function buildExportSharingData(
+  title: string,
+  locatorParams: DashboardLocatorParams,
+  dashboardApi: DashboardApi
+) {
   return {
     title,
+    dashboardApi,
     locatorParams: {
       id: DASHBOARD_APP_LOCATOR,
       params: locatorParams,
@@ -157,6 +163,13 @@ export const mapExportIntegrationToMetaData = (intgrationId: string) => {
         iconType: 'calendar',
         order: 3,
         separator: 'above' as const,
+      };
+    case 'dashboardJsonExport':
+      return {
+        label: topNavStrings.export.jsonLabel,
+        testId: 'exportMenuItem-JSON',
+        iconType: 'document',
+        order: 4,
       };
     default:
       return {
