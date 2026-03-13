@@ -42,7 +42,10 @@ describe('CAI_CONTENT_INDEX_MAPPINGS', () => {
     const longTemplate = CAI_CONTENT_INDEX_MAPPINGS.dynamic_templates!.find(
       (t: Record<string, unknown>) => Object.keys(t)[0] === 'ef_long'
     );
-    const config = Object.values(longTemplate!)[0] as { path_match: string; mapping: { type: string } };
+    const config = Object.values(longTemplate!)[0] as {
+      path_match: string;
+      mapping: { type: string };
+    };
     expect(config.path_match).toBe('extended_fields.*_as_long');
     expect(config.mapping.type).toBe('long');
   });
@@ -51,7 +54,10 @@ describe('CAI_CONTENT_INDEX_MAPPINGS', () => {
     const ipTemplate = CAI_CONTENT_INDEX_MAPPINGS.dynamic_templates!.find(
       (t: Record<string, unknown>) => Object.keys(t)[0] === 'ef_ip'
     );
-    const config = Object.values(ipTemplate!)[0] as { path_match: string; mapping: { type: string } };
+    const config = Object.values(ipTemplate!)[0] as {
+      path_match: string;
+      mapping: { type: string };
+    };
     expect(config.path_match).toBe('extended_fields.*_as_ip');
     expect(config.mapping.type).toBe('ip');
   });
@@ -72,7 +78,10 @@ describe('CAI_CONTENT_INDEX_MAPPINGS', () => {
     for (const [name, expectedPath] of Object.entries(expectedPatterns)) {
       const template = templates.find((t: Record<string, unknown>) => Object.keys(t)[0] === name);
       expect(template).toBeDefined();
-      const config = Object.values(template!)[0] as { path_match: string; mapping: { type: string } };
+      const config = Object.values(template!)[0] as {
+        path_match: string;
+        mapping: { type: string };
+      };
       expect(config.path_match).toBe(expectedPath);
     }
   });

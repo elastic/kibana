@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import type {
   IndicesGetMappingResponse,
   TasksTaskInfo,

@@ -26,7 +26,6 @@ interface GridPos {
   h: number;
 }
 
-
 let panelCounter = 0;
 function nextPanelId() {
   return `cases-analytics-panel-${++panelCounter}`;

@@ -173,8 +173,7 @@ export function getLifecycleTransformConfig(
                 }
               }
             `,
-            combine_script:
-              'return ["created": state.created, "closed": state.closed]',
+            combine_script: 'return ["created": state.created, "closed": state.closed]',
             reduce_script: `
               long created = 0L; long closed = 0L;
               boolean hasCreated = false; boolean hasClosed = false;
@@ -204,8 +203,7 @@ export function getLifecycleTransformConfig(
                 }
               }
             `,
-            combine_script:
-              'return ["created": state.created, "firstComment": state.firstComment]',
+            combine_script: 'return ["created": state.created, "firstComment": state.firstComment]',
             reduce_script: `
               long created = 0L; long first = 0L;
               boolean hasCreated = false; boolean hasFirst = false;
@@ -235,8 +233,7 @@ export function getLifecycleTransformConfig(
                 }
               }
             `,
-            combine_script:
-              'return ["created": state.created, "firstAssign": state.firstAssign]',
+            combine_script: 'return ["created": state.created, "firstAssign": state.firstAssign]',
             reduce_script: `
               long created = 0L; long first = 0L;
               boolean hasCreated = false; boolean hasFirst = false;

@@ -1210,7 +1210,9 @@ async function main() {
     if (config.templates.length > 0 && config.templateOwners.length > 0) {
       const tplSpace = config.templateSpace || 'default';
       logger.info(
-        `Creating ${config.templates.length} template(s) in space "${tplSpace}" for owners: ${config.templateOwners.join(', ')}`
+        `Creating ${
+          config.templates.length
+        } template(s) in space "${tplSpace}" for owners: ${config.templateOwners.join(', ')}`
       );
       for (const owner of config.templateOwners) {
         await createTemplates({

@@ -9,7 +9,11 @@ import expect from '@kbn/expect';
 import { join } from 'path';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { runSchedulerTask } from '../../../../../common/lib/api/analytics';
-import { createConfiguration, deleteConfiguration, getConfigurationRequest } from '../../../../../common/lib/api';
+import {
+  createConfiguration,
+  deleteConfiguration,
+  getConfigurationRequest,
+} from '../../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
   const esClient = getService('es');
