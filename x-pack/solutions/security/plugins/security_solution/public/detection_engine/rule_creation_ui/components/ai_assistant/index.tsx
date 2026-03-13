@@ -13,7 +13,10 @@ import { NewChat } from '@kbn/elastic-assistant';
 
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { css } from '@emotion/react';
-import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../../../common/constants';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { DefineStepRule } from '../../../common/types';
@@ -105,6 +108,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
     const queryField = getFields().queryBar;
     const { query } = (queryField.value as DefineStepRule['queryBar']).query;
     return {
+      attachmentId: SECURITY_RULE_ATTACHMENT_ID,
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
         text: JSON.stringify({ query: query ?? '', queryLanguage: language }),
