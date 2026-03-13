@@ -727,6 +727,9 @@ describe('#getQueryParams', () => {
                 key: {
                   type: 'keyword',
                 },
+                deep: {
+                  type: 'flattened',
+                },
               },
             },
           },
@@ -765,6 +768,26 @@ describe('#getQueryParams', () => {
         expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
         expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
           'nestedtype.title.value',
+        ]);
+      });
+
+      it('supports deeply nested fields', () => {
+        const result = getQueryParams({
+          registry,
+          search: 'foo',
+          searchFields: ['title.deep.someField'],
+          type: ['nestedtype'],
+          mappings: nestedFieldMappings,
+        });
+
+        const mustClause = result.query.bool.must;
+        expect(mustClause.length).toBe(1);
+        const nestedQueryClause = mustClause[0].nested;
+
+        expect(nestedQueryClause.path).toBe('nestedtype.title');
+        expect(nestedQueryClause.query.simple_query_string.query).toBe('foo');
+        expect(nestedQueryClause.query.simple_query_string.fields).toEqual([
+          'nestedtype.title.deep.someField',
         ]);
       });
 
