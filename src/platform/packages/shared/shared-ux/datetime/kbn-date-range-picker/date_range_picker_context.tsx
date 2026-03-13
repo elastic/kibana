@@ -11,6 +11,7 @@ import React, {
   createContext,
   useContext,
   useState,
+  useEffect,
   useRef,
   useMemo,
   useCallback,
@@ -21,7 +22,13 @@ import React, {
 
 import { useGeneratedHtmlId } from '@elastic/eui';
 
-import type { TimeRangeBounds, TimeRangeBoundsOption, TimeRange, InitialFocus } from './types';
+import type {
+  TimeRangeBounds,
+  TimeRangeBoundsOption,
+  TimeRange,
+  InitialFocus,
+  CalendarOptions,
+} from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
 import {
@@ -60,6 +67,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   setIsEditing: (value: boolean) => void;
   /** Whether to use EUI compressed form styling. */
   compressed: boolean;
+  /** Whether the idle-state control hides its text label. */
+  collapsed: boolean;
   /** Predefined time range options shown in the Presets section. */
   presets: TimeRangeBoundsOption[];
   /** Recently used time ranges shown in the Recent section. */
@@ -93,6 +102,14 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
    * @beta
    */
   onInputChange?: (value: string) => void;
+  /** Horizontal sizing behavior of the picker. */
+  width: NonNullable<DateRangePickerProps['width']>;
+  /** Whether the picker is disabled. */
+  disabled: boolean;
+  /** Whether a loading spinner is shown inside the form control. */
+  isLoading: boolean;
+  /** Calendar-specific options (e.g. first day of week). */
+  calendarOptions?: CalendarOptions;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -114,17 +131,23 @@ export function useDateRangePickerContext(): DateRangePickerInternalContextValue
  */
 export function DateRangePickerProvider({
   children,
+  value,
   defaultValue,
   onChange,
   dateFormat,
   isInvalid = false,
+  disabled = false,
+  isLoading = false,
   compressed = true,
+  collapsed = false,
   showTimeWindowButtons = false,
   presets = DEFAULT_PRESETS,
   recent = [],
   onPresetSave,
   onPresetDelete,
   onInputChange,
+  width = 'auto',
+  calendarOptions,
 }: PropsWithChildren<DateRangePickerProps>) {
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -132,7 +155,9 @@ export function DateRangePickerProvider({
   const panelId = useGeneratedHtmlId({ prefix: 'dateRangePickerPanel' });
   const lastValidText = useRef('');
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [text, setText] = useState<string>(() => defaultValue ?? '');
+  const isEditingRef = useRef(isEditing);
+  isEditingRef.current = isEditing;
+  const [text, setText] = useState<string>(() => value ?? defaultValue ?? '');
   const timeRange: TimeRange = useMemo(() => textToTimeRange(text), [text]);
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, { dateFormat }),
@@ -150,6 +175,12 @@ export function DateRangePickerProvider({
     ? durationToDisplayShortText(duration.startDate, duration.endDate)
     : null;
 
+  useEffect(() => {
+    if (typeof value === 'string' && !isEditingRef.current) {
+      setText(value);
+    }
+  }, [value]);
+
   const timeWindowButtonsConfig: TimeWindowButtonsConfig | false = useMemo(
     () =>
       showTimeWindowButtons === false
@@ -165,13 +196,17 @@ export function DateRangePickerProvider({
       if (editing && text) {
         lastValidText.current = text;
       }
-      if (!editing && lastValidText.current) {
-        setText(lastValidText.current);
+      if (!editing) {
+        if (typeof value === 'string') {
+          setText(value);
+        } else if (lastValidText.current) {
+          setText(lastValidText.current);
+        }
         lastValidText.current = '';
       }
       setIsEditing(editing);
     },
-    [text]
+    [text, value]
   );
 
   /** Apply a range: parse it, call `onChange`, and exit editing mode. */
@@ -210,6 +245,7 @@ export function DateRangePickerProvider({
       isEditing,
       setIsEditing: setIsEditingWithRestore,
       compressed,
+      collapsed,
       displayText,
       displayFullFormattedText,
       displayShortDuration,
@@ -224,6 +260,10 @@ export function DateRangePickerProvider({
       onPresetSave,
       onPresetDelete,
       onInputChange,
+      width,
+      disabled,
+      isLoading,
+      calendarOptions,
     }),
     [
       text,
@@ -232,6 +272,7 @@ export function DateRangePickerProvider({
       isEditing,
       setIsEditingWithRestore,
       compressed,
+      collapsed,
       displayText,
       displayFullFormattedText,
       displayShortDuration,
@@ -243,6 +284,10 @@ export function DateRangePickerProvider({
       onPresetSave,
       onPresetDelete,
       onInputChange,
+      width,
+      disabled,
+      isLoading,
+      calendarOptions,
     ]
   );
 

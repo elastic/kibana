@@ -29,7 +29,12 @@ import { ContentListTable } from '@kbn/content-list-table';
 import { ContentListToolbar } from '@kbn/content-list-toolbar';
 import { ContentListFooter } from '@kbn/content-list-footer';
 
-import { createStoryFindItems, toJsx } from '../stories_helpers';
+import {
+  createMockFavoritesClient,
+  createStoryFindItems,
+  mockTagsService,
+  toJsx,
+} from '../stories_helpers';
 import { BuilderPanel } from './builder_panel';
 import type { PlaygroundState } from './playground_state';
 import { INITIAL_STATE, playgroundReducer } from './playground_state';
@@ -106,8 +111,31 @@ const usePreview = (state: PlaygroundState) => {
     [provider.entity, provider.entityPlural]
   );
 
+  const sortFields = useMemo(() => buildSortFields(state.table.columns), [state.table.columns]);
+
+  const hasTagsFilter = toolbar.filters.some((f) => f.type === 'tags');
+  const hasTagsColumn = table.columns.some((c) => c.type === 'name' && c.props.showTags);
+  const hasTags = hasTagsFilter || hasTagsColumn;
+
+  // `features.starred` is the master switch in the playground: the favorites client
+  // and provider feature are only enabled when it is explicitly turned on.
+  // Starred columns and filters render silently empty without it.
+  const hasStarred = features.starred;
+
+  // Memoized before `dataSource` so both the provider and findItems share the same
+  // in-memory favorites set — starring an item is immediately reflected when the
+  // `starredOnly` filter is toggled.
+  const favoritesClient = useMemo(
+    () => (hasStarred ? createMockFavoritesClient() : undefined),
+    [hasStarred]
+  );
+
   const dataSource = useMemo(() => {
-    const baseOptions = { totalItems: data.totalItems, isEmpty: !data.hasItems };
+    const baseOptions = {
+      totalItems: data.totalItems,
+      isEmpty: !data.hasItems,
+      favoritesClient,
+    };
     if (data.isLoading) {
       return {
         findItems: createStoryFindItems({ ...baseOptions, delay: 800 }),
@@ -116,9 +144,7 @@ const usePreview = (state: PlaygroundState) => {
     return {
       findItems: createStoryFindItems(baseOptions),
     };
-  }, [data.totalItems, data.isLoading, data.hasItems]);
-
-  const sortFields = useMemo(() => buildSortFields(state.table.columns), [state.table.columns]);
+  }, [data.totalItems, data.isLoading, data.hasItems, favoritesClient]);
 
   const providerFeatures = useMemo(
     () => ({
@@ -129,8 +155,18 @@ const usePreview = (state: PlaygroundState) => {
         ? { initialPageSize: features.initialPageSize }
         : (false as const),
       search: features.search ? {} : (false as const),
+      tags: hasTags ? true : (false as const),
+      starred: hasStarred ? true : (false as const),
     }),
-    [features.sorting, features.pagination, features.initialPageSize, features.search, sortFields]
+    [
+      features.sorting,
+      features.pagination,
+      features.initialPageSize,
+      features.search,
+      sortFields,
+      hasTags,
+      hasStarred,
+    ]
   );
 
   const providerItemConfig = useMemo(() => {
@@ -160,6 +196,8 @@ const usePreview = (state: PlaygroundState) => {
         );
 
         switch (col.type) {
+          case 'starred':
+            return <Column.Starred key={col.instanceId} {...cleanProps} />;
           case 'name':
             return <Column.Name key={col.instanceId} {...cleanProps} />;
           case 'updatedAt':
@@ -211,24 +249,61 @@ const usePreview = (state: PlaygroundState) => {
   );
 
   const toolbarElement = useMemo(() => {
-    if (toolbar.filters.length === 0) {
-      return <ContentListToolbar />;
-    }
-    return (
-      <ContentListToolbar>
-        <Filters>
-          {toolbar.filters.map((f) => {
+    // Always render explicit Filters children so the toolbar shows exactly what
+    // the user has configured. Falling back to framework defaults would include
+    // the starred filter whenever supports.starred is true, even if the user
+    // hasn't added Filters.Starred.
+    const filterParts =
+      toolbar.filters.length > 0
+        ? toolbar.filters.map((f) => {
+            if (f.type === 'starred') {
+              return (
+                <React.Fragment key={f.instanceId}>
+                  <Filters.Starred />
+                </React.Fragment>
+              );
+            }
             if (f.type === 'sort') {
-              return <Filters.Sort key={f.instanceId} />;
+              return (
+                <React.Fragment key={f.instanceId}>
+                  <Filters.Sort />
+                </React.Fragment>
+              );
+            }
+            if (f.type === 'tags') {
+              return (
+                <React.Fragment key={f.instanceId}>
+                  <Filters.Tags />
+                </React.Fragment>
+              );
             }
             return null;
-          })}
-        </Filters>
+          })
+        : [
+            <React.Fragment key="sort">
+              <Filters.Sort />
+            </React.Fragment>,
+          ];
+
+    return (
+      <ContentListToolbar>
+        <Filters>{filterParts}</Filters>
       </ContentListToolbar>
     );
   }, [toolbar.filters]);
 
   const tableTitle = `${provider.entityPlural} table`;
+
+  const services = useMemo(() => {
+    const s: Record<string, unknown> = {};
+    if (hasTags) {
+      s.tags = mockTagsService;
+    }
+    if (hasStarred && favoritesClient) {
+      s.favorites = favoritesClient;
+    }
+    return Object.keys(s).length > 0 ? s : undefined;
+  }, [hasTags, hasStarred, favoritesClient]);
 
   const providerProps = useMemo(
     () => ({
@@ -237,8 +312,9 @@ const usePreview = (state: PlaygroundState) => {
       features: providerFeatures,
       isReadOnly: provider.isReadOnly,
       item: providerItemConfig,
+      ...(services && { services }),
     }),
-    [labels, dataSource, providerFeatures, provider.isReadOnly, providerItemConfig]
+    [labels, dataSource, providerFeatures, provider.isReadOnly, providerItemConfig, services]
   );
 
   const consumerJsx = useMemo(
@@ -305,6 +381,16 @@ export const PlaygroundBuilder = () => {
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
       {
+        id: 'about',
+        name: 'About',
+        content: (
+          <>
+            <EuiSpacer size="m" />
+            <EuiMarkdownFormat textSize="s">{INSTRUCTIONS_MD}</EuiMarkdownFormat>
+          </>
+        ),
+      },
+      {
         id: 'preview',
         name: 'Preview',
         content: (
@@ -325,16 +411,6 @@ export const PlaygroundBuilder = () => {
             <EuiCodeBlock language="tsx" fontSize="s" paddingSize="s" overflowHeight={300}>
               {jsx}
             </EuiCodeBlock>
-          </>
-        ),
-      },
-      {
-        id: 'about',
-        name: 'About',
-        content: (
-          <>
-            <EuiSpacer size="m" />
-            <EuiMarkdownFormat textSize="s">{INSTRUCTIONS_MD}</EuiMarkdownFormat>
           </>
         ),
       },

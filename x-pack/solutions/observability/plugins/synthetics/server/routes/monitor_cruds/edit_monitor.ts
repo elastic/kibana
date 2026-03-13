@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { isEmpty } from 'lodash';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { invalidOriginError } from './add_monitor';
@@ -253,38 +254,44 @@ export const syncEditedMonitor = async ({
 }) => {
   const { server, savedObjectsClient, syntheticsMonitorClient, monitorConfigRepository } =
     routeContext;
+
+  const monitorId = decryptedPreviousMonitor.id;
+  const monitorPrivateLocations = normalizedMonitor[ConfigKey.LOCATIONS].filter(
+    (loc) => !loc.isServiceManaged
+  );
+  const packagePolicySoType = await getPackagePolicySavedObjectType();
+  const references = monitorPrivateLocations.map((loc) => ({
+    id: `${monitorId}-${loc.id}`,
+    name: `${monitorId}-${loc.id}`,
+    type: packagePolicySoType,
+  }));
+
   try {
     const monitorWithId = {
       ...normalizedMonitor,
-      [ConfigKey.MONITOR_QUERY_ID]:
-        normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
-      [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
+      [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorId,
+      [ConfigKey.CONFIG_ID]: monitorId,
       [ConfigKey.KIBANA_SPACES]:
         normalizedMonitor[ConfigKey.KIBANA_SPACES] || decryptedPreviousMonitor.namespaces,
     };
     const formattedMonitor = formatSecrets(monitorWithId);
-    const editedSOPromise = monitorConfigRepository.update(
-      decryptedPreviousMonitor.id,
-      formattedMonitor,
-      decryptedPreviousMonitor
-    );
 
     const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
 
-    const editSyncPromise = syntheticsMonitorClient.editMonitors(
-      [
-        {
-          monitor: monitorWithId as MonitorFields,
-          id: decryptedPreviousMonitor.id,
-          decryptedPreviousMonitor,
-        },
-      ],
-      allPrivateLocations,
-      spaceId
-    );
-
     const [editedMonitorSavedObject, { publicSyncErrors, failedPolicyUpdates }] = await Promise.all(
-      [editedSOPromise, editSyncPromise]
+      [
+        monitorConfigRepository.update(
+          monitorId,
+          formattedMonitor,
+          decryptedPreviousMonitor,
+          references.length > 0 ? references : undefined
+        ),
+        syntheticsMonitorClient.editMonitors(
+          [{ monitor: monitorWithId as MonitorFields, id: monitorId, decryptedPreviousMonitor }],
+          allPrivateLocations,
+          spaceId
+        ),
+      ]
     );
 
     sendTelemetryEvents(

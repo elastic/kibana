@@ -29,7 +29,16 @@ import {
   useContentListConfig,
 } from '@kbn/content-list-provider';
 import type { FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
-import { MOCK_DASHBOARDS, createMockFindItems } from '@kbn/content-list-mock-data';
+import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
+import {
+  MOCK_DASHBOARDS,
+  createMockFindItems,
+  createMockFavoritesClient,
+  extractTagIds,
+  mockTagsService,
+} from '@kbn/content-list-mock-data';
+
+export { mockTagsService, createMockFavoritesClient };
 
 // =============================================================================
 // Mock Data
@@ -63,16 +72,26 @@ const buildMockItems = (count: number): typeof MOCK_DASHBOARDS => {
 /**
  * Creates a mock `findItems` function with configurable behavior.
  * Shared across Content List story files.
+ *
+ * Pass the same `favoritesClient` instance used for `services.favorites`
+ * on the provider so that starred items are immediately visible when the
+ * `starredOnly` filter is toggled (both sides share the same in-memory set).
  */
 export const createStoryFindItems = (options?: {
   totalItems?: number;
   delay?: number;
   isEmpty?: boolean;
+  favoritesClient?: FavoritesClientPublic;
 }) => {
-  const { totalItems = MOCK_DASHBOARDS.length, delay = 0, isEmpty = false } = options ?? {};
+  const {
+    totalItems = MOCK_DASHBOARDS.length,
+    delay = 0,
+    isEmpty = false,
+    favoritesClient,
+  } = options ?? {};
 
   const items = buildMockItems(totalItems);
-  const mockFindItems = createMockFindItems({ items });
+  const mockFindItems = createMockFindItems({ items, favoritesClient });
 
   return async (params: FindItemsParams): Promise<FindItemsResult> => {
     if (delay > 0) {
@@ -85,7 +104,7 @@ export const createStoryFindItems = (options?: {
 
     const result = await mockFindItems({
       searchQuery: params.searchQuery,
-      filters: {},
+      filters: params.filters,
       sort: params.sort ?? { field: 'title', direction: 'asc' },
       page: params.page,
     });
@@ -97,8 +116,10 @@ export const createStoryFindItems = (options?: {
         description: item.attributes.description,
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+        tags: extractTagIds(item.references),
       })),
       total: result.total,
+      counts: result.counts,
     };
   };
 };

@@ -36,7 +36,7 @@ export function DashboardSelector({
   });
 
   useEffect(() => {
-    const preselectedDashboard = customDashboards.find(
+    const preselectedDashboard = customDashboards?.find(
       ({ dashboardSavedObjectId }) => dashboardSavedObjectId === currentDashboardId
     );
     // preselect dashboard
@@ -54,8 +54,16 @@ export function DashboardSelector({
     [onRefresh, setUrlState]
   );
 
+  const selectDashboardLabel = i18n.translate(
+    'xpack.infra.customDashboards.selectDashboard.placeholder',
+    {
+      defaultMessage: 'Select dashboard',
+    }
+  );
+
   return (
     <EuiComboBox
+      aria-label={selectDashboardLabel}
       compressed
       style={{ minWidth: '200px' }}
       placeholder={i18n.translate('xpack.infra.customDashboards.selectDashboard.placeholder', {
