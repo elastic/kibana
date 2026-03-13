@@ -9,6 +9,7 @@ import { EuiEmptyPrompt, EuiFormRow, EuiLink, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import React from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 
 // TODO - add return type
@@ -19,7 +20,7 @@ export const useEnrichPolicies = () => {
     },
   } = useKibana();
 
-  const { data, isLoading, error, isFetched } = useQuery({
+  const { data, isLoading, isFetched } = useQuery({
     queryKey: ['enrichPolicies'],
     queryFn: async () => {
       const response = await indexManagement.apiService.getAllEnrichPolicies();
@@ -27,12 +28,13 @@ export const useEnrichPolicies = () => {
     },
   });
 
-  return { policies: data ?? [], isLoading, isFetched, error };
+  return { policies: data ?? [], isLoading, isFetched };
 };
 
 // TODO - handle errors and prompt to create a policy if no policies are found
 export const EnrichPolicySelector = () => {
-  const { policies, isLoading, isFetched, error } = useEnrichPolicies();
+  const { control } = useFormContext();
+  const { policies, isLoading, isFetched } = useEnrichPolicies();
   const { core } = useKibana();
   const createEnrichPolicyUrl = core.application.getUrlForApp('management', {
     path: '/data/index_management/enrich_policies/create',
@@ -60,18 +62,28 @@ export const EnrichPolicySelector = () => {
   }
 
   return (
-    <EuiFormRow
-      label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.enrichPolicyLabel',
-        { defaultMessage: 'Enrich policy' }
+    <Controller
+      control={control}
+      name="policy_name"
+      render={({ field }) => (
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.enrichPolicyLabel',
+            { defaultMessage: 'Enrich policy' }
+          )}
+        >
+          <EuiSelect
+            hasNoInitialSelection
+            options={policies.map((policy) => ({
+              text: policy.name,
+              value: policy.name,
+            }))}
+            value={field.value}
+            onChange={field.onChange}
+            isLoading={isLoading}
+          />
+        </EuiFormRow>
       )}
-    >
-      <EuiSelect
-        options={policies.map((policy) => ({
-          text: policy.name,
-        }))}
-        isLoading={isLoading}
-      />
-    </EuiFormRow>
+    />
   );
 };

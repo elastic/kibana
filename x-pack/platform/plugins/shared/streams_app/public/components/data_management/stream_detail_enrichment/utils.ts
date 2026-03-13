@@ -339,6 +339,7 @@ const defaultEnrichProcessorFormState = (): EnrichFormState => ({
   to: '',
   ignore_failure: true,
   ignore_missing: true,
+  override: true,
   where: ALWAYS_CONDITION,
 });
 
