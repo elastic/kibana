@@ -28,6 +28,11 @@ describe('ConnectorExecutor', () => {
           },
         ] as ConnectorWithExtraFindData[])
       ),
+      get: jest.fn().mockResolvedValue({
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        name: 'test-connector',
+        actionTypeId: 'http',
+      } as ConnectorWithExtraFindData),
     } as unknown as jest.Mocked<ActionsClient>;
 
     connectorExecutor = new ConnectorExecutor(mockActionsClient);
@@ -97,6 +102,7 @@ describe('ConnectorExecutor', () => {
       ];
 
       mockActionsClient.getAll.mockResolvedValue(mockConnectors);
+      mockActionsClient.get.mockRejectedValue(new Error('Connector not found'));
       mockActionsClient.execute.mockResolvedValue(expectedResult);
 
       const result = await connectorExecutor.execute({
@@ -106,6 +112,7 @@ describe('ConnectorExecutor', () => {
         abortController,
       });
 
+      expect(mockActionsClient.get).toHaveBeenCalledWith({ id: name });
       expect(mockActionsClient.getAll).toHaveBeenCalled();
       expect(mockActionsClient.execute).toHaveBeenCalledWith({
         actionId: connectorId,
@@ -117,6 +124,7 @@ describe('ConnectorExecutor', () => {
 
     it('should throw error if connector not found by name', async () => {
       mockActionsClient.getAll.mockResolvedValue([]);
+      mockActionsClient.get.mockRejectedValue(new Error('Connector not found'));
 
       await expect(
         connectorExecutor.execute({

@@ -152,6 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: testFleetPolicyID },
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });
@@ -204,6 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
           params,
           isBrowser: true,
           location: { id: testFleetPolicyID },
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });
@@ -252,6 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
         isTLSEnabled: false,
         namespace: 'testnamespace',
         location: { id: loc.id },
+        packageVersion: testPrivateLocations.installedVersion,
       });
 
       comparePolicies(packagePolicy, pPolicy);
@@ -302,6 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: loc.id },
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });
@@ -321,6 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: loc.id },
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });
