@@ -64,6 +64,7 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
+import { KBN_PROJECT_ROUTING_HEADER } from '@kbn/cps-utils';
 import type { ICPSManager } from '@kbn/cps-utils';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
@@ -285,9 +286,6 @@ export class SearchInterceptor {
     if (combined.executionContext !== undefined) {
       serializableOptions.executionContext = combined.executionContext;
     }
-    if (combined.projectRouting !== undefined) {
-      serializableOptions.projectRouting = combined.projectRouting;
-    }
 
     return serializableOptions;
   }
@@ -479,7 +477,7 @@ export class SearchInterceptor {
     { params, ...request }: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
-    const { abortSignal } = options || {};
+    const { abortSignal, projectRouting } = options || {};
 
     const requestHash = params ? createRequestHashForBackgroundSearches(params) : undefined;
 
@@ -496,6 +494,9 @@ export class SearchInterceptor {
           version: '1',
           signal: abortSignal,
           context: this.deps.executionContext.withGlobalContext(executionContext),
+          ...(projectRouting != null && {
+            headers: { [KBN_PROJECT_ROUTING_HEADER]: projectRouting },
+          }),
           body: JSON.stringify({
             ...{ ...request, params: paramsToUse },
             ...searchOptions,
