@@ -21,9 +21,9 @@ describe('buildStepExecutionId', () => {
 
       const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
-      // Should be a valid SHA-256 hash (64 characters, hexadecimal)
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
+      // Should be a valid truncated SHA-256 hash (32 hex characters, 128 bits)
+      expect(result).toMatch(/^[a-f0-9]{32}$/);
+      expect(result.length).toBe(32);
 
       // Verify it's deterministic by calling again
       const result2 = buildStepExecutionId(executionId, stepId, stackFrames);
@@ -42,9 +42,9 @@ describe('buildStepExecutionId', () => {
 
       const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
-      // Should be a valid SHA-256 hash
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
+      // Should be a valid truncated SHA-256 hash (32 hex characters, 128 bits)
+      expect(result).toMatch(/^[a-f0-9]{32}$/);
+      expect(result.length).toBe(32);
     });
 
     it('should be deterministic - same inputs produce same output', () => {
@@ -129,8 +129,8 @@ describe('buildStepExecutionId', () => {
 
       const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
+      expect(result).toMatch(/^[a-f0-9]{32}$/);
+      expect(result.length).toBe(32);
     });
 
     it('should handle stack frames with multiple nested scopes', () => {
@@ -148,8 +148,8 @@ describe('buildStepExecutionId', () => {
 
       const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
+      expect(result).toMatch(/^[a-f0-9]{32}$/);
+      expect(result.length).toBe(32);
     });
 
     it('should handle stack frames with empty scopeId', () => {
@@ -164,8 +164,8 @@ describe('buildStepExecutionId', () => {
 
       const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
+      expect(result).toMatch(/^[a-f0-9]{32}$/);
+      expect(result.length).toBe(32);
     });
 
     it('should handle stack frames with undefined scopeId', () => {
@@ -180,8 +180,8 @@ describe('buildStepExecutionId', () => {
 
       const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
+      expect(result).toMatch(/^[a-f0-9]{32}$/);
+      expect(result.length).toBe(32);
     });
 
     it('should handle empty nested scopes array', () => {
@@ -196,8 +196,8 @@ describe('buildStepExecutionId', () => {
 
       const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
+      expect(result).toMatch(/^[a-f0-9]{32}$/);
+      expect(result.length).toBe(32);
     });
   });
 
@@ -205,8 +205,8 @@ describe('buildStepExecutionId', () => {
     it('should handle empty strings', () => {
       const result = buildStepExecutionId('', '', []);
 
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
+      expect(result).toMatch(/^[a-f0-9]{32}$/);
+      expect(result.length).toBe(32);
     });
 
     it('should handle special characters in IDs', () => {
@@ -221,16 +221,16 @@ describe('buildStepExecutionId', () => {
 
       const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
+      expect(result).toMatch(/^[a-f0-9]{32}$/);
+      expect(result.length).toBe(32);
     });
 
     it('should handle very long strings', () => {
       const longString = 'a'.repeat(1000);
       const result = buildStepExecutionId(longString, longString, []);
 
-      expect(result).toMatch(/^[a-f0-9]{64}$/);
-      expect(result.length).toBe(64);
+      expect(result).toMatch(/^[a-f0-9]{32}$/);
+      expect(result.length).toBe(32);
     });
   });
 
@@ -240,9 +240,12 @@ describe('buildStepExecutionId', () => {
       const stepId = 'test-step';
       const stackFrames: StackFrame[] = [];
 
-      // Calculate expected hash manually to verify implementation
       const expectedInput = 'test-exec-123_test-step';
-      const expectedHash = crypto.createHash('sha256').update(expectedInput).digest('hex');
+      const expectedHash = crypto
+        .createHash('sha256')
+        .update(expectedInput)
+        .digest('hex')
+        .slice(0, 32);
 
       const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
@@ -259,9 +262,12 @@ describe('buildStepExecutionId', () => {
         },
       ];
 
-      // Calculate expected hash manually
       const expectedInput = 'test-exec-123_parent-step_scope1_test-step';
-      const expectedHash = crypto.createHash('sha256').update(expectedInput).digest('hex');
+      const expectedHash = crypto
+        .createHash('sha256')
+        .update(expectedInput)
+        .digest('hex')
+        .slice(0, 32);
 
       const result = buildStepExecutionId(executionId, stepId, stackFrames);
 
@@ -278,9 +284,12 @@ describe('buildStepExecutionId', () => {
         },
       ];
 
-      // Calculate expected hash manually - should include empty string for missing scopeId
       const expectedInput = 'test-exec-123_parent-step__test-step';
-      const expectedHash = crypto.createHash('sha256').update(expectedInput).digest('hex');
+      const expectedHash = crypto
+        .createHash('sha256')
+        .update(expectedInput)
+        .digest('hex')
+        .slice(0, 32);
 
       const result = buildStepExecutionId(executionId, stepId, stackFrames);
 

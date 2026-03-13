@@ -10,8 +10,8 @@
 import type { StackFrame } from '../../../types/v1';
 import { buildStepExecutionId } from '../build_step_execution_id/build_step_execution_id';
 
-const SHA256_HEX_LENGTH = 64;
-const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/;
+const HASH_HEX_LENGTH = 32;
+const HASH_HEX_REGEX = /^[a-f0-9]{32}$/;
 
 export function generateEncodedStepExecutionId({
   executionId,
@@ -58,7 +58,7 @@ export function decodeEncodedStepExecutionId(encodedStepExecutionId: string):
   const indexSuffix = decodedId.slice(0, lastUnderscoreIndex);
   const hex = decodedId.slice(lastUnderscoreIndex + 1);
 
-  if (hex.length !== SHA256_HEX_LENGTH || !SHA256_HEX_REGEX.test(hex)) {
+  if (hex.length !== HASH_HEX_LENGTH || !HASH_HEX_REGEX.test(hex)) {
     return { success: false, error: 'Invalid encoded step execution ID: malformed hash' };
   }
 

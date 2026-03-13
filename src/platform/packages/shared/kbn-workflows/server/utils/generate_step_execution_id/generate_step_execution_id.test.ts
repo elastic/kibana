@@ -25,7 +25,8 @@ const STACK_FRAMES: StackFrame[] = [];
 const EXPECTED_HASH = crypto
   .createHash('sha256')
   .update(`${EXECUTION_ID}_${STEP_ID}`)
-  .digest('hex');
+  .digest('hex')
+  .slice(0, 32);
 
 describe('generateEncodedStepExecutionId', () => {
   it('should return a base64url-encoded string', () => {
@@ -162,7 +163,7 @@ describe('decodeEncodedStepExecutionId', () => {
     });
   });
 
-  it('should return a 64-char hex hash', () => {
+  it('should return a 32-char hex hash', () => {
     const encoded = generateEncodedStepExecutionId({
       executionId: EXECUTION_ID,
       stepId: STEP_ID,
@@ -174,7 +175,7 @@ describe('decodeEncodedStepExecutionId', () => {
 
     expect(decoded.success).toBe(true);
     if (decoded.success) {
-      expect(decoded.stepExecutionHash).toMatch(/^[a-f0-9]{64}$/);
+      expect(decoded.stepExecutionHash).toMatch(/^[a-f0-9]{32}$/);
     }
   });
 
@@ -250,7 +251,7 @@ describe('decodeEncodedStepExecutionId', () => {
   });
 
   it('should return error for malformed hash (non-hex characters)', () => {
-    const nonHex = 'z'.repeat(64);
+    const nonHex = 'z'.repeat(32);
     const encoded = Buffer.from(`000001_${nonHex}`)
       .toString('base64')
       .replace(/\+/g, '-')
