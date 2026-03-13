@@ -49,6 +49,8 @@ export class OTLPSpanProcessor extends tracing.BatchSpanProcessor {
 
     super(exporter, {
       scheduledDelayMillis: config.scheduled_delay,
+      maxExportBatchSize: config.max_export_batch_size,
+      maxQueueSize: config.max_queue_size,
     });
 
     diag.info('OTLP span processor initialized successfully');

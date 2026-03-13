@@ -26,6 +26,16 @@ export interface OTLPExportConfig {
    * batch of spans.
    */
   scheduled_delay: number;
+  /**
+   * The maximum batch size of every export. It must be smaller or equal to
+   * maxQueueSize. The default value is 512.
+   */
+  max_export_batch_size: number;
+  /**
+   * The maximum queue size. After the size is reached spans are dropped.
+   * The default value is 2048.
+   */
+  max_queue_size: number;
 }
 
 /**
@@ -54,4 +64,18 @@ export interface TracingConfig {
    * OTLP exporters for tracing data
    */
   exporters: TracingExporterConfig | TracingExporterConfig[];
+  /**
+   * Configuration for auto-instrumentations.
+   */
+  auto_instrumentations: AutoInstrumentationsConfig;
+}
+
+/**
+ * Configuration for auto-instrumentations.
+ */
+export interface AutoInstrumentationsConfig {
+  /**
+   * Whether auto-instrumentations should be enabled.
+   */
+  enabled: boolean;
 }
