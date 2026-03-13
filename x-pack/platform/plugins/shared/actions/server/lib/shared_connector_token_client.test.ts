@@ -110,6 +110,7 @@ describe('SharedConnectorTokenClient', () => {
         references: [],
         attributes: {
           token: 'testtokenvalue',
+          refreshToken: 'testrefreshtoken',
         },
       });
       const result = await sharedClient.get({
@@ -123,6 +124,7 @@ describe('SharedConnectorTokenClient', () => {
           connectorId: '123',
           tokenType: 'access_token',
           token: 'testtokenvalue',
+          refreshToken: 'testrefreshtoken',
           createdAt,
           expiresAt,
         },
