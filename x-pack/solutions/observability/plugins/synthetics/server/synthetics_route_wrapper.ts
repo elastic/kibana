@@ -69,7 +69,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       const monitorIntegrationHealthApi = new MonitorIntegrationHealthApi(
         server,
         savedObjectsClient,
-        monitorConfigRepository        
+        monitorConfigRepository
       );
 
       try {
