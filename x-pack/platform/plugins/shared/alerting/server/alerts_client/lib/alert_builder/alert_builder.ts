@@ -24,7 +24,7 @@ import type { RuleAlertData } from '../../../types';
 import type { AlertRule, AlertRuleData } from '../../types';
 import type { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import type { IIndexPatternString } from '../../../alerts_service/resource_installer_utils';
-import type { TrackedAADAlerts } from '../../alerts_client';
+import type { TrackedAADAlerts } from '../../types';
 import { buildOngoingAlert } from './build_ongoing_alert';
 import { buildNewAlert } from './build_new_alert';
 import { buildRecoveredAlert } from './build_recovered_alert';
