@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { combineLatest } from 'rxjs';
 import { CodeEditor } from '@kbn/code-editor';
@@ -64,13 +64,15 @@ const saveWorkflow = async ({
   yaml,
   workflowId,
   updateOrigin,
-}: SaveWorkflowParams): Promise<void> => {
+}: SaveWorkflowParams): Promise<string | undefined> => {
   try {
+    let savedId = workflowId;
     if (workflowId) {
       await updateWorkflow(http, workflowId, yaml);
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowId] });
     } else {
       const result = await createWorkflow(http, yaml);
+      savedId = result.id;
       await updateOrigin({ workflowId: result.id });
     }
     queryClient.invalidateQueries({ queryKey: ['workflows'] });
@@ -80,6 +82,7 @@ const saveWorkflow = async ({
       }),
       { toastLifeTimeMs: 2000 }
     );
+    return savedId;
   } catch (error) {
     notifications.toasts.addDanger({
       title: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveError', {
@@ -87,6 +90,7 @@ const saveWorkflow = async ({
       }),
       text: extractErrorMessage(error),
     });
+    return undefined;
   }
 };
 
@@ -97,7 +101,6 @@ const READONLY_EDITOR_OPTIONS = {
   lineNumbers: 'on' as const,
   scrollBeyondLastLine: false,
   tabSize: 2,
-  lineNumbersMinChars: 2,
   fontSize: 14,
   lineHeight: 23,
   renderWhitespace: 'none' as const,
@@ -112,8 +115,133 @@ const READONLY_EDITOR_OPTIONS = {
 
 const WorkflowYamlCanvasContent: React.FC<{
   attachment: WorkflowYamlAttachment;
-}> = ({ attachment }) => {
+  isSidebar: boolean;
+  registerActionButtons: (buttons: ActionButton[]) => void;
+  updateOrigin: (origin: unknown) => Promise<unknown>;
+  http: HttpSetup;
+  notifications: NotificationsStart;
+  application: ApplicationStart;
+  isOnWorkflowPage: (workflowId: string) => boolean;
+}> = ({
+  attachment,
+  isSidebar,
+  registerActionButtons,
+  updateOrigin,
+  http,
+  notifications,
+  application,
+  isOnWorkflowPage,
+}) => {
   useWorkflowsMonacoTheme();
+
+  // Defer button registration past the initial mount cycle so the parent
+  // flyout's clearing effect (which also fires on mount) doesn't overwrite
+  // our buttons. This mirrors the dashboard pattern where registration is
+  // gated on an async dependency (dashboardApi).
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    setReady(true);
+  }, []);
+
+  const [savedWorkflowId, setSavedWorkflowId] = useState<string | undefined>(
+    attachment.data.workflowId
+  );
+  const workflowId = savedWorkflowId ?? attachment.data.workflowId;
+
+  const handleSave = useCallback(async () => {
+    const id = await saveWorkflow({
+      http,
+      notifications,
+      yaml: attachment.data.yaml,
+      workflowId,
+      updateOrigin,
+    });
+    if (id && !workflowId) {
+      setSavedWorkflowId(id);
+    }
+  }, [http, notifications, attachment.data.yaml, workflowId, updateOrigin]);
+
+  const handleSaveAsNew = useCallback(async () => {
+    try {
+      const result = await createWorkflow(http, attachment.data.yaml);
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      notifications.toasts.addSuccess(
+        i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNewSuccess', {
+          defaultMessage: 'Workflow saved as new',
+        }),
+        { toastLifeTimeMs: 2000 }
+      );
+      application.navigateToApp(PLUGIN_ID, { path: result.id });
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate(
+          'workflowsManagement.attachmentRenderers.workflowYaml.saveAsNewError',
+          { defaultMessage: 'Failed to save workflow' }
+        ),
+        text: extractErrorMessage(error),
+      });
+    }
+  }, [http, notifications, application, attachment.data.yaml]);
+
+  useEffect(() => {
+    if (!ready || isSidebar) {
+      return;
+    }
+
+    const buttons: ActionButton[] = [];
+
+    if (workflowId) {
+      buttons.push({
+        label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.override', {
+          defaultMessage: 'Override',
+        }),
+        icon: 'save',
+        type: ACTION_TYPE_PRIMARY,
+        handler: handleSave,
+      });
+      buttons.push({
+        label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.saveAsNew', {
+          defaultMessage: 'Save as new',
+        }),
+        icon: 'copy',
+        type: ACTION_TYPE_SECONDARY,
+        handler: handleSaveAsNew,
+      });
+    } else {
+      buttons.push({
+        label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.save', {
+          defaultMessage: 'Save',
+        }),
+        icon: 'save',
+        type: ACTION_TYPE_PRIMARY,
+        handler: handleSave,
+      });
+    }
+
+    if (workflowId && !isOnWorkflowPage(workflowId)) {
+      buttons.push({
+        label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.openInEditor', {
+          defaultMessage: 'Open in editor',
+        }),
+        icon: 'popout',
+        type: ACTION_TYPE_SECONDARY,
+        handler: () => {
+          application.navigateToApp(PLUGIN_ID, { path: workflowId });
+        },
+      });
+    }
+
+    registerActionButtons(buttons);
+  }, [
+    ready,
+    isSidebar,
+    workflowId,
+    handleSave,
+    handleSaveAsNew,
+    isOnWorkflowPage,
+    application,
+    registerActionButtons,
+  ]);
 
   return (
     <div
@@ -181,87 +309,18 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
 
     getIcon: () => 'workflowsApp',
 
-    getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin }) => {
+    getActionButtons: ({ attachment, openCanvas }) => {
       const buttons: ActionButton[] = [];
 
-      if (isCanvas) {
-        if (!isSidebar) {
-          if (attachment.data.workflowId) {
-            buttons.push({
-              label: i18n.translate(
-                'workflowsManagement.attachmentRenderers.workflowYaml.override',
-                { defaultMessage: 'Override' }
-              ),
-              icon: 'save',
-              type: ACTION_TYPE_PRIMARY,
-              handler: () =>
-                saveWorkflow({
-                  http,
-                  notifications,
-                  yaml: attachment.data.yaml,
-                  workflowId: attachment.data.workflowId,
-                  updateOrigin,
-                }),
-            });
-
-            buttons.push({
-              label: i18n.translate(
-                'workflowsManagement.attachmentRenderers.workflowYaml.saveAsNew',
-                { defaultMessage: 'Save as new' }
-              ),
-              icon: 'copy',
-              type: ACTION_TYPE_SECONDARY,
-              handler: async () => {
-                try {
-                  const result = await createWorkflow(http, attachment.data.yaml);
-                  queryClient.invalidateQueries({ queryKey: ['workflows'] });
-                  notifications.toasts.addSuccess(
-                    i18n.translate(
-                      'workflowsManagement.attachmentRenderers.workflowYaml.saveAsNewSuccess',
-                      { defaultMessage: 'Workflow saved as new' }
-                    ),
-                    { toastLifeTimeMs: 2000 }
-                  );
-                  application.navigateToApp(PLUGIN_ID, { path: result.id });
-                } catch (error) {
-                  notifications.toasts.addDanger({
-                    title: i18n.translate(
-                      'workflowsManagement.attachmentRenderers.workflowYaml.saveAsNewError',
-                      { defaultMessage: 'Failed to save workflow' }
-                    ),
-                    text: extractErrorMessage(error),
-                  });
-                }
-              },
-            });
-          } else {
-            buttons.push({
-              label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.save', {
-                defaultMessage: 'Save',
-              }),
-              icon: 'save',
-              type: ACTION_TYPE_PRIMARY,
-              handler: () =>
-                saveWorkflow({
-                  http,
-                  notifications,
-                  yaml: attachment.data.yaml,
-                  updateOrigin,
-                }),
-            });
-          }
-        }
-      } else {
-        if (openCanvas) {
-          buttons.push({
-            label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.preview', {
-              defaultMessage: 'Preview',
-            }),
-            icon: 'eye',
-            type: ACTION_TYPE_SECONDARY,
-            handler: openCanvas,
-          });
-        }
+      if (openCanvas) {
+        buttons.push({
+          label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.preview', {
+            defaultMessage: 'Preview',
+          }),
+          icon: 'eye',
+          type: ACTION_TYPE_SECONDARY,
+          handler: openCanvas,
+        });
       }
 
       if (attachment.data.workflowId && !isOnWorkflowPage(attachment.data.workflowId)) {
@@ -281,6 +340,17 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
       return buttons;
     },
 
-    renderCanvasContent: ({ attachment }) => <WorkflowYamlCanvasContent attachment={attachment} />,
+    renderCanvasContent: ({ attachment, isSidebar }, { registerActionButtons, updateOrigin }) => (
+      <WorkflowYamlCanvasContent
+        attachment={attachment}
+        isSidebar={isSidebar}
+        registerActionButtons={registerActionButtons}
+        updateOrigin={updateOrigin}
+        http={http}
+        notifications={notifications}
+        application={application}
+        isOnWorkflowPage={isOnWorkflowPage}
+      />
+    ),
   };
 };

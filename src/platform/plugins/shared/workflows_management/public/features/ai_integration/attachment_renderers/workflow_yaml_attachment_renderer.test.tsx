@@ -106,75 +106,6 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       expect(previewButton).toBeDefined();
     });
 
-    it('does NOT include Save button (Save is only in canvas)', () => {
-      const services = createMockServices();
-      const definition = createWorkflowYamlAttachmentUiDefinition(services);
-      const attachment = createAttachment();
-
-      const buttons = definition.getActionButtons!({
-        attachment,
-        isSidebar: false,
-        isCanvas: false,
-        updateOrigin: jest.fn(),
-        openCanvas: jest.fn(),
-      });
-
-      const saveButton = buttons.find(
-        (b) => b.label === 'Save' || b.label === 'Update workflow' || b.label === 'Save as new'
-      );
-      expect(saveButton).toBeUndefined();
-    });
-
-    it('returns Override and Save as new buttons in canvas mode for existing workflow', () => {
-      const services = createMockServices();
-      const definition = createWorkflowYamlAttachmentUiDefinition(services);
-      const attachment = createAttachment({ workflowId: 'wf-123' });
-
-      const buttons = definition.getActionButtons!({
-        attachment,
-        isSidebar: false,
-        isCanvas: true,
-        updateOrigin: jest.fn(),
-      });
-
-      expect(buttons.find((b) => b.label === 'Override')).toBeDefined();
-      expect(buttons.find((b) => b.label === 'Save as new')).toBeDefined();
-    });
-
-    it('returns only Save button in canvas mode for new workflow', () => {
-      const services = createMockServices();
-      const definition = createWorkflowYamlAttachmentUiDefinition(services);
-      const attachment = createAttachment();
-
-      const buttons = definition.getActionButtons!({
-        attachment,
-        isSidebar: false,
-        isCanvas: true,
-        updateOrigin: jest.fn(),
-      });
-
-      expect(buttons.find((b) => b.label === 'Save')).toBeDefined();
-      expect(buttons.find((b) => b.label === 'Override')).toBeUndefined();
-      expect(buttons.find((b) => b.label === 'Save as new')).toBeUndefined();
-    });
-
-    it('does NOT return any action buttons in canvas mode when in sidebar', () => {
-      const services = createMockServices();
-      const definition = createWorkflowYamlAttachmentUiDefinition(services);
-      const attachment = createAttachment({ workflowId: 'wf-123' });
-
-      const buttons = definition.getActionButtons!({
-        attachment,
-        isSidebar: true,
-        isCanvas: true,
-        updateOrigin: jest.fn(),
-      });
-
-      expect(buttons.find((b) => b.label === 'Override')).toBeUndefined();
-      expect(buttons.find((b) => b.label === 'Save as new')).toBeUndefined();
-      expect(buttons.find((b) => b.label === 'Save')).toBeUndefined();
-    });
-
     it('includes Open in editor button when workflowId is present', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
@@ -265,6 +196,83 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       );
 
       expect(container.querySelector('[data-test-subj="TextBasedLangEditor"]')).toBeDefined();
+    });
+
+    it('registers Save button for new workflow', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = createAttachment();
+      const registerActionButtons = jest.fn();
+
+      render(
+        <>
+          {definition.renderCanvasContent(
+            { attachment, isSidebar: false },
+            { registerActionButtons, updateOrigin: jest.fn() }
+          )}
+        </>
+      );
+
+      const buttons = registerActionButtons.mock.calls[0][0];
+      expect(buttons.find((b: { label: string }) => b.label === 'Save')).toBeDefined();
+      expect(buttons.find((b: { label: string }) => b.label === 'Override')).toBeUndefined();
+    });
+
+    it('registers Override and Save as new buttons for existing workflow', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = createAttachment({ workflowId: 'wf-123' });
+      const registerActionButtons = jest.fn();
+
+      render(
+        <>
+          {definition.renderCanvasContent(
+            { attachment, isSidebar: false },
+            { registerActionButtons, updateOrigin: jest.fn() }
+          )}
+        </>
+      );
+
+      const buttons = registerActionButtons.mock.calls[0][0];
+      expect(buttons.find((b: { label: string }) => b.label === 'Override')).toBeDefined();
+      expect(buttons.find((b: { label: string }) => b.label === 'Save as new')).toBeDefined();
+    });
+
+    it('registers Open in editor button for existing workflow', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = createAttachment({ workflowId: 'wf-123' });
+      const registerActionButtons = jest.fn();
+
+      render(
+        <>
+          {definition.renderCanvasContent(
+            { attachment, isSidebar: false },
+            { registerActionButtons, updateOrigin: jest.fn() }
+          )}
+        </>
+      );
+
+      const buttons = registerActionButtons.mock.calls[0][0];
+      expect(buttons.find((b: { label: string }) => b.label === 'Open in editor')).toBeDefined();
+    });
+
+    it('does NOT register buttons in sidebar mode', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = createAttachment({ workflowId: 'wf-123' });
+      const registerActionButtons = jest.fn();
+
+      render(
+        <>
+          {definition.renderCanvasContent(
+            { attachment, isSidebar: true },
+            { registerActionButtons, updateOrigin: jest.fn() }
+          )}
+        </>
+      );
+
+      expect(registerActionButtons).not.toHaveBeenCalled();
     });
   });
 });
