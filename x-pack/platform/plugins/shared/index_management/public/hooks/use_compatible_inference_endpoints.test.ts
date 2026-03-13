@@ -34,7 +34,7 @@ describe('useCompatibleInferenceEndpoints', () => {
   });
 
   describe('priority list sorting', () => {
-    it('should prioritize JINAv3 when available', () => {
+    it('should prioritize Jina v5 when available', () => {
       const endpoints: InferenceAPIConfigResponse[] = [
         {
           inference_id: defaultInferenceEndpoints.JINAv5,
@@ -55,7 +55,7 @@ describe('useCompatibleInferenceEndpoints', () => {
       );
     });
 
-    it('should prioritize ELSER_IN_EIS when JINAv3 is not available', () => {
+    it('should prioritize ELSER_IN_EIS when Jina v5 is not available', () => {
       const endpoints: InferenceAPIConfigResponse[] = [
         {
           inference_id: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,

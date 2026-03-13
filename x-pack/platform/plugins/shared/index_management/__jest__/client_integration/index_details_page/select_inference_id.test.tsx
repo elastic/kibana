@@ -8,6 +8,7 @@
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   installConsoleTruncationWarningFilter,
@@ -159,17 +160,17 @@ describe('SelectInferenceId', () => {
     });
 
     it('SHOULD display selected endpoint in button', async () => {
-      renderSelectInferenceId();
+      renderSelectInferenceId({ initialValue: '' });
 
       const button = await screen.findByTestId('inferenceIdButton');
-      expect(button).toHaveTextContent('.jina-embeddings-v5-text-small');
+      expect(button).toHaveTextContent(defaultInferenceEndpoints.JINAv5);
     });
 
-    it('SHOULD prioritize JINAv3 endpoint as default selection', async () => {
-      renderSelectInferenceId();
+    it('SHOULD prioritize Jina v5 endpoint as default selection', async () => {
+      renderSelectInferenceId({ initialValue: '' });
 
       const button = await screen.findByTestId('inferenceIdButton');
-      expect(button).toHaveTextContent('.jina-embeddings-v5-text-small');
+      expect(button).toHaveTextContent(defaultInferenceEndpoints.JINAv5);
       expect(button).not.toHaveTextContent('.preconfigured-elser');
       expect(button).not.toHaveTextContent('endpoint-1');
       expect(button).not.toHaveTextContent('endpoint-2');
@@ -340,16 +341,16 @@ describe('SelectInferenceId', () => {
       renderSelectInferenceId({ initialValue: '' });
 
       const button = screen.getByTestId('inferenceIdButton');
-      expect(button).toHaveTextContent('No inference endpoint selected');
+      expect(button).toHaveTextContent(defaultInferenceEndpoints.ELSER);
     });
 
-    it('SHOULD display "No inference endpoint selected" message', () => {
+    it('SHOULD default to the ELSER endpoint when no endpoints are returned', () => {
       setupInferenceEndpointsMocks({ data: [], isLoading: false, error: null });
 
       renderSelectInferenceId({ initialValue: '' });
 
       const button = screen.getByTestId('inferenceIdButton');
-      expect(button).toHaveTextContent('No inference endpoint selected');
+      expect(button).toHaveTextContent(defaultInferenceEndpoints.ELSER);
     });
   });
 
@@ -404,21 +405,21 @@ describe('SelectInferenceId', () => {
       renderSelectInferenceId({ initialValue: '' });
 
       const button = await screen.findByTestId('inferenceIdButton');
-      await waitFor(() => expect(button).toHaveTextContent('.preconfigured-elser'));
+      await waitFor(() => expect(button).toHaveTextContent(defaultInferenceEndpoints.JINAv5));
     });
 
-    describe('AND .elser-2-elastic is available', () => {
-      it('SHOULD prioritize .elser-2-elastic over other endpoints', async () => {
+    describe('AND .elser-2-elasticsearch is available', () => {
+      it('SHOULD prioritize .elser-2-elasticsearch over lower-priority endpoints', async () => {
         setupInferenceEndpointsMocks({
           data: [
             {
-              inference_id: '.preconfigured-elser',
+              inference_id: defaultInferenceEndpoints.ELSER,
               task_type: 'sparse_embedding',
               service: 'elastic',
               service_settings: { model_id: 'elser' },
             },
             {
-              inference_id: '.elser-2-elastic',
+              inference_id: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
               task_type: 'sparse_embedding',
               service: 'elastic',
               service_settings: { model_id: 'elser-2-elastic' },
@@ -435,7 +436,9 @@ describe('SelectInferenceId', () => {
         renderSelectInferenceId({ initialValue: '' });
 
         const button = await screen.findByTestId('inferenceIdButton');
-        await waitFor(() => expect(button).toHaveTextContent('.elser-2-elastic'));
+        await waitFor(() =>
+          expect(button).toHaveTextContent(defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID)
+        );
       });
     });
   });
