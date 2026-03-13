@@ -29,6 +29,7 @@ import {
   createReportEvent,
   type TelemetryReporter,
 } from '../telemetry/events';
+import { wrapTaskRun } from '../telemetry/traces';
 
 const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
 
@@ -178,13 +179,21 @@ export function registerStatusReportTask({
         timeout: config.timeout,
         createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => ({
           run: () =>
-            runTask({
-              taskInstance,
-              fakeRequest,
-              abortController,
-              logger: logger.get(taskInstance.id),
-              core,
-              telemetryReporter,
+            wrapTaskRun({
+              spanName: 'entityStore.task.status_report.run',
+              namespace: taskInstance.state.namespace,
+              attributes: {
+                'entity_store.task.id': taskInstance.id,
+              },
+              run: () =>
+                runTask({
+                  taskInstance,
+                  fakeRequest,
+                  abortController,
+                  logger: logger.get(taskInstance.id),
+                  core,
+                  telemetryReporter,
+                }),
             }),
         }),
       },
