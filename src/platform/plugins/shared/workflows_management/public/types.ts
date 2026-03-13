@@ -80,9 +80,9 @@ export interface WorkflowsPublicPluginStartDependencies {
 
 export interface WorkflowsPublicPluginStartAdditionalServices {
   storage: Storage;
-  agentBuilder?: AgentBuilderPluginStartContract;
   workflowsManagement: {
     telemetry: TelemetryServiceClient;
+    agentBuilder?: AgentBuilderPluginStartContract;
   };
 }
 

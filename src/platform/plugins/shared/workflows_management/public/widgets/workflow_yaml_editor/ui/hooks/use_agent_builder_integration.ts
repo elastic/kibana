@@ -60,7 +60,8 @@ export const useAgentBuilderIntegration = ({
   workflowName,
   validationErrors,
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
-  const { agentBuilder } = useKibana().services;
+  const { workflowsManagement } = useKibana().services;
+  const agentBuilder = workflowsManagement?.agentBuilder;
   const proposalManagerRef = useRef<ProposalManager | null>(null);
   const attachmentBridgeRef = useRef<AttachmentBridge | null>(null);
   const trackerRef = useRef<ProposalTracker | null>(null);
