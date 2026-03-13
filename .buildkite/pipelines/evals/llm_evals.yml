@@ -1,5 +1,6 @@
 env:
   KBN_EVALS: '1'
+  KBN_EVALS_WEEKLY: '1'
 steps:
   - label: '👨‍🔧 Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
@@ -220,7 +221,7 @@ steps:
             - exit_status: '-1'
               limit: 3
 
-      - label: 'Evals: Entity Anlaytics'
+      - label: 'Evals: Entity Analytics'
         key: kbn-evals-weekly-entity-analytics
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
