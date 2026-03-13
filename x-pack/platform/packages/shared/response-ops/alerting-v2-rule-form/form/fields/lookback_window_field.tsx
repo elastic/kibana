@@ -14,7 +14,7 @@ import { LookbackWindow } from './lookback_window';
 
 const LOOKBACK_WINDOW_ROW_ID = 'ruleV2FormLookbackWindowField';
 
-export const LookbackWindowField: React.FC = () => {
+export const LookbackWindowField = () => {
   const { control } = useFormContext<FormValues>();
 
   return (

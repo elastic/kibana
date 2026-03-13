@@ -7,8 +7,6 @@
 
 import { PluginStart } from '@kbn/core-di';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { ISavedObjectsClientFactory } from '@kbn/core-di-server';
-import { SavedObjectsClientFactory } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -17,6 +15,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
+import { RuleSavedObjectsClientToken } from './tokens';
 
 export type RulesSavedObjectsBulkGetResultItem =
   | {
@@ -58,18 +57,12 @@ export interface RulesSavedObjectServiceContract {
 
 @injectable()
 export class RulesSavedObjectService implements RulesSavedObjectServiceContract {
-  private readonly client: SavedObjectsClientContract;
-
   constructor(
-    @inject(SavedObjectsClientFactory)
-    private readonly savedObjectsClientFactory: ISavedObjectsClientFactory,
+    @inject(RuleSavedObjectsClientToken)
+    private readonly client: SavedObjectsClientContract,
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
     private readonly spaces: SpacesPluginStart
-  ) {
-    this.client = this.savedObjectsClientFactory({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-    });
-  }
+  ) {}
   public async create({
     attrs,
     id,

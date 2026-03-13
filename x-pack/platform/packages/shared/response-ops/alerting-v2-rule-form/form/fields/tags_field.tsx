@@ -11,7 +11,7 @@ import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 
-export const TagsField: React.FC = () => {
+export const TagsField = () => {
   const { control } = useFormContext<FormValues>();
 
   return (
@@ -24,8 +24,11 @@ export const TagsField: React.FC = () => {
 
         return (
           <EuiFormRow
-            label={i18n.translate('xpack.alertingV2.ruleForm.labelsLabel', {
-              defaultMessage: 'Labels',
+            label={i18n.translate('xpack.alertingV2.ruleForm.tagsLabel', {
+              defaultMessage: 'Tags',
+            })}
+            labelAppend={i18n.translate('xpack.alertingV2.ruleForm.tagsOptional', {
+              defaultMessage: 'optional',
             })}
             isInvalid={!!error}
             error={error?.message}

@@ -50,11 +50,11 @@ export interface ChromeSetup {
  * ```
  *
  * @example
- * How to set the help dropdown extension:
+ * How to set the help dropdown extension (React-first, preferred):
  * ```tsx
- * core.chrome.setHelpExtension(elem => {
- *   ReactDOM.render(<MyHelpComponent />, elem);
- *   return () => ReactDOM.unmountComponentAtNode(elem);
+ * core.chrome.setHelpExtension({
+ *   appName: 'My App',
+ *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
  * });
  * ```
  *
@@ -84,11 +84,15 @@ export interface ChromeStart {
 
   /**
    * Get an observable of the current badge
+   * @deprecated Badges now render inline with breadcrumbs. Prefer {@link ChromeStart.setBreadcrumbsBadges}.
    */
   getBadge$(): Observable<ChromeBadge | undefined>;
 
   /**
-   * Override the current badge
+   * Override the current badge.
+   * Internally delegates to {@link ChromeStart.setBreadcrumbsBadges} so the badge
+   * renders inline with breadcrumbs in both classic and project layouts.
+   * @deprecated Use {@link ChromeStart.setBreadcrumbsBadges} directly for full control.
    */
   setBadge(badge?: ChromeBadge): void;
 
@@ -149,7 +153,19 @@ export interface ChromeStart {
   getBreadcrumbsAppendExtensions$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
 
   /**
-   * Mount an element next to the last breadcrumb
+   * Render an element next to the last breadcrumb.
+   *
+   * @example
+   * ```tsx
+   * import { dynamic } from '@kbn/shared-ux-utility';
+   *
+   * const LazyBadge = dynamic(() => import('./my_badge'));
+   *
+   * const unregister = chrome.setBreadcrumbsAppendExtension({
+   *   content: <LazyBadge />,
+   *   order: 10,
+   * });
+   * ```
    */
   setBreadcrumbsAppendExtension(
     breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
@@ -214,7 +230,8 @@ export interface ChromeStart {
   getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
 
   /**
-   * Override the current set of custom help content
+   * Override the current set of custom help content.
+   * Use {@link ChromeHelpExtension.content} to render custom React content below the links.
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 

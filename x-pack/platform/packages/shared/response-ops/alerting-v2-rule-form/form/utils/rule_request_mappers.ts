@@ -87,17 +87,27 @@ const mapStateTransition = (
   kind: FormValues['kind'],
   stateTransition: FormValues['stateTransition']
 ) => {
-  const hasStateTransition =
-    kind === 'alert' &&
-    stateTransition != null &&
-    (stateTransition.pendingCount != null || stateTransition.pendingTimeframe != null);
+  if (kind !== 'alert' || stateTransition == null) return undefined;
 
-  if (!hasStateTransition) return undefined;
+  const hasPending =
+    stateTransition.pendingCount != null || stateTransition.pendingTimeframe != null;
+  const hasRecovering =
+    stateTransition.recoveringCount != null || stateTransition.recoveringTimeframe != null;
+
+  if (!hasPending && !hasRecovering) return undefined;
 
   return {
-    pending_count: stateTransition!.pendingCount,
-    ...(stateTransition!.pendingTimeframe != null
-      ? { pending_timeframe: stateTransition!.pendingTimeframe }
+    ...(stateTransition.pendingCount != null
+      ? { pending_count: stateTransition.pendingCount }
+      : {}),
+    ...(stateTransition.pendingTimeframe != null
+      ? { pending_timeframe: stateTransition.pendingTimeframe }
+      : {}),
+    ...(stateTransition.recoveringCount != null
+      ? { recovering_count: stateTransition.recoveringCount }
+      : {}),
+    ...(stateTransition.recoveringTimeframe != null
+      ? { recovering_timeframe: stateTransition.recoveringTimeframe }
       : {}),
   };
 };
@@ -113,7 +123,12 @@ export interface RuleRequestCommon {
   evaluation: { query: { base: string; condition?: string } };
   grouping?: { fields: string[] };
   recovery_policy?: { type: RecoveryPolicyType; query?: { base?: string; condition?: string } };
-  state_transition?: { pending_count?: number; pending_timeframe?: string };
+  state_transition?: {
+    pending_count?: number;
+    pending_timeframe?: string;
+    recovering_count?: number;
+    recovering_timeframe?: string;
+  };
 }
 
 /**
@@ -219,6 +234,8 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
         stateTransition: {
           pendingCount: rule.state_transition.pending_count,
           pendingTimeframe: rule.state_transition.pending_timeframe,
+          recoveringCount: rule.state_transition.recovering_count,
+          recoveringTimeframe: rule.state_transition.recovering_timeframe,
         },
       }
     : {}),

@@ -16,8 +16,8 @@ const LOOKBACK_WINDOW_TITLE_PREFIX = i18n.translate(
   }
 );
 
-const LOOKBACK_WINDOW_UNIT_LABEL = i18n.translate(
-  'xpack.alertingV2.ruleForm.lookbackWindow.unitLabel',
+const LOOKBACK_WINDOW_UNIT_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.ruleForm.lookbackWindow.unitAriaLabel',
   {
     defaultMessage: 'Unit',
   }
@@ -35,7 +35,7 @@ export const LookbackWindow = React.forwardRef<HTMLInputElement, Props>((props, 
     ref={ref}
     fallback="5m"
     numberLabel={LOOKBACK_WINDOW_TITLE_PREFIX}
-    unitLabel={LOOKBACK_WINDOW_UNIT_LABEL}
+    unitAriaLabel={LOOKBACK_WINDOW_UNIT_ARIA_LABEL}
     dataTestSubj="lookbackWindow"
     idPrefix="lookbackWindow"
   />

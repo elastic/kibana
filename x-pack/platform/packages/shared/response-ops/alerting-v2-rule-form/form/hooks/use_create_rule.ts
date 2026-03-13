@@ -14,10 +14,9 @@ import { mapFormValuesToCreateRequest } from '../utils/rule_request_mappers';
 interface UseCreateRuleProps {
   http: HttpStart;
   notifications: NotificationsStart;
-  onSuccess?: () => void;
 }
 
-export const useCreateRule = ({ http, notifications, onSuccess }: UseCreateRuleProps) => {
+export const useCreateRule = ({ http, notifications }: UseCreateRuleProps) => {
   const mutation = useMutation(
     (formValues: FormValues) => {
       return http.post<RuleResponse>('/internal/alerting/v2/rule', {
@@ -27,7 +26,6 @@ export const useCreateRule = ({ http, notifications, onSuccess }: UseCreateRuleP
     {
       onSuccess: (data: RuleResponse) => {
         notifications.toasts.addSuccess(`Rule '${data.metadata.name}' was created successfully`);
-        onSuccess?.();
       },
       onError: (error: Error) => {
         notifications.toasts.addDanger(`Error creating rule: ${error.message}`);

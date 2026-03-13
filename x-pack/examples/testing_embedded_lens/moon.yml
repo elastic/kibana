@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/testing-embedded-lens-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/testing-embedded-lens-plugin'
+  title: '@kbn/testing-embedded-lens-plugin'
   description: Moon project for @kbn/testing-embedded-lens-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: x-pack/examples/testing_embedded_lens
+  sourceRoot: x-pack/examples/testing_embedded_lens
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'

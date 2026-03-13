@@ -50,6 +50,12 @@ jest.mock('../../hooks/use_bulk_enable_disable_rules', () => ({
   useBulkDisableRules: () => ({ mutate: mockBulkDisableMutate, isLoading: false }),
 }));
 
+const mockToggleEnabledMutate = jest.fn();
+const mockUseToggleRuleEnabled = jest.fn();
+jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
+  useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
+}));
+
 const mockRules = [
   {
     id: 'rule-1',
@@ -91,6 +97,10 @@ describe('RulesListPage', () => {
     jest.clearAllMocks();
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
+      isLoading: false,
+    });
+    mockUseToggleRuleEnabled.mockReturnValue({
+      mutate: mockToggleEnabledMutate,
       isLoading: false,
     });
   });
@@ -245,6 +255,92 @@ describe('RulesListPage', () => {
       expect.objectContaining({
         onSettled: expect.any(Function),
       })
+    );
+  });
+
+  it('renders the Status column with Enabled and Disabled badges', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByText('Enabled')).toBeInTheDocument();
+    expect(screen.getByText('Disabled')).toBeInTheDocument();
+  });
+
+  it('shows "Disable" action for enabled rules and "Enable" for disabled rules', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    // Open the context menu for the enabled rule (rule-1)
+    fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('toggleEnabledRule-rule-1')).toHaveTextContent('Disable');
+    });
+  });
+
+  it('calls toggleEnabledMutation when toggle action is clicked', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    // Open the context menu for the enabled rule (rule-1)
+    fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+    // Click the toggle action — should disable the enabled rule
+    fireEvent.click(screen.getByTestId('toggleEnabledRule-rule-1'));
+
+    expect(mockToggleEnabledMutate).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
+  });
+
+  it('shows "Clone" action in the context menu', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('cloneRule-rule-1')).toHaveTextContent('Clone');
+    });
+  });
+
+  it('navigates to the create page with cloneFrom query param when clone is clicked', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+    fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
+
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+      '/app/management/insightsAndAlerting/alerting_v2/create?cloneFrom=rule-1'
     );
   });
 

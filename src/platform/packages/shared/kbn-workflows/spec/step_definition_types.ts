@@ -8,6 +8,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import type { StepStabilityLevel } from '../types/v1';
 
 export enum StepCategory {
   Elasticsearch = 'elasticsearch',
@@ -105,4 +106,10 @@ export interface BaseStepDefinition<
    * Documentation for the step, including details and examples.
    */
   documentation?: StepDocumentation;
+
+  /**
+   * API stability level for this step (e.g. 'tech_preview', 'beta').
+   * Omit for stable/GA steps.
+   */
+  stability?: StepStabilityLevel;
 }

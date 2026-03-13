@@ -12,6 +12,15 @@ import { RuleForm } from './rule_form';
 import { RULE_FORM_ID } from './constants';
 import { createFormWrapper, createMockServices } from '../test_utils';
 
+// Mock RulePreviewPanel to avoid rendering the full preview
+jest.mock('./fields/rule_preview_panel', () => ({
+  RulePreviewPanel: () => <div data-test-subj="mockRulePreviewPanel">Preview Panel</div>,
+}));
+
+// Mock NameField to avoid rendering inline edit title setup
+jest.mock('./fields/name_field', () => ({
+  NameField: () => <div data-test-subj="mockNameField">Rule Name</div>,
+}));
 const mockCreateRule = jest.fn();
 const mockUpdateRule = jest.fn();
 jest.mock('./hooks/use_create_rule', () => ({
@@ -270,7 +279,7 @@ describe('RuleForm', () => {
   });
 
   describe('services context', () => {
-    it('provides services via RuleFormServicesProvider (tested implicitly)', () => {
+    it('provides services via RuleFormProvider (tested implicitly)', () => {
       // Child components use useRuleFormServices and would throw if context was not provided
       render(<RuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
 

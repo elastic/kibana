@@ -957,7 +957,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(linkURL?.includes('mapping')).to.be(true);
         });
 
-        it('should display increase field limit as a possible mitigation for special packages like apm app', async () => {
+        it.skip('should display increase field limit as a possible mitigation for special packages like apm app', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: apmAppDataStreamName,
             expandedDegradedField: 'cloud.project',

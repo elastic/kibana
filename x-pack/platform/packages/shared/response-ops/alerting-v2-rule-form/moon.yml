@@ -4,19 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/alerting-v2-rule-form'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
+  javascript:
+    rootPackageDependenciesOnly: false
 language: typescript
 project:
-  name: '@kbn/alerting-v2-rule-form'
+  title: '@kbn/alerting-v2-rule-form'
   description: Moon project for @kbn/alerting-v2-rule-form
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form
+  sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
@@ -25,10 +26,19 @@ dependsOn:
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
+  - '@kbn/esql'
   - '@kbn/esql-utils'
+  - '@kbn/esql-types'
+  - '@kbn/esql-language'
+  - '@kbn/es-query'
   - '@kbn/react-query'
   - '@kbn/search-types'
   - '@kbn/alerting-v2-schemas'
+  - '@kbn/yaml-rule-editor'
+  - '@kbn/code-editor'
+  - '@kbn/monaco'
+  - '@kbn/core-application-browser-mocks'
+  - '@kbn/react-hooks'
 tags:
   - shared-browser
   - package
@@ -43,14 +53,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

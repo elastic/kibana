@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-data-streams-server'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-data-streams-server'
+  title: '@kbn/core-data-streams-server'
   description: Moon project for @kbn/core-data-streams-server
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/core/packages/data-streams/server
+  sourceRoot: src/core/packages/data-streams/server
 dependsOn:
   - '@kbn/data-streams'
   - '@kbn/es-mappings'
@@ -33,14 +32,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

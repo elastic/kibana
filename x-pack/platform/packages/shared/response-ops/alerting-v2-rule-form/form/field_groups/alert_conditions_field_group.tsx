@@ -16,26 +16,35 @@ import { RecoveryBaseQueryOnlyField } from '../fields/recovery_base_query_only_f
 import { RecoveryBaseAndConditionField } from '../fields/recovery_base_and_condition_field';
 import { useRuleFormServices } from '../contexts';
 import { useRecoveryValidation } from '../hooks/use_recovery_validation';
+import { AlertDelayField } from '../fields/alert_delay_field';
+import { RecoveryDelayField } from '../fields/recovery_delay_field';
 
 /**
- * Alert conditions field group for configuring recovery policy.
+ * Alert conditions field group for configuring alert and recovery policies.
  *
  * Displays:
+ * - Alert delay (pending state transition: immediate / breaches / duration)
  * - A dropdown to select recovery type (no_breach vs. custom query)
  * - When `query` type is selected:
  *   - If an evaluation condition (WHERE clause) exists:
  *     uses RecoveryBaseAndConditionField (split mode with WHERE clause editor)
  *   - If no evaluation condition exists:
  *     uses RecoveryBaseQueryOnlyField (full ES|QL editor with "not same as eval" validation)
+ * - Recovery delay (recovering state transition: immediate / breaches / duration)
  */
-export const AlertConditionsFieldGroup: React.FC = () => {
+export const AlertConditionsFieldGroup = () => {
   const { control } = useFormContext<FormValues>();
   const { data } = useRuleFormServices();
+  const kind = useWatch({ control, name: 'kind' });
   const recoveryType = useWatch({ control, name: 'recoveryPolicy.type' });
 
   const recoveryValidation = useRecoveryValidation({
     search: data.search.search,
   });
+
+  if (kind !== 'alert') {
+    return null;
+  }
 
   return (
     <FieldGroup
@@ -43,6 +52,8 @@ export const AlertConditionsFieldGroup: React.FC = () => {
         defaultMessage: 'Alert conditions',
       })}
     >
+      <AlertDelayField />
+      <EuiSpacer size="m" />
       <RecoveryTypeField />
       {recoveryType === 'query' && (
         <>
@@ -54,6 +65,8 @@ export const AlertConditionsFieldGroup: React.FC = () => {
           )}
         </>
       )}
+      <EuiSpacer size="m" />
+      <RecoveryDelayField />
     </FieldGroup>
   );
 };
