@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SECURITY_FEATURE_ID, ALERTS_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
+import {
+  SECURITY_FEATURE_ID,
+  ALERTS_FEATURE_ID,
+} from '@kbn/security-solution-plugin/common/constants';
 import type { Role } from './types';
 
 export const noKibanaPrivileges: Role = {
