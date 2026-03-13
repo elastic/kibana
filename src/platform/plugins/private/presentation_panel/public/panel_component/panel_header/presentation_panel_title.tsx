@@ -96,16 +96,13 @@ export const PresentationPanelTitle = ({
     );
   }, [onClick, hideTitle, panelTitle, viewMode, api, euiTheme, titleHighlight]);
 
-  const describedPanelTitleElement = useMemo(() => {
+  const tooltipElement = useMemo(() => {
     if (hideTitle) return null;
 
-    if (!panelDescription) {
-      return panelTitleElement;
-    }
     return (
       <EuiToolTip
         title={panelTitle}
-        content={panelDescription}
+        content={panelDescription ?? ''}
         delay="regular"
         position="top"
         anchorProps={{
@@ -123,40 +120,41 @@ export const PresentationPanelTitle = ({
           `}
           tabIndex={0}
         >
-          {!hideTitle ? (
-            <h2
-              // styles necessary for applying ellipsis and showing the info icon if description is present
-              css={css`
-                overflow: hidden;
-              `}
-            >
-              <EuiScreenReaderOnly>
-                <span id={headerId}>
-                  {panelTitle
-                    ? i18n.translate('presentationPanel.ariaLabel', {
-                        defaultMessage: 'Panel: {title}',
-                        values: {
-                          title: panelTitle,
-                        },
-                      })
-                    : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
-                        defaultMessage: 'Untitled panel',
-                      })}
-                </span>
-              </EuiScreenReaderOnly>
-              {panelTitleElement}
-            </h2>
+          <h2
+            // styles necessary for applying ellipsis and showing the info icon if description is present
+            css={css`
+               ${euiTextTruncate()};
+              overflow: hidden;
+            `}
+          >
+            <EuiScreenReaderOnly>
+              <span id={headerId}>
+                {panelTitle
+                  ? i18n.translate('presentationPanel.ariaLabel', {
+                      defaultMessage: 'Panel: {title}',
+                      values: {
+                        title: panelTitle,
+                      },
+                    })
+                  : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
+                      defaultMessage: 'Untitled panel',
+                    })}
+              </span>
+            </EuiScreenReaderOnly>
+            {panelTitleElement}
+          </h2>
+          {panelDescription ? (
+            <EuiIcon
+              type="info"
+              color="subdued"
+              data-test-subj="embeddablePanelTitleDescriptionIcon"
+              tabIndex={0}
+            />
           ) : null}
-          <EuiIcon
-            type="info"
-            color="subdued"
-            data-test-subj="embeddablePanelTitleDescriptionIcon"
-            tabIndex={0}
-          />
         </div>
       </EuiToolTip>
     );
   }, [hideTitle, panelDescription, panelTitle, panelTitleElement, headerId, euiTheme.size.xs]);
 
-  return describedPanelTitleElement;
+  return tooltipElement;
 };
