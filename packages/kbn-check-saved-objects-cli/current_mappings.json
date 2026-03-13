@@ -1579,8 +1579,7 @@
   },
   "entity-store-global-state": {
     "dynamic": false,
-    "properties": {
-    }
+    "properties": {}
   },
   "epm-packages": {
     "dynamic": false,
@@ -1671,6 +1670,10 @@
         "type": "keyword"
       },
       "package_assets": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "pending_upgrade_review": {
         "dynamic": false,
         "properties": {}
       },
@@ -2495,6 +2498,10 @@
         "type": "keyword"
       }
     }
+  },
+  "inference-settings": {
+    "dynamic": false,
+    "properties": {}
   },
   "infra-custom-dashboards": {
     "dynamic": false,
@@ -4568,6 +4575,9 @@
     "properties": {
       "attempts": {
         "type": "integer"
+      },
+      "cost": {
+        "type": "keyword"
       },
       "enabled": {
         "type": "boolean"

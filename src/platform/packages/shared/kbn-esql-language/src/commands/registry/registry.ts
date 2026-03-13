@@ -96,6 +96,8 @@ export interface ICommandMetadata {
   observabilityTier?: string; // Optional property indicating the observability tier availability
   type?: 'source' | 'header' | 'processing'; // Optional property to classify the command type
   isTimeseries?: boolean; // Optional property to indicate if the command is a timeseries source command
+  requiresTimeseriesSource?: boolean; // Optional property to indicate the command is only available when the source command is TS
+  hiddenAfterCommands?: string[]; // Optional list of command names; this command is not suggested when any of them appear anywhere in the pipeline
   subqueryRestrictions?: {
     hideInside: boolean; // Command is hidden inside subqueries
     hideOutside: boolean; // Command is hidden outside subqueries (at root level)
