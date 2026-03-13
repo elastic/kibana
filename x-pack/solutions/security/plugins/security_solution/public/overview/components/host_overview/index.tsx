@@ -116,11 +116,9 @@ export const HostOverview = React.memo<HostSummaryProps>(
     );
     const useEntityStoreV2AsDataSource = Boolean(riskScoreStateFromEntityStore);
     const filterQuery = useMemo(() => {
-      const euidFilter = euidApi?.euid?.getEuidDslFilterBasedOnDocument(
-        'host',
-        entityIdentifiers,
-        { includeEuidSourceFilter: useEntityStoreV2AsDataSource }
-      );
+      const euidFilter = euidApi?.euid?.getEuidDslFilterBasedOnDocument('host', entityIdentifiers, {
+        includeEuidSourceFilter: useEntityStoreV2AsDataSource,
+      });
       if (euidFilter) {
         return JSON.stringify(euidFilter);
       }
