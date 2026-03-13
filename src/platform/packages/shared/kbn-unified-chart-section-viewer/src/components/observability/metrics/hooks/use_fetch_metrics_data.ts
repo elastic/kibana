@@ -8,12 +8,11 @@
  */
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import type {
   Dimension,
-  ParsedMetricItem,
   MetricsESQLResponseObject,
   ParsedMetricsResult,
   MetricsInfoResponse,
@@ -44,11 +43,18 @@ export function useFetchMetricsData({
 
   const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
 
+  const dimensions = useMemo(
+    () => selectedDimensionNames?.map((dimension) => dimension.name),
+    [selectedDimensionNames]
+  );
+
+  const metricsInfoQuery = useMemo(
+    () => buildMetricsInfoQuery(esql, dimensions),
+    [esql, dimensions]
+  );
+
   const [{ value, error, loading }, executeFetch] =
     useAsyncFn(async (): Promise<ParsedMetricsResult | null> => {
-      const dimensions = selectedDimensionNames?.map((dimension) => dimension.name);
-      const metricsInfoQuery = buildMetricsInfoQuery(esql, dimensions);
-
       const result = await executeEsqlQuery<MetricsESQLResponseObject>({
         esqlQuery: metricsInfoQuery,
         search: services.data.search.search,
@@ -60,11 +66,16 @@ export function useFetchMetricsData({
         uiSettings: services.uiSettings,
       });
 
-      return parseMetricsResponse(result);
+      const parsed = parseMetricsResponse(result);
+
+      return {
+        metricItems: [...(parsed?.metricItems ?? [])].sort((a, b) =>
+          a.metricName.localeCompare(b.metricName)
+        ),
+        allDimensions: [...(parsed?.allDimensions ?? [])].sort((a, b) => a.localeCompare(b)),
+      };
     }, [
-      shouldFetch,
-      esql,
-      selectedDimensionNames,
+      metricsInfoQuery,
       fetchParams.dataView,
       fetchParams.timeRange,
       fetchParams.abortController,
@@ -81,7 +92,6 @@ export function useFetchMetricsData({
     executeFetch();
   }, [
     shouldFetch,
-    esql,
     selectedDimensionNames,
     fetchParams.dataView,
     fetchParams.timeRange,
@@ -94,10 +104,7 @@ export function useFetchMetricsData({
   return {
     loading,
     error: error ?? null,
-    metricItems:
-      value?.metricItems.sort((a: ParsedMetricItem, b: ParsedMetricItem) =>
-        a.metricName.localeCompare(b.metricName)
-      ) ?? [],
-    allDimensions: value?.allDimensions.sort((a: string, b: string) => a.localeCompare(b)) ?? [],
+    metricItems: value?.metricItems ?? [],
+    allDimensions: value?.allDimensions ?? [],
   };
 }
