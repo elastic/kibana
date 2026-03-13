@@ -21,6 +21,7 @@ const createWrapper = () => {
   });
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
+
   return Wrapper;
 };
 

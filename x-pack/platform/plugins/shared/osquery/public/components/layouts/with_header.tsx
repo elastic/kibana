@@ -39,7 +39,7 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
     </Header>
     <EuiPage
       css={pageCss}
-      restrictWidth={restrictWidth === false ? false : (restrictWidth || 1200)}
+      restrictWidth={restrictWidth === false ? false : restrictWidth || 1200}
       data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
     >
       <EuiPageBody>

@@ -29,7 +29,7 @@ interface Props {
 
 export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
   <Fragment>
-    <EuiPage css={pageCss} restrictWidth={restrictWidth === false ? false : (restrictWidth || 1200)}>
+    <EuiPage css={pageCss} restrictWidth={restrictWidth === false ? false : restrictWidth || 1200}>
       <EuiPageBody>
         <div css={contentCss}>
           <EuiSpacer size="m" />
