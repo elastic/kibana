@@ -25,6 +25,7 @@ import {
   isDOMNode,
   EuiSpacer,
 } from '@elastic/eui';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
@@ -56,6 +57,7 @@ export interface UnifiedDocViewerFlyoutProps
   };
   docViewsRegistry?: DocViewRenderProps['docViewsRegistry'];
   isEsqlQuery: boolean;
+  query?: Query | AggregateQuery;
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
   hit: DataTableRecord;
@@ -97,6 +99,7 @@ export function UnifiedDocViewerFlyout({
   isEsqlQuery,
   columns,
   columnsMeta,
+  query,
   hit,
   hits,
   dataView,
@@ -229,6 +232,7 @@ export function UnifiedDocViewerFlyout({
         ? euiTheme.base + PROJECT_VIEW_MARGIN_BOTTOM
         : euiTheme.base,
       hideFilteringOnComputedColumns,
+      query,
     }),
     [
       actualHit,
@@ -244,6 +248,7 @@ export function UnifiedDocViewerFlyout({
       isProjectStyle,
       euiTheme.base,
       hideFilteringOnComputedColumns,
+      query,
     ]
   );
 
