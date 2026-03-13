@@ -47,7 +47,6 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
       },
     },
     no_data: { type: 'object', enabled: false },
-    notification_policies: { type: 'object', enabled: false },
 
     enabled: { type: 'boolean' },
     createdBy: { type: 'keyword' },

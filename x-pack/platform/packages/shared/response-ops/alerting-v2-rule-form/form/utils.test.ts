@@ -220,7 +220,7 @@ describe('utils', () => {
 
   describe('numeric input helpers', () => {
     it('exposes invalid number keys for EuiFieldNumber guards', () => {
-      expect(INVALID_NUMBER_KEYS).toEqual(['-', '+', '.', 'e', 'E']);
+      expect(INVALID_NUMBER_KEYS).toEqual(['-', '+', ',', '.', 'e', 'E']);
     });
   });
 });

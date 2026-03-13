@@ -7,20 +7,20 @@
 
 import type { NotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { createNotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service.mock';
-import { createDispatcherPipelineState, createRule } from '../fixtures/test_utils';
+import { createDispatcherPipelineState } from '../fixtures/test_utils';
 import { FetchPoliciesStep } from './fetch_policies_step';
 
 describe('FetchPoliciesStep', () => {
   let npSoService: NotificationPolicySavedObjectService;
-  let mockBulkGetDecryptedByIds: jest.SpyInstance;
+  let mockFindAllDecrypted: jest.SpyInstance;
 
   beforeEach(() => {
-    ({ notificationPolicySavedObjectService: npSoService, mockBulkGetDecryptedByIds } =
+    ({ notificationPolicySavedObjectService: npSoService, mockFindAllDecrypted } =
       createNotificationPolicySavedObjectService());
   });
 
-  it('fetches and decrypts unique policies via bulkGetDecryptedByIds', async () => {
-    mockBulkGetDecryptedByIds.mockResolvedValue([
+  it('fetches all decrypted policies via findAllDecrypted', async () => {
+    mockFindAllDecrypted.mockResolvedValue([
       {
         id: 'p1',
         attributes: {
@@ -37,12 +37,7 @@ describe('FetchPoliciesStep', () => {
     ]);
 
     const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState({
-      rules: new Map([
-        ['r1', createRule({ id: 'r1', notificationPolicyIds: ['p1'] })],
-        ['r2', createRule({ id: 'r2', notificationPolicyIds: ['p1'] })],
-      ]),
-    });
+    const state = createDispatcherPipelineState();
 
     const result = await step.execute(state);
 
@@ -53,47 +48,31 @@ describe('FetchPoliciesStep', () => {
     const policy = result.data?.policies?.get('p1');
     expect(policy?.name).toBe('Policy 1');
     expect(policy?.apiKey).toBe('decrypted-key');
+    expect(policy?.ruleLabels).toEqual([]);
 
-    expect(mockBulkGetDecryptedByIds).toHaveBeenCalledTimes(1);
-    expect(mockBulkGetDecryptedByIds).toHaveBeenCalledWith(['p1']);
+    expect(mockFindAllDecrypted).toHaveBeenCalledTimes(1);
   });
 
-  it('returns empty map when rules is empty', async () => {
+  it('returns empty map when no policies exist', async () => {
+    mockFindAllDecrypted.mockResolvedValue([]);
+
     const step = new FetchPoliciesStep(npSoService);
-
-    const state = createDispatcherPipelineState({ rules: new Map() });
-    const result = await step.execute(state);
-
-    expect(result.type).toBe('continue');
-    if (result.type !== 'continue') return;
-    expect(result.data?.policies?.size).toBe(0);
-    expect(mockBulkGetDecryptedByIds).not.toHaveBeenCalled();
-  });
-
-  it('returns empty map when rules have no policy IDs', async () => {
-    const step = new FetchPoliciesStep(npSoService);
-
-    const state = createDispatcherPipelineState({
-      rules: new Map([['r1', createRule({ id: 'r1', notificationPolicyIds: [] })]]),
-    });
+    const state = createDispatcherPipelineState();
 
     const result = await step.execute(state);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(0);
-    expect(mockBulkGetDecryptedByIds).not.toHaveBeenCalled();
   });
 
   it('skips documents with errors', async () => {
-    mockBulkGetDecryptedByIds.mockResolvedValue([
+    mockFindAllDecrypted.mockResolvedValue([
       { id: 'p1', error: { statusCode: 500, message: 'Decryption failed', error: 'Error' } },
     ]);
 
     const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState({
-      rules: new Map([['r1', createRule({ id: 'r1', notificationPolicyIds: ['p1'] })]]),
-    });
+    const state = createDispatcherPipelineState();
 
     const result = await step.execute(state);
 
@@ -102,13 +81,14 @@ describe('FetchPoliciesStep', () => {
     expect(result.data?.policies?.size).toBe(0);
   });
 
-  it('fetches multiple policies', async () => {
-    mockBulkGetDecryptedByIds.mockResolvedValue([
+  it('fetches multiple policies and preserves rule_labels', async () => {
+    mockFindAllDecrypted.mockResolvedValue([
       {
         id: 'p1',
         attributes: {
           name: 'Policy 1',
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
+          rule_labels: ['production'],
           auth: { apiKey: 'key-1', owner: 'elastic', createdByUser: false },
           createdBy: null,
           updatedBy: null,
@@ -131,12 +111,7 @@ describe('FetchPoliciesStep', () => {
     ]);
 
     const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState({
-      rules: new Map([
-        ['r1', createRule({ id: 'r1', notificationPolicyIds: ['p1'] })],
-        ['r2', createRule({ id: 'r2', notificationPolicyIds: ['p2'] })],
-      ]),
-    });
+    const state = createDispatcherPipelineState();
 
     const result = await step.execute(state);
 
@@ -144,7 +119,9 @@ describe('FetchPoliciesStep', () => {
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(2);
     expect(result.data?.policies?.get('p1')?.apiKey).toBe('key-1');
+    expect(result.data?.policies?.get('p1')?.ruleLabels).toEqual(['production']);
     expect(result.data?.policies?.get('p2')?.apiKey).toBe('key-2');
-    expect(mockBulkGetDecryptedByIds).toHaveBeenCalledTimes(1);
+    expect(result.data?.policies?.get('p2')?.ruleLabels).toEqual([]);
+    expect(mockFindAllDecrypted).toHaveBeenCalledTimes(1);
   });
 });
