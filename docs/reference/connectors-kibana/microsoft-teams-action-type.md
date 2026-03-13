@@ -42,11 +42,11 @@ You can test connectors while creating or editing them in {{kib}}. The test veri
 The Microsoft Teams connector has the following actions:
 
 **List joined teams**
-:   Returns the teams the authenticated user has joined.
+:   Returns the authenticated user's joined teams when using delegated auth, or the specified user's joined teams when `userId` is provided for app-only auth.
     - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (bearer token).
 
 **List channels**
-:   Returns the channels in a team.
+:   Returns chats for the authenticated user when using delegated auth, or for the specified user when `userId` is provided for app-only auth.
     - `teamId` (required): The ID of the team.
 
 **List channel messages**
