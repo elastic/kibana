@@ -13,7 +13,7 @@ import { LOCAL_CACHE_ROOT } from './archive/constants';
 
 export async function cleanCache() {
   const { TS_PROJECTS } = await import('@kbn/ts-projects');
-  const { cleanupRootRefsConfig } = await import('../root_refs_config');
+  const { cleanupRootRefsConfig } = await import('../root_refs_config.js');
 
   await asyncForEachWithLimit(TS_PROJECTS, 10, async (proj) => {
     await Fsp.rm(Path.resolve(proj.directory, 'target/types'), {

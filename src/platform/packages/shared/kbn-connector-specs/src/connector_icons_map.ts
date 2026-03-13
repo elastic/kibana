@@ -126,7 +126,10 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
-  ['.figma', lazy(() => import(/* webpackChunkName: "connectorIconFigma" */ './specs/figma/icon'))],
+  [
+    '.figma',
+    lazy(() => import(/* webpackChunkName: "connectorIconFigma" */ './specs/figma/icon/index.js')),
+  ],
   [
     '.google_drive',
     lazy(
@@ -170,7 +173,10 @@ export const ConnectorIconsMap: Map<
   [
     '.1password',
     lazy(
-      () => import(/* webpackChunkName: "connectorIconOnePassword" */ './specs/one_password/icon')
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconOnePassword" */ './specs/one_password/icon/index.js'
+        )
     ),
   ],
   [
@@ -197,6 +203,9 @@ export const ConnectorIconsMap: Map<
   ],
   [
     '.amazon_s3',
-    lazy(() => import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon')),
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon/index.js')
+    ),
   ],
 ]);
