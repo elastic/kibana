@@ -9,9 +9,14 @@
 
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
-import type { ReactNode } from 'react';
 import type { Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
+import type {
+  ActionButton,
+  AttachmentUIDefinition,
+  CanvasRenderCallbacks,
+} from '@kbn/agent-builder-browser/attachments';
+import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { CodeEditor } from '@kbn/code-editor';
 import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -35,17 +40,6 @@ interface WorkflowYamlAttachment {
   data: WorkflowYamlData;
 }
 
-// Local button type constants matching ActionButtonType enum values
-const ACTION_TYPE_PRIMARY = 'primary';
-const ACTION_TYPE_SECONDARY = 'secondary';
-
-interface ActionButton {
-  label: string;
-  icon?: string;
-  type: string;
-  handler: () => void | Promise<void>;
-}
-
 const extractErrorMessage = (error: unknown): string =>
   (error as { body?: { message?: string } })?.body?.message ||
   (error as Error)?.message ||
@@ -56,7 +50,7 @@ interface SaveWorkflowParams {
   notifications: NotificationsStart;
   yaml: string;
   workflowId?: string;
-  updateOrigin: (origin: unknown) => Promise<unknown>;
+  updateOrigin: CanvasRenderCallbacks['updateOrigin'];
 }
 
 const saveWorkflow = async ({
@@ -117,8 +111,8 @@ const READONLY_EDITOR_OPTIONS = {
 const WorkflowYamlCanvasContent: React.FC<{
   attachment: WorkflowYamlAttachment;
   isSidebar: boolean;
-  registerActionButtons: (buttons: ActionButton[]) => void;
-  updateOrigin: (origin: unknown) => Promise<unknown>;
+  registerActionButtons: CanvasRenderCallbacks['registerActionButtons'];
+  updateOrigin: CanvasRenderCallbacks['updateOrigin'];
   http: HttpSetup;
   notifications: NotificationsStart;
   application: ApplicationStart;
@@ -197,7 +191,7 @@ const WorkflowYamlCanvasContent: React.FC<{
           defaultMessage: 'Override',
         }),
         icon: 'save',
-        type: ACTION_TYPE_PRIMARY,
+        type: ActionButtonType.PRIMARY,
         handler: handleSave,
       });
       buttons.push({
@@ -205,7 +199,7 @@ const WorkflowYamlCanvasContent: React.FC<{
           defaultMessage: 'Save as new',
         }),
         icon: 'copy',
-        type: ACTION_TYPE_SECONDARY,
+        type: ActionButtonType.SECONDARY,
         handler: handleSaveAsNew,
       });
     } else {
@@ -214,7 +208,7 @@ const WorkflowYamlCanvasContent: React.FC<{
           defaultMessage: 'Save',
         }),
         icon: 'save',
-        type: ACTION_TYPE_PRIMARY,
+        type: ActionButtonType.PRIMARY,
         handler: handleSave,
       });
     }
@@ -225,7 +219,7 @@ const WorkflowYamlCanvasContent: React.FC<{
           defaultMessage: 'Open in editor',
         }),
         icon: 'popout',
-        type: ACTION_TYPE_SECONDARY,
+        type: ActionButtonType.SECONDARY,
         handler: () => {
           application.navigateToApp(PLUGIN_ID, { path: workflowId });
         },
@@ -269,24 +263,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
   http: HttpSetup;
   notifications: NotificationsStart;
   application: ApplicationStart;
-}): {
-  getLabel: (attachment: WorkflowYamlAttachment) => string;
-  getIcon: () => string;
-  getActionButtons: (params: {
-    attachment: WorkflowYamlAttachment;
-    isSidebar: boolean;
-    isCanvas: boolean;
-    updateOrigin: (origin: unknown) => Promise<unknown>;
-    openCanvas?: () => void;
-  }) => ActionButton[];
-  renderCanvasContent: (
-    props: { attachment: WorkflowYamlAttachment; isSidebar: boolean },
-    callbacks: {
-      registerActionButtons: (buttons: ActionButton[]) => void;
-      updateOrigin: (origin: unknown) => Promise<unknown>;
-    }
-  ) => ReactNode;
-} => {
+}): AttachmentUIDefinition<WorkflowYamlAttachment> => {
   let currentAppId: string | undefined;
   let currentLocation = '';
   let appContextSub: Subscription | undefined;
@@ -323,7 +300,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
             defaultMessage: 'Preview',
           }),
           icon: 'eye',
-          type: ACTION_TYPE_SECONDARY,
+          type: ActionButtonType.SECONDARY,
           handler: openCanvas,
         });
       }
@@ -335,7 +312,7 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
             { defaultMessage: 'Open in editor' }
           ),
           icon: 'popout',
-          type: ACTION_TYPE_SECONDARY,
+          type: ActionButtonType.SECONDARY,
           handler: () => {
             application.navigateToApp(PLUGIN_ID, { path: attachment.data.workflowId });
           },

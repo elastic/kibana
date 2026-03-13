@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
 import { workflowYamlDiffAttachmentUiDefinition } from './workflow_yaml_diff_attachment_renderer';
@@ -15,9 +16,7 @@ const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
 
 export const registerWorkflowAttachmentRenderers = (
-  attachments: {
-    addAttachmentType: (type: string, definition: unknown) => void;
-  },
+  attachments: AttachmentServiceStartContract,
   services: { http: HttpSetup; notifications: NotificationsStart; application: ApplicationStart }
 ): void => {
   attachments.addAttachmentType(

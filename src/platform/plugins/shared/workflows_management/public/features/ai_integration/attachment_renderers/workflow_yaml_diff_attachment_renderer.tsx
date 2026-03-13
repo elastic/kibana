@@ -10,6 +10,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 
@@ -202,18 +203,17 @@ const DiffInlineContent: React.FC<{
   );
 };
 
-export const workflowYamlDiffAttachmentUiDefinition = {
-  getLabel: (attachment: WorkflowYamlDiffAttachment) =>
-    attachment.data.name
-      ? i18n.translate('workflowsManagement.attachmentRenderers.diff.labelWithName', {
-          defaultMessage: '{name} changes',
-          values: { name: attachment.data.name },
-        })
-      : i18n.translate('workflowsManagement.attachmentRenderers.diff.label', {
-          defaultMessage: 'Workflow changes',
-        }),
-  getIcon: () => 'merge',
-  renderInlineContent: ({ attachment }: { attachment: WorkflowYamlDiffAttachment }) => (
-    <DiffInlineContent attachment={attachment} />
-  ),
-};
+export const workflowYamlDiffAttachmentUiDefinition: AttachmentUIDefinition<WorkflowYamlDiffAttachment> =
+  {
+    getLabel: (attachment) =>
+      attachment.data.name
+        ? i18n.translate('workflowsManagement.attachmentRenderers.diff.labelWithName', {
+            defaultMessage: '{name} changes',
+            values: { name: attachment.data.name },
+          })
+        : i18n.translate('workflowsManagement.attachmentRenderers.diff.label', {
+            defaultMessage: 'Workflow changes',
+          }),
+    getIcon: () => 'merge',
+    renderInlineContent: ({ attachment }) => <DiffInlineContent attachment={attachment} />,
+  };
