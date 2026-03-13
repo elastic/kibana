@@ -12,6 +12,12 @@ import { useKibana } from '../../common/lib/kibana/use_kibana';
 
 export interface UseAgentBuilderAttachmentParams {
   /**
+   * Optional stable ID for the attachment. When provided, the platform will
+   * replace any existing attachment with the same ID instead of creating a new one.
+   * Falls back to `${attachmentType}-${Date.now()}` when omitted.
+   */
+  attachmentId?: string;
+  /**
    * Type of attachment (e.g., 'alert', 'attack_discovery')
    */
   attachmentType: string;
@@ -37,6 +43,7 @@ export interface UseAgentBuilderAttachmentResult {
  * Opens a conversation flyout with attachments and prefilled conversation.
  */
 export const useAgentBuilderAttachment = ({
+  attachmentId,
   attachmentType,
   attachmentData,
   attachmentPrompt,
@@ -48,12 +55,8 @@ export const useAgentBuilderAttachment = ({
       return;
     }
 
-    // Create a unique ID for the attachment
-    const attachmentId = `${attachmentType}-${Date.now()}`;
-
-    // Create the UiAttachment object
     const attachment: AttachmentInput = {
-      id: attachmentId,
+      id: attachmentId ?? `${attachmentType}-${Date.now()}`,
       type: attachmentType,
       data: attachmentData,
     };
@@ -67,7 +70,7 @@ export const useAgentBuilderAttachment = ({
       sessionTag: 'security',
       agentId: THREAT_HUNTING_AGENT_ID,
     });
-  }, [attachmentType, attachmentData, attachmentPrompt, agentBuilder]);
+  }, [attachmentId, attachmentType, attachmentData, attachmentPrompt, agentBuilder]);
 
   return {
     openAgentBuilderFlyout,

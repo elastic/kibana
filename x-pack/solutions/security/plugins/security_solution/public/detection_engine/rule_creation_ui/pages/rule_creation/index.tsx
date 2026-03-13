@@ -27,10 +27,7 @@ import {
   isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
-import type {
-  RuleCreateProps,
-  RuleResponse,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 
 import {
@@ -56,7 +53,6 @@ import {
   redirectToDetections,
   getActionMessageParams,
   MaxWidthEuiFlexItem,
-  getStepsData,
 } from '../../../common/helpers';
 import type { DefineStepRule } from '../../../common/types';
 import { RuleStep } from '../../../common/types';
@@ -89,6 +85,7 @@ import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
+import { useAgentBuilderRuleCreation } from './hooks/use_agent_builder_rule_creation';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 
 const MyEuiPanel = styled(EuiPanel)<{
@@ -116,11 +113,7 @@ const MyEuiPanel = styled(EuiPanel)<{
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
-const CreateRulePageComponent: React.FC<{
-  rule?: RuleResponse;
-  sendToAgentChat?: boolean; // allows the user to send the rule to the agent chat as an attachment
-  backComponent?: React.ReactNode;
-}> = ({ rule, sendToAgentChat, backComponent }) => {
+const CreateRulePageComponent: React.FC = () => {
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
@@ -142,8 +135,6 @@ const CreateRulePageComponent: React.FC<{
   const scheduleRuleRef = useRef<EuiAccordion | null>(null);
   // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const ruleActionsRef = useRef<EuiAccordion | null>(null);
-
-  const isAICreatedRuleValidated = useRef<boolean>(false);
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -171,12 +162,6 @@ const CreateRulePageComponent: React.FC<{
     [kibanaAbsoluteUrl]
   );
 
-  const stepsData = rule
-    ? getStepsData({
-        rule,
-      })
-    : undefined;
-
   const {
     defineStepForm,
     defineStepData,
@@ -188,10 +173,10 @@ const CreateRulePageComponent: React.FC<{
     actionsStepData,
     handleNewConnectorCreated,
   } = useRuleForms({
-    defineStepDefault: stepsData?.defineRuleData || defineStepDefault,
-    aboutStepDefault: stepsData?.aboutRuleData || stepAboutDefaultValue,
-    scheduleStepDefault: stepsData?.scheduleRuleData || defaultSchedule,
-    actionsStepDefault: stepsData?.ruleActionsData || actionsStepDefault,
+    defineStepDefault,
+    aboutStepDefault: stepAboutDefaultValue,
+    scheduleStepDefault: defaultSchedule,
+    actionsStepDefault,
   });
 
   const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
@@ -218,6 +203,9 @@ const CreateRulePageComponent: React.FC<{
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
+  const togglePanelFnRef = useRef<
+    ((panelId: string, options: { direction: 'left' | 'right' }) => void) | undefined
+  >();
   const [prevRuleType, setPrevRuleType] = useState<string>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
 
@@ -232,17 +220,40 @@ const CreateRulePageComponent: React.FC<{
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
+  const { isAiRuleUpdateRef } = useAgentBuilderRuleCreation({
+    defineStepForm,
+    aboutStepForm,
+    scheduleStepForm,
+    actionsStepForm,
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    actionsStepData,
+    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+  });
+
   useEffect(() => {
     if (prevRuleType && prevRuleType !== ruleType) {
       aboutStepForm.updateFieldValues({
         threatIndicatorPath: isThreatMatchRuleValue ? DEFAULT_INDICATOR_SOURCE_PATH : undefined,
       });
-      scheduleStepForm.updateFieldValues(
-        isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
-      );
+      if (isAiRuleUpdateRef.current) {
+        isAiRuleUpdateRef.current = false;
+      } else {
+        scheduleStepForm.updateFieldValues(
+          isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
+        );
+      }
     }
     setPrevRuleType(ruleType);
-  }, [aboutStepForm, scheduleStepForm, isThreatMatchRuleValue, prevRuleType, ruleType]);
+  }, [
+    aboutStepForm,
+    scheduleStepForm,
+    isThreatMatchRuleValue,
+    prevRuleType,
+    ruleType,
+    isAiRuleUpdateRef,
+  ]);
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
 
@@ -374,15 +385,6 @@ const CreateRulePageComponent: React.FC<{
 
     return { valid, warnings };
   }, [validateStep]);
-
-  useEffect(() => {
-    // validate Define step when rule is loaded after AI suggestion.
-    // It's required to make sure we highlight possible errors in query that were not caught during AI generation.
-    if (rule && sendToAgentChat && isAICreatedRuleValidated.current === false) {
-      validateStep(RuleStep.defineRule);
-      isAICreatedRuleValidated.current = true;
-    }
-  }, [rule, sendToAgentChat, validateStep]);
 
   const verifyRuleDefinitionForPreview = useCallback(
     () => defineStepForm.validate(),
@@ -874,14 +876,18 @@ const CreateRulePageComponent: React.FC<{
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
             collapseFn.current = () => togglePanel?.('preview', { direction: 'left' });
+            if (togglePanel) {
+              togglePanelFnRef.current = (id: string, options: { direction: 'left' | 'right' }) => {
+                togglePanel(id, options);
+              };
+            }
             return (
               <>
                 <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
                   <EuiFlexGroup direction="row" justifyContent="spaceAround">
                     <MaxWidthEuiFlexItem>
                       <CustomHeaderPageMemo
-                        backOptions={backComponent ? undefined : backOptions}
-                        backComponent={backComponent}
+                        backOptions={backOptions}
                         isLoading={isCreateRuleLoading || loading}
                         title={i18n.PAGE_TITLE}
                         isRulePreviewVisible={isRulePreviewVisible}

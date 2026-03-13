@@ -13,7 +13,10 @@ import { AddRuleAttachmentToChatButton } from './add_rule_attachment_to_chat_but
 import { RULE_EXPLORATION_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 import type { NewAgentBuilderAttachmentProps } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import type { UseAgentBuilderAttachmentParams } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
-import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../../../common/constants';
 import type {
   AboutStepRule,
   ActionsStepRule,
@@ -99,6 +102,7 @@ describe('AddRuleAttachmentToChatButton', () => {
 
     expect(mockUseAgentBuilderAttachment).toHaveBeenCalledTimes(1);
     expect(getCapturedAttachment()).toEqual<UseAgentBuilderAttachmentParams>({
+      attachmentId: SECURITY_RULE_ATTACHMENT_ID,
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
         text: JSON.stringify({ name: 'Formatted Rule' }),

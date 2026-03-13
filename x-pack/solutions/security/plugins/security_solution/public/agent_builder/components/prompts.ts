@@ -86,6 +86,9 @@ Analyze the attached Security detection rule and provide actionable insights.
 Important:
 - Always read the rule from the attachment data (attachment type: security.rule)
 - If the attachment data is not found, use the dedicated attachment read tool (attachment type: security.rule)
+- Always use latest version of the rule attachment. Discard older versions.
+- Always render inline the latest version of the rule attachment(attachment type: security.rule). Do not render older versions.
+- To ensure you are using the latest version, always use the attachment read tool (attachment type: security.rule) before analyzing the rule.
 
 Analysis Framework:
 1. Detection Intent & Strategy

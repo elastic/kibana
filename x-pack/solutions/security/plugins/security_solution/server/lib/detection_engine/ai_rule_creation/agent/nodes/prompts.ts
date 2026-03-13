@@ -47,9 +47,9 @@ A: Please find matched rule JSON object below:
 "description":"Detects hosts accessing destination IP addresses outside of private IP ranges, indicating potential suspicious activity."
 }}
 \`\`\`
+Respond ONLY with a valid JSON object containing "name" and "description" fields. No markdown, no explanation.
 </example_response>`,
   ],
-  ['ai', 'Please find generated rule JSON object below:'],
 ]);
 
 export const TAGS_SELECTION_PROMPT = ChatPromptTemplate.fromMessages([
