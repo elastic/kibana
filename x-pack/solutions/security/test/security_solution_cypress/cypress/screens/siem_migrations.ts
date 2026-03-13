@@ -77,6 +77,7 @@ export const TRANSLATED_RULE_SAVE_BTN = getDataTestSubjectSelector('saveTranslat
 export const TRANSLATED_RULE_QUERY_VIEWER = getDataTestSubjectSelector('translatedRuleQueryViewer');
 export const TRANSLATED_RULE_RESULT_BADGE = getDataTestSubjectSelector('translationResultBadge');
 
+export const RULE_MIGRATION_DESCRIPTION = getDataTestSubjectSelector('ruleMigrationDescription');
 export const RULE_MIGRATION_PROGRESS_BAR = getDataTestSubjectSelector('ruleMigrationProgressPanel');
 export const RULE_MIGRATION_PROGRESS_BAR_TEXT = `${RULE_MIGRATION_PROGRESS_BAR} .euiProgress__valueText`;
 

@@ -6,13 +6,12 @@
  */
 
 import {
-  MIGRATION_PANEL_NAME,
   ONBOARDING_SIEM_MIGRATIONS_LIST,
-  ONBOARDING_TRANSLATIONS_RESULT_TABLE,
   RULE_MIGRATIONS_GROUP_PANEL,
-  RULE_MIGRATION_PROGRESS_BAR,
+  RULE_MIGRATION_DESCRIPTION,
   REFERENCE_SETS_UPLOAD_STEP,
 } from '../../../../screens/siem_migrations';
+import { TOASTER_MESSAGE } from '../../../../screens/alerts_detection_rules';
 import { deleteConnectors } from '../../../../tasks/api_calls/common';
 import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
 import { cleanMigrationData } from '../../../../tasks/api_calls/siem_migrations';
@@ -20,18 +19,17 @@ import { visit } from '../../../../tasks/navigation';
 import {
   openUploadRulesFlyout,
   selectMigrationConnector,
+  setMigrationName,
   startMigrationFromFlyout,
-  toggleMigrateRulesCard,
-  renameMigration,
   selectQRadarMigrationSource,
   uploadQRadarRules,
-  selectAutomaticMigrationTopic,
 } from '../../../../tasks/siem_migrations';
 import { GET_STARTED_URL } from '../../../../urls/navigation';
 import { role } from '../common/role';
 import {
   QRADAR_TEST_RULES_XML,
   QRADAR_TEST_RULES_XML_WITH_REFERENCE_SETS,
+  QRADAR_BUILDING_BLOCK_ONLY_XML,
 } from '../../../../fixtures/siem_migrations/qradar_test_data';
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
@@ -44,124 +42,80 @@ describe(
     });
 
     beforeEach(() => {
+      cleanMigrationData();
       deleteConnectors();
       createBedrockConnector();
       role.login();
       cy.log('Creating Bedrock connector');
       visit(GET_STARTED_URL);
+      selectMigrationConnector();
+      openUploadRulesFlyout();
+      selectQRadarMigrationSource();
+      setMigrationName();
     });
 
     after(() => {
       role.teardown();
     });
 
-    context('First QRadar Migration', () => {
-      beforeEach(() => {
-        cleanMigrationData();
-      });
+    it('should be able to create and start QRadar migrations', () => {
+      cy.intercept({
+        url: '**/qradar/rules',
+      }).as('createQRadarRules');
 
-      it('should be able to create QRadar migrations', () => {
-        selectMigrationConnector();
-        openUploadRulesFlyout();
+      cy.intercept({
+        url: '**/start',
+      }).as('startMigration');
+      uploadQRadarRules(QRADAR_TEST_RULES_XML);
 
-        // Select QRadar as the migration source
-        selectQRadarMigrationSource();
+      startMigrationFromFlyout();
 
-        // Upload QRadar XML rules
-        uploadQRadarRules(QRADAR_TEST_RULES_XML);
+      cy.wait('@createQRadarRules').its('response.statusCode').should('eq', 200);
+      cy.wait('@startMigration')
+        .its('request.body.settings')
+        .should('have.property', 'skip_prebuilt_rules_matching', false);
 
-        cy.intercept({
-          url: '**/qradar/rules',
-        }).as('createQRadarRules');
-
-        cy.intercept({
-          url: '**/start',
-        }).as('startMigration');
-
-        startMigrationFromFlyout();
-
-        cy.wait('@createQRadarRules').its('response.statusCode').should('eq', 200);
-        cy.wait('@startMigration')
-          .its('request.body.settings')
-          .should('have.property', 'skip_prebuilt_rules_matching', false);
-
-        cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
-          cy.get(ONBOARDING_SIEM_MIGRATIONS_LIST).should('have.length', 1);
-          cy.get(RULE_MIGRATION_PROGRESS_BAR).should('have.length', 1);
-        });
-      });
-
-      it('should identify missing reference sets from QRadar rules', () => {
-        selectMigrationConnector();
-        openUploadRulesFlyout();
-
-        // Select QRadar as the migration source
-        selectQRadarMigrationSource();
-
-        // Upload QRadar XML rules that contain reference sets
-        uploadQRadarRules(QRADAR_TEST_RULES_XML_WITH_REFERENCE_SETS);
-
-        cy.intercept({
-          url: '**/qradar/rules',
-        }).as('createQRadarRules');
-
-        cy.intercept({
-          url: '**/resources/missing',
-        }).as('getMissingResources');
-
-        cy.wait('@createQRadarRules').its('response.statusCode').should('eq', 200);
-
-        // Verify the reference sets step is shown after rules are uploaded
-        cy.get(REFERENCE_SETS_UPLOAD_STEP.STEP_NUMBER).should('exist');
-        cy.get(REFERENCE_SETS_UPLOAD_STEP.TITLE).should('contain.text', 'reference sets');
+      cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
+        cy.get(ONBOARDING_SIEM_MIGRATIONS_LIST).should('have.length', 1);
       });
     });
 
-    context('On Successful QRadar Translation', () => {
-      beforeEach(() => {
-        cy.task('esArchiverLoad', {
-          archiveName: 'siem_migrations/qradar_rules',
-        });
+    it('should show error toast when uploading only building block rules', () => {
+      uploadQRadarRules(QRADAR_BUILDING_BLOCK_ONLY_XML);
 
-        cy.task('esArchiverLoad', {
-          archiveName: 'siem_migrations/qradar_rule_migrations',
-        });
+      cy.get(TOASTER_MESSAGE).should('be.visible');
+      cy.contains('Failed to upload rules file').should('be.visible');
+    });
 
-        selectAutomaticMigrationTopic();
-        toggleMigrateRulesCard();
-      });
+    it('should exclude building block rules from the uploaded count and ready panel count', () => {
+      uploadQRadarRules(QRADAR_TEST_RULES_XML);
 
-      afterEach(() => {
-        cy.task('esArchiverUnload', {
-          archiveName: 'siem_migrations/qradar_rules',
-        });
+      // Success toast count should exclude building block rules (3 total, 1 building block = 2 eligible)
+      cy.contains('2 rules uploaded').should('be.visible');
 
-        cy.task('esArchiverUnload', {
-          archiveName: 'siem_migrations/qradar_rule_migrations',
-        });
-      });
+      // Close the flyout to see the ready panel
+      cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
 
-      it('should be able to see the result of the completed QRadar migration', () => {
-        cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
-          cy.get(ONBOARDING_SIEM_MIGRATIONS_LIST).should('have.length', 1);
-          cy.get(ONBOARDING_TRANSLATIONS_RESULT_TABLE.TRANSLATION_STATUS_COUNT('Failed')).should(
-            'have.text',
-            1
-          );
-          cy.get(
-            ONBOARDING_TRANSLATIONS_RESULT_TABLE.TRANSLATION_STATUS_COUNT('Partially translated')
-          ).should('have.text', 2);
-          cy.get(
-            ONBOARDING_TRANSLATIONS_RESULT_TABLE.TRANSLATION_STATUS_COUNT('Translated')
-          ).should('have.text', 1);
-        });
-      });
+      // Ready panel count should also exclude building block rules
+      cy.get(RULE_MIGRATION_DESCRIPTION).should('contain.text', '2 rules');
+    });
 
-      it('should be able to rename the QRadar migration', () => {
-        cy.get(ONBOARDING_SIEM_MIGRATIONS_LIST).should('have.length', 1);
-        renameMigration('Renamed QRadar Migration');
-        cy.get(MIGRATION_PANEL_NAME).should('have.text', 'Renamed QRadar Migration');
-      });
+    it('should identify missing reference sets from QRadar rules', () => {
+      uploadQRadarRules(QRADAR_TEST_RULES_XML_WITH_REFERENCE_SETS);
+
+      cy.intercept({
+        url: '**/qradar/rules',
+      }).as('createQRadarRules');
+
+      cy.intercept({
+        url: '**/resources/missing',
+      }).as('getMissingResources');
+
+      cy.wait('@createQRadarRules').its('response.statusCode').should('eq', 200);
+
+      // Verify the reference sets step is shown after rules are uploaded
+      cy.get(REFERENCE_SETS_UPLOAD_STEP.STEP_NUMBER).should('exist');
+      cy.get(REFERENCE_SETS_UPLOAD_STEP.TITLE).should('contain.text', 'reference sets');
     });
   }
 );

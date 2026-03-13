@@ -80,6 +80,13 @@ export const saveDefaultMigrationName = () => {
   cy.get(SELECTORS.MIGRATION_NAME_INPUT).blur();
 };
 
+export const setMigrationName = (name = 'New Migration') => {
+  cy.get(SELECTORS.MIGRATION_NAME_INPUT).should('exist');
+  cy.get(SELECTORS.MIGRATION_NAME_INPUT).clear();
+  cy.get(SELECTORS.MIGRATION_NAME_INPUT).type(name);
+  cy.get(SELECTORS.MIGRATION_NAME_INPUT).blur();
+};
+
 export const uploadRules = (splunkRulesJSON: object) => {
   cy.get(SELECTORS.UPLOAD_RULES_FILE_PICKER).selectFile({
     contents: Cypress.Buffer.from(JSON.stringify(splunkRulesJSON)),

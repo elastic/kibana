@@ -62,6 +62,21 @@ const QRADAR_RULE_3 = `<rule buildingBlock="false" enabled="true" id="100003">
   </responses>
 </rule>`;
 
+const QRADAR_BUILDING_BLOCK_RULE_2 = `<rule buildingBlock="true" enabled="true" id="100005">
+  <name>BB:CategoryDefinition: Privilege Escalation Attempt</name>
+  <notes>Building block rule for detecting privilege escalation attempts</notes>
+  <testDefinitions>
+    <test group="Event Property Tests" id="24" name="com.q1labs.sem.semces.cre.tests.EventCategory_Test" uid="0">
+      <text>when the event category for the event is one of the following Authentication.Privilege Escalation</text>
+      <parameter id="1">
+        <initialText>categories</initialText>
+        <userSelection>4001, 20-1</userSelection>
+      </parameter>
+    </test>
+  </testDefinitions>
+  <actions flowAnalysisInterval="0" forceOffenseCreation="false"></actions>
+</rule>`;
+
 const QRADAR_RULE_WITH_REFERENCE_SETS = `<rule buildingBlock="false" enabled="true" id="100004">
   <name>QRadar Test Rule - IP Blocklist Check</name>
   <notes>Rule that checks IPs against reference sets for blocked and suspicious lists</notes>
@@ -138,6 +153,21 @@ export const QRADAR_SINGLE_RULE_XML = `<?xml version="1.0" encoding="UTF-8"?>
  * Invalid QRadar XML for error handling tests.
  */
 export const QRADAR_INVALID_XML = 'This is not valid XML content';
+
+/**
+ * QRadar XML containing only building block rules.
+ * Used to test that uploads with only building block rules are rejected.
+ */
+export const QRADAR_BUILDING_BLOCK_ONLY_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<content>
+  <qradarversion>2021.6.12.20250509154206</qradarversion>
+  <custom_rule>
+    <rule_data>${encodeRule(QRADAR_RULE_2)}</rule_data>
+  </custom_rule>
+  <custom_rule>
+    <rule_data>${encodeRule(QRADAR_BUILDING_BLOCK_RULE_2)}</rule_data>
+  </custom_rule>
+</content>`;
 
 /**
  * Empty QRadar XML (no rules) for error handling tests.
