@@ -12,9 +12,11 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiResizableContainer,
+  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import {
+  RULES_TABLE_FILTERS_MAIN_PANEL_MIN_WIDTH_PERCENT,
   RULES_TABLE_FILTERS_SIDEBAR_DEFAULT_WIDTH_PERCENT,
   RULES_TABLE_FILTERS_SIDEBAR_MIN_WIDTH_PERCENT,
 } from '../constants';
@@ -22,6 +24,7 @@ import * as i18n from '../translations';
 import { CLEAR_RULES_TABLE_FILTERS } from '../../../../common/translations';
 
 const RULES_TABLE_FILTERS_SIDEBAR_PANEL_ID = 'rulesTableFiltersSidebar';
+const RULES_TABLE_FILTERS_MAIN_PANEL_ID = 'rulesTableFiltersMain';
 
 export interface RulesTableFiltersLayoutProps {
   /** Search bar rendered at the top of the main content area (beside the sidebar) */
@@ -50,45 +53,12 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
 
     const mainPanelSizePercent = useMemo(() => 100 - sidebarWidthPercent, [sidebarWidthPercent]);
 
-    const sidebarBorderStyle = useMemo(
-      () => ({
-        borderRight: `1px solid ${euiTheme.border.color}`,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column' as const,
-        minHeight: 0,
-      }),
-      [euiTheme.border.color]
-    );
-
-    const sidebarContentPaddingStyle = useMemo(
-      () => ({
-        padding: euiTheme.size.m,
-        minHeight: '100%',
-        display: 'flex',
-        flexDirection: 'column' as const,
-        flexGrow: 1,
-        minWidth: 0,
-      }),
-      [euiTheme.size.m]
-    );
-
-    const mainContentPaddingStyle = useMemo(
-      () => ({
-        paddingLeft: euiTheme.size.m,
-        paddingBottom: euiTheme.size.l,
-        minHeight: 0,
-        height: '100%',
-      }),
-      [euiTheme.size.m, euiTheme.size.l]
-    );
-
     return (
       <EuiResizableContainer
         direction="horizontal"
         onPanelWidthChange={onPanelWidthChange}
         data-test-subj="rulesTableFiltersLayout"
-        style={{ minHeight: 0 }}
+        style={{ padding: 0, height: '100%' }}
       >
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
@@ -98,18 +68,11 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
               initialSize={sidebarWidthPercent}
               minSize={`${RULES_TABLE_FILTERS_SIDEBAR_MIN_WIDTH_PERCENT}%`}
               scrollable={true}
-              paddingSize="none"
+              paddingSize="m"
               data-test-subj="rulesTableFiltersSidebar"
-              wrapperProps={{
-                style: sidebarBorderStyle,
-              }}
+              style={{ paddingLeft: 0, height: '100%' }}
             >
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="m"
-                responsive={false}
-                style={sidebarContentPaddingStyle}
-              >
+              <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup
                     alignItems="center"
@@ -145,25 +108,25 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiResizablePanel>
-            <EuiResizableButton />
+            <EuiResizableButton
+              indicator="border"
+              style={{ height: 'stretch' }}
+              alignIndicator="start"
+            />
             <EuiResizablePanel
-              id="rulesTableFiltersMain"
+              id={RULES_TABLE_FILTERS_MAIN_PANEL_ID}
               size={mainPanelSizePercent}
               initialSize={mainPanelSizePercent}
-              minSize="20%"
-              scrollable={false}
-              paddingSize="none"
+              minSize={`${RULES_TABLE_FILTERS_MAIN_PANEL_MIN_WIDTH_PERCENT}%`}
+              scrollable={true}
+              paddingSize="m"
+              style={{ paddingBottom: 0 }}
               data-test-subj="rulesTableFiltersMainContent"
             >
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="s"
-                style={{ ...mainContentPaddingStyle, flexGrow: 1 }}
-              >
+              <EuiSpacer />
+              <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem grow={false}>{searchBar}</EuiFlexItem>
-                <EuiFlexItem grow={true} style={{ minHeight: 0 }}>
-                  {children}
-                </EuiFlexItem>
+                <EuiFlexItem grow={true}>{children}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiResizablePanel>
           </>

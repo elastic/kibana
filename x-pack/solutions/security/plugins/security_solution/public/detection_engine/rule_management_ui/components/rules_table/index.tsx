@@ -34,7 +34,6 @@ export const AllRules = React.memo(() => {
         {tabName !== AllRulesTabs.monitoring && <RuleGapsCallout />}
         <GapSchedulerErrorsCallout />
         <RulesTableToolbar />
-        <EuiSpacer />
         <RulesTables selectedTab={tabName as AllRulesTabs} />
       </>
     );
@@ -42,7 +41,6 @@ export const AllRules = React.memo(() => {
     return (
       <UpgradePrebuiltRulesTableContextProvider>
         <RulesTableToolbar />
-        <EuiSpacer />
         <UpgradePrebuiltRulesTable />
       </UpgradePrebuiltRulesTableContextProvider>
     );
