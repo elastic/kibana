@@ -1,0 +1,38 @@
+version: '1'
+name: 'sources.hubspot.search_deals'
+description: 'Search HubSpot deals with optional keyword, owner, pipeline, and stage filters. Use when you need to find deals by name, filter by the deal owner (use list_owners to resolve a name to an ownerId), or narrow by sales pipeline and deal stage. Inputs: query (string, optional), ownerId (string, optional — HubSpot owner ID), pipeline (string, optional), dealStage (string, optional), limit (number, optional).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: false
+    description: 'Keyword to search for in deal names or properties.'
+  - name: ownerId
+    type: string
+    required: false
+    description: 'HubSpot owner ID (hubspot_owner_id) to filter deals by. Use the list_owners workflow to resolve an owner name to their ID.'
+  - name: pipeline
+    type: string
+    required: false
+    description: 'The HubSpot pipeline ID to filter deals by (e.g. "default").'
+  - name: dealStage
+    type: string
+    required: false
+    description: 'The deal stage ID to filter deals by (e.g. "appointmentscheduled", "closedwon", "closedlost").'
+  - name: limit
+    type: number
+    required: false
+    description: 'Maximum number of results to return (default: 10).'
+steps:
+  - name: search-deals
+    type: hubspot.searchDeals
+    connector-id: <%= hubspot-stack-connector-id %>
+    with:
+      query: "${{inputs.query}}"
+      ownerId: "${{inputs.ownerId}}"
+      pipeline: "${{inputs.pipeline}}"
+      dealStage: "${{inputs.dealStage}}"
+      limit: ${{inputs.limit}}

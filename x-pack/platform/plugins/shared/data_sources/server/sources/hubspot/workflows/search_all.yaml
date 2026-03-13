@@ -1,0 +1,23 @@
+version: '1'
+name: 'sources.hubspot.search_all'
+description: 'Search across all HubSpot CRM object types (contacts, companies, deals, and tickets) simultaneously using a single query term. Returns a combined object with results grouped by type. Use when you need to find anything related to a term without knowing which object type it belongs to. Inputs: query (string, required), limit (number, optional — applied per object type).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: true
+    description: 'Search term to look for across all HubSpot object types.'
+  - name: limit
+    type: number
+    required: false
+    description: 'Maximum results per object type.'
+steps:
+  - name: search-all-objects
+    type: hubspot.searchAll
+    connector-id: <%= hubspot-stack-connector-id %>
+    with:
+      query: "${{inputs.query}}"
+      limit: ${{inputs.limit}}

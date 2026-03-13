@@ -1,0 +1,23 @@
+version: '1'
+name: 'sources.hubspot.search_and_connect'
+description: 'Find HubSpot contacts matching a search query, then fetch all deals associated with those contacts in a single call. Returns contacts and their associated deal IDs grouped together. Use when you want the full picture for a person or account — e.g. "show me all deals for contacts at Acme". Follow up with search (objectType: deals) to get full deal details from the returned IDs. Inputs: query (string, required), limit (number, optional — max contacts to search).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: true
+    description: 'Search term to find contacts (by name, email, company, etc.).'
+  - name: limit
+    type: number
+    required: false
+    description: 'Maximum number of contacts to search.'
+steps:
+  - name: search-and-connect
+    type: hubspot.searchAndConnect
+    connector-id: <%= hubspot-stack-connector-id %>
+    with:
+      query: "${{inputs.query}}"
+      limit: ${{inputs.limit}}

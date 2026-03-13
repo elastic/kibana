@@ -9,12 +9,30 @@ argument-hint: [3rd-party-data-source-name]
 
 This skill orchestrates the full lifecycle of building a new Workplace AI data source for **$ARGUMENTS**. It chains together multiple skills and performs code review and quality verification between each stage.
 
+## Pre-Step: Gather Intended Use
+
+Before creating the task list, ask the user how the data source is intended to be used. Use `AskUserQuestion` with the following options:
+
+> How do you intend to use the **$ARGUMENTS** data source?
+
+| Option | Label | Description |
+|--------|-------|-------------|
+| A | **Read / Federated Search** | Search and retrieve data — read-only (search, get, list). Good for document stores, wikis, code repos. |
+| B | **Write / Actions** | Perform write operations — create, update, delete, or send items. Good for ticketing systems, messaging, CRMs. |
+| C | **Full CRUD** | Both read and write — search/retrieve data and also create/update/delete items. |
+| D | **Monitoring / Observability** | Fetch recent events, statuses, or alerts — read-only but time-oriented. Good for monitoring tools, incident trackers. |
+| E | **Custom** | Describe specific workflows needed. |
+
+If the user selects **Custom (E)**, ask a follow-up question for their description (e.g., "I need to search contacts and create deals") before proceeding.
+
+Store the result as `INTENDED_USE` (include the letter and label, e.g., `C — Full CRUD`). This value is used throughout the skill.
+
 ## Step 0: Create the Task List
 
 Use `TaskCreate` to create all of the following tasks up front so the user can see the full plan. Set all tasks to `pending` initially.
 
-1. **Create the data source code** — "Generate connector spec, workflows, and data source YAML for $ARGUMENTS"
-2. **Code review** — "Review generated data source files for correctness and completeness"
+1. **Create the data source code** — "Generate connector spec, workflows ($INTENDED_USE), and data source definition for $ARGUMENTS"
+2. **Code review** — "Review generated data source files for correctness, completeness, and workflow coverage"
 3. **Edit based on review** — "Fix issues found during code review"
 4. **Wait for Kibana** — "Ask user to start Elasticsearch and Kibana"
 5. **Activate the data source** — "Register the data source in running Kibana"
@@ -36,17 +54,19 @@ Then begin working through the tasks in order.
 
 Mark task 1 as `in_progress`.
 
-Invoke the `create-data-source` skill with `$ARGUMENTS` as the argument:
+Invoke the `create-data-source` skill, passing both the data source name **and** the intended use in the Args so the forked skill can skip asking the user again:
 
 ```
 Skill: create-data-source
-Args: $ARGUMENTS
+Args: $ARGUMENTS (intended-use: $INTENDED_USE)
 ```
+
+For example, if the user chose Full CRUD: `Args: hubspot (intended-use: C — Full CRUD)`
 
 This runs in a forked context and will generate:
 - A connector specification code bundle (in `src/platform/packages/shared/kbn-connector-specs/src/specs/`)
 - Documentation for the connector (in `docs/reference/connectors-kibana/`)
-- A data source definition and Workflow YAML files (in `x-pack/solutions/workplace_ai/packages/data_sources/src/data_sources/`)
+- A data source definition and Workflow YAML files (in `x-pack/platform/plugins/shared/data_sources/server/sources/`)
 
 When complete, mark task 1 as `completed`.
 
@@ -70,6 +90,13 @@ Read all the files generated in Task 1 and review them for:
 - **MCP tool names use underscores** (e.g., `tavily_search`), NOT hyphens — verify against MCP server docs or `listTools`
 - Only pass parameters that the MCP tool actually accepts (check the tool's `inputSchema` — some params in third-party docs may be outdated or unavailable via MCP)
 - Look at existing workflows for patterns in `x-pack/platform/plugins/shared/data_sources/server/sources/`
+- **Workflow coverage matches intended use** (`$INTENDED_USE`): verify that the generated workflow set is appropriate for the stated intent:
+  - **A — Read/Search**: expect `search`, `get_{item}`, and `list_{items}` workflows
+  - **B — Write/Actions**: expect `create_{item}`, `update_{item}`, and `delete_{item}` workflows (or equivalent action workflows)
+  - **C — Full CRUD**: expect both read and write workflows
+  - **D — Monitoring**: expect `list_recent_{events}`, `get_{event}`, and `search_{events}` workflows
+  - **E — Custom**: verify each operation the user described has a corresponding workflow
+  - Flag any missing workflows as issues to fix in Task 3
 
 ### Data Source Definition
 - Correct references to the connector spec and workflows
@@ -167,9 +194,15 @@ Mark task 6 as `completed`.
 
 Mark task 7 as `in_progress`.
 
-Invoke the `chat-with-agent` skill to test the agent. Use the agent ID created in Task 6. The default prompt should be:
+Invoke the `chat-with-agent` skill to test the agent. Use the agent ID created in Task 6.
 
-> Summarize the data available to you through your tools.
+Choose the test prompt based on `$INTENDED_USE`:
+
+- **A — Read/Search**: `"Search for recent items and summarize the top results."`
+- **B — Write/Actions**: `"Create a sample item using the available tools, then confirm it was created."`
+- **C — Full CRUD**: `"Search for existing items, then create a new sample item and confirm it was created."`
+- **D — Monitoring**: `"List the most recent events or alerts and summarize their status."`
+- **E — Custom**: Use a prompt that exercises the first workflow the user described.
 
 ```
 Skill: chat-with-agent
@@ -275,8 +308,13 @@ Skill: chat-with-agent
 Args: <agent-id>
 ```
 
-Use a more specific prompt this time, something like:
-> Search for recent items and give me a detailed summary of what you find.
+Use a more specific prompt that exercises the full intended use (`$INTENDED_USE`):
+
+- **A — Read/Search**: `"Find the most relevant items about [a topic related to $ARGUMENTS] and give me a detailed summary."`
+- **B — Write/Actions**: `"Create a new item with realistic sample data, update one of its fields, then confirm both operations succeeded."`
+- **C — Full CRUD**: `"Search for existing items, create a new one with sample data, update a field, and then list what's available."`
+- **D — Monitoring**: `"Show me the most recent alerts or events. Are there any that need attention?"`
+- **E — Custom**: Compose a prompt that exercises all workflows the user originally described.
 
 Verify the agent successfully calls tools, gets results, and produces a useful response.
 
@@ -292,10 +330,12 @@ Tell the user something like the below template, listing the actual file paths t
 
 > The **$ARGUMENTS** data source is ready for manual inspection. Here's what was created:
 >
+> **Intended use**: $INTENDED_USE
+>
 > **Files created/modified:**
 > - Connector spec: `src/platform/packages/shared/kbn-connector-specs/src/specs/<name>/...`
-> - Workflows: `x-pack/solutions/workplace_ai/packages/workflows/src/workflows/<name>/...`
-> - Data source: `x-pack/solutions/workplace_ai/packages/data_sources/src/data_sources/<name>/...`
+> - Workflows: `x-pack/platform/plugins/shared/data_sources/server/sources/<name>/workflows/` — list each workflow file and one-line description
+> - Data source: `x-pack/platform/plugins/shared/data_sources/server/sources/<name>/...`
 >
 > **Kibana state:**
 > - Data source activated with ID: `<id>`

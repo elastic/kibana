@@ -1,0 +1,18 @@
+version: '1'
+name: 'sources.hubspot.list_owners'
+description: 'List HubSpot owners (users with access to the CRM). Use to discover who owns contacts, companies, or deals, or to look up owner IDs and emails. Inputs: limit (number, optional).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: limit
+    type: number
+    required: false
+    description: 'Maximum number of owners to return (default: 20).'
+steps:
+  - name: list-owners
+    type: hubspot.listOwners
+    connector-id: <%= hubspot-stack-connector-id %>
+    with:
+      limit: ${{inputs.limit}}

@@ -1,0 +1,31 @@
+version: '1'
+name: 'sources.hubspot.search'
+description: 'Search or list HubSpot CRM records (contacts, companies, deals, or tickets). Provide a query to search by keyword (name, email, company, etc.), or omit the query to list all records of the chosen type. Inputs: objectType (choice: contacts|companies|deals|tickets), query (string, optional), limit (number, optional).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: objectType
+    type: choice
+    options:
+      - 'contacts'
+      - 'companies'
+      - 'deals'
+      - 'tickets'
+  - name: query
+    type: string
+    required: false
+    description: 'Keyword to search CRM records by name, email, company, or other text. Omit to list all records.'
+  - name: limit
+    type: number
+    required: false
+    description: 'Maximum number of results to return (default: 10).'
+steps:
+  - name: search-crm-objects
+    type: hubspot.searchCrmObjects
+    connector-id: <%= hubspot-stack-connector-id %>
+    with:
+      objectType: "${{inputs.objectType}}"
+      query: "${{inputs.query}}"
+      limit: ${{inputs.limit}}
