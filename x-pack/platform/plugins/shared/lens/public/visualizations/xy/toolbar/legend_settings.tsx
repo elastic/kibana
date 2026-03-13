@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
 import { LegendValue, ScaleType } from '@elastic/charts';
@@ -28,6 +28,7 @@ export const XyLegendSettings = ({
   setState,
   frame,
 }: VisualizationToolbarProps<XYState>) => {
+  const hasLayoutChange = useRef(false);
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
       ? 'auto'
@@ -146,7 +147,9 @@ export const XyLegendSettings = ({
             ...state.legend,
             position: nextPosition,
             layout:
-              (nextPosition === 'top' || nextPosition === 'bottom') && state.legend.layout == null
+              !hasLayoutChange.current &&
+              (nextPosition === 'top' || nextPosition === 'bottom') &&
+              state.legend.layout == null
                 ? LegendLayout.List
                 : state.legend.layout,
           },
@@ -154,6 +157,7 @@ export const XyLegendSettings = ({
       }}
       layout={state.legend.layout}
       onLayoutChange={(layout) => {
+        hasLayoutChange.current = true;
         setState({
           ...state,
           legend: {
