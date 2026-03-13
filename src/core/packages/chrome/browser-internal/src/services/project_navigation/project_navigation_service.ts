@@ -227,6 +227,7 @@ export class ProjectNavigationService {
         );
       },
       getActiveSolutionNavId$: () => activeSolutionNavId$,
+      getActiveSolutionNavId: () => currentNavSource$.getValue()?.id ?? null,
     };
   }
 
