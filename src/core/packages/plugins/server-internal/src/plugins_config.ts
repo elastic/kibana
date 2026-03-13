@@ -20,7 +20,7 @@ const configSchema = schema.object({
   /**
    * Defines an array of directories where another plugin should be loaded from.
    */
-  paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  paths: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 100 }),
   /**
    * Internal config, not intended to be used by end users. Only for specific
    * internal purposes.
