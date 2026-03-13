@@ -145,6 +145,6 @@ export class BundleRemotesPlugin {
       );
     }
 
-    return cb(undefined, new BundleRemoteModule(remote, parsed));
+    return cb(undefined, new BundleRemoteModule(remote, { ...parsed, target }));
   }
 }
