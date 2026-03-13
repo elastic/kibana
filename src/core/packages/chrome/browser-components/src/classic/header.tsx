@@ -29,7 +29,7 @@ import { HeaderNavControls } from '../shared/header_nav_controls';
 import { HeaderActionMenu } from '../shared/header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
-import { useHasAppMenuConfig } from '../shared/use_has_app_menu_config';
+import { useHasAppMenuConfig } from '../shared/chrome_hooks';
 
 export function ClassicHeader() {
   const {
