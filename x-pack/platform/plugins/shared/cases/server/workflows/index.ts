@@ -14,7 +14,7 @@ import { createCaseStepDefinition } from './steps/create_case';
 // import { createCaseFromTemplateStepDefinition } from './steps/create_case_from_template';
 import { updateCaseStepDefinition } from './steps/update_case';
 import { updateCasesStepDefinition } from './steps/update_cases';
-import { setCustomFieldStepDefinition } from './steps/set_custom_field';
+// import { setCustomFieldStepDefinition } from './steps/set_custom_field';
 import { addCommentStepDefinition } from './steps/add_comment';
 import { findCasesStepDefinition } from './steps/find_cases';
 import { setSeverityStepDefinition } from './steps/set_severity';
@@ -44,9 +44,9 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions.registerStepDefinition(createCaseStepDefinition(getCasesClient));
   // TODO: enable once https://github.com/elastic/security-team/issues/15982 has been resolved
   // workflowsExtensions.registerStepDefinition(createCaseFromTemplateStepDefinition(getCasesClient));
+  // workflowsExtensions.registerStepDefinition(setCustomFieldStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(updateCaseStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(updateCasesStepDefinition(getCasesClient));
-  workflowsExtensions.registerStepDefinition(setCustomFieldStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addCommentStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(findCasesStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(setSeverityStepDefinition(getCasesClient));
