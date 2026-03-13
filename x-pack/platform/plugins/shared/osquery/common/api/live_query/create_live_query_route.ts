@@ -31,7 +31,6 @@ export const createLiveQueryRequestBodySchema = t.partial({
   case_ids: t.array(t.string),
   event_ids: t.array(t.string),
   metadata: t.union([t.object, t.undefined]),
-  tags: t.union([t.array(t.string), t.undefined]),
 });
 
 export type CreateLiveQueryRequestBodySchema = t.OutputOf<typeof createLiveQueryRequestBodySchema>;

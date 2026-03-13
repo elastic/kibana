@@ -16,12 +16,7 @@ import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
-import {
-  ACTIONS_INDEX,
-  QUERY_TIMEOUT,
-  MAX_TAGS_PER_ACTION,
-  MAX_TAG_LENGTH,
-} from '../../../common/constants';
+import { ACTIONS_INDEX, QUERY_TIMEOUT } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
@@ -89,20 +84,6 @@ export const createActionHandler = async (
     throw new CustomHttpRequestError('No agents found for selection', 400);
   }
 
-  if (params.tags) {
-    if (params.tags.length > MAX_TAGS_PER_ACTION) {
-      throw new CustomHttpRequestError(`Cannot have more than ${MAX_TAGS_PER_ACTION} tags`, 400);
-    }
-
-    const invalidTag = params.tags.find((tag) => tag.length === 0 || tag.length > MAX_TAG_LENGTH);
-    if (invalidTag !== undefined) {
-      throw new CustomHttpRequestError(
-        `Tags must be non-empty strings with a maximum length of ${MAX_TAG_LENGTH}`,
-        400
-      );
-    }
-  }
-
   let packSO;
 
   if (params.pack_id) {
@@ -134,7 +115,7 @@ export const createActionHandler = async (
     pack_prebuilt: params.pack_id
       ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
-    tags: [...new Set(params.tags ?? [])],
+    tags: [],
     space_id: options.space?.id ?? DEFAULT_SPACE_ID,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {

@@ -32,8 +32,8 @@ import { AgentsTableField } from './agents_table_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
 import { AlertAttachmentContext } from '../../common/contexts';
-import { TagsEditor } from '../../actions/components/tags_editor';
 import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
+import { PackQueriesStatusTable } from './pack_queries_status_table';
 
 export interface LiveQueryFormFields {
   alertIds?: string[];
@@ -43,7 +43,6 @@ export interface LiveQueryFormFields {
   ecs_mapping: ECSMapping;
   packId: string[];
   timeout?: number;
-  tags: string[];
   queryType: 'query' | 'pack';
 }
 
@@ -58,7 +57,6 @@ interface DefaultLiveQueryFormFields {
 }
 
 type FormType = 'simple' | 'steps';
-const EMPTY_TAGS: string[] = [];
 
 interface LiveQueryFormProps {
   defaultValue?: DefaultLiveQueryFormFields;
@@ -127,17 +125,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     isLive,
   });
 
-  const handleTagsChange = useCallback(
-    (newTags: string[]) => {
-      setValue('tags', newTags);
-    },
-    [setValue]
-  );
-
   useEffect(() => {
     register('savedQueryId');
     register('alertIds');
-    register('tags');
   }, [register]);
 
   const queryStatus = useMemo(() => {
@@ -174,7 +164,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           },
           (value) => !isEmpty(value) || isNumber(value)
         ),
-        tags: values.tags,
       } as unknown as LiveQueryFormFields;
       await mutateAsync(serializedData);
     },
@@ -332,11 +321,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               <AgentsTableField />
             </EuiFlexItem>
           )}
-          {isHistoryEnabled && (
-            <EuiFlexItem>
-              <TagsEditor tags={watchedValues.tags ?? EMPTY_TAGS} onChange={handleTagsChange} />
-            </EuiFlexItem>
-          )}
           {queryType === 'pack' ? (
             <PackFieldWrapper
               liveQueryDetails={liveQueryDetails}
@@ -350,7 +334,21 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 <LiveQueryQueryField handleSubmitForm={handleSubmit(onSubmit)} />
               </EuiFlexItem>
               {submitButtonContent}
-              <EuiFlexItem>{resultsStepContent}</EuiFlexItem>
+              <EuiFlexItem>
+                {isHistoryEnabled ? (
+                  <PackQueriesStatusTable
+                    actionId={liveQueryActionId}
+                    data={liveQueryDetails?.queries}
+                    startDate={liveQueryDetails?.['@timestamp']}
+                    expirationDate={liveQueryDetails?.expiration}
+                    agentIds={liveQueryDetails?.agents}
+                    showResultsHeader
+                    addToTimeline={addToTimeline}
+                  />
+                ) : (
+                  resultsStepContent
+                )}
+              </EuiFlexItem>
             </>
           )}
         </EuiFlexGroup>
