@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { getCasesFromAlertsUrl } from '@kbn/cases-plugin/common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { ResponseActionApiResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
@@ -45,7 +46,16 @@ import { resolvePathVariables } from '../../../../common/utils/resolve_path_vari
 export const fetchQueryAlerts = async <Hit, Aggregations>({
   query,
   signal,
+  uniqueQueryId,
 }: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
+  const executionContext: KibanaExecutionContext | undefined = uniqueQueryId
+    ? {
+        type: 'security_solution',
+        name: 'query',
+        id: uniqueQueryId,
+      }
+    : undefined;
+
   return KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
     DETECTION_ENGINE_QUERY_SIGNALS_URL,
     {
@@ -53,6 +63,7 @@ export const fetchQueryAlerts = async <Hit, Aggregations>({
       method: 'POST',
       body: JSON.stringify(query),
       signal,
+      context: executionContext,
     }
   );
 };
