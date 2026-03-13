@@ -17,7 +17,7 @@ import type { SLOPublicPluginsStart } from '..';
 import {
   ADD_SLO_ALERTS_ACTION_ID,
   SLO_ALERTS_EMBEDDABLE_ID,
-} from '../embeddable/slo/alerts/constants';
+} from '../../common/embeddables/alerts/constants';
 import type { SLORepositoryClient } from '../types';
 import { openSloConfiguration } from '../embeddable/slo/alerts/slo_alerts_open_configuration';
 

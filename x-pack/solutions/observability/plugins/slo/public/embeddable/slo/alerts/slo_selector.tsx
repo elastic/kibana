@@ -25,12 +25,23 @@ interface Props {
 const SLO_REQUIRED = i18n.translate('xpack.slo.sloEmbeddable.config.errors.sloRequired', {
   defaultMessage: 'SLO is required.',
 });
+
+function getSloId(slo: SloItem | SLOWithSummaryResponse): string {
+  return (slo as SloItem).slo_id ?? (slo as SLOWithSummaryResponse).id ?? '';
+}
+function getSloInstanceId(slo: SloItem | SLOWithSummaryResponse): string {
+  return (slo as SloItem).slo_instance_id ?? (slo as SLOWithSummaryResponse).instanceId ?? '';
+}
+
 export function SloSelector({ initialSlos, onSelected, hasError, singleSelection }: Props) {
   const mapSlosToOptions = (slos: SloItem[] | SLOWithSummaryResponse[] | undefined) =>
-    slos?.map((slo) => ({
-      label: slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.instanceId})` : slo.name,
-      value: `${slo.id}-${slo.instanceId}`,
-    })) ?? [];
+    slos?.map((slo) => {
+      const instanceId = getSloInstanceId(slo);
+      return {
+        label: instanceId !== ALL_VALUE ? `${slo.name} (${instanceId})` : slo.name,
+        value: `${getSloId(slo)}-${instanceId}`,
+      };
+    }) ?? [];
 
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(

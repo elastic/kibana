@@ -132,7 +132,7 @@ export const useSloAlertsQuery = (
           {
             bool: {
               should: slos.map((slo) =>
-                getSloInstanceFilter(slo.id, slo.instanceId, showAllGroupByInstances)
+                getSloInstanceFilter(slo.slo_id, slo.slo_instance_id, showAllGroupByInstances)
               ),
             },
           },

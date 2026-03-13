@@ -9,7 +9,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { firstValueFrom } from 'rxjs';
 import { ALL_VALUE } from '@kbn/slo-schema/src/constants';
-import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
+import { SLO_ALERTS_EMBEDDABLE_ID } from '../common/embeddables/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../common/embeddables/overview/constants';
@@ -89,6 +89,21 @@ export const registerEmbeddables = async ({
 
       return getAlertsEmbeddableFactory({ coreStart, pluginsStart, sloClient, kibanaVersion });
     });
+    plugins.embeddable.registerLegacyURLTransform(
+      SLO_ALERTS_EMBEDDABLE_ID,
+      async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+        const { getTransformOut } = await import(
+          '../common/embeddables/alerts/transforms/get_transform_out'
+        );
+        const transformOut = getTransformOut(transformDrilldownsOut);
+        return (
+          storedState: object,
+          panelReferences?: Reference[],
+          containerReferences?: Reference[],
+          id?: string
+        ) => transformOut(storedState, panelReferences);
+      }
+    );
 
     plugins.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
       const { getErrorBudgetEmbeddableFactory } = await import(

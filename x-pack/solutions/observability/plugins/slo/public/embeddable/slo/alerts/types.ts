@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { IUiSettingsClient, ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import { type CoreStart } from '@kbn/core/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -19,21 +19,22 @@ import type {
   PublishesTitle,
   HasEditCapabilities,
 } from '@kbn/presentation-publishing';
+import type { HasSupportedTriggers } from '@kbn/presentation-publishing';
 import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 export interface SloItem {
-  id: string;
-  instanceId: string;
+  slo_id: string;
+  slo_instance_id: string;
   name: string;
-  groupBy: string;
+  group_by: string[];
 }
 
 export interface EmbeddableSloProps {
   slos: SloItem[];
-  showAllGroupByInstances?: boolean;
+  show_all_group_by_instances?: boolean;
 }
 
 export type SloAlertsEmbeddableState = SerializedTitles & EmbeddableSloProps;
@@ -41,6 +42,8 @@ export type SloAlertsEmbeddableState = SerializedTitles & EmbeddableSloProps;
 export type SloAlertsApi = DefaultEmbeddableApi<SloAlertsEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
+  HasDrilldowns &
+  HasSupportedTriggers &
   HasSloAlertsConfig &
   HasEditCapabilities;
 

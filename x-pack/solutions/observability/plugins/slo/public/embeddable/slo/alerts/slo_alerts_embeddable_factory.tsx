@@ -25,7 +25,10 @@ import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
-import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
+import {
+  SLO_ALERTS_EMBEDDABLE_ID,
+  SLO_ALERTS_SUPPORTED_TRIGGERS,
+} from '../../../../common/embeddables/alerts/constants';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import type { EmbeddableSloProps, SloAlertsApi, SloAlertsEmbeddableState } from './types';
 import { openSloConfiguration } from './slo_alerts_open_configuration';
@@ -49,8 +52,15 @@ export function getAlertsEmbeddableFactory({
 }) {
   const factory: EmbeddableFactory<SloAlertsEmbeddableState, SloAlertsApi> = {
     type: SLO_ALERTS_EMBEDDABLE_ID,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      uuid,
+      parentApi,
+    }) => {
       const deps = { ...coreStart, ...pluginsStart };
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
       async function onEdit() {
         try {
           const result = await openSloConfiguration(
@@ -68,7 +78,7 @@ export function getAlertsEmbeddableFactory({
       const titleManager = initializeTitleManager(initialState);
       const sloAlertsStateManager = initializeStateManager<EmbeddableSloProps>(initialState, {
         slos: [],
-        showAllGroupByInstances: false,
+        show_all_group_by_instances: false,
       });
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
@@ -76,6 +86,7 @@ export function getAlertsEmbeddableFactory({
       function serializeState() {
         return {
           ...titleManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
           ...sloAlertsStateManager.getLatestState(),
         };
       }
@@ -84,13 +95,19 @@ export function getAlertsEmbeddableFactory({
         uuid,
         parentApi,
         serializeState,
-        anyStateChange$: merge(titleManager.anyStateChange$, sloAlertsStateManager.anyStateChange$),
+        anyStateChange$: merge(
+          drilldownsManager.anyStateChange$,
+          titleManager.anyStateChange$,
+          sloAlertsStateManager.anyStateChange$
+        ),
         getComparators: () => ({
           ...titleComparators,
+          ...drilldownsManager.comparators,
           slos: 'referenceEquality',
-          showAllGroupByInstances: 'referenceEquality',
+          show_all_group_by_instances: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
+          drilldownsManager.reinitializeState(lastSaved ?? {});
           titleManager.reinitializeState(lastSaved);
           sloAlertsStateManager.reinitializeState(lastSaved);
         },
@@ -99,7 +116,9 @@ export function getAlertsEmbeddableFactory({
       const api = finalizeApi({
         ...titleManager.api,
         ...unsavedChangesApi,
+        ...drilldownsManager.api,
         defaultTitle$,
+        supportedTriggers: () => SLO_ALERTS_SUPPORTED_TRIGGERS,
         getTypeDisplayName: () =>
           i18n.translate('xpack.slo.editSloAlertswEmbeddable.typeDisplayName', {
             defaultMessage: 'configuration',
@@ -112,12 +131,13 @@ export function getAlertsEmbeddableFactory({
         getSloAlertsConfig: () => {
           return {
             slos: sloAlertsStateManager.api.slos$.getValue(),
-            showAllGroupByInstances: sloAlertsStateManager.api.showAllGroupByInstances$.getValue(),
+            show_all_group_by_instances:
+              sloAlertsStateManager.api.showAllGroupByInstances$.getValue(),
           };
         },
         updateSloAlertsConfig: (update) => {
           sloAlertsStateManager.api.setSlos(update.slos);
-          sloAlertsStateManager.api.setShowAllGroupByInstances(update.showAllGroupByInstances);
+          sloAlertsStateManager.api.setShowAllGroupByInstances(update.show_all_group_by_instances);
         },
       });
 
@@ -139,6 +159,7 @@ export function getAlertsEmbeddableFactory({
 
           useEffect(() => {
             return () => {
+              drilldownsManager.cleanup();
               fetchSubscription.unsubscribe();
             };
           }, []);

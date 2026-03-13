@@ -12,10 +12,15 @@ import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { SLO_ALERTS_SUPPORTED_TRIGGERS } from '../../../common/embeddables/alerts/constants';
 
 const sloItemSchema = schema.object({
-  id: schema.string({ meta: { description: 'SLO ID' } }),
-  instanceId: schema.string({ meta: { description: 'SLO instance ID' } }),
+  slo_id: schema.string({ meta: { description: 'SLO ID' } }),
+  slo_instance_id: schema.string({ meta: { description: 'SLO instance ID' } }),
   name: schema.string({ meta: { description: 'SLO name' } }),
-  groupBy: schema.string({ meta: { description: 'Group by field' } }),
+  group_by: schema.arrayOf(schema.string(), {
+    defaultValue: [],
+    meta: {
+      description: 'Group by fields (e.g. ["*"] for none, ["agent.id", "url.domain"] for multiple)',
+    },
+  }),
 });
 
 const AlertsCustomSchema = schema.object({
@@ -23,7 +28,7 @@ const AlertsCustomSchema = schema.object({
     defaultValue: [],
     meta: { description: 'List of SLOs to display alerts for' },
   }),
-  showAllGroupByInstances: schema.boolean({
+  show_all_group_by_instances: schema.boolean({
     defaultValue: false,
     meta: { description: 'Whether to show all group-by instances' },
   }),
