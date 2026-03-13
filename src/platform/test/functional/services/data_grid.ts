@@ -40,7 +40,6 @@ export class DataGridService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
-  private readonly toasts = this.ctx.getService('toasts');
 
   async getDataGridTableData(): Promise<TabbedGridData> {
     const table = await this.find.byCssSelector('.euiDataGrid');
@@ -725,7 +724,6 @@ export class DataGridService extends FtrService {
       ? `tableDocViewRow-${fieldName}-value`
       : `tableDocViewRow-${fieldName}-name`;
     await this.retry.try(async () => {
-      await this.toasts.dismissIfExists();
       const cell = await this.testSubjects.find(cellSelector);
       await cell.pressKeys(Key.ENTER);
 
@@ -745,7 +743,6 @@ export class DataGridService extends FtrService {
 
     const actionSelector = `${actionName}-${fieldName}`;
     await this.retry.try(async () => {
-      await this.toasts.dismissIfExists();
       const action = await this.testSubjects.find(actionSelector);
       await action.pressKeys(Key.ENTER);
     });
