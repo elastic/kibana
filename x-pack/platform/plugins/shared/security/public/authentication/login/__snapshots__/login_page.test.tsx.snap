@@ -308,6 +308,7 @@ exports[`LoginPage page renders as expected 1`] = `
           class="loginWelcome__logo"
         >
           <span
+            aria-hidden="true"
             data-euiicon-type="logoElastic"
           />
         </span>
