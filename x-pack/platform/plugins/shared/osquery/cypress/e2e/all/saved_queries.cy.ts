@@ -43,8 +43,7 @@ import {
 import { ServerlessRoleName } from '../../support/roles';
 import { getAdvancedButton } from '../../screens/integrations';
 
-// FLAKY: https://github.com/elastic/kibana/issues/249946
-describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   let caseId: string;
 
   before(() => {

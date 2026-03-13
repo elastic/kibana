@@ -6,7 +6,6 @@ source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-security-solution-chrome
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
-export CYPRESS_SHARE_STACKS=true
 
 echo "--- Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests"
 
