@@ -10,7 +10,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { ConfigKey } from '../../../../common/runtime_types';
 
 jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
-  getPackagePolicySavedObjectType: jest.fn().mockResolvedValue(PACKAGE_POLICY_SAVED_OBJECT_TYPE),
+  getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('fleet-package-policies'),
 }));
 
 jest.mock('uuid', () => ({
