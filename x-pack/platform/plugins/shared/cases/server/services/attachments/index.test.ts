@@ -33,8 +33,6 @@ import type { ConfigType } from '../../config';
 const createAttachmentServiceConfig = (attachmentsEnabled = false): ConfigType =>
   ({ attachments: { enabled: attachmentsEnabled } } as ConfigType);
 
-const owner = SECURITY_SOLUTION_OWNER;
-
 describe('AttachmentService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
@@ -61,7 +59,6 @@ describe('AttachmentService', () => {
             attributes: createUserAttachment().attributes,
             references: [],
             id: '1',
-            owner,
           })
         ).resolves.not.toThrow();
       });
@@ -73,7 +70,6 @@ describe('AttachmentService', () => {
           attributes: createUserAttachment().attributes,
           references: [],
           id: '1',
-          owner,
         });
 
         expect(res).toStrictEqual(createUserAttachment());
@@ -90,7 +86,6 @@ describe('AttachmentService', () => {
             attributes: createUserAttachment().attributes,
             references: [],
             id: '1',
-            owner,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
@@ -108,7 +103,6 @@ describe('AttachmentService', () => {
             attributes: invalidAttachment.attributes,
             references: [],
             id: '1',
-            owner,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\",Invalid value \\"undefined\\" supplied to \\"data\\""`
@@ -123,7 +117,6 @@ describe('AttachmentService', () => {
           attributes: { ...createUserAttachment().attributes, foo: 'bar' },
           references: [],
           id: '1',
-          owner,
         });
 
         const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
@@ -144,7 +137,6 @@ describe('AttachmentService', () => {
             attachments: [
               { attributes: createUserAttachment().attributes, references: [], id: '1' },
             ],
-            owner,
           })
         ).resolves.not.toThrow();
       });
@@ -164,7 +156,6 @@ describe('AttachmentService', () => {
             { attributes: createUserAttachment().attributes, references: [], id: '1' },
             { attributes: createUserAttachment().attributes, references: [], id: '1' },
           ],
-          owner,
         });
 
         expect(res).toStrictEqual({ saved_objects: [errorResponseObj, createUserAttachment()] });
@@ -177,7 +168,6 @@ describe('AttachmentService', () => {
 
         const res = await service.bulkCreate({
           attachments: [{ attributes: createUserAttachment().attributes, references: [], id: '1' }],
-          owner,
         });
 
         expect(res).toStrictEqual({ saved_objects: [createUserAttachment()] });
@@ -196,7 +186,6 @@ describe('AttachmentService', () => {
             attachments: [
               { attributes: createUserAttachment().attributes, references: [], id: '1' },
             ],
-            owner,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
@@ -214,7 +203,6 @@ describe('AttachmentService', () => {
         await expect(
           service.bulkCreate({
             attachments: [{ attributes: invalidAttachment.attributes, references: [], id: '1' }],
-            owner,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\",Invalid value \\"undefined\\" supplied to \\"data\\""`
@@ -235,7 +223,6 @@ describe('AttachmentService', () => {
               id: '1',
             },
           ],
-          owner,
         });
 
         const persistedAttributes = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0];
@@ -255,6 +242,7 @@ describe('AttachmentService', () => {
       const unifiedAttrs = {
         type: 'comment',
         data: { content: 'hello' },
+        owner: SECURITY_SOLUTION_OWNER,
         created_at: '2024-01-01T00:00:00.000Z',
         created_by: { username: 'u', full_name: null, email: null },
         pushed_at: null,
@@ -273,7 +261,6 @@ describe('AttachmentService', () => {
         attributes: unifiedAttrs,
         references: [],
         id: '1',
-        owner,
       });
 
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -290,7 +277,6 @@ describe('AttachmentService', () => {
         attributes: createUserAttachment().attributes,
         references: [],
         id: '1',
-        owner,
       });
 
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -310,6 +296,7 @@ describe('AttachmentService', () => {
       const unifiedAttrs = {
         type: 'comment',
         data: { content: 'hi' },
+        owner: SECURITY_SOLUTION_OWNER,
         created_at: '2024-01-01T00:00:00.000Z',
         created_by: { username: 'u', full_name: null, email: null },
         pushed_at: null,
@@ -326,7 +313,6 @@ describe('AttachmentService', () => {
       await serviceWithFlagOn.bulkCreate({
         attachments: [{ attributes: unifiedAttrs, references: [], id: '1' }],
         refresh: false,
-        owner,
       });
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -347,7 +333,6 @@ describe('AttachmentService', () => {
 
       await service.bulkCreate({
         attachments: [{ attributes: createUserAttachment().attributes, references: [], id: '1' }],
-        owner,
         refresh: false,
       });
 
@@ -386,7 +371,6 @@ describe('AttachmentService', () => {
         attachmentId: '1',
         updatedAttributes: persistableStateAttachment,
         options: { references: [] },
-        owner,
       });
 
       expect(res).toEqual({ ...soClientRes, attributes: persistableStateAttachmentAttributes });
@@ -402,7 +386,6 @@ describe('AttachmentService', () => {
         attachmentId: '1',
         updatedAttributes: externalReferenceAttachmentSO,
         options: { references: [] },
-        owner,
       });
 
       expect(res).toEqual({ ...soClientRes, attributes: externalReferenceAttachmentSOAttributes });
@@ -418,7 +401,6 @@ describe('AttachmentService', () => {
         attachmentId: '1',
         updatedAttributes: externalReferenceAttachmentESAttributes,
         options: { references: [] },
-        owner,
       });
 
       expect(res).toEqual({ ...soClientRes, attributes: externalReferenceAttachmentESAttributes });
@@ -432,7 +414,6 @@ describe('AttachmentService', () => {
           service.update({
             updatedAttributes: createUserAttachment().attributes,
             attachmentId: '1',
-            owner,
           })
         ).resolves.not.toThrow();
       });
@@ -443,7 +424,6 @@ describe('AttachmentService', () => {
         const res = await service.update({
           updatedAttributes: createUserAttachment().attributes,
           attachmentId: '1',
-          owner,
         });
 
         expect(res).toStrictEqual(createUserAttachment());
@@ -538,7 +518,6 @@ describe('AttachmentService', () => {
             options: { references: [] },
           },
         ],
-        owner,
       });
 
       expect(res).toEqual({
@@ -559,7 +538,7 @@ describe('AttachmentService', () => {
         const updatedAttributes = createUserAttachment().attributes;
 
         await expect(
-          service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }], owner })
+          service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }] })
         ).resolves.not.toThrow();
       });
 
@@ -578,7 +557,6 @@ describe('AttachmentService', () => {
             { attachmentId: '1', updatedAttributes: userAttachment.attributes },
             { attachmentId: '1', updatedAttributes: userAttachment.attributes },
           ],
-          owner,
         });
 
         expect(res).toStrictEqual({ saved_objects: [errorResponseObj, createUserAttachment()] });
@@ -593,7 +571,6 @@ describe('AttachmentService', () => {
 
         const res = await service.bulkUpdate({
           comments: [{ attachmentId: '1', updatedAttributes }],
-          owner,
         });
 
         expect(res).toStrictEqual({ saved_objects: [createUserAttachment()] });
@@ -610,7 +587,7 @@ describe('AttachmentService', () => {
         const updatedAttributes = createAlertAttachment().attributes;
 
         await expect(
-          service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }], owner })
+          service.bulkUpdate({ comments: [{ attachmentId: '1', updatedAttributes }] })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
@@ -632,8 +609,6 @@ describe('AttachmentService', () => {
                 attachmentId: '1',
               },
             ],
-
-            owner,
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid attributes: expected attributes.rule.name for alert attachments"`
