@@ -5,6 +5,12 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
-import type { AutomaticImportPluginStartDependencies } from '../types';
+import type {
+  AutomaticImportPluginStartDependencies,
+  AutomaticImportV2PluginStart,
+} from '../types';
 
-export type Services = CoreStart & AutomaticImportPluginStartDependencies;
+export type Services = CoreStart &
+  AutomaticImportPluginStartDependencies & {
+    automaticImportV2?: AutomaticImportV2PluginStart;
+  };

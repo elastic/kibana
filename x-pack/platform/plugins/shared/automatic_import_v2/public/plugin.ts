@@ -24,15 +24,21 @@ import { useGetIntegrationById } from './common/hooks/use_get_integration_by_id'
 import { getCreateIntegrationLazy } from './components/create_integration';
 import { getCreateIntegrationSideCardButtonLazy } from './components/create_integration_card_button';
 import { getDataStreamResultsFlyoutComponent } from './components/data_stream_results_flyout';
+import { AIV2Telemetry } from './services/telemetry';
 
 export class AutomaticImportV2Plugin
   implements Plugin<AutomaticImportV2PluginSetup, AutomaticImportV2PluginStart>
 {
+  private telemetry = new AIV2Telemetry();
+
   constructor(_: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<AutomaticImportPluginStartDependencies, AutomaticImportV2PluginStart>
   ): AutomaticImportV2PluginSetup {
+    // Register EBT telemetry event types
+    this.telemetry.setup(core.analytics);
+
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -66,6 +72,7 @@ export class AutomaticImportV2Plugin
         CreateIntegrationSideCardButton: getCreateIntegrationSideCardButtonLazy(),
         DataStreamResultsFlyout: getDataStreamResultsFlyoutComponent(),
       },
+      telemetry: this.telemetry.start(),
     };
   }
 

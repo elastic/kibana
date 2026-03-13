@@ -44,3 +44,9 @@ export type {
   OriginalSourceType,
   LangSmithOptions,
 } from './model/common_attributes.gen';
+
+export {
+  AIV2TelemetryEventType,
+  type IntegrationInstalledPayload,
+  type AIV2EventPayload,
+} from './telemetry/types';
