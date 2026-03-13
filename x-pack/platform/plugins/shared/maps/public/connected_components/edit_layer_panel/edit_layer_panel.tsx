@@ -42,6 +42,7 @@ export interface Props {
   selectedLayer?: ILayer;
   updateSourceProps: (layerId: string, sourcePropChanges: OnSourceChangeArgs[]) => Promise<void>;
   updateStyleDescriptor: (styleDescriptor: StyleDescriptor) => void;
+  ariaLabelId?: string;
 }
 
 interface State {
@@ -218,7 +219,14 @@ export class EditLayerPanel extends Component<Props, State> {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="s">
-                  <h2>{this.state.displayName}</h2>
+                  <h2
+                    id={
+                      /* Provide a label to the aria-labelledby prop of the enclosing EuiFlyout */
+                      this.props.ariaLabelId
+                    }
+                  >
+                    {this.state.displayName}
+                  </h2>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
