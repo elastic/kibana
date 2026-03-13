@@ -10,7 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { APP_ID } from '@kbn/security-solution-features/constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import { WATCHLISTS_DATA_SOURCE_LIST_URL } from '../../../../../../../common/constants';
 import { WatchlistDataSources } from '../../../../../../../common/api/entity_analytics';
