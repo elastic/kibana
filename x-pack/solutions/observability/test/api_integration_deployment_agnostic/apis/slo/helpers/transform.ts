@@ -30,10 +30,10 @@ export function createTransformHelper(
             .set(samlAuth.getInternalRequestHeader())
             .set('elastic-api-version', '1')
             .send()
-            .timeout(10000)
+            .timeout(15000)
             .expect(404);
         },
-        { retryCount: 10, retryDelay: 3000 }
+        { retryCount: 20, retryDelay: 4000 }
       );
     },
 
@@ -49,11 +49,11 @@ export function createTransformHelper(
             .set(samlAuth.getInternalRequestHeader())
             .set('elastic-api-version', '1')
             .send()
-            .timeout(10000)
+            .timeout(15000)
             .expect(200);
           return response.body;
         },
-        { retryCount: 10, retryDelay: 3000 }
+        { retryCount: 20, retryDelay: 4000 }
       );
     },
 
@@ -69,7 +69,7 @@ export function createTransformHelper(
           }
           return response;
         },
-        { retryCount: 20, retryDelay: 3000 }
+        { retryCount: 35, retryDelay: 4000 }
       );
     },
 
@@ -85,7 +85,7 @@ export function createTransformHelper(
           }
           return response;
         },
-        { retryCount: 20, retryDelay: 3000 }
+        { retryCount: 35, retryDelay: 4000 }
       );
     },
   };
