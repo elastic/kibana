@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker'],
-  moduleNameMapper: {
-    '^react-day-picker$':
-      '<rootDir>/src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/calendar/__mocks__/react-day-picker.tsx',
-  },
-};
+/** Default time for start date when no time source is available. */
+export const DEFAULT_START_TIME = '00:00:00.000';
+
+/** Default time for end date when no time source is available. */
+export const DEFAULT_END_TIME = '23:59:59.999';
