@@ -272,9 +272,17 @@ export const getKqlSearchQueries = (esql: string) => {
     .filter((query) => query !== '');
 };
 
-export const prettifyQuery = (src: string): string => {
+const DEFAULT_PRETTIFY_LINE_WIDTH = 80;
+
+/**
+ * Prettifies an ES|QL query with configurable line wrapping.
+ * @param src - The raw ES|QL query string
+ * @param lineWidth - Optional line width in characters; when provided, output is wrapped to fit. Defaults to 80.
+ */
+export const prettifyQuery = (src: string, lineWidth?: number): string => {
   const { root } = Parser.parse(src, { withFormatting: true });
-  return WrappingPrettyPrinter.print(root, { multiline: true });
+  const wrap = lineWidth ?? DEFAULT_PRETTIFY_LINE_WIDTH;
+  return WrappingPrettyPrinter.print(root, { multiline: true, wrap });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {
