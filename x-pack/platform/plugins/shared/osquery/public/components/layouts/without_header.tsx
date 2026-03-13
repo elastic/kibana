@@ -10,7 +10,7 @@ import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 
 export const pageCss = ({ euiTheme }: UseEuiTheme) => ({
-  background: euiTheme.colors.emptyShade,
+  background: 'transparent',
   width: '100%',
   alignSelf: 'center',
   marginLeft: 0,
@@ -23,13 +23,13 @@ export const contentCss = {
 };
 
 interface Props {
-  restrictWidth?: number;
+  restrictWidth?: number | false;
   children?: React.ReactNode;
 }
 
 export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
   <Fragment>
-    <EuiPage css={pageCss} restrictWidth={restrictWidth || 1200}>
+    <EuiPage css={pageCss} restrictWidth={restrictWidth === false ? false : (restrictWidth || 1200)}>
       <EuiPageBody>
         <div css={contentCss}>
           <EuiSpacer size="m" />

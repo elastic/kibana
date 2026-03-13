@@ -54,7 +54,7 @@ export const useAllResults = ({
   return useQuery<{ data: ResultsStrategyResponse }, Error, ResultsArgs>(
     [
       'allActionResults',
-      { actionId, liveQueryActionId, activePage, limit, sort, scheduleId, executionCount },
+      { actionId, liveQueryActionId, activePage, limit, sort, kuery, scheduleId, executionCount },
     ],
     () => {
       if (isScheduled) {
