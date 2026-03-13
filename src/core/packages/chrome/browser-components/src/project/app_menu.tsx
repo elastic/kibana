@@ -11,8 +11,8 @@ import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 
 import React, { useMemo } from 'react';
 import { HeaderAppMenu } from '../shared/header_app_menu';
-import { HeaderActionMenu, useHasActionMenu } from '../shared/header_action_menu';
-import { useHasAppMenuConfig } from '../shared/use_has_app_menu_config';
+import { HeaderActionMenu } from '../shared/header_action_menu';
+import { useHasLegacyActionMenu, useHasAppMenuConfig } from '../shared/chrome_hooks';
 const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
   useMemo(() => {
     // Root bar styles
@@ -31,14 +31,14 @@ const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
   }, [euiTheme]);
 
 export const AppMenuBar = () => {
-  const hasActionMenu = useHasActionMenu();
+  const hasLegacyActionMenu = useHasLegacyActionMenu();
   const { euiTheme } = useEuiTheme();
 
   const styles = useAppMenuBarStyles(euiTheme);
 
   const hasAppMenuConfig = useHasAppMenuConfig();
 
-  if (!hasActionMenu && !hasAppMenuConfig) return null;
+  if (!hasLegacyActionMenu && !hasAppMenuConfig) return null;
 
   return (
     <div
