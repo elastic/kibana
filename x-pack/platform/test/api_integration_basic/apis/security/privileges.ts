@@ -207,6 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_read',
               'manage_agents',
               'manage_tools',
+              'manage_skills',
             ],
             slo: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],

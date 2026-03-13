@@ -19,7 +19,7 @@ import { AgentBuilderSkillsTable } from './skills_table';
 export const AgentBuilderSkills = () => {
   const { euiTheme } = useEuiTheme();
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const { manageTools } = useUiPrivileges();
+  const { manageSkills } = useUiPrivileges();
 
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderSkillsPage">
@@ -34,7 +34,7 @@ export const AgentBuilderSkills = () => {
           border-block-end: none;
         `}
         rightSideItems={[
-          manageTools && (
+          manageSkills && (
             <EuiButton
               key="new-skill-button"
               fill

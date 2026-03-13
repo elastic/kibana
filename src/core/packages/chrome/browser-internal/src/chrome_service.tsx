@@ -203,7 +203,6 @@ export class ChromeService {
       },
       classic: {
         breadcrumbs$: state.breadcrumbs.classic.$,
-        badge$: state.badge.$,
         recentlyAccessed$,
         customNavLink$: state.customNavLink.$,
       },

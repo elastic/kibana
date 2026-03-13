@@ -72,7 +72,6 @@
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
-    "@kbn/visualizations-plugin",
     "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-error-boundary",
     "@kbn/shared-ux-markdown",

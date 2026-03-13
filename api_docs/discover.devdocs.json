@@ -3276,10 +3276,10 @@
         "label": "SEARCH_EMBEDDABLE_TYPE",
         "description": [],
         "signature": [
-          "\"search\""
+          "\"discover_session\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
-        "lineNumber": 22,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
