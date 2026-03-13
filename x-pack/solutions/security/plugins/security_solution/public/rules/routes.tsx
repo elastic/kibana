@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { Redirect, useLocation } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
@@ -124,16 +124,12 @@ const getRulesSubRoutes = (
 
 const RulesContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
-  const { pathname } = useLocation();
   const { capabilities } = useKibana().services.application;
   const deHealthUiFFEnabled = useIsExperimentalFeatureEnabled('deHealthUIEnabled');
   const ruleHealthUiFFEnabled = useIsExperimentalFeatureEnabled('ruleHealthUIEnabled');
   const [deHealthUIAdvancedSetting] = useUiSetting$<boolean>(ENABLE_DE_HEALTH_UI_SETTING, false);
   const deHealthUIEnabled = deHealthUiFFEnabled && deHealthUIAdvancedSetting;
   const ruleHealthUIEnabled = ruleHealthUiFFEnabled && deHealthUIAdvancedSetting;
-
-  const noSectionBottomPadding =
-    pathname === '/rules/add_rules' || /^\/rules\/(management|monitoring|updates)$/.test(pathname);
 
   const subRoutes = useMemo(() => {
     return getRulesSubRoutes(capabilities, { deHealthUIEnabled, ruleHealthUIEnabled }).map(
@@ -146,7 +142,7 @@ const RulesContainerComponent: React.FC = () => {
   }, [capabilities, deHealthUIEnabled, ruleHealthUIEnabled]);
 
   return (
-    <PluginTemplateWrapper noSectionBottomPadding={noSectionBottomPadding}>
+    <PluginTemplateWrapper>
       <Routes>
         <Route // Redirect to first tab if none specified
           path="/rules/id/:detailName"
