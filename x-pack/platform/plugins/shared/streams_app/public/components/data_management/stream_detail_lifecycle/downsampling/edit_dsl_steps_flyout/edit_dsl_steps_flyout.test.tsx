@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
+import { isEqual } from 'lodash';
 import { EditDslStepsFlyout } from './edit_dsl_steps_flyout';
 
 const DATA_TEST_SUBJ = 'streamsEditDslStepsFlyout';
@@ -792,6 +793,63 @@ describe('EditDslStepsFlyout', () => {
         clearTimeoutSpy.mockRestore();
         jest.useRealTimers();
       }
+    });
+  });
+
+  describe('parent-owned draft rehydration', () => {
+    it('keeps the latest draft across a remount', async () => {
+      const initialSteps: IngestStreamLifecycleDSL = {
+        dsl: {
+          data_retention: '30d',
+          downsample: [{ after: '20d', fixed_interval: '1h' }],
+        },
+      };
+
+      const WrapperWithDraft = () => {
+        const [draft, setDraft] = React.useState<IngestStreamLifecycleDSL>(initialSteps);
+        const [selectedStepIndex, setSelectedStepIndex] = React.useState<number | undefined>(0);
+        const [instanceKey, setInstanceKey] = React.useState(0);
+
+        return (
+          <>
+            <button
+              type="button"
+              data-test-subj="remountFlyout"
+              onClick={() => setInstanceKey((k) => k + 1)}
+            >
+              remount
+            </button>
+            <EditDslStepsFlyout
+              key={instanceKey}
+              initialSteps={draft}
+              selectedStepIndex={selectedStepIndex}
+              setSelectedStepIndex={setSelectedStepIndex}
+              onChange={(next) =>
+                setDraft((prev) =>
+                  isEqual(prev, next) ? prev : (next as IngestStreamLifecycleDSL)
+                )
+              }
+              onSave={jest.fn()}
+              onClose={jest.fn()}
+              onChangeDebounceMs={0}
+            />
+          </>
+        );
+      };
+
+      render(<WrapperWithDraft />);
+      await tick();
+
+      const panel = withinStep(0);
+      const afterValueInput = panel.getByTestId(`${DATA_TEST_SUBJ}AfterValue`) as HTMLInputElement;
+
+      fireEvent.change(afterValueInput, { target: { value: '21' } });
+      fireEvent.blur(afterValueInput);
+      await tick();
+
+      fireEvent.click(screen.getByTestId('remountFlyout'));
+      await tick();
+      expect(withinStep(0).getByTestId(`${DATA_TEST_SUBJ}AfterValue`)).toHaveValue(21);
     });
   });
 });
