@@ -24,6 +24,8 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/shared-ux-utility'
   - '@kbn/content-management-favorites-public'
+  - '@kbn/content-management-user-profiles'
+  - '@kbn/user-profile-components'
 tags:
   - shared-browser
   - package
