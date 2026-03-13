@@ -8,7 +8,8 @@
  */
 
 import { EcsVersion } from '@elastic/ecs';
-import { LogLevel, LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
 
 jest.spyOn(process, 'uptime').mockReturnValue(10);
@@ -553,6 +554,161 @@ test('format() correctly serializes meta.error after calling meta.toJSON() if me
     },
     process: {
       pid: 5355,
+      uptime: 10,
+    },
+  });
+});
+
+test.each([
+  ['string', 'hello'],
+  ['boolean', false],
+  ['integer', 42],
+  ['float', 1.25],
+  ['NaN', Number.NaN],
+  ['array', ['hello', 'world']],
+])('format() serializes non-object meta as plain string in error: %s', (_, meta) => {
+  const layout = new JsonLayout();
+
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        // @ts-expect-error validating defensive runtime behavior
+        meta,
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    error: String(meta),
+    process: {
+      pid: 3,
+      uptime: 10,
+    },
+  });
+});
+
+test('format() does not add error when meta is null', () => {
+  const layout = new JsonLayout();
+
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        // @ts-expect-error validating defensive runtime behavior
+        meta: null,
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+      uptime: 10,
+    },
+  });
+});
+
+test.each([
+  ['string', 'hello'],
+  ['boolean', true],
+  ['integer', 42],
+  ['null', null],
+  ['undefined', undefined],
+  ['array', ['hello', 'world']],
+])(
+  'format() serializes non-object meta.toJSON() output as string in error: %s',
+  (_, toJsonValue) => {
+    const layout = new JsonLayout();
+
+    expect(
+      JSON.parse(
+        layout.format({
+          message: 'foo',
+          timestamp,
+          level: LogLevel.Debug,
+          context: 'bar',
+          pid: 3,
+          meta: {
+            // @ts-expect-error validating defensive runtime behavior
+            toJSON() {
+              return toJsonValue;
+            },
+          },
+        })
+      )
+    ).toStrictEqual({
+      ecs: { version: expect.any(String) },
+      '@timestamp': '2012-02-01T09:30:22.011-05:00',
+      message: 'foo',
+      log: {
+        level: 'DEBUG',
+        logger: 'bar',
+      },
+      error: String(toJsonValue),
+      process: {
+        pid: 3,
+        uptime: 10,
+      },
+    });
+  }
+);
+
+test('format() serializes Error from meta.toJSON()', () => {
+  const layout = new JsonLayout();
+  const metaError = new Error('boom');
+  metaError.name = 'BoomError';
+  metaError.stack = 'BoomStack';
+
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          // @ts-expect-error validating defensive runtime behavior
+          toJSON() {
+            return { error: metaError };
+          },
+        },
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    error: {
+      message: metaError.message,
+      type: metaError.name,
+      stack_trace: metaError.stack,
+    },
+    process: {
+      pid: 3,
       uptime: 10,
     },
   });
