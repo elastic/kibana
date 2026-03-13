@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 
 import type { CoreStart, AppMountParameters, AppLeaveHandler } from '@kbn/core/public';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart, DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
@@ -239,6 +240,7 @@ export interface PluginStart {
   getUpselling: () => UpsellingService;
   setOnboardingSettings: OnboardingService['setSettings'];
   setSolutionNavigationTree: (navigationTree: NavigationTreeDefinition | null) => void;
+  getDefaultArtifactsPageId: () => SecurityPageName;
 }
 
 export type InspectResponse = Inspect & { response: string[] };
