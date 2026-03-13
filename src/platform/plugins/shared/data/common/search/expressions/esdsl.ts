@@ -47,7 +47,7 @@ interface EsdslStartDependencies {
 export const getEsdslFn = ({
   getStartDependencies,
 }: {
-  getStartDependencies: (getKibanaRequest: any) => Promise<EsdslStartDependencies>;
+  getStartDependencies: (getKibanaRequest: unknown) => Promise<EsdslStartDependencies>;
 }) => {
   const esdsl: EsdslExpressionFunctionDefinition = {
     name,

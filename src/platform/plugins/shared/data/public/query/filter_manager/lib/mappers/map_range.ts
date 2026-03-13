@@ -54,8 +54,11 @@ function getParams(filter: RangeFilter) {
   return { type: FILTERS.RANGE, key, value: params, params };
 }
 
-export const isMapRangeFilter = (filter: any): filter is RangeFilter =>
-  isRangeFilter(filter) || isScriptedRangeFilter(filter);
+export const isMapRangeFilter = (filter: unknown): filter is RangeFilter =>
+  hasFilterShape(filter) && (isRangeFilter(filter) || isScriptedRangeFilter(filter));
+
+const hasFilterShape = (filter: unknown): filter is Filter =>
+  typeof filter === 'object' && filter !== null && 'meta' in filter && 'query' in filter;
 
 export const mapRange = (filter: Filter) => {
   if (!isMapRangeFilter(filter)) {

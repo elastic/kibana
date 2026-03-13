@@ -622,7 +622,10 @@ export class SearchSource {
     val: SearchSourceFields[K],
     key: K
   ): false | void {
-    val = typeof val === 'function' ? val(this) : val;
+    if (typeof val === 'function') {
+      const fn = val as unknown as (searchSource?: SearchSource) => SearchSourceFields[K];
+      val = fn.length > 0 ? fn(this) : fn();
+    }
     if (val == null || !key) return;
 
     const addToRoot = (rootKey: string, value: unknown) => {
@@ -643,14 +646,15 @@ export class SearchSource {
 
     switch (key) {
       case 'filter':
-        return addToRoot(
-          'filters',
-          (typeof data.filters === 'function' ? data.filters() : data.filters ?? []).concat(val)
-        );
+        const filters = typeof data.filters === 'function' ? data.filters() : data.filters ?? [];
+        return addToRoot('filters', filters.concat(val as Filter | Filter[]));
       case 'nonHighlightingFilters':
         return addToRoot('nonHighlightingFilters', (data.nonHighlightingFilters ?? []).concat(val));
       case 'query':
-        return addToRoot(key, (data.query ?? []).concat(val));
+        return addToRoot(
+          key,
+          (data.query ?? []).concat(val as NonNullable<SearchSourceFields['query']>)
+        );
       case 'fields':
         // This will pass the passed in parameters to the new fields API.
         // Also if will only return scripted fields that are part of the specified
@@ -675,7 +679,7 @@ export class SearchSource {
         return addToBody('_source', val);
       case 'sort':
         const sort = normalizeSortRequest(
-          val,
+          val as EsQuerySortValue | EsQuerySortValue[],
           this.getField('index'),
           getConfig(UI_SETTINGS.SORT_OPTIONS)
         );
@@ -683,7 +687,7 @@ export class SearchSource {
       case 'pit':
         return addToRoot(key, val);
       case 'aggs':
-        if ((val as unknown) instanceof AggConfigs) {
+        if (val instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());
         } else {
           return addToBody('aggs', val);

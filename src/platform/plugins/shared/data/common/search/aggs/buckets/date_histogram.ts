@@ -52,8 +52,13 @@ export interface IBucketDateHistogramAggConfig extends IBucketAggConfig {
   buckets: TimeBuckets;
 }
 
-export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHistogramAggConfig {
-  return Boolean(agg.buckets);
+export function isDateHistogramBucketAggConfig(agg: unknown): agg is IBucketDateHistogramAggConfig {
+  return (
+    typeof agg === 'object' &&
+    agg !== null &&
+    'buckets' in agg &&
+    (agg as { buckets: unknown }).buckets instanceof TimeBuckets
+  );
 }
 
 export interface AggParamsDateHistogram extends BaseAggParams {
