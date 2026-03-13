@@ -13,4 +13,4 @@ jobs:
       issue-body: ${{ github.event.issue.body }}
       dry-run: true
     secrets:
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_KEY_ISSUE_TRIAGE }}
