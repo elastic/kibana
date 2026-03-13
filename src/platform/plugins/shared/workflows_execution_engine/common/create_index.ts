@@ -168,7 +168,9 @@ const ensureIlmPolicy = async ({
       },
     });
     logger?.debug(
-      `ILM policy ${ilmPolicyName} created/updated (max_age: ${rolloverMaxAge}${rolloverMaxDocs != null ? `, max_docs: ${rolloverMaxDocs}` : ''})`
+      `ILM policy ${ilmPolicyName} created/updated (max_age: ${rolloverMaxAge}${
+        rolloverMaxDocs != null ? `, max_docs: ${rolloverMaxDocs}` : ''
+      })`
     );
   } catch (error) {
     logger?.error(`Failed to create ILM policy ${ilmPolicyName}: ${error}`);
