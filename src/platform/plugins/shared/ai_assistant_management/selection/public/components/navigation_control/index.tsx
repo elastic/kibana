@@ -169,7 +169,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
       size="s"
       data-test-subj="aiAssistantHeaderButton"
     >
-    <FormattedMessage
+      <FormattedMessage
         id="aiAssistantManagementSelection.headerButton.label"
         defaultMessage="AI Assistant"
       />
