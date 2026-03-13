@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom-v5-compat';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { appPaths } from '../../../../utils/app_paths';
@@ -20,9 +20,11 @@ interface AgentSettingsSidebarViewProps {
 
 export const AgentSettingsSidebarView: React.FC<AgentSettingsSidebarViewProps> = ({ pathname }) => {
   const agentId = getAgentIdFromPath(pathname) ?? 'elastic-ai-agent';
+  const { euiTheme } = useEuiTheme();
 
   const linkStyles = css`
     text-decoration: none;
+    color: inherit;
     &:hover {
       text-decoration: underline;
     }
@@ -30,7 +32,8 @@ export const AgentSettingsSidebarView: React.FC<AgentSettingsSidebarViewProps> =
 
   const activeLinkStyles = css`
     ${linkStyles}
-    font-weight: bold;
+    font-weight: ${euiTheme.font.weight.bold};
+    color: ${euiTheme.colors.primaryText};
   `;
 
   const isActive = (path: string) => pathname === path;

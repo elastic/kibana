@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom-v5-compat';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiHorizontalRule,
+  EuiSelect,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { appPaths } from '../../../../utils/app_paths';
 import { getAgentIdFromPath } from '../get_sidebar_view';
+import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
+import { storageKeys } from '../../../../storage_keys';
 
 interface ConversationSidebarViewProps {
   pathname: string;
@@ -20,13 +30,31 @@ interface ConversationSidebarViewProps {
 
 export const ConversationSidebarView: React.FC<ConversationSidebarViewProps> = ({ pathname }) => {
   const agentId = getAgentIdFromPath(pathname) ?? 'elastic-ai-agent';
+  const { agents, isLoading } = useAgentBuilderAgents();
+  const navigate = useNavigate();
+  const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.agentId);
 
   const linkStyles = css`
     text-decoration: none;
+    color: inherit;
     &:hover {
       text-decoration: underline;
     }
   `;
+
+  const handleAgentChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const newAgentId = e.target.value;
+      setStoredAgentId(newAgentId);
+      navigate(appPaths.agent.root({ agentId: newAgentId }));
+    },
+    [navigate, setStoredAgentId]
+  );
+
+  const agentOptions = agents.map((agent) => ({
+    value: agent.id,
+    text: agent.name,
+  }));
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -34,7 +62,17 @@ export const ConversationSidebarView: React.FC<ConversationSidebarViewProps> = (
         <EuiText size="xs" color="subdued">
           <strong>Agent</strong>
         </EuiText>
-        <EuiText size="s">{agentId}</EuiText>
+        {isLoading ? (
+          <EuiLoadingSpinner size="s" />
+        ) : (
+          <EuiSelect
+            compressed
+            options={agentOptions}
+            value={agentId}
+            onChange={handleAgentChange}
+            aria-label="Select agent"
+          />
+        )}
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
@@ -52,7 +90,7 @@ export const ConversationSidebarView: React.FC<ConversationSidebarViewProps> = (
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <Link to={appPaths.agent.conversations.new({ agentId })} css={linkStyles}>
+        <Link to={appPaths.agent.root({ agentId })} css={linkStyles}>
           <EuiText size="s">+ New conversation</EuiText>
         </Link>
       </EuiFlexItem>
