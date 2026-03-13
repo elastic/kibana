@@ -35,7 +35,7 @@ export const useRegisterActionButtons = ({
   updateOrigin,
   timeRange,
   dashboardState,
-  linkedSavedObjectId,  
+  linkedSavedObjectId,
   doesSavedDashboardExist,
 }: UseRegisterActionButtonsParams) => {
   const timeRangeRef = useLatest(timeRange);
@@ -58,7 +58,11 @@ export const useRegisterActionButtons = ({
         }),
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          const existingDashboardId = linkedSavedObjectIdRef.current && await doesSavedDashboardExist(linkedSavedObjectIdRef.current) ? linkedSavedObjectIdRef.current : undefined;
+          const existingDashboardId =
+            linkedSavedObjectIdRef.current &&
+            (await doesSavedDashboardExist(linkedSavedObjectIdRef.current))
+              ? linkedSavedObjectIdRef.current
+              : undefined;
           await locator.navigate({
             ...dashboardStateRef.current,
             dashboardId: existingDashboardId,
@@ -75,9 +79,13 @@ export const useRegisterActionButtons = ({
       icon: 'save',
       type: ActionButtonType.PRIMARY,
       handler: async () => {
-        const existingDashboardId = linkedSavedObjectIdRef.current && await doesSavedDashboardExist(linkedSavedObjectIdRef.current) ? linkedSavedObjectIdRef.current : undefined;
+        const existingDashboardId =
+          linkedSavedObjectIdRef.current &&
+          (await doesSavedDashboardExist(linkedSavedObjectIdRef.current))
+            ? linkedSavedObjectIdRef.current
+            : undefined;
         if (existingDashboardId) {
-          await dashboardApi.runQuickSave({ showOpenLink: true });
+          await dashboardApi.runQuickSave();
           return;
         }
         const result = await dashboardApi.runInteractiveSave();

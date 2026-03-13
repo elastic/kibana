@@ -85,10 +85,14 @@ export const DashboardCanvasContent = ({
 
       doesSavedDashboardExist(linkedSavedObjectId)
         .then((exists) => {
-          if (!canceled) { setSavedObjectStatus({ status: 'resolved', exists }) }
+          if (!canceled) {
+            setSavedObjectStatus({ status: 'resolved', exists });
+          }
         })
         .catch(() => {
-          if (!canceled) { setSavedObjectStatus({ status: 'resolved', exists: false }); }
+          if (!canceled) {
+            setSavedObjectStatus({ status: 'resolved', exists: false });
+          }
         });
 
       return () => {
@@ -154,7 +158,9 @@ export const DashboardCanvasContent = ({
           showPlainSpinner
           locator={dashboardLocator}
           savedObjectId={
-           savedObjectStatus.status === 'resolved' && savedObjectStatus.exists ? linkedSavedObjectId : undefined
+            savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
+              ? linkedSavedObjectId
+              : undefined
           }
           onApiAvailable={(api) => {
             api.setViewMode('view');
