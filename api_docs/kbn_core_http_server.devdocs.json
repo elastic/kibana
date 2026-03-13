@@ -3801,6 +3801,10 @@
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/connectors.ts"
               },
               {
+                "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/routes/endpoints.ts"
+              },
+              {
                 "plugin": "workflowsExtensions",
                 "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_step_definitions.ts"
               },
@@ -7383,6 +7387,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
               },
               {
                 "plugin": "cloudConnect",
@@ -16395,6 +16403,18 @@
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
+              },
+              {
+                "plugin": "automaticImportVTwo",
+                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
+              },
+              {
                 "plugin": "automaticImportVTwo",
                 "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
               },
@@ -16765,6 +16785,18 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/unified_history/get_unified_history_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/scheduled_results/get_scheduled_action_results_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/scheduled_results/get_scheduled_query_results_route.ts"
+              },
+              {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
               },
               {
                 "plugin": "dataUsage",
@@ -17794,6 +17826,10 @@
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/update_pack_route.ts"
               },
               {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
+              },
+              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -18315,6 +18351,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
               },
               {
                 "plugin": "aiops",
@@ -19297,6 +19337,14 @@
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph/route.ts"
               },
               {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph_entities/route.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph_events/route.ts"
+              },
+              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/get_unallowed_field_values.ts"
               },
@@ -19439,6 +19487,14 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph_entities/route.test.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph_events/route.test.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -19725,6 +19781,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
               },
               {
                 "plugin": "automaticImportVTwo",
