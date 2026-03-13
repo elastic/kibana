@@ -27,7 +27,7 @@ export interface InferenceFeatureRegistryContract {
   register: (feature: InferenceFeatureConfig) => RegisterResult;
 }
 
-export interface InferenceFeatureRegistryStartContract {
+export interface InferenceFeatureRegistryStartContract extends InferenceFeatureRegistryContract {
   getAll: () => InferenceFeatureConfig[];
   get: (featureId: string) => InferenceFeatureConfig | undefined;
 }
