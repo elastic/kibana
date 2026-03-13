@@ -34,6 +34,11 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 const metadataSchema = z
   .object({
     name: z.string().min(1).max(256).describe('Unique rule name/identifier.'),
+    description: z
+      .string()
+      .max(1024)
+      .optional()
+      .describe('Optional human-readable description of the rule.'),
     owner: z.string().max(256).optional().describe('Owner of the rule.'),
     labels: z.array(z.string().max(64)).max(100).optional().describe('Labels for categorization.'),
   })

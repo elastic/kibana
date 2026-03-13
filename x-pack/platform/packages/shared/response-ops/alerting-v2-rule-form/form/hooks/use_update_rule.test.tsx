@@ -141,6 +141,29 @@ describe('useUpdateRule', () => {
     });
   });
 
+  it('includes description in the update payload when provided', async () => {
+    const { http, result } = setupUseUpdateRule();
+
+    http.patch.mockResolvedValue({ id: ruleId, metadata: { name: 'Updated Rule' } });
+
+    const formDataWithDescription: FormValues = {
+      ...validFormData,
+      metadata: {
+        ...validFormData.metadata,
+        description: 'Updated description',
+      },
+    };
+
+    await act(async () => {
+      result.current.updateRule(formDataWithDescription);
+    });
+
+    await waitFor(() => {
+      const body = getLastPatchedBody(http);
+      expect(body.metadata.description).toBe('Updated description');
+    });
+  });
+
   it('includes evaluation condition when non-empty', async () => {
     const { http, result } = setupUseUpdateRule();
 

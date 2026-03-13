@@ -41,6 +41,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     kind: data.kind,
     metadata: {
       name: data.metadata.name,
+      description: data.metadata.description,
       owner: data.metadata.owner,
       labels: data.metadata.labels,
     },
@@ -115,6 +116,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     kind: attrs.kind,
     metadata: {
       name: attrs.metadata.name,
+      description: attrs.metadata.description,
       owner: attrs.metadata.owner,
       labels: attrs.metadata.labels,
     },

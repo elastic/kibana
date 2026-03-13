@@ -17,6 +17,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
     metadata: {
       properties: {
         name: { type: 'text' },
+        description: { type: 'text' },
         owner: { type: 'keyword' },
         labels: { type: 'keyword' },
       },
