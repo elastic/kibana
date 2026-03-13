@@ -46,6 +46,7 @@ export enum ReadOperations {
   GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
   GetUserActionUsers = 'getUserActionUsers',
+  GetAllTemplates = 'readTemplate',
 }
 
 /**
@@ -65,6 +66,7 @@ export enum WriteOperations {
   UpdateConfiguration = 'updateConfiguration',
   ReopenCase = 'reopenCase',
   AssignCase = 'assignCase',
+  ManageTemplate = 'manageTemplate',
 }
 
 /**

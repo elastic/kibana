@@ -2520,6 +2520,90 @@ Object {
 }
 `;
 
+exports[`audit_logger log function event structure creates the correct audit event for operation: "manageTemplate" with an error and entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_template_manage",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "change",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "1",
+      "type": "cases-templates",
+    },
+  },
+  "message": "Failed attempt to update cases-templates [id=1] as owner \\"awesome\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "manageTemplate" with an error but no entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_template_manage",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "change",
+    ],
+  },
+  "message": "Failed attempt to update a template as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "manageTemplate" without an error but with an entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_template_manage",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "unknown",
+    "type": Array [
+      "change",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "5",
+      "type": "cases-templates",
+    },
+  },
+  "message": "User is updating cases-templates [id=5] as owner \\"super\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "manageTemplate" without an error or entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_template_manage",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "unknown",
+    "type": Array [
+      "change",
+    ],
+  },
+  "message": "User is updating a template as any owners",
+}
+`;
+
 exports[`audit_logger log function event structure creates the correct audit event for operation: "pushCase" with an error and entity 1`] = `
 Object {
   "error": Object {
@@ -2601,6 +2685,90 @@ Object {
     ],
   },
   "message": "User is pushing a case as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "readTemplate" with an error and entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_template_get",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "1",
+      "type": "cases-templates",
+    },
+  },
+  "message": "Failed attempt to access cases-templates [id=1] as owner \\"awesome\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "readTemplate" with an error but no entity 1`] = `
+Object {
+  "error": Object {
+    "code": "Error",
+    "message": "an error",
+  },
+  "event": Object {
+    "action": "case_template_get",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "failure",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "Failed attempt to access a templates as any owners",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "readTemplate" without an error but with an entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_template_get",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "kibana": Object {
+    "saved_object": Object {
+      "id": "5",
+      "type": "cases-templates",
+    },
+  },
+  "message": "User has accessed cases-templates [id=5] as owner \\"super\\"",
+}
+`;
+
+exports[`audit_logger log function event structure creates the correct audit event for operation: "readTemplate" without an error or entity 1`] = `
+Object {
+  "event": Object {
+    "action": "case_template_get",
+    "category": Array [
+      "database",
+    ],
+    "outcome": "success",
+    "type": Array [
+      "access",
+    ],
+  },
+  "message": "User has accessed a templates as any owners",
 }
 `;
 
