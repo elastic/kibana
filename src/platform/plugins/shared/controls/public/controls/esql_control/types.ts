@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { OptionsListESQLControlState, OptionsListSelection } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 // import type { Filter } from '@kbn/es-query';
 import type { PublishesESQLVariable } from '@kbn/esql-types';
@@ -15,6 +15,7 @@ import type {
   PublishesDataLoading,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
+import type { OptionsListSuggestions } from '../../../common/options_list';
 // import type { OptionsListCom+ponentState } from '../data_controls/options_list_control/types';
 
 export type ESQLControlApi = DefaultEmbeddableApi<OptionsListESQLControlState> &
@@ -24,15 +25,20 @@ export type ESQLControlApi = DefaultEmbeddableApi<OptionsListESQLControlState> &
 
 export interface ESQLOptionsListComponentApi {
   uuid: string;
-  availableOptions$: PublishingSubject<OptionsListESQLControlState['available_options']>;
+  availableOptions$: PublishingSubject<OptionsListSuggestions>;
+  invalidSelections$: PublishingSubject<Set<string | number>>;
   variableName$: PublishingSubject<OptionsListESQLControlState['variable_name']>;
-  selectedOptions$: PublishingSubject<OptionsListESQLControlState['selected_options']>;
-  dataLoading$: PublishingSubject<boolean>;
+  selectedOptions$: PublishingSubject<OptionsListSelection[]>;
+  dataLoading$: PublishingSubject<boolean | undefined>;
   label$: PublishingSubject<string>;
   totalCardinality$: PublishingSubject<number>;
+  singleSelect$: PublishingSubject<boolean>;
   makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
   deselectOption: (key: string | undefined) => void;
   setSearchString: (next: string) => void;
+  setDataLoading: (loading: boolean | undefined) => void;
+  selectAll: (keys: string[]) => void;
+  deselectAll: () => void;
 }
 
 // type HideExcludeUnusedState = Pick<OptionsListComponentState, 'exclude'>;

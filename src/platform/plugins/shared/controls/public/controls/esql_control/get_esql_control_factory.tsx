@@ -19,7 +19,6 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { uiActionsService } from '../../services/kibana_services';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
-import type { DSLOptionsListComponentApi } from '../data_controls/options_list_control/types';
 import { initializeESQLControlManager, selectionComparators } from './esql_control_manager';
 import type { ESQLControlApi, ESQLOptionsListComponentApi } from './types';
 import { VariableControlsStrings } from './constants';
@@ -122,10 +121,6 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         ...api,
         ...selections.internalApi,
         ...labelManager.api,
-        isExpandable: false,
-        isCustomizable: false,
-        isDuplicable: false,
-        isPinnable: true,
         uuid,
         setDataLoading,
 
@@ -169,9 +164,9 @@ export const getESQLControlFactory = (): EmbeddableFactory<
         deselectAll: () => {
           // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
         },
-        loadMoreSubject: new BehaviorSubject<void>(undefined),
-        fieldFormatter: new BehaviorSubject((v: string) => v),
-        dataViews$: new BehaviorSubject(undefined) as DSLOptionsListComponentApi['dataViews$'],
+        // loadMoreSubject: new BehaviorSubject<void>(undefined),
+        // fieldFormatter: new BehaviorSubject((v: string) => v),
+        // dataViews$: new BehaviorSubject(undefined) as DSLOptionsListComponentApi['dataViews$'],
       };
 
       const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
@@ -185,7 +180,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<
               labelManager.cleanup();
             };
           }, []);
-          1;
+
           return (
             <OptionsListControlContext.Provider
               value={{

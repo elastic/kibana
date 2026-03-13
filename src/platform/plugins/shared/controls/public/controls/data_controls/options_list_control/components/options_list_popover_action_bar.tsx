@@ -88,15 +88,13 @@ export const OptionsListPopoverActionBar = ({
   const conditionalApiSubjects: [
     DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>,
     DSLOptionsListComponentApi['searchTechnique$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['searchStringValid$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['singleSelect$'] | PublishingSubject<undefined>
+    DSLOptionsListComponentApi['searchStringValid$'] | PublishingSubject<undefined>
   ] = useMemo(() => {
     const isDSLControl = isDSLOptionsListApi(componentApi);
     return [
       isDSLControl ? componentApi.field$ : new BehaviorSubject(undefined),
       isDSLControl ? componentApi.searchTechnique$ : new BehaviorSubject(undefined),
       isDSLControl ? componentApi.searchStringValid$ : new BehaviorSubject(undefined),
-      isDSLControl ? componentApi.singleSelect$ : new BehaviorSubject(undefined),
     ];
   }, [componentApi]);
 
@@ -106,16 +104,17 @@ export const OptionsListPopoverActionBar = ({
     fieldName,
     availableOptions = [],
     dataLoading,
+    singleSelect,
     field,
     searchTechnique,
     searchStringValid,
-    singleSelect,
   ] = useBatchedPublishingSubjects(
     componentApi.selectedOptions$,
     componentApi.totalCardinality$,
     componentApi.label$,
     componentApi.availableOptions$,
     componentApi.dataLoading$,
+    componentApi.singleSelect$,
     ...conditionalApiSubjects
   );
 
