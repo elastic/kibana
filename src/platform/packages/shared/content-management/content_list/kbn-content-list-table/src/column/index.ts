@@ -24,6 +24,14 @@ export {
   UpdatedAtCell,
   type UpdatedAtCellProps,
 } from './updated_at';
+export {
+  StarredColumn,
+  type StarredColumnProps,
+  StarredCell,
+  type StarredCellProps,
+  StarButton,
+  type StarButtonProps,
+} from './starred';
 
 // Namespace type for TypeScript typing of `Column`.
 export type { ColumnNamespace } from './part';
