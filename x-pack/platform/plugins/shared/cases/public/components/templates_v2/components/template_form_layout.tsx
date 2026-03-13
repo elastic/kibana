@@ -23,6 +23,7 @@ import { TemplateFormHeader } from './template_form_header';
 import { TemplateResetModal } from './template_reset_modal';
 import { TemplateEditorLayout } from './template_editor_layout';
 import { updateYamlFieldDefault } from '../utils/update_yaml_field_default';
+import { FieldType } from '../field_types/constants';
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
@@ -84,7 +85,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const handleFieldDefaultChange = useCallback(
     (fieldName: string, value: string, control: string) => {
-      const isNumericControl = control === 'INPUT_NUMBER';
+      const isNumericControl = control === FieldType.INPUT_NUMBER;
       const parsedValue = isNumericControl && value !== '' ? Number(value) : value;
       const updatedYaml = updateYamlFieldDefault(yamlValueRef.current, fieldName, parsedValue);
       if (updatedYaml !== yamlValueRef.current) {
