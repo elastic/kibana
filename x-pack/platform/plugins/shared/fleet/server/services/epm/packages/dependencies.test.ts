@@ -117,4 +117,39 @@ describe('getPackageDependencies', () => {
     expect(result).toHaveLength(1);
     expect(result![0]).toEqual({ name: 'elastic-agent', version: '^8.0.0' });
   });
+
+  it('returns null when package has only requires.input (required input packages are not installed)', () => {
+    mockGetExperimentalFeatures.mockReturnValue({
+      enableResolveDependencies: true,
+    } as ReturnType<typeof mockGetExperimentalFeatures>);
+
+    const packageInfo = {
+      name: 'test-package',
+      version: '1.0.0',
+      requires: {
+        input: [{ package: 'input-dep-a', version: '1.0.0' }],
+      },
+    } as unknown as InstallablePackage;
+
+    expect(getPackageDependencies(packageInfo)).toBeNull();
+  });
+
+  it('returns only requires.content dependencies and ignores requires.input', () => {
+    mockGetExperimentalFeatures.mockReturnValue({
+      enableResolveDependencies: true,
+    } as ReturnType<typeof mockGetExperimentalFeatures>);
+
+    const packageInfo = {
+      name: 'test-package',
+      version: '1.0.0',
+      requires: {
+        content: [{ package: 'content-dep', version: '1.0.0' }],
+        input: [{ package: 'input-dep-a', version: '1.0.0' }],
+      },
+    } as unknown as InstallablePackage;
+
+    expect(getPackageDependencies(packageInfo)).toEqual([
+      { name: 'content-dep', version: '1.0.0' },
+    ]);
+  });
 });
