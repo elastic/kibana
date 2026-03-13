@@ -414,11 +414,9 @@ const unifiedCorrelationsRoute = createApmServerRoute({
         durationMin,
         durationMax,
         percentileThreshold,
-        includeHistogram,
+        includeHistogram = false,
       },
     } = resources.params;
-
-    const includeHistogramWithDefault = includeHistogram ?? true;
 
     const correlationTypeMetric: Metric = ((): Metric => {
       if (metric === 'latency' || metric === 'failure_rate') {
@@ -458,7 +456,7 @@ const unifiedCorrelationsRoute = createApmServerRoute({
       percentileThreshold,
       durationMin,
       durationMax,
-      includeHistogram: includeHistogramWithDefault,
+      includeHistogram,
     });
   },
 });
