@@ -105,11 +105,7 @@ const buildApi = (overrides: {
     get: jest.fn(),
   }) as unknown as MonitorConfigRepository;
 
-  return new MonitorIntegrationHealthApi(
-    server,
-    savedObjectsClient,
-    monitorConfigRepository,    
-  );
+  return new MonitorIntegrationHealthApi(server, savedObjectsClient, monitorConfigRepository);
 };
 
 describe('MonitorIntegrationHealthApi', () => {
