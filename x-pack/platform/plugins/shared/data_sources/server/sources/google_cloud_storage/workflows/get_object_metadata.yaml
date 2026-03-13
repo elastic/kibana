@@ -19,3 +19,17 @@ steps:
     with:
       bucket: "${{inputs.bucket}}"
       object: "${{inputs.object}}"
+  - name: map_results
+    type: data.map
+    items: ${{ steps.get_metadata.output }}
+    with:
+      fields:
+        name: "${{ item.name }}"
+        bucket: "${{ item.bucket }}"
+        contentType: "${{ item.contentType }}"
+        size: "${{ item.size }}"
+        storageClass: "${{ item.storageClass }}"
+        timeCreated: "${{ item.timeCreated }}"
+        updated: "${{ item.updated }}"
+        md5Hash: "${{ item.md5Hash }}"
+        metadata: "${{ item.metadata }}"

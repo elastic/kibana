@@ -35,3 +35,19 @@ steps:
       delimiter: "${{inputs.delimiter}}"
       maxResults: ${{inputs.maxResults}}
       pageToken: "${{inputs.pageToken}}"
+  - name: map_results
+    type: data.map
+    items: ${{ steps.list_objects.output }}
+    with:
+      fields:
+        nextPageToken: "${{ item.nextPageToken }}"
+        prefixes: "${{ item.prefixes }}"
+        objects:
+          $map: { items: "${{ item.items }}", item: "obj" }
+          name: "${{ obj.name }}"
+          bucket: "${{ obj.bucket }}"
+          size: "${{ obj.size }}"
+          contentType: "${{ obj.contentType }}"
+          timeCreated: "${{ obj.timeCreated }}"
+          updated: "${{ obj.updated }}"
+          md5Hash: "${{ obj.md5Hash }}"

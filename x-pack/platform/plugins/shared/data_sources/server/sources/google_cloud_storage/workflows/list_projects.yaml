@@ -26,3 +26,15 @@ steps:
       pageSize: ${{inputs.pageSize}}
       pageToken: "${{inputs.pageToken}}"
       filter: "${{inputs.filter}}"
+  - name: map_results
+    type: data.map
+    items: ${{ steps.list_projects.output }}
+    with:
+      fields:
+        nextPageToken: "${{ item.nextPageToken }}"
+        projects:
+          $map: { items: "${{ item.projects }}", item: "p" }
+          projectId: "${{ p.projectId }}"
+          name: "${{ p.name }}"
+          lifecycleState: "${{ p.lifecycleState }}"
+          createTime: "${{ p.createTime }}"

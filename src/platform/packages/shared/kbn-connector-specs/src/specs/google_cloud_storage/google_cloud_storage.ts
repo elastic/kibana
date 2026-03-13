@@ -77,22 +77,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
           const response = await ctx.client.get(`${RESOURCE_MANAGER_API_BASE}/projects`, {
             params,
           });
-          return {
-            projects: (response.data.projects ?? []).map(
-              (p: {
-                projectId: string;
-                name: string;
-                lifecycleState: string;
-                createTime: string;
-              }) => ({
-                projectId: p.projectId,
-                name: p.name,
-                lifecycleState: p.lifecycleState,
-                createTime: p.createTime,
-              })
-            ),
-            nextPageToken: response.data.nextPageToken,
-          };
+          return response.data;
         } catch (error: unknown) {
           throwGcsError(error);
           throw error;
@@ -113,26 +98,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
 
         try {
           const response = await ctx.client.get(`${GCS_API_BASE}/b`, { params });
-          return {
-            buckets: (response.data.items ?? []).map(
-              (b: {
-                id: string;
-                name: string;
-                location: string;
-                storageClass: string;
-                timeCreated: string;
-                updated: string;
-              }) => ({
-                id: b.id,
-                name: b.name,
-                location: b.location,
-                storageClass: b.storageClass,
-                timeCreated: b.timeCreated,
-                updated: b.updated,
-              })
-            ),
-            nextPageToken: response.data.nextPageToken,
-          };
+          return response.data;
         } catch (error: unknown) {
           throwGcsError(error);
           throw error;
@@ -156,29 +122,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
             `${GCS_API_BASE}/b/${encodeURIComponent(input.bucket)}/o`,
             { params }
           );
-          return {
-            objects: (response.data.items ?? []).map(
-              (obj: {
-                name: string;
-                bucket: string;
-                size: string;
-                contentType: string;
-                timeCreated: string;
-                updated: string;
-                md5Hash: string;
-              }) => ({
-                name: obj.name,
-                bucket: obj.bucket,
-                size: obj.size,
-                contentType: obj.contentType,
-                timeCreated: obj.timeCreated,
-                updated: obj.updated,
-                md5Hash: obj.md5Hash,
-              })
-            ),
-            prefixes: response.data.prefixes ?? [],
-            nextPageToken: response.data.nextPageToken,
-          };
+          return response.data;
         } catch (error: unknown) {
           throwGcsError(error);
           throw error;
@@ -196,19 +140,7 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
               input.object
             )}`
           );
-          const obj = response.data;
-          return {
-            name: obj.name,
-            bucket: obj.bucket,
-            contentType: obj.contentType,
-            size: obj.size,
-            storageClass: obj.storageClass,
-            timeCreated: obj.timeCreated,
-            updated: obj.updated,
-            md5Hash: obj.md5Hash,
-            // user-defined metadata (key-value pairs set by the object owner)
-            metadata: obj.metadata,
-          };
+          return response.data;
         } catch (error: unknown) {
           throwGcsError(error);
           throw error;
