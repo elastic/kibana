@@ -13,6 +13,7 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
+import type { SerializedTimeRange } from '@kbn/presentation-publishing';
 import { DEFAULT_TIME_RANGE } from '../../../common/lib';
 import type { ExpressionValueFilter } from '../../../types';
 import type { EmbeddableExpression } from '../../expression_types';
@@ -21,7 +22,6 @@ import { getFunctionHelp } from '../../../i18n';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { decode, encode } from '../../../common/lib/embeddable_dataurl';
 import type { InitializeArguments } from '.';
-import type { SerializedTimeRange } from '@kbn/presentation-publishing';
 
 export interface Arguments {
   config: string;
