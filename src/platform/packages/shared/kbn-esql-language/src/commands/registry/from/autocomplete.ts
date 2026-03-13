@@ -205,9 +205,5 @@ async function suggestAdditionalSources(
 }
 
 function shouldSuggestSubquery(context: ICommandContext | undefined): boolean {
-  if (context?.isCursorInSubquery) {
-    return false;
-  }
-
-  return true;
+  return !context?.isCursorInSubquery;
 }
