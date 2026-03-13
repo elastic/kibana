@@ -84,10 +84,21 @@ export function aggregationStats(fields: EntityField[], renameToRecent: boolean 
 }
 
 export function fieldsToKeep(definitionFields: EntityField[], defaultFields: string[]): string {
-  return definitionFields
+  const allFieldPatterns = definitionFields
     .map(({ destination }) => destination)
     .concat(defaultFields)
-    .join(',\n ');
+    .map((field) => {
+      const dotIndex = field.indexOf('.');
+      // not a pattern
+      if (dotIndex === -1) {
+        return field;
+      }
+
+      const firstPart = field.substring(0, dotIndex);
+      return `${firstPart}*`;
+    });
+
+  return [...new Set(allFieldPatterns)].join(',\n');
 }
 
 export function castSrcType(field: EntityField): string {

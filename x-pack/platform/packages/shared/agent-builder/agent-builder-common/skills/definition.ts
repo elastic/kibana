@@ -58,6 +58,14 @@ export interface PublicSkillDefinition {
 }
 
 /**
+ * Lightweight version of {@link PublicSkillDefinition} used for listing.
+ * Omits heavy `content` and `referenced_content` fields; carries only the count.
+ */
+export type PublicSkillSummary = Omit<PublicSkillDefinition, 'content' | 'referenced_content'> & {
+  referenced_content_count: number;
+};
+
+/**
  * Shape for creating a persisted (user-created) skill.
  */
 export interface PersistedSkillCreateRequest {

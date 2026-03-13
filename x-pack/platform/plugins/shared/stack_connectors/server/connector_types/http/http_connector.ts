@@ -241,6 +241,10 @@ export async function executor(
       connectorUsageCollector,
       keepAlive,
       maxRedirects,
+      ...(fetcher?.max_content_length != null && {
+        maxContentLength: fetcher.max_content_length,
+        maxBodyLength: fetcher.max_content_length,
+      }),
       signal,
     })
   );

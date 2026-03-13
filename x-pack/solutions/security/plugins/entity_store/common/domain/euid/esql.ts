@@ -6,8 +6,11 @@
  */
 
 import { conditionToESQL } from '@kbn/streamlang';
-import type { EntityDefinitionWithoutId, EntityType } from '../definitions/entity_schema';
-import type { FieldEvaluation } from '../definitions/entity_schema';
+import type {
+  EntityDefinitionWithoutId,
+  FieldEvaluation,
+  EntityType,
+} from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
@@ -16,10 +19,15 @@ import {
   getFieldValue,
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
+  getSourceFieldNames,
   isEuidField,
   isEuidSeparator,
 } from './commons';
-import { applyFieldEvaluations } from './field_evaluations';
+import {
+  applyFieldEvaluations,
+  getSourceMatchSpec,
+  type SourceMatchSpec,
+} from './field_evaluations';
 
 /**
  * Constructs an ESQL filter for the provided entity type and document.
@@ -69,14 +77,30 @@ export function getEuidEsqlFilterBasedOnDocument(
     return undefined;
   }
 
-  const onExpressions = Object.entries(fieldsToBeFilteredOn.values).map(
-    ([field, value]) => `(${field} == "${escapeEsqlString(value)}")`
+  const evaluatedDestinations = new Set(
+    identityField.fieldEvaluations?.map((e) => e.destination) ?? []
   );
 
-  const toBeFilteredOut = getFieldsToBeFilteredOut(identityField.euidFields, fieldsToBeFilteredOn);
+  const onExpressions = Object.entries(fieldsToBeFilteredOn.values)
+    .filter(([field]) => !evaluatedDestinations.has(field))
+    .map(([field, value]) => `(${field} == "${escapeEsqlString(value)}")`);
+
+  const toBeFilteredOut = getFieldsToBeFilteredOut(
+    identityField.euidFields,
+    fieldsToBeFilteredOn
+  ).filter((field) => !evaluatedDestinations.has(field));
   const outExpressions = toBeFilteredOut.map((field) => `${esqlIsNullOrEmpty(field)}`);
 
-  return `(${[...onExpressions, ...outExpressions].join(' AND ')})`;
+  const allParts: string[] = [...onExpressions, ...outExpressions];
+
+  if (identityField.fieldEvaluations?.length) {
+    for (const evaluation of identityField.fieldEvaluations) {
+      const spec = getSourceMatchSpec(doc, evaluation);
+      allParts.push(buildSourceClauseEsql(evaluation, spec));
+    }
+  }
+
+  return `(${allParts.join(' AND ')})`;
 }
 
 function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): string {
@@ -137,6 +161,24 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
 
 function escapeEsqlString(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpec): string {
+  const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
+  const allSourceFields = [...exactMatchFields, ...prefixMatchFields];
+
+  if (spec.type === 'unknown') {
+    return `(${allSourceFields.map((f) => esqlIsNullOrEmpty(f)).join(' AND ')})`;
+  }
+
+  const disjuncts = spec.values.map((v) => {
+    const escaped = escapeEsqlString(v);
+    const exactConds = exactMatchFields.map((f) => `(${f} == "${escaped}")`);
+    const prefixConds = prefixMatchFields.map((f) => `STARTS_WITH(${f}, "${escaped}")`);
+    const parts = [...exactConds, ...prefixConds];
+    return parts.length === 1 ? parts[0] : `(${parts.join(' OR ')})`;
+  });
+  return disjuncts.length === 1 ? disjuncts[0] : `(${disjuncts.join(' OR ')})`;
 }
 
 export function getFieldEvaluationsEsql(entityType: EntityType): string | undefined {

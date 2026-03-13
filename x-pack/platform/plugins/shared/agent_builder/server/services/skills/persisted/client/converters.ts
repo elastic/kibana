@@ -16,14 +16,20 @@ export const fromEs = (document: SkillDocument): SkillPersistedDefinition => {
   if (!document._source) {
     throw new Error('No source found on skill document');
   }
+  const countField = document.fields?.referenced_content_count;
+  const referencedContent = document._source.referenced_content ?? [];
   return {
     id: document._source.id,
     name: document._source.name,
     description: document._source.description,
-    content: document._source.content,
-    referenced_content: document._source.referenced_content,
+    content: document._source.content ?? '',
+    referenced_content: referencedContent,
     tool_ids: document._source.tool_ids ?? [],
     plugin_id: document._source.plugin_id,
+    referenced_content_count:
+      Array.isArray(countField) && countField.length > 0
+        ? (countField[0] as number)
+        : referencedContent.length,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
   };

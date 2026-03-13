@@ -14,6 +14,10 @@ import { timezoneNames } from './schema/triggers/timezone_names';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
+export const ByteSizeSchema = z
+  .string()
+  .regex(/^\d+(\.\d+)?\s*(b|kb|mb|gb)$/i, 'Invalid byte size format (e.g., "10mb", "1gb")');
+
 /* -- Settings -- */
 export const RetryPolicySchema = z.object({
   'max-attempts': z.number().int().min(1).optional(),
@@ -34,6 +38,7 @@ export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 export const BaseStepSchema = z.object({
   name: z.string().min(1),
   type: z.string(),
+  'max-step-size': ByteSizeSchema.optional(),
 });
 export type BaseStep = z.infer<typeof BaseStepSchema>;
 
@@ -73,6 +78,7 @@ export const WorkflowSettingsSchema = z.object({
   timezone: z.string().optional(), // Should follow IANA TZ format
   timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
   concurrency: ConcurrencySettingsSchema.optional(),
+  'max-step-size': ByteSizeSchema.optional(), // e.g., '10mb', '15MB', '1gb'
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
@@ -177,6 +183,11 @@ export const TimeoutPropSchema = z.object({
 });
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
+export const MaxStepSizePropSchema = z.object({
+  'max-step-size': ByteSizeSchema.optional(),
+});
+export type MaxStepSizeProp = z.infer<typeof MaxStepSizePropSchema>;
+
 export const MaxIterationsObjectSchema = z.object({
   limit: z.number().int().positive(),
   'on-limit': z.enum(['continue', 'fail']),
@@ -228,6 +239,7 @@ export const BuiltInStepProperties = [
   'if',
   'foreach',
   'timeout',
+  'max-step-size',
   'on-failure',
   'max-iterations',
   'iteration-timeout',
@@ -245,6 +257,17 @@ export const WaitStepSchema = BaseStepSchema.extend({
   with: WaitStepInputSchema,
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
+
+export const WaitForInputStepInputSchema = z
+  .object({
+    message: z.string().optional().describe('Message displayed to the user when waiting for input'),
+  })
+  .optional();
+export const WaitForInputStepSchema = BaseStepSchema.extend({
+  type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
+  with: WaitForInputStepInputSchema,
+});
+export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
 export const DataSetStepInputSchema = z
   .record(z.string(), z.unknown())
@@ -270,6 +293,12 @@ export const FetcherConfigSchema = z
       .describe('Whether to follow HTTP redirects. Defaults to true'),
     max_redirects: z.number().optional().describe('Maximum number of redirects to follow'),
     keep_alive: z.boolean().optional().describe('Enable HTTP keep-alive for connection reuse'),
+    max_content_length: z
+      .number()
+      .positive()
+      .finite()
+      .optional()
+      .describe('Maximum response body size in bytes. Aborts the request mid-stream if exceeded.'),
   })
   .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();
@@ -641,6 +670,7 @@ const StepSchema = z.lazy(() =>
     WhileStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    WaitForInputStepSchema,
     DataSetStepSchema,
     ElasticsearchStepSchema,
     KibanaStepSchema,
@@ -903,6 +933,13 @@ export const ForEachContextSchema = z.object({
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
+export const BaseSerializedErrorSchema = z.object({
+  type: z.string(),
+  message: z.string(),
+  details: z.record(z.string(), z.unknown()).optional(),
+});
+export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
+
 export const WhileContextSchema = z.object({
   iteration: z.number().int(),
 });
@@ -913,6 +950,7 @@ export const StepContextSchema = WorkflowContextSchema.extend({
   foreach: ForEachContextSchema.optional(),
   while: WhileContextSchema.optional(),
   variables: z.record(z.string(), z.unknown()).optional(),
+  error: BaseSerializedErrorSchema.optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
 
@@ -922,10 +960,3 @@ export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
   steps: z.object({}),
 });
 export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
-
-export const BaseSerializedErrorSchema = z.object({
-  type: z.string(),
-  message: z.string(),
-  details: z.record(z.string(), z.unknown()).optional(),
-});
-export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;

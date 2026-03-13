@@ -43,8 +43,8 @@ export interface LiveHistoryRow extends UnifiedHistoryRowBase {
 export interface ScheduledHistoryRow extends UnifiedHistoryRowBase {
   sourceType: 'scheduled';
   source: 'Scheduled';
-  scheduleId?: string;
-  executionCount?: number;
+  scheduleId: string;
+  executionCount: number;
   plannedTime?: string;
 }
 

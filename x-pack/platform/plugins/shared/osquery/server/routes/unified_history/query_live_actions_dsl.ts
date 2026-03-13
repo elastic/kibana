@@ -60,10 +60,9 @@ export const buildLiveActionsQuery = ({
   }
 
   if (kuery) {
-    const escaped = escapeSimpleQueryString(kuery);
     filters.push({
       simple_query_string: {
-        query: `*${escaped}*`,
+        query: `${escapeSimpleQueryString(kuery)}*`,
         fields: ['pack_name', 'queries.query', 'queries.id'],
         analyze_wildcard: true,
       },

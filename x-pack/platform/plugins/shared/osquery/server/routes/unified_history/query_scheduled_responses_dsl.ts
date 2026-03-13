@@ -12,6 +12,7 @@ interface ScheduledResponsesQueryOptions {
   scheduledOffset?: number;
   pageSize?: number;
   packIds?: string[];
+  scheduleIds?: string[];
   spaceId: string;
   startDate?: string;
   endDate?: string;
@@ -22,6 +23,7 @@ export const buildScheduledResponsesQuery = ({
   scheduledOffset = 0,
   pageSize = 20,
   packIds,
+  scheduleIds,
   spaceId,
   startDate,
   endDate,
@@ -43,11 +45,23 @@ export const buildScheduledResponsesQuery = ({
     filters.push({ term: { space_id: spaceId } });
   }
 
-  if (packIds) {
-    if (packIds.length === 0) {
-      filters.push({ match_none: {} });
-    } else {
+  if (packIds !== undefined || scheduleIds !== undefined) {
+    const hasPackIds = packIds && packIds.length > 0;
+    const hasScheduleIds = scheduleIds && scheduleIds.length > 0;
+
+    if (hasPackIds && hasScheduleIds) {
+      filters.push({
+        bool: {
+          should: [{ terms: { pack_id: packIds } }, { terms: { schedule_id: scheduleIds } }],
+          minimum_should_match: 1,
+        },
+      });
+    } else if (hasPackIds) {
       filters.push({ terms: { pack_id: packIds } });
+    } else if (hasScheduleIds) {
+      filters.push({ terms: { schedule_id: scheduleIds } });
+    } else {
+      filters.push({ match_none: {} });
     }
   }
 
@@ -96,9 +110,6 @@ export const buildScheduledResponsesQuery = ({
             },
             error_count: {
               filter: { exists: { field: 'error' } },
-            },
-            pack_id_hit: {
-              top_hits: { size: 1, _source: { includes: ['pack_id'] } },
             },
           },
         },

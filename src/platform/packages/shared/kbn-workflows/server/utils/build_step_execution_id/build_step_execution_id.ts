@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line import/no-nodejs-modules
-import crypto from 'crypto';
+import { createSHA256Hash } from '@kbn/crypto';
 import type { StackFrame } from '../../..';
 
 /**
@@ -63,6 +62,5 @@ export function buildStepExecutionId(
   // The step execution ID is later combined with an index suffix and base64url-encoded
   // to form the final Elasticsearch document _id. Halving the hash from 64 to 32 hex chars
   // reduces the encoded ID from ~95 to ~52 characters.
-  const hashedId = crypto.createHash('sha256').update(generatedId).digest('hex').slice(0, 32);
-  return hashedId;
+  return createSHA256Hash(generatedId).slice(0, 32);
 }

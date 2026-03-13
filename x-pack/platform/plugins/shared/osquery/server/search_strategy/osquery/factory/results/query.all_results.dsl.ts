@@ -21,11 +21,22 @@ export const buildResultsQuery = ({
   startDate,
   pagination: { activePage, querySize },
   integrationNamespaces,
+  scheduleId,
+  executionCount,
 }: ResultsRequestOptions): ISearchRequestParams => {
   const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
-  const actionIdQuery = `action_id: ${actionId}`;
-  const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
-  let filter = actionIdQuery + agentQuery;
+
+  let filter: string;
+  if (scheduleId != null && executionCount != null) {
+    const scheduleQuery = `schedule_id: ${scheduleId} AND osquery_meta.schedule_execution_count: ${executionCount}`;
+    const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
+    filter = scheduleQuery + agentQuery;
+  } else {
+    const actionIdQuery = `action_id: ${actionId}`;
+    const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
+    filter = actionIdQuery + agentQuery;
+  }
+
   if (!isEmpty(kuery)) {
     filter = filter + ` AND ${kuery}`;
   }

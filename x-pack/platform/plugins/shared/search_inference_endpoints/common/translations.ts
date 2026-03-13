@@ -128,7 +128,7 @@ export const GROUP_BY_NONE = i18n.translate(
 export const GROUP_BY_MODELS = i18n.translate(
   'xpack.searchInferenceEndpoints.groupBy.options.models.label',
   {
-    defaultMessage: 'Models',
+    defaultMessage: 'Model Author',
   }
 );
 

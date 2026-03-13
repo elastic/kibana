@@ -68,14 +68,6 @@ Array [
         "task_type": "rerank",
       },
       Object {
-        "inference_id": ".rainbow-sprinkles-elastic",
-        "service": "elastic",
-        "service_settings": Object {
-          "model_id": "rainbow-sprinkles",
-        },
-        "task_type": "chat_completion",
-      },
-      Object {
         "inference_id": ".rerank-v1-elasticsearch",
         "service": "elasticsearch",
         "service_settings": Object {
@@ -129,6 +121,30 @@ Array [
           "model_id": "anthropic-claude-4.5-sonnet",
         },
         "task_type": "completion",
+      },
+      Object {
+        "inference_id": ".gp-llm-v2-chat_completion",
+        "service": "elastic",
+        "service_settings": Object {
+          "model_id": "gp-llm-v2",
+        },
+        "task_type": "chat_completion",
+      },
+      Object {
+        "inference_id": ".gp-llm-v2-completion",
+        "service": "elastic",
+        "service_settings": Object {
+          "model_id": "gp-llm-v2",
+        },
+        "task_type": "completion",
+      },
+      Object {
+        "inference_id": ".rainbow-sprinkles-elastic",
+        "service": "elastic",
+        "service_settings": Object {
+          "model_id": "rainbow-sprinkles",
+        },
+        "task_type": "chat_completion",
       },
     ],
     "groupId": "anthropic",
@@ -341,28 +357,6 @@ Array [
     ],
     "groupId": "unknown_model",
     "groupLabel": "Unknown Model",
-  },
-  Object {
-    "endpoints": Array [
-      Object {
-        "inference_id": ".gp-llm-v2-chat_completion",
-        "service": "elastic",
-        "service_settings": Object {
-          "model_id": "gp-llm-v2",
-        },
-        "task_type": "chat_completion",
-      },
-      Object {
-        "inference_id": ".gp-llm-v2-completion",
-        "service": "elastic",
-        "service_settings": Object {
-          "model_id": "gp-llm-v2",
-        },
-        "task_type": "completion",
-      },
-    ],
-    "groupId": "gp-llm-v2",
-    "groupLabel": "gp-llm-v2",
   },
 ]
 `;

@@ -7,7 +7,7 @@
 
 import type { FieldEvaluation } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { applyFieldEvaluations, getFieldValue } from './field_evaluations';
+import { applyFieldEvaluations, getFieldValue, getSourceMatchSpec } from './field_evaluations';
 
 describe('getFieldValue', () => {
   it('returns string value when doc has flat field', () => {
@@ -151,6 +151,24 @@ describe('applyFieldEvaluations', () => {
     ).toEqual({ 'entity.namespace': 'entra_id' });
   });
 
+  it('returns full data_stream.dataset when it has no delimiter', () => {
+    expect(applyFieldEvaluations({ data_stream: { dataset: 'okta' } }, userEvaluations)).toEqual({
+      'entity.namespace': 'okta',
+    });
+    expect(
+      applyFieldEvaluations(
+        { data_stream: { dataset: 'entityanalytics_entra_id' } },
+        userEvaluations
+      )
+    ).toEqual({ 'entity.namespace': 'entra_id' });
+  });
+
+  it('sets entity.namespace to unknown when data_stream.dataset starts with delimiter (empty first chunk)', () => {
+    expect(applyFieldEvaluations({ data_stream: { dataset: '.logs' } }, userEvaluations)).toEqual({
+      'entity.namespace': 'unknown',
+    });
+  });
+
   it('prefers event.module over data_stream.dataset when both are present', () => {
     expect(
       applyFieldEvaluations(
@@ -164,5 +182,79 @@ describe('applyFieldEvaluations', () => {
     expect(applyFieldEvaluations({ data_stream: { dataset: '' } }, userEvaluations)).toEqual({
       'entity.namespace': 'unknown',
     });
+  });
+});
+
+describe('getSourceMatchSpec', () => {
+  const userEvaluations = (
+    getEntityDefinitionWithoutId('user').identityField as { fieldEvaluations?: FieldEvaluation[] }
+  ).fieldEvaluations!;
+  const userEval = userEvaluations[0];
+
+  it('returns unknown when both event.module and data_stream.dataset are missing', () => {
+    expect(getSourceMatchSpec({}, userEval)).toEqual({ type: 'unknown' });
+    expect(getSourceMatchSpec({ event: {} }, userEval)).toEqual({ type: 'unknown' });
+    expect(getSourceMatchSpec({ event: { module: null } }, userEval)).toEqual({ type: 'unknown' });
+    expect(getSourceMatchSpec({ event: { module: '' } }, userEval)).toEqual({ type: 'unknown' });
+  });
+
+  it('returns single value when only event.module is present (no whenClause match)', () => {
+    expect(getSourceMatchSpec({ event: { module: 'aws' } }, userEval)).toEqual({
+      type: 'values',
+      values: ['aws'],
+    });
+  });
+
+  it('returns single value when only first chunk of data_stream.dataset is present', () => {
+    expect(getSourceMatchSpec({ data_stream: { dataset: 'aws.cloudtrail' } }, userEval)).toEqual({
+      type: 'values',
+      values: ['aws'],
+    });
+  });
+
+  it('returns full value when data_stream.dataset has no delimiter', () => {
+    // okta matches whenClause so spec expands to sourceMatchesAny
+    expect(getSourceMatchSpec({ data_stream: { dataset: 'okta' } }, userEval)).toEqual({
+      type: 'values',
+      values: ['okta', 'entityanalytics_okta'],
+    });
+    // aws has no whenClause match so single value
+    expect(getSourceMatchSpec({ data_stream: { dataset: 'aws' } }, userEval)).toEqual({
+      type: 'values',
+      values: ['aws'],
+    });
+  });
+
+  it('returns unknown when data_stream.dataset starts with delimiter (empty first chunk)', () => {
+    expect(getSourceMatchSpec({ data_stream: { dataset: '.logs' } }, userEval)).toEqual({
+      type: 'unknown',
+    });
+  });
+
+  it('expands to sourceMatchesAny when whenClause matches (event.module)', () => {
+    expect(getSourceMatchSpec({ event: { module: 'okta' } }, userEval)).toEqual({
+      type: 'values',
+      values: ['okta', 'entityanalytics_okta'],
+    });
+    expect(getSourceMatchSpec({ event: { module: 'entityanalytics_okta' } }, userEval)).toEqual({
+      type: 'values',
+      values: ['okta', 'entityanalytics_okta'],
+    });
+  });
+
+  it('expands to sourceMatchesAny when whenClause matches (data_stream.dataset first chunk)', () => {
+    expect(getSourceMatchSpec({ data_stream: { dataset: 'okta.logs' } }, userEval)).toEqual({
+      type: 'values',
+      values: ['okta', 'entityanalytics_okta'],
+    });
+  });
+
+  it('prefers event.module over data_stream.dataset (first source wins)', () => {
+    expect(
+      getSourceMatchSpec(
+        { event: { module: 'azure' }, data_stream: { dataset: 'okta.logs' } },
+        userEval
+      )
+    ).toEqual({ type: 'values', values: ['azure', 'entityanalytics_entra_id'] });
   });
 });

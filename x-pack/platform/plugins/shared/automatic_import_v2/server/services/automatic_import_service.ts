@@ -25,8 +25,13 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { IntegrationResponse, DataStreamResponse, TaskStatus, InputType } from '../../common';
-import type { IntegrationAttributes, DataStreamAttributes } from './saved_objects/schemas/types';
+import type {
+  IntegrationAttributes,
+  DataStreamAttributes,
+  ChangelogEntry,
+} from './saved_objects/schemas/types';
 import type { AddSamplesToDataStreamParams as SamplesToDataStreamParams } from './samples_index/index_service';
 import { AutomaticImportSamplesIndexService } from './samples_index/index_service';
 import { AutomaticImportSavedObjectService } from './saved_objects/saved_objects_service';
@@ -40,6 +45,10 @@ import type {
   CreateUpdateIntegrationParams,
 } from '../routes/types';
 import { TASK_STATUSES } from './saved_objects/constants';
+import type { BuildIntegrationPackageResult } from './build_integration/build_integration_service';
+import { buildIntegrationPackage } from './build_integration/build_integration_service';
+import { generateFieldMappings } from './build_integration/fields';
+import { validateFieldMappings } from './build_integration/validate_fields';
 
 /**
  * Derives the integration status from its data streams.
@@ -105,6 +114,13 @@ import { DATA_STREAM_CREATION_TASK_TYPE } from './task_manager';
 import { ErrorUtils } from '../errors/util';
 import type { AutomaticImportV2PluginStartDependencies } from '../types';
 
+function bumpMinorVersion(version: string): string {
+  const parts = version.split('.').map(Number);
+  const major = parts[0] ?? 0;
+  const minor = parts[1] ?? 0;
+  return `${major}.${minor + 1}.0`;
+}
+
 export class AutomaticImportService {
   private pluginStop$: Subject<void>;
   private samplesIndexService: AutomaticImportSamplesIndexService;
@@ -158,20 +174,21 @@ export class AutomaticImportService {
         this.logger.debug(
           `Integration ${integrationParams.integrationId} already exists, updating it`
         );
-        // Build a full IntegrationAttributes object for the saved objects update API
         const existing = await this.savedObjectService.getIntegration(
           integrationParams.integrationId
         );
-        const newVersion = existing.metadata?.version || '0.0.0';
+        const currentVersion = existing.metadata?.version || '0.1.0';
+        const wasApproved = existing.status === TASK_STATUSES.approved;
+        const newVersion = wasApproved ? bumpMinorVersion(currentVersion) : currentVersion;
 
         const updateData: IntegrationAttributes = {
           ...existing,
           last_updated_by: authenticatedUser.username,
           last_updated_at: new Date().toISOString(),
-          status:
-            existing.status === TASK_STATUSES.approved ? TASK_STATUSES.completed : existing.status,
+          status: wasApproved ? TASK_STATUSES.completed : existing.status,
           metadata: {
             ...existing.metadata,
+            version: newVersion,
             ...(integrationParams.title ? { title: integrationParams.title } : {}),
             ...(integrationParams.description
               ? { description: integrationParams.description }
@@ -284,6 +301,19 @@ export class AutomaticImportService {
       );
     }
 
+    const title = existing.metadata?.title ?? integrationId;
+    const isInitialRelease = !existing.changelog || existing.changelog.length === 0;
+    const changelogEntry: ChangelogEntry = {
+      version,
+      changes: [
+        {
+          description: isInitialRelease ? `Initial release of ${title}` : `Updated ${title}`,
+          type: 'enhancement',
+          link: '',
+        },
+      ],
+    };
+
     const updateData: IntegrationAttributes = {
       ...existing,
       last_updated_by: authenticatedUser.username,
@@ -292,10 +322,20 @@ export class AutomaticImportService {
       metadata: {
         ...existing.metadata,
       },
+      changelog: [changelogEntry, ...(existing.changelog ?? [])],
     };
 
-    // Bump semantic version (defaults to patch) on approval.
     await this.savedObjectService.updateIntegration(updateData, version);
+  }
+
+  public async buildIntegrationPackage(
+    integrationId: string,
+    fieldsMetadataClient: IFieldsMetadataClient
+  ): Promise<BuildIntegrationPackageResult> {
+    assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    const integration = await this.savedObjectService.getIntegration(integrationId);
+    const dataStreams = await this.savedObjectService.getAllDataStreams(integrationId);
+    return buildIntegrationPackage(integration, dataStreams, fieldsMetadataClient);
   }
 
   public async createDataStream(
@@ -431,6 +471,26 @@ export class AutomaticImportService {
       jobType: DATA_STREAM_CREATION_TASK_TYPE,
     });
 
+    const existing = await this.savedObjectService.getIntegration(integrationId);
+    if (existing.status === TASK_STATUSES.approved) {
+      const currentVersion = existing.metadata?.version || '0.1.0';
+      const newVersion = bumpMinorVersion(currentVersion);
+
+      const updateData: IntegrationAttributes = {
+        ...existing,
+        status: TASK_STATUSES.completed,
+        metadata: {
+          ...existing.metadata,
+          version: newVersion,
+        },
+      };
+
+      await this.savedObjectService.updateIntegration(updateData, newVersion);
+      this.logger.debug(
+        `Integration ${integrationId} status reset from approved to completed, version bumped to ${newVersion}`
+      );
+    }
+
     this.logger.debug(`Data stream ${dataStreamId} scheduled for reanalysis with task ${taskId}`);
   }
 
@@ -480,12 +540,13 @@ export class AutomaticImportService {
     dataStreamId: string;
     ingestPipeline: string | Record<string, unknown>;
     esClient: ElasticsearchClient;
+    fieldsMetadataClient: IFieldsMetadataClient;
   }): Promise<{
     ingest_pipeline: Record<string, unknown>;
     results: Array<Record<string, unknown>>;
   }> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
-    const { integrationId, dataStreamId, ingestPipeline, esClient } = params;
+    const { integrationId, dataStreamId, ingestPipeline, esClient, fieldsMetadataClient } = params;
 
     let parsedPipeline: Pipeline;
     try {
@@ -534,11 +595,26 @@ export class AutomaticImportService {
           source !== undefined
       );
 
+    const fieldMapping = await generateFieldMappings(
+      pipelineDocs as Array<Record<string, unknown>>,
+      fieldsMetadataClient
+    );
+
+    const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
+    if (!validationResult.valid) {
+      this.logger.warn(
+        `Field mapping validation warnings for ${dataStreamId}: ${validationResult.errors.join(
+          ', '
+        )}`
+      );
+    }
+
     await this.savedObjectService.updateDataStreamSavedObjectAttributes({
       integrationId,
       dataStreamId,
       ingestPipeline: parsedPipeline,
       pipelineDocs,
+      fieldMapping,
       status: TASK_STATUSES.completed,
     });
 

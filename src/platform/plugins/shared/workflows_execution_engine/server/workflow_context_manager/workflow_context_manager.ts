@@ -27,6 +27,7 @@ import { WorkflowScopeStack } from './workflow_scope_stack';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN } from '../../common/step_executions_index';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import { generateEncodedStepExecutionId, isTemplateExpression } from '../utils';
+import { isSerializedError } from '../utils/errors';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -406,9 +407,9 @@ export class WorkflowContextManager {
         // Proper solution would be to have dynamic context object that would resolve properties on demand,
         // but it requires significant changes in the codebase.
         // So for now, we just set the error on the context when we are in fallback scope.
-        const stepContextGeneric = stepContext as Record<string, unknown>;
-        if (!stepContextGeneric.error) {
-          stepContextGeneric.error = stepExecution.state?.error;
+        const rawError = stepExecution.state?.error;
+        if (isSerializedError(rawError)) {
+          stepContext.error = rawError;
         }
       }
     }

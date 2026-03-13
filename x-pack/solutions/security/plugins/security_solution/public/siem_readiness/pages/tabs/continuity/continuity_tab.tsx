@@ -34,26 +34,21 @@ import {
   getContinuityCaseTags,
 } from './continuity_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
+import {
+  getFailureRateString,
+  isCriticalFailureRateFromString,
+} from '../../../hooks/visibility_status_utils';
 import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const DATA_CONTINUITY_CASE_TAGS = ['siem-readiness', 'data-continuity', 'ingest-pipelines'];
-// Extended PipelineStats with computed fields and Record<string, unknown> for CategoryAccordionTable
 
 export interface PipelineInfoWithStatus extends PipelineStats, Record<string, unknown> {
   failureRate: string;
   status: 'healthy' | 'critical';
 }
 
-export const getDocInjectionFailRate = (failedDocsCount: number, docsCount: number): string => {
-  return docsCount > 0 ? ((failedDocsCount / docsCount) * 100).toFixed(1) : '0.0';
-};
-
-export const isCriticalFailureRate = (failureRate: string): boolean => {
-  return Number(failureRate) >= 1;
-};
-
-export const getDocInjectionStatus = (failureRate: string): 'healthy' | 'critical' => {
-  return isCriticalFailureRate(failureRate) ? 'critical' : 'healthy';
+const getDocInjectionStatus = (failureRate: string): 'healthy' | 'critical' => {
+  return isCriticalFailureRateFromString(failureRate) ? 'critical' : 'healthy';
 };
 
 export const getIngestPipelineUrl = (basePath: string, pipelineName: string): string => {
@@ -94,7 +89,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     const categoryPipelinesMap = new Map<string, PipelineInfoWithStatus[]>();
 
     pipelinesData.forEach((pipeline) => {
-      const failureRate = getDocInjectionFailRate(pipeline.failedDocsCount, pipeline.docsCount);
+      const failureRate = getFailureRateString(pipeline.failedDocsCount, pipeline.docsCount);
 
       const pipelineWithStats: PipelineInfoWithStatus = {
         ...pipeline,
@@ -230,7 +225,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
             href={getIngestPipelineUrl(basePath, pipelineName)}
             target="_blank"
           >
-            {isCriticalFailureRate(item.failureRate)
+            {isCriticalFailureRateFromString(item.failureRate)
               ? i18n.translate(
                   'xpack.securitySolution.siemReadiness.continuity.action.viewFailure',
                   {
@@ -256,8 +251,8 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     const totalPipelines = category.items.length;
     const totalDocs = category.items.reduce((sum, p) => sum + p.docsCount, 0);
     const totalFailed = category.items.reduce((sum, p) => sum + p.failedDocsCount, 0);
-    const overallFailureRate = getDocInjectionFailRate(totalFailed, totalDocs);
-    const isCritical = isCriticalFailureRate(overallFailureRate);
+    const overallFailureRate = getFailureRateString(totalFailed, totalDocs);
+    const isCritical = isCriticalFailureRateFromString(overallFailureRate);
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

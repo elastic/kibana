@@ -247,6 +247,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           config: connectorWithId.config,
           connectorId: connectorWithId.id,
           name: connectorWithId.name,
+          isInferenceEndpoint: false,
           capabilities: {
             contextWindowSize: 32000,
           },

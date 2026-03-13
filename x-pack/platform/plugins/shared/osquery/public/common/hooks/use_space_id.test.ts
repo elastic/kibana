@@ -48,7 +48,7 @@ describe('useSpaceId', () => {
     expect(result.current).toBe('my-space');
   });
 
-  test('returns undefined when spaces plugin is not available', async () => {
+  test('returns default when spaces plugin is not available', async () => {
     useKibanaMock.mockReturnValue({
       services: {},
     } as unknown as ReturnType<typeof useKibana>);
@@ -57,6 +57,22 @@ describe('useSpaceId', () => {
 
     await act(async () => {});
 
-    expect(result.current).toBeUndefined();
+    expect(result.current).toBe('default');
+  });
+
+  test('falls back to default when getActiveSpace rejects', async () => {
+    useKibanaMock.mockReturnValue({
+      services: {
+        spaces: {
+          getActiveSpace: jest.fn().mockRejectedValue(new Error('space not found')),
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+
+    const { result } = renderHook(() => useSpaceId());
+
+    await act(async () => {});
+
+    expect(result.current).toBe('default');
   });
 });
