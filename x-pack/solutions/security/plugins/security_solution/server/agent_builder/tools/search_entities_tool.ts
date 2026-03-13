@@ -12,7 +12,6 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import {
   getHistorySnapshotIndexPattern,
-  getLatestEntitiesIndexName,
 } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import {
@@ -23,7 +22,16 @@ import type { ExperimentalFeatures } from '../../../common';
 import { AssetCriticalityLevel } from '../../../common/api/entity_analytics/asset_criticality/common.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import {
+  ENTITY_STORE_ENTITY_TYPE_FIELD,
+  ENTITY_STORE_ENTITY_ID_FIELD,
+  getRowValue,
+  addOrUpdateEntityAttachment,
+} from '../utils/entity_attachment_utils';
 import { securityTool } from './constants';
+
+const getLatestEntitiesIndexName = (spaceId: string) =>
+  `.entities.v2.latest.security_${spaceId}`;
 
 const ENTITY_STORE_KEEP_FIELDS = [
   '@timestamp',
@@ -417,7 +425,7 @@ export const searchEntitiesTool = (
         }
       },
     },
-    handler: async (params, { spaceId, esClient }) => {
+    handler: async (params, { spaceId, esClient, attachments }) => {
       logger.debug(
         `${SECURITY_SEARCH_ENTITIES_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
@@ -443,6 +451,26 @@ export const searchEntitiesTool = (
             ],
           };
         }
+
+        const entities = values.flatMap((row) => {
+          const entityId = String(getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD) ?? '');
+          if (!entityId) return [];
+
+          const entityTypeRaw = getRowValue(columns, row, ENTITY_STORE_ENTITY_TYPE_FIELD);
+          // Fall back to parsing the type prefix from the entity ID (e.g. "host:server1" → "host")
+          const entityType =
+            entityTypeRaw != null ? String(entityTypeRaw) : entityId.split(':')[0] ?? '';
+
+          return [{ entityType, entityId }];
+        });
+
+        console.log(`Entities found: ${JSON.stringify(entities)}`);
+
+        await addOrUpdateEntityAttachment(
+          attachments,
+          entities,
+          'Entities matching search criteria'
+        );
 
         return {
           results: values.map((_, rowIdx) => ({

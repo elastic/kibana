@@ -12,25 +12,27 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import {
   getHistorySnapshotIndexPattern,
-  getLatestEntitiesIndexName,
 } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../common';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
-import {
-  DEFAULT_ALERTS_INDEX,
-  ESSENTIAL_ALERT_FIELDS,
-  SecurityAgentBuilderAttachments,
-} from '../../../common/constants';
+import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 import { getRiskScoreTimeSeriesIndex } from '../../../common/entity_analytics/risk_engine/indices';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import {
+  ENTITY_STORE_ENTITY_TYPE_FIELD,
+  ENTITY_STORE_ENTITY_ID_FIELD,
+  getRowValue,
+  addOrUpdateEntityAttachment,
+} from '../utils/entity_attachment_utils';
 import { securityTool } from './constants';
 
+const getLatestEntitiesIndexName = (spaceId: string) =>
+  `.entities.v2.latest.security_${spaceId}`;
+
 const ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD = 'entity.risk.calculated_score_norm';
-const ENTITY_STORE_ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
-const ENTITY_STORE_ENTITY_ID_FIELD = 'entity.id';
 
 const schema = z.object({
   entityType: IdentifierType.describe(
@@ -85,14 +87,6 @@ export const normalizeEntityId = (
   return entityId.startsWith(prefix) ? entityId : `${prefix}${entityId}`;
 };
 
-const getRowValue = (
-  columns: Array<{ name: string }>,
-  row: unknown[],
-  columnName: string
-): unknown => {
-  const idx = columns.findIndex((col) => col.name === columnName);
-  return idx >= 0 ? row[idx] : undefined;
-};
 interface GetAlertIdsFromRiskScoreIndexParams {
   entityId: string;
   entityType: string;
@@ -385,20 +379,29 @@ export const getEntityTool = (
           )
         );
 
-        await Promise.all(
-          enrichedResults.map((res) =>
-            attachments.add({
-              type: SecurityAgentBuilderAttachments.entity,
-              data: {
-                identifier: 'Camille_Kris',
-                identifierType: 'user',
-                attachmentLabel: 'User',
-                link: '/app/security/users/name/Camille_Kris/events',
-              },
-              description: `User Entity Camille_Kris`,
-            })
-          )
-        );
+        // console.log(`Adding attachment in GET tool`);
+
+        // await addOrUpdateEntityAttachment(
+        //   attachments,
+        //   enrichedResults.map((res) => {
+        //     const firstValue = res.data.values[0];
+        //     const entityTypeValue = getRowValue(
+        //       res.data.columns,
+        //       firstValue,
+        //       ENTITY_STORE_ENTITY_TYPE_FIELD
+        //     );
+        //     const entityIdValue = getRowValue(
+        //       res.data.columns,
+        //       firstValue,
+        //       ENTITY_STORE_ENTITY_ID_FIELD
+        //     );
+        //     return {
+        //       entityType: String(entityTypeValue ?? ''),
+        //       entityId: String(entityIdValue ?? ''),
+        //     };
+        //   }),
+        //   `Entity: ${normalizedEntityId}`
+        // );
 
         return { results: enrichedResults };
       } catch (error) {

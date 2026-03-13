@@ -119,6 +119,9 @@ if 10 entities are found using \`security.search_entities\`, you MUST call \`sec
 - Recommend investigating external activities for user entities
 - Recommend investigating vulnerabilities and exposures for host and service entities
 
+### 5. Render attachments
+- You MUST ALWAYS render entity attachments. Use the \`attachments.read\` tool to read the entity attachment.
+
 ## Examples
 
 ### Example 1: Riskiest Users
@@ -129,6 +132,7 @@ Steps:
 1. Use the 'security.search_entities' tool to get the top N users sorted by their normalized risk scores.
 2. For each user, use the 'security.get_entity' tool to get their full profile. If 10 entities are returned, you MUST call the 'security.get_entity' tool 10 times to get each user's profile.
 3. Present the results in a table format showing entity ID, risk score, risk level, asset criticality level and any watchlists they belong to.
+4. Use the 'attachments.read' tool to read and render the entity attachment
 
 ### Example 2: Risk Score Changes Over Time
 
@@ -140,6 +144,7 @@ Steps:
    increases in risk score.
 3. For each entity with significant risk score change, use the 'security.get_entity' tool with an interval of '90d' to get their full profile history.
 4. Present the findings in a table format showing entity ID, previous risk score, current risk score, risk score change, and a summary of how their risk score has changed over the interval.
+5. Use the 'attachments.read' tool to read and render the entity attachment
 
 ### Example 3: High Impact Assets
 
@@ -149,6 +154,7 @@ Steps:
 1. Use the 'security.search_entities' tool to get the top N hosts sorted by their normalized risk scores, using parameter
 criticalityLevels: ['high_impact', 'extreme_impact'] to filter for high impact.
 2. Present the results in a table format showing entity ID, risk score, risk level, and asset criticality level
+3. Use the 'attachments.read' tool to read and render the entity attachment
 
 ### Example 4: Risk Score History
 
@@ -158,6 +164,7 @@ Steps:
 1. Use the 'security.get_entity' tool with an interval of '30d' to fetch Cielo39's current profile and profile_history for the last 30 days
 2. Analyze the risk scores in the profile history along with the current risk score to determine if the change in risk score is significant (e.g., greater than ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points).
 3. Summarize the trends in risk score changes (stable, increasing, decreasing) and present findings in a concise format showing the previous risk scores, current risk score, and whether the change is significant.
+4. Use the 'attachments.read' tool to read and render the entity attachment
 
 ## Best Practices
 - Always use \`calculated_score_norm\` (0-100) when reporting risk scores
@@ -300,6 +307,6 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
         : [getRiskScoreInlineTool(ctx), getAssetCriticalityInlineTool(ctx)],
     getRegistryTools: () =>
       ctx.isEntityStoreV2Enabled
-        ? [SECURITY_GET_ENTITY_TOOL_ID, SECURITY_SEARCH_ENTITIES_TOOL_ID]
+        ? ['attachments.read', SECURITY_GET_ENTITY_TOOL_ID, SECURITY_SEARCH_ENTITIES_TOOL_ID]
         : [],
   });
