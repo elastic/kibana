@@ -162,6 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
           isBrowser: true,
           location: { id: testFleetPolicyID },
           mws: [mwObject],
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });
@@ -186,6 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
           isBrowser: true,
           location: { id: testFleetPolicyID },
           mws: [mwObject],
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });

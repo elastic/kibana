@@ -160,6 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
             location: { id: pvtLoc.id },
             namespace: formatKibanaNamespace(SPACE_ID),
             spaceId: SPACE_ID,
+            packageVersion: testPrivateLocations.installedVersion,
           })
         );
         await supertestWithoutAuth
