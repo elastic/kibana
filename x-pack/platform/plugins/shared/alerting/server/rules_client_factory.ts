@@ -39,6 +39,11 @@ import {
   RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import {
+  UIAM_LOGS_CREDENTIALS_TAGS,
+  UIAM_LOGS_GRANT_TAGS,
+  UIAM_LOGS_INVALIDATE_TAGS,
+} from './constants';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -173,7 +178,10 @@ export class RulesClientFactory {
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
       this.logger.error(
-        `Failed to create UIAM API key for alerting rule : ${name}: Invalid or missing UIAM credentials`
+        `Failed to create UIAM API key for alerting rule : ${name}: Invalid or missing UIAM credentials`,
+        {
+          tags: UIAM_LOGS_CREDENTIALS_TAGS,
+        }
       );
       return;
     }
@@ -182,14 +190,20 @@ export class RulesClientFactory {
         name: `uiam-${name}`,
       });
       if (!result) {
-        this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`);
+        this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`, {
+          tags: UIAM_LOGS_GRANT_TAGS,
+        });
         return;
       }
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       this.logger.error(
-        `Failed to create UIAM API key for alerting rule : ${name}: ${errorMessage}`
+        `Failed to create UIAM API key for alerting rule : ${name}: ${errorMessage}`,
+        {
+          tags: UIAM_LOGS_GRANT_TAGS,
+          error: { stack_trace: err.stack },
+        }
       );
       return;
     }
@@ -208,7 +222,10 @@ export class RulesClientFactory {
       this.logger.error(
         `Failed to invalidate UIAM API key for alerting rule : ${ruleName}: ${result.error_details
           ?.map((error) => error.reason)
-          .join(', ')}  `
+          .join(', ')}  `,
+        {
+          tags: UIAM_LOGS_INVALIDATE_TAGS,
+        }
       );
     }
   }
