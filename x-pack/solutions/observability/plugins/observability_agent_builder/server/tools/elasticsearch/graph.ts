@@ -114,12 +114,19 @@ const isValidLangchainTool = (tool: Tool, esClient: IScopedClusterClient): boole
 const parseToolResponse = async (
   toolMessage: BaseMessage,
   chatModel: BaseChatModel
-): Promise<{ name: string; response: unknown; console_request?: string }> => {
+): Promise<{
+  name: string;
+  response?: unknown;
+  console_request?: string;
+  error?: string;
+  statusCode?: number;
+}> => {
   const parsedContent = JSON.parse(toolMessage.content as string);
-  if (parsedContent.error) {
+  if ('error' in parsedContent) {
     return {
       name: toolMessage.name || 'unknown',
-      response: parsedContent.error,
+      error: parsedContent.error,
+      statusCode: parsedContent.statusCode,
       console_request: parsedContent.consoleRequest,
     };
   }

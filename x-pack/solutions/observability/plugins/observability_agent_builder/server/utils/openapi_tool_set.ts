@@ -112,7 +112,8 @@ const buildHandler = (operation: OperationObject): ToolHandler => {
 
       return { response, consoleRequest };
     } catch (error) {
-      return { error: error.message, consoleRequest };
+      const statusCode = error.statusCode ?? error.meta?.statusCode;
+      return { error: error.message, statusCode, consoleRequest };
     }
   };
 };
