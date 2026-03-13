@@ -323,6 +323,32 @@ export const createElasticsearchToolGraph = async ({
     const response = await searchModel.invoke(
       getElasticsearchPrompt({ nlQuery: state.nlQuery, tools })
     );
+    if (response.tool_calls?.length === 0) {
+      if (response.content) {
+        return new Command({
+          update: {
+            toolOutput: {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    message: response.content,
+                  },
+                },
+              ],
+            },
+          },
+          goto: END,
+        });
+      }
+
+      return new Command({
+        update: {
+          toolOutput: { results: [createErrorResult(`No tools were selected`)] },
+        },
+        goto: END,
+      });
+    }
     if (isDangerousOperation(response, state.openApiToolSet)) {
       return new Command({
         update: {
@@ -367,7 +393,7 @@ export const createElasticsearchToolGraph = async ({
     })
     .addNode(NODE_NAMES.GENERATE_TOOLS, generateTools)
     .addNode(NODE_NAMES.LLM_SELECT_TOOLS, llmSelectTools, {
-      ends: [NODE_NAMES.ASK_FOR_CONFIRMATION, NODE_NAMES.EXECUTE_TOOL],
+      ends: [NODE_NAMES.ASK_FOR_CONFIRMATION, NODE_NAMES.EXECUTE_TOOL, END],
     })
     .addNode(NODE_NAMES.ASK_FOR_CONFIRMATION, askForConfirmation)
     .addNode(NODE_NAMES.EXECUTE_TOOL, executeTool)
