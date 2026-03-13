@@ -9,8 +9,23 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { Operations, ReadOperations, WriteOperations } from '../../authorization';
 import { createCasesClientMockArgs } from '../mocks';
 import { createTemplatesSubClient } from './client';
+import type { TemplatesFindRequest, TemplatesFindResponse } from '../../../common/types/api/template/v1';
+import type { SavedObject } from '@kbn/core/server';
+import type { Template } from '../../../common/types/domain/template/latest';
 
-const mockTemplateSO = {
+const mockFindRequest: TemplatesFindRequest = {
+  page: 1,
+  perPage: 10,
+  sortField: 'name',
+  sortOrder: 'asc',
+  search: '',
+  tags: [],
+  author: [],
+  owner: [],
+  isDeleted: false,
+};
+
+const mockTemplateSO: SavedObject<Template> = {
   id: 'template-so-id',
   type: 'cases-templates',
   references: [],
@@ -25,11 +40,17 @@ const mockTemplateSO = {
     fieldCount: 0,
     fieldNames: [],
     usageCount: 0,
-    lastUsedAt: null,
-    author: 'damaged_raccoon',
     description: 'A test template',
     tags: [],
+    author: 'damaged_raccoon',
   },
+};
+
+const mockFindResponse: TemplatesFindResponse = {
+  templates: [{ ...mockTemplateSO.attributes, fieldSearchMatches: false }],
+  total: 1,
+  page: 1,
+  perPage: 10,
 };
 
 describe('TemplatesSubClient', () => {
@@ -44,14 +65,9 @@ describe('TemplatesSubClient', () => {
 
   describe('getAllTemplates', () => {
     it('calls getAuthorizationFilter with GetAllTemplates operation', async () => {
-      clientArgs.services.templatesService.getAllTemplates.mockResolvedValue({
-        templates: [],
-        total: 0,
-        page: 1,
-        perPage: 10,
-      });
+      clientArgs.services.templatesService.getAllTemplates.mockResolvedValue(mockFindResponse);
 
-      await client.getAllTemplates({ page: 1, perPage: 10 });
+      await client.getAllTemplates(mockFindRequest);
 
       expect(clientArgs.authorization.getAuthorizationFilter).toHaveBeenCalledWith(
         Operations[ReadOperations.GetAllTemplates]
@@ -62,20 +78,18 @@ describe('TemplatesSubClient', () => {
       const error = new Error('Unauthorized');
       clientArgs.authorization.getAuthorizationFilter.mockRejectedValue(error);
 
-      await expect(client.getAllTemplates({ page: 1, perPage: 10 })).rejects.toThrow('Unauthorized');
+      await expect(client.getAllTemplates(mockFindRequest)).rejects.toThrow('Unauthorized');
     });
 
     it('delegates to templatesService when authorized', async () => {
-      const mockResponse = { templates: [mockTemplateSO], total: 1, page: 1, perPage: 10 };
-      clientArgs.services.templatesService.getAllTemplates.mockResolvedValue(mockResponse);
+      clientArgs.services.templatesService.getAllTemplates.mockResolvedValue(mockFindResponse);
 
-      const result = await client.getAllTemplates({ page: 1, perPage: 10 });
+      const result = await client.getAllTemplates(mockFindRequest);
 
-      expect(clientArgs.services.templatesService.getAllTemplates).toHaveBeenCalledWith({
-        page: 1,
-        perPage: 10,
-      });
-      expect(result).toEqual(mockResponse);
+      expect(clientArgs.services.templatesService.getAllTemplates).toHaveBeenCalledWith(
+        mockFindRequest
+      );
+      expect(result).toEqual(mockFindResponse);
     });
   });
 
