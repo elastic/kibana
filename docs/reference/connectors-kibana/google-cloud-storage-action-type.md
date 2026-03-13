@@ -17,7 +17,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [google-cloud-storage-connector-configuration]
 
-Google Cloud Storage connectors have the following configuration properties:
+Google Cloud Storage connectors have the following configuration property:
 
 Bearer Token
 :   A Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes. Refer to [Get API credentials](#google-cloud-storage-api-credentials) for instructions.
