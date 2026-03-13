@@ -19,6 +19,9 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 Confluence Cloud connectors have the following configuration properties:
 
+Account email
+:   Your Atlassian account email address used for Basic authentication.
+
 Subdomain
 :   Your Atlassian subdomain (for example, `your-domain` for `https://your-domain.atlassian.net`).
 
