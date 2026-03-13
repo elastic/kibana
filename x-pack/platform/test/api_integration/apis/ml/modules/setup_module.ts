@@ -522,7 +522,7 @@ export default ({ getService }: FtrProviderContext) => {
             datafeedState: DATAFEED_STATE.STOPPED,
           },
           {
-            jobId: 'pf20_rare_method_for_a_username_ea',
+            jobId: 'pf20_rare_method_for_a_user_id_ea',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
           },
