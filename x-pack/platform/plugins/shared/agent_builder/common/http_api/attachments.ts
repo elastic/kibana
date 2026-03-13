@@ -39,8 +39,6 @@ export interface RenameAttachmentResponse {
 export interface AttachmentStaleCheckResult {
   attachment_id: string;
   is_stale: boolean;
-  latest_version: number;
-  resolved_data?: unknown;
 }
 
 export interface CheckStaleAttachmentsResponse {

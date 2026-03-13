@@ -202,13 +202,10 @@ export const Conversation: React.FC<{}> = () => {
     );
 
     return (staleResponse?.attachments ?? [])
-      .filter((staleAttachment) => {
-        return (
-          staleAttachment.is_stale &&
-          staleAttachment.resolved_data !== undefined &&
-          !stagedAttachmentIds.has(staleAttachment.attachment_id)
-        );
-      })
+      .filter(
+        (staleAttachment) =>
+          staleAttachment.is_stale && !stagedAttachmentIds.has(staleAttachment.attachment_id)
+      )
       .map((staleAttachment) => {
         const conversationAttachment = attachmentsById.get(staleAttachment.attachment_id);
         const latestVersion = conversationAttachment?.versions.find(

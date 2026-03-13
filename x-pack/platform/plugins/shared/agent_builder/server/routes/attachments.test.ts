@@ -439,13 +439,12 @@ describe('Attachment Routes', () => {
   describe('GET /conversations/{conversation_id}/attachments/stale', () => {
     const path = '/attachments/stale';
 
-    it('checks staleness only against latest version and returns resolved data when stale', async () => {
-      const latestData = { value: 'v2' };
-      const resolvedData = { value: 'v3' };
+    it('returns not stale when type has origin and resolve but no isStale (no fallback)', async () => {
+      const resolveMock = jest.fn();
       const attachment = createMockAttachment({
         id: 'att-1',
         type: 'viz',
-        current_version: 2,
+        current_version: 1,
         origin: { savedObjectId: 'so-1' },
         versions: [
           {
@@ -453,12 +452,6 @@ describe('Attachment Routes', () => {
             data: { value: 'v1' },
             created_at: '2024-01-01',
             content_hash: hashContent({ value: 'v1' }),
-          },
-          {
-            version: 2,
-            data: latestData,
-            created_at: '2024-01-02',
-            content_hash: hashContent(latestData),
           },
         ],
       });
@@ -469,7 +462,7 @@ describe('Attachment Routes', () => {
             id: 'viz',
             validate: (input: unknown) => ({ valid: true, data: input }),
             format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-            resolve: jest.fn().mockResolvedValue(resolvedData),
+            resolve: resolveMock,
           };
         }
 
@@ -487,14 +480,13 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
-      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(resolveMock).not.toHaveBeenCalled();
       const result = mockResponse.ok.mock.calls[0][0];
       expect(result.body.attachments).toEqual([
         expect.objectContaining({
           attachment_id: 'att-1',
-          is_stale: true,
-          latest_version: 2,
-          resolved_data: resolvedData,
+          is_stale: false,
+          latest_version: 1,
         }),
       ]);
     });
@@ -547,12 +539,12 @@ describe('Attachment Routes', () => {
       ]);
     });
 
-    it('uses custom isStale when provided', async () => {
-      const resolvedData = { value: 'fresh' };
+    it('uses custom isStale when provided and invokes it with full VersionedAttachment', async () => {
       const attachment = createMockAttachment({
         id: 'att-custom',
         type: 'custom',
         origin: { id: 'source-1' },
+        origin_snapshot_at: '2024-01-01T12:00:00.000Z',
         versions: [
           {
             version: 1,
@@ -563,14 +555,15 @@ describe('Attachment Routes', () => {
         ],
       });
       mockConversationsClient.get.mockResolvedValue(createMockConversation([attachment]));
+      const isStaleMock = jest.fn().mockResolvedValue(true);
       mockGetInternalServices().attachments.getTypeDefinition.mockImplementation((type: string) => {
         if (type === 'custom') {
           return {
             id: 'custom',
             validate: (input: unknown) => ({ valid: true, data: input }),
             format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-            resolve: jest.fn().mockResolvedValue(resolvedData),
-            isStale: jest.fn().mockResolvedValue(true),
+            resolve: jest.fn(),
+            isStale: isStaleMock,
           };
         }
 
@@ -588,12 +581,24 @@ describe('Attachment Routes', () => {
 
       await handler(createMockContext(), request, mockResponse);
 
+      expect(isStaleMock).toHaveBeenCalledTimes(1);
+      expect(isStaleMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'att-custom',
+          type: 'custom',
+          origin: { id: 'source-1' },
+          origin_snapshot_at: '2024-01-01T12:00:00.000Z',
+          versions: attachment.versions,
+          current_version: 1,
+        }),
+        expect.any(Object)
+      );
       const result = mockResponse.ok.mock.calls[0][0];
       expect(result.body.attachments).toEqual([
         expect.objectContaining({
           attachment_id: 'att-custom',
           is_stale: true,
-          resolved_data: resolvedData,
+          latest_version: 1,
         }),
       ]);
     });

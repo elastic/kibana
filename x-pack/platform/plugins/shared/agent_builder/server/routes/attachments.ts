@@ -15,7 +15,8 @@ import type {
   AttachmentTypeDefinition,
 } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { ATTACHMENT_REF_ACTOR, hashContent } from '@kbn/agent-builder-common/attachments';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -74,106 +75,27 @@ const hasClientId = (attachment: { client_id?: string; versions: Array<{ data: u
 };
 
 interface ComputeStaleResultParams {
-  attachment: {
-    id: string;
-    type: string;
-    active?: boolean;
-    origin?: unknown;
-    current_version: number;
-    versions: Array<{ version: number; data: unknown; content_hash: string }>;
-  };
+  attachment: VersionedAttachment;
   typeDefinition?: AttachmentTypeDefinition;
   resolveContext: AttachmentResolveContext;
 }
-
-const createStaleResult = ({
-  attachmentId,
-  latestVersion,
-  isStale,
-  resolvedData,
-}: {
-  attachmentId: string;
-  latestVersion: number;
-  isStale: boolean;
-  resolvedData?: unknown;
-}): AttachmentStaleCheckResult => {
-  return {
-    attachment_id: attachmentId,
-    is_stale: isStale,
-    latest_version: latestVersion,
-    ...(resolvedData !== undefined ? { resolved_data: resolvedData } : {}),
-  };
-};
-
-interface RunStaleCheckParams {
-  latest: { data: unknown; content_hash: string };
-  origin: unknown;
-  resolveContext: AttachmentResolveContext;
-  resolve: NonNullable<AttachmentTypeDefinition['resolve']>;
-  customIsStale?: AttachmentTypeDefinition['isStale'];
-}
-
-const runStaleCheck = async ({
-  latest,
-  origin,
-  resolveContext,
-  resolve,
-  customIsStale,
-}: RunStaleCheckParams): Promise<{ isStale: boolean; resolvedData?: unknown }> => {
-  if (customIsStale) {
-    const isStale = await customIsStale(latest.data, origin, resolveContext);
-    if (!isStale) {
-      return { isStale: false };
-    }
-
-    const resolvedData = await resolve(origin, resolveContext);
-    return { isStale: true, resolvedData };
-  }
-
-  const resolvedData = await resolve(origin, resolveContext);
-  if (resolvedData === undefined) {
-    return { isStale: false };
-  }
-
-  return {
-    isStale: hashContent(resolvedData) !== latest.content_hash,
-    resolvedData,
-  };
-};
 
 const computeAttachmentStaleResult = async ({
   attachment,
   typeDefinition,
   resolveContext,
 }: ComputeStaleResultParams): Promise<AttachmentStaleCheckResult> => {
-  const latest = attachment.versions.find(
-    (version) => version.version === attachment.current_version
-  );
-  const latestVersion = latest?.version ?? attachment.current_version;
+  const shouldRunStaleCheck =
+    attachment.active !== false &&
+    attachment.origin !== undefined &&
+    typeDefinition?.isStale != null;
 
-  if (
-    attachment.active === false ||
-    !latest ||
-    attachment.origin === undefined ||
-    !typeDefinition?.resolve
-  ) {
-    return createStaleResult({ attachmentId: attachment.id, latestVersion, isStale: false });
+  if (!shouldRunStaleCheck) {
+    return { attachment_id: attachment.id, is_stale: false };
   }
 
-  const { isStale, resolvedData } = await runStaleCheck({
-    latest,
-    origin: attachment.origin,
-    resolveContext,
-    resolve: typeDefinition.resolve,
-    customIsStale: typeDefinition.isStale,
-  });
-
-  return createStaleResult({
-    attachmentId: attachment.id,
-    latestVersion,
-    isStale,
-    resolvedData,
-  });
+  const isStale = await typeDefinition.isStale!(attachment, resolveContext);
+  return { attachment_id: attachment.id, is_stale: isStale };
 };
 
 export function registerAttachmentRoutes({
