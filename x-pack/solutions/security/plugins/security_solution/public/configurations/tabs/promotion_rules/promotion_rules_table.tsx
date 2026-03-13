@@ -166,6 +166,9 @@ export const PromotionRulesTable = () => {
           },
         }}
         columns={rulesColumns}
+        tableLayout="auto"
+        scrollableInline
+        responsiveBreakpoint={false}
       />
     </>
   );
