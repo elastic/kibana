@@ -33,13 +33,8 @@ import { hasCapabilities } from '../../common/lib/capabilities';
 
 type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
 
-const isOnRuleFormPage = (): boolean => {
-  const { pathname } = window.location;
-  return (
-    (pathname.includes(RULES_PATH) && pathname.includes('/create')) ||
-    (pathname.includes(RULES_PATH) && pathname.includes('/edit'))
-  );
-};
+export const isOnRuleFormPage = (pathname: string): boolean =>
+  pathname.includes(RULES_PATH) && (pathname.includes('/create') || pathname.includes('/edit'));
 
 const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
   try {
@@ -288,7 +283,7 @@ export const createRuleAttachmentDefinition = ({
       return [];
     }
 
-    const onRuleForm = isOnRuleFormPage();
+    const onRuleForm = isOnRuleFormPage(window.location.pathname);
 
     return [
       {
