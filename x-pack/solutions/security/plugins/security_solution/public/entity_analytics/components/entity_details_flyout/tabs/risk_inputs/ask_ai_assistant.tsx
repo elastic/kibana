@@ -70,9 +70,13 @@ export const AskAiAssistant = <T extends EntityType>({
     () => ({
       attachmentType: SecurityAgentBuilderAttachments.entity,
       attachmentData: {
-        identifierType: entityType,
-        identifier: entityName,
-        attachmentLabel: `${entityType}: ${entityName}`,
+        entities: [
+          {
+            entityType,
+            entityId: entityName,
+            attachmentLabel: `${entityType}: ${entityName}`,
+          },
+        ],
       },
       attachmentPrompt: `Explain how inputs contributed to the risk score, including any risk modifiers such as asset criticality or privileged user monitoring status. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration both the risk score inputs and any modifiers that adjusted the final score.`,
     }),
