@@ -38,6 +38,7 @@ export {
   toolIdentifierFromToolCall,
   sanitizeToolId,
   createToolIdMappings,
+  reverseMap,
   type ToolIdMapping,
   type ToolsAndMappings,
 } from './tools';
