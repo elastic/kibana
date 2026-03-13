@@ -25,3 +25,17 @@ export interface FindRulesResponse {
   page: number;
   perPage: number;
 }
+
+export interface BulkRulesParams {
+  ids: string[];
+}
+
+export interface BulkOperationError {
+  id: string;
+  error: { message: string; statusCode: number };
+}
+
+export interface BulkOperationResponse {
+  rules: RuleResponse[];
+  errors: BulkOperationError[];
+}

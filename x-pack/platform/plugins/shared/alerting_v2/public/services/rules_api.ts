@@ -21,6 +21,16 @@ export interface FindRulesResponse {
   perPage: number;
 }
 
+export interface BulkOperationError {
+  id: string;
+  error: { message: string; statusCode: number };
+}
+
+export interface BulkOperationResponse {
+  rules: RuleResponse[];
+  errors: BulkOperationError[];
+}
+
 @injectable()
 export class RulesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
@@ -49,5 +59,26 @@ export class RulesApi {
 
   public async deleteRule(id: string) {
     await this.http.delete(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`);
+  }
+
+  public async bulkDeleteRules(ids: string[]) {
+    return this.http.post<BulkOperationResponse>(
+      `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk_delete`,
+      { body: JSON.stringify({ ids }) }
+    );
+  }
+
+  public async bulkEnableRules(ids: string[]) {
+    return this.http.post<BulkOperationResponse>(
+      `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk_enable`,
+      { body: JSON.stringify({ ids }) }
+    );
+  }
+
+  public async bulkDisableRules(ids: string[]) {
+    return this.http.post<BulkOperationResponse>(
+      `${INTERNAL_ALERTING_V2_RULE_API_PATH}/_bulk_disable`,
+      { body: JSON.stringify({ ids }) }
+    );
   }
 }

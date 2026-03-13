@@ -24,6 +24,9 @@ import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_obje
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type {
+  BulkOperationError,
+  BulkOperationResponse,
+  BulkRulesParams,
   CreateRuleParams,
   FindRulesParams,
   FindRulesResponse,
@@ -240,5 +243,196 @@ export class RulesClient {
       page,
       perPage,
     };
+  }
+
+  @withApm
+  public async bulkDeleteRules({ ids }: BulkRulesParams): Promise<BulkOperationResponse> {
+    const { spaceId } = this.getSpaceContext();
+    const errors: BulkOperationError[] = [];
+
+    // Remove associated task manager tasks (best-effort)
+    const taskIds = ids.map((id) => getRuleExecutorTaskId({ ruleId: id, spaceId }));
+    try {
+      await this.taskManager.bulkRemove(taskIds);
+    } catch {
+      // Task removal failures are non-fatal; continue with SO deletion.
+    }
+
+    const deleteResults = await this.rulesSavedObjectService.bulkDelete(ids);
+    for (const result of deleteResults) {
+      if (!result.success) {
+        errors.push({
+          id: result.id,
+          error: {
+            message: result.error.message,
+            statusCode: result.error.statusCode,
+          },
+        });
+      }
+    }
+
+    return { rules: [], errors };
+  }
+
+  @withApm
+  public async bulkEnableRules({ ids }: BulkRulesParams): Promise<BulkOperationResponse> {
+    const { spaceId } = this.getSpaceContext();
+    const errors: BulkOperationError[] = [];
+    const rules: RuleResponse[] = [];
+
+    const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
+
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const nowIso = new Date().toISOString();
+
+    const itemsToUpdate: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      version?: string;
+    }> = [];
+
+    for (const doc of fetchResults) {
+      if ('error' in doc) {
+        errors.push({
+          id: doc.id,
+          error: { message: doc.error.message, statusCode: doc.error.statusCode },
+        });
+        continue;
+      }
+
+      if (doc.attributes.enabled) {
+        // Already enabled — include in response without updating
+        rules.push(transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes));
+        continue;
+      }
+
+      const nextAttrs: RuleSavedObjectAttributes = {
+        ...doc.attributes,
+        enabled: true,
+        updatedBy: userProfileUid,
+        updatedAt: nowIso,
+      };
+
+      itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
+    }
+
+    if (itemsToUpdate.length > 0) {
+      const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
+
+      for (let i = 0; i < updateResults.length; i++) {
+        const updateResult = updateResults[i];
+        const item = itemsToUpdate[i];
+
+        if (!updateResult.success) {
+          errors.push({
+            id: updateResult.id,
+            error: {
+              message: updateResult.error.message,
+              statusCode: updateResult.error.statusCode,
+            },
+          });
+          continue;
+        }
+
+        rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
+
+        // Ensure tasks are scheduled for newly enabled rules
+        try {
+          await ensureRuleExecutorTaskScheduled({
+            services: { taskManager: this.taskManager },
+            input: {
+              ruleId: item.id,
+              spaceId,
+              schedule: { interval: item.attrs.schedule.every },
+              request: this.request as unknown as CoreKibanaRequest,
+            },
+          });
+        } catch {
+          // Task scheduling failure is non-fatal for bulk operations
+        }
+      }
+    }
+
+    return { rules, errors };
+  }
+
+  @withApm
+  public async bulkDisableRules({ ids }: BulkRulesParams): Promise<BulkOperationResponse> {
+    const { spaceId } = this.getSpaceContext();
+    const errors: BulkOperationError[] = [];
+    const rules: RuleResponse[] = [];
+
+    const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
+
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const nowIso = new Date().toISOString();
+
+    const itemsToUpdate: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      version?: string;
+    }> = [];
+
+    for (const doc of fetchResults) {
+      if ('error' in doc) {
+        errors.push({
+          id: doc.id,
+          error: { message: doc.error.message, statusCode: doc.error.statusCode },
+        });
+        continue;
+      }
+
+      if (!doc.attributes.enabled) {
+        // Already disabled — include in response without updating
+        rules.push(transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes));
+        continue;
+      }
+
+      const nextAttrs: RuleSavedObjectAttributes = {
+        ...doc.attributes,
+        enabled: false,
+        updatedBy: userProfileUid,
+        updatedAt: nowIso,
+      };
+
+      itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
+    }
+
+    if (itemsToUpdate.length > 0) {
+      const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
+
+      for (let i = 0; i < updateResults.length; i++) {
+        const updateResult = updateResults[i];
+        const item = itemsToUpdate[i];
+
+        if (!updateResult.success) {
+          errors.push({
+            id: updateResult.id,
+            error: {
+              message: updateResult.error.message,
+              statusCode: updateResult.error.statusCode,
+            },
+          });
+          continue;
+        }
+
+        rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
+      }
+    }
+
+    // Disable tasks for the successfully disabled rules (best-effort)
+    const disabledTaskIds = itemsToUpdate
+      .filter((item) => !errors.some((e) => e.id === item.id))
+      .map((item) => getRuleExecutorTaskId({ ruleId: item.id, spaceId }));
+
+    if (disabledTaskIds.length > 0) {
+      try {
+        await this.taskManager.bulkDisable(disabledTaskIds);
+      } catch {
+        // Task disable failure is non-fatal for bulk operations
+      }
+    }
+
+    return { rules, errors };
   }
 }

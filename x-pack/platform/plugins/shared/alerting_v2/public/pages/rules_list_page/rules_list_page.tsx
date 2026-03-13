@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiContextMenuItem,
@@ -24,6 +25,7 @@ import {
   EuiText,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
+  type EuiTableSelectionType,
 } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +34,8 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
+import { useBulkDeleteRules } from '../../hooks/use_bulk_delete_rules';
+import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_enable_disable_rules';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { DeleteConfirmationModal } from '../../components/rule/delete_confirmation_modal';
 import { paths } from '../../constants';
@@ -140,10 +144,61 @@ export const RulesListPage = () => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
+  const [selectedRules, setSelectedRules] = useState<RuleApiResponse[]>([]);
+  const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   const { data, isLoading, isError, error } = useFetchRules({ page, perPage });
   const deleteRuleMutation = useDeleteRule();
+  const bulkDeleteMutation = useBulkDeleteRules();
+  const bulkEnableMutation = useBulkEnableRules();
+  const bulkDisableMutation = useBulkDisableRules();
   const toggleEnabledMutation = useToggleRuleEnabled();
+
+  const selection: EuiTableSelectionType<RuleApiResponse> = useMemo(
+    () => ({
+      onSelectionChange: (selected) => setSelectedRules(selected),
+      selectable: () => true,
+      selectableMessage: (selectable) =>
+        selectable
+          ? ''
+          : i18n.translate('xpack.alertingV2.rulesList.selectionDisabled', {
+              defaultMessage: 'This rule cannot be selected',
+            }),
+    }),
+    []
+  );
+
+  const clearSelection = useCallback(() => setSelectedRules([]), []);
+
+  const selectedIds = useMemo(() => selectedRules.map((r) => r.id), [selectedRules]);
+
+  const handleBulkDelete = useCallback(() => {
+    setIsBulkActionsOpen(false);
+    setShowBulkDeleteConfirm(true);
+  }, []);
+
+  const onBulkDeleteConfirm = useCallback(() => {
+    bulkDeleteMutation.mutate(selectedIds, {
+      onSuccess: () => {
+        clearSelection();
+        setShowBulkDeleteConfirm(false);
+      },
+      onError: () => {
+        setShowBulkDeleteConfirm(false);
+      },
+    });
+  }, [bulkDeleteMutation, selectedIds, clearSelection]);
+
+  const handleBulkEnable = useCallback(() => {
+    setIsBulkActionsOpen(false);
+    bulkEnableMutation.mutate(selectedIds, { onSuccess: clearSelection });
+  }, [bulkEnableMutation, selectedIds, clearSelection]);
+
+  const handleBulkDisable = useCallback(() => {
+    setIsBulkActionsOpen(false);
+    bulkDisableMutation.mutate(selectedIds, { onSuccess: clearSelection });
+  }, [bulkDisableMutation, selectedIds, clearSelection]);
 
   const onTableChange = ({ page: tablePage }: CriteriaWithPagination<RuleApiResponse>) => {
     setPage(tablePage.index + 1);
@@ -170,7 +225,6 @@ export const RulesListPage = () => {
     {
       field: 'metadata',
       name: <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />,
-      width: '20%',
       truncateText: true,
       render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) =>
         metadata?.name ?? rule.id,
@@ -282,7 +336,7 @@ export const RulesListPage = () => {
   ];
 
   return (
-    <>
+    <div>
       <EuiPageHeader
         pageTitle={
           <FormattedMessage
@@ -324,39 +378,122 @@ export const RulesListPage = () => {
       ) : null}
       {data && !isError ? (
         <>
-          <EuiText size="xs" data-test-subj="rulesListShowingLabel">
-            <FormattedMessage
-              id="xpack.alertingV2.rulesList.showingLabel"
-              defaultMessage="Showing {rangeBold} of {totalBold}"
-              values={{
-                rangeBold: (
-                  <strong>
-                    {Math.min((page - 1) * perPage + 1, data.total)}-
-                    {Math.min(page * perPage, data.total)}
-                  </strong>
-                ),
-                totalBold: (
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.alertingV2.rulesList.showingLabelTotal"
-                      defaultMessage="{total} {total, plural, one {Rule} other {Rules}}"
-                      values={{ total: data.total }}
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" data-test-subj="rulesListShowingLabel">
+                <FormattedMessage
+                  id="xpack.alertingV2.rulesList.showingLabel"
+                  defaultMessage="Showing {rangeBold} of {totalBold}"
+                  values={{
+                    rangeBold: (
+                      <strong>
+                        {Math.min((page - 1) * perPage + 1, data.total)}-
+                        {Math.min(page * perPage, data.total)}
+                      </strong>
+                    ),
+                    totalBold: (
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.alertingV2.rulesList.showingLabelTotal"
+                          defaultMessage="{total} {total, plural, one {Rule} other {Rules}}"
+                          values={{ total: data.total }}
+                        />
+                      </strong>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            {selectedRules.length > 0 ? (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    button={
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType="arrowDown"
+                        iconSide="right"
+                        onClick={() => setIsBulkActionsOpen((open) => !open)}
+                        data-test-subj="bulkActionsButton"
+                      >
+                        <FormattedMessage
+                          id="xpack.alertingV2.rulesList.selectedCount"
+                          defaultMessage="{count} Selected"
+                          values={{ count: selectedRules.length }}
+                        />
+                      </EuiButtonEmpty>
+                    }
+                    isOpen={isBulkActionsOpen}
+                    closePopover={() => setIsBulkActionsOpen(false)}
+                    panelPaddingSize="none"
+                    anchorPosition="downLeft"
+                  >
+                    <EuiContextMenuPanel
+                      size="s"
+                      items={[
+                        <EuiContextMenuItem
+                          key="enable"
+                          icon={<EuiIcon type="checkCircle" size="m" aria-hidden={true} />}
+                          onClick={handleBulkEnable}
+                          data-test-subj="bulkEnableRules"
+                        >
+                          {i18n.translate('xpack.alertingV2.rulesList.bulkAction.enable', {
+                            defaultMessage: 'Enable',
+                          })}
+                        </EuiContextMenuItem>,
+                        <EuiContextMenuItem
+                          key="disable"
+                          icon={<EuiIcon type="crossInCircle" size="m" aria-hidden={true} />}
+                          onClick={handleBulkDisable}
+                          data-test-subj="bulkDisableRules"
+                        >
+                          {i18n.translate('xpack.alertingV2.rulesList.bulkAction.disable', {
+                            defaultMessage: 'Disable',
+                          })}
+                        </EuiContextMenuItem>,
+                        <EuiContextMenuItem
+                          key="delete"
+                          icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
+                          onClick={handleBulkDelete}
+                          data-test-subj="bulkDeleteRules"
+                        >
+                          {i18n.translate('xpack.alertingV2.rulesList.bulkAction.delete', {
+                            defaultMessage: 'Delete',
+                          })}
+                        </EuiContextMenuItem>,
+                      ]}
                     />
-                  </strong>
-                ),
-              }}
-            />
-          </EuiText>
+                  </EuiPopover>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="cross"
+                    color="danger"
+                    onClick={clearSelection}
+                    data-test-subj="clearSelectionButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.alertingV2.rulesList.clearSelection"
+                      defaultMessage="Clear selection"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </>
+            ) : null}
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiHorizontalRule margin="none" style={{ height: 2 }} />
         </>
       ) : null}
       <EuiBasicTable
         items={data?.items ?? []}
+        itemId="id"
         columns={columns}
         loading={isLoading}
         pagination={pagination}
         onChange={onTableChange}
+        selection={selection}
         responsiveBreakpoint={false}
         tableCaption={i18n.translate('xpack.alertingV2.rulesList.tableCaption', {
           defaultMessage: 'Rules',
@@ -371,6 +508,14 @@ export const RulesListPage = () => {
           isLoading={deleteRuleMutation.isLoading}
         />
       ) : null}
-    </>
+      {showBulkDeleteConfirm ? (
+        <DeleteConfirmationModal
+          ruleCount={selectedRules.length}
+          onCancel={() => setShowBulkDeleteConfirm(false)}
+          onConfirm={onBulkDeleteConfirm}
+          isLoading={bulkDeleteMutation.isLoading}
+        />
+      ) : null}
+    </div>
   );
 };

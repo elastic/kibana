@@ -629,4 +629,388 @@ describe('RulesClient', () => {
       expect(res.perPage).toBe(50);
     });
   });
+
+  describe('bulkDeleteRules', () => {
+    it('removes tasks and deletes saved objects for all ids', async () => {
+      const client = createClient();
+
+      getRuleExecutorTaskIdMock
+        .mockReturnValueOnce('task:rule-1')
+        .mockReturnValueOnce('task:rule-2');
+
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'rule-1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'rule-2', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      const res = await client.bulkDeleteRules({ ids: ['rule-1', 'rule-2'] });
+
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1', 'task:rule-2']);
+      expect(mockSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-1' },
+        { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-2' },
+      ]);
+      expect(res.rules).toEqual([]);
+      expect(res.errors).toEqual([]);
+    });
+
+    it('returns errors for rules that failed to delete', async () => {
+      const client = createClient();
+
+      getRuleExecutorTaskIdMock
+        .mockReturnValueOnce('task:rule-1')
+        .mockReturnValueOnce('task:rule-2');
+
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'rule-1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          {
+            id: 'rule-2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            success: false,
+            error: { error: 'Not Found', message: 'Rule not found', statusCode: 404 },
+          },
+        ],
+      });
+
+      const res = await client.bulkDeleteRules({ ids: ['rule-1', 'rule-2'] });
+
+      expect(res.rules).toEqual([]);
+      expect(res.errors).toEqual([
+        { id: 'rule-2', error: { message: 'Rule not found', statusCode: 404 } },
+      ]);
+    });
+
+    it('continues with deletion even if task removal fails', async () => {
+      const client = createClient();
+
+      getRuleExecutorTaskIdMock
+        .mockReturnValueOnce('task:rule-1')
+        .mockReturnValueOnce('task:rule-2');
+
+      taskManager.bulkRemove.mockRejectedValueOnce(new Error('task removal failed'));
+
+      mockSavedObjectsClient.bulkDelete.mockResolvedValueOnce({
+        statuses: [
+          { id: 'rule-1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'rule-2', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      const res = await client.bulkDeleteRules({ ids: ['rule-1', 'rule-2'] });
+
+      expect(res.errors).toEqual([]);
+    });
+  });
+
+  describe('bulkEnableRules', () => {
+    it('enables disabled rules and returns updated responses', async () => {
+      const client = createClient();
+
+      const disabledAttrs = createRuleSoAttributes({
+        metadata: { name: 'disabled-rule' },
+        enabled: false,
+      });
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: disabledAttrs,
+            version: 'v1',
+            references: [],
+          },
+        ],
+      });
+
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: { ...disabledAttrs, enabled: true },
+            references: [],
+          },
+        ],
+      });
+
+      const res = await client.bulkEnableRules({ ids: ['rule-1'] });
+
+      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          id: 'rule-1',
+          attributes: expect.objectContaining({
+            enabled: true,
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          }),
+        }),
+      ]);
+
+      expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: expect.objectContaining({ ruleId: 'rule-1' }),
+        })
+      );
+
+      expect(res.rules).toHaveLength(1);
+      expect(res.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1', enabled: true }));
+      expect(res.errors).toEqual([]);
+    });
+
+    it('skips already-enabled rules without updating them', async () => {
+      const client = createClient();
+
+      const enabledAttrs = createRuleSoAttributes({
+        metadata: { name: 'enabled-rule' },
+        enabled: true,
+      });
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: enabledAttrs,
+            version: 'v1',
+            references: [],
+          },
+        ],
+      });
+
+      const res = await client.bulkEnableRules({ ids: ['rule-1'] });
+
+      expect(mockSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(res.rules).toHaveLength(1);
+      expect(res.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1', enabled: true }));
+      expect(res.errors).toEqual([]);
+    });
+
+    it('returns errors for rules that fail to fetch', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-missing',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {} as RuleSavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object not found',
+            },
+          },
+        ],
+      });
+
+      const res = await client.bulkEnableRules({ ids: ['rule-missing'] });
+
+      expect(res.rules).toEqual([]);
+      expect(res.errors).toEqual([
+        { id: 'rule-missing', error: { message: 'Saved object not found', statusCode: 404 } },
+      ]);
+    });
+
+    it('returns errors for rules that fail to update', async () => {
+      const client = createClient();
+
+      const disabledAttrs = createRuleSoAttributes({
+        metadata: { name: 'disabled-rule' },
+        enabled: false,
+      });
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: disabledAttrs,
+            version: 'v1',
+            references: [],
+          },
+        ],
+      });
+
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {} as RuleSavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 409,
+              error: 'Conflict',
+              message: 'Version conflict',
+            },
+          },
+        ],
+      });
+
+      const res = await client.bulkEnableRules({ ids: ['rule-1'] });
+
+      expect(res.rules).toEqual([]);
+      expect(res.errors).toEqual([
+        { id: 'rule-1', error: { message: 'Version conflict', statusCode: 409 } },
+      ]);
+    });
+  });
+
+  describe('bulkDisableRules', () => {
+    it('disables enabled rules and calls bulkDisable on task manager', async () => {
+      const client = createClient();
+
+      const enabledAttrs = createRuleSoAttributes({
+        metadata: { name: 'enabled-rule' },
+        enabled: true,
+      });
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: enabledAttrs,
+            version: 'v1',
+            references: [],
+          },
+        ],
+      });
+
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: { ...enabledAttrs, enabled: false },
+            references: [],
+          },
+        ],
+      });
+
+      getRuleExecutorTaskIdMock.mockReturnValueOnce('task:rule-1');
+
+      const res = await client.bulkDisableRules({ ids: ['rule-1'] });
+
+      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          id: 'rule-1',
+          attributes: expect.objectContaining({
+            enabled: false,
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          }),
+        }),
+      ]);
+
+      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['task:rule-1']);
+
+      expect(res.rules).toHaveLength(1);
+      expect(res.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1', enabled: false }));
+      expect(res.errors).toEqual([]);
+    });
+
+    it('skips already-disabled rules without updating them', async () => {
+      const client = createClient();
+
+      const disabledAttrs = createRuleSoAttributes({
+        metadata: { name: 'disabled-rule' },
+        enabled: false,
+      });
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: disabledAttrs,
+            version: 'v1',
+            references: [],
+          },
+        ],
+      });
+
+      const res = await client.bulkDisableRules({ ids: ['rule-1'] });
+
+      expect(mockSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(taskManager.bulkDisable).not.toHaveBeenCalled();
+      expect(res.rules).toHaveLength(1);
+      expect(res.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1', enabled: false }));
+      expect(res.errors).toEqual([]);
+    });
+
+    it('returns errors for rules that fail to fetch', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-missing',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {} as RuleSavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object not found',
+            },
+          },
+        ],
+      });
+
+      const res = await client.bulkDisableRules({ ids: ['rule-missing'] });
+
+      expect(res.rules).toEqual([]);
+      expect(res.errors).toEqual([
+        { id: 'rule-missing', error: { message: 'Saved object not found', statusCode: 404 } },
+      ]);
+    });
+
+    it('continues even if bulkDisable on task manager fails', async () => {
+      const client = createClient();
+
+      const enabledAttrs = createRuleSoAttributes({
+        metadata: { name: 'enabled-rule' },
+        enabled: true,
+      });
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: enabledAttrs,
+            version: 'v1',
+            references: [],
+          },
+        ],
+      });
+
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: { ...enabledAttrs, enabled: false },
+            references: [],
+          },
+        ],
+      });
+
+      getRuleExecutorTaskIdMock.mockReturnValueOnce('task:rule-1');
+      taskManager.bulkDisable.mockRejectedValueOnce(new Error('task disable failed'));
+
+      const res = await client.bulkDisableRules({ ids: ['rule-1'] });
+
+      expect(res.rules).toHaveLength(1);
+      expect(res.errors).toEqual([]);
+    });
+  });
 });
