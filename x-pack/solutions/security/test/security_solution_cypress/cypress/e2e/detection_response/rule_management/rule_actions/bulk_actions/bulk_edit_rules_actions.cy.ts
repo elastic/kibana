@@ -149,7 +149,7 @@ describe(
     });
 
     context('Restricted action privileges', () => {
-      it("User with no privileges can't add rule actions", () => {
+      it('User with read-only privileges can see bulk actions menu', () => {
         login(ROLES.t1_analyst);
         visitRulesManagementTable();
 
@@ -166,7 +166,7 @@ describe(
         ]);
         waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
 
-        cy.get(BULK_ACTIONS_BTN).should('not.exist');
+        cy.get(BULK_ACTIONS_BTN).should('exist');
       });
     });
 

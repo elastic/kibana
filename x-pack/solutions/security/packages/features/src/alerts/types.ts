@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RulePatchProps, RuleSource } from '../../../model';
+import type { ProductFeatureAlertsKey } from '../product_features_keys';
+import type { ProductFeaturesConfig } from '../types';
 
-export type ReadAuthRulePatchProps = Pick<RulePatchProps, 'exceptions_list'>;
-
-export type ReadAuthRulePatchWithRuleSource = ReadAuthRulePatchProps & { rule_source: RuleSource };
+export type AlertsProductFeaturesConfig = ProductFeaturesConfig<ProductFeatureAlertsKey>;

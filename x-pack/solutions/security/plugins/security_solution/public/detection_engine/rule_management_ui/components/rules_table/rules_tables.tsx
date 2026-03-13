@@ -74,7 +74,9 @@ const NO_ITEMS_MESSAGE = (
 export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const modalTitleId = useGeneratedHtmlId();
 
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  const {
+    rules: { read: canReadRules },
+  } = useUserPrivileges().rulesPrivileges;
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const rulesTableContext = useRulesTableContext();
@@ -205,7 +207,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const { loading: isLoadingJobs, jobs: mlJobs, startMlJobs } = useStartMlJobs();
   const rulesColumns = useRulesColumns({
-    hasCRUDPermissions: canEditRules,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
@@ -215,7 +216,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   });
 
   const monitoringColumns = useMonitoringColumns({
-    hasCRUDPermissions: canEditRules,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
@@ -227,7 +227,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const isSelectAllCalled = useRef(false);
 
   const isTableSelectable =
-    canEditRules &&
+    canReadRules &&
     (selectedTab === AllRulesTabs.management || selectedTab === AllRulesTabs.monitoring);
 
   const euiBasicTableSelectionProps = useMemo(
@@ -385,7 +385,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           <RulesTableFilters selectedTab={selectedTab} />
           <RulesTableWarnings warnings={warnings} />
           <RulesTableUtilityBar
-            canBulkEdit={canEditRules}
+            canBulkEdit={canReadRules}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
             onToggleSelectAll={toggleSelectAll}
             isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}

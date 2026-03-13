@@ -38,8 +38,6 @@ export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
 
 export const CLOSE_ALERT_BTN = '[data-test-subj="alert-close-context-menu-item"]';
 
-export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="alert-close-context-menu-item"]';
-
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
 export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsTableEmptyState"]';
@@ -54,9 +52,13 @@ export const TAKE_ACTION_MENU = '[data-test-subj="takeActionPanelMenu"]';
 
 export const CLOSE_FLYOUT = '[data-test-subj="euiFlyoutCloseButton"]';
 
-export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
-
+/**
+ * Selectors for bulk alert actions popover items
+ */
 export const OPEN_ALERT_BTN = '[data-test-subj="open-alert-status"]';
+export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="alert-close-context-menu-item"]';
+export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
+export const ALERT_TAGGING_CONTEXT_MENU_ITEM = '[data-test-subj="alert-tags-context-menu-item"]';
 
 export const OPENED_ALERTS_FILTER_BTN = '[data-test-subj="openAlerts"]';
 
@@ -169,8 +171,6 @@ export const SELECT_COUNTS_TABLE = '[data-test-subj="chart-select-table"]';
 export const SELECT_TREEMAP = getDataTestSubjectSelector('chart-select-treemap');
 
 export const ALERT_TREEMAP = getDataTestSubjectSelector('treemapPanel');
-
-export const ALERT_TAGGING_CONTEXT_MENU_ITEM = '[data-test-subj="alert-tags-context-menu-item"]';
 
 export const ALERT_TAGGING_CONTEXT_MENU = '[data-test-subj="alert-tags-selectable-menu"]';
 

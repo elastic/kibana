@@ -30,40 +30,46 @@ export interface HeaderSectionProps {
    * Callback to set the assignees for the alerts page as they're also used in the FilterSection component
    */
   setAssignees: Dispatch<SetStateAction<AssigneesIdsSelection[]>>;
+
+  showManageRulesButton: boolean;
 }
 
 /**
  * UI section of the alerts page that renders the assignees button and a button to navigate to the rules page.
  */
-export const HeaderSection = memo(({ assignees, setAssignees }: HeaderSectionProps) => {
-  const handleSelectedAssignees = useCallback(
-    (newAssignees: AssigneesIdsSelection[]) => {
-      if (!isEqual(newAssignees, assignees)) {
-        setAssignees(newAssignees);
-      }
-    },
-    [assignees, setAssignees]
-  );
+export const HeaderSection = memo(
+  ({ assignees, setAssignees, showManageRulesButton }: HeaderSectionProps) => {
+    const handleSelectedAssignees = useCallback(
+      (newAssignees: AssigneesIdsSelection[]) => {
+        if (!isEqual(newAssignees, assignees)) {
+          setAssignees(newAssignees);
+        }
+      },
+      [assignees, setAssignees]
+    );
 
-  return (
-    <EuiFlexGroup gutterSize="m">
-      <EuiFlexItem>
-        <FilterByAssigneesPopover
-          selectedUserIds={assignees}
-          onSelectionChange={handleSelectedAssignees}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <SecuritySolutionLinkButton
-          deepLinkId={SecurityPageName.rules}
-          data-test-subj={GO_TO_RULES_BUTTON_TEST_ID}
-          fill
-        >
-          {BUTTON_MANAGE_RULES}
-        </SecuritySolutionLinkButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+    return (
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>
+          <FilterByAssigneesPopover
+            selectedUserIds={assignees}
+            onSelectionChange={handleSelectedAssignees}
+          />
+        </EuiFlexItem>
+        {showManageRulesButton ? (
+          <EuiFlexItem>
+            <SecuritySolutionLinkButton
+              deepLinkId={SecurityPageName.rules}
+              data-test-subj={GO_TO_RULES_BUTTON_TEST_ID}
+              fill
+            >
+              {BUTTON_MANAGE_RULES}
+            </SecuritySolutionLinkButton>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    );
+  }
+);
 
 HeaderSection.displayName = 'HeaderSection';

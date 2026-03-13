@@ -8,6 +8,13 @@
 import type { RouteSecurity } from '@kbn/core-http-server';
 
 /**
+ * API privilege required for gap auto fill scheduler routes. Must match the
+ * Rules management settings subfeature API privilege RULES_MANAGEMENT_SETTINGS_API_PRIVILEGE.
+ */
+export const RULES_MANAGEMENT_SETTINGS_API_PRIVILEGE =
+  'rules-management-settings-privilege' as const;
+
+/**
  * This constant is used as the default value for the security object in routes
  * where a reason for opting out needs to be provided.
  */

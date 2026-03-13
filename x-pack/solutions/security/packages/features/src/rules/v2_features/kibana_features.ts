@@ -8,16 +8,7 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
 
-import {
-  ESQL_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-} from '@kbn/securitysolution-rules';
+import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
 
 import {
@@ -39,30 +30,40 @@ import {
   SECURITY_SOLUTION_RULES_APP_ID,
   SERVER_APP_ID,
   USERS_API_READ,
+  ALERTS_FEATURE_ID,
+  RULES_FEATURE_ID_V4,
+  INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
+  CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
+  ENABLE_DISABLE_RULES_SUBFEATURE_ID,
+  MANUAL_RUN_RULES_SUBFEATURE_ID,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+  ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE,
 } from '../../constants';
 import { type BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../../security/types';
 
-const SECURITY_RULE_TYPES = [
-  LEGACY_NOTIFICATIONS_ID,
-  ESQL_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-];
-
-const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
-  ruleTypeId,
-  consumers: [SERVER_APP_ID],
-}));
+const alertingFeatures = [LEGACY_NOTIFICATIONS_ID, ...SECURITY_SOLUTION_RULE_TYPE_IDS].map(
+  (ruleTypeId) => ({
+    ruleTypeId,
+    consumers: [SERVER_APP_ID],
+  })
+);
 
 export const getRulesV2BaseKibanaFeature = (
   params: SecurityFeatureParams
 ): BaseKibanaFeatureConfig => ({
+  deprecated: {
+    notice: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage',
+      {
+        defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
+        values: {
+          currentId: RULES_FEATURE_ID_V2,
+          latestId: RULES_FEATURE_ID_V4,
+        },
+      }
+    ),
+  },
   id: RULES_FEATURE_ID_V2,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionRulesV2Title',
@@ -80,6 +81,25 @@ export const getRulesV2BaseKibanaFeature = (
   },
   privileges: {
     all: {
+      replacedBy: {
+        default: [
+          { feature: RULES_FEATURE_ID_V4, privileges: ['all'] },
+          { feature: ALERTS_FEATURE_ID, privileges: ['all'] },
+        ],
+        minimal: [
+          {
+            feature: RULES_FEATURE_ID_V4,
+            privileges: [
+              'minimal_all',
+              INVESTIGATION_GUIDE_SUBFEATURE_EDIT_ID,
+              CUSTOM_HIGHLIGHTED_FIELDS_SUBFEATURE_EDIT_ID,
+              ENABLE_DISABLE_RULES_SUBFEATURE_ID,
+              MANUAL_RUN_RULES_SUBFEATURE_ID,
+            ],
+          },
+          { feature: ALERTS_FEATURE_ID, privileges: ['minimal_all'] },
+        ],
+      },
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
@@ -114,6 +134,19 @@ export const getRulesV2BaseKibanaFeature = (
       ],
     },
     read: {
+      replacedBy: {
+        default: [
+          { feature: RULES_FEATURE_ID_V4, privileges: ['read'] },
+          { feature: ALERTS_FEATURE_ID, privileges: ['read'] },
+        ],
+        minimal: [
+          {
+            feature: RULES_FEATURE_ID_V4,
+            privileges: ['minimal_read'],
+          },
+          { feature: ALERTS_FEATURE_ID, privileges: ['minimal_read'] },
+        ],
+      },
       app: [SECURITY_SOLUTION_RULES_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
@@ -127,10 +160,11 @@ export const getRulesV2BaseKibanaFeature = (
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
       },
-      ui: [RULES_UI_READ, EXCEPTIONS_UI_READ],
+      ui: [RULES_UI_READ, EXCEPTIONS_UI_READ, ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE],
       api: [
         RULES_API_READ,
         ALERTS_API_READ,
+        ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
         LISTS_API_READ,
         EXCEPTIONS_API_READ,
         USERS_API_READ,

@@ -204,6 +204,7 @@ export const performBulkActionRoute = (
           const actionsClient = ctx.actions.getActionsClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+          const rulesAuthz = ctx.securitySolution.getRulesAuthz();
           const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
           const endpointService = ctx.securitySolution.getEndpointService();
           const spaceId = ctx.securitySolution.getSpaceId();
@@ -253,6 +254,7 @@ export const performBulkActionRoute = (
                 rulesClient,
                 action: 'enable',
                 mlAuthz,
+                rulesAuthz,
               });
               errors.push(...bulkActionErrors);
               updated = updatedRules;
@@ -265,6 +267,7 @@ export const performBulkActionRoute = (
                 rulesClient,
                 action: 'disable',
                 mlAuthz,
+                rulesAuthz,
               });
               errors.push(...bulkActionErrors);
               updated = updatedRules;
@@ -392,6 +395,7 @@ export const performBulkActionRoute = (
                   executor: async (rule) => {
                     await dryRunValidateBulkEditRule({
                       mlAuthz,
+                      rulesAuthz,
                       rule,
                       edit: body.edit,
                       ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
@@ -412,6 +416,7 @@ export const performBulkActionRoute = (
                   prebuiltRuleAssetClient,
                   rules,
                   actions: body.edit,
+                  rulesAuthz,
                   mlAuthz,
                   ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
                 });
@@ -428,6 +433,7 @@ export const performBulkActionRoute = (
                 isDryRun,
                 rulesClient,
                 mlAuthz,
+                rulesAuthz,
                 runPayload: body.run,
               });
               errors.push(...bulkActionErrors);
@@ -445,6 +451,7 @@ export const performBulkActionRoute = (
                 isDryRun,
                 rulesClient,
                 mlAuthz,
+                rulesAuthz,
                 fillGapsPayload: body.fill_gaps,
               });
               errors.push(...bulkActionErrors);
