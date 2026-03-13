@@ -70,9 +70,7 @@ test('should call onSave when "Save" clicked (url)', async () => {
   expect(onSave).toBeCalledWith({
     alt_text: 'alt text',
     background_color: '',
-    sizing: {
-      object_fit: 'contain',
-    },
+    object_fit: 'contain',
     src: {
       type: 'url',
       url: 'https://elastic.co/image',
@@ -84,9 +82,7 @@ test('should be able to edit', async () => {
   const initialImageConfig = {
     alt_text: 'alt text',
     background_color: '',
-    sizing: {
-      object_fit: 'contain' as const,
-    },
+    object_fit: 'contain' as const,
     src: {
       type: 'url' as const,
       url: 'https://elastic.co/image',
@@ -107,9 +103,7 @@ test('should be able to edit', async () => {
   expect(onSave).toBeCalledWith({
     alt_text: 'alt text changed',
     background_color: '',
-    sizing: {
-      object_fit: 'contain',
-    },
+    object_fit: 'contain',
     src: {
       type: 'url',
       url: 'https://elastic.co/image-changed',
@@ -121,9 +115,7 @@ test(`shouldn't be able to save if url is invalid`, async () => {
   const initialImageConfig = {
     alt_text: 'alt text',
     background_color: '',
-    sizing: {
-      object_fit: 'contain' as const,
-    },
+    object_fit: 'contain' as const,
     src: {
       type: 'url' as const,
       url: 'https://elastic.co/image',

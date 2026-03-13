@@ -49,9 +49,7 @@ describe('Image embeddable transformOut', () => {
           file_id: 'abc123',
         },
         alt_text: 'A photo',
-        sizing: {
-          object_fit: 'cover',
-        },
+        object_fit: 'cover',
         background_color: '#fff',
       },
     });
@@ -78,14 +76,12 @@ describe('Image embeddable transformOut', () => {
           url: 'https://example.com/image.png',
         },
         alt_text: 'An image',
-        sizing: {
-          object_fit: 'contain',
-        },
+        object_fit: 'contain',
       },
     });
   });
 
-  it('leaves already snake_cased state unchanged', () => {
+  it('passes through state with top-level object_fit unchanged', () => {
     const current = {
       image_config: {
         src: {
@@ -93,9 +89,7 @@ describe('Image embeddable transformOut', () => {
           file_id: 'abc123',
         },
         alt_text: 'A photo',
-        sizing: {
-          object_fit: 'cover',
-        },
+        object_fit: 'cover',
         background_color: '#fff',
       },
     };

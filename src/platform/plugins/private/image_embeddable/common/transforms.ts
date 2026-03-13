@@ -29,15 +29,25 @@ export function getTransforms(drilldownTransforms: DrilldownTransforms) {
     },
     transformOut: (storedState: ImageEmbeddableState, references?: Reference[]) => {
       const transformsFlow = flow(
-        // Strip fileImageMeta from src — removed in 9.4.0, previously nested in src
+        // Strip fileImageMeta from src and hoist objectFit out of sizing — both removed in 9.4.0
         (state: Record<string, unknown>) => {
-          const config = state.imageConfig as Record<string, unknown> | undefined;
-          const src = config?.src as Record<string, unknown> | undefined;
+          if ('imageConfig' in state === false) return state;
+          const config = state.imageConfig as Record<string, unknown>;
+
+          const updated = { ...config };
+
+          const src = updated.src as Record<string, unknown> | undefined;
           if (src?.fileImageMeta) {
-            const { fileImageMeta, ...rest } = src;
-            return { ...state, imageConfig: { ...config, src: rest } };
+            delete src.fileImageMeta;
           }
-          return state;
+
+          const sizing = updated.sizing as Record<string, unknown> | undefined;
+          if (sizing) {
+            updated.objectFit = sizing.objectFit;
+            delete updated.sizing;
+          }
+
+          return { ...state, imageConfig: updated };
         },
         transformToSnakeCase,
         transformTitlesOut<ImageEmbeddableState>,

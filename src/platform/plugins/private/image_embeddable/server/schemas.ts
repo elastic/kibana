@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
-import { IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../common';
+import { DEFAULT_OBJECT_FIT, IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../common';
 
 const imageFileSrcSchema = schema.object({
   type: schema.literal('file'),
@@ -30,19 +30,19 @@ const imageConfigSchema = schema.object({
     meta: { description: 'Image source (file or URL)' },
   }),
   alt_text: schema.maybe(schema.string()),
-  sizing: schema.object({
-    object_fit: schema.oneOf(
-      [
-        schema.literal('fill'),
-        schema.literal('contain'),
-        schema.literal('cover'),
-        schema.literal('none'),
-      ],
-      {
-        meta: { description: 'How the image should be sized within its container' },
-      }
-    ),
-  }),
+  object_fit: schema.oneOf(
+    [
+      schema.literal('fill'),
+      schema.literal('contain'),
+      schema.literal('cover'),
+      schema.literal('none'),
+    ],
+    {
+      meta: { description: 'How the image should be sized within its container' },
+      defaultValue: DEFAULT_OBJECT_FIT, // CSS spec defaults to fill but embeddable has historically defaulted to contain
+    }
+  ),
+
   background_color: schema.maybe(schema.string()),
 });
 

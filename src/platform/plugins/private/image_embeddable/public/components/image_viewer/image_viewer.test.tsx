@@ -37,7 +37,7 @@ test('should display an image by a valid url', () => {
     <DefaultImageViewer
       imageConfig={{
         src: { type: 'url', url: 'https://elastic.co/image' },
-        sizing: { object_fit: 'fill' },
+        object_fit: 'fill',
         alt_text: 'alt text',
       }}
     />
@@ -52,7 +52,7 @@ test('should display a 404 if url is invalid', () => {
     <DefaultImageViewer
       imageConfig={{
         src: { type: 'url', url: 'https://elastic.co/image' },
-        sizing: { object_fit: 'fill' },
+        object_fit: 'fill',
         alt_text: 'alt text',
       }}
     />
@@ -67,7 +67,7 @@ test('should display an image by file id', () => {
     <DefaultImageViewer
       imageConfig={{
         src: { type: 'file', file_id: 'imageId' },
-        sizing: { object_fit: 'fill' },
+        object_fit: 'fill',
         alt_text: 'alt text',
       }}
     />
@@ -82,7 +82,7 @@ test('image is lazy by default', () => {
     <DefaultImageViewer
       imageConfig={{
         src: { type: 'url', url: 'https://elastic.co/image' },
-        sizing: { object_fit: 'fill' },
+        object_fit: 'fill',
         alt_text: 'alt text',
       }}
     />
@@ -96,7 +96,7 @@ test('image is eager when in screenshotting mode', () => {
     <DefaultImageViewer
       imageConfig={{
         src: { type: 'url', url: 'https://elastic.co/image' },
-        sizing: { object_fit: 'fill' },
+        object_fit: 'fill',
         alt_text: 'alt text',
       }}
       isScreenshotMode={true}

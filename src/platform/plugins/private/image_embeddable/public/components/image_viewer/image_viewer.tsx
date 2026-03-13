@@ -104,7 +104,7 @@ export function ImageViewer({
           style={{
             width: '100%',
             height: '100%',
-            objectFit: imageConfig?.sizing?.object_fit ?? 'contain',
+            objectFit: imageConfig?.object_fit,
             cursor: onChange || onClick ? 'pointer' : 'initial',
             display: 'block', // needed to remove gap under the image
             backgroundColor: imageConfig.background_color,

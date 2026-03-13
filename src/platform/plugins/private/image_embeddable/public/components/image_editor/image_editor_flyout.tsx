@@ -37,6 +37,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { imageEmbeddableFileKind } from '../../imports';
+import { DEFAULT_OBJECT_FIT } from '../../../common';
 import type { ImageConfig } from '../../types';
 import { ImageViewer } from '../image_viewer/image_viewer'; // use eager version to avoid flickering
 import type { DraftImageConfig } from '../../utils/validate_image_config';
@@ -82,8 +83,8 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
     return null;
   });
   const [isFilePickerOpen, setIsFilePickerOpen] = useState<boolean>(false);
-  const [sizingObjectFit, setSizingObjectFit] = useState<ImageConfig['sizing']['object_fit']>(
-    () => props.initialImageConfig?.sizing?.object_fit ?? 'contain'
+  const [objectFit, setObjectFit] = useState<ImageConfig['object_fit']>(
+    () => props.initialImageConfig?.object_fit ?? DEFAULT_OBJECT_FIT
   );
   const [altText, setAltText] = useState<string>(() => props.initialImageConfig?.alt_text ?? '');
   const [color, setColor, colorErrors] = useColorPickerState(
@@ -102,9 +103,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
         : { type: 'file', file_id: fileId },
     alt_text: altText,
     background_color: colorErrors ? undefined : color,
-    sizing: {
-      object_fit: sizingObjectFit,
-    },
+    object_fit: objectFit,
   };
 
   const isDraftImageConfigValid = validateImageConfig(draftImageConfig, {
@@ -335,9 +334,9 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 }),
               },
             ]}
-            value={sizingObjectFit}
+            value={objectFit}
             onChange={(e) =>
-              setSizingObjectFit(e.target.value as ImageConfig['sizing']['object_fit'])
+              setObjectFit(e.target.value as ImageConfig['object_fit'])
             }
           />
         </EuiFormRow>
