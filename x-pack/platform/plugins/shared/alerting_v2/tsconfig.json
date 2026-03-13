@@ -62,7 +62,6 @@
     "@kbn/workflows-management-plugin",
     "@kbn/workflows",
     "@kbn/core-http-server-utils",
-    "@kbn/es-query",
     "@kbn/eval-kql",
     "@kbn/react-query"
   ],
