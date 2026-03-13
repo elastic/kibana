@@ -67,10 +67,10 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
                 response.success_count_exception_list_items
               )}${
                 response.errors.length
-                  ? ` :: ${response.errors.length} errors happened: ${response.errors
+                  ? ` ${response.errors.length} errors happened: ${response.errors
                       .map(
                         (item, index) =>
-                          `[[ [${index + 1}] item (${item.item_id}): ${item.error.message} ]]`
+                          `(${index + 1}) item (${item.item_id}): ${item.error.message}.`
                       )
                       .join(' -- ')}`
                   : ''
