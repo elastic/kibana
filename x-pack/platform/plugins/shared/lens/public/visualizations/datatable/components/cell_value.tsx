@@ -5,19 +5,26 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { makeHighContrastColor } from '@elastic/eui';
-import { EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiLink, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { RawValue } from '@kbn/data-plugin/common';
+import { i18n } from '@kbn/i18n';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
 import { getContrastColor } from '../../../shared_components/coloring/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+
+const getBadgeLabel = (value: unknown) =>
+  i18n.translate('xpack.lens.table.dynamicColoring.badge.filterLabel', {
+    defaultMessage: 'Filter by value: {value}',
+    values: { value: String(value) },
+  });
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
@@ -35,6 +42,7 @@ export const createGridCell = (
     const { table, alignments, handleFilterClick } = useContext(DataContext);
     const formatter = formatters[columnId];
     const rawValue: RawValue = table?.rows[rowIndex]?.[columnId];
+    const fallbackText = rawValue == null ? '' : String(rawValue);
     const colIndex = columnConfig.columns.findIndex(({ columnId: id }) => id === columnId);
     const { euiTheme } = useEuiTheme();
     const {
@@ -44,12 +52,20 @@ export const createGridCell = (
       colorMapping,
     } = columnConfig.columns[colIndex] ?? {};
     const filterOnClick = oneClickFilter && handleFilterClick;
-    const content = formatter?.convert(rawValue, filterOnClick ? 'text' : 'html');
+    const textContent = formatter?.convert(rawValue, 'text') ?? fallbackText;
+    const htmlContent = formatter?.convert(rawValue, 'html') ?? textContent;
+    const content = colorMode === 'badge' ? textContent : filterOnClick ? textContent : htmlContent;
     const currentAlignment = alignments?.get(columnId);
+
+    const badgeColor = useMemo(() => {
+      if (colorMode !== 'badge' || (!palette && !colorMapping)) return null;
+      const color = getCellColor(columnId, palette, colorMapping)(rawValue);
+      return color || null;
+    }, [colorMode, columnId, palette, colorMapping, rawValue]);
 
     useEffect(() => {
       let colorSet = false;
-      if (colorMode !== 'none' && (palette || colorMapping)) {
+      if (colorMode !== 'none' && colorMode !== 'badge' && (palette || colorMapping)) {
         const color = getCellColor(columnId, palette, colorMapping)(rawValue);
 
         if (color) {
@@ -75,6 +91,37 @@ export const createGridCell = (
         };
       }
     }, [rawValue, columnId, setCellProps, colorMode, palette, colorMapping, isExpanded]);
+
+    if (colorMode === 'badge') {
+      const badgeTextColor = badgeColor ? getContrastColor(badgeColor, isDarkMode) : undefined;
+      const label = content ?? '';
+      const clickProps = filterOnClick
+        ? {
+            onClick: () => {
+              handleFilterClick?.(columnId, rawValue, colIndex, rowIndex);
+            },
+            onClickAriaLabel: getBadgeLabel(label),
+          }
+        : {};
+
+      return (
+        <div
+          data-test-subj="lnsTableCellContent"
+          className={classNames({
+            'lnsTableCell--multiline': fitRowToContent,
+            [`lnsTableCell--${currentAlignment}`]: true,
+          })}
+        >
+          <EuiBadge
+            color={badgeColor ?? 'hollow'}
+            style={badgeTextColor ? { color: badgeTextColor } : undefined}
+            {...clickProps}
+          >
+            {label}
+          </EuiBadge>
+        </div>
+      );
+    }
 
     if (filterOnClick) {
       const backgroundColor = getCellColor(columnId, palette, colorMapping)(rawValue);
@@ -115,7 +162,7 @@ export const createGridCell = (
          * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
          * which is produced in a safe way.
          */
-        dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: content ?? '' }} // eslint-disable-line react/no-danger
         data-test-subj="lnsTableCellContent"
         className={classNames({
           'lnsTableCell--multiline': fitRowToContent,

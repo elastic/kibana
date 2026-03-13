@@ -8,6 +8,8 @@
  */
 
 import { datatableStateSchema } from '../../schema';
+import { LensConfigBuilder } from '../../config_builder';
+import type { DatatableState } from '../../schema';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
   singleMetricDatatableAttributes,
@@ -97,6 +99,19 @@ describe('Datatable', () => {
 
     it('should convert a selector color by value palette', () => {
       validateConverter(selectorColorByValueAttributes, datatableStateSchema);
+    });
+
+    it('should preserve badge apply_color_to when converting', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const attributes = structuredClone(singleMetricDatatableAttributes);
+      attributes.state.visualization.columns[0].colorMode = 'badge';
+
+      const apiConfig = builder.toAPIFormat(attributes) as DatatableState;
+      const firstMetric = apiConfig.metrics?.[0];
+      expect(firstMetric?.apply_color_to).toEqual('badge');
+
+      const newLensAttributes = builder.fromAPIFormat(apiConfig);
+      expect(newLensAttributes.state.visualization.columns[0].colorMode).toEqual('badge');
     });
   });
   describe('validateAPIConverter ', () => {

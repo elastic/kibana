@@ -44,7 +44,8 @@ function buildColorProps(
   const { colorMode, palette, colorMapping } = column;
   if (!colorMode || colorMode === 'none') return {};
 
-  const applyColorTo = colorMode === 'text' ? 'value' : 'background';
+  const applyColorTo =
+    colorMode === 'text' ? 'value' : colorMode === 'badge' ? 'badge' : 'background';
 
   // Prefer colorMapping if present, otherwise use palette
   if (colorMapping) {
@@ -107,7 +108,8 @@ function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
     ...buildRowCommonProps(column),
     ...(colorMode && colorMode !== 'none'
       ? {
-          apply_color_to: colorMode === 'text' ? 'value' : 'background',
+          apply_color_to:
+            colorMode === 'text' ? 'value' : colorMode === 'badge' ? 'badge' : 'background',
           ...(colorMapping || palette
             ? { color: fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput) }
             : {}),
