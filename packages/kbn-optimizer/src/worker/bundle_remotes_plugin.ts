@@ -122,7 +122,14 @@ export class BundleRemotesPlugin {
       return cb(undefined, null);
     }
 
-    if (!remote.targets.includes(parsed.target)) {
+    let target = parsed.target;
+    if (target.endsWith('/index.js')) {
+      target = target.slice(0, -'/index.js'.length);
+    } else if (target.endsWith('.js')) {
+      target = target.slice(0, -'.js'.length);
+    }
+
+    if (!remote.targets.includes(target)) {
       return cb(
         new Error(
           `import [${request}] references a non-public export of the [${remote.bundleId}] bundle and must point to one of the public directories: [${remote.targets}]`
