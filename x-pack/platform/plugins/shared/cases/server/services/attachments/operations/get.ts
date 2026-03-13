@@ -119,7 +119,9 @@ export class AttachmentGetter {
       } else if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
         const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
         validatedAttachments.push(
-          Object.assign(so, { attributes: validatedAttributes }) as unknown as AttachmentSavedObjectTransformed
+          Object.assign(so, {
+            attributes: validatedAttributes,
+          }) as unknown as AttachmentSavedObjectTransformed
         );
       } else {
         const transformedAttachment = injectAttachmentAttributesAndHandleErrors(
@@ -320,11 +322,10 @@ export class AttachmentGetter {
             attachmentId
           );
         } catch {
-          res =
-            await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
-              CASE_COMMENT_SAVED_OBJECT,
-              attachmentId
-            );
+          res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
+            CASE_COMMENT_SAVED_OBJECT,
+            attachmentId
+          );
         }
       } else {
         res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(

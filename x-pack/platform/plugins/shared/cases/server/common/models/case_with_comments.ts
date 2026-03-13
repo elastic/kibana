@@ -32,7 +32,11 @@ import {
   AttachmentType,
 } from '../../../common/types/domain';
 
-import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
+} from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
