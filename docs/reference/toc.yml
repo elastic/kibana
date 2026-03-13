@@ -19,7 +19,13 @@ toc:
       - file: configuration-reference/metrics-settings.md
       - file: configuration-reference/monitoring-settings.md
       - file: configuration-reference/reporting-settings.md
-      - file: configuration-reference/search-sessions-settings.md
+        children:
+          - file: configuration-reference/reporting-settings-enable.md
+          - file: configuration-reference/reporting-settings-encryption-key.md
+          - file: configuration-reference/reporting-settings-security.md
+          - file: configuration-reference/reporting-settings-background-job.md
+          - file: configuration-reference/reporting-settings-png-pdf.md
+          - file: configuration-reference/reporting-settings-csv.md
       - file: configuration-reference/security-settings.md
       - file: configuration-reference/spaces-settings.md
       - file: configuration-reference/task-manager-settings.md
