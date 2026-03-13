@@ -83,11 +83,17 @@ export class EsqlService {
    * @param scope The scope to retrieve indices for (local or all).
    * @returns A promise that resolves to an array of ESQL source results.
    */
-  public async getAllIndices(scope: 'local' | 'all' = 'local'): Promise<ESQLSourceResult[]> {
+  public async getAllIndices(
+    scope: 'local' | 'all' | 'remote' = 'local'
+  ): Promise<ESQLSourceResult[]> {
     const { client } = this.options;
 
-    // All means local + remote indices (queried with <cluster>:*)
-    const namesToQuery = scope === 'local' ? ['*'] : ['*', '*:*'];
+    const scopeToNames: Record<typeof scope, string[]> = {
+      local: ['*'],
+      remote: ['*:*'],
+      all: ['*', '*:*'],
+    };
+    const namesToQuery = scopeToNames[scope];
 
     // hidden and not, important for finding timeseries mode
     // mode is not returned for time_series datastreams, we need to find it from the indices
