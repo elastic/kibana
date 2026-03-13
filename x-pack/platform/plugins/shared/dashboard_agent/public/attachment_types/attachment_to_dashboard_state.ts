@@ -29,13 +29,14 @@ const buildLensPanelFromApi = (
   config: LensApiSchemaType,
   uid?: string
 ): Omit<DashboardPanel, 'grid'> => {
+  const lensAttributes = lensConfigBuilder.fromAPIFormat(config);
   const lensConfig: LensSerializedAPIConfig = {
     title:
-      config.title ??
+      lensAttributes.title ??
       i18n.translate('xpack.dashboardAgent.attachments.dashboard.generatedPanelTitle', {
         defaultMessage: 'Generated panel',
       }),
-    attributes: config,
+    attributes: lensAttributes,
   };
 
   return {
