@@ -13,6 +13,7 @@ export { MaintenanceWindowCallout } from './src/maintenance_window_callout';
 export { useFetchActiveMaintenanceWindows } from './src/maintenance_window_callout/use_fetch_active_maintenance_windows';
 export { AddMessageVariables } from './src/add_message_variables';
 
+export * from './src/common/formatters';
 export * from './src/common/hooks';
 export { AlertsSearchBar } from './src/alerts_search_bar';
 export type { AlertsSearchBarProps } from './src/alerts_search_bar/types';

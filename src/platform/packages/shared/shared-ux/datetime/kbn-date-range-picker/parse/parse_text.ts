@@ -55,6 +55,7 @@ const SUPPORTED_DATE_FORMATS = [
   'MMM D YYYY', // e.g. "Feb 3 2016"
   'MMM D, YYYY', // e.g. "feb 3, 2016"
   'YYYY-MM-DD',
+  'YYYY-MM-DDTHH:mm:ss.SSS',
   'YYYY-MM-DDTHH:mm:ss.SSSZ',
   'YYYY-MM-DDTHH:mm:ssZ',
   'YYYY-MM-DDTHH:mm',
@@ -100,7 +101,7 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   // (1) Check if text matches a preset label (case insensitive)
 
   const matchedPreset = presets.find(
-    (preset) => preset.label.toLowerCase() === trimmed.toLowerCase()
+    (preset) => preset.label?.toLowerCase() === trimmed.toLowerCase()
   );
   if (matchedPreset) {
     return buildTimeRange({

@@ -248,7 +248,7 @@
         "label": "DimensionTrigger",
         "description": [],
         "signature": [
-          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"default\" | \"success\" | \"warning\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"success\" | \"warning\" | \"default\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
           "Property",
           ".Color | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
@@ -311,7 +311,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"default\" | \"success\" | \"warning\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
+                  "\"success\" | \"warning\" | \"default\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
                   "Property",
                   ".Color | undefined"
                 ],
@@ -2071,7 +2071,7 @@
             "label": "triggerIconType",
             "description": [],
             "signature": [
-              "\"none\" | \"custom\" | \"color\" | \"disabled\" | \"aggregate\" | \"colorBy\" | \"invisible\" | undefined"
+              "\"none\" | \"disabled\" | \"color\" | \"aggregate\" | \"custom\" | \"colorBy\" | \"invisible\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
             "lineNumber": 14,
@@ -2716,7 +2716,7 @@
         "label": "LineStyle",
         "description": [],
         "signature": [
-          "\"dotted\" | \"solid\" | \"dashed\""
+          "\"dashed\" | \"solid\" | \"dotted\""
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/types.ts",
         "lineNumber": 14,
@@ -2760,7 +2760,7 @@
         "label": "SharedSetOfIcons",
         "description": [],
         "signature": [
-          "\"alert\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"starEmpty\" | \"tag\" | \"empty\""
+          "\"alert\" | \"tag\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"empty\" | \"flag\" | \"heart\" | \"mapMarker\" | \"starEmpty\""
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/types.ts",
         "lineNumber": 17,

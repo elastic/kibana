@@ -21,11 +21,11 @@ paths:
       summary: Generate a chat completion
       operationId: observability-ai-assistant-chat-complete
       description: |
-        Create a new chat completion by using the Observability AI Assistant. 
+        Create a new chat completion by using the Observability AI Assistant.
 
-        The API returns the model's response based on the current conversation context. 
+        The API returns the model's response based on the current conversation context.
 
-        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM). 
+        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
 
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       x-state: Technical Preview
@@ -108,7 +108,7 @@ paths:
                 - persist
             examples:
               chatCompleteRequestExample:
-                $ref: '#/components/schemas/ChatCompleteRequestExample'
+                $ref: '#/components/examples/ChatCompleteRequestExample'
       responses:
         '200':
           description: Successful response
@@ -118,7 +118,7 @@ paths:
                 type: object
               examples:
                 chatCompleteResponseExample:
-                  $ref: '#/components/schemas/ChatCompleteResponseExample'
+                  $ref: '#/components/examples/ChatCompleteResponseExample'
 
 components:
   schemas:
@@ -211,6 +211,7 @@ components:
           required:
             - id
             - text
+  examples:
     ChatCompleteResponseExample:
       summary: Get a chat completion from the Observability AI Assistant
       value: |

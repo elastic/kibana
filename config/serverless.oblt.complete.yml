@@ -3,10 +3,6 @@
 ## Cloud settings
 xpack.cloud.serverless.product_tier: complete
 
-# Cross Project Search
-cps.enabled: true
-cps.cpsEnabled: false
-
 ## Enabled plugins
 xpack.infra.enabled: true
 xpack.slo.enabled: true

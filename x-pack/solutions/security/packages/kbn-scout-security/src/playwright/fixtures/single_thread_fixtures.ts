@@ -16,6 +16,7 @@ import {
   getDetectionRuleApiService,
   getDetectionAlertsApiService,
   getEntityAnalyticsApiService,
+  getTimelineApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -57,6 +58,10 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         log,
       });
       extendedApiServices.entityAnalytics = getEntityAnalyticsApiService({
+        kbnClient,
+        log,
+      });
+      extendedApiServices.timeline = getTimelineApiService({
         kbnClient,
         log,
       });

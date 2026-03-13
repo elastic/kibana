@@ -81,6 +81,19 @@ export const useSourcesBadge = ({
     const firstSupportedCommand = getSupportedCommand(queryText);
 
     if (!firstSupportedCommand || !firstSupportedCommand.range) return;
+
+    // Only show the badge when there is whitespace after the command keyword.
+    // When the text is just "FROM" or "TS" with nothing after it, the badge would
+    // cover the entire clickable area and prevent the user from clicking into the
+    // editor to continue typing.
+    const commandEndOffset = model.getOffsetAt(
+      new monaco.Position(
+        firstSupportedCommand.range.lineNumber,
+        firstSupportedCommand.range.endColumn
+      )
+    );
+    if (!/\s/.test(queryText[commandEndOffset] ?? '')) return;
+
     collections.push({
       range: new monaco.Range(
         firstSupportedCommand.range.lineNumber,
@@ -124,6 +137,17 @@ export const useSourcesBadge = ({
         currentWord.startColumn >= firstSupportedCommand.range.startColumn &&
         currentWord.endColumn <= firstSupportedCommand.range.endColumn
       ) {
+        // Don't open the browser when there's no whitespace after the command keyword
+        // (e.g. "FROM" with no trailing space) -- the user is trying to click into the
+        // editor to continue typing, not to open the data source browser.
+        const commandEndOffset = model.getOffsetAt(
+          new monaco.Position(
+            firstSupportedCommand.range.lineNumber,
+            firstSupportedCommand.range.endColumn
+          )
+        );
+        if (!/\s/.test(queryText[commandEndOffset] ?? '')) return;
+
         const positionAfterCommand = new monaco.Position(
           firstSupportedCommand.range.lineNumber,
           firstSupportedCommand.range.endColumn + 1

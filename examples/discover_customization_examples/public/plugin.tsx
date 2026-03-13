@@ -118,23 +118,19 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             });
           }, []);
 
-          const currentSavedSearch = useObservable(
-            stateContainer.savedSearchState.getCurrent$(),
-            stateContainer.savedSearchState.getState()
-          );
-
           return (
             <EuiFlexItem grow={false}>
               <EuiPopover
                 button={
                   <EuiButton
+                    size="s"
                     iconType="arrowDown"
                     iconSide="right"
                     fullWidth
                     onClick={togglePopover}
                     data-test-subj="logsViewSelectorButton"
                   >
-                    {currentSavedSearch.title ?? 'None selected'}
+                    {'None selected'}
                   </EuiButton>
                 }
                 isOpen={isPopoverOpen}
@@ -156,7 +152,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                               discoverSessionId: savedSearch.id,
                             })
                           ),
-                        icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
+                        icon: 'empty',
                         'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
                           /[^a-zA-Z0-9]/g,
                           ''

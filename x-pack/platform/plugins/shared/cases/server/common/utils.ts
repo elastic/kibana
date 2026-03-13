@@ -54,10 +54,12 @@ import { dedupAssignees } from '../client/cases/utils';
 import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
 import type {
   AttachmentRequest,
+  AttachmentRequestV2,
   AttachmentsFindResponse,
   CasePostRequest,
   CasesFindResponse,
 } from '../../common/types/api';
+import type { AttachmentAttributesV2 } from '../../common/types/domain/attachment/v2';
 
 /**
  * Default sort field for querying saved objects.
@@ -216,7 +218,7 @@ export const getAlertInfoFromComments = (comments: AttachmentRequest[] = []): Al
     return acc;
   }, []);
 
-type NewCommentArgs = AttachmentRequest & {
+export type NewCommentArgs = AttachmentRequestV2 & {
   createdDate: string;
   owner: string;
   email?: string | null;
@@ -232,7 +234,7 @@ export const transformNewComment = ({
   username,
   profile_uid: profileUid,
   ...comment
-}: NewCommentArgs): AttachmentAttributes => {
+}: NewCommentArgs): AttachmentAttributesV2 => {
   return {
     ...comment,
     created_at: createdDate,

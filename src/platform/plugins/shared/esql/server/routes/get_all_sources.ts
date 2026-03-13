@@ -18,9 +18,12 @@ export const registerGetSourcesRoute = (router: IRouter, { logger }: PluginIniti
       path: `${SOURCES_AUTOCOMPLETE_ROUTE}{scope}`,
       validate: {
         params: schema.object({
-          scope: schema.oneOf([schema.literal('all'), schema.literal('local')], {
-            defaultValue: 'local', // Default to 'local' if no scope is provided
-          }),
+          scope: schema.oneOf(
+            [schema.literal('all'), schema.literal('local'), schema.literal('remote')],
+            {
+              defaultValue: 'local', // Default to 'local' if no scope is provided
+            }
+          ),
         }),
       },
       security: {

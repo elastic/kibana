@@ -32,34 +32,12 @@ import type {
   RegistryInput,
 } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { doesPackageHaveIntegrations } from '../../../../../services';
+import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
 
 import type { PackagePolicyValidationResults, VarGroupSelection } from '../../services';
+import { isInputCompatibleWithVarGroupSelections } from '../../services';
 
 import { PackagePolicyInputPanel } from './components';
-
-/**
- * Check if an input is compatible with the current var_group selections.
- * An input is incompatible if any of its hide_in_var_group_options includes
- * the currently selected option for that var_group.
- */
-export function isInputCompatibleWithVarGroupSelections(
-  input: RegistryInput,
-  varGroupSelections: VarGroupSelection
-): boolean {
-  if (!input.hide_in_var_group_options) {
-    return true;
-  }
-
-  for (const [groupName, hiddenOptions] of Object.entries(input.hide_in_var_group_options)) {
-    const selectedOption = varGroupSelections[groupName];
-    if (selectedOption && hiddenOptions.includes(selectedOption)) {
-      return false;
-    }
-  }
-
-  return true;
-}
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
   packageInfo: PackageInfo;
@@ -98,6 +76,9 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         : packageInfo.policy_templates || [],
     [packageInfo.policy_templates, showOnlyIntegration]
   );
+
+  const isSinglePolicyTemplate = packagePolicyTemplates.length === 1;
+
   // Configure inputs (and their streams)
   const renderConfigureInputs = () =>
     packagePolicyTemplates.length ? (
@@ -108,6 +89,56 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
             const inputs = getNormalizedInputs(policyTemplate);
             const packagePolicyInputs = packagePolicy.inputs;
             const isPolicyTemplateDeprecated = !hasIntegrations && !!policyTemplate.deprecated;
+
+            const inputsToRender = inputs
+              .map((packageInput) => {
+                const packagePolicyInput = packagePolicyInputs.find(
+                  (input) =>
+                    input.type === packageInput.type &&
+                    (hasIntegrations ? input.policy_template === policyTemplate.name : true)
+                );
+
+                const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
+                  packageInput.type,
+                  packageInfo,
+                  hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
+                    ? policyTemplate.data_streams
+                    : []
+                );
+
+                if (
+                  !packagePolicyInput ||
+                  !isInputAllowedForDeploymentMode(
+                    packagePolicyInput,
+                    deploymentMode,
+                    packageInfo
+                  ) ||
+                  !isInputCompatibleWithVarGroupSelections(packageInput, varGroupSelections)
+                ) {
+                  return null;
+                }
+
+                return { packageInput, packagePolicyInput, packageInputStreams };
+              })
+              .filter(
+                (
+                  item
+                ): item is {
+                  packageInput: RegistryInput;
+                  packagePolicyInput: NewPackagePolicyInput;
+                  packageInputStreams: ReturnType<
+                    typeof getRegistryStreamWithDataStreamForInputType
+                  >;
+                } => item !== null
+              );
+
+            const isSingleInput = isSinglePolicyTemplate && inputsToRender.length === 1;
+            //  Enable simplified agentless UX for single input/datastreams integrations
+            const isSingleInputAndStreams =
+              ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX &&
+              isSingleInput &&
+              inputsToRender[0].packagePolicyInput.streams.length <= 1;
+
             return (
               <React.Fragment key={policyTemplate.name}>
                 {isPolicyTemplateDeprecated && (
@@ -131,20 +162,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                     <EuiSpacer size="m" />
                   </>
                 )}
-                {inputs.map((packageInput) => {
-                  const packagePolicyInput = packagePolicyInputs.find(
-                    (input) =>
-                      input.type === packageInput.type &&
-                      (hasIntegrations ? input.policy_template === policyTemplate.name : true)
-                  );
-                  const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
-                    packageInput.type,
-                    packageInfo,
-                    hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
-                      ? policyTemplate.data_streams
-                      : []
-                  );
-
+                {inputsToRender.map(({ packageInput, packagePolicyInput, packageInputStreams }) => {
                   const updatePackagePolicyInput = (
                     updatedInput: Partial<NewPackagePolicyInput>
                   ) => {
@@ -163,23 +181,10 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                     });
                   };
 
-                  const allStreamsDeprecated =
-                    packageInputStreams.length > 0 &&
-                    packageInputStreams.every((s) => !!s.deprecated);
-                  const isDeprecatedInput =
-                    !!packagePolicyInput?.deprecated || allStreamsDeprecated;
-                  const isInputAvailable =
-                    packagePolicyInput &&
-                    isInputAllowedForDeploymentMode(
-                      packagePolicyInput,
-                      deploymentMode,
-                      packageInfo
-                    ) &&
-                    isInputCompatibleWithVarGroupSelections(packageInput, varGroupSelections) &&
-                    (!isDeprecatedInput || isEditPage); // Hide deprecated inputs on new installations
-                  return isInputAvailable ? (
+                  return (
                     <EuiFlexItem key={packageInput.type}>
                       <PackagePolicyInputPanel
+                        isSingleInputAndStreams={isSingleInputAndStreams}
                         packageInput={packageInput}
                         packageInfo={packageInfo}
                         packageInputStreams={packageInputStreams}
@@ -198,7 +203,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                       />
                       <EuiHorizontalRule margin="m" />
                     </EuiFlexItem>
-                  ) : null;
+                  );
                 })}
               </React.Fragment>
             );

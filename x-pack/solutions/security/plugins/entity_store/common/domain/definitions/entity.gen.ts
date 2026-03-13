@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type EngineMetadata = z.infer<typeof EngineMetadata>;
 export const EngineMetadata = z
@@ -39,7 +39,10 @@ export const EntityField = z
     EngineMetadata: EngineMetadata.optional(),
     attributes: z
       .object({
-        privileged: z.boolean().optional(),
+        /**
+         * Watchlist identifiers the entity belongs to (v2).
+         */
+        watchlists: z.array(z.string()).optional(),
         asset: z.boolean().optional(),
         managed: z.boolean().optional(),
         mfa_enabled: z.boolean().optional(),
@@ -48,9 +51,14 @@ export const EntityField = z
       .optional(),
     behaviors: z
       .object({
-        brute_force_victim: z.boolean().optional(),
-        new_country_login: z.boolean().optional(),
-        used_usb_device: z.boolean().optional(),
+        /**
+         * Detection rule names that flagged this entity (v2).
+         */
+        rule_names: z.array(z.string()).optional(),
+        /**
+         * ML anomaly job identifiers (v2).
+         */
+        anomaly_job_ids: z.array(z.string()).optional(),
       })
       .strict()
       .optional(),
@@ -65,13 +73,35 @@ export const EntityField = z
       .object({
         communicates_with: z.array(z.string()).optional(),
         depends_on: z.array(z.string()).optional(),
-        dependent_of: z.array(z.string()).optional(),
         owns: z.array(z.string()).optional(),
-        owned_by: z.array(z.string()).optional(),
         accesses_frequently: z.array(z.string()).optional(),
-        accessed_frequently_by: z.array(z.string()).optional(),
         supervises: z.array(z.string()).optional(),
-        supervised_by: z.array(z.string()).optional(),
+        resolution: z
+          .object({
+            /**
+             * entity.id of the entity this one resolves to
+             */
+            resolved_to: z.string().optional(),
+            risk: z
+              .object({
+                /**
+                 * Lexical description of the resolution group's aggregated risk.
+                 */
+                calculated_level: EntityRiskLevels.optional(),
+                /**
+                 * The raw numeric value of the resolution group's aggregated risk score.
+                 */
+                calculated_score: z.number().optional(),
+                /**
+                 * The normalized numeric value of the resolution group's aggregated risk score.
+                 */
+                calculated_score_norm: z.number().min(0).max(100).optional(),
+              })
+              .strict()
+              .optional(),
+          })
+          .strict()
+          .optional(),
       })
       .strict()
       .optional(),

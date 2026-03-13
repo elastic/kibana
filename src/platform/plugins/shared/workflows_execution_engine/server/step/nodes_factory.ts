@@ -15,11 +15,16 @@ import type {
   EnterIfNode,
   EnterRetryNode,
   EnterTryBlockNode,
+  EnterWhileNode,
   ExitConditionBranchNode,
   ExitFallbackPathNode,
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
+  ExitWhileNode,
+  WaitForInputGraphNode,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteGraphNode,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
 import {
@@ -58,7 +63,10 @@ import {
   ExitStepTimeoutZoneNodeImpl,
   ExitWorkflowTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
+import { WaitForInputStepImpl } from './wait_for_input_step/wait_for_input_step';
 import { WaitStepImpl } from './wait_step/wait_step';
+import { EnterWhileNodeImpl, ExitWhileNodeImpl } from './while_step';
+import { WorkflowExecuteStepImpl } from './workflow_execute_step/workflow_execute_step_impl';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
@@ -170,6 +178,20 @@ export class NodesFactory {
           this.workflowRuntime,
           stepLogger
         );
+      case 'enter-while':
+        return new EnterWhileNodeImpl(
+          node as EnterWhileNode,
+          this.workflowRuntime,
+          stepExecutionRuntime,
+          stepLogger
+        );
+      case 'exit-while':
+        return new ExitWhileNodeImpl(
+          node as ExitWhileNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger
+        );
       case 'enter-retry':
         return new EnterRetryNodeImpl(
           node as EnterRetryNode,
@@ -259,6 +281,13 @@ export class NodesFactory {
           this.workflowRuntime,
           stepLogger
         );
+      case 'waitForInput':
+        return new WaitForInputStepImpl(
+          node as WaitForInputGraphNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger
+        );
       case 'atomic':
         return new AtomicStepImpl(
           node as AtomicGraphNode,
@@ -267,6 +296,38 @@ export class NodesFactory {
           this.workflowRuntime,
           stepLogger
         );
+      case 'workflow.execute':
+      case 'workflow.executeAsync':
+        if (!this.dependencies.workflowsExecutionEngine) {
+          throw new Error('WorkflowsExecutionEngine is not available in dependencies');
+        }
+        if (!this.dependencies.workflowRepository) {
+          throw new Error('WorkflowRepository is not available in dependencies');
+        }
+        if (!this.dependencies.workflowExecutionRepository) {
+          throw new Error('WorkflowExecutionRepository is not available in dependencies');
+        }
+        if (!this.dependencies.stepExecutionRepository) {
+          throw new Error('StepExecutionRepository is not available in dependencies');
+        }
+        if (!this.dependencies.spaceId) {
+          throw new Error('spaceId is not available in dependencies');
+        }
+        if (!this.dependencies.request) {
+          throw new Error('request is not available in dependencies');
+        }
+        return new WorkflowExecuteStepImpl({
+          node: node as WorkflowExecuteGraphNode | WorkflowExecuteAsyncGraphNode,
+          stepExecutionRuntime,
+          workflowExecutionRuntime: this.workflowRuntime,
+          workflowRepository: this.dependencies.workflowRepository,
+          spaceId: this.dependencies.spaceId,
+          request: this.dependencies.request,
+          workflowsExecutionEngine: this.dependencies.workflowsExecutionEngine,
+          workflowExecutionRepository: this.dependencies.workflowExecutionRepository,
+          stepExecutionRepository: this.dependencies.stepExecutionRepository,
+          workflowLogger: this.workflowLogger,
+        });
       default:
         throw new Error(`Unknown node type: ${node.stepType}`);
     }

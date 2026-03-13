@@ -8,9 +8,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { ESQLCommand } from '@kbn/esql-language';
-import { EsqlQuery, Parser, Walker } from '@kbn/esql-language';
-import type { ESQLProperNode } from '@kbn/esql-language/src/types';
+import type { ESQLCommand, ESQLProperNode } from '@elastic/esql/types';
+import { EsqlQuery, Parser, Walker } from '@elastic/esql';
 import type { Annotation } from '../annotations';
 import { highlight } from './helpers';
 

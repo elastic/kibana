@@ -47,6 +47,7 @@ import {
 import type { DiscoverAppState } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { useDataState } from '../../hooks/use_data_state';
+import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
 
 /**
  * Helper function to build the top nav links
@@ -147,7 +148,7 @@ export const useTopNavLinks = ({
     if (!services.embeddableEditor.isEmbeddedEditor()) {
       const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
         isEsqlMode && currentDataView.type === ESQL_TYPE
-          ? { query: { esql: getInitialESQLQuery(currentDataView, true) } }
+          ? { query: { esql: getInitialESQLQuery(currentDataView) } }
           : undefined;
       const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
         ? defaultEsqlState
@@ -243,6 +244,23 @@ export const useTopNavLinks = ({
     if (services.capabilities.discover_v2.save) {
       const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
 
+      const savedAsButton = {
+        run: async () => {
+          await onSaveDiscoverSession({
+            initialCopyOnSave: true,
+            services,
+            state,
+          });
+        },
+        id: 'saveAs',
+        order: 1,
+        label: i18n.translate('discover.localMenu.saveAsTitle', {
+          defaultMessage: 'Save as',
+        }),
+        iconType: 'save',
+        testId: 'interactiveSaveMenuItem',
+      };
+
       newAppMenuRegistry.setPrimaryActionItem({
         id: 'save',
         label: isEmbeddedEditor
@@ -258,7 +276,15 @@ export const useTopNavLinks = ({
           await onSaveDiscoverSession({
             services,
             state,
-            onSaveCb: isEmbeddedEditor ? services.embeddableEditor.transferBackToEditor : undefined,
+            onSaveCb: isEmbeddedEditor
+              ? (saveState) => {
+                  const action = saveState
+                    ? TransferAction.SaveSession
+                    : TransferAction.SaveByValue;
+
+                  services.embeddableEditor.transferBackToEditor(action, saveState);
+                }
+              : undefined,
           });
         },
         popoverWidth: 150,
@@ -272,8 +298,10 @@ export const useTopNavLinks = ({
           ...(isEmbeddedEditor
             ? {
                 items: [
+                  savedAsButton,
                   {
-                    run: () => services.embeddableEditor.transferBackToEditor(),
+                    run: () =>
+                      services.embeddableEditor.transferBackToEditor(TransferAction.Cancel),
                     id: 'cancel',
                     order: 100,
                     label: i18n.translate('discover.localMenu.cancelTitle', {
@@ -293,20 +321,7 @@ export const useTopNavLinks = ({
                   : undefined,
                 items: [
                   {
-                    run: async () => {
-                      await onSaveDiscoverSession({
-                        initialCopyOnSave: true,
-                        services,
-                        state,
-                      });
-                    },
-                    id: 'saveAs',
-                    order: 1,
-                    label: i18n.translate('discover.localMenu.saveAsTitle', {
-                      defaultMessage: 'Save as',
-                    }),
-                    iconType: 'save',
-                    testId: 'interactiveSaveMenuItem',
+                    ...savedAsButton,
                     disableButton: !persistedDiscoverSession,
                   },
                   {

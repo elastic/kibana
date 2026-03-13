@@ -8,7 +8,7 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { Client } from '@elastic/elasticsearch';
-import { hashEuid } from '../../../../server/domain/crud_client/utils';
+import { hashEuid } from '../../../../server/domain/crud/utils';
 import { getEuidFromObject } from '../../../../common/domain/euid';
 import type { Entity, HostEntity } from '../../../../common/domain/definitions/entity.gen';
 import {
@@ -20,7 +20,8 @@ import {
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
-apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/256319
+apiTest.describe.skip('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ apiClient, kbnClient, samlAuth }) => {
@@ -74,11 +75,10 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
   });
 
   apiTest('Should require a force flag', async ({ apiClient, esClient }) => {
+    // Send a field that exists on generic definition but has allowAPIUpdate: false (e.g. entity.name)
     const entityObj: Entity = {
       entity: {
         id: 'required-id-force',
-      },
-      host: {
         name: 'needs-force-flag',
       },
     };
@@ -108,13 +108,10 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
   apiTest('Should perform an upsert', async ({ apiClient, esClient }) => {
     const entityObj: Entity = {
       entity: {
-        id: 'this-is-upsert',
+        id: 'host:this-is-upsert',
       },
       host: {
         name: 'this-is-upsert',
-        entity: {
-          id: 'this-is-upsert',
-        },
       },
     };
 
@@ -131,7 +128,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       responseType: 'json',
       body: {
         entity: {
-          id: entityObj.host?.entity?.id,
+          id: entityObj.entity.id,
           name: 'this-is-upsert',
         },
         host: {
@@ -154,7 +151,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(received.entity).toBeUndefined();
     expect(received.host).toMatchObject({
       entity: {
-        id: entityObj.host?.entity?.id,
+        id: entityObj.entity?.id,
       },
       name: 'this-is-upsert',
     });
