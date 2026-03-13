@@ -136,7 +136,7 @@ export const SampleDataCardKibanaProvider: FC<PropsWithChildren<KibanaDependenci
       clearDataViewsCache();
     },
     removeSampleDataSet: async (id, defaultIndex) => {
-      await http.delete(`${SAMPLE_DATA_API}/${id}`);
+      await http.delete(`${SAMPLE_DATA_API}/${encodeURIComponent(id)}`);
 
       if (
         !uiSettings.isDefault('defaultIndex') &&

@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsResolveResponse, SavedObject } from '@kbn/core-saved-objects-api-server';
+import { buildPath } from '@kbn/core-http-browser';
 import {
   API_ROUTE_TEMPLATES,
   API_ROUTE_WORKPAD,
@@ -156,25 +157,25 @@ class CanvasWorkpadService {
   }
 
   public async remove(id: string) {
-    coreServices.http.delete(`${this.apiPath}/${id}`, { version: '1' });
+    coreServices.http.delete(buildPath(`${this.apiPath}/{id}`, { id }), { version: '1' });
   }
 
   public async update(id: string, workpad: CanvasWorkpad) {
-    coreServices.http.put(`${this.apiPath}/${id}`, {
+    coreServices.http.put(buildPath(`${this.apiPath}/{id}`, { id }), {
       body: JSON.stringify({ ...sanitizeWorkpad({ ...workpad }) }),
       version: '1',
     });
   }
 
   public async updateWorkpad(id: string, workpad: CanvasWorkpad) {
-    coreServices.http.put(`${API_ROUTE_WORKPAD_STRUCTURES}/${id}`, {
+    coreServices.http.put(buildPath(`${API_ROUTE_WORKPAD_STRUCTURES}/{id}`, { id }), {
       body: JSON.stringify({ ...sanitizeWorkpad({ ...workpad }) }),
       version: '1',
     });
   }
 
   public async updateAssets(id: string, assets: CanvasWorkpad['assets']) {
-    coreServices.http.put(`${API_ROUTE_WORKPAD_ASSETS}/${id}`, {
+    coreServices.http.put(buildPath(`${API_ROUTE_WORKPAD_ASSETS}/{id}`, { id }), {
       body: JSON.stringify(assets),
       version: '1',
     });

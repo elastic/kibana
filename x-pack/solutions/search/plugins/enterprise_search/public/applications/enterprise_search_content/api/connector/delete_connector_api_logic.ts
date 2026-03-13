@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { buildPath } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 
 import type { DeleteConnectorResponse } from '../../../../../common/types/connectors';
@@ -27,11 +28,14 @@ export const deleteConnector = async ({
   connectorName,
   shouldDeleteIndex = false,
 }: DeleteConnectorApiLogicArgs): Promise<DeleteConnectorApiLogicResponse> => {
-  await HttpLogic.values.http.delete(`/internal/enterprise_search/connectors/${connectorId}`, {
-    query: {
-      shouldDeleteIndex,
-    },
-  });
+  await HttpLogic.values.http.delete(
+    buildPath('/internal/enterprise_search/connectors/{connectorId}', { connectorId }),
+    {
+      query: {
+        shouldDeleteIndex,
+      },
+    }
+  );
   return { connectorName };
 };
 

@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/react-kibana-context-render'
   - '@kbn/core-plugins-browser'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
