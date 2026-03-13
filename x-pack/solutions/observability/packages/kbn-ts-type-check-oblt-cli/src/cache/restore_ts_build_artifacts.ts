@@ -439,11 +439,15 @@ export async function restoreTSBuildArtifacts(log: SomeDevLog, specificSha?: str
       return;
     }
 
-    await new LocalFileSystem(log).restoreArchive({
+    const restored = await new LocalFileSystem(log).restoreArchive({
       ...restoreOptions,
       cacheInvalidationFiles: undefined,
       skipClean: true,
     });
+
+    if (restored) {
+      await writeArtifactsState(restored);
+    }
   } catch (error) {
     const restoreErrorDetails = error instanceof Error ? error.message : String(error);
     log.warning(`Failed to restore TypeScript build artifacts: ${restoreErrorDetails}`);
