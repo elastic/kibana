@@ -7,10 +7,10 @@
 
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
-import type { ApiParams } from '@kbn/securitysolution-list-api';
 import { findListItems } from '@kbn/securitysolution-list-api';
 import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { useCursor } from '../use_cursor';
+import type { SecuritySolutionListHttp } from '../types';
 
 const findListItemsWithOptionalSignal = withOptionalSignal(findListItems);
 
@@ -41,7 +41,7 @@ export const useFindListItems = ({
   sortOrder: 'asc' | 'desc';
   listId: string;
   filter: string;
-  http: ApiParams['http'];
+  http: SecuritySolutionListHttp;
 }) => {
   const [cursor, setCursor] = useCursor({ pageIndex, pageSize });
   return useQuery(

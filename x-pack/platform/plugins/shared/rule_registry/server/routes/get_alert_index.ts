@@ -13,6 +13,10 @@ import { buildRouteValidation } from './utils/route_validation';
 import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 
+interface GetAlertsIndexRequestQuery {
+  ruleTypeIds?: string | string[];
+}
+
 export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.get(
     {
@@ -39,7 +43,7 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { ruleTypeIds } = request.query;
+        const { ruleTypeIds } = request.query as GetAlertsIndexRequestQuery;
 
         const ruleTypeIdsAsArray =
           ruleTypeIds != null

@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AxiosResponse } from 'axios';
+import type { AxiosError } from 'axios';
 import type { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
@@ -56,30 +57,41 @@ export const createConnectorInstanceMock = <T extends typeof SubActionConnector<
   constructorArguments: ConstructorParameters<T>[0]
 ): ConnectorInstanceMock<InstanceType<T>> => {
   const requestMock = jest.fn();
+  const ConnectorBaseClass = ConnectorClass as unknown as abstract new (
+    ...args: any[]
+  ) => SubActionConnector<any, any>;
 
-  const ConnectorClassExtended =
-    // @ts-expect-error
-    class extends ConnectorClass {
-      public async request<R>(
-        params: SubActionRequestParams<R>,
-        usageCollector: ConnectorUsageCollector
-      ): Promise<AxiosResponse<R>> {
-        return requestMock(params, usageCollector);
-      }
-    };
-  // @ts-expect-error
-  const instance = new ConnectorClassExtended(constructorArguments);
+  const ConnectorClassExtended = class extends ConnectorBaseClass {
+    constructor(...args: any[]) {
+      super(...args);
+    }
+
+    protected getResponseErrorMessage(_error: AxiosError): string {
+      return 'unknown error';
+    }
+
+    public async request<R>(
+      params: SubActionRequestParams<R>,
+      usageCollector: ConnectorUsageCollector
+    ): Promise<AxiosResponse<R>> {
+      return requestMock(params, usageCollector);
+    }
+  };
+  const instance = new ConnectorClassExtended(constructorArguments) as InstanceType<T>;
   const mockedMethods: { [K in keyof InstanceType<T>]?: jest.Mock } = { request: requestMock };
-  const instanceAccessorHandler: ProxyHandler<InstanceType<T>> = {};
-  const proxiedInstance = new Proxy(instance, instanceAccessorHandler) as ConnectorInstanceMock<
-    InstanceType<T>
-  >;
+  const instanceAccessorHandler: ProxyHandler<object> = {};
+  const proxiedInstance = new Proxy(
+    instance as object,
+    instanceAccessorHandler
+  ) as ConnectorInstanceMock<InstanceType<T>>;
 
   instanceAccessorHandler.get = function (target, prop, receiver) {
-    if (typeof instance[prop] === 'function') {
+    const value = instance[prop as keyof InstanceType<T>];
+
+    if (typeof value === 'function') {
       if (!mockedMethods[prop as keyof InstanceType<T>]) {
         mockedMethods[prop as keyof InstanceType<T>] = jest.fn(
-          instance[prop].bind(proxiedInstance) // << Magic sauce!
+          value.bind(proxiedInstance) // << Magic sauce!
         );
       }
 

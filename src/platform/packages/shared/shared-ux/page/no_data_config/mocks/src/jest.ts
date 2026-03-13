@@ -17,18 +17,18 @@ import {
   getNoDataPageKibanaDependenciesMock,
 } from '@kbn/shared-ux-page-no-data-mocks';
 
-export const getServicesMock = (): NoDataConfigPageServices => {
+export function getServicesMock(): NoDataConfigPageServices {
   const services: NoDataConfigPageServices = {
     ...getNoDataPageServicesMock(),
   };
 
   return services;
-};
+}
 
-export const getKibanaDependenciesMock = (): NoDataConfigPageKibanaDependencies => {
+export function getKibanaDependenciesMock(): NoDataConfigPageKibanaDependencies {
   const dependencies: NoDataConfigPageKibanaDependencies = {
     ...getNoDataPageKibanaDependenciesMock(),
   };
 
   return dependencies;
-};
+}

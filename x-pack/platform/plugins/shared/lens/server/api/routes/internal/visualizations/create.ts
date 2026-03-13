@@ -14,6 +14,11 @@ import {
 } from '../../../../../common/constants';
 import type { LensCreateIn, LensSavedObject } from '../../../../content_management';
 import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../../types';
+import type {
+  LensCreateRequestBody,
+  LensCreateRequestParams,
+  LensCreateRequestQuery,
+} from './types';
 import {
   lensCreateRequestBodySchema,
   lensCreateRequestParamsSchema,
@@ -76,7 +81,9 @@ export const registerLensInternalVisualizationsCreateAPIRoute: RegisterAPIRouteF
       },
     },
     async (ctx, req, res) => {
-      const requestBodyData = req.body;
+      const requestBodyData = req.body as LensCreateRequestBody;
+      const requestParams = req.params as LensCreateRequestParams;
+      const requestQuery = req.query as LensCreateRequestQuery;
       if ('state' in requestBodyData && !requestBodyData.visualizationType) {
         throw new Error('visualizationType is required');
       }
@@ -88,8 +95,12 @@ export const registerLensInternalVisualizationsCreateAPIRoute: RegisterAPIRouteF
 
       try {
         // Note: these types are to enforce loose param typings of client methods
-        const { references, ...data } = getLensInternalRequestConfig(builder, req.body);
-        const options: LensCreateIn['options'] = { ...req.query, references, id: req.params.id };
+        const { references, ...data } = getLensInternalRequestConfig(builder, requestBodyData);
+        const options: LensCreateIn['options'] = {
+          ...requestQuery,
+          references,
+          id: requestParams.id,
+        };
         const { result } = await client.create(data, options);
 
         if (result.item.error) {

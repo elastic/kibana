@@ -44,7 +44,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       modelName,
     });
 
-    return defer(() => {
+    const connectorResult$ = defer(() => {
       return executor.invoke({
         subAction: 'unified_completion_stream',
         subActionParams: {
@@ -56,11 +56,17 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
           ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
         },
       });
-    }).pipe(
+    });
+
+    const connectorStream$ = connectorResult$.pipe(
       handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
-      processOpenAIStream(),
-      emitTokenCountEstimateIfMissing({ request }),
-      useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
+      processOpenAIStream()
     );
+
+    const eventStream$ = connectorStream$.pipe(emitTokenCountEstimateIfMissing({ request }));
+
+    return useSimulatedFunctionCalling
+      ? eventStream$.pipe(parseInlineFunctionCalls({ logger }))
+      : eventStream$.pipe(identity);
   },
 };

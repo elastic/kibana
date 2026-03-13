@@ -93,7 +93,10 @@ export function registerPromptRoute({
     },
     async (context, request, response) => {
       try {
-        const promptResponse = await callPrompt({ request, stream: false });
+        const promptResponse = await callPrompt({
+          request: request as KibanaRequest<unknown, unknown, PromptRequestBody>,
+          stream: false,
+        });
         return response.ok({
           body: promptResponse,
         });
@@ -126,7 +129,10 @@ export function registerPromptRoute({
       },
     },
     async (context, request, response) => {
-      const promptResponse$ = await callPrompt({ request, stream: true });
+      const promptResponse$ = await callPrompt({
+        request: request as KibanaRequest<unknown, unknown, PromptRequestBody>,
+        stream: true,
+      });
       return response.ok({
         body: observableIntoEventSourceStream(promptResponse$, {
           logger,

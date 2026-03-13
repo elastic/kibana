@@ -8,13 +8,10 @@
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import type SearchApi from '@elastic/elasticsearch/lib/api/api/search';
 import type { SiemMigrationsClientDependencies, ItemDocument } from '../types';
 import { SiemMigrationsDataItemClient } from './siem_migrations_data_item_client';
 import { dsl } from './dsl_queries';
 import type { SiemMigrationSort } from './types';
-
-type SearchApiResponse = Awaited<ReturnType<typeof SearchApi>>;
 
 class TestSiemMigrationsDataItemClient extends SiemMigrationsDataItemClient<ItemDocument> {
   protected type = 'rule' as const;
@@ -56,7 +53,9 @@ describe('SiemMigrationsDataItemClient', () => {
   describe('getStats', () => {
     it('queries ES using isEligibleForTranslation filter', async () => {
       (
-        esClient.asInternalUser.search as unknown as jest.MockedFn<typeof SearchApi>
+        esClient.asInternalUser.search as unknown as jest.MockedFn<
+          typeof esClient.asInternalUser.search
+        >
       ).mockResolvedValueOnce({
         hits: { total: { value: 0 }, hits: [] },
         aggregations: {
@@ -64,7 +63,7 @@ describe('SiemMigrationsDataItemClient', () => {
             buckets: [],
           },
         },
-      } as unknown as SearchApiResponse);
+      } as unknown as Awaited<ReturnType<typeof esClient.asInternalUser.search>>);
 
       await client.getStats('mig-1');
 
@@ -88,7 +87,9 @@ describe('SiemMigrationsDataItemClient', () => {
   describe('getAllStats', () => {
     it('queries ES using eligibility filter', async () => {
       (
-        esClient.asInternalUser.search as unknown as jest.MockedFn<typeof SearchApi>
+        esClient.asInternalUser.search as unknown as jest.MockedFn<
+          typeof esClient.asInternalUser.search
+        >
       ).mockResolvedValueOnce({
         hits: { total: { value: 0 }, hits: [] },
         aggregations: {
@@ -96,7 +97,7 @@ describe('SiemMigrationsDataItemClient', () => {
             buckets: [],
           },
         },
-      } as unknown as SearchApiResponse);
+      } as unknown as Awaited<ReturnType<typeof esClient.asInternalUser.search>>);
 
       await client.getAllStats();
 
@@ -127,7 +128,7 @@ describe('SiemMigrationsDataItemClient', () => {
       (esClient.asInternalUser.openPointInTime as jest.Mock).mockResolvedValue({ id: 'pit-1' });
 
       const searchMock = esClient.asInternalUser.search as unknown as jest.MockedFn<
-        typeof SearchApi
+        typeof esClient.asInternalUser.search
       >;
       searchMock
         .mockResolvedValueOnce({
@@ -139,14 +140,14 @@ describe('SiemMigrationsDataItemClient', () => {
               { _id: '2', _source: { migration_id: 'mig-1' }, sort: ['b'] },
             ],
           },
-        } as unknown as SearchApiResponse)
+        } as unknown as Awaited<ReturnType<typeof esClient.asInternalUser.search>>)
         .mockResolvedValueOnce({
           pit_id: 'pit-3',
           hits: {
             total: { value: 0 },
             hits: [],
           },
-        } as unknown as SearchApiResponse);
+        } as unknown as Awaited<ReturnType<typeof esClient.asInternalUser.search>>);
 
       const { next } = client.searchBatches('mig-1');
 

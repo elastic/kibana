@@ -123,12 +123,14 @@ describe('datatableFn', () => {
   // This is needed for ghost formula columns, see https://github.com/elastic/kibana/issues/239170
   it('should sort unknown columns in table by order of args.columns', async () => {
     const table = buildTable();
+    const unknownColumn: Datatable['columns'][number] = {
+      id: 'unknown',
+      name: 'unknown',
+      meta: { type: 'number' },
+    };
     const shuffledTable: Datatable = {
       ...table,
-      columns: shuffle([
-        ...table.columns,
-        { id: 'unknown', name: 'unknown', meta: { type: 'number' } },
-      ]),
+      columns: shuffle([...table.columns, unknownColumn]),
     };
     const args = buildArgs();
     const result = await datatableFn(() => mockFormatFactory)(shuffledTable, args, context);

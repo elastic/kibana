@@ -8,6 +8,7 @@
 import {
   configureStore,
   getDefaultMiddleware,
+  type EnhancedStore,
   type PreloadedState,
   type Action,
   type Dispatch,
@@ -15,7 +16,7 @@ import {
 } from '@reduxjs/toolkit';
 import type { TypedUseSelectorHook } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
-import type { LensState, LensStoreDeps } from '@kbn/lens-common';
+import type { LensAppState, LensStoreDeps } from '@kbn/lens-common';
 import { makeLensReducer, lensActions, getPreloadedState } from './lens_slice';
 import { initMiddleware } from './init_middleware';
 import { optimizingMiddleware } from './optimizing_middleware';
@@ -63,9 +64,17 @@ export const {
 
 type CustomMiddleware = (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => void;
 
-export const makeConfigureStore = (
+export interface LensStoreState {
+  lens: LensAppState;
+}
+
+export const makeConfigureStore: (
   storeDeps: LensStoreDeps,
-  preloadedState?: PreloadedState<LensState> | undefined,
+  preloadedState?: PreloadedState<LensStoreState>,
+  customMiddleware?: CustomMiddleware
+) => EnhancedStore<LensStoreState> = (
+  storeDeps: LensStoreDeps,
+  preloadedState,
   customMiddleware?: CustomMiddleware
 ) => {
   const middleware = [

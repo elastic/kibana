@@ -49,7 +49,7 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
         },
       },
       createLicensedRouteHandler(async (context, request, response) => {
-        const spaceId = request.params.id;
+        const { id: spaceId } = request.params as { id: string };
         const spacesClient = getSpacesService().createSpacesClient(request);
         try {
           const space = await spacesClient.get(spaceId);

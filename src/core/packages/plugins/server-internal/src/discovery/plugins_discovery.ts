@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { from, merge, EMPTY } from 'rxjs';
+import { from, merge } from 'rxjs';
 import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { getPluginPackagesFilter } from '@kbn/repo-packages';
+import type { PluginPackageManifest, Package as RepoPackageCtor } from '@kbn/repo-packages';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { PluginWrapper } from '../plugin';
@@ -21,6 +22,9 @@ import type { PluginsConfig } from '../plugins_config';
 import type { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
 import { scanPluginSearchPaths } from './scan_plugin_search_paths';
+
+type RepoPackage = InstanceType<typeof RepoPackageCtor>;
+type RepoPluginPackage = RepoPackage & { manifest: PluginPackageManifest };
 
 /**
  * Tries to discover all possible plugins based on the provided plugin config.
@@ -44,6 +48,19 @@ export function discover({
   nodeInfo: NodeInfo;
 }) {
   const log = coreContext.logger.get('plugins-discovery');
+  const pluginPackagesFilter = getPluginPackagesFilter({
+    allowlistPluginGroups: config.allowlistPluginGroups,
+    oss: coreContext.env.cliArgs.oss,
+    examples: coreContext.env.cliArgs.runExamples,
+    paths: config.additionalPluginPaths,
+    parentDirs: config.pluginSearchPaths,
+  });
+  const pluginPackagesFilterWithIndex = pluginPackagesFilter as (
+    pkg: RepoPackage,
+    index: number
+  ) => boolean;
+  const isPluginPackage = (pkg: RepoPackage, index: number): pkg is RepoPluginPackage =>
+    pluginPackagesFilterWithIndex(pkg, index);
   log.debug('Discovering plugins...');
 
   if (config.additionalPluginPaths.length && coreContext.env.mode.dev) {
@@ -63,16 +80,10 @@ export function discover({
     })
   );
 
-  const pluginPkgDiscovery$ = from(coreContext.env.repoPackages ?? EMPTY).pipe(
-    filter(
-      getPluginPackagesFilter({
-        allowlistPluginGroups: config.allowlistPluginGroups,
-        oss: coreContext.env.cliArgs.oss,
-        examples: coreContext.env.cliArgs.runExamples,
-        paths: config.additionalPluginPaths,
-        parentDirs: config.pluginSearchPaths,
-      })
-    ),
+  const repoPackages = (coreContext.env.repoPackages ?? []) as readonly RepoPackage[];
+
+  const pluginPkgDiscovery$ = from(repoPackages).pipe(
+    filter(isPluginPackage),
     map((pkg) => {
       log.debug(`Successfully discovered plugin package "${pkg.id}"`);
       const manifest = pluginManifestFromPluginPackage(

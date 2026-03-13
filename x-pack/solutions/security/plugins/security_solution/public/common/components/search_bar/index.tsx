@@ -8,7 +8,6 @@
 import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
@@ -502,8 +501,16 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-export const connector = connect(makeMapStateToProps, mapDispatchToProps);
+type SearchBarStateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type SearchBarDispatchProps = ReturnType<typeof mapDispatchToProps>;
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+export const connector = connect<
+  SearchBarStateProps,
+  SearchBarDispatchProps,
+  SiemSearchBarProps,
+  State
+>(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = SearchBarStateProps & SearchBarDispatchProps;
 
 export const SiemSearchBar = connector(SearchBarComponent);

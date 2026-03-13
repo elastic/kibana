@@ -7,19 +7,31 @@
 
 import moment from 'moment';
 import { apm, timerange } from '@kbn/synthtrace-client';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+
+interface SynthtraceService {
+  createApmSynthtraceEsClient(): Promise<ApmSynthtraceEsClient>;
+}
+
+type GetSyntheticApmDataService = (name: 'synthtrace') => SynthtraceService;
+
+interface CreateSyntheticApmDataArgs {
+  getService: GetSyntheticApmDataService;
+  serviceName?: string;
+  environment?: string;
+  language?: string;
+}
+
+interface SyntheticApmDataResult {
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
+}
 
 export const createSyntheticApmData = async ({
   getService,
   serviceName = 'my-service',
   environment = 'production',
   language = 'go',
-}: {
-  getService: DeploymentAgnosticFtrProviderContext['getService'];
-  serviceName?: string;
-  environment?: string;
-  language?: string;
-}) => {
+}: CreateSyntheticApmDataArgs): Promise<SyntheticApmDataResult> => {
   const synthtrace = getService('synthtrace');
   const apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 

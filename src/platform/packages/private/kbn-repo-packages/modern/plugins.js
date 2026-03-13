@@ -9,6 +9,8 @@
 
 const Path = require('path');
 
+/** @typedef {InstanceType<typeof import('./package').Package>} RepoPackage */
+
 /**
  * @param {{ rootDir: string }} options
  * @returns {string[]}
@@ -111,11 +113,11 @@ function matchPluginGroups(selector, pkg) {
 
 /**
  * @param {import('./types').PluginSelector} selector
- * @returns {(pkg: import('./package').Package) => pkg is import('./types').PluginPackage}
+ * @returns {(pkg: RepoPackage) => pkg is import('./types').PluginPackage}
  */
 function getPluginPackagesFilter(selector = {}) {
   /**
-   * @param {import('./package').Package} pkg
+   * @param {RepoPackage} pkg
    * @returns {pkg is import('./types').PluginPackage}
    */
   return (pkg) =>

@@ -8,6 +8,7 @@
  */
 
 /** @typedef {import('./modern/types').PluginPackage} PluginPackage */
+/** @typedef {import('./modern/types').Package} Package */
 /** @typedef {import('./modern/types').PluginSelector} PluginSelector */
 /** @typedef {import('./modern/types').KibanaPackageManifest} KibanaPackageManifest */
 /** @typedef {import('./modern/types').PluginPackageManifest} PluginPackageManifest */
@@ -32,29 +33,27 @@ const {
   readPackageMap,
 } = require('./modern/get_packages');
 const { readPackageManifest } = require('./modern/parse_package_manifest');
-const { Package } = require('./modern/package');
+const { Package: PackageClass } = require('./modern/package');
 const { parseKbnImportReq } = require('./modern/parse_kbn_import_req');
 const { getRepoRels, getRepoRelsSync } = require('./modern/get_repo_rels');
 const Jsonc = require('./utils/jsonc');
 const { getPluginPackagesFilter, getPluginSearchPaths } = require('./modern/plugins');
 const { readPackageJson } = require('./modern/parse_package_json');
 
-module.exports = {
-  Package,
-  readHashOfPackageMap,
-  readPackageMap,
-  getPackages,
-  getPkgDirMap,
-  getPkgsById,
-  updatePackageMap,
-  removePackagesFromPackageMap,
-  findPackageForPath,
-  readPackageManifest,
-  Jsonc,
-  getPluginPackagesFilter,
-  getPluginSearchPaths,
-  parseKbnImportReq,
-  getRepoRels,
-  getRepoRelsSync,
-  readPackageJson,
-};
+exports.Package = PackageClass;
+exports.readHashOfPackageMap = readHashOfPackageMap;
+exports.readPackageMap = readPackageMap;
+exports.getPackages = getPackages;
+exports.getPkgDirMap = getPkgDirMap;
+exports.getPkgsById = getPkgsById;
+exports.updatePackageMap = updatePackageMap;
+exports.removePackagesFromPackageMap = removePackagesFromPackageMap;
+exports.findPackageForPath = findPackageForPath;
+exports.readPackageManifest = readPackageManifest;
+exports.Jsonc = Jsonc;
+exports.getPluginPackagesFilter = getPluginPackagesFilter;
+exports.getPluginSearchPaths = getPluginSearchPaths;
+exports.parseKbnImportReq = parseKbnImportReq;
+exports.getRepoRels = getRepoRels;
+exports.getRepoRelsSync = getRepoRelsSync;
+exports.readPackageJson = readPackageJson;

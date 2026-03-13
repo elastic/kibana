@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 
 import type { Agent } from '@kbn/fleet-plugin/common';
-import type { processAggregations } from '../../common/utils/aggregations';
+import type { ProcessAggregationsResult } from '../../common/utils/aggregations';
 import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
@@ -31,7 +31,7 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
 
   return useQuery<{
     agents: Agent[];
-    groups: ReturnType<typeof processAggregations>;
+    groups: ProcessAggregationsResult;
     total: number;
   }>({
     queryKey: ['agents', osqueryPolicies, searchValue, perPage, agentIds],

@@ -17,7 +17,9 @@ const defaultParams = { canAccessFleet: true };
 /**
  * Returns the Jest-compatible service abstractions for the `NoDataCardProvider`.
  */
-export const getServicesMock = (params: Partial<NoDataCardServices> = defaultParams) => {
+export function getServicesMock(
+  params: Partial<NoDataCardServices> = defaultParams
+): NoDataCardServices {
   const canAccessFleet =
     params.canAccessFleet !== undefined ? params.canAccessFleet : defaultParams.canAccessFleet;
 
@@ -27,14 +29,14 @@ export const getServicesMock = (params: Partial<NoDataCardServices> = defaultPar
   };
 
   return services;
-};
+}
 
 /**
  * Return a Jest mock of the Kibana dependencies for the `NoDataCardKibanaProvider`.
  */
-export const getKibanaDependenciesMock = (
+export function getKibanaDependenciesMock(
   params: Partial<NoDataCardServices> = defaultParams
-): NoDataCardKibanaDependencies => {
+): NoDataCardKibanaDependencies {
   const integrations =
     params.canAccessFleet !== undefined ? params.canAccessFleet : defaultParams.canAccessFleet;
 
@@ -56,4 +58,4 @@ export const getKibanaDependenciesMock = (
   };
 
   return result;
-};
+}

@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useGenAIConnectors, type Connector } from './use_genai_connectors';
+import { useGenAIConnectors } from './use_genai_connectors';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import {
@@ -17,10 +17,22 @@ import {
 const STREAMS_CONNECTOR_STORAGE_KEY = 'xpack.streamsApp.lastUsedConnector';
 const OLD_STORAGE_KEY = 'xpack.observabilityAiAssistant.lastUsedConnector';
 
-const createMockConnector = (id: string, name: string): Connector => ({
+type ConnectorsResponse = Extract<
+  Awaited<ReturnType<StreamsRepositoryClient['fetch']>>,
+  { connectors: unknown[] }
+>;
+
+type ConnectorResponse = ConnectorsResponse['connectors'][number];
+
+const createMockConnector = (id: string, name: string): ConnectorResponse => ({
   id,
   name,
   actionTypeId: '.gen-ai',
+  isDeprecated: false,
+  isConnectorTypeDeprecated: false,
+  isPreconfigured: false,
+  isSystemAction: false,
+  referencedByCount: 0,
 });
 
 describe('useGenAIConnectors', () => {

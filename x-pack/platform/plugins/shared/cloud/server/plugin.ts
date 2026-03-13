@@ -15,6 +15,7 @@ import { parseNextURL } from '@kbn/std';
 
 import camelcaseKeys from 'camelcase-keys';
 import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-groups';
+import type { CloudSecurityAnswer, ResourceData } from '../common/types';
 import type { CloudConfigType } from './config';
 
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
@@ -33,6 +34,12 @@ import { persistTokenCloudData } from './cloud_data';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
+}
+
+interface CloudOnboardingQuery {
+  onboarding_token?: string;
+  resource_data?: ResourceData;
+  security?: CloudSecurityAnswer;
 }
 
 /**
@@ -299,6 +306,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         },
       },
       async (context, request, response) => {
+        const requestQuery = request.query as CloudOnboardingQuery;
         const { uiSettings } = await context.core;
         const defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request });
         const nextCandidateRoute = parseNextURL(request.url.href);
@@ -307,15 +315,15 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         // need to get rid of ../../ to make sure we will not be out of space basePath
         const normalizedRoute = new URL(route, 'https://localhost');
 
-        const queryOnboardingToken = request.query?.onboarding_token ?? undefined;
-        const queryOnboardingSecurityRaw = request.query?.security ?? undefined;
+        const queryOnboardingToken = requestQuery.onboarding_token ?? undefined;
+        const queryOnboardingSecurityRaw = requestQuery.security ?? undefined;
         const queryOnboardingSecurity = queryOnboardingSecurityRaw
           ? camelcaseKeys(queryOnboardingSecurityRaw, {
               deep: true,
             })
           : undefined;
 
-        const queryResourceDataRaw = request.query?.resource_data ?? undefined;
+        const queryResourceDataRaw = requestQuery.resource_data ?? undefined;
         const queryResourceData = queryResourceDataRaw
           ? camelcaseKeys(queryResourceDataRaw, {
               deep: true,

@@ -10,7 +10,6 @@ import {
   SeverityStatusBadge,
   getNormalizedSeverity,
   type FindingVulnerabilityFullFlyoutContentProps,
-  type FindingsVulnerabilityPanelExpandableFlyoutProps,
 } from '@kbn/cloud-security-posture';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +21,15 @@ import { FlyoutHeader } from '../../../shared/components/flyout_header';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 
+interface FindingsVulnerabilityPanelProps {
+  vulnerabilityId: string | string[];
+  resourceId?: string;
+  packageName: string | string[];
+  packageVersion: string | string[];
+  eventId?: string;
+  isPreviewMode?: boolean;
+}
+
 export const FindingsVulnerabilityPanel = ({
   vulnerabilityId,
   resourceId,
@@ -29,7 +37,7 @@ export const FindingsVulnerabilityPanel = ({
   packageVersion,
   eventId,
   isPreviewMode,
-}: FindingsVulnerabilityPanelExpandableFlyoutProps['params']) => {
+}: FindingsVulnerabilityPanelProps) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspVulnerabilityFlyout = cloudSecurityPosture.getCloudSecurityPostureVulnerabilityFlyout();
 

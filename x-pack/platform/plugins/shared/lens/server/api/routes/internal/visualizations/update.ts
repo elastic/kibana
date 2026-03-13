@@ -15,6 +15,11 @@ import {
 } from '../../../../../common/constants';
 import type { LensUpdateIn, LensSavedObject } from '../../../../content_management';
 import type { LensUpdateResponseBody, RegisterAPIRouteFn } from '../../../types';
+import type {
+  LensUpdateRequestBody,
+  LensUpdateRequestParams,
+  LensUpdateRequestQuery,
+} from './types';
 import {
   lensUpdateRequestBodySchema,
   lensUpdateRequestParamsSchema,
@@ -80,7 +85,9 @@ export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteF
       },
     },
     async (ctx, req, res) => {
-      const requestBodyData = req.body;
+      const requestBodyData = req.body as LensUpdateRequestBody;
+      const requestParams = req.params as LensUpdateRequestParams;
+      const requestQuery = req.query as LensUpdateRequestQuery;
       if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
         throw new Error('visualizationType is required');
       }
@@ -91,11 +98,11 @@ export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteF
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
       // Note: these types are to enforce loose param typings of client methods
-      const { references, ...data } = getLensInternalRequestConfig(builder, req.body);
-      const options: LensUpdateIn['options'] = { ...req.query, references };
+      const { references, ...data } = getLensInternalRequestConfig(builder, requestBodyData);
+      const options: LensUpdateIn['options'] = { ...requestQuery, references };
 
       try {
-        const { result } = await client.update(req.params.id, data, options);
+        const { result } = await client.update(requestParams.id, data, options);
 
         if (result.item.error) {
           throw result.item.error;
@@ -110,7 +117,7 @@ export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteF
           if (error.output.statusCode === 404) {
             return res.notFound({
               body: {
-                message: `A Lens visualization with id [${req.params.id}] was not found.`,
+                message: `A Lens visualization with id [${requestParams.id}] was not found.`,
               },
             });
           }

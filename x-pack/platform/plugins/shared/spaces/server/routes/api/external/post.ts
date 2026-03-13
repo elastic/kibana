@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { ExternalRouteDeps } from '.';
-import { API_VERSIONS } from '../../../../common';
+import { API_VERSIONS, type Space } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { getSpaceSchema } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
@@ -51,7 +51,7 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
       createLicensedRouteHandler(async (context, request, response) => {
         log.debug(`Inside POST /api/spaces/space`);
         const spacesClient = getSpacesService().createSpacesClient(request);
-        const space = request.body;
+        const space = request.body as Space;
         try {
           log.debug(`Attempting to create space`);
           const createdSpace = await spacesClient.create(space);

@@ -5,17 +5,56 @@
  * 2.0.
  */
 
-import type { InheritedFtrProviderContext } from '../../ftr_provider_context';
+interface SecurityService {
+  role: {
+    create(
+      roleName: string,
+      options: {
+        kibana: Array<{
+          feature: Record<string, string[]>;
+          spaces: string[];
+        }>;
+      }
+    ): Promise<void>;
+    delete(roleName: string): Promise<void>;
+  };
+  user: {
+    create(
+      username: string,
+      options: {
+        password: string;
+        roles: string[];
+        full_name: string;
+      }
+    ): Promise<void>;
+    delete(username: string): Promise<void>;
+  };
+}
+
+interface SecurityPageObject {
+  forceLogout(): Promise<void>;
+  login(
+    username: string,
+    password: string,
+    options: { expectSpaceSelector: boolean }
+  ): Promise<void>;
+}
+
+type GetFeatureControlService = (name: 'security') => SecurityService;
+
+type GetFeatureControlPageObjects = (pageObjects: ['security']) => {
+  security: SecurityPageObject;
+};
 
 const AI_ASSISTANT_ROLE_NAME = 'ai_assistant_role';
 const AI_ASSISTANT_USER_NAME = 'ai_assistant_user';
 const AI_ASSISTANT_USER_PASSWORD = `${AI_ASSISTANT_USER_NAME}-password`;
 
 export const createAndLoginUserWithCustomRole = async (
-  getPageObjects: InheritedFtrProviderContext['getPageObjects'],
-  getService: InheritedFtrProviderContext['getService'],
+  getPageObjects: GetFeatureControlPageObjects,
+  getService: GetFeatureControlService,
   featurePrivileges: { [key: string]: string[] }
-) => {
+): Promise<void> => {
   const security = getService('security');
   const PageObjects = getPageObjects(['security']);
 
@@ -44,9 +83,9 @@ export const createAndLoginUserWithCustomRole = async (
 };
 
 export const deleteAndLogoutUser = async (
-  getService: InheritedFtrProviderContext['getService'],
-  getPageObjects: InheritedFtrProviderContext['getPageObjects']
-) => {
+  getService: GetFeatureControlService,
+  getPageObjects: GetFeatureControlPageObjects
+): Promise<void> => {
   const security = getService('security');
   const PageObjects = getPageObjects(['security']);
 

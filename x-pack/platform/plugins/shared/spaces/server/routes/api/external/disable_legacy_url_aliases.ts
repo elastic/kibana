@@ -11,6 +11,14 @@ import type { ExternalRouteDeps } from '.';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
 
+interface DisableLegacyUrlAliasesRequestBody {
+  aliases: Array<{
+    sourceId: string;
+    targetSpace: string;
+    targetType: string;
+  }>;
+}
+
 export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
   const { router, getSpacesService, usageStatsServicePromise, log, isServerless } = deps;
   const usageStatsClientPromise = usageStatsServicePromise.then(({ getClient }) => getClient());
@@ -55,7 +63,7 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
     createLicensedRouteHandler(async (_context, request, response) => {
       const spacesClient = getSpacesService().createSpacesClient(request);
 
-      const { aliases } = request.body;
+      const { aliases } = request.body as DisableLegacyUrlAliasesRequestBody;
 
       usageStatsClientPromise
         .then((usageStatsClient) => usageStatsClient.incrementDisableLegacyUrlAliases())

@@ -34,7 +34,7 @@ interface Props {
 
 export type LazyWithContextProviders = ReturnType<typeof getLazyWithContextProviders>;
 
-interface Options {
+export interface Options {
   spinnerSize?: EuiLoadingSpinnerProps['size'];
 }
 

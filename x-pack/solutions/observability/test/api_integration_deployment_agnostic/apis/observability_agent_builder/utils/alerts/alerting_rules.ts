@@ -7,20 +7,81 @@
 
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import type { ApmAlertFields } from '../../../apm/alerts/helpers/alerting_helper';
 import { APM_ALERTS_INDEX } from '../../../apm/alerts/helpers/alerting_helper';
+
+interface AlertRuleData {
+  ruleTypeId?: string;
+  ruleName?: string;
+  consumer?: string;
+  interval?: string;
+  tags?: string[];
+  environment?: string;
+  threshold?: number;
+  windowSize?: number;
+  windowUnit?: string;
+  indexName?: string;
+  docCountTarget?: number;
+}
+
+interface AlertingApiService {
+  createRule(params: {
+    ruleTypeId: string;
+    name: string;
+    consumer: string;
+    schedule: { interval: string };
+    tags: string[];
+    params: {
+      environment: string;
+      threshold: number;
+      windowSize: number;
+      windowUnit: string;
+    };
+    roleAuthc: RoleCredentials;
+  }): Promise<{ id?: string }>;
+  waitForDocumentInIndex<T>(params: {
+    indexName: string;
+    ruleId: string;
+    docCountTarget: number;
+  }): Promise<T | unknown>;
+  runRule(roleAuthc: RoleCredentials, ruleId: string): Promise<unknown>;
+  deleteRules(params: { roleAuthc: RoleCredentials }): Promise<unknown>;
+}
+
+interface LoggerService {
+  error(message: string): void;
+}
+
+interface GetAlertingHelperService {
+  (name: 'alertingApi'): AlertingApiService;
+  (name: 'log'): LoggerService;
+}
+
+interface CreateRuleArgs {
+  getService: GetAlertingHelperService;
+  roleAuthc: RoleCredentials;
+  internalReqHeader?: InternalRequestHeader;
+  data?: AlertRuleData;
+}
+
+interface RunRuleArgs {
+  getService: GetAlertingHelperService;
+  roleAuthc: RoleCredentials;
+  internalReqHeader?: InternalRequestHeader;
+  ruleId: string;
+}
+
+interface DeleteRulesArgs {
+  getService: GetAlertingHelperService;
+  roleAuthc: RoleCredentials;
+  internalReqHeader?: InternalRequestHeader;
+}
 
 export const createRule = async ({
   getService,
   roleAuthc,
   data,
-}: {
-  getService: DeploymentAgnosticFtrProviderContext['getService'];
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
-  data?: any;
-}) => {
+}: CreateRuleArgs): Promise<string> => {
   const alertingApi = getService('alertingApi');
   const logger = getService('log');
 
@@ -55,28 +116,12 @@ export const createRule = async ({
   }
 };
 
-export const runRule = async ({
-  getService,
-  roleAuthc,
-  ruleId,
-}: {
-  getService: DeploymentAgnosticFtrProviderContext['getService'];
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
-  ruleId: string;
-}) => {
+export const runRule = async ({ getService, roleAuthc, ruleId }: RunRuleArgs): Promise<unknown> => {
   const alertingApi = getService('alertingApi');
   return alertingApi.runRule(roleAuthc, ruleId);
 };
 
-export const deleteRules = async ({
-  getService,
-  roleAuthc,
-}: {
-  getService: DeploymentAgnosticFtrProviderContext['getService'];
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
-}) => {
+export const deleteRules = async ({ getService, roleAuthc }: DeleteRulesArgs): Promise<unknown> => {
   const alertingApi = getService('alertingApi');
   return alertingApi.deleteRules({ roleAuthc });
 };

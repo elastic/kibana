@@ -10,12 +10,39 @@ import {
   KNOWN_SERVERLESS_ROLE_DEFINITIONS,
 } from '@kbn/security-solution-plugin/common/test';
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const KNOWN_ROLE_DEFINITIONS = {
   ...KNOWN_SERVERLESS_ROLE_DEFINITIONS,
   ...KNOWN_ESS_ROLE_DEFINITIONS,
 };
+
+interface SecurityService {
+  role: {
+    create(roleName: string, roleDefinition: unknown): Promise<void>;
+    delete(roleName: string): Promise<void>;
+  };
+  user: {
+    create(
+      username: string,
+      userDefinition: {
+        password: string;
+        roles: string[];
+        full_name: string;
+        email: string;
+      }
+    ): Promise<void>;
+    delete(username: string): Promise<void>;
+  };
+}
+
+interface LoggerService {
+  error(message: string): void;
+}
+
+interface GetSecuritySolutionService {
+  (name: 'security'): SecurityService;
+  (name: 'log'): LoggerService;
+}
 
 /**
  * creates a security solution centric role and a user (both having the same name)
@@ -23,7 +50,7 @@ const KNOWN_ROLE_DEFINITIONS = {
  * @param role
  */
 export const createUserAndRole = async (
-  getService: FtrProviderContext['getService'],
+  getService: GetSecuritySolutionService,
   role: SecurityRoleName
 ): Promise<void> => {
   const securityService = getService('security');
@@ -45,7 +72,7 @@ export const createUserAndRole = async (
  * @param securityService The security service
  */
 export const deleteUserAndRole = async (
-  getService: FtrProviderContext['getService'],
+  getService: GetSecuritySolutionService,
   roleName: SecurityRoleName
 ): Promise<void> => {
   const securityService = getService('security');
@@ -54,7 +81,7 @@ export const deleteUserAndRole = async (
 };
 
 export const deleteAndReCreateUserRole = async (
-  getService: FtrProviderContext['getService'],
+  getService: GetSecuritySolutionService,
   roleName: SecurityRoleName
 ): Promise<void> => {
   const log = getService('log');

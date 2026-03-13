@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
-import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import { i18n } from '@kbn/i18n';
 import { FlyoutNavigation } from '../../../shared/components/flyout_navigation';
@@ -17,11 +16,17 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
 
+interface FindingsMisconfigurationPanelProps {
+  resourceId: string;
+  ruleId: string;
+  isPreviewMode?: boolean;
+}
+
 export const FindingsMisconfigurationPanel = ({
   resourceId,
   ruleId,
   isPreviewMode,
-}: FindingsMisconfigurationPanelExpandableFlyoutProps['params']) => {
+}: FindingsMisconfigurationPanelProps) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspFlyout = cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyout();
 

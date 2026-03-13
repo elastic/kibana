@@ -10,7 +10,10 @@ import { merge } from 'lodash';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
-import type { StreamingChatResponseEventWithoutError } from '@kbn/observability-ai-assistant-plugin/common';
+import type {
+  Conversation,
+  StreamingChatResponseEventWithoutError,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import {
   MessageRole,
   StreamingChatResponseEventType,
@@ -28,6 +31,7 @@ import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hoo
 import type { NotificationsStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { buildConversation } from '../utils/builders';
 
 let hookResult: RenderHookResult<UseConversationResult, UseConversationProps>;
 
@@ -77,6 +81,23 @@ const useKibanaMockServices = {
 };
 
 describe('useConversation', () => {
+  const buildStoredConversation = (params: Partial<Conversation> = {}) => {
+    const timestamp = new Date().toISOString();
+
+    return buildConversation({
+      '@timestamp': timestamp,
+      conversation: {
+        id: 'my-conversation-id',
+        title: EMPTY_CONVERSATION_TITLE,
+        last_updated: timestamp,
+      },
+      systemMessage: 'System',
+      messages: [],
+      namespace: 'default',
+      ...params,
+    });
+  };
+
   const wrapper = ({ children }: PropsWithChildren) => (
     <KibanaContextProvider services={useKibanaMockServices}>{children}</KibanaContextProvider>
   );
@@ -170,11 +191,15 @@ describe('useConversation', () => {
 
   describe('with a conversation id that successfully loads', () => {
     beforeEach(async () => {
+      const lastUpdated = new Date().toISOString();
+
       mockService.callApi.mockResolvedValueOnce({
+        ...buildStoredConversation(),
         conversation: {
           id: 'my-conversation-id',
+          title: EMPTY_CONVERSATION_TITLE,
+          last_updated: lastUpdated,
         },
-        systemMessage: 'System',
         messages: [
           {
             '@timestamp': new Date().toISOString(),
@@ -204,6 +229,8 @@ describe('useConversation', () => {
       expect(hookResult.result.current.conversation.value).toEqual({
         conversation: {
           id: 'my-conversation-id',
+          title: EMPTY_CONVERSATION_TITLE,
+          last_updated: expect.any(String),
         },
         systemMessage: 'System',
         messages: [
@@ -215,6 +242,11 @@ describe('useConversation', () => {
             },
           },
         ],
+        '@timestamp': expect.any(String),
+        labels: {},
+        numeric_labels: {},
+        namespace: 'default',
+        public: false,
       });
     });
 
@@ -294,13 +326,10 @@ describe('useConversation', () => {
     beforeEach(() => {
       mockService.callApi.mockImplementation(async (endpoint, request) =>
         merge(
-          {
-            conversation: {
-              id: 'my-conversation-id',
-            },
+          buildStoredConversation({
             systemMessage: '',
             messages: expectedMessages,
-          },
+          }),
           (request as any).params.body
         )
       );
@@ -423,27 +452,17 @@ describe('useConversation', () => {
     });
 
     describe('with a stored conversation', () => {
-      let resolve: (value: unknown) => void;
+      let resolve: (value: Conversation) => void;
       beforeEach(async () => {
         mockService.callApi.mockImplementation(async (endpoint, request) => {
           if (
             endpoint === 'PUT /internal/observability_ai_assistant/conversation/{conversationId}'
           ) {
-            return new Promise((_resolve) => {
+            return new Promise<Conversation>((_resolve) => {
               resolve = _resolve;
             });
           }
-          return {
-            '@timestamp': new Date().toISOString(),
-            conversation: {
-              id: 'my-conversation-id',
-              title: EMPTY_CONVERSATION_TITLE,
-            },
-            labels: {},
-            numeric_labels: {},
-            public: false,
-            messages: [],
-          };
+          return buildStoredConversation();
         });
 
         await act(async () => {
@@ -497,25 +516,25 @@ describe('useConversation', () => {
         ]);
 
         mockService.callApi.mockImplementation(async (endpoint, request) => {
-          return {
-            '@timestamp': new Date().toISOString(),
+          return buildStoredConversation({
             conversation: {
               id: 'my-conversation-id',
               title: 'my-new-title',
+              last_updated: new Date().toISOString(),
             },
-            labels: {},
-            numeric_labels: {},
-            public: false,
-            messages: [],
-          };
+          });
         });
 
         await act(async () => {
-          resolve({
-            conversation: {
-              title: 'my-new-title',
-            },
-          });
+          resolve(
+            buildStoredConversation({
+              conversation: {
+                id: 'my-conversation-id',
+                title: 'my-new-title',
+                last_updated: new Date().toISOString(),
+              },
+            })
+          );
         });
 
         expect(mockService.callApi.mock.calls[2]).toEqual([

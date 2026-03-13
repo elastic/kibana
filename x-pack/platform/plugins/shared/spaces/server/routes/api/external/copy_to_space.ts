@@ -19,6 +19,12 @@ import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
 type SavedObjectIdentifier = Pick<SavedObject, 'id' | 'type'>;
+type CopyToSpacesRequestBody = {
+  spaces: string[];
+} & Parameters<ReturnType<typeof copySavedObjectsToSpacesFactory>>[2];
+type ResolveCopyToSpacesErrorsRequestBody = Parameters<
+  ReturnType<typeof resolveCopySavedObjectsToSpacesConflictsFactory>
+>[1];
 
 const areObjectsUnique = (objects: SavedObjectIdentifier[]) =>
   _.uniqBy(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
@@ -135,6 +141,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const [startServices] = await getStartServices();
+      const requestBody = request.body as CopyToSpacesRequestBody;
       const {
         spaces: destinationSpaceIds,
         objects,
@@ -142,7 +149,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         overwrite,
         createNewCopies,
         compatibilityMode,
-      } = request.body;
+      } = requestBody;
 
       const { headers } = request;
       usageStatsClientPromise
@@ -290,8 +297,9 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const [startServices] = await getStartServices();
+      const requestBody = request.body as ResolveCopyToSpacesErrorsRequestBody;
       const { objects, includeReferences, retries, createNewCopies, compatibilityMode } =
-        request.body;
+        requestBody;
 
       const { headers } = request;
       usageStatsClientPromise

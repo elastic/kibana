@@ -6,14 +6,14 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { ApiParams } from '@kbn/securitysolution-list-api';
 import { getListById } from '@kbn/securitysolution-list-api';
 import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import type { SecuritySolutionListHttp } from '../types';
 
 const getListByIdWithOptionalSignal = withOptionalSignal(getListById);
 
 const GET_LIST_BY_ID_QUERY_KEY = 'GET_LIST_BY_ID';
-export const useGetListById = ({ http, id }: { http: ApiParams['http']; id: string }) => {
+export const useGetListById = ({ http, id }: { http: SecuritySolutionListHttp; id: string }) => {
   return useQuery(
     [GET_LIST_BY_ID_QUERY_KEY, id],
     async ({ signal }) => {
