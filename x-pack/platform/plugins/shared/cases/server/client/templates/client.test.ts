@@ -9,7 +9,10 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { Operations, ReadOperations, WriteOperations } from '../../authorization';
 import { createCasesClientMockArgs } from '../mocks';
 import { createTemplatesSubClient } from './client';
-import type { TemplatesFindRequest, TemplatesFindResponse } from '../../../common/types/api/template/v1';
+import type {
+  TemplatesFindRequest,
+  TemplatesFindResponse,
+} from '../../../common/types/api/template/v1';
 import type { SavedObject } from '@kbn/core/server';
 import type { Template } from '../../../common/types/domain/template/latest';
 
@@ -207,7 +210,9 @@ describe('TemplatesSubClient', () => {
 
       await client.updateTemplate('template-id-1', input);
 
-      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('template-id-1');
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith(
+        'template-id-1'
+      );
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
         operation: Operations[WriteOperations.ManageTemplate],
         entities: [{ owner: mockTemplateSO.attributes.owner, id: mockTemplateSO.id }],
@@ -251,7 +256,9 @@ describe('TemplatesSubClient', () => {
 
       await client.deleteTemplate('template-id-1');
 
-      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('template-id-1');
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith(
+        'template-id-1'
+      );
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
         operation: Operations[WriteOperations.ManageTemplate],
         entities: [{ owner: mockTemplateSO.attributes.owner, id: mockTemplateSO.id }],
