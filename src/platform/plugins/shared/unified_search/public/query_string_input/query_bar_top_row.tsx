@@ -1024,7 +1024,6 @@ export const QueryBarTopRow = React.memo(
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             queryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
-            openVisorOnSourceCommands
           />
         )
       );

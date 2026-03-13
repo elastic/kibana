@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/slo-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/actionable-obs-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/slo-plugin'
+  title: '@kbn/slo-plugin'
   description: Moon project for @kbn/slo-plugin
   channel: ''
   owner: '@elastic/actionable-obs-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/slo
+  sourceRoot: x-pack/solutions/observability/plugins/slo
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
@@ -142,14 +141,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
