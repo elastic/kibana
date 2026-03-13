@@ -14,7 +14,6 @@ import moment from 'moment';
 import type {
   CoreSetup,
   CoreStart,
-  IClusterClient,
   KibanaRequest,
   Logger,
   PluginInitializerContext,
@@ -292,11 +291,10 @@ export class SearchService {
       asScoped: this.asScoped,
       searchSource: {
         asScoped: async (request: KibanaRequest, opts?: AsScopedOptions) => {
-          const esClient = this.createScopedEsClient({
-            client: elasticsearch.client,
+          const esClient = elasticsearch.client.asScoped(
             request,
-            opts,
-          });
+            opts ?? { projectRouting: 'request-header' }
+          );
 
           const savedObjectsClient = savedObjects.getScopedClient(request);
           const scopedIndexPatterns = await indexPatterns.dataViewsServiceFactory(
@@ -546,7 +544,7 @@ export class SearchService {
       const deps = {
         searchSessionsClient,
         savedObjectsClient,
-        esClient: this.createScopedEsClient({ client: elasticsearch.client, request, opts }),
+        esClient: elasticsearch.client.asScoped(request, opts ?? { projectRouting: 'request-header' }),
         uiSettingsClient: new CachedUiSettingsClient(
           uiSettings.asScopedToClient(savedObjectsClient)
         ),
@@ -575,32 +573,5 @@ export class SearchService {
         getSessionStatus: searchSessionsClient.status,
       };
     };
-  };
-
-  private createScopedEsClient = ({
-    client,
-    request,
-    opts,
-  }: {
-    client: IClusterClient;
-    request: KibanaRequest;
-    opts?: AsScopedOptions;
-  }) => {
-    if (!opts?.projectRouting) {
-      return client.asScoped(request);
-    }
-
-    switch (opts?.projectRouting) {
-      case 'space-npre':
-        return client.asScoped(request, { projectRouting: 'space-npre' });
-      case 'all':
-        return client.asScoped(request, { projectRouting: 'all' });
-      case 'origin-only':
-        return client.asScoped(request, { projectRouting: 'origin-only' });
-      case 'request-header':
-        return client.asScoped(request, { projectRouting: 'request-header' });
-      default:
-        throw new KbnServerError(`Invalid project routing: ${opts?.projectRouting}`, 400);
-    }
   };
 }

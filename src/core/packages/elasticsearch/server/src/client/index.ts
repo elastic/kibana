@@ -12,9 +12,7 @@ export type {
   IClusterClient,
   ICustomClusterClient,
   AsScopedOptions,
-  OriginOnlyRouting,
   SpaceNPRERouting,
-  AllProjectsRouting,
   RequestHeaderRouting,
 } from './cluster_client';
 export type { ScopeableRequest, FakeRequest, UrlRequest, ScopeableUrlRequest } from './types';

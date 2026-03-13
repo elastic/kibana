@@ -24,9 +24,7 @@ import type {
   IScopedClusterClient,
   ElasticsearchClientConfig,
   AsScopedOptions,
-  OriginOnlyRouting,
   SpaceNPRERouting,
-  AllProjectsRouting,
   RequestHeaderRouting,
 } from '@kbn/core-elasticsearch-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
@@ -139,25 +137,21 @@ export class ClusterClient implements ICustomClusterClient {
 
   asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
   asScoped(request: ScopeableRequest, opts: RequestHeaderRouting): IScopedClusterClient;
-  asScoped(
-    request: ScopeableRequest,
-    opts?: OriginOnlyRouting | AllProjectsRouting
-  ): IScopedClusterClient;
-  asScoped(request: ScopeableRequest, opts: AsScopedOptions = { projectRouting: 'origin-only' }) {
+  asScoped(request: ScopeableRequest): IScopedClusterClient;
+  asScoped(request: ScopeableRequest, opts?: AsScopedOptions) {
     const createScopedClient = () => {
       const scopedHeaders = this.getScopedHeaders(request);
-      const { projectRouting } = opts;
       let factoryOpts: FactoryRoutingOpts;
-      if (projectRouting === 'space-npre') {
+      if (opts?.projectRouting === 'space-npre') {
         factoryOpts = {
           projectRouting: 'space-npre',
           request: request as ScopeableUrlRequest,
           logger: this.logger,
         };
-      } else if (projectRouting === 'request-header') {
+      } else if (opts?.projectRouting === 'request-header') {
         factoryOpts = { projectRouting: 'request-header', request, logger: this.logger };
       } else {
-        factoryOpts = { projectRouting, logger: this.logger };
+        factoryOpts = { projectRouting: 'origin-only', logger: this.logger };
       }
 
       const transportClass = createTransport({
