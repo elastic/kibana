@@ -8,14 +8,21 @@
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import type { AttackDetailsLeftPanelKey, AttackDetailsRightPanelKey } from './constants/panel_keys';
 
+export interface AttackDetailsPanelParams extends Record<string, unknown> {
+  attackId: string;
+  indexName: string;
+  isPreviewMode?: boolean;
+  banner?: Record<string, unknown>;
+}
+
 export interface AttackDetailsProps extends FlyoutPanelProps {
   key: typeof AttackDetailsRightPanelKey;
   path?: PanelPath;
-  params?: { attackId: string; indexName: string; isPreviewMode?: boolean };
+  params?: AttackDetailsPanelParams;
 }
 
 export interface AttackDetailsLeftPanelProps extends FlyoutPanelProps {
   key: typeof AttackDetailsLeftPanelKey;
   path?: PanelPath;
-  params?: { attackId: string; indexName: string; isPreviewMode?: boolean };
+  params?: AttackDetailsPanelParams;
 }

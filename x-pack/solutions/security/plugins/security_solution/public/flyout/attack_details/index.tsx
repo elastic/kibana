@@ -6,6 +6,7 @@
  */
 import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { i18n } from '@kbn/i18n';
 import type { AttackDetailsProps } from './types';
 import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 
@@ -23,23 +24,37 @@ import { PanelHeader } from './header';
 
 export type AttackDetailsPanelPaths = 'overview' | 'table' | 'json';
 
+export const ATTACK_PREVIEW_BANNER = {
+  title: i18n.translate('xpack.securitySolution.flyout.right.attack.attackPreviewTitle', {
+    defaultMessage: 'Preview attack details',
+  }),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+};
+
 /**
  * Panel to be displayed in Attack Details flyout
  */
 export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({ path }) => {
   const { storage } = useKibana().services;
   const { openRightPanel, openPreviewPanel } = useExpandableFlyoutApi();
-  const { attackId, indexName, isPreviewMode = false } = useAttackDetailsContext();
+  const { attackId, indexName, isPreviewMode = false, banner } = useAttackDetailsContext();
   const expandDetails = useNavigateToAttackDetailsLeftPanel();
 
   const { tabsDisplayed, selectedTabId } = useTabs({ path });
 
   const setSelectedTabId = useCallback(
     (tabId: AttackDetailsPanelTabType['id']) => {
+      const previewBanner = banner ?? ATTACK_PREVIEW_BANNER;
       const panel = {
         id: AttackDetailsRightPanelKey,
         path: { tab: tabId },
-        params: { attackId, indexName, isPreviewMode },
+        params: {
+          attackId,
+          indexName,
+          isPreviewMode,
+          ...(isPreviewMode ? { banner: previewBanner } : {}),
+        },
       };
       if (isPreviewMode) {
         openPreviewPanel(panel);
@@ -49,7 +64,7 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
       // saving which tab is currently selected in the right panel in local storage
       storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
     },
-    [attackId, indexName, isPreviewMode, openPreviewPanel, openRightPanel, storage]
+    [attackId, banner, indexName, isPreviewMode, openPreviewPanel, openRightPanel, storage]
   );
 
   return (
