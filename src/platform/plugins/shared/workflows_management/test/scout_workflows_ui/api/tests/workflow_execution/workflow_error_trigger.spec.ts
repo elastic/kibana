@@ -44,6 +44,53 @@ steps:
       message: "Error handler ran for workflow {{ event.workflow.name }}"
 `;
 
+/** Failing workflow whose name does not match "Scout*" (for filter-by-name no-match test). */
+const FAILING_OTHER_NAME_WORKFLOW_YAML = `
+name: Other Failing Workflow
+enabled: true
+description: Fails on purpose; name does not match Scout*
+triggers:
+  - type: manual
+steps:
+  - name: fail_step
+    type: http
+    with:
+      url: "https://httpstat.us/500"
+      method: GET
+`;
+
+/** Error handler that runs only when event.workflow.name matches "Scout*". */
+const ERROR_HANDLER_NAME_FILTER_YAML = `
+name: Scout Error Trigger - Name Filter Handler
+enabled: true
+description: Subscribes to workflows.executionFailed when workflow name matches Scout*
+triggers:
+  - type: workflows.executionFailed
+    on:
+      condition: not event.workflow.isErrorHandler:true and event.workflow.name:"Scout*"
+steps:
+  - name: log_event
+    type: console
+    with:
+      message: "Name filter handler ran for {{ event.workflow.name }}"
+`;
+
+/** Error handler that runs only when event.error.stepId is "fail_step". */
+const ERROR_HANDLER_STEP_ID_FILTER_YAML = `
+name: Scout Error Trigger - StepId Filter Handler
+enabled: true
+description: Subscribes to workflows.executionFailed when failed step id is fail_step
+triggers:
+  - type: workflows.executionFailed
+    on:
+      condition: not event.workflow.isErrorHandler:true and event.error.stepId:"fail_step"
+steps:
+  - name: log_event
+    type: console
+    with:
+      message: "StepId filter handler ran for step {{ event.error.stepId }}"
+`;
+
 async function waitForExecution(
   workflowsApi: WorkflowsApiService,
   executionId: string,
@@ -66,6 +113,9 @@ spaceTest.describe(
     let workflowsApi: WorkflowsApiService;
     let failingWorkflowId: string;
     let errorHandlerWorkflowId: string;
+    let failingOtherWorkflowId: string;
+    let handlerNameFilterId: string;
+    let handlerStepFilterId: string;
 
     spaceTest.beforeAll(async ({ apiServices }) => {
       spaceTest.setTimeout(90_000);
@@ -74,8 +124,17 @@ spaceTest.describe(
       const failing = await workflowsApi.create(FAILING_WORKFLOW_YAML);
       failingWorkflowId = failing.id;
 
+      const failingOther = await workflowsApi.create(FAILING_OTHER_NAME_WORKFLOW_YAML);
+      failingOtherWorkflowId = failingOther.id;
+
       const handler = await workflowsApi.create(ERROR_HANDLER_WORKFLOW_YAML);
       errorHandlerWorkflowId = handler.id;
+
+      const handlerNameFilter = await workflowsApi.create(ERROR_HANDLER_NAME_FILTER_YAML);
+      handlerNameFilterId = handlerNameFilter.id;
+
+      const handlerStepFilter = await workflowsApi.create(ERROR_HANDLER_STEP_ID_FILTER_YAML);
+      handlerStepFilterId = handlerStepFilter.id;
     });
 
     spaceTest.afterAll(async () => {
@@ -109,6 +168,66 @@ spaceTest.describe(
         const handlerExecutionId = (firstHandlerExecution as (typeof handlerExecutions)[number]).id;
         const handlerExecution = await waitForExecution(workflowsApi, handlerExecutionId);
 
+        expect(handlerExecution?.triggeredBy).toBe('workflows.executionFailed');
+        expect(handlerExecution?.status).toBe(ExecutionStatus.COMPLETED);
+      }
+    );
+
+    spaceTest(
+      'filter by workflow name: handler runs when name matches condition, does not run when name does not match',
+      async () => {
+        const { results: initialResults } = await workflowsApi.getExecutions(handlerNameFilterId);
+        const initialCount = initialResults.length;
+
+        // Run workflow whose name matches "Scout*" → name-filter handler should run once more
+        await workflowsApi.run(failingWorkflowId, {});
+        const { results: afterMatch } = await waitForConditionOrThrow({
+          action: () => workflowsApi.getExecutions(handlerNameFilterId),
+          condition: ({ results: r }) => r.length >= initialCount + 1,
+          interval: 2000,
+          timeout: 25_000,
+          errorMessage: ({ results: r }) =>
+            `Name filter handler should have at least ${
+              initialCount + 1
+            } execution(s) after Scout workflow failed, got ${r.length}`,
+        });
+        const countAfterMatch = afterMatch.length;
+
+        // Run workflow whose name does not match "Scout*" → name-filter handler should not run again
+        const { workflowExecutionId: otherExecutionId } = await workflowsApi.run(
+          failingOtherWorkflowId,
+          {}
+        );
+        await waitForExecution(workflowsApi, otherExecutionId);
+        await new Promise((r) => setTimeout(r, 4000));
+        const { results: afterNoMatch } = await workflowsApi.getExecutions(handlerNameFilterId);
+        expect(afterNoMatch).toHaveLength(countAfterMatch);
+      }
+    );
+
+    spaceTest(
+      'filter by failed step: handler runs when event.error.stepId matches condition',
+      async () => {
+        const { workflowExecutionId: failedExecutionId } = await workflowsApi.run(
+          failingWorkflowId,
+          {}
+        );
+        const failedExecution = await waitForExecution(workflowsApi, failedExecutionId);
+        expect(failedExecution?.status).toBe(ExecutionStatus.FAILED);
+
+        const { results: handlerExecutions } = await waitForConditionOrThrow({
+          action: () => workflowsApi.getExecutions(handlerStepFilterId),
+          condition: ({ results: r }) => r.length >= 1,
+          interval: 2000,
+          timeout: 25_000,
+          errorMessage: ({ results: r }) =>
+            `StepId filter handler should run when workflow fails at fail_step, got ${r.length} executions`,
+        });
+
+        const firstHandlerExecution = handlerExecutions[0];
+        expect(firstHandlerExecution).toBeDefined();
+        const handlerExecutionId = (firstHandlerExecution as (typeof handlerExecutions)[number]).id;
+        const handlerExecution = await waitForExecution(workflowsApi, handlerExecutionId);
         expect(handlerExecution?.triggeredBy).toBe('workflows.executionFailed');
         expect(handlerExecution?.status).toBe(ExecutionStatus.COMPLETED);
       }
