@@ -20,7 +20,7 @@ describe('useFormDefaults', () => {
         description: '',
       },
       timeField: '@timestamp', // Default to @timestamp; TimeFieldSelect may update if not available
-      schedule: { every: '5m', lookback: '1m' },
+      schedule: { every: '1m', lookback: '5m' },
       evaluation: {
         query: {
           base: '',

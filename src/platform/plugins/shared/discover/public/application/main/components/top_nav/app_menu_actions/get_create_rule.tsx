@@ -40,7 +40,7 @@ export function CreateESQLRuleFlyout({
     (stateContainer.getCurrentTab().appState.query as AggregateQuery)?.esql || ''
   );
 
-  const { http, data, dataViews, notifications, history, core } = services;
+  const { http, data, dataViews, notifications, history, core, lens } = services;
 
   // Use a ref to avoid stale closure issues with onClose
   const onCloseRef = useRef(onClose);
@@ -102,6 +102,7 @@ export function CreateESQLRuleFlyout({
           dataViews,
           notifications,
           application: core.application,
+          lens,
         }}
         query={query}
         onClose={onClose}
