@@ -38,7 +38,6 @@ const MermaidDiagram: React.FC<{ content: string }> = ({ content }) => {
     setSvgContent(null);
 
     try {
-      // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
       const mermaid = (await import('mermaid')).default;
 
       mermaid.initialize({
