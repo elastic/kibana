@@ -31,12 +31,12 @@ If the user accepts the default or leaves it blank, use `$HOME/.gcs/gcs.client.d
 Launch Elasticsearch in the background using `run_in_background`. Include the GCS credentials:
 
 ```bash
-yarn es snapshot --license trial --secure-files gcs.client.default.credentials_file=<GCS_CREDENTIALS_PATH>
+yarn es snapshot --license trial --secure-files gcs.client.default.credentials_file=<GCS_CREDENTIALS_PATH> -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
 ```
 
 Tell the user Elasticsearch is starting up.
 
-### Step 3: Register GCS Snapshot Repository
+### Step 3: Set Up EIS and Register GCS Snapshot Repository
 
 Wait for Elasticsearch to become available by polling until the cluster health endpoint responds. Fail after 30 attempts (approximately 2.5 minutes):
 
@@ -46,7 +46,17 @@ MAX_RETRIES=30; COUNT=0; until curl -s -u elastic:changeme http://localhost:9200
 
 If the poll times out, show the error to the user and suggest checking the Elasticsearch background task output for startup errors.
 
-Once ES is ready, register the GCS snapshot repository with these defaults:
+Once ES is ready, run the EIS setup script to configure Cloud Connected Mode (CCM):
+
+```bash
+node scripts/eis.js
+```
+
+Verify it succeeds by checking for the "EIS API key successfully set" message. If it fails, show the error to the user.
+
+Tell the user EIS/CCM has been configured.
+
+Next, register the GCS snapshot repository with these defaults:
 
 - **Repository name**: `agent-builder-datasets`
 - **Bucket**: `agent-builder-datasets`
@@ -109,13 +119,23 @@ Tell the user the snapshot has been restored.
 
 ### Step 5: Launch Kibana
 
-Launch Kibana in the background using `run_in_background`:
+Use `AskUserQuestion` to ask the user whether Kibana should be started:
+
+> Should Kibana be started?
+
+Options:
+- **Yes** — Launch Kibana in the background (recommended if Kibana is not already running)
+- **No, it's already running** — Skip launching Kibana and proceed to the next step
+
+If the user selects **Yes**, launch Kibana in the background using `run_in_background`:
 
 ```bash
 yarn start --no-base-path
 ```
 
 Tell the user Kibana is starting up.
+
+If the user selects **No, it's already running**, tell the user Kibana launch was skipped and proceed to the next step.
 
 ### Step 6: Confirm Phoenix Running
 
@@ -188,8 +208,6 @@ Display a summary and the command:
 > - Kibana: running (no base path)
 > - Phoenix: confirmed running
 > - EDOT: running
->
-> **Important:** Make sure Cloud Connected Mode (CCM) is enabled in Kibana before running the evaluation. Go to **Stack Management > Cloud Connected Mode** in the Kibana UI and enable it if it is not already active.
 >
 > **Run the following command in a separate terminal to start the evaluation:**
 >
