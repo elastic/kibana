@@ -630,7 +630,6 @@ export const getCommandAutocompleteDefinitions = (commands: string[]): ISuggesti
         label: type.name ? `${type.name.toLocaleUpperCase()} ${label}` : label,
         text: type.name ? `${type.name.toLocaleUpperCase()} ${text}` : text,
         kind: 'Method',
-        ...(commandDefinition.metadata.preview && { detail: techPreviewLabel }),
         documentation: {
           value: buildDocumentation(
             detail,

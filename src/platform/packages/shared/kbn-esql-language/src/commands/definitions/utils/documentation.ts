@@ -17,6 +17,44 @@ const examplesLabel = i18n.translate('kbn-esql-language.esql.autocomplete.exampl
   defaultMessage: 'Examples:',
 });
 
+const MAX_LINE_LENGTH = 30;
+
+/**
+ * Wraps lines that exceed MAX_LINE_LENGTH at word boundaries,
+ * indenting continuation lines with two spaces.
+ * Lines that are already within the limit are left unchanged.
+ */
+function wrapLines(text: string): string {
+  return text
+    .split('\n')
+    .map((line) => {
+      if (line.length <= MAX_LINE_LENGTH) {
+        return line;
+      }
+
+      const words = line.split(' ');
+      const lines: string[] = [];
+      let current = '';
+
+      for (const word of words) {
+        const candidate = current ? `${current} ${word}` : word;
+        if (candidate.length > MAX_LINE_LENGTH && current) {
+          lines.push(current);
+          current = `  ${word}`;
+        } else {
+          current = candidate;
+        }
+      }
+
+      if (current) {
+        lines.push(current);
+      }
+
+      return lines.join('\n');
+    })
+    .join('\n');
+}
+
 /** @internal */
 export const buildFunctionDocumentation = (
   detail: string,
@@ -30,7 +68,9 @@ ${detail}
 
 # ${declarationLabel}
 \`\`\`typescript
-${signatures.map(({ declaration, license }) => `${declaration}${license || ''}`).join('\n')}
+${wrapLines(
+  signatures.map(({ declaration, license }) => `${declaration}${license || ''}`).join('\n')
+)}
 \`\`\`
 
 ${
@@ -38,7 +78,7 @@ ${
     ? `\
 # ${examplesLabel}
 \`\`\`esql
-${examples.join('\n')}
+${wrapLines(examples.join('\n'))}
 \`\`\`
 `
     : ''
@@ -50,7 +90,7 @@ ${detail}
 
 # ${declarationLabel}
 \`\`\`esql
-${declaration}
+${wrapLines(declaration)}
 \`\`\`
 
 ${
@@ -58,7 +98,7 @@ ${
     ? `\
 # ${examplesLabel}
 \`\`\`esql
-${examples.map((ex) => ex.replace(/^…/gm, '...')).join('\n')}
+${wrapLines(examples.map((ex) => ex.replace(/^…/gm, '...')).join('\n'))}
 \`\`\`
 `
     : ''
