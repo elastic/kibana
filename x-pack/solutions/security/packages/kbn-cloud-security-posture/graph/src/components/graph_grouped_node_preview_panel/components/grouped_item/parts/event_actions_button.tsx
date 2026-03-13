@@ -8,14 +8,13 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DOCUMENT_TYPE_ALERT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import { PopoverListItem } from '../../../../popovers/primitives/popover_list_item';
 import {
   GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID,
   GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID,
 } from '../../../test_ids';
-import type { EventItem, AlertItem } from '../types';
 import { getLabelExpandItems } from '../../../../popovers/node_expand/get_label_expand_items';
 import { emitFilterToggle, isFilterActiveForScope } from '../../../../filters/filter_store';
 import {
@@ -32,7 +31,7 @@ const actionsButtonAriaLabel = i18n.translate(
 );
 
 export interface EventActionsButtonProps {
-  item: EventItem | AlertItem;
+  item: EventOrAlertItem;
   /**
    * Unique identifier for the graph instance, used to scope filter state.
    */
@@ -56,10 +55,10 @@ export const EventActionsButton = ({ item, scopeId }: EventActionsButtonProps) =
     openPreviewPanel({
       id: DocumentDetailsPreviewPanelKey,
       params: {
-        id: item.docId,
+        id: item.id,
         indexName: item.index,
         scopeId,
-        banner: item.itemType === DOCUMENT_TYPE_ALERT ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+        banner: item.isAlert ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
         isPreviewMode: true,
       },
     });
@@ -76,7 +75,7 @@ export const EventActionsButton = ({ item, scopeId }: EventActionsButtonProps) =
       showEventsWithAction: true,
       showEventDetails: true,
     },
-    isSingleAlert: item.itemType === DOCUMENT_TYPE_ALERT,
+    isSingleAlert: item.isAlert,
   });
 
   return (

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EntityActionsButton } from './entity_actions_button';
-import type { EntityItem } from '../types';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
 import { GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID } from '../../../test_ids';
 import { GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID } from '../../../../test_ids';
 
@@ -23,9 +23,8 @@ jest.mock('@kbn/expandable-flyout', () => ({
 describe('EntityActionsButton', () => {
   const mockEntityItem: EntityItem = {
     id: 'entity-123',
-    itemType: 'entity',
     icon: 'user',
-    label: 'Test Entity',
+    name: 'Test Entity',
     availableInEntityStore: true,
   };
 

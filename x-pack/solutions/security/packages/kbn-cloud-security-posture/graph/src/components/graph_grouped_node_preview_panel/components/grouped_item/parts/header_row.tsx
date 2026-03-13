@@ -82,7 +82,7 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
-            id: item.docId,
+            id: item.id,
             indexName: item.index,
             scopeId,
             banner: item.isAlert ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,

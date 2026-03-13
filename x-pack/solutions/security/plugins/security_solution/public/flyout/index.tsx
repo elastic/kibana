@@ -192,6 +192,7 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
           documentIds={params.documentIds}
           start={params.start}
           end={params.end}
+          scopeId={params.scopeId ?? ''}
         />
       );
     },
