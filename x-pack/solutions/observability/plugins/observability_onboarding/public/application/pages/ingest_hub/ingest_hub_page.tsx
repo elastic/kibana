@@ -883,6 +883,7 @@ export const IngestHubPage: React.FC = () => {
 
   const isStopVersion = activeVersion === 'skipUx';
   const isStopFillVersion = activeVersion === 'blockUx';
+  const [leavingForDiscover, setLeavingForDiscover] = useState(false);
   const [isGetStartedFlyoutOpen, setIsGetStartedFlyoutOpen] = useState(
     !routeSection || routeSection === 'get-started'
   );
@@ -896,7 +897,7 @@ export const IngestHubPage: React.FC = () => {
   }, [activeVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (activeVersion !== 'blockUx') return;
+    if (activeVersion !== 'blockUx' || leavingForDiscover) return;
     const appEl = document.querySelector('.kbnChromeLayoutApplication');
     const gridRoot = appEl?.parentElement;
     if (!gridRoot) return;
@@ -910,13 +911,17 @@ export const IngestHubPage: React.FC = () => {
     (appEl as HTMLElement).style.setProperty('margin-right', '24px', 'important');
     (appEl as HTMLElement).style.setProperty('width', 'calc(100% - 48px)', 'important');
     return () => {
-      gridRoot.style.gridTemplateColumns = originalColumns;
-      gridRoot.style.background = originalGridBg;
-      (appEl as HTMLElement).style.marginRight = originalMarginRight;
-      (appEl as HTMLElement).style.width = originalWidth;
+      gridRoot.style.removeProperty('grid-template-columns');
+      gridRoot.style.removeProperty('background');
+      if (originalColumns) gridRoot.style.gridTemplateColumns = originalColumns;
+      if (originalGridBg) gridRoot.style.background = originalGridBg;
       (appEl as HTMLElement).style.removeProperty('margin-left');
+      (appEl as HTMLElement).style.removeProperty('margin-right');
+      (appEl as HTMLElement).style.removeProperty('width');
+      if (originalMarginRight) (appEl as HTMLElement).style.marginRight = originalMarginRight;
+      if (originalWidth) (appEl as HTMLElement).style.width = originalWidth;
     };
-  }, [activeVersion]);
+  }, [activeVersion, leavingForDiscover]);
 
   useEffect(() => {
     if (activeVersion === 'skipUx') {
@@ -1987,9 +1992,176 @@ export const IngestHubPage: React.FC = () => {
     </>
   );
 
+  const seedAwsLogsAndNavigateToDiscover = async () => {
+    setWelcomeChildTile(null);
+
+    const now = Date.now();
+    const sources = [
+      {
+        index: 'logs-aws.cloudtrail-default',
+        dataset: 'aws.cloudtrail',
+        messages: [
+          { level: 'info', msg: 'AssumeRole performed by user:admin from IP 10.0.1.54', action: 'AssumeRole' },
+          { level: 'info', msg: 'ConsoleLogin for user:dev-engineer from 192.168.1.100', action: 'ConsoleLogin' },
+          { level: 'info', msg: 'CreateBucket action on resource arn:aws:s3:::app-logs-backup', action: 'CreateBucket' },
+          { level: 'info', msg: 'PutObject to s3://production-data/configs/app.yaml', action: 'PutObject' },
+          { level: 'info', msg: 'DescribeInstances called by role:ECSServiceRole', action: 'DescribeInstances' },
+          { level: 'warning', msg: 'AuthorizeSecurityGroupIngress on sg-0a1b2c3d4e5f from 0.0.0.0/0', action: 'AuthorizeSecurityGroupIngress' },
+          { level: 'info', msg: 'DeleteObject from s3://temp-uploads/batch-7291.tmp', action: 'DeleteObject' },
+          { level: 'info', msg: 'RunInstances launched i-0abc123def456 (t3.medium)', action: 'RunInstances' },
+        ],
+      },
+      {
+        index: 'logs-aws.vpcflow-default',
+        dataset: 'aws.vpcflow',
+        messages: [
+          { level: 'info', msg: '10.0.3.45 → 10.0.5.22:443 ACCEPT 12 packets 4892 bytes', action: 'ACCEPT' },
+          { level: 'error', msg: '10.0.1.17 → 172.16.0.5:22 REJECT 3 packets 180 bytes', action: 'REJECT' },
+          { level: 'info', msg: '10.0.2.88 → 10.0.4.100:5432 ACCEPT 45 packets 32400 bytes', action: 'ACCEPT' },
+          { level: 'info', msg: '192.168.1.50 → 10.0.3.10:80 ACCEPT 8 packets 2048 bytes', action: 'ACCEPT' },
+          { level: 'error', msg: '10.0.5.12 → 10.0.1.4:3389 REJECT 7 packets 420 bytes', action: 'REJECT' },
+          { level: 'info', msg: '10.0.4.100 → 10.0.6.15:8443 ACCEPT 34 packets 22100 bytes', action: 'ACCEPT' },
+        ],
+      },
+      {
+        index: 'logs-aws.cloudwatch_logs-default',
+        dataset: 'aws.cloudwatch_logs',
+        messages: [
+          { level: 'info', msg: '[INFO] Lambda function app-processor invoked successfully in 245ms', action: 'LambdaInvoke' },
+          { level: 'error', msg: '[ERROR] Connection timeout to RDS instance db-prod-01 after 30s', action: 'RDSTimeout' },
+          { level: 'warning', msg: '[WARN] Memory utilization at 87% for ECS task web-service/abc123', action: 'ECSMemory' },
+          { level: 'info', msg: '[INFO] API Gateway request 200 OK — GET /api/v1/users — 12ms', action: 'APIGateway' },
+          { level: 'info', msg: '[DEBUG] DynamoDB query consumed 5.0 RCU on table user-sessions', action: 'DynamoDBQuery' },
+          { level: 'error', msg: '[ERROR] ECS container health check failed for task web-service/def456', action: 'ECSHealthCheck' },
+        ],
+      },
+      {
+        index: 'logs-aws.s3access-default',
+        dataset: 'aws.s3access',
+        messages: [
+          { level: 'info', msg: 'REST.GET.OBJECT production-data/reports/2026-03-09.csv — 200 — 14ms', action: 'GET' },
+          { level: 'info', msg: 'REST.PUT.OBJECT app-logs-backup/2026/03/09/ct-log.gz — 200 — 8ms', action: 'PUT' },
+          { level: 'info', msg: 'REST.GET.BUCKET production-data — 200 — prefix=configs/', action: 'GET' },
+          { level: 'info', msg: 'REST.HEAD.OBJECT static-assets/images/logo.png — 200 — 3ms', action: 'HEAD' },
+          { level: 'info', msg: 'REST.DELETE.OBJECT temp-uploads/batch-7291.tmp — 204 — 5ms', action: 'DELETE' },
+        ],
+      },
+      {
+        index: 'logs-aws.guardduty-default',
+        dataset: 'aws.guardduty',
+        messages: [
+          { level: 'error', msg: 'UnauthorizedAccess:EC2/SSHBruteForce on i-0abc123def456 — severity: HIGH', action: 'SSHBruteForce' },
+          { level: 'warning', msg: 'Recon:EC2/PortProbeUnprotectedPort on i-0def456abc789 — severity: MEDIUM', action: 'PortProbe' },
+          { level: 'error', msg: 'CryptoCurrency:EC2/BitcoinTool.B on i-0789abc123def — severity: HIGH', action: 'BitcoinTool' },
+          { level: 'warning', msg: 'UnauthorizedAccess:IAMUser/MaliciousIPCaller on user:test-account — severity: LOW', action: 'MaliciousIP' },
+          { level: 'error', msg: 'Trojan:EC2/DNSDataExfiltration on i-0abc999def111 — severity: HIGH', action: 'DNSExfiltration' },
+        ],
+      },
+      {
+        index: 'logs-aws.elb_logs-default',
+        dataset: 'aws.elb_logs',
+        messages: [
+          { level: 'info', msg: 'https 200 app/web-alb/abc123 10.0.1.50:443 "GET /api/health HTTP/2" 0.015s', action: 'GET' },
+          { level: 'info', msg: 'https 200 app/web-alb/abc123 10.0.2.31:443 "POST /api/v1/events HTTP/2" 0.008s', action: 'POST' },
+          { level: 'error', msg: 'https 502 app/web-alb/abc123 10.0.3.72:443 "GET /api/v1/dashboard HTTP/2" 0.030s', action: 'GET' },
+          { level: 'info', msg: 'https 200 app/web-alb/abc123 10.0.4.18:443 "GET /static/app.js HTTP/2" 0.003s', action: 'GET' },
+          { level: 'warning', msg: 'https 429 app/web-alb/abc123 10.0.5.91:443 "POST /api/v1/ingest HTTP/2" 0.045s', action: 'POST' },
+        ],
+      },
+    ];
+
+    let bulkBody = '';
+    let docIdx = 0;
+    for (const src of sources) {
+      for (let round = 0; round < 3; round++) {
+        for (const m of src.messages) {
+          const ts = new Date(now - docIdx * 1800 - Math.floor(Math.random() * 500)).toISOString();
+          bulkBody += JSON.stringify({ index: { _index: src.index } }) + '\n';
+          bulkBody += JSON.stringify({
+            '@timestamp': ts,
+            message: m.msg,
+            log: { level: m.level },
+            data_stream: { dataset: src.dataset, namespace: 'default', type: 'logs' },
+            cloud: { provider: 'aws', region: 'us-west-2', account: { id: '123456789012' } },
+            event: { action: m.action, dataset: src.dataset },
+          }) + '\n';
+          docIdx++;
+        }
+      }
+    }
+
+    const basePath = services.http?.basePath.get() ?? '';
+
+    try {
+      const resp = await fetch(`${basePath}/api/console/proxy?path=${encodeURIComponent('/_bulk')}&method=POST`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'kbn-xsrf': 'reporting',
+        },
+        body: bulkBody,
+      });
+      if (!resp.ok) {
+        throw new Error(`Bulk failed: ${resp.status}`);
+      }
+    } catch (_) {
+      try {
+        for (const src of sources) {
+          for (const m of src.messages) {
+            const ts = new Date(now - Math.floor(Math.random() * 300000)).toISOString();
+            await services.http?.post(`/api/console/proxy`, {
+              query: { path: `/${src.index}/_doc`, method: 'POST' },
+              body: JSON.stringify({
+                '@timestamp': ts,
+                message: m.msg,
+                log: { level: m.level },
+                data_stream: { dataset: src.dataset, namespace: 'default', type: 'logs' },
+                cloud: { provider: 'aws', region: 'us-west-2', account: { id: '123456789012' } },
+                event: { action: m.action, dataset: src.dataset },
+              }),
+            });
+          }
+        }
+      } catch { /* last resort: proceed without data */ }
+    }
+
+    let dataViewId = '';
+    try {
+      const existing = await services.http?.get('/api/data_views');
+      const dvList = (existing as { data_view?: Array<{ id: string; title: string; name?: string }> })?.data_view ?? [];
+      const allLogs = dvList.find((dv) =>
+        dv.name?.toLowerCase() === 'all logs' || dv.title === 'logs-*' || dv.title === 'logs-*-*'
+      );
+      dataViewId = allLogs?.id ?? '';
+    } catch { /* ignore */ }
+
+    setLeavingForDiscover(true);
+
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    document.getElementById('blockUxOverrideStyles')?.remove();
+    const appEl = document.querySelector('.kbnChromeLayoutApplication');
+    const gridRoot = appEl?.parentElement;
+    if (gridRoot) {
+      gridRoot.style.removeProperty('grid-template-columns');
+      gridRoot.style.removeProperty('background');
+    }
+    if (appEl) {
+      (appEl as HTMLElement).style.removeProperty('margin-left');
+      (appEl as HTMLElement).style.removeProperty('margin-right');
+      (appEl as HTMLElement).style.removeProperty('width');
+    }
+
+    const discoverPath = dataViewId
+      ? `#/?_a=(dataSource:(dataViewId:'${dataViewId}',type:dataView))`
+      : undefined;
+    services.application?.navigateToApp('discover', { path: discoverPath });
+  };
+
   const renderBlockUxPage = () => (
     <>
-    <style>{`
+    <style id="blockUxOverrideStyles">{`
       .kbnChromeLayoutNavigation,
       .kbnChromeLayoutSidebar {
         display: none !important;
@@ -2057,7 +2229,7 @@ export const IngestHubPage: React.FC = () => {
         <EuiHorizontalRule margin="none" css={dividerStyle} />
         <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
           <div style={{ height: 32 }} />
-          <div css={css`margin-bottom: 32px;`}>
+          <div css={css`margin-bottom: 48px;`}>
             <EuiTitle size="s">
               <h3>Add your data</h3>
             </EuiTitle>
@@ -2106,6 +2278,7 @@ export const IngestHubPage: React.FC = () => {
         <AwsFlyout
           logoUrl={welcomeChildTile.logoUrl ?? ''}
           onClose={() => setWelcomeChildTile(null)}
+          onSeeMyData={() => seedAwsLogsAndNavigateToDiscover()}
         />
       )}
 
@@ -2158,7 +2331,7 @@ export const IngestHubPage: React.FC = () => {
     </>
   );
 
-  if (isStopFillVersion) {
+  if (isStopFillVersion && !leavingForDiscover) {
     return renderBlockUxPage();
   }
 
@@ -2203,6 +2376,7 @@ export const IngestHubPage: React.FC = () => {
         <AwsFlyout
           logoUrl={flyoutTile.logoUrl ?? ''}
           onClose={() => setFlyoutTile(null)}
+          onSeeMyData={() => seedAwsLogsAndNavigateToDiscover()}
         />
       )}
 
@@ -2310,7 +2484,7 @@ export const IngestHubPage: React.FC = () => {
             </div>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <div css={css`margin-bottom: 32px;`}>
+            <div css={css`margin-bottom: 48px;`}>
               <EuiTitle size="s">
                 <h3>Get started adding your data</h3>
               </EuiTitle>
@@ -2372,6 +2546,7 @@ export const IngestHubPage: React.FC = () => {
             <AwsFlyout
               logoUrl={welcomeChildTile.logoUrl ?? ''}
               onClose={() => setWelcomeChildTile(null)}
+              onSeeMyData={() => seedAwsLogsAndNavigateToDiscover()}
               isChild
               hideCloseButton={isStopFillVersion}
             />

@@ -68,7 +68,7 @@ const VERSION_OPTIONS = [
   },
 ];
 
-const VersionSwitcherNavControl: React.FC = () => {
+const VersionSwitcherNavControl: React.FC<{ navigateToApp?: (appId: string, options?: { path?: string }) => Promise<void> }> = ({ navigateToApp }) => {
   const [active, setActive] = React.useState<IngestHubVersion>(versionStore.getSnapshot());
   const [portalContainer] = React.useState(() => {
     const el = document.createElement('div');
@@ -105,7 +105,11 @@ const VersionSwitcherNavControl: React.FC = () => {
         legend="Onboarding Experience"
         options={VERSION_OPTIONS}
         idSelected={active}
-        onChange={(id) => versionStore.setVersion(id as IngestHubVersion)}
+        onChange={(id) => {
+          versionStore.setVersion(id as IngestHubVersion);
+          const path = id === 'blockUx' ? '/ingest-hub/integrations' : '/ingest-hub';
+          navigateToApp?.(PLUGIN_ID, { path });
+        }}
         buttonSize="compressed"
         color="text"
         isFullWidth={false}
@@ -255,7 +259,7 @@ export class ObservabilityOnboardingPlugin
     core.chrome.navControls.registerRight({
       order: 9000,
       mount: (element) => {
-        ReactDOM.render(<VersionSwitcherNavControl />, element, () => {});
+        ReactDOM.render(<VersionSwitcherNavControl navigateToApp={core.application.navigateToApp} />, element, () => {});
         return () => {
           ReactDOM.unmountComponentAtNode(element);
         };

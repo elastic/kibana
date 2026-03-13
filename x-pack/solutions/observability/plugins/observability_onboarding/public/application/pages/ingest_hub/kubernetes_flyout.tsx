@@ -21,6 +21,7 @@ import {
   EuiFlyoutHeader,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiSpacer,
   EuiSteps,
   EuiSwitch,

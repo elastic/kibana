@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { css } from '@emotion/react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { css, keyframes } from '@emotion/react';
 import {
   EuiAccordion,
   EuiBadge,
   EuiButton,
+  EuiButtonIcon,
   EuiCallOut,
+  EuiCheckableCard,
+  EuiCodeBlock,
+  EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,6 +44,7 @@ import { CardLogoIcon } from './ingest_hub_components';
 interface AwsFlyoutProps {
   logoUrl: string;
   onClose: () => void;
+  onSeeMyData?: () => void;
   isChild?: boolean;
   hideCloseButton?: boolean;
   ownFocus?: boolean;
@@ -118,6 +124,96 @@ const AWS_METRICS_DASHBOARDS = [
   '[Metrics AWS] Overview',
 ];
 
+const LOGS_SETUP_OPTIONS = [
+  {
+    id: 'discovery-script',
+    label: 'Discovery script (Recommended)',
+    description:
+      "Run our discovery script in CloudShell. We'll automatically detect and configure your AWS services.",
+  },
+  {
+    id: 'manually-configure',
+    label: 'Manually configure sources',
+    description:
+      'Select which AWS services to monitor and configure your buckets.',
+  },
+];
+
+const CLOUDSHELL_COMMAND =
+  "export API_KEY=asdfasdfasdfasdf OTLP_ENDPOINT=asdfasdfasdfasdf | curl -fsSL http://ela.st/onboard-ecf-aws | bash";
+
+const AWS_SELECTABLE_SOURCES = [
+  { id: 'bedrock', name: 'Amazon Bedrock', logoUrl: `${ELASTIC_LOGOS}/aws_bedrock/img/icon.svg` },
+  { id: 'bedrock-agentcore', name: 'Amazon Bedrock AgentCore', logoUrl: `${ELASTIC_LOGOS}/aws_bedrock/img/icon.svg` },
+  { id: 'cloudfront', name: 'Amazon CloudFront', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_cloudfront.svg` },
+  { id: 'firehose', name: 'Amazon Data Firehose', logoUrl: `${ELASTIC_LOGOS}/awsfirehose/img/logo_firehose.svg` },
+  { id: 'ec2', name: 'Amazon EC2', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_ec2.svg` },
+  { id: 'emr', name: 'Amazon EMR', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_emr.svg` },
+  { id: 'guardduty', name: 'Amazon GuardDuty', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_guardduty.svg` },
+  { id: 'inspector', name: 'Amazon Inspector', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_inspector.svg` },
+  { id: 'mq', name: 'Amazon MQ', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_msk.svg` },
+  { id: 's3', name: 'Amazon S3', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_s3.svg` },
+  { id: 'vpc', name: 'Amazon VPC', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_vpcflow.svg` },
+  { id: 'api-gateway', name: 'AWS API Gateway', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_apigateway.svg` },
+  { id: 'cloudtrail', name: 'AWS CloudTrail', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_cloudtrail.svg` },
+  { id: 'cloudwatch', name: 'AWS CloudWatch', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_cloudwatch.svg` },
+  { id: 'config', name: 'AWS Config', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo-aws-config.svg` },
+  { id: 'ecs', name: 'Amazon ECS', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_ecs.svg` },
+  { id: 'elb', name: 'AWS ELB', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_elb.svg` },
+  { id: 'lambda', name: 'AWS Lambda', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_lambda.svg` },
+  { id: 'network-firewall', name: 'AWS Network Firewall', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_firewall.svg` },
+  { id: 'route53', name: 'AWS Route 53', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_route53.svg` },
+  { id: 'security-hub', name: 'AWS Security Hub', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_securityhub.svg` },
+  { id: 'security-hub-cspm', name: 'AWS Security Hub CSPM', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_securityhub.svg` },
+  { id: 'serverless-app-repo', name: 'AWS Serverless Application Repository', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_lambda.svg` },
+  { id: 'waf', name: 'AWS WAF', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_waf.svg` },
+  { id: 'custom-aws-logs', name: 'Custom AWS Logs', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_aws.svg` },
+];
+
+const CLOUDSHELL_TERMINAL_LINES: Array<{ text: string; delay: number; color?: string }> = [
+  { text: '$ export API_KEY=asdf... OTLP_ENDPOINT=asdf... | curl -fsSL http://ela.st/onboard-ecf-aws | bash', delay: 0, color: '#98c379' },
+  { text: '', delay: 300 },
+  { text: '  ✓ Authenticating with Elastic Cloud...', delay: 600, color: '#98c379' },
+  { text: '  ✓ Verifying API key permissions...', delay: 400, color: '#98c379' },
+  { text: '', delay: 200 },
+  { text: '  Discovering AWS log sources in region us-west-2...', delay: 700, color: '#61afef' },
+  { text: '  ├─ CloudWatch Logs      ✓ 14 log groups found', delay: 350, color: '#abb2bf' },
+  { text: '  ├─ CloudTrail           ✓ trail logs enabled', delay: 300, color: '#abb2bf' },
+  { text: '  ├─ S3 Access Logs       ✓ 3 buckets found', delay: 300, color: '#abb2bf' },
+  { text: '  ├─ VPC Flow Logs        ✓ 2 VPCs found', delay: 250, color: '#abb2bf' },
+  { text: '  ├─ Lambda               ✓ 12 functions found', delay: 300, color: '#abb2bf' },
+  { text: '  ├─ GuardDuty            ✓ findings enabled', delay: 250, color: '#abb2bf' },
+  { text: '  ├─ ECS                  ✓ 2 clusters found', delay: 300, color: '#abb2bf' },
+  { text: '  └─ ELB Access Logs      ✓ 4 load balancers found', delay: 300, color: '#abb2bf' },
+  { text: '', delay: 200 },
+  { text: '  Found 8 log sources across 1 region', delay: 400, color: '#e5c07b' },
+  { text: '', delay: 300 },
+  { text: '  Configuring log collection pipelines...', delay: 600, color: '#61afef' },
+  { text: '  ├─ Creating CloudFormation stack elastic-log-forwarder...', delay: 700, color: '#abb2bf' },
+  { text: '  ├─ Deploying log forwarder (v9.2.4)...', delay: 900, color: '#abb2bf' },
+  { text: '  ├─ Setting up S3 bucket notifications...', delay: 500, color: '#abb2bf' },
+  { text: '  ├─ Subscribing to CloudWatch log groups (14 groups)...', delay: 600, color: '#abb2bf' },
+  { text: '  ├─ Enabling VPC Flow Logs export...', delay: 400, color: '#abb2bf' },
+  { text: '  └─ Configuring GuardDuty findings export...', delay: 450, color: '#abb2bf' },
+  { text: '', delay: 200 },
+  { text: '  ✓ Stack elastic-log-forwarder created successfully', delay: 700, color: '#98c379' },
+  { text: '', delay: 300 },
+  { text: '  Sending test data to Elastic Observability...', delay: 600, color: '#61afef' },
+  { text: '  ├─ CloudWatch logs      ✓ streaming (87 events/sec)', delay: 400, color: '#98c379' },
+  { text: '  ├─ S3 access logs       ✓ streaming (34 events/sec)', delay: 350, color: '#98c379' },
+  { text: '  ├─ VPC Flow Logs        ✓ streaming (56 events/sec)', delay: 350, color: '#98c379' },
+  { text: '  ├─ CloudTrail events    ✓ streaming (21 events/sec)', delay: 300, color: '#98c379' },
+  { text: '  ├─ Lambda logs          ✓ streaming (43 events/sec)', delay: 350, color: '#98c379' },
+  { text: '  └─ GuardDuty findings   ✓ streaming (8 events/sec)', delay: 400, color: '#98c379' },
+  { text: '', delay: 200 },
+  { text: '  ══════════════════════════════════════════════════════════', delay: 300, color: '#61afef' },
+  { text: '  ✅ Setup complete! Logs are flowing to Elastic Observability.', delay: 400, color: '#98c379' },
+  { text: '  📊 Dashboards: 23 installed  |  🔔 Alert rules: 8 pre-configured', delay: 300, color: '#e5c07b' },
+  { text: '  ══════════════════════════════════════════════════════════', delay: 200, color: '#61afef' },
+  { text: '', delay: 150 },
+  { text: '  You can now close this window and return to Elastic to view your data.', delay: 400, color: '#abb2bf' },
+];
+
 const AWS_LOGS_DASHBOARDS = [
   '[Logs AWS] Inspector Findings Overview',
   '[Logs AWS] VPC Flow Log Overview',
@@ -147,6 +243,7 @@ const AWS_LOGS_DASHBOARDS = [
 export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
   logoUrl,
   onClose,
+  onSeeMyData,
   isChild,
   hideCloseButton,
   ownFocus: ownFocusProp,
@@ -158,6 +255,47 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
   const [selectedConnector, setSelectedConnector] = useState('aws-connector-2');
   const [connectorName, setConnectorName] = useState('aws-connector-2');
   const [roleArn, setRoleArn] = useState('arn:aws:iam::123456789012:role/ExampleRole');
+  const [logsSetupMethod, setLogsSetupMethod] = useState('discovery-script');
+  const [hasCloudShellCopied, setHasCloudShellCopied] = useState(false);
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
+  const [bucketNames, setBucketNames] = useState<Record<string, string>>({});
+  const [isCloudShellOpen, setIsCloudShellOpen] = useState(false);
+  const [terminalLines, setTerminalLines] = useState<string[]>([]);
+  const [terminalComplete, setTerminalComplete] = useState(false);
+  const terminalRef = useRef<HTMLDivElement>(null);
+  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const startCloudShell = useCallback(() => {
+    setIsCloudShellOpen(true);
+    setTerminalLines([]);
+    setTerminalComplete(false);
+    timeoutsRef.current.forEach(clearTimeout);
+    timeoutsRef.current = [];
+
+    let cumulative = 0;
+    CLOUDSHELL_TERMINAL_LINES.forEach((line, idx) => {
+      cumulative += line.delay;
+      const t = setTimeout(() => {
+        setTerminalLines((prev) => [...prev, line.text]);
+        if (idx === CLOUDSHELL_TERMINAL_LINES.length - 1) {
+          setTerminalComplete(true);
+        }
+      }, cumulative);
+      timeoutsRef.current.push(t);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [terminalLines]);
+
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach(clearTimeout);
+    };
+  }, []);
 
   const renderExistingConnectionTab = () => (
     <>
@@ -247,7 +385,79 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
     </>
   );
 
-  const steps = [
+  const renderCheckingForDataStep = (dashboards: string[], accordionId: string, isComplete?: boolean) => ({
+    title: 'Verify your connection',
+    status: (isComplete ? 'complete' : 'incomplete') as 'complete' | 'incomplete',
+    children: (
+      <>
+        <EuiText size="s" color="subdued">
+          <p>
+            {isComplete
+              ? 'Your data is successfully flowing into Elastic Observability.'
+              : 'When finished come back and test your connection to see incoming data.'}
+          </p>
+        </EuiText>
+        <EuiSpacer size="l" />
+        <EuiCallOut
+          color={isComplete ? 'success' : 'primary'}
+          css={css`
+            border-radius: ${euiTheme.border.radius.small};
+          `}
+          title={
+            isComplete ? (
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="checkCircle" color="success" />
+                </EuiFlexItem>
+                <EuiFlexItem>Data is flowing successfully</EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem>Establishing connection...</EuiFlexItem>
+              </EuiFlexGroup>
+            )
+          }
+        />
+        <EuiSpacer size="m" />
+        <EuiAccordion
+          id={accordionId}
+          buttonContent={isComplete
+            ? `Dashboards installed (${dashboards.length})`
+            : `Dashboards available once installed (${dashboards.length})`}
+          paddingSize="s"
+          initialIsOpen={isComplete}
+          forceState={isComplete ? 'open' : undefined}
+        >
+          <EuiSpacer size="s" />
+          <EuiPanel color="plain" hasBorder paddingSize="m">
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              {dashboards.map((name, idx) => (
+                <EuiFlexItem key={`${name}-${idx}`}>
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon
+                        type={isComplete ? 'checkCircle' : 'dashedCircle'}
+                        size="s"
+                        color={isComplete ? 'success' : 'subdued'}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="xs">{name}</EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiAccordion>
+      </>
+    ),
+  });
+
+  const metricsSteps = [
     {
       title: 'Setup Access',
       status: 'current' as const,
@@ -293,63 +503,246 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
         </>
       ),
     },
+    renderCheckingForDataStep(AWS_METRICS_DASHBOARDS, 'awsMetricsDashboardsAccordion'),
+  ];
+
+  const logsSteps = [
     {
-      title: 'Checking for data',
-      status: 'incomplete' as const,
+      title: 'Choose your setup method',
+      status: (terminalComplete ? 'complete' : 'current') as const,
       children: (
         <>
           <EuiText size="s" color="subdued">
-            <p>When finished come back and test your connection to see incoming data.</p>
+            <p>
+              Select how you want to discover and collect logs from your AWS environment.
+            </p>
           </EuiText>
-          <EuiSpacer size="l" />
-          <EuiCallOut
-            color="primary"
-            css={css`
-              border-radius: ${euiTheme.border.radius.small};
-            `}
-            title={
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
-                </EuiFlexItem>
-                <EuiFlexItem>Waiting for connection...</EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          />
-          <EuiSpacer size="m" />
-          <EuiAccordion
-            id="awsDashboardsAccordion"
-            buttonContent={`Dashboards available once installed (${selectedTab === 'metrics' ? AWS_METRICS_DASHBOARDS.length : AWS_LOGS_DASHBOARDS.length})`}
-            paddingSize="s"
-          >
-            <EuiSpacer size="s" />
-            <EuiPanel color="plain" hasBorder paddingSize="m">
-              <EuiFlexGroup direction="column" gutterSize="xs">
-                {(selectedTab === 'metrics' ? AWS_METRICS_DASHBOARDS : AWS_LOGS_DASHBOARDS).map((name, idx) => (
-                  <EuiFlexItem key={`${name}-${idx}`}>
-                    <EuiFlexGroup
-                      gutterSize="s"
-                      alignItems="center"
-                      responsive={false}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="dashedCircle" size="s" color="subdued" />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText size="xs">{name}</EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiAccordion>
+          {!terminalComplete && (
+            <>
+              <EuiSpacer size="l" />
+              <fieldset>
+                <EuiFlexGroup
+                  gutterSize="m"
+                  responsive={false}
+                  css={css`
+                    .euiCheckableCard {
+                      height: 100%;
+                    }
+                  `}
+                >
+                  {LOGS_SETUP_OPTIONS.map((option) => (
+                    <EuiFlexItem key={option.id}>
+                      <EuiCheckableCard
+                        id={`logs-${option.id}`}
+                        label={
+                          <>
+                            <strong>{option.label}</strong>
+                            <EuiText size="xs" color="subdued" style={{ marginTop: 2 }}>
+                              {option.description}
+                            </EuiText>
+                          </>
+                        }
+                        checked={logsSetupMethod === option.id}
+                        onChange={() => setLogsSetupMethod(option.id)}
+                        checkableType="radio"
+                      />
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </fieldset>
+            </>
+          )}
         </>
       ),
     },
+    ...(logsSetupMethod === 'discovery-script'
+      ? [
+          {
+            title: 'Discover and send data from AWS sources using CloudShell',
+            status: (terminalComplete ? 'complete' : 'incomplete') as const,
+            children: (
+              <>
+                <EuiText size="s" color="subdued">
+                  <p>
+                    {terminalComplete
+                      ? 'CloudShell discovery completed successfully. All log sources are connected.'
+                      : 'Copy and paste our script into CloudShell to automatically discover and send data from your AWS sources.'}
+                  </p>
+                </EuiText>
+                {!terminalComplete && (
+                  <>
+                    <EuiSpacer size="l" />
+                    {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+                    <div onClick={() => setHasCloudShellCopied(true)}>
+                      <EuiCodeBlock language="bash" isCopyable paddingSize="m" fontSize="s">
+                        {CLOUDSHELL_COMMAND}
+                      </EuiCodeBlock>
+                    </div>
+                    <EuiSpacer size="l" />
+                    <EuiButton
+                      iconType="popout"
+                      iconSide="right"
+                      color="primary"
+                      fill={false}
+                      disabled={!hasCloudShellCopied || isCloudShellOpen}
+                      onClick={startCloudShell}
+                    >
+                      {isCloudShellOpen ? 'CloudShell running...' : 'Launch CloudShell'}
+                    </EuiButton>
+                  </>
+                )}
+              </>
+            ),
+          },
+        ]
+      : [
+          {
+            title: 'What AWS sources do you want to monitor?',
+            status: 'incomplete' as const,
+            children: (
+              <>
+                <EuiText size="s" color="subdued">
+                  <p>
+                    Select the sources you&apos;re using. We&apos;ll collect metrics, logs, and
+                    traces from each one.
+                  </p>
+                </EuiText>
+                <EuiSpacer size="l" />
+                <EuiComboBox
+                  placeholder="Search AWS sources..."
+                  options={AWS_SELECTABLE_SOURCES.map((s) => ({
+                    key: s.id,
+                    label: s.name,
+                    value: s,
+                  }))}
+                  selectedOptions={selectedSources.map((id) => {
+                    const s = AWS_SELECTABLE_SOURCES.find((src) => src.id === id);
+                    return { key: id, label: s?.name ?? id, value: s };
+                  })}
+                  onChange={(opts) => {
+                    setSelectedSources(opts.map((o) => o.key!));
+                  }}
+                  renderOption={(option) => {
+                    const source = option.value as (typeof AWS_SELECTABLE_SOURCES)[number];
+                    return (
+                      <EuiFlexGroup
+                        gutterSize="s"
+                        alignItems="center"
+                        responsive={false}
+                      >
+                        <EuiFlexItem grow={false}>
+                          <img
+                            src={source.logoUrl}
+                            alt={source.name}
+                            style={{
+                              width: 24,
+                              height: 24,
+                              objectFit: 'contain',
+                            }}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>{source.name}</EuiFlexItem>
+                      </EuiFlexGroup>
+                    );
+                  }}
+                  rowHeight={40}
+                  fullWidth
+                />
+
+                {selectedSources.length > 0 && (
+                  <>
+                    <EuiSpacer size="xl" />
+                    <EuiTitle size="xs">
+                      <h4>Configure data sources</h4>
+                    </EuiTitle>
+                    <EuiText size="s" color="subdued">
+                      <p>Add the bucket name for each source</p>
+                    </EuiText>
+                    <EuiSpacer size="l" />
+                    {selectedSources.map((sourceId) => {
+                      const source = AWS_SELECTABLE_SOURCES.find((s) => s.id === sourceId);
+                      if (!source) return null;
+                      return (
+                        <React.Fragment key={sourceId}>
+                          <EuiFormRow
+                            label={
+                              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                                <EuiFlexItem grow={false}>
+                                  <img
+                                    src={source.logoUrl}
+                                    alt=""
+                                    style={{ width: 20, height: 20, objectFit: 'contain' }}
+                                  />
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>
+                                  <EuiText size="s">
+                                    <strong>{source.name}</strong>
+                                  </EuiText>
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            }
+                            css={css`
+                              .euiFormRow__labelWrapper {
+                                margin-bottom: ${euiTheme.size.s};
+                              }
+                            `}
+                          >
+                            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                              <EuiFlexItem>
+                                <EuiFieldText
+                                  placeholder={`Enter ${source.name} bucket name`}
+                                  value={bucketNames[sourceId] ?? ''}
+                                  onChange={(e) =>
+                                    setBucketNames((prev) => ({
+                                      ...prev,
+                                      [sourceId]: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonIcon
+                                  iconType="cross"
+                                  aria-label={`Remove ${source.name}`}
+                                  onClick={() => {
+                                    setSelectedSources((prev) =>
+                                      prev.filter((s) => s !== sourceId)
+                                    );
+                                    setBucketNames((prev) => {
+                                      const next = { ...prev };
+                                      delete next[sourceId];
+                                      return next;
+                                    });
+                                  }}
+                                />
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiFormRow>
+                          <EuiSpacer size="xl" />
+                        </React.Fragment>
+                      );
+                    })}
+                    <EuiSpacer size="m" />
+                    <EuiButton
+                      iconType="popout"
+                      iconSide="right"
+                      color="primary"
+                      fill={false}
+                      disabled
+                    >
+                      Launch CloudFormation in AWS
+                    </EuiButton>
+                  </>
+                )}
+              </>
+            ),
+          },
+        ]),
+    renderCheckingForDataStep(AWS_LOGS_DASHBOARDS, 'awsLogsDashboardsAccordion', terminalComplete),
   ];
 
   return (
+    <>
     <EuiFlyout
       ownFocus={ownFocusProp !== undefined ? ownFocusProp : !isChild}
       onClose={onClose}
@@ -478,7 +871,7 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
         )}
         <EuiSpacer size="xxl" />
         <EuiSteps
-          steps={steps}
+          steps={selectedTab === 'metrics' ? metricsSteps : logsSteps}
           headingElement="h3"
           titleSize="xs"
           css={css`
@@ -500,8 +893,8 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
             <EuiButton
               data-test-subj="awsFlyoutSeeMyDataButton"
               fill
-              disabled
-              onClick={onClose}
+              disabled={!terminalComplete}
+              onClick={onSeeMyData ?? onClose}
             >
               See my data
             </EuiButton>
@@ -509,5 +902,167 @@ export const AwsFlyout: React.FC<AwsFlyoutProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
+
+    {isCloudShellOpen &&
+      createPortal(
+        <div
+          css={css`
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: #1e1e2e;
+            display: flex;
+            flex-direction: column;
+            animation: ${keyframes`
+              from { opacity: 0; }
+              to { opacity: 1; }
+            `} 0.25s ease-out;
+          `}
+        >
+          <div
+            css={css`
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 8px 16px;
+              background: #181825;
+              border-bottom: 1px solid #313244;
+              flex-shrink: 0;
+              user-select: none;
+            `}
+          >
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <div css={css`display: flex; gap: 8px;`}>
+                  <div css={css`width: 12px; height: 12px; border-radius: 50%; background: #f38ba8;`} />
+                  <div css={css`width: 12px; height: 12px; border-radius: 50%; background: #f9e2af;`} />
+                  <div css={css`width: 12px; height: 12px; border-radius: 50%; background: #a6e3a1;`} />
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText
+                  size="s"
+                  css={css`
+                    color: #a6adc8;
+                    text-align: center;
+                    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+                  `}
+                >
+                  AWS CloudShell — us-west-2
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} css={css`min-width: 60px;`} />
+            </EuiFlexGroup>
+          </div>
+
+          <div
+            css={css`
+              background: #232634;
+              padding: 4px 16px 0;
+              border-bottom: 1px solid #313244;
+              display: flex;
+              flex-shrink: 0;
+            `}
+          >
+            <div
+              css={css`
+                background: #1e1e2e;
+                border: 1px solid #45475a;
+                border-bottom: 1px solid #1e1e2e;
+                border-radius: 8px 8px 0 0;
+                padding: 6px 16px;
+                font-size: 12px;
+                color: #cdd6f4;
+                font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+              `}
+            >
+              <EuiIcon type="console" size="s" color="#cdd6f4" />
+              bash
+            </div>
+          </div>
+
+          <div
+            ref={terminalRef}
+            css={css`
+              flex: 1;
+              overflow-y: auto;
+              padding: 24px 32px;
+              font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Menlo', monospace;
+              font-size: 14px;
+              line-height: 1.8;
+              color: #cdd6f4;
+              &::-webkit-scrollbar {
+                width: 8px;
+              }
+              &::-webkit-scrollbar-track {
+                background: transparent;
+              }
+              &::-webkit-scrollbar-thumb {
+                background: #45475a;
+                border-radius: 4px;
+              }
+            `}
+          >
+            {terminalLines.map((line, idx) => (
+              <div
+                key={idx}
+                css={css`
+                  white-space: pre-wrap;
+                  word-break: break-all;
+                  min-height: 1.8em;
+                  color: ${CLOUDSHELL_TERMINAL_LINES[idx]?.color ?? '#cdd6f4'};
+                `}
+              >
+                {line}
+              </div>
+            ))}
+            {!terminalComplete && (
+              <span
+                css={css`
+                  display: inline-block;
+                  width: 9px;
+                  height: 18px;
+                  background: #cdd6f4;
+                  animation: ${keyframes`
+                    50% { opacity: 0; }
+                  `} 1s step-end infinite;
+                `}
+              />
+            )}
+          </div>
+
+          {terminalComplete && (
+            <div
+              css={css`
+                background: #181825;
+                border-top: 1px solid #313244;
+                padding: 16px 32px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-shrink: 0;
+              `}
+            >
+              <EuiText size="s" css={css`color: #a6e3a1;`}>
+                Setup complete — all services connected successfully.
+              </EuiText>
+              <EuiButton
+                color="success"
+                fill
+                onClick={() => setIsCloudShellOpen(false)}
+                iconType="returnKey"
+                iconSide="right"
+              >
+                Return to Elastic Observability
+              </EuiButton>
+            </div>
+          )}
+        </div>,
+        document.body
+      )}
+    </>
   );
 };
