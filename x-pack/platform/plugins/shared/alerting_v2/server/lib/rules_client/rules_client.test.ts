@@ -628,5 +628,139 @@ describe('RulesClient', () => {
       expect(res.page).toBe(2);
       expect(res.perPage).toBe(50);
     });
+
+    it('returns rules by ids when ids parameter is provided', async () => {
+      const client = createClient();
+
+      const so1Attrs = createRuleSoAttributes({
+        metadata: { name: 'rule-find-id-1' },
+      });
+      const so2Attrs = createRuleSoAttributes({
+        metadata: { name: 'rule-find-id-2' },
+      });
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-id-find-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: so1Attrs,
+            references: [],
+          },
+          {
+            id: 'rule-id-find-2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: so2Attrs,
+            references: [],
+          },
+        ],
+      });
+
+      const res = await client.findRules({ ids: ['rule-id-find-1', 'rule-id-find-2'] });
+
+      expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-id-find-1' },
+        { type: RULE_SAVED_OBJECT_TYPE, id: 'rule-id-find-2' },
+      ]);
+      expect(mockSavedObjectsClient.find).not.toHaveBeenCalled();
+
+      expect(res.items).toHaveLength(2);
+      expect(res.items[0]).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-find-1',
+          metadata: expect.objectContaining({ name: 'rule-find-id-1' }),
+        })
+      );
+      expect(res.items[1]).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-find-2',
+          metadata: expect.objectContaining({ name: 'rule-find-id-2' }),
+        })
+      );
+      expect(res.total).toBe(2);
+      expect(res.page).toBe(1);
+      expect(res.perPage).toBe(2);
+    });
+
+    it('excludes missing rules when using ids parameter', async () => {
+      const client = createClient();
+
+      const soAttrs = createRuleSoAttributes({
+        metadata: { name: 'rule-find-id-success' },
+      });
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-id-find-success',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: soAttrs,
+            references: [],
+          },
+          {
+            id: 'rule-id-find-missing',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {} as RuleSavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object [alerting-rule/rule-id-find-missing] not found',
+            },
+          },
+        ],
+      });
+
+      const res = await client.findRules({
+        ids: ['rule-id-find-success', 'rule-id-find-missing'],
+      });
+
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0]).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-find-success',
+          metadata: expect.objectContaining({ name: 'rule-find-id-success' }),
+        })
+      );
+      expect(res.total).toBe(1);
+      expect(res.page).toBe(1);
+      expect(res.perPage).toBe(1);
+    });
+
+    it('uses pagination when ids parameter is not provided', async () => {
+      const client = createClient();
+
+      const so1 = {
+        id: 'rule-pagination-1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+        score: 0,
+        attributes: createRuleSoAttributes({
+          metadata: { name: 'rule-pagination-1' },
+        }),
+      };
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: [so1],
+        total: 100,
+        page: 1,
+        per_page: 20,
+      });
+
+      const res = await client.findRules();
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: RULE_SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: 20,
+        sortField: 'updatedAt',
+        sortOrder: 'desc',
+      });
+      expect(mockSavedObjectsClient.bulkGet).not.toHaveBeenCalled();
+
+      expect(res.total).toBe(100);
+      expect(res.page).toBe(1);
+      expect(res.perPage).toBe(20);
+    });
   });
 });

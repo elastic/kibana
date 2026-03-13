@@ -38,3 +38,5 @@ export {
 export type { DiscoverServices } from './build_services';
 
 export const loadSharingDataHelpers = () => import('./utils/get_sharing_data');
+
+export { getEsqlDataView } from './application/main/state_management/utils/get_esql_data_view';

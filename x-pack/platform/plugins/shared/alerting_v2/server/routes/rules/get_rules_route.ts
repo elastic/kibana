@@ -20,6 +20,7 @@ import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 const getRulesQuerySchema = schema.object({
   page: schema.maybe(schema.number({ min: 1 })),
   perPage: schema.maybe(schema.number({ min: 1, max: 1000 })),
+  ids: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 @injectable()
@@ -50,6 +51,7 @@ export class GetRulesRoute {
       const result = await this.rulesClient.findRules({
         page: this.request.query.page,
         perPage: this.request.query.perPage,
+        ids: this.request.query.ids,
       });
       return this.response.ok({ body: result });
     } catch (e) {

@@ -227,6 +227,17 @@ export class RulesClient {
 
   @withApm
   public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
+    if (params.ids && params.ids.length > 0) {
+      const items = await this.getRules(params.ids);
+
+      return {
+        items,
+        total: items.length,
+        page: 1,
+        perPage: items.length,
+      };
+    }
+
     const page = params.page ?? 1;
     const perPage = params.perPage ?? 20;
 
