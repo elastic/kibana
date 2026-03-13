@@ -28,7 +28,7 @@ export function createSession(): InspectorSession {
     async post(method: string, args?: object): Promise<unknown> {
       return await session.post(method, args);
     },
-    async disconnect(): Promise<void> {
+    disconnect(): void {
       session.disconnect();
     },
   };
