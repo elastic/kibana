@@ -122,6 +122,7 @@ export function DiscoverGridFlyout({
       renderCustomHeader={docViewer.renderHeader}
       renderCustomFooter={docViewer.renderFooter}
       isEsqlQuery={isESQLQuery}
+      query={query}
       hit={hit}
       hits={hits}
       dataView={dataView}
