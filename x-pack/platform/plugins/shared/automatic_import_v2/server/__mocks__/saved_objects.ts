@@ -86,9 +86,10 @@ export const mockDataStreamData: DataStreamAttributes = {
   },
   result: {
     ingest_pipeline: { name: 'test-pipeline', processors: [] },
-    field_mapping: {
-      'test-field': 'test-value',
-    },
+    field_mapping: [
+      { name: 'source.ip', type: 'ip', is_ecs: true },
+      { name: 'custom_app.request_id', type: 'keyword', is_ecs: false },
+    ],
   },
 };
 
