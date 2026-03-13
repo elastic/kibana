@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { InferenceFeatureConfig, RegisterResult } from './types';
 import { validateFeature } from './utils/validate_feature';
 
@@ -13,6 +14,11 @@ import { validateFeature } from './utils/validate_feature';
  */
 export class InferenceFeatureRegistry {
   private features: Map<string, InferenceFeatureConfig> = new Map();
+  private readonly logger: Logger;
+
+  constructor(logger: Logger) {
+    this.logger = logger;
+  }
 
   /**
    * Registers a new inference feature in the registry.
@@ -24,17 +30,22 @@ export class InferenceFeatureRegistry {
     try {
       validateFeature(feature);
     } catch (e) {
+      this.logger.error(`Failed to register inference feature: ${e.message}`);
       return { ok: false, error: e.message };
     }
 
     if (this.features.has(feature.featureId)) {
-      return { ok: false, error: `Feature with id "${feature.featureId}" is already registered.` };
+      const error = `Feature with id "${feature.featureId}" is already registered.`;
+      this.logger.error(`Failed to register inference feature: ${error}`);
+      return { ok: false, error };
     }
 
     if (feature.parentFeatureId !== undefined && !this.features.has(feature.parentFeatureId)) {
+      const error = `parentFeatureId "${feature.parentFeatureId}" referenced by feature "${feature.featureId}" does not exist.`;
+      this.logger.error(`Failed to register inference feature: ${error}`);
       return {
         ok: false,
-        error: `parentFeatureId "${feature.parentFeatureId}" referenced by feature "${feature.featureId}" does not exist.`,
+        error,
       };
     }
 

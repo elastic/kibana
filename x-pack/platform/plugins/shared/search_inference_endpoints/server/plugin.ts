@@ -51,7 +51,7 @@ export class SearchInferenceEndpointsPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<SearchInferenceEndpointsConfig>();
-    this.featureRegistry = new InferenceFeatureRegistry();
+    this.featureRegistry = new InferenceFeatureRegistry(this.logger);
   }
 
   public setup(

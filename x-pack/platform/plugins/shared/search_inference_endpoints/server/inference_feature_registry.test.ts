@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { InferenceFeatureConfig } from './types';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
 
@@ -21,9 +22,11 @@ const createValidFeature = (
 
 describe('InferenceFeatureRegistry', () => {
   let registry: InferenceFeatureRegistry;
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    registry = new InferenceFeatureRegistry();
+    mockLogger = loggingSystemMock.createLogger();
+    registry = new InferenceFeatureRegistry(mockLogger.get());
   });
 
   describe('registration', () => {
@@ -51,12 +54,18 @@ describe('InferenceFeatureRegistry', () => {
 
       expect(result).toEqual({ ok: false, error: expect.stringContaining('featureId') });
       expect(registry.getAll()).toHaveLength(0);
+      expect(mockLogger.get().error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to register inference feature')
+      );
     });
 
     it('returns error for featureId starting with a digit', () => {
       const result = registry.register(createValidFeature({ featureId: '1abc' }));
 
       expect(result).toEqual({ ok: false, error: expect.stringContaining('featureId') });
+      expect(mockLogger.get().error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to register inference feature')
+      );
     });
 
     it('returns error for duplicate featureId', () => {
@@ -65,12 +74,18 @@ describe('InferenceFeatureRegistry', () => {
 
       expect(result).toEqual({ ok: false, error: expect.stringContaining('already registered') });
       expect(registry.getAll()).toHaveLength(1);
+      expect(mockLogger.get().error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to register inference feature')
+      );
     });
 
     it('returns error for parentFeatureId referencing non-existent feature', () => {
       const result = registry.register(createValidFeature({ parentFeatureId: 'missing' }));
 
       expect(result).toEqual({ ok: false, error: expect.stringContaining('parentFeatureId') });
+      expect(mockLogger.get().error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to register inference feature')
+      );
     });
 
     it('accepts child after parent is registered', () => {
