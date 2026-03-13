@@ -42,7 +42,6 @@ describe(
     });
 
     beforeEach(() => {
-      cleanMigrationData();
       deleteConnectors();
       createBedrockConnector();
       role.login();
@@ -52,6 +51,10 @@ describe(
       openUploadRulesFlyout();
       selectQRadarMigrationSource();
       setMigrationName();
+    });
+
+    afterEach(() => {
+      cleanMigrationData();
     });
 
     after(() => {
@@ -66,6 +69,7 @@ describe(
       cy.intercept({
         url: '**/start',
       }).as('startMigration');
+
       uploadQRadarRules(QRADAR_TEST_RULES_XML);
 
       startMigrationFromFlyout();

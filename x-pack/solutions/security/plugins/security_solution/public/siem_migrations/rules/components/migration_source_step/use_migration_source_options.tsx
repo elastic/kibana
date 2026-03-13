@@ -28,7 +28,7 @@ export const useMigrationSourceOptions = () => {
       inputDisplay: (
         <span>
           {MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.QRADAR]}
-          <EuiIcon type="flask" aria-hidden={true} />
+          <EuiIcon type="flask" aria-label="Technical Preview" />
         </span>
       ),
       'data-test-subj': `migrationSourceOption-${MigrationSource.QRADAR}`,
