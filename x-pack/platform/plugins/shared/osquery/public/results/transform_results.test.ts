@@ -106,10 +106,7 @@ describe('transform_results', () => {
         _source: { process: { name: 'chrome' } },
       };
       const ecsMapping = { 'process.name': { field: 'name' } };
-      const result = flattenOsqueryHit(
-        hit as unknown as ResultEdges[number],
-        ecsMapping as any
-      );
+      const result = flattenOsqueryHit(hit as unknown as ResultEdges[number], ecsMapping as any);
       expect(result['process.name']).toBe('chrome');
     });
 
@@ -121,10 +118,7 @@ describe('transform_results', () => {
         _source: { 'host.ip': ['10.0.0.1', '10.0.0.2'] },
       };
       const ecsMapping = { 'host.ip': { field: 'ip' } };
-      const result = flattenOsqueryHit(
-        hit as unknown as ResultEdges[number],
-        ecsMapping as any
-      );
+      const result = flattenOsqueryHit(hit as unknown as ResultEdges[number], ecsMapping as any);
       expect(result['host.ip']).toContain('10.0.0.1');
       expect(result['host.ip']).toContain('10.0.0.2');
     });

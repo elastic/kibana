@@ -574,7 +574,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       padding: `${euiTheme.size.m}`,
       backgroundColor: euiTheme.colors.body,
     }),
-    [euiTheme.size.s, euiTheme.colors.body]
+    [euiTheme.size.m, euiTheme.colors.body]
   );
 
   const { data: actionResultsData } = useActionResults({
@@ -816,8 +816,17 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         columns[col] = { display: col.split('.')[1] };
       }
     }
+
     return columns;
   }, [visibleColumns]);
+
+  const mergedGridSettings = useMemo(
+    () => ({
+      ...gridSettings,
+      columns: { ...osqueryColumnDisplaySettings, ...gridSettings.columns },
+    }),
+    [gridSettings, osqueryColumnDisplaySettings]
+  );
 
   // Server-side pagination
   const totalResults = allResultsData?.total ?? 0;
@@ -1020,7 +1029,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
                   onSort={handleSort}
                   onSetColumns={handleSetColumns}
                   onResize={handleResize}
-                  settings={{ ...gridSettings, columns: { ...osqueryColumnDisplaySettings, ...gridSettings.columns } }}
+                  settings={mergedGridSettings}
                   showTimeCol={false}
                   showFullScreenButton={appName === OSQUERY_PLUGIN_NAME}
                   canDragAndDropColumns

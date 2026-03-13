@@ -15,14 +15,10 @@ import type { OsqueryTimelinesStart } from '../types';
 import { useKibana } from '../common/lib/kibana';
 
 jest.mock('../common/lib/kibana');
-jest.mock('../cases/add_to_cases', () => {
-  const { createElement } = require('react');
-
-  return {
-    AddToCaseWrapper: () =>
-      createElement('div', { 'data-test-subj': 'mock-case-wrapper' }, 'Add to Case'),
-  };
-});
+jest.mock('../cases/add_to_cases', () => ({
+  AddToCaseWrapper: () =>
+    React.createElement('div', { 'data-test-subj': 'mock-case-wrapper' }, 'Add to Case'),
+}));
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
