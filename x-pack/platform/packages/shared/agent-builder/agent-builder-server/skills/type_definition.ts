@@ -27,6 +27,7 @@ export type SkillsDirectoryStructure = Directory<{
   skills: Directory<{
     platform: FileDirectory<{
       dashboard: FileDirectory;
+      mermaid: FileDirectory;
       visualization: FileDirectory;
       workflows: FileDirectory;
     }>;

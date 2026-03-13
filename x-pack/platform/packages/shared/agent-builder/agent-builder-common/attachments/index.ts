@@ -13,6 +13,7 @@ export type {
   ScreenContextAttachment,
   EsqlAttachment,
   VisualizationAttachment,
+  MermaidAttachment,
 } from './attachments';
 export {
   AttachmentType,
@@ -21,6 +22,7 @@ export {
   screenContextAttachmentDataSchema,
   visualizationAttachmentDataSchema,
   visualizationOriginDataSchema,
+  mermaidAttachmentDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type ScreenContextTimeRange,
@@ -28,6 +30,7 @@ export {
   type EsqlAttachmentData,
   type VisualizationAttachmentData,
   type VisualizationOriginData,
+  type MermaidAttachmentData,
 } from './attachment_types';
 
 export type {

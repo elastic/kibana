@@ -11,6 +11,7 @@ import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createEsqlAttachmentDefinition } from './esql_attachment';
 import { textAttachmentDefinition } from './text_attachment';
 import { screenContextAttachmentDefinition } from './screen_context_attachment';
+import { mermaidAttachmentDefinition } from './mermaid_attachment';
 
 export const registerAttachmentUiDefinitions = ({
   attachments,
@@ -22,4 +23,5 @@ export const registerAttachmentUiDefinitions = ({
   attachments.addAttachmentType(AttachmentType.text, textAttachmentDefinition);
   attachments.addAttachmentType(AttachmentType.screenContext, screenContextAttachmentDefinition);
   attachments.addAttachmentType(AttachmentType.esql, createEsqlAttachmentDefinition({ locators }));
+  attachments.addAttachmentType(AttachmentType.mermaid, mermaidAttachmentDefinition);
 };
