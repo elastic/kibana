@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useContext } from 'react';
-import { MetricsExperienceFieldsContext } from './metrics_experience_fields_provider';
-
-export const useMetricsExperienceFieldsContext = () => {
-  return useContext(MetricsExperienceFieldsContext);
-};
+export function toArray<T>(value: T | T[] | null | undefined): T[] {
+  if (value == null) return [];
+  return Array.isArray(value) ? value : [value];
+}

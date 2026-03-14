@@ -10,16 +10,16 @@
 import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { ChartsGrid } from '../../charts_grid';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from '../../toolbar/right_side_actions/search_button';
-import { useMetricFields } from './hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
-import { useDiscoverFieldForBreakdown } from './hooks';
+import { useDiscoverFieldForBreakdown, useMetricFieldsFilter } from './hooks';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -31,7 +31,6 @@ export const MetricsExperienceGrid = ({
   services,
   fetch$: discoverFetch$,
   fetchParams,
-  isChartLoading: isDiscoverLoading,
   isComponentVisible,
   breakdownField,
   onBreakdownFieldChange,
@@ -45,7 +44,23 @@ export const MetricsExperienceGrid = ({
     onDimensionsChange,
   } = useMetricsExperienceState();
 
-  const { allMetricFields, visibleMetricFields, dimensions } = useMetricFields();
+  const {
+    metricItems,
+    allDimensions,
+    loading: isDiscoverLoading,
+  } = useFetchMetricsData({
+    fetchParams,
+    services,
+    isComponentVisible,
+    selectedDimensionNames: selectedDimensions,
+  });
+
+  // TODO: simplify the dimensions to a string array
+  const dimensions = allDimensions.map((name) => ({ name }));
+  const { filteredMetricItems } = useMetricFieldsFilter({
+    metricItems,
+    searchTerm,
+  });
 
   useDiscoverFieldForBreakdown(breakdownField, dimensions, selectedDimensions, onDimensionsChange);
 
@@ -59,7 +74,7 @@ export const MetricsExperienceGrid = ({
 
   const { onPageReady } = usePerformanceContext();
   useEffect(() => {
-    if (!isDiscoverLoading && allMetricFields.length > 0) {
+    if (!isDiscoverLoading && metricItems.length > 0) {
       onPageReady({
         meta: {
           rangeFrom: fetchParams.timeRange?.from,
@@ -67,12 +82,12 @@ export const MetricsExperienceGrid = ({
         },
         customMetrics: {
           key1: 'metric_experience_fields_count',
-          value1: allMetricFields.length,
+          value1: metricItems.length,
         },
       });
     }
   }, [
-    allMetricFields.length,
+    metricItems.length,
     onPageReady,
     fetchParams.timeRange?.from,
     fetchParams.timeRange?.to,
@@ -80,7 +95,7 @@ export const MetricsExperienceGrid = ({
   ]);
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
-    allMetricFields,
+    metricItems,
     dimensions,
     renderToggleActions,
     onDimensionsChange: onToolbarDimensionsChange,
@@ -97,7 +112,7 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  if (allMetricFields.length === 0) {
+  if (metricItems.length === 0 && isDiscoverLoading) {
     return <EmptyState isLoading={isDiscoverLoading} />;
   }
 
@@ -127,7 +142,7 @@ export const MetricsExperienceGrid = ({
       onKeyDown={onKeyDown}
     >
       <MetricsExperienceGridContent
-        fields={visibleMetricFields}
+        metricItems={filteredMetricItems}
         services={services}
         discoverFetch$={discoverFetch$}
         fetchParams={fetchParams}

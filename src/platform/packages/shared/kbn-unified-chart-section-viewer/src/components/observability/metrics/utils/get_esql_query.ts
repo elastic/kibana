@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  MetricsExperienceFieldsProvider as MetricsExperienceFieldsCapsProvider,
-  type MetricsExperienceFieldsProviderProps as MetricsExperienceFieldsCapsProviderProps,
-} from './metrics_experience_fields_provider';
-export { useMetricsExperienceFieldsContext } from './use_metrics_experience_fields_context';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+
+export const getEsqlQuery = (query: Query | AggregateQuery | undefined): string | undefined =>
+  query && isOfAggregateQueryType(query) ? query.esql : undefined;

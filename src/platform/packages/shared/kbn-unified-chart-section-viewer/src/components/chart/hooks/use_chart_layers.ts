@@ -9,16 +9,17 @@
 
 import { useMemo } from 'react';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { Dimension, MetricField } from '../../../types';
+import type { Dimension, ParsedMetricItem } from '../../../types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
   getLensMetricFormat,
+  firstNonNullable,
 } from '../../../common/utils';
 
 interface UseChartLayersParams {
   dimensions?: Dimension[];
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   color?: string;
   seriesType?: LensSeriesLayer['seriesType'];
   customFunction?: string;
@@ -34,16 +35,19 @@ interface UseChartLayersParams {
  */
 export const useChartLayers = ({
   dimensions = [],
-  metric,
+  metricItem,
   color,
   seriesType,
   customFunction,
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
+    const type = firstNonNullable(metricItem.fieldTypes);
+    const instrument = firstNonNullable(metricItem.metricTypes);
+    const resolvedUnit = firstNonNullable(metricItem.units);
     const metricField = createMetricAggregation({
-      type: metric.type,
-      instrument: metric.instrument,
-      metricName: metric.name,
+      type,
+      instrument,
+      metricName: metricItem.metricName,
       customFunction,
     });
     const hasDimensions = dimensions.length > 0;
@@ -62,7 +66,7 @@ export const useChartLayers = ({
             label: metricField,
             compactValues: true,
             seriesColor: color,
-            ...(metric.unit ? getLensMetricFormat(metric.unit) : {}),
+            ...(resolvedUnit ? getLensMetricFormat(resolvedUnit) : {}),
           },
         ],
         breakdown: hasDimensions ? dimensions.map((dim) => dim.name) : undefined,
@@ -72,10 +76,10 @@ export const useChartLayers = ({
     color,
     customFunction,
     dimensions,
-    metric.type,
-    metric.instrument,
-    metric.name,
-    metric.unit,
+    metricItem.fieldTypes,
+    metricItem.metricTypes,
+    metricItem.metricName,
+    metricItem.units,
     seriesType,
   ]);
 };
