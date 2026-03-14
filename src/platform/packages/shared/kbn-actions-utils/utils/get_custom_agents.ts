@@ -173,8 +173,7 @@ function getTargetTLSOpts(
   agentOptions?: AgentOptions
 ): AgentOptions | undefined {
   const tlsOpts: AgentOptions = {};
-  const rejectUnauthorized =
-    agentOptions?.rejectUnauthorized ?? agentSSLOptions.rejectUnauthorized;
+  const rejectUnauthorized = agentOptions?.rejectUnauthorized ?? agentSSLOptions.rejectUnauthorized;
   if (rejectUnauthorized !== undefined) {
     tlsOpts.rejectUnauthorized = rejectUnauthorized;
   }
@@ -184,10 +183,7 @@ function getTargetTLSOpts(
   return Object.keys(tlsOpts).length > 0 ? tlsOpts : undefined;
 }
 
-function patchProxyAgentCallback(
-  agent: HttpsProxyAgent,
-  targetTLSOpts: AgentOptions
-): void {
+function patchProxyAgentCallback(agent: HttpsProxyAgent, targetTLSOpts: AgentOptions): void {
   const origCallback = (agent as any).callback as (
     req: IncomingMessage,
     opts: Record<string, unknown>
