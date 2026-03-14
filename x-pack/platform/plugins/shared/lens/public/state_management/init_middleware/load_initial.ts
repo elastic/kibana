@@ -115,6 +115,7 @@ interface LoaderSharedArgs {
   dataViews: LensStoreDeps['lensServices']['dataViews'];
   storage: LensStoreDeps['lensServices']['storage'];
   eventAnnotationService: LensStoreDeps['lensServices']['eventAnnotationService'];
+  http: LensStoreDeps['lensServices']['http'];
   defaultIndexPatternId: string;
 }
 
@@ -370,6 +371,7 @@ export async function loadInitial(
     dataViews: lensServices.dataViews,
     storage: lensServices.storage,
     eventAnnotationService: lensServices.eventAnnotationService,
+    http: lensServices.http,
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
   };
 

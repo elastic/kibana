@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/expression-xy-plugin'
   - '@kbn/utility-types'
   - '@kbn/transpose-utils'
+  - '@kbn/crypto-browser'
 tags:
   - shared-common
   - package

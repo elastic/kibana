@@ -6,7 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { HttpStart, IUiSettingsClient } from '@kbn/core/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -19,6 +19,7 @@ import {
   type EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
 } from '@kbn/event-annotation-common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   Datasource,
   DatasourceMap,
@@ -34,6 +35,7 @@ import type {
   VisualizationState,
   DocumentToExpressionReturnType,
   LensDocument,
+  TextBasedPersistedState,
 } from '@kbn/lens-common';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
 
@@ -112,6 +114,19 @@ const getRefsForAdHocDataViewsFromContext = (
   return adHocDataViewsList.map(({ id, title, name }) => ({ id, title, name }));
 };
 
+function buildEsqlIndexToQueryMap(datasourceStates: DatasourceStates): Record<string, string> {
+  const queryMap: Record<string, string> = {};
+  const textBasedState = datasourceStates.textBased?.state as TextBasedPersistedState | undefined;
+  if (textBasedState?.layers) {
+    for (const layer of Object.values(textBasedState.layers)) {
+      if (layer.index && layer.query && isOfAggregateQueryType(layer.query) && layer.query.esql) {
+        queryMap[layer.index] = layer.query.esql;
+      }
+    }
+  }
+  return queryMap;
+}
+
 export async function initializeDataViews(
   {
     dataViews,
@@ -123,6 +138,7 @@ export async function initializeDataViews(
     initialContext,
     adHocDataViews: persistedAdHocDataViews,
     annotationGroups,
+    http,
   }: {
     dataViews: DataViewsContract;
     datasourceMap: DatasourceMap;
@@ -133,6 +149,7 @@ export async function initializeDataViews(
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
     annotationGroups: Record<string, EventAnnotationGroupConfig>;
+    http?: HttpStart;
   },
   options?: InitializationOptions
 ) {
@@ -181,12 +198,16 @@ export async function initializeDataViews(
 
   const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedIndexPatternsIds);
 
+  const esqlQueryMap = buildEsqlIndexToQueryMap(datasourceStates);
+
   const indexPatterns = await loadIndexPatterns({
     dataViews,
     patterns: usedIndexPatternsIds,
     notUsedPatterns,
     cache: {},
     adHocDataViews,
+    http,
+    esqlQueryMap,
   });
 
   const adHocDataViewsRefs = getRefsForAdHocDataViewsFromContext(
@@ -235,6 +256,7 @@ export async function initializeSources(
     references,
     initialContext,
     adHocDataViews,
+    http,
   }: {
     dataViews: DataViewsContract;
     eventAnnotationService: EventAnnotationServiceType;
@@ -247,6 +269,7 @@ export async function initializeSources(
     references?: Reference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
+    http?: HttpStart;
   },
   options?: InitializationOptions
 ) {
@@ -266,6 +289,7 @@ export async function initializeSources(
       references,
       adHocDataViews,
       annotationGroups,
+      http,
     },
     options
   );
@@ -369,6 +393,7 @@ export async function persistedStateToExpression(
     nowProvider: DataPublicPluginStart['nowProvider'];
     eventAnnotationService: EventAnnotationServiceType;
     forceDSL?: boolean;
+    http?: HttpStart;
   }
 ): Promise<DocumentToExpressionReturnType> {
   const {
@@ -415,6 +440,7 @@ export async function persistedStateToExpression(
       defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
       adHocDataViews,
       annotationGroups,
+      http: services.http,
     },
     { isFullEditor: false }
   );

@@ -6,6 +6,8 @@
  */
 
 import type { DataViewsContract, DataViewField } from '@kbn/data-views-plugin/public';
+import type { HttpStart } from '@kbn/core/public';
+import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import {
   ensureIndexPattern,
   loadIndexPatternRefs,
@@ -99,7 +101,11 @@ describe('loader', () => {
             title: 'Foo index',
           })),
           create: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+          clearInstanceCache: jest.fn(),
+        } as unknown as Pick<
+          DataViewsContract,
+          'get' | 'getIdsWithTitle' | 'create' | 'clearInstanceCache'
+        >,
       });
 
       expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
@@ -158,7 +164,11 @@ describe('loader', () => {
             title: 'Foo index',
           })),
           create: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+          clearInstanceCache: jest.fn(),
+        } as unknown as Pick<
+          DataViewsContract,
+          'get' | 'getIdsWithTitle' | 'create' | 'clearInstanceCache'
+        >,
       });
 
       expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
@@ -215,7 +225,11 @@ describe('loader', () => {
             title: 'Foo index',
           })),
           create: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+          clearInstanceCache: jest.fn(),
+        } as unknown as Pick<
+          DataViewsContract,
+          'get' | 'getIdsWithTitle' | 'create' | 'clearInstanceCache'
+        >,
       });
 
       expect(cache.foo.getFieldByName('bytes_counter')!.timeSeriesMetric).toEqual('counter');
@@ -266,7 +280,11 @@ describe('loader', () => {
           return Promise.reject();
         }),
         getIdsWithTitle: jest.fn(),
-      } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+        clearInstanceCache: jest.fn(),
+      } as unknown as Pick<
+        DataViewsContract,
+        'get' | 'getIdsWithTitle' | 'create' | 'clearInstanceCache'
+      >;
       const cache = await loadIndexPatterns({
         cache: {},
         patterns: ['1', '2'],
@@ -299,7 +317,11 @@ describe('loader', () => {
             throw err;
           }),
           getIdsWithTitle: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
+          clearInstanceCache: jest.fn(),
+        } as unknown as Pick<
+          DataViewsContract,
+          'get' | 'getIdsWithTitle' | 'create' | 'clearInstanceCache'
+        >,
         onError,
       });
 
@@ -344,6 +366,123 @@ describe('loader', () => {
         new Set(['meta'])
       );
       expect(field.meta).toEqual(true);
+    });
+  });
+
+  describe('resolveEsqlTimeFields', () => {
+    it('should resolve and enrich time field for ESQL ad-hoc data views missing one', async () => {
+      const esqlSpecId = 'esql-logs-no_time_field';
+
+      const createMock = jest.fn(async (spec) => ({
+        id: spec.id,
+        title: spec.title,
+        type: spec.type,
+        timeFieldName: spec.timeFieldName,
+        fields: [],
+        metaFields: [],
+        isPersisted: () => false,
+        toSpec: () => spec,
+      }));
+
+      const httpMock = {
+        get: jest.fn(async () => {
+          return { timeField: '@timestamp' };
+        }),
+      } as unknown as HttpStart;
+
+      const clearInstanceCacheMock = jest.fn();
+
+      const dataViewsService = {
+        get: jest.fn(async () => Promise.reject()),
+        getIdsWithTitle: jest.fn(async () => []),
+        create: createMock,
+        clearInstanceCache: clearInstanceCacheMock,
+      } as unknown as Pick<
+        DataViewsContract,
+        'get' | 'getIdsWithTitle' | 'create' | 'clearInstanceCache'
+      >;
+
+      const cache = await loadIndexPatterns({
+        cache: {},
+        patterns: [],
+        dataViews: dataViewsService,
+        adHocDataViews: {
+          [esqlSpecId]: {
+            id: esqlSpecId,
+            title: 'logs-*',
+            type: 'esql',
+          },
+        },
+        http: httpMock,
+      });
+
+      expect(httpMock.get).toHaveBeenCalledWith(
+        `${TIMEFIELD_ROUTE}${encodeURIComponent('FROM logs-*')}`
+      );
+      expect(clearInstanceCacheMock).toHaveBeenCalledWith(esqlSpecId);
+      expect(createMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: esqlSpecId,
+          title: 'logs-*',
+          type: 'esql',
+          timeFieldName: '@timestamp',
+        })
+      );
+      expect(cache[esqlSpecId].timeFieldName).toEqual('@timestamp');
+    });
+
+    it('should not enrich time field for ESQL ad-hoc data views that already have one', async () => {
+      const esqlSpecId = 'esql-logs-custom_time';
+
+      const createMock = jest.fn(async (spec) => ({
+        id: spec.id,
+        title: spec.title,
+        type: spec.type,
+        timeFieldName: spec.timeFieldName,
+        fields: [],
+        metaFields: [],
+        isPersisted: () => false,
+        toSpec: () => spec,
+      }));
+
+      const httpMock = {
+        get: jest.fn(),
+      } as unknown as HttpStart;
+
+      const clearInstanceCacheMock = jest.fn();
+
+      const dataViewsService = {
+        get: jest.fn(async () => Promise.reject()),
+        getIdsWithTitle: jest.fn(async () => []),
+        create: createMock,
+        clearInstanceCache: clearInstanceCacheMock,
+      } as unknown as Pick<
+        DataViewsContract,
+        'get' | 'getIdsWithTitle' | 'create' | 'clearInstanceCache'
+      >;
+
+      const cache = await loadIndexPatterns({
+        cache: {},
+        patterns: [],
+        dataViews: dataViewsService,
+        adHocDataViews: {
+          [esqlSpecId]: {
+            id: esqlSpecId,
+            title: 'logs-*',
+            name: 'logs-*',
+            type: 'esql',
+            timeFieldName: 'event.created',
+          },
+        },
+        http: httpMock,
+      });
+
+      expect(httpMock.get).not.toHaveBeenCalled();
+      expect(clearInstanceCacheMock).not.toHaveBeenCalled();
+      expect(createMock).toHaveBeenCalledWith(
+        expect.objectContaining({ timeFieldName: 'event.created' })
+      );
+      expect(cache[esqlSpecId].timeFieldName).toEqual('event.created');
     });
   });
 });

@@ -347,8 +347,24 @@ export function getTextBasedDatasource({
       });
 
       const initState = state || { layers: {} };
+
+      const resolvedLayers: typeof initState.layers = {};
+
+      for (const [layerId, layer] of Object.entries(initState.layers)) {
+        if (layer.timeField || !indexPatterns) {
+          resolvedLayers[layerId] = layer;
+          continue;
+        }
+
+        const matchedIndexPattern = layer.index ? indexPatterns[layer.index] : undefined;
+        resolvedLayers[layerId] = matchedIndexPattern?.timeFieldName
+          ? { ...layer, timeField: matchedIndexPattern.timeFieldName }
+          : layer;
+      }
+
       return {
         ...initState,
+        layers: resolvedLayers,
         indexPatternRefs: refs,
         initialContext: context,
       };

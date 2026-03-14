@@ -18,6 +18,7 @@ import type {
 } from '@kbn/lens-common';
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { Sha256 } from '@kbn/crypto-browser';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { LensAttributes, LensDatatableDataset } from '../types';
@@ -106,8 +107,23 @@ export function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
-function generateAdHocDataViewId(dataView: APIAdHocDataView) {
-  return `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`;
+function sha256Sync(str: string): string {
+  return new Sha256().update(str).digest('hex');
+}
+
+// Normalize whitespace and convert to lowercase to make the id more predictable and hit cache more often
+function normalizeWhitespace(str: string): string {
+  return str.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+function generateAdHocDataViewId(
+  dataView: Pick<APIAdHocDataView, 'index' | 'timeFieldName' | 'esqlQuery' | 'dataSourceType'>
+) {
+  const base = `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`;
+  if (dataView.dataSourceType === 'esql' && dataView.esqlQuery) {
+    return sha256Sync(`${base}-${normalizeWhitespace(dataView.esqlQuery)}`);
+  }
+  return base;
 }
 
 function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
@@ -123,6 +139,7 @@ function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
     fieldAttrs: {},
     allowNoIndex: false,
     allowHidden: false,
+    ...(dataView.dataSourceType ? { type: dataView.dataSourceType } : {}),
   };
 }
 
@@ -263,6 +280,7 @@ export function getDatasetIndex(dataset: DatasetType) {
       return {
         index: getIndexPatternFromESQLQuery(dataset.query),
         timeFieldName: getTimeFieldFromESQLQuery(dataset.query),
+        esqlQuery: dataset.query,
       };
     case 'dataView':
       return {
@@ -281,7 +299,7 @@ function buildDatasourceStatesLayer(
   layer: unknown,
   i: number,
   dataset: DatasetType,
-  datasetIndex: { index: string; timeFieldName: string | undefined },
+  datasetIndex: { index: string; timeFieldName: string | undefined; esqlQuery?: string },
   buildDataLayer: (
     config: unknown,
     i: number,
@@ -318,7 +336,7 @@ function buildDatasourceStatesLayer(
     const columns = getValueColumns(config, i);
 
     return {
-      index: datasetIndex.index,
+      index: generateAdHocDataViewId(datasetIndex),
       query: { esql: ds.query },
       timeField: getTimeFieldFromESQLQuery(ds.query) || undefined,
       columns,
@@ -409,6 +427,9 @@ export const buildDatasourceStates = (
               : {
                   type: 'adHocDataView',
                   ...index,
+                  ...(dataset.type === 'esql'
+                    ? { dataSourceType: 'esql', esqlQuery: dataset.query }
+                    : {}),
                 };
         }
       }
