@@ -44,8 +44,11 @@ export const registerSkills = async ({
     );
   }
 
+  const isEntityStoreV2Enabled = experimentalFeatures.entityAnalyticsEntityStoreV2;
   await agentBuilder.skills.register(
-    getEntityAnalyticsSkill({ getStartServices, kibanaVersion, logger })
+    getEntityAnalyticsSkill({ getStartServices, isEntityStoreV2Enabled, kibanaVersion, logger })
   );
-  await agentBuilder.skills.register(getSecurityMlJobsSkill({ getStartServices, logger, ml }));
+  await agentBuilder.skills.register(
+    getSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
+  );
 };
