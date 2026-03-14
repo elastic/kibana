@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { sortedTriggerDefinitions } from './trigger_definitions';
-import type { TriggerMatchResult, ActiveTrigger } from './types';
+import { sortedCommandDefinitions } from './command_definitions';
+import type { CommandMatchResult, ActiveCommand } from './types';
 
 /**
  * Determines if the character at the given position is at a word boundary.
@@ -20,23 +20,23 @@ const isAtWordBoundary = (text: string, offset: number): boolean => {
   return /\s/.test(precedingChar);
 };
 
-const INACTIVE_RESULT: TriggerMatchResult = {
+const INACTIVE_RESULT: CommandMatchResult = {
   isActive: false,
-  activeTrigger: null,
+  activeCommand: null,
 };
 
 /**
- * Given the text preceding the cursor, checks if any registered trigger
- * is active. Returns the first (longest) matching trigger.
+ * Given the text preceding the cursor, checks if any registered command
+ * is active. Returns the first (longest) matching command.
  *
  * The algorithm scans backward from the cursor position to find the nearest
- * trigger sequence. For each registered trigger (sorted longest-first), it:
+ * command sequence. For each registered command (sorted longest-first), it:
  * 1. Finds the last occurrence of the sequence in the text
  * 2. Checks that the sequence starts at a word boundary
  */
-export const matchTrigger = (textBeforeCursor: string): TriggerMatchResult => {
-  for (const trigger of sortedTriggerDefinitions) {
-    const { sequence } = trigger;
+export const matchCommand = (textBeforeCursor: string): CommandMatchResult => {
+  for (const command of sortedCommandDefinitions) {
+    const { sequence } = command;
     const lastIndex = textBeforeCursor.lastIndexOf(sequence);
 
     if (lastIndex === -1) {
@@ -47,17 +47,17 @@ export const matchTrigger = (textBeforeCursor: string): TriggerMatchResult => {
       continue;
     }
 
-    const afterTrigger = textBeforeCursor.substring(lastIndex + sequence.length);
+    const afterCommand = textBeforeCursor.substring(lastIndex + sequence.length);
 
-    const activeTrigger: ActiveTrigger = {
-      trigger,
-      triggerStartOffset: lastIndex,
-      query: afterTrigger,
+    const activeCommand: ActiveCommand = {
+      command,
+      commandStartOffset: lastIndex,
+      query: afterCommand,
     };
 
     return {
       isActive: true,
-      activeTrigger,
+      activeCommand,
     };
   }
 

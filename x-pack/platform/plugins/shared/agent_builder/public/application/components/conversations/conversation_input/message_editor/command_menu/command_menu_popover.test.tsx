@@ -8,28 +8,28 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CommandMenuPopover } from './command_menu_popover';
-import type { TriggerMatchResult } from './types';
-import { TriggerId } from './types';
+import type { CommandMatchResult } from './types';
+import { CommandId } from './types';
 
-const inactiveMatch: TriggerMatchResult = {
+const inactiveMatch: CommandMatchResult = {
   isActive: false,
-  activeTrigger: null,
+  activeCommand: null,
 };
 
-const activeMatch: TriggerMatchResult = {
+const activeMatch: CommandMatchResult = {
   isActive: true,
-  activeTrigger: {
-    trigger: { id: TriggerId.Attachment, sequence: '@', name: 'Attachment' },
-    triggerStartOffset: 0,
+  activeCommand: {
+    command: { id: CommandId.Attachment, sequence: '@', name: 'Attachment' },
+    commandStartOffset: 0,
     query: 'joh',
   },
 };
 
 describe('CommandMenuPopover', () => {
-  it('renders closed when trigger is inactive', () => {
+  it('renders closed when command is inactive', () => {
     render(
       <CommandMenuPopover
-        triggerMatch={inactiveMatch}
+        commandMatch={inactiveMatch}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
       />
@@ -41,7 +41,7 @@ describe('CommandMenuPopover', () => {
   it('renders closed when anchorPosition is null', () => {
     render(
       <CommandMenuPopover
-        triggerMatch={activeMatch}
+        commandMatch={activeMatch}
         anchorPosition={null}
         data-test-subj="testPopover"
       />
@@ -50,10 +50,10 @@ describe('CommandMenuPopover', () => {
     expect(screen.queryByTestId('testPopover-content')).not.toBeInTheDocument();
   });
 
-  it('renders open when trigger is active and anchorPosition is provided', () => {
+  it('renders open when command is active and anchorPosition is provided', () => {
     render(
       <CommandMenuPopover
-        triggerMatch={activeMatch}
+        commandMatch={activeMatch}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
       />
@@ -62,10 +62,10 @@ describe('CommandMenuPopover', () => {
     expect(screen.getByTestId('testPopover-content')).toBeInTheDocument();
   });
 
-  it('renders screen reader announcement when trigger is active', () => {
+  it('renders screen reader announcement when command is active', () => {
     render(
       <CommandMenuPopover
-        triggerMatch={activeMatch}
+        commandMatch={activeMatch}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
       />
@@ -74,10 +74,10 @@ describe('CommandMenuPopover', () => {
     expect(screen.getByText(/attachment suggestions opened/i)).toBeInTheDocument();
   });
 
-  it('does not render screen reader announcement when trigger is inactive', () => {
+  it('does not render screen reader announcement when command is inactive', () => {
     render(
       <CommandMenuPopover
-        triggerMatch={inactiveMatch}
+        commandMatch={inactiveMatch}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
       />
@@ -86,10 +86,10 @@ describe('CommandMenuPopover', () => {
     expect(screen.queryByText(/suggestions opened/i)).not.toBeInTheDocument();
   });
 
-  it('displays trigger id and query', () => {
+  it('displays command id and query', () => {
     render(
       <CommandMenuPopover
-        triggerMatch={activeMatch}
+        commandMatch={activeMatch}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
       />

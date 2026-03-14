@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MessageEditor } from './message_editor';
 import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
-import { TriggerId } from './command_menu';
+import { CommandId } from './command_menu';
 
 // TODO: Remove once the inline actions feature is no longer behind the experimental feature flag
 jest.mock('../../../../hooks/use_experimental_features', () => ({
@@ -42,7 +42,7 @@ const createMockMessageEditor = (): {
       ref: mockRef,
       onChange: jest.fn(),
       onFocus: jest.fn(),
-      triggerMatch: { isActive: false, activeTrigger: null },
+      commandMatch: { isActive: false, activeCommand: null },
       dismissActionMenu: jest.fn(),
     },
     controller: {
@@ -178,7 +178,7 @@ describe('MessageEditor', () => {
     expect(mockOnSubmit).toHaveBeenCalled();
   });
 
-  it('calls dismissTrigger when Escape is pressed', () => {
+  it('calls dismissCommand when Escape is pressed', () => {
     const { messageEditor } = createMockMessageEditor();
     render(
       <MessageEditor
@@ -223,7 +223,7 @@ describe('MessageEditor', () => {
     expect(screen.getByTestId('messageEditor')).toHaveAttribute('aria-haspopup', 'dialog');
   });
 
-  it('renders popover content when trigger is active', () => {
+  it('renders popover content when command is active', () => {
     const { messageEditor } = createMockMessageEditor();
 
     const { rerender } = render(
@@ -234,11 +234,11 @@ describe('MessageEditor', () => {
       />
     );
 
-    messageEditor.triggerMatch = {
+    messageEditor.commandMatch = {
       isActive: true,
-      activeTrigger: {
-        trigger: { id: TriggerId.Attachment, sequence: '@', name: 'Attachment' },
-        triggerStartOffset: 0,
+      activeCommand: {
+        command: { id: CommandId.Attachment, sequence: '@', name: 'Attachment' },
+        commandStartOffset: 0,
         query: 'test',
       },
     };

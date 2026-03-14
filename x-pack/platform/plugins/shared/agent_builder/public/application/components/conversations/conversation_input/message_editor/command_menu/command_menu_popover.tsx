@@ -9,10 +9,10 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiPopover, EuiScreenReaderLive, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { TriggerMatchResult, AnchorPosition } from './types';
+import type { CommandMatchResult, AnchorPosition } from './types';
 
 interface CommandMenuPopoverProps {
-  triggerMatch: TriggerMatchResult;
+  commandMatch: CommandMatchResult;
   anchorPosition: AnchorPosition | null;
   'data-test-subj'?: string;
 }
@@ -36,16 +36,16 @@ const anchorStyles = css`
 `;
 
 export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
-  triggerMatch,
+  commandMatch,
   anchorPosition,
   'data-test-subj': dataTestSubj = 'commandMenuPopover',
 }) => {
-  const { activeTrigger, isActive } = triggerMatch;
-  const isOpen = isActive && activeTrigger !== null && anchorPosition !== null;
+  const { activeCommand, isActive } = commandMatch;
+  const isOpen = isActive && activeCommand !== null && anchorPosition !== null;
   let announcementText = '';
   let panelAriaLabel = '';
-  if (activeTrigger) {
-    const { name } = activeTrigger.trigger;
+  if (activeCommand) {
+    const { name } = activeCommand.command;
     announcementText = i18n.translate(
       'xpack.agentBuilder.conversationInput.inlineActionPopover.openedAnnouncement',
       { defaultMessage: '{name} suggestions opened. Press Escape to close.', values: { name } }
@@ -69,7 +69,7 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
         closePopover={() => {
           // Do nothing
           // The popover does not control its own visibility state.
-          // The external state of triggerMatch controls this popover's visibility.
+          // The external state of commandMatch controls this popover's visibility.
         }}
         anchorPosition="upLeft"
         panelPaddingSize="s"
@@ -79,7 +79,7 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
         display="block"
       >
         <EuiText size="s" data-test-subj={`${dataTestSubj}-content`}>
-          {placeholderLabel}: {activeTrigger?.trigger.id} &quot;{activeTrigger?.query}&quot;
+          {placeholderLabel}: {activeCommand?.command.id} &quot;{activeCommand?.query}&quot;
         </EuiText>
       </EuiPopover>
     </div>

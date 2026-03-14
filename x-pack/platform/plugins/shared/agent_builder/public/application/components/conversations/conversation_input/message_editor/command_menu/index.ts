@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-export { useCommandMenuTrigger } from './use_command_menu_trigger';
-export type { CommandMenuTriggerState } from './use_command_menu_trigger';
-export type { ActiveTrigger, AnchorPosition, TriggerMatchResult } from './types';
-export { TriggerId } from './types';
+export { useCommandMenu } from './use_command_menu';
+export type { ActiveCommand, AnchorPosition, CommandMatchResult } from './types';
+export { CommandId } from './types';
 export { getRectAtOffset } from './cursor_rect';
 export { CommandMenuPopover } from './command_menu_popover';
 export { CommandMenuContainer } from './command_menu_container';

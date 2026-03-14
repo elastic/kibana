@@ -6,14 +6,14 @@
  */
 
 import { useRef, useMemo, useState, useCallback } from 'react';
-import type { TriggerMatchResult } from './command_menu';
-import { useCommandMenuTrigger } from './command_menu';
+import type { CommandMatchResult } from './command_menu';
+import { useCommandMenu } from './command_menu';
 
 export interface MessageEditorInstance {
   ref: React.RefObject<HTMLDivElement>;
   onChange: () => void;
   onFocus: () => void;
-  triggerMatch: TriggerMatchResult;
+  commandMatch: CommandMatchResult;
   /** Dismiss the active action menu */
   dismissActionMenu: () => void;
 }
@@ -47,10 +47,10 @@ export const useMessageEditor = (): {
   controller: MessageEditorController;
 } => {
   const {
-    match: triggerMatch,
-    dismiss: dismissActionMenu,
-    checkInputForTrigger,
-  } = useCommandMenuTrigger();
+    match: commandMatch,
+    dismiss: dismissCommandMenu,
+    checkInputForCommand,
+  } = useCommandMenu();
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
 
@@ -73,21 +73,21 @@ export const useMessageEditor = (): {
       onChange: () => {
         syncIsEmpty();
         if (ref.current) {
-          checkInputForTrigger(ref.current);
+          checkInputForCommand(ref.current);
         }
       },
       onFocus: () => {
         // Must request animation frame as some browsers have not instantiated the user's cursor selection when the focus event fires
         requestAnimationFrame(() => {
           if (ref.current) {
-            checkInputForTrigger(ref.current);
+            checkInputForCommand(ref.current);
           }
         });
       },
-      triggerMatch,
-      dismissActionMenu,
+      commandMatch,
+      dismissActionMenu: dismissCommandMenu,
     }),
-    [syncIsEmpty, checkInputForTrigger, triggerMatch, dismissActionMenu]
+    [syncIsEmpty, checkInputForCommand, commandMatch, dismissCommandMenu]
   );
 
   const controller = useMemo(

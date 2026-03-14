@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-export enum TriggerId {
+export enum CommandId {
   Attachment = 'attachment',
   Prompt = 'prompt',
 }
 
 /**
- * Defines a trigger that activates an inline action.
+ * Defines a command that activates an inline action.
  */
-export interface TriggerDefinition {
-  /** Unique identifier for this trigger */
-  readonly id: TriggerId;
-  /** The character sequence that activates the trigger (e.g. '@', '/p') */
+export interface CommandDefinition {
+  /** Unique identifier for this command */
+  readonly id: CommandId;
+  /** The character sequence that activates the command (e.g. '@', '/p') */
   readonly sequence: string;
   /** Human readable name to be used for a11y */
   readonly name: string;
 }
 
 /**
- * The state of a currently active trigger.
+ * The state of a currently active command.
  */
-export interface ActiveTrigger {
-  /** The trigger definition that matched */
-  readonly trigger: TriggerDefinition;
-  /** Character offset where the trigger sequence starts in the full input text */
-  readonly triggerStartOffset: number;
-  /** The search query text typed after the trigger sequence */
+export interface ActiveCommand {
+  /** The command definition that matched */
+  readonly command: CommandDefinition;
+  /** Character offset where the command sequence starts in the full input text */
+  readonly commandStartOffset: number;
+  /** The search query text typed after the command sequence */
   readonly query: string;
 }
 
 /**
- * Result of evaluating the current input text for trigger matches.
+ * Result of evaluating the current input text for command matches.
  */
-export interface TriggerMatchResult {
-  /** Whether a trigger is currently active */
+export interface CommandMatchResult {
+  /** Whether a command is currently active */
   readonly isActive: boolean;
-  /** The active trigger details, or null */
-  readonly activeTrigger: ActiveTrigger | null;
+  /** The active command details, or null */
+  readonly activeCommand: ActiveCommand | null;
 }
 
 /**

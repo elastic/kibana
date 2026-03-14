@@ -51,7 +51,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const [isComposing, setIsComposing] = useState(false);
-  const { ref, onChange, onFocus, triggerMatch } = messageEditor;
+  const { ref, onChange, onFocus, commandMatch } = messageEditor;
   const editorId = useGeneratedHtmlId({ prefix: 'messageEditor' });
   const { euiTheme } = useEuiTheme();
   const placeholderStyles = css`
@@ -80,7 +80,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
 
   return (
     <CommandMenuContainer
-      triggerMatch={triggerMatch}
+      commandMatch={commandMatch}
       editorRef={ref}
       data-test-subj={`${dataTestSubj}-container`}
     >
