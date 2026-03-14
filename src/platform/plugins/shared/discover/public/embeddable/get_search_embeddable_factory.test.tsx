@@ -22,6 +22,7 @@ import { userEvent } from '@testing-library/user-event';
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { createDataViewDataSource } from '../../common/data_sources';
+import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import { discoverServiceMock } from '../__mocks__/services';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import type { SearchEmbeddableApi, SearchEmbeddableRuntimeState } from './types';
@@ -77,6 +78,21 @@ describe('saved search embeddable', () => {
   };
 
   const uuid = 'mock-embeddable-id';
+  const byValueInitialState: SearchEmbeddableState = {
+    attributes: {
+      title: 'By value Discover session',
+      description: '',
+      sort: [],
+      columns: [],
+      grid: {},
+      hideChart: false,
+      isTextBasedQuery: false,
+      kibanaSavedObjectMeta: {
+        searchSourceJSON: '{}',
+      },
+      tabs: [],
+    },
+  };
   const factory = getSearchEmbeddableFactory(mockServices);
   const dashboadFilters = new BehaviorSubject<Filter[] | undefined>(undefined);
   const mockedDashboardApi = {
@@ -283,6 +299,35 @@ describe('saved search embeddable', () => {
       expect(search).toHaveBeenCalledTimes(1);
     });
 
+    it('should not provide inline editing overrides for by-value embeddables', async () => {
+      const { search } = createSearchFnMock(1);
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
+      });
+
+      discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockReturnValue({
+        navigateToEditor: jest.fn(),
+      });
+      (discoverServiceMock.locator.getLocation as jest.Mock).mockResolvedValue({
+        app: 'discover',
+        path: '/mock-url',
+        state: {},
+      });
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: byValueInitialState,
+        finalizeApi: finalizeEditableApiMock,
+        uuid,
+        parentApi: mockedEditableDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(api.overrideHoverActions$).toBeUndefined();
+      expect(api.OverriddenHoverActionsComponent).toBeUndefined();
+    });
+
     it('should enter inline edit mode and keep legacy discover edit behavior', async () => {
       const user = userEvent.setup();
 
@@ -317,6 +362,7 @@ describe('saved search embeddable', () => {
       await waitOneTick();
 
       expect(api.overrideHoverActions$?.getValue()).toBe(false);
+      expect(api.OverriddenHoverActionsComponent).toBeDefined();
       expect(api.onEdit).toBeDefined();
 
       await act(async () => {
@@ -338,6 +384,37 @@ describe('saved search embeddable', () => {
         expect(
           discoverComponent.queryByTestId('discoverEmbeddableInlineEditApplyButton')
         ).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('deleted tab', () => {
+    it('should render the deleted tab prompt when the selected tab no longer exists', async () => {
+      const { search } = createSearchFnMock(0);
+
+      runtimeState = getInitialRuntimeState({
+        searchMock: search,
+        partialState: {
+          savedObjectId: 'id',
+          selectedTabId: 'removed-tab',
+          tabs: [{ id: 'tab-1' }, { id: 'tab-2' }] as SearchEmbeddableRuntimeState['tabs'],
+        },
+      });
+
+      const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { savedObjectId: 'id' },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+
+      await waitOneTick();
+      const { queryByTestId } = renderWithI18n(<Component />);
+
+      await waitFor(() => {
+        expect(queryByTestId('discoverEmbeddableDeletedTabCallout')).toBeInTheDocument();
+        expect(queryByTestId('discoverDocTable')).not.toBeInTheDocument();
       });
     });
   });
