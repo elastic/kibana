@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
 import { EditHighlightedFieldsButton } from './highlighted_fields_button';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import {
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID,
   HIGHLIGHTED_FIELDS_MODAL_TEST_ID,
@@ -34,7 +34,7 @@ const mockCustomHighlightedFields = ['field1', 'field2'];
 const defaultProps = {
   rule: { id: '123', index: ['index1', 'index2'] } as RuleResponse,
   customHighlightedFields: mockCustomHighlightedFields,
-  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+  hit: buildDataTableRecord(mockContextValue.searchHit as EsHitRecord),
   setIsEditLoading: mockSetIsEditLoading,
   isExistingRule: true,
 };

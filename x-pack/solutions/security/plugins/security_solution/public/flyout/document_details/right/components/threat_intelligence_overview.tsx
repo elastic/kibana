@@ -7,22 +7,19 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { EuiBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
-import { InsightsSummaryRow } from './insights_summary_row';
-import { useDocumentDetailsContext } from '../../shared/context';
+import { InsightsSummaryRow } from '../../../../flyout_v2/document/components/insights_summary_row';
 import {
   INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID,
 } from './test_ids';
-import { LeftPanelInsightsTab } from '../../left';
-import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
-import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
 const HEADER_TITLE = (
   <FormattedMessage
@@ -66,27 +63,42 @@ const CUSTOM_TIME_RANGE_TOOLTIP = (
  * The component fetches the necessary data, then pass it down to the InsightsSubSection component for loading and error state,
  * and the SummaryPanel component for data rendering.
  */
-export const ThreatIntelligenceOverview: FC = () => {
-  const { dataFormattedForFieldBrowser, isPreviewMode } = useDocumentDetailsContext();
+export interface ThreatIntelligenceOverviewProps {
+  /**
+   * Document record used to retrieve threat intelligence data
+   */
+  hit: DataTableRecord;
+  /**
+   * Whether to show the navigation icon
+   */
+  showIcon?: boolean;
+  /**
+   * Callback to navigate to threat intelligence details
+   */
+  onShowThreatIntelligence: () => void;
+}
 
+export const ThreatIntelligenceOverview: FC<ThreatIntelligenceOverviewProps> = ({
+  hit,
+  showIcon = true,
+  onShowThreatIntelligence,
+}) => {
   const { storage } = useKibana().services;
   const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.THREAT_INTELLIGENCE_TIME_RANGE);
 
-  const goToThreatIntelligenceTab = useNavigateToLeftPanel({
-    tab: LeftPanelInsightsTab,
-    subTab: THREAT_INTELLIGENCE_TAB_ID,
-  });
-
   const { loading, threatMatchesCount, threatEnrichmentsCount } = useFetchThreatIntelligence({
-    dataFormattedForFieldBrowser,
+    hit,
   });
 
   const link = useMemo(
-    () => ({
-      callback: goToThreatIntelligenceTab,
-      tooltip: HEADER_TOOLTIP,
-    }),
-    [goToThreatIntelligenceTab]
+    () =>
+      onShowThreatIntelligence
+        ? {
+            callback: onShowThreatIntelligence,
+            tooltip: HEADER_TOOLTIP,
+          }
+        : undefined,
+    [onShowThreatIntelligence]
   );
 
   const threatMatchCountText = useMemo(
@@ -116,7 +128,7 @@ export const ThreatIntelligenceOverview: FC = () => {
       header={{
         title: HEADER_TITLE,
         link,
-        iconType: !isPreviewMode ? 'arrowStart' : undefined,
+        iconType: showIcon ? 'arrowStart' : undefined,
         headerContent: (
           <EuiToolTip
             content={
@@ -140,13 +152,13 @@ export const ThreatIntelligenceOverview: FC = () => {
         <InsightsSummaryRow
           text={threatMatchCountText}
           value={threatMatchesCount}
-          expandedSubTab={THREAT_INTELLIGENCE_TAB_ID}
+          onShowDetails={onShowThreatIntelligence}
           data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID}
         />
         <InsightsSummaryRow
           text={threatEnrichmentsCountText}
           value={threatEnrichmentsCount}
-          expandedSubTab={THREAT_INTELLIGENCE_TAB_ID}
+          onShowDetails={onShowThreatIntelligence}
           data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID}
         />
       </EuiFlexGroup>

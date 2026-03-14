@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import {
   HIGHLIGHTED_FIELDS_DETAILS_TEST_ID,
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID,
   HIGHLIGHTED_FIELDS_TITLE_TEST_ID,
 } from './test_ids';
 import { HighlightedFields } from './highlighted_fields';
-import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
 import { TestProviders } from '../../../../common/mock';
 import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_ui/pages/form';
 import { mockContextValue } from '../../shared/mocks/mock_context';
@@ -21,7 +22,7 @@ import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighte
 import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
-jest.mock('../../shared/hooks/use_highlighted_fields');
+jest.mock('../../../../flyout_v2/document/hooks/use_highlighted_fields');
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../../../../detection_engine/rule_creation_ui/pages/form');
 jest.mock('../../shared/hooks/use_highlighted_fields_privilege');
@@ -37,7 +38,7 @@ const renderHighlightedFields = (showEditButton = false) =>
   render(
     <TestProviders>
       <HighlightedFields
-        dataFormattedForFieldBrowser={mockContextValue.dataFormattedForFieldBrowser}
+        hit={buildDataTableRecord(mockContextValue.searchHit as EsHitRecord)}
         investigationFields={mockContextValue.investigationFields}
         scopeId={mockContextValue.scopeId}
         showEditButton={showEditButton}

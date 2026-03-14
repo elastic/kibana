@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { UseHighlightedFieldsResult } from '../hooks/use_highlighted_fields';
+import type { UseHighlightedFieldsResult } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
 import type { HighlightedFieldsTableRow } from '../../right/components/highlighted_fields';
 
 /**
