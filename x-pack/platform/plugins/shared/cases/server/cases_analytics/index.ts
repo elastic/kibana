@@ -19,10 +19,8 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { Owner } from '../../common/constants/types';
 import type { CasesServerStartDependencies } from '../types';
 import { registerCAIBackfillTask } from './tasks/backfill_task';
-import {
-  registerCAISynchronizationTask,
-  scheduleCAISynchronizationTask,
-} from './tasks/synchronization_task';
+import { registerOwnerSyncTask } from './tasks/owner_sync_task';
+import { ANALYTICS_SYNCHRONIZATION_TASK_TYPE } from '../../common/constants';
 import { createContentAnalyticsIndex } from './content_index';
 import { createActivityAnalyticsIndex } from './activity_index';
 import { createLifecycleAnalyticsTransform } from './lifecycle_index';
@@ -148,21 +146,20 @@ export const registerCasesAnalyticsIndexesTasks = ({
 }) => {
   registerCAIBackfillTask({ taskManager, logger, core, analyticsConfig });
   registerCAISchedulerTask({ taskManager, logger, core, analyticsConfig, isServerless });
-  registerCAISynchronizationTask({ taskManager, logger, core, analyticsConfig });
-};
-
-export const scheduleCasesAnalyticsSyncTasksForOwner = ({
-  taskManager,
-  logger,
-  spaceId,
-  owner,
-}: {
-  taskManager: TaskManagerStartContract;
-  logger: Logger;
-  spaceId: string;
-  owner: Owner;
-}) => {
-  void scheduleCAISynchronizationTask({ taskManager, logger, spaceId, owner });
+  // Register the new per-owner consolidated sync task (3 tasks, one per owner type)
+  registerOwnerSyncTask({ taskManager, logger, core, analyticsConfig });
+  // Register old per-space sync task type as a no-op so existing task-manager records
+  // from pre-GA deployments do not surface "unknown task type" errors on upgrade.
+  // The scheduler task's migration pass will remove these stale records on first run.
+  taskManager.registerTaskDefinitions({
+    [ANALYTICS_SYNCHRONIZATION_TASK_TYPE]: {
+      title: '[Deprecated] Cases analytics per-space sync task (no-op)',
+      createTaskRunner: () => ({
+        run: async () => ({ state: {} }),
+        cancel: async () => {},
+      }),
+    },
+  });
 };
 
 export const getIndicesForOwnerAndSpace = (spaceId: string, owner: Owner): string[] => {

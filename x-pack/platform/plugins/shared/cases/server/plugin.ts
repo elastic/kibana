@@ -55,6 +55,7 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
+import { scheduleOwnerSyncTasks } from './cases_analytics/tasks/owner_sync_task';
 import { registerCaseWorkflowSteps } from './workflows';
 
 export class CasePlugin
@@ -250,6 +251,10 @@ export class CasePlugin
         ]);
         const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
         scheduleCAISchedulerTask({
+          taskManager: plugins.taskManager,
+          logger: this.logger,
+        }).catch(() => {}); // it shouldn't reject, but just in case
+        scheduleOwnerSyncTasks({
           taskManager: plugins.taskManager,
           logger: this.logger,
         }).catch(() => {}); // it shouldn't reject, but just in case

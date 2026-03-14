@@ -56,7 +56,7 @@ export function registerCAISchedulerTask({
     [ANALYTICS_SCHEDULER_TASK_TYPE]: {
       title: 'Schedules cases analytics synchronization tasks.',
       maxAttempts: 3,
-      createTaskRunner: () => {
+      createTaskRunner: (context) => {
         return new AnalyticsIndexSchedulerTaskFactory({
           getUnsecureSavedObjectsClient,
           getTaskManager,
@@ -64,7 +64,7 @@ export function registerCAISchedulerTask({
           analyticsConfig,
           getESClient,
           isServerless,
-        }).create();
+        }).create(context);
       },
     },
   });

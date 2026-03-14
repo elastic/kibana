@@ -6,7 +6,7 @@
  */
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { RunContext, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ConfigType } from '../../../config';
 import { SchedulerTaskRunner } from './scheduler_task_runner';
 
@@ -43,8 +43,9 @@ export class AnalyticsIndexSchedulerTaskFactory {
     this.isServerless = isServerless;
   }
 
-  public create() {
+  public create(context: RunContext) {
     return new SchedulerTaskRunner({
+      taskInstance: context.taskInstance,
       analyticsConfig: this.analyticsConfig,
       logger: this.logger,
       getUnsecureSavedObjectsClient: this.getUnsecureSavedObjectsClient,
