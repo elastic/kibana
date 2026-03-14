@@ -40,6 +40,8 @@ import type {
   CaseCustomFields,
   CustomFieldsConfiguration,
   Observable,
+  CaseConnector,
+  JiraFieldsType,
 } from '../../../common/types/domain';
 import {
   CaseStatuses,
@@ -330,10 +332,10 @@ describe('utils', () => {
               connector: {
                 ...mockCases[2].attributes.connector,
                 fields: {
-                  ...mockCases[2].attributes.connector.fields,
+                  ...(mockCases[2].attributes.connector.fields as JiraFieldsType),
                   otherFields: '{"customfield_123456":"Blue team"}',
                 },
-              },
+              } as CaseConnector,
             },
           },
         }),
