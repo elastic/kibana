@@ -31,7 +31,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
     incrementalId: { enabled: true, taskIntervalMinutes: 10, taskStartDelayMinutes: 10 },
-    analytics: { index: { enabled: true } },
+    analytics: { index: { enabled: true, reindexConcurrency: 3 } },
     templates: { enabled: true },
     attachments: { enabled: true },
     ...overrides,

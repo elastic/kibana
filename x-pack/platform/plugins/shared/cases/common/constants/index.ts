@@ -204,7 +204,19 @@ export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
 export const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
 export const ANALYTICS_BACKFILL_TASK_TYPE = 'cai:cases_analytics_index_backfill';
 export const ANALYTICS_SCHEDULER_TASK_TYPE = 'cai:cases_analytics_index_scheduler';
+/**
+ * @deprecated Per-space sync tasks are superseded by ANALYTICS_OWNER_SYNC_TASK_TYPE.
+ * This registration is kept as a no-op so existing task-manager records from
+ * pre-GA deployments do not surface "unknown task type" errors on upgrade.
+ */
 export const ANALYTICS_SYNCHRONIZATION_TASK_TYPE = 'cai:cases_analytics_index_synchronization';
+/**
+ * One task per owner (securitySolution | observability | cases).  Each task
+ * handles all analytics-enabled spaces for its owner in a single run, using
+ * msearch to batch-check for new documents and a concurrency-capped fan-out
+ * for reindex operations.
+ */
+export const ANALYTICS_OWNER_SYNC_TASK_TYPE = 'cai:cases_analytics_owner_sync';
 
 /**
  * Telemetry

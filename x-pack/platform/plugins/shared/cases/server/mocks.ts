@@ -790,6 +790,7 @@ export const mockCasesContract = (): CasesServerStart => ({
     analytics: {
       index: {
         enabled: true,
+        reindexConcurrency: 3,
       },
     },
     incrementalId: {

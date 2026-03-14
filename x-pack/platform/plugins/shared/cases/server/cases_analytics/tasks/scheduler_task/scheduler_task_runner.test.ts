@@ -41,12 +41,14 @@ describe('SchedulerTaskRunner', () => {
   const analyticsConfig = {
     index: {
       enabled: true,
+      reindexConcurrency: 3,
     },
   };
 
   const analyticsConfigDisabled = {
     index: {
       enabled: false,
+      reindexConcurrency: 3,
     },
   };
 

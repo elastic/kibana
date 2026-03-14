@@ -65,6 +65,7 @@ describe('SynchronizationTaskRunner', () => {
   const analyticsConfig = {
     index: {
       enabled: true,
+      reindexConcurrency: 3,
     },
   };
 
@@ -340,6 +341,7 @@ describe('SynchronizationTaskRunner', () => {
     const analyticsConfigDisabled = {
       index: {
         enabled: false,
+        reindexConcurrency: 3,
       },
     };
 
