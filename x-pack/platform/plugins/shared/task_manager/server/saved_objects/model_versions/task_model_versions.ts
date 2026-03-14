@@ -15,7 +15,6 @@ import {
   taskSchemaV6,
   taskSchemaV7,
   taskSchemaV8,
-  taskSchemaV9,
 } from '../schemas/task';
 
 // IMPORTANT!!!
