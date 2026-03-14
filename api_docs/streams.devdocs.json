@@ -1423,7 +1423,17 @@
             },
             "<\"PUT /internal/streams/_prompts\", any, ",
             "StreamsRouteHandlerResources",
-            ", { results: Readonly<{ featurePromptOverride?: string | undefined; significantEventsPromptOverride?: string | undefined; descriptionPromptOverride?: string | undefined; systemsPromptOverride?: string | undefined; } & {}>; }, undefined>; \"GET /internal/streams/failure_store/default_retention\": ",
+            ", { results: Readonly<{ featurePromptOverride?: string | undefined; significantEventsPromptOverride?: string | undefined; descriptionPromptOverride?: string | undefined; systemsPromptOverride?: string | undefined; } & {}>; }, undefined>; \"GET /internal/streams/{name}/time_series/_count\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /internal/streams/{name}/time_series/_count\", any, ",
+            "StreamsRouteHandlerResources",
+            ", { timeSeriesCount: null; } | { timeSeriesCount: number; }, undefined>; \"GET /internal/streams/failure_store/default_retention\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2759,7 +2769,17 @@
           },
           "<\"PUT /internal/streams/_prompts\", any, ",
           "StreamsRouteHandlerResources",
-          ", { results: Readonly<{ featurePromptOverride?: string | undefined; significantEventsPromptOverride?: string | undefined; descriptionPromptOverride?: string | undefined; systemsPromptOverride?: string | undefined; } & {}>; }, undefined>; \"GET /internal/streams/failure_store/default_retention\": ",
+          ", { results: Readonly<{ featurePromptOverride?: string | undefined; significantEventsPromptOverride?: string | undefined; descriptionPromptOverride?: string | undefined; systemsPromptOverride?: string | undefined; } & {}>; }, undefined>; \"GET /internal/streams/{name}/time_series/_count\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/streams/{name}/time_series/_count\", any, ",
+          "StreamsRouteHandlerResources",
+          ", { timeSeriesCount: null; } | { timeSeriesCount: number; }, undefined>; \"GET /internal/streams/failure_store/default_retention\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -3036,7 +3056,7 @@
           "[]; canReadFailureStore: boolean; }, undefined>; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/server/routes/index.ts",
-        "lineNumber": 68,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
