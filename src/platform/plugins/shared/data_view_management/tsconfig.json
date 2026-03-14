@@ -50,6 +50,7 @@
     "@kbn/css-utils",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/cps-utils",
+    "@kbn/cps",
   ],
   "exclude": [
     "target/**/*",
