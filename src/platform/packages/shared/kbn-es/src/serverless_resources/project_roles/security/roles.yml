@@ -1,7 +1,8 @@
 # ----- Copy from internal roles config in elasticsearch-controller
 # modeled after the t1_analyst minus osquery run saved queries privilege, plus endpoint exceptions read
 viewer:
-  cluster: []
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - '.siem-signals*'
@@ -70,7 +71,8 @@ viewer:
 
 # modeled after t3_analyst
 editor:
-  cluster: []
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - '.siem-signals*'
@@ -166,7 +168,8 @@ editor:
   run_as: []
 
 t1_analyst:
-  cluster: []
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - '.alerts-security*'
@@ -226,7 +229,8 @@ t1_analyst:
       resources: '*'
 
 t2_analyst:
-  cluster: []
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - .alerts-security*
@@ -290,7 +294,8 @@ t2_analyst:
       resources: '*'
 
 t3_analyst:
-  cluster: []
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - apm-*-transaction*
@@ -373,7 +378,8 @@ t3_analyst:
       resources: '*'
 
 threat_intelligence_analyst:
-  cluster: []
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - apm-*-transaction*
@@ -446,7 +452,8 @@ threat_intelligence_analyst:
       resources: '*'
 
 rule_author:
-  cluster: []
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - apm-*-transaction*
@@ -528,7 +535,8 @@ rule_author:
       resources: '*'
 
 soc_manager:
-  cluster: []
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - apm-*-transaction*
@@ -626,7 +634,7 @@ soc_manager:
       resources: '*'
 
 detections_admin:
-  cluster: ['manage_index_templates', 'manage_transform']
+  cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
     - names:
         - apm-*-transaction*
@@ -782,7 +790,8 @@ platform_engineer:
       resources: '*'
 
 endpoint_operations_analyst:
-  cluster: []
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
@@ -869,7 +878,8 @@ endpoint_operations_analyst:
       resources: '*'
 
 endpoint_policy_manager:
-  cluster: []
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
