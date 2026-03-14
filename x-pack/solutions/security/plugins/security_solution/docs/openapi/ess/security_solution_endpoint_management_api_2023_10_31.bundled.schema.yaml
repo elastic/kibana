@@ -348,23 +348,27 @@ paths:
                   description: >-
                     If this action is associated with any alerts, they can be
                     specified here. The action will be logged in any cases
-                    associated with the specified alerts.
+                    associated with the specified alerts. Max of 50.
                   example:
                     - alert-id-1
                     - alert-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 case_ids:
-                  description: The IDs of cases where the action taken will be logged.
+                  description: >-
+                    The IDs of cases where the action taken will be logged. Max
+                    of 50.
                   example:
                     - case-id-1
                     - case-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 comment:
@@ -624,23 +628,27 @@ paths:
                   description: >-
                     If this action is associated with any alerts, they can be
                     specified here. The action will be logged in any cases
-                    associated with the specified alerts.
+                    associated with the specified alerts. Max of 50.
                   example:
                     - alert-id-1
                     - alert-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 case_ids:
-                  description: The IDs of cases where the action taken will be logged.
+                  description: >-
+                    The IDs of cases where the action taken will be logged. Max
+                    of 50.
                   example:
                     - case-id-1
                     - case-id-2
                   items:
                     minLength: 1
                     type: string
+                  maxItems: 50
                   minItems: 1
                   type: array
                 comment:
@@ -961,7 +969,7 @@ components:
       description: Agent ID
       type: string
     AgentIds:
-      description: A list of agent IDs. Max of 50.
+      description: A list of agent IDs. Max of 250.
       example:
         - agent-id-1
         - agent-id-2
@@ -970,7 +978,7 @@ components:
         - items:
             minLength: 1
             type: string
-          maxItems: 50
+          maxItems: 250
           minItems: 1
           type: array
         - minLength: 1
@@ -1030,23 +1038,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -1112,6 +1124,7 @@ components:
         - unisolate
       items:
         $ref: '#/components/schemas/Command'
+      maxItems: 50
       type: array
     Comment:
       description: Optional comment
@@ -1134,13 +1147,14 @@ components:
       example: '2023-10-31T23:59:59.999Z'
       type: string
     EndpointIds:
-      description: List of endpoint IDs (cannot contain empty strings)
+      description: List of endpoint IDs (cannot contain empty strings). Max of 250.
       example:
         - endpoint-id-1
         - endpoint-id-2
       items:
         minLength: 1
         type: string
+      maxItems: 250
       minItems: 1
       type: array
     EndpointMetadataResponse:
@@ -1374,23 +1388,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -1560,23 +1578,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -1642,23 +1664,25 @@ components:
           description: >-
             If this action is associated with any alerts, they can be specified
             here. The action will be logged in any cases associated with the
-            specified alerts.
+            specified alerts. Max of 50.
           example:
             - alert-id-1
             - alert-id-2
           items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         case_ids:
-          description: The IDs of cases where the action taken will be logged.
+          description: The IDs of cases where the action taken will be logged. Max of 50.
           example:
             - case-id-1
             - case-id-2
           items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         comment:
@@ -1723,6 +1747,7 @@ components:
           - inactive
           - unenrolled
         type: string
+      maxItems: 20
       type: array
     Isolate:
       $ref: '#/components/schemas/ResponseActionDetails'
@@ -1819,23 +1844,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -2015,23 +2044,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -2564,23 +2597,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -2634,23 +2671,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -2812,23 +2853,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -2979,23 +3024,27 @@ components:
               description: >-
                 If this action is associated with any alerts, they can be
                 specified here. The action will be logged in any cases
-                associated with the specified alerts.
+                associated with the specified alerts. Max of 50.
               example:
                 - alert-id-1
                 - alert-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             case_ids:
-              description: The IDs of cases where the action taken will be logged.
+              description: >-
+                The IDs of cases where the action taken will be logged. Max of
+                50.
               example:
                 - case-id-1
                 - case-id-2
               items:
                 minLength: 1
                 type: string
+              maxItems: 50
               minItems: 1
               type: array
             comment:
@@ -3059,7 +3108,7 @@ components:
       type: object
       properties: {}
     UserIds:
-      description: A list of user IDs.
+      description: A list of user IDs. Max of 50.
       example:
         - user-id-1
         - user-id-2
@@ -3067,6 +3116,7 @@ components:
         - items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         - minLength: 1
@@ -3074,7 +3124,7 @@ components:
     WithOutputs:
       description: >-
         A list of action IDs that should include the complete output of the
-        action.
+        action. Max of 50.
       example:
         - action-id-1
         - action-id-2
@@ -3082,6 +3132,7 @@ components:
         - items:
             minLength: 1
             type: string
+          maxItems: 50
           minItems: 1
           type: array
         - minLength: 1

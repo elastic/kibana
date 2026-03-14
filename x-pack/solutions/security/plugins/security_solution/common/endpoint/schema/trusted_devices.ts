@@ -64,6 +64,7 @@ const getTrustedDeviceDuplicateFields = (entries: TrustedDeviceConditionEntry[])
 
 const entriesSchemaOptions = {
   minSize: 1,
+  maxSize: 250,
   validate(entries: TrustedDeviceConditionEntry[]) {
     return (
       getTrustedDeviceDuplicateFields(entries)
@@ -90,7 +91,7 @@ const getTrustedDeviceForOsScheme = () =>
       }),
       schema.object({
         type: schema.literal('policy'),
-        policies: schema.arrayOf(schema.string({ minLength: 1 })),
+        policies: schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 50 }),
       }),
     ]),
     entries: EntriesSchema,

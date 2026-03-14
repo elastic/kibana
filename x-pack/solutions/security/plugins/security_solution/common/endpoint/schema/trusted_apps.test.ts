@@ -158,6 +158,18 @@ describe('When invoking Trusted Apps Schema', () => {
       expect(() => body.validate(createNewTrustedApp({ entries: [] }))).toThrow();
     });
 
+    it('should not accept more than 250 entries', () => {
+      expect(() =>
+        body.validate(
+          createNewTrustedApp({
+            entries: Array(251).fill(
+              createConditionEntry({ field: ConditionEntryField.PATH, value: '/tmp/path' })
+            ),
+          })
+        )
+      ).toThrow();
+    });
+
     describe('when `entries` are defined', () => {
       // Some static hashes for use in validation. Some chr. are in UPPERcase on purpose
       const VALID_HASH_MD5 = '741462ab431a22233C787BAAB9B653C7';
@@ -379,6 +391,51 @@ describe('When invoking Trusted Apps Schema', () => {
           );
         }).toThrow();
       });
+    });
+  });
+
+  describe('effectScope validation', () => {
+    const body = PostTrustedAppCreateRequestSchema.body;
+    const createConditionEntry = <T>(data?: T): TrustedAppConditionEntry => ({
+      field: ConditionEntryField.PATH,
+      type: 'match',
+      operator: 'included',
+      value: 'c:/programs files/Anti-Virus',
+      ...(data || {}),
+    });
+    const createNewTrustedApp = <T>(data?: T): NewTrustedApp =>
+      ({
+        name: 'Some Anti-Virus App',
+        os: OperatingSystem.WINDOWS,
+        effectScope: { type: 'global' },
+        entries: [createConditionEntry()],
+        ...(data || {}),
+      } as NewTrustedApp);
+
+    it('should accept a policy effectScope with up to 50 policies', () => {
+      expect(() =>
+        body.validate(
+          createNewTrustedApp({
+            effectScope: {
+              type: 'policy',
+              policies: Array(50).fill('policy-id'),
+            },
+          })
+        )
+      ).not.toThrow();
+    });
+
+    it('should not accept a policy effectScope with more than 50 policies', () => {
+      expect(() =>
+        body.validate(
+          createNewTrustedApp({
+            effectScope: {
+              type: 'policy',
+              policies: Array(51).fill('policy-id'),
+            },
+          })
+        )
+      ).toThrow();
     });
   });
 

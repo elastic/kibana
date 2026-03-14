@@ -93,6 +93,7 @@ const MacEntrySchema = schema.object({
 
 const entriesSchemaOptions = {
   minSize: 1,
+  maxSize: 250,
   validate(entries: TrustedAppConditionEntry[]) {
     return (
       getDuplicateFields(entries)
@@ -137,7 +138,7 @@ const getTrustedAppForOsScheme = () =>
       }),
       schema.object({
         type: schema.literal('policy'),
-        policies: schema.arrayOf(schema.string({ minLength: 1 })),
+        policies: schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 50 }),
       }),
     ]),
     entries: EntriesSchema,
