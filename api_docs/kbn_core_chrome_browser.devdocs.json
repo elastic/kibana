@@ -1890,6 +1890,10 @@
             "references": [
               {
                 "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/browser-internal-types/index.ts"
+              },
+              {
+                "plugin": "@kbn/core",
                 "path": "src/core/packages/chrome/browser-internal/src/chrome_api.tsx"
               }
             ],
@@ -2035,44 +2039,6 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeStart.setGlobalFooter",
-            "type": "Function",
-            "tags": [],
-            "label": "setGlobalFooter",
-            "description": [
-              "\nSet global footer; Meant to be used by developer toolbar"
-            ],
-            "signature": [
-              "(node: React.ReactNode) => void"
-            ],
-            "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 99,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-chrome-browser",
-                "id": "def-public.ChromeStart.setGlobalFooter.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "node",
-                "description": [],
-                "signature": [
-                  "React.ReactNode"
-                ],
-                "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 102,
-                "columnNumber": 19,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.ChromeStart.getBreadcrumbs$",
             "type": "Function",
             "tags": [],
@@ -2088,7 +2054,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 104,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2110,7 +2076,7 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 109,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2134,7 +2100,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 114,
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2151,7 +2117,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 117,
+                "lineNumber": 112,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2169,7 +2135,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 117,
+                "lineNumber": 112,
                 "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2195,7 +2161,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 119,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2217,7 +2183,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 124,
+            "lineNumber": 119,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2234,7 +2200,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 148,
+                "lineNumber": 143,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2260,7 +2226,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 150,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2282,7 +2248,7 @@
               ") => () => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 155,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2298,7 +2264,7 @@
                   "ChromeBreadcrumbsAppendExtension"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 171,
+                "lineNumber": 166,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2322,7 +2288,7 @@
               "[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 174,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2341,7 +2307,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 198,
+                "lineNumber": 193,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2367,7 +2333,7 @@
               "> | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 200,
+            "lineNumber": 195,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2389,7 +2355,7 @@
               "> | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 205,
+            "lineNumber": 200,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2407,13 +2373,37 @@
                   "> | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 208,
+                "lineNumber": 203,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.getHelpMenuLinks$",
+            "type": "Function",
+            "tags": [],
+            "label": "getHelpMenuLinks$",
+            "description": [
+              "\nGet an observable of the current help menu links"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              "ChromeHelpMenuLink",
+              "[]>"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 205,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -2713,6 +2703,26 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.hasHeaderBanner",
+            "type": "Function",
+            "tags": [],
+            "label": "hasHeaderBanner",
+            "description": [
+              "\nGet the current header banner presence synchronously."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 261,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.ChromeStart.setChromeStyle",
             "type": "Function",
             "tags": [],
@@ -2726,7 +2736,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 261,
+            "lineNumber": 266,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2744,7 +2754,7 @@
                   "ChromeStyle"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 265,
+                "lineNumber": 270,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2770,7 +2780,28 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 267,
+            "lineNumber": 272,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.getChromeStyle",
+            "type": "Function",
+            "tags": [],
+            "label": "getChromeStyle",
+            "description": [
+              "\nGet the current style type synchronously."
+            ],
+            "signature": [
+              "() => ",
+              "ChromeStyle"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 277,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2787,10 +2818,10 @@
             "signature": [
               "{ getIsCollapsed$(): ",
               "Observable",
-              "<boolean>; setIsCollapsed(isCollapsed: boolean): void; }"
+              "<boolean>; getIsCollapsed(): boolean; setIsCollapsed(isCollapsed: boolean): void; }"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 272,
+            "lineNumber": 282,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2808,7 +2839,7 @@
               "SidebarStart"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 285,
+            "lineNumber": 300,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2828,7 +2859,27 @@
               "<\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 290,
+            "lineNumber": 305,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.getActiveSolutionNavId",
+            "type": "Function",
+            "tags": [],
+            "label": "getActiveSolutionNavId",
+            "description": [
+              "\nGet the id of the currently active project navigation synchronously."
+            ],
+            "signature": [
+              "() => \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 310,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2848,7 +2899,7 @@
               "(component: React.ReactNode) => React.ReactNode"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 295,
+            "lineNumber": 315,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2864,7 +2915,7 @@
                   "React.ReactNode"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 298,
+                "lineNumber": 318,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
