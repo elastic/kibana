@@ -343,17 +343,25 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
     outputSchema: InteropZodType<RunOutput> | Record<string, any>,
     config?: StructuredOutputMethodOptions<false>
-  ): Runnable<BaseLanguageModelInput, RunOutput>;
+  ): Runnable<BaseLanguageModelInput, RunOutput, InferenceChatModelCallOptions>;
   withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
     outputSchema: InteropZodType<RunOutput> | Record<string, any>,
     config?: StructuredOutputMethodOptions<true>
-  ): Runnable<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }>;
+  ): Runnable<
+    BaseLanguageModelInput,
+    { raw: BaseMessage; parsed: RunOutput },
+    InferenceChatModelCallOptions
+  >;
   withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
     outputSchema: InteropZodType<RunOutput> | Record<string, any>,
     config?: StructuredOutputMethodOptions<boolean>
   ):
-    | Runnable<BaseLanguageModelInput, RunOutput>
-    | Runnable<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }> {
+    | Runnable<BaseLanguageModelInput, RunOutput, InferenceChatModelCallOptions>
+    | Runnable<
+        BaseLanguageModelInput,
+        { raw: BaseMessage; parsed: RunOutput },
+        InferenceChatModelCallOptions
+      > {
     const schema: InteropZodType<RunOutput> | Record<string, any> = outputSchema;
     const name = config?.name;
     const description =
