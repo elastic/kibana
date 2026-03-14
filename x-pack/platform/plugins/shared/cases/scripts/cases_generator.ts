@@ -131,7 +131,10 @@ function weightedOwnerPick(owners: string[], distribution: Record<string, number
 function parseOwnerDistribution(str: string): Record<string, number> | null {
   if (!str) return null;
   const result: Record<string, number> = {};
-  for (const pair of str.split(',').map((s) => s.trim()).filter(Boolean)) {
+  for (const pair of str
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)) {
     const colonIdx = pair.lastIndexOf(':');
     if (colonIdx > 0) {
       const owner = pair.slice(0, colonIdx).trim();
@@ -864,7 +867,9 @@ async function enableAnalyticsForOwner({
     }
   } catch (err) {
     logger.error(
-      `  Failed to enable analytics for owner "${owner}" in space "${spaceLabel}": ${formatRequestError(err)}`
+      `  Failed to enable analytics for owner "${owner}" in space "${spaceLabel}": ${formatRequestError(
+        err
+      )}`
     );
   }
 }
@@ -1186,11 +1191,7 @@ async function interactiveMode(): Promise<GeneratorConfig> {
     .map((o) => o.trim())
     .filter(Boolean);
 
-  const configureDistStr = await prompt(
-    rl,
-    'Configure owner distribution percentages? (y/n)',
-    'n'
-  );
+  const configureDistStr = await prompt(rl, 'Configure owner distribution percentages? (y/n)', 'n');
   let ownerDistribution: Record<string, number> | null = null;
   if (configureDistStr.toLowerCase() === 'y') {
     ownerDistribution = {};
@@ -1479,10 +1480,7 @@ async function main() {
         templates: autoTemplates,
         templateOwners: (argv.templateOwners as string[] | undefined) ?? cliOwners,
         templateSpace: argv.templateSpace ?? argv.space,
-        spaces:
-          numSpaces > 0
-            ? { namePattern: argv.spaceNamePattern, count: numSpaces }
-            : null,
+        spaces: numSpaces > 0 ? { namePattern: argv.spaceNamePattern, count: numSpaces } : null,
         ownerDistribution: parseOwnerDistribution(argv.ownerDistribution ?? ''),
         analyticsOwners: (argv.analyticsOwners as string[] | undefined)?.length
           ? (argv.analyticsOwners as string[])

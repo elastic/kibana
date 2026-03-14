@@ -14,10 +14,7 @@ import type { CancellableTask } from '@kbn/task-manager-plugin/server/task';
 import type { ConfigType } from '../../../config';
 import { getSpacesWithAnalyticsEnabled } from '../../utils';
 import type { OwnerSpacePair } from '../../utils';
-import {
-  createCasesAnalyticsIndexesForOwnerAndSpace,
-  getIndicesForOwnerAndSpace,
-} from '../..';
+import { createCasesAnalyticsIndexesForOwnerAndSpace, getIndicesForOwnerAndSpace } from '../..';
 import { scheduleOwnerSyncTasks } from '../owner_sync_task';
 import { getSynchronizationTaskId } from '../synchronization_task';
 import type { Owner } from '../../../../common/constants/types';
@@ -139,9 +136,7 @@ export class SchedulerTaskRunner implements CancellableTask {
     const removals = spaces.map(({ spaceId, owner }) => {
       const taskId = getSynchronizationTaskId(spaceId, owner as Owner);
       return taskManager.removeIfExists(taskId).catch((err: Error) => {
-        this.logger.warn(
-          `[scheduler-task] Failed to remove legacy task ${taskId}: ${err.message}`
-        );
+        this.logger.warn(`[scheduler-task] Failed to remove legacy task ${taskId}: ${err.message}`);
       });
     });
 

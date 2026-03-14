@@ -29,7 +29,9 @@ export default ({ getService }: FtrProviderContext): void => {
       // getSpacesWithAnalyticsEnabled includes it (it filters by OWNERS).
       await createConfiguration(
         supertestService,
-        getConfigurationRequest({ overrides: { analytics_enabled: true, owner: SECURITY_SOLUTION_OWNER } })
+        getConfigurationRequest({
+          overrides: { analytics_enabled: true, owner: SECURITY_SOLUTION_OWNER },
+        })
       );
 
       await supertestService

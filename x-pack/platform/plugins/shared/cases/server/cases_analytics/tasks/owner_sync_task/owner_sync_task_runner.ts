@@ -77,7 +77,11 @@ import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import type { Owner } from '../../../../common/constants/types';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../../common/constants';
 import type { ConfigType } from '../../../config';
-import { type CAISyncType, CAISyncTypes, SYNCHRONIZATION_QUERIES_DICTIONARY } from '../../constants';
+import {
+  type CAISyncType,
+  CAISyncTypes,
+  SYNCHRONIZATION_QUERIES_DICTIONARY,
+} from '../../constants';
 import { destinationIndexBySyncType, sourceIndexBySyncType } from '../../constants';
 import { getSpacesWithAnalyticsEnabled } from '../../utils';
 import { getIndicesForOwnerAndSpace } from '../..';
@@ -237,11 +241,7 @@ export class OwnerSyncTaskRunner implements CancellableTask {
       this.logDebug(`In-flight reindex tasks: ${ongoingCount} running.`);
 
       // ── Phase 4: msearch — detect new source docs per (space, syncType) ───
-      const spaceHasNewDocs = await this.batchCheckForNewDocs(
-        esClient,
-        runableSpaces,
-        spaceStates
-      );
+      const spaceHasNewDocs = await this.batchCheckForNewDocs(esClient, runableSpaces, spaceStates);
 
       // ── Phase 5: Fan-out — start new reindexes / update idle counters ─────
       const concurrencyCap = this.analyticsConfig.index.reindexConcurrency;
@@ -326,15 +326,15 @@ export class OwnerSyncTaskRunner implements CancellableTask {
     } catch (e) {
       if (isRetryableEsClientError(e)) {
         throwRetryableError(
-          createTaskRunError(new Error(this.buildErrorMessage(e.message)), TaskErrorSource.FRAMEWORK),
+          createTaskRunError(
+            new Error(this.buildErrorMessage(e.message)),
+            TaskErrorSource.FRAMEWORK
+          ),
           true
         );
       }
       throwUnrecoverableError(
-        createTaskRunError(
-          new Error(this.buildErrorMessage(e.message)),
-          TaskErrorSource.FRAMEWORK
-        )
+        createTaskRunError(new Error(this.buildErrorMessage(e.message)), TaskErrorSource.FRAMEWORK)
       );
       // unreachable — throwUnrecoverableError always throws
       return undefined;
@@ -432,7 +432,9 @@ export class OwnerSyncTaskRunner implements CancellableTask {
 
       if ('error' in resp) {
         this.logger.warn(
-          `[owner-sync-task][${this.owner}][${spaceId}] msearch error: ${JSON.stringify(resp.error)}`
+          `[owner-sync-task][${this.owner}][${spaceId}] msearch error: ${JSON.stringify(
+            resp.error
+          )}`
         );
         // Err on the side of triggering a sync when uncertain
         result[spaceId] = true;
