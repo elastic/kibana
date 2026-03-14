@@ -4,20 +4,22 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-chrome-layout'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-chrome-layout'
+  title: '@kbn/core-chrome-layout'
   description: Moon project for @kbn/core-chrome-layout
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/core/packages/chrome/layout/core-chrome-layout
+  sourceRoot: src/core/packages/chrome/layout/core-chrome-layout
 dependsOn:
+  - '@kbn/core-http-browser-internal'
+  - '@kbn/core-doc-links-browser'
+  - '@kbn/core-custom-branding-browser'
   - '@kbn/core-application-common'
   - '@kbn/core-application-browser-internal'
   - '@kbn/core-chrome-browser-internal'
@@ -25,6 +27,7 @@ dependsOn:
   - '@kbn/core-chrome-layout-components'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/core-chrome-browser-components'
+  - '@kbn/core-chrome-browser-hooks'
 tags:
   - shared-browser
   - package
@@ -39,14 +42,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
