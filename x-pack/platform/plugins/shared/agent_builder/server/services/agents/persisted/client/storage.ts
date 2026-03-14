@@ -62,6 +62,7 @@ export interface AgentProperties {
 export interface AgentConfigurationProperties {
   instructions?: string;
   tools: ToolSelection[];
+  skill_ids?: string[];
   workflow_ids?: string[];
 }
 

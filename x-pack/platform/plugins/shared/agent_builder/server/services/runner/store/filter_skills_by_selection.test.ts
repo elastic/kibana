@@ -24,11 +24,11 @@ const createMockSkill = (
 });
 
 describe('filterSkillsBySelection', () => {
-  const builtinA = createMockSkill('skill-a', { readonly: true });
-  const builtinB = createMockSkill('skill-b', { readonly: true });
-  const builtinC = createMockSkill('skill-c', { readonly: true });
+  const skillA = createMockSkill('skill-a');
+  const skillB = createMockSkill('skill-b');
+  const skillC = createMockSkill('skill-c');
   const userSkill = createMockSkill('user-skill-1', { readonly: false });
-  const allSkills = [builtinA, builtinB, builtinC, userSkill];
+  const allSkills = [skillA, skillB, skillC, userSkill];
 
   it('should return all skills when selection is undefined (backward compat)', () => {
     const result = filterSkillsBySelection(allSkills, undefined);
@@ -40,43 +40,28 @@ describe('filterSkillsBySelection', () => {
     expect(result).toEqual([]);
   });
 
-  it('should return only built-in skills when wildcard is present', () => {
-    const result = filterSkillsBySelection(allSkills, [{ skill_ids: ['*'] }]);
-    expect(result).toEqual([builtinA, builtinB, builtinC]);
-  });
-
-  it('should return built-in skills + explicit user skills when wildcard and explicit IDs are combined', () => {
-    const result = filterSkillsBySelection(allSkills, [{ skill_ids: ['*', 'user-skill-1'] }]);
-    expect(result).toEqual(allSkills);
-  });
-
   it('should return only explicitly selected skills', () => {
-    const result = filterSkillsBySelection(allSkills, [{ skill_ids: ['skill-a', 'skill-c'] }]);
-    expect(result).toEqual([builtinA, builtinC]);
-  });
-
-  it('should handle selection across multiple entries', () => {
-    const result = filterSkillsBySelection(allSkills, [
-      { skill_ids: ['skill-a'] },
-      { skill_ids: ['skill-b'] },
-    ]);
-    expect(result).toEqual([builtinA, builtinB]);
+    const result = filterSkillsBySelection(allSkills, ['skill-a', 'skill-c']);
+    expect(result).toEqual([skillA, skillC]);
   });
 
   it('should ignore non-existent skill IDs', () => {
-    const result = filterSkillsBySelection(allSkills, [{ skill_ids: ['skill-a', 'non-existent'] }]);
-    expect(result).toEqual([builtinA]);
+    const result = filterSkillsBySelection(allSkills, ['skill-a', 'non-existent']);
+    expect(result).toEqual([skillA]);
   });
 
-  it('should return empty when no explicit IDs match', () => {
-    const result = filterSkillsBySelection(allSkills, [
-      { skill_ids: ['non-existent-1', 'non-existent-2'] },
-    ]);
+  it('should return empty when no IDs match', () => {
+    const result = filterSkillsBySelection(allSkills, ['non-existent-1', 'non-existent-2']);
     expect(result).toEqual([]);
   });
 
-  it('should include user skills when explicitly selected without wildcard', () => {
-    const result = filterSkillsBySelection(allSkills, [{ skill_ids: ['user-skill-1'] }]);
+  it('should include user skills when explicitly selected', () => {
+    const result = filterSkillsBySelection(allSkills, ['user-skill-1']);
     expect(result).toEqual([userSkill]);
+  });
+
+  it('should return all matching skills across builtin and user types', () => {
+    const result = filterSkillsBySelection(allSkills, ['skill-a', 'skill-b', 'user-skill-1']);
+    expect(result).toEqual([skillA, skillB, userSkill]);
   });
 });
