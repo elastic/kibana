@@ -103,12 +103,7 @@ export const changeDataView: InternalStateThunkActionCreator<
       dispatch(
         internalStateActions.setResetDefaultProfileState({
           tabId,
-          resetDefaultProfileState: {
-            columns: true,
-            rowHeight: true,
-            breakdownField: true,
-            hideChart: true,
-          },
+          resetDefaultProfileState: 'all',
         })
       );
 
@@ -125,7 +120,13 @@ export const changeDataView: InternalStateThunkActionCreator<
         currentAppState.query
       );
 
-      dispatch(internalStateActions.updateAppState({ tabId, appState: nextAppState }));
+      dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: nextAppState,
+          isSystemTriggered: true,
+        })
+      );
 
       const currentTab = selectTab(currentState, tabId);
       if (currentTab.expandedDoc) {

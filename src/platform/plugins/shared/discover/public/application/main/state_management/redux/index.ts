@@ -18,6 +18,9 @@ export {
   type DiscoverAppState,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
+  type DefaultProfileStateField,
+  type ResetDefaultProfileStateFields,
+  type ResetDefaultProfileState,
   TabInitializationStatus,
 } from './types';
 
@@ -26,7 +29,13 @@ export { DEFAULT_TAB_STATE } from './constants';
 export { type InternalStateStore, createInternalStateStore } from './internal_state';
 
 export const internalStateActions = {
-  ...omit(internalStateSlice.actions, 'setTabs', 'setDefaultProfileAdHocDataViewIds'),
+  ...omit(
+    internalStateSlice.actions,
+    'setTabs',
+    'setDefaultProfileAdHocDataViewIds',
+    'setAppState',
+    'syncPreviousStateSnapshots'
+  ),
   ...actions,
   syncLocallyPersistedTabState,
 };

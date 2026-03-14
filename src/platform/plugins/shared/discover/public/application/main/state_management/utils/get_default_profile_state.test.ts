@@ -31,10 +31,8 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: true,
-          hideChart: false,
+          fields: ['breakdownField'],
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -45,10 +43,8 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: true,
-          hideChart: false,
+          fields: ['breakdownField'],
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -60,10 +56,8 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: true,
+          fields: ['hideChart'],
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -74,10 +68,8 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
+          fields: 'none',
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -91,10 +83,8 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: true,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
+          fields: ['columns'],
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -118,10 +108,8 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: true,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
+          fields: ['columns'],
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: emptyDataView,
       }).getPostFetchState({
@@ -148,10 +136,8 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: false,
-          rowHeight: true,
-          breakdownField: false,
-          hideChart: false,
+          fields: ['rowHeight'],
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -168,10 +154,8 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
+          fields: 'none',
+          previousStateSnapshotsByProfileId: {},
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({

@@ -37,10 +37,8 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   esqlVariables: [],
   resetDefaultProfileState: {
     resetId: '',
-    columns: false,
-    rowHeight: false,
-    breakdownField: false,
-    hideChart: false,
+    fields: 'none',
+    previousStateSnapshotsByProfileId: {},
   },
   expandedDoc: undefined,
   uiState: {},

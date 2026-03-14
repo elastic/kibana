@@ -8,7 +8,7 @@
  */
 
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { internalStateActions, selectTab } from '..';
+import { internalStateActions, selectTab, selectTabRuntimeState } from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
@@ -48,6 +48,78 @@ const setup = async () => {
 };
 
 describe('tab_state actions', () => {
+  describe('setAppState', () => {
+    it('should sync previousStateSnapshotsByProfileId for the current profile', async () => {
+      const { internalState, runtimeStateManager, tabId } = await setup();
+      const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
+        .scopedProfilesManager$.getValue()
+        .getContexts().dataSourceContext.profileId;
+
+      internalState.dispatch(
+        internalStateActions.setAppState({
+          tabId,
+          appState: {
+            query: { language: 'kuery', query: 'response:200' },
+            columns: ['message'],
+            rowHeight: 3,
+            breakdownField: 'extension',
+            hideChart: true,
+          },
+        })
+      );
+
+      expect(
+        selectTab(internalState.getState(), tabId).resetDefaultProfileState
+          .previousStateSnapshotsByProfileId
+      ).toEqual(
+        expect.objectContaining({
+          [profileId]: {
+            columns: ['message'],
+            rowHeight: 3,
+            breakdownField: 'extension',
+            hideChart: true,
+          },
+        })
+      );
+    });
+  });
+
+  describe('syncPreviousStateSnapshots', () => {
+    it('should sync previousStateSnapshotsByProfileId for the current profile when triggered separately', async () => {
+      const { internalState, tabId } = await setup();
+
+      internalState.dispatch(
+        internalStateActions.setAppState({
+          tabId,
+          appState: {
+            columns: ['message'],
+            hideChart: true,
+          },
+          isSystemTriggered: true,
+        })
+      );
+
+      expect(
+        Object.values(
+          selectTab(internalState.getState(), tabId).resetDefaultProfileState
+            .previousStateSnapshotsByProfileId
+        )
+      ).toContainEqual({});
+
+      internalState.dispatch(internalStateActions.syncPreviousStateSnapshots({ tabId }));
+
+      expect(
+        Object.values(
+          selectTab(internalState.getState(), tabId).resetDefaultProfileState
+            .previousStateSnapshotsByProfileId
+        )
+      ).toContainEqual({
+        columns: ['message'],
+        hideChart: true,
+      });
+    });
+  });
+
   describe('transitionFromESQLToDataView', () => {
     it('should transition from ES|QL mode to Data View mode', async () => {
       const { internalState, tabId } = await setup();
@@ -62,13 +134,12 @@ describe('tab_state actions', () => {
         type: DataSourceType.Esql,
       });
 
-      expect(prevResetDefaultProfileState).toEqual({
-        resetId: expect.any(String),
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      });
+      expect(prevResetDefaultProfileState).toEqual(
+        expect.objectContaining({
+          resetId: expect.any(String),
+          fields: 'none',
+        })
+      );
 
       // Transition to data view mode
       internalState.dispatch(
@@ -93,13 +164,12 @@ describe('tab_state actions', () => {
         dataViewId,
       });
 
-      expect(tab.resetDefaultProfileState).toEqual({
-        resetId: expect.any(String),
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
-        hideChart: true,
-      });
+      expect(tab.resetDefaultProfileState).toEqual(
+        expect.objectContaining({
+          resetId: expect.any(String),
+          fields: 'all',
+        })
+      );
       expect(tab.resetDefaultProfileState.resetId).not.toEqual(
         prevResetDefaultProfileState.resetId
       );
@@ -153,13 +223,12 @@ describe('tab_state actions', () => {
         dataViewId: 'the-data-view-id',
       });
 
-      expect(prevResetDefaultProfileState).toEqual({
-        resetId: expect.any(String),
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      });
+      expect(prevResetDefaultProfileState).toEqual(
+        expect.objectContaining({
+          resetId: expect.any(String),
+          fields: 'none',
+        })
+      );
 
       // Transition to ES|QL mode
       internalState.dispatch(
@@ -184,13 +253,12 @@ describe('tab_state actions', () => {
         type: DataSourceType.Esql,
       });
 
-      expect(tab.resetDefaultProfileState).toEqual({
-        resetId: expect.any(String),
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
-        hideChart: true,
-      });
+      expect(tab.resetDefaultProfileState).toEqual(
+        expect.objectContaining({
+          resetId: expect.any(String),
+          fields: 'all',
+        })
+      );
       expect(tab.resetDefaultProfileState.resetId).not.toEqual(
         prevResetDefaultProfileState.resetId
       );

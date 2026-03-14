@@ -178,6 +178,164 @@ describe('test getDataStateContainer', () => {
   });
 
   describe('default profile state', () => {
+    it('should populate previousStateSnapshotsByProfileId when the data source profile changes', async () => {
+      const toolkit = getDiscoverInternalStateMock();
+
+      await toolkit.initializeTabs();
+      await toolkit.initializeSingleTab({
+        tabId: toolkit.getCurrentTab().id,
+        skipWaitForDataFetching: true,
+      });
+
+      const fetchDocumentsDeferred = Promise.withResolvers<{ records: never[] }>();
+
+      mockFetchDocuments.mockImplementation(() => fetchDocumentsDeferred.promise);
+
+      const { scopedProfilesManager$ } = selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        toolkit.getCurrentTab().id
+      );
+      const previousProfileId = scopedProfilesManager$.getValue().getContexts()
+        .dataSourceContext.profileId;
+
+      jest
+        .spyOn(scopedProfilesManager$.getValue(), 'resolveDataSourceProfile')
+        .mockResolvedValue({ didProfileChange: true });
+
+      toolkit.internalState.dispatch(
+        internalStateActions.assignNextDataView({
+          tabId: toolkit.getCurrentTab().id,
+          dataView: dataViewMock,
+        })
+      );
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: {
+            columns: ['custom_column'],
+            rowHeight: 5,
+            breakdownField: 'extension',
+            hideChart: true,
+          },
+        })
+      );
+      toolkit.internalState.dispatch(
+        internalStateActions.setResetDefaultProfileState({
+          tabId: toolkit.getCurrentTab().id,
+          resetDefaultProfileState: ['columns', 'rowHeight'],
+        })
+      );
+
+      await waitFor(() => {
+        expect(omit(toolkit.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+          fields: ['columns', 'rowHeight'],
+          previousStateSnapshotsByProfileId: {
+            [previousProfileId]: {
+              columns: ['custom_column'],
+              rowHeight: 5,
+              breakdownField: 'extension',
+              hideChart: true,
+            },
+          },
+        });
+      });
+
+      fetchDocumentsDeferred.resolve({ records: [] });
+    });
+
+    it('should apply previous state for the incoming profile when the data source profile changes', async () => {
+      const toolkit = getDiscoverInternalStateMock();
+
+      await toolkit.initializeTabs();
+      await toolkit.initializeSingleTab({
+        tabId: toolkit.getCurrentTab().id,
+        skipWaitForDataFetching: true,
+      });
+
+      const fetchDocumentsDeferred = Promise.withResolvers<{ records: never[] }>();
+
+      mockFetchDocuments.mockImplementation(() => fetchDocumentsDeferred.promise);
+
+      const { scopedProfilesManager$ } = selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        toolkit.getCurrentTab().id
+      );
+      const scopedProfilesManager = scopedProfilesManager$.getValue();
+      const initialContexts = scopedProfilesManager.getContexts();
+      const incomingProfileId = 'incoming-profile-id';
+      const getContextsSpy = jest.spyOn(scopedProfilesManager, 'getContexts');
+
+      jest
+        .spyOn(scopedProfilesManager, 'resolveDataSourceProfile')
+        .mockResolvedValue({ didProfileChange: true });
+
+      toolkit.internalState.dispatch(
+        internalStateActions.assignNextDataView({
+          tabId: toolkit.getCurrentTab().id,
+          dataView: dataViewMock,
+        })
+      );
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: {
+            columns: ['custom_column'],
+            rowHeight: 5,
+          },
+        })
+      );
+      toolkit.internalState.dispatch(
+        internalStateActions.setResetDefaultProfileState({
+          tabId: toolkit.getCurrentTab().id,
+          resetDefaultProfileState: ['columns', 'rowHeight'],
+        })
+      );
+      getContextsSpy.mockReturnValue({
+        ...initialContexts,
+        dataSourceContext: {
+          ...initialContexts.dataSourceContext,
+          profileId: incomingProfileId,
+        },
+      });
+      toolkit.internalState.dispatch(
+        internalStateActions.setAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: {
+            ...toolkit.getCurrentTab().appState,
+            columns: ['restored_column'],
+            rowHeight: 2,
+          },
+        })
+      );
+
+      getContextsSpy.mockReturnValue(initialContexts);
+      toolkit.internalState.dispatch(
+        internalStateActions.setAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: {
+            ...toolkit.getCurrentTab().appState,
+            columns: ['custom_column'],
+            rowHeight: 5,
+          },
+        })
+      );
+
+      getContextsSpy.mockReturnValueOnce(initialContexts).mockReturnValue({
+        ...initialContexts,
+        dataSourceContext: {
+          ...initialContexts.dataSourceContext,
+          profileId: incomingProfileId,
+        },
+      });
+
+      await waitFor(() => {
+        expect(toolkit.getCurrentTab().appState.columns).toEqual(['restored_column']);
+        expect(toolkit.getCurrentTab().appState.rowHeight).toBe(2);
+      });
+
+      fetchDocumentsDeferred.resolve({ records: [] });
+    });
+
     it('should update app state from default profile state', async () => {
       mockFetchDocuments.mockResolvedValue({ records: [] });
       const stateContainer = getDiscoverStateMock({ isTimeBased: true });
@@ -199,12 +357,7 @@ describe('test getDataStateContainer', () => {
       );
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-          resetDefaultProfileState: {
-            columns: true,
-            rowHeight: true,
-            breakdownField: true,
-            hideChart: false,
-          },
+          resetDefaultProfileState: ['columns', 'rowHeight', 'breakdownField'],
         })
       );
 
@@ -217,12 +370,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      });
+      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual('none');
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
       dataUnsub();
@@ -251,12 +399,7 @@ describe('test getDataStateContainer', () => {
       );
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-          resetDefaultProfileState: {
-            columns: false,
-            rowHeight: false,
-            breakdownField: false,
-            hideChart: false,
-          },
+          resetDefaultProfileState: 'none',
         })
       );
       dataState.data$.totalHits$.next({
@@ -267,12 +410,7 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      });
+      expect(stateContainer.getCurrentTab().resetDefaultProfileState.fields).toEqual('none');
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();
       dataUnsub();

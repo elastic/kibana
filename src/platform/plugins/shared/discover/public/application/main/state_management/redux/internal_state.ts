@@ -9,7 +9,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { throttle } from 'lodash';
+import { isEqual, throttle } from 'lodash';
 import { from, type Observable } from 'rxjs';
 import {
   type PayloadAction,
@@ -38,8 +38,11 @@ import {
   selectTabRuntimeState,
 } from './runtime_state';
 import {
+  DEFAULT_PROFILE_STATE_FIELDS,
   TabsBarVisibility,
+  type DefaultProfileStateField,
   type DiscoverInternalState,
+  type PreviousStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
   TabInitializationStatus,
@@ -91,6 +94,34 @@ const withTab = <TPayload extends TabActionPayload>(
   if (tab) {
     fn(tab);
   }
+};
+
+const setPreviousStateSnapshotField = <TField extends DefaultProfileStateField>(
+  snapshot: PreviousStateSnapshot,
+  field: TField,
+  value: TabState['appState'][TField]
+) => {
+  snapshot[field] = value;
+};
+
+const syncPreviousStateSnapshots = (
+  tab: TabState,
+  profileId: string,
+  compareWithPreviousAppState: boolean
+) => {
+  const previousStateSnapshots = tab.resetDefaultProfileState.previousStateSnapshotsByProfileId;
+  const previousStateSnapshot = previousStateSnapshots[profileId] ?? {};
+
+  for (const field of DEFAULT_PROFILE_STATE_FIELDS) {
+    if (
+      !compareWithPreviousAppState ||
+      !isEqual(tab.previousAppState[field], tab.appState[field])
+    ) {
+      setPreviousStateSnapshotField(previousStateSnapshot, field, tab.appState[field]);
+    }
+  }
+
+  previousStateSnapshots[profileId] = previousStateSnapshot;
 };
 
 export const internalStateSlice = createSlice({
@@ -235,7 +266,12 @@ export const internalStateSlice = createSlice({
     /**
      * Set the tab app state, overwriting existing state and pushing to URL history
      */
-    setAppState: (state, action: TabAction<Pick<TabState, 'appState'>>) =>
+    setAppState: (
+      state,
+      action: TabAction<
+        Pick<TabState, 'appState'> & { profileId: string; isSystemTriggered?: boolean }
+      >
+    ) =>
       withTab(state, action.payload, (tab) => {
         let appState = action.payload.appState;
 
@@ -246,6 +282,15 @@ export const internalStateSlice = createSlice({
 
         tab.previousAppState = tab.appState;
         tab.appState = appState;
+
+        if (!action.payload.isSystemTriggered) {
+          syncPreviousStateSnapshots(tab, action.payload.profileId, true);
+        }
+      }),
+
+    syncPreviousStateSnapshots: (state, action: TabAction<{ profileId: string }>) =>
+      withTab(state, action.payload, (tab) => {
+        syncPreviousStateSnapshots(tab, action.payload.profileId, false);
       }),
 
     /**
@@ -305,20 +350,31 @@ export const internalStateSlice = createSlice({
     setResetDefaultProfileState: {
       prepare: (
         payload: TabActionPayload<{
-          resetDefaultProfileState: Omit<TabState['resetDefaultProfileState'], 'resetId'>;
+          resetDefaultProfileState: TabState['resetDefaultProfileState']['fields'];
         }>
       ) => ({
         payload: {
           ...payload,
           resetDefaultProfileState: {
-            ...payload.resetDefaultProfileState,
+            fields: payload.resetDefaultProfileState,
             resetId: uuidv4(),
           },
         },
       }),
-      reducer: (state, action: TabAction<Pick<TabState, 'resetDefaultProfileState'>>) =>
+      reducer: (
+        state,
+        action: TabAction<{
+          resetDefaultProfileState: Pick<
+            TabState['resetDefaultProfileState'],
+            'fields' | 'resetId'
+          >;
+        }>
+      ) =>
         withTab(state, action.payload, (tab) => {
-          tab.resetDefaultProfileState = action.payload.resetDefaultProfileState;
+          tab.resetDefaultProfileState = {
+            ...tab.resetDefaultProfileState,
+            ...action.payload.resetDefaultProfileState,
+          };
         }),
     },
 

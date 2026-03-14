@@ -40,7 +40,9 @@ import type {
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
 
-type AppStatePayload = TabActionPayload<Pick<TabState, 'appState'>>;
+type AppStatePayload = TabActionPayload<
+  Pick<TabState, 'appState'> & { isSystemTriggered?: boolean }
+>;
 
 const mergeAppState = (
   currentState: DiscoverInternalState,
@@ -51,6 +53,31 @@ const mergeAppState = (
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
+const getCurrentProfileId = (
+  runtimeStateManager: Parameters<typeof selectTabRuntimeState>[0],
+  tabId: string
+) => {
+  return selectTabRuntimeState(runtimeStateManager, tabId)
+    .scopedProfilesManager$.getValue()
+    .getContexts().dataSourceContext.profileId;
+};
+
+export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
+  function setAppStateThunkFn(dispatch, _, { runtimeStateManager }) {
+    const profileId = getCurrentProfileId(runtimeStateManager, payload.tabId);
+
+    dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
+  };
+
+export const syncPreviousStateSnapshots: InternalStateThunkActionCreator<[TabActionPayload]> = (
+  payload
+) =>
+  function syncPreviousStateSnapshotsThunkFn(dispatch, _, { runtimeStateManager }) {
+    const profileId = getCurrentProfileId(runtimeStateManager, payload.tabId);
+
+    dispatch(internalStateSlice.actions.syncPreviousStateSnapshots({ ...payload, profileId }));
+  };
+
 /**
  * Partially update the tab app state, merging with existing state and pushing to URL history
  */
@@ -59,9 +86,7 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
     const { mergedAppState, hasStateChanges } = mergeAppState(getState(), payload);
 
     if (hasStateChanges) {
-      dispatch(
-        internalStateSlice.actions.setAppState({ tabId: payload.tabId, appState: mergedAppState })
-      );
+      dispatch(setAppState({ ...payload, appState: mergedAppState }));
     }
   };
 
@@ -196,12 +221,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
     dispatch(
       internalStateSlice.actions.setResetDefaultProfileState({
         tabId,
-        resetDefaultProfileState: {
-          columns: true,
-          rowHeight: true,
-          breakdownField: true,
-          hideChart: true,
-        },
+        resetDefaultProfileState: 'all',
       })
     );
 
@@ -248,12 +268,7 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     dispatch(
       internalStateSlice.actions.setResetDefaultProfileState({
         tabId,
-        resetDefaultProfileState: {
-          columns: true,
-          rowHeight: true,
-          breakdownField: true,
-          hideChart: true,
-        },
+        resetDefaultProfileState: 'all',
       })
     );
 

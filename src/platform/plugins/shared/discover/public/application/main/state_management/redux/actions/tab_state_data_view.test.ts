@@ -126,6 +126,7 @@ describe('tab_state_data_view actions', () => {
       await promise;
       expect(updateAppStateSpy).toHaveBeenCalledWith({
         tabId: params.getCurrentTab().id,
+        isSystemTriggered: true,
         appState: {
           columns: ['default_column'], // default_column would be added as dataViewWithDefaultColumn has it as a mapped field
           dataSource: createDataViewDataSource({
@@ -135,6 +136,24 @@ describe('tab_state_data_view actions', () => {
         },
       });
       expect(params.getCurrentTab().isDataViewLoading).toBe(false);
+    });
+
+    it('should mark data view switch app state updates as system triggered', async () => {
+      const params = setupTestParams(dataViewComplexMock);
+      const updateAppStateSpy = jest.spyOn(internalStateActions, 'updateAppState').mockClear();
+
+      await params.internalState.dispatch(
+        params.injectCurrentTab(internalStateActions.changeDataView)({
+          dataViewOrDataViewId: dataViewComplexMock.id!,
+        })
+      );
+
+      expect(updateAppStateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tabId: params.getCurrentTab().id,
+          isSystemTriggered: true,
+        })
+      );
     });
 
     it('should set the right app state when a valid data view to switch to is given', async () => {
@@ -149,6 +168,7 @@ describe('tab_state_data_view actions', () => {
       await promise;
       expect(updateAppStateSpy).toHaveBeenCalledWith({
         tabId: params.getCurrentTab().id,
+        isSystemTriggered: true,
         appState: {
           columns: [], // default_column would not be added as dataViewComplexMock does not have it as a mapped field
           dataSource: createDataViewDataSource({
@@ -178,10 +198,7 @@ describe('tab_state_data_view actions', () => {
       const params = setupTestParams(dataViewComplexMock);
       expect(params.getCurrentTab().resetDefaultProfileState).toEqual(
         expect.objectContaining({
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
+          fields: 'none',
         })
       );
       await params.internalState.dispatch(
@@ -191,10 +208,7 @@ describe('tab_state_data_view actions', () => {
       );
       expect(params.getCurrentTab().resetDefaultProfileState).toEqual(
         expect.objectContaining({
-          columns: true,
-          rowHeight: true,
-          breakdownField: true,
-          hideChart: true,
+          fields: 'all',
         })
       );
     });

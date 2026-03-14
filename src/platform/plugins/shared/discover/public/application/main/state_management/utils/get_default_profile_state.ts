@@ -10,7 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { uniqBy } from 'lodash';
-import type { DiscoverAppState } from '../redux';
+import type { DiscoverAppState, DefaultProfileStateField } from '../redux';
 import type { DefaultAppStateColumn, ScopedProfilesManager } from '../../../../context_awareness';
 import { getMergedAccessor } from '../../../../context_awareness';
 import type { DataDocumentsMsg } from '../discover_data_state_container';
@@ -37,14 +37,17 @@ export const getDefaultProfileState = ({
       const stateUpdate: DiscoverAppState = {};
 
       if (
-        resetDefaultProfileState.breakdownField &&
+        shouldResetDefaultProfileField(resetDefaultProfileState, 'breakdownField') &&
         defaultState.breakdownField !== undefined &&
         dataView.fields.getByName(defaultState.breakdownField)
       ) {
         stateUpdate.breakdownField = defaultState.breakdownField;
       }
 
-      if (resetDefaultProfileState.hideChart && defaultState.hideChart !== undefined) {
+      if (
+        shouldResetDefaultProfileField(resetDefaultProfileState, 'hideChart') &&
+        defaultState.hideChart !== undefined
+      ) {
         stateUpdate.hideChart = defaultState.hideChart;
       }
 
@@ -65,7 +68,7 @@ export const getDefaultProfileState = ({
     }) => {
       const stateUpdate: DiscoverAppState = {};
 
-      if (resetDefaultProfileState.columns) {
+      if (shouldResetDefaultProfileField(resetDefaultProfileState, 'columns')) {
         const mappedDefaultColumns = defaultColumns.map((name) => ({ name }));
         const isValidColumn = getIsValidColumn(dataView, esqlQueryColumns);
         const validColumns = uniqBy(
@@ -89,7 +92,10 @@ export const getDefaultProfileState = ({
         }
       }
 
-      if (resetDefaultProfileState.rowHeight && defaultState.rowHeight !== undefined) {
+      if (
+        shouldResetDefaultProfileField(resetDefaultProfileState, 'rowHeight') &&
+        defaultState.rowHeight !== undefined
+      ) {
         stateUpdate.rowHeight = defaultState.rowHeight;
       }
 
@@ -107,6 +113,13 @@ const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView:
 
   return getDefaultAppState({ dataView });
 };
+
+const shouldResetDefaultProfileField = (
+  resetDefaultProfileState: TabState['resetDefaultProfileState'],
+  field: DefaultProfileStateField
+) =>
+  resetDefaultProfileState.fields === 'all' ||
+  (resetDefaultProfileState.fields !== 'none' && resetDefaultProfileState.fields.includes(field));
 
 const getIsValidColumn =
   (dataView: DataView, esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns']) =>
