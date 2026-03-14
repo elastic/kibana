@@ -16,6 +16,12 @@ import {
 } from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
 
+// Caches the in-flight or resolved TIMEFIELD_ROUTE promise by query.
+// Storing the Promise (not the resolved value) deduplicates concurrent calls:
+// if multiple callers request the same query before the first resolves,
+// they all await the same promise instead of each firing a separate HTTP request.
+const timeFieldCache = new Map<string, Promise<string | undefined>>();
+
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
   if (crypto.subtle) {
@@ -49,7 +55,8 @@ async function sha256(str: string) {
  * @param options.allowNoIndex - Whether to allow creating a DataView for non-existent indices
  * @param options.skipFetchFields - Whether to skip fetching fields for performance reasons
  * @param options.createNewInstanceEvenIfCachedOneAvailable - Forces creation of a new instance, clearing any cached DataView
- * @param options.idPrefix - Custom prefix for the DataView ID (defaults to 'esql'). Use a different prefix to avoid cache collisions between consumers.
+ * @param options.id - Explicit DataView ID. When provided, this ID is used as-is instead of generating one via SHA-256. Useful when the caller already knows the ID (e.g. from a persisted ad-hoc DataView spec) and wants the DataViewService cache to be populated under that exact key.
+ * @param options.idPrefix - Custom prefix for the DataView ID (defaults to 'esql'). Ignored when `options.id` is provided. Use a different prefix to avoid cache collisions between consumers.
  * @param http - Optional HTTP service for fetching time field information. If not provided, no time field detection is performed
  *
  * @returns Promise that resolves to the created DataView with the detected time field (if any)
@@ -69,25 +76,38 @@ export async function getESQLAdHocDataview({
     allowNoIndex?: boolean;
     createNewInstanceEvenIfCachedOneAvailable?: boolean;
     skipFetchFields?: boolean;
+    id?: string;
     idPrefix?: string;
   };
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  const encodedQuery = encodeURIComponent(query);
-  const response = (await http?.get(`${TIMEFIELD_ROUTE}${encodedQuery}`).catch((error) => {
-    // eslint-disable-next-line no-console
-    console.error('Failed to fetch the timefield', error);
-    return undefined;
-  })) as { timeField?: string } | undefined;
-  const timeField = response?.timeField;
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const prefix = options?.idPrefix ?? 'esql';
-  const dataViewId = await sha256(`${prefix}-${indexPattern}`);
+  const dataViewId = options?.id ?? (await sha256(`${prefix}-${indexPattern}`));
 
   if (options?.createNewInstanceEvenIfCachedOneAvailable) {
     // overwise it might return a cached data view with a different time field
     dataViewsService.clearInstanceCache(dataViewId);
+    timeFieldCache.delete(query);
+  }
+
+  let timeFieldName: string | undefined;
+  if (timeFieldCache.has(query)) {
+    timeFieldName = await timeFieldCache.get(query);
+  } else if (http) {
+    const encodedQuery = encodeURIComponent(query);
+    const pendingRequest = http
+      .get(`${TIMEFIELD_ROUTE}${encodedQuery}`)
+      .then((response) => (response as { timeField?: string } | undefined)?.timeField)
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch the timefield', error);
+        timeFieldCache.delete(query);
+        return undefined;
+      });
+    timeFieldCache.set(query, pendingRequest);
+    timeFieldName = await pendingRequest;
   }
   const skipFetchFields = options?.skipFetchFields ?? false;
 
@@ -97,7 +117,7 @@ export async function getESQLAdHocDataview({
       type: ESQL_TYPE,
       id: dataViewId,
       allowNoIndex: options?.allowNoIndex,
-      timeFieldName: timeField || undefined,
+      timeFieldName,
     },
     // important to skip if you just need the dataview without the fields for performance reasons
     skipFetchFields

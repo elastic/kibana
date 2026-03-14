@@ -116,6 +116,7 @@ interface LoaderSharedArgs {
   storage: LensStoreDeps['lensServices']['storage'];
   eventAnnotationService: LensStoreDeps['lensServices']['eventAnnotationService'];
   defaultIndexPatternId: string;
+  http: LensStoreDeps['lensServices']['http'];
 }
 
 type PreloadedState = Omit<
@@ -371,6 +372,7 @@ export async function loadInitial(
     storage: lensServices.storage,
     eventAnnotationService: lensServices.eventAnnotationService,
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
+    http: lensServices.http,
   };
 
   let activeDatasourceId: string | undefined;
