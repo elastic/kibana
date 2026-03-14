@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { Observable } from 'rxjs';
 import { of, ReplaySubject, take, map, switchMap } from 'rxjs';
 import type {
@@ -20,6 +21,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { Space } from '@kbn/spaces-plugin/public';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import { i18n } from '@kbn/i18n';
 import type {
   NavigationPublicSetup,
   NavigationPublicStart,
@@ -29,6 +31,7 @@ import type {
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
+import { CustomizeNavigationMenuItem } from './customize_navigation_menu_item';
 
 export class NavigationPublicPlugin
   implements
@@ -61,7 +64,7 @@ export class NavigationPublicPlugin
     core: CoreStart,
     depsStart: NavigationPublicStartDependencies
   ): NavigationPublicStart {
-    const { unifiedSearch, cloud, spaces } = depsStart;
+    const { unifiedSearch, cloud, spaces, security } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
     this.chrome = chrome;
@@ -106,6 +109,33 @@ export class NavigationPublicPlugin
       initSolutionNavigation();
     } else {
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
+    }
+
+    // Register the "Customize navigation" link in the user menu (via security plugin)
+    if (security && this.isSolutionNavEnabled) {
+      security.navControlService.addUserMenuLinks([
+        {
+          label: i18n.translate('navigation.customizeNavigationLabel', {
+            defaultMessage: 'Customize navigation',
+          }),
+          iconType: 'controls',
+          href: '',
+          order: 500,
+          content: ({ closePopover }: { closePopover: () => void }) => (
+            <CustomizeNavigationMenuItem
+              core={core}
+              closePopover={closePopover}
+              getNavigationPrimaryItems={() => chrome.project.getNavigationPrimaryItems()}
+              setNavigationCustomization={(id, customization) =>
+                chrome.project.setNavigationCustomization(id, customization)
+              }
+              setIsEditingNavigation={(isEditing) =>
+                chrome.project.setIsEditingNavigation(isEditing)
+              }
+            />
+          ),
+        },
+      ]);
     }
 
     return {

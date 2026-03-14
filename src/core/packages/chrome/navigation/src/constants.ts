@@ -23,3 +23,6 @@ export const TOOLTIP_OFFSET = 4;
 export const ITEM_HORIZONTAL_SPACING_OFFSET = 32;
 export const SUB_MENU_ICON_SPACING_OFFSET = 48;
 export const BADGE_SPACING_OFFSET = 60;
+
+/** Item IDs that are always locked (cannot be reordered or hidden) */
+export const LOCKED_ITEM_IDS = new Set(['discover', 'dashboards']);

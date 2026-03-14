@@ -31,6 +31,8 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
   AppDeepLinkId,
+  NavigationCustomization,
+  NavigationItemInfo,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   CloudURLs,
@@ -86,6 +88,7 @@ interface ProjectChromeObservables {
     solutionId: SolutionId;
     navigationTree: NavigationTreeDefinitionUI;
     activeNodes: ChromeProjectNavigationNode[][];
+    isEditing?: boolean;
   }>;
 }
 
@@ -191,6 +194,7 @@ export interface InternalChromeStart extends ChromeStart {
       solutionId: SolutionId;
       navigationTree: NavigationTreeDefinitionUI;
       activeNodes: ChromeProjectNavigationNode[][];
+      isEditing?: boolean;
     }>;
 
     /** Get an observable of the current project breadcrumbs. */
@@ -208,5 +212,33 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
+
+    /**
+     * Returns a simplified list of primary navigation items.
+     */
+    getNavigationPrimaryItems: () => NavigationItemInfo[];
+
+    /**
+     * Set navigation customization for a solution.
+     * Pass undefined to clear the customization and revert to the original order.
+     * Changes are persisted unless editing mode is active (see setIsEditingNavigation).
+     */
+    setNavigationCustomization(
+      id: SolutionId,
+      customization: NavigationCustomization | undefined
+    ): void;
+
+    /**
+     * Set navigation editing mode.
+     * When editing, customization changes are previewed but not persisted.
+     * When exiting edit mode, reverts to the last persisted state.
+     */
+    setIsEditingNavigation(isEditing: boolean): void;
+
+    /**
+     * Get navigation editing state.
+     * @internal
+     */
+    getIsEditing$(): Observable<boolean>;
   };
 }

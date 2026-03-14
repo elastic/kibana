@@ -10,7 +10,8 @@
 import React, { useMemo } from 'react';
 import type { FC, ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { useEuiTheme, useIsWithinBreakpoints, type UseEuiTheme } from '@elastic/eui';
+import { layoutLevels } from '@kbn/core-chrome-layout-constants';
 
 import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '../../hooks/use_layout_width';
 import { Footer } from '../footer';
@@ -33,9 +34,16 @@ const getNavWrapperStyles = (theme: UseEuiTheme['euiTheme'], isCollapsed: boolea
   width: ${isCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH}px;
 `;
 
+const getEditingStyles = (theme: UseEuiTheme['euiTheme']) => css`
+  z-index: ${layoutLevels.navigationEditing};
+  background: ${theme.colors.backgroundBasePlain};
+  pointer-events: none;
+`;
+
 export interface SideNavProps {
   children: ReactNode;
   isCollapsed: boolean;
+  isEditing?: boolean;
 }
 
 interface SideNavComponent extends FC<SideNavProps> {
@@ -57,16 +65,27 @@ interface SideNavComponent extends FC<SideNavProps> {
  * - the footer,
  * - the side panel.
  */
-export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
+export const SideNav: SideNavComponent = ({ children, isCollapsed, isEditing = false }) => {
   const { euiTheme } = useEuiTheme();
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+  const shouldElevate = isEditing && !isMobile;
 
   const wrapperStyles = useMemo(
     () => getNavWrapperStyles(euiTheme, isCollapsed),
     [euiTheme, isCollapsed]
   );
 
+  const editingStyles = useMemo(
+    () => (shouldElevate ? getEditingStyles(euiTheme) : null),
+    [shouldElevate, euiTheme]
+  );
+
   return (
-    <div className={NAVIGATION_ROOT_SELECTOR} css={wrapperStyles}>
+    <div
+      className={NAVIGATION_ROOT_SELECTOR}
+      css={[wrapperStyles, editingStyles]}
+      data-editing={shouldElevate || undefined}
+    >
       {children}
     </div>
   );

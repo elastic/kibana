@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ReactNode } from 'react';
+import React, { useMemo, useState, type ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -71,6 +71,10 @@ export interface NavigationProps {
    */
   sidePanelFooter?: ReactNode;
   /**
+   * (optional) Whether navigation is being edited.
+   */
+  isEditing?: boolean;
+  /**
    * (optional) data-test-subj attribute for testing purposes.
    */
   'data-test-subj'?: string;
@@ -79,6 +83,7 @@ export interface NavigationProps {
 export const Navigation = ({
   activeItemId,
   isCollapsed: isCollapsedProp,
+  isEditing,
   items,
   logo,
   onItemClick,
@@ -104,9 +109,29 @@ export const Navigation = ({
 
   const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
 
-  const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
-    isCollapsed,
-    items.primaryItems
+  // Separate hidden-by-user items before responsive calculation so the hook
+  // only measures items that are actually rendered in the DOM.
+  const nonHiddenPrimaryItems = useMemo(
+    () => items.primaryItems.filter((item) => !item.hiddenByUser),
+    [items.primaryItems]
+  );
+  const hiddenByUserItems = useMemo(
+    () => items.primaryItems.filter((item) => item.hiddenByUser),
+    [items.primaryItems]
+  );
+
+  const hasHiddenItems = hiddenByUserItems.length > 0;
+
+  const {
+    overflowMenuItems: responsiveOverflowItems,
+    primaryMenuRef,
+    visibleMenuItems,
+  } = useResponsiveMenu(isCollapsed, nonHiddenPrimaryItems, hasHiddenItems);
+
+  // Overflow = items that don't fit + items hidden by user
+  const overflowMenuItems = useMemo(
+    () => [...responsiveOverflowItems, ...hiddenByUserItems],
+    [responsiveOverflowItems, hiddenByUserItems]
   );
 
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
@@ -129,7 +154,7 @@ export const Navigation = ({
       data-test-subj={rest['data-test-subj'] ?? NAVIGATION_ROOT_SELECTOR}
       id={NAVIGATION_ROOT_SELECTOR}
     >
-      <SideNav isCollapsed={isCollapsed}>
+      <SideNav isCollapsed={isCollapsed} isEditing={isEditing}>
         <SideNav.Logo
           isCollapsed={isCollapsed}
           isCurrent={actualActiveItemId === logo.id}
@@ -142,7 +167,7 @@ export const Navigation = ({
           {({ mainNavigationInstructionsId }) => (
             <>
               {visibleMenuItems.map((item, index) => {
-                const { sections, ...itemProps } = item;
+                const { sections, hiddenByUser, ...itemProps } = item;
                 const isFirstItem = index === 0;
                 const ariaDescribedBy = isFirstItem ? mainNavigationInstructionsId : undefined;
 
@@ -262,39 +287,41 @@ export const Navigation = ({
                         )}
                       >
                         {({ panelNavigationInstructionsId, panelEnterSubmenuInstructionsId }) => (
-                          <SideNav.NestedSecondaryMenu.Section>
-                            {overflowMenuItems.map((item, index) => {
-                              const hasSubmenu = getHasSubmenu(item);
-                              const { sections, ...itemProps } = item;
-                              const isFirstItem = index === 0;
-                              const ariaDescribedBy =
-                                [
-                                  isFirstItem && panelNavigationInstructionsId,
-                                  hasSubmenu && panelEnterSubmenuInstructionsId,
-                                ]
-                                  .filter(Boolean)
-                                  .join(' ') || undefined;
-                              return (
-                                <SideNav.NestedSecondaryMenu.PrimaryMenuItem
-                                  key={item.id}
-                                  aria-describedby={ariaDescribedBy}
-                                  isHighlighted={item.id === visuallyActivePageId}
-                                  isNew={getIsNewPrimary(item.id)}
-                                  hasSubmenu={hasSubmenu}
-                                  onClick={() => {
-                                    onItemClick?.(item);
-                                    if (!hasSubmenu) {
-                                      closePopover();
-                                      focusMainContent();
-                                    }
-                                  }}
-                                  {...itemProps}
-                                >
-                                  {item.label}
-                                </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
-                              );
-                            })}
-                          </SideNav.NestedSecondaryMenu.Section>
+                          <>
+                            <SideNav.NestedSecondaryMenu.Section>
+                              {overflowMenuItems.map((item, index) => {
+                                const hasSubmenu = getHasSubmenu(item);
+                                const { sections, hiddenByUser, ...itemProps } = item;
+                                const isFirstItem = index === 0;
+                                const ariaDescribedBy =
+                                  [
+                                    isFirstItem && panelNavigationInstructionsId,
+                                    hasSubmenu && panelEnterSubmenuInstructionsId,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(' ') || undefined;
+                                return (
+                                  <SideNav.NestedSecondaryMenu.PrimaryMenuItem
+                                    key={item.id}
+                                    aria-describedby={ariaDescribedBy}
+                                    isHighlighted={item.id === visuallyActivePageId}
+                                    isNew={getIsNewPrimary(item.id)}
+                                    hasSubmenu={hasSubmenu}
+                                    onClick={() => {
+                                      onItemClick?.(item);
+                                      if (!hasSubmenu) {
+                                        closePopover();
+                                        focusMainContent();
+                                      }
+                                    }}
+                                    {...itemProps}
+                                  >
+                                    {item.label}
+                                  </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
+                                );
+                              })}
+                            </SideNav.NestedSecondaryMenu.Section>
+                          </>
                         )}
                       </SideNav.NestedSecondaryMenu.Panel>
                       {overflowMenuItems.filter(getHasSubmenu).map((item) => (

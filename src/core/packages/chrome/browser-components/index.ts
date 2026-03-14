@@ -17,6 +17,10 @@ export type {
 export { ClassicHeader } from './src/classic';
 export { ProjectHeader } from './src/project';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
+export {
+  CustomizeNavigationModal,
+  type CustomizeNavigationModalProps,
+} from './src/project/sidenav/customize_navigation_modal';
 export { Sidebar } from './src/sidebar';
 export { AppMenuBar } from './src/project/app_menu';
 export {

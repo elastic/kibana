@@ -15,6 +15,7 @@ import classnames from 'classnames';
 import type {
   MenuItem,
   NavigationStructure,
+  PrimaryMenuItem,
   SecondaryMenuItem,
   SecondaryMenuSection,
   SideNavLogo,
@@ -127,6 +128,7 @@ export const toNavigationItems = (
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
     if (!navNode) return null;
 
+    // Items hidden by nav definition are completely excluded
     if (navNode.sideNavStatus === 'hidden') {
       return null;
     }
@@ -241,10 +243,17 @@ export const toNavigationItems = (
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
       badgeType: navNode.badgeType,
-    } as MenuItem;
+    };
   };
 
-  const primaryItems = filterEmpty(primaryNodes.flatMap(toMenuItem));
+  const primaryItems: PrimaryMenuItem[] = filterEmpty(primaryNodes.flatMap(toMenuItem)).map(
+    (item) => ({
+      ...item,
+      hiddenByUser: primaryNodes.some(
+        (node) => node.id === item.id && node.sideNavStatus === 'hiddenByUser'
+      ),
+    })
+  );
   const footerItems = filterEmpty(footerNodes.flatMap(toMenuItem));
 
   if (footerItems.length > 5) {

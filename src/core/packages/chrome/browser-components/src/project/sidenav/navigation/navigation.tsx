@@ -39,6 +39,7 @@ export interface ChromeNavigationProps {
     solutionId: SolutionId;
     navigationTree: NavigationTreeDefinitionUI;
     activeNodes: ChromeProjectNavigationNode[][];
+    isEditing?: boolean;
   }>;
   navLinks$: Observable<Readonly<ChromeNavLink[]>>;
 
@@ -53,7 +54,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId, solutionId } = state;
+  const { navItems, logoItem, activeItemId, solutionId, isEditing } = state;
 
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
@@ -61,6 +62,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         items={navItems}
         logo={logoItem}
         isCollapsed={props.isCollapsed}
+        isEditing={isEditing}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
@@ -76,7 +78,7 @@ export default Navigation;
 
 const useNavigationItems = (
   props: Pick<ChromeNavigationProps, 'navigation$' | 'navLinks$' | 'basePath'>
-): (NavigationItems & { solutionId: SolutionId }) | null => {
+): (NavigationItems & { solutionId: SolutionId; isEditing?: boolean }) | null => {
   const state = useObservable(props.navigation$);
 
   const basePath = props.basePath.get();
@@ -87,6 +89,7 @@ const useNavigationItems = (
     return {
       ...toNavigationItems(state.navigationTree, state.activeNodes, panelStateManager),
       solutionId: state.solutionId,
+      isEditing: state.isEditing,
     };
   }, [state, panelStateManager]);
 

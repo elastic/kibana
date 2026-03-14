@@ -17,10 +17,10 @@ import { getStyleProperty } from '../utils/get_style_property';
 import { useRafDebouncedCallback } from './use_raf_debounced';
 import { useStableMenuItemsReference } from './use_stable_menu_items_reference';
 
-interface ResponsiveMenuState {
+interface ResponsiveMenuState<T extends MenuItem> {
   primaryMenuRef: MutableRefObject<HTMLElement | null>;
-  visibleMenuItems: MenuItem[];
-  overflowMenuItems: MenuItem[];
+  visibleMenuItems: T[];
+  overflowMenuItems: T[];
 }
 
 /**
@@ -30,12 +30,18 @@ interface ResponsiveMenuState {
  *
  * @param isCollapsed - whether the side nav is currently collapsed (affects layout recalculation).
  * @param items - all primary navigation items, in priority order.
+ * @param hasUserHiddenItems - Whether there are user-hidden items that would be moved to the
+ * overflow menu (affects available height).
  * @returns an object containing:
  * - `primaryMenuRef` - a ref to the primary menu.
  * - `visibleMenuItems` - the visible menu items.
  * - `overflowMenuItems` - the overflow menu items.
  */
-export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): ResponsiveMenuState {
+export function useResponsiveMenu<T extends MenuItem>(
+  isCollapsed: boolean,
+  items: T[],
+  hasUserHiddenItems: boolean = false
+): ResponsiveMenuState<T> {
   const primaryMenuRef = useRef<HTMLElement | null>(null);
   const heightsCacheRef = useRef<number[]>([]);
 
@@ -62,11 +68,16 @@ export function useResponsiveMenu(isCollapsed: boolean, items: MenuItem[]): Resp
     const childrenGap = getStyleProperty(menu, 'gap');
 
     // 2. Calculate the number of visible menu items
-    const nextVisibleCount = countVisibleMenuItems(childrenHeights, childrenGap, menuHeight);
+    const nextVisibleCount = countVisibleMenuItems(
+      childrenHeights,
+      childrenGap,
+      menuHeight,
+      hasUserHiddenItems
+    );
 
     // 3. Update the visible count if needed
     setVisibleCount(nextVisibleCount);
-  }, [stableItemsReference]);
+  }, [stableItemsReference, hasUserHiddenItems]);
 
   const [scheduleRecalculation, cancelRecalculation] =
     useRafDebouncedCallback(recalculateMenuLayout);
