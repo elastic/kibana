@@ -78,7 +78,10 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
       prevInterval.concat(intervals);
     }
 
-    await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
+    const legacyActionsMigratedRuleIds = await bulkMigrateLegacyActions({
+      context,
+      rules: response.saved_objects,
+    });
 
     await pMap(
       response.saved_objects,
@@ -90,6 +93,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
           skipped,
           errors,
           username,
+          legacyActionsMigratedRuleIds,
         }),
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
     );
