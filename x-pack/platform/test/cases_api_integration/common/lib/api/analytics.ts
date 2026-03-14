@@ -50,6 +50,14 @@ export const runSchedulerTask = async (supertest: SuperTest.Agent) => {
     .expect(200);
 };
 
+export const runOwnerSyncTask = async (supertest: SuperTest.Agent, owner: string) => {
+  await supertest
+    .post('/api/analytics_index/owner_sync/run_soon')
+    .set('kbn-xsrf', 'xxx')
+    .send({ owner })
+    .expect(200);
+};
+
 export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
   await supertest
     .post('/api/analytics_index/backfill/run_soon')

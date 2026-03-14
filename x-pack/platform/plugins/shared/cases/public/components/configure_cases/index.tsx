@@ -130,7 +130,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const [currentSpaceId, setCurrentSpaceId] = useState<string>('default');
   useEffect(() => {
-    spaces?.getActiveSpace().then((space) => setCurrentSpaceId(space.id));
+    spaces?.getActiveSpace()?.then((space) => setCurrentSpaceId(space.id));
   }, [spaces]);
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();

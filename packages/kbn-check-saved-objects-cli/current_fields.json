@@ -235,6 +235,9 @@
     "updated_at"
   ],
   "cases-configure": [
+    "analytics_enabled",
+    "analytics_last_sync_at",
+    "analytics_sync_status",
     "closure_type",
     "created_at",
     "owner"

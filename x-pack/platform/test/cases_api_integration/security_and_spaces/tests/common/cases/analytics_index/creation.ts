@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { join } from 'path';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { runSchedulerTask } from '../../../../../common/lib/api/analytics';
 import {
@@ -23,10 +24,12 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('analytics indexes creation', () => {
     const indexVersion = 1;
     before(async () => {
-      // Enable analytics for the default space so the scheduler task creates indexes
+      // Enable analytics for the default space so the scheduler task creates indexes.
+      // Must use a real owner (SECURITY_SOLUTION_OWNER) so that
+      // getSpacesWithAnalyticsEnabled includes it (it filters by OWNERS).
       await createConfiguration(
         supertestService,
-        getConfigurationRequest({ overrides: { analytics_enabled: true } })
+        getConfigurationRequest({ overrides: { analytics_enabled: true, owner: SECURITY_SOLUTION_OWNER } })
       );
 
       await supertestService

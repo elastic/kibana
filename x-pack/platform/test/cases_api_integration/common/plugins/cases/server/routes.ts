@@ -19,7 +19,9 @@ import {
   ANALYTICS_BACKFILL_TASK_TYPE,
   CASES_TELEMETRY_TASK_NAME,
 } from '@kbn/cases-plugin/common/constants';
+import type { Owner } from '@kbn/cases-plugin/common/constants/types';
 import { CAI_SCHEDULER_TASK_ID } from '@kbn/cases-plugin/server/cases_analytics/tasks/scheduler_task/constants';
+import { getOwnerSyncTaskId } from '@kbn/cases-plugin/server/cases_analytics/tasks/owner_sync_task';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
@@ -379,6 +381,35 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         return res.ok({ body: await taskManager.runSoon(taskId) });
       } catch (err) {
         logger.error(`Error : ${err}`);
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/analytics_index/owner_sync/run_soon',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          owner: schema.string(),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const { owner } = req.body;
+      const taskId = getOwnerSyncTaskId(owner as Owner);
+      try {
+        const [_, { taskManager }] = await core.getStartServices();
+        logger.info(`Request to run owner sync task id: ${taskId}`);
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        logger.error(`Error running owner sync task ${taskId}: ${err}`);
         return res.ok({ body: { id: taskId, error: `${err}` } });
       }
     }

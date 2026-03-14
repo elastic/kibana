@@ -815,6 +815,15 @@
       },
       "owner": {
         "type": "keyword"
+      },
+      "analytics_enabled": {
+        "type": "boolean"
+      },
+      "analytics_last_sync_at": {
+        "type": "date"
+      },
+      "analytics_sync_status": {
+        "type": "keyword"
       }
     }
   },
