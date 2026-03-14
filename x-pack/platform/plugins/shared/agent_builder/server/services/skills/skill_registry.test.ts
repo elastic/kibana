@@ -218,6 +218,52 @@ describe('createSkillRegistry', () => {
     });
   });
 
+  describe('list with type filter', () => {
+    it('returns only built-in skills when type is built-in', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
+      const persistedProvider = createMockPersistedProvider([persistedSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.list({ type: 'built-in' });
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('builtin-skill-1');
+      expect(builtinProvider.list).toHaveBeenCalledWith({});
+      expect(persistedProvider.list).not.toHaveBeenCalled();
+    });
+
+    it('returns only persisted skills when type is persisted', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
+      const persistedProvider = createMockPersistedProvider([persistedSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.list({ type: 'persisted' });
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('custom-skill-1');
+      expect(persistedProvider.list).toHaveBeenCalledWith({});
+      expect(builtinProvider.list).not.toHaveBeenCalled();
+    });
+
+    it('does not forward the type field to providers', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      await registry.list({ type: 'built-in', summaryOnly: true });
+      expect(builtinProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
+    });
+  });
+
   describe('bulkGet', () => {
     it('returns all built-in skills when all IDs are built-in', async () => {
       const builtinProvider = createMockBuiltinProvider([builtinSkill1]);

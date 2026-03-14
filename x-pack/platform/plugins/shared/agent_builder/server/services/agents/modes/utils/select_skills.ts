@@ -10,12 +10,11 @@ import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillsService, WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 
 /**
- * Fetches skills matching the agent's `skill_ids` configuration via bulkGet,
- * populates the writable skills store so that the skills volume in the virtual
- * filesystem reflects only the selected skills, and returns the resolved list
- * for downstream use (e.g. tool selection).
+ * Resolves the set of skills available to an agent based on its configuration:
+ * - Explicitly selected skills via `skill_ids` (fetched with bulkGet)
+ * - All built-in skills when `enable_elastic_capabilities` is true
  *
- * When `skill_ids` is undefined or empty, no skills are loaded.
+ * Populates the writable skills store and returns the merged list.
  */
 export const selectSkills = async ({
   skills,
@@ -27,13 +26,31 @@ export const selectSkills = async ({
   agentConfiguration: AgentConfiguration;
 }): Promise<InternalSkillDefinition[]> => {
   const skillIds = agentConfiguration.skill_ids ?? [];
-  if (skillIds.length === 0) {
+  const enableElasticCapabilities = agentConfiguration.enable_elastic_capabilities ?? false;
+
+  if (skillIds.length === 0 && !enableElasticCapabilities) {
     return [];
   }
 
-  const filteredSkills = [...(await skills.bulkGet(skillIds)).values()];
-  for (const skill of filteredSkills) {
+  const [selectedSkillsMap, builtinSkills] = await Promise.all([
+    skillIds.length > 0
+      ? skills.bulkGet(skillIds)
+      : Promise.resolve(new Map<string, InternalSkillDefinition>()),
+    enableElasticCapabilities
+      ? skills.list({ type: 'built-in' })
+      : Promise.resolve([] as InternalSkillDefinition[]),
+  ]);
+
+  const merged = new Map(selectedSkillsMap);
+  for (const skill of builtinSkills) {
+    if (!merged.has(skill.id)) {
+      merged.set(skill.id, skill);
+    }
+  }
+
+  const result = [...merged.values()];
+  for (const skill of result) {
     skillsStore.add(skill);
   }
-  return filteredSkills;
+  return result;
 };

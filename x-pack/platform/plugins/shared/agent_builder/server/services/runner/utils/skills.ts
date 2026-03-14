@@ -42,7 +42,7 @@ export const createSkillsService = async ({
   });
 
   return {
-    list: () => skillRegistry.list(),
+    list: (options) => skillRegistry.list(options),
     get: async (skillId) => {
       try {
         return await skillRegistry.get(skillId);
