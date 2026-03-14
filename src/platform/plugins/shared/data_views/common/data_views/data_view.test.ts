@@ -911,5 +911,81 @@ describe('IndexPattern', () => {
       // This should not throw - it verifies that fieldFormats service is properly passed
       expect(() => clonedDataView.getFormatterForField(field!)).not.toThrow();
     });
+
+    test('should clear timeFieldName when time field not in provided fields', () => {
+      const dataView = new DataView({
+        spec: {
+          id: 'test',
+          title: 'test*',
+          timeFieldName: '@timestamp',
+          fields: {
+            '@timestamp': {
+              name: '@timestamp',
+              type: 'date',
+              esTypes: ['date'],
+              searchable: true,
+              aggregatable: true,
+            },
+          },
+        },
+        fieldFormats: fieldFormatsMock,
+      });
+
+      const fields: Record<string, FieldSpec> = {
+        field1: {
+          name: 'field1',
+          type: 'string',
+          searchable: true,
+          aggregatable: false,
+        },
+      };
+
+      const clonedDataView = dataView.cloneWithFields(fields);
+
+      expect(dataView.timeFieldName).toBe('@timestamp');
+      expect(clonedDataView.timeFieldName).toBeUndefined();
+      expect(clonedDataView.isTimeBased()).toBe(false);
+    });
+
+    test('should preserve timeFieldName when time field is in provided fields', () => {
+      const dataView = new DataView({
+        spec: {
+          id: 'test',
+          title: 'test*',
+          timeFieldName: '@timestamp',
+          fields: {
+            '@timestamp': {
+              name: '@timestamp',
+              type: 'date',
+              esTypes: ['date'],
+              searchable: true,
+              aggregatable: true,
+            },
+          },
+        },
+        fieldFormats: fieldFormatsMock,
+      });
+
+      const fields: Record<string, FieldSpec> = {
+        field1: {
+          name: 'field1',
+          type: 'string',
+          searchable: true,
+          aggregatable: false,
+        },
+        '@timestamp': {
+          name: '@timestamp',
+          type: 'date',
+          esTypes: ['date'],
+          searchable: true,
+          aggregatable: true,
+        },
+      };
+
+      const clonedDataView = dataView.cloneWithFields(fields);
+
+      expect(clonedDataView.timeFieldName).toBe('@timestamp');
+      expect(clonedDataView.isTimeBased()).toBe(true);
+    });
   });
 });

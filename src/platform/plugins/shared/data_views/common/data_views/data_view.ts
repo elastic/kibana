@@ -91,6 +91,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
    * - metaFields: Taken directly from this DataView (e.g., _source, _id)
    * - shortDotsEnable: Taken directly from this DataView
    * - fieldFormats: Taken directly from this DataView
+   * - timeFieldName: Cleared if the time field is not present in the provided fields
    *
    * @param fields - A record of field specifications keyed by field name
    * @returns A new DataView instance with the provided fields
@@ -101,6 +102,11 @@ export class DataView extends AbstractDataView implements DataViewBase {
     const enrichedSpec: DataViewSpec = {
       ...baseSpec,
       fields,
+      // Clear timeFieldName if the time field is not in the provided fields
+      timeFieldName:
+        baseSpec.timeFieldName && fields[baseSpec.timeFieldName]
+          ? baseSpec.timeFieldName
+          : undefined,
     };
 
     return new DataView({

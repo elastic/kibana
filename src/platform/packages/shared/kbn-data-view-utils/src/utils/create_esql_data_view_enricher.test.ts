@@ -12,27 +12,22 @@ import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plug
 import { createEsqlDataViewEnricher } from './create_esql_data_view_enricher';
 
 describe('createEsqlDataViewEnricher', () => {
-  const createMockDataView = (
-    id: string,
-    timeFieldName?: string,
-    timeFieldSpec?: { name: string; type: string; esTypes: string[] }
-  ): DataView => {
+  const createMockDataView = (id: string, timeFieldName?: string): DataView => {
     const mockDataView = {
       id,
       timeFieldName,
-      cloneWithFields: jest.fn((fields) => ({
-        ...mockDataView,
-        id,
-        fields,
-        isCloned: true,
-      })),
-      getTimeField: jest.fn(() =>
-        timeFieldSpec
-          ? {
-              toSpec: () => timeFieldSpec,
-            }
-          : undefined
-      ),
+      cloneWithFields: jest.fn((fields) => {
+        // Mimic the real cloneWithFields behavior: clear timeFieldName if time field not in fields
+        const clonedTimeFieldName =
+          timeFieldName && fields[timeFieldName] ? timeFieldName : undefined;
+        return {
+          ...mockDataView,
+          id,
+          fields,
+          timeFieldName: clonedTimeFieldName,
+          isCloned: true,
+        };
+      }),
     } as unknown as DataView;
     return mockDataView;
   };
@@ -229,32 +224,65 @@ describe('createEsqlDataViewEnricher', () => {
     expect(mockDataView.cloneWithFields).toHaveBeenCalledTimes(2);
   });
 
-  describe('time field preservation', () => {
-    const timeFieldSpec = { name: '@timestamp', type: 'date', esTypes: ['date'] };
-
-    it('should include time field when not in ES|QL columns', () => {
+  describe('time field handling', () => {
+    it('should clear timeFieldName when time field not in ES|QL columns', () => {
       const enricher = createEsqlDataViewEnricher();
-      const mockDataView = createMockDataView('test-id', '@timestamp', timeFieldSpec);
+      const mockDataView = createMockDataView('test-id', '@timestamp');
       const columns = createColumns([{ name: 'field1', type: 'string' }]);
 
-      enricher.enrich(mockDataView, columns);
+      const result = enricher.enrich(mockDataView, columns);
 
+      expect(result?.timeFieldName).toBeUndefined();
       expect(mockDataView.cloneWithFields).toHaveBeenCalledWith({
         field1: expect.objectContaining({ name: 'field1' }),
-        '@timestamp': timeFieldSpec,
       });
     });
 
-    it('should not override time field when already in ES|QL columns', () => {
+    it('should preserve timeFieldName when time field is in ES|QL columns', () => {
       const enricher = createEsqlDataViewEnricher();
-      const mockDataView = createMockDataView('test-id', '@timestamp', timeFieldSpec);
+      const mockDataView = createMockDataView('test-id', '@timestamp');
+      const columns = createColumns([
+        { name: 'field1', type: 'string' },
+        { name: '@timestamp', type: 'date', esType: 'date' },
+      ]);
+
+      const result = enricher.enrich(mockDataView, columns);
+
+      expect(result?.timeFieldName).toBe('@timestamp');
+      expect(mockDataView.cloneWithFields).toHaveBeenCalledWith(
+        expect.objectContaining({
+          '@timestamp': expect.objectContaining({
+            name: '@timestamp',
+            esTypes: ['date'],
+          }),
+        })
+      );
+    });
+
+    it('should not modify timeFieldName when base DataView has no time field', () => {
+      const enricher = createEsqlDataViewEnricher();
+      const mockDataView = createMockDataView('test-id');
+      const columns = createColumns([{ name: 'field1', type: 'string' }]);
+
+      const result = enricher.enrich(mockDataView, columns);
+
+      expect(result?.timeFieldName).toBeUndefined();
+      expect(mockDataView.cloneWithFields).toHaveBeenCalledWith({
+        field1: expect.objectContaining({ name: 'field1' }),
+      });
+    });
+
+    it('should handle different time field types correctly', () => {
+      const enricher = createEsqlDataViewEnricher();
+      const mockDataView = createMockDataView('test-id', '@timestamp');
       const columns = createColumns([
         { name: 'field1', type: 'string' },
         { name: '@timestamp', type: 'date', esType: 'date_nanos' },
       ]);
 
-      enricher.enrich(mockDataView, columns);
+      const result = enricher.enrich(mockDataView, columns);
 
+      expect(result?.timeFieldName).toBe('@timestamp');
       expect(mockDataView.cloneWithFields).toHaveBeenCalledWith(
         expect.objectContaining({
           '@timestamp': expect.objectContaining({
@@ -263,49 +291,51 @@ describe('createEsqlDataViewEnricher', () => {
           }),
         })
       );
-      expect(mockDataView.getTimeField).not.toHaveBeenCalled();
     });
 
-    it('should not add time field when base DataView has no time field', () => {
+    it('should invalidate cache when time field presence changes', () => {
       const enricher = createEsqlDataViewEnricher();
-      const mockDataView = createMockDataView('test-id');
-      const columns = createColumns([{ name: 'field1', type: 'string' }]);
+      const mockDataView = createMockDataView('test-id', '@timestamp');
 
-      enricher.enrich(mockDataView, columns);
+      // First: columns without time field
+      const columnsWithoutTime = createColumns([{ name: 'field1', type: 'string' }]);
+      const firstResult = enricher.enrich(mockDataView, columnsWithoutTime);
 
-      expect(mockDataView.cloneWithFields).toHaveBeenCalledWith({
-        field1: expect.objectContaining({ name: 'field1' }),
-      });
-      expect(mockDataView.getTimeField).not.toHaveBeenCalled();
-    });
+      // Second: same columns but now WITH time field - should recreate
+      const columnsWithTime = createColumns([
+        { name: 'field1', type: 'string' },
+        { name: '@timestamp', type: 'date', esType: 'date' },
+      ]);
+      const secondResult = enricher.enrich(mockDataView, columnsWithTime);
 
-    it('should handle case when timeFieldName exists but getTimeField returns undefined', () => {
-      const enricher = createEsqlDataViewEnricher();
-      const mockDataView = createMockDataView('test-id', '@timestamp', undefined);
-      const columns = createColumns([{ name: 'field1', type: 'string' }]);
-
-      enricher.enrich(mockDataView, columns);
-
-      expect(mockDataView.cloneWithFields).toHaveBeenCalledWith({
-        field1: expect.objectContaining({ name: 'field1' }),
-      });
+      expect(firstResult?.timeFieldName).toBeUndefined();
+      expect(secondResult?.timeFieldName).toBe('@timestamp');
+      expect(firstResult).not.toBe(secondResult);
+      expect(mockDataView.cloneWithFields).toHaveBeenCalledTimes(2);
     });
 
     it('should invalidate cache when time field name changes', () => {
       const enricher = createEsqlDataViewEnricher();
-      const mockDataView1 = createMockDataView('test-id', '@timestamp', timeFieldSpec);
-      const mockDataView2 = {
-        ...mockDataView1,
-        timeFieldName: 'timestamp',
-        getTimeField: jest.fn(() => ({ toSpec: () => ({ ...timeFieldSpec, name: 'timestamp' }) })),
-        cloneWithFields: jest.fn((fields) => ({ fields, isCloned: true })),
-      } as unknown as DataView;
-      const columns = createColumns([{ name: 'field1', type: 'string' }]);
 
-      const first = enricher.enrich(mockDataView1, columns);
-      const second = enricher.enrich(mockDataView2, columns);
+      // First call with @timestamp
+      const mockDataView1 = createMockDataView('test-id', '@timestamp');
+      const columns1 = createColumns([
+        { name: 'field1', type: 'string' },
+        { name: '@timestamp', type: 'date', esType: 'date' },
+      ]);
+      const firstResult = enricher.enrich(mockDataView1, columns1);
 
-      expect(first).not.toBe(second);
+      // Second call with different time field name (timestamp instead of @timestamp)
+      const mockDataView2 = createMockDataView('test-id', 'timestamp');
+      const columns2 = createColumns([
+        { name: 'field1', type: 'string' },
+        { name: 'timestamp', type: 'date', esType: 'date' },
+      ]);
+      const secondResult = enricher.enrich(mockDataView2, columns2);
+
+      expect(firstResult?.timeFieldName).toBe('@timestamp');
+      expect(secondResult?.timeFieldName).toBe('timestamp');
+      expect(firstResult).not.toBe(secondResult);
       expect(mockDataView1.cloneWithFields).toHaveBeenCalledTimes(1);
       expect(mockDataView2.cloneWithFields).toHaveBeenCalledTimes(1);
     });

@@ -13,14 +13,15 @@ import { convertDatatableColumnsToFieldSpecs } from './convert_to_data_view_fiel
 
 /**
  * Creates a stable signature from ES|QL columns for memoization comparison.
- * The signature includes field name, type, esType, and time field name to detect schema changes.
+ * The signature includes field name, type, esType, and the base DataView's time field name.
  */
 function getColumnsSignature(columns: DatatableColumn[], timeFieldName?: string): string {
   const colsSignature = columns
     .map((col) => `${col.name}:${col.meta?.type ?? 'unknown'}:${col.meta?.esType ?? ''}`)
     .sort()
     .join('|');
-  return timeFieldName ? `${colsSignature}|tf:${timeFieldName}` : colsSignature;
+
+  return `${colsSignature}|tf:${timeFieldName ?? 'none'}`;
 }
 
 export interface EsqlDataViewEnricher {
@@ -48,9 +49,8 @@ export interface EsqlDataViewEnricher {
  * - The columns schema changes (different fields, types, or esTypes)
  * - The base DataView changes (different ID)
  *
- * The enriched DataView always includes the time field from the base DataView
- * (if present) to ensure `isTimeBased()` and `getTimeField()` work correctly.
- * This maintains backwards compatibility with pre-columnsMeta behavior.
+ * The enriched DataView is created using `cloneWithFields()`, which automatically
+ * clears `timeFieldName` if the time field is not present in the ES|QL columns.
  *
  * @example
  * ```typescript
@@ -79,8 +79,7 @@ export function createEsqlDataViewEnricher(): EsqlDataViewEnricher {
         return undefined;
       }
 
-      const timeFieldName = baseDataView.timeFieldName;
-      const currentSignature = getColumnsSignature(columns, timeFieldName);
+      const currentSignature = getColumnsSignature(columns, baseDataView.timeFieldName);
       const baseDataViewId = baseDataView.id;
 
       if (
@@ -92,16 +91,6 @@ export function createEsqlDataViewEnricher(): EsqlDataViewEnricher {
       }
 
       const fields = convertDatatableColumnsToFieldSpecs(columns);
-
-      // Ensure time field is always present if base DataView has one.
-      // This maintains backwards compatibility - the enriched DataView should
-      // behave like the original DataView for time-based checks (isTimeBased(), getTimeField()).
-      if (timeFieldName && !fields[timeFieldName]) {
-        const timeField = baseDataView.getTimeField();
-        if (timeField) {
-          fields[timeFieldName] = timeField.toSpec();
-        }
-      }
 
       cachedDataView = baseDataView.cloneWithFields(fields);
       cachedSignature = currentSignature;
