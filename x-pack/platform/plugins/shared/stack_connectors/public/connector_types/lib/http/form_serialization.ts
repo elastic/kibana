@@ -74,21 +74,20 @@ export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema
     ...formData,
     config: {
       ...formData.config,
-      headers: isEmpty(configHeaders) ? null : configHeaders,
-      ...(hasProxy
-        ? {}
-        : {
-            proxyUrl: undefined,
-            proxyVerificationMode: undefined,
-            hasProxyAuth: false,
-          }),
+      ...(isEmpty(configHeaders) && { headers: null }),
+      ...(!hasProxy && {
+        proxyUrl: null,
+        proxyVerificationMode: undefined,
+        hasProxyAuth: false,
+      }),
     },
     secrets: {
       ...formData.secrets,
-      secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
-      ...(hasProxy && formData.config?.hasProxyAuth
-        ? {}
-        : { proxyUsername: null, proxyPassword: null }),
+      ...(isEmpty(secretHeaders) && { secretHeaders: undefined }),
+      ...((!hasProxy || !formData.config?.hasProxyAuth) && {
+        proxyUsername: null,
+        proxyPassword: null,
+      }),
     },
   };
 };
