@@ -48,8 +48,15 @@ export const fetchEntities = async ({
 
   const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
 
+  // Include entity store index in FROM clause when available so that
+  // entities that only exist in the entity store (e.g. relationship targets)
+  // can be found directly, not just via event enrichment.
+  const queryIndexPatterns = isLookupIndexAvailable
+    ? [...resolvedIndexPatterns, lookupIndexName]
+    : resolvedIndexPatterns;
+
   const query = buildEntitiesEsqlQuery({
-    indexPatterns: resolvedIndexPatterns,
+    indexPatterns: queryIndexPatterns,
     lookupIndexName,
     isLookupIndexAvailable,
     entityCount: entityIds.length,
@@ -60,7 +67,7 @@ export const fetchEntities = async ({
   return await esClient.asCurrentUser.helpers
     .esql({
       columnar: false,
-      filter: buildDslFilter(entityIds, start, end),
+      filter: buildDslFilter(entityIds, start, end, isLookupIndexAvailable, lookupIndexName),
       query,
       // @ts-expect-error - esql helper params types are not up to date
       params: entityIds.map((id, idx) => ({ [`entity_id${idx}`]: id })),
@@ -68,33 +75,51 @@ export const fetchEntities = async ({
     .toRecords<EntityRecord>();
 };
 
-const buildDslFilter = (entityIds: string[], start: string | number, end: string | number) => ({
-  bool: {
-    filter: [
-      {
-        range: {
-          '@timestamp': {
-            gte: start,
-            lte: end,
-          },
-        },
-      },
-      {
+const buildDslFilter = (
+  entityIds: string[],
+  start: string | number,
+  end: string | number,
+  isLookupIndexAvailable: boolean,
+  lookupIndexName: string
+) => {
+  const entityFieldTerms = [
+    ...GRAPH_ACTOR_ENTITY_FIELDS.map((field) => ({
+      terms: { [field]: entityIds },
+    })),
+    ...GRAPH_TARGET_ENTITY_FIELDS.map((field) => ({
+      terms: { [field]: entityIds },
+    })),
+  ];
+
+  // When the entity store index is included in the FROM clause, allow entity store
+  // documents to match without the timestamp constraint since their timestamps may
+  // be outside the event time range.
+  const timestampFilter = isLookupIndexAvailable
+    ? {
         bool: {
           should: [
-            ...GRAPH_ACTOR_ENTITY_FIELDS.map((field) => ({
-              terms: { [field]: entityIds },
-            })),
-            ...GRAPH_TARGET_ENTITY_FIELDS.map((field) => ({
-              terms: { [field]: entityIds },
-            })),
+            { range: { '@timestamp': { gte: start, lte: end } } },
+            { term: { _index: lookupIndexName } },
           ],
           minimum_should_match: 1,
         },
-      },
-    ],
-  },
-});
+      }
+    : { range: { '@timestamp': { gte: start, lte: end } } };
+
+  return {
+    bool: {
+      filter: [
+        timestampFilter,
+        {
+          bool: {
+            should: entityFieldTerms,
+            minimum_should_match: 1,
+          },
+        },
+      ],
+    },
+  };
+};
 
 interface BuildEntitiesQueryParams {
   indexPatterns: string[];
@@ -114,15 +139,31 @@ const buildEntitiesEsqlQuery = ({
   );
 
   const allEntityFields = [...GRAPH_ACTOR_ENTITY_FIELDS, ...GRAPH_TARGET_ENTITY_FIELDS];
-  const entityFieldsCoalesce = allEntityFields.join(',\n    ');
+
+  // Collect ALL entity IDs from all actor and target fields using MV_APPEND.
+  // This handles multi-value target fields (e.g. entity.target.id can be an array).
+  // After MV_EXPAND, we get one row per entity ID and can match each individually.
+  const entityIdEvals = [
+    '| EVAL entityId = TO_STRING(null)',
+    ...allEntityFields.map(
+      (field) => `| EVAL entityId = CASE(
+    ${field} IS NULL,
+    entityId,
+    CASE(
+      entityId IS NULL,
+      ${field},
+      MV_DEDUPE(MV_APPEND(entityId, ${field}))
+    )
+  )`
+    ),
+  ].join('\n');
 
   // Generate field hint CASE statements to determine ecsParentField
   const entityFieldHintCases = generateFieldHintCases(allEntityFields, 'entityId');
 
   return `FROM ${indexPatterns.filter((p) => p.length > 0).join(',')} METADATA _index
-| EVAL entityId = COALESCE(
-    ${entityFieldsCoalesce}
-  )
+${entityIdEvals}
+| MV_EXPAND entityId
 | WHERE entityId IN (${entityIdParams})
 | EVAL ecsParentField = CASE(
 ${entityFieldHintCases},
