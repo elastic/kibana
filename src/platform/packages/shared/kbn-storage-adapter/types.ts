@@ -24,6 +24,7 @@ type StorageMappingPropertyType = AllMappingPropertyType &
     | 'double'
     | 'long'
     | 'object'
+    | 'nested'
     | 'semantic_text'
   );
 
@@ -74,6 +75,7 @@ const types = {
   byte: createFactory('byte'),
   float: createFactory('float'),
   object: createFactory('object'),
+  nested: createFactory('nested'),
   semantic_text: createFactory('semantic_text'),
 } satisfies {
   [TKey in StorageMappingPropertyType]: MappingPropertyFactory<TKey, any>;
@@ -98,6 +100,11 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
         [key in keyof TProperty['properties']]?: StorageFieldTypeOf<TProperty['properties'][key]>;
       }
     : object;
+  nested: TProperty extends { properties: Record<string, StorageMappingProperty> }
+    ? Array<{
+        [key in keyof TProperty['properties']]?: StorageFieldTypeOf<TProperty['properties'][key]>;
+      }>
+    : Array<object>;
   semantic_text: string;
 }[TProperty['type']];
 

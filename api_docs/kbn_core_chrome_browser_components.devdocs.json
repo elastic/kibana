@@ -40,7 +40,7 @@
           "; }>) => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-        "lineNumber": 121,
+        "lineNumber": 118,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -58,7 +58,7 @@
               "; }>"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 121,
+            "lineNumber": 118,
             "columnNumber": 98,
             "deprecated": false,
             "trackAdoption": false,
@@ -98,7 +98,7 @@
           "() => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/browser-components/src/classic/header.tsx",
-        "lineNumber": 35,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -344,7 +344,7 @@
           "ChromeComponentsDeps"
         ],
         "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-        "lineNumber": 132,
+        "lineNumber": 129,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -370,7 +370,7 @@
           ", \"navigateToUrl\" | \"navigateToApp\" | \"currentAppId$\">"
         ],
         "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-        "lineNumber": 35,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -391,7 +391,7 @@
               "<HTMLElement> | undefined>"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 42,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -407,7 +407,7 @@
         "label": "ChromeComponentsDeps",
         "description": [],
         "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-        "lineNumber": 80,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -423,7 +423,7 @@
               "ChromeComponentsConfig"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 81,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -439,7 +439,7 @@
               "ChromeApplicationContext"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 82,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -455,7 +455,7 @@
               "IBasePath"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 83,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -471,7 +471,7 @@
               "DocLinksStart"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 84,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -487,7 +487,7 @@
               "NavControlsObservables"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 85,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -505,7 +505,7 @@
               "ClassicChromeObservables"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 86,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -523,7 +523,7 @@
               "ProjectChromeObservables"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 88,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -540,7 +540,7 @@
               "<number>"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 90,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -570,7 +570,7 @@
               "[]>; }"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 91,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -589,7 +589,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 97,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -608,7 +608,7 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 98,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -627,7 +627,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 99,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -646,7 +646,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 100,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -665,7 +665,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 101,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -683,7 +683,7 @@
               "<boolean>; initialCollapsed: boolean; onToggleCollapsed: (collapsed: boolean) => void; }"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 102,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -43,6 +43,10 @@
     "@kbn/deeplinks-agent-builder",
     "@kbn/connector-schemas",
     "@kbn/task-manager-plugin",
-    "@kbn/workflows"
+    "@kbn/workflows",
+    "@kbn/workflows-execution-engine",
+    "@kbn/tooling-log",
+    "@kbn/test",
+    "@kbn/workflows-extensions"
   ]
 }

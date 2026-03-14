@@ -100,10 +100,14 @@ describe('FullScreenWaterfall', () => {
   });
 
   describe('when service name is undefined', () => {
-    it('does not display the full trace waterfall', () => {
+    it('renders the full trace waterfall after the delay', () => {
       render(<FullScreenWaterfall {...defaultProps} serviceName={undefined} />);
 
-      expect(screen.queryByTestId('fullTraceWaterfall')).not.toBeInTheDocument();
+      act(() => {
+        jest.advanceTimersByTime(FULL_TRACE_WATERFALL_RENDER_DELAY_MS);
+      });
+
+      expect(screen.getByTestId('fullTraceWaterfall')).toBeInTheDocument();
     });
   });
 

@@ -8,7 +8,7 @@ export interface FullTraceWaterfallProps {
   traceId: string;
   rangeFrom: string;
   rangeTo: string;
-  serviceName: string;
+  serviceName?: string;
   scrollElement?: Element;
   onNodeClick?: (nodeSpanId: string) => void;
   onErrorClick?: FullTraceWaterfallOnErrorClick;

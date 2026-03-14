@@ -22,6 +22,9 @@ export interface ScoutTestConfig {
   type: string;
   module: ScoutTestableModule;
   manifest: ScoutConfigManifest;
+  server: {
+    configSet: string;
+  };
 }
 
 export const testConfig = {
@@ -54,12 +57,12 @@ export const testConfig = {
       moduleType,
       moduleVisibility,
       moduleName,
-      customTargetConfigSetName,
+      serverConfigSet,
       testCategory,
       testConfigType,
     ] = match;
 
-    const scoutDirName = `scout${customTargetConfigSetName ? `_${customTargetConfigSetName}` : ''}`;
+    const scoutDirName = `scout${serverConfigSet ? `_${serverConfigSet}` : ''}`;
     const moduleRoot = configPath.split('/test/scout')[0];
 
     const manifestPath = path.join(
@@ -103,6 +106,9 @@ export const testConfig = {
         path: manifestPath,
         exists: manifestExists,
         ...manifestFileData,
+      },
+      server: {
+        configSet: serverConfigSet || 'default',
       },
     };
   },
