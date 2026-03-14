@@ -357,7 +357,7 @@ describe('SearchSource', () => {
 
         const request = searchSource.getSearchRequestBody();
         expect(request).toHaveProperty('docvalue_fields');
-        expect(request._source.includes).toEqual(['c', 'a', 'b', 'd']);
+        expect((request._source as { includes: string[] }).includes).toEqual(['c', 'a', 'b', 'd']);
         expect(request.docvalue_fields).toEqual([{ field: 'b', format: 'date_time' }]);
         expect(request.fields).toEqual(['c', { field: 'a', format: 'date_time' }]);
       });

@@ -54,8 +54,8 @@ function getParams(filter: RangeFilter) {
   return { type: FILTERS.RANGE, key, value: params, params };
 }
 
-export const isMapRangeFilter = (filter: any): filter is RangeFilter =>
-  isRangeFilter(filter) || isScriptedRangeFilter(filter);
+export const isMapRangeFilter = (filter: unknown): filter is RangeFilter =>
+  isRangeFilter(filter as Filter) || isScriptedRangeFilter(filter as Filter);
 
 export const mapRange = (filter: Filter) => {
   if (!isMapRangeFilter(filter)) {

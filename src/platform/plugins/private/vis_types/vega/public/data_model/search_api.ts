@@ -71,7 +71,7 @@ export class SearchAPI {
           {
             ...body,
             ...restRequest,
-          },
+          } as SearchRequest,
           {
             getConfig: this.dependencies.uiSettings.get.bind(this.dependencies.uiSettings),
           }
