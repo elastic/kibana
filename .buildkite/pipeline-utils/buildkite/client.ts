@@ -374,7 +374,7 @@ export class BuildkiteClient {
   };
 
   getMetadataKeys = (): string[] => {
-    const stdout = this.exec('buildkite-agent meta-data keys', {
+    const stdout = execFileSync('buildkite-agent', ['meta-data', 'keys'], {
       stdio: ['pipe', 'pipe', 'inherit'],
     });
 
@@ -387,7 +387,7 @@ export class BuildkiteClient {
   };
 
   setMetadata = (key: string, value: string) => {
-    this.exec(`buildkite-agent meta-data set '${key}'`, {
+    execFileSync('buildkite-agent', ['meta-data', 'set', key], {
       input: value,
       stdio: ['pipe', 'inherit', 'inherit'],
     });
@@ -395,7 +395,7 @@ export class BuildkiteClient {
 
   getMetadata(key: string, defaultValue: string | null = null): string | null {
     try {
-      const stdout = this.exec(`buildkite-agent meta-data get '${key}'`, {
+      const stdout = execFileSync('buildkite-agent', ['meta-data', 'get', key], {
         stdio: ['pipe'],
       });
       return stdout?.toString().trim() || defaultValue;

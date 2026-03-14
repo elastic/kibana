@@ -9,8 +9,6 @@ steps:
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
-    env:
-      CHECK_GATE: 'true'
     retry:
       automatic:
         - exit_status: '-1'
