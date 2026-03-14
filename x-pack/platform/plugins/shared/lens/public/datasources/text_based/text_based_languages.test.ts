@@ -839,6 +839,100 @@ describe('Textbased Data Source', () => {
     });
   });
 
+  describe('#initialize', () => {
+    it('should hydrate timeField from indexPatterns when layer has no timeField', () => {
+      const state = {
+        layers: {
+          a: {
+            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
+            query: { esql: 'FROM foo' },
+            index: '1',
+          },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = TextBasedDatasource.initialize(state, [], undefined, undefined, indexPatterns);
+      expect(result.layers.a.timeField).toBe('timestamp');
+    });
+
+    it('should not overwrite timeField when layer already has one', () => {
+      const state = {
+        layers: {
+          a: {
+            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
+            query: { esql: 'FROM foo' },
+            index: '1',
+            timeField: 'custom_time',
+          },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = TextBasedDatasource.initialize(state, [], undefined, undefined, indexPatterns);
+      expect(result.layers.a.timeField).toBe('custom_time');
+    });
+
+    it('should not hydrate when indexPatterns is undefined', () => {
+      const state = {
+        layers: {
+          a: {
+            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
+            query: { esql: 'FROM foo' },
+            index: '1',
+          },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = TextBasedDatasource.initialize(state, [], undefined, undefined, undefined);
+      expect(result.layers.a.timeField).toBeUndefined();
+    });
+
+    it('should leave layer unchanged when layer.index does not match any indexPattern', () => {
+      const state = {
+        layers: {
+          a: {
+            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
+            query: { esql: 'FROM unknown' },
+            index: 'non-existent',
+          },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = TextBasedDatasource.initialize(state, [], undefined, undefined, indexPatterns);
+      expect(result.layers.a.timeField).toBeUndefined();
+    });
+
+    it('should hydrate each layer independently', () => {
+      const patternsWithNoTime = {
+        ...indexPatterns,
+        '2': { ...indexPatterns['1'], id: '2', timeFieldName: undefined },
+      };
+      const state = {
+        layers: {
+          a: {
+            columns: [{ columnId: 'col1', fieldName: 'bytes', meta: { type: 'number' } }],
+            query: { esql: 'FROM foo' },
+            index: '1',
+          },
+          b: {
+            columns: [{ columnId: 'col2', fieldName: 'src', meta: { type: 'string' } }],
+            query: { esql: 'FROM bar' },
+            index: '2',
+          },
+        },
+      } as unknown as TextBasedPersistedState;
+
+      const result = TextBasedDatasource.initialize(
+        state,
+        [],
+        undefined,
+        undefined,
+        patternsWithNoTime
+      );
+      expect(result.layers.a.timeField).toBe('timestamp');
+      expect(result.layers.b.timeField).toBeUndefined();
+    });
+  });
+
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = TextBasedDatasource.initialize();
