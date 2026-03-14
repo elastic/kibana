@@ -7,7 +7,7 @@
 
 import React, { useRef } from 'react';
 import { css } from '@emotion/react';
-import type { CommandMatchResult } from './types';
+import type { CommandMatchResult, CommandMenuHandle } from './types';
 import { CommandMenuPopover } from './command_menu_popover';
 import { useCommandMenuAnchor } from './use_command_menu_anchor';
 import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
@@ -21,6 +21,8 @@ const containerStyles = css`
 interface CommandMenuContainerProps {
   commandMatch: CommandMatchResult;
   editorRef: React.RefObject<HTMLDivElement>;
+  onSelect: (text: string) => void;
+  commandMenuRef: React.RefObject<CommandMenuHandle>;
   children: React.ReactNode;
   'data-test-subj'?: string;
 }
@@ -28,6 +30,8 @@ interface CommandMenuContainerProps {
 export const CommandMenuContainer: React.FC<CommandMenuContainerProps> = ({
   commandMatch,
   editorRef,
+  onSelect,
+  commandMenuRef,
   children,
   'data-test-subj': dataTestSubj,
 }) => {
@@ -44,7 +48,12 @@ export const CommandMenuContainer: React.FC<CommandMenuContainerProps> = ({
     <div ref={containerRef} css={containerStyles} data-test-subj={dataTestSubj}>
       {children}
       {isExperimentalFeaturesEnabled && (
-        <CommandMenuPopover commandMatch={commandMatch} anchorPosition={anchorPosition} />
+        <CommandMenuPopover
+          commandMatch={commandMatch}
+          anchorPosition={anchorPosition}
+          onSelect={onSelect}
+          commandMenuRef={commandMenuRef}
+        />
       )}
     </div>
   );

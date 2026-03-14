@@ -8,8 +8,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { CommandMenuPopover } from './command_menu_popover';
-import type { CommandMatchResult } from './types';
+import type { CommandMatchResult, CommandMenuHandle, CommandMenuComponentProps } from './types';
 import { CommandId } from './types';
+
+const MockMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
+  ({ query, onSelect }, ref) => {
+    return <div data-test-subj="mockMenu">Mock menu: {query}</div>;
+  }
+);
 
 const inactiveMatch: CommandMatchResult = {
   isActive: false,
@@ -19,10 +25,20 @@ const inactiveMatch: CommandMatchResult = {
 const activeMatch: CommandMatchResult = {
   isActive: true,
   activeCommand: {
-    command: { id: CommandId.Attachment, sequence: '@', name: 'Attachment' },
+    command: {
+      id: CommandId.Attachment,
+      sequence: '@',
+      name: 'Attachment',
+      menuComponent: MockMenuComponent,
+    },
     commandStartOffset: 0,
     query: 'joh',
   },
+};
+
+const defaultProps = {
+  onSelect: jest.fn(),
+  commandMenuRef: { current: null } as React.RefObject<CommandMenuHandle>,
 };
 
 describe('CommandMenuPopover', () => {
@@ -32,6 +48,7 @@ describe('CommandMenuPopover', () => {
         commandMatch={inactiveMatch}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
+        {...defaultProps}
       />
     );
 
@@ -44,6 +61,7 @@ describe('CommandMenuPopover', () => {
         commandMatch={activeMatch}
         anchorPosition={null}
         data-test-subj="testPopover"
+        {...defaultProps}
       />
     );
 
@@ -56,6 +74,7 @@ describe('CommandMenuPopover', () => {
         commandMatch={activeMatch}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
+        {...defaultProps}
       />
     );
 
@@ -68,6 +87,7 @@ describe('CommandMenuPopover', () => {
         commandMatch={activeMatch}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
+        {...defaultProps}
       />
     );
 
@@ -80,23 +100,23 @@ describe('CommandMenuPopover', () => {
         commandMatch={inactiveMatch}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
+        {...defaultProps}
       />
     );
 
     expect(screen.queryByText(/suggestions opened/i)).not.toBeInTheDocument();
   });
 
-  it('displays command id and query', () => {
+  it('renders the menu component with query', () => {
     render(
       <CommandMenuPopover
         commandMatch={activeMatch}
         anchorPosition={{ left: 10, top: 20 }}
         data-test-subj="testPopover"
+        {...defaultProps}
       />
     );
 
-    const content = screen.getByTestId('testPopover-content');
-    expect(content).toHaveTextContent('attachment');
-    expect(content).toHaveTextContent('joh');
+    expect(screen.getByTestId('mockMenu')).toHaveTextContent('Mock menu: joh');
   });
 });

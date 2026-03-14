@@ -5,9 +5,33 @@
  * 2.0.
  */
 
+import type React from 'react';
+
 export enum CommandId {
   Attachment = 'attachment',
   Skill = 'skill',
+}
+
+/**
+ * Props passed to a command menu component.
+ */
+export interface CommandMenuComponentProps {
+  readonly query: string;
+  readonly onSelect: (selectedText: string) => void;
+}
+
+/**
+ * Imperative handle exposed by a command menu component for keyboard delegation.
+ */
+export interface CommandMenuHandle {
+  /**
+   * Checks if keyboard event should be handled by the command menu
+   */
+  isKeyDownEventHandled: (event: React.KeyboardEvent) => boolean;
+  /**
+   * Handles keyboard event. Should only be called after receiving `true` from `isKeyDownEventHandled`.
+   */
+  handleKeyDown: (event: React.KeyboardEvent) => void;
 }
 
 /**
@@ -16,10 +40,14 @@ export enum CommandId {
 export interface CommandDefinition {
   /** Unique identifier for this command */
   readonly id: CommandId;
-  /** The character sequence that activates the command (e.g. '@', '/p') */
+  /** The character sequence that activates the command (e.g. '@', '/') */
   readonly sequence: string;
   /** Human readable name to be used for a11y */
   readonly name: string;
+  /** Component that will render the menu for this command */
+  readonly menuComponent: React.ForwardRefExoticComponent<
+    CommandMenuComponentProps & React.RefAttributes<CommandMenuHandle>
+  >;
 }
 
 /**

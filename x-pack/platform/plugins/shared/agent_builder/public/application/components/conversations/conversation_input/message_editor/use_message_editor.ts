@@ -8,6 +8,7 @@
 import { useRef, useMemo, useState, useCallback } from 'react';
 import type { CommandMatchResult } from './command_menu';
 import { useCommandMenu } from './command_menu';
+import { useCommandMenuPrefetch } from './command_menu/use_command_menu_prefetch';
 
 export interface MessageEditorInstance {
   ref: React.RefObject<HTMLDivElement>;
@@ -16,6 +17,8 @@ export interface MessageEditorInstance {
   commandMatch: CommandMatchResult;
   /** Dismiss the active action menu */
   dismissActionMenu: () => void;
+  /** Handle selection of an item from the command menu */
+  handleCommandSelect: (selectedText: string) => void;
 }
 
 export interface MessageEditorController {
@@ -51,6 +54,7 @@ export const useMessageEditor = (): {
     dismiss: dismissCommandMenu,
     checkInputForCommand,
   } = useCommandMenu();
+  const prefetchCommandMenus = useCommandMenuPrefetch();
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
 
@@ -77,6 +81,7 @@ export const useMessageEditor = (): {
         }
       },
       onFocus: () => {
+        prefetchCommandMenus();
         // Must request animation frame as some browsers have not instantiated the user's cursor selection when the focus event fires
         requestAnimationFrame(() => {
           if (ref.current) {
@@ -86,8 +91,27 @@ export const useMessageEditor = (): {
       },
       commandMatch,
       dismissActionMenu: dismissCommandMenu,
+      handleCommandSelect: (selectedText: string) => {
+        if (!ref.current || !commandMatch.activeCommand) {
+          return;
+        }
+        const text = ref.current.textContent ?? '';
+        const { commandStartOffset, query, command } = commandMatch.activeCommand;
+        const cursorPos = commandStartOffset + command.sequence.length + query.length;
+        const newText =
+          text.slice(0, commandStartOffset) + selectedText + ' ' + text.slice(cursorPos);
+        ref.current.textContent = newText;
+        syncIsEmpty();
+        // Position cursor after inserted text + space
+        const selection = window.getSelection();
+        if (selection && ref.current.firstChild) {
+          const newCursorPos = commandStartOffset + selectedText.length + 1;
+          selection.setPosition(ref.current.firstChild, newCursorPos);
+        }
+        dismissCommandMenu();
+      },
     }),
-    [syncIsEmpty, checkInputForCommand, commandMatch, dismissCommandMenu]
+    [syncIsEmpty, checkInputForCommand, prefetchCommandMenus, commandMatch, dismissCommandMenu]
   );
 
   const controller = useMemo(

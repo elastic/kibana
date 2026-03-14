@@ -6,7 +6,13 @@
  */
 
 export { useCommandMenu } from './use_command_menu';
-export type { ActiveCommand, AnchorPosition, CommandMatchResult } from './types';
+export type {
+  ActiveCommand,
+  AnchorPosition,
+  CommandMatchResult,
+  CommandMenuComponentProps,
+  CommandMenuHandle,
+} from './types';
 export { CommandId } from './types';
 export { getRectAtOffset } from './cursor_rect';
 export { CommandMenuPopover } from './command_menu_popover';

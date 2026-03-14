@@ -10,6 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { MessageEditor } from './message_editor';
 import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
 import { CommandId } from './command_menu';
+import type { CommandMenuComponentProps, CommandMenuHandle } from './command_menu';
 
 // TODO: Remove once the inline actions feature is no longer behind the experimental feature flag
 jest.mock('../../../../hooks/use_experimental_features', () => ({
@@ -30,6 +31,10 @@ jest.mock('./command_menu/cursor_rect', () => ({
   }),
 }));
 
+const MockMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
+  (_props, _ref) => <div />
+);
+
 const mockOnSubmit = jest.fn();
 
 const createMockMessageEditor = (): {
@@ -44,6 +49,7 @@ const createMockMessageEditor = (): {
       onFocus: jest.fn(),
       commandMatch: { isActive: false, activeCommand: null },
       dismissActionMenu: jest.fn(),
+      handleCommandSelect: jest.fn(),
     },
     controller: {
       clear: jest.fn(),
@@ -237,7 +243,12 @@ describe('MessageEditor', () => {
     messageEditor.commandMatch = {
       isActive: true,
       activeCommand: {
-        command: { id: CommandId.Attachment, sequence: '@', name: 'Attachment' },
+        command: {
+          id: CommandId.Attachment,
+          sequence: '@',
+          name: 'Attachment',
+          menuComponent: MockMenuComponent,
+        },
         commandStartOffset: 0,
         query: 'test',
       },

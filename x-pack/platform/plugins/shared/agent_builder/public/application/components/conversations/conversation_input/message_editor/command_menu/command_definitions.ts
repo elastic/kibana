@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { Skills } from './menus/skills';
 import type { CommandDefinition } from './types';
 import { CommandId } from './types';
 
 const COMMAND_DEFINITIONS: readonly CommandDefinition[] = [
-  { id: CommandId.Attachment, sequence: '@', name: 'Attachment' },
-  { id: CommandId.Skill, sequence: '/', name: 'Skill' },
+  // { id: CommandId.Attachment, sequence: '@', name: 'Attachment', menuComponent: Attachments },
+  { id: CommandId.Skill, sequence: '/', name: 'Skill', menuComponent: Skills },
 ];
 
 // Sorted once at module load — longest sequence first for greedy matching

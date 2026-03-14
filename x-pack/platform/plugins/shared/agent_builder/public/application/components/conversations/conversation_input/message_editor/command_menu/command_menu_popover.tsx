@@ -7,20 +7,17 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiPopover, EuiScreenReaderLive, EuiText } from '@elastic/eui';
+import { EuiPopover, EuiScreenReaderLive } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CommandMatchResult, AnchorPosition } from './types';
+import type { CommandMatchResult, AnchorPosition, CommandMenuHandle } from './types';
 
 interface CommandMenuPopoverProps {
   commandMatch: CommandMatchResult;
   anchorPosition: AnchorPosition | null;
+  onSelect: (text: string) => void;
+  commandMenuRef: React.RefObject<CommandMenuHandle>;
   'data-test-subj'?: string;
 }
-
-const placeholderLabel = i18n.translate(
-  'xpack.agentBuilder.conversationInput.inlineActionPopover.placeholder',
-  { defaultMessage: 'Inline actions' }
-);
 
 const wrapperStyles = css`
   position: absolute;
@@ -38,6 +35,8 @@ const anchorStyles = css`
 export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
   commandMatch,
   anchorPosition,
+  onSelect,
+  commandMenuRef,
   'data-test-subj': dataTestSubj = 'commandMenuPopover',
 }) => {
   const { activeCommand, isActive } = commandMatch;
@@ -72,15 +71,21 @@ export const CommandMenuPopover: React.FC<CommandMenuPopoverProps> = ({
           // The external state of commandMatch controls this popover's visibility.
         }}
         anchorPosition="upLeft"
-        panelPaddingSize="s"
+        panelPaddingSize="none"
         panelProps={{ 'aria-label': panelAriaLabel }}
         data-test-subj={dataTestSubj}
         ownFocus={false}
         display="block"
       >
-        <EuiText size="s" data-test-subj={`${dataTestSubj}-content`}>
-          {placeholderLabel}: {activeCommand?.command.id} &quot;{activeCommand?.query}&quot;
-        </EuiText>
+        {activeCommand && (
+          <div data-test-subj={`${dataTestSubj}-content`}>
+            <activeCommand.command.menuComponent
+              ref={commandMenuRef}
+              query={activeCommand.query}
+              onSelect={onSelect}
+            />
+          </div>
+        )}
       </EuiPopover>
     </div>
   );
