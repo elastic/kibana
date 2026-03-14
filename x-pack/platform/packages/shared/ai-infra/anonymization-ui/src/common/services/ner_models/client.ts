@@ -7,11 +7,21 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 
+export interface TrainedModelDeploymentStats {
+  state?: string;
+  allocation_status?: {
+    state?: string;
+  };
+  nodes?: Array<{
+    routing_state?: {
+      routing_state?: string;
+    };
+  }>;
+}
+
 export interface TrainedModelStatsResponse {
   trained_model_stats?: Array<{
-    deployment_stats?: {
-      state?: string;
-    };
+    deployment_stats?: TrainedModelDeploymentStats;
   }>;
 }
 

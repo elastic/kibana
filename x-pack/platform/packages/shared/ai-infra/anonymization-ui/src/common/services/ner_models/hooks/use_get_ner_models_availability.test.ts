@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
-import { useGetNerModelsAvailability } from './use_get_ner_models_availability';
+import { buildNerModelsAvailabilityQueryFn } from './use_get_ner_models_availability';
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn(),
-}));
-
-describe('useGetNerModelsAvailability', () => {
+describe('buildNerModelsAvailabilityQueryFn', () => {
   const getTrainedModelStats = jest.fn();
   const client = { getTrainedModelStats };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useQuery).mockImplementation((params: unknown) => params as never);
   });
 
   it('returns unavailable model ids when deployment is not started', async () => {
@@ -30,43 +24,22 @@ describe('useGetNerModelsAvailability', () => {
         trained_model_stats: [{ deployment_stats: { state: 'stopped' } }],
       });
 
-    const query = useGetNerModelsAvailability({
-      client,
-      modelIds: ['model-a', 'model-b'],
-      enabled: true,
-    }) as {
-      queryFn: () => Promise<unknown>;
-    };
-
-    await expect(query.queryFn()).resolves.toEqual(['model-b']);
+    const queryFn = buildNerModelsAvailabilityQueryFn(client, ['model-a', 'model-b']);
+    await expect(queryFn()).resolves.toEqual(['model-b']);
   });
 
   it('marks model as unavailable when stats request fails', async () => {
     getTrainedModelStats.mockRejectedValue(new Error('not found'));
 
-    const query = useGetNerModelsAvailability({
-      client,
-      modelIds: ['model-a'],
-      enabled: true,
-    }) as {
-      queryFn: () => Promise<unknown>;
-    };
-
-    await expect(query.queryFn()).resolves.toEqual(['model-a']);
+    const queryFn = buildNerModelsAvailabilityQueryFn(client, ['model-a']);
+    await expect(queryFn()).resolves.toEqual(['model-a']);
   });
 
   it('does not mark model as unavailable when stats request is unauthorized', async () => {
     getTrainedModelStats.mockRejectedValue({ statusCode: 403 });
 
-    const query = useGetNerModelsAvailability({
-      client,
-      modelIds: ['model-a'],
-      enabled: true,
-    }) as {
-      queryFn: () => Promise<unknown>;
-    };
-
-    await expect(query.queryFn()).resolves.toEqual([]);
+    const queryFn = buildNerModelsAvailabilityQueryFn(client, ['model-a']);
+    await expect(queryFn()).resolves.toEqual([]);
   });
 
   it('treats fully allocated deployments as available', async () => {
@@ -82,14 +55,7 @@ describe('useGetNerModelsAvailability', () => {
       ],
     });
 
-    const query = useGetNerModelsAvailability({
-      client,
-      modelIds: ['model-a'],
-      enabled: true,
-    }) as {
-      queryFn: () => Promise<unknown>;
-    };
-
-    await expect(query.queryFn()).resolves.toEqual([]);
+    const queryFn = buildNerModelsAvailabilityQueryFn(client, ['model-a']);
+    await expect(queryFn()).resolves.toEqual([]);
   });
 });
