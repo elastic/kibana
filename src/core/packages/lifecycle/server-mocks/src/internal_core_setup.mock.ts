@@ -65,6 +65,9 @@ export function createInternalCoreSetupMock() {
     pricing: pricingServiceMock.createSetupContract(),
     injection: injectionServiceMock.createInternalSetupContract(),
     dataStreams: dataStreamServiceMock.createSetupContract(),
+    zodRegistry: {
+      registerZodV4Component: jest.fn(),
+    },
   });
   return setupDeps;
 }

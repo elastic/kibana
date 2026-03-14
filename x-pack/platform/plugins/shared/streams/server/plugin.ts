@@ -52,6 +52,7 @@ import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/proc
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
 import { InsightService } from './lib/significant_events/insights/client/insight_service';
+import { registerStreamsOasComponents } from './register_oas_components';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 
@@ -97,6 +98,8 @@ export class StreamsPlugin
       config: this.config,
       logger: this.logger,
     } as StreamsServer;
+
+    registerStreamsOasComponents({ zodRegistry: core.zodRegistry });
 
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(

@@ -92,6 +92,9 @@ export function createCoreSetupMock({
     pricing: pricingServiceMock.createSetupContract(),
     injection: injectionServiceMock.createSetupContract(),
     dataStreams: dataStreamServiceMock.createSetupContract(),
+    zodRegistry: {
+      registerZodV4Component: jest.fn(),
+    },
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),

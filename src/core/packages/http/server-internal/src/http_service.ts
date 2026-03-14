@@ -16,6 +16,7 @@ import { schema } from '@kbn/config-schema';
 import { pick, Semaphore } from '@kbn/std';
 import {
   generateOpenApiDocument,
+  registerZodV4Component,
   type GenerateOpenApiDocumentOptionsFilters,
 } from '@kbn/router-to-openapispec';
 import type { Logger } from '@kbn/logging';
@@ -230,6 +231,10 @@ export class HttpService
         contextName: ContextName,
         provider: IContextProvider<Context, ContextName>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
+
+      zodRegistry: {
+        registerZodV4Component,
+      },
     };
 
     return this.internalSetup;

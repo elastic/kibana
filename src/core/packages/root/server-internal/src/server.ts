@@ -465,6 +465,7 @@ export class Server {
       userProfile: userProfileSetup,
       injection: injectionSetup,
       dataStreams: dataStreamsSetup,
+      zodRegistry: httpSetup.zodRegistry,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);

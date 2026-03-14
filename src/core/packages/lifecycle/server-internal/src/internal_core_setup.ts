@@ -18,7 +18,7 @@ import type { InternalContextSetup } from '@kbn/core-http-context-server-interna
 import type { InternalDeprecationsServiceSetup } from '@kbn/core-deprecations-server-internal';
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { InternalHttpResourcesSetup } from '@kbn/core-http-resources-server-internal';
-import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { InternalHttpServiceSetup, ZodRegistrySetup } from '@kbn/core-http-server-internal';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
 import type { InternalRenderingServiceSetup } from '@kbn/core-rendering-server-internal';
@@ -64,4 +64,5 @@ export interface InternalCoreSetup {
   pricing: PricingServiceSetup;
   injection: InternalCoreDiServiceSetup;
   dataStreams: DataStreamsSetup;
+  zodRegistry: ZodRegistrySetup;
 }

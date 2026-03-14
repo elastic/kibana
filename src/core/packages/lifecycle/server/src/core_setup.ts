@@ -103,6 +103,17 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   injection: CoreDiServiceSetup;
   /** {@link DataStreamSetup} */
   dataStreams: DataStreamsSetup;
+  zodRegistry: {
+    /**
+     * Register a Zod v4 schema so that the OAS converter emits it as a named
+     * `$ref: '#/components/schemas/<name>'` instead of inlining it or using an
+     * auto-generated name.
+     *
+     * Call once per schema at plugin setup time. The name must be unique across
+     * all registered schemas and must follow `[a-zA-Z0-9._-]+`.
+     */
+    registerZodV4Component(schema: object, name: string): void;
+  };
 }
 
 /**

@@ -78,6 +78,7 @@ export interface InternalHttpServiceSetup
     provider: IContextProvider<Context, ContextName>
   ) => IContextContainer;
   getRegisteredDeprecatedApis: () => RouterDeprecatedApiDetails[];
+  zodRegistry: ZodRegistrySetup;
 }
 
 /** @internal */
@@ -96,4 +97,9 @@ export interface GenerateOasArgs {
   pluginId?: string;
   baseUrl: string;
   filters?: GenerateOpenApiDocumentOptionsFilters;
+}
+
+/** @internal */
+export interface ZodRegistrySetup {
+  registerZodV4Component(schema: object, name: string): void;
 }

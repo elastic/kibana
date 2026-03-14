@@ -16,6 +16,7 @@ export type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
+  ZodRegistrySetup,
 } from './src/types';
 export { BasePath } from './src/base_path_service';
 export { type InternalStaticAssets, StaticAssets } from './src/static_assets';
