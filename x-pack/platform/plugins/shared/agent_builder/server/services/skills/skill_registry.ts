@@ -21,6 +21,7 @@ import type { SkillListOptions } from './persisted/client';
 export interface SkillRegistry {
   has(skillId: string): Promise<boolean>;
   get(skillId: string): Promise<InternalSkillDefinition | undefined>;
+  bulkGet(ids: string[]): Promise<Map<string, InternalSkillDefinition>>;
   list(options?: SkillListOptions): Promise<InternalSkillDefinition[]>;
   create(params: PersistedSkillCreateRequest): Promise<InternalSkillDefinition>;
   update(skillId: string, update: PersistedSkillUpdateRequest): Promise<InternalSkillDefinition>;
@@ -68,6 +69,19 @@ export const createSkillRegistry = ({
         return builtin;
       }
       return persistedProvider.get(skillId);
+    },
+
+    async bulkGet(ids) {
+      const builtinResult = await builtinProvider.bulkGet(ids);
+      const remainingIds = ids.filter((id) => !builtinResult.has(id));
+      if (remainingIds.length === 0) {
+        return builtinResult;
+      }
+      const persistedResult = await persistedProvider.bulkGet(remainingIds);
+      for (const [id, skill] of persistedResult) {
+        builtinResult.set(id, skill);
+      }
+      return builtinResult;
     },
 
     async list(options) {

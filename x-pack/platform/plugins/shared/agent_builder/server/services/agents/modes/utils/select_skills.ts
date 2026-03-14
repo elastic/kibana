@@ -8,17 +8,16 @@
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillsService, WritableSkillsStore } from '@kbn/agent-builder-server/runner';
-import { filterSkillsBySelection } from '../../../runner/store/create_store';
 
 /**
- * Fetches all available skills, filters them according to the agent's
- * `skill_ids` configuration, and populates the writable skills store
- * so that the skills volume in the virtual filesystem reflects only
- * the selected skills.
+ * Fetches skills matching the agent's `skill_ids` configuration via bulkGet,
+ * populates the writable skills store so that the skills volume in the virtual
+ * filesystem reflects only the selected skills, and returns the resolved list
+ * for downstream use (e.g. tool selection).
  *
- * Returns the filtered list for downstream use (e.g. tool selection).
+ * When `skill_ids` is undefined or empty, no skills are loaded.
  */
-export const selectAndEnableSkills = async ({
+export const selectSkills = async ({
   skills,
   skillsStore,
   agentConfiguration,
@@ -27,8 +26,12 @@ export const selectAndEnableSkills = async ({
   skillsStore: WritableSkillsStore;
   agentConfiguration: AgentConfiguration;
 }): Promise<InternalSkillDefinition[]> => {
-  const allSkills = await skills.list();
-  const filteredSkills = filterSkillsBySelection(allSkills, agentConfiguration.skill_ids);
+  const skillIds = agentConfiguration.skill_ids ?? [];
+  if (skillIds.length === 0) {
+    return [];
+  }
+
+  const filteredSkills = [...(await skills.bulkGet(skillIds)).values()];
   for (const skill of filteredSkills) {
     skillsStore.add(skill);
   }

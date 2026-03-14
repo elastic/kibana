@@ -21,6 +21,10 @@ export interface SkillsService {
    */
   get(skillId: string): Promise<InternalSkillDefinition | undefined>;
   /**
+   * Fetches multiple skills by ID. Silently omits IDs that are not found.
+   */
+  bulkGet(ids: string[]): Promise<Map<string, InternalSkillDefinition>>;
+  /**
    * Convert a skill-scoped tool to a generic executable tool.
    */
   convertSkillTool(tool: SkillBoundedTool): ExecutableTool;

@@ -26,7 +26,7 @@ import {
   addRoundCompleteEvent,
   extractRound,
   prepareConversation,
-  selectAndEnableSkills,
+  selectSkills,
   selectTools,
   getPendingRound,
   evictInternalEvents,
@@ -106,7 +106,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
 
-  const filteredSkills = await selectAndEnableSkills({ skills, skillsStore, agentConfiguration });
+  const filteredSkills = await selectSkills({ skills, skillsStore, agentConfiguration });
 
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 

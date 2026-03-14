@@ -136,6 +136,7 @@ export const createSkillsServiceMock = (): SkillsServiceMock => {
   return {
     list: jest.fn().mockResolvedValue([]),
     get: jest.fn().mockResolvedValue(undefined),
+    bulkGet: jest.fn().mockResolvedValue(new Map()),
     convertSkillTool: jest.fn(),
   };
 };
@@ -170,6 +171,7 @@ export const createSkillRegistryMock = (): SkillRegistryMock => {
   return {
     has: jest.fn().mockResolvedValue(false),
     get: jest.fn(),
+    bulkGet: jest.fn().mockResolvedValue(new Map()),
     list: jest.fn().mockResolvedValue([]),
     create: jest.fn(),
     update: jest.fn(),

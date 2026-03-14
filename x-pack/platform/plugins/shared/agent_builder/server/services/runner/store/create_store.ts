@@ -11,16 +11,6 @@ import { createResultStore } from './volumes/tool_results';
 import { FileSystemStore } from './store';
 import { createSkillsStore } from './volumes/skills/skills_store';
 
-export const filterSkillsBySelection = <T extends { id: string }>(
-  skills: T[],
-  selection: string[] | undefined
-): T[] => {
-  if (selection === undefined) return skills;
-  if (selection.length === 0) return [];
-  const selectedIds = new Set(selection);
-  return skills.filter((skill) => selectedIds.has(skill.id));
-};
-
 export const createStore = ({ conversation }: { conversation?: Conversation }) => {
   const filesystem = new VirtualFileSystem();
 

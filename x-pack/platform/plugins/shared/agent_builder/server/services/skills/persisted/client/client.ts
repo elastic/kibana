@@ -43,6 +43,11 @@ export interface SkillClient {
    * Deletes all skills associated with the given plugin.
    */
   deleteByPluginId(pluginId: string): Promise<void>;
+  /**
+   * Fetches multiple skills by ID in a single ES query.
+   * Silently omits skills that are not found.
+   */
+  bulkGet(ids: string[]): Promise<SkillPersistedDefinition[]>;
   has(skillId: string): Promise<boolean>;
 }
 
@@ -236,6 +241,22 @@ class SkillClientImpl implements SkillClient {
         },
       },
     });
+  }
+
+  async bulkGet(ids: string[]): Promise<SkillPersistedDefinition[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    const response = await this.storage.getClient().search({
+      query: {
+        bool: {
+          filter: [createSpaceDslFilter(this.space), { terms: { id: ids } }],
+        },
+      },
+      size: ids.length,
+      track_total_hits: false,
+    });
+    return response.hits.hits.map((hit) => fromEs(hit as SkillDocument));
   }
 
   async has(id: string): Promise<boolean> {

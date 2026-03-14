@@ -50,6 +50,7 @@ export const createSkillsService = async ({
         return undefined;
       }
     },
+    bulkGet: (ids) => skillRegistry.bulkGet(ids),
     convertSkillTool: toolConverterFn,
   };
 };

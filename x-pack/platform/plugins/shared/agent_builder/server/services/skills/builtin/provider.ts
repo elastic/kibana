@@ -21,6 +21,16 @@ export const createBuiltinSkillProvider = (skills: SkillDefinition[]): ReadonlyS
       const skill = skillsMap.get(skillId);
       return skill ? convertBuiltinSkill(skill) : undefined;
     },
+    bulkGet: (ids) => {
+      const result = new Map<string, ReturnType<typeof convertBuiltinSkill>>();
+      for (const id of ids) {
+        const skill = skillsMap.get(id);
+        if (skill) {
+          result.set(id, convertBuiltinSkill(skill));
+        }
+      }
+      return result;
+    },
     list: (options?: SkillListOptions) => {
       const converted = [...skillsMap.values()].map(convertBuiltinSkill);
       if (options?.summaryOnly) {
