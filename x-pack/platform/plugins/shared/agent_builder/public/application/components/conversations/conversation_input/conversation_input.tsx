@@ -23,6 +23,7 @@ import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id'
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import {
   useAgentId,
+  useConversationTitle,
   useHasActiveConversation,
   useIsAwaitingPrompt,
 } from '../../../hooks/use_conversation';
@@ -118,6 +119,25 @@ const enabledPlaceholder = i18n.translate(
   }
 );
 
+const getMessageEditorAriaLabel = ({
+  isNewConversation,
+  conversationTitle,
+}: {
+  isNewConversation: boolean;
+  conversationTitle: string;
+}): string | undefined => {
+  if (isNewConversation) {
+    return i18n.translate(
+      'xpack.agentBuilder.conversationInput.messageEditor.newConversationLabel',
+      { defaultMessage: 'New conversation, Message input' }
+    );
+  }
+  return i18n.translate('xpack.agentBuilder.conversationInput.messageEditor.conversationLabel', {
+    defaultMessage: '{title} conversation, Message input',
+    values: { title: conversationTitle },
+  });
+};
+
 export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
   const { sendMessage, pendingMessage, error, isResuming } = useSendMessage();
@@ -161,6 +181,13 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   }, [attachments, shouldHideAttachments]);
 
   const isNewConversation = !conversationId;
+  const { title: conversationTitle } = useConversationTitle();
+
+  const messageEditorAriaLabel = getMessageEditorAriaLabel({
+    isNewConversation,
+    conversationTitle,
+  });
+
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
     if (initialMessage && !autoSendInitialMessage && isNewConversation) {
@@ -210,6 +237,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
           onSubmit={handleSubmit}
           disabled={isInputDisabled}
           placeholder={placeholder}
+          ariaLabel={messageEditorAriaLabel}
           data-test-subj="agentBuilderConversationInputEditor"
         />
       </EuiFlexItem>
