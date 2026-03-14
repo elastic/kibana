@@ -234,7 +234,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/security/get_started');
       expect(currentURL.hash).to.eql('#some=hash-value');
 
@@ -304,7 +304,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/security/get_started');
       expect(currentURL.hash).to.eql('#some=hash-value');
 
@@ -340,7 +340,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/security/get_started');
       expect(currentURL.hash).to.eql('#some=hash-value');
 
@@ -409,7 +409,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/security/get_started');
       expect(currentURL.hash).to.eql('#some=hash-value');
 

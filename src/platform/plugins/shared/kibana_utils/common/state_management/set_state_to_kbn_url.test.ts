@@ -103,5 +103,21 @@ describe('set_state_to_kbn_url', () => {
         `"http://localhost:5601/oxf/app/kibana/yourApp?_a=(tab:other)&_b=(f:test,i:'',l:'')"`
       );
     });
+
+    it('preserves hash-based relative urls without adding a leading slash', () => {
+      const newUrl = setStateToKbnUrl('_g', {}, { useHash: false }, '#/create');
+      expect(newUrl).toBe('#/create?_g=()');
+    });
+
+    it('preserves app paths without adding a trailing slash before the query', () => {
+      const newUrl = setStateToKbnUrl(
+        '_a',
+        { tab: 'other' },
+        { useHash: false, storeInHashQuery: false },
+        '/app/management/ml/anomaly_detection'
+      );
+
+      expect(newUrl).toBe('/app/management/ml/anomaly_detection?_a=(tab:other)');
+    });
   });
 });

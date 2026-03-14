@@ -9,8 +9,6 @@
 
 import type { ParsedQuery } from 'query-string';
 
-const ABSOLUTE_URL_BASE = 'http://localhost';
-
 interface ParsedUrl {
   auth: string | null;
   hash: string | null;
@@ -31,6 +29,30 @@ const parseAbsoluteUrl = (url: string): URL | undefined => {
   } catch {
     return undefined;
   }
+};
+
+const parseProtocolRelativeUrl = (url: string): URL | undefined => {
+  if (!url.startsWith('//')) {
+    return undefined;
+  }
+
+  try {
+    return new URL(`http:${url}`);
+  } catch {
+    return undefined;
+  }
+};
+
+const splitRelativeUrl = (url: string) => {
+  const hashIndex = url.indexOf('#');
+  const beforeHash = hashIndex === -1 ? url : url.slice(0, hashIndex);
+  const hash = hashIndex === -1 ? null : url.slice(hashIndex) || null;
+  const searchIndex = beforeHash.indexOf('?');
+  const pathname =
+    searchIndex === -1 ? beforeHash || null : beforeHash.slice(0, searchIndex) || null;
+  const search = searchIndex === -1 ? null : beforeHash.slice(searchIndex) || null;
+
+  return { hash, pathname, search };
 };
 
 const parseQuery = (searchParams: URLSearchParams): ParsedQuery => {
@@ -68,21 +90,41 @@ const formatAuth = (username: string, password: string): string | null => {
 
 export const parseUrl = (url: string): ParsedUrl => {
   const absoluteUrl = parseAbsoluteUrl(url);
-  const parsedUrl = absoluteUrl ?? new URL(url, ABSOLUTE_URL_BASE);
+  const protocolRelativeUrl = absoluteUrl ? undefined : parseProtocolRelativeUrl(url);
+  const parsedUrl = absoluteUrl ?? protocolRelativeUrl;
+
+  if (!parsedUrl) {
+    const { hash, pathname, search } = splitRelativeUrl(url);
+
+    return {
+      auth: null,
+      hash,
+      host: null,
+      hostname: null,
+      path: pathname || search ? `${pathname ?? ''}${search ?? ''}` : null,
+      pathname,
+      port: null,
+      protocol: null,
+      query: parseQuery(new URLSearchParams(search?.slice(1) ?? '')),
+      search,
+      slashes: null,
+    };
+  }
+
   const search = parsedUrl.search || null;
 
   return {
     auth: formatAuth(parsedUrl.username, parsedUrl.password),
     hash: parsedUrl.hash || null,
-    host: absoluteUrl ? parsedUrl.host || null : null,
-    hostname: absoluteUrl ? parsedUrl.hostname || null : null,
+    host: parsedUrl.host || null,
+    hostname: parsedUrl.hostname || null,
     path: parsedUrl.pathname || search ? `${parsedUrl.pathname}${parsedUrl.search}` : null,
     pathname: parsedUrl.pathname || null,
-    port: absoluteUrl ? parsedUrl.port || null : null,
+    port: parsedUrl.port || null,
     protocol: absoluteUrl ? parsedUrl.protocol || null : null,
     query: parseQuery(parsedUrl.searchParams),
     search,
-    slashes: absoluteUrl ? true : null,
+    slashes: true,
   };
 };
 

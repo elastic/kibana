@@ -13,14 +13,20 @@ import { AppStatus } from '@kbn/core-application-browser';
 import type { PluginFunctionalProviderContext } from '../../services';
 import '@kbn/core-app-status-plugin/public/types';
 
-const getKibanaUrl = (pathname?: string, search?: string) =>
-  Url.format({
-    protocol: 'http:',
-    hostname: process.env.TEST_KIBANA_HOST || 'localhost',
-    port: process.env.TEST_KIBANA_PORT || '5620',
-    pathname,
-    search,
-  });
+const getKibanaUrl = (pathname?: string, search?: string) => {
+  const url = new URL(
+    pathname ?? '/',
+    `http://${process.env.TEST_KIBANA_HOST || 'localhost'}:${
+      process.env.TEST_KIBANA_PORT || '5620'
+    }`
+  );
+
+  if (search !== undefined) {
+    url.search = search;
+  }
+
+  return pathname === undefined && search === undefined ? url.origin : url.toString();
+};
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);

@@ -58,6 +58,14 @@ describe('modifyUrl()', () => {
       })
     ).toEqual('mail:localhost');
   });
+
+  test('preserves relative paths without adding a leading slash', () => {
+    expect(modifyUrl('a/b', (parsed) => parsed)).toEqual('a/b');
+  });
+
+  test('preserves hash-only relative urls without adding a pathname', () => {
+    expect(modifyUrl('#/path?x=1', (parsed) => parsed)).toEqual('#/path?x=1');
+  });
 });
 
 describe('isRelativeUrl()', () => {
