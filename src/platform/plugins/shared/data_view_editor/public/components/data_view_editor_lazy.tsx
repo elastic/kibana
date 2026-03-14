@@ -12,7 +12,9 @@ import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
 import type { DataViewEditorProps } from '../types';
 
-const DataViewFlyoutContentContainer = lazy(() => import('./data_view_flyout_content_container'));
+const DataViewFlyoutContentContainer = lazy(
+  () => import('./data_view_flyout_content_container.js')
+);
 
 export const DataViewEditorLazy = (props: DataViewEditorProps) => {
   const { euiTheme } = useEuiTheme();

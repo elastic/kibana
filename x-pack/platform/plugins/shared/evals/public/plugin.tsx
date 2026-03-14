@@ -34,7 +34,7 @@ export class EvalsPublicPlugin
         keywords: ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'],
         capabilitiesId: PLUGIN_ID,
         mount: async (mountParams) => {
-          const { mountManagementSection } = await import('./management_section/mount_section');
+          const { mountManagementSection } = await import('./management_section/mount_section.js');
           return mountManagementSection({ core: coreSetup, mountParams });
         },
       });

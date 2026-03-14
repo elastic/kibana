@@ -53,10 +53,10 @@ export const usersManagementApp = Object.freeze({
           { RolesAPIClient },
         ] = await Promise.all([
           getStartServices(), // TODO: remove this and write test.
-          import('./users_grid'),
-          import('./edit_user'),
-          import('./user_api_client'),
-          import('../roles'),
+          import('./users_grid/index.js'),
+          import('./edit_user/index.js'),
+          import('./user_api_client.js'),
+          import('../roles/index.js'),
         ]);
 
         render(

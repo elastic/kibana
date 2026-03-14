@@ -99,7 +99,7 @@ export const getDatatable = (
   },
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/
-    const { datatableFn } = await import('../../impl/async_fns');
+    const { datatableFn } = await import('../../impl/async_fns.js');
     return datatableFn(getFormatFactory)(...args);
   },
 });

@@ -12,7 +12,7 @@ import { PanelLoader } from '@kbn/panel-loader';
 import type { ReactExpressionRendererProps } from './react_expression_renderer';
 
 const ReactExpressionRendererComponent = lazy(async () => {
-  const { ReactExpressionRenderer } = await import('./react_expression_renderer');
+  const { ReactExpressionRenderer } = await import('./react_expression_renderer/index.js');
 
   return { default: ReactExpressionRenderer };
 });

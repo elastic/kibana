@@ -95,7 +95,7 @@ export function prepareInlineEditPanel(
       return null;
     }
 
-    const { getEditLensConfiguration } = await import('../../async_services');
+    const { getEditLensConfiguration } = await import('../../async_services.js');
     const Component = await getEditLensConfiguration(
       coreStart,
       startDependencies,

@@ -18,7 +18,7 @@ export class LegacyMetricVisualization {
   setup(core: CoreSetup, { editorFrame, charts }: LegacyMetricVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
       const [{ getLegacyMetricVisualization: getMetricVisualization }, paletteService] =
-        await Promise.all([import('../../async_services'), charts.palettes.getPalettes()]);
+        await Promise.all([import('../../async_services.js'), charts.palettes.getPalettes()]);
 
       return getMetricVisualization({ paletteService });
     });

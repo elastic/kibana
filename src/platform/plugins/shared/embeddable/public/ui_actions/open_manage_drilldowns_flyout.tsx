@@ -84,7 +84,9 @@ export const openManageDrilldownsFlyout: ActionDefinition<EmbeddableApiContext> 
       core,
       parentApi: embeddable.parentApi,
       loadContent: async ({ closeFlyout }) => {
-        const { getDrilldownManagerUi } = await import('../drilldowns/drilldown_manager_ui');
+        const { getDrilldownManagerUi } = await import(
+          '../drilldowns/drilldown_manager_ui/index.js'
+        );
         return getDrilldownManagerUi({
           entries: getDrilldownRegistryEntries(),
           initialRoute: '/manage',

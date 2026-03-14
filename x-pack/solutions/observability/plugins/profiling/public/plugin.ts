@@ -126,7 +126,7 @@ export class ProfilingPlugin
       async mount({ element, history, theme$, setHeaderActionMenu }: AppMountParameters) {
         const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
-        const { renderApp } = await import('./app');
+        const { renderApp } = await import('./app.js');
 
         function pushKueryToSubject(location: Location) {
           const query = new URLSearchParams(location.search);

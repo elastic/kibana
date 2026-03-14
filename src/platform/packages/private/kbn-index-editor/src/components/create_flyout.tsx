@@ -50,7 +50,7 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
   }
 
   const LazyFlyoutContent = lazy(async () => {
-    const { FlyoutContent } = await import('./flyout_content');
+    const { FlyoutContent } = await import('./flyout_content.js');
     return {
       default: FlyoutContent,
     };

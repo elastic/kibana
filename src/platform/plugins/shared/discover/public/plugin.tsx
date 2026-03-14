@@ -186,7 +186,7 @@ export class DiscoverPlugin
             core.getStartServices(),
             getHistoryService(),
             getEbtManager(),
-            import('./application'),
+            import('./application/index.js'),
           ]);
 
         // Store the current scoped history so initializeKbnUrlTracking can access it
@@ -347,7 +347,7 @@ export class DiscoverPlugin
       { createProfileProviderSharedServices, registerProfileProviders },
     ] = await Promise.all([
       this.createProfileServices(),
-      import('./context_awareness/profile_providers'),
+      import('./context_awareness/profile_providers/index.js'),
     ]);
 
     const [sharedServices, services] = await Promise.all([
@@ -480,9 +480,9 @@ export class DiscoverPlugin
   }
 }
 
-const getLocators = () => import('./plugin_imports/locators');
-const getEmbeddableServices = () => import('./plugin_imports/embeddable_services');
-const getSharedServices = () => import('./plugin_imports/shared_services');
+const getLocators = () => import('./plugin_imports/locators.js');
+const getEmbeddableServices = () => import('./plugin_imports/embeddable_services.js');
+const getSharedServices = () => import('./plugin_imports/shared_services.js');
 
 const getHistoryService = once(async () => {
   const { HistoryService } = await getSharedServices();

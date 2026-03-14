@@ -112,7 +112,7 @@ export class VegaPlugin implements Plugin<void, void> {
     setUsageCollectionStart(deps.usageCollection);
 
     deps.uiActions.registerActionAsync('addVegaPanelAction', async () => {
-      const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
+      const { getAddVegaPanelAction } = await import('./add_vega_panel_action.js');
       return getAddVegaPanelAction(deps);
     });
     deps.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addVegaPanelAction');

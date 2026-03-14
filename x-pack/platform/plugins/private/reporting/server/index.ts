@@ -17,7 +17,7 @@ export type { ReportingSetup, ReportingStart } from './types';
 
 // @internal
 export const plugin = async (initContext: PluginInitializerContext<ReportingConfigType>) => {
-  const { ReportingPlugin } = await import('./plugin');
+  const { ReportingPlugin } = await import('./plugin.js');
   return new ReportingPlugin(initContext);
 };
 

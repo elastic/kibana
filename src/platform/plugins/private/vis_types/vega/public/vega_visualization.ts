@@ -92,10 +92,10 @@ export const createVegaVisualization = (
         };
 
         if (vegaParser.useMap) {
-          const { VegaMapView } = await import('./vega_view/vega_map_view/view');
+          const { VegaMapView } = await import('./vega_view/vega_map_view/view.js');
           this.vegaView = new VegaMapView(vegaViewParams);
         } else {
-          const { VegaView: VegaViewClass } = await import('./async_services');
+          const { VegaView: VegaViewClass } = await import('./async_services.js');
           this.vegaView = new VegaViewClass(vegaViewParams);
         }
         await this.vegaView?.init();

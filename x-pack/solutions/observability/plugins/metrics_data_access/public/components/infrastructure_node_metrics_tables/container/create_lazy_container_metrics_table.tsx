@@ -10,7 +10,7 @@ import React, { lazy, Suspense } from 'react';
 import type { MetricsDataClient } from '../../../lib/metrics_client';
 import type { NodeMetricsTableProps } from '../shared';
 const LazyIntegratedContainerMetricsTable = lazy(
-  () => import('./integrated_container_metrics_table')
+  () => import('./integrated_container_metrics_table.js')
 );
 
 export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: MetricsDataClient) {

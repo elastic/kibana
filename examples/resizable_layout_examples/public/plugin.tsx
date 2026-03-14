@@ -27,7 +27,7 @@ export class ResizableLayoutExamplesPlugin implements Plugin {
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
         // Load application bundle
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         // Render the application
         return renderApp(coreStart, params);
       },

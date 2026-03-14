@@ -61,7 +61,7 @@ export class TriggersActionsUiExamplePlugin
       },
       mount: async (params: AppMountParameters) => {
         const [coreStart, devStart] = await core.getStartServices();
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         return renderApp(coreStart, devStart, params);
       },
     });

@@ -130,10 +130,28 @@ module.exports = (request, options) => {
       );
     }
 
-    return resolve.sync(`./${pkgDir}${sub.length ? `/${sub.join('/')}` : ''}`, {
-      basedir: REPO_ROOT,
-      extensions: options.extensions,
-    });
+    const kbnReq = `./${pkgDir}${sub.length ? `/${sub.join('/')}` : ''}`;
+    try {
+      return resolve.sync(kbnReq, {
+        basedir: REPO_ROOT,
+        extensions: options.extensions,
+      });
+    } catch (error) {
+      if (error.code === 'MODULE_NOT_FOUND' && kbnReq.endsWith('.js')) {
+        const base = kbnReq.slice(0, -3);
+        for (const ext of ['.ts', '.tsx']) {
+          try {
+            return resolve.sync(base + ext, {
+              basedir: REPO_ROOT,
+              extensions: options.extensions,
+            });
+          } catch {
+            // try next extension
+          }
+        }
+      }
+      throw error;
+    }
   }
 
   try {
@@ -142,6 +160,20 @@ module.exports = (request, options) => {
       extensions: options.extensions,
     });
   } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND' && request.endsWith('.js')) {
+      const base = request.slice(0, -3);
+      for (const ext of ['.ts', '.tsx']) {
+        try {
+          return resolve.sync(base + ext, {
+            basedir: options.basedir,
+            extensions: options.extensions,
+          });
+        } catch {
+          // try next extension
+        }
+      }
+    }
+
     if (error.code === 'MODULE_NOT_FOUND') {
       return options.defaultResolver(request, options);
     }

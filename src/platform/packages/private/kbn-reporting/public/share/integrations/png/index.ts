@@ -22,7 +22,7 @@ export const reportingPNGExportShareIntegration = ({
     id: 'imageReports',
     groupId: 'export',
     getShareIntegrationConfig: async (...args) => {
-      const { getShareMenuItems } = await import('./png_export_config');
+      const { getShareMenuItems } = await import('./png_export_config.js');
       return getShareMenuItems({ apiClient, startServices$ })(...args);
     },
     prerequisiteCheck({ license, capabilities, objectType }) {

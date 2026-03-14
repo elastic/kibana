@@ -12,7 +12,7 @@ import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_p
 import type { StackTracesProps } from './stack_traces';
 
 const LazyEmbeddableStackTraces = dynamic(async () => {
-  const Component = await import('./embeddable_stack_traces');
+  const Component = await import('./embeddable_stack_traces.js');
   return { default: Component.EmbeddableStackTraces };
 });
 

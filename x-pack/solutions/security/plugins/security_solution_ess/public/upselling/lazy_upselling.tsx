@@ -11,7 +11,7 @@ import { withSuspenseUpsell } from '@kbn/security-solution-upselling/helpers';
 
 export const EntityAnalyticsUpsellingSectionLazy = withSuspenseUpsell(
   lazy(() =>
-    import('./sections/entity_analytics_upselling').then(
+    import('./sections/entity_analytics_upselling.js').then(
       ({ EntityAnalyticsUpsellingSectionESS }) => ({
         default: EntityAnalyticsUpsellingSectionESS,
       })
@@ -21,7 +21,7 @@ export const EntityAnalyticsUpsellingSectionLazy = withSuspenseUpsell(
 
 export const SiemMigrationsStartUpsellSectionLazy = withSuspenseUpsell(
   lazy(() =>
-    import('./sections/siem_migration_start').then(({ SiemMigrationStartUpsellSection }) => ({
+    import('./sections/siem_migration_start.js').then(({ SiemMigrationStartUpsellSection }) => ({
       default: SiemMigrationStartUpsellSection,
     }))
   )
@@ -29,7 +29,7 @@ export const SiemMigrationsStartUpsellSectionLazy = withSuspenseUpsell(
 
 export const SiemMigrationsTranslatedRulesUpsellPageLazy = withSuspenseUpsell(
   lazy(() =>
-    import('./pages/siem_migrations_translated_rules').then(
+    import('./pages/siem_migrations_translated_rules.js').then(
       ({ SiemMigrationsTranslatedRulesPage }) => ({
         default: SiemMigrationsTranslatedRulesPage,
       })
@@ -38,20 +38,20 @@ export const SiemMigrationsTranslatedRulesUpsellPageLazy = withSuspenseUpsell(
 );
 
 export const EntityAnalyticsUpsellingPageLazy = lazy(() =>
-  import('./pages/entity_analytics_upselling').then(({ EntityAnalyticsUpsellingPageESS }) => ({
+  import('./pages/entity_analytics_upselling.js').then(({ EntityAnalyticsUpsellingPageESS }) => ({
     default: EntityAnalyticsUpsellingPageESS,
   }))
 );
 
 export const AttackDiscoveryUpsellingPageLazy = lazy(() =>
-  import('./pages/attack_discovery').then(({ AttackDiscoveryUpsellingPageESS }) => ({
+  import('./pages/attack_discovery/index.js').then(({ AttackDiscoveryUpsellingPageESS }) => ({
     default: AttackDiscoveryUpsellingPageESS,
   }))
 );
 
 export const AIValueUpsellingPageLazy = withSuspenseUpsell(
   lazy(() =>
-    import('./pages/ai_value').then(({ AIValueUpsellingPageESS }) => ({
+    import('./pages/ai_value/index.js').then(({ AIValueUpsellingPageESS }) => ({
       default: AIValueUpsellingPageESS,
     }))
   )

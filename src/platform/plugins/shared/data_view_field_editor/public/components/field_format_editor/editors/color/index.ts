@@ -14,5 +14,5 @@ import { formatId } from './constants';
 export type { ColorFormatEditor } from './color';
 export const colorFormatEditorFactory: FieldFormatEditorFactory<
   ColorFormatEditorFormatParams
-> = () => import('./color').then((m) => m.ColorFormatEditor);
+> = () => import('./color.js').then((m) => m.ColorFormatEditor);
 colorFormatEditorFactory.formatId = formatId;

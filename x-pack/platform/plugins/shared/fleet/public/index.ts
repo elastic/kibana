@@ -88,7 +88,7 @@ export type { InputFieldProps } from './applications/fleet/sections/agent_policy
 
 export const LazyPackagePolicyInputVarField = lazy(() =>
   import(
-    './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field'
+    './applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.js'
   ).then((module) => ({ default: module.PackagePolicyInputVarField }))
 );
 export type { PackageListGridProps } from './applications/integrations/sections/epm/components/package_list_grid';
@@ -97,16 +97,16 @@ export type { IntegrationCardItem } from './applications/integrations/sections/e
 export type { CategoryFacet } from './applications/integrations/sections/epm/screens/home/category_facets';
 
 export const PackageList = () => {
-  return import('./applications/integrations/sections/epm/components/package_list_grid');
+  return import('./applications/integrations/sections/epm/components/package_list_grid/index.js');
 };
 export const AvailablePackagesHook = () => {
   return import(
-    './applications/integrations/sections/epm/screens/home/hooks/use_available_packages'
+    './applications/integrations/sections/epm/screens/home/hooks/use_available_packages.js'
   );
 };
 
 export const LazyPackageCard = lazy(() =>
-  import('./applications/integrations/sections/epm/components/package_card').then((module) => ({
+  import('./applications/integrations/sections/epm/components/package_card.js').then((module) => ({
     default: module.PackageCard,
   }))
 );
@@ -119,7 +119,7 @@ export { NamespaceComboBox } from './components/namespace_combo_box';
 
 // Cloud Connector Setup - lazy loaded component for external plugins
 export const LazyCloudConnectorSetup = lazy(() =>
-  import('./components/cloud_connector').then((module) => ({
+  import('./components/cloud_connector/index.js').then((module) => ({
     default: module.CloudConnectorSetup,
   }))
 );

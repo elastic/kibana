@@ -16,19 +16,19 @@ export function registerCasesSteps(
   }
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./get_case').then((m) => m.getCaseStepDefinition)
+    import('./get_case.js').then((m) => m.getCaseStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./create_case').then((m) => m.createCaseStepDefinition)
+    import('./create_case.js').then((m) => m.createCaseStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./update_case').then((m) => m.updateCaseStepDefinition)
+    import('./update_case.js').then((m) => m.updateCaseStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./add_comment').then((m) => m.addCommentStepDefinition)
+    import('./add_comment.js').then((m) => m.addCommentStepDefinition)
   );
 
   // Leaving this in for now. We need to get support for reflective value lookup first.

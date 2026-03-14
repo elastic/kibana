@@ -15,7 +15,7 @@ import { REGION_MAP_RENDER } from './types';
 import { getCore } from '../../kibana_services';
 
 const Component = dynamic(async () => {
-  const { RegionMapVisualization } = await import('./region_map_visualization');
+  const { RegionMapVisualization } = await import('./region_map_visualization.js');
   return {
     default: RegionMapVisualization,
   };

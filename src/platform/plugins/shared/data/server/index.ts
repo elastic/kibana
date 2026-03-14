@@ -94,7 +94,7 @@ export { getTime, parseInterval } from '../common';
  */
 
 export async function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
-  const { DataServerPlugin } = await import('./plugin');
+  const { DataServerPlugin } = await import('./plugin.js');
   return new DataServerPlugin(initializerContext);
 }
 

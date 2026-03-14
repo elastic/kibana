@@ -12,7 +12,7 @@ export { config } from './config';
 export const plugin: PluginInitializer = async (
   pluginInitializerContext: PluginInitializerContext<SampleDataIngestConfig>
 ) => {
-  const { SampleDataIngestPlugin } = await import('./plugin');
+  const { SampleDataIngestPlugin } = await import('./plugin.js');
 
   return new SampleDataIngestPlugin(pluginInitializerContext);
 };

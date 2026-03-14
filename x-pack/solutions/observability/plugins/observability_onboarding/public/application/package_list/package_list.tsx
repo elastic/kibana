@@ -9,7 +9,7 @@ import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import React, { Suspense, lazy } from 'react';
 
 export const LazyPackageList = lazy(async () => ({
-  default: await import('@kbn/fleet-plugin/public')
+  default: await import('@kbn/fleet-plugin/public/index.js')
     .then((module) => module.PackageList())
     .then((pkg) => pkg.PackageListGrid),
 }));

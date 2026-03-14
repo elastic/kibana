@@ -8,6 +8,6 @@
 export { config } from './config';
 
 export const plugin = async () => {
-  const { CloudDataMigrationPlugin } = await import('./plugin');
+  const { CloudDataMigrationPlugin } = await import('./plugin.js');
   return new CloudDataMigrationPlugin();
 };

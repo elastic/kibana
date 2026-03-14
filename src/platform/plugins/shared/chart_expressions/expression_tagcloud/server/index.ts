@@ -8,6 +8,6 @@
  */
 
 export async function plugin() {
-  const { ExpressionTagcloudPlugin } = await import('./plugin');
+  const { ExpressionTagcloudPlugin } = await import('./plugin.js');
   return new ExpressionTagcloudPlugin();
 }

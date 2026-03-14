@@ -102,7 +102,7 @@ export class EditorFrameService {
       await Promise.all([
         this.loadDatasources(),
         this.loadVisualizations(),
-        import('../async_services'),
+        import('../async_services.js'),
       ]);
 
     return persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc, services);
@@ -124,7 +124,7 @@ export class EditorFrameService {
       const [resolvedDatasources, resolvedVisualizations, { EditorFrame }] = await Promise.all([
         this.loadDatasources(),
         this.loadVisualizations(),
-        import('../async_services'),
+        import('../async_services.js'),
       ]);
 
       return {

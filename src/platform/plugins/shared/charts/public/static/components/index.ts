@@ -22,7 +22,7 @@ export * from './warnings';
  * the withSuspense` HOC to load this component.
  */
 export const ColorPickerLazy = React.lazy(() =>
-  import('./color_picker').then(({ ColorPicker }) => ({
+  import('./color_picker.js').then(({ ColorPicker }) => ({
     default: ColorPicker,
   }))
 );
@@ -39,7 +39,7 @@ export const ColorPicker = withSuspense(ColorPickerLazy);
  * the withSuspense` HOC to load this component.
  */
 export const LegendToggleLazy = React.lazy(() =>
-  import('./legend_toggle').then(({ LegendToggle }) => ({
+  import('./legend_toggle.js').then(({ LegendToggle }) => ({
     default: LegendToggle,
   }))
 );

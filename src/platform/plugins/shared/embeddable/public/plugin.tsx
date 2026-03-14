@@ -44,12 +44,12 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
     uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, OPEN_FLYOUT_ADD_DRILLDOWN, async () => {
-      const { openCreateDrilldownFlyout } = await import('./async_module');
+      const { openCreateDrilldownFlyout } = await import('./async_module.js');
       return openCreateDrilldownFlyout;
     });
 
     uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, OPEN_FLYOUT_EDIT_DRILLDOWN, async () => {
-      const { openManageDrilldownsFlyout } = await import('./async_module');
+      const { openManageDrilldownsFlyout } = await import('./async_module.js');
       return openManageDrilldownsFlyout;
     });
 
@@ -74,7 +74,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
     const embeddableStart: EmbeddableStart = {
       getAddFromLibraryComponent: async () => {
-        const { AddFromLibraryFlyout } = await import('./add_from_library/add_from_library_flyout');
+        const { AddFromLibraryFlyout } = await import(
+          './add_from_library/add_from_library_flyout.js'
+        );
         return AddFromLibraryFlyout;
       },
       getStateTransfer: (storage?: Storage) =>

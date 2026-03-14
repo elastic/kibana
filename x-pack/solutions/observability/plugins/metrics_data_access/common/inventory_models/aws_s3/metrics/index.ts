@@ -30,7 +30,7 @@ export const metrics: InventoryMetricsConfig<S3Aggregations> = {
     'awsS3UploadBytes',
   ],
   getAggregations: async (args) => {
-    const { snapshot } = await import('./snapshot');
+    const { snapshot } = await import('./snapshot/index.js');
     const catalog = new MetricsCatalog(snapshot, args?.schema);
     return catalog;
   },

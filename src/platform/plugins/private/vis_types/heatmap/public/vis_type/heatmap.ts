@@ -149,11 +149,11 @@ export const getHeatmapVisTypeDefinition = ({
   },
   requiresSearch: true,
   navigateToLens: async (vis, timefilter) => {
-    const { convertToLens } = await import('../convert_to_lens');
+    const { convertToLens } = await import('../convert_to_lens/index.js');
     return vis ? convertToLens(vis, timefilter) : null;
   },
   getExpressionVariables: async (vis, timeFilter) => {
-    const { convertToLens } = await import('../convert_to_lens');
+    const { convertToLens } = await import('../convert_to_lens/index.js');
     return {
       canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
     };

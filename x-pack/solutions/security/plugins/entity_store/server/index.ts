@@ -11,6 +11,6 @@ export type { EntityStoreStartContract, EntityStoreCRUDClient } from './types';
 export type { BulkObject, BulkObjectResponse } from './domain/crud';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { EntityStorePlugin } = await import('./plugin');
+  const { EntityStorePlugin } = await import('./plugin.js');
   return new EntityStorePlugin(initializerContext);
 }

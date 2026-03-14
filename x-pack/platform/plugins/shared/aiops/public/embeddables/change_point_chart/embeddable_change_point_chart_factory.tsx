@@ -114,7 +114,7 @@ export const getChangePointChartEmbeddableFactory = (
             },
             loadContent: async ({ closeFlyout }) => {
               const { EmbeddableChangePointUserInput } = await import(
-                './change_point_config_input'
+                './change_point_config_input.js'
               );
               return (
                 <EmbeddableChangePointUserInput

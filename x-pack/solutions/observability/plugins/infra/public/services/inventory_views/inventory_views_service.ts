@@ -27,7 +27,7 @@ export class InventoryViewsService {
 
   private async getClient({ http }: InventoryViewsServiceStartDeps) {
     if (!this.client) {
-      const { InventoryViewsClient } = await import('./inventory_views_client');
+      const { InventoryViewsClient } = await import('./inventory_views_client.js');
       const client = new InventoryViewsClient(http);
       this.client = client;
     }

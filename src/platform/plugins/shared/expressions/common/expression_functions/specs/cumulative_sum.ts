@@ -95,7 +95,7 @@ export const cumulativeSum: ExpressionFunctionCumulativeSum = {
   },
 
   async fn(input, args) {
-    const { cumulativeSumFn } = await import('./cumulative_sum_fn');
+    const { cumulativeSumFn } = await import('./cumulative_sum_fn.js');
     return cumulativeSumFn(input, args);
   },
 };

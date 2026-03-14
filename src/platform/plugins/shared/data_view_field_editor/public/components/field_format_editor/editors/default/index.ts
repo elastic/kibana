@@ -16,5 +16,5 @@ export type { FormatEditorProps } from '../types';
 export type { DefaultFormatEditor } from './default';
 
 export const defaultFormatEditorFactory: FieldFormatEditorFactory = () =>
-  import('./default').then((m) => m.DefaultFormatEditor);
+  import('./default.js').then((m) => m.DefaultFormatEditor);
 defaultFormatEditorFactory.formatId = formatId;

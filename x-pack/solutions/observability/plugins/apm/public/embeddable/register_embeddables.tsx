@@ -24,7 +24,7 @@ export async function registerEmbeddables(
 
   registerReactEmbeddableFactory(APM_ALERTING_LATENCY_CHART_EMBEDDABLE, async () => {
     const { getApmAlertingLatencyChartEmbeddableFactory } = await import(
-      './alerting/alerting_latency_chart/react_embeddable_factory'
+      './alerting/alerting_latency_chart/react_embeddable_factory.js'
     );
 
     return getApmAlertingLatencyChartEmbeddableFactory({ ...deps, coreStart, pluginsStart });
@@ -32,7 +32,7 @@ export async function registerEmbeddables(
 
   registerReactEmbeddableFactory(APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE, async () => {
     const { getApmAlertingThroughputChartEmbeddableFactory } = await import(
-      './alerting/alerting_throughput_chart/react_embeddable_factory'
+      './alerting/alerting_throughput_chart/react_embeddable_factory.js'
     );
 
     return getApmAlertingThroughputChartEmbeddableFactory({ ...deps, coreStart, pluginsStart });
@@ -40,7 +40,7 @@ export async function registerEmbeddables(
 
   registerReactEmbeddableFactory(APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE, async () => {
     const { getApmAlertingFailedTransactionsChartEmbeddableFactory } = await import(
-      './alerting/alerting_failed_transactions_chart/react_embeddable_factory'
+      './alerting/alerting_failed_transactions_chart/react_embeddable_factory.js'
     );
 
     return getApmAlertingFailedTransactionsChartEmbeddableFactory({

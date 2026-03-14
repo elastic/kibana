@@ -31,7 +31,7 @@ export type { dataViewsServiceFactory } from './data_views_service_factory';
  */
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { DataViewsServerPlugin } = await import('./plugin');
+  const { DataViewsServerPlugin } = await import('./plugin.js');
   return new DataViewsServerPlugin(initializerContext);
 }
 

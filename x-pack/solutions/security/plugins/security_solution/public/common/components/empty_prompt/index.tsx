@@ -7,7 +7,7 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingLogo } from '@elastic/eui';
 
-const EmptyPromptLazy = lazy(() => import('./empty_prompt'));
+const EmptyPromptLazy = lazy(() => import('./empty_prompt.js'));
 
 const centerLogoStyle = { display: 'flex', margin: 'auto' };
 

@@ -22,7 +22,7 @@ import {
 import { DataSourceContextProvider } from '../../../contexts/ml';
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../jobs/new_job/pages/job_type')).Page,
+  default: (await import('../../../jobs/new_job/pages/job_type/index.js')).Page,
 }));
 
 export const jobTypeRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({

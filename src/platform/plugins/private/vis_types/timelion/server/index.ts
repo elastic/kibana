@@ -20,6 +20,6 @@ export const config: PluginConfigDescriptor<TimelionConfig> = {
 };
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { TimelionPlugin } = await import('./plugin');
+  const { TimelionPlugin } = await import('./plugin.js');
   return new TimelionPlugin(initializerContext);
 };

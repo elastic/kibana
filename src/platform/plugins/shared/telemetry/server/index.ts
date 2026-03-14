@@ -14,7 +14,7 @@ export { config } from './config';
 export type { TelemetryPluginSetup, TelemetryPluginStart } from './plugin';
 
 export const plugin = async (initializerContext: PluginInitializerContext<TelemetryConfigType>) => {
-  const { TelemetryPlugin } = await import('./plugin');
+  const { TelemetryPlugin } = await import('./plugin.js');
   return new TelemetryPlugin(initializerContext);
 };
 export { getClusterUuids, getLocalStats } from './telemetry_collection';

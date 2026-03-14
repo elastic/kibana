@@ -32,7 +32,7 @@ export class CloudDataMigrationPlugin
           // Initialize services
           this.breadcrumbService.setup(setBreadcrumbs);
 
-          const { renderApp } = await import('./application');
+          const { renderApp } = await import('./application/index.js');
           // Render the application
           const unmountAppCallback = renderApp(coreStart, this.breadcrumbService, params);
 

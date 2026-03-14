@@ -10,7 +10,7 @@ import type { PackagePolicyEditExtensionComponent } from '@kbn/fleet-plugin/publ
 
 export const getLazyApmAgentsTabExtension = () => {
   return lazy<PackagePolicyEditExtensionComponent>(async () => {
-    const { ApmAgents } = await import('./apm_agents');
+    const { ApmAgents } = await import('./apm_agents/index.js');
     return { default: ApmAgents };
   });
 };

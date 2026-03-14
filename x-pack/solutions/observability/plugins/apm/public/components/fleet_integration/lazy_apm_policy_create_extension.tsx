@@ -10,7 +10,7 @@ import type { PackagePolicyCreateExtensionComponent } from '@kbn/fleet-plugin/pu
 
 export const getLazyAPMPolicyCreateExtension = () => {
   return lazy<PackagePolicyCreateExtensionComponent>(async () => {
-    const { CreateAPMPolicyForm } = await import('./apm_policy_form/create_apm_policy_form');
+    const { CreateAPMPolicyForm } = await import('./apm_policy_form/create_apm_policy_form.js');
 
     return { default: CreateAPMPolicyForm };
   });

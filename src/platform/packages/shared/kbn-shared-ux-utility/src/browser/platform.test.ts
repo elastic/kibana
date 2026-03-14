@@ -23,7 +23,7 @@ describe('Browser platform', () => {
         configurable: true,
       });
 
-      const { isMac, getPlatform } = await import('./platform');
+      const { isMac, getPlatform } = await import('./platform.js');
 
       expect(isMac).toBe(true);
       expect(getPlatform()).toBe('mac');
@@ -38,7 +38,7 @@ describe('Browser platform', () => {
         configurable: true,
       });
 
-      const { isMac, getPlatform } = await import('./platform');
+      const { isMac, getPlatform } = await import('./platform.js');
 
       expect(isMac).toBe(true);
       expect(getPlatform()).toBe('mac');
@@ -52,7 +52,7 @@ describe('Browser platform', () => {
         configurable: true,
       });
 
-      const { isMac, getPlatform } = await import('./platform');
+      const { isMac, getPlatform } = await import('./platform.js');
 
       expect(isMac).toBe(true);
       expect(getPlatform()).toBe('mac');
@@ -70,7 +70,7 @@ describe('Browser platform', () => {
         configurable: true,
       });
 
-      const { isWindows, getPlatform } = await import('./platform');
+      const { isWindows, getPlatform } = await import('./platform.js');
 
       expect(isWindows).toBe(true);
       expect(getPlatform()).toBe('windows');
@@ -84,7 +84,7 @@ describe('Browser platform', () => {
         },
         configurable: true,
       });
-      const { isWindows, getPlatform } = await import('./platform');
+      const { isWindows, getPlatform } = await import('./platform.js');
 
       expect(isWindows).toBe(true);
       expect(getPlatform()).toBe('windows');
@@ -98,7 +98,7 @@ describe('Browser platform', () => {
         configurable: true,
       });
 
-      const { isWindows, getPlatform } = await import('./platform');
+      const { isWindows, getPlatform } = await import('./platform.js');
 
       expect(isWindows).toBe(true);
       expect(getPlatform()).toBe('windows');
@@ -115,7 +115,7 @@ describe('Browser platform', () => {
         configurable: true,
       });
 
-      const { isLinux, getPlatform } = await import('./platform');
+      const { isLinux, getPlatform } = await import('./platform.js');
 
       expect(isLinux).toBe(true);
       expect(getPlatform()).toBe('linux');
@@ -131,7 +131,7 @@ describe('Browser platform', () => {
         configurable: true,
       });
 
-      const { isLinux, getPlatform } = await import('./platform');
+      const { isLinux, getPlatform } = await import('./platform.js');
 
       expect(isLinux).toBe(true);
       expect(getPlatform()).toBe('linux');
@@ -145,7 +145,7 @@ describe('Browser platform', () => {
         configurable: true,
       });
 
-      const { isLinux, getPlatform } = await import('./platform');
+      const { isLinux, getPlatform } = await import('./platform.js');
 
       expect(isLinux).toBe(true);
       expect(getPlatform()).toBe('linux');
@@ -162,7 +162,7 @@ describe('Browser platform', () => {
         configurable: true,
       });
 
-      const { isMac, isWindows, isLinux, getPlatform } = await import('./platform');
+      const { isMac, isWindows, isLinux, getPlatform } = await import('./platform.js');
 
       expect(isMac).toBe(false);
       expect(isWindows).toBe(false);
@@ -176,7 +176,7 @@ describe('Browser platform', () => {
         configurable: true,
       });
 
-      const { getPlatform } = await import('./platform');
+      const { getPlatform } = await import('./platform.js');
 
       expect(getPlatform()).toBe('other');
     });

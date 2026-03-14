@@ -8,7 +8,7 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const plugin = async (context: PluginInitializerContext) => {
-  const { LicensingPlugin } = await import('./plugin');
+  const { LicensingPlugin } = await import('./plugin.js');
   return new LicensingPlugin(context);
 };
 

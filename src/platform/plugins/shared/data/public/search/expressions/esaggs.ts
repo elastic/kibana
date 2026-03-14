@@ -49,7 +49,10 @@ export function getFunctionDefinition({
     ) {
       return defer(async () => {
         const [{ aggs, dataViews, searchSource, getNow }, { handleEsaggsRequest }] =
-          await Promise.all([getStartDependencies(), import('../../../common/search/expressions')]);
+          await Promise.all([
+            getStartDependencies(),
+            import('../../../common/search/expressions/index.js'),
+          ]);
 
         const indexPattern = await dataViews.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(

@@ -17,7 +17,7 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
     const startServicesPromise = untilPluginStartServicesReady();
     const [, { mapEmbeddableFactory }] = await Promise.all([
       startServicesPromise,
-      import('./embeddable_module'),
+      import('./embeddable_module.js'),
     ]);
 
     return mapEmbeddableFactory;
@@ -47,7 +47,7 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
   embeddableSetup.registerLegacyURLTransform(
     MAP_SAVED_OBJECT_TYPE,
     async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
-      const { getTransformOut } = await import('./embeddable_module');
+      const { getTransformOut } = await import('./embeddable_module.js');
       return getTransformOut(transformDrilldownsOut);
     }
   );

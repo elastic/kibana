@@ -22,6 +22,9 @@ module.exports = {
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    extensionAlias: {
+      '.js': ['.ts', '.tsx', '.js'],
+    },
     alias: {
       // Point to the built OneNavigation package
       '@kbn/one-navigation': path.resolve(__dirname, '../../target'),

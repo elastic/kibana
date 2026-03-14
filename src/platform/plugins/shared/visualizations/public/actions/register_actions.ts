@@ -19,7 +19,7 @@ export function registerActions(
   types: TypesStart
 ) {
   uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, ACTION_EDIT_IN_LENS, async () => {
-    const { EditInLensAction } = await import('./edit_in_lens_action');
+    const { EditInLensAction } = await import('./edit_in_lens_action.js');
     return new EditInLensAction(data.query.timefilter.timefilter);
   });
 }

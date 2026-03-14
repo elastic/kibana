@@ -22,7 +22,7 @@ export const alertsCardConfig: OnboardingCardConfig = {
     () =>
       import(
         /* webpackChunkName: "onboarding_alerts_card" */
-        './alerts_card'
+        './alerts_card.js'
       )
   ),
   capabilitiesRequired: [RULES_UI_DETECTIONS_PRIVILEGE],

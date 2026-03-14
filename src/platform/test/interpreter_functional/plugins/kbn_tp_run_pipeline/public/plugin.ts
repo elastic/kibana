@@ -23,7 +23,7 @@ export class Plugin {
       id: 'kbn_tp_run_pipeline',
       title: 'Run Pipeline',
       async mount(params) {
-        const { renderApp } = await import('./app/app');
+        const { renderApp } = await import('./app/app.js');
         return renderApp(params);
       },
     });

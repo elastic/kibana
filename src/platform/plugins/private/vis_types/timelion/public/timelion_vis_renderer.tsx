@@ -22,7 +22,9 @@ import type { TimelionRenderValue } from './timelion_vis_fn';
 import { getCoreStart, getUsageCollection } from './helpers/plugin_services';
 
 const LazyTimelionVisComponent = lazy(() =>
-  import('./async_services').then(({ TimelionVisComponent }) => ({ default: TimelionVisComponent }))
+  import('./async_services.js').then(({ TimelionVisComponent }) => ({
+    default: TimelionVisComponent,
+  }))
 );
 
 /** @internal **/

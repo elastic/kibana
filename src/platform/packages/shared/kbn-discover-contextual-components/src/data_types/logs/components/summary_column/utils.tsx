@@ -77,7 +77,7 @@ const DurationIcon = () => {
   );
 };
 
-const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
+const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon/index.js'));
 
 const EventOutcomeBadge = (props: FieldBadgeWithActionsProps) =>
   props.rawValue === 'failure' ? <FieldBadgeWithActions {...props} color="danger" /> : null;

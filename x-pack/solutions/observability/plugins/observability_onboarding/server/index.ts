@@ -10,7 +10,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config, type ObservabilityOnboardingConfig } from './config';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { ObservabilityOnboardingPlugin } = await import('./plugin');
+  const { ObservabilityOnboardingPlugin } = await import('./plugin.js');
   return new ObservabilityOnboardingPlugin(initializerContext);
 }
 

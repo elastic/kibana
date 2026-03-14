@@ -23,12 +23,12 @@ import type { FetchedIndexPattern } from '../../../../common/types';
  * Disable typescript errors since the components are not typed yet.
  */
 
-const timeseries = lazy(() => import('./timeseries/vis'));
-const metric = lazy(() => import('./metric/vis'));
-const topN = lazy(() => import('./top_n/vis'));
-const table = lazy(() => import('./table/vis'));
-const gauge = lazy(() => import('./gauge/vis'));
-const markdown = lazy(() => import('./markdown/vis'));
+const timeseries = lazy(() => import('./timeseries/vis.js'));
+const metric = lazy(() => import('./metric/vis.js'));
+const topN = lazy(() => import('./top_n/vis.js'));
+const table = lazy(() => import('./table/vis.js'));
+const gauge = lazy(() => import('./gauge/vis.js'));
+const markdown = lazy(() => import('./markdown/vis.js'));
 
 export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVisProps>> = {
   timeseries,

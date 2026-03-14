@@ -18,7 +18,7 @@ export async function getServiceSettingsLazy(): Promise<IServiceSettings> {
 
   servicesPromise = new Promise(async (resolve, reject) => {
     try {
-      const { getServiceSettings } = await import('../../../async_services');
+      const { getServiceSettings } = await import('../../../async_services.js');
       resolve(await getServiceSettings());
     } catch (error) {
       reject(error);

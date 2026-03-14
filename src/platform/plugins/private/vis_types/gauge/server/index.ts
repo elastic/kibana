@@ -19,6 +19,6 @@ export const config: PluginConfigDescriptor<GaugeConfig> = {
 };
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { VisTypeGaugeServerPlugin } = await import('./plugin');
+  const { VisTypeGaugeServerPlugin } = await import('./plugin.js');
   return new VisTypeGaugeServerPlugin(initializerContext);
 };

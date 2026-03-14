@@ -25,7 +25,7 @@ export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadat
     () =>
       import(
         /* webpackChunkName: "onboarding_integrations_card" */
-        './integrations_card'
+        './integrations_card.js'
       )
   ),
   checkComplete: checkIntegrationsCardComplete,

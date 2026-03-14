@@ -18,7 +18,7 @@ export const createSiemMigrationsService = async (
 ) => {
   const { SiemMigrationsService } = await import(
     /* webpackChunkName: "lazySiemMigrationsService" */
-    './siem_migrations_service'
+    './siem_migrations_service.js'
   );
   return new SiemMigrationsService(coreStart, plugins, telemetry);
 };

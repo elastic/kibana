@@ -12,7 +12,7 @@ import { lazy } from 'react';
 
 export const AlertEventOverviewLazy = withSuspense(
   lazy(() =>
-    import('./alert_event_overview').then((module) => ({
+    import('./alert_event_overview.js').then((module) => ({
       default: module.AlertEventOverview,
     }))
   )
@@ -20,7 +20,7 @@ export const AlertEventOverviewLazy = withSuspense(
 
 export const EnhancedAlertEventOverviewLazy = withSuspense(
   lazy(() =>
-    import('./enhanced_alert_event_overview').then((module) => ({
+    import('./enhanced_alert_event_overview.js').then((module) => ({
       default: module.EnhancedAlertEventOverview,
     }))
   )

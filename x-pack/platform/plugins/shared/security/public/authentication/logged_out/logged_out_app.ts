@@ -31,7 +31,7 @@ export const loggedOutApp = Object.freeze({
       async mount({ element }: AppMountParameters) {
         const [[coreStart], { renderLoggedOutPage }] = await Promise.all([
           getStartServices(),
-          import('./logged_out_page'),
+          import('./logged_out_page.js'),
         ]);
         return renderLoggedOutPage(
           coreStart,

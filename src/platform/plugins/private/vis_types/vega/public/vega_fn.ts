@@ -60,7 +60,7 @@ export const createVegaFn = (
     },
   },
   async fn(input, args, context) {
-    const { createVegaRequestHandler } = await import('./async_services');
+    const { createVegaRequestHandler } = await import('./async_services.js');
     const vegaRequestHandler = createVegaRequestHandler(dependencies, context);
 
     const response = await vegaRequestHandler({

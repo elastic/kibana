@@ -26,7 +26,7 @@ describe('Status Code Extraction in sendRequest', () => {
 
   describe('extractStatusCodeAndText function behavior', () => {
     it('should use proxy headers when available for ES requests', async () => {
-      const { sendRequest } = await import('./send_request');
+      const { sendRequest } = await import('./send_request.js');
 
       const mockResponse = {
         response: {
@@ -53,7 +53,7 @@ describe('Status Code Extraction in sendRequest', () => {
     });
 
     it('should fall back to actual response status when proxy headers are missing', async () => {
-      const { sendRequest } = await import('./send_request');
+      const { sendRequest } = await import('./send_request.js');
 
       const mockResponse = {
         response: {
@@ -81,7 +81,7 @@ describe('Status Code Extraction in sendRequest', () => {
     });
 
     it('should handle empty proxy header as missing header', async () => {
-      const { sendRequest } = await import('./send_request');
+      const { sendRequest } = await import('./send_request.js');
 
       const mockResponse = {
         response: {

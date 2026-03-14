@@ -11,6 +11,6 @@ export type { CustomPaletteArguments, CustomPaletteState, SystemPaletteArguments
 export { paletteIds } from '../common';
 
 export const plugin = async () => {
-  const { ChartsServerPlugin } = await import('./plugin');
+  const { ChartsServerPlugin } = await import('./plugin.js');
   return new ChartsServerPlugin();
 };

@@ -29,7 +29,7 @@ import type { EditConnectorProps } from './types';
 import { loadAllActions } from '../../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
 
-const ConnectorsList = lazy(() => import('./actions_connectors_list'));
+const ConnectorsList = lazy(() => import('./actions_connectors_list.js'));
 
 export interface MatchParams {
   section: Section;

@@ -36,7 +36,7 @@ export const unauthenticatedApp = Object.freeze({
       async mount({ element }: AppMountParameters) {
         const [[coreStart], { renderUnauthenticatedPage }] = await Promise.all([
           getStartServices(),
-          import('./unauthenticated_page'),
+          import('./unauthenticated_page.js'),
         ]);
 
         // Get the original URL from query parameters

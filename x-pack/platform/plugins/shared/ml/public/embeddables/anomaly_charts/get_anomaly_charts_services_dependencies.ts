@@ -24,13 +24,13 @@ export const getAnomalyChartsServiceDependencies = async (
     { mlResultsServiceProvider },
     { MlCapabilitiesService },
   ] = await Promise.all([
-    await import('../../application/services/anomaly_detector_service'),
-    await import('../../application/services/field_format_service_factory'),
-    await import('../../application/util/index_service'),
-    await import('../../application/services/ml_api_service'),
-    await import('../../application/services/job_service'),
-    await import('../../application/services/results_service'),
-    await import('../../application/capabilities/check_capabilities'),
+    await import('../../application/services/anomaly_detector_service.js'),
+    await import('../../application/services/field_format_service_factory.js'),
+    await import('../../application/util/index_service.js'),
+    await import('../../application/services/ml_api_service/index.js'),
+    await import('../../application/services/job_service.js'),
+    await import('../../application/services/results_service/index.js'),
+    await import('../../application/capabilities/check_capabilities.js'),
   ]);
   const httpService = new HttpService(coreStart.http);
   const anomalyDetectorService = new AnomalyDetectorService(httpService);

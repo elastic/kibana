@@ -40,7 +40,7 @@ export {
 export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
 
 export async function transformType(type: string) {
-  const { transformType: transformTypeFn } = await import('./async_module');
+  const { transformType: transformTypeFn } = await import('./async_module.js');
   return transformTypeFn(type);
 }
 

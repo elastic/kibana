@@ -11,7 +11,7 @@ import React, { lazy } from 'react';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import type { TagCloudVisParams, TagCloudTypeProps } from '../types';
 
-const TagCloudOptionsLazy = lazy(() => import('./tag_cloud_options'));
+const TagCloudOptionsLazy = lazy(() => import('./tag_cloud_options.js'));
 
 export const getTagCloudOptions =
   ({ palettes }: TagCloudTypeProps) =>

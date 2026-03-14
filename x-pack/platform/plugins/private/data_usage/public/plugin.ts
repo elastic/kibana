@@ -55,7 +55,7 @@ export class DataUsagePlugin
         keywords: ['data usage', 'usage'],
         async mount(params: ManagementAppMountParams) {
           const [{ renderApp }, [coreStart, pluginsStartDeps, pluginStart]] = await Promise.all([
-            import('./application'),
+            import('./application.js'),
             core.getStartServices(),
           ]);
 

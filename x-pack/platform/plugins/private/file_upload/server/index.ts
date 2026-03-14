@@ -8,6 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { FileUploadPlugin } = await import('./plugin');
+  const { FileUploadPlugin } = await import('./plugin.js');
   return new FileUploadPlugin(initializerContext);
 };

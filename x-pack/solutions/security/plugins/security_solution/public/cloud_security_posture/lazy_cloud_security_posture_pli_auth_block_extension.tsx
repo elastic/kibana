@@ -16,8 +16,8 @@ export const getLazyCloudSecurityPosturePliAuthBlockExtension = ({
   lazy(async () => {
     const [{ withSecurityContext }, { CloudSecurityPosturePliAuthBlockExtension }] =
       await Promise.all([
-        import('../common/components/with_security_context/with_security_context'),
-        import('./cloud_security_posture_pli_auth_block_extension'),
+        import('../common/components/with_security_context/with_security_context.js'),
+        import('./cloud_security_posture_pli_auth_block_extension.js'),
       ]);
     return {
       default: withSecurityContext({

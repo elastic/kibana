@@ -70,7 +70,7 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
     core: coreServices,
     parentApi,
     loadContent: async ({ closeFlyout }) => {
-      const { DataControlEditor } = await import('./data_control_editor');
+      const { DataControlEditor } = await import('./data_control_editor.js');
       return (
         <DataControlEditor<State>
           ariaLabelledBy="control-editor-title-input"

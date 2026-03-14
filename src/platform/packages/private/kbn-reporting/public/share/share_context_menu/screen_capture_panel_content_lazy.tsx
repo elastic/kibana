@@ -14,7 +14,7 @@ import { PanelSpinner } from './panel_spinner';
 import type { Props } from './screen_capture_panel_content';
 
 const LazyComponent = lazy(() =>
-  import('./screen_capture_panel_content').then(({ ScreenCapturePanelContent }) => ({
+  import('./screen_capture_panel_content.js').then(({ ScreenCapturePanelContent }) => ({
     default: ScreenCapturePanelContent,
   }))
 );

@@ -344,7 +344,7 @@ export class LensPlugin {
         { visualizationMap, datasourceMap },
         eventAnnotationService,
       ] = await Promise.all([
-        import('./async_services'),
+        import('./async_services.js'),
         this.initEditorFrameService(),
         plugins.eventAnnotation.getService(),
       ]);
@@ -387,7 +387,7 @@ export class LensPlugin {
       embeddable.registerReactEmbeddableFactory(LENS_EMBEDDABLE_TYPE, async () => {
         const [deps, { createLensEmbeddableFactory }] = await Promise.all([
           getStartServicesForEmbeddable(),
-          import('./async_services'),
+          import('./async_services.js'),
         ]);
         return createLensEmbeddableFactory(deps);
       });
@@ -403,7 +403,7 @@ export class LensPlugin {
           embeddable.registerLegacyURLTransform(
             LENS_EMBEDDABLE_TYPE,
             async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
-              const { getTransformOut } = await import('./async_services');
+              const { getTransformOut } = await import('./async_services.js');
               const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
               const builder = new LensConfigBuilder(undefined, flags.apiFormat);
 
@@ -436,7 +436,7 @@ export class LensPlugin {
       });
 
       embeddable.registerDrilldown(DISCOVER_DRILLDOWN_TYPE, async () => {
-        const { getDiscoverDrilldown } = await import('./async_services');
+        const { getDiscoverDrilldown } = await import('./async_services.js');
         return getDiscoverDrilldown({
           dataViews: () => this.dataViewsService!,
           locator: () => share?.url.locators.get('DISCOVER_APP_LOCATOR'),
@@ -484,7 +484,7 @@ export class LensPlugin {
       () => startServices().plugins.fieldFormats.deserialize,
       () => startServices().plugins.data.datatableUtilities,
       async () => {
-        const { getTimeZone } = await import('./async_services');
+        const { getTimeZone } = await import('./async_services.js');
         return getTimeZone(core.uiSettings);
       },
       () => startServices().plugins.data.nowProvider.get()
@@ -507,7 +507,7 @@ export class LensPlugin {
             initMemoizedErrorNotification,
           },
         ] = await Promise.all([
-          import('./async_services'),
+          import('./async_services.js'),
           this.initParts(
             core,
             data,
@@ -596,7 +596,7 @@ export class LensPlugin {
       GaugeVisualization,
       TagcloudVisualization,
       TextBasedDatasource,
-    } = await import('./async_services');
+    } = await import('./async_services.js');
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
     this.FormBasedDatasource = new FormBasedDatasource();
@@ -652,7 +652,7 @@ export class LensPlugin {
       VISUALIZE_FIELD_TRIGGER,
       ACTION_VISUALIZE_LENS_FIELD,
       async () => {
-        const { visualizeFieldAction } = await import('./async_services');
+        const { visualizeFieldAction } = await import('./async_services.js');
         return visualizeFieldAction(core.application);
       }
     );
@@ -661,7 +661,7 @@ export class LensPlugin {
       VISUALIZE_EDITOR_TRIGGER,
       ACTION_CONVERT_TO_LENS,
       async () => {
-        const { visualizeTSVBAction } = await import('./async_services');
+        const { visualizeTSVBAction } = await import('./async_services.js');
         return visualizeTSVBAction(core.application);
       }
     );
@@ -670,7 +670,7 @@ export class LensPlugin {
       DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
       ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
       async () => {
-        const { convertToLensActionFactory } = await import('./async_services');
+        const { convertToLensActionFactory } = await import('./async_services.js');
         const action = convertToLensActionFactory(
           ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
           i18n.translate('xpack.lens.visualizeLegacyVisualizationChart', {
@@ -688,7 +688,7 @@ export class LensPlugin {
       AGG_BASED_VISUALIZATION_TRIGGER,
       ACTION_CONVERT_AGG_BASED_TO_LENS,
       async () => {
-        const { convertToLensActionFactory } = await import('./async_services');
+        const { convertToLensActionFactory } = await import('./async_services.js');
         const action = convertToLensActionFactory(
           ACTION_CONVERT_AGG_BASED_TO_LENS,
           i18n.translate('xpack.lens.visualizeAggBasedLegend', {
@@ -707,7 +707,7 @@ export class LensPlugin {
       IN_APP_EMBEDDABLE_EDIT_TRIGGER,
       ACTION_EDIT_LENS_EMBEDDABLE,
       async () => {
-        const { EditLensEmbeddableAction } = await import('./async_services');
+        const { EditLensEmbeddableAction } = await import('./async_services.js');
         const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
         return new EditLensEmbeddableAction(core, {
           ...startDependencies,
@@ -721,12 +721,12 @@ export class LensPlugin {
       ADD_PANEL_TRIGGER,
       ACTION_CREATE_ESQL_CHART,
       async () => {
-        const { AddESQLPanelAction } = await import('./async_services');
+        const { AddESQLPanelAction } = await import('./async_services.js');
         return new AddESQLPanelAction(core);
       }
     );
     startDependencies.uiActions.registerActionAsync('addLensPanelAction', async () => {
-      const { getAddLensPanelAction } = await import('./async_services');
+      const { getAddLensPanelAction } = await import('./async_services.js');
       return getAddLensPanelAction(startDependencies);
     });
     startDependencies.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addLensPanelAction');
@@ -739,7 +739,7 @@ export class LensPlugin {
         ON_OPEN_PANEL_MENU,
         'ACTION_OPEN_IN_DISCOVER',
         async () => {
-          const { createOpenInDiscoverAction } = await import('./async_services');
+          const { createOpenInDiscoverAction } = await import('./async_services.js');
           return createOpenInDiscoverAction(
             discoverLocator,
             startDependencies.dataViews,
@@ -779,13 +779,13 @@ export class LensPlugin {
         return Boolean(core.application.capabilities.visualize_v2?.show);
       },
       getXyVisTypes: async () => {
-        const { visualizationSubtypes } = await import('./async_services');
+        const { visualizationSubtypes } = await import('./async_services.js');
         return visualizationSubtypes;
       },
 
       stateHelperApi: async () => {
         const [{ createChartInfoApi, suggestionsApi }, { visualizationMap, datasourceMap }] =
-          await Promise.all([import('./async_services'), this.initEditorFrameService()]);
+          await Promise.all([import('./async_services.js'), this.initEditorFrameService()]);
 
         return {
           chartInfo: createChartInfoApi(
@@ -816,7 +816,7 @@ export class LensPlugin {
       // This is currently used in Discover by the unified histogram plugin
       EditLensConfigPanelApi: async () => {
         const [{ visualizationMap, datasourceMap }, { getEditLensConfiguration }] =
-          await Promise.all([this.initEditorFrameService(), import('./async_services')]);
+          await Promise.all([this.initEditorFrameService(), import('./async_services.js')]);
         const Component = await getEditLensConfiguration(
           core,
           startDependencies,

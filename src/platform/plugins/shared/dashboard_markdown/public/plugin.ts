@@ -40,7 +40,7 @@ export class DashboardMarkdownPlugin
     { embeddable, contentManagement }: MarkdownSetupDeps
   ) {
     embeddable.registerReactEmbeddableFactory(MARKDOWN_EMBEDDABLE_TYPE, async () => {
-      const { markdownEmbeddableFactory } = await import('./async_services');
+      const { markdownEmbeddableFactory } = await import('./async_services.js');
       return markdownEmbeddableFactory;
     });
 
@@ -77,7 +77,7 @@ export class DashboardMarkdownPlugin
   public start(core: CoreStart, plugins: MarkdownStartDeps) {
     setKibanaServices(core, plugins);
     plugins.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_MARKDOWN_ACTION_ID, async () => {
-      const { createMarkdownAction } = await import('./async_services');
+      const { createMarkdownAction } = await import('./async_services.js');
       return createMarkdownAction();
     });
 
@@ -85,7 +85,7 @@ export class DashboardMarkdownPlugin
       ON_OPEN_PANEL_MENU,
       CONVERT_LEGACY_MARKDOWN_ACTION_ID,
       async () => {
-        const { getConvertLegacyMarkdownAction } = await import('./async_services');
+        const { getConvertLegacyMarkdownAction } = await import('./async_services.js');
         return getConvertLegacyMarkdownAction();
       }
     );

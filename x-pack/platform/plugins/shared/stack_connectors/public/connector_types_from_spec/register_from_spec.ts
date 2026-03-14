@@ -47,7 +47,7 @@ export function registerConnectorTypesFromSpecs({
     ),
     import(
       /* webpackChunkName: "generateSchema" */
-      './generate_schema'
+      './generate_schema.js'
     ),
   ]).then(([{ connectorsSpecs }, { generateFormFields }, { generateSchema }]) => {
     for (const spec of Object.values(connectorsSpecs)) {
@@ -62,7 +62,7 @@ const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   ref: { uiSettings?: IUiSettingsClient },
   generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
-  generateSchema: typeof import('./generate_schema').generateSchema
+  generateSchema: typeof import('./generate_schema.js').generateSchema
 ): ActionTypeModel => {
   const schema = generateSchema(spec);
 
@@ -85,7 +85,7 @@ const createConnectorTypeFromSpec = (
     },
     actionConnectorFields: lazy(() =>
       Promise.resolve({
-        default: (props) => {
+        default: (props: { readOnly: boolean; isEdit: boolean }) => {
           return generateFormFields({
             schema,
             formConfig: { disabled: props.readOnly, isEdit: props.isEdit },

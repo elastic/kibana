@@ -21,7 +21,7 @@ export type GetRecentCasesProps = Omit<
 >;
 
 const RecentCasesLazy: React.FC<RecentCasesProps> = lazy(
-  () => import('../../components/recent_cases')
+  () => import('../../components/recent_cases/index.js')
 );
 export const getRecentCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,

@@ -16,7 +16,7 @@ export type {
 } from './src/types';
 
 export const LazySavedSearchComponent = dynamic(() =>
-  import('./src/components/saved_search').then((mod) => ({
+  import('./src/components/saved_search.js').then((mod) => ({
     default: mod.SavedSearchComponent,
   }))
 );

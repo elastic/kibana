@@ -22,7 +22,7 @@ export type GetCasesContextProps = Omit<
 const CasesProviderLazy: React.FC<{
   children: React.ReactNode;
   value: GetCasesContextPropsInternal;
-}> = lazy(() => import('../../components/cases_context'));
+}> = lazy(() => import('../../components/cases_context/index.js'));
 
 const CasesProviderLazyWrapper = ({
   externalReferenceAttachmentTypeRegistry,

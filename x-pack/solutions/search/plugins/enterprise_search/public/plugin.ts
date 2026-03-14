@@ -172,9 +172,9 @@ export class EnterpriseSearchPlugin implements Plugin {
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
-        const { renderApp } = await import('./applications');
+        const { renderApp } = await import('./applications/index.js');
         const { EnterpriseSearchContent } = await import(
-          './applications/enterprise_search_content'
+          './applications/enterprise_search_content/index.js'
         );
 
         return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
@@ -198,8 +198,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
-        const { renderApp } = await import('./applications');
-        const { Applications } = await import('./applications/applications');
+        const { renderApp } = await import('./applications/index.js');
+        const { Applications } = await import('./applications/applications/index.js');
 
         return renderApp(Applications, kibanaDeps, pluginData);
       },
@@ -220,8 +220,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
-        const { renderApp } = await import('./applications');
-        const { Analytics } = await import('./applications/analytics');
+        const { renderApp } = await import('./applications/index.js');
+        const { Analytics } = await import('./applications/analytics/index.js');
 
         return renderApp(Analytics, kibanaDeps, pluginData);
       },
@@ -239,8 +239,10 @@ export class EnterpriseSearchPlugin implements Plugin {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const pluginData = this.getPluginData();
 
-        const { renderApp } = await import('./applications');
-        const { ApplicationRedirect } = await import('./applications/enterprise_search_redirect');
+        const { renderApp } = await import('./applications/index.js');
+        const { ApplicationRedirect } = await import(
+          './applications/enterprise_search_redirect/index.js'
+        );
 
         return renderApp(ApplicationRedirect, kibanaDeps, pluginData);
       },
@@ -275,7 +277,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
 
-    import('./navigation_tree').then(({ getNavigationTreeDefinition }) => {
+    import('./navigation_tree.js').then(({ getNavigationTreeDefinition }) => {
       return plugins.navigation.addSolutionNavigation(
         getNavigationTreeDefinition({
           dynamicItems$: this.sideNavDynamicItems$,

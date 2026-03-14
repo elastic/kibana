@@ -12,7 +12,7 @@ import type { DiscardStarredQueryModalProps } from './discard_starred_query_moda
 
 const Fallback = () => <div />;
 
-const LazyDiscardStarredQueryModal = React.lazy(() => import('./discard_starred_query_modal'));
+const LazyDiscardStarredQueryModal = React.lazy(() => import('./discard_starred_query_modal.js'));
 export const DiscardStarredQueryModal = (props: DiscardStarredQueryModalProps) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyDiscardStarredQueryModal {...props} />

@@ -10,6 +10,6 @@
 export type { ImageConfig, ImageConfigState, ImageEmbeddableState } from './schemas';
 
 export const plugin = async () => {
-  const { ImageEmbeddablePlugin } = await import('./plugin');
+  const { ImageEmbeddablePlugin } = await import('./plugin.js');
   return new ImageEmbeddablePlugin();
 };

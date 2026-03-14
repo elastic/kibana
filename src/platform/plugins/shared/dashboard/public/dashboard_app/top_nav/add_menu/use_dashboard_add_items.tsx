@@ -51,7 +51,9 @@ export const useDashboardAddItems = ({ dashboardApi }: Props): AppMenuPopoverIte
       core: coreServices,
       parentApi: dashboardApi,
       loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-        const { AddPanelFlyout } = await import('../add_panel_button/components/add_panel_flyout');
+        const { AddPanelFlyout } = await import(
+          '../add_panel_button/components/add_panel_flyout.js'
+        );
 
         return (
           <AddPanelFlyout

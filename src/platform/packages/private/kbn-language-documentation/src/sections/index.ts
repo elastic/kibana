@@ -19,7 +19,7 @@ export const getESQLDocsSections = async () => {
     aggregationFunctions,
     groupingFunctions,
     operators,
-  } = await import('./esql_documentation_sections');
+  } = await import('./esql_documentation_sections.js');
   groups.push({
     label: i18n.translate('languageDocumentation.esqlSections.initialSectionLabel', {
       defaultMessage: 'ES|QL',

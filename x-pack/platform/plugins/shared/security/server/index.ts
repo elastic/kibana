@@ -95,6 +95,6 @@ export const plugin: PluginInitializer<
   RecursiveReadonly<SecurityPluginStart>,
   PluginSetupDependencies
 > = async (initializerContext: PluginInitializerContext) => {
-  const { SecurityPlugin } = await import('./plugin');
+  const { SecurityPlugin } = await import('./plugin.js');
   return new SecurityPlugin(initializerContext);
 };

@@ -11,7 +11,7 @@ import type { EmbeddableFunctionsSharedComponent, FunctionsProps } from './embed
 import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
 
 const LazyEmbeddableFunctions = dynamic(async () => {
-  const Component = await import('./embeddable_functions');
+  const Component = await import('./embeddable_functions.js');
   return { default: Component.EmbeddableFunctions };
 });
 

@@ -10,6 +10,6 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config } from './config';
 
 export const plugin = async (ctx: PluginInitializerContext) => {
-  const { UpgradeAssistantServerPlugin } = await import('./plugin');
+  const { UpgradeAssistantServerPlugin } = await import('./plugin.js');
   return new UpgradeAssistantServerPlugin(ctx);
 };

@@ -8,6 +8,6 @@
  */
 
 export async function plugin() {
-  const { FieldFormatsExamplePlugin } = await import('./plugin');
+  const { FieldFormatsExamplePlugin } = await import('./plugin.js');
   return new FieldFormatsExamplePlugin();
 }

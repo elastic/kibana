@@ -19,7 +19,7 @@ export const attackDiscoveryCardConfig: OnboardingCardConfig = {
     () =>
       import(
         /* webpackChunkName: "onboarding_attack_discovery_card" */
-        './attack_discovery_card'
+        './attack_discovery_card.js'
       )
   ),
   capabilitiesRequired: 'securitySolutionAttackDiscovery.attack-discovery',

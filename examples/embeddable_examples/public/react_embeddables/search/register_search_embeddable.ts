@@ -13,7 +13,7 @@ import type { Services } from './types';
 
 export function registerSearchEmbeddable(embeddable: EmbeddableSetup, services: Promise<Services>) {
   embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
-    const { getSearchEmbeddableFactory } = await import('./search_react_embeddable');
+    const { getSearchEmbeddableFactory } = await import('./search_react_embeddable.js');
     return getSearchEmbeddableFactory(await services);
   });
 }

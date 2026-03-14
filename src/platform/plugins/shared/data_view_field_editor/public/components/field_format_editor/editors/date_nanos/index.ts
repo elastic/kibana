@@ -14,5 +14,5 @@ import type { DateNanosFormatEditorFormatParams } from './date_nanos';
 export type { DateNanosFormatEditor } from './date_nanos';
 export const dateNanosFormatEditorFactory: FieldFormatEditorFactory<
   DateNanosFormatEditorFormatParams
-> = () => import('./date_nanos').then((m) => m.DateNanosFormatEditor);
+> = () => import('./date_nanos.js').then((m) => m.DateNanosFormatEditor);
 dateNanosFormatEditorFactory.formatId = formatId;

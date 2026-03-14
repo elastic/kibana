@@ -16,7 +16,7 @@ import { basicResolvers, initSavedObjects } from '../../resolvers';
 import { type NavigateToApp, getStackManagementBreadcrumb } from '../../breadcrumbs';
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../data_frame_analytics/pages/analytics_management')).Page,
+  default: (await import('../../../data_frame_analytics/pages/analytics_management/index.js')).Page,
 }));
 
 export const analyticsJobsListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({

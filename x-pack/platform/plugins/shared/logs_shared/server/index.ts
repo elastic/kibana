@@ -17,6 +17,6 @@ export { config } from './config';
 export { logViewSavedObjectName } from './saved_objects';
 
 export async function plugin(context: PluginInitializerContext) {
-  const { LogsSharedPlugin } = await import('./plugin');
+  const { LogsSharedPlugin } = await import('./plugin.js');
   return new LogsSharedPlugin(context);
 }

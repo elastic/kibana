@@ -19,7 +19,7 @@ import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../aiops')).ChangePointDetectionPage,
+  default: (await import('../../../aiops/index.js')).ChangePointDetectionPage,
 }));
 
 export const changePointDetectionRouteFactory = (

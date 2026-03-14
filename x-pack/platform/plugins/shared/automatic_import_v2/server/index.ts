@@ -10,7 +10,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config } from './config';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { AutomaticImportV2Plugin: AutomaticImportV2Plugin } = await import('./plugin');
+  const { AutomaticImportV2Plugin: AutomaticImportV2Plugin } = await import('./plugin.js');
   return new AutomaticImportV2Plugin(initializerContext);
 }
 

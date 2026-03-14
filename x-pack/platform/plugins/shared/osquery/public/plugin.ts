@@ -77,7 +77,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
         // Load application bundle
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
 
         // Render the application
         return renderApp(

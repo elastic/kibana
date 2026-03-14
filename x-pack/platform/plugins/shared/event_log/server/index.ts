@@ -31,6 +31,6 @@ export const config: PluginConfigDescriptor<IEventLogConfig> = {
   schema: ConfigSchema,
 };
 export const plugin = async (context: PluginInitializerContext) => {
-  const { Plugin } = await import('./plugin');
+  const { Plugin } = await import('./plugin.js');
   return new Plugin(context);
 };

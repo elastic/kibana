@@ -28,7 +28,7 @@ export const integrationsExternalDetectionsCardConfig: OnboardingCardConfig<Exte
       () =>
         import(
           /* webpackChunkName: "onboarding_integrations_external_detections_card" */
-          './integrations_card'
+          './integrations_card.js'
         )
     ),
     checkComplete: checkIntegrationsCardComplete,

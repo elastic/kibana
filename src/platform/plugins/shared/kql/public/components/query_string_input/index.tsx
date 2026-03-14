@@ -12,7 +12,7 @@ import type { QueryStringInputProps } from './query_string_input';
 const Fallback = () => <div />;
 
 const LazyQueryStringInputUI = React.lazy(async () => {
-  const { QueryStringInput } = await import('./query_string_input');
+  const { QueryStringInput } = await import('./query_string_input.js');
   return { default: QueryStringInput };
 });
 

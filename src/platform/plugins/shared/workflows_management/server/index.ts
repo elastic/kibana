@@ -14,7 +14,7 @@ export { config } from './config';
 //  as well as, Kibana Platform `plugin()` initializer.
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { WorkflowsPlugin } = await import('./plugin');
+  const { WorkflowsPlugin } = await import('./plugin.js');
   return new WorkflowsPlugin(initializerContext);
 }
 

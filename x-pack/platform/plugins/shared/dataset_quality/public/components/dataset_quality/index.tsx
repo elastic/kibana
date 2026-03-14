@@ -12,7 +12,7 @@ import type { CreateDatasetQualityArgs, DatasetQualityProps } from './dataset_qu
 export type { CreateDatasetQualityArgs, DatasetQualityProps };
 
 const DatasetQuality = dynamic(() =>
-  import('./dataset_quality').then((mod) => ({ default: mod.DatasetQuality }))
+  import('./dataset_quality.js').then((mod) => ({ default: mod.DatasetQuality }))
 );
 
 export const createDatasetQuality = ({

@@ -44,6 +44,7 @@
 
 const Fs = require('fs');
 const Path = require('path');
+const Module = require('module');
 
 const { addHook } = require('pirates');
 const sourceMapSupport = require('source-map-support');
@@ -102,6 +103,35 @@ function install(options = undefined) {
   }
 
   installed = true;
+
+  // Under moduleResolution: nodenext, TypeScript requires .js extensions on
+  // dynamic import() calls. At runtime, babel transpiles these to require()
+  // calls, but the .js files don't exist (only .ts/.tsx source files do).
+  // This hook remaps .js resolution to .ts/.tsx when the .js file isn't found.
+  const originalResolveFilename = /** @type {any} */ (Module)._resolveFilename;
+  /** @type {any} */ (Module)._resolveFilename = function (
+    /** @type {string} */ request,
+    /** @type {any} */ parent,
+    /** @type {boolean} */ isMain,
+    /** @type {any} */ resolveOptions
+  ) {
+    try {
+      return originalResolveFilename.call(this, request, parent, isMain, resolveOptions);
+    } catch (err) {
+      if (err.code === 'MODULE_NOT_FOUND' && request.endsWith('.js')) {
+        const base = request.slice(0, -3);
+        for (const ext of ['.ts', '.tsx']) {
+          try {
+            return originalResolveFilename.call(this, base + ext, parent, isMain, resolveOptions);
+          } catch {
+            // try next extension
+          }
+        }
+      }
+      throw err;
+    }
+  };
+
   const cache = getCache();
 
   sourceMapSupport.install({

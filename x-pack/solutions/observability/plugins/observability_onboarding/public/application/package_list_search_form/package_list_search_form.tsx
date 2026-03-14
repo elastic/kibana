@@ -32,7 +32,7 @@ type WrapperProps = Props & {
 };
 
 const fetchAvailablePackagesHook = (): Promise<AvailablePackagesHookType> =>
-  import('@kbn/fleet-plugin/public')
+  import('@kbn/fleet-plugin/public/index.js')
     .then((module) => module.AvailablePackagesHook())
     .then((hook) => hook.useAvailablePackages);
 

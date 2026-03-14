@@ -8,7 +8,7 @@
 import { lazy } from 'react';
 
 export const AutomaticImportLazy = lazy(() =>
-  import('./automatic_import').then(({ AutomaticImport }) => ({
+  import('./automatic_import.js').then(({ AutomaticImport }) => ({
     default: AutomaticImport,
   }))
 );

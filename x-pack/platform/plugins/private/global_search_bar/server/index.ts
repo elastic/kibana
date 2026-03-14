@@ -6,7 +6,7 @@
  */
 
 export const plugin = async () => {
-  const { GlobalSearchBarPlugin } = await import('./plugin');
+  const { GlobalSearchBarPlugin } = await import('./plugin.js');
   return new GlobalSearchBarPlugin();
 };
 

@@ -12,5 +12,5 @@ import { dynamic } from '@kbn/shared-ux-utility';
 export * from './data_types/logs/components';
 
 export const LazySummaryColumn = dynamic(
-  () => import('./data_types/logs/components/summary_column/summary_column')
+  () => import('./data_types/logs/components/summary_column/summary_column.js')
 );

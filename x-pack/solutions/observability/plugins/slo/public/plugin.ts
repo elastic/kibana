@@ -69,7 +69,7 @@ export class SLOPlugin
     const sloListLocator = plugins.share.url.locators.create(new SloListLocatorDefinition());
 
     const mount = async (params: AppMountParameters<unknown>) => {
-      const { renderApp } = await import('./application');
+      const { renderApp } = await import('./application.js');
       const [coreStart, pluginsStart] = await core.getStartServices();
       const { observabilityRuleTypeRegistry } = pluginsStart.observability;
 
@@ -158,12 +158,12 @@ export class SLOPlugin
     });
 
     const getCreateSLOFormFlyout = lazyWithContextProviders(
-      lazy(() => import('./pages/slo_edit/shared_flyout/create_slo_form_flyout')),
+      lazy(() => import('./pages/slo_edit/shared_flyout/create_slo_form_flyout.js')),
       { spinnerSize: 'm' }
     );
 
     const getSLODetailsFlyout = lazyWithContextProviders(
-      lazy(() => import('./pages/slo_details/shared_flyout/slo_details_flyout')),
+      lazy(() => import('./pages/slo_details/shared_flyout/slo_details_flyout.js')),
       { spinnerSize: 'm' }
     );
 

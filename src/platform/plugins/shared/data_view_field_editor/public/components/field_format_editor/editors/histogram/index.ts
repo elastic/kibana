@@ -14,5 +14,5 @@ import type { HistogramFormatEditorParams } from './histogram';
 export type { HistogramFormatEditor } from './histogram';
 export const histogramFormatEditorFactory: FieldFormatEditorFactory<
   HistogramFormatEditorParams
-> = () => import('./histogram').then((m) => m.HistogramFormatEditor);
+> = () => import('./histogram.js').then((m) => m.HistogramFormatEditor);
 histogramFormatEditorFactory.formatId = formatId;

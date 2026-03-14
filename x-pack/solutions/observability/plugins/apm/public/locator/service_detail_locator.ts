@@ -26,7 +26,7 @@ export class APMServiceDetailLocator implements LocatorDefinition<APMLocatorPayl
   }
 
   async getLocation(payload: APMLocatorPayload) {
-    const { getPathForServiceDetail } = await import('./helpers');
+    const { getPathForServiceDetail } = await import('./helpers.js');
 
     const defaultTimeRange = this.uiSettings.get<TimePickerTimeDefaults>(
       UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS

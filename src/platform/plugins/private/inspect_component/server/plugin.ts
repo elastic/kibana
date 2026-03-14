@@ -30,7 +30,7 @@ export class InspectComponentPluginServer implements Plugin {
 
   public setup(core: CoreSetup) {
     if (this.isEnabled && this.isDev) {
-      import('./routes/routes')
+      import('./routes/routes.js')
         .then(({ registerInspectComponentRoutes }) => {
           registerInspectComponentRoutes({ httpService: core.http, logger: this.logger });
         })

@@ -47,7 +47,7 @@ export const getTimeScale = (
   inputTypes: ['datatable'],
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/
-    const { timeScaleFn } = await import('../../impl/async_fns');
+    const { timeScaleFn } = await import('../../impl/async_fns.js');
     return timeScaleFn(...timeScaleFnParameters)(...args);
   },
 });

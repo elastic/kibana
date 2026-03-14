@@ -32,14 +32,14 @@ export function getServiceNowSIRConnectorType(): ConnectorTypeModel<
 > {
   return {
     id: CONNECTOR_ID,
-    iconClass: lazy(() => import('./logo')),
+    iconClass: lazy(() => import('./logo.js')),
     selectMessage: SERVICENOW_SIR_DESC,
     actionTypeTitle: CONNECTOR_NAME,
-    actionConnectorFields: lazy(() => import('../lib/servicenow/servicenow_connectors')),
+    actionConnectorFields: lazy(() => import('../lib/servicenow/servicenow_connectors.js')),
     validateParams: async (
       actionParams: ServiceNowSIRActionParams
     ): Promise<GenericValidationResult<unknown>> => {
-      const translations = await import('../lib/servicenow/translations');
+      const translations = await import('../lib/servicenow/translations.js');
       const errors = {
         'subActionParams.incident.short_description': new Array<string>(),
         'subActionParams.incident.additional_fields': new Array<string>(),
@@ -67,7 +67,7 @@ export function getServiceNowSIRConnectorType(): ConnectorTypeModel<
 
       return validationResult;
     },
-    actionParamsFields: lazy(() => import('./servicenow_sir_params')),
+    actionParamsFields: lazy(() => import('./servicenow_sir_params.js')),
     customConnectorSelectItem: {
       getText: getConnectorDescriptiveTitle,
       getComponent: getSelectedConnectorIcon,

@@ -48,28 +48,28 @@ export class CustomIntegrationsPlugin
 
     const languageClientsUiComponents = {
       sample: React.lazy(async () => ({
-        default: (await import('./language_components')).SampleClientReadme,
+        default: (await import('./language_components.js')).SampleClientReadme,
       })),
       javascript: React.lazy(async () => ({
-        default: (await import('./language_components')).ElasticsearchJsClientReadme,
+        default: (await import('./language_components.js')).ElasticsearchJsClientReadme,
       })),
       python: React.lazy(async () => ({
-        default: (await import('./language_components')).ElasticsearchPyClientReadme,
+        default: (await import('./language_components.js')).ElasticsearchPyClientReadme,
       })),
       go: React.lazy(async () => ({
-        default: (await import('./language_components')).ElasticsearchGoClientReadme,
+        default: (await import('./language_components.js')).ElasticsearchGoClientReadme,
       })),
       ruby: React.lazy(async () => ({
-        default: (await import('./language_components')).ElasticsearchRubyClientReadme,
+        default: (await import('./language_components.js')).ElasticsearchRubyClientReadme,
       })),
       java: React.lazy(async () => ({
-        default: (await import('./language_components')).ElasticsearchJavaClientReadme,
+        default: (await import('./language_components.js')).ElasticsearchJavaClientReadme,
       })),
       php: React.lazy(async () => ({
-        default: (await import('./language_components')).ElasticsearchPhpClientReadme,
+        default: (await import('./language_components.js')).ElasticsearchPhpClientReadme,
       })),
       dotnet: React.lazy(async () => ({
-        default: (await import('./language_components')).ElasticsearchDotnetClientReadme,
+        default: (await import('./language_components.js')).ElasticsearchDotnetClientReadme,
       })),
     };
 

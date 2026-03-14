@@ -14,7 +14,7 @@ import type { Props } from './options_editor';
 
 const LazyDashboardNavigationOptionsEditor = React.lazy(async () => {
   const { DashboardNavigationOptionsEditor } = await import(
-    '../dashboard_renderer/dashboard_module'
+    '../dashboard_renderer/dashboard_module.js'
   );
   return { default: DashboardNavigationOptionsEditor };
 });

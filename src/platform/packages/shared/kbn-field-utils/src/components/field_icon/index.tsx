@@ -14,7 +14,7 @@ import { type FieldBase } from '../../types';
 
 const Fallback = () => <Fragment />;
 
-const LazyFieldIcon = React.lazy(() => import('./field_icon')) as GenericFieldIcon;
+const LazyFieldIcon = React.lazy(() => import('./field_icon.js')) as GenericFieldIcon;
 
 function WrappedFieldIcon<T extends FieldBase = DataViewField>(props: FieldIconProps) {
   return (

@@ -52,7 +52,7 @@ export class FormBasedDatasource {
   ) {
     editorFrame.registerDatasource(async () => {
       const { getFormBasedDatasource, getSuffixFormatter, suffixFormatterId } = await import(
-        '../../async_services'
+        '../../async_services.js'
       );
 
       if (!fieldFormatsSetup.has(suffixFormatterId)) {

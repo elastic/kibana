@@ -12,7 +12,7 @@ import React, { lazy } from 'react';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import type { VisParams } from '../vega_fn';
 
-const VegaVisEditor = lazy(() => import('./vega_vis_editor'));
+const VegaVisEditor = lazy(() => import('./vega_vis_editor.js'));
 
 export const VegaVisEditorComponent = (props: VisEditorOptionsProps<VisParams>) => (
   <VegaVisEditor {...props} />

@@ -49,7 +49,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         const [coreStart] = await getStartServices();
         const { notifications, ...startServices } = coreStart;
 
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application/index.js');
 
         const license = await firstValueFrom(licensing.license$);
         const initialLicenseStatus = checkLicenseStatus(license);

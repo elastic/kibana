@@ -21,7 +21,7 @@ export class UserActivityExamplePlugin implements Plugin<{}, {}, SetupDeps, {}> 
       title: 'User Activity',
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
-        const { renderApp } = await import('./app');
+        const { renderApp } = await import('./app.js');
         return renderApp(coreStart, params.element);
       },
     });

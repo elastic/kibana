@@ -9,7 +9,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { ObservabilityLogsAIAssistantFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
 import type { LogAIAssistantDocument, LogAIAssistantProps } from './log_ai_assistant';
 
-export const LogAIAssistant = dynamic(() => import('./log_ai_assistant'));
+export const LogAIAssistant = dynamic(() => import('./log_ai_assistant.js'));
 
 export function createLogAIAssistant({
   observabilityAIAssistant,

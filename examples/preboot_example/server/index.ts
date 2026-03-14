@@ -18,6 +18,6 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
 };
 
 export const plugin = async (context: PluginInitializerContext) => {
-  const { PrebootExamplePlugin } = await import('./plugin');
+  const { PrebootExamplePlugin } = await import('./plugin.js');
   return new PrebootExamplePlugin(context);
 };

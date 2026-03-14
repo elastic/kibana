@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { FocusedTraceWaterfallProps } from '@kbn/apm-types';
 
 const LazyFocusedTraceWaterfallRendererComponent = dynamic(() =>
-  import('./focused_trace_waterfall_renderer').then((mod) => ({
+  import('./focused_trace_waterfall_renderer.js').then((mod) => ({
     default: mod.FocusedTraceWaterfallRenderer,
   }))
 );

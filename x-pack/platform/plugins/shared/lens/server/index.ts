@@ -9,7 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 export type { LensServerPluginSetup } from './plugin';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { LensServerPlugin } = await import('./plugin');
+  const { LensServerPlugin } = await import('./plugin.js');
   return new LensServerPlugin(initContext);
 };
 

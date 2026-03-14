@@ -27,7 +27,7 @@ export class MetricsExplorerViewsService {
 
   private async getClient({ http }: MetricsExplorerViewsServiceStartDeps) {
     if (!this.client) {
-      const { MetricsExplorerViewsClient } = await import('./metrics_explorer_views_client');
+      const { MetricsExplorerViewsClient } = await import('./metrics_explorer_views_client.js');
       const client = new MetricsExplorerViewsClient(http);
       this.client = client;
     }

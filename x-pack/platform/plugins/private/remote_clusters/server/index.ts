@@ -11,6 +11,6 @@ export { config } from './config';
 export type { RemoteClustersPluginSetup } from './plugin';
 
 export const plugin = async (ctx: PluginInitializerContext) => {
-  const { RemoteClustersServerPlugin } = await import('./plugin');
+  const { RemoteClustersServerPlugin } = await import('./plugin.js');
   return new RemoteClustersServerPlugin(ctx);
 };

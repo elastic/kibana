@@ -27,6 +27,6 @@ export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
 };
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { EncryptedSavedObjectsPlugin } = await import('./plugin');
+  const { EncryptedSavedObjectsPlugin } = await import('./plugin.js');
   return new EncryptedSavedObjectsPlugin(initializerContext);
 };

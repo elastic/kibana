@@ -75,7 +75,7 @@ export class IndexLifecycleManagementPlugin
           docTitle.change(PLUGIN.TITLE);
           this.breadcrumbService.setup(setBreadcrumbs);
 
-          const { renderApp } = await import('./application');
+          const { renderApp } = await import('./application/index.js');
 
           const unmountAppCallback = renderApp(
             coreStart,

@@ -21,7 +21,7 @@ export const ESQLLangEditor = (props: ESQLEditorProps) => {
     return Promise.all([startServicesPromise, modulePromise]);
   }, []);
 
-  const ESQLEditor = value?.[1]?.default;
+  const ESQLEditor = value?.[1]?.default as React.ComponentType<ESQLEditorProps> | undefined;
   const deps = value?.[0];
 
   if (loading || !deps || !ESQLEditor) return <EuiLoadingSpinner />;

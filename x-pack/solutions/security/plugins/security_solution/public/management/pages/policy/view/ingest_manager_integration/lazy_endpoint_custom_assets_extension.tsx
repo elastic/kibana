@@ -8,7 +8,7 @@
 import { lazy } from 'react';
 
 export const LazyEndpointCustomAssetsExtension = lazy(async () => {
-  const { EndpointCustomAssetsExtension } = await import('./endpoint_custom_assets_extension');
+  const { EndpointCustomAssetsExtension } = await import('./endpoint_custom_assets_extension.js');
 
   return {
     default: EndpointCustomAssetsExtension,

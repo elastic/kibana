@@ -34,7 +34,7 @@ import { ServiceDashboards } from '../../app/service_dashboards';
 import type { MobileSearchBar } from '../../app/mobile/search_bar';
 
 const ServiceLogs = dynamic(() =>
-  import('../../app/service_logs').then((mod) => ({ default: mod.ServiceLogs }))
+  import('../../app/service_logs/index.js').then((mod) => ({ default: mod.ServiceLogs }))
 );
 
 export function page({

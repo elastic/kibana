@@ -27,7 +27,7 @@ export const getESQLSearchProvider = (options: {
   id: 'esql',
   find: (...findParams) => {
     return defer(async () => {
-      const { searchProviderFind } = await import('./search_provider_find');
+      const { searchProviderFind } = await import('./search_provider_find.js');
       return searchProviderFind(options, ...findParams);
     });
   },

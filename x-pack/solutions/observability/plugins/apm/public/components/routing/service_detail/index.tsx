@@ -33,35 +33,43 @@ import { ServiceDashboards } from '../../app/service_dashboards';
 import { ErrorGroupDetails } from '../../app/error_group_details';
 
 const ErrorGroupOverview = dynamic(() =>
-  import('../../app/error_group_overview').then((mod) => ({ default: mod.ErrorGroupOverview }))
+  import('../../app/error_group_overview/index.js').then((mod) => ({
+    default: mod.ErrorGroupOverview,
+  }))
 );
 const InfraOverview = dynamic(() =>
-  import('../../app/infra_overview').then((mod) => ({ default: mod.InfraOverview }))
+  import('../../app/infra_overview/index.js').then((mod) => ({ default: mod.InfraOverview }))
 );
 const Metrics = dynamic(() =>
-  import('../../app/metrics').then((mod) => ({ default: mod.Metrics }))
+  import('../../app/metrics/index.js').then((mod) => ({ default: mod.Metrics }))
 );
 const MetricsDetails = dynamic(() =>
-  import('../../app/metrics_details').then((mod) => ({ default: mod.MetricsDetails }))
+  import('../../app/metrics_details/index.js').then((mod) => ({ default: mod.MetricsDetails }))
 );
 
 const ServiceLogs = dynamic(() =>
-  import('../../app/service_logs').then((mod) => ({ default: mod.ServiceLogs }))
+  import('../../app/service_logs/index.js').then((mod) => ({ default: mod.ServiceLogs }))
 );
 const ServiceMapServiceDetail = dynamic(() =>
-  import('../../app/service_map').then((mod) => ({ default: mod.ServiceMapServiceDetail }))
+  import('../../app/service_map/index.js').then((mod) => ({ default: mod.ServiceMapServiceDetail }))
 );
 const ServiceOverview = dynamic(() =>
-  import('../../app/service_overview').then((mod) => ({ default: mod.ServiceOverview }))
+  import('../../app/service_overview/index.js').then((mod) => ({ default: mod.ServiceOverview }))
 );
 const TransactionDetails = dynamic(() =>
-  import('../../app/transaction_details').then((mod) => ({ default: mod.TransactionDetails }))
+  import('../../app/transaction_details/index.js').then((mod) => ({
+    default: mod.TransactionDetails,
+  }))
 );
 const TransactionOverview = dynamic(() =>
-  import('../../app/transaction_overview').then((mod) => ({ default: mod.TransactionOverview }))
+  import('../../app/transaction_overview/index.js').then((mod) => ({
+    default: mod.TransactionOverview,
+  }))
 );
 const ProfilingOverview = dynamic(() =>
-  import('../../app/profiling_overview').then((mod) => ({ default: mod.ProfilingOverview }))
+  import('../../app/profiling_overview/index.js').then((mod) => ({
+    default: mod.ProfilingOverview,
+  }))
 );
 
 function page({

@@ -51,7 +51,7 @@ export class DiscoverEnhancedPlugin
 
       if (this.config.actions.exploreDataInContextMenu.enabled) {
         uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'ACTION_EXPLORE_DATA', async () => {
-          const { ExploreDataContextMenuAction } = await import('./actions');
+          const { ExploreDataContextMenuAction } = await import('./actions/index.js');
           const exploreDataAction = new ExploreDataContextMenuAction(params);
           return exploreDataAction;
         });
@@ -59,7 +59,7 @@ export class DiscoverEnhancedPlugin
 
       if (this.config.actions.exploreDataInChart.enabled) {
         uiActions.addTriggerActionAsync(ON_APPLY_FILTER, 'ACTION_EXPLORE_DATA_CHART', async () => {
-          const { ExploreDataChartAction } = await import('./actions');
+          const { ExploreDataChartAction } = await import('./actions/index.js');
           const exploreDataChartAction = new ExploreDataChartAction(params);
           return exploreDataChartAction;
         });

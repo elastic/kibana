@@ -28,6 +28,6 @@ export type { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = { schema: ConfigSchema };
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { FeaturesPlugin } = await import('./plugin');
+  const { FeaturesPlugin } = await import('./plugin.js');
   return new FeaturesPlugin(initializerContext);
 };

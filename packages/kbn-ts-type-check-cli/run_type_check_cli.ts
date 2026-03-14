@@ -22,6 +22,11 @@ import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifact
 import { LOCAL_CACHE_ROOT } from './src/archive/constants';
 import { isCiEnvironment } from './src/archive/utils';
 import { normalizeProjectPath } from './src/normalize_project_path';
+import {
+  updateRootRefsConfig,
+  cleanupRootRefsConfig,
+  ROOT_REFS_CONFIG_PATH,
+} from './root_refs_config';
 
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
@@ -117,10 +122,6 @@ run(
       log.warning('Deleted all TypeScript caches');
       return;
     }
-
-    const { updateRootRefsConfig, cleanupRootRefsConfig, ROOT_REFS_CONFIG_PATH } = await import(
-      './root_refs_config'
-    );
 
     // if the tsconfig.refs.json file is not self-managed then make sure it has
     // a reference to every composite project in the repo

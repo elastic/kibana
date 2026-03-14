@@ -74,7 +74,7 @@ export const registerApp = ({
     updater$: appUpdater$,
     deepLinks: BASE_DEEP_LINKS,
     async mount({ element, history, onAppLeave }: AppMountParameters) {
-      const { mountApp } = await import('./application');
+      const { mountApp } = await import('./application/index.js');
       const [coreStart, startDependencies] = await core.getStartServices();
 
       coreStart.chrome.docTitle.change(AGENT_BUILDER_FULL_TITLE);

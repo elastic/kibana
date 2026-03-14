@@ -15,7 +15,7 @@ export type { MonitoringConfig } from './config';
 export type { MonitoringPluginSetup, IBulkUploader } from './types';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { MonitoringPlugin } = await import('./plugin');
+  const { MonitoringPlugin } = await import('./plugin.js');
   return new MonitoringPlugin(initContext);
 };
 export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {

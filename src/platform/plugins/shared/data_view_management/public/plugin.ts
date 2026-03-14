@@ -98,7 +98,7 @@ export class IndexPatternManagementPlugin
       capabilitiesId: 'indexPatterns',
       redirectFrom: 'kibana/indexPatterns',
       mount: async (params) => {
-        const { mountManagementSection } = await import('./management_app');
+        const { mountManagementSection } = await import('./management_app/index.js');
 
         return mountManagementSection(core.getStartServices, deps, params);
       },

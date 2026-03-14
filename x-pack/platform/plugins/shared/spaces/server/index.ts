@@ -38,6 +38,6 @@ export const config: PluginConfigDescriptor = {
 };
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { SpacesPlugin } = await import('./plugin');
+  const { SpacesPlugin } = await import('./plugin.js');
   return new SpacesPlugin(initializerContext);
 };

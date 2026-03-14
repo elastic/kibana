@@ -27,13 +27,13 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
     core.chrome.sidebar.registerApp({
       appId: textInputAppId,
       store: textInputStore,
-      loadComponent: () => import('./text_input_app').then((m) => m.TextInputApp),
+      loadComponent: () => import('./text_input_app.js').then((m) => m.TextInputApp),
     });
 
     core.chrome.sidebar.registerApp({
       appId: counterAppId,
       restoreOnReload: false, // Uses internal React state, not persisted store state
-      loadComponent: () => import('./counter_app').then((m) => m.CounterApp),
+      loadComponent: () => import('./counter_app.js').then((m) => m.CounterApp),
     });
 
     // Register tab selection app as initially pending (simulating permission check)
@@ -41,7 +41,7 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
       appId: tabSelectionAppId,
       status: 'pending', // Initially pending async check
       store: tabSelectionStore,
-      loadComponent: () => import('./tab_selection_app').then((m) => m.TabSelectionApp),
+      loadComponent: () => import('./tab_selection_app.js').then((m) => m.TabSelectionApp),
     });
 
     core.application.register({
@@ -49,7 +49,7 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
       title: 'Sidebar Examples',
       async mount({ element }: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
-        const { App } = await import('./app');
+        const { App } = await import('./app.js');
 
         ReactDOM.render(coreStart.rendering.addContext(<App />), element);
         return () => ReactDOM.unmountComponentAtNode(element);

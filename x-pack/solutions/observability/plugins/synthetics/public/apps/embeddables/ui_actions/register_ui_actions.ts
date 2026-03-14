@@ -26,7 +26,7 @@ export const registerSyntheticsUiActions = async (
       ADD_PANEL_TRIGGER,
       ADD_SYNTHETICS_OVERVIEW_ACTION_ID,
       async () => {
-        const { createStatusOverviewPanelAction } = await import('./add_panel_actions_module');
+        const { createStatusOverviewPanelAction } = await import('./add_panel_actions_module.js');
         return createStatusOverviewPanelAction(coreStart, pluginsStart);
       }
     );
@@ -34,7 +34,7 @@ export const registerSyntheticsUiActions = async (
       ADD_PANEL_TRIGGER,
       ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID,
       async () => {
-        const { createMonitorsOverviewPanelAction } = await import('./add_panel_actions_module');
+        const { createMonitorsOverviewPanelAction } = await import('./add_panel_actions_module.js');
         return createMonitorsOverviewPanelAction(coreStart, pluginsStart);
       }
     );

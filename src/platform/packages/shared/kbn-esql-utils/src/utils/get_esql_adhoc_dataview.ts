@@ -25,7 +25,7 @@ async function sha256(str: string) {
       .map((v) => v.toString(16).padStart(2, '0'))
       .join('');
   } else {
-    const { sha256: sha256fn } = await import('./sha256');
+    const { sha256: sha256fn } = await import('./sha256.js');
     return sha256fn(str);
   }
 }

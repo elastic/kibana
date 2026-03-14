@@ -10,7 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { FullTraceWaterfallProps } from '@kbn/apm-types';
 
 const LazyFullTraceWaterfallRendererComponent = dynamic(() =>
-  import('./full_trace_waterfall_renderer').then((mod) => ({
+  import('./full_trace_waterfall_renderer.js').then((mod) => ({
     default: mod.FullTraceWaterfallRenderer,
   }))
 );

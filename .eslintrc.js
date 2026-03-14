@@ -2542,6 +2542,16 @@ module.exports = {
     },
 
     /**
+     * Ambient type declarations in typings/ may declare many classes per file
+     */
+    {
+      files: ['typings/**/*.d.ts'],
+      rules: {
+        'max-classes-per-file': 'off',
+      },
+    },
+
+    /**
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {

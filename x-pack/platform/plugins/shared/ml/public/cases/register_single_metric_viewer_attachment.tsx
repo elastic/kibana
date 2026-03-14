@@ -38,7 +38,7 @@ export function registerSingleMetricViewerCasesAttachment(
       timelineAvatar: PLUGIN_ICON,
       children: React.lazy(async () => {
         const [{ initComponent }, mlServices] = await Promise.all([
-          import('./single_metric_viewer_attachment'),
+          import('./single_metric_viewer_attachment.js'),
           getMlServices(coreStart, pluginStart),
         ]);
         const SingleMetricViewerComponent = getSingleMetricViewerComponent(

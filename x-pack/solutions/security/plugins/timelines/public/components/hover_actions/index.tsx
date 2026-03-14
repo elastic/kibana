@@ -27,7 +27,7 @@ export interface HoverActionsConfig {
   ) => ReactElement<HoverActionComponentProps & FilterValueFnArgs>;
 }
 
-const AddToTimelineButtonLazy = React.lazy(() => import('./actions/add_to_timeline'));
+const AddToTimelineButtonLazy = React.lazy(() => import('./actions/add_to_timeline.js'));
 const getAddToTimelineButtonLazy = (store: Store, props: AddToTimelineButtonProps) => {
   return (
     <React.Suspense fallback={<EuiLoadingSpinner />}>
@@ -40,7 +40,7 @@ const getAddToTimelineButtonLazy = (store: Store, props: AddToTimelineButtonProp
   );
 };
 
-const CopyButtonLazy = React.lazy(() => import('./actions/copy'));
+const CopyButtonLazy = React.lazy(() => import('./actions/copy.js'));
 const getCopyButtonLazy = (props: CopyProps) => {
   return (
     <React.Suspense fallback={<EuiLoadingSpinner />}>
@@ -49,7 +49,7 @@ const getCopyButtonLazy = (props: CopyProps) => {
   );
 };
 
-const FilterForValueButtonLazy = React.lazy(() => import('./actions/filter_for_value'));
+const FilterForValueButtonLazy = React.lazy(() => import('./actions/filter_for_value.js'));
 const getFilterForValueButtonLazy = (props: HoverActionComponentProps & FilterValueFnArgs) => {
   return (
     <React.Suspense fallback={<EuiLoadingSpinner />}>
@@ -58,7 +58,7 @@ const getFilterForValueButtonLazy = (props: HoverActionComponentProps & FilterVa
   );
 };
 
-const FilterOutValueButtonLazy = React.lazy(() => import('./actions/filter_out_value'));
+const FilterOutValueButtonLazy = React.lazy(() => import('./actions/filter_out_value.js'));
 const getFilterOutValueButtonLazy = (props: HoverActionComponentProps & FilterValueFnArgs) => {
   return (
     <React.Suspense fallback={<EuiLoadingSpinner />}>

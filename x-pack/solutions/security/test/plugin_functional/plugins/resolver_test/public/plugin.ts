@@ -39,7 +39,7 @@ export class ResolverTestPlugin
         const [coreStart] = startServices;
 
         const [{ renderApp }, resolverPluginSetup] = await Promise.all([
-          import('./applications/resolver_test'),
+          import('./applications/resolver_test/index.js'),
           setupDependencies.securitySolution.resolver(),
         ]);
         return renderApp(coreStart, params, resolverPluginSetup);

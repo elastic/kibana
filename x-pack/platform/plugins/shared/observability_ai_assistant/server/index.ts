@@ -80,7 +80,7 @@ export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
 };
 
 export const plugin = async (ctx: PluginInitializerContext<ObservabilityAIAssistantConfig>) => {
-  const { ObservabilityAIAssistantPlugin } = await import('./plugin');
+  const { ObservabilityAIAssistantPlugin } = await import('./plugin.js');
   return new ObservabilityAIAssistantPlugin(ctx);
 };
 

@@ -32,7 +32,7 @@ interface NewFilterPageProps extends PageProps {
 }
 
 const EditFilterList = dynamic(async () => ({
-  default: (await import('../../../settings/filter_lists')).EditFilterList,
+  default: (await import('../../../settings/filter_lists/index.js')).EditFilterList,
 }));
 
 export const newFilterListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({

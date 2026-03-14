@@ -35,7 +35,7 @@ interface ESQLDataGridProps {
   controlColumnIds?: string[]; // default: ['openDetails', 'select']
 }
 
-const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
+const DataGridLazy = withSuspense(lazy(() => import('./data_grid.js')));
 
 export const ESQLDataGrid = (props: ESQLDataGridProps) => {
   const { loading, value } = useAsync(() => {

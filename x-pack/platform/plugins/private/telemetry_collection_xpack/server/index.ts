@@ -9,6 +9,6 @@
 //  as well as, Kibana Platform `plugin()` initializer.
 
 export async function plugin() {
-  const { TelemetryCollectionXpackPlugin } = await import('./plugin');
+  const { TelemetryCollectionXpackPlugin } = await import('./plugin.js');
   return new TelemetryCollectionXpackPlugin();
 }

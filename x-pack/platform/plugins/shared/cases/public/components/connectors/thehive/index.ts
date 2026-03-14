@@ -15,6 +15,6 @@ export * from './types';
 
 export const getCaseConnector = (): CaseConnector<TheHiveFieldsType> => ({
   id: ConnectorTypes.theHive,
-  fieldsComponent: lazy(() => import('./case_fields')),
-  previewComponent: lazy(() => import('./case_fields_preview')),
+  fieldsComponent: lazy(() => import('./case_fields.js')),
+  previewComponent: lazy(() => import('./case_fields_preview.js')),
 });

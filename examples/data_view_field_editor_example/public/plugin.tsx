@@ -29,7 +29,7 @@ export class DataViewFieldEditorPlugin implements Plugin<void, void, SetupDeps, 
       visibleIn: [],
       async mount(params: AppMountParameters) {
         const [, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./app');
+        const { renderApp } = await import('./app.js');
         return renderApp(depsStart, params);
       },
     });

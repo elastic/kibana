@@ -20,15 +20,15 @@ export type { ErrorSampleAiInsightProps } from './error_sample_ai_insight';
 export type { LogAiInsightProps, LogAiInsightDocument } from './log_ai_insight';
 
 const AlertAiInsightLazy = dynamic(() =>
-  import('./alert_ai_insight').then((m) => ({ default: m.AlertAiInsight }))
+  import('./alert_ai_insight.js').then((m) => ({ default: m.AlertAiInsight }))
 );
 
 const ErrorSampleAiInsightLazy = dynamic(() =>
-  import('./error_sample_ai_insight').then((m) => ({ default: m.ErrorSampleAiInsight }))
+  import('./error_sample_ai_insight.js').then((m) => ({ default: m.ErrorSampleAiInsight }))
 );
 
 const LogAiInsightLazy = dynamic(() =>
-  import('./log_ai_insight').then((m) => ({ default: m.LogAiInsight }))
+  import('./log_ai_insight.js').then((m) => ({ default: m.LogAiInsight }))
 );
 
 export function createAlertAIInsight(

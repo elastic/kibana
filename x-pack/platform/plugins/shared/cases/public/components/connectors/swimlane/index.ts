@@ -15,8 +15,8 @@ import * as i18n from './translations';
 export const getCaseConnector = (): CaseConnector<SwimlaneFieldsType> => {
   return {
     id: ConnectorTypes.swimlane,
-    fieldsComponent: lazy(() => import('./case_fields')),
-    previewComponent: lazy(() => import('./case_fields_preview')),
+    fieldsComponent: lazy(() => import('./case_fields.js')),
+    previewComponent: lazy(() => import('./case_fields_preview.js')),
   };
 };
 

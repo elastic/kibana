@@ -21,43 +21,43 @@ import { ACTION_SHOW_CONFIG_PANEL } from './show_config_panel_action/constants';
 
 export const registerActions = () => {
   uiActions.registerActionAsync(ACTION_REMOVE_PANEL, async () => {
-    const { RemovePanelAction } = await import('../panel_component/panel_module');
+    const { RemovePanelAction } = await import('../panel_component/panel_module.js');
     return new RemovePanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_REMOVE_PANEL);
 
   uiActions.registerActionAsync(CUSTOM_TIME_RANGE_BADGE, async () => {
-    const { CustomTimeRangeBadge } = await import('../panel_component/panel_module');
+    const { CustomTimeRangeBadge } = await import('../panel_component/panel_module.js');
     return new CustomTimeRangeBadge();
   });
   uiActions.attachAction(PANEL_BADGE_TRIGGER, CUSTOM_TIME_RANGE_BADGE);
 
   uiActions.registerActionAsync(CPS_USAGE_OVERRIDES_BADGE, async () => {
-    const { CpsUsageOverridesBadge } = await import('../panel_component/panel_module');
+    const { CpsUsageOverridesBadge } = await import('../panel_component/panel_module.js');
     return new CpsUsageOverridesBadge();
   });
   uiActions.attachAction(PANEL_BADGE_TRIGGER, CPS_USAGE_OVERRIDES_BADGE);
 
   uiActions.registerActionAsync(ACTION_INSPECT_PANEL, async () => {
-    const { InspectPanelAction } = await import('../panel_component/panel_module');
+    const { InspectPanelAction } = await import('../panel_component/panel_module.js');
     return new InspectPanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_INSPECT_PANEL);
 
   uiActions.registerActionAsync(ACTION_EDIT_PANEL, async () => {
-    const { EditPanelAction } = await import('../panel_component/panel_module');
+    const { EditPanelAction } = await import('../panel_component/panel_module.js');
     return new EditPanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_EDIT_PANEL);
 
   uiActions.registerActionAsync(ACTION_CUSTOMIZE_PANEL, async () => {
-    const { CustomizePanelAction } = await import('../panel_component/panel_module');
+    const { CustomizePanelAction } = await import('../panel_component/panel_module.js');
     return new CustomizePanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_CUSTOMIZE_PANEL);
 
   uiActions.registerActionAsync(ACTION_SHOW_CONFIG_PANEL, async () => {
-    const { ShowConfigPanelAction } = await import('../panel_component/panel_module');
+    const { ShowConfigPanelAction } = await import('../panel_component/panel_module.js');
     return new ShowConfigPanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_SHOW_CONFIG_PANEL);

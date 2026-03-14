@@ -109,7 +109,7 @@ export const config: PluginConfigDescriptor = {
 export type ObservabilityConfig = TypeOf<typeof configSchema>;
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { ObservabilityPlugin } = await import('./plugin');
+  const { ObservabilityPlugin } = await import('./plugin.js');
   return new ObservabilityPlugin(initContext);
 };
 

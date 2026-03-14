@@ -18,7 +18,7 @@ export class HeatmapVisualization {
   setup(core: CoreSetup, { editorFrame, charts }: HeatmapVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
       const [{ getHeatmapVisualization }, paletteService] = await Promise.all([
-        import('../../async_services'),
+        import('../../async_services.js'),
         charts.palettes.getPalettes(),
       ]);
 

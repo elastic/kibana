@@ -17,7 +17,7 @@ export const mount =
   (coreSetup: CoreSetup<StartDependencies>) =>
   async ({ element }: AppMountParameters) => {
     const [core, plugins] = await coreSetup.getStartServices();
-    const { App } = await import('./app');
+    const { App } = await import('./app.js');
 
     const defaultDataView = await plugins.data.dataViews.getDefault();
 

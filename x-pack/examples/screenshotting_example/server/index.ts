@@ -6,6 +6,6 @@
  */
 
 export async function plugin() {
-  const { ScreenshottingExamplePlugin } = await import('./plugin');
+  const { ScreenshottingExamplePlugin } = await import('./plugin.js');
   return new ScreenshottingExamplePlugin();
 }

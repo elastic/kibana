@@ -30,7 +30,7 @@ export function getRuleType(): RuleTypeModel<DegradedDocsRuleParams> {
     }),
     iconClass: 'bell',
     documentationUrl: null,
-    ruleParamsExpression: lazy(() => import('./rule_form')),
+    ruleParamsExpression: lazy(() => import('./rule_form/index.js')),
     validate,
     requiresAppContext: false,
     getDescriptionFields,

@@ -155,6 +155,9 @@ module.exports = (_, argv) => {
         ],
       },
       extensions: ['.js', '.ts'],
+      extensionAlias: {
+        '.js': ['.ts', '.tsx', '.js'],
+      },
       mainFields: ['browser', 'module', 'main'],
       conditionNames: ['browser', 'module', 'import', 'require', 'default'],
     },

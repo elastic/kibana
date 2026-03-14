@@ -12,8 +12,8 @@ import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import type { InputControlVisDependencies } from '../../plugin';
 import type { InputControlVisParams } from '../../types';
 
-const ControlsTab = lazy(() => import('./controls_tab'));
-const OptionsTab = lazy(() => import('./options_tab'));
+const ControlsTab = lazy(() => import('./controls_tab.js'));
+const OptionsTab = lazy(() => import('./options_tab.js'));
 
 export const getControlsTab =
   (deps: InputControlVisDependencies) => (props: VisEditorOptionsProps<InputControlVisParams>) =>

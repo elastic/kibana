@@ -8,6 +8,6 @@
  */
 
 export async function plugin() {
-  const { ExpressionLegacyMetricPlugin } = await import('./plugin');
+  const { ExpressionLegacyMetricPlugin } = await import('./plugin.js');
   return new ExpressionLegacyMetricPlugin();
 }

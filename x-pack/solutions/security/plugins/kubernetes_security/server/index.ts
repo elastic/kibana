@@ -8,6 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { KubernetesSecurityPlugin } = await import('./plugin');
+  const { KubernetesSecurityPlugin } = await import('./plugin.js');
   return new KubernetesSecurityPlugin(initializerContext);
 }

@@ -42,6 +42,6 @@ export interface DiscoverServerPluginStart {
 export { config } from './config';
 
 export const plugin = async (context: PluginInitializerContext) => {
-  const { DiscoverServerPlugin } = await import('./plugin');
+  const { DiscoverServerPlugin } = await import('./plugin.js');
   return new DiscoverServerPlugin(context);
 };

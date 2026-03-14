@@ -19,7 +19,7 @@ import type { ConfigType } from '../config';
 import type { SpacesManager } from '../spaces_manager';
 
 const LazyNavControlPopover = lazy(() =>
-  import('./nav_control_popover').then(({ NavControlPopover }) => ({
+  import('./nav_control_popover.js').then(({ NavControlPopover }) => ({
     default: NavControlPopover,
   }))
 );

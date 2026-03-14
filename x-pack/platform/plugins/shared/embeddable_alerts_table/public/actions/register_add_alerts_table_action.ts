@@ -21,7 +21,7 @@ export const registerAddAlertsTableAction = ({
   uiActions,
 }: AddAlertsTableActionDeps) => {
   uiActions.registerActionAsync<EmbeddableApiContext>(ADD_ALERTS_TABLE_ACTION_ID, async () => {
-    const { getAddAlertsTableAction } = await import('./add_alerts_table_action');
+    const { getAddAlertsTableAction } = await import('./add_alerts_table_action.js');
     return getAddAlertsTableAction(coreServices);
   });
   uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_ALERTS_TABLE_ACTION_ID);

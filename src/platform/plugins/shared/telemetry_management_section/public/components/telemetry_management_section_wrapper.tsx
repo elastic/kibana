@@ -19,7 +19,7 @@ export type TelemetryManagementSectionWrapperProps = Omit<
   'telemetryService' | 'showAppliesSettingMessage' | 'docLinks'
 >;
 
-const TelemetryManagementSectionComponent = lazy(() => import('./telemetry_management_section'));
+const TelemetryManagementSectionComponent = lazy(() => import('./telemetry_management_section.js'));
 
 export function telemetryManagementSectionWrapper(
   telemetryService: TelemetryPluginSetup['telemetryService'],

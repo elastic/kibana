@@ -80,11 +80,11 @@ interface PageUrlState {
 }
 
 const ExpandedRow = dynamic(async () => ({
-  default: (await import('./expanded_row')).ExpandedRow,
+  default: (await import('./expanded_row.js')).ExpandedRow,
 }));
 
 const AddModelFlyout = dynamic(async () => ({
-  default: (await import('./add_model_flyout')).AddModelFlyout,
+  default: (await import('./add_model_flyout.js')).AddModelFlyout,
 }));
 
 const modelIdColumnName = i18n.translate('xpack.ml.trainedModels.modelsList.modelIdHeader', {

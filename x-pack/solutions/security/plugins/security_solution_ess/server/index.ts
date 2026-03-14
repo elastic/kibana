@@ -12,7 +12,7 @@ export { config } from './config';
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 export async function plugin(_initializerContext: PluginInitializerContext) {
-  const { SecuritySolutionEssPlugin } = await import('./plugin');
+  const { SecuritySolutionEssPlugin } = await import('./plugin.js');
   return new SecuritySolutionEssPlugin();
 }
 

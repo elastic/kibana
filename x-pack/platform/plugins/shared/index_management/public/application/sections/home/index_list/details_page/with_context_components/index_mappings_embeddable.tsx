@@ -12,7 +12,9 @@ import React, { Suspense } from 'react';
 import type { IndexMappingWithContextProps } from './index_mapping_with_context_types';
 
 const IndexMappingWithContext = dynamic<ComponentType<IndexMappingWithContextProps>>(() =>
-  import('./index_mapping_with_context').then((mod) => ({ default: mod.IndexMappingWithContext }))
+  import('./index_mapping_with_context.js').then((mod) => ({
+    default: mod.IndexMappingWithContext,
+  }))
 );
 
 export const IndexMapping: React.FC<IndexMappingWithContextProps> = (props) => {

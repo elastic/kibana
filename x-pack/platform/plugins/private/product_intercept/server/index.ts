@@ -9,6 +9,6 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config } from '../common/config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { ProductInterceptServerPlugin } = await import('./plugin');
+  const { ProductInterceptServerPlugin } = await import('./plugin.js');
   return new ProductInterceptServerPlugin(initContext);
 };

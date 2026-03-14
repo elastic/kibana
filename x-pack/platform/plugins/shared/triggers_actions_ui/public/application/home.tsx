@@ -29,9 +29,9 @@ import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
-const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
+const RulesList = lazy(() => import('./sections/rules_list/components/rules_list.js'));
 const LogsList = lazy(
-  () => import('./sections/rule_details/components/global_rule_event_log_list')
+  () => import('./sections/rule_details/components/global_rule_event_log_list.js')
 );
 
 export interface MatchParams {

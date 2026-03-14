@@ -18,7 +18,7 @@ export type { LazyOptInExampleFlyoutProps };
 export const LazyOptInExampleFlyout: LazyExoticComponent<
   ComponentType<LazyOptInExampleFlyoutProps>
 > = lazy(() =>
-  import('./opt_in_example_flyout').then(({ OptInExampleFlyout }) => ({
+  import('./opt_in_example_flyout.js').then(({ OptInExampleFlyout }) => ({
     default: OptInExampleFlyout,
   }))
 );

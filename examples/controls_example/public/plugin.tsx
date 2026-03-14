@@ -35,7 +35,7 @@ export class ControlsExamplePlugin
       visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./app/app');
+        const { renderApp } = await import('./app/app.js');
         return renderApp(coreStart, depsStart, params);
       },
     });

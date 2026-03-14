@@ -17,7 +17,7 @@ import { useAIFeatures } from '../../../../../../../hooks/use_ai_features';
 import type { ProcessorFormState } from '../../../../types';
 
 const DissectPatternAISuggestions = dynamic(() =>
-  import('./dissect_pattern_suggestion').then((mod) => ({
+  import('./dissect_pattern_suggestion.js').then((mod) => ({
     default: mod.DissectPatternAISuggestions,
   }))
 );

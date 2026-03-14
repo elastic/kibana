@@ -18,8 +18,8 @@ import {
 } from '../routes';
 import { ConnectorDetailRouter } from '../connector_detail/connector_detail_router';
 
-const Connectors = lazy(() => import('./connectors'));
-const CreateConnector = lazy(() => import('./create_connector/create_connector'));
+const Connectors = lazy(() => import('./connectors.js'));
+const CreateConnector = lazy(() => import('./create_connector/create_connector.js'));
 
 export const ConnectorsRouter: React.FC = () => {
   return (

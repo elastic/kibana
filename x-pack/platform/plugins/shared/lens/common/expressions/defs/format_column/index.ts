@@ -66,7 +66,7 @@ export const formatColumn: FormatColumnExpressionFunction = {
   inputTypes: ['datatable'],
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/
-    const { formatColumnFn } = await import('../../impl/async_fns');
+    const { formatColumnFn } = await import('../../impl/async_fns.js');
     return formatColumnFn(...args);
   },
 };

@@ -30,20 +30,20 @@ import {
 
 export function registerActions(uiActions: UiActionsStart) {
   uiActions.registerActionAsync(ACTION_CLEAR_CONTROL, async () => {
-    const { ClearControlAction } = await import('../controls_module');
+    const { ClearControlAction } = await import('../controls_module.js');
     return new ClearControlAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_CLEAR_CONTROL);
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_CLEAR_CONTROL);
   uiActions.registerActionAsync(ACTION_PIN_CONTROL, async () => {
-    const { PinControlAction } = await import('../controls_module');
+    const { PinControlAction } = await import('../controls_module.js');
     return new PinControlAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_PIN_CONTROL);
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_PIN_CONTROL);
 
   uiActions.registerActionAsync(ACTION_EDIT_CONTROL_DISPLAY_SETTINGS, async () => {
-    const { EditControlDisplaySettingsAction } = await import('../controls_module');
+    const { EditControlDisplaySettingsAction } = await import('../controls_module.js');
     return new EditControlDisplaySettingsAction();
   });
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_EDIT_CONTROL_DISPLAY_SETTINGS);
@@ -52,26 +52,26 @@ export function registerActions(uiActions: UiActionsStart) {
   uiActions.attachAction(CONTROL_HOVER_TRIGGER_ID, ACTION_EDIT_PANEL);
 
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_CREATE_CONTROL, async () => {
-    const { createDataControlPanelAction } = await import('../controls_module');
+    const { createDataControlPanelAction } = await import('../controls_module.js');
     return createDataControlPanelAction();
   });
 
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_CREATE_ESQL_CONTROL, async () => {
-    const { createESQLControlAction } = await import('../controls_module');
+    const { createESQLControlAction } = await import('../controls_module.js');
     return createESQLControlAction();
   });
 
   uiActions.registerActionAsync(ACTION_CREATE_TIME_SLIDER, async () => {
-    const { createTimeSliderAction } = await import('../controls_module');
+    const { createTimeSliderAction } = await import('../controls_module.js');
     return createTimeSliderAction();
   });
 
   uiActions.addTriggerActionAsync(CONTROL_MENU_TRIGGER, OPTIONS_LIST_ACTION, async () => {
-    const { createOptionsListControlAction } = await import('./create_options_list_action');
+    const { createOptionsListControlAction } = await import('./create_options_list_action.js');
     return createOptionsListControlAction();
   });
   uiActions.addTriggerActionAsync(CONTROL_MENU_TRIGGER, RANGE_SLIDER_ACTION, async () => {
-    const { createRangeSliderControlAction } = await import('./create_range_slider_action');
+    const { createRangeSliderControlAction } = await import('./create_range_slider_action.js');
     return createRangeSliderControlAction();
   });
 }

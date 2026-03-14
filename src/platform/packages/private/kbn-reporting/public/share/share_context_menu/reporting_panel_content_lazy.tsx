@@ -14,7 +14,7 @@ import { PanelSpinner } from './panel_spinner';
 import type { Props } from './reporting_panel_content';
 
 const LazyComponent = lazy(() =>
-  import('./reporting_panel_content').then(({ ReportingPanelContent }) => ({
+  import('./reporting_panel_content/index.js').then(({ ReportingPanelContent }) => ({
     default: ReportingPanelContent,
   }))
 );

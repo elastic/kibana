@@ -20,7 +20,8 @@ import { useRouteResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../data_frame_analytics/pages/analytics_exploration')).Page,
+  default: (await import('../../../data_frame_analytics/pages/analytics_exploration/index.js'))
+    .Page,
 }));
 
 export const analyticsJobExplorationRouteFactory = (

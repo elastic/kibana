@@ -17,7 +17,7 @@ import type { TeamsActionParams, TeamsSecrets } from '../types';
 export function getConnectorType(): ConnectorTypeModel<unknown, TeamsSecrets, TeamsActionParams> {
   return {
     id: CONNECTOR_ID,
-    iconClass: lazy(() => import('./logo')),
+    iconClass: lazy(() => import('./logo.js')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.teams.selectMessageText', {
       defaultMessage: 'Send a message to a Microsoft Teams channel.',
     }),
@@ -27,7 +27,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, TeamsSecrets, Te
     validateParams: async (
       actionParams: TeamsActionParams
     ): Promise<GenericValidationResult<TeamsActionParams>> => {
-      const translations = await import('./translations');
+      const translations = await import('./translations.js');
       const errors = {
         message: new Array<string>(),
       };
@@ -37,7 +37,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, TeamsSecrets, Te
       }
       return validationResult;
     },
-    actionConnectorFields: lazy(() => import('./teams_connectors')),
-    actionParamsFields: lazy(() => import('./teams_params')),
+    actionConnectorFields: lazy(() => import('./teams_connectors.js')),
+    actionParamsFields: lazy(() => import('./teams_params.js')),
   };
 }

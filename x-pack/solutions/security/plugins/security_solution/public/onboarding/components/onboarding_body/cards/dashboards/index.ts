@@ -21,7 +21,7 @@ export const dashboardsCardConfig: OnboardingCardConfig = {
     () =>
       import(
         /* webpackChunkName: "onboarding_dashboards_card" */
-        './dashboards_card'
+        './dashboards_card.js'
       )
   ),
   capabilitiesRequired: [

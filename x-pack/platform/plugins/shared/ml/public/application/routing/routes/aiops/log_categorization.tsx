@@ -18,7 +18,7 @@ import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../aiops/log_categorization')).LogCategorizationPage,
+  default: (await import('../../../aiops/log_categorization.js')).LogCategorizationPage,
 }));
 
 export const logCategorizationRouteFactory = (

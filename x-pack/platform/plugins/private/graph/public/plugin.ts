@@ -106,7 +106,7 @@ export class GraphPlugin
         coreStart.chrome.docTitle.change(
           i18n.translate('xpack.graph.pageTitle', { defaultMessage: 'Graph' })
         );
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         return renderApp({
           ...params,
           pluginInitializerContext: this.initializerContext,

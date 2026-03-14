@@ -37,18 +37,18 @@ import type { CreateTemplatePageProps } from '../templates_v2/pages/create_templ
 import type { EditTemplatePageProps } from '../templates_v2/pages/edit_template/page';
 import { KibanaServices } from '../../common/lib/kibana/services';
 
-const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view'));
+const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view/index.js'));
 
 const CreateTemplateLazy: FC<CreateTemplatePageProps> = lazy(
-  () => import('../templates_v2/pages/create_template/page')
+  () => import('../templates_v2/pages/create_template/page.js')
 );
 
 const EditTemplateLazy: FC<EditTemplatePageProps> = lazy(
-  () => import('../templates_v2/pages/edit_template/page')
+  () => import('../templates_v2/pages/edit_template/page.js')
 );
 
 const AllCasesTemplatesLazy: React.FC = lazy(
-  () => import('../templates_v2/pages/all_templates_page')
+  () => import('../templates_v2/pages/all_templates_page.js')
 );
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({

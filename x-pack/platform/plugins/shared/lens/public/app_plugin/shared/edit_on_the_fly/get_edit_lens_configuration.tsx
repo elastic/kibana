@@ -303,7 +303,7 @@ export async function getEditLensConfiguration(
   visualizationMap?: VisualizationMap,
   datasourceMap?: DatasourceMap
 ) {
-  const { getLensServices, getLensAttributeService } = await import('../../../async_services');
+  const { getLensServices, getLensAttributeService } = await import('../../../async_services.js');
   const lensServices = await getLensServices(
     coreStart,
     startDependencies,

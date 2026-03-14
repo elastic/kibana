@@ -159,7 +159,7 @@ export class ReportingPublicPlugin
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[coreStart, startDeps], { mountManagementSection }] = await Promise.all([
           getStartServices(),
-          import('./management/mount_management_section'),
+          import('./management/mount_management_section.js'),
         ]);
 
         const { licensing, data, share } = startDeps;
@@ -190,7 +190,7 @@ export class ReportingPublicPlugin
       mount: async (params) => {
         const [startServices, importParams] = await Promise.all([
           core.getStartServices(),
-          import('./redirect'),
+          import('./redirect/index.js'),
         ]);
         const [coreStart] = startServices;
         const { mountRedirectApp } = importParams;
@@ -241,7 +241,7 @@ export class ReportingPublicPlugin
       );
     }
 
-    import('./management/integrations/scheduled_report_share_integration').then(
+    import('./management/integrations/scheduled_report_share_integration.js').then(
       async ({
         shouldRegisterScheduledReportShareIntegration,
         createScheduledReportShareIntegration,

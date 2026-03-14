@@ -34,7 +34,7 @@ export function getConnectorType(): ConnectorTypeModel<
   return {
     id: CONNECTOR_ID,
     actionTypeTitle: CONNECTOR_NAME,
-    iconClass: lazy(() => import('./logo')),
+    iconClass: lazy(() => import('./logo.js')),
     isExperimental: false,
     selectMessage: i18n.translate(
       'xpack.stackConnectors.security.MicrosoftDefenderEndpointSecrets.config.selectMessageText',
@@ -45,7 +45,7 @@ export function getConnectorType(): ConnectorTypeModel<
     validateParams: async (
       actionParams: MicrosoftDefenderEndpointActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {
-      const translations = await import('./translations');
+      const translations = await import('./translations.js');
       const errors: ValidationErrors = {
         subAction: [],
       };
@@ -59,8 +59,8 @@ export function getConnectorType(): ConnectorTypeModel<
       }
       return { errors };
     },
-    actionConnectorFields: lazy(() => import('./microsoft_defender_endpoint_connector')),
-    actionParamsFields: lazy(() => import('./microsoft_defender_endpoint_params')),
+    actionConnectorFields: lazy(() => import('./microsoft_defender_endpoint_connector.js')),
+    actionParamsFields: lazy(() => import('./microsoft_defender_endpoint_params.js')),
     subFeature: 'endpointSecurity',
   };
 }

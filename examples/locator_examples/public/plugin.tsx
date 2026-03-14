@@ -35,7 +35,7 @@ export class LocatorExamplesPlugin
       title: 'Access links examples',
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./app');
+        const { renderApp } = await import('./app.js');
         return renderApp(
           {
             appBasePath: params.appBasePath,

@@ -168,7 +168,7 @@ export class DashboardPlugin
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
             const [{ dashboardClient }, { toStoredFilters }] = await Promise.all([
-              import('./dashboard_client'),
+              import('./dashboard_client/index.js'),
               import('@kbn/as-code-filters-transforms'),
               untilPluginStartServicesReady(),
             ]);
@@ -252,8 +252,8 @@ export class DashboardPlugin
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
         const [{ mountApp }] = await Promise.all([
-          import('./dashboard_app/dashboard_router'),
-          import('./dashboard_renderer/dashboard_module'),
+          import('./dashboard_app/dashboard_router.js'),
+          import('./dashboard_renderer/dashboard_module.js'),
           untilPluginStartServicesReady(),
         ]);
         appMounted();
@@ -305,7 +305,7 @@ export class DashboardPlugin
     }
 
     embeddable.registerDrilldown(DASHBOARD_DRILLDOWN_TYPE, async () => {
-      const { dashboardDrilldown } = await import('./dashboard_renderer/dashboard_module');
+      const { dashboardDrilldown } = await import('./dashboard_renderer/dashboard_module.js');
       return dashboardDrilldown;
     });
 
@@ -322,12 +322,12 @@ export class DashboardPlugin
     registerActions(plugins);
 
     plugins.uiActions.registerActionAsync('searchDashboardAction', async () => {
-      const { searchAction } = await import('./dashboard_client');
+      const { searchAction } = await import('./dashboard_client/index.js');
       return searchAction;
     });
 
     plugins.uiActions.registerActionAsync('getDashboardsByIdsAction', async () => {
-      const { getDashboardsByIdsAction } = await import('./dashboard_client');
+      const { getDashboardsByIdsAction } = await import('./dashboard_client/index.js');
       return getDashboardsByIdsAction;
     });
 
@@ -349,7 +349,7 @@ export class DashboardPlugin
 
     return {
       findDashboardsService: async () => {
-        const { findService } = await import('./dashboard_client');
+        const { findService } = await import('./dashboard_client/index.js');
         return findService;
       },
     };

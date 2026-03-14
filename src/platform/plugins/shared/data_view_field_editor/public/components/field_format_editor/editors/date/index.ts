@@ -13,5 +13,5 @@ import type { DateFormatEditorFormatParams } from './date';
 
 export type { DateFormatEditor } from './date';
 export const dateFormatEditorFactory: FieldFormatEditorFactory<DateFormatEditorFormatParams> = () =>
-  import('./date').then((m) => m.DateFormatEditor);
+  import('./date.js').then((m) => m.DateFormatEditor);
 dateFormatEditorFactory.formatId = formatId;

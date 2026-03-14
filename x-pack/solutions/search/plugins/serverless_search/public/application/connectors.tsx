@@ -26,7 +26,7 @@ export async function renderApp(
   services: ServerlessSearchContext,
   queryClient: QueryClient
 ) {
-  const { ConnectorsRouter } = await import('./components/connectors_router');
+  const { ConnectorsRouter } = await import('./components/connectors_router.js');
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>

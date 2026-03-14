@@ -19,7 +19,7 @@ export function openSettingsFlyout(dashboardApi: DashboardApi) {
     core: coreServices,
     parentApi: dashboardApi,
     loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-      const { DashboardSettingsFlyout } = await import('./settings_flyout');
+      const { DashboardSettingsFlyout } = await import('./settings_flyout.js');
       return (
         <DashboardContext.Provider value={dashboardApi}>
           <DashboardSettingsFlyout onClose={closeFlyout} ariaLabelledBy={ariaLabelledBy} />

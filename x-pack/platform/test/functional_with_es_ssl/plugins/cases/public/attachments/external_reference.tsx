@@ -11,7 +11,7 @@ import type {
   ExternalReferenceAttachmentType,
 } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
-const AttachmentContentLazy = lazy(() => import('./external_references_content'));
+const AttachmentContentLazy = lazy(() => import('./external_references_content.js'));
 
 export const getExternalReferenceAttachmentRegular = (): ExternalReferenceAttachmentType => ({
   id: '.test',

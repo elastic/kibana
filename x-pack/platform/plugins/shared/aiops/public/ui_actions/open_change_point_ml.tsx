@@ -45,7 +45,9 @@ export function createOpenChangePointInMlAppAction(
         defaultMessage: 'Open in AIOps Labs',
       }),
     async getHref(context): Promise<string | undefined> {
-      const { isChangePointChartEmbeddableContext } = await import('./change_point_action_context');
+      const { isChangePointChartEmbeddableContext } = await import(
+        './change_point_action_context.js'
+      );
       if (!isChangePointChartEmbeddableContext(context)) {
         throw new IncompatibleActionError();
       }
@@ -70,7 +72,9 @@ export function createOpenChangePointInMlAppAction(
       });
     },
     async execute(context) {
-      const { isChangePointChartEmbeddableContext } = await import('./change_point_action_context');
+      const { isChangePointChartEmbeddableContext } = await import(
+        './change_point_action_context.js'
+      );
       if (!isChangePointChartEmbeddableContext(context)) {
         throw new IncompatibleActionError();
       }
@@ -80,7 +84,9 @@ export function createOpenChangePointInMlAppAction(
       }
     },
     async isCompatible(context) {
-      const { isChangePointChartEmbeddableContext } = await import('./change_point_action_context');
+      const { isChangePointChartEmbeddableContext } = await import(
+        './change_point_action_context.js'
+      );
       return isChangePointChartEmbeddableContext(context);
     },
   };

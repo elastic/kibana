@@ -11,7 +11,7 @@ import type { PluginInitializerContext } from '@kbn/core-plugins-server';
  * Screenshotting plugin entry point.
  */
 export async function plugin(pluginInitializerContext: PluginInitializerContext) {
-  const { ScreenshottingPlugin } = await import('./plugin');
+  const { ScreenshottingPlugin } = await import('./plugin.js');
   return new ScreenshottingPlugin(pluginInitializerContext);
 }
 
