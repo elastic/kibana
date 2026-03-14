@@ -156,6 +156,7 @@ export const createCustomThresholdExecutor = ({
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
       dataViewIndexPattern,
+      dataView,
       timeFieldName,
       compositeSize,
       alertOnGroupDisappear,
