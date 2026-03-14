@@ -170,6 +170,7 @@ describe('Cases Plugin', () => {
             "analytics": Object {
               "index": Object {
                 "enabled": true,
+                "reindexConcurrency": 3,
               },
             },
             "attachments": Object {

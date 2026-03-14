@@ -5,10 +5,29 @@
  * 2.0.
  */
 
-import type { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsModelVersion, SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../common/constants';
 import { configureMigrations } from './migrations';
+
+const modelVersion1: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        analytics_enabled: {
+          type: 'boolean',
+        },
+        analytics_last_sync_at: {
+          type: 'date',
+        },
+        analytics_sync_status: {
+          type: 'keyword',
+        },
+      },
+    },
+  ],
+};
 
 /**
  * The comments in the mapping indicate the additional properties that are stored in Elasticsearch but are not indexed.
@@ -104,4 +123,7 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
     },
   },
   migrations: configureMigrations,
+  modelVersions: {
+    1: modelVersion1,
+  },
 };
