@@ -13,11 +13,8 @@ import type { ProcessedConversationRound } from './prepare_conversation';
 /**
  * Fraction of the context window reserved for system prompt, output generation,
  * actions buffer, and other overhead that isn't conversation history.
- *
- * Demo:       RESERVED = 0.98,  TRIGGER = 0.8  → triggers after ~5-6 rounds
- * Production: RESERVED = 0.3,   TRIGGER = 0.8
  */
-const RESERVED_FRACTION = 0.98;
+const RESERVED_FRACTION = 0.3;
 
 /**
  * Fraction of the history budget at which compaction should trigger.
