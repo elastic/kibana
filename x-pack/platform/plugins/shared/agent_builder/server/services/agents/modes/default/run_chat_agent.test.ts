@@ -18,6 +18,7 @@ import { createAgentGraph } from './graph';
 
 jest.mock('../utils', () => ({
   prepareConversation: jest.fn(),
+  selectSkills: jest.fn().mockResolvedValue([]),
   selectTools: jest.fn(),
   extractRound: jest.fn(),
   getPendingRound: jest.fn(),

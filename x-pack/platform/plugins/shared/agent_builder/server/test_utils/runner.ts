@@ -25,6 +25,7 @@ import type {
   ToolRegistry,
   HooksServiceStart,
 } from '@kbn/agent-builder-server';
+import type { WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type {
@@ -48,6 +49,7 @@ import { createAgentsServiceStartMock } from './agents';
 import type { SkillServiceStart, SkillRegistry } from '../services/skills';
 
 export type ToolResultStoreMock = jest.Mocked<WritableToolResultStore>;
+export type SkillsStoreMock = jest.Mocked<WritableSkillsStore>;
 export type SkillRegistryMock = jest.Mocked<SkillRegistry>;
 export type AttachmentsServiceStartMock = jest.Mocked<AttachmentServiceStart>;
 export type ToolProviderMock = jest.Mocked<ToolProvider>;
@@ -84,6 +86,16 @@ export const createToolRegistryMock = (): ToolRegistryMock => {
 };
 
 export const createToolResultStoreMock = (): ToolResultStoreMock => {
+  return {
+    has: jest.fn(),
+    get: jest.fn(),
+    add: jest.fn(),
+    delete: jest.fn(),
+    asReadonly: jest.fn(),
+  };
+};
+
+export const createSkillsStoreMock = (): SkillsStoreMock => {
   return {
     has: jest.fn(),
     get: jest.fn(),
@@ -239,6 +251,7 @@ export interface AgentHandlerContextMock extends AgentHandlerContext {
   toolProvider: ToolProviderMock;
   toolRegistry: ToolRegistryMock;
   resultStore: ToolResultStoreMock;
+  skillsStore: SkillsStoreMock;
   attachments: AttachmentsServiceMock;
   filestore: FileSystemStoreMock;
   skills: SkillsServiceMock;
@@ -257,6 +270,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     runner: createScopedRunnerMock(),
     attachments: createAttachmentsService(),
     resultStore: createToolResultStoreMock(),
+    skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
     events: {
       emit: jest.fn(),
@@ -341,6 +355,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     logger: loggerMock.create(),
     request: httpServerMock.createKibanaRequest(),
     resultStore: createToolResultStoreMock(),
+    skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
     attachmentsService: createAttachmentsServiceStartMock(),
     promptManager: createPromptManagerMock(),

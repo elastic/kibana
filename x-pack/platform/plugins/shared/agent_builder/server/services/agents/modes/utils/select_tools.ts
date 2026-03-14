@@ -15,6 +15,7 @@ import type {
   BuiltinToolDefinition,
 } from '@kbn/agent-builder-server';
 import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
@@ -29,6 +30,7 @@ import type { ProcessedConversation } from './prepare_conversation';
 export const selectTools = async ({
   conversation,
   previousDynamicToolIds,
+  filteredSkills,
   skills,
   request,
   toolProvider,
@@ -41,6 +43,7 @@ export const selectTools = async ({
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds: string[];
+  filteredSkills: InternalSkillDefinition[];
   skills: SkillsService;
   request: KibanaRequest;
   toolProvider: ToolProvider;
@@ -111,10 +114,9 @@ export const selectTools = async ({
     request,
   });
 
-  const allSkills = await skills.list();
   const dynamicInlineTools = (
     await Promise.all(
-      allSkills
+      filteredSkills
         .filter((skill) => skill.getInlineTools !== undefined)
         .map((skill) => skill.getInlineTools!())
     )
