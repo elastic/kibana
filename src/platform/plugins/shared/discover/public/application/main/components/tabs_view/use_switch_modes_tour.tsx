@@ -31,8 +31,10 @@ export const useSwitchModesTour = (): React.ReactNode => {
   }, [services.storage]);
 
   const areToursEnabled = services.notifications.tours.isEnabled();
+  const isCpsEnabled = Boolean(services.cps?.cpsManager);
   const shouldShow =
     areToursEnabled &&
+    !isCpsEnabled &&
     services.uiSettings.get(ENABLE_ESQL) &&
     !isDismissed &&
     !hideTabsBar &&
