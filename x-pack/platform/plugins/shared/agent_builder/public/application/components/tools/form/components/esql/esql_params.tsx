@@ -99,7 +99,7 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           aria-label={i18nMessages.addParamButtonLabel}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           color="primary"
           size="s"
           onClick={() => {

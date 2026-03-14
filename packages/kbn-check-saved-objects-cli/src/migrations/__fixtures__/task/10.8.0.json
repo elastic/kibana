@@ -6,7 +6,6 @@
       "startedAt": "string?|null",
       "retryAt": "string?|null",
       "runAt": "string",
-      "schedule": "object?",
       "params": "string",
       "state": "string",
       "stateVersion": "number?",
@@ -21,12 +20,10 @@
       "version": "string?",
       "partition": "number?",
       "priority": "number?",
+      "interval": "string",
       "apiKey": "string?",
-      "userScope": {
-        "apiKeyId": "string?",
-        "spaceId": "string",
-        "apiKeyCreatedByUser": "boolean"
-      }
+      "userScope": "object?",
+      "schedule": "object?"
     }
   ],
   "10.8.0": [
@@ -36,7 +33,6 @@
       "startedAt": "string?|null",
       "retryAt": "string?|null",
       "runAt": "string",
-      "schedule": "object?",
       "params": "string",
       "state": "string",
       "stateVersion": "number?",
@@ -51,14 +47,12 @@
       "version": "string?",
       "partition": "number?",
       "priority": "number?",
+      "interval": "string",
       "apiKey": "string?",
       "uiamApiKey": "string?",
-      "userScope": {
-        "apiKeyId": "string?",
-        "uiamApiKeyId": "string?",
-        "spaceId": "string",
-        "apiKeyCreatedByUser": "boolean"
-      }
+      "userScope": "object?",
+      "schedule": "object?",
+      "cost": "tiny?|normal?|extralarge?"
     }
   ]
 }

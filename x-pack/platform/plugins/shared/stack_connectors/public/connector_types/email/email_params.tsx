@@ -130,7 +130,11 @@ export const EmailParamsFields = ({
                 </EuiButtonEmpty>
               ) : null}
               {!addBCC && (!bcc || bcc?.length === 0) ? (
-                <EuiButtonEmpty size="xs" onClick={() => setAddBCC(true)}>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => setAddBCC(true)}
+                  data-test-subj="emailAddBccButton"
+                >
                   <FormattedMessage
                     defaultMessage="Bcc"
                     id="xpack.stackConnectors.components.email.addBccButton"

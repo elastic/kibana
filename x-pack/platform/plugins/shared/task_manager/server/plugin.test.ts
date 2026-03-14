@@ -9,8 +9,7 @@ import { TaskManagerPlugin } from './plugin';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 
 import { coreMock } from '@kbn/core/server/mocks';
-import type { TaskManagerConfig } from './config';
-import { ApiKeyType } from './config';
+import { ApiKeyType, type TaskManagerConfig } from './config';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';

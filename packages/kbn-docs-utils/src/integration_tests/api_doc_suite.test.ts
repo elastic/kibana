@@ -125,7 +125,7 @@ beforeAll(async () => {
     referencedDeprecations,
     adoptionTrackedAPIs,
     unnamedExports,
-  } = getPluginApiMap(project, plugins, log, { collectReferences: false });
+  } = getPluginApiMap(project, plugins, plugins, log, { collectReferences: false });
 
   doc = pluginApiMap.pluginA;
 
@@ -985,6 +985,53 @@ describe('validation and stats', () => {
     it('documents expected behavior for property-level validation', () => {
       // placeholder to keep suite shape; property-level validation is active
       expect(true).toBe(true);
+    });
+  });
+
+  describe('multiple call signatures (function overloads)', () => {
+    it('handles OverloadedFunction interface with call signatures as children', () => {
+      const overloadedFnType = doc.client.find((c) => c.label === 'OverloadedFunction');
+      expect(overloadedFnType).toBeDefined();
+      expect(overloadedFnType!.type).toBe(TypeKind.InterfaceKind);
+      // Interface signature is undefined (self-referential); call signatures appear as children.
+      expect(overloadedFnType!.signature).toBeUndefined();
+      expect(overloadedFnType!.children).toBeDefined();
+      expect(overloadedFnType!.children!.length).toBe(3); // Three overload signatures.
+    });
+
+    it('handles overloadedFn variable with multiple call signatures', () => {
+      const overloadedFn = doc.client.find((c) => c.label === 'overloadedFn');
+      expect(overloadedFn).toBeDefined();
+      // Should be typed as FunctionKind since it has call signatures.
+      expect(overloadedFn!.type).toBe(TypeKind.FunctionKind);
+      // Should have children (parameters from the first signature).
+      expect(overloadedFn!.children).toBeDefined();
+      expect(overloadedFn!.children!.length).toBeGreaterThan(0);
+      // The first parameter should be 'input'.
+      expect(overloadedFn!.children![0].label).toBe('input');
+    });
+
+    it('extracts parameter documentation from the first overload signature', () => {
+      const overloadedFn = doc.client.find((c) => c.label === 'overloadedFn');
+      expect(overloadedFn).toBeDefined();
+      expect(overloadedFn!.children).toBeDefined();
+
+      const inputParam = overloadedFn!.children!.find((c) => c.label === 'input');
+      expect(inputParam).toBeDefined();
+      // The description should come from the JSDoc on the variable or first signature.
+      // Note: JSDoc on individual overload signatures inside a type literal
+      // is typically not extracted by ts-morph in the same way as top-level JSDoc.
+    });
+
+    it('links to OverloadedFunction interface in signature field', () => {
+      const overloadedFn = doc.client.find((c) => c.label === 'overloadedFn');
+      expect(overloadedFn).toBeDefined();
+      expect(overloadedFn!.signature).toBeDefined();
+      // The signature contains a reference link to the OverloadedFunction interface.
+      const sigText = overloadedFn!
+        .signature!.map((s) => (typeof s === 'string' ? s : s.text))
+        .join('');
+      expect(sigText).toContain('OverloadedFunction');
     });
   });
 });

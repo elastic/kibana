@@ -103,7 +103,7 @@ async function getDefendInsightsGraph(logger: Logger): Promise<Drawable> {
   const mockEsClient = {} as unknown as ElasticsearchClient;
 
   const graph = getDefaultDefendInsightsGraph({
-    insightType: DefendInsightType.Enum.incompatible_antivirus,
+    insightType: DefendInsightType.enum.incompatible_antivirus,
     endpointIds: ['mock-endpoint-1'],
     anonymizationFields: [],
     esClient: mockEsClient,

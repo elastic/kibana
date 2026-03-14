@@ -52,7 +52,7 @@ import {
   type VarGroupSelection,
 } from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services';
+import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../services';
 
 import {
   getInheritedNamespace,
@@ -153,12 +153,15 @@ export const EditPackagePolicyForm = memo<{
   );
 
   // Derive var_group_selections from policy for edit mode
+  const { enableVarGroups } = ExperimentalFeaturesService.get();
+  const varGroups =
+    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(packageInfo?.var_groups, hasAgentlessAgentPolicy);
-  }, [packagePolicy.var_group_selections, packageInfo?.var_groups, hasAgentlessAgentPolicy]);
+    return computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
+  }, [packagePolicy.var_group_selections, varGroups, hasAgentlessAgentPolicy]);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);

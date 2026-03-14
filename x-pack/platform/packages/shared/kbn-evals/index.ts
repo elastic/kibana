@@ -21,7 +21,6 @@ export type {
   EvalsExecutorClient,
 } from './src/types';
 export { KibanaEvalsClient } from './src/kibana_evals_executor/client';
-export { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
@@ -53,9 +52,13 @@ export {
   type EvaluatorStats,
   type RunStats,
 } from './src/utils/score_repository';
+export { mapToEvaluationScoreDocuments, exportEvaluations } from './src/utils/report_model_score';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
-export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';
+export {
+  createSpanLatencyEvaluator,
+  createSkillInvocationEvaluator,
+} from './src/evaluators/trace_based';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 
 export {

@@ -9,17 +9,13 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
-import type { DashboardState } from './api';
-import type { create, read, update, deleteDashboard } from './api';
+import type { read } from './api';
 
 /**
  * Client interface for dashboard CRUD operations
  */
 export interface DashboardServerClient {
-  create: typeof create;
-  read: typeof read;
-  update: typeof update;
-  delete: typeof deleteDashboard;
+  read(requestCtx: RequestHandlerContext, id: string): ReturnType<typeof read>;
 }
 
 /** The setup contract for the Dashboard plugin on the server. */
@@ -33,22 +29,6 @@ export interface DashboardPluginSetup {}
 export interface DashboardPluginStart {
   /** Client for dashboard CRUD operations. */
   client: DashboardServerClient;
-  /**
-   * Retrieves a dashboard by ID.
-   *
-   * @deprecated This method is deprecated and should be replaced by client.read.
-   * @param ctx - The request handler context.
-   * @param id - The dashboard ID.
-   * @returns A promise that resolves to the dashboard summary.
-   */
-  getDashboard: (
-    ctx: RequestHandlerContext,
-    id: string
-  ) => Promise<
-    Pick<DashboardState, 'description' | 'tags' | 'title'> & {
-      id: string;
-    }
-  >;
   /**
    * Scans dashboards with pagination.
    *

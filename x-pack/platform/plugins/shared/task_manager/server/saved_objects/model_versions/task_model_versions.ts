@@ -15,6 +15,7 @@ import {
   taskSchemaV6,
   taskSchemaV7,
   taskSchemaV8,
+  taskSchemaV9,
 } from '../schemas/task';
 
 // IMPORTANT!!!
@@ -102,6 +103,20 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '8': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          cost: { type: 'keyword' },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: taskSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV8,
+    },
+  },
+  '9': {
     changes: [
       {
         type: 'mappings_addition',

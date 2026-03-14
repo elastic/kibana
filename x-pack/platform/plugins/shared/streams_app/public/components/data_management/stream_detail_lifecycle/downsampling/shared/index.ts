@@ -18,3 +18,4 @@ export {
 export { getBoundsHelpTextValues } from './bounds_help_text';
 export { getUnitSelectOptions, isPreservedNonDefaultUnit } from './unit_select_options';
 export type { TimeUnitSelectOption } from './unit_select_options';
+export { downsamplingHelpText } from './i18n';

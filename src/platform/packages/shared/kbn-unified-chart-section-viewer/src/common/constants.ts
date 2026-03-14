@@ -59,3 +59,6 @@ export const DIMENSION_TYPES = [
   ES_FIELD_TYPES.BYTE,
   ES_FIELD_TYPES.UNSIGNED_LONG,
 ];
+
+// Metric instrument types allowed in the Metrics experience.
+export const ALLOWED_METRIC_TYPES = ['gauge', 'counter', 'histogram'];

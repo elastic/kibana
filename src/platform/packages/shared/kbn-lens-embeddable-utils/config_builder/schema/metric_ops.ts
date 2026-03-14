@@ -40,7 +40,7 @@ export const staticOperationDefinitionSchema = genericOperationOptionsSchema.ext
       defaultValue: LENS_STATIC_VALUE_DEFAULT,
     }),
   },
-  { meta: { id: 'staticOperationDefinition' } }
+  { meta: { id: 'staticOperationDefinition', title: 'Static Operation Definition' } }
 );
 
 const advancedOperationSettings = {
@@ -49,14 +49,24 @@ const advancedOperationSettings = {
    */
   reduced_time_range: schema.maybe(
     schema.string({
-      meta: { id: 'operationReducedTimeRangeSetting', description: 'Reduced time range' },
+      meta: {
+        id: 'operationReducedTimeRangeSetting',
+        title: 'Operation Reduced Time Range Setting',
+        description: 'Reduced time range',
+      },
     })
   ),
   /**
    * Time shift
    */
   time_shift: schema.maybe(
-    schema.string({ meta: { id: 'operationTimeShiftSetting', description: 'Time shift' } })
+    schema.string({
+      meta: {
+        id: 'operationTimeShiftSetting',
+        title: 'Operation Time Shift Setting',
+        description: 'Time shift',
+      },
+    })
   ),
   /**
    * Filter
@@ -68,7 +78,13 @@ const advancedOperationSettings = {
   time_scale: schema.maybe(
     schema.oneOf(
       [schema.literal('s'), schema.literal('m'), schema.literal('h'), schema.literal('d')],
-      { meta: { id: 'operationTimeScaleSetting', description: 'Time scale' } }
+      {
+        meta: {
+          id: 'operationTimeScaleSetting',
+          title: 'Operation Time Scale Setting',
+          description: 'Time scale',
+        },
+      }
     )
   ),
 };
@@ -95,7 +111,7 @@ export const formulaOperationDefinitionSchema = genericOperationOptionsSchema.ex
       )
     ),
   },
-  { meta: { id: 'formulaOperation' } }
+  { meta: { id: 'formulaOperation', title: 'Formula Operation' } }
 );
 
 const esqlColumn = {
@@ -149,7 +165,7 @@ export const countMetricOperationSchema = fieldBasedOperationSharedSchema
         schema.string({ meta: { description: 'Field to be used for the metric' } })
       ),
     },
-    { meta: { id: 'countMetricOperation' } }
+    { meta: { id: 'countMetricOperation', title: 'Count Metric Operation' } }
   );
 
 export const uniqueCountMetricOperationSchema = fieldBasedOperationSharedSchema
@@ -158,7 +174,7 @@ export const uniqueCountMetricOperationSchema = fieldBasedOperationSharedSchema
     {
       operation: schema.literal('unique_count'),
     },
-    { meta: { id: 'uniqueCountMetricOperation' } }
+    { meta: { id: 'uniqueCountMetricOperation', title: 'Unique Count Metric Operation' } }
   );
 
 export const metricOperationSchema = fieldBasedOperationSharedSchema.extends(
@@ -171,7 +187,7 @@ export const metricOperationSchema = fieldBasedOperationSharedSchema.extends(
       schema.literal('standard_deviation'),
     ]),
   },
-  { meta: { id: 'minMaxAvgMedianStdDevMetricOperation' } }
+  { meta: { id: 'minMaxAvgMedianStdDevMetricOperation', title: 'Stats Metric Operation' } }
 );
 
 export const sumMetricOperationSchema = fieldBasedOperationSharedSchema
@@ -180,7 +196,7 @@ export const sumMetricOperationSchema = fieldBasedOperationSharedSchema
     {
       operation: schema.literal('sum'),
     },
-    { meta: { id: 'sumMetricOperation' } }
+    { meta: { id: 'sumMetricOperation', title: 'Sum Metric Operation' } }
   );
 
 export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends(
@@ -192,7 +208,7 @@ export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends(
       defaultValue: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
     }),
   },
-  { meta: { id: 'lastValueOperation' } }
+  { meta: { id: 'lastValueOperation', title: 'Last Value Operation' } }
 );
 
 export const percentileOperationSchema = fieldBasedOperationSharedSchema.extends(
@@ -203,7 +219,7 @@ export const percentileOperationSchema = fieldBasedOperationSharedSchema.extends
       defaultValue: LENS_PERCENTILE_DEFAULT_VALUE,
     }),
   },
-  { meta: { id: 'percentileOperation' } }
+  { meta: { id: 'percentileOperation', title: 'Percentile Operation' } }
 );
 
 export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema.extends(
@@ -214,7 +230,7 @@ export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema.ex
       defaultValue: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
     }),
   },
-  { meta: { id: 'percentileRanksOperation' } }
+  { meta: { id: 'percentileRanksOperation', title: 'Percentile Ranks Operation' } }
 );
 
 export const fieldMetricOperationsSchema = schema.oneOf(
@@ -227,7 +243,7 @@ export const fieldMetricOperationsSchema = schema.oneOf(
     percentileOperationSchema,
     percentileRanksOperationSchema,
   ],
-  { meta: { id: 'fieldMetricOperations' } }
+  { meta: { id: 'fieldMetricOperations', title: 'Field Metric Operations' } }
 );
 
 export const differencesOperationSchema = metricOperationSharedSchema.extends(
@@ -235,7 +251,7 @@ export const differencesOperationSchema = metricOperationSharedSchema.extends(
     operation: schema.literal('differences'),
     of: fieldMetricOperationsSchema,
   },
-  { meta: { id: 'differencesOperation' } }
+  { meta: { id: 'differencesOperation', title: 'Differences Operation' } }
 );
 
 export const movingAverageOperationSchema = metricOperationSharedSchema.extends(
@@ -247,21 +263,21 @@ export const movingAverageOperationSchema = metricOperationSharedSchema.extends(
       defaultValue: LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
     }),
   },
-  { meta: { id: 'movingAverageOperation' } }
+  { meta: { id: 'movingAverageOperation', title: 'Moving Average Operation' } }
 );
 
 export const cumulativeSumOperationSchema = fieldBasedOperationSharedSchema.extends(
   {
     operation: schema.literal('cumulative_sum'),
   },
-  { meta: { id: 'cumulativeSumOperation' } }
+  { meta: { id: 'cumulativeSumOperation', title: 'Cumulative Sum Operation' } }
 );
 
 export const counterRateOperationSchema = fieldBasedOperationSharedSchema.extends(
   {
     operation: schema.literal('counter_rate'),
   },
-  { meta: { id: 'counterRateOperation' } }
+  { meta: { id: 'counterRateOperation', title: 'Counter Rate Operation' } }
 );
 
 export const metricOperationDefinitionSchema = schema.oneOf([

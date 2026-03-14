@@ -123,8 +123,9 @@ export interface FailedTaskResult {
   status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
-export type RunFunction = () => Promise<RunResult | undefined | void>;
-export type CancelFunction = () => Promise<RunResult | undefined | void>;
+export type AnyRunResult = RunResult | undefined | void;
+export type RunFunction = () => Promise<AnyRunResult>;
+export type CancelFunction = () => Promise<AnyRunResult>;
 export interface CancellableTask<T = never> {
   run: RunFunction;
   cancel?: CancelFunction;

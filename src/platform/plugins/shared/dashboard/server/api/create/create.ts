@@ -15,11 +15,14 @@ import type { DashboardCreateRequestBody, DashboardCreateRequestParams } from '.
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
 import type { DashboardCreateResponseBody } from './types';
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function create(
   requestCtx: RequestHandlerContext,
+  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardCreateRequestBody,
-  createParams?: DashboardCreateRequestParams
+  createParams?: DashboardCreateRequestParams,
+  isDashboardAppRequest: boolean = false
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = createBody;
@@ -28,7 +31,7 @@ export async function create(
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn(restOfData);
+  } = transformDashboardIn(restOfData, isDashboardAppRequest);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
@@ -52,5 +55,10 @@ export async function create(
     }
   );
 
-  return getDashboardCRUResponseBody(savedObject, 'create');
+  return getDashboardCRUResponseBody(
+    savedObject,
+    'create',
+    dashboardStateSchema,
+    isDashboardAppRequest
+  );
 }

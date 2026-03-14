@@ -1817,21 +1817,29 @@ class AgentPolicyService {
       );
 
       if (bulkResponse.errors) {
-        const erroredDocuments = bulkResponse.items.reduce((acc, item) => {
+        const erroredDocuments = bulkResponse.items.reduce((acc, item, idx) => {
           const value: BulkResponseItem | undefined = item.index;
           if (!value || !value.error) {
             return acc;
           }
 
-          acc.push(value);
+          const policy = fleetServerPolicies[idx];
+          acc.push({
+            bulkItem: value,
+            policyId: policy?.policy_id,
+            revisionIdx: policy?.revision_idx,
+          });
           return acc;
-        }, [] as BulkResponseItem[]);
+        }, [] as Array<{ bulkItem: BulkResponseItem; policyId?: string; revisionIdx?: number }>);
 
-        const errorMessage = `Failed to index documents with ids ${erroredDocuments
-          .map((doc) => doc._id)
-          .join(', ')} during policy deployment: ${erroredDocuments
-          .map((doc) => doc.error?.reason)
-          .join(', ')}`;
+        const errorMessage = `Failed to deploy ${
+          erroredDocuments.length
+        } policy revision(s) to ${AGENT_POLICY_INDEX}: ${erroredDocuments
+          .map(
+            ({ bulkItem, policyId, revisionIdx }) =>
+              `policy [${policyId}] revision [${revisionIdx}] (${bulkItem.error?.reason})`
+          )
+          .join('; ')}`;
 
         logger.error(errorMessage);
 
@@ -1840,6 +1848,28 @@ class AgentPolicyService {
         }
       }
     }
+
+    // Check for mismatched revisions after deploy (excluding version-specific policies)
+    const deployedPolicyIds = [
+      ...new Set(
+        fleetServerPolicies.map((fsp) => fsp.policy_id).filter((id) => !hasVersionSuffix(id))
+      ),
+    ];
+    await pMap(
+      deployedPolicyIds,
+      async (policyId) => {
+        const latestFleetPolicy = await this.getLatestFleetPolicyRevision(esClient, policyId);
+        const soRevision = policiesMap[policyId]?.revision;
+        if (latestFleetPolicy && soRevision && latestFleetPolicy.revision_idx !== soRevision) {
+          logger.warn(
+            `Policy [${policyId}] has mismatched revisions after deploy: ` +
+              `.kibana_ingest revision [${soRevision}], ` +
+              `.fleet-policies revision_idx [${latestFleetPolicy.revision_idx}]`
+          );
+        }
+      },
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 }
+    );
 
     for (const agentPolicy of policies) {
       if (!agentPolicy.supports_agentless) {
@@ -1931,11 +1961,15 @@ class AgentPolicyService {
     }
   }
 
-  public async getLatestFleetPolicy(esClient: ElasticsearchClient, agentPolicyId: string) {
-    const res = await esClient.search<FleetServerPolicy>({
+  public async getLatestFleetPolicyRevision(
+    esClient: ElasticsearchClient,
+    agentPolicyId: string
+  ): Promise<Pick<FleetServerPolicy, 'revision_idx' | 'policy_id'> | null> {
+    const res = await esClient.search<Pick<FleetServerPolicy, 'revision_idx' | 'policy_id'>>({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
       rest_total_hits_as_int: true,
+      _source: ['revision_idx', 'policy_id'],
       query: {
         term: {
           policy_id: agentPolicyId,
@@ -1949,7 +1983,7 @@ class AgentPolicyService {
       return null;
     }
 
-    return res.hits.hits[0]._source;
+    return res.hits.hits[0]._source ?? null;
   }
 
   public async getFleetServerPolicy(

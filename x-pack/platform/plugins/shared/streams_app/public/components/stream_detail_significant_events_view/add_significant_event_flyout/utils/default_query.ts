@@ -12,12 +12,8 @@ export function defaultQuery(): StreamQuery {
   return {
     id: v4(),
     title: '',
-    kql: {
-      query: '',
-    },
     esql: {
       query: '',
     },
-    feature: undefined,
   };
 }

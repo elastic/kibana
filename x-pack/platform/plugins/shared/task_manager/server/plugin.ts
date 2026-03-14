@@ -374,6 +374,7 @@ export class TaskManagerPlugin
       canEncryptSavedObjects: this.canEncryptSavedObjects,
       getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
       basePath: http.basePath,
+      executionContext,
       shouldGrantUiam,
     });
 
