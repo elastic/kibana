@@ -294,13 +294,7 @@ describe('Lens inline editing helpers', () => {
         timeFieldName: '@timestamp',
       });
 
-      await getGridAttrs(
-        query,
-        [],
-        startDependencies.data,
-        startDependencies.http,
-        uiSettingsMock
-      );
+      await getGridAttrs(query, [], startDependencies.data, startDependencies.http, uiSettingsMock);
 
       expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
         expect.objectContaining({
