@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { ConfigKey, MonitorFields } from '../../../../common/runtime_types';
+import type { MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
+import { secondsToCronFormatter } from '../formatting_utils';
 
 type FormatterFn = (
   fields: Partial<MonitorFields>,
@@ -32,4 +34,12 @@ export const stringToObjectFormatter: FormatterFn = (fields, key) => {
   } catch {
     return undefined;
   }
+};
+
+export const publicTimeoutFormatter: FormatterFn = (fields) => {
+  if (fields[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER) {
+    return null;
+  }
+
+  return secondsToCronFormatter(fields, ConfigKey.TIMEOUT);
 };

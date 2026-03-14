@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { maxAttemptsFormatter, secondsToCronFormatter } from '../formatting_utils';
-import { arrayFormatter, stringToObjectFormatter } from './formatting_utils';
+import { maxAttemptsFormatter } from '../formatting_utils';
+import {
+  arrayFormatter,
+  publicTimeoutFormatter,
+  stringToObjectFormatter,
+} from './formatting_utils';
 import type { CommonFields, MonitorFields } from '../../../../common/runtime_types';
 import { ConfigKey, SourceType } from '../../../../common/runtime_types';
 
@@ -45,7 +49,7 @@ export const commonFormatters: CommonFormatMap = {
   retest_on_failure: null,
   [ConfigKey.MAX_ATTEMPTS]: maxAttemptsFormatter,
   [ConfigKey.KIBANA_SPACES]: null,
-  [ConfigKey.TIMEOUT]: secondsToCronFormatter,
+  [ConfigKey.TIMEOUT]: publicTimeoutFormatter,
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,
   [ConfigKey.PARAMS]: stringToObjectFormatter,
