@@ -16,10 +16,11 @@ import { TracingConfig } from './types';
 export const tracingConfigSchema: Type<TracingConfig> = schema.object({
   enabled: schema.maybe(schema.boolean()),
   sample_rate: schema.number({ defaultValue: 1, min: 0, max: 1 }),
-  exporters: schema.maybe(
-    schema.oneOf([
+  exporters: schema.oneOf(
+    [
       inferenceTracingExportConfigSchema,
-      schema.arrayOf(inferenceTracingExportConfigSchema),
-    ])
+      schema.arrayOf(inferenceTracingExportConfigSchema, { maxSize: 25 }),
+    ],
+    { defaultValue: [] }
   ),
 });
