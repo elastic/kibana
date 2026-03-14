@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
 import { AGENTS_WRITE_SECURITY } from './route_security';
-import type { ConsumptionResponse, ConsumptionSortField } from '../../common/http_api/consumption';
-import {
-  buildConsumptionQuery,
-  buildConsumptionDataSearchParams,
-  buildConsumptionAggsSearchParams,
-  buildConsumptionResponseBody,
-} from '../services/metering/utils';
+import type { ConsumptionResponse } from '../../common/http_api/consumption';
 
 /**
  * Registers POST /api/agent_builder/agents/{agent_id}/consumption
@@ -32,7 +25,11 @@ import {
  * structured params (search_after array, usernames array) are passed in the
  * request body instead of encoded query strings.
  */
-export function registerConsumptionRoutes({ router, coreSetup, logger }: RouteDependencies) {
+export function registerConsumptionRoutes({
+  router,
+  getInternalServices,
+  logger,
+}: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   router.versioned
@@ -120,47 +117,11 @@ export function registerConsumptionRoutes({ router, coreSetup, logger }: RouteDe
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const [coreStart] = await coreSetup.getStartServices();
-        const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
+        const { consumption } = getInternalServices();
+        const client = consumption.getScopedClient({ request });
+        const body = await client.getConsumption();
 
-        const { agent_id: agentId } = request.params;
-        const {
-          size,
-          sort_field: sortField,
-          sort_order: sortOrder,
-          search_after: searchAfter,
-          search: searchText,
-          usernames: usernameFilter,
-          has_warnings: hasWarningsFilter,
-        } = request.body;
-
-        const space = (await ctx.agentBuilder).spaces.getSpaceId();
-
-        const { query, runtimeMappings } = buildConsumptionQuery({
-          space,
-          agentId,
-          usernameFilter,
-          searchText,
-          hasWarningsFilter,
-        });
-
-        const [esResponse, aggsResponse] = await Promise.all([
-          esClient.search(
-            buildConsumptionDataSearchParams({
-              query,
-              runtimeMappings,
-              size,
-              sortField: sortField as ConsumptionSortField,
-              sortOrder: sortOrder as 'asc' | 'desc',
-              searchAfter: searchAfter as FieldValue[] | undefined,
-            })
-          ),
-          esClient.search(buildConsumptionAggsSearchParams(space, agentId)),
-        ]);
-
-        return response.ok<ConsumptionResponse>({
-          body: buildConsumptionResponseBody(esResponse, aggsResponse),
-        });
+        return response.ok<ConsumptionResponse>({ body });
       })
     );
 }

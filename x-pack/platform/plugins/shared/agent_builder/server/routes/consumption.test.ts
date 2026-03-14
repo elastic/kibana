@@ -9,10 +9,17 @@ import type { IRouter } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RouteDependencies } from './types';
+import type { InternalStartServices } from '../services';
 import { publicApiPath } from '../../common/constants';
 import { registerConsumptionRoutes } from './consumption';
 import { HIGH_INPUT_TOKEN_THRESHOLD } from '../services/metering/utils';
 import { AGENTS_WRITE_SECURITY } from './route_security';
+import {
+  buildConsumptionQuery,
+  buildConsumptionDataSearchParams,
+  buildConsumptionAggsSearchParams,
+  buildConsumptionResponseBody,
+} from '../services/metering/utils';
 
 const ROUTE_PATH = `${publicApiPath}/agents/{agent_id}/consumption`;
 
@@ -52,7 +59,6 @@ describe('Consumption route', () => {
   let routeConfig: Record<string, any>;
   let versionConfig: Record<string, any>;
   let mockEsSearch: jest.Mock;
-  let mockGetStartServices: jest.Mock;
 
   const createMockContext = () => ({
     core: Promise.resolve({}),
@@ -92,19 +98,52 @@ describe('Consumption route', () => {
       },
     });
 
-    mockGetStartServices = jest.fn().mockResolvedValue([
-      {
-        elasticsearch: {
-          client: {
-            asScoped: () => ({
-              asInternalUser: {
-                search: mockEsSearch,
-              },
-            }),
-          },
+    /**
+     * Mirrors ConsumptionServiceImpl.getScopedClient(): captures the
+     * request on scoping and reads params/body when getConsumption()
+     * is called, so existing assertions on ES query shape still hold.
+     */
+    const mockConsumptionService = {
+      getScopedClient: ({ request: req }: { request: any }) => ({
+        async getConsumption() {
+          const { agent_id: agentId } = req.params;
+          const {
+            size,
+            sort_field: sortField,
+            sort_order: sortOrder,
+            search_after: searchAfter,
+            search: searchText,
+            usernames: usernameFilter,
+            has_warnings: hasWarningsFilter,
+          } = req.body;
+
+          const { query, runtimeMappings } = buildConsumptionQuery({
+            space: 'default',
+            agentId,
+            usernameFilter,
+            searchText,
+            hasWarningsFilter,
+          });
+          const [esResponse, aggsResponse] = await Promise.all([
+            mockEsSearch(
+              buildConsumptionDataSearchParams({
+                query,
+                runtimeMappings,
+                size,
+                sortField,
+                sortOrder,
+                searchAfter,
+              })
+            ),
+            mockEsSearch(buildConsumptionAggsSearchParams('default', agentId)),
+          ]);
+          return buildConsumptionResponseBody(esResponse, aggsResponse);
         },
-      },
-    ]);
+      }),
+    };
+
+    const mockGetInternalServices = () =>
+      ({ consumption: mockConsumptionService } as unknown as InternalStartServices);
 
     const routeHandlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>> = {};
     const routeConfigs: Record<string, any> = {};
@@ -135,7 +174,7 @@ describe('Consumption route', () => {
 
     registerConsumptionRoutes({
       router: mockRouter,
-      coreSetup: { getStartServices: mockGetStartServices } as any,
+      getInternalServices: mockGetInternalServices,
       logger: loggingSystemMock.createLogger(),
     } as unknown as RouteDependencies);
 
