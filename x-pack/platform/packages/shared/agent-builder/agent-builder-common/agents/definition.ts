@@ -104,6 +104,11 @@ export interface AgentConfiguration {
   skill_ids?: string[];
 
   /**
+   * When true, enables built-in Elastic capabilities for the agent.
+   */
+  enable_elastic_capabilities?: boolean;
+
+  /**
    * Optional list of workflow IDs. When set, these workflows run before the agent is executed.
    */
   workflow_ids?: string[];

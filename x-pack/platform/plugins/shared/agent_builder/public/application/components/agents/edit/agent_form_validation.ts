@@ -89,6 +89,7 @@ export const agentFormSchema = z.object({
       })
     ),
     skill_ids: z.array(z.string()).optional(),
+    enable_elastic_capabilities: z.boolean().optional(),
     workflow_ids: z.array(z.string()).optional(),
   }),
 });

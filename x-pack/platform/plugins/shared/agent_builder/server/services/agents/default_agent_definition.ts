@@ -18,6 +18,8 @@ export const getDefaultAgentCreateRequest = (): AgentCreateRequest => ({
   description: 'Elastic AI Agent',
   visibility: AgentVisibility.Public,
   configuration: {
+    // enable built-in skills and default set of tools for the default agent
+    enable_elastic_capabilities: true,
     tools: [{ tool_ids: [...defaultAgentToolIds] }],
   },
 });

@@ -218,6 +218,14 @@ export function registerAgentRoutes({
                   ),
                   tools: TOOL_SELECTION_SCHEMA,
                   skill_ids: schema.maybe(SKILLS_SCHEMA),
+                  enable_elastic_capabilities: schema.maybe(
+                    schema.boolean({
+                      meta: {
+                        description:
+                          'When true, enables built-in Elastic capabilities for the agent.',
+                      },
+                    })
+                  ),
                   workflow_ids: schema.maybe(
                     schema.arrayOf(
                       schema.string({
@@ -369,6 +377,14 @@ export function registerAgentRoutes({
                     ),
                     tools: schema.maybe(TOOL_SELECTION_SCHEMA),
                     skill_ids: schema.maybe(SKILLS_SCHEMA),
+                    enable_elastic_capabilities: schema.maybe(
+                      schema.boolean({
+                        meta: {
+                          description:
+                            'When true, enables built-in Elastic capabilities for the agent.',
+                        },
+                      })
+                    ),
                     workflow_ids: schema.maybe(
                       schema.arrayOf(
                         schema.string({
