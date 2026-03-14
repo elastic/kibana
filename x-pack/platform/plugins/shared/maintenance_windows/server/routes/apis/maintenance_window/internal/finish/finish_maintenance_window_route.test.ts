@@ -68,9 +68,19 @@ describe('finishMaintenanceWindowRoute', () => {
 
     expect(maintenanceWindowClient.finish).toHaveBeenLastCalledWith({ id: 'test-id' });
 
-    const { schedule, ...mwWithoutSchedule } = mockMaintenanceWindow; // internal api response doesn't have schedule
+    const { schedule, rRule, ...mwWithoutSchedule } = mockMaintenanceWindow; // internal api response doesn't have schedule
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
+      body: {
+        ...rewritePartialMaintenanceBodyRes(mwWithoutSchedule),
+        r_rule: {
+          count: 2,
+          dtstart: '2023-02-26T00:00:00.000Z',
+          freq: 2,
+          interval: 1,
+          tzid: 'UTC',
+        },
+        duration: 3600000,
+      },
     });
   });
 

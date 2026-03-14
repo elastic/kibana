@@ -31,22 +31,6 @@ describe('transformCreateBody', () => {
     ).toEqual({
       title: 'test-maintenance-window',
       enabled: false,
-      scopedQuery: {
-        filters: [],
-        kql: "_id: '1234'",
-      },
-      duration: 864000000,
-      rRule: {
-        dtstart: '2021-03-07T00:00:00.000Z',
-        tzid: 'UTC',
-        byweekday: ['MO', 'FR'],
-        freq: 3,
-        interval: 1,
-        until: '2022-05-17T05:05:00.000Z',
-        bymonth: undefined,
-        count: undefined,
-        bymonthday: undefined,
-      },
       schedule: {
         custom: {
           duration: '10d',
@@ -79,18 +63,6 @@ describe('transformCreateBody', () => {
     ).toEqual({
       title: 'test-maintenance-window',
       enabled: false,
-      duration: 864000000,
-      rRule: {
-        dtstart: '2021-03-07T00:00:00.000Z',
-        tzid: 'UTC',
-        byweekday: ['MO', 'FR'],
-        freq: 3,
-        interval: 1,
-        until: '2022-05-17T05:05:00.000Z',
-        bymonth: undefined,
-        count: undefined,
-        bymonthday: undefined,
-      },
       schedule: {
         custom: {
           duration: '10d',

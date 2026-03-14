@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment-timezone';
-import { Frequency } from '@kbn/rrule';
 import { finishMaintenanceWindow } from './finish_maintenance_window';
 import {
   savedObjectsClientMock,
@@ -17,7 +16,6 @@ import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import type { MaintenanceWindowClientContext } from '../../../../common';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../common';
 import { getMockMaintenanceWindow } from '../../../data/test_helpers';
-import type { MaintenanceWindow } from '../../types';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
@@ -54,14 +52,7 @@ describe('MaintenanceWindowClient - finish', () => {
   it('should finish the currently running maintenance window event', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
-      duration: 60 * 60 * 1000,
       expirationDate: moment.utc().add(1, 'year').toISOString(),
-      rRule: {
-        tzid: 'UTC',
-        dtstart: moment().utc().toISOString(),
-        freq: Frequency.WEEKLY,
-        count: 2,
-      } as MaintenanceWindow['rRule'],
     });
 
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -112,12 +103,6 @@ describe('MaintenanceWindowClient - finish', () => {
       { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-01T23:43:21.000Z' },
     ];
     const mockMaintenanceWindow = getMockMaintenanceWindow({
-      rRule: {
-        tzid: 'CET',
-        dtstart: '2023-03-26T00:00:00.000Z',
-        freq: Frequency.WEEKLY,
-        count: 5,
-      } as MaintenanceWindow['rRule'],
       schedule: {
         custom: {
           start: '2023-03-26T00:00:00.000Z',
@@ -169,14 +154,7 @@ describe('MaintenanceWindowClient - finish', () => {
   it('should throw if trying to finish a maintenance window that is not running', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({
-      duration: 60 * 60 * 1000, //
       expirationDate: moment.utc().add(1, 'year').toISOString(),
-      rRule: {
-        tzid: 'UTC',
-        dtstart: moment().utc().toISOString(),
-        freq: Frequency.WEEKLY,
-        count: 2,
-      } as MaintenanceWindow['rRule'],
     });
 
     savedObjectsClient.get.mockResolvedValueOnce({

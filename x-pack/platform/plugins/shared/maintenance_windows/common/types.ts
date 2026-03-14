@@ -90,3 +90,19 @@ export interface MaintenanceWindowClientContext {
 
 export type MaintenanceWindowDeepLinkIds =
   (typeof MAINTENANCE_WINDOW_DEEP_LINK_IDS)[keyof typeof MAINTENANCE_WINDOW_DEEP_LINK_IDS];
+
+export interface ScheduleRecurring {
+  end?: string;
+  every?: string;
+  onWeekDay?: string[];
+  onMonthDay?: number[];
+  onMonth?: number[];
+  occurrences?: number;
+}
+
+export interface Schedule {
+  start: string;
+  duration: string;
+  timezone?: string;
+  recurring?: ScheduleRecurring;
+}

@@ -71,9 +71,11 @@ describe('MaintenanceWindowClient - get', () => {
         type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       },
     ]);
+    const { rRule, duration, ...mwWithoutRRule } = mockMaintenanceWindow1;
+    const { rRule: rRule2, duration: duration2, ...mwWithoutRRule2 } = mockMaintenanceWindow2;
     expect(result.maintenanceWindows).toEqual([
-      expect.objectContaining(mockMaintenanceWindow1),
-      expect.objectContaining(mockMaintenanceWindow2),
+      expect.objectContaining(mwWithoutRRule),
+      expect.objectContaining(mwWithoutRRule2),
     ]);
   });
 });

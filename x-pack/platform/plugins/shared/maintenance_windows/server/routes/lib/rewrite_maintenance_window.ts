@@ -10,7 +10,6 @@ import type { RewriteResponseCase } from './rewrite_request_case';
 
 export const rewriteMaintenanceWindowRes: RewriteResponseCase<MaintenanceWindow> = ({
   expirationDate,
-  rRule,
   createdBy,
   updatedBy,
   createdAt,
@@ -21,7 +20,6 @@ export const rewriteMaintenanceWindowRes: RewriteResponseCase<MaintenanceWindow>
 }) => ({
   ...rest,
   expiration_date: expirationDate,
-  r_rule: rRule,
   created_by: createdBy,
   updated_by: updatedBy,
   created_at: createdAt,
@@ -32,7 +30,6 @@ export const rewriteMaintenanceWindowRes: RewriteResponseCase<MaintenanceWindow>
 
 export const rewritePartialMaintenanceBodyRes: RewriteResponseCase<Partial<MaintenanceWindow>> = ({
   expirationDate,
-  rRule,
   createdBy,
   updatedBy,
   createdAt,
@@ -43,7 +40,6 @@ export const rewritePartialMaintenanceBodyRes: RewriteResponseCase<Partial<Maint
 }) => ({
   ...rest,
   expiration_date: expirationDate,
-  r_rule: rRule,
   created_by: createdBy,
   updated_by: updatedBy,
   created_at: createdAt,

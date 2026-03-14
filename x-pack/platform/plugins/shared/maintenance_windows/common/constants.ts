@@ -42,6 +42,10 @@ export const MAINTENANCE_WINDOW_DATE_FORMAT = 'MM/DD/YY hh:mm A';
 export const MAINTENANCE_WINDOW_DEFAULT_PER_PAGE = 10 as const;
 export const MAINTENANCE_WINDOW_DEFAULT_TABLE_ACTIVE_PAGE = 1 as const;
 
+export const DURATION_REGEX = /(\d+)(ms|s|m|h|d)/;
+export const INTERVAL_FREQUENCY_REGEXP = /(\d+)(h|d|w|M|y)/;
+export const DEFAULT_TIMEZONE = 'UTC';
+
 export const PLUGIN = {
   ID: 'maintenanceWindows',
   MINIMUM_LICENSE_REQUIRED: 'platinum' as LicenseType,

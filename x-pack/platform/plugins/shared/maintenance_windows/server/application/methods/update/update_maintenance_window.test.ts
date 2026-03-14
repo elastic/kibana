@@ -6,9 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { Frequency } from '@kbn/rrule';
 import { updateMaintenanceWindow } from './update_maintenance_window';
-import type { UpdateMaintenanceWindowParams } from './types';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -30,14 +28,6 @@ const secondTimestamp = '2023-03-26T00:00:00.000Z';
 const updatedAttributes = {
   title: 'updated-title',
   enabled: true,
-  duration: 2 * 60 * 60 * 1000,
-  rRule: {
-    tzid: 'CET',
-    dtstart: '2023-03-26T00:00:00.000Z',
-    freq: Frequency.WEEKLY,
-    count: 2,
-    byweekday: ['-1MO', 'WE'],
-  },
   schedule: {
     custom: {
       start: '2023-03-26T00:00:00.000Z',
@@ -107,9 +97,7 @@ describe('MaintenanceWindowClient - update', () => {
       id: 'test-id',
       data: {
         ...updatedAttributes,
-        rRule: updatedAttributes.rRule as UpdateMaintenanceWindowParams['data']['rRule'],
         schedule: updatedAttributes.schedule,
-        categoryIds: ['observability', 'securitySolution'],
       },
     });
 
@@ -121,16 +109,24 @@ describe('MaintenanceWindowClient - update', () => {
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       {
         ...updatedAttributes,
+        duration: 7200000,
         events: [
           { gte: '2023-03-26T23:00:00.000Z', lte: '2023-03-27T01:00:00.000Z' },
           { gte: '2023-03-28T23:00:00.000Z', lte: '2023-03-29T01:00:00.000Z' }, // Daylight savings
         ],
         expirationDate: moment(new Date(secondTimestamp)).tz('UTC').add(1, 'year').toISOString(),
+        rRule: {
+          byweekday: ['-1MO', 'WE'],
+          count: 2,
+          dtstart: '2023-03-26T00:00:00.000Z',
+          freq: 2,
+          interval: 1,
+          tzid: 'CET',
+        },
         createdAt: '2023-02-26T00:00:00.000Z',
         createdBy: 'test-user',
         updatedAt: updatedMetadata.updatedAt,
         updatedBy: updatedMetadata.updatedBy,
-        categoryIds: ['observability', 'securitySolution'],
       },
       {
         id: 'test-id',
@@ -190,14 +186,11 @@ describe('MaintenanceWindowClient - update', () => {
     jest.useFakeTimers().setSystemTime(new Date(secondTimestamp));
 
     const updatedStartTime = initialExpirationDate.add(2, 'month').toISOString();
-    const updatedDuration = 24 * 60 * 60 * 1000; // 24h
 
     await updateMaintenanceWindow(mockContext, {
       id: 'test-id',
       data: {
         ...updatedAttributes,
-        rRule: updatedAttributes.rRule as UpdateMaintenanceWindowParams['data']['rRule'],
-        duration: updatedDuration,
         schedule: {
           custom: {
             ...updatedAttributes.schedule.custom,
@@ -206,7 +199,6 @@ describe('MaintenanceWindowClient - update', () => {
             recurring: undefined,
           },
         },
-        categoryIds: ['observability', 'securitySolution'],
       },
     });
 
@@ -219,7 +211,11 @@ describe('MaintenanceWindowClient - update', () => {
       MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       {
         ...updatedAttributes,
-        duration: updatedDuration,
+        duration: 86400000,
+        rRule: {
+          dtstart: '2023-06-26T00:00:00.000Z',
+          tzid: 'CET',
+        },
         schedule: {
           custom: {
             ...updatedAttributes.schedule.custom,
@@ -234,7 +230,6 @@ describe('MaintenanceWindowClient - update', () => {
         createdBy: 'test-user',
         updatedAt: updatedMetadata.updatedAt,
         updatedBy: updatedMetadata.updatedBy,
-        categoryIds: ['observability', 'securitySolution'],
       },
       {
         id: 'test-id',
@@ -352,7 +347,6 @@ describe('MaintenanceWindowClient - update', () => {
       },
       events: modifiedEvents,
       expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
-      categoryIds: ['observability'],
     });
 
     savedObjectsClient.get.mockResolvedValue({
@@ -553,12 +547,11 @@ describe('MaintenanceWindowClient - update', () => {
     );
   });
 
-  it('should throw if updating a maintenance window with invalid category ids', async () => {
+  it('should throw if updating a maintenance window with category ids', async () => {
     await expect(async () => {
       await updateMaintenanceWindow(mockContext, {
         id: 'test-id',
         data: {
-          categoryIds: ['invalid_id'] as unknown as MaintenanceWindow['categoryIds'],
           schedule: {
             custom: {
               start: '2023-03-26T00:00:00.000Z',
@@ -570,15 +563,12 @@ describe('MaintenanceWindowClient - update', () => {
               },
             },
           },
+          // @ts-expect-error Testing invalid attribute
+          categoryIds: ['observability', 'securitySolution'],
         },
       });
-    }).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Error validating update maintenance window data - [data.categoryIds]: types that failed validation:
-      - [data.categoryIds.0.0]: types that failed validation:
-       - [data.categoryIds.0.0]: expected value to equal [observability]
-       - [data.categoryIds.0.1]: expected value to equal [securitySolution]
-       - [data.categoryIds.0.2]: expected value to equal [management]
-      - [data.categoryIds.1]: expected value to equal [null]"
-    `);
+    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error validating update maintenance window data - [data.categoryIds]: definition for this key is missing"`
+    );
   });
 });

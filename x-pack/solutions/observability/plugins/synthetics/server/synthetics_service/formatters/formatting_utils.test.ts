@@ -8,6 +8,7 @@ import {
   handleMultilineStringFormatter,
   inlineSourceFormatter,
   replaceStringWithParams,
+  formatMWs,
 } from './formatting_utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ConfigKey } from '../../../common/constants/monitor_management';
@@ -271,5 +272,90 @@ describe('handleMultilineStringFormatter', () => {
     expect(JSON.stringify(value)).toEqual(
       '"-----BEGIN CERTIFICATE-----\\n\\nMIICMJBgNV\\n\\n\\npAqElJlQND\\n\\n-----END CERTIFICATE-----"'
     );
+  });
+});
+
+describe('formatMWs', () => {
+  const createMockMW = (overrides = {}) => ({
+    id: 'test-mw-id',
+    title: 'Test MW',
+    enabled: true,
+    expirationDate: new Date('2025-12-31').toISOString(),
+    events: [{ gte: '2023-02-26T00:00:00.000Z', lte: '2023-02-26T01:00:00.000Z' }],
+    createdBy: 'test-user',
+    updatedBy: 'test-user',
+    createdAt: '2023-01-01T00:00:00.000Z',
+    updatedAt: '2023-01-01T00:00:00.000Z',
+    eventStartTime: null,
+    eventEndTime: null,
+    status: 'upcoming' as const,
+    schedule: {
+      custom: {
+        start: '2023-02-26T00:00:00.000Z',
+        duration: '1h',
+        timezone: 'UTC',
+        recurring: {
+          every: '1w',
+          onMonthDay: [15],
+          onMonth: [1, 3, 5],
+          occurrences: 2,
+        },
+      },
+    },
+    ...overrides,
+  });
+
+  it('should return undefined when mws is undefined', () => {
+    const result = formatMWs(undefined);
+    expect(result).toBeUndefined();
+  });
+
+  it('should format maintenance windows with schedule', () => {
+    const mws = [createMockMW()];
+    const result = formatMWs(mws);
+
+    expect(result).toEqual(
+      '[{"bymonthday":[15],"bymonth":[1,3,5],"count":2,"interval":1,"freq":"weekly","dtstart":"2023-02-26T00:00:00.000Z","tzid":"UTC","duration":"3600000ms"}]'
+    );
+  });
+
+  it('should handle maintenance windows with different duration formats', () => {
+    const mws = [
+      createMockMW({
+        id: 'test-mw-minutes',
+        schedule: {
+          custom: {
+            start: '2023-02-26T00:00:00.000Z',
+            duration: '45m',
+            timezone: 'UTC',
+          },
+        },
+      }),
+      createMockMW({
+        id: 'test-mw-hours',
+        schedule: {
+          custom: {
+            start: '2023-02-26T00:00:00.000Z',
+            duration: '3h',
+            timezone: 'UTC',
+          },
+        },
+      }),
+      createMockMW({
+        id: 'test-mw-days',
+        schedule: {
+          custom: {
+            start: '2023-02-26T00:00:00.000Z',
+            duration: '2d',
+            timezone: 'UTC',
+          },
+        },
+      }),
+    ];
+
+    const result = formatMWs(mws, false) as any[];
+    expect(result[0].duration).toBe('2700000ms'); // 45 minutes
+    expect(result[1].duration).toBe('10800000ms'); // 3 hours
+    expect(result[2].duration).toBe('172800000ms'); // 2 days
   });
 });

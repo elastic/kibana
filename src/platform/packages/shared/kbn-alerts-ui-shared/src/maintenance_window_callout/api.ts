@@ -12,7 +12,6 @@ import type { KibanaServices, MaintenanceWindow } from './types';
 
 const rewriteMaintenanceWindowRes = ({
   expiration_date: expirationDate,
-  r_rule: rRule,
   created_by: createdBy,
   updated_by: updatedBy,
   created_at: createdAt,
@@ -24,7 +23,6 @@ const rewriteMaintenanceWindowRes = ({
 }: AsApiContract<MaintenanceWindow>): MaintenanceWindow => ({
   ...rest,
   expirationDate,
-  rRule,
   createdBy,
   updatedBy,
   createdAt,

@@ -6,12 +6,8 @@
  */
 
 import { Frequency } from '@kbn/rrule';
-import type { RRuleRequestV1 } from '../../../routes/schemas/r_rule';
-import type { ScheduleRequest } from '../../../routes/schemas/schedule/types/v1';
-import {
-  DEFAULT_TIMEZONE,
-  INTERVAL_FREQUENCY_REGEXP,
-} from '../../../routes/schemas/schedule/constants';
+import { DEFAULT_TIMEZONE, INTERVAL_FREQUENCY_REGEXP } from '../../constants';
+import type { RRuleRecord, Schedule } from '../../types';
 
 const transformEveryToFrequency = (frequency?: string) => {
   switch (frequency) {
@@ -31,9 +27,9 @@ const transformEveryToFrequency = (frequency?: string) => {
 };
 
 export const transformCustomScheduleToRRule = (
-  schedule: ScheduleRequest
+  schedule: Schedule
 ): {
-  rRule: RRuleRequestV1;
+  rRule: RRuleRecord;
 } => {
   const { recurring, start, timezone } = schedule;
 
@@ -42,12 +38,12 @@ export const transformCustomScheduleToRRule = (
 
   return {
     rRule: {
-      byweekday: recurring?.onWeekDay,
-      bymonthday: recurring?.onMonthDay,
-      bymonth: recurring?.onMonth,
-      until: recurring?.end,
-      count: recurring?.occurrences,
-      interval: interval ? parseInt(interval, 10) : undefined,
+      ...(recurring?.onWeekDay !== undefined ? { byweekday: recurring?.onWeekDay } : {}),
+      ...(recurring?.onMonthDay !== undefined ? { bymonthday: recurring?.onMonthDay } : {}),
+      ...(recurring?.onMonth !== undefined ? { bymonth: recurring?.onMonth } : {}),
+      ...(recurring?.end !== undefined ? { until: recurring?.end } : {}),
+      ...(recurring?.occurrences !== undefined ? { count: recurring?.occurrences } : {}),
+      ...(interval !== undefined ? { interval: parseInt(interval, 10) } : {}),
       freq: transformedFrequency,
       dtstart: start,
       tzid: timezone ?? DEFAULT_TIMEZONE,

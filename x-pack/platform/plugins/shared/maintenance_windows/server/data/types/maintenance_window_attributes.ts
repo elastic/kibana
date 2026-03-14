@@ -26,12 +26,12 @@ export interface MaintenanceWindowEventAttributes {
 export interface MaintenanceWindowAttributes {
   title: string;
   enabled: boolean;
-  duration: number;
   expirationDate: string;
+  duration: number;
   events: MaintenanceWindowEventAttributes[];
-  rRule: RRuleAttributes;
   createdBy: string | null;
   updatedBy: string | null;
+  rRule: RRuleAttributes;
   createdAt: string;
   updatedAt: string;
   categoryIds?: MaintenanceWindowCategoryIdTypes[] | null;
