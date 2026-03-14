@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PinnedControlState } from '@kbn/controls-schemas';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../dashboard_saved_object';
-import type { DashboardState } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
 
 jest.mock('../../../kibana_services', () => ({
@@ -52,47 +50,7 @@ describe('transformDashboardOut', () => {
       timeRestore: false,
       title: 'my title',
     };
-    expect(transformDashboardOut(input)).toEqual<DashboardState>({
-      title: 'my title',
-    });
-  });
-
-  test('should not supply defaults for optional nested properties', () => {
-    const input: DashboardSavedObjectAttributes = {
-      controlGroupInput: {
-        panelsJSON: JSON.stringify({ foo: pinnedPanelSo }),
-      },
-      panelsJSON: JSON.stringify(panelsSo),
-      optionsJSON: JSON.stringify({
-        hidePanelTitles: false,
-      }),
-      kibanaSavedObjectMeta: {},
-      title: 'my title',
-      description: 'my description',
-    };
-    expect(transformDashboardOut(input)).toEqual<DashboardState>({
-      pinned_panels: [
-        {
-          config: { anyKey: 'some value' },
-          uid: 'foo',
-          type: 'type1',
-        } as unknown as PinnedControlState,
-      ],
-      description: 'my description',
-      options: {
-        hide_panel_titles: false,
-      },
-      panels: [
-        {
-          config: {
-            enhancements: {},
-            title: 'title1',
-          },
-          grid: { x: 0, y: 0, w: 10, h: 10 },
-          uid: '1',
-          type: 'type1',
-        },
-      ],
+    expect(transformDashboardOut(input)).toEqual({
       title: 'my title',
     });
   });
@@ -144,7 +102,7 @@ describe('transformDashboardOut', () => {
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(transformDashboardOut(input, references)).toEqual<DashboardState>({
+    expect(transformDashboardOut(input, references)).toEqual({
       pinned_panels: [
         {
           uid: 'foo',
@@ -154,7 +112,7 @@ describe('transformDashboardOut', () => {
             anyKey: 'some value',
           },
           type: 'type1',
-        } as unknown as PinnedControlState,
+        },
       ],
       description: 'description',
       query: { query: 'test', language: 'KQL' },
@@ -230,7 +188,7 @@ describe('transformDashboardOut', () => {
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(transformDashboardOut(input, references)).toEqual<DashboardState>({
+    expect(transformDashboardOut(input, references)).toEqual({
       pinned_panels: [
         {
           uid: 'foo',
@@ -240,7 +198,7 @@ describe('transformDashboardOut', () => {
             anyKey: 'some value',
           },
           type: 'type1',
-        } as unknown as PinnedControlState,
+        },
       ],
       description: 'description',
       query: { query: 'test', language: 'KQL' },

@@ -40,7 +40,8 @@
       "kibanaUtils",
       "lens",
       "maps",
-      "fieldFormats"
+      "fieldFormats",
+      "savedSearch"
     ]
   }
 }

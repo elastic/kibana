@@ -8,7 +8,7 @@ import expect from 'expect';
 import { omit, sortBy } from 'lodash';
 import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/server/application/types';
-import { INSTALLED_VERSION } from '../services/private_location_test_service';
+import { DEFAULT_SYNTHETICS_VERSION } from '../services/private_location_test_service';
 import { commonVars } from './test_project_monitor_policy';
 
 interface PolicyProps {
@@ -24,10 +24,11 @@ interface PolicyProps {
   isBrowser?: boolean;
   spaceId?: string;
   mws?: MaintenanceWindow[];
+  packageVersion?: string;
 }
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
-  const { namespace } = props;
+  const { namespace, packageVersion } = props;
   return {
     id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
     version: 'WzE2MjYsMV0=',
@@ -37,7 +38,7 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
     package: {
       name: 'synthetics',
       title: 'Elastic Synthetics',
-      version: INSTALLED_VERSION,
+      version: packageVersion ?? DEFAULT_SYNTHETICS_VERSION,
     },
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',

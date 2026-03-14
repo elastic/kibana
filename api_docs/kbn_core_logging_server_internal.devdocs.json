@@ -204,7 +204,7 @@
           "<Readonly<{} & { name: string; level: \"info\" | \"error\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\"; appenders: string[]; }>[]>; }>"
         ],
         "path": "src/core/packages/logging/server-internal/src/logging_config.ts",
-        "lineNumber": 102,
+        "lineNumber": 105,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -254,7 +254,7 @@
           "<\"info\" | \"error\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\">; }>"
         ],
         "path": "src/core/packages/logging/server-internal/src/logging_config.ts",
-        "lineNumber": 61,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
