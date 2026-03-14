@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
+import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 
 export const BulkOperations = ({
   selectedItems,
@@ -18,27 +19,58 @@ export const BulkOperations = ({
   selectedItems: EncryptedSyntheticsSavedMonitor[];
   setMonitorPendingDeletion: (val: string[]) => void;
 }) => {
+  const { isUnhealthy, resetMonitors, isResetting } = useMonitorIntegrationHealth();
+
   const onDeleted = () => {
     setMonitorPendingDeletion(selectedItems.map((item) => item[ConfigKey.CONFIG_ID]));
   };
+
+  const selectedConfigIds = selectedItems.map((item) => item[ConfigKey.CONFIG_ID]);
+  const unhealthyConfigIds = selectedConfigIds.filter((id) => isUnhealthy(id));
+
+  const onReset = useCallback(async () => {
+    await resetMonitors(unhealthyConfigIds);
+  }, [resetMonitors, unhealthyConfigIds]);
 
   if (selectedItems.length === 0) {
     return null;
   }
 
   return (
-    <EuiButtonEmpty
-      data-test-subj="syntheticsBulkOperationPopoverClickMeToLoadAContextMenuButton"
-      iconType="trash"
-      iconSide="left"
-      onClick={onDeleted}
-      color="danger"
-    >
-      {i18n.translate('xpack.synthetics.bulkOperationPopover.clickMeToLoadButtonLabel', {
-        defaultMessage:
-          'Delete {monitorCount, number} selected {monitorCount, plural, one {monitor} other {monitors}}',
-        values: { monitorCount: selectedItems.length },
-      })}
-    </EuiButtonEmpty>
+    <EuiFlexGroup gutterSize="s" responsive={false}>
+      {unhealthyConfigIds.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="syntheticsBulkResetIntegrationButton"
+            iconType="refresh"
+            iconSide="left"
+            onClick={onReset}
+            isLoading={isResetting}
+            color="warning"
+          >
+            {i18n.translate('xpack.synthetics.bulkOperations.resetIntegration', {
+              defaultMessage:
+                'Reset {count, number} {count, plural, one {monitor} other {monitors}}',
+              values: { count: unhealthyConfigIds.length },
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          data-test-subj="syntheticsBulkOperationPopoverClickMeToLoadAContextMenuButton"
+          iconType="trash"
+          iconSide="left"
+          onClick={onDeleted}
+          color="danger"
+        >
+          {i18n.translate('xpack.synthetics.bulkOperationPopover.clickMeToLoadButtonLabel', {
+            defaultMessage:
+              'Delete {monitorCount, number} selected {monitorCount, plural, one {monitor} other {monitors}}',
+            values: { monitorCount: selectedItems.length },
+          })}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

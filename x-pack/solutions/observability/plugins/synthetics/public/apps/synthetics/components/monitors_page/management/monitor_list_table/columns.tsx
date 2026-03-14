@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -41,6 +41,7 @@ import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge'
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
+import { UnhealthyTooltip } from './unhealthy_tooltip';
 
 export function useMonitorListColumns({
   loading,
@@ -82,9 +83,16 @@ export function useMonitorListColumns({
         defaultMessage: 'Monitor',
       }),
       sortable: true,
-      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
-        <MonitorDetailsLink monitor={monitor} />
-      ),
+      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => {
+        const configId = monitor[ConfigKey.CONFIG_ID];
+
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <MonitorDetailsLink monitor={monitor} />
+            <UnhealthyTooltip configId={configId} />
+          </EuiFlexGroup>
+        );
+      },
     },
     // Only show Project ID column if project monitors are present
     ...(overviewStatus?.projectMonitorsCount ?? 0 > 0

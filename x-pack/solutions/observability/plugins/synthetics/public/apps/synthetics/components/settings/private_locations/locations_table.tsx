@@ -34,6 +34,8 @@ import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
 import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
 import type { ClientPluginsStart } from '../../../../../plugin';
+import { UnhealthyCountBadge } from './unhealthy_count_badge';
+import { RESET_MONITORS_LABEL, ResetLocationMonitors } from './reset_location_monitors';
 
 interface ListItem extends PrivateLocation {
   monitors: number;
@@ -77,9 +79,16 @@ export const PrivateLocationsTable = ({
     {
       field: 'monitors',
       name: MONITORS,
-      render: (monitors: number, item: ListItem) => (
-        <ViewLocationMonitors count={monitors} locationName={item.label} />
-      ),
+      render: (monitors: number, item: ListItem) => {
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <ViewLocationMonitors count={monitors} locationName={item.label} />
+            </EuiFlexItem>
+            <UnhealthyCountBadge item={item} />
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       field: 'agentPolicyId',
@@ -125,6 +134,15 @@ export const PrivateLocationsTable = ({
           onClick: onEdit,
           icon: 'pencil',
           type: 'icon',
+        },
+        {
+          name: RESET_MONITORS_LABEL,
+          description: RESET_MONITORS_LABEL,
+          render: (item: ListItem) => {
+            return <ResetLocationMonitors locationId={item.id} />;
+          },
+          isPrimary: false,
+          'data-test-subj': 'action-reset',
         },
         {
           name: DELETE_LOCATION,
