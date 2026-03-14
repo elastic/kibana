@@ -9,102 +9,13 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
-import type { Observable } from 'rxjs';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
 import type {
-  ChromeBadge,
-  ChromeBreadcrumb,
-  ChromeBreadcrumbsAppendExtension,
-  ChromeGlobalHelpExtensionMenuLink,
-  ChromeHelpExtension,
-  ChromeHelpMenuLink,
-  ChromeNavControl,
-  ChromeNavLink,
-  ChromeProjectNavigationNode,
-  ChromeUserBanner,
-  NavigationTreeDefinitionUI,
-  SolutionId,
-} from '@kbn/core-chrome-browser';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
+  ChromeApplicationContext,
+  ChromeComponentsConfig,
+  ChromeComponentsDeps,
+} from '@kbn/core-chrome-browser-internal-types';
 
-/**
- * Minimal application contract needed by Chrome components.
- * Replaces `InternalApplicationStart` to break the dependency on the private
- * `@kbn/core-application-browser-internal` package.
- */
-export interface ChromeApplicationContext
-  extends Pick<ApplicationStart, 'navigateToApp' | 'navigateToUrl' | 'currentAppId$'> {
-  /** Current app's action menu mount point. */
-  currentActionMenu$: Observable<MountPoint<HTMLElement> | undefined>;
-}
-
-interface ChromeComponentsConfig {
-  isServerless: boolean;
-  kibanaVersion: string;
-  homeHref: string;
-  kibanaDocLink: string;
-}
-
-interface NavControlsObservables {
-  left$: Observable<ChromeNavControl[]>;
-  center$: Observable<ChromeNavControl[]>;
-  right$: Observable<ChromeNavControl[]>;
-  extension$: Observable<ChromeNavControl[]>;
-}
-
-interface ClassicChromeObservables {
-  /** User-set breadcrumbs via {@link ChromeStart.setBreadcrumbs}. */
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  /** @todo Consolidate into {@link ChromeComponentsDeps.breadcrumbsAppendExtensions$} — see https://github.com/elastic/kibana/issues/256050 */
-  badge$: Observable<ChromeBadge | undefined>;
-  recentlyAccessed$: Observable<RecentlyAccessedHistoryItem[]>;
-  customNavLink$: Observable<ChromeNavLink | undefined>;
-}
-
-interface ProjectChromeObservables {
-  /** Auto-generated breadcrumbs derived from the active nav tree node. */
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  homeHref$: Observable<string>;
-  navigation$: Observable<{
-    solutionId: SolutionId;
-    navigationTree: NavigationTreeDefinitionUI;
-    activeNodes: ChromeProjectNavigationNode[][];
-  }>;
-}
-
-export interface ChromeComponentsDeps {
-  config: ChromeComponentsConfig;
-  application: ChromeApplicationContext;
-  basePath: HttpStart['basePath'];
-  docLinks: DocLinksStart;
-  navControls: NavControlsObservables;
-  /** Classic-layout-specific chrome state. */
-  classic: ClassicChromeObservables;
-  /** Project/solution-layout-specific chrome state. */
-  project: ProjectChromeObservables;
-  loadingCount$: Observable<number>;
-  helpMenu: {
-    menuLinks$: Observable<ChromeHelpMenuLink[]>;
-    extension$: Observable<ChromeHelpExtension | undefined>;
-    supportUrl$: Observable<string>;
-    globalExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
-  };
-  navLinks$: Observable<ChromeNavLink[]>;
-  customBranding$: Observable<CustomBranding>;
-  breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
-  appMenu$: Observable<AppMenuConfig | undefined>;
-  headerBanner$: Observable<ChromeUserBanner | undefined>;
-  sideNav: {
-    collapsed$: Observable<boolean>;
-    initialCollapsed: boolean;
-    onToggleCollapsed: (collapsed: boolean) => void;
-  };
-}
+export type { ChromeApplicationContext, ChromeComponentsConfig, ChromeComponentsDeps };
 
 const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null);
 

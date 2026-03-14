@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/data-sources-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workchat-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/data-sources-plugin'
+  title: '@kbn/data-sources-plugin'
   description: Moon project for @kbn/data-sources-plugin
   channel: ''
   owner: '@elastic/workchat-eng'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/data_sources
+  sourceRoot: x-pack/platform/plugins/shared/data_sources
 dependsOn:
   - '@kbn/core'
   - '@kbn/kibana-react-plugin'
@@ -50,6 +49,10 @@ dependsOn:
   - '@kbn/connector-schemas'
   - '@kbn/task-manager-plugin'
   - '@kbn/workflows'
+  - '@kbn/workflows-execution-engine'
+  - '@kbn/tooling-log'
+  - '@kbn/test'
+  - '@kbn/workflows-extensions'
 tags:
   - plugin
   - prod
@@ -66,14 +69,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
