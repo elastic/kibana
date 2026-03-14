@@ -871,6 +871,7 @@ describe('TaskStore', () => {
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
         executionContext: mockExecutionContextStart,
+        shouldGrantUiam: false,
       });
 
       let getApiKeysCallCount = 0;
@@ -976,6 +977,7 @@ describe('TaskStore', () => {
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
         executionContext: mockExecutionContextStart,
+        shouldGrantUiam: false,
       });
 
       let getApiKeysCallCount = 0;
@@ -1075,6 +1077,7 @@ describe('TaskStore', () => {
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
         executionContext: mockExecutionContextStart,
+        shouldGrantUiam: false,
       });
 
       let getApiKeysCallCount = 0;
@@ -3999,6 +4002,7 @@ describe('TaskStore', () => {
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
         shouldGrantUiam: true,
+        executionContext: mockExecutionContextStart,
       });
       store.registerEncryptedSavedObjectsClient(esoClient);
 
@@ -4101,6 +4105,7 @@ describe('TaskStore', () => {
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
         shouldGrantUiam: true,
+        executionContext: mockExecutionContextStart,
       });
       store.registerEncryptedSavedObjectsClient(esoClient);
 

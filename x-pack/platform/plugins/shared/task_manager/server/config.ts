@@ -221,9 +221,6 @@ export const configSchema = schema.object(
     claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_MGET }),
     request_timeouts: requestTimeoutsConfig,
     auto_calculate_default_ech_capacity: schema.boolean({ defaultValue: false }),
-    api_key_type: schema.oneOf([schema.literal(ApiKeyType.ES), schema.literal(ApiKeyType.UIAM)], {
-      defaultValue: ApiKeyType.ES,
-    }),
   },
   {
     validate: (config) => {
