@@ -33,7 +33,7 @@ export const request = async <T = unknown>({
   configurationUtilities,
   headers,
   sslOverrides,
-  proxySettings,
+  proxyOverrides,
   timeout,
   connectorUsageCollector,
   keepAlive,
@@ -48,7 +48,7 @@ export const request = async <T = unknown>({
   headers?: Record<string, AxiosHeaderValue>;
   timeout?: number;
   sslOverrides?: SSLSettings;
-  proxySettings?: ProxySettings;
+  proxyOverrides?: ProxySettings;
   connectorUsageCollector?: ConnectorUsageCollector;
   /**
    *  keep-alive is only supported for https connections or proxied http connections
@@ -66,7 +66,7 @@ export const request = async <T = unknown>({
     logger,
     url,
     sslOverrides,
-    proxySettings
+    proxyOverrides
   );
 
   if (keepAlive) {

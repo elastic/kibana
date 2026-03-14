@@ -664,7 +664,7 @@ describe('execute()', () => {
       },
       logger: expect.any(Object),
       method: 'POST',
-      proxySettings: undefined,
+      proxyOverrides: undefined,
       sslOverrides: {},
       url: 'https://abc.def/my-endpoint',
     });
@@ -712,7 +712,7 @@ describe('execute()', () => {
       },
       logger: expect.any(Object),
       method: 'POST',
-      proxySettings: undefined,
+      proxyOverrides: undefined,
       sslOverrides: {},
       url: 'https://abc.def/my-endpoint',
     });
@@ -759,7 +759,7 @@ describe('execute()', () => {
       },
       logger: expect.any(Object),
       method: 'POST',
-      proxySettings: undefined,
+      proxyOverrides: undefined,
       sslOverrides: {},
       url: 'https://abc.def/my-endpoint',
     });
@@ -1152,7 +1152,7 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0].signal).toBe(controller.signal);
   });
 
-  test('execute passes proxySettings to request when config.proxyUrl is set', async () => {
+  test('execute passes proxyOverrides to request when config.proxyUrl is set', async () => {
     const config: ConnectorTypeConfigType = {
       ...emptyConfig,
       url: 'https://abc.def',
@@ -1174,7 +1174,7 @@ describe('execute()', () => {
       connectorUsageCollector,
     });
 
-    expect(requestMock.mock.calls[0][0].proxySettings).toEqual({
+    expect(requestMock.mock.calls[0][0].proxyOverrides).toEqual({
       proxyUrl: 'http://proxy.example.com:8080/',
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
@@ -1182,7 +1182,7 @@ describe('execute()', () => {
     });
   });
 
-  test('execute passes proxySettings with credentials in URL when proxy auth is set', async () => {
+  test('execute passes proxyOverrides with credentials in URL when proxy auth is set', async () => {
     const config: ConnectorTypeConfigType = {
       ...emptyConfig,
       url: 'https://abc.def',
@@ -1210,9 +1210,9 @@ describe('execute()', () => {
       connectorUsageCollector,
     });
 
-    const proxySettings = requestMock.mock.calls[0][0].proxySettings;
-    expect(proxySettings?.proxyUrl).toBe('http://proxyuser:proxypass@proxy.example.com:8080/');
-    expect(proxySettings?.proxySSLSettings).toEqual({ verificationMode: 'full' });
+    const proxyOverrides = requestMock.mock.calls[0][0].proxyOverrides;
+    expect(proxyOverrides?.proxyUrl).toBe('http://proxyuser:proxypass@proxy.example.com:8080/');
+    expect(proxyOverrides?.proxySSLSettings).toEqual({ verificationMode: 'full' });
   });
 
   test('execute returns response with status, statusText, headers, and data', async () => {

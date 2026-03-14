@@ -303,6 +303,52 @@ describe('request', () => {
     expect(httpsAgent instanceof HttpsProxyAgent).toBe(true);
   });
 
+  test('it passes proxy auth to HttpsProxyAgent when proxySettings has credentials', async () => {
+    await request({
+      axios,
+      url: TestUrl,
+      logger,
+      configurationUtilities,
+      proxyOverrides: {
+        proxyUrl: 'https://proxyuser:proxypass@myproxy:8080',
+        proxySSLSettings: {
+          verificationMode: 'full',
+        },
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: undefined,
+      },
+    });
+
+    expect(axiosMock.mock.calls.length).toBe(1);
+    // @ts-expect-error Auto-mocked axios has unknown request config type
+    const { httpsAgent } = axiosMock.mock.calls[0][1];
+    expect(httpsAgent instanceof HttpsProxyAgent).toBe(true);
+    expect(httpsAgent.proxy.auth).toBe('proxyuser:proxypass');
+  });
+
+  test('it does not set proxy auth on HttpsProxyAgent when proxySettings has no credentials', async () => {
+    await request({
+      axios,
+      url: TestUrl,
+      logger,
+      configurationUtilities,
+      proxyOverrides: {
+        proxyUrl: 'https://myproxy:8080',
+        proxySSLSettings: {
+          verificationMode: 'full',
+        },
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: undefined,
+      },
+    });
+
+    expect(axiosMock.mock.calls.length).toBe(1);
+    // @ts-expect-error Auto-mocked axios has unknown request config type
+    const { httpsAgent } = axiosMock.mock.calls[0][1];
+    expect(httpsAgent instanceof HttpsProxyAgent).toBe(true);
+    expect(httpsAgent.proxy.auth).toBeUndefined();
+  });
+
   test('it does not proxy with proxyOnlyHosts when expected', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxySSLSettings: {

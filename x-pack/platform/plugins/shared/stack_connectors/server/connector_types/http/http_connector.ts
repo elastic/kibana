@@ -230,7 +230,8 @@ export async function executor(
   // Merge headers: params headers take precedence over config headers
   const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
 
-  const proxySettings = getProxySettings({
+  // Connector-level proxy overrides
+  const proxyOverrides = getProxySettings({
     url: config.proxyUrl,
     hasAuth: config.hasProxyAuth,
     username: execOptions.secrets.proxyUsername ?? undefined,
@@ -268,7 +269,7 @@ export async function executor(
       data: body,
       configurationUtilities,
       sslOverrides,
-      proxySettings,
+      proxyOverrides,
       connectorUsageCollector,
       keepAlive,
       maxRedirects,
