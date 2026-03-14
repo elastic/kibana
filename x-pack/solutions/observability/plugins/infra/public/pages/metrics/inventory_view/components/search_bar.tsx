@@ -5,9 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import type { TimeRange } from '@kbn/es-query';
 import { UnifiedSearchBar } from '../../../../components/shared/unified_search_bar';
+import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 
 export const SearchBar = () => {
-  return <UnifiedSearchBar />;
+  const { setDateRange } = useWaffleTimeContext();
+
+  const handleQuerySubmit = useCallback(
+    (payload: { dateRange: TimeRange }, isUpdate?: boolean) => {
+      if (isUpdate === false) {
+        setDateRange(payload.dateRange);
+      }
+    },
+    [setDateRange]
+  );
+
+  return (
+    <UnifiedSearchBar
+      onQuerySubmit={handleQuerySubmit}
+      showDatePicker
+      showFilterBar
+      showSubmitButton
+      showQueryMenu
+    />
+  );
 };

@@ -80,7 +80,6 @@ const BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES = {
     direction: 'desc',
   },
   timelineOpen: false,
-  autoReload: false,
   filterQuery: {
     expression: '',
     kind: 'kuery',

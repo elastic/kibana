@@ -61,6 +61,7 @@ export interface MutationContext<TView> {
 export interface BasicAttributes {
   name?: string;
   time?: number;
+  dateRange?: { from: string; to: string };
   isDefault?: boolean;
   isStatic?: boolean;
 }

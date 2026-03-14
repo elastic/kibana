@@ -82,6 +82,7 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
     const attributes = { ...viewState, name };
 
     if (!shouldIncludeTime) {
+      delete attributes.dateRange;
       delete attributes.time;
     }
 
@@ -94,6 +95,7 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
     const attributes = { ...viewState, name };
 
     if (!shouldIncludeTime) {
+      delete attributes.dateRange;
       delete attributes.time;
     }
 
@@ -177,7 +179,9 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
           onClose={closeUpdateModal}
           onSave={handleUpdateView}
           initialName={currentView?.attributes.name}
-          initialIncludeTime={Boolean(currentView?.attributes.time)}
+          initialIncludeTime={Boolean(
+            currentView?.attributes.dateRange || currentView?.attributes.time
+          )}
           title={
             <FormattedMessage
               defaultMessage="Update View"

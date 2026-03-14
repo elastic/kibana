@@ -11,7 +11,6 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiLink, useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';
 import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SwitchSchemaMessage } from '../../../../components/shared/switch_schema_message';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
@@ -51,8 +50,6 @@ interface Props {
   formatter: InfraFormatter;
   bottomMargin: number;
   showLoading: boolean;
-  isAutoReloading?: boolean;
-  refreshInterval?: number;
 }
 
 export const NodesOverview = ({
@@ -68,13 +65,11 @@ export const NodesOverview = ({
   onDrilldown,
   bottomMargin,
   showLoading,
-  refreshInterval,
-  isAutoReloading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const [{ detailsItemId, entityType }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
   const { onPageReady } = usePerformanceContext();
-  const { jumpToTime } = useWaffleTimeContext();
+  const { setDateRange } = useWaffleTimeContext();
   const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
   const { preferredSchema } = useWaffleOptionsContext();
   const schemas: DataSchemaFormat[] = useMemo(
@@ -115,7 +110,7 @@ export const NodesOverview = ({
           defaultMessage: 'Check for new data',
         }),
         onRefetch: () => {
-          jumpToTime(moment().valueOf());
+          setDateRange({ from: 'now-15m', to: 'now' });
         },
       };
 
@@ -190,10 +185,7 @@ export const NodesOverview = ({
             entityName={nodeName}
             entityType={nodeType}
             closeFlyout={closeFlyout}
-            currentTime={currentTime}
-            isAutoReloading={isAutoReloading}
             options={options}
-            refreshInterval={refreshInterval}
           />
         )}
       </TableContainer>
@@ -219,10 +211,7 @@ export const NodesOverview = ({
           entityName={nodeName}
           entityType={nodeType}
           closeFlyout={closeFlyout}
-          currentTime={currentTime}
-          isAutoReloading={isAutoReloading}
           options={options}
-          refreshInterval={refreshInterval}
         />
       )}
       <Legend

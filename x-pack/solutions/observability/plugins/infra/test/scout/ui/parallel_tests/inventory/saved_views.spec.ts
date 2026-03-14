@@ -50,7 +50,6 @@ test.describe(
           direction: 'desc',
         },
         timelineOpen: false,
-        autoReload: false,
         filterQuery: {
           expression: '',
           kind: 'kuery',
@@ -264,7 +263,6 @@ test.describe(
           direction: 'desc',
         },
         timelineOpen: false,
-        autoReload: false,
         filterQuery: {
           expression: '',
           kind: 'kuery',
@@ -320,7 +318,6 @@ test.describe(
           direction: 'desc',
         },
         timelineOpen: false,
-        autoReload: false,
         filterQuery: {
           expression: '',
           kind: 'kuery',

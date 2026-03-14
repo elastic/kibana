@@ -123,8 +123,8 @@ const AnomalyActionMenu = ({
     });
 
     setWaffleTimeState({
-      currentTime: startTime,
-      isAutoReloading: false,
+      from: new Date(startTime - 15 * 60 * 1000).toISOString(),
+      to: new Date(startTime).toISOString(),
     });
 
     setWaffleFiltersState({

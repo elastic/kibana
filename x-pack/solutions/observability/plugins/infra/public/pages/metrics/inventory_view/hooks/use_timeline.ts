@@ -50,12 +50,13 @@ export function useTimeline({
   metrics,
   nodeType,
   sourceId,
-  currentTime,
+  to: toTime,
   accountId,
   region,
   interval,
   shouldReload,
-}: Omit<UseSnapshotRequest, 'groupBy'> & {
+}: Omit<UseSnapshotRequest, 'groupBy' | 'currentTime'> & {
+  to: number;
   interval?: string;
   shouldReload: boolean;
 }) {
@@ -67,8 +68,8 @@ export function useTimeline({
   );
   const { timeLength, intervalInSeconds } = timeLengthResult;
 
-  const endTime = currentTime + intervalInSeconds * 1000;
-  const startTime = currentTime - timeLength * 1000;
+  const endTime = toTime + intervalInSeconds * 1000;
+  const startTime = toTime - timeLength * 1000;
   const timerange: InfraTimerangeInput = {
     interval: displayInterval ?? '',
     to: endTime,
@@ -80,7 +81,7 @@ export function useTimeline({
     {
       metrics,
       groupBy: null,
-      currentTime,
+      to: toTime,
       nodeType,
       timerange,
       kuery,

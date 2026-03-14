@@ -33,7 +33,6 @@ describe('invetoryViewSavedObject model version transformation', () => {
         autoBounds: true,
         accountId: '',
         region: '',
-        autoReload: false,
         filterQuery: { expression: '', kind: 'kuery' },
         legend: { palette: 'cool', reverseColors: false, steps: 18 },
         timelineOpen: false,

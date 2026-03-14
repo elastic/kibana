@@ -71,10 +71,14 @@ export const inventoryViewSavedObjectAttributesRT = rt.intersection([
   inventorySavedObjectOptionsStateRT,
   rt.type({
     name: nonEmptyStringRt,
-    autoReload: rt.boolean,
     filterQuery: inventorySavedObjectFiltersStateRT,
   }),
-  rt.partial({ time: rt.number, isDefault: rt.boolean, isStatic: rt.boolean }),
+  rt.partial({
+    autoReload: rt.boolean,
+    time: rt.number,
+    isDefault: rt.boolean,
+    isStatic: rt.boolean,
+  }),
 ]);
 
 export const inventoryViewSavedObjectRT = rt.intersection([

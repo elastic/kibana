@@ -21,14 +21,13 @@ export const RedirectToInventory: React.FC<RouteComponentProps> = ({ location })
 
   useEffect(() => {
     const parsedQueryString = parse(location.search || '', { sort: false });
-    const currentTime = parseFloat((parsedQueryString.timestamp ?? '') as string);
+    const timestamp = parseFloat((parsedQueryString.timestamp ?? '') as string);
+    const to = isNaN(timestamp) ? 'now' : new Date(timestamp).toISOString();
+    const from = isNaN(timestamp) ? 'now-15m' : new Date(timestamp - 15 * 60 * 1000).toISOString();
 
     baseLocator?.navigate({
       ...parsedQueryString,
-      waffleTime: {
-        currentTime,
-        isAutoReloading: false,
-      },
+      waffleTime: { from, to },
       state: location.state as SerializableRecord,
     });
   }, [baseLocator, location.search, location.state]);

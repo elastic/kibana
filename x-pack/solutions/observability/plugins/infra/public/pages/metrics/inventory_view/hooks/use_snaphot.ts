@@ -16,7 +16,9 @@ import type {
 import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
 
 export interface UseSnapshotRequest extends Omit<SnapshotRequest, 'timerange' | 'schema'> {
-  currentTime: number;
+  currentTime?: number;
+  from?: number;
+  to?: number;
   timerange?: InfraTimerangeInput;
   schema?: DataSchemaFormat | null;
 }
@@ -51,10 +53,14 @@ export function useSnapshot(
   };
 }
 
+const DEFAULT_LOOKBACK_MS = 15 * 60 * 1000;
+
 const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
   const {
     accountId = '',
     currentTime,
+    from,
+    to,
     dropPartialBuckets = true,
     kuery,
     groupBy = null,
@@ -67,6 +73,9 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     timerange,
     schema,
   } = args;
+
+  const resolvedTo = to ?? currentTime ?? Date.now();
+  const resolvedFrom = from ?? resolvedTo - DEFAULT_LOOKBACK_MS;
 
   return {
     accountId,
@@ -82,8 +91,8 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     schema: schema ?? 'ecs',
     timerange: timerange ?? {
       interval: '1m',
-      to: currentTime,
-      from: currentTime - 1200 * 1000,
+      to: resolvedTo,
+      from: resolvedFrom,
       lookbackSize: 5,
     },
   };

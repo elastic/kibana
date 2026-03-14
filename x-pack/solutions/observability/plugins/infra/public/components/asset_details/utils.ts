@@ -15,15 +15,10 @@ export const toTimestampRange = ({ from, to }: { from: string; to: string }) => 
   return { from: fromTs, to: toTs };
 };
 
-const DEFAULT_FROM_IN_MILLISECONDS = 15 * 60000;
-export const getDefaultDateRange = () => {
-  const now = Date.now();
-
-  return {
-    from: new Date(now - DEFAULT_FROM_IN_MILLISECONDS).toISOString(),
-    to: new Date(now).toISOString(),
-  };
-};
+export const getDefaultDateRange = () => ({
+  from: 'now-15m',
+  to: 'now',
+});
 
 export const getIntegrationsAvailable = (metadata?: InfraMetadata | null) => {
   if (!metadata) {

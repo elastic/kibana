@@ -17,14 +17,14 @@ export interface Props {
 }
 
 export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
-  const { parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const { searchCriteria } = useUnifiedSearchContext();
 
   return (
     <AssetDetails
       entityId={name}
       entityName={name}
       entityType="host"
-      dateRange={parsedDateRange}
+      dateRange={searchCriteria.dateRange}
       overrides={{
         metadata: {
           showActionsColumn: true,
