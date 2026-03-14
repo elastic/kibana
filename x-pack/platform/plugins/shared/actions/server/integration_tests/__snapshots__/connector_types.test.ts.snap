@@ -1381,6 +1381,10 @@ Object {
         "keep_alive": Object {
           "type": "boolean",
         },
+        "max_content_length": Object {
+          "exclusiveMinimum": 0,
+          "type": "number",
+        },
         "max_redirects": Object {
           "type": "number",
         },
@@ -1461,6 +1465,10 @@ Object {
         },
         "keep_alive": Object {
           "type": "boolean",
+        },
+        "max_content_length": Object {
+          "exclusiveMinimum": 0,
+          "type": "number",
         },
         "max_redirects": Object {
           "type": "number",
