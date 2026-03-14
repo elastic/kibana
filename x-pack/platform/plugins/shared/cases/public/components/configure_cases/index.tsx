@@ -165,6 +165,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     observableTypes,
     analyticsEnabled,
     analyticsLastSyncAt,
+    analyticsSyncStatus,
     owner,
   } = currentConfiguration;
 
@@ -847,6 +848,18 @@ export const ConfigureCases: React.FC = React.memo(() => {
                           </EuiText>
                         </EuiFlexItem>
                       </EuiFlexGroup>
+                      {analyticsSyncStatus === 'idle' && (
+                        <>
+                          <EuiSpacer size="s" />
+                          <EuiCallOut
+                            data-test-subj="configure-cases-analytics-idle-callout"
+                            size="s"
+                            color="warning"
+                            iconType="clock"
+                            title={i18n.ANALYTICS_SYNC_IDLE_INFO}
+                          />
+                        </>
+                      )}
                       <EuiSpacer size="s" />
                       <EuiFlexGroup
                         alignItems="baseline"

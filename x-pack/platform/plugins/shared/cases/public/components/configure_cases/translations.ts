@@ -269,6 +269,16 @@ export const ANALYTICS_EXPLORE_IN_DISCOVER = i18n.translate(
 export const ANALYTICS_AUTO_SYNC_INFO = i18n.translate(
   'xpack.cases.configureCases.analytics.autoSyncInfo',
   {
-    defaultMessage: 'Data is automatically synced every hour.',
+    defaultMessage: 'Data is automatically synced every 5 minutes.',
+  }
+);
+
+export const ANALYTICS_SYNC_IDLE_INFO = i18n.translate(
+  'xpack.cases.configureCases.analytics.syncIdleInfo',
+  {
+    defaultMessage:
+      'Analytics sync is idle — no new case activity was detected in recent checks. ' +
+      'The sync interval has been extended to 30 minutes to reduce load. ' +
+      'It will resume normal frequency once new activity is found.',
   }
 );
