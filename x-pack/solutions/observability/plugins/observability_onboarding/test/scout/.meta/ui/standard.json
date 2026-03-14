@@ -1,5 +1,5 @@
 {
-  "sha1": "98249506cdde26d697fa2fe7ecfa5366f37df095",
+  "sha1": "c7ab563e9e6e4d46bca1cf7da4e15fad603600c4",
   "tests": [
     {
       "id": "bd77233fbb28a70-b95459eaf733782",
@@ -9,9 +9,7 @@
         "@local-stateful-classic",
         "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
@@ -33,7 +31,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 91,
+        "line": 87,
         "column": 7
       }
     },
@@ -51,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 107,
+        "line": 103,
         "column": 7
       }
     },
@@ -69,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 125,
+        "line": 121,
         "column": 7
       }
     },
@@ -87,7 +85,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 145,
+        "line": 141,
         "column": 7
       }
     },
@@ -101,7 +99,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 184,
+        "line": 180,
         "column": 7
       }
     },
