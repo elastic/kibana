@@ -81,12 +81,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }`,
           false
         );
-        await retry.try(async () => {
-          await testSubjects.existOrFail('queryCancelButton');
-        });
         // Wait for the "send to background" button to become enabled, indicating
         // the async search has been established on ES with an async search ID
         await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
+
+        // Cancel the query
+        await testSubjects.waitForEnabled('queryCancelButton');
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
 
@@ -125,12 +125,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))
   | STATS count = COUNT(*) BY buckets, delay`);
         await timePicker.setDefaultAbsoluteRange();
-        await retry.try(async () => {
-          await testSubjects.existOrFail('queryCancelButton');
-        });
+
         // Wait for the "send to background" button to become enabled, indicating
         // the async search has been established on ES with an async search ID
         await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
+
+        // Cancel the query
+        await testSubjects.waitForEnabled('queryCancelButton');
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
 
