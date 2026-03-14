@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/shared-ux-table-persist'
   - '@kbn/css-utils'
   - '@kbn/saved-objects-tagging-oss-plugin'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod
