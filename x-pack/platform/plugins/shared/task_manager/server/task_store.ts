@@ -352,9 +352,9 @@ export class TaskStore {
 
   private async bulkGetDecryptedTaskApiKeys(
     taskIds: string[]
-  ): Promise<Map<string, string | undefined>> {
+  ): Promise<Map<string, { apiKey?: string; uiamApiKey?: string } | undefined>> {
     if (!this.canEncryptSo() || !taskIds.length) {
-      return new Map<string, string | undefined>();
+      return new Map<string, { apiKey?: string; uiamApiKey?: string } | undefined>();
     }
 
     const result = await this.getApiKeys(taskIds);
@@ -397,7 +397,7 @@ export class TaskStore {
       })
     );
 
-    const result = new Map<string, string | undefined>();
+    const result = new Map<string, { apiKey?: string; uiamApiKey?: string }>();
     const finder =
       await this.esoClient!.createPointInTimeFinderDecryptedAsInternalUser<SerializedConcreteTaskInstance>(
         {
