@@ -48,7 +48,6 @@ import {
   throwError,
 } from 'rxjs';
 import type { UrlObject } from 'url';
-import { format, parse } from 'url';
 import { inspect } from 'util';
 import type { ObservabilityAIAssistantAPIClientRequestParamsOf } from '@kbn/observability-ai-assistant-plugin/public';
 import type { EvaluationResult } from './types';
@@ -104,21 +103,33 @@ export class KibanaClient {
   }
 
   private getUrl(props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean }) {
-    const parsed = parse(this.url);
+    const url = new URL(this.url);
+    const baseUrl = url.pathname.replaceAll('/', '');
 
-    const baseUrl = parsed.pathname?.replaceAll('/', '') ?? '';
+    url.pathname = `/${[
+      ...(baseUrl ? [baseUrl] : []),
+      ...(props.ignoreSpaceId || !this.spaceId ? [] : ['s', this.spaceId]),
+      props.pathname.startsWith('/') ? props.pathname.substring(1) : props.pathname,
+    ].join('/')}`;
+    url.search = '';
 
-    const url = format({
-      ...parsed,
-      pathname: `/${[
-        ...(baseUrl ? [baseUrl] : []),
-        ...(props.ignoreSpaceId || !this.spaceId ? [] : ['s', this.spaceId]),
-        props.pathname.startsWith('/') ? props.pathname.substring(1) : props.pathname,
-      ].join('/')}`,
-      query: props.query,
-    });
+    if (props.query) {
+      for (const [key, value] of Object.entries(props.query)) {
+        if (value == null) {
+          continue;
+        }
 
-    return url;
+        if (Array.isArray(value)) {
+          value.forEach((item) => {
+            url.searchParams.append(key, String(item));
+          });
+        } else {
+          url.searchParams.set(key, String(value));
+        }
+      }
+    }
+
+    return url.toString();
   }
 
   callKibana<T>(

@@ -24,7 +24,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
-import { format as formatUrl, parse as parseUrl } from 'url';
 import type { AnonymousAccessState } from '../../../../common';
 
 import { useShareContext, type IShareContext } from '../../context';
@@ -154,31 +153,26 @@ export const EmbedContent = ({
       ? updateUrlParams(shareableUrlForSavedObject)
       : snapshotUrl;
 
-    const parsedUrl = parseUrl(tempUrl);
+    const parsedUrl = new URL(tempUrl, window.location.href);
 
-    if (!parsedUrl || !parsedUrl.hash) {
+    if (!parsedUrl.hash) {
       return tempUrl;
     }
 
     // Get the application route, after the hash, and remove the #.
-    const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
+    const parsedAppUrl = new URL(parsedUrl.hash.slice(1), window.location.href);
+    const appHashSearchParams = new URLSearchParams();
+    const globalState = parsedAppUrl.searchParams.get('_g');
 
-    const formattedUrl = formatUrl({
-      protocol: parsedUrl.protocol,
-      auth: parsedUrl.auth,
-      host: parsedUrl.host,
-      pathname: parsedUrl.pathname,
-      hash: formatUrl({
-        pathname: parsedAppUrl.pathname,
-        query: {
-          // Add global state to the URL so that the iframe doesn't just show the time range
-          // default.
-          _g: parsedAppUrl.query._g,
-        },
-      }),
-    });
+    if (globalState !== null) {
+      appHashSearchParams.set('_g', globalState);
+    }
 
-    return updateUrlParams(formattedUrl);
+    parsedUrl.hash = `${parsedAppUrl.pathname}${
+      appHashSearchParams.size > 0 ? `?${appHashSearchParams.toString()}` : ''
+    }`;
+
+    return updateUrlParams(parsedUrl.toString());
   }, [shareableUrlForSavedObject, snapshotUrl, updateUrlParams]);
 
   const createShortUrl = useCallback(async () => {

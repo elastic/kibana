@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { parse, format } from 'url';
-
 export function parseIndexUrl(url: string): { node: string; index: string } {
-  const parsed = parse(url);
-  const { pathname, ...rest } = parsed;
+  const parsed = new URL(url);
+  const index = parsed.pathname.replace(/^\//, '');
+
+  parsed.pathname = '/';
+  parsed.search = '';
+  parsed.hash = '';
 
   return {
-    node: format(rest),
-    index: pathname!.replace('/', ''),
+    node: parsed.toString().replace(/\/$/, ''),
+    index,
   };
 }

@@ -8,7 +8,6 @@
  */
 
 import { getUrlOrigin } from '@kbn/std';
-import { resolve } from 'url';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { App } from '@kbn/core-application-browser';
 import type { ParsedAppUrl } from '../types';
@@ -46,7 +45,8 @@ export const parseAppUrl = (
 
   // if the path is relative (i.e `../../to/somewhere`), we convert it to absolute
   if (!url.startsWith('/')) {
-    url = resolve(currentPath, url);
+    const resolvedUrl = new URL(url, `${currentOrigin}${currentPath}`);
+    url = `${resolvedUrl.pathname}${resolvedUrl.search}${resolvedUrl.hash}`;
   }
 
   // if using a basePath and the absolute path does not starts with it, it can't be a match

@@ -117,7 +117,8 @@ export class Http2BasePathProxyServer implements BasePathProxyServer {
 
     server.listen(this.httpConfig.port, this.httpConfig.host, () => {
       server.on('request', (inboundRequest, inboundResponse) => {
-        const requestPath = Url.parse(inboundRequest.url).path ?? '/';
+        const parsedRequestUrl = new URL(inboundRequest.url ?? '/', 'http://localhost');
+        const requestPath = `${parsedRequestUrl.pathname}${parsedRequestUrl.search}` || '/';
 
         if (requestPath === '/') {
           // Always redirect from root URL to the URL with basepath.

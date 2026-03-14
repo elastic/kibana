@@ -25,8 +25,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { format as formatUrl, parse as parseUrl } from 'url';
-
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
@@ -213,29 +211,25 @@ class UrlPanelContentComponent extends Component<UrlPanelContentProps, State, Wi
 
     const url = this.getSnapshotUrl(true);
 
-    const parsedUrl = parseUrl(url);
-    if (!parsedUrl || !parsedUrl.hash) {
+    const parsedUrl = new URL(url, window.location.href);
+    if (!parsedUrl.hash) {
       return;
     }
 
     // Get the application route, after the hash, and remove the #.
-    const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
+    const parsedAppUrl = new URL(parsedUrl.hash.slice(1), window.location.href);
+    const appHashSearchParams = new URLSearchParams();
+    const globalState = parsedAppUrl.searchParams.get('_g');
 
-    const formattedUrl = formatUrl({
-      protocol: parsedUrl.protocol,
-      auth: parsedUrl.auth,
-      host: parsedUrl.host,
-      pathname: parsedUrl.pathname,
-      hash: formatUrl({
-        pathname: parsedAppUrl.pathname,
-        query: {
-          // Add global state to the URL so that the iframe doesn't just show the time range
-          // default.
-          _g: parsedAppUrl.query._g,
-        },
-      }),
-    });
-    return this.updateUrlParams(formattedUrl);
+    if (globalState !== null) {
+      appHashSearchParams.set('_g', globalState);
+    }
+
+    parsedUrl.hash = `${parsedAppUrl.pathname}${
+      appHashSearchParams.size > 0 ? `?${appHashSearchParams.toString()}` : ''
+    }`;
+
+    return this.updateUrlParams(parsedUrl.toString());
   };
 
   private getSnapshotUrl = (forSavedObject?: boolean) => {

@@ -10,7 +10,6 @@ import moment, { type Moment } from 'moment';
 import { cloneDeep } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
-import url from 'url';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
@@ -324,7 +323,7 @@ async function buildDashboardUrlFromSettings(
 
   const urlToAdd: MlUrlConfig = {
     url_name: settings.label,
-    url_value: decodeURIComponent(`dashboards${url.parse(resultPath).hash}`),
+    url_value: decodeURIComponent(`dashboards${new URL(resultPath, 'http://localhost').hash}`),
     time_range: TIME_RANGE_TYPE.AUTO as string,
   };
 

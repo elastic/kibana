@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from 'url';
 import { filter } from 'lodash';
 
 /*
@@ -18,9 +17,16 @@ import { filter } from 'lodash';
  * to it, which url.parse doesn't catch all variants of
  */
 const isBogusUrl = (url: string) => {
-  const { host, protocol, port } = parse(url, false, true);
+  if (url.startsWith('//')) {
+    return true;
+  }
 
-  return host !== null || protocol !== null || port !== null;
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 export const validateUrls = (urls: string[]): void => {

@@ -7,13 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Url } from 'url';
-import { format, parse } from 'url';
 import { readKibanaConfig } from './read_kibana_config';
 import type { Logger } from '../../lib/utils/create_logger';
 import type { RunOptions } from './parse_run_cli_flags';
 import { getFetchAgent } from './ssl';
 import { getApiKeyHeader, getBasicAuthHeader } from './get_auth_header';
+
+const getAuth = (url: URL): string | undefined => {
+  if (!url.username && !url.password) {
+    return undefined;
+  }
+
+  return `${decodeURIComponent(url.username)}:${decodeURIComponent(url.password)}`;
+};
+
+const setAuth = (url: URL, auth?: string): URL => {
+  const nextUrl = new URL(url.toString());
+
+  if (!auth) {
+    return nextUrl;
+  }
+
+  const separatorIndex = auth.indexOf(':');
+  nextUrl.username = separatorIndex >= 0 ? auth.slice(0, separatorIndex) : auth;
+  nextUrl.password = separatorIndex >= 0 ? auth.slice(separatorIndex + 1) : '';
+
+  return nextUrl;
+};
+
+const stripAuth = (url: URL): URL => {
+  const nextUrl = new URL(url.toString());
+  nextUrl.username = '';
+  nextUrl.password = '';
+  return nextUrl;
+};
 
 async function getFetchStatus(url: string, apiKey?: string) {
   try {
@@ -36,10 +63,7 @@ async function getFetchStatus(url: string, apiKey?: string) {
 
 function stripAuthIfCi(url: string) {
   if (process.env.CI?.toLowerCase() === 'true') {
-    return format({
-      ...parse(url),
-      auth: undefined,
-    });
+    return stripAuth(new URL(url)).toString();
   }
   return url;
 }
@@ -48,21 +72,20 @@ function stripTrailingSlash(url: string) {
   return url.replace(/\/$/, '');
 }
 
-async function discoverAuth(parsedTarget: Url) {
+async function discoverAuth(parsedTarget: URL) {
   const possibleCredentials = [`admin:changeme`, `elastic:changeme`, `elastic_serverless:changeme`];
   for (const auth of possibleCredentials) {
-    const url = format({
-      ...parsedTarget,
-      auth,
-    });
+    const url = setAuth(parsedTarget, auth);
 
-    const status = await getFetchStatus(url);
+    const status = await getFetchStatus(url.toString());
     if (status === 200) {
       return auth;
     }
   }
 
-  throw new Error(`Failed to authenticate user for ${stripAuthIfCi(format(parsedTarget))}`);
+  throw new Error(
+    `Failed to authenticate user for ${stripAuthIfCi(stripAuth(parsedTarget).toString())}`
+  );
 }
 
 async function getKibanaUrl({
@@ -147,16 +170,12 @@ async function getKibanaUrl({
 }
 
 async function discoverTargetFromKibanaUrl(kibanaUrl: string) {
-  const suspectedParsedTargetUrl = parse(getTargetUrlFromKibana(kibanaUrl));
-
-  let targetAuth = suspectedParsedTargetUrl.auth;
+  const suspectedParsedTargetUrl = new URL(getTargetUrlFromKibana(kibanaUrl));
+  let targetAuth = getAuth(suspectedParsedTargetUrl);
   let targetProtocol = suspectedParsedTargetUrl.protocol;
-  const urlWithSwitchedProtocol = parse(
-    format({
-      ...suspectedParsedTargetUrl,
-      protocol: suspectedParsedTargetUrl.protocol === 'https:' ? 'http:' : 'https:',
-    })
-  );
+  const urlWithSwitchedProtocol = new URL(suspectedParsedTargetUrl.toString());
+  urlWithSwitchedProtocol.protocol =
+    suspectedParsedTargetUrl.protocol === 'https:' ? 'http:' : 'https:';
   const errorMessages = `Could not discover Elasticsearch URL based on Kibana URL ${stripAuthIfCi(
     kibanaUrl
   )}.`;
@@ -175,8 +194,8 @@ async function discoverTargetFromKibanaUrl(kibanaUrl: string) {
       }
     }
   } else {
-    const status = await getFetchStatus(format(suspectedParsedTargetUrl));
-    const statusWithSwitchedProtocol = await getFetchStatus(format(urlWithSwitchedProtocol));
+    const status = await getFetchStatus(suspectedParsedTargetUrl.toString());
+    const statusWithSwitchedProtocol = await getFetchStatus(urlWithSwitchedProtocol.toString());
     if (status === 0 && statusWithSwitchedProtocol !== 0) {
       targetProtocol = urlWithSwitchedProtocol.protocol;
     }
@@ -187,11 +206,10 @@ async function discoverTargetFromKibanaUrl(kibanaUrl: string) {
   }
 
   return stripTrailingSlash(
-    format({
-      ...suspectedParsedTargetUrl,
-      auth: targetAuth,
-      protocol: targetProtocol,
-    })
+    setAuth(
+      Object.assign(new URL(suspectedParsedTargetUrl.toString()), { protocol: targetProtocol }),
+      targetAuth
+    ).toString()
   );
 }
 
@@ -204,11 +222,11 @@ function discoverTargetFromKibanaConfig() {
   }
   const password = config.elasticsearch?.password;
   if (hosts) {
-    const parsed = parse(Array.isArray(hosts) ? hosts[0] : hosts);
-    return format({
-      ...parsed,
-      auth: parsed.auth || (username && password ? `${username}:${password}` : undefined),
-    });
+    const parsed = new URL(Array.isArray(hosts) ? hosts[0] : hosts);
+    return setAuth(
+      parsed,
+      getAuth(parsed) || (username && password ? `${username}:${password}` : undefined)
+    ).toString();
   }
 }
 
@@ -233,7 +251,7 @@ function getKibanaUrlFromTarget(target: string) {
   return esToKb;
 }
 
-function logCertificateWarningsIfNeeded(parsedTarget: Url, parsedKibanaUrl: Url, logger: Logger) {
+function logCertificateWarningsIfNeeded(parsedTarget: URL, parsedKibanaUrl: URL, logger: Logger) {
   if (
     (parsedTarget.protocol === 'https:' || parsedKibanaUrl.protocol === 'https:') &&
     (parsedTarget.hostname === '127.0.0.1' || parsedKibanaUrl.hostname === '127.0.0.1')
@@ -261,9 +279,8 @@ export async function getServiceUrls({
     }
   }
 
-  const parsedTarget = parse(target);
-
-  let auth = parsedTarget.auth;
+  const parsedTarget = new URL(target);
+  let auth = getAuth(parsedTarget);
   let esHeaders;
 
   if (apiKey) {
@@ -272,21 +289,13 @@ export async function getServiceUrls({
     auth = await discoverAuth(parsedTarget);
   }
 
-  const formattedEsUrl = stripTrailingSlash(
-    format({
-      ...parsedTarget,
-      auth,
-    })
-  );
+  const formattedEsUrl = stripTrailingSlash(setAuth(parsedTarget, auth).toString());
 
   let targetKibanaUrl = kibana || getKibanaUrlFromTarget(formattedEsUrl);
-  const parsedKibanaUrl = parse(targetKibanaUrl);
+  const parsedKibanaUrl = new URL(targetKibanaUrl);
 
   if (!apiKey) {
-    targetKibanaUrl = format({
-      ...parsedKibanaUrl,
-      auth,
-    });
+    targetKibanaUrl = setAuth(parsedKibanaUrl, auth).toString();
   }
 
   const { kibanaUrl, kibanaHeaders, username, password } = await getKibanaUrl({

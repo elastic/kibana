@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Url from 'url';
 import expect from '@kbn/expect';
 import type { AppUpdatableFields } from '@kbn/core-application-browser';
 import { AppStatus } from '@kbn/core-application-browser';
@@ -101,7 +100,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await navigateToApp('app_status');
       expect(await testSubjects.exists('appStatusApp')).to.eql(true);
       const currentUrl = await browser.getCurrentUrl();
-      expect(Url.parse(currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
+      expect(new URL(currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
     });
 
     it('can change the state of the currently mounted app', async () => {

@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from 'url';
-
 import { UnsupportedProtocolError } from '../lib/errors';
 import { downloadHttpFile } from './downloaders/http';
 import { downloadLocalFile } from './downloaders/file';
@@ -35,14 +33,14 @@ export function _checkFilePathDeprecation(sourceUrl, logger) {
 }
 
 export function _downloadSingle(settings, logger, sourceUrl) {
-  const urlInfo = parse(sourceUrl);
+  const urlInfo = new URL(sourceUrl);
   let downloadPromise;
 
   if (/^file/.test(urlInfo.protocol)) {
     _checkFilePathDeprecation(sourceUrl, logger);
     downloadPromise = downloadLocalFile(
       logger,
-      _getFilePath(urlInfo.path),
+      _getFilePath(urlInfo.pathname),
       settings.tempArchiveFile
     );
   } else if (/^https?/.test(urlInfo.protocol)) {

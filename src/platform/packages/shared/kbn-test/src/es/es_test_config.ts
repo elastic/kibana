@@ -8,7 +8,7 @@
  */
 
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
-import Url from 'url';
+import { format as formatUrl } from 'url';
 import { systemIndicesSuperuser } from '../kbn';
 
 class EsTestConfig {
@@ -21,7 +21,7 @@ class EsTestConfig {
   }
 
   getUrl() {
-    return Url.format(this.getUrlParts());
+    return formatUrl(this.getUrlParts());
   }
 
   getBuildFrom() {
@@ -39,20 +39,30 @@ class EsTestConfig {
   getUrlParts() {
     // Allow setting one complete TEST_ES_URL for Es like https://elastic:changeme@myCloudInstance:9200
     if (process.env.TEST_ES_URL) {
-      const testEsUrl = Url.parse(process.env.TEST_ES_URL);
+      const testEsUrl = new URL(process.env.TEST_ES_URL);
       if (!testEsUrl.port) {
         throw new Error(
           `process.env.TEST_ES_URL must contain port. given: ${process.env.TEST_ES_URL}`
         );
       }
+      const username =
+        testEsUrl.username === '' ? undefined : decodeURIComponent(testEsUrl.username);
+      const password =
+        testEsUrl.password === '' ? undefined : decodeURIComponent(testEsUrl.password);
+
       return {
         // have to remove the ":" off protocol
-        protocol: testEsUrl.protocol?.slice(0, -1),
+        protocol: testEsUrl.protocol.slice(0, -1),
         hostname: testEsUrl.hostname,
         port: parseInt(testEsUrl.port, 10),
-        username: testEsUrl.auth?.split(':')[0],
-        password: testEsUrl.auth?.split(':')[1],
-        auth: testEsUrl.auth,
+        username,
+        password,
+        auth:
+          username === undefined && password === undefined
+            ? undefined
+            : password === undefined
+            ? username
+            : `${username ?? ''}:${password}`,
       };
     }
 

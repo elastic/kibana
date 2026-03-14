@@ -159,4 +159,42 @@ describe('applyConfigOverrides', () => {
       },
     });
   });
+
+  it('injects the serverless service account token for localhost Elasticsearch hosts', () => {
+    expect(
+      applyConfigOverrides(
+        {
+          elasticsearch: {
+            hosts: ['https://localhost:9200'],
+          },
+        },
+        { dev: true, serverless: true },
+        {},
+        {}
+      )
+    ).toEqual(
+      expect.objectContaining({
+        elasticsearch: {
+          hosts: ['https://localhost:9200'],
+          serviceAccountToken: kibanaDevServiceAccount.token,
+          ssl: { certificateAuthorities: expect.stringContaining('ca.crt') },
+        },
+      })
+    );
+  });
+
+  it('preserves the configured localhost Elasticsearch port when enabling ssl', () => {
+    expect(
+      applyConfigOverrides({}, { ssl: true, elasticsearch: 'https://localhost:9400' }, {}, {})
+    ).toEqual(
+      expect.objectContaining({
+        elasticsearch: {
+          hosts: ['https://localhost:9400'],
+          ssl: {
+            certificateAuthorities: expect.stringContaining('ca.crt'),
+          },
+        },
+      })
+    );
+  });
 });

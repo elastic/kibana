@@ -14,7 +14,7 @@
  *************************************************************/
 
 import Path from 'path';
-import Url from 'url';
+import { format as formatUrl } from 'url';
 import readline from 'readline';
 import Fs from 'fs';
 
@@ -55,7 +55,7 @@ export function runCli() {
         throw createFlagError('--es-url must be a string');
       }
       if (!esUrl && config) {
-        esUrl = Url.format(config.get('servers.elasticsearch'));
+        esUrl = formatUrl(config.get('servers.elasticsearch'));
       }
       if (!esUrl) {
         throw createFlagError('--es-url or --config must be defined');
@@ -66,7 +66,7 @@ export function runCli() {
         throw createFlagError('--kibana-url must be a string');
       }
       if (!kibanaUrl && config) {
-        kibanaUrl = Url.format(config.get('servers.kibana'));
+        kibanaUrl = formatUrl(config.get('servers.kibana'));
       }
       if (!kibanaUrl) {
         throw createFlagError('--kibana-url or --config must be defined');
@@ -83,7 +83,7 @@ export function runCli() {
       } else if (kibanaCaPath) {
         kibanaCa = Fs.readFileSync(kibanaCaPath);
       } else {
-        const { protocol, hostname } = Url.parse(kibanaUrl);
+        const { protocol, hostname } = new URL(kibanaUrl);
         if (protocol === 'https:' && hostname === 'localhost') {
           kibanaCa = Fs.readFileSync(CA_CERT_PATH);
         }
@@ -100,7 +100,7 @@ export function runCli() {
       } else if (esCaPath) {
         esCa = Fs.readFileSync(esCaPath);
       } else {
-        const { protocol, hostname } = Url.parse(kibanaUrl);
+        const { protocol, hostname } = new URL(kibanaUrl);
         if (protocol === 'https:' && hostname === 'localhost') {
           esCa = Fs.readFileSync(CA_CERT_PATH);
         }

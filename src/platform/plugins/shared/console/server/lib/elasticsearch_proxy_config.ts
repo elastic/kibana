@@ -10,12 +10,11 @@
 import _ from 'lodash';
 import http from 'http';
 import https from 'https';
-import url from 'url';
 
 import type { ESConfigForProxy } from '../types';
 
 const createAgent = (legacyConfig: ESConfigForProxy) => {
-  const target = url.parse(_.head(legacyConfig.hosts)!);
+  const target = new URL(_.head(legacyConfig.hosts)!);
   if (!/^https/.test(target.protocol || '')) return new http.Agent();
 
   const agentOptions: https.AgentOptions = {};

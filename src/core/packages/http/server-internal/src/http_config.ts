@@ -8,7 +8,7 @@
  */
 
 import { EOL, hostname } from 'node:os';
-import url, { URL } from 'node:url';
+import { URL } from 'node:url';
 import type { Duration } from 'moment';
 import type { ByteSizeValue, TypeOf } from '@kbn/config-schema';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
@@ -268,12 +268,12 @@ const configSchema = schema.object(
       }
 
       if (rawConfig.publicBaseUrl) {
-        const parsedUrl = url.parse(rawConfig.publicBaseUrl);
-        if (parsedUrl.query || parsedUrl.hash || parsedUrl.auth) {
+        const parsedUrl = new URL(rawConfig.publicBaseUrl);
+        if (parsedUrl.search || parsedUrl.hash || parsedUrl.username || parsedUrl.password) {
           return `[publicBaseUrl] may only contain a protocol, host, port, and pathname`;
         }
-        if (parsedUrl.path !== (rawConfig.basePath ?? '/')) {
-          return `[publicBaseUrl] must contain the [basePath]: ${parsedUrl.path} !== ${rawConfig.basePath}`;
+        if (parsedUrl.pathname !== (rawConfig.basePath ?? '/')) {
+          return `[publicBaseUrl] must contain the [basePath]: ${parsedUrl.pathname} !== ${rawConfig.basePath}`;
         }
       }
 

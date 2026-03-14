@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import url from 'url';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
@@ -345,11 +344,7 @@ export class ActionsClient {
     }
 
     // Verify that token url contains a hostname and uses https
-    const parsedUrl = url.parse(
-      options.tokenUrl,
-      false /* parseQueryString */,
-      true /* slashesDenoteHost */
-    );
+    const parsedUrl = new URL(options.tokenUrl);
 
     if (!parsedUrl.hostname) {
       throw Boom.badRequest(`Token URL must contain hostname`);

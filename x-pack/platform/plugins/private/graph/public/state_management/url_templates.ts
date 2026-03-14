@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { modifyUrl } from '@kbn/std';
 import rison from '@kbn/rison';
 import { takeEvery } from 'redux-saga/effects';
-import { format, parse } from 'url';
 import type { GraphState, GraphStoreDependencies } from './store';
 import type { UrlTemplate } from '../types';
 import { reset } from './global';
@@ -46,14 +45,8 @@ function generateDefaultTemplate(
       sort: ['_score', 'desc'],
     });
   });
-  const parsedAppPath = parse(`/app/discover#${appPath}`, true, true);
-  const formattedAppPath = format({
-    protocol: parsedAppPath.protocol,
-    host: parsedAppPath.host,
-    pathname: parsedAppPath.pathname,
-    query: parsedAppPath.query,
-    hash: parsedAppPath.hash,
-  });
+  const parsedAppPath = new URL(`/app/discover#${appPath}`, 'http://localhost');
+  const formattedAppPath = `${parsedAppPath.pathname}${parsedAppPath.search}${parsedAppPath.hash}`;
 
   // replace the URI encoded version of the tag with the unescaped version
   // so it can be found with String.replace, regexp, etc.

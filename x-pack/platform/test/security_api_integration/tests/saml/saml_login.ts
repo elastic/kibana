@@ -10,7 +10,6 @@ import { stringify } from 'query-string';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
-import url from 'url';
 
 import expect from '@kbn/expect';
 import {
@@ -154,12 +153,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(handshakeCookie.httpOnly).to.be(true);
         checkIntermediateSessionCookiePropsDefault(handshakeCookie);
 
-        const redirectURL = url.parse(
-          handshakeResponse.headers.location,
-          true /* parseQueryString */
-        );
-        expect(redirectURL.href!.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
-        expect(redirectURL.query.SAMLRequest).to.not.be.empty();
+        const redirectURL = new URL(handshakeResponse.headers.location);
+        expect(redirectURL.toString().startsWith(`https://elastic.co/sso/saml`)).to.be(true);
+        expect(redirectURL.searchParams.get('SAMLRequest')).to.not.be.empty();
       });
 
       it('should not allow access to the API with the handshake cookie', async () => {
@@ -376,9 +372,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(logoutCookie.maxAge).to.be(0);
         checkStandardSessionCookiePropsDefault(logoutCookie);
 
-        const redirectURL = url.parse(logoutResponse.headers.location, true /* parseQueryString */);
-        expect(redirectURL.href!.startsWith(`https://elastic.co/slo/saml`)).to.be(true);
-        expect(redirectURL.query.SAMLRequest).to.not.be.empty();
+        const redirectURL = new URL(logoutResponse.headers.location);
+        expect(redirectURL.toString().startsWith(`https://elastic.co/slo/saml`)).to.be(true);
+        expect(redirectURL.searchParams.get('SAMLRequest')).to.not.be.empty();
 
         // Session should be invalidated and old session cookie should not allow API access.
         await supertest
@@ -428,9 +424,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(logoutCookie.maxAge).to.be(0);
         checkStandardSessionCookiePropsDefault(logoutCookie);
 
-        const redirectURL = url.parse(logoutResponse.headers.location, true /* parseQueryString */);
-        expect(redirectURL.href!.startsWith(`https://elastic.co/slo/saml`)).to.be(true);
-        expect(redirectURL.query.SAMLResponse).to.not.be.empty();
+        const redirectURL = new URL(logoutResponse.headers.location);
+        expect(redirectURL.toString().startsWith(`https://elastic.co/slo/saml`)).to.be(true);
+        expect(redirectURL.searchParams.get('SAMLResponse')).to.not.be.empty();
 
         // Session should be invalidated and old session cookie should not allow API access.
         await supertest
@@ -448,9 +444,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
 
-        const redirectURL = url.parse(logoutResponse.headers.location, true /* parseQueryString */);
-        expect(redirectURL.href!.startsWith(`https://elastic.co/slo/saml`)).to.be(true);
-        expect(redirectURL.query.SAMLResponse).to.not.be.empty();
+        const redirectURL = new URL(logoutResponse.headers.location);
+        expect(redirectURL.toString().startsWith(`https://elastic.co/slo/saml`)).to.be(true);
+        expect(redirectURL.searchParams.get('SAMLResponse')).to.not.be.empty();
 
         // Elasticsearch should find and invalidate access and refresh tokens that correspond to provided
         // IdP session id (encoded in SAML LogoutRequest) even if Kibana doesn't provide them and session
@@ -696,12 +692,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(handshakeCookie.httpOnly).to.be(true);
         checkIntermediateSessionCookiePropsDefault(handshakeCookie);
 
-        const redirectURL = url.parse(
-          handshakeResponse.headers.location,
-          true /* parseQueryString */
-        );
-        expect(redirectURL.href!.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
-        expect(redirectURL.query.SAMLRequest).to.not.be.empty();
+        const redirectURL = new URL(handshakeResponse.headers.location);
+        expect(redirectURL.toString().startsWith(`https://elastic.co/sso/saml`)).to.be(true);
+        expect(redirectURL.searchParams.get('SAMLRequest')).to.not.be.empty();
       });
 
       it('should start new SAML handshake even if multiple concurrent requests try to refresh access token', async () => {

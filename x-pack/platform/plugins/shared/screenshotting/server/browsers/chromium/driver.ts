@@ -13,7 +13,6 @@ import type { CDPSession } from 'puppeteer';
 import { truncate } from 'lodash';
 import type { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
 import { Subject } from 'rxjs';
-import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
 import type { Layout } from '../../layouts';
 import { getPrintLayoutSelectors } from '../../layouts/print_layout';
@@ -462,22 +461,18 @@ export class HeadlessChromiumDriver {
       hostname: sourceHostname,
       protocol: sourceProtocol,
       port: sourcePort,
-    } = parseUrl(sourceUrl);
+    } = new URL(sourceUrl);
     const {
       hostname: targetHostname,
       protocol: targetProtocol,
       port: targetPort,
       pathname: targetPathname,
-    } = parseUrl(targetUrl);
-
-    if (targetPathname === null) {
-      throw new Error(`URL missing pathname: ${targetUrl}`);
-    }
+    } = new URL(targetUrl);
 
     // `port` is null in URLs that don't explicitly state it,
     // however we can derive the port from the protocol (http/https)
     // IE: https://feeds.elastic.co/kibana/v8.0.0.json
-    const derivedPort = (protocol: string | null, port: string | null, url: string) => {
+    const derivedPort = (protocol: string, port: string, url: string) => {
       if (port) {
         return port;
       }

@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UrlWithParsedQuery, UrlWithStringQuery } from 'url';
-import { format as urlFormat, parse as urlParse } from 'url';
-
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
@@ -44,16 +41,16 @@ export function getFullUrls(
   validateUrls(relativeUrls);
 
   const urls = relativeUrls.map((relativeUrl) => {
-    const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
+    const parsedRelative = new URL(relativeUrl, 'http://localhost');
     const jobUrl = getAbsoluteUrl({
-      path: parsedRelative.pathname === null ? undefined : parsedRelative.pathname,
-      hash: parsedRelative.hash === null ? undefined : parsedRelative.hash,
-      search: parsedRelative.search === null ? undefined : parsedRelative.search,
+      path: parsedRelative.pathname || undefined,
+      hash: parsedRelative.hash || undefined,
+      search: parsedRelative.search || undefined,
     });
 
     // capture the route to the visualization
-    const parsed: UrlWithParsedQuery = urlParse(jobUrl, true);
-    if (parsed.hash == null) {
+    const parsed = new URL(jobUrl);
+    if (!parsed.hash) {
       throw new Error(
         'No valid hash in the URL! A hash is expected for the application to route to the intended visualization.'
       );
@@ -64,21 +61,11 @@ export function getFullUrls(
       return jobUrl;
     }
 
-    const visualizationRoute: UrlWithParsedQuery = urlParse(parsed.hash.replace(/^#/, ''), true);
+    const visualizationRoute = new URL(parsed.hash.replace(/^#/, ''), 'http://localhost');
+    visualizationRoute.searchParams.set('forceNow', job.forceNow);
+    parsed.hash = `${visualizationRoute.pathname}${visualizationRoute.search}`;
 
-    // combine the visualization route and forceNow parameter into a URL
-    const transformedHash = urlFormat({
-      pathname: visualizationRoute.pathname,
-      query: {
-        ...visualizationRoute.query,
-        forceNow: job.forceNow,
-      },
-    });
-
-    return urlFormat({
-      ...parsed,
-      hash: transformedHash,
-    });
+    return parsed.toString();
   });
 
   return urls;

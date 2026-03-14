@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import url from 'url';
 import expect from '@kbn/expect';
 import type { PluginFunctionalProviderContext } from '../../services';
 import '@kbn/core-app-status-plugin/public/types';
@@ -19,8 +18,8 @@ declare global {
 }
 
 const getPathWithHash = (absoluteUrl: string) => {
-  const parsed = url.parse(absoluteUrl);
-  return `${parsed.path}${parsed.hash ?? ''}`;
+  const parsed = new URL(absoluteUrl);
+  return `${parsed.pathname}${parsed.search}${parsed.hash}`;
 };
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {

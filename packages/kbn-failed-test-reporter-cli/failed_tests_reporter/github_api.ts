@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Url from 'url';
-
 import type { AxiosRequestConfig, AxiosInstance, AxiosHeaderValue } from 'axios';
 import Axios, { AxiosHeaders } from 'axios';
 import { isAxiosResponseError, isAxiosRequestError } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const BASE_URL = 'https://api.github.com/repos/elastic/kibana/';
+const resolveGithubUrl = (path: string) => new URL(path, BASE_URL).toString();
 
 export interface GithubIssue {
   html_url: string;
@@ -81,7 +80,7 @@ export class GithubApi {
     await this.request(
       {
         method: 'PATCH',
-        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(issueNumber)}`),
+        url: resolveGithubUrl(`issues/${encodeURIComponent(issueNumber)}`),
         data: {
           state: 'open', // Reopen issue if it was closed.
           body: newBody,
@@ -95,7 +94,7 @@ export class GithubApi {
     await this.request(
       {
         method: 'POST',
-        url: Url.resolve(BASE_URL, `issues/${encodeURIComponent(issueNumber)}/comments`),
+        url: resolveGithubUrl(`issues/${encodeURIComponent(issueNumber)}/comments`),
         data: {
           body: commentBody,
         },
@@ -108,7 +107,7 @@ export class GithubApi {
     const resp = await this.request<GithubIssueMini>(
       {
         method: 'POST',
-        url: Url.resolve(BASE_URL, 'issues'),
+        url: resolveGithubUrl('issues'),
         data: {
           title,
           body,

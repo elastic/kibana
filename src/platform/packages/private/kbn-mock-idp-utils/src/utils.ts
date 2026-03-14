@@ -10,7 +10,6 @@
 import type { Client } from '@elastic/elasticsearch';
 import { createHmac, randomBytes, X509Certificate } from 'crypto';
 import { readFile } from 'fs/promises';
-import Url from 'url';
 import { promisify } from 'util';
 import { SignedXml } from 'xml-crypto';
 import { parseString } from 'xml2js';
@@ -424,7 +423,7 @@ const inflateRawAsync = promisify(zlib.inflateRaw);
 const parseStringAsync = promisify(parseString);
 
 export async function getSAMLRequestId(requestUrl: string): Promise<string | undefined> {
-  const samlRequest = Url.parse(requestUrl, true /* parseQueryString */).query.SAMLRequest;
+  const samlRequest = new URL(requestUrl).searchParams.get('SAMLRequest');
 
   let requestId: string | undefined;
 

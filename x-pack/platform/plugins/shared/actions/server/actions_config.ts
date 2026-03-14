@@ -6,10 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/Option';
-import url from 'url';
 import { curry } from 'lodash';
-import { pipe } from 'fp-ts/pipeable';
 
 import {
   getSSLSettingsFromConfig,
@@ -106,12 +103,12 @@ function isAllowed({ allowedHosts }: ActionsConfig, hostname: string | null): bo
 }
 
 function isHostnameAllowedInUri(config: ActionsConfig, uri: string): boolean {
-  return pipe(
-    tryCatch(() => url.parse(uri, false /* parseQueryString */, true /* slashesDenoteHost */)),
-    map((parsedUrl) => parsedUrl.hostname),
-    mapNullable((hostname) => isAllowed(config, hostname)),
-    getOrElse<boolean>(() => false)
-  );
+  try {
+    const parsedUrl = new URL(uri.startsWith('//') ? `http:${uri}` : uri);
+    return isAllowed(config, parsedUrl.hostname || null);
+  } catch {
+    return false;
+  }
 }
 
 function isActionTypeEnabledInConfig(

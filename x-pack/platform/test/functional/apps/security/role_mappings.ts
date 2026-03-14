@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { parse } from 'url';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -96,7 +95,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.existOrFail('errorLoadingRoleMappingEditorToast');
 
-      const url = parse(await browser.getCurrentUrl());
+      const url = new URL(await browser.getCurrentUrl());
 
       expect(url.pathname).to.eql('/app/management/security/role_mappings/');
     });

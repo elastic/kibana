@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse as parseUrl } from 'url';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { convertRelativeTimeStringToAbsoluteTimeString } from '../../lib/time_utils';
 import type { LegacyShortUrlLocatorParams } from '../../../common/url_service/locators/legacy_short_url_locator';
@@ -130,14 +129,12 @@ export class BrowserShortUrlClient implements IShortUrlClient {
     longUrl: string,
     isAbsoluteTime?: boolean
   ): Promise<ShortUrlCreateFromLongUrlResponse> {
-    const parsedUrl = parseUrl(longUrl);
-
-    if (!parsedUrl || !parsedUrl.path) {
-      throw new Error(`Invalid URL: ${longUrl}`);
-    }
-
-    const path = parsedUrl.path.replace(this.dependencies.http.basePath.get(), '');
-    const hash = parsedUrl.hash ? parsedUrl.hash : '';
+    const parsedUrl = new URL(longUrl, window.location.href);
+    const path = `${parsedUrl.pathname}${parsedUrl.search}`.replace(
+      this.dependencies.http.basePath.get(),
+      ''
+    );
+    const hash = parsedUrl.hash || '';
     const relativeUrl = path + hash;
     const locator = this.dependencies.locators.get<LegacyShortUrlLocatorParams>(
       LEGACY_SHORT_URL_LOCATOR_ID

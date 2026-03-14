@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { format, parse } from 'url';
 import { readKibanaConfig } from './read_kibana_config';
 
 const config = readKibanaConfig();
@@ -19,14 +18,18 @@ export const elasticsearchOption = {
   alias: 'es',
   describe: 'Where Elasticsearch is running',
   string: true as const,
-  default: format({
-    ...parse(
+  default: (() => {
+    const elasticsearchUrl = new URL(
       Array.isArray(config['elasticsearch.hosts'])
         ? config['elasticsearch.hosts'][0]
         : config['elasticsearch.hosts']
-    ),
-    auth: `${config['elasticsearch.username']}:${config['elasticsearch.password']}`,
-  }),
+    );
+
+    elasticsearchUrl.username = config['elasticsearch.username'];
+    elasticsearchUrl.password = config['elasticsearch.password'];
+
+    return elasticsearchUrl.toString();
+  })(),
 };
 
 export const connectorIdOption = {

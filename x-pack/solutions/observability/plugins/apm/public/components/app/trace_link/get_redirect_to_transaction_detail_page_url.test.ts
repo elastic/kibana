@@ -6,7 +6,6 @@
  */
 
 import { getRedirectToTransactionDetailPageUrl } from './get_redirect_to_transaction_detail_page_url';
-import { parse } from 'url';
 
 describe('getRedirectToTransactionDetailPageUrl', () => {
   const transaction = {
@@ -23,13 +22,14 @@ describe('getRedirectToTransactionDetailPageUrl', () => {
 
   describe('without time range', () => {
     const url = getRedirectToTransactionDetailPageUrl({ transaction });
+    const parsedUrl = new URL(url, 'http://localhost');
 
     it('rounds the start time down', () => {
-      expect(parse(url, true).query.rangeFrom).toBe('2020-01-01T00:00:00.000Z');
+      expect(parsedUrl.searchParams.get('rangeFrom')).toBe('2020-01-01T00:00:00.000Z');
     });
 
     it('rounds the end time up', () => {
-      expect(parse(url, true).query.rangeTo).toBe('2020-01-01T00:05:00.000Z');
+      expect(parsedUrl.searchParams.get('rangeTo')).toBe('2020-01-01T00:05:00.000Z');
     });
 
     it('formats url correctly', () => {

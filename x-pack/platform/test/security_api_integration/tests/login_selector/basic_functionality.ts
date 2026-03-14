@@ -9,7 +9,6 @@ import { readFileSync } from 'fs';
 import type { Response } from 'supertest';
 import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
-import url from 'url';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
@@ -962,22 +961,23 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
-        const redirectURL = url.parse(handshakeResponse.body.location, true /* parseQueryString */);
+        const redirectURL = new URL(handshakeResponse.body.location);
         expect(
           handshakeResponse.body.location.startsWith(
             `https://test-op.elastic.co/oauth2/v1/authorize`
           )
         ).to.be(true);
 
-        expect(redirectURL.query.scope).to.not.be.empty();
-        expect(redirectURL.query.response_type).to.not.be.empty();
-        expect(redirectURL.query.client_id).to.not.be.empty();
-        expect(redirectURL.query.redirect_uri).to.not.be.empty();
-        expect(redirectURL.query.state).to.not.be.empty();
-        expect(redirectURL.query.nonce).to.not.be.empty();
+        expect(redirectURL.searchParams.get('scope')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('response_type')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('client_id')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('redirect_uri')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('state')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('nonce')).to.not.be.empty();
 
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
-        const { state, nonce } = redirectURL.query;
+        const state = redirectURL.searchParams.get('state')!;
+        const nonce = redirectURL.searchParams.get('nonce')!;
         await supertest
           .post('/api/oidc_provider/setup')
           .ca(CA_CERT)

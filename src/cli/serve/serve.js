@@ -10,7 +10,7 @@
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import { resolve } from 'path';
-import url from 'url';
+import { URL } from 'url';
 
 import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/lib/read_keystore';
@@ -34,6 +34,14 @@ function canRequire(path) {
     } else {
       throw error;
     }
+  }
+}
+
+function tryParseUrl(value) {
+  try {
+    return new URL(value);
+  } catch {
+    return;
   }
 }
 
@@ -63,11 +71,11 @@ const setServerlessKibanaDevServiceAccountIfPossible = (get, set, opts) => {
    */
   const isESlocalhost = esHosts.length
     ? esHosts.some((hostUrl) => {
-        const parsedUrl = url.parse(hostUrl);
+        const parsedUrl = tryParseUrl(hostUrl);
         return (
-          parsedUrl.hostname === 'localhost' ||
-          parsedUrl.hostname === '127.0.0.1' ||
-          parsedUrl.hostname === 'host.docker.internal'
+          parsedUrl?.hostname === 'localhost' ||
+          parsedUrl?.hostname === '127.0.0.1' ||
+          parsedUrl?.hostname === 'host.docker.internal'
         );
       })
     : true; // default is localhost:9200
@@ -178,13 +186,13 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
         'https://localhost:9200',
       ]
     ).map((hostUrl) => {
-      const parsedUrl = url.parse(hostUrl);
-      if (parsedUrl.hostname !== 'localhost') {
+      const parsedUrl = tryParseUrl(hostUrl);
+      if (parsedUrl?.hostname !== 'localhost') {
         throw new Error(
-          `Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`
+          `Hostname "${parsedUrl?.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`
         );
       }
-      return `https://localhost:${parsedUrl.port}`;
+      return `https://localhost${parsedUrl.port ? `:${parsedUrl.port}` : ''}`;
     });
 
     set('elasticsearch.hosts', elasticsearchHosts);

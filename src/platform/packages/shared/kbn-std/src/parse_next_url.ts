@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from 'url';
 import { isInternalURL } from './is_internal_url';
 
 const DEFAULT_NEXT_URL_QUERY_STRING_PARAMETER = 'next';
@@ -22,18 +21,13 @@ export function parseNextURL(
   basePath = '',
   nextUrlQueryParam = DEFAULT_NEXT_URL_QUERY_STRING_PARAMETER
 ) {
-  const { query, hash } = parse(href, true);
-
-  let next = query[nextUrlQueryParam];
-  if (!next) {
+  const parsedUrl = new URL(href, 'http://localhost');
+  const nextValues = parsedUrl.searchParams.getAll(nextUrlQueryParam);
+  if (!nextValues.length) {
     return `${basePath}/`;
   }
 
-  if (Array.isArray(next) && next.length > 0) {
-    next = next[0];
-  } else {
-    next = next as string;
-  }
+  const next = nextValues[0];
 
   // validate that `next` is not attempting a redirect to somewhere
   // outside of this Kibana install.
@@ -41,5 +35,5 @@ export function parseNextURL(
     return `${basePath}/`;
   }
 
-  return next + (hash || '');
+  return next + parsedUrl.hash;
 }

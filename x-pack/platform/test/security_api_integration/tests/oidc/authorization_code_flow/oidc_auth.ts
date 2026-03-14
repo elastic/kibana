@@ -9,7 +9,6 @@ import { resolve } from 'path';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
-import url from 'url';
 
 import expect from '@kbn/expect';
 import { getStateAndNonce } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
@@ -85,19 +84,16 @@ export default function ({ getService }: FtrProviderContext) {
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
 
-        const redirectURL = url.parse(
-          handshakeResponse.headers.location,
-          true /* parseQueryString */
-        );
+        const redirectURL = new URL(handshakeResponse.headers.location);
         expect(
-          redirectURL.href!.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)
+          redirectURL.toString().startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)
         ).to.be(true);
-        expect(redirectURL.query.scope).to.not.be.empty();
-        expect(redirectURL.query.response_type).to.not.be.empty();
-        expect(redirectURL.query.client_id).to.not.be.empty();
-        expect(redirectURL.query.redirect_uri).to.not.be.empty();
-        expect(redirectURL.query.state).to.not.be.empty();
-        expect(redirectURL.query.nonce).to.not.be.empty();
+        expect(redirectURL.searchParams.get('scope')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('response_type')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('client_id')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('redirect_uri')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('state')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('nonce')).to.not.be.empty();
       });
 
       it('should properly set cookie, return all parameters and redirect user for Third Party initiated', async () => {
@@ -115,19 +111,16 @@ export default function ({ getService }: FtrProviderContext) {
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
 
-        const redirectURL = url.parse(
-          handshakeResponse.headers.location,
-          true /* parseQueryString */
-        );
+        const redirectURL = new URL(handshakeResponse.headers.location);
         expect(
-          redirectURL.href!.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)
+          redirectURL.toString().startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)
         ).to.be(true);
-        expect(redirectURL.query.scope).to.not.be.empty();
-        expect(redirectURL.query.response_type).to.not.be.empty();
-        expect(redirectURL.query.client_id).to.not.be.empty();
-        expect(redirectURL.query.redirect_uri).to.not.be.empty();
-        expect(redirectURL.query.state).to.not.be.empty();
-        expect(redirectURL.query.nonce).to.not.be.empty();
+        expect(redirectURL.searchParams.get('scope')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('response_type')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('client_id')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('redirect_uri')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('state')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('nonce')).to.not.be.empty();
       });
 
       it('should not allow access to the API with the handshake cookie', async () => {
@@ -425,11 +418,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(logoutCookie.httpOnly).to.be(true);
         expect(logoutCookie.maxAge).to.be(0);
 
-        const redirectURL = url.parse(logoutResponse.headers.location, true /* parseQueryString */);
+        const redirectURL = new URL(logoutResponse.headers.location);
         expect(
-          redirectURL.href!.startsWith(`https://test-op.elastic.co/oauth2/v1/endsession`)
+          redirectURL.toString().startsWith(`https://test-op.elastic.co/oauth2/v1/endsession`)
         ).to.be(true);
-        expect(redirectURL.query.id_token_hint).to.not.be.empty();
+        expect(redirectURL.searchParams.get('id_token_hint')).to.not.be.empty();
 
         // Session should be invalidated and old session cookie should not allow API access.
         await supertest
@@ -653,19 +646,16 @@ export default function ({ getService }: FtrProviderContext) {
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
 
-        const redirectURL = url.parse(
-          handshakeResponse.headers.location,
-          true /* parseQueryString */
-        );
+        const redirectURL = new URL(handshakeResponse.headers.location);
         expect(
-          redirectURL.href!.startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)
+          redirectURL.toString().startsWith(`https://test-op.elastic.co/oauth2/v1/authorize`)
         ).to.be(true);
-        expect(redirectURL.query.scope).to.not.be.empty();
-        expect(redirectURL.query.response_type).to.not.be.empty();
-        expect(redirectURL.query.client_id).to.not.be.empty();
-        expect(redirectURL.query.redirect_uri).to.not.be.empty();
-        expect(redirectURL.query.state).to.not.be.empty();
-        expect(redirectURL.query.nonce).to.not.be.empty();
+        expect(redirectURL.searchParams.get('scope')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('response_type')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('client_id')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('redirect_uri')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('state')).to.not.be.empty();
+        expect(redirectURL.searchParams.get('nonce')).to.not.be.empty();
       });
     });
 

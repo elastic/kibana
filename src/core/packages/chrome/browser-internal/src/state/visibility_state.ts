@@ -19,7 +19,6 @@ import {
   shareReplay,
   startWith,
 } from 'rxjs';
-import { parse } from 'url';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import { createState } from './state_helpers';
@@ -35,7 +34,8 @@ export interface VisibilityState {
 
 export const createVisibilityState = ({ application }: VisibilityStateDeps): VisibilityState => {
   // Start off the chrome service hidden if "embed" is in the hash query string.
-  const isEmbedded = 'embed' in parse(location.hash.slice(1), true).query;
+  const hashUrl = new URL(location.hash.slice(1) || '/', 'http://localhost');
+  const isEmbedded = hashUrl.searchParams.has('embed');
   const forceHidden = createState(isEmbedded);
 
   /** Emits true during printing (window.beforeprint), false otherwise. */
