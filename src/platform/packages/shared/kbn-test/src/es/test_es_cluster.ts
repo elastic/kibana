@@ -282,7 +282,8 @@ export function createTestEsCluster<
       } else if (esFrom === 'snapshot') {
         ({ installPath, disableEsTmpDir } = await firstNode.installSnapshot(config));
       } else if (esFrom === 'docker') {
-        await firstNode.runDockerSnapshot({
+        await firstNode.runDocker({
+          snapshot: true,
           port,
           password,
           license: testLicense,

@@ -75,6 +75,9 @@ const fullscreenLabels = {
   skills: i18n.translate('xpack.agentBuilder.conversationActions.skills', {
     defaultMessage: 'View all skills',
   }),
+  plugins: i18n.translate('xpack.agentBuilder.conversationActions.plugins', {
+    defaultMessage: 'View all plugins',
+  }),
   sources: i18n.translate('xpack.agentBuilder.conversationActions.sources', {
     defaultMessage: 'View all sources',
   }),
@@ -240,6 +243,15 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
             data-test-subj="agentBuilderActionsSkills"
           >
             {fullscreenLabels.skills}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            key="plugins"
+            icon="package"
+            onClick={closePopover}
+            href={createAgentBuilderUrl(appPaths.plugins.list)}
+            data-test-subj="agentBuilderActionsPlugins"
+          >
+            {fullscreenLabels.plugins}
           </EuiContextMenuItem>,
         ]
       : []),
