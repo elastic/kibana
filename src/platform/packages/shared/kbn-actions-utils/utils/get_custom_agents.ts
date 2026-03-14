@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Agent as HttpAgent } from 'http';
+import type { Agent as HttpAgent, IncomingMessage } from 'http';
 import type { AgentOptions } from 'https';
 import { Agent as HttpsAgent } from 'https';
 import { HttpProxyAgent } from 'http-proxy-agent';
@@ -142,6 +142,8 @@ export function getCustomAgents(opts: GetCustomAgentsOpts): GetCustomAgentsRespo
     port: Number(proxyUrl.port),
     protocol: proxyUrl.protocol,
     headers: proxySettings.proxyHeaders,
+    ...(proxyUrl.username &&
+      proxyUrl.password && { auth: `${proxyUrl.username}:${proxyUrl.password}` }),
     // do not fail on invalid certs if value is false
     ...proxyNodeSSLOptions,
   }) as unknown as HttpsAgent;
@@ -154,5 +156,47 @@ export function getCustomAgents(opts: GetCustomAgentsOpts): GetCustomAgentsRespo
     };
   }
 
+  // agent-base@6 (used by https-proxy-agent@5) doesn't merge agent.options
+  // into the opts passed to its callback(), so target TLS options like
+  // rejectUnauthorized and ca never reach the tls.connect() call for the
+  // target. Inject them by wrapping the callback.
+  const targetTLSOpts = getTargetTLSOpts(agentSSLOptions, agentOptions);
+  if (targetTLSOpts) {
+    patchProxyAgentCallback(httpsAgent as unknown as HttpsProxyAgent, targetTLSOpts);
+  }
+
   return { httpAgent, httpsAgent };
+}
+
+function getTargetTLSOpts(
+  agentSSLOptions: { rejectUnauthorized?: boolean },
+  agentOptions?: AgentOptions
+): AgentOptions | undefined {
+  const tlsOpts: AgentOptions = {};
+  const rejectUnauthorized =
+    agentOptions?.rejectUnauthorized ?? agentSSLOptions.rejectUnauthorized;
+  if (rejectUnauthorized !== undefined) {
+    tlsOpts.rejectUnauthorized = rejectUnauthorized;
+  }
+  if (agentOptions?.ca) {
+    tlsOpts.ca = agentOptions.ca;
+  }
+  return Object.keys(tlsOpts).length > 0 ? tlsOpts : undefined;
+}
+
+function patchProxyAgentCallback(
+  agent: HttpsProxyAgent,
+  targetTLSOpts: AgentOptions
+): void {
+  const origCallback = (agent as any).callback as (
+    req: IncomingMessage,
+    opts: Record<string, unknown>
+  ) => Promise<unknown>;
+  (agent as any).callback = function (
+    this: HttpsProxyAgent,
+    req: IncomingMessage,
+    opts: Record<string, unknown>
+  ) {
+    return origCallback.call(this, req, { ...opts, ...targetTLSOpts });
+  };
 }
