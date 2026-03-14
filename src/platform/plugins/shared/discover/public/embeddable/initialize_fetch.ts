@@ -151,22 +151,21 @@ export function initializeFetch({
   const fetchSubscription = combineLatest(observables)
     .pipe(
       debounceTime(0), // debounce to batch updates in the same tick
-      tap(() => {
+      tap(([fetchContext, savedSearch, dataViews]) => {
         // abort any in-progress requests
         if (abortController) {
           abortController.abort(AbortReason.REPLACED);
           abortController = undefined;
+        }
+        if (isFieldStatsMode(savedSearch, dataViews[0], discoverServices.uiSettings)) {
+          api.fetchContext$.next(fetchContext);
         }
       }),
       switchMap(async ([fetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
 
         setBlockingError(undefined);
-        if (
-          !dataView ||
-          !savedSearch.searchSource ||
-          isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings)
-        ) {
+        if (!dataView || !savedSearch.searchSource) {
           return;
         }
 
@@ -181,6 +180,10 @@ export function initializeFetch({
             sortDir: discoverServices.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
           }
         );
+        // Still update search source for field stats mode, but not necessarily fetch data
+        if (isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings)) {
+          return;
+        }
 
         const searchSessionId = fetchContext.searchSessionId;
         const searchSourceQuery = savedSearch.searchSource.getField('query');
