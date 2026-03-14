@@ -11,7 +11,7 @@ export class InferenceManagementPage {
   constructor(private readonly page: ScoutPage) {}
 
   public async goto() {
-    await this.page.gotoApp('searchInferenceEndpoints');
+    await this.page.gotoApp('management/ml/inference_endpoints');
     await this.page.testSubj.waitForSelector('allInferenceEndpointsPage');
   }
 
