@@ -290,3 +290,14 @@ export type EuiSideNavItemTypeEnhanced<T = unknown> = Omit<EuiSideNavItemType<T>
   iconToString?: string;
   nameToString?: string;
 };
+
+/**
+ * Customization configuration for navigation items.
+ * Used to reorder and hide top-level navigation items without modifying the tree structure.
+ */
+export interface NavigationCustomization {
+  /** Ordered array of top-level navigation item IDs. */
+  order: string[];
+  /** IDs of items to hide from the main navigation (moved to overflow menu). */
+  hiddenIds: AppDeepLinkId[];
+}

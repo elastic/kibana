@@ -29,7 +29,10 @@
     "@kbn/std",
     "@kbn/router-utils",
     "@kbn/split-button",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/security-plugin",
+    "@kbn/navigation-customization-components",
+    "@kbn/usage-collection-plugin"
   ],
   "exclude": [
     "target/**/*",

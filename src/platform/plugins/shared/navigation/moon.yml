@@ -35,6 +35,9 @@ dependsOn:
   - '@kbn/router-utils'
   - '@kbn/split-button'
   - '@kbn/scout'
+  - '@kbn/security-plugin'
+  - '@kbn/navigation-customization-components'
+  - '@kbn/usage-collection-plugin'
 tags:
   - plugin
   - prod

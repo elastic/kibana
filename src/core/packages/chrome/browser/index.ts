@@ -47,6 +47,7 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  NavigationCustomization,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
   SolutionId,

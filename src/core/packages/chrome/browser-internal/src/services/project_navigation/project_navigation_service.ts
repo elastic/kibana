@@ -15,6 +15,7 @@ import type {
   ChromeProjectNavigationNode,
   ChromeNavLink,
   CloudURLs,
+  NavigationCustomization,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   CloudLinks,
@@ -58,10 +59,15 @@ interface ParsedNavigation {
   tree: ChromeProjectNavigationNode[];
   treeUI: NavigationTreeDefinitionUI;
   flattened: Record<string, ChromeProjectNavigationNode>;
+  overflowItemIds: string[];
 }
 
 export class ProjectNavigationService {
   private readonly stop$ = new ReplaySubject<void>(1);
+  private readonly customization$ = new BehaviorSubject<NavigationCustomization | undefined>(
+    undefined
+  );
+  private readonly customizeNavigationHandler$ = new BehaviorSubject<(() => void) | null>(null);
 
   constructor(private isServerless: boolean) {}
 
@@ -104,17 +110,54 @@ export class ProjectNavigationService {
     const parsedNavigation$: Observable<ParsedNavigation | null> = currentNavSource$.pipe(
       switchMap((source) => {
         if (!source) return of(null);
-        return combineLatest([source.navTreeDefinition$, deepLinksMap$, cloudLinks$]).pipe(
-          map(([def, deepLinks, links]) => {
-            const { navigationTree, navigationTreeUI } = parseNavigationTree(source.id, def, {
-              deepLinks,
-              cloudLinks: links,
-            });
+        return combineLatest([
+          source.navTreeDefinition$,
+          deepLinksMap$,
+          cloudLinks$,
+          this.customization$,
+        ]).pipe(
+          map(([def, deepLinks, links, customization]) => {
+            let { body } = def;
+            let overflowItemIds: string[] = [];
+
+            if (customization) {
+              const { order, hiddenIds } = customization;
+              overflowItemIds = hiddenIds;
+              const getId = (item: (typeof body)[number]) => item.id ?? item.link;
+              const orderSet = new Set<string | undefined>(order);
+              const itemMap = new Map(body.map((i) => [getId(i), i]));
+
+              // Items in the customized order, preserving the user's arrangement
+              const ordered = order.flatMap((id) => {
+                const item = itemMap.get(id);
+                return item ? [item] : [];
+              });
+
+              // New items (not in the customized order) inserted at their original position
+              const unordered = body
+                .map((item, i) => ({ item, originalIndex: i }))
+                .filter(({ item }) => !orderSet.has(getId(item)));
+
+              const result = [...ordered];
+              unordered.forEach(({ item, originalIndex }) => {
+                result.splice(Math.min(originalIndex, result.length), 0, item);
+              });
+
+              body = result;
+            }
+
+            const { navigationTree, navigationTreeUI } = parseNavigationTree(
+              source.id,
+              { ...def, body },
+              { deepLinks, cloudLinks: links }
+            );
+
             return {
               id: source.id,
               treeUI: navigationTreeUI,
               tree: navigationTree,
               flattened: flattenNav(navigationTree),
+              overflowItemIds,
             };
           }),
           catchError((err) => {
@@ -135,6 +178,7 @@ export class ProjectNavigationService {
           solutionId: parsed.id,
           navigationTree: parsed.treeUI,
           activeNodes: findActiveNodes(pathname, parsed.flattened, location, prependBasePath),
+          overflowItemIds: parsed.overflowItemIds,
         };
       }),
       distinctUntilChanged(deepEqual),
@@ -188,9 +232,11 @@ export class ProjectNavigationService {
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         id: SolutionId,
-        navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>
+        navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>,
+        options?: { customization?: NavigationCustomization }
       ) => {
         if (currentNavSource$.getValue()?.id === id) return;
+        this.customization$.next(options?.customization);
         currentNavSource$.next({
           id,
           navTreeDefinition$: navTreeDefinition$ as Observable<NavigationTreeDefinition>,
@@ -228,6 +274,12 @@ export class ProjectNavigationService {
       },
       getActiveSolutionNavId$: () => activeSolutionNavId$,
       getActiveSolutionNavId: () => currentNavSource$.getValue()?.id ?? null,
+      setNavigationCustomization: (customization: NavigationCustomization | undefined) =>
+        this.customization$.next(customization),
+      getCustomizeNavigationHandler$: () => this.customizeNavigationHandler$.asObservable(),
+      registerCustomizeNavigationHandler: (handler: () => void) => {
+        this.customizeNavigationHandler$.next(handler);
+      },
     };
   }
 

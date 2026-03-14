@@ -10465,6 +10465,41 @@
         }
       }
     },
+    "navigation_customization": {
+      "properties": {
+        "customizations": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "solution_type": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The solution type for this customization."
+                }
+              },
+              "hidden_items": {
+                "type": "array",
+                "items": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "List of navigation items hidden by the user."
+                  }
+                }
+              },
+              "order_of_items": {
+                "type": "array",
+                "items": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "List of navigation items in the user-defined order."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "sample-data": {
       "properties": {
         "installed": {

@@ -22,6 +22,7 @@ import type {
   NavigationServerStartDependencies,
 } from './types';
 import { getUiSettings } from './ui_settings';
+import { registerNavigationUsageCollector } from './collectors/register';
 
 export class NavigationServerPlugin
   implements
@@ -43,6 +44,10 @@ export class NavigationServerPlugin
     plugins: NavigationServerSetupDependencies
   ) {
     core.uiSettings.register(getUiSettings(core, plugins, this.logger));
+
+    if (plugins.usageCollection) {
+      registerNavigationUsageCollector(plugins.usageCollection);
+    }
 
     return {};
   }

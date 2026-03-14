@@ -1648,6 +1648,8 @@
       "@kbn/monitoring-plugin/*": ["x-pack/platform/plugins/private/monitoring/*"],
       "@kbn/moon": ["packages/kbn-moon"],
       "@kbn/moon/*": ["packages/kbn-moon/*"],
+      "@kbn/navigation-customization-components": ["src/platform/packages/shared/navigation-customization-components"],
+      "@kbn/navigation-customization-components/*": ["src/platform/packages/shared/navigation-customization-components/*"],
       "@kbn/navigation-plugin": ["src/platform/plugins/shared/navigation"],
       "@kbn/navigation-plugin/*": ["src/platform/plugins/shared/navigation/*"],
       "@kbn/newsfeed-plugin": ["src/platform/plugins/shared/newsfeed"],

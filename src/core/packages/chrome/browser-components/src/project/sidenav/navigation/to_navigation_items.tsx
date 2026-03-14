@@ -58,7 +58,8 @@ export interface NavigationItems {
 export const toNavigationItems = (
   navigationTree: NavigationTreeDefinitionUI,
   activeNodes: ChromeProjectNavigationNode[][],
-  panelStateManager: PanelStateManager
+  panelStateManager: PanelStateManager,
+  overflowItemIds: string[] = []
 ): NavigationItems => {
   // HACK: extract the logo, primary and footer nodes from the navigation tree
   let logoNode: ChromeProjectNavigationNode | null = null;
@@ -244,7 +245,10 @@ export const toNavigationItems = (
     } as MenuItem;
   };
 
-  const primaryItems = filterEmpty(primaryNodes.flatMap(toMenuItem));
+  const overflowIdSet = new Set(overflowItemIds);
+  const allPrimaryItems = filterEmpty(primaryNodes.flatMap(toMenuItem));
+  const primaryItems = allPrimaryItems.filter((item) => !overflowIdSet.has(item.id));
+  const overflowItems = allPrimaryItems.filter((item) => overflowIdSet.has(item.id));
   const footerItems = filterEmpty(footerNodes.flatMap(toMenuItem));
 
   if (footerItems.length > 5) {
@@ -266,7 +270,7 @@ export const toNavigationItems = (
 
   return {
     logoItem,
-    navItems: { primaryItems, footerItems },
+    navItems: { primaryItems, overflowItems, footerItems },
     activeItemId: deepestActiveItemId,
   };
 };

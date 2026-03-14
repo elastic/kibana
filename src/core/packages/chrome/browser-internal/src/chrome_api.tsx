@@ -59,15 +59,20 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
   const project: InternalChromeStart['project'] = {
     setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
     setKibanaName: projectNavigation.setKibanaName.bind(projectNavigation),
-    initNavigation: (id, navigationTree$) => {
+    initNavigation: (id, navigationTree$, options) => {
       validateProjectStyle();
-      projectNavigation.initNavigation(id, navigationTree$);
+      projectNavigation.initNavigation(id, navigationTree$, options);
     },
     getNavigation$: () => projectNavigation.getNavigation$(),
     setBreadcrumbs: (breadcrumbs, params) =>
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
     getProjectHome$: () => projectNavigation.getProjectHome$(),
+    setNavigationCustomization: (customization) =>
+      projectNavigation.setNavigationCustomization(customization),
+    getCustomizeNavigationHandler$: () => projectNavigation.getCustomizeNavigationHandler$(),
+    registerCustomizeNavigationHandler: (handler) =>
+      projectNavigation.registerCustomizeNavigationHandler(handler),
   };
 
   const chromeStart: InternalChromeStart = {
