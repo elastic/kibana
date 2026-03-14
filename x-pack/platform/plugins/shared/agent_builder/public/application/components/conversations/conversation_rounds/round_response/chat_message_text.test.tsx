@@ -8,6 +8,7 @@
 import React from 'react';
 import type { Node, Parent } from 'unist';
 import { act, render, screen } from '@testing-library/react';
+import { EMPTY } from 'rxjs';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
 import { cloneDeep } from 'lodash';
@@ -23,6 +24,7 @@ import { useConversationContext } from '../../../../context/conversation/convers
 import { useKibana } from '../../../../hooks/use_kibana';
 import { VisualizeESQL } from '../../../tools/esql/visualize_esql';
 import type { AgentBuilderStartDependencies } from '../../../../../types';
+import type { AgentBuilderInternalService } from '../../../../../services';
 import { setWith } from '@kbn/safer-lodash-set';
 import { ChartType } from '@kbn/visualization-utils';
 import { useResolveAnonymizedValues } from '@kbn/anonymization-ui';
@@ -118,6 +120,68 @@ function createStartDependencies() {
   } as AgentBuilderStartDependencies;
 }
 
+function createMockAgentBuilderServices(
+  hasAnonymizationEnabled: boolean = true
+): AgentBuilderInternalService {
+  return {
+    agentService: {},
+    attachmentsService: {
+      addAttachmentType: jest.fn(),
+      getAttachmentUiDefinition: jest.fn(),
+      hasAttachmentType: jest.fn(),
+      updateOrigin: jest.fn(),
+    },
+    chatService: {},
+    conversationsService: {},
+    docLinksService: {
+      agentBuilder: '',
+      getStarted: '',
+      models: '',
+      chat: '',
+      agentBuilderAgents: '',
+      tools: '',
+      programmaticAccess: '',
+      kibanaApi: '',
+      mcpServer: '',
+      a2aServer: '',
+      limitationsKnownIssues: '',
+      limitationsKnownIssuesConversationLengthExceeded: '',
+    },
+    navigationService: {
+      hasLicenseManagentLocator: jest.fn(),
+      navigateToLicenseManagementDashboard: jest.fn(),
+      navigateToLlmConnectorsManagement: jest.fn(),
+    },
+    toolsService: {},
+    skillsService: {
+      list: jest.fn(),
+      get: jest.fn(),
+      delete: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+    pluginsService: {
+      list: jest.fn(),
+      get: jest.fn(),
+      delete: jest.fn(),
+      installFromUrl: jest.fn(),
+      upload: jest.fn(),
+    },
+    startDependencies: createStartDependencies(),
+    accessChecker: {
+      getAccess: jest.fn(() => ({
+        hasRequiredLicense: true,
+        hasLlmConnector: true,
+        hasAnonymizationEnabled,
+      })),
+    },
+    eventsService: {
+      obs$: EMPTY,
+      propagateChatEvent: jest.fn(),
+    },
+  };
+}
+
 function getAST(markdown: string) {
   const processor = unified().use(remarkParse);
   const tree = processor.parse(markdown);
@@ -128,20 +192,7 @@ describe('chat_message_text', () => {
   beforeEach(() => {
     mockVisualizeESQL.mockClear();
     useResolveAnonymizedValuesMock.mockClear();
-    useAgentBuilderServicesMock.mockReturnValue({
-      agentService: {},
-      chatService: {},
-      conversationsService: {},
-      toolsService: {},
-      startDependencies: createStartDependencies(),
-      accessChecker: {
-        getAccess: jest.fn(() => ({
-          hasRequiredLicense: true,
-          hasLlmConnector: true,
-          hasAnonymizationEnabled: true,
-        })),
-      },
-    } as ReturnType<typeof useAgentBuilderServices>);
+    useAgentBuilderServicesMock.mockReturnValue(createMockAgentBuilderServices(true));
     useStepsFromPrevRoundsMock.mockReturnValue([]);
     useConversationContextMock.mockReturnValue({
       isEmbeddedContext: false,
@@ -488,20 +539,7 @@ Area Chart
     });
 
     it('does not enable replacements lookup when anonymization is disabled', () => {
-      useAgentBuilderServicesMock.mockReturnValue({
-        agentService: {},
-        chatService: {},
-        conversationsService: {},
-        toolsService: {},
-        startDependencies: createStartDependencies(),
-        accessChecker: {
-          getAccess: jest.fn(() => ({
-            hasRequiredLicense: true,
-            hasLlmConnector: true,
-            hasAnonymizationEnabled: false,
-          })),
-        },
-      } as ReturnType<typeof useAgentBuilderServices>);
+      useAgentBuilderServicesMock.mockReturnValue(createMockAgentBuilderServices(false));
 
       render(<ChatMessageText content="response" steps={[]} replacementsId="repl-1" />);
 
