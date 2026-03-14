@@ -35,6 +35,16 @@ const MockMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuCompone
   (_props, _ref) => <div />
 );
 
+const ClickableMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
+  ({ onSelect }, _ref) => (
+    <div>
+      <button data-test-subj="menuOption" onClick={() => onSelect('Summarize')}>
+        Summarize
+      </button>
+    </div>
+  )
+);
+
 const mockOnSubmit = jest.fn();
 
 const createMockMessageEditor = (): {
@@ -263,5 +273,34 @@ describe('MessageEditor', () => {
     );
 
     expect(screen.getByTestId('commandMenuPopover-content')).toBeInTheDocument();
+  });
+
+  it('calls handleCommandSelect when a menu option is clicked', () => {
+    const { messageEditor } = createMockMessageEditor();
+    messageEditor.commandMatch = {
+      isActive: true,
+      activeCommand: {
+        command: {
+          id: CommandId.Skill,
+          sequence: '/',
+          name: 'Skill',
+          menuComponent: ClickableMenuComponent,
+        },
+        commandStartOffset: 0,
+        query: '',
+      },
+    };
+
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('menuOption'));
+
+    expect(messageEditor.handleCommandSelect).toHaveBeenCalledWith('Summarize');
   });
 });

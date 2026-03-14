@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { createRef } from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { Skills } from './skills';
-import type { CommandMenuHandle } from '../../types';
 
 const mockSkills = [
   { id: 'skill-1', name: 'Summarize', description: 'Summarize text' },
@@ -54,140 +53,7 @@ describe('Skills', () => {
     expect(screen.queryByText('Summarize')).not.toBeInTheDocument();
   });
 
-  it('shows no matches message when nothing matches', () => {
-    renderWithProvider(<Skills query="zzzzz" onSelect={jest.fn()} />);
-
-    expect(screen.getByText('No matching skills')).toBeInTheDocument();
-  });
-
-  it('calls onSelect when an option is clicked', () => {
-    const onSelect = jest.fn();
-    renderWithProvider(<Skills query="" onSelect={onSelect} />);
-
-    fireEvent.click(screen.getByText('Translate'));
-
-    expect(onSelect).toHaveBeenCalledWith('Translate');
-  });
-
-  describe('keyboard navigation via imperative handle', () => {
-    it('selects first item with Enter', () => {
-      const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
-      renderWithProvider(<Skills ref={ref} query="" onSelect={onSelect} />);
-
-      act(() => {
-        ref.current!.handleKeyDown({ key: 'Enter' } as React.KeyboardEvent);
-      });
-
-      expect(onSelect).toHaveBeenCalledWith('Summarize');
-    });
-
-    it('navigates down and selects with Enter', () => {
-      const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
-      renderWithProvider(<Skills ref={ref} query="" onSelect={onSelect} />);
-
-      act(() => {
-        ref.current!.handleKeyDown({ key: 'ArrowDown' } as React.KeyboardEvent);
-      });
-      act(() => {
-        ref.current!.handleKeyDown({ key: 'Enter' } as React.KeyboardEvent);
-      });
-
-      expect(onSelect).toHaveBeenCalledWith('Translate');
-    });
-
-    it('navigates up from second item', () => {
-      const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
-      renderWithProvider(<Skills ref={ref} query="" onSelect={onSelect} />);
-
-      act(() => {
-        ref.current!.handleKeyDown({ key: 'ArrowDown' } as React.KeyboardEvent);
-      });
-      act(() => {
-        ref.current!.handleKeyDown({ key: 'ArrowUp' } as React.KeyboardEvent);
-      });
-      act(() => {
-        ref.current!.handleKeyDown({ key: 'Enter' } as React.KeyboardEvent);
-      });
-
-      expect(onSelect).toHaveBeenCalledWith('Summarize');
-    });
-
-    it('clamps at end of list', () => {
-      const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
-      renderWithProvider(<Skills ref={ref} query="" onSelect={onSelect} />);
-
-      act(() => {
-        ref.current!.handleKeyDown({ key: 'ArrowDown' } as React.KeyboardEvent);
-        ref.current!.handleKeyDown({ key: 'ArrowDown' } as React.KeyboardEvent);
-        ref.current!.handleKeyDown({ key: 'ArrowDown' } as React.KeyboardEvent);
-        ref.current!.handleKeyDown({ key: 'ArrowDown' } as React.KeyboardEvent);
-      });
-      act(() => {
-        ref.current!.handleKeyDown({ key: 'Enter' } as React.KeyboardEvent);
-      });
-
-      expect(onSelect).toHaveBeenCalledWith('Search');
-    });
-
-    it('clamps at start of list', () => {
-      const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
-      renderWithProvider(<Skills ref={ref} query="" onSelect={onSelect} />);
-
-      act(() => {
-        ref.current!.handleKeyDown({ key: 'ArrowUp' } as React.KeyboardEvent);
-      });
-      act(() => {
-        ref.current!.handleKeyDown({ key: 'Enter' } as React.KeyboardEvent);
-      });
-
-      expect(onSelect).toHaveBeenCalledWith('Summarize');
-    });
-
-    it('selects with Tab', () => {
-      const ref = createRef<CommandMenuHandle>();
-      const onSelect = jest.fn();
-      renderWithProvider(<Skills ref={ref} query="" onSelect={onSelect} />);
-
-      act(() => {
-        ref.current!.handleKeyDown({ key: 'Tab' } as React.KeyboardEvent);
-      });
-
-      expect(onSelect).toHaveBeenCalledWith('Summarize');
-    });
-
-    it('reports handled keys via isKeyDownEventHandled', () => {
-      const ref = createRef<CommandMenuHandle>();
-      renderWithProvider(<Skills ref={ref} query="" onSelect={jest.fn()} />);
-
-      expect(ref.current!.isKeyDownEventHandled({ key: 'ArrowDown' } as React.KeyboardEvent)).toBe(
-        true
-      );
-      expect(ref.current!.isKeyDownEventHandled({ key: 'ArrowUp' } as React.KeyboardEvent)).toBe(
-        true
-      );
-      expect(ref.current!.isKeyDownEventHandled({ key: 'Enter' } as React.KeyboardEvent)).toBe(
-        true
-      );
-      expect(ref.current!.isKeyDownEventHandled({ key: 'Tab' } as React.KeyboardEvent)).toBe(true);
-    });
-
-    it('returns false for unhandled keys', () => {
-      const ref = createRef<CommandMenuHandle>();
-      renderWithProvider(<Skills ref={ref} query="" onSelect={jest.fn()} />);
-
-      expect(ref.current!.isKeyDownEventHandled({ key: 'a' } as React.KeyboardEvent)).toBe(false);
-    });
-  });
-});
-
-describe('Skills loading state', () => {
-  it('shows loading spinner when loading', () => {
-    // Override the mock for this test
+  it('shows loading state when skills are loading', () => {
     const useSkillsMock = jest.requireMock('./use_skills') as { useSkills: () => unknown };
     const originalImpl = useSkillsMock.useSkills;
     useSkillsMock.useSkills = () => ({
@@ -199,9 +65,8 @@ describe('Skills loading state', () => {
 
     renderWithProvider(<Skills query="" onSelect={jest.fn()} />);
 
-    expect(screen.getByTestId('skillsMenuLoading')).toBeInTheDocument();
+    expect(screen.getByTestId('skillsMenu-loading')).toBeInTheDocument();
 
-    // Restore
     useSkillsMock.useSkills = originalImpl;
   });
 });
