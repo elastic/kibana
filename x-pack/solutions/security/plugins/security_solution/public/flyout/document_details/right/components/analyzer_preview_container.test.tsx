@@ -12,7 +12,11 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import {
+  ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID,
+  ANALYZER_PREVIEW_LOADING_TEST_ID,
+  ANALYZER_PREVIEW_TEST_ID,
+} from './test_ids';
 import {
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
@@ -40,6 +44,21 @@ jest.mock('../../../../data_view_manager/constants', () => {
     PageScope: {
       analyzer: 'analyzer',
     },
+  };
+});
+
+const mockUiSettingsGet = jest.fn();
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+    useKibana: () => ({
+      services: {
+        uiSettings: {
+          get: mockUiSettingsGet,
+        },
+      },
+    }),
   };
 });
 
@@ -103,7 +122,7 @@ const setExperimentalFeatureFlags = ({
 describe('AnalyzerPreviewContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
+    mockUiSettingsGet.mockReturnValue(true);
     (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     (useSourcererDataView as jest.Mock).mockReturnValue({
       selectedPatterns: ['old-analyzer-pattern'],
@@ -115,6 +134,27 @@ describe('AnalyzerPreviewContainer', () => {
         hasMatchedIndices: () => true,
       },
     });
+
+    mockNavigateToAnalyzer.mockClear();
+    mockAnalyzerPreview.mockClear();
+  });
+
+  it('should render excluded cold/frozen tiers badge when setting is enabled', () => {
+    const { getByTestId } = renderAnalyzerPreview();
+
+    expect(getByTestId(ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID)).toHaveTextContent(
+      'Cold/Frozen tiers off'
+    );
+  });
+
+  it('should render included cold/frozen tiers badge when setting is disabled', () => {
+    mockUiSettingsGet.mockReturnValue(false);
+
+    const { getByTestId } = renderAnalyzerPreview();
+
+    expect(getByTestId(ANALYZER_PREVIEW_COLD_FROZEN_TIER_BADGE_TEST_ID)).toHaveTextContent(
+      'Cold/Frozen tiers on'
+    );
   });
 
   describe('when newExpandableFlyoutNavigationDisabled is true', () => {
