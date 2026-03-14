@@ -17,3 +17,4 @@ export const OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID = 'observability.service';
 export const OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID = 'observability.slo';
 export const OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID = 'observability.host';
 export const OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID = 'observability.transaction';
+export const OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID = 'observability.monitor';
