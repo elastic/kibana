@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/reporting-export-types-csv'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/reporting-export-types-csv'
+  title: '@kbn/reporting-export-types-csv'
   description: Moon project for @kbn/reporting-export-types-csv
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-reporting/export_types/csv
+  sourceRoot: src/platform/packages/private/kbn-reporting/export_types/csv
 dependsOn:
   - '@kbn/core'
   - '@kbn/reporting-common'
@@ -43,14 +42,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
