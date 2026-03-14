@@ -12,6 +12,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../common/constants';
 import type { Verbs, OperationDetails } from './types';
@@ -318,6 +319,28 @@ const AttachmentOperations = {
   },
 };
 
+const READ_TEMPLATE_OPERATION: CasesSupportedOperations = 'readTemplate';
+const MANAGE_TEMPLATE_OPERATION: CasesSupportedOperations = 'manageTemplate';
+
+const TemplateOperations = {
+  [ReadOperations.GetAllTemplates]: {
+    ecsType: EVENT_TYPES.access,
+    name: READ_TEMPLATE_OPERATION,
+    action: 'case_template_get',
+    verbs: accessVerbs,
+    docType: 'templates',
+    savedObjectType: CASE_TEMPLATE_SAVED_OBJECT,
+  },
+  [WriteOperations.ManageTemplate]: {
+    ecsType: EVENT_TYPES.change,
+    name: MANAGE_TEMPLATE_OPERATION,
+    action: 'case_template_manage',
+    verbs: updateVerbs,
+    docType: 'template',
+    savedObjectType: CASE_TEMPLATE_SAVED_OBJECT,
+  },
+};
+
 /**
  * Definition of all APIs within the cases backend.
  */
@@ -325,6 +348,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
   ...CaseOperations,
   ...ConfigurationOperations,
   ...AttachmentOperations,
+  ...TemplateOperations,
   [ReadOperations.GetTags]: {
     ecsType: EVENT_TYPES.access,
     name: ReadOperations.GetTags as const,

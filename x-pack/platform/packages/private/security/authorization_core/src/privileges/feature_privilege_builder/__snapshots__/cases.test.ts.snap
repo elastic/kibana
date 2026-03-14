@@ -34,6 +34,13 @@ Array [
 ]
 `;
 
+exports[`cases feature_privilege_builder within feature grants manageTemplates privileges under feature with id securitySolution 1`] = `
+Array [
+  "cases:securitySolution/readTemplate",
+  "cases:securitySolution/manageTemplate",
+]
+`;
+
 exports[`cases feature_privilege_builder within feature grants delete privileges under feature with id securitySolution 1`] = `
 Array [
   "cases:securitySolution/deleteCase",
