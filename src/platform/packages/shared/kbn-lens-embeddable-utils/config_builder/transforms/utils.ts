@@ -106,8 +106,8 @@ export function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
-function generateAdHocDataViewId(dataView: APIAdHocDataView) {
-  return `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`;
+function generateAdHocDataViewId(dataView: Pick<APIAdHocDataView, 'index'>) {
+  return dataView.index;
 }
 
 function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
@@ -318,7 +318,7 @@ function buildDatasourceStatesLayer(
     const columns = getValueColumns(config, i);
 
     return {
-      index: datasetIndex.index,
+      index: generateAdHocDataViewId(datasetIndex),
       query: { esql: ds.query },
       timeField: datasetIndex.timeFieldName,
       columns,

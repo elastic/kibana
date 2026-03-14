@@ -204,14 +204,12 @@ export async function ensureESQLTimeFieldOnAdHocDataViews({
     const freshDataView = await getESQLAdHocDataview({
       dataViewsService,
       query: layer.query.esql,
-      options: { skipFetchFields: true },
+      options: { skipFetchFields: true, id: layer.index },
       http,
     });
     const spec = freshDataView.toSpec(false);
-    if (layer.index) {
-      spec.id = layer.index;
-      result[layer.index] = spec;
-    } else if (freshDataView.id) {
+
+    if (freshDataView.id) {
       result[freshDataView.id] = spec;
     }
   }
