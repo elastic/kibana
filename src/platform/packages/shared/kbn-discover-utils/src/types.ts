@@ -8,7 +8,6 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
 export type {
@@ -49,17 +48,6 @@ export interface DataTableRecord {
    */
   isAnchor?: boolean;
 }
-
-/**
- * Custom column types per column name
- */
-export type DataTableColumnsMeta = Record<
-  string,
-  {
-    type: DatatableColumnMeta['type'];
-    esType?: DatatableColumnMeta['esType'];
-  }
->;
 
 type FormattedHitPair = readonly [
   fieldDisplayName: string,

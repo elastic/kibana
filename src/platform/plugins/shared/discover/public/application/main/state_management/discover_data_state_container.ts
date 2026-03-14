@@ -26,10 +26,12 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import { createEsqlDataViewEnricher } from '@kbn/data-view-utils';
 import { isEqual, sortBy } from 'lodash';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverServices } from '../../../build_services';
@@ -72,6 +74,7 @@ export interface DataMainMsg extends DataMsg {
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
   esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
+  esqlDataView?: DataView; // enriched DataView clone with fields from ES|QL columns
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
 }
@@ -172,6 +175,7 @@ export function getDataStateContainer({
   const inspectorAdapters = { requests: new RequestAdapter() };
   const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails | null>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
+  const esqlDataViewEnricher = createEsqlDataViewEnricher();
   let numberOfFetches = 0;
   let unsubscribeIsRequested = false;
 
@@ -216,12 +220,17 @@ export function getDataStateContainer({
   /**
    * Subscribes to ES|QL fetches to handle state changes when loading or before a fetch completes
    */
-  const { esqlFetchSubscribe, cleanupEsql } = buildEsqlFetchSubscribe({
+  const { esqlFetchSubscribe, cleanupEsql: cleanupEsqlState } = buildEsqlFetchSubscribe({
     internalState,
     dataSubjects,
     getCurrentTab,
     injectCurrentTab,
   });
+
+  const cleanupEsql = () => {
+    cleanupEsqlState();
+    esqlDataViewEnricher.clear();
+  };
 
   // The main subscription to handle state changes
   dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
@@ -308,6 +317,7 @@ export function getDataStateContainer({
             scopedProfilesManager,
             scopedEbtManager,
             getCurrentTab,
+            esqlDataViewEnricher,
           };
 
           cancel(AbortReason.REPLACED);
@@ -459,11 +469,12 @@ export function getDataStateContainer({
                 return;
               }
 
-              const { esqlQueryColumns } = dataSubjects.documents$.getValue();
+              const { esqlQueryColumns, esqlDataView } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
               const postFetchStateUpdate = defaultProfileState?.getPostFetchState({
                 defaultColumns,
                 esqlQueryColumns,
+                esqlDataView,
               });
 
               if (postFetchStateUpdate) {
@@ -542,6 +553,7 @@ export function getDataStateContainer({
 
   const reset = () => {
     sendResetMsg(dataSubjects, getInitialFetchStatus());
+    esqlDataViewEnricher.clear();
   };
 
   const cancel = (reason: AbortReason = AbortReason.CANCELED) => {

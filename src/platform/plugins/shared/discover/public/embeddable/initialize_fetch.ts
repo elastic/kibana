@@ -11,6 +11,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, debounceTime, lastValueFrom, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
+import { createEsqlDataViewEnricher } from '@kbn/data-view-utils';
 import {
   buildDataTableRecordList,
   SEARCH_EMBEDDABLE_TYPE,
@@ -35,7 +36,6 @@ import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/in
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import type { DiscoverServices } from '../build_services';
@@ -145,6 +145,7 @@ export function initializeFetch({
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
+  const esqlDataViewEnricher = createEsqlDataViewEnricher();
 
   const observables = [fetch$(api), api.savedSearch$, api.dataViews$] as const;
 
@@ -223,10 +224,12 @@ export function initializeFetch({
               esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
               projectRouting: fetchContext.projectRouting,
             });
+
+            // Create enriched DataView with ES|QL column fields if available (memoized)
+            const esqlDataView = esqlDataViewEnricher.enrich(dataView, result.esqlQueryColumns);
+
             return {
-              columnsMeta: result.esqlQueryColumns
-                ? getTextBasedColumnsMeta(result.esqlQueryColumns)
-                : undefined,
+              esqlDataView,
               rows: result.records,
               hitCount: result.records.length,
               fetchContext,
@@ -291,12 +294,13 @@ export function initializeFetch({
 
       api.fetchWarnings$.next(next.warnings ?? []);
       api.fetchContext$.next(next.fetchContext);
-      if (Object.hasOwn(next, 'columnsMeta')) {
-        stateManager.columnsMeta.next(next.columnsMeta);
+      if (Object.hasOwn(next, 'esqlDataView')) {
+        stateManager.esqlDataView.next(next.esqlDataView);
       }
     });
 
   return () => {
     fetchSubscription.unsubscribe();
+    esqlDataViewEnricher.clear();
   };
 }

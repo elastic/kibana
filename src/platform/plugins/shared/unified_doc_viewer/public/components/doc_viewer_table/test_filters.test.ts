@@ -42,7 +42,6 @@ const rowExtensionKeyword = new FieldRow({
   dataView,
   fieldFormats: {} as FieldFormatsStart,
   isPinned: false,
-  columnsMeta: undefined,
 });
 const rowBytes = new FieldRow({
   name: 'bytes',
@@ -51,7 +50,6 @@ const rowBytes = new FieldRow({
   dataView,
   fieldFormats: {} as FieldFormatsStart,
   isPinned: false,
-  columnsMeta: undefined,
 });
 const rowTimestamp = new FieldRow({
   name: '@timestamp',
@@ -60,7 +58,6 @@ const rowTimestamp = new FieldRow({
   dataView,
   fieldFormats: {} as FieldFormatsStart,
   isPinned: false,
-  columnsMeta: undefined,
 });
 
 describe('useTableFilters', () => {

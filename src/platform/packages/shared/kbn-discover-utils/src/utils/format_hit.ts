@@ -10,13 +10,11 @@
 import { i18n } from '@kbn/i18n';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
   FormattedHit,
   EsHitRecord,
-  DataTableColumnsMeta,
 } from '../types';
 import { formatFieldValue } from './format_value';
 
@@ -39,19 +37,17 @@ const formattedHitCache = new WeakMap<
  * The value returned in each pair is an HTML string which is safe to be applied to the DOM, since
  * it's formatted using field formatters.
  * @param hit
- * @param dataView
+ * @param dataView - enriched DataView containing ES|QL fields if applicable
  * @param shouldShowFieldHandler
  * @param maxEntries
  * @param fieldFormats
- * @param columnsMeta
  */
 export function formatHit(
   hit: DataTableRecord,
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
-  fieldFormats: FieldFormatsStart,
-  columnsMeta: DataTableColumnsMeta | undefined
+  fieldFormats: FieldFormatsStart
 ): FormattedHit {
   const cached = formattedHitCache.get(hit.raw);
 
@@ -69,11 +65,7 @@ export function formatHit(
   // highlighted fields are shown first in the document summary.
   for (const key of Object.keys(flattened)) {
     // Retrieve the (display) name of the fields, if it's a mapped field on the data view
-    const field = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: key,
-      columnMeta: columnsMeta?.[key],
-    });
+    const field = dataView.getFieldByName(key);
     const displayKey = field?.displayName;
     const pairs = highlights[key] ? renderedPairs : otherPairs;
 
@@ -110,11 +102,7 @@ export function formatHit(
     const key = pair[2]!;
 
     // Format the raw value using the regular field formatters for that field
-    const field = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: key,
-      columnMeta: columnsMeta?.[key],
-    });
+    const field = dataView.getFieldByName(key);
     pair[1] = formatFieldValue(flattened[key], hit.raw, fieldFormats, dataView, field);
   }
 

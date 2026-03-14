@@ -219,7 +219,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await cell.getVisibleText()).to.be(NULL_LABEL);
         expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
-          'machine.ram_range',
+          'Unknown fieldmachine.ram_range',
         ]);
       });
 

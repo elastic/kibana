@@ -96,7 +96,6 @@ export const Content = ({
   isSingleLine = false,
   row,
   shouldShowFieldHandler,
-  columnsMeta,
 }: ContentProps) => {
   // Use OTel fallback version that returns the actual field name used
   const { field, value } = getMessageFieldWithFallbacks(row.flattened);
@@ -128,20 +127,13 @@ export const Content = ({
       shouldShowFieldHandler={shouldShowFieldHandler}
       isCompressed={isCompressed}
       row={row}
-      columnsMeta={columnsMeta}
     />
   );
 };
 
 type FormattedSourceDocumentProps = Pick<
   ContentProps,
-  | 'columnId'
-  | 'dataView'
-  | 'fieldFormats'
-  | 'isCompressed'
-  | 'row'
-  | 'shouldShowFieldHandler'
-  | 'columnsMeta'
+  'columnId' | 'dataView' | 'fieldFormats' | 'isCompressed' | 'row' | 'shouldShowFieldHandler'
 >;
 
 const FormattedSourceDocument = ({ row, ...props }: FormattedSourceDocumentProps) => {

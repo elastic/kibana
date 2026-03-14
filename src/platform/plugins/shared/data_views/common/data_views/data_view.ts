@@ -80,6 +80,43 @@ export class DataView extends AbstractDataView implements DataViewBase {
     this.fields.replaceAll(Object.values(spec.fields || {}));
   }
 
+  /**
+   * Clones this DataView and replaces its fields with the provided field specifications.
+   *
+   * This creates a new DataView instance with the same configuration (title, timeFieldName, etc.)
+   * but with a completely different set of fields. This is useful for scenarios like ES|QL mode
+   * where the query result columns may differ from the original index pattern fields.
+   *
+   * The cloned DataView reuses configuration from this DataView:
+   * - metaFields: Taken directly from this DataView (e.g., _source, _id)
+   * - shortDotsEnable: Taken directly from this DataView
+   * - fieldFormats: Taken directly from this DataView
+   * - timeFieldName: Cleared if the time field is not present in the provided fields
+   *
+   * @param fields - A record of field specifications keyed by field name
+   * @returns A new DataView instance with the provided fields
+   */
+  public cloneWithFields(fields: Record<string, FieldSpec>): DataView {
+    const baseSpec = this.toSpec(false);
+
+    const enrichedSpec: DataViewSpec = {
+      ...baseSpec,
+      fields,
+      // Clear timeFieldName if the time field is not in the provided fields
+      timeFieldName:
+        baseSpec.timeFieldName && fields[baseSpec.timeFieldName]
+          ? baseSpec.timeFieldName
+          : undefined,
+    };
+
+    return new DataView({
+      spec: enrichedSpec,
+      fieldFormats: this.fieldFormats,
+      shortDotsEnable: this.shortDotsEnable,
+      metaFields: this.metaFields,
+    });
+  }
+
   getScriptedFieldsForQuery() {
     return this.getScriptedFields().reduce((scriptFields, field) => {
       scriptFields[field.name] = {

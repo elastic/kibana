@@ -59,9 +59,11 @@ export const getDefaultProfileState = ({
     getPostFetchState: ({
       defaultColumns,
       esqlQueryColumns,
+      esqlDataView,
     }: {
       defaultColumns: string[];
       esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns'];
+      esqlDataView: DataDocumentsMsg['esqlDataView'];
     }) => {
       const stateUpdate: DiscoverAppState = {};
 
@@ -86,6 +88,16 @@ export const getDefaultProfileState = ({
 
           stateUpdate.grid = columns ? { columns } : undefined;
           stateUpdate.columns = validColumns.map(({ name }) => name);
+        }
+      }
+
+      if (resetDefaultProfileState.breakdownField && defaultState.breakdownField !== undefined) {
+        // For ES|QL mode, validate breakdown field against the enriched data view
+        // which contains fields from ES|QL columns. For data view mode, fall back
+        // to the original data view since esqlDataView is undefined in that case.
+        const effectiveDataView = esqlDataView ?? dataView;
+        if (effectiveDataView.fields.getByName(defaultState.breakdownField)) {
+          stateUpdate.breakdownField = defaultState.breakdownField;
         }
       }
 

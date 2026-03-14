@@ -13,6 +13,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { createEsqlDataViewEnricher } from '@kbn/data-view-utils';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import type {
@@ -28,7 +29,7 @@ import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mock
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState } from '../state_management/redux';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
 jest.mock('./fetch_documents', () => ({
@@ -91,6 +92,7 @@ describe('test fetchAll', () => {
       searchSource,
       services,
       getCurrentTab: toolkit.getCurrentTab,
+      esqlDataViewEnricher: createEsqlDataViewEnricher(),
     };
     mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
     mockfetchEsql.mockReset().mockResolvedValue({ records: [] });
@@ -257,6 +259,12 @@ describe('test fetchAll', () => {
       esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
     });
     const query = { esql: 'from foo' };
+
+    // Mock cloneWithFields method for ES|QL query to return a DataView instance
+    const clonedDataView = Object.create(DataView.prototype);
+    Object.assign(clonedDataView, dataViewMock);
+    dataViewMock.cloneWithFields = jest.fn(() => clonedDataView);
+
     deps.internalState.dispatch(
       internalStateActions.updateAppState({
         tabId: deps.getCurrentTab().id,
@@ -274,6 +282,7 @@ describe('test fetchAll', () => {
         interceptedWarnings: [],
         result: documents,
         esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
+        esqlDataView: expect.any(DataView),
         query,
       },
     ]);

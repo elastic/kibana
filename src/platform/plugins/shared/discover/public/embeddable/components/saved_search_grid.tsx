@@ -15,7 +15,6 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
   type UnifiedDataTableProps,
-  type DataTableColumnsMeta,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
@@ -73,8 +72,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      expandedDocSetter: NonNullable<UnifiedDataTableProps['setExpandedDoc']>,
-      customColumnsMeta?: DataTableColumnsMeta
+      expandedDocSetter: NonNullable<UnifiedDataTableProps['setExpandedDoc']>
     ) => (
       <DiscoverGridFlyout
         dataView={props.dataView}
@@ -82,7 +80,6 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
         savedSearchId={props.savedSearchId}
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}

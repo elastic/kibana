@@ -61,7 +61,6 @@ const renderCell = (serviceNameField: string, record: DataTableRecord) => {
       fieldFormats={fieldFormatsMock}
       setCellProps={() => {}}
       closePopover={() => {}}
-      columnsMeta={undefined}
     />
   );
 };

@@ -82,7 +82,7 @@ export function SearchEmbeddableGridComponent({
     fetchContext,
     rows,
     totalHitCount,
-    columnsMeta,
+    esqlDataView,
     grid,
     panelTitle,
     panelDescription,
@@ -99,7 +99,7 @@ export function SearchEmbeddableGridComponent({
     api.fetchContext$,
     stateManager.rows,
     stateManager.totalHitCount,
-    stateManager.columnsMeta,
+    stateManager.esqlDataView,
     stateManager.grid,
     api.title$,
     api.description$,
@@ -115,6 +115,9 @@ export function SearchEmbeddableGridComponent({
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
 
+  // Use enriched ES|QL DataView with fields from query columns when available
+  const gridDataView = useMemo(() => esqlDataView ?? dataView, [esqlDataView, dataView]);
+
   const sort = useMemo(
     () => getSortArray(savedSearch.sort ?? [], dataView, isEsql),
     [dataView, isEsql, savedSearch.sort]
@@ -123,11 +126,11 @@ export function SearchEmbeddableGridComponent({
   const originalColumns = useMemo(() => {
     return replaceColumnsWithVariableDriven(
       savedSearch.columns,
-      columnsMeta,
+      esqlDataView,
       esqlVariables,
       isEsql
     );
-  }, [columnsMeta, isEsql, esqlVariables, savedSearch.columns]);
+  }, [esqlDataView, isEsql, esqlVariables, savedSearch.columns]);
 
   const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
     capabilities: discoverServices.capabilities,
@@ -161,7 +164,7 @@ export function SearchEmbeddableGridComponent({
 
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
-    dataView,
+    dataView: gridDataView,
     query: savedSearchQuery,
     filters: savedSearchFilters,
     timeRange,
@@ -231,7 +234,7 @@ export function SearchEmbeddableGridComponent({
       {...onStateEditedProps}
       onUpdateSampleSize={isEsql ? undefined : onStateEditedProps.onUpdateSampleSize}
       columns={columns}
-      dataView={dataView}
+      dataView={gridDataView}
       interceptedWarnings={interceptedWarnings}
       onFilter={onAddFilter}
       rows={rows}
@@ -249,7 +252,6 @@ export function SearchEmbeddableGridComponent({
       }
       cellActionsMetadata={isInSecuritySolution ? undefined : cellActionsMetadata}
       cellActionsHandling={isInSecuritySolution ? 'replace' : 'append'}
-      columnsMeta={columnsMeta}
       configHeaderRowHeight={defaults.headerRowHeight}
       configRowHeight={defaults.rowHeight}
       headerRowHeightState={savedSearch.headerRowHeight}

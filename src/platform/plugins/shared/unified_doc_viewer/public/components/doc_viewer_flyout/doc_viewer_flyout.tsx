@@ -25,7 +25,7 @@ import {
   isDOMNode,
   EuiSpacer,
 } from '@elastic/eui';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import useObservable from 'react-use/lib/useObservable';
@@ -57,7 +57,6 @@ export interface UnifiedDocViewerFlyoutProps
   docViewsRegistry?: DocViewRenderProps['docViewsRegistry'];
   isEsqlQuery: boolean;
   columns: string[];
-  columnsMeta?: DataTableColumnsMeta;
   hit: DataTableRecord;
   hits?: DataTableRecord[];
   dataView: DataView;
@@ -96,7 +95,6 @@ export function UnifiedDocViewerFlyout({
   docViewsRegistry,
   isEsqlQuery,
   columns,
-  columnsMeta,
   hit,
   hits,
   dataView,
@@ -219,7 +217,6 @@ export function UnifiedDocViewerFlyout({
       hit: actualHit,
       dataView,
       columns,
-      columnsMeta,
       textBasedHits: isEsqlQuery ? hits : undefined,
       filter: onFilter,
       onAddColumn: addColumn,
@@ -234,7 +231,6 @@ export function UnifiedDocViewerFlyout({
       actualHit,
       dataView,
       columns,
-      columnsMeta,
       isEsqlQuery,
       hits,
       onFilter,

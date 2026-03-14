@@ -100,6 +100,7 @@ describe('getDefaultProfileState', () => {
       }).getPostFetchState({
         defaultColumns: ['messsage', 'bytes'],
         esqlQueryColumns: undefined,
+        esqlDataView: undefined,
       });
       expect(appState).toEqual({
         columns: ['message', 'extension', 'bytes'],
@@ -130,6 +131,7 @@ describe('getDefaultProfileState', () => {
           { id: '1', name: 'foo', meta: { type: 'string' } },
           { id: '2', name: 'bar', meta: { type: 'string' } },
         ],
+        esqlDataView: undefined,
       });
       expect(appState).toEqual({
         columns: ['foo', 'bar'],
@@ -157,6 +159,7 @@ describe('getDefaultProfileState', () => {
       }).getPostFetchState({
         defaultColumns: [],
         esqlQueryColumns: undefined,
+        esqlDataView: undefined,
       });
       expect(appState).toEqual({
         rowHeight: 3,
@@ -177,8 +180,44 @@ describe('getDefaultProfileState', () => {
       }).getPostFetchState({
         defaultColumns: [],
         esqlQueryColumns: undefined,
+        esqlDataView: undefined,
       });
       expect(appState).toEqual(undefined);
+    });
+
+    it('should return breakdownField from enriched esqlDataView', () => {
+      // Create a data view with the breakdown field
+      const dataViewWithBreakdownField = buildDataViewMock({
+        name: 'dataViewWithBreakdownField',
+        fields: fieldList([
+          {
+            name: 'extension',
+            type: 'string',
+            esTypes: ['keyword'],
+            aggregatable: true,
+            searchable: true,
+          },
+        ]),
+      });
+
+      const appState = getDefaultProfileState({
+        scopedProfilesManager,
+        resetDefaultProfileState: {
+          resetId: 'test',
+          columns: false,
+          rowHeight: false,
+          breakdownField: true,
+          hideChart: false,
+        },
+        dataView: emptyDataView, // Original data view doesn't have the field
+      }).getPostFetchState({
+        defaultColumns: [],
+        esqlQueryColumns: undefined,
+        esqlDataView: dataViewWithBreakdownField, // Enriched data view has the field
+      });
+      expect(appState).toEqual({
+        breakdownField: 'extension',
+      });
     });
   });
 });

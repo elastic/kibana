@@ -43,14 +43,7 @@ export interface TableFieldConfiguration {
 export interface ContentFrameworkTableProps
   extends Pick<
     DocViewRenderProps,
-    | 'hit'
-    | 'dataView'
-    | 'columnsMeta'
-    | 'textBasedHits'
-    | 'filter'
-    | 'onAddColumn'
-    | 'onRemoveColumn'
-    | 'columns'
+    'hit' | 'dataView' | 'textBasedHits' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
   > {
   fieldNames: string[];
   fieldConfigurations?: Record<string, FieldConfiguration>;
@@ -130,7 +123,6 @@ export function ContentFrameworkTable({
               dataView,
               fieldFormats,
               isPinned: false,
-              columnsMeta: {},
             })
           );
 

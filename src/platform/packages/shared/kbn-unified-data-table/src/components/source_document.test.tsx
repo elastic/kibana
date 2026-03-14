@@ -10,7 +10,6 @@
 import {
   dataViewMock,
   createDataViewWithBytesField,
-  columnsMetaOverridingBytesType,
   createFormatFieldValueSpy,
   expectFieldCallToMatch,
 } from '@kbn/discover-utils/src/__mocks__';
@@ -56,7 +55,6 @@ describe('Unified data table source document cell rendering', function () {
         shouldShowFieldHandler={() => false}
         maxEntries={100}
         isPlainRecord={true}
-        columnsMeta={undefined}
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
@@ -87,7 +85,6 @@ describe('Unified data table source document cell rendering', function () {
         shouldShowFieldHandler={() => true}
         maxEntries={100}
         isPlainRecord={true}
-        columnsMeta={undefined}
       />
     );
 
@@ -95,8 +92,8 @@ describe('Unified data table source document cell rendering', function () {
     expect(component.html()).toContain('my bar value');
   });
 
-  describe('with columnsMeta', () => {
-    it('should use data view field type when columnsMeta is undefined', () => {
+  describe('with enriched DataView (ES|QL mode)', () => {
+    it('should use data view field type from original data view', () => {
       const formatFieldValueSpy = createFormatFieldValueSpy();
       const testDataView = createDataViewWithBytesField();
 
@@ -120,7 +117,6 @@ describe('Unified data table source document cell rendering', function () {
           shouldShowFieldHandler={() => true}
           maxEntries={100}
           isPlainRecord={true}
-          columnsMeta={undefined}
         />
       );
 
@@ -128,9 +124,23 @@ describe('Unified data table source document cell rendering', function () {
       formatFieldValueSpy.mockRestore();
     });
 
-    it('should use columnsMeta type instead of data view field type when provided', () => {
+    it('should use enriched field type when DataView has ES|QL overridden field', () => {
       const formatFieldValueSpy = createFormatFieldValueSpy();
+      // Create a DataView where bytes is enriched as string/keyword (simulating ES|QL)
       const testDataView = createDataViewWithBytesField();
+      // Mock the field to return string type instead
+      testDataView.fields.getByName = jest.fn((name: string) => {
+        if (name === 'bytes') {
+          return {
+            name: 'bytes',
+            type: 'string',
+            esTypes: ['keyword'],
+            searchable: true,
+            aggregatable: true,
+          } as any;
+        }
+        return testDataView.fields.find((f) => f.name === name);
+      });
 
       const row = buildDataTableRecord(
         {
@@ -152,7 +162,6 @@ describe('Unified data table source document cell rendering', function () {
           shouldShowFieldHandler={() => true}
           maxEntries={100}
           isPlainRecord={true}
-          columnsMeta={columnsMetaOverridingBytesType}
         />
       );
 

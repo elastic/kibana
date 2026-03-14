@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { getVisibleColumns } from '@kbn/discover-utils';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { deserializeHeaderRowHeight, getEuiGridColumns } from './data_table_columns';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { dataTableContextMock } from '../../__mocks__/table_context';
@@ -23,6 +22,24 @@ const columnsWithTimeCol = getVisibleColumns(
   dataViewWithTimefieldMock,
   true
 ) as string[];
+
+/**
+ * Helper to sanitize grid columns for snapshot testing by removing
+ * DataView references and function references that bloat snapshots
+ */
+const simplifyGridColumnsForSnapshot = (gridColumns: any[]) => {
+  return gridColumns.map((col) => ({
+    ...col,
+    // Keep only essential properties, exclude functions that bloat snapshots
+    // Keep display but sanitize it to remove DataView props
+    display: col.display
+      ? React.cloneElement(col.display, {
+          ...col.display.props,
+          dataView: col.display.props?.dataView ? '[DataView]' : undefined,
+        })
+      : undefined,
+  }));
+};
 
 describe('Data table columns', function () {
   describe('getEuiGridColumns', () => {
@@ -47,7 +64,7 @@ describe('Data table columns', function () {
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(actual).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(actual)).toMatchSnapshot();
     });
 
     it('returns eui grid columns with time column', async () => {
@@ -71,7 +88,7 @@ describe('Data table columns', function () {
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(actual).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(actual)).toMatchSnapshot();
     });
 
     it('returns eui grid with in memory sorting', async () => {
@@ -92,15 +109,10 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-          timestamp: { type: 'date', esType: 'dateTime' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(actual).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(actual)).toMatchSnapshot();
     });
 
     describe('cell actions', () => {
@@ -123,11 +135,6 @@ describe('Data table columns', function () {
           hasEditDataViewPermission: () =>
             servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
           onFilter: () => {},
-          columnsMeta: {
-            extension: { type: 'string' },
-            message: { type: 'string', esType: 'keyword' },
-            timestamp: { type: 'date', esType: 'dateTime' },
-          },
           onResize: () => {},
           columnsCellActions: [[cellAction]],
           cellActionsHandling: 'replace',
@@ -154,11 +161,6 @@ describe('Data table columns', function () {
           hasEditDataViewPermission: () =>
             servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
           onFilter: () => {},
-          columnsMeta: {
-            extension: { type: 'string' },
-            message: { type: 'string', esType: 'keyword' },
-            timestamp: { type: 'date', esType: 'dateTime' },
-          },
           onResize: () => {},
           columnsCellActions: [[cellAction]],
           cellActionsHandling: 'append',
@@ -197,16 +199,12 @@ describe('Data table columns', function () {
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(actual).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(actual)).toMatchSnapshot();
     });
 
     it('returns eui grid columns with tokens for custom column types', async () => {
       const actual = getEuiGridColumns({
         showColumnTokens: true,
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-        },
         columns,
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -226,7 +224,7 @@ describe('Data table columns', function () {
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(actual).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(actual)).toMatchSnapshot();
     });
   });
 
@@ -254,9 +252,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          extension: { type: 'string' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -282,9 +277,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          'geo.coordinates': { type: 'geo_point' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -292,9 +284,9 @@ describe('Data table columns', function () {
       expect(gridColumns[0].isSortable).toBe(false);
     });
 
-    it('should allow sorting on version columns', async () => {
+    it('should allow sorting on date columns', async () => {
       const gridColumns = getEuiGridColumns({
-        columns: ['stack_version'],
+        columns: ['timestamp'],
         settings: {},
         dataView: dataViewWithTimefieldMock,
         defaultColumns: false,
@@ -310,19 +302,16 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          stack_version: { type: 'version' as DatatableColumnType },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(gridColumns[0].schema).toBe(kibanaJSON);
+      expect(gridColumns[0].schema).toBe('datetime');
       expect(gridColumns[0].isSortable).toBe(true);
     });
 
-    it('should allow sorting on ip columns', async () => {
+    it('should allow sorting on number columns', async () => {
       const gridColumns = getEuiGridColumns({
-        columns: ['ip_address'],
+        columns: ['bytes'],
         settings: {},
         dataView: dataViewWithTimefieldMock,
         defaultColumns: false,
@@ -338,9 +327,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          ip_address: { type: 'ip' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -348,14 +334,14 @@ describe('Data table columns', function () {
       expect(gridColumns[0].isSortable).toBe(true);
     });
 
-    it('returns eui grid with in memory sorting for text based languages and columns not on the columnsMeta', async () => {
-      const columnsNotInDataview = getVisibleColumns(
-        ['var_test'],
+    it('returns eui grid with in memory sorting for text based languages and columns in the dataview', async () => {
+      const columnsInDataview = getVisibleColumns(
+        ['extension'],
         dataViewWithTimefieldMock,
         true
       ) as string[];
       const gridColumns = getEuiGridColumns({
-        columns: columnsNotInDataview,
+        columns: columnsInDataview,
         settings: {},
         dataView: dataViewWithTimefieldMock,
         defaultColumns: false,
@@ -371,14 +357,100 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          var_test: { type: 'number' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(gridColumns[1].schema).toBe('numeric');
-      expect(gridColumns[1].isSortable).toBe(true);
+      expect(gridColumns[0].isSortable).toBe(true);
+    });
+
+    it('should use type override from enriched DataView for ES|QL (e.g., IP field)', async () => {
+      // Create an enriched DataView where 'clientip' is an IP field (specialized ES|QL type)
+      const enrichedDataView = {
+        ...dataViewWithTimefieldMock,
+        getFieldByName: (fieldName: string) => {
+          if (fieldName === 'clientip') {
+            return {
+              name: 'clientip',
+              type: 'ip',
+              esTypes: ['ip'],
+              searchable: true,
+              aggregatable: true,
+            };
+          }
+          return dataViewWithTimefieldMock.getFieldByName(fieldName);
+        },
+        fields: dataViewWithTimefieldMock.fields,
+      };
+
+      const gridColumns = getEuiGridColumns({
+        columns: ['clientip'],
+        settings: {},
+        dataView: enrichedDataView as any,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        onResize: () => {},
+        cellActionsHandling: 'replace',
+      });
+
+      // IP fields should be sortable and use 'numeric' schema (see getSchemaByKbnType)
+      expect(gridColumns[0].schema).toBe('numeric');
+      expect(gridColumns[0].isSortable).toBe(true);
+    });
+
+    it('should use type override from enriched DataView for ES|QL (version field)', async () => {
+      // Create an enriched DataView where 'app_version' is a version field
+      const enrichedDataView = {
+        ...dataViewWithTimefieldMock,
+        getFieldByName: (fieldName: string) => {
+          if (fieldName === 'app_version') {
+            return {
+              name: 'app_version',
+              type: 'string',
+              esTypes: ['version'],
+              searchable: true,
+              aggregatable: true,
+            };
+          }
+          return dataViewWithTimefieldMock.getFieldByName(fieldName);
+        },
+        fields: dataViewWithTimefieldMock.fields,
+      };
+
+      const gridColumns = getEuiGridColumns({
+        columns: ['app_version'],
+        settings: {},
+        dataView: enrichedDataView as any,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        onResize: () => {},
+        cellActionsHandling: 'replace',
+      });
+
+      // Version fields should be sortable and use 'string' schema
+      expect(gridColumns[0].schema).toBe('string');
+      expect(gridColumns[0].isSortable).toBe(true);
     });
 
     it('returns columns in correct format when column customisation is provided', async () => {
@@ -399,10 +471,6 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
@@ -431,15 +499,11 @@ describe('Data table columns', function () {
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
         customGridColumnsConfiguration,
-        columnsMeta: {
-          extension: { type: 'string' },
-          message: { type: 'string', esType: 'keyword' },
-        },
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
 
-      expect(customizedGridColumns).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(customizedGridColumns)).toMatchSnapshot();
     });
   });
 
@@ -465,7 +529,7 @@ describe('Data table columns', function () {
         onResize: () => {},
         cellActionsHandling: 'replace',
       });
-      expect(actual).toMatchSnapshot();
+      expect(simplifyGridColumnsForSnapshot(actual)).toMatchSnapshot();
     });
   });
 

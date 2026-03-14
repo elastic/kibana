@@ -36,7 +36,6 @@ export interface AttributeField {
 
 export function AttributesOverview({
   columns,
-  columnsMeta,
   hit,
   dataView,
   textBasedHits,
@@ -236,7 +235,6 @@ export function AttributesOverview({
                     hit={hit}
                     dataView={dataView}
                     columns={columns}
-                    columnsMeta={columnsMeta}
                     searchTerm={searchTerm}
                     onAddColumn={onAddColumn}
                     onRemoveColumn={onRemoveColumn}

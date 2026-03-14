@@ -58,7 +58,6 @@ const buildFieldRow = (name: string, value: string) => {
     }),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     isPinned: false,
-    columnsMeta: {},
   });
 };
 

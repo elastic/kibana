@@ -7,17 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { replaceColumnsWithVariableDriven } from './replace_columns_with_variable_driven';
+import { fieldList } from '@kbn/data-views-plugin/common';
+import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 describe('replaceColumnsWithVariableDriven', () => {
-  const mockColumnsMeta: Record<string, DatatableColumnMeta> = {
-    timestamp: { type: 'date' },
-    message: { type: 'string' },
-    host: { type: 'string' },
-    variableColumn: { type: 'string' },
-  };
+  const mockEsqlDataView = buildDataViewMock({
+    name: 'test-esql-data-view',
+    fields: fieldList([
+      { name: 'timestamp', type: 'date', searchable: true, aggregatable: true, scripted: false },
+      { name: 'message', type: 'string', searchable: true, aggregatable: false, scripted: false },
+      { name: 'host', type: 'string', searchable: true, aggregatable: true, scripted: false },
+      {
+        name: 'variableColumn',
+        type: 'string',
+        searchable: true,
+        aggregatable: true,
+        scripted: false,
+      },
+    ]),
+  });
 
   const mockEsqlVariables: ESQLControlVariable[] = [
     { key: 'field', value: 'variableColumn', type: ESQLVariableType.FIELDS },
@@ -30,7 +40,7 @@ describe('replaceColumnsWithVariableDriven', () => {
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockEsqlDataView,
         mockEsqlVariables,
         false
       );
@@ -39,8 +49,8 @@ describe('replaceColumnsWithVariableDriven', () => {
     });
   });
 
-  describe('when columnsMeta is not provided', () => {
-    it('should return original columns when columnsMeta is undefined', () => {
+  describe('when esqlDataView is not provided', () => {
+    it('should return original columns when esqlDataView is undefined', () => {
       const savedSearchColumns = ['timestamp', 'message'];
 
       const result = replaceColumnsWithVariableDriven(
@@ -56,30 +66,32 @@ describe('replaceColumnsWithVariableDriven', () => {
 
   describe('when no variable-driven columns exist', () => {
     it('should return original columns when no columns match ESQL variables', () => {
-      const columnsMetaWithoutVariables: Record<string, DatatableColumnMeta> = {
-        timestamp: { type: 'date' },
-        message: { type: 'string' },
-        host: { type: 'string' },
-      };
+      const dataViewWithoutVariables = buildDataViewMock({
+        name: 'test-data-view',
+        fields: fieldList([
+          {
+            name: 'timestamp',
+            type: 'date',
+            searchable: true,
+            aggregatable: true,
+            scripted: false,
+          },
+          {
+            name: 'message',
+            type: 'string',
+            searchable: true,
+            aggregatable: false,
+            scripted: false,
+          },
+          { name: 'host', type: 'string', searchable: true, aggregatable: true, scripted: false },
+        ]),
+      });
       const savedSearchColumns = ['timestamp', 'message'];
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        columnsMetaWithoutVariables,
+        dataViewWithoutVariables,
         mockEsqlVariables,
-        true
-      );
-
-      expect(result).toEqual(savedSearchColumns);
-    });
-
-    it('should return original columns when esqlVariables is undefined', () => {
-      const savedSearchColumns = ['timestamp', 'message'];
-
-      const result = replaceColumnsWithVariableDriven(
-        savedSearchColumns,
-        mockColumnsMeta,
-        undefined,
         true
       );
 
@@ -89,24 +101,24 @@ describe('replaceColumnsWithVariableDriven', () => {
 
   describe('when variable-driven columns exist', () => {
     it('should replace non-existent columns with variable-driven column', () => {
-      const savedSearchColumns = ['timestamp', 'nonExistentColumn', 'message'];
+      const savedSearchColumns = ['timestamp', 'message', 'nonExistentColumn'];
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockEsqlDataView,
         mockEsqlVariables,
         true
       );
 
-      expect(result).toEqual(['timestamp', 'variableColumn', 'message']);
+      expect(result).toEqual(['timestamp', 'message', 'variableColumn']);
     });
 
-    it('should keep existing columns that are present in columnsMeta', () => {
+    it('should not replace columns that exist in current request', () => {
       const savedSearchColumns = ['timestamp', 'message', 'host'];
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockEsqlDataView,
         mockEsqlVariables,
         true
       );
@@ -114,18 +126,30 @@ describe('replaceColumnsWithVariableDriven', () => {
       expect(result).toEqual(['timestamp', 'message', 'host']);
     });
 
-    it('should remove duplicates from the final result', () => {
-      const savedSearchColumns = ['nonExistent1', 'nonExistent2', 'timestamp'];
+    it('should remove duplicates when multiple columns are replaced', () => {
+      const savedSearchColumns = ['timestamp', 'nonExistent1', 'nonExistent2', 'message'];
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockEsqlDataView,
         mockEsqlVariables,
         true
       );
 
-      // Both non-existent columns get replaced with 'variableColumn', but duplicates are removed
-      expect(result).toEqual(['variableColumn', 'timestamp']);
+      // Both nonExistent1 and nonExistent2 would be replaced with variableColumn,
+      // but only one should remain after deduplication
+      expect(result).toEqual(['timestamp', 'variableColumn', 'message']);
+    });
+
+    it('should handle empty savedSearchColumns', () => {
+      const result = replaceColumnsWithVariableDriven(
+        [],
+        mockEsqlDataView,
+        mockEsqlVariables,
+        true
+      );
+
+      expect(result).toEqual([]);
     });
   });
 });

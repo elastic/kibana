@@ -10,9 +10,6 @@
 import {
   dataViewMock,
   createDataViewWithBytesField,
-  createDataViewWithoutCustomField,
-  columnsMetaOverridingBytesType,
-  columnsMetaWithCustomField,
   createFormatFieldValueSpy,
   expectFieldCallToMatch,
 } from '../__mocks__';
@@ -20,6 +17,8 @@ import { formatHit } from './format_hit';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { DataTableRecord, EsHitRecord } from '../types';
 import { buildDataTableRecord } from './build_data_record';
+import { fieldList } from '@kbn/data-views-plugin/common';
+import { buildDataViewMock } from '../__mocks__/data_view';
 
 describe('formatHit', () => {
   let row: DataTableRecord;
@@ -47,8 +46,7 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       220,
-      fieldFormatsMock,
-      undefined
+      fieldFormatsMock
     );
     expect(formatted).toEqual([
       ['extension', 'formatted:png', 'extension'],
@@ -73,8 +71,7 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       220,
-      fieldFormatsMock,
-      undefined
+      fieldFormatsMock
     );
     expect(formatted.map(([fieldName]) => fieldName)).toEqual([
       'message',
@@ -91,8 +88,7 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       2,
-      fieldFormatsMock,
-      undefined
+      fieldFormatsMock
     );
     expect(formatted).toEqual([
       ['extension', 'formatted:png', 'extension'],
@@ -107,8 +103,7 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['_index', 'message', 'object.value'].includes(fieldName),
       220,
-      fieldFormatsMock,
-      undefined
+      fieldFormatsMock
     );
     expect(formatted).toEqual([
       ['message', 'formatted:foobar', 'message'],
@@ -137,8 +132,7 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['_index', 'object'].includes(fieldName),
       220,
-      fieldFormatsMock,
-      undefined
+      fieldFormatsMock
     );
 
     expect(formatted).toEqual([
@@ -155,8 +149,7 @@ describe('formatHit', () => {
       dataViewMock,
       (fieldName) => ['_index', 'bytes'].includes(fieldName),
       220,
-      fieldFormatsMock,
-      undefined
+      fieldFormatsMock
     );
     expect(formatted).toEqual([
       ['bytesDisplayName', 'formatted:123', 'bytes'],
@@ -165,7 +158,7 @@ describe('formatHit', () => {
     ]);
   });
 
-  describe('with columnsMeta', () => {
+  describe('with enriched DataView', () => {
     let formatFieldValueSpy: jest.SpyInstance;
 
     beforeEach(() => {
@@ -176,52 +169,78 @@ describe('formatHit', () => {
       formatFieldValueSpy.mockRestore();
     });
 
-    it('should pass data view field to formatFieldValue when columnsMeta is undefined', () => {
+    it('should pass data view field to formatFieldValue', () => {
       const testDataView = createDataViewWithBytesField();
       const testHit = buildDataTableRecord(
         { _id: '1', _index: 'logs', fields: { bytes: [100] } },
         testDataView
       );
 
-      formatHit(testHit, testDataView, () => true, 220, fieldFormatsMock, undefined);
+      formatHit(testHit, testDataView, () => true, 220, fieldFormatsMock);
 
       expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'number');
     });
 
-    it('should pass field with columnsMeta type to formatFieldValue when types differ', () => {
-      const testDataView = createDataViewWithBytesField();
+    it('should pass enriched field type when DataView has different type (ES|QL mode)', () => {
+      // In ES|QL mode, the DataView will be enriched with fields from query results
+      const enrichedDataView = buildDataViewMock({
+        name: 'test-data-view',
+        fields: fieldList([
+          {
+            name: '_index',
+            type: 'string',
+            scripted: false,
+            searchable: true,
+            aggregatable: false,
+          },
+          {
+            name: 'bytes',
+            type: 'string',
+            esTypes: ['keyword'],
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+          },
+        ]),
+      });
       const testHit = buildDataTableRecord(
         { _id: '1', _index: 'logs', fields: { bytes: ['100'] } },
-        testDataView
+        enrichedDataView
       );
 
-      formatHit(
-        testHit,
-        testDataView,
-        () => true,
-        220,
-        fieldFormatsMock,
-        columnsMetaOverridingBytesType
-      );
+      formatHit(testHit, enrichedDataView, () => true, 220, fieldFormatsMock);
 
       expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'string', ['keyword']);
     });
 
-    it('should pass field created from columnsMeta to formatFieldValue for fields not in data view', () => {
-      const testDataView = createDataViewWithoutCustomField();
+    it('should pass enriched field for ES|QL computed fields not in original data view', () => {
+      // In ES|QL mode, the DataView will be enriched with computed fields
+      const enrichedDataView = buildDataViewMock({
+        name: 'test-data-view',
+        fields: fieldList([
+          {
+            name: '_index',
+            type: 'string',
+            scripted: false,
+            searchable: true,
+            aggregatable: false,
+          },
+          {
+            name: 'custom_esql_field',
+            type: 'number',
+            esTypes: ['long'],
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+          },
+        ]),
+      });
       const testHit = buildDataTableRecord(
         { _id: '1', _index: 'logs', fields: { custom_esql_field: [42] } },
-        testDataView
+        enrichedDataView
       );
 
-      formatHit(
-        testHit,
-        testDataView,
-        () => true,
-        220,
-        fieldFormatsMock,
-        columnsMetaWithCustomField
-      );
+      formatHit(testHit, enrichedDataView, () => true, 220, fieldFormatsMock);
 
       expectFieldCallToMatch(formatFieldValueSpy, 'custom_esql_field', 'number', ['long']);
     });

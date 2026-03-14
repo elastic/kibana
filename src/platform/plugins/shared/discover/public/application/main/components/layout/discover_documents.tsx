@@ -33,8 +33,6 @@ import type {
 import {
   DataLoadingState,
   useColumns,
-  type DataTableColumnsMeta,
-  getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
@@ -297,13 +295,12 @@ function DiscoverDocumentsComponent({
     [uiSettings]
   );
 
-  const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
-    () =>
-      documentState.esqlQueryColumns
-        ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
-        : undefined,
-    [documentState.esqlQueryColumns]
+  // Use enriched ES|QL DataView with fields from query columns when available.
+  const gridDataView = useMemo(
+    () => documentState.esqlDataView ?? dataView,
+    [documentState.esqlDataView, dataView]
   );
+
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
 
   const extensionActions = useMemo(
@@ -317,7 +314,7 @@ function DiscoverDocumentsComponent({
 
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
-    dataView,
+    dataView: gridDataView,
     query,
     filters,
     timeRange: requestParams.timeRangeAbsolute,
@@ -366,16 +363,14 @@ function DiscoverDocumentsComponent({
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      expandedDocSetter: DiscoverGridFlyoutProps['setExpandedDoc'],
-      customColumnsMeta?: DataTableColumnsMeta
+      expandedDocSetter: DiscoverGridFlyoutProps['setExpandedDoc']
     ) => (
       <DiscoverGridFlyout
-        dataView={dataView}
+        dataView={gridDataView}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
         savedSearchId={persistedDiscoverSession?.id!}
         query={query}
         initialTabId={initialDocViewerTabId}
@@ -392,7 +387,7 @@ function DiscoverDocumentsComponent({
       />
     ),
     [
-      dataView,
+      gridDataView,
       persistedDiscoverSession?.id,
       query,
       initialDocViewerTabId,
@@ -433,11 +428,11 @@ function DiscoverDocumentsComponent({
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
       actions: { addFilter: onAddFilter },
-      dataView,
+      dataView: gridDataView,
       density: cellRendererDensity,
       rowHeight: cellRendererRowHeight,
     }),
-    [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight]
+    [onAddFilter, gridDataView, cellRendererDensity, cellRendererRowHeight]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
@@ -555,9 +550,8 @@ function DiscoverDocumentsComponent({
             ariaLabelledBy="documentsAriaLabel"
             cascadedDocumentsContext={cascadedDocumentsContext}
             columns={currentColumns}
-            columnsMeta={columnsMeta}
             expandedDoc={expandedDoc}
-            dataView={dataView}
+            dataView={gridDataView}
             loadingState={
               isDataLoading
                 ? DataLoadingState.loading

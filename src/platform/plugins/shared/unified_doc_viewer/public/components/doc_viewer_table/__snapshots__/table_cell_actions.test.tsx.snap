@@ -8,7 +8,6 @@ Array [
     onToggleColumn={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -46,7 +45,6 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -77,7 +75,6 @@ Array [
     onToggleColumn={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -114,7 +111,6 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "isComputedColumn": true,
           "kbnFieldType": KbnFieldType {
@@ -154,7 +150,6 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "isComputedColumn": true,
           "kbnFieldType": KbnFieldType {
@@ -191,7 +186,6 @@ Array [
     Component={[Function]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "isComputedColumn": true,
           "kbnFieldType": KbnFieldType {
@@ -245,7 +239,6 @@ Array [
     Component={[Function]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -293,7 +286,6 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -324,7 +316,6 @@ Array [
     onFilter={[MockFunction]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,
@@ -353,7 +344,6 @@ Array [
     Component={[Function]}
     row={
       FieldRow {
-        "columnsMeta": undefined,
         "dataViewField": Object {
           "aggregatable": false,
           "conflictDescriptions": undefined,

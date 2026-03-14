@@ -88,6 +88,10 @@ dataView.fields.getByName = (name: string) => {
   return dataView.fields.getAll().find((field) => field.name === name);
 };
 
+dataView.getFieldByName = (name: string) => {
+  return dataView.fields.getByName(name);
+};
+
 const buildHit = (fields: Record<string, unknown> = {}, customIndex: string = DATA_STREAM_NAME) =>
   buildDataTableRecord(
     {

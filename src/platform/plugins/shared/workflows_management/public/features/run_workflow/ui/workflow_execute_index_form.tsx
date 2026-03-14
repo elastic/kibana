@@ -341,8 +341,7 @@ export const WorkflowExecuteIndexForm = ({
                   selectedDataView,
                   () => true, // Show all fields
                   10, // Max entries
-                  services.fieldFormats,
-                  undefined
+                  services.fieldFormats
                 )
               : [];
 

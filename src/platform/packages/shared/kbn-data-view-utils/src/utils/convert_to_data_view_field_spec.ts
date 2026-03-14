@@ -13,6 +13,12 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
 /**
  * Convert a datatable column to a DataViewFieldSpec
+ *
+ * @param column - The datatable column from ES|QL response
+ * @returns A FieldSpec that can be used to create a DataView field
+ *
+ * Note: `isComputedColumn` is explicitly set by the ES|QL backend in the response.
+ * We default to `true` when the property is absent because of the legacy behaviour of the function.
  */
 export function convertDatatableColumnToDataViewFieldSpec(column: DatatableColumn): FieldSpec {
   let esType = column.meta?.esType;
@@ -33,7 +39,30 @@ export function convertDatatableColumnToDataViewFieldSpec(column: DatatableColum
     searchable: true,
     aggregatable: false,
     isNull: Boolean(column?.isNull),
-    isComputedColumn: true,
+    isComputedColumn: column?.isComputedColumn ?? true,
     ...(timeSeriesMetric ? { timeSeriesMetric } : {}),
   };
+}
+
+/**
+ * Convert an array of datatable columns to a record of DataViewFieldSpecs
+ *
+ * @param columns - The datatable columns from ES|QL response
+ * @returns A record of FieldSpecs keyed by field name, ready to use with DataView.cloneWithFields()
+ *
+ * @example
+ * ```typescript
+ * const esqlColumns: DatatableColumn[] = [...];
+ * const fields = convertDatatableColumnsToFieldSpecs(esqlColumns);
+ * const enrichedDataView = baseDataView.cloneWithFields(fields);
+ * ```
+ */
+export function convertDatatableColumnsToFieldSpecs(
+  columns: DatatableColumn[]
+): Record<string, FieldSpec> {
+  const fields: Record<string, FieldSpec> = {};
+  for (const column of columns) {
+    fields[column.name] = convertDatatableColumnToDataViewFieldSpec(column);
+  }
+  return fields;
 }

@@ -812,4 +812,180 @@ describe('IndexPattern', () => {
       ).toMatchInlineSnapshot(`undefined`);
     });
   });
+
+  describe('cloneWithFields', () => {
+    test('should create a new DataView with provided fields', () => {
+      const fields: Record<string, FieldSpec> = {
+        field1: {
+          name: 'field1',
+          type: 'string',
+          esTypes: ['keyword'],
+          searchable: true,
+          aggregatable: false,
+        },
+        field2: {
+          name: 'field2',
+          type: 'number',
+          esTypes: ['long'],
+          searchable: true,
+          aggregatable: false,
+        },
+      };
+
+      const clonedDataView = indexPattern.cloneWithFields(fields);
+
+      expect(clonedDataView).toBeInstanceOf(DataView);
+      expect(clonedDataView.id).toEqual(indexPattern.id);
+      expect(clonedDataView.getIndexPattern()).toEqual(indexPattern.getIndexPattern());
+      expect(clonedDataView.fields.length).toEqual(2);
+      expect(clonedDataView.fields.getByName('field1')).toBeDefined();
+      expect(clonedDataView.fields.getByName('field2')).toBeDefined();
+      expect(clonedDataView.fields.getByName('field1')?.type).toEqual('string');
+      expect(clonedDataView.fields.getByName('field2')?.type).toEqual('number');
+    });
+
+    test('should preserve metaFields and shortDotsEnable from original DataView', () => {
+      const dataView = new DataView({
+        spec: {
+          id: 'test',
+          title: 'test*',
+          fields: {},
+        },
+        fieldFormats: fieldFormatsMock,
+        shortDotsEnable: true,
+        metaFields: ['_source', '_id', '_index'],
+      });
+
+      const fields: Record<string, FieldSpec> = {
+        'nested.field.name': {
+          name: 'nested.field.name',
+          type: 'string',
+          searchable: true,
+          aggregatable: false,
+        },
+      };
+
+      const clonedDataView = dataView.cloneWithFields(fields);
+
+      expect(clonedDataView.metaFields).toEqual(['_source', '_id', '_index']);
+
+      // Verify shortDotsEnable is preserved by checking field displayName behavior
+      // When shortDotsEnable is true, dotted field names should be shortened (e.g., 'nested.field.name' -> 'n.f.name')
+      const clonedField = clonedDataView.fields.getByName('nested.field.name');
+      expect(clonedField?.displayName).toBe('n.f.name');
+    });
+
+    test('should not mutate the original DataView', () => {
+      const originalFieldsLength = indexPattern.fields.length;
+      const fields: Record<string, FieldSpec> = {
+        new_field: {
+          name: 'new_field',
+          type: 'string',
+          searchable: true,
+          aggregatable: false,
+        },
+      };
+
+      const clonedDataView = indexPattern.cloneWithFields(fields);
+
+      expect(indexPattern.fields.length).toEqual(originalFieldsLength);
+      expect(clonedDataView.fields.length).toEqual(1);
+      expect(indexPattern.fields.getByName('new_field')).toBeUndefined();
+    });
+
+    test('should clone fieldFormats service correctly', () => {
+      const fields: Record<string, FieldSpec> = {
+        field1: {
+          name: 'field1',
+          type: 'string',
+          searchable: true,
+          aggregatable: false,
+        },
+      };
+
+      const clonedDataView = indexPattern.cloneWithFields(fields);
+
+      const field = clonedDataView.fields.getByName('field1');
+      expect(field).toBeDefined();
+
+      // This should not throw - it verifies that fieldFormats service is properly passed
+      expect(() => clonedDataView.getFormatterForField(field!)).not.toThrow();
+    });
+
+    test('should clear timeFieldName when time field not in provided fields', () => {
+      const dataView = new DataView({
+        spec: {
+          id: 'test',
+          title: 'test*',
+          timeFieldName: '@timestamp',
+          fields: {
+            '@timestamp': {
+              name: '@timestamp',
+              type: 'date',
+              esTypes: ['date'],
+              searchable: true,
+              aggregatable: true,
+            },
+          },
+        },
+        fieldFormats: fieldFormatsMock,
+      });
+
+      const fields: Record<string, FieldSpec> = {
+        field1: {
+          name: 'field1',
+          type: 'string',
+          searchable: true,
+          aggregatable: false,
+        },
+      };
+
+      const clonedDataView = dataView.cloneWithFields(fields);
+
+      expect(dataView.timeFieldName).toBe('@timestamp');
+      expect(clonedDataView.timeFieldName).toBeUndefined();
+      expect(clonedDataView.isTimeBased()).toBe(false);
+    });
+
+    test('should preserve timeFieldName when time field is in provided fields', () => {
+      const dataView = new DataView({
+        spec: {
+          id: 'test',
+          title: 'test*',
+          timeFieldName: '@timestamp',
+          fields: {
+            '@timestamp': {
+              name: '@timestamp',
+              type: 'date',
+              esTypes: ['date'],
+              searchable: true,
+              aggregatable: true,
+            },
+          },
+        },
+        fieldFormats: fieldFormatsMock,
+      });
+
+      const fields: Record<string, FieldSpec> = {
+        field1: {
+          name: 'field1',
+          type: 'string',
+          searchable: true,
+          aggregatable: false,
+        },
+        '@timestamp': {
+          name: '@timestamp',
+          type: 'date',
+          esTypes: ['date'],
+          searchable: true,
+          aggregatable: true,
+        },
+      };
+
+      const clonedDataView = dataView.cloneWithFields(fields);
+
+      expect(clonedDataView.timeFieldName).toBe('@timestamp');
+      expect(clonedDataView.isTimeBased()).toBe(true);
+    });
+  });
 });

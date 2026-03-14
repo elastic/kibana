@@ -79,8 +79,9 @@ export async function getESQLAdHocDataview({
     // eslint-disable-next-line no-console
     console.error('Failed to fetch the timefield', error);
     return undefined;
-  })) as { timeField?: string } | undefined;
+  })) as { timeField?: string; timeFieldType?: 'date' | 'date_nanos' } | undefined;
   const timeField = response?.timeField;
+  const timeFieldType = response?.timeFieldType ?? 'date';
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const prefix = options?.idPrefix ?? 'esql';
   const dataViewId = await sha256(`${prefix}-${indexPattern}`);
@@ -98,6 +99,17 @@ export async function getESQLAdHocDataview({
       id: dataViewId,
       allowNoIndex: options?.allowNoIndex,
       timeFieldName: timeField || undefined,
+      fields:
+        skipFetchFields && timeField
+          ? {
+              [timeField]: {
+                name: timeField,
+                type: timeFieldType,
+                searchable: true,
+                aggregatable: true,
+              },
+            }
+          : undefined,
     },
     // important to skip if you just need the dataview without the fields for performance reasons
     skipFetchFields
