@@ -5,12 +5,72 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { InferenceConnector } from '@kbn/inference-common';
-import { isSupportedConnector, connectorToInference } from '@kbn/inference-common';
+import {
+  isSupportedConnector,
+  connectorToInference,
+  InferenceConnectorType,
+} from '@kbn/inference-common';
+import { getInferenceEndpoints } from './get_inference_endpoints';
 
 export const getConnectorList = async ({
+  actions,
+  request,
+  esClient,
+  logger,
+}: {
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<InferenceConnector[]> => {
+  const [connectorsResult, endpointsResult] = await Promise.allSettled([
+    getStackConnectors({ actions, request }),
+    getInferenceEndpoints({ esClient, taskType: 'chat_completion' }),
+  ]);
+
+  if (connectorsResult.status === 'rejected' && endpointsResult.status === 'rejected') {
+    throw new Error(
+      `Failed to retrieve connectors and inference endpoints: ${connectorsResult.reason}, ${endpointsResult.reason}`
+    );
+  }
+
+  if (connectorsResult.status === 'rejected') {
+    // Log the error but continue, as we may still have inference endpoints to return
+    logger.debug(`Failed to retrieve connectors: ${connectorsResult.reason}`);
+  }
+
+  if (endpointsResult.status === 'rejected') {
+    // Log the error but continue, as we may still have connectors to return
+    logger.debug(`Failed to retrieve inference endpoints: ${endpointsResult.reason}`);
+  }
+
+  const connectors = connectorsResult.status === 'fulfilled' ? connectorsResult.value : [];
+  const endpoints = endpointsResult.status === 'fulfilled' ? endpointsResult.value : [];
+
+  const inferenceEndpointConnectors: InferenceConnector[] = endpoints.map((ep) => ({
+    type: InferenceConnectorType.Inference,
+    name: ep.inferenceId,
+    connectorId: ep.inferenceId,
+    config: {
+      inferenceId: ep.inferenceId,
+      providerConfig: {
+        model_id: ep.serviceSettings?.model_id, // for backwards compatibility, consider removing in future
+      },
+      taskType: ep.taskType,
+      service: ep.service,
+      serviceSettings: ep.serviceSettings,
+    },
+    capabilities: {},
+    isInferenceEndpoint: true,
+  }));
+
+  return [...connectors, ...inferenceEndpointConnectors];
+};
+
+const getStackConnectors = async ({
   actions,
   request,
 }: {

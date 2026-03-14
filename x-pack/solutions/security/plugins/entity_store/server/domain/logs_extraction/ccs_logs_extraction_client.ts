@@ -8,20 +8,27 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
-import type {
+import { unflattenObject } from '@kbn/object-utils';
+import { get } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import type { Entity } from '../../../common/domain/definitions/entity.gen';
+import {
   EntityType,
-  ManagedEntityDefinition,
+  type ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
-import type { PaginationParams } from './logs_extraction_query_builder';
+import {
+  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  type PaginationParams,
+} from './query_builder_commons';
 import {
   buildCcsLogsExtractionEsqlQuery,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  extractPaginationParams,
-} from './logs_extraction_query_builder';
-import { executeEsqlQuery, esqlResponseToBulkObjects } from '../../infra/elasticsearch/esql';
-import type { CRUDClient } from '../crud';
+  extractCcsPaginationParams,
+} from './ccs_logs_extraction_query_builder';
+import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
+import { ingestEntities } from '../../infra/elasticsearch/ingest';
+import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 
-export interface CcsExtractToUpdatesParams {
+interface CcsExtractToUpdatesParams {
   type: EntityType;
   remoteIndexPatterns: string[];
   fromDateISO: string;
@@ -41,7 +48,7 @@ export class CcsLogsExtractionClient {
   constructor(
     private readonly logger: Logger,
     private readonly esClient: ElasticsearchClient,
-    private readonly crudClient: CRUDClient
+    private readonly namespace: string
   ) {}
 
   public async extractToUpdates(
@@ -99,28 +106,29 @@ export class CcsLogsExtractionClient {
       });
 
       totalCount += esqlResponse.values.length;
-      pagination = extractPaginationParams(esqlResponse, docsLimit);
+      pagination = extractCcsPaginationParams(esqlResponse, docsLimit);
 
       if (esqlResponse.values.length > 0) {
         pages++;
         this.logger.debug(
           `CCS extraction ingesting ${esqlResponse.values.length} partial entities`
         );
-        const bulkObjects = esqlResponseToBulkObjects(esqlResponse, type, [
-          ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-        ]);
-
         const momentToDate = moment.utc(toDateISO);
-        let inc = 0;
-        await this.crudClient.upsertEntitiesBulk({
-          objects: bulkObjects,
-          force: true,
-          // It's good to generate a sparse timestamp to avoid too many ts collisions
-          // in the main extraction
-          timestampGenerator: () => {
-            inc++;
-            return momentToDate.add(inc, 'ms').toISOString();
-          },
+        let timestampIncrement = 0;
+        const transformDocument = (doc: Record<string, unknown>) => {
+          timestampIncrement++;
+          const timestamp = momentToDate.add(timestampIncrement, 'ms').toISOString();
+          return this.transformDocForCcsUpsert(type, doc, timestamp);
+        };
+
+        await ingestEntities({
+          esClient: this.esClient,
+          esqlResponse,
+          targetIndex: getUpdatesEntitiesDataStreamName(this.namespace),
+          logger: this.logger,
+          abortController,
+          fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
+          transformDocument,
         });
       }
     } while (pagination);
@@ -128,5 +136,31 @@ export class CcsLogsExtractionClient {
     abortController?.signal.removeEventListener('abort', onAbort);
 
     return { count: totalCount, pages };
+  }
+
+  private transformDocForCcsUpsert(
+    type: EntityType,
+    data: Partial<Entity>,
+    timestamp: string
+  ): Record<string, unknown> {
+    const doc: Record<string, unknown> = unflattenObject({
+      ...data,
+      '@timestamp': timestamp,
+    });
+
+    if (type === EntityType.enum.generic) {
+      return doc;
+    }
+
+    const entityDoc = get(doc, ['entity']);
+    const typeDoc = get(doc, [type, 'entity']);
+    const finalEntity = {
+      ...(typeDoc || {}),
+      ...(entityDoc || {}),
+    };
+
+    set(doc, [type, 'entity'], finalEntity);
+    delete doc.entity;
+    return doc;
   }
 }
