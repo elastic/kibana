@@ -164,6 +164,7 @@ export type CasesConfigurationUI = Pick<
   | 'observableTypes'
   | 'analyticsEnabled'
   | 'analyticsLastSyncAt'
+  | 'analyticsSyncStatus'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];

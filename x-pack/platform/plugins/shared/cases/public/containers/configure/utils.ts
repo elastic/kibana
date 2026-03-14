@@ -24,6 +24,7 @@ export const initialConfiguration: CasesConfigurationUI = {
   observableTypes: [],
   analyticsEnabled: false,
   analyticsLastSyncAt: undefined,
+  analyticsSyncStatus: undefined,
 };
 
 export const getConfigurationByOwner = ({

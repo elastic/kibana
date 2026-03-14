@@ -138,6 +138,7 @@ const convertConfigureResponseToCasesConfigure = (
     observableTypes,
     analyticsEnabled,
     analyticsLastSyncAt,
+    analyticsSyncStatus,
   } = configuration;
 
   return {
@@ -152,5 +153,6 @@ const convertConfigureResponseToCasesConfigure = (
     observableTypes,
     analyticsEnabled,
     analyticsLastSyncAt,
+    analyticsSyncStatus,
   };
 };

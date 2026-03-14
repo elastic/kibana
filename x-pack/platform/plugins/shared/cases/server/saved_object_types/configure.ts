@@ -77,6 +77,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       analytics_last_sync_at: {
         type: 'date',
       },
+      analytics_sync_status: {
+        type: 'keyword',
+      },
       /*
       updated_at: {
         type: 'date',
