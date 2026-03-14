@@ -51,6 +51,7 @@ fi
 if ! yarn install --non-interactive; then
   echo "--- yarn install failed, falling back to full bootstrap"
   yarn kbn bootstrap
+  exit $?
 fi
 
 echo "--- Running install scripts"
