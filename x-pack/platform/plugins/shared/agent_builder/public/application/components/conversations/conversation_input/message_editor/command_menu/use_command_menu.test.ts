@@ -7,24 +7,10 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useCommandMenu } from './use_command_menu';
-import * as commandMatcherModule from './command_matcher';
+import { getTextBeforeCursor } from './utils/get_text_before_cursor';
 
-jest.mock('./command_matcher', () => {
-  const actual = jest.requireActual('./command_matcher');
-  const { CommandId } = jest.requireActual('./types');
-  return {
-    ...actual,
-    getTextBeforeCursor: jest.fn(),
-    matchCommand: actual.createMatchCommand([
-      { id: CommandId.Attachment, sequence: '@' },
-      { id: CommandId.Prompt, sequence: '/p' },
-    ]),
-  };
-});
-
-const mockGetTextBeforeCursor = commandMatcherModule.getTextBeforeCursor as jest.MockedFunction<
-  typeof commandMatcherModule.getTextBeforeCursor
->;
+jest.mock('./utils/get_text_before_cursor');
+const mockGetTextBeforeCursor = jest.mocked(getTextBeforeCursor);
 
 const mockElement = document.createElement('div');
 

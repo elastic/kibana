@@ -10,7 +10,7 @@ import { CommandId } from './types';
 
 const COMMAND_DEFINITIONS: readonly CommandDefinition[] = [
   { id: CommandId.Attachment, sequence: '@', name: 'Attachment' },
-  { id: CommandId.Prompt, sequence: '/p', name: 'Prompt' },
+  { id: CommandId.Skill, sequence: '/', name: 'Skill' },
 ];
 
 // Sorted once at module load — longest sequence first for greedy matching

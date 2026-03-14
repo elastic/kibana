@@ -7,7 +7,7 @@
 
 export enum CommandId {
   Attachment = 'attachment',
-  Prompt = 'prompt',
+  Skill = 'skill',
 }
 
 /**

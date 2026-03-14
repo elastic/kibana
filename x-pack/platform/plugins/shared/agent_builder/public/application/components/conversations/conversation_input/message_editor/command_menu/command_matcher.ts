@@ -63,29 +63,3 @@ export const matchCommand = (textBeforeCursor: string): CommandMatchResult => {
 
   return INACTIVE_RESULT;
 };
-
-/**
- * Extracts the text before the cursor from a contentEditable element.
- *
- * Uses the Selection/Range API to determine the cursor position within
- * the element's text content and returns the substring from the start
- * to the cursor.
- */
-export const getTextBeforeCursor = (element: HTMLElement): string => {
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) {
-    return '';
-  }
-
-  const range = selection.getRangeAt(0);
-
-  if (!element.contains(range.startContainer)) {
-    return '';
-  }
-
-  const preCaretRange = document.createRange();
-  preCaretRange.selectNodeContents(element);
-  preCaretRange.setEnd(range.startContainer, range.startOffset);
-
-  return preCaretRange.toString();
-};

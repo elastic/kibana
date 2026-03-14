@@ -7,7 +7,8 @@
 
 import { useState, useCallback } from 'react';
 import type { CommandMatchResult } from './types';
-import { matchCommand, getTextBeforeCursor } from './command_matcher';
+import { matchCommand } from './command_matcher';
+import { getTextBeforeCursor } from './utils/get_text_before_cursor';
 
 interface CommandMenuState {
   /** Current command match result */
