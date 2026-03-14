@@ -19,7 +19,9 @@ export function ensureLibraryReference(
   const restOfRefs: SavedObjectReference[] = [];
 
   references.forEach((ref) => {
-    if (ref.name === panelRefName && BY_REF_LIBRARY_TYPES.includes(ref.type)) {
+    if (ref.name === 'savedObjectRef') {
+      libraryRef = ref;
+    } else if (ref.name === panelRefName && BY_REF_LIBRARY_TYPES.includes(ref.type)) {
       libraryRef = {
         ...ref,
         // Embeddable transforms for BY_REF_LIBRARY_TYPES embeddable types

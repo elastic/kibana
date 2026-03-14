@@ -8,6 +8,20 @@
 import { ensureLibraryReference } from './ensure_library_reference';
 
 describe('ensureLibraryReference', () => {
+  it('does nothing if library reference is already named savedObjectRef', () => {
+    const originalReferences = [{ id: 'test-id', name: 'savedObjectRef', type: 'lens' }];
+    const references = ensureLibraryReference(originalReferences, 'lens', 'embeddable.id');
+    expect(references).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "test-id",
+          "name": "savedObjectRef",
+          "type": "lens",
+        },
+      ]
+    `);
+  });
+
   it('ensures library reference is named savedObjectRef', () => {
     const originalReferences = [{ id: 'test-id', name: 'embeddable.id', type: 'lens' }];
     const references = ensureLibraryReference(originalReferences, 'lens', 'embeddable.id');
