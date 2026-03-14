@@ -5,28 +5,21 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
-import { useGetReplacements } from './use_get_replacements';
+import { buildGetReplacementsQueryFn, buildGetReplacementsRetryFn } from './use_get_replacements';
 
-jest.mock('@kbn/react-query', () => ({
-  useQuery: jest.fn(),
-}));
-
-describe('useGetReplacements', () => {
+describe('buildGetReplacementsQueryFn', () => {
   const getReplacements = jest.fn();
-  const client = { getReplacements };
+  const deanonymizeText = jest.fn();
+  const getTokenToOriginalMap = jest.fn();
+  const client = { getReplacements, deanonymizeText, getTokenToOriginalMap };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useQuery).mockImplementation((params: unknown) => params as never);
   });
 
-  it('returns null from queryFn when replacementsId is not provided', async () => {
-    const query = useGetReplacements({ client, replacementsId: undefined, enabled: true }) as {
-      queryFn: () => Promise<unknown>;
-    };
-
-    await expect(query.queryFn()).resolves.toBeNull();
+  it('returns null when replacementsId is not provided', async () => {
+    const queryFn = buildGetReplacementsQueryFn(client, undefined);
+    await expect(queryFn()).resolves.toBeNull();
     expect(getReplacements).not.toHaveBeenCalled();
   });
 
@@ -34,53 +27,40 @@ describe('useGetReplacements', () => {
     const replacements = { id: 'rep-1', namespace: 'default', replacements: [] };
     getReplacements.mockResolvedValue(replacements);
 
-    const query = useGetReplacements({ client, replacementsId: 'rep-1', enabled: true }) as {
-      queryFn: () => Promise<unknown>;
-    };
-
-    await expect(query.queryFn()).resolves.toEqual(replacements);
+    const queryFn = buildGetReplacementsQueryFn(client, 'rep-1');
+    await expect(queryFn()).resolves.toEqual(replacements);
     expect(getReplacements).toHaveBeenCalledWith('rep-1');
   });
 
   it('returns null for not_found errors', async () => {
     getReplacements.mockRejectedValue({ kind: 'not_found' });
 
-    const query = useGetReplacements({ client, replacementsId: 'rep-404', enabled: true }) as {
-      queryFn: () => Promise<unknown>;
-    };
-
-    await expect(query.queryFn()).resolves.toBeNull();
+    const queryFn = buildGetReplacementsQueryFn(client, 'rep-404');
+    await expect(queryFn()).resolves.toBeNull();
   });
 
   it('rethrows unexpected errors', async () => {
     const error = new Error('boom');
     getReplacements.mockRejectedValue(error);
 
-    const query = useGetReplacements({ client, replacementsId: 'rep-err', enabled: true }) as {
-      queryFn: () => Promise<unknown>;
-    };
-
-    await expect(query.queryFn()).rejects.toThrow('boom');
+    const queryFn = buildGetReplacementsQueryFn(client, 'rep-err');
+    await expect(queryFn()).rejects.toThrow('boom');
   });
+});
 
+describe('buildGetReplacementsRetryFn', () => {
   it('does not retry for expected auth/not-found failures', () => {
-    const query = useGetReplacements({ client, replacementsId: 'rep-1', enabled: true }) as {
-      retry: (failureCount: number, error: unknown) => boolean;
-    };
-
-    expect(query.retry(0, { kind: 'not_found' })).toBe(false);
-    expect(query.retry(0, { kind: 'forbidden' })).toBe(false);
-    expect(query.retry(0, { kind: 'unauthorized' })).toBe(false);
+    const retry = buildGetReplacementsRetryFn();
+    expect(retry(0, { kind: 'not_found' })).toBe(false);
+    expect(retry(0, { kind: 'forbidden' })).toBe(false);
+    expect(retry(0, { kind: 'unauthorized' })).toBe(false);
   });
 
   it('retries generic errors up to three attempts', () => {
-    const query = useGetReplacements({ client, replacementsId: 'rep-1', enabled: true }) as {
-      retry: (failureCount: number, error: unknown) => boolean;
-    };
-
-    expect(query.retry(0, new Error('transient'))).toBe(true);
-    expect(query.retry(1, new Error('transient'))).toBe(true);
-    expect(query.retry(2, new Error('transient'))).toBe(true);
-    expect(query.retry(3, new Error('transient'))).toBe(false);
+    const retry = buildGetReplacementsRetryFn();
+    expect(retry(0, new Error('transient'))).toBe(true);
+    expect(retry(1, new Error('transient'))).toBe(true);
+    expect(retry(2, new Error('transient'))).toBe(true);
+    expect(retry(3, new Error('transient'))).toBe(false);
   });
 });
