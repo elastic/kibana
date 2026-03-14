@@ -553,5 +553,4 @@ export class VisualizeEditorPageObject extends FtrService {
   public async setSeriesType(seriesNth: number, type: string) {
     await this.find.selectValue(`select#seriesType${seriesNth}`, type);
   }
-
 }
