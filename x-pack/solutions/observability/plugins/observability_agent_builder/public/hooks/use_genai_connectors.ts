@@ -23,12 +23,15 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
     services: { inference },
   } = useKibana();
 
-  const { value: connectors = [], loading } = useAsync(async () => {
+  const { value: result, loading } = useAsync(async () => {
     if (!inference) {
-      return [];
+      const connectors: InferenceConnector[] = [];
+      return { connectors, anonymizationEnabled: false };
     }
     return inference.getConnectors();
   }, [inference]);
+
+  const connectors = result?.connectors ?? [];
 
   return {
     connectors,
