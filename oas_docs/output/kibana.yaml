@@ -1357,6 +1357,9 @@ paths:
                   description: Configuration settings for the agent.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: When true, enables built-in Elastic capabilities for the agent.
+                      type: boolean
                     instructions:
                       description: Optional system instructions that define the agent behavior.
                       type: string
@@ -1676,6 +1679,9 @@ paths:
                   description: Updated configuration settings for the agent.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: When true, enables built-in Elastic capabilities for the agent.
+                      type: boolean
                     instructions:
                       description: Updated system instructions that define the agent behavior.
                       type: string
