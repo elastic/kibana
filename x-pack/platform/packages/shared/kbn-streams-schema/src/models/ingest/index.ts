@@ -5,10 +5,8 @@
  * 2.0.
  */
 import { z } from '@kbn/zod/v4';
-import { BaseStream } from '../base';
+import type { BaseStream } from '../base';
 import { IngestBase, IngestBaseUpsertRequest } from './base';
-import type { ModelValidation } from '../validation/model_validation';
-import { joinValidation } from '../validation/model_validation';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
 import { ClassicIngest, ClassicIngestUpsertRequest, ClassicStream } from './classic';
@@ -26,13 +24,37 @@ export namespace IngestStream {
     export type Model = WiredStream.Model | ClassicStream.Model;
   }
 
-  export const all: ModelValidation<BaseStream.Model, IngestStream.all.Model> = joinValidation(
-    BaseStream,
-    [
-      WiredStream as ModelValidation<BaseStream.Model, WiredStream.Model>,
-      ClassicStream as ModelValidation<BaseStream.Model, ClassicStream.Model>,
-    ]
-  );
+  export const all: {
+    Definition: Validation<BaseStream.Model['Definition'], IngestStream.all.Definition>;
+    Source: Validation<BaseStream.Model['Definition'], IngestStream.all.Source>;
+    GetResponse: Validation<BaseStream.Model['GetResponse'], IngestStream.all.GetResponse>;
+    UpsertRequest: Validation<BaseStream.Model['UpsertRequest'], IngestStream.all.UpsertRequest>;
+  } = {
+    Definition: validation(
+      z.union([WiredStream.Definition.right, ClassicStream.Definition.right]) as z.Schema<
+        BaseStream.Model['Definition']
+      >,
+      z.union([WiredStream.Definition.right, ClassicStream.Definition.right])
+    ),
+    Source: validation(
+      z.union([WiredStream.Source.right, ClassicStream.Source.right]) as z.Schema<
+        BaseStream.Model['Definition']
+      >,
+      z.union([WiredStream.Source.right, ClassicStream.Source.right])
+    ),
+    GetResponse: validation(
+      z.union([WiredStream.GetResponse.right, ClassicStream.GetResponse.right]) as z.Schema<
+        BaseStream.Model['GetResponse']
+      >,
+      z.union([WiredStream.GetResponse.right, ClassicStream.GetResponse.right])
+    ),
+    UpsertRequest: validation(
+      z.union([WiredStream.UpsertRequest.right, ClassicStream.UpsertRequest.right]) as z.Schema<
+        BaseStream.Model['UpsertRequest']
+      >,
+      z.union([WiredStream.UpsertRequest.right, ClassicStream.UpsertRequest.right])
+    ),
+  };
 
   // Optimized implementation for Definition check - the fallback is a zod-based check
   all.Definition.is = (

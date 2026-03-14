@@ -38,10 +38,10 @@ import type { FlattenRecord } from '@kbn/streams-schema';
 import {
   Streams,
   isSchema,
-  type ClassicFieldDefinition,
   type FieldDefinition,
+  type ClassicFieldDefinition,
 } from '@kbn/streams-schema';
-import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import type { IngestUpsertRequest } from '@kbn/streams-schema';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
