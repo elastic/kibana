@@ -11,6 +11,7 @@ import React, { useCallback } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
+import { MAX_SAVED_SEARCH_TABS } from '@kbn/saved-search-plugin/common';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
   createTabItem,
@@ -26,8 +27,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
 import { useSwitchModesTour } from './use_switch_modes_tour';
-
-const MAX_TABS_COUNT = 25;
 
 export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
@@ -96,7 +95,7 @@ export const TabsView = (props: SingleTabViewProps) => {
               selectedItemId={currentTabId}
               recentlyClosedItems={recentlyClosedItems}
               unsavedItemIds={unsavedTabIds}
-              maxItemsCount={MAX_TABS_COUNT}
+              maxItemsCount={MAX_SAVED_SEARCH_TABS}
               hideTabsBar={hideTabsBar}
               createItem={createItem}
               getPreviewData={getPreviewData}

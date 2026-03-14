@@ -130,7 +130,7 @@ export const fieldSpecSchemaFields = {
     })
   ),
   format: schema.maybe(serializedFieldFormatSchema),
-  esTypes: schema.maybe(schema.arrayOf(schema.string())),
+  esTypes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 60 })),
   scripted: schema.maybe(schema.boolean()),
   subType: schema.maybe(
     schema.object({

@@ -53,14 +53,15 @@ const getDataViewsRouteFactory =
       const dataViewListSchema = schema.arrayOf(
         schema.object({
           id: schema.string(),
-          namespaces: schema.maybe(schema.arrayOf(schema.string())),
+          namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
           title: schema.string(),
           type: schema.maybe(schema.string()),
           typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           name: schema.maybe(schema.string()),
           timeFieldName: schema.maybe(schema.string()),
           managed: schema.maybe(schema.boolean()),
-        })
+        }),
+        { maxSize: 10_000 }
       );
       return schema.object({ [serviceKey]: dataViewListSchema });
     };
