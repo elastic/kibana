@@ -852,6 +852,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                         <>
                           <EuiSpacer size="s" />
                           <EuiCallOut
+                            announceOnMount
                             data-test-subj="configure-cases-analytics-idle-callout"
                             size="s"
                             color="warning"
@@ -875,7 +876,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                             href={http.basePath.prepend(
                               `/app/discover#/?_a=(index:'${getCaseAnalyticsDataViewId(
                                 currentSpaceId
-                              )}')`
+                              )}')&_g=(time:(from:now-24h,to:now))`
                             )}
                             data-test-subj="configure-cases-analytics-discover-link"
                           >
