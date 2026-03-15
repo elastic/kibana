@@ -31,6 +31,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
   const [originatingPath, setOriginatingPath] = useState<string>();
+  const [breadcrumbTitle, setBreadcrumbTitle] = useState<string>();
   const [embeddableIdValue, setEmbeddableId] = useState<string>();
   const [embeddableInput, setEmbeddableInput] = useState<VisualizeInput>();
   const { services } = useKibana<VisualizeServices>();
@@ -45,6 +46,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       searchSessionId,
       embeddableId,
       originatingPath: pathValue,
+      breadcrumbTitle: titleValue,
       valueInput: valueInputValue,
     } = stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
 
@@ -57,6 +59,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     setEmbeddableId(embeddableId);
     setOriginatingApp(value);
     setOriginatingPath(pathValue);
+    setBreadcrumbTitle(titleValue);
   }, [services]);
   const { savedVisInstance, visEditorRef, visEditorController } = useSavedVisInstance(
     services,
@@ -64,7 +67,9 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     isChromeVisible,
     originatingApp,
     visualizationIdFromUrl,
-    embeddableInput
+    embeddableInput,
+    originatingPath,
+    breadcrumbTitle
   );
 
   const editorName = savedVisInstance?.vis.type.title.toLowerCase().replace(' ', '_') || '';
@@ -114,6 +119,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       originatingApp={originatingApp}
       setOriginatingApp={setOriginatingApp}
       originatingPath={originatingPath}
+      breadcrumbTitle={breadcrumbTitle}
       visualizationIdFromUrl={visualizationIdFromUrl}
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}

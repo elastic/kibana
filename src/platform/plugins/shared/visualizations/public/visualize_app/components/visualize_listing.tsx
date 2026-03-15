@@ -75,13 +75,15 @@ type CustomTableViewProps = Pick<
 
 const useTableListViewProps = (
   closeNewVisModal: MutableRefObject<() => void>,
-  listingLimit: number
+  listingLimit: number,
+  breadcrumbTitle: string
 ): CustomTableViewProps => {
   const {
     services: {
       application,
       history,
       savedObjectsTagging,
+      stateTransferService,
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
@@ -93,8 +95,12 @@ const useTableListViewProps = (
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
 
   const createNewVis = useCallback(() => {
-    closeNewVisModal.current = showNewVisModal();
-  }, [closeNewVisModal]);
+    closeNewVisModal.current = showNewVisModal({
+      originatingApp: VisualizeConstants.APP_ID,
+      originatingPath: window.location.hash,
+      breadcrumbTitle,
+    });
+  }, [closeNewVisModal, breadcrumbTitle]);
 
   const editItem = useCallback(
     async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
@@ -105,13 +111,16 @@ const useTableListViewProps = (
 
       const { editApp, editUrl } = editor;
       if (editApp) {
-        application.navigateToApp(editApp, { path: editUrl });
+        await stateTransferService.navigateToEditor(editApp, {
+          path: editUrl,
+          state: { originatingApp: VisualizeConstants.APP_ID },
+        });
         return;
       }
       // for visualizations the edit and view URLs are the same
       history.push(editUrl);
     },
-    [application, history]
+    [history, stateTransferService]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
@@ -283,7 +292,9 @@ export const VisualizeListing = () => {
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
   const closeNewVisModal = useRef(() => {});
-
+  const visualizeLibraryPageTitle = i18n.translate('visualizations.listingPageTitle', {
+    defaultMessage: 'Visualize library',
+  });
   useExecutionContext(executionContext, {
     type: 'application',
     page: 'list',
@@ -314,32 +325,33 @@ export const VisualizeListing = () => {
     } else {
       chrome.setBreadcrumbs([
         {
-          text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-            defaultMessage: 'Visualize library',
-          }),
+          text: visualizeLibraryPageTitle,
         },
       ]);
     }
 
-    chrome.docTitle.change(
-      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize library' })
-    );
+    chrome.docTitle.change(visualizeLibraryPageTitle);
   });
   useUnmount(() => closeNewVisModal.current());
 
-  const getVisualizeListItemLink = useMemo(
-    () => getVisualizeListItemLinkFn(application, kbnUrlStateStorage),
-    [application, kbnUrlStateStorage]
-  );
+  const getVisualizeListItemLink = useMemo(() => {
+    const linkFn = getVisualizeListItemLinkFn(application, kbnUrlStateStorage);
+    return (item: VisualizeUserContent) => {
+      if (item.editor && 'editApp' in item.editor && item.editor.editApp) {
+        return undefined;
+      }
+      return linkFn(item);
+    };
+  }, [application, kbnUrlStateStorage]);
 
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
-  const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
-
-  const visualizeLibraryTitle = i18n.translate('visualizations.listing.table.listTitle', {
-    defaultMessage: 'Visualize library',
-  });
+  const tableViewProps = useTableListViewProps(
+    closeNewVisModal,
+    listingLimit,
+    visualizeLibraryPageTitle
+  );
 
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {
     const calloutMessage = (
@@ -399,7 +411,7 @@ export const VisualizeListing = () => {
                   : () => tableViewProps.editItem?.(item)
               }
               getDetailViewLink={getVisualizeListItemLink}
-              tableCaption={visualizeLibraryTitle}
+              tableCaption={visualizeLibraryPageTitle}
               {...tableViewProps}
               {...propsFromParent}
             />
@@ -413,7 +425,7 @@ export const VisualizeListing = () => {
     application,
     dashboardCapabilities.createNew,
     initialPageSize,
-    visualizeLibraryTitle,
+    visualizeLibraryPageTitle,
     tableViewProps,
     getVisualizeListItemLink,
   ]);
@@ -428,7 +440,7 @@ export const VisualizeListing = () => {
   return (
     <TabbedTableListView
       headingId="visualizeListingHeading"
-      title={visualizeLibraryTitle}
+      title={visualizeLibraryPageTitle}
       tabs={tabs}
       activeTabId={activeTab}
       changeActiveTab={(id) => {

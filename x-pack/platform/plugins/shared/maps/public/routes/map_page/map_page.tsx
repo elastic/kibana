@@ -25,6 +25,7 @@ interface Props {
   stateTransfer: EmbeddableStateTransfer;
   originatingApp?: string;
   originatingPath?: string;
+  breadcrumbTitle?: string;
   history: ScopedHistory;
 }
 
@@ -49,6 +50,7 @@ export class MapPage extends Component<Props, State> {
         embeddableId: props.embeddableId,
         originatingApp: props.originatingApp,
         originatingPath: props.originatingPath,
+        breadcrumbTitle: props.breadcrumbTitle,
         stateTransfer: props.stateTransfer,
         onSaveCallback: this.updateSaveCounter,
         defaultLayerWizard: getOpenLayerWizardFromUrlParam() || '',

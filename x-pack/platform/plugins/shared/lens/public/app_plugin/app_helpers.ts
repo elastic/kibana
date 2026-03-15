@@ -19,9 +19,7 @@ import type {
   LensAppLocatorParams,
   LensDocument,
 } from '@kbn/lens-common';
-// Avoid importing Dashboard public constants here to prevent lens -> dashboard cycles.
-const DASHBOARDS_APP_ID = 'dashboards';
-const DASHBOARDS_VISUALIZATIONS_TAB_PATH = '#/list/visualizations';
+import { getOriginatingAppBreadcrumbs } from '@kbn/breadcrumbs-utils';
 import type { RedirectToOriginProps } from './types';
 
 const VISUALIZE_APP_ID = 'visualize';
@@ -72,41 +70,48 @@ export function setBreadcrumbsTitle(
   },
   {
     isByValueMode,
+    originatingApp,
     originatingAppName,
+    originatingPath,
+    breadcrumbTitle,
     redirectToOrigin,
     isFromLegacyEditor,
     currentDocTitle,
   }: {
     isByValueMode: boolean;
+    originatingApp: string | undefined;
     originatingAppName: string | undefined;
+    originatingPath: string | undefined;
+    breadcrumbTitle: string | undefined;
     redirectToOrigin: ((props?: RedirectToOriginProps | undefined) => void) | undefined;
     isFromLegacyEditor: boolean;
     currentDocTitle: string;
   }
 ) {
   const breadcrumbs: EuiBreadcrumb[] = [];
-  if ((isFromLegacyEditor || originatingAppName) && originatingAppName && redirectToOrigin) {
+
+  if (breadcrumbTitle && originatingApp && originatingPath) {
+    const originatingAppBreadcrumbs = getOriginatingAppBreadcrumbs({
+      originatingApp,
+      originatingPath,
+      breadcrumbTitle,
+      originatingAppName,
+      navigateToApp: application.navigateToApp,
+    });
+    if (
+      originatingAppBreadcrumbs.length === 2 &&
+      originatingAppBreadcrumbs[0]?.text === originatingAppBreadcrumbs[1]?.text
+    ) {
+      breadcrumbs.push(originatingAppBreadcrumbs[0]);
+    } else {
+      breadcrumbs.push(...originatingAppBreadcrumbs);
+    }
+  } else if ((isFromLegacyEditor || originatingAppName) && originatingAppName && redirectToOrigin) {
     breadcrumbs.push({
       onClick: () => {
         redirectToOrigin();
       },
       text: originatingAppName,
-    });
-  }
-  if (!isByValueMode && !originatingAppName) {
-    breadcrumbs.push({
-      href: application.getUrlForApp(DASHBOARDS_APP_ID, {
-        path: DASHBOARDS_VISUALIZATIONS_TAB_PATH,
-      }),
-      onClick: (e) => {
-        application.navigateToApp(DASHBOARDS_APP_ID, {
-          path: DASHBOARDS_VISUALIZATIONS_TAB_PATH,
-        });
-        e.preventDefault();
-      },
-      text: i18n.translate('xpack.lens.breadcrumbsDashboardsTitle', {
-        defaultMessage: 'Dashboards',
-      }),
     });
   }
 

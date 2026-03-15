@@ -16,6 +16,7 @@ export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
 export interface EmbeddableEditorState {
   originatingApp: string;
   originatingPath?: string;
+  breadcrumbTitle?: string;
   embeddableId?: string;
   valueInput?: object;
 

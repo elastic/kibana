@@ -61,10 +61,11 @@ export class EventAnnotationListingPlugin
     core: CoreSetup<EventAnnotationListingStartDependencies>,
     dependencies: SetupDependencies
   ) {
+    const tabTitle = i18n.translate('eventAnnotationListing.listingViewTitle', {
+      defaultMessage: 'Annotation groups',
+    });
     const annotationGroupsTabConfig = {
-      title: i18n.translate('eventAnnotationListing.listingViewTitle', {
-        defaultMessage: 'Annotation groups',
-      }),
+      title: tabTitle,
       id: 'annotations',
       getTableList: async (props: TableListTabParentProps) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
@@ -83,6 +84,7 @@ export class EventAnnotationListingPlugin
           dataViews,
           createDataView: pluginsStart.dataViews.create.bind(pluginsStart.dataViews),
           sessionService: pluginsStart.data.search.session,
+          breadcrumbTitle: tabTitle,
           queryInputServices: {
             http: coreStart.http,
             docLinks: coreStart.docLinks,

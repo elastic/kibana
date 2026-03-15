@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.searchForItemWithName('lnsTableVis');
         await lens.clickVisualizeListItemTitle('lnsTableVis');
         // go to empty vis
-        await lens.goToListingPageViaBreadcrumbs();
+        await visualize.gotoVisualizationLandingPage();
         await visualize.clickNewVisualization();
         await visualize.waitForGroupsSelectPage();
         await visualize.clickVisType('lens');
@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       it('when moving from empty to existing workspace, preserves time range and loads filters and query', async () => {
         // go to existing vis
-        await lens.goToListingPageViaBreadcrumbs();
+        await visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsTableVis');
         await lens.clickVisualizeListItemTitle('lnsTableVis');
 

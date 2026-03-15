@@ -8,14 +8,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import type { ApplicationStart } from '@kbn/core/public';
 import { VisualizeConstants } from '@kbn/visualizations-common';
+
+import { getOriginatingAppBreadcrumbs } from '@kbn/breadcrumbs-utils';
 
 const defaultEditText = i18n.translate('visualizations.editor.defaultEditBreadcrumbText', {
   defaultMessage: 'Edit visualization',
 });
 
-export function getLandingBreadcrumbs() {
+const getVisualizeLibraryCrumbs = (originatingAppName?: string) => {
+  if (originatingAppName) {
+    return [];
+  }
+
   return [
     {
       text: i18n.translate('visualizations.listing.breadcrumb', {
@@ -24,20 +30,45 @@ export function getLandingBreadcrumbs() {
       href: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
     },
   ];
-}
+};
 
 export function getCreateBreadcrumbs({
-  byValue,
+  originatingApp,
   originatingAppName,
+  originatingPath,
+  breadcrumbTitle,
   redirectToOrigin,
+  navigateToApp,
 }: {
-  byValue?: boolean;
+  originatingApp?: string;
   originatingAppName?: string;
+  originatingPath?: string;
+  breadcrumbTitle?: string;
   redirectToOrigin?: () => void;
+  navigateToApp?: ApplicationStart['navigateToApp'];
 }) {
+  const originatingCrumbs = navigateToApp
+    ? getOriginatingAppBreadcrumbs({
+        originatingApp,
+        originatingAppName,
+        originatingPath,
+        breadcrumbTitle,
+        navigateToApp,
+      })
+    : [];
+  if (originatingCrumbs.length > 0) {
+    return [
+      ...originatingCrumbs,
+      {
+        text: i18n.translate('visualizations.editor.createBreadcrumb', {
+          defaultMessage: 'Create',
+        }),
+      },
+    ];
+  }
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
-    ...(!byValue && !originatingAppName ? getLandingBreadcrumbs() : []),
+    ...getVisualizeLibraryCrumbs(originatingAppName),
     {
       text: i18n.translate('visualizations.editor.createBreadcrumb', {
         defaultMessage: 'Create',
@@ -70,19 +101,37 @@ export function getCreateServerlessBreadcrumbs({
 
 export function getEditBreadcrumbs(
   {
-    byValue,
+    originatingApp,
     originatingAppName,
+    originatingPath,
+    breadcrumbTitle,
     redirectToOrigin,
+    navigateToApp,
   }: {
-    byValue?: boolean;
+    originatingApp?: string;
     originatingAppName?: string;
+    originatingPath?: string;
+    breadcrumbTitle?: string;
     redirectToOrigin?: () => void;
+    navigateToApp?: ApplicationStart['navigateToApp'];
   },
   title: string = defaultEditText
 ) {
+  const originatingCrumbs = navigateToApp
+    ? getOriginatingAppBreadcrumbs({
+        originatingApp,
+        originatingAppName,
+        originatingPath,
+        breadcrumbTitle,
+        navigateToApp,
+      })
+    : [];
+  if (originatingCrumbs.length > 0) {
+    return [...originatingCrumbs, { text: title }];
+  }
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
-    ...(!byValue && !originatingAppName ? getLandingBreadcrumbs() : []),
+    ...getVisualizeLibraryCrumbs(originatingAppName),
     {
       text: title,
     },

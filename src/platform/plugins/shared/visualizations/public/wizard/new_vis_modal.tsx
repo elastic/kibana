@@ -77,6 +77,7 @@ export interface TypeSelectionProps {
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
   originatingPath?: string;
+  breadcrumbTitle?: string;
   showAggsSelection?: boolean;
   selectedVisType?: BaseVisType;
 }
@@ -226,6 +227,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
         state: {
           originatingApp: this.props.originatingApp,
           originatingPath: this.props.originatingPath,
+          breadcrumbTitle: this.props.breadcrumbTitle,
         },
       });
     } else {

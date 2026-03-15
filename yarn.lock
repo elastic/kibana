@@ -4811,6 +4811,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/breadcrumbs-utils@link:src/platform/packages/shared/kbn-breadcrumbs-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cache-cli@link:src/platform/packages/shared/kbn-cache-cli":
   version "0.0.0"
   uid ""

@@ -362,9 +362,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickLoadSavedVisButton() {
-    // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
-    // element as a child instead of building the breadcrumbs dynamically.
-    await this.find.clickByCssSelector('[href="#/"]');
+    await this.testSubjects.click('breadcrumb first');
   }
 
   public async loadSavedVisualization(vizName: string, { navigateToVisualize = true } = {}) {

@@ -168,7 +168,9 @@ export function App({
 
   const isFromLegacyEditorEmbeddable = isLegacyEditorEmbeddable(initialContext);
   const legacyEditorAppName =
-    initialContext && 'originatingApp' in initialContext
+    initialContext && 'legacyEditorOriginatingApp' in initialContext
+      ? initialContext.legacyEditorOriginatingApp
+      : initialContext && 'originatingApp' in initialContext
       ? initialContext.originatingApp
       : undefined;
   const legacyEditorAppUrl =
@@ -274,6 +276,9 @@ export function App({
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
+    if (savedObjectId && !persistedDoc) {
+      return;
+    }
     const isByValueMode = getIsByValueMode();
     const currentDocTitle = getCurrentTitle(persistedDoc, isByValueMode, initialContext);
     setBreadcrumbsTitle(
@@ -282,11 +287,15 @@ export function App({
         isByValueMode,
         currentDocTitle,
         redirectToOrigin,
+        originatingApp: incomingState?.originatingApp,
+        originatingPath: incomingState?.originatingPath,
+        breadcrumbTitle: incomingState?.breadcrumbTitle,
         isFromLegacyEditor: Boolean(isLinkedToOriginatingApp || legacyEditorAppName),
         originatingAppName: getOriginatingAppName(),
       }
     );
   }, [
+    savedObjectId,
     getOriginatingAppName,
     redirectToOrigin,
     getIsByValueMode,
@@ -298,6 +307,9 @@ export function App({
     legacyEditorAppName,
     serverless,
     initialContext,
+    incomingState?.originatingApp,
+    incomingState?.originatingPath,
+    incomingState?.breadcrumbTitle,
   ]);
 
   const switchDatasource = useCallback(() => {
@@ -357,7 +369,10 @@ export function App({
             onAppLeave,
             redirectTo,
             switchDatasource,
-            originatingApp: incomingState?.originatingApp,
+            originatingApp:
+              isComingFromContainerView(incomingState) || initialContextIsEmbedded
+                ? incomingState?.originatingApp ?? initialContext?.originatingApp
+                : undefined,
             textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
             ...lensAppServices,
           },
@@ -387,7 +402,9 @@ export function App({
       onAppLeave,
       redirectTo,
       switchDatasource,
-      incomingState?.originatingApp,
+      incomingState,
+      initialContextIsEmbedded,
+      initialContext?.originatingApp,
       shouldCloseAndSaveTextBasedQuery,
       lensAppServices,
       dispatchSetState,
