@@ -263,6 +263,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   running?: boolean | null;
   viewInAppRelativeUrl?: string;
   alertDelay?: AlertDelay | null;
+  lastEnabledAt?: Date;
   flapping?: Flapping | null;
   artifacts?: Artifacts | null;
 }
