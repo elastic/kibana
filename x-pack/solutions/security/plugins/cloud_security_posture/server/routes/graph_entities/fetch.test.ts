@@ -90,7 +90,7 @@ describe('fetchEntities', () => {
     });
   });
 
-  it('uses lookup join when the entities index is in lookup mode', async () => {
+  it('uses lookup join and includes entity store index when the entities index is in lookup mode', async () => {
     (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
       .fn()
       .mockResolvedValueOnce({
@@ -117,7 +117,23 @@ describe('fetchEntities', () => {
     expect(esqlCallArgs.query).toContain(
       '| LOOKUP JOIN .entities.v2.latest.security_default ON entity.id'
     );
+    expect(esqlCallArgs.query).toContain(
+      'FROM logs-*,.entities.v2.latest.security_default METADATA _index'
+    );
     expect(esqlCallArgs.query).not.toContain('ENRICH');
+
+    // Verify DSL filter allows entity store documents without timestamp constraint
+    const filter = esqlCallArgs.filter as {
+      bool?: {
+        filter?: QueryDslQueryContainer[];
+      };
+    };
+    const timestampClause = filter.bool?.filter?.[0] as {
+      bool?: { should?: QueryDslQueryContainer[] };
+    };
+    expect(timestampClause?.bool?.should).toContainEqual({
+      term: { _index: '.entities.v2.latest.security_default' },
+    });
   });
 
   it('falls back to null enrichment fields when lookup mode is unavailable', async () => {
@@ -135,6 +151,6 @@ describe('fetchEntities', () => {
     expect(esqlCallArgs.query).toContain('| EVAL entityName = TO_STRING(null)');
     expect(esqlCallArgs.query).toContain('| EVAL availableInEntityStore = false');
     expect(esqlCallArgs.query).not.toContain('ENRICH');
-    expect((esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy).not.toHaveBeenCalled();
+    expect(esqlCallArgs.query).not.toContain('LOOKUP JOIN');
   });
 });

@@ -15,6 +15,8 @@ import {
   DOCUMENT_TYPE_EVENT,
   DOCUMENT_TYPE_ALERT,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
+import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
 import type {
   NodeViewModel,
   NodeDocumentDataViewModel,
@@ -267,3 +269,28 @@ export const buildGraphFromViewModels = (
 };
 
 export const showStackedShape = (count?: number) => !!count && count > 1;
+
+/**
+ * Type guard to check if an item is an EntityItem.
+ * EntityItem is distinguished by the absence of the 'isAlert' property,
+ * which is required in EventOrAlertItem.
+ *
+ * @param item - The item to check
+ * @returns true if the item is an EntityItem, false otherwise
+ */
+export const isEntityItem = (item: EntityItem | EventOrAlertItem): item is EntityItem => {
+  return !('isAlert' in item);
+};
+
+/**
+ * Type guard to check if an item is an EventOrAlertItem.
+ * EventOrAlertItem is distinguished by the presence of the required 'isAlert' property.
+ *
+ * @param item - The item to check
+ * @returns true if the item is an EventOrAlertItem, false otherwise
+ */
+export const isEventOrAlertItem = (
+  item: EntityItem | EventOrAlertItem
+): item is EventOrAlertItem => {
+  return 'isAlert' in item;
+};

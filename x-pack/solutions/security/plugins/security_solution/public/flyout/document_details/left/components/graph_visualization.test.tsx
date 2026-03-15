@@ -41,7 +41,7 @@ jest.mock('@kbn/cloud-security-posture-graph', () => {
     '@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/constants'
   );
   const { isEntityItem } = jest.requireActual(
-    '@kbn/cloud-security-posture-graph/src/components/graph_grouped_node_preview_panel/components/grouped_item/types'
+    '@kbn/cloud-security-posture-graph/src/components/utils'
   );
 
   return {
