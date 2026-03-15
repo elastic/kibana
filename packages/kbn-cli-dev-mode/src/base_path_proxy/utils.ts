@@ -12,5 +12,8 @@ import { sampleSize } from 'lodash';
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
 // Thank you, Spencer! :elasticheart:
-export const getRandomBasePath = () =>
-  Math.random() * 100 < 1 ? 'spalger' : sampleSize(alphabet, 3).join('');
+// Avoid 'app' — Kibana's application routes use the /app/ prefix, so basePath /app would conflict.
+export const getRandomBasePath = (): string => {
+  const path = Math.random() * 100 < 1 ? 'spalger' : sampleSize(alphabet, 3).join('');
+  return path === 'app' ? getRandomBasePath() : path;
+};
