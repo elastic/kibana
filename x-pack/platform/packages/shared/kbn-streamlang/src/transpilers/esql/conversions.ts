@@ -32,6 +32,7 @@ import type {
   SortProcessor,
   ConcatProcessor,
   NetworkDirectionProcessor,
+  EnrichProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import { convertRenameProcessorToESQL } from './processors/rename';
@@ -53,6 +54,7 @@ import { convertSplitProcessorToESQL } from './processors/split';
 import { convertSortProcessorToESQL } from './processors/sort';
 import { convertConcatProcessorToESQL } from './processors/concat';
 import { convertNetworkDirectionProcessorToESQL } from './processors/network_direction';
+import { convertEnrichProcessorToESQL } from './processors/enrich';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -121,6 +123,9 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'network_direction':
       return convertNetworkDirectionProcessorToESQL(processor as NetworkDirectionProcessor);
+
+    case 'enrich':
+      return convertEnrichProcessorToESQL(processor as EnrichProcessor);
 
     case 'manual_ingest_pipeline':
       return [

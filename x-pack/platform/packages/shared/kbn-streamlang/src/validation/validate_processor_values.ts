@@ -68,8 +68,8 @@ export function validateProcessorValues(
     case 'split':
     case 'sort':
     case 'network_direction':
+    case 'enrich':
     case 'manual_ingest_pipeline':
-      // No value validation implemented for these processors yet
       break;
     default: {
       const _exhaustiveCheck: never = step;

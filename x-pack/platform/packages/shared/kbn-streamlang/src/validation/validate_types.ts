@@ -148,6 +148,10 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
       }
       break;
 
+    case 'enrich':
+      fields.push(processor.to);
+      break;
+
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -275,6 +279,7 @@ export function getProcessorOutputType(
     case 'network_direction':
       return 'string';
 
+    case 'enrich':
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
@@ -369,6 +374,7 @@ export function getExpectedInputType(
     case 'remove_by_prefix':
     case 'drop_document':
     case 'network_direction':
+    case 'enrich':
     case 'manual_ingest_pipeline':
       return null;
     default: {
@@ -439,6 +445,9 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
         if ('internal_networks_field' in step && step.internal_networks_field) {
           fieldsUsed.push(step.internal_networks_field);
         }
+        break;
+      case 'enrich':
+        fieldsUsed.push(step.field, step.to);
         break;
       case 'append':
       case 'drop_document':
