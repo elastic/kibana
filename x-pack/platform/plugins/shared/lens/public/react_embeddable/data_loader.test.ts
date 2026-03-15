@@ -99,6 +99,7 @@ async function expectRerenderOnDataLoader(
     ...internalApiOverrides,
     attributes$: new BehaviorSubject(runtimeState.attributes),
   });
+  internalApi.updateContainerWidth(800);
   const services = {
     ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
       visOverrides: { id: 'lnsXY' },

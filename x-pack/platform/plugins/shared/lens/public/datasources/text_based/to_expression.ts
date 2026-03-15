@@ -15,7 +15,8 @@ import type { OriginalColumn } from '../../../common/types';
 function getExpressionForLayer(
   layer: TextBasedLayer,
   layerId: string,
-  refs: IndexPatternRef[]
+  refs: IndexPatternRef[],
+  maxDataPoints?: number
 ): Ast | null {
   if (!layer.columns || layer.columns?.length === 0) {
     return null;
@@ -94,6 +95,7 @@ function getExpressionForLayer(
         defaultMessage:
           'This request queries Elasticsearch to fetch the data for the visualization.',
       }),
+      maxDataPoints,
     });
 
     textBasedQueryToAst.chain.push({
@@ -131,9 +133,18 @@ function getExpressionForLayer(
   }
 }
 
-export function toExpression(state: TextBasedPrivateState, layerId: string) {
+export function toExpression(
+  state: TextBasedPrivateState,
+  layerId: string,
+  maxDataPoints?: number
+) {
   if (state.layers[layerId]) {
-    return getExpressionForLayer(state.layers[layerId], layerId, state.indexPatternRefs);
+    return getExpressionForLayer(
+      state.layers[layerId],
+      layerId,
+      state.indexPatternRefs,
+      maxDataPoints
+    );
   }
 
   return null;
