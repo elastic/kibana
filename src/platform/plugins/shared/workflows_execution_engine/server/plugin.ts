@@ -558,12 +558,13 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
       }
 
-      // Caller specifies the refresh strategy: manual/UI paths use refresh:true (immediate,
-      // no latency for the user); async paths use refresh:'wait_for' (waits for the next
-      // scheduled refresh cycle, lower cluster cost). Either way the execution must be visible
-      // to the search-based concurrency check that follows before it runs.
+      // Only pay the refresh cost when the concurrency check will actually run.
+      // Without a concurrencyGroupKey there is no check, so refresh:false is fine.
+      // When a check will run, the caller dictates the strategy: manual/UI paths use
+      // refresh:true (immediate, no latency for the user); async paths use refresh:'wait_for'
+      // (piggybacks on the scheduled cycle, lower cluster cost).
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-        refresh: options.refresh,
+        refresh: concurrencyGroupKey ? options.refresh : false,
       });
 
       return { workflowExecution, repository: workflowExecutionRepository };
