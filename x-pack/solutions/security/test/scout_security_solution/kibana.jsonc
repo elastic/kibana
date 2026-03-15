@@ -1,0 +1,8 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/test-suites-xpack-security-scout",
+  "owner": ["@elastic/security-engineering-productivity"],
+  "group": "security",
+  "visibility": "private",
+  "devOnly": true
+}
