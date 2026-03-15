@@ -57,55 +57,49 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     expect(install.statusCode).toBe(403);
   });
 
-  apiTest(
-    'logExtraction is not mandatory on install',
-    async ({ apiClient, kbnClient }) => {
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
+  apiTest('logExtraction is not mandatory on install', async ({ apiClient, kbnClient }) => {
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: true,
+    });
 
-      const install = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-      expect(install.statusCode).toBe(201);
+    const install = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+    expect(install.statusCode).toBe(201);
 
-      await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-    }
-  );
+    await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+  });
 
-  apiTest(
-    'logExtraction is mandatory on update',
-    async ({ apiClient, kbnClient }) => {
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
+  apiTest('logExtraction is mandatory on update', async ({ apiClient, kbnClient }) => {
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: true,
+    });
 
-      await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
+    await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
 
-      const update = await apiClient.put(ENTITY_STORE_ROUTES.UPDATE, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-      expect(update.statusCode).toBe(400);
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+    expect(update.statusCode).toBe(400);
 
-      await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-    }
-  );
+    await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+  });
 
   apiTest(
     'Update should change installed logExtraction params',
@@ -169,9 +163,8 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
         responseType: 'json',
       });
       expect(status.statusCode).toBe(200);
-      const engines = (
-        status.body as { engines: Array<{ delay: string; frequency: string }> }
-      ).engines;
+      const engines = (status.body as { engines: Array<{ delay: string; frequency: string }> })
+        .engines;
       expect(engines.length).toBeGreaterThan(0);
       expect(engines[0].delay).toBe('5m');
       expect(engines[0].frequency).toBe('1m');

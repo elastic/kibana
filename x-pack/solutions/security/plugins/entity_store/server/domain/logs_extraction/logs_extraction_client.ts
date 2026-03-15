@@ -33,7 +33,10 @@ import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
 } from '../asset_manager/external_indices_contants';
-import { type LogExtractionConfig, LogExtractionConfig as LogExtractionConfigSchema } from '../saved_objects';
+import {
+  type LogExtractionConfig,
+  LogExtractionConfig as LogExtractionConfigSchema,
+} from '../saved_objects';
 import {
   type EngineDescriptorClient,
   type EngineLogExtractionState,
