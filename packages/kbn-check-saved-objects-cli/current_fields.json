@@ -1353,6 +1353,13 @@
   "ui-metric": [
     "count"
   ],
+  "uiam_api_keys_provisioning_status": [
+    "@timestamp",
+    "entityId",
+    "entityType",
+    "message",
+    "status"
+  ],
   "upgrade-assistant-ml-upgrade-operation": [
     "snapshotId"
   ],
