@@ -9,6 +9,7 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { aiClassifyStepDefinition } from './ai/ai_classify_step/step';
+import { aiGuardrailsStepDefinition } from './ai/ai_guardrails_step/step';
 import { aiPromptStepDefinition } from './ai/ai_prompt_step/step';
 import { aiSummarizeStepDefinition } from './ai/ai_summarize_step/step';
 import {
@@ -41,6 +42,7 @@ export const registerInternalStepDefinitions = (
   serverStepRegistry.register(dataParseJsonStepDefinition);
   serverStepRegistry.register(dataStringifyJsonStepDefinition);
   serverStepRegistry.register(aiClassifyStepDefinition(core));
+  serverStepRegistry.register(aiGuardrailsStepDefinition(core));
   serverStepRegistry.register(aiPromptStepDefinition(core));
   serverStepRegistry.register(aiSummarizeStepDefinition(core));
 };

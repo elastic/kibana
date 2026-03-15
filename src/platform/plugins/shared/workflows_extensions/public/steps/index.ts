@@ -37,6 +37,9 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
     import('./ai/ai_classify_step').then((m) => m.AiClassifyStepDefinition)
   );
   stepRegistry.register(() =>
+    import('./ai/ai_guardrails_step').then((m) => m.AiGuardrailsStepDefinition)
+  );
+  stepRegistry.register(() =>
     import('./data/data_stringify_json_step').then((m) => m.dataStringifyJsonStepDefinition)
   );
   stepRegistry.register(() =>

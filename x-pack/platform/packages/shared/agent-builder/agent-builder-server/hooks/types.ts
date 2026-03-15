@@ -14,6 +14,18 @@ import type { ToolHandlerContext } from '../tools/handler';
 
 export { HookLifecycle, HookExecutionMode };
 
+export interface ChatMessage {
+  role?: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
+export interface SerializedAttachment {
+  id?: string;
+  type: string;
+  data: Record<string, unknown>;
+  hidden?: boolean;
+}
+
 interface AgentHookContextBase {
   request: KibanaRequest;
   abortSignal?: AbortSignal;
@@ -22,6 +34,8 @@ interface AgentHookContextBase {
 
 export interface BeforeAgentHookContext extends AgentHookContextBase {
   nextInput: ProcessedRoundInput;
+  conversationHistory?: ChatMessage[];
+  attachments?: SerializedAttachment[];
 }
 
 interface ToolCallHookContextBase extends AgentHookContextBase {

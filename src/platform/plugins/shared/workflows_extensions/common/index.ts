@@ -11,3 +11,9 @@ export type { CommonStepDefinition } from './step_registry/types';
 export type { CommonTriggerDefinition } from './trigger_registry/types';
 export { EVENT_FIELD_PREFIX } from './trigger_registry/constants';
 export { DataMapStepTypeId } from './steps/data';
+export {
+  MAX_ATTACHMENT_DATA_CHARS,
+  MAX_ATTACHMENTS,
+  MAX_CONVERSATION_HISTORY_CHARS,
+  MAX_CONVERSATION_HISTORY_MESSAGES,
+} from './steps/ai/guardrail_context_limits';
