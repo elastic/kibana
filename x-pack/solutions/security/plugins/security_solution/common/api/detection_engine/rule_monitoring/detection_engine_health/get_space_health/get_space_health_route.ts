@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
+import { PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
 import type {
   HealthInterval,
   HealthTimings,
@@ -22,6 +23,7 @@ export type GetSpaceHealthRequestBody = t.TypeOf<typeof GetSpaceHealthRequestBod
 export const GetSpaceHealthRequestBody = t.exact(
   t.partial({
     interval: HealthIntervalParameters,
+    num_of_top_rules: PositiveIntegerGreaterThanZero,
     debug: t.boolean,
   })
 );
@@ -34,6 +36,11 @@ export interface GetSpaceHealthRequest {
    * Time period over which health stats are requested.
    */
   interval: HealthInterval;
+
+  /**
+   * Number of top rules for each metric
+   */
+  num_of_top_rules: number;
 
   /**
    * If true, the endpoint will return various debug information, such as

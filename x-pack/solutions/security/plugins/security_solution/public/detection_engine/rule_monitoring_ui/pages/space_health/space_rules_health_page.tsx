@@ -31,6 +31,7 @@ import {
   PerformanceSection,
   GapsAndFrozenSection,
   TopMessagesSection,
+  TopRulesSection,
   HistoricalTrendsSection,
 } from '../../components/health_overview';
 import { HealthIntervalFilter } from './health_interval_filter';
@@ -107,6 +108,10 @@ export const DetectionEngineSpaceRulesHealthPage = memo(
           <SectionPanel title="Performance Percentiles">
             <PerformanceSection health={health} />
           </SectionPanel>
+
+          <EuiSpacer size="l" />
+
+          <TopRulesSection health={health} />
 
           <EuiSpacer size="l" />
 

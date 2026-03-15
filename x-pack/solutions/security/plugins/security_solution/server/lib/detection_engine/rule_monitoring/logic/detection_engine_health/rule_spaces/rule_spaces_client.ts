@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../event_log/event_log_constants';
 import { DETECTION_RULES_FILTER } from '../rule_objects/filters';
 import { getSpacesAggregation, normalizeSpacesAggregation } from './aggregations/spaces';
@@ -27,8 +27,7 @@ export interface IRuleSpacesClient {
 
 export const createRuleSpacesClient = (
   currentSpaceId: string,
-  internalSavedObjectsClient: SavedObjectsClientContract,
-  logger: Logger
+  internalSavedObjectsClient: SavedObjectsClientContract
 ): IRuleSpacesClient => {
   return {
     getCurrentSpaceId(): string {

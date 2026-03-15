@@ -8,6 +8,7 @@
 import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 import type { RuleLastRunOutcomes } from '@kbn/alerting-plugin/common';
 import type { LogLevel } from '../../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import type { SpaceHealthOverviewStats } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 
 /**
  * "Static" health state at the moment of the API call. Calculated for a set of rules.
@@ -34,6 +35,12 @@ export interface HealthOverInterval {
    * Optional debug information, such as requests and aggregations sent to Elasticsearch
    * and responses received from Elasticsearch.
    */
+  debug?: Record<string, unknown>;
+}
+
+export interface SpaceHealthOverInterval {
+  stats_over_interval: SpaceHealthOverviewStats;
+  history_over_interval: HealthHistory<SpaceHealthOverviewStats>;
   debug?: Record<string, unknown>;
 }
 

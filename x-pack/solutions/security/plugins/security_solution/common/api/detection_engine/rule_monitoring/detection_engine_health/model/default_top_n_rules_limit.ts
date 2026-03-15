@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export const DEFAULT_PERCENTILES: number[] = [50, 95, 99, 99.9];
-
-export const DEFAULT_BASE_RULE_FIELDS = [
-  'rule.id',
-  'rule.category',
-  'rule.name',
-  'kibana.space_ids',
-];
+export const DEFAULT_TOP_N_RULES_LIMIT = 10;

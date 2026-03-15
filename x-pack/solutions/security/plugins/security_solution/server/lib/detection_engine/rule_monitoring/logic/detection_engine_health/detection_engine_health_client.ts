@@ -84,7 +84,7 @@ export const createDetectionEngineHealthClient = (
       return withSecuritySpan('IDetectionEngineHealthClient.calculateSpaceHealth', async () => {
         try {
           const [statsBasedOnRuleObjects, statsBasedOnEventLog] = await Promise.all([
-            ruleObjectsHealthClient.calculateSpaceHealth(args),
+            ruleObjectsHealthClient.calculateSpaceHealth(),
             eventLogHealthClient.calculateSpaceHealth(args),
           ]);
 
@@ -115,7 +115,7 @@ export const createDetectionEngineHealthClient = (
       return withSecuritySpan('IDetectionEngineHealthClient.calculateClusterHealth', async () => {
         try {
           const [statsBasedOnRuleObjects, statsBasedOnEventLog] = await Promise.all([
-            ruleObjectsHealthClient.calculateClusterHealth(args),
+            ruleObjectsHealthClient.calculateClusterHealth(),
             eventLogHealthClient.calculateClusterHealth(args),
           ]);
 

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import type { IEvent } from '@kbn/event-log-plugin/server';
+
 /**
  * When using these execution events as templates be sure to replace all the following fields with their updated values
  *
@@ -761,3 +764,233 @@ export const failedRanAfterDisabled = [
     },
   },
 ];
+
+interface MakeExecutionEventsParams {
+  ruleId: string;
+  ruleName: string;
+  timestamp: string;
+  outcome: 'success' | 'failure';
+  durationMs: number;
+  searchDurationMs: number;
+  indexingDurationMs: number;
+  scheduleDelayMs: number;
+}
+
+/**
+ * Generates a set of event log documents representing a single rule execution.
+ */
+export const makeExecutionEvents = (params: MakeExecutionEventsParams): IEvent[] => {
+  const {
+    ruleId,
+    ruleName,
+    timestamp,
+    outcome,
+    durationMs,
+    searchDurationMs,
+    indexingDurationMs,
+    scheduleDelayMs,
+  } = params;
+
+  const executionUuid = uuidv4();
+  const durationNanos = durationMs * 1_000_000;
+  const scheduleDelayNanos = scheduleDelayMs * 1_000_000;
+
+  const securityStatus = outcome === 'success' ? 'succeeded' : 'failed';
+  const securityStatusOrder = outcome === 'success' ? 0 : 30;
+  const alertingOutcome = outcome === 'success' ? 'success' : 'failure';
+  const alertingStatus = outcome === 'success' ? 'ok' : 'error';
+
+  return [
+    {
+      '@timestamp': timestamp,
+      event: {
+        provider: 'alerting',
+        action: 'execute',
+        kind: 'alert',
+        category: ['siem'],
+        start: timestamp,
+        outcome,
+        end: timestamp,
+        duration: durationNanos,
+      },
+      kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: executionUuid,
+              metrics: {
+                number_of_triggered_actions: 0,
+                number_of_searches: 1,
+                es_search_duration_ms: searchDurationMs,
+                total_search_duration_ms: searchDurationMs,
+                total_run_duration_ms: durationMs,
+              },
+            },
+          },
+        },
+        saved_objects: [
+          {
+            rel: 'primary',
+            type: 'alert',
+            id: ruleId,
+            type_id: 'siem.queryRule',
+          },
+        ],
+        task: {
+          scheduled: timestamp,
+          schedule_delay: scheduleDelayNanos,
+        },
+        alerting: {
+          status: alertingStatus,
+          outcome: alertingOutcome,
+        },
+        server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
+        version: '8.2.0',
+      },
+      rule: {
+        id: ruleId,
+        license: 'basic',
+        category: 'siem.queryRule',
+        ruleset: 'siem',
+        name: ruleName,
+      },
+      message: `rule executed: siem.queryRule:${ruleId}: '${ruleName}'`,
+      ecs: { version: '1.8.0' },
+    },
+    {
+      '@timestamp': timestamp,
+      event: {
+        provider: 'securitySolution.ruleExecution',
+        kind: 'metric',
+        action: 'execution-metrics',
+        sequence: 1,
+      },
+      rule: {
+        id: ruleId,
+        name: ruleName,
+        category: 'siem.queryRule',
+      },
+      kibana: {
+        alert: {
+          rule: {
+            execution: {
+              metrics: {
+                total_search_duration_ms: searchDurationMs,
+                total_indexing_duration_ms: indexingDurationMs,
+              },
+              uuid: executionUuid,
+            },
+          },
+        },
+        space_ids: ['default'],
+        saved_objects: [{ rel: 'primary', type: 'alert', id: ruleId }],
+        server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
+        version: '8.2.0',
+      },
+      ecs: { version: '1.8.0' },
+    },
+    {
+      '@timestamp': timestamp,
+      event: {
+        provider: 'securitySolution.ruleExecution',
+        kind: 'event',
+        action: 'status-change',
+        sequence: 2,
+      },
+      message: securityStatus,
+      rule: {
+        id: ruleId,
+        name: ruleName,
+        category: 'siem.queryRule',
+      },
+      kibana: {
+        alert: {
+          rule: {
+            execution: {
+              status: securityStatus,
+              status_order: securityStatusOrder,
+              uuid: executionUuid,
+            },
+          },
+        },
+        space_ids: ['default'],
+        saved_objects: [{ rel: 'primary', type: 'alert', id: ruleId }],
+        server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
+        version: '8.2.0',
+      },
+      ecs: { version: '1.8.0' },
+    },
+    {
+      '@timestamp': timestamp,
+      event: {
+        provider: 'securitySolution.ruleExecution',
+        kind: 'event',
+        action: 'status-change',
+        sequence: 0,
+      },
+      message: '',
+      rule: {
+        id: ruleId,
+        name: ruleName,
+        category: 'siem.queryRule',
+      },
+      kibana: {
+        alert: {
+          rule: {
+            execution: {
+              status: 'running',
+              status_order: 15,
+              uuid: executionUuid,
+            },
+          },
+        },
+        space_ids: ['default'],
+        saved_objects: [{ rel: 'primary', type: 'alert', id: ruleId }],
+        server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
+        version: '8.2.0',
+      },
+      ecs: { version: '1.8.0' },
+    },
+    {
+      '@timestamp': timestamp,
+      event: {
+        provider: 'alerting',
+        action: 'execute-start',
+        kind: 'alert',
+        category: ['siem'],
+        start: timestamp,
+      },
+      kibana: {
+        alert: {
+          rule: {
+            execution: {
+              uuid: executionUuid,
+            },
+          },
+        },
+        saved_objects: [
+          {
+            rel: 'primary',
+            type: 'alert',
+            id: ruleId,
+            type_id: 'siem.queryRule',
+          },
+        ],
+        task: {
+          scheduled: timestamp,
+          schedule_delay: scheduleDelayNanos,
+        },
+        server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
+        version: '8.2.0',
+      },
+      rule: {
+        id: ruleId,
+        license: 'basic',
+        category: 'siem.queryRule',
+        ruleset: 'siem',
+      },
+      message: `rule execution start: "${ruleId}"`,
+      ecs: { version: '1.8.0' },
+    },
+  ];
+};

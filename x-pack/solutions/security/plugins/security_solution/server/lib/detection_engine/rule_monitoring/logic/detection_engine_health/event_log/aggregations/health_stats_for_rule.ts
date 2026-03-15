@@ -6,20 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
-
-import type {
-  HealthIntervalGranularity,
-  HealthHistory,
-} from '../../../../../../../../common/api/detection_engine/rule_monitoring';
-import type { RawData } from '../../../utils/normalization';
-
+import type { HealthIntervalGranularity } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import * as f from '../../../event_log/event_log_fields';
-import {
-  getRuleExecutionStatsAggregation,
-  normalizeRuleExecutionStatsAggregationResult,
-} from './rule_execution_stats';
-import type { HealthOverInterval, HealthOverviewStats } from './types';
+import { getRuleExecutionStatsAggregation } from './rule_execution_stats';
 
 export const getRuleHealthAggregation = (
   granularity: HealthIntervalGranularity
@@ -50,39 +39,5 @@ const getRuleExecutionStatsHistoryAggregation = (
       },
       aggs: getRuleExecutionStatsAggregation('histogram'),
     },
-  };
-};
-
-export const normalizeRuleHealthAggregationResult = (
-  result: AggregateEventsBySavedObjectResult,
-  requestAggs: Record<string, estypes.AggregationsAggregationContainer>
-): HealthOverInterval => {
-  const aggregations = result.aggregations ?? {};
-  return {
-    stats_over_interval: normalizeRuleExecutionStatsAggregationResult(
-      aggregations,
-      'whole-interval'
-    ),
-    history_over_interval: normalizeHistoryOverInterval(aggregations),
-    debug: {
-      eventLog: {
-        request: { aggs: requestAggs },
-        response: { aggregations },
-      },
-    },
-  };
-};
-
-const normalizeHistoryOverInterval = (
-  aggregations: Record<string, RawData>
-): HealthHistory<HealthOverviewStats> => {
-  const statsHistory = aggregations.statsHistory || {};
-
-  return {
-    buckets: statsHistory.buckets.map((rawBucket: RawData) => {
-      const timestamp: string = String(rawBucket.key_as_string);
-      const stats = normalizeRuleExecutionStatsAggregationResult(rawBucket, 'histogram');
-      return { timestamp, stats };
-    }),
   };
 };
