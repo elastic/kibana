@@ -61,11 +61,17 @@ describe('TaskManagerService Integration Tests', () => {
       expect(taskManagerSetupSpy).toHaveBeenCalled();
       taskManagerSetup = taskManagerSetupSpy.mock.results[0].value;
 
+      const mockAnalytics = {
+        reportEvent: jest.fn(),
+        registerEventType: jest.fn(),
+      } as any;
+
       automaticImportService = new AutomaticImportService(
         kbnRoot.logger,
         coreSetup.savedObjects,
         taskManagerSetup,
-        coreSetup as unknown as CoreSetup<AutomaticImportV2PluginStartDependencies>
+        coreSetup as unknown as CoreSetup<AutomaticImportV2PluginStartDependencies>,
+        mockAnalytics
       );
 
       // Start Kibana to boot taskManager

@@ -6,7 +6,13 @@
  */
 
 import assert from 'assert';
-import type { CoreSetup, KibanaRequest, Logger, LoggerFactory } from '@kbn/core/server';
+import type {
+  AnalyticsServiceSetup,
+  CoreSetup,
+  KibanaRequest,
+  Logger,
+  LoggerFactory,
+} from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -24,6 +30,7 @@ import { validateFieldMappings } from '../build_integration/validate_fields';
 import type { LangSmithOptions } from '../../routes/types';
 import type { AutomaticImportV2PluginStartDependencies } from '../../types';
 import type { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
+import { AIV2TelemetryEventType } from '../../../common';
 
 export const DATA_STREAM_CREATION_TASK_TYPE = 'autoImport-dataStream-task';
 
@@ -48,14 +55,17 @@ export class TaskManagerService {
   private taskManager: TaskManagerStartContract | null = null;
   private agentService: AgentService;
   private automaticImportSavedObjectService: AutomaticImportSavedObjectService | null = null;
+  private analytics: AnalyticsServiceSetup;
 
   constructor(
     logger: LoggerFactory,
     taskManagerSetup: TaskManagerSetupContract,
-    core: CoreSetup<AutomaticImportV2PluginStartDependencies>
+    core: CoreSetup<AutomaticImportV2PluginStartDependencies>,
+    analytics: AnalyticsServiceSetup
   ) {
     this.logger = logger.get('taskManagerService');
     this.agentService = new AgentService(new AutomaticImportSamplesIndexService(logger), logger);
+    this.analytics = analytics;
     // Register task definitions during setup phase
     taskManagerSetup.registerTaskDefinitions({
       [DATA_STREAM_CREATION_TASK_TYPE]: {
@@ -189,6 +199,8 @@ export class TaskManagerService {
       `Running task ${taskId} with ${JSON.stringify({ integrationId, dataStreamId, connectorId })}`
     );
 
+    const startTime = Date.now();
+
     try {
       if (!integrationId || !dataStreamId || !connectorId) {
         throw new Error('Task params must include integrationId, dataStreamId, and connectorId');
@@ -260,6 +272,15 @@ export class TaskManagerService {
       this.logger.debug(`Data stream ${dataStreamId} updated successfully`);
       this.logger.debug(`Task ${taskId} result: ${JSON.stringify(result)}`);
 
+      // Report telemetry for successful completion
+      const durationMs = Date.now() - startTime;
+      this.reportDataStreamCreationComplete({
+        integrationId,
+        dataStreamId,
+        durationMs,
+        success: true,
+      });
+
       return {
         state: {
           task_status: TASK_STATUSES.completed,
@@ -271,7 +292,40 @@ export class TaskManagerService {
       };
     } catch (error) {
       this.logger.error(`Task ${taskId} failed: ${JSON.stringify(error)}`);
+
+      // Report telemetry for failed completion
+      const durationMs = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.reportDataStreamCreationComplete({
+        integrationId,
+        dataStreamId,
+        durationMs,
+        success: false,
+        errorMessage,
+      });
+
       return { state: { task_status: TASK_STATUSES.failed }, error };
+    }
+  }
+
+  private reportDataStreamCreationComplete(params: {
+    integrationId: string;
+    dataStreamId: string;
+    durationMs: number;
+    success: boolean;
+    errorMessage?: string;
+  }) {
+    try {
+      this.analytics.reportEvent(AIV2TelemetryEventType.DataStreamCreationComplete, {
+        sessionId: 'server-task',
+        integrationId: params.integrationId,
+        dataStreamId: params.dataStreamId,
+        durationMs: params.durationMs,
+        success: params.success,
+        ...(params.errorMessage ? { errorMessage: params.errorMessage } : {}),
+      });
+    } catch (telemetryError) {
+      this.logger.warn(`Failed to report telemetry: ${telemetryError}`);
     }
   }
 

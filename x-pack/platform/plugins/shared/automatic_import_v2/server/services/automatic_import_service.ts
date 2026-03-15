@@ -8,6 +8,7 @@
 import assert from 'assert';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type {
+  AnalyticsServiceSetup,
   Logger,
   LoggerFactory,
   SavedObject,
@@ -128,7 +129,8 @@ export class AutomaticImportService {
     loggerFactory: LoggerFactory,
     savedObjectsServiceSetup: SavedObjectsServiceSetup,
     taskManagerSetup: TaskManagerSetupContract,
-    core: CoreSetup<AutomaticImportV2PluginStartDependencies>
+    core: CoreSetup<AutomaticImportV2PluginStartDependencies>,
+    analytics: AnalyticsServiceSetup
   ) {
     this.pluginStop$ = new ReplaySubject(1);
     this.loggerFactory = loggerFactory;
@@ -140,7 +142,12 @@ export class AutomaticImportService {
     this.savedObjectsServiceSetup.registerType(dataStreamSavedObjectType);
 
     this.taskManagerSetup = taskManagerSetup;
-    this.taskManagerService = new TaskManagerService(loggerFactory, this.taskManagerSetup, core);
+    this.taskManagerService = new TaskManagerService(
+      loggerFactory,
+      this.taskManagerSetup,
+      core,
+      analytics
+    );
   }
 
   // Run initialize in the start phase of plugin

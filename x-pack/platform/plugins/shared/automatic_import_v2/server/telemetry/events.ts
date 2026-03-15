@@ -12,13 +12,48 @@ import { AIV2TelemetryEventType } from '../../common';
 /**
  * Server-side EBT event schemas.
  * These are used by server/plugin.ts to register event types.
- *
- * Note: IntegrationInstalled is registered on both client and server.
- * Server can report this event from routes when installations succeed.
  */
 export const telemetryEventsSchemas: Partial<
   Record<AIV2TelemetryEventType, EventTypeOpts<object>>
 > = {
+  // F4: Datastream creation completion (from Task Manager)
+  [AIV2TelemetryEventType.DataStreamCreationComplete]: {
+    eventType: AIV2TelemetryEventType.DataStreamCreationComplete,
+    schema: {
+      sessionId: {
+        type: 'keyword',
+        _meta: {
+          description: 'The ID to identify all the events in the same session',
+          optional: false,
+        },
+      },
+      integrationId: {
+        type: 'keyword',
+        _meta: { description: 'Integration ID', optional: false },
+      },
+      dataStreamId: {
+        type: 'keyword',
+        _meta: { description: 'Data stream ID', optional: false },
+      },
+      durationMs: {
+        type: 'long',
+        _meta: {
+          description: 'Time taken for datastream creation in milliseconds',
+          optional: false,
+        },
+      },
+      success: {
+        type: 'boolean',
+        _meta: { description: 'Whether the creation was successful', optional: false },
+      },
+      errorMessage: {
+        type: 'keyword',
+        _meta: { description: 'Error message if creation failed', optional: true },
+      },
+    },
+  },
+
+  // Integration installed event
   [AIV2TelemetryEventType.IntegrationInstalled]: {
     eventType: AIV2TelemetryEventType.IntegrationInstalled,
     schema: {

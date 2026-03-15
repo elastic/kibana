@@ -48,6 +48,12 @@ export type {
 export {
   AIV2TelemetryEventType,
   type CreateIntegrationPageLoadedPayload,
+  type DataStreamFlyoutOpenedPayload,
+  type EditDataStreamFlyoutOpenedPayload,
+  type AnalyzeLogsTriggeredPayload,
+  type EditPipelineTabOpenedPayload,
+  type CodeEditorCopyClickedPayload,
+  type DataStreamCreationCompletePayload,
   type IntegrationInstalledPayload,
   type AIV2EventPayload,
 } from './telemetry/types';

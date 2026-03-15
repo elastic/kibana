@@ -78,7 +78,8 @@ export class AutomaticImportV2Plugin
       this.logger,
       core.savedObjects,
       plugins.taskManager,
-      core
+      core,
+      core.analytics
     );
 
     const requestContextFactory = new RequestContextFactory({
