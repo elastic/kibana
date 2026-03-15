@@ -189,6 +189,7 @@ export const ConfigurationRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      analytics_enabled: rt.boolean,
     })
   ),
 ]);
@@ -215,6 +216,7 @@ export const ConfigurationPatchRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      analytics_enabled: rt.boolean,
     })
   ),
   rt.strict({ version: rt.string }),

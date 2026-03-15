@@ -52,6 +52,13 @@ jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/configure/use_persist_configuration');
 jest.mock('../../containers/configure/use_action_types');
 jest.mock('../../common/use_license');
+jest.mock('../../containers/configure/use_trigger_analytics_sync', () => ({
+  useTriggerAnalyticsSync: () => ({
+    mutate: jest.fn(),
+    mutateAsync: jest.fn(),
+    isLoading: false,
+  }),
+}));
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;

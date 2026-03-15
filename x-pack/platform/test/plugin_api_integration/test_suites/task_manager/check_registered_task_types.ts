@@ -166,6 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cai:cases_analytics_index_backfill',
         'cai:cases_analytics_index_scheduler',
         'cai:cases_analytics_index_synchronization',
+        'cai:cases_analytics_owner_sync',
         'cases-telemetry-task',
         'cases_incremental_id_assignment',
         'cloud_security_posture-stats_task',

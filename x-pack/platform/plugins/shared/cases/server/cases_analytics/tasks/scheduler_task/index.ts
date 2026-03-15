@@ -23,11 +23,13 @@ export function registerCAISchedulerTask({
   logger,
   core,
   analyticsConfig,
+  isServerless,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   core: CoreSetup<CasesServerStartDependencies>;
   analyticsConfig: ConfigType['analytics'];
+  isServerless: boolean;
 }) {
   const getUnsecureSavedObjectsClient = async (): Promise<SavedObjectsClientContract> => {
     const [{ savedObjects }] = await core.getStartServices();
@@ -54,14 +56,15 @@ export function registerCAISchedulerTask({
     [ANALYTICS_SCHEDULER_TASK_TYPE]: {
       title: 'Schedules cases analytics synchronization tasks.',
       maxAttempts: 3,
-      createTaskRunner: () => {
+      createTaskRunner: (context) => {
         return new AnalyticsIndexSchedulerTaskFactory({
           getUnsecureSavedObjectsClient,
           getTaskManager,
           logger,
           analyticsConfig,
           getESClient,
-        }).create();
+          isServerless,
+        }).create(context);
       },
     },
   });

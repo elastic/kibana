@@ -30,6 +30,7 @@ describe('BackfillTaskRunner', () => {
   const analyticsConfig = {
     index: {
       enabled: true,
+      reindexConcurrency: 3,
     },
   };
 
@@ -158,6 +159,7 @@ describe('BackfillTaskRunner', () => {
     const analyticsConfigDisabled = {
       index: {
         enabled: false,
+        reindexConcurrency: 3,
       },
     };
 

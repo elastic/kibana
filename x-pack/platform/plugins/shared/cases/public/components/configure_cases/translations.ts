@@ -214,3 +214,71 @@ export const SHOW_ALL_TEMPLATES = i18n.translate(
     defaultMessage: 'Show all templates',
   }
 );
+
+export const ANALYTICS_TITLE = i18n.translate('xpack.cases.configureCases.analytics.title', {
+  defaultMessage: 'Analytics',
+});
+
+export const ANALYTICS_DESC = i18n.translate('xpack.cases.configureCases.analytics.desc', {
+  defaultMessage:
+    'Enable analytics indexing to make cases data available for dashboards and search.',
+});
+
+export const ANALYTICS_ENABLE_LABEL = i18n.translate(
+  'xpack.cases.configureCases.analytics.enableLabel',
+  {
+    defaultMessage: 'Enable analytics',
+  }
+);
+
+export const ANALYTICS_LAST_SYNC_LABEL = i18n.translate(
+  'xpack.cases.configureCases.analytics.lastSyncLabel',
+  {
+    defaultMessage: 'Last updated:',
+  }
+);
+
+export const ANALYTICS_SYNC_BUTTON_LABEL = i18n.translate(
+  'xpack.cases.configureCases.analytics.syncButtonLabel',
+  {
+    defaultMessage: 'Sync data',
+  }
+);
+
+export const ANALYTICS_SYNCING_LABEL = i18n.translate(
+  'xpack.cases.configureCases.analytics.syncingLabel',
+  {
+    defaultMessage: 'Syncing...',
+  }
+);
+
+export const ANALYTICS_SYNC_ERROR_TITLE = i18n.translate(
+  'xpack.cases.configureCases.analytics.syncErrorTitle',
+  {
+    defaultMessage: 'Failed to trigger analytics sync',
+  }
+);
+
+export const ANALYTICS_EXPLORE_IN_DISCOVER = i18n.translate(
+  'xpack.cases.configureCases.analytics.exploreInDiscover',
+  {
+    defaultMessage: 'Explore in Discover',
+  }
+);
+
+export const ANALYTICS_AUTO_SYNC_INFO = i18n.translate(
+  'xpack.cases.configureCases.analytics.autoSyncInfo',
+  {
+    defaultMessage: 'Data is automatically synced every 5 minutes.',
+  }
+);
+
+export const ANALYTICS_SYNC_IDLE_INFO = i18n.translate(
+  'xpack.cases.configureCases.analytics.syncIdleInfo',
+  {
+    defaultMessage:
+      'Analytics sync is idle — no new case activity was detected in recent checks. ' +
+      'The sync interval has been extended to 30 minutes to reduce load. ' +
+      'It will resume normal frequency once new activity is found.',
+  }
+);

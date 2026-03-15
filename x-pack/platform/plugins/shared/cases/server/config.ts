@@ -20,6 +20,21 @@ export const ConfigSchema = schema.object({
         serverless: schema.boolean({ defaultValue: false }),
         traditional: schema.boolean({ defaultValue: false }),
       }),
+      /**
+       * Maximum number of concurrent ES _reindex operations the owner sync task may
+       * start in a single run.  Keeping this low prevents coordinating-node OOM
+       * (each in-flight reindex holds a full bulk batch in memory on the node that
+       * received the API call).
+       *
+       * Serverless is capped at 1 and cannot be overridden — the single search-tier
+       * node coordinates all requests and saturates at ~3-5 simultaneous reindexes.
+       * On traditional deployments the safe upper bound depends on cluster size;
+       * the default of 3 is conservative enough for a single-node dev cluster.
+       */
+      reindexConcurrency: offeringBasedSchema({
+        serverless: schema.number({ defaultValue: 1, min: 1, max: 1 }),
+        traditional: schema.number({ defaultValue: 3, min: 1, max: 10 }),
+      }),
     }),
   }),
   attachments: schema.object({

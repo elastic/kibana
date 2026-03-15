@@ -21,6 +21,14 @@ export const ClosureTypeRt = rt.union([
   rt.literal('close-by-pushing'),
 ]);
 
+/**
+ * Tracks whether the analytics sync for a given (owner, space) pair is running
+ * at the active cadence (every 5 min) or has been throttled to idle cadence
+ * (every 30 min) after 5 consecutive empty runs.
+ */
+export const AnalyticsSyncStatusRt = rt.union([rt.literal('active'), rt.literal('idle')]);
+export type AnalyticsSyncStatus = rt.TypeOf<typeof AnalyticsSyncStatusRt>;
+
 export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
   /**
    * key of custom field
@@ -150,6 +158,23 @@ export const ConfigurationActivityFieldsRt = rt.strict({
 export const ConfigurationAttributesRt = rt.intersection([
   CasesConfigureBasicRt,
   ConfigurationActivityFieldsRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * Whether analytics indexing is enabled for cases in this space/owner
+       */
+      analytics_enabled: rt.boolean,
+      /**
+       * ISO timestamp of the last successful analytics sync for this space/owner
+       */
+      analytics_last_sync_at: rt.string,
+      /**
+       * Whether the analytics sync is running at active (5-min) or idle (30-min) cadence.
+       * Set by the per-owner sync task; undefined means no sync has run yet.
+       */
+      analytics_sync_status: AnalyticsSyncStatusRt,
+    })
+  ),
 ]);
 
 export const ConfigurationRt = rt.intersection([

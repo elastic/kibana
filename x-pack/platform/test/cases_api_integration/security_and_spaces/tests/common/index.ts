@@ -71,5 +71,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/analytics_index/creation'));
     loadTestFile(require.resolve('./cases/analytics_index/backfill'));
     loadTestFile(require.resolve('./cases/analytics_index/synchronization'));
+    loadTestFile(require.resolve('./cases/analytics_index/owner_sync'));
   });
 };

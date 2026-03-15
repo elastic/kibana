@@ -6,7 +6,15 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_CONFIGURE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../common/constants';
+import { OWNERS } from '../../common/constants/owners';
+import type { Owner } from '../../common/constants/types';
+import type { ConfigurationPersistedAttributes } from '../common/types/configure';
+
+export interface OwnerSpacePair {
+  spaceId: string;
+  owner: Owner;
+}
 
 const MAX_BUCKETS_LIMIT = 65535;
 export async function getAllSpacesWithCases(savedObjectsClient: SavedObjectsClientContract) {
@@ -43,4 +51,35 @@ export async function getAllSpacesWithCases(savedObjectsClient: SavedObjectsClie
     },
   });
   return spaces.aggregations?.spaces.buckets.map((space) => space.key) ?? [];
+}
+
+export async function getSpacesWithAnalyticsEnabled(
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<OwnerSpacePair[]> {
+  const result = await savedObjectsClient.find<ConfigurationPersistedAttributes>({
+    type: CASE_CONFIGURE_SAVED_OBJECT,
+    namespaces: ['*'],
+    filter: `${CASE_CONFIGURE_SAVED_OBJECT}.attributes.analytics_enabled: true`,
+    page: 1,
+    perPage: 10000,
+  });
+
+  const seen = new Set<string>();
+  const pairs: OwnerSpacePair[] = [];
+
+  for (const so of result.saved_objects) {
+    const owner = so.attributes.owner as Owner;
+    if (OWNERS.includes(owner as (typeof OWNERS)[number])) {
+      const spaces = (so.namespaces ?? []).filter((ns) => ns !== '*');
+      for (const spaceId of spaces) {
+        const key = `${spaceId}:${owner}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          pairs.push({ spaceId, owner });
+        }
+      }
+    }
+  }
+
+  return pairs;
 }

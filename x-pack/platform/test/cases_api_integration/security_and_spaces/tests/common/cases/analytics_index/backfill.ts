@@ -14,9 +14,7 @@ import {
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import {
   runActivityBackfillTask,
-  runAttachmentsBackfillTask,
-  runCasesBackfillTask,
-  runCommentsBackfillTask,
+  runContentBackfillTask,
   runSchedulerTask,
 } from '../../../../../common/lib/api/analytics';
 import {
@@ -101,11 +99,11 @@ export default ({ getService }: FtrProviderContext): void => {
         200
       );
 
-      await runCasesBackfillTask(supertest);
+      await runContentBackfillTask(supertest);
 
       await retry.tryForTime(300000, async () => {
         const caseAnalytics = await esClient.get({
-          index: '.internal.cases.securitysolution-default',
+          index: '.internal.cases-analytics.securitysolution-default',
           id: `cases:${caseToBackfill.id}`,
         });
 
@@ -190,18 +188,18 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await runAttachmentsBackfillTask(supertest);
+      await runContentBackfillTask(supertest);
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
-          index: '.internal.cases-attachments.securitysolution-space1',
+          index: '.internal.cases-analytics.securitysolution-space1',
           id: `cases-comments:${postedCaseWithAttachments.comments![0].id}`,
         });
 
         expect(firstAttachmentAnalytics.found).to.be(true);
 
         const secondAttachmentAnalytics = await esClient.get({
-          index: '.internal.cases-attachments.securitysolution-space1',
+          index: '.internal.cases-analytics.securitysolution-space1',
           id: `cases-comments:${postedCaseWithAttachments.comments![1].id}`,
         });
 
@@ -224,11 +222,11 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         params: { ...postCommentUserReq, owner: SECURITY_SOLUTION_OWNER },
       });
-      await runCommentsBackfillTask(supertest);
+      await runContentBackfillTask(supertest);
 
       await retry.try(async () => {
         const commentAnalytics = await esClient.get({
-          index: '.internal.cases-comments.securitysolution-default',
+          index: '.internal.cases-analytics.securitysolution-default',
           id: `cases-comments:${patchedCase.comments![0].id}`,
         });
 
@@ -294,7 +292,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await retry.try(async () => {
         await runActivityBackfillTask(supertest);
         const activityAnalytics = await esClient.search({
-          index: '.internal.cases-activity.securitysolution-default',
+          index: '.internal.cases-analytics-activity.securitysolution-default',
         });
 
         // @ts-ignore
