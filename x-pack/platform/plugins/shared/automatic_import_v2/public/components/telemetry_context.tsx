@@ -4,23 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useRef, type PropsWithChildren } from 'react';
+import React, { useMemo, useRef, useEffect, type PropsWithChildren } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 import { useKibana } from '../common/hooks/use_kibana';
 import { AIV2TelemetryEventType } from '../../common';
 
-type ReportIntegrationInstalled = (params: {
-  integrationName: string;
-  version: string;
-  dataStreamCount: number;
-  dataStreamNames: string[];
-  processorCount: number;
-  processorTypes: string[];
-}) => void;
-
 interface TelemetryContextProps {
   sessionId: string;
-  reportIntegrationInstalled: ReportIntegrationInstalled;
 }
 
 const TelemetryContext = React.createContext<TelemetryContextProps | null>(null);
@@ -39,34 +29,18 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
   const { automaticImportV2 } = useKibana().services;
   const telemetry = automaticImportV2?.telemetry;
 
-  const reportIntegrationInstalled = useCallback<ReportIntegrationInstalled>(
-    ({
-      integrationName,
-      version,
-      dataStreamCount,
-      dataStreamNames,
-      processorCount,
-      processorTypes,
-    }) => {
-      telemetry?.reportEvent(AIV2TelemetryEventType.IntegrationInstalled, {
-        sessionId: sessionData.current.sessionId,
-        integrationName,
-        version,
-        dataStreamCount,
-        dataStreamNames,
-        processorCount,
-        processorTypes,
-      });
-    },
-    [telemetry]
-  );
+  // Report page load event once when provider mounts
+  useEffect(() => {
+    telemetry?.reportEvent(AIV2TelemetryEventType.CreateIntegrationPageLoaded, {
+      sessionId: sessionData.current.sessionId,
+    });
+  }, [telemetry]);
 
   const value = useMemo<TelemetryContextProps>(
     () => ({
       sessionId: sessionData.current.sessionId,
-      reportIntegrationInstalled,
     }),
-    [reportIntegrationInstalled]
+    []
   );
 
   return <TelemetryContext.Provider value={value}>{children}</TelemetryContext.Provider>;

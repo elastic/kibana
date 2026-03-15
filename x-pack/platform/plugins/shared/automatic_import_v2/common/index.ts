@@ -47,6 +47,7 @@ export type {
 
 export {
   AIV2TelemetryEventType,
+  type CreateIntegrationPageLoadedPayload,
   type IntegrationInstalledPayload,
   type AIV2EventPayload,
 } from './telemetry/types';

@@ -12,44 +12,17 @@ import { AIV2TelemetryEventType } from '../../../common';
 /**
  * EBT schema definitions for browser-side telemetry events.
  * These schemas define the structure of event payloads for BigQuery.
+ *
+ * Note: IntegrationInstalled is server-only and registered in server/telemetry/events.ts
  */
-export const telemetryEventsSchemas: Record<AIV2TelemetryEventType, RootSchema<object>> = {
-  [AIV2TelemetryEventType.IntegrationInstalled]: {
+export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, RootSchema<object>>> = {
+  [AIV2TelemetryEventType.CreateIntegrationPageLoaded]: {
     sessionId: {
       type: 'keyword',
-      _meta: { description: 'Session identifier', optional: false },
-    },
-    integrationName: {
-      type: 'keyword',
-      _meta: { description: 'Integration name', optional: false },
-    },
-    version: {
-      type: 'keyword',
-      _meta: { description: 'Integration version', optional: false },
-    },
-    dataStreamCount: {
-      type: 'long',
-      _meta: { description: 'Number of data streams', optional: false },
-    },
-    dataStreamNames: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: { description: 'Data stream name', optional: false },
+      _meta: {
+        description: 'The ID to identify all the events in the same session',
+        optional: false,
       },
-      _meta: { description: 'List of data stream names', optional: false },
-    },
-    processorCount: {
-      type: 'long',
-      _meta: { description: 'Total number of processors across all pipelines', optional: false },
-    },
-    processorTypes: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: { description: 'Processor type', optional: false },
-      },
-      _meta: { description: 'List of unique processor types used', optional: false },
     },
   },
 };

@@ -12,14 +12,22 @@ import { AIV2TelemetryEventType } from '../../common';
 /**
  * Server-side EBT event schemas.
  * These are used by server/plugin.ts to register event types.
+ *
+ * Note: IntegrationInstalled is registered on both client and server.
+ * Server can report this event from routes when installations succeed.
  */
-export const telemetryEventsSchemas: Record<AIV2TelemetryEventType, EventTypeOpts<object>> = {
+export const telemetryEventsSchemas: Partial<
+  Record<AIV2TelemetryEventType, EventTypeOpts<object>>
+> = {
   [AIV2TelemetryEventType.IntegrationInstalled]: {
     eventType: AIV2TelemetryEventType.IntegrationInstalled,
     schema: {
       sessionId: {
         type: 'keyword',
-        _meta: { description: 'Session identifier', optional: false },
+        _meta: {
+          description: 'The ID to identify all the events in the same session',
+          optional: false,
+        },
       },
       integrationName: {
         type: 'keyword',
@@ -31,15 +39,15 @@ export const telemetryEventsSchemas: Record<AIV2TelemetryEventType, EventTypeOpt
       },
       dataStreamCount: {
         type: 'long',
-        _meta: { description: 'Number of data streams', optional: false },
+        _meta: { description: 'Number of data streams in the integration', optional: false },
       },
       dataStreamNames: {
         type: 'array',
         items: {
           type: 'keyword',
-          _meta: { description: 'Data stream name', optional: false },
+          _meta: { description: 'Data stream name (dataset)', optional: false },
         },
-        _meta: { description: 'List of data stream names', optional: false },
+        _meta: { description: 'List of data stream names (datasets)', optional: false },
       },
       processorCount: {
         type: 'long',

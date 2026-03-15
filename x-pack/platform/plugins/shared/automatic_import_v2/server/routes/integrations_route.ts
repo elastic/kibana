@@ -248,7 +248,8 @@ const approveIntegrationRoute = (
       },
       async (context, request, response) => {
         try {
-          const { automaticImportService, getCurrentUser } = await context.automaticImportv2;
+          const { automaticImportService, getCurrentUser, reportTelemetryEvent } =
+            await context.automaticImportv2;
           const authenticatedUser = await getCurrentUser();
 
           const { integration_id: integrationId } = request.params;
@@ -259,6 +260,42 @@ const approveIntegrationRoute = (
             authenticatedUser,
             version,
           });
+
+          // Report telemetry after successful approval
+          try {
+            const integration = await automaticImportService.getIntegrationById(integrationId);
+            const dataStreams = await automaticImportService.getAllDataStreams(integrationId);
+
+            // Extract processor info from all data streams
+            const allProcessorTypes: string[] = [];
+            let totalProcessorCount = 0;
+
+            dataStreams.forEach((ds) => {
+              if (ds.result?.ingest_pipeline?.processors) {
+                const processors = ds.result.ingest_pipeline.processors;
+                totalProcessorCount += processors.length;
+                processors.forEach((processor: Record<string, unknown>) => {
+                  const processorType = Object.keys(processor)[0];
+                  if (processorType && !allProcessorTypes.includes(processorType)) {
+                    allProcessorTypes.push(processorType);
+                  }
+                });
+              }
+            });
+
+            reportTelemetryEvent('aiv2_integration_installed', {
+              sessionId: request.headers['x-session-id'] || 'unknown',
+              integrationName: integration.title,
+              version,
+              dataStreamCount: dataStreams.length,
+              dataStreamNames: dataStreams.map((ds) => ds.title),
+              processorCount: totalProcessorCount,
+              processorTypes: allProcessorTypes,
+            });
+          } catch (telemetryError) {
+            // Don't fail the request if telemetry fails
+            logger.warn(`Failed to report telemetry: ${telemetryError}`);
+          }
 
           return response.ok({ body: { message: 'Integration approved successfully' } });
         } catch (err) {
