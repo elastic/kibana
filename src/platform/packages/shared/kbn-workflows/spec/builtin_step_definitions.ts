@@ -120,6 +120,37 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     },
   },
   {
+    id: 'loop.break',
+    label: 'Break',
+    description: 'Exit the enclosing loop immediately. Valid only inside a foreach or while body',
+    category: StepCategory.FlowControl,
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    documentation: {
+      examples: [
+        `- name: stop_on_done
+  type: loop.break
+  if: "foreach.item.status : 'done'"`,
+      ],
+    },
+  },
+  {
+    id: 'loop.continue',
+    label: 'Continue',
+    description:
+      'Skip remaining steps in the current iteration and advance to the next one. Valid only inside a foreach or while body',
+    category: StepCategory.FlowControl,
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    documentation: {
+      examples: [
+        `- name: skip_processed
+  type: loop.continue
+  if: "foreach.item.processed : true"`,
+      ],
+    },
+  },
+  {
     id: 'wait',
     label: 'Wait',
     description: 'Pause execution for a specified duration',
