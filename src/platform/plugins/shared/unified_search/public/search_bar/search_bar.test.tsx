@@ -127,8 +127,7 @@ function wrapSearchBarInContext(
   );
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/253342
-describe.skip('SearchBar', () => {
+describe('SearchBar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
