@@ -22,7 +22,6 @@ import {
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { EntityStoreManagementPage } from './pages/entity_store_management_page';
 import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
@@ -40,8 +39,7 @@ const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
   return (
     <Routes>
       <Route
-        path={ENTITY_ANALYTICS_MANAGEMENT_PATH}
-        exact
+        path={`${ENTITY_ANALYTICS_MANAGEMENT_PATH}/:tab?`}
         component={EntityAnalyticsManagementWrapper}
       />
       <Route component={NotFoundPage} />
@@ -61,7 +59,7 @@ const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
           <Redirect
             to={{
               ...location,
-              pathname: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
+              pathname: `${ENTITY_ANALYTICS_MANAGEMENT_PATH}/asset_criticality`,
               search: location.search,
             }}
           />
@@ -75,27 +73,30 @@ const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
 EntityAnalyticsAssetClassificationContainer.displayName =
   'EntityAnalyticsAssetClassificationContainer';
 
-// ---- Entity store routes ----
-const EntityAnalyticsEntityStoreWrapper = () => (
-  <PluginTemplateWrapper>
-    <EntityStoreManagementPage />
-  </PluginTemplateWrapper>
-);
-
-const EntityAnalyticsEntityStoreContainer: React.FC = React.memo(() => {
+// ---- Entity store redirect route ----
+const EntityAnalyticsEntityStoreRedirectContainer: React.FC = React.memo(() => {
   return (
     <Routes>
       <Route
         path={ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH}
         exact
-        component={EntityAnalyticsEntityStoreWrapper}
+        render={({ location }) => (
+          <Redirect
+            to={{
+              ...location,
+              pathname: `${ENTITY_ANALYTICS_MANAGEMENT_PATH}/status`,
+              search: location.search,
+            }}
+          />
+        )}
       />
       <Route component={NotFoundPage} />
     </Routes>
   );
 });
 
-EntityAnalyticsEntityStoreContainer.displayName = 'EntityAnalyticsEntityStoreContainer';
+EntityAnalyticsEntityStoreRedirectContainer.displayName =
+  'EntityAnalyticsEntityStoreRedirectContainer';
 
 // ---- Landing routes ----
 const EntityAnalyticsLandingWrapper = () => (
@@ -219,10 +220,7 @@ export const routes = [
   },
   {
     path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
-    component: withSecurityRoutePageWrapper(
-      EntityAnalyticsEntityStoreContainer,
-      SecurityPageName.entityAnalyticsEntityStoreManagement
-    ),
+    component: EntityAnalyticsEntityStoreRedirectContainer,
   },
   {
     path: ENTITY_ANALYTICS_LANDING_PATH,

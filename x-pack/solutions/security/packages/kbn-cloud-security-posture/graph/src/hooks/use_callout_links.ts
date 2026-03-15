@@ -80,10 +80,8 @@ export const useCalloutLinks = ():
     INTEGRATIONS_PLUGIN_ID
   )}/detail/cloud_asset_inventory/overview`;
 
-  // Hard-coded path referencing ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH
-  // from x-pack/solutions/security/plugins/security_solution/common/constants.ts
   const entityStoreUrl = getUrlForApp('security', {
-    path: '/entity_analytics_entity_store',
+    path: '/entity_analytics_management',
   });
 
   return {
