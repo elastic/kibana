@@ -7767,6 +7767,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/node-debugging-routes-plugin@link:src/platform/plugins/private/node_debugging_routes":
+  version "0.0.0"
+  uid ""
+
 "@kbn/node-libs-browser-webpack-plugin@link:src/platform/packages/private/kbn-node-libs-browser-webpack-plugin":
   version "0.0.0"
   uid ""
