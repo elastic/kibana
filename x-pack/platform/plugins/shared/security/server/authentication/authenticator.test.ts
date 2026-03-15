@@ -419,6 +419,7 @@ describe('Authenticator', () => {
         ).toHaveBeenCalledWith(expect.anything(), {
           supportedSchemes: new Set(['apikey', 'bearer', 'basic']),
           jwt: { taggedRoutesOnly: true },
+          acceptUiamOAuth: false,
         });
       });
 

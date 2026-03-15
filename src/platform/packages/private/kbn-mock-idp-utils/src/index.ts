@@ -46,4 +46,5 @@ export {
   generateCosmosDBApiRequestHeaders,
   getSAMLRequestId,
   createUiamSessionTokens,
+  createUiamOAuthAccessToken,
 } from './utils';
