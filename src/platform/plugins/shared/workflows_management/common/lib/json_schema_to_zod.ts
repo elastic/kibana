@@ -12,6 +12,17 @@ import { resolveRef } from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 
+/**
+ * Applies `.strict()` to a ZodObject when `additionalProperties: false` is set,
+ * so extra keys are rejected at validation time.
+ */
+function applyAdditionalProperties(jsonSchema: JSONSchema7, zodResult: z.ZodType): z.ZodType {
+  if (jsonSchema.additionalProperties === false && zodResult instanceof z.ZodObject) {
+    return zodResult.strict();
+  }
+  return zodResult;
+}
+
 /** Root schema type for $ref resolution (same as resolveRef's second parameter). */
 type RootSchemaType = Parameters<typeof resolveRef>[1];
 
@@ -64,13 +75,8 @@ export function convertJsonSchemaToZod(jsonSchema: JSONSchema7 | null | undefine
   // Use fromJSONSchema polyfill - it handles objects, arrays, strings, numbers, booleans,
   // enums, defaults, required fields, validation constraints, etc.
   const zodSchema = fromJSONSchema(jsonSchema as Record<string, unknown>);
-  if (zodSchema !== undefined) {
-    return zodSchema;
-  }
-
-  // If fromJSONSchema returns undefined (should be rare), fall back to recursive converter
-  // This is a safety net for edge cases the polyfill might not handle
-  return convertJsonSchemaToZodRecursive(jsonSchema);
+  const result = zodSchema ?? convertJsonSchemaToZodRecursive(jsonSchema);
+  return applyAdditionalProperties(jsonSchema, result);
 }
 
 /**
@@ -91,7 +97,7 @@ export function convertJsonSchemaToZodWithRefs(
 
   const zodSchema = fromJSONSchema(schemaToConvert as Record<string, unknown>);
   if (zodSchema !== undefined) {
-    return zodSchema;
+    return applyAdditionalProperties(schemaToConvert, zodSchema);
   }
 
   if (schemaToConvert.type === 'object' && schemaToConvert.properties) {
@@ -107,7 +113,7 @@ export function convertJsonSchemaToZodWithRefs(
       }
       shape[key] = zodProp;
     }
-    return z.object(shape);
+    return applyAdditionalProperties(schemaToConvert, z.object(shape));
   }
 
   return convertJsonSchemaToZod(schemaToConvert);
@@ -142,5 +148,8 @@ export function buildInputsZodValidator(
       shape[propertyName] = zodSchema;
     }
   }
-  return z.object(shape) as z.ZodType<Record<string, unknown>>;
+  const rootObject = z.object(shape);
+  return (schema.additionalProperties === false ? rootObject.strict() : rootObject) as z.ZodType<
+    Record<string, unknown>
+  >;
 }

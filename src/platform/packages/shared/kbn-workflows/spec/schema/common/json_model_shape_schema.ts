@@ -31,25 +31,18 @@ export type JsonSchemaType = (typeof JSON_SCHEMA_TYPE_VALUES)[number];
  * Single source of truth for autocomplete suggestions.
  * Reference: https://json-schema.org/draft-07/schema#section-7.3
  */
+/**
+ * Only formats that fromJSONSchema actively validates are listed here.
+ * Omitted formats (ipv4, ipv6, hostname, regex, etc.) are not enforced by the
+ * converter, so we don't suggest them — users can use `pattern` instead.
+ */
 export const JSON_SCHEMA_FORMAT_VALUES = [
   'date-time',
   'date',
   'time',
   'email',
-  'idn-email',
-  'hostname',
-  'idn-hostname',
-  'ipv4',
-  'ipv6',
-  'uri',
-  'uri-reference',
-  'iri',
-  'iri-reference',
-  'uri-template',
-  'json-pointer',
-  'relative-json-pointer',
-  'regex',
   'uuid',
+  'uri',
 ] as const;
 
 export interface JsonSchema {
@@ -65,11 +58,9 @@ export interface JsonSchema {
   allOf?: JsonSchema[];
   anyOf?: JsonSchema[];
   oneOf?: JsonSchema[];
-  not?: JsonSchema;
 
   // Structure
   properties?: Record<string, JsonSchema>;
-  patternProperties?: Record<string, JsonSchema>;
   additionalProperties?: boolean | JsonSchema;
   items?: JsonSchema | JsonSchema[];
   prefixItems?: JsonSchema[];
@@ -110,7 +101,6 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
   'enum',
   'const',
   'properties',
-  'patternProperties',
   'additionalProperties',
   'required',
   'items',
@@ -118,7 +108,6 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
   'allOf',
   'anyOf',
   'oneOf',
-  'not',
   '$ref',
   'definitions',
   'minimum',
@@ -156,11 +145,9 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
       allOf: z.array(JsonModelShapeSchema).optional(),
       anyOf: z.array(JsonModelShapeSchema).optional(),
       oneOf: z.array(JsonModelShapeSchema).optional(),
-      not: JsonModelShapeSchema.optional(),
 
       // --- Object Properties ---
       properties: z.record(z.string(), JsonModelShapeSchema).optional(),
-      patternProperties: z.record(z.string(), JsonModelShapeSchema).optional(),
       additionalProperties: z.union([z.boolean(), JsonModelShapeSchema]).optional(),
       required: z.array(z.string()).optional(),
 
@@ -205,7 +192,6 @@ export const JsonModelRootShapeSchema = z
     description: z.string().optional(),
     $ref: z.string().optional(),
     properties: z.record(z.string(), JsonModelShapeSchema).optional(),
-    patternProperties: z.record(z.string(), JsonModelShapeSchema).optional(),
     additionalProperties: z.union([z.boolean(), JsonModelShapeSchema]).optional(),
     required: z.array(z.string()).optional(),
     definitions: z.record(z.string(), JsonModelShapeSchema).optional(),
