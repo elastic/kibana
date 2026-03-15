@@ -934,6 +934,13 @@ export const ForEachContextSchema = z.object({
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
+export const BaseSerializedErrorSchema = z.object({
+  type: z.string(),
+  message: z.string(),
+  details: z.record(z.string(), z.unknown()).optional(),
+});
+export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
+
 export const WhileContextSchema = z.object({
   iteration: z.number().int(),
 });
@@ -944,6 +951,7 @@ export const StepContextSchema = WorkflowContextSchema.extend({
   foreach: ForEachContextSchema.optional(),
   while: WhileContextSchema.optional(),
   variables: z.record(z.string(), z.unknown()).optional(),
+  error: BaseSerializedErrorSchema.optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
 
@@ -953,10 +961,3 @@ export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
   steps: z.object({}),
 });
 export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
-
-export const BaseSerializedErrorSchema = z.object({
-  type: z.string(),
-  message: z.string(),
-  details: z.record(z.string(), z.unknown()).optional(),
-});
-export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;

@@ -8402,7 +8402,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
-        "lineNumber": 956,
+        "lineNumber": 936,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8889,7 +8889,7 @@
           "z.infer<any>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
-        "lineNumber": 954,
+        "lineNumber": 962,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8906,7 +8906,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
-        "lineNumber": 949,
+        "lineNumber": 957,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -9757,7 +9757,7 @@
           "z.infer<any>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
-        "lineNumber": 961,
+        "lineNumber": 941,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9815,7 +9815,7 @@
           "z.infer<any>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
-        "lineNumber": 947,
+        "lineNumber": 955,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9832,7 +9832,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
-        "lineNumber": 941,
+        "lineNumber": 948,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10240,7 +10240,7 @@
           "z.infer<any>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
-        "lineNumber": 939,
+        "lineNumber": 946,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10257,7 +10257,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
-        "lineNumber": 936,
+        "lineNumber": 943,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
