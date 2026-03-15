@@ -36,6 +36,8 @@ const useReplacementsHoldMock = useReplacementsHold as jest.MockedFunction<
   typeof useReplacementsHold
 >;
 
+const emailToken = 'EMAIL_token';
+
 describe('useResolvedMessageContent', () => {
   const http = {} as Parameters<typeof createAnonymizationReplacementsClient>[0];
   const replacementsClient = {
@@ -48,35 +50,87 @@ describe('useResolvedMessageContent', () => {
     jest.clearAllMocks();
     createAnonymizationReplacementsClientMock.mockReturnValue(replacementsClient);
     useResolveAnonymizedValuesMock.mockReturnValue({
-      tokenToOriginalMap: {},
-      resolveText: (value: string) => value.replace('EMAIL_token', 'alice@example.com'),
+      tokenToOriginalMap: { [emailToken]: 'alice@example.com' },
+      resolveText: (value: string) => value.replace(emailToken, 'alice@example.com'),
       isLoading: false,
       error: undefined,
     });
     useReplacementsHoldMock.mockReturnValue(false);
   });
 
-  it('returns resolved content when replacements are available', () => {
+  it('fetches replacements and deanonymizes tokens when showAnonymized is false (default)', () => {
     const { result } = renderHook(() =>
       useResolvedMessageContent({
-        content: 'Contact: EMAIL_token',
+        content: `Contact: ${emailToken}`,
         anonymizationEnabled: true,
         hasHttp: true,
         http,
         replacementsId: 'repl-1',
+        showAnonymized: false,
         holdContentWhileResolvingReplacements: true,
         holdContentMaxMs: 600,
       })
     );
 
     expect(result.current.displayContent).toBe('Contact: alice@example.com');
-    expect(createAnonymizationReplacementsClientMock).toHaveBeenCalledWith(http);
     expect(useResolveAnonymizedValuesMock).toHaveBeenCalledWith(
       expect.objectContaining({
         replacementsId: 'repl-1',
         enabled: true,
       })
     );
+    expect(useReplacementsHoldMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        holdEnabled: true,
+      })
+    );
+  });
+
+  it('returns raw stored content (tokens) when showAnonymized is true', () => {
+    const { result } = renderHook(() =>
+      useResolvedMessageContent({
+        content: `Contact: ${emailToken}`,
+        anonymizationEnabled: true,
+        hasHttp: true,
+        http,
+        replacementsId: 'repl-1',
+        showAnonymized: true,
+        holdContentWhileResolvingReplacements: true,
+        holdContentMaxMs: 600,
+      })
+    );
+
+    expect(result.current.displayContent).toBe(`Contact: ${emailToken}`);
+    expect(useResolveAnonymizedValuesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        replacementsId: 'repl-1',
+        enabled: false,
+      })
+    );
+    expect(useReplacementsHoldMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        holdEnabled: false,
+      })
+    );
+  });
+
+  it('returns empty content while hold is active when showAnonymized is false', () => {
+    useReplacementsHoldMock.mockReturnValue(true);
+
+    const { result } = renderHook(() =>
+      useResolvedMessageContent({
+        content: emailToken,
+        anonymizationEnabled: true,
+        hasHttp: true,
+        http,
+        replacementsId: 'repl-1',
+        showAnonymized: false,
+        holdContentWhileResolvingReplacements: true,
+        holdContentMaxMs: 600,
+      })
+    );
+
+    expect(result.current.displayContent).toBe('');
     expect(useReplacementsHoldMock).toHaveBeenCalledWith(
       expect.objectContaining({
         holdEnabled: true,
@@ -88,77 +142,62 @@ describe('useResolvedMessageContent', () => {
     );
   });
 
-  it('returns empty content while hold is active', () => {
-    useReplacementsHoldMock.mockReturnValue(true);
-
-    const { result } = renderHook(() =>
-      useResolvedMessageContent({
-        content: 'EMAIL_token',
-        anonymizationEnabled: true,
-        hasHttp: true,
-        http,
-        replacementsId: 'repl-1',
-        holdContentWhileResolvingReplacements: true,
-        holdContentMaxMs: 600,
-      })
-    );
-
-    expect(result.current.displayContent).toBe('');
-  });
-
-  it('falls back to original content when replacements are loading', () => {
+  it('falls back to raw content when replacements are loading with showAnonymized false', () => {
     useResolveAnonymizedValuesMock.mockReturnValue({
       tokenToOriginalMap: {},
-      resolveText: (value: string) => value.replace('EMAIL_token', 'alice@example.com'),
+      resolveText: (value: string) => value,
       isLoading: true,
       error: undefined,
     });
 
     const { result } = renderHook(() =>
       useResolvedMessageContent({
-        content: 'EMAIL_token',
+        content: emailToken,
         anonymizationEnabled: true,
         hasHttp: true,
         http,
         replacementsId: 'repl-1',
+        showAnonymized: false,
         holdContentWhileResolvingReplacements: false,
         holdContentMaxMs: 600,
       })
     );
 
-    expect(result.current.displayContent).toBe('EMAIL_token');
+    expect(result.current.displayContent).toBe(emailToken);
   });
 
-  it('falls back to original content when replacements resolution errors', () => {
+  it('falls back to raw content when replacements resolution errors with showAnonymized false', () => {
     useResolveAnonymizedValuesMock.mockReturnValue({
       tokenToOriginalMap: {},
-      resolveText: (value: string) => value.replace('EMAIL_token', 'alice@example.com'),
+      resolveText: (value: string) => value,
       isLoading: false,
       error: new Error('resolution failed'),
     });
 
     const { result } = renderHook(() =>
       useResolvedMessageContent({
-        content: 'EMAIL_token',
+        content: emailToken,
         anonymizationEnabled: true,
         hasHttp: true,
         http,
         replacementsId: 'repl-1',
+        showAnonymized: false,
         holdContentWhileResolvingReplacements: false,
         holdContentMaxMs: 600,
       })
     );
 
-    expect(result.current.displayContent).toBe('EMAIL_token');
+    expect(result.current.displayContent).toBe(emailToken);
   });
 
   it('disables replacements lookup when replacementsId is missing', () => {
     renderHook(() =>
       useResolvedMessageContent({
-        content: 'EMAIL_token',
+        content: emailToken,
         anonymizationEnabled: true,
         hasHttp: true,
         http,
+        showAnonymized: false,
         holdContentWhileResolvingReplacements: false,
         holdContentMaxMs: 600,
       })
@@ -172,23 +211,23 @@ describe('useResolvedMessageContent', () => {
     );
   });
 
-  it('disables replacements lookup when anonymization is disabled', () => {
+  it('returns content as-is when anonymization is disabled', () => {
     const { result } = renderHook(() =>
       useResolvedMessageContent({
-        content: 'EMAIL_token',
+        content: emailToken,
         anonymizationEnabled: false,
         hasHttp: true,
         http,
         replacementsId: 'repl-1',
+        showAnonymized: false,
         holdContentWhileResolvingReplacements: false,
         holdContentMaxMs: 600,
       })
     );
 
-    expect(result.current.displayContent).toBe('EMAIL_token');
+    expect(result.current.displayContent).toBe(emailToken);
     expect(useResolveAnonymizedValuesMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        replacementsId: 'repl-1',
         enabled: false,
       })
     );

@@ -28,6 +28,7 @@ export interface RoundResponseProps {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  showAnonymized?: boolean;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
@@ -40,6 +41,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   conversationAttachments,
   attachmentRefs,
   conversationId,
+  showAnonymized = false,
 }) => {
   // Conversation-level replacementsId is authoritative for 3a continuity and
   // can outlive earlier round-level IDs from intermediate plumbing iterations.
@@ -66,6 +68,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
             conversationAttachments={conversationAttachments}
             attachmentRefs={attachmentRefs}
             conversationId={conversationId}
+            showAnonymized={showAnonymized}
           />
         ) : (
           <ChatMessageText
@@ -75,6 +78,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
             conversationAttachments={conversationAttachments}
             attachmentRefs={attachmentRefs}
             conversationId={conversationId}
+            showAnonymized={showAnonymized}
           />
         )}
       </EuiFlexItem>

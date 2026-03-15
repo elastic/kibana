@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { replaceTokensWithOriginals } from '@kbn/anonymization-common';
 import {
   createAnonymizationReplacementsClient,
   useResolveAnonymizedValues,
@@ -20,6 +21,7 @@ interface UseResolvedMessageContentParams {
   replacementsId?: string;
   holdContentWhileResolvingReplacements: boolean;
   holdContentMaxMs: number;
+  showAnonymized: boolean;
 }
 
 export const useResolvedMessageContent = ({
@@ -30,6 +32,7 @@ export const useResolvedMessageContent = ({
   replacementsId,
   holdContentWhileResolvingReplacements,
   holdContentMaxMs,
+  showAnonymized,
 }: UseResolvedMessageContentParams) => {
   const replacementsClient = useMemo(() => {
     if (http) {
@@ -43,18 +46,25 @@ export const useResolvedMessageContent = ({
     };
   }, [http]);
 
+  // Fetch replacements when anonymization is active and a replacementsId is present.
+  // showAnonymized=true: skip the fetch — raw stored content (tokens) is the desired output.
+  // showAnonymized=false (default): apply token→original substitution for UI display.
+  const resolveEnabled = Boolean(
+    anonymizationEnabled && hasHttp && replacementsId && !showAnonymized
+  );
+
   const {
-    resolveText,
+    tokenToOriginalMap,
     isLoading: isResolvingReplacements,
     error: replacementsError,
   } = useResolveAnonymizedValues({
     client: replacementsClient,
     replacementsId,
-    enabled: Boolean(anonymizationEnabled && hasHttp && replacementsId),
+    enabled: resolveEnabled,
   });
 
   const shouldHoldContent = useReplacementsHold({
-    holdEnabled: holdContentWhileResolvingReplacements,
+    holdEnabled: holdContentWhileResolvingReplacements && !showAnonymized,
     holdMaxMs: holdContentMaxMs,
     hasHttp,
     replacementsId,
@@ -62,28 +72,21 @@ export const useResolvedMessageContent = ({
   });
 
   const displayContent = useMemo(() => {
-    if (shouldHoldContent) {
-      return '';
-    }
-    if (
-      !anonymizationEnabled ||
-      !hasHttp ||
-      !replacementsId ||
-      isResolvingReplacements ||
-      replacementsError
-    ) {
-      return content;
-    }
-    return resolveText(content);
+    // Show anonymized: return raw stored content (tokens) without any substitution.
+    if (showAnonymized || !anonymizationEnabled || !hasHttp || !replacementsId) return content;
+    if (shouldHoldContent) return '';
+    if (isResolvingReplacements || replacementsError) return content;
+    return replaceTokensWithOriginals(content, tokenToOriginalMap);
   }, [
     content,
+    showAnonymized,
     anonymizationEnabled,
     hasHttp,
+    replacementsId,
+    shouldHoldContent,
     isResolvingReplacements,
     replacementsError,
-    replacementsId,
-    resolveText,
-    shouldHoldContent,
+    tokenToOriginalMap,
   ]);
 
   return {

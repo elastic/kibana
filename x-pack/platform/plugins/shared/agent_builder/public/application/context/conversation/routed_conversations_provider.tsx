@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useQueryClient } from '@kbn/react-query';
@@ -92,6 +92,8 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     onDeleteConversation,
   });
 
+  const [showAnonymized, setShowAnonymized] = useState(false);
+
   // Handle agent ID syncing from URL params (moved from useSyncAgentId)
   useEffect(() => {
     if (agentIdSyncedRef.current || conversationId) {
@@ -117,8 +119,10 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       conversationActions,
       initialMessage,
       autoSendInitialMessage: true,
+      showAnonymized,
+      setShowAnonymized,
     }),
-    [conversationId, shouldStickToBottom, conversationActions, initialMessage]
+    [conversationId, shouldStickToBottom, conversationActions, initialMessage, showAnonymized]
   );
 
   return (

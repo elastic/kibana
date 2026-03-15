@@ -22,6 +22,7 @@ interface StreamingTextProps {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  showAnonymized?: boolean;
 }
 
 export const StreamingText = ({
@@ -32,6 +33,7 @@ export const StreamingText = ({
   conversationAttachments,
   attachmentRefs,
   conversationId,
+  showAnonymized = false,
 }: StreamingTextProps) => {
   const [displayedText, setDisplayedText] = useState('');
   const tokenQueueRef = useRef<string[]>([]);
@@ -81,6 +83,7 @@ export const StreamingText = ({
       conversationAttachments={conversationAttachments}
       attachmentRefs={attachmentRefs}
       conversationId={conversationId}
+      showAnonymized={showAnonymized}
     />
   );
 };
