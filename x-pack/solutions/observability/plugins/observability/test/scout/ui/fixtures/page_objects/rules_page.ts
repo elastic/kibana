@@ -603,6 +603,26 @@ export class RulesPage {
   }
 
   /**
+   * Ensures a rule is enabled before status-change tests run
+   */
+  async ensureRuleEnabled(ruleName: string) {
+    const ruleRow = this.getRuleRowByName(ruleName);
+    await expect(ruleRow).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    const statusDropdown = this.getRuleStatusDropdown(ruleRow);
+    await expect(statusDropdown).toBeVisible({ timeout: SHORTER_TIMEOUT });
+
+    const statusTitle = await statusDropdown.getAttribute('title');
+    if (statusTitle === 'Disabled') {
+      await statusDropdown.click();
+      await this.clickEnableFromDropDownMenu();
+
+      await expect(this.confirmModalButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
+      await this.confirmModalButton.click();
+      await expect(statusDropdown).toHaveAttribute('title', 'Enabled', { timeout: BIGGER_TIMEOUT });
+    }
+  }
+
+  /**
    * Verifies that a rule's status is "Disabled"
    */
   async expectRuleToBeDisabled(ruleName: string) {

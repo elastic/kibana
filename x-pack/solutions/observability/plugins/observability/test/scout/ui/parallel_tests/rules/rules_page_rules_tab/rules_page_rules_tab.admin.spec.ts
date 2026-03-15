@@ -64,15 +64,8 @@ test.describe(
 
     test('changes the rule status to "disabled"', async ({ pageObjects }) => {
       await expect(pageObjects.rulesPage.rulesTable).toBeVisible();
-
-      await pageObjects.rulesPage.clickRuleStatusDropDownMenu(RULE_NAMES.FIRST_RULE_TEST);
-      await pageObjects.rulesPage.clickDisableFromDropDownMenu();
-
-      await expect(pageObjects.rulesPage.confirmModalButton).toBeVisible();
-      await pageObjects.rulesPage.confirmModalButton.click();
-
-      // Wait for the rule status to change
-      await pageObjects.rulesPage.expectRuleToBeDisabled(RULE_NAMES.FIRST_RULE_TEST);
+      await pageObjects.rulesPage.ensureRuleEnabled(RULE_NAMES.FIRST_RULE_TEST);
+      await pageObjects.rulesPage.disableRule(RULE_NAMES.FIRST_RULE_TEST);
     });
   }
 );
