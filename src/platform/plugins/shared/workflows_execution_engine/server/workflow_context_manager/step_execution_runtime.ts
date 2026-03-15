@@ -76,6 +76,19 @@ export class StepExecutionRuntime {
     return this.workflowGraph.topologicalOrder;
   }
 
+  private getStepName(): string {
+    if (
+      'configuration' in this.node &&
+      this.node.configuration != null &&
+      typeof this.node.configuration === 'object' &&
+      'name' in this.node.configuration
+    ) {
+      return this.node.configuration.name;
+    }
+
+    return this.node.stepId;
+  }
+
   constructor(stepExecutionRuntimeInit: StepExecutionRuntimeInit) {
     this.workflowGraph = stepExecutionRuntimeInit.workflowExecutionGraph;
     this.contextManager = stepExecutionRuntimeInit.contextManager;
@@ -170,6 +183,13 @@ export class StepExecutionRuntime {
     // if not, create a new step execution with fail
     const executionError = ExecutionError.fromError(error);
     const serializedError = executionError.toSerializableObject();
+
+    this.workflowExecutionState.setLastFailedStepContext({
+      stepId: this.node.stepId,
+      stepName: this.getStepName(),
+      stepExecutionId: this.stepExecutionId,
+    });
+
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
