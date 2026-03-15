@@ -44,6 +44,11 @@ export function buildWorkflowContext(
     normalizedInputsSchema
   );
 
+  const metadata = (workflowExecution.metadata ??
+    (workflowExecution.context?.metadata as Record<string, unknown> | undefined)) as
+    | Record<string, unknown>
+    | undefined;
+
   return {
     execution: {
       id: workflowExecution.id,
@@ -72,5 +77,6 @@ export function buildWorkflowContext(
             depth: parentDepth !== undefined ? parentDepth + 1 : 0,
           }
         : undefined,
+    metadata,
   };
 }

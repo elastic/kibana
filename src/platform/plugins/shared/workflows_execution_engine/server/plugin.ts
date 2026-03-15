@@ -533,6 +533,7 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
+      const metadata = context.metadata as Record<string, unknown> | undefined;
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId,
@@ -545,6 +546,7 @@ export class WorkflowsExecutionEnginePlugin
         createdAt: workflowCreatedAt.toISOString(),
         executedBy,
         triggeredBy,
+        ...(metadata ? { metadata } : {}),
       };
 
       const concurrencyGroupKey = this.getConcurrencyGroupKey(
