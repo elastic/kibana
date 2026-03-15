@@ -44,3 +44,20 @@ declare module '*.text' {
   // eslint-disable-next-line import/no-default-export
   export default content;
 }
+
+/**
+ * YAML files are loaded as raw strings via asset/source in webpack,
+ * the yaml transform in kbn-babel-register for Node runtime,
+ * and the raw transform in Jest.
+ */
+declare module '*.yaml' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
+declare module '*.yml' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
