@@ -59,13 +59,13 @@ export const DashboardCanvasContent = ({
   updateOrigin,
   dashboardLocator,
   searchBarComponent: SearchBar,
-  doesSavedDashboardExist,
+  checkSavedDashboardExist,
 }: AttachmentRenderProps<DashboardAttachment> & {
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: DashboardAttachmentOrigin) => Promise<unknown>;
   dashboardLocator?: DashboardRendererProps['locator'];
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
-  doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }) => {
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
@@ -84,7 +84,7 @@ export const DashboardCanvasContent = ({
       let canceled = false;
       setSavedObjectStatus({ status: 'loading' });
 
-      doesSavedDashboardExist(linkedSavedObjectId)
+      checkSavedDashboardExist(linkedSavedObjectId)
         .then((exists) => {
           if (!canceled) {
             setSavedObjectStatus({ status: 'resolved', exists });
@@ -100,7 +100,7 @@ export const DashboardCanvasContent = ({
         canceled = true;
       };
     },
-    [linkedSavedObjectId, doesSavedDashboardExist]
+    [linkedSavedObjectId, checkSavedDashboardExist]
   );
 
   const dashboardState = useMemo(() => getStateFromAttachment(attachment), [attachment]);
@@ -124,7 +124,7 @@ export const DashboardCanvasContent = ({
     timeRange,
     dashboardState,
     linkedSavedObjectId,
-    doesSavedDashboardExist,
+    checkSavedDashboardExist,
   });
 
   return (

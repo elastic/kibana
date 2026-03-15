@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
@@ -17,16 +16,17 @@ import type {
   DashboardStart,
 } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
 import { getStateFromAttachment } from './attachment_to_dashboard_state';
 
 export const registerDashboardAttachmentUiDefinition = ({
-  attachments,
+  agentBuilder: { attachments },
   dashboardLocator,
   unifiedSearch,
   dashboardPlugin,
 }: {
-  attachments: AttachmentServiceStartContract;
+  agentBuilder: AgentBuilderPluginStart;
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dashboardPlugin: DashboardStart;
@@ -37,7 +37,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   });
 
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
-  const doesSavedDashboardExist = async (dashboardId: string) => {
+  const checkSavedDashboardExist = async (dashboardId: string) => {
     const findDashboardsService = await findDashboardsServicePromise;
     const result = await findDashboardsService.findById(dashboardId);
     return result.status === 'success';
@@ -59,7 +59,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         updateOrigin={callbacks.updateOrigin}
         dashboardLocator={dashboardLocator}
         searchBarComponent={unifiedSearch.ui.SearchBar}
-        doesSavedDashboardExist={doesSavedDashboardExist}
+        checkSavedDashboardExist={checkSavedDashboardExist}
       />
     ),
     getActionButtons: ({ attachment, openCanvas, isCanvas }) => {
