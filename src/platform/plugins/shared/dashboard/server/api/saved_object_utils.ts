@@ -78,7 +78,6 @@ export function getDashboardCRUResponseBody(
       }),
     },
     meta: getDashboardMeta(savedObject, operation),
-    spaces: savedObject.namespaces,
     ...(warnings?.length && { warnings }),
   };
 }
