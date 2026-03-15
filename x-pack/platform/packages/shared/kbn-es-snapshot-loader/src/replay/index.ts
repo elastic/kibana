@@ -52,7 +52,7 @@ export async function getMaxTimestampFromData({
 }
 
 export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> {
-  const { esClient, log, repository, snapshotName, patterns, concurrency } = config;
+  const { esClient, log, repository, snapshotName, patterns, concurrency, destIndex } = config;
 
   const result: LoadResult = {
     success: false,
@@ -118,7 +118,11 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       maxTimestamp: result.maxTimestamp!,
     });
 
-    log.info('Step 4/4: Reindexing with timestamp transformation...');
+    if (destIndex) {
+      log.info(`Step 4/4: Reindexing with timestamp transformation into ${destIndex}...`);
+    } else {
+      log.info('Step 4/4: Reindexing with timestamp transformation...');
+    }
     const reindexedIndices = await reindexAllIndices({
       esClient,
       log,
@@ -126,26 +130,29 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       originalIndices: indicesToRestore,
       concurrency,
       pipelineName,
+      destIndexOverride: destIndex,
     });
     result.reindexedIndices = reindexedIndices;
 
-    const expectedDataStreams = new Set(
-      indicesToRestore
-        .map((index) => extractDataStreamName(index))
-        .filter((name): name is string => name != null)
-    );
-    const missingDataStreams = await getMissingDataStreams({
-      esClient,
-      dataStreamNames: expectedDataStreams,
-    });
-
-    if (missingDataStreams.length > 0) {
-      log.warning(
-        `Some expected data streams were not created: ${missingDataStreams.join(', ')}. ` +
-          `Replay may have created regular indices instead. ` +
-          `Ensure the cluster contains a matching index template with data streams enabled. ` +
-          `To check: GET _index_template/*?filter_path=index_templates.name,index_templates.index_template.index_patterns,index_templates.index_template.data_stream`
+    if (!destIndex) {
+      const expectedDataStreams = new Set(
+        indicesToRestore
+          .map((index) => extractDataStreamName(index))
+          .filter((name): name is string => name != null)
       );
+      const missingDataStreams = await getMissingDataStreams({
+        esClient,
+        dataStreamNames: expectedDataStreams,
+      });
+
+      if (missingDataStreams.length > 0) {
+        log.warning(
+          `Some expected data streams were not created: ${missingDataStreams.join(', ')}. ` +
+            `Replay may have created regular indices instead. ` +
+            `Ensure the cluster contains a matching index template with data streams enabled. ` +
+            `To check: GET _index_template/*?filter_path=index_templates.name,index_templates.index_template.index_patterns,index_templates.index_template.data_stream`
+        );
+      }
     }
 
     result.success = reindexedIndices.length > 0;

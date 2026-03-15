@@ -135,6 +135,40 @@ describe('reindexAllIndices', () => {
     expect(result).toEqual([]);
   });
 
+  it('routes all indices to destIndexOverride when provided', async () => {
+    const esClient = createMockEsClient();
+    (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
+      timed_out: false,
+      total: 10,
+      created: 10,
+      failures: [],
+    });
+
+    const result = await reindexAllIndices({
+      esClient,
+      log,
+      restoredIndices: [
+        'snapshot-loader-temp-.ds-logs-nginx-default-2024.01.01-000001',
+        'snapshot-loader-temp-some-regular-index',
+      ],
+      originalIndices: ['.ds-logs-nginx-default-2024.01.01-000001', 'some-regular-index'],
+      pipelineName: 'my-pipeline',
+      concurrency: 1,
+      destIndexOverride: 'my-custom-index',
+    });
+
+    expect(esClient.reindex).toHaveBeenCalledTimes(2);
+    for (const call of (esClient.reindex as unknown as jest.Mock).mock.calls) {
+      expect(call[0].dest).toEqual(
+        expect.objectContaining({
+          index: 'my-custom-index',
+          op_type: 'create',
+        })
+      );
+    }
+    expect(result).toEqual(['my-custom-index', 'my-custom-index']);
+  });
+
   it('treats timed_out=true as an error and does not count as successful', async () => {
     const esClient = createMockEsClient();
     (esClient.reindex as unknown as jest.Mock).mockResolvedValue({
