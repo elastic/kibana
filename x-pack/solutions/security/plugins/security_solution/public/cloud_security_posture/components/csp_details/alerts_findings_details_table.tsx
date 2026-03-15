@@ -47,7 +47,8 @@ import { SeverityBadge } from '../../../common/components/severity_badge';
 import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 
 enum KIBANA_ALERTS {
   SEVERITY = 'kibana.alert.severity',
@@ -85,8 +86,18 @@ interface AlertsDetailsFields {
 }
 
 export const AlertsDetailsTable = memo(
-  ({ field, value }: { field: CloudPostureEntityIdentifier; value: string }) => {
+  ({ entityIdentifiers }: { entityIdentifiers: EntityIdentifiers }) => {
     const { euiTheme } = useEuiTheme();
+
+    // Extract primary field and value from entityIdentifiers
+    // Priority: host.name > user.name > first available field
+    const field =
+      entityIdentifiers[EntityIdentifierFields.hostName]
+        ? EntityIdentifierFields.hostName
+        : entityIdentifiers[EntityIdentifierFields.userName]
+        ? EntityIdentifierFields.userName
+        : Object.keys(entityIdentifiers)[0];
+    const value = entityIdentifiers[field] || '';
 
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -154,8 +165,7 @@ export const AlertsDetailsTable = memo(
     });
 
     const { filteredAlertsData: alertsData } = useNonClosedAlerts({
-      field,
-      value,
+      entityIdentifiers,
       to,
       from,
       queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}`,

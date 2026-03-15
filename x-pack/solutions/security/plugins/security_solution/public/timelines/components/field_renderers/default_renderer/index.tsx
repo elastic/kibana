@@ -20,12 +20,23 @@ interface DefaultFieldRendererProps {
   idPrefix: string;
   moreMaxHeight?: string;
   render?: (item: string) => React.ReactNode;
-  rowItems: string[] | null | undefined;
+  /** Accepts array, string, or null/undefined - entity/store data may use different formats */
+  rowItems: string[] | string | null | undefined;
   scopeId?: string;
 }
 
 /** The default max-height of the popover used to show "+n More" items (e.g. `+9 More`) */
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
+
+/** Normalize rowItems to an array - handles string, string[], or unexpected formats from entity/store data */
+const toRowItemsArray = (
+  rowItems: string[] | string | null | undefined
+): string[] => {
+  if (rowItems == null) return [];
+  if (Array.isArray(rowItems)) return rowItems.filter((v): v is string => typeof v === 'string');
+  if (typeof rowItems === 'string') return [rowItems];
+  return [];
+};
 
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
   attrName,
@@ -36,8 +47,9 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
   rowItems,
   scopeId,
 }) => {
-  if (rowItems != null && rowItems.length > 0) {
-    const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
+  const items = toRowItemsArray(rowItems);
+  if (items.length > 0) {
+    const draggables = items.slice(0, displayCount).map((rowItem, index) => {
       const id = escapeDataProviderId(
         `default-field-renderer-default-draggable-${idPrefix}-${attrName}-${rowItem}`
       );
@@ -74,7 +86,7 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             moreMaxHeight={moreMaxHeight}
             overflowIndexStart={displayCount}
             render={render}
-            rowItems={rowItems}
+            rowItems={items}
             scopeId={scopeId}
           />
         </EuiFlexItem>
