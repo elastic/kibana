@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiToolTip,
   useEuiTheme,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,6 +22,7 @@ import { gapFillStatus } from '@kbn/alerting-plugin/common';
 import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import {
@@ -289,7 +291,7 @@ export const LAST_EXECUTION_COLUMN = {
     return (
       <EuiFlexGroup data-test-subj="ruleLastRun">
         {value == null ? (
-          getEmptyTagValue()
+          <EmptyCellValue />
         ) : (
           <FormattedRelativePreferenceDate
             tooltipFieldName={i18n.COLUMN_LAST_COMPLETE_RUN}
@@ -303,7 +305,8 @@ export const LAST_EXECUTION_COLUMN = {
   },
   sortable: true,
   truncateText: true,
-  width: '16%',
+  minWidth: '9em',
+  width: '16em',
 };
 
 const useActionsColumn = ({
@@ -368,7 +371,8 @@ export const useRulesColumns = ({
         ),
         sortable: true,
         truncateText: true,
-        width: '85px',
+        width: '8em',
+        align: RIGHT_ALIGNMENT,
       },
       {
         field: 'severity',
@@ -376,7 +380,7 @@ export const useRulesColumns = ({
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
         sortable: true,
         truncateText: true,
-        width: '12%',
+        width: '7.5em',
       },
       LAST_EXECUTION_COLUMN,
       executionStatusColumn,

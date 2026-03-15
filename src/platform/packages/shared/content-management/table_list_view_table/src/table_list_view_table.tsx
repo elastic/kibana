@@ -620,6 +620,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
             />
           );
         },
+        minWidth: '18em',
       },
     ];
 
@@ -647,7 +648,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ),
         sortable:
           false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
-        width: '100px',
+        width: '4.5em',
+        minWidth: '4.5em',
         align: 'center',
       });
     }
@@ -658,11 +660,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         name: i18n.translate('contentManagement.tableList.lastUpdatedColumnTitle', {
           defaultMessage: 'Last updated',
         }),
-        render: (field: string, record: { updatedAt?: string }) => (
+        render: (_: string, record: { updatedAt?: string }) => (
           <UpdatedAtField dateTime={record.updatedAt} DateFormatterComp={DateFormatterComp} />
         ),
         sortable: true,
-        width: '130px',
+        width: '8em', // Always fit relative and absolute (day, month, year) dates
+        minWidth: '8em',
       });
     }
 
@@ -725,7 +728,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         name: i18n.translate('contentManagement.tableList.listing.table.actionTitle', {
           defaultMessage: 'Actions',
         }),
-        width: `72px`,
+        // Allow expanding to the width needed to show 3 action buttons in a row
+        minWidth: '4.5em',
+        width: '6em',
+        maxWidth: '6em',
         actions,
       });
     }
