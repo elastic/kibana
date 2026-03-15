@@ -36,6 +36,7 @@ import {
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
+import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
@@ -609,12 +610,30 @@ export class WorkflowsExecutionEnginePlugin
         request
       );
 
+      const executionId = workflowExecution.id;
+      if (!executionId) {
+        throw new Error('Workflow execution ID is required');
+      }
+
+      const inputsValid = await validateWorkflowInputs(
+        workflow,
+        context,
+        executionId,
+        workflowExecutionRepository,
+        this.logger
+      );
+      if (!inputsValid) {
+        return {
+          workflowExecutionId: executionId,
+        };
+      }
+
       // Check concurrency limits and apply collision strategy if needed
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
         // Execution was dropped due to concurrency limit, return execution ID
         return {
-          workflowExecutionId: workflowExecution.id as string,
+          workflowExecutionId: executionId,
         };
       }
 
@@ -630,7 +649,7 @@ export class WorkflowsExecutionEnginePlugin
         const [, , workflowsExecutionEngine] = await this.coreSetup.getStartServices();
 
         await runWorkflow({
-          workflowRunId: workflowExecution.id as string,
+          workflowRunId: executionId,
           spaceId: workflowExecution.spaceId || 'default',
           taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
           logger: this.logger,
@@ -652,7 +671,7 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       return {
-        workflowExecutionId: workflowExecution.id as string,
+        workflowExecutionId: executionId,
       };
     };
 

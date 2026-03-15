@@ -8,11 +8,8 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import {
-  buildInputsZodValidator,
-  convertJsonSchemaToZod,
-  convertJsonSchemaToZodWithRefs,
-} from './json_schema_to_zod';
+import { convertJsonSchemaToZodWithRefs } from '@kbn/workflows/spec/lib/input_conversion';
+import { buildInputsZodValidator, convertJsonSchemaToZod } from './json_schema_to_zod';
 
 describe('convertJsonSchemaToZod', () => {
   it('should convert a string schema to Zod', () => {

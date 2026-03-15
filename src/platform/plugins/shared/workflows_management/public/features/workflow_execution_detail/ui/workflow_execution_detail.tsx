@@ -20,6 +20,7 @@ import {
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import {
   buildOverviewStepExecutionFromContext,
@@ -80,9 +81,9 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
 
     useEffect(() => {
       if (
-        !selectedStepExecutionId && // no step execution selected
-        executionId === workflowExecution?.id && // execution id matches (not stale execution used)
-        workflowExecution?.stepExecutions?.length // step executions are loaded
+        !selectedStepExecutionId &&
+        executionId === workflowExecution?.id &&
+        (workflowExecution?.stepExecutions?.length || isTerminalStatus(workflowExecution?.status))
       ) {
         setSelectedStepExecution(PSEUDO_STEP_OVERVIEW);
       }

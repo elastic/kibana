@@ -36,7 +36,12 @@ import type {
   WorkflowStepExecutionDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { isDangerousStatus, isInProgressStatus, isTerminalStatus } from '@kbn/workflows';
+import {
+  isDangerousStatus,
+  isFailedBeforeSteps,
+  isInProgressStatus,
+  isTerminalStatus,
+} from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
@@ -166,6 +171,9 @@ export const WorkflowStepExecutionTree = ({
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
 
+  const failedBeforeSteps =
+    execution != null && isFailedBeforeSteps(execution.status, execution.stepExecutions);
+
   if (!execution) {
     return (
       <EuiEmptyPrompt
@@ -185,7 +193,7 @@ export const WorkflowStepExecutionTree = ({
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        icon={<EuiIcon type="error" size="l" />}
+        icon={<EuiIcon type="error" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage
@@ -197,7 +205,11 @@ export const WorkflowStepExecutionTree = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  } else if (execution?.stepExecutions?.length === 0 && !isInProgressStatus(execution?.status)) {
+  } else if (
+    execution?.stepExecutions?.length === 0 &&
+    !isInProgressStatus(execution?.status) &&
+    !failedBeforeSteps
+  ) {
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -221,7 +233,7 @@ export const WorkflowStepExecutionTree = ({
       stepExecutionMap.set(stepExecution.id, stepExecution);
     }
 
-    if (!isTerminalStatus(execution.status)) {
+    if (!isTerminalStatus(execution.status) || failedBeforeSteps) {
       definition.steps
         .filter((step) => !stepExecutionNameMap.has(step.name)) // we put skeletons only for steps without execution
         .filter((step) => !execution.stepId || step.name === execution.stepId) // we create skeletons only for the executed step and its children
@@ -248,7 +260,8 @@ export const WorkflowStepExecutionTree = ({
     const stepExecutionsTree = buildStepExecutionsTree(
       Array.from(stepExecutionMap.values()),
       execution.context,
-      execution.status
+      execution.status,
+      execution.triggeredBy
     );
 
     const overviewPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__overview');
