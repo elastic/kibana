@@ -78,8 +78,12 @@ export const updateConversation$ = ({
     roundCompletedEvent: roundCompletedEvents$,
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
-      const { round, resumed = false, conversation_state, compaction_summary } =
-        roundCompletedEvent.data;
+      const {
+        round,
+        resumed = false,
+        conversation_state,
+        compaction_summary,
+      } = roundCompletedEvent.data;
       // Replace last round when resumed (HITL flow), regenerate action is requested
       const shouldReplaceLastRound = resumed || action === 'regenerate';
       const updatedRound = shouldReplaceLastRound

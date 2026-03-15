@@ -80,9 +80,7 @@ export const estimateRoundTokens = (round: ProcessedConversationRound): number =
 /**
  * Estimates the total token count for all conversation rounds.
  */
-export const estimateConversationTokens = (
-  rounds: ProcessedConversationRound[]
-): number => {
+export const estimateConversationTokens = (rounds: ProcessedConversationRound[]): number => {
   return rounds.reduce((total, round) => total + estimateRoundTokens(round), 0);
 };
 

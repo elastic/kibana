@@ -47,7 +47,10 @@ export type PersistentToolCallStep = ConversationRoundStepMixin<
 /**
  * A union of all possible persistent step types.
  */
-export type PersistentConversationRoundStep = PersistentToolCallStep | ReasoningStep | CompactionStep;
+export type PersistentConversationRoundStep =
+  | PersistentToolCallStep
+  | ReasoningStep
+  | CompactionStep;
 
 /**
  * Represents a conversation round suitable for persistence, with tool

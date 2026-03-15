@@ -37,7 +37,9 @@ const createMockRound = (
     tool_call_id: `tc-${i}`,
     tool_id: `tool-${i}`,
     params: { query: 'test' },
-    results: [{ type: 'other' as const, tool_result_id: `result-${i}`, data: { value: 'x'.repeat(100) } }],
+    results: [
+      { type: 'other' as const, tool_result_id: `result-${i}`, data: { value: 'x'.repeat(100) } },
+    ],
     progression: [],
   }));
 
@@ -134,11 +136,7 @@ describe('shouldTriggerCompaction', () => {
     const connector = createMockConnector(1000); // very small window for testing
     const budget = computeContextBudget(connector);
     // Create rounds with enough text to exceed the threshold
-    const rounds = [
-      createMockRound(2000),
-      createMockRound(2000),
-      createMockRound(2000),
-    ];
+    const rounds = [createMockRound(2000), createMockRound(2000), createMockRound(2000)];
 
     expect(shouldTriggerCompaction(rounds, budget)).toBe(true);
   });

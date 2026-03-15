@@ -7,7 +7,11 @@
 
 import type { AgentBuilderEvent } from '../base/events';
 import type { ToolResult } from '../tools/tool_result';
-import type { CompactionSummary, ConversationInternalState, ConversationRound } from './conversation';
+import type {
+  CompactionSummary,
+  ConversationInternalState,
+  ConversationRound,
+} from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
 
