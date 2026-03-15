@@ -322,10 +322,10 @@ export function registerChatRoutes({
           body: {
             conversation_id: convId,
             round_id: round.id,
-            ...omit(round, ['id', 'input', 'response', 'pending_prompt', 'state']),
+            ...omit(round, ['id', 'input', 'response', 'pending_prompts', 'state']),
             response: {
               ...round.response,
-              prompt: round.pending_prompt,
+              prompts: round.pending_prompts,
             },
           },
         });

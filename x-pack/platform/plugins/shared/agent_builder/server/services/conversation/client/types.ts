@@ -13,6 +13,8 @@ import type {
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
@@ -49,9 +51,28 @@ export type PersistentToolCallStep = ConversationRoundStepMixin<
 export type PersistentConversationRoundStep = PersistentToolCallStep | ReasoningStep;
 
 /**
+ * Legacy fields that may exist in old persisted documents.
+ * These are normalized to the current model shape during deserialization.
+ */
+interface LegacyRoundFields {
+  /** @deprecated Use `pending_prompts` (array). Normalized on read. */
+  pending_prompt?: PromptRequest;
+}
+
+/**
+ * Legacy fields that may exist in old persisted RoundState documents.
+ * Normalized to use `nodes` (array) during deserialization.
+ */
+export interface LegacyAgentStateFields {
+  /** @deprecated Use `nodes` (array). Normalized on read. */
+  node?: AgentNodeState;
+}
+
+/**
  * Represents a conversation round suitable for persistence, with tool
  * call results serialized to a string.
  */
-export type PersistentConversationRound = Omit<ConversationRound, 'steps'> & {
-  steps: PersistentConversationRoundStep[];
-};
+export type PersistentConversationRound = Omit<ConversationRound, 'steps'> &
+  LegacyRoundFields & {
+    steps: PersistentConversationRoundStep[];
+  };

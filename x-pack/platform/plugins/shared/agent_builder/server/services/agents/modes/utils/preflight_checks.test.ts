@@ -74,19 +74,19 @@ describe('preflight_checks', () => {
     });
 
     describe('when last round is awaiting prompt', () => {
-      const createConversationAwaitingPrompt = (promptId: string) =>
+      const createConversationAwaitingPrompt = (...promptIds: string[]) =>
         createEmptyConversation({
           rounds: [
             createRound({
               status: ConversationRoundStatus.awaitingPrompt,
-              pending_prompt: {
+              pending_prompts: promptIds.map((id) => ({
                 type: AgentPromptType.confirmation,
-                id: promptId,
+                id,
                 title: 'Confirm',
                 message: 'Do you want to proceed?',
                 confirm_text: 'Yes',
                 cancel_text: 'No',
-              },
+              })),
             }),
           ],
         });
@@ -102,12 +102,37 @@ describe('preflight_checks', () => {
         expect(() => ensureValidInput({ input, conversation })).not.toThrow();
       });
 
+      it('should not throw when all prompt responses are provided for multiple prompts', () => {
+        const conversation = createConversationAwaitingPrompt('prompt-1', 'prompt-2');
+        const input: ConverseInput = {
+          prompts: {
+            'prompt-1': { allow: true },
+            'prompt-2': { allow: false },
+          },
+        };
+
+        expect(() => ensureValidInput({ input, conversation })).not.toThrow();
+      });
+
       it('should throw when no prompt response is provided', () => {
         const conversation = createConversationAwaitingPrompt('prompt-123');
         const input: ConverseInput = {};
 
         expect(() => ensureValidInput({ input, conversation })).toThrow(
-          /Conversation is awaiting a prompt response, but none was provided/
+          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
+        );
+      });
+
+      it('should throw when only some prompt responses are provided for multiple prompts', () => {
+        const conversation = createConversationAwaitingPrompt('prompt-1', 'prompt-2');
+        const input: ConverseInput = {
+          prompts: {
+            'prompt-1': { allow: true },
+          },
+        };
+
+        expect(() => ensureValidInput({ input, conversation })).toThrow(
+          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
         );
       });
 
@@ -120,7 +145,7 @@ describe('preflight_checks', () => {
         };
 
         expect(() => ensureValidInput({ input, conversation })).toThrow(
-          /Conversation is awaiting a prompt response, but none was provided/
+          /Conversation is awaiting prompt responses, but 1 response\(s\) are missing/
         );
       });
 

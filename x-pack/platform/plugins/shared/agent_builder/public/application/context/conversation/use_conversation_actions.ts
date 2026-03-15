@@ -62,8 +62,8 @@ export interface ConversationActions {
   setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
   addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
   setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => void;
-  setPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => void;
-  clearPendingPrompt: () => void;
+  addPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => void;
+  clearPendingPrompts: () => void;
   onConversationCreated: ({
     conversationId,
     title,
@@ -233,15 +233,18 @@ const createConversationActions = ({
         round.time_to_first_token = timeToFirstToken;
       });
     },
-    setPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => {
+    addPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => {
       setCurrentRound((round) => {
-        round.pending_prompt = prompt;
+        if (!round.pending_prompts) {
+          round.pending_prompts = [];
+        }
+        round.pending_prompts.push(prompt);
         round.status = ConversationRoundStatus.awaitingPrompt;
       });
     },
-    clearPendingPrompt: () => {
+    clearPendingPrompts: () => {
       setCurrentRound((round) => {
-        round.pending_prompt = undefined;
+        round.pending_prompts = undefined;
         round.status = ConversationRoundStatus.inProgress;
       });
     },

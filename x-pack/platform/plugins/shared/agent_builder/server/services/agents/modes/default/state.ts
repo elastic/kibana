@@ -38,7 +38,10 @@ export const StateAnnotation = Annotation.Root({
   }),
   // outputs
   interrupted: Annotation<boolean>(),
-  prompt: Annotation<PromptRequest>(),
+  prompts: Annotation<PromptRequest[]>({
+    reducer: (a, b) => [...(a ?? []), ...b],
+    default: () => [],
+  }),
   finalAnswer: Annotation<string>(),
 });
 
