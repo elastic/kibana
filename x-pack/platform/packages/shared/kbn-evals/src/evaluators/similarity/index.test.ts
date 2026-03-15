@@ -113,38 +113,4 @@ describe('createSimilarityEvaluator', () => {
 
     expect(result.score).toBeCloseTo(1.0);
   });
-
-  it('handles non-string outputs with different key order', async () => {
-    const result = await evaluator.evaluate({
-      input: {},
-      output: { hello: 'world', message: 'hello world' },
-      expected: { message: 'hello world', hello: 'world' },
-      metadata: null,
-    });
-
-    expect(result.score).toBeCloseTo(1.0);
-  });
-
-  it('handles undefined expected gracefully', async () => {
-    const result = await evaluator.evaluate({
-      input: {},
-      output: 'some text',
-      expected: undefined,
-      metadata: null,
-    });
-
-    expect(result.score).toBe(0.0);
-    expect(result.label).toBe('dissimilar');
-  });
-
-  it('handles both null expected and output', async () => {
-    const result = await evaluator.evaluate({
-      input: {},
-      output: null,
-      expected: null,
-      metadata: null,
-    });
-
-    expect(result.score).toBe(1.0);
-  });
 });

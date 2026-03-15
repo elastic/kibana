@@ -26,12 +26,30 @@ function computeTermFrequency(tokens: string[]): Map<string, number> {
   return tf;
 }
 
-function buildVocabulary(a: string[], b: string[]): string[] {
-  return Array.from(new Set([...a, ...b]));
+function computeIDF(documents: string[][]): Map<string, number> {
+  const idf = new Map<string, number>();
+  const totalDocs = documents.length;
+
+  const allTerms = new Set(documents.flat());
+
+  for (const term of allTerms) {
+    const docsWithTerm = documents.filter((doc) => doc.includes(term)).length;
+    idf.set(term, Math.log((totalDocs + 1) / (docsWithTerm + 1)) + 1);
+  }
+
+  return idf;
 }
 
-function computeTfVector(tf: Map<string, number>, vocabulary: string[]): number[] {
-  return vocabulary.map((term) => tf.get(term) ?? 0);
+function computeTfIdfVector(
+  tf: Map<string, number>,
+  idf: Map<string, number>,
+  vocabulary: string[]
+): number[] {
+  return vocabulary.map((term) => {
+    const tfVal = tf.get(term) ?? 0;
+    const idfVal = idf.get(term) ?? 0;
+    return tfVal * idfVal;
+  });
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {
@@ -50,30 +68,6 @@ function cosineSimilarity(a: number[], b: number[]): number {
   return dotProduct / denominator;
 }
 
-function sortKeys(value: unknown): unknown {
-  if (value === null || value === undefined || typeof value !== 'object') {
-    return value;
-  }
-  if (Array.isArray(value)) {
-    return value.map(sortKeys);
-  }
-  return Object.keys(value as Record<string, unknown>)
-    .sort()
-    .reduce<Record<string, unknown>>((acc, key) => {
-      acc[key] = sortKeys((value as Record<string, unknown>)[key]);
-      return acc;
-    }, {});
-}
-
-/**
- * Computes term-frequency cosine similarity between expected and actual outputs.
- *
- * Both inputs are normalized to lowercase tokens. Objects are sorted by keys and
- * serialized to JSON for consistent comparison. Returns a score between 0 and 1,
- * with a configurable threshold for the similar/dissimilar label.
- *
- * @param config.threshold - Minimum cosine similarity to be labeled 'similar' (default: 0.7)
- */
 export function createSimilarityEvaluator(config?: { threshold?: number }): Evaluator {
   const threshold = config?.threshold ?? 0.7;
 
@@ -81,18 +75,8 @@ export function createSimilarityEvaluator(config?: { threshold?: number }): Eval
     name: 'similarity',
     kind: 'CODE',
     evaluate: async ({ output, expected }) => {
-      const expectedText =
-        typeof expected === 'string'
-          ? expected
-          : expected == null
-          ? ''
-          : JSON.stringify(sortKeys(expected));
-      const outputText =
-        typeof output === 'string'
-          ? output
-          : output == null
-          ? ''
-          : JSON.stringify(sortKeys(output));
+      const expectedText = typeof expected === 'string' ? expected : JSON.stringify(expected ?? '');
+      const outputText = typeof output === 'string' ? output : JSON.stringify(output ?? '');
 
       if (expectedText.trim().length === 0 && outputText.trim().length === 0) {
         return {
@@ -121,13 +105,15 @@ export function createSimilarityEvaluator(config?: { threshold?: number }): Eval
         };
       }
 
-      const vocabulary = buildVocabulary(expectedTokens, outputTokens);
+      const documents = [expectedTokens, outputTokens];
+      const idf = computeIDF(documents);
+      const vocabulary = Array.from(idf.keys());
 
       const expectedTf = computeTermFrequency(expectedTokens);
       const outputTf = computeTermFrequency(outputTokens);
 
-      const expectedVector = computeTfVector(expectedTf, vocabulary);
-      const outputVector = computeTfVector(outputTf, vocabulary);
+      const expectedVector = computeTfIdfVector(expectedTf, idf, vocabulary);
+      const outputVector = computeTfIdfVector(outputTf, idf, vocabulary);
 
       const score = cosineSimilarity(expectedVector, outputVector);
 
@@ -143,12 +129,8 @@ export function createSimilarityEvaluator(config?: { threshold?: number }): Eval
         explanation: [
           `Cosine similarity: ${score.toFixed(3)}`,
           `Threshold: ${threshold}`,
-          `Matching terms (${matchingTerms.length}): ${matchingTerms.slice(0, 10).join(', ')}${
-            matchingTerms.length > 10 ? '...' : ''
-          }`,
-          `Missing terms (${missingTerms.length}): ${missingTerms.slice(0, 10).join(', ')}${
-            missingTerms.length > 10 ? '...' : ''
-          }`,
+          `Matching terms (${matchingTerms.length}): ${matchingTerms.slice(0, 10).join(', ')}${matchingTerms.length > 10 ? '...' : ''}`,
+          `Missing terms (${missingTerms.length}): ${missingTerms.slice(0, 10).join(', ')}${missingTerms.length > 10 ? '...' : ''}`,
         ].join('. '),
         metadata: {
           similarity: score,

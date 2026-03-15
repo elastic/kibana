@@ -25,49 +25,27 @@ function computeMajority(scores: number[]): number {
   return ones > rounded.length / 2 ? 1 : 0;
 }
 
-/**
- * Meta-evaluator that aggregates scores from multiple judge evaluators using a
- * configurable strategy (mean, median, or majority vote).
- *
- * Individual judge failures are handled gracefully — failed judges are logged via
- * the optional logger and excluded from aggregation. The evaluator's `kind` is
- * derived from the judges: 'LLM' if any judge is LLM-based, 'CODE' otherwise.
- *
- * @param config.judges - Array of evaluators to aggregate
- * @param config.strategy - Aggregation method: 'mean' | 'median' | 'majority' (default: 'mean')
- * @param config.logger - Optional logger for warning on judge failures
- */
 export function createMultiJudgeEvaluator(config: {
   judges: Evaluator[];
   strategy?: AggregationStrategy;
-  logger?: { warn: (msg: string) => void };
 }): Evaluator {
-  const { judges, strategy = 'mean', logger } = config;
-
-  const hasLlmJudge = judges.some((judge) => judge.kind === 'LLM');
+  const { judges, strategy = 'mean' } = config;
 
   return {
     name: 'multi-judge',
-    kind: hasLlmJudge ? 'LLM' : 'CODE',
+    kind: 'LLM',
     evaluate: async (params) => {
       const results = await Promise.allSettled(judges.map((judge) => judge.evaluate(params)));
 
       const judgeResults: Array<{ name: string; result: EvaluationResult }> = [];
       const scores: number[] = [];
 
-      const failedJudges: Array<{ name: string; error: string }> = [];
-
       results.forEach((result, i) => {
         if (result.status === 'fulfilled') {
           judgeResults.push({ name: judges[i].name, result: result.value });
-          if (result.value.score != null && Number.isFinite(result.value.score)) {
+          if (result.value.score != null) {
             scores.push(result.value.score);
           }
-        } else {
-          const errorMessage =
-            result.reason instanceof Error ? result.reason.message : String(result.reason);
-          failedJudges.push({ name: judges[i].name, error: errorMessage });
-          logger?.warn(`Judge "${judges[i].name}" failed: ${errorMessage}`);
         }
       });
 
@@ -76,7 +54,7 @@ export function createMultiJudgeEvaluator(config: {
           score: null,
           label: 'no-scores',
           explanation: 'No judges returned valid scores.',
-          metadata: { judgeResults, failedJudges },
+          metadata: { judgeResults },
         };
       }
 
@@ -91,10 +69,6 @@ export function createMultiJudgeEvaluator(config: {
         case 'majority':
           aggregatedScore = computeMajority(scores);
           break;
-        default: {
-          const _exhaustive: never = strategy;
-          throw new Error(`Unknown aggregation strategy: ${_exhaustive}`);
-        }
       }
 
       const explanation = judgeResults
@@ -104,16 +78,13 @@ export function createMultiJudgeEvaluator(config: {
       return {
         score: aggregatedScore,
         label: `${strategy}(${scores.length} judges)`,
-        explanation: `Aggregated via ${strategy}: ${aggregatedScore.toFixed(
-          3
-        )}. Individual scores — ${explanation}`,
+        explanation: `Aggregated via ${strategy}: ${aggregatedScore.toFixed(3)}. Individual scores — ${explanation}`,
         metadata: {
           strategy,
           judgeCount: judges.length,
           successfulJudges: scores.length,
           individualScores: scores,
           judgeResults,
-          failedJudges,
         },
       };
     },

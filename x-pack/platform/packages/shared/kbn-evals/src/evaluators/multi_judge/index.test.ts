@@ -38,32 +38,6 @@ const defaultParams: EvaluatorParams<any, any> = {
 };
 
 describe('createMultiJudgeEvaluator', () => {
-  it('sets kind to CODE when all judges are CODE', () => {
-    const evaluator = createMultiJudgeEvaluator({
-      judges: [mockJudge('a', 0.8), mockJudge('b', 0.6)],
-    });
-
-    expect(evaluator.kind).toBe('CODE');
-  });
-
-  it('sets kind to LLM when any judge is LLM', () => {
-    const llmJudge: Evaluator = {
-      name: 'llm',
-      kind: 'LLM',
-      evaluate: async (): Promise<EvaluationResult> => ({
-        score: 0.9,
-        label: 'test',
-        explanation: 'Score: 0.9',
-      }),
-    };
-
-    const evaluator = createMultiJudgeEvaluator({
-      judges: [mockJudge('a', 0.8), llmJudge],
-    });
-
-    expect(evaluator.kind).toBe('LLM');
-  });
-
   describe('mean strategy', () => {
     it('computes mean of all scores', async () => {
       const evaluator = createMultiJudgeEvaluator({
@@ -98,12 +72,7 @@ describe('createMultiJudgeEvaluator', () => {
 
     it('returns average of two middle values for even count', async () => {
       const evaluator = createMultiJudgeEvaluator({
-        judges: [
-          mockJudge('a', 0.2),
-          mockJudge('b', 0.4),
-          mockJudge('c', 0.6),
-          mockJudge('d', 0.8),
-        ],
+        judges: [mockJudge('a', 0.2), mockJudge('b', 0.4), mockJudge('c', 0.6), mockJudge('d', 0.8)],
         strategy: 'median',
       });
 
@@ -142,20 +111,6 @@ describe('createMultiJudgeEvaluator', () => {
 
       const result = await evaluator.evaluate(defaultParams);
       expect(result.score).toBeCloseTo(0.7);
-      expect(result.metadata).toHaveProperty('failedJudges');
-      expect((result.metadata as any).failedJudges).toHaveLength(1);
-      expect((result.metadata as any).failedJudges[0].name).toBe('b');
-    });
-
-    it('logs warnings for failed judges', async () => {
-      const warn = jest.fn();
-      const evaluator = createMultiJudgeEvaluator({
-        judges: [mockJudge('a', 0.8), failingJudge('b')],
-        logger: { warn },
-      });
-
-      await evaluator.evaluate(defaultParams);
-      expect(warn).toHaveBeenCalledWith('Judge "b" failed: Judge failed');
     });
 
     it('skips judges with null scores', async () => {

@@ -11,17 +11,6 @@ import pRetry from 'p-retry';
 import type { Evaluator } from '../../types';
 import { LlmCoherenceEvaluationPrompt } from './prompt';
 
-/**
- * LLM-as-a-judge evaluator that scores multi-turn conversation quality across four
- * dimensions: topic consistency, context retention, contradiction detection, and
- * resolution quality. Each dimension is scored 0–1 by the LLM, then averaged.
- *
- * Uses retry logic for resilience against transient LLM failures. Validates that
- * all returned scores are finite numbers in the [0, 1] range.
- *
- * @param config.inferenceClient - Bound inference client for LLM calls
- * @param config.log - Logger for retry warnings and error reporting
- */
 export function createConversationCoherenceEvaluator(config: {
   inferenceClient: BoundInferenceClient;
   log: ToolingLog;
@@ -46,34 +35,13 @@ export function createConversationCoherenceEvaluator(config: {
           throw new Error('No tool call found in LLM response');
         }
 
-        const result = toolCall.function.arguments;
-        const scoreFields = [
-          'topic_consistency',
-          'context_retention',
-          'contradiction_score',
-          'resolution_quality',
-        ] as const;
-        for (const field of scoreFields) {
-          const val = result[field];
-          if (typeof val !== 'number' || !Number.isFinite(val)) {
-            throw new Error(
-              `LLM returned invalid ${field}: ${JSON.stringify(val)} — expected a finite number`
-            );
-          }
-          if (val < 0 || val > 1) {
-            throw new Error(
-              `LLM returned out-of-range ${field}: ${val} — expected a value between 0 and 1`
-            );
-          }
-        }
-
-        return result;
+        return toolCall.function.arguments;
       }
 
       const scores = await pRetry(runCoherenceAnalysis, {
         retries: 3,
         onFailedAttempt: (error) => {
-          const isLastAttempt = error.retriesLeft === 0;
+          const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
           if (isLastAttempt) {
             log.error(
               new Error(
@@ -83,9 +51,10 @@ export function createConversationCoherenceEvaluator(config: {
             );
           } else {
             log.warning(
-              new Error(`Coherence analysis attempt ${error.attemptNumber} failed; retrying...`, {
-                cause: error,
-              })
+              new Error(
+                `Coherence analysis attempt ${error.attemptNumber} failed; retrying...`,
+                { cause: error }
+              )
             );
           }
         },

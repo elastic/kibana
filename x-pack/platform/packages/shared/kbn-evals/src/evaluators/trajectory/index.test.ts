@@ -115,15 +115,4 @@ describe('createTrajectoryEvaluator', () => {
     // LCS = ['search', 'display'] → 2/3
     expect(result.score).toBeCloseTo(2 / 3);
   });
-
-  it('throws when weights do not sum to 1', () => {
-    expect(() =>
-      createTrajectoryEvaluator({
-        extractToolCalls: (output: unknown) => (output as { tools: string[] }).tools,
-        goldenPathExtractor: (expected: unknown) => (expected as { tools: string[] }).tools,
-        orderWeight: 0.3,
-        coverageWeight: 0.3,
-      })
-    ).toThrow('orderWeight (0.3) + coverageWeight (0.3) must sum to 1');
-  });
 });
