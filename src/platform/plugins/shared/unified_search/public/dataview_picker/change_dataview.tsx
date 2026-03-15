@@ -279,7 +279,7 @@ export function ChangeDataView({
               <EuiButtonEmpty
                 onClick={onCreate}
                 size="xs"
-                iconType="plusInCircleFilled"
+                iconType="plusCircle"
                 iconSide="left"
                 data-test-subj="dataview-create-new"
               >

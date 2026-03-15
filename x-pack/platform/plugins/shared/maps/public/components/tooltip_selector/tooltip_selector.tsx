@@ -215,7 +215,7 @@ export class TooltipSelector extends Component<Props, State> {
                         />
                         <EuiButtonIcon
                           className="mapTooltipSelector__grab"
-                          iconType="grab"
+                          iconType="dragVertical"
                           color="text"
                           title={i18n.translate('xpack.maps.tooltipSelector.grabButtonTitle', {
                             defaultMessage: 'Reorder property',

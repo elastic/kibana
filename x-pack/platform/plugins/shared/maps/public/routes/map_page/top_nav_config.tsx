@@ -263,7 +263,7 @@ export function getTopNavConfig({
           defaultMessage: 'Save and return',
         }),
         emphasize: true,
-        iconType: 'checkInCircleFilled',
+        iconType: 'checkCircleFill',
         run: () => {
           savedMap.save({
             newTitle: savedMap.getTitle(),

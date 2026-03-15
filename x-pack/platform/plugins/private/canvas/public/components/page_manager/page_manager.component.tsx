@@ -230,7 +230,7 @@ export class PageManager extends Component<Props, State> {
                   className="canvasPageManager__addPage kbn-resetFocusState"
                   data-test-subj="canvasAddPageButton"
                 >
-                  <EuiIcon color="ghost" type="plusInCircle" size="l" />
+                  <EuiIcon color="ghost" type="plusCircle" size="l" />
                 </button>
               </EuiToolTip>
             </EuiFlexItem>

@@ -56,7 +56,7 @@ export const FilterItemActions: FC<FilterItemActionsProps & { minimizePaddings?:
           <EuiButtonEmpty
             onClick={onOrButtonClick}
             isDisabled={disableOr || disabled}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             size="xs"
             iconSize="s"
             flush="right"
@@ -73,7 +73,7 @@ export const FilterItemActions: FC<FilterItemActionsProps & { minimizePaddings?:
           <EuiButtonEmpty
             onClick={onAddButtonClick}
             isDisabled={disableAnd || disabled}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             size="xs"
             iconSize="s"
             flush="right"

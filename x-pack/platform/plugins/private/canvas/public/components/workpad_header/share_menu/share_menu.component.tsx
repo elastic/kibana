@@ -61,7 +61,7 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
     items: [
       {
         name: strings.getShareDownloadJSONTitle(),
-        icon: <EuiIcon type="exportAction" size="m" />,
+        icon: <EuiIcon type="upload" size="m" />,
         onClick: () => {
           onExport('json');
           closePopover();

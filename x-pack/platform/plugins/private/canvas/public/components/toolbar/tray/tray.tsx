@@ -31,7 +31,7 @@ export const Tray = ({ children, done }: Props) => {
             size="s"
             onClick={done}
             aria-label={strings.getCloseTrayAriaLabel()}
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

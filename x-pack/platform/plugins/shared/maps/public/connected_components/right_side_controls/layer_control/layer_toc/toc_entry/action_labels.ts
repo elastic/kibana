@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export function getVisibilityToggleIcon(isVisible: boolean) {
-  return isVisible ? 'eyeClosed' : 'eye';
+  return isVisible ? 'eyeSlash' : 'eye';
 }
 
 export function getVisibilityToggleLabel(isVisible: boolean) {

@@ -120,7 +120,7 @@ export function IconStops({
         <div>
           {deleteButton}
           <EuiButtonIcon
-            iconType="plusInCircle"
+            iconType="plusCircle"
             color="primary"
             aria-label="Add"
             title="Add"

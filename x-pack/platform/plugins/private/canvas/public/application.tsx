@@ -119,7 +119,7 @@ export const initializeCanvas = async (
       : {
           text: strings.getText(),
           tooltip: strings.getTooltip(),
-          iconType: 'glasses',
+          iconType: 'readOnly',
         }
   );
 

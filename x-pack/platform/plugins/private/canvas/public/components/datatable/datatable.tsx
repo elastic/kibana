@@ -34,7 +34,7 @@ const getIcon = (type: DatatableColumnType | null) => {
       icon = 'calendar';
       break;
     case 'boolean':
-      icon = 'invert';
+      icon = 'contrast';
       break;
     default:
       icon = 'question';

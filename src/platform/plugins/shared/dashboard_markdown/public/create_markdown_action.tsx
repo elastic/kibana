@@ -22,7 +22,7 @@ export const createMarkdownAction = (): ActionDefinition<EmbeddableApiContext> =
   id: ADD_MARKDOWN_ACTION_ID,
   grouping: [ADD_PANEL_ANNOTATION_GROUP],
   order: 30,
-  getIconType: () => 'visText',
+  getIconType: () => 'text',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
