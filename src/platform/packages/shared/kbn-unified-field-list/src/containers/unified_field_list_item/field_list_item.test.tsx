@@ -45,11 +45,13 @@ async function getComponent({
   field,
   canFilter = true,
   isBreakdownSupported = true,
+  getMultiFields,
 }: {
   selected?: boolean;
   field?: DataViewField;
   canFilter?: boolean;
   isBreakdownSupported?: boolean;
+  getMultiFields?: UnifiedFieldListItemProps['getMultiFields'];
 }) {
   const finalField =
     field ??
@@ -89,6 +91,7 @@ async function getComponent({
     itemIndex: 0,
     size: 'xs',
     workspaceSelectedFieldNames: [],
+    getMultiFields,
   };
   const comp = await mountWithIntl(
     <EuiThemeProvider>
@@ -145,6 +148,22 @@ describe('UnifiedFieldListItem', function () {
     });
 
     expect(comp.find(FieldItemButton).prop('onClick')).toBeUndefined();
+  });
+
+  it('should not mount a popover until the field is opened', async function () {
+    const { comp } = await getComponent({});
+
+    expect(comp.find(EuiPopover).exists()).toBe(false);
+
+    await act(async () => {
+      const fieldItem = findTestSubject(comp, 'field-bytes-showDetails');
+      await fieldItem.simulate('click');
+      await comp.update();
+    });
+
+    await comp.update();
+
+    expect(comp.find(EuiPopover).prop('isOpen')).toBe(true);
   });
 
   it('should not show addBreakdownField action button if not supported', async function () {
@@ -206,6 +225,31 @@ describe('UnifiedFieldListItem', function () {
     expect(comp.find(EuiProgress)).toHaveLength(2);
     expect(findTestSubject(comp, 'fieldStats-topValues').find(EuiButtonIcon)).toHaveLength(4);
   });
+
+  it('should resolve multi fields only after opening the popover', async function () {
+    const field = new DataViewField({
+      name: 'machine.os',
+      type: 'string',
+      esTypes: ['text'],
+      searchable: true,
+      aggregatable: false,
+    });
+    const getMultiFields = jest.fn(() => []);
+
+    const { comp } = await getComponent({ field, getMultiFields });
+
+    expect(getMultiFields).not.toHaveBeenCalled();
+
+    await act(async () => {
+      const fieldItem = findTestSubject(comp, 'field-machine.os-showDetails');
+      await fieldItem.simulate('click');
+      await comp.update();
+    });
+
+    await comp.update();
+
+    expect(getMultiFields).toHaveBeenCalledWith(field);
+  });
   it('should include popover actions', async function () {
     const field = new DataViewField({
       name: 'extension.keyword',
@@ -254,7 +298,7 @@ describe('UnifiedFieldListItem', function () {
 
     await comp.update();
 
-    expect(comp.find(EuiPopover).prop('isOpen')).toBe(false);
+    expect(comp.find(EuiPopover).exists()).toBe(false);
   });
 
   it('should not include + action for selected fields', async function () {

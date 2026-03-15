@@ -11,7 +11,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/shared/kbn-unified-field-list'],
-  testPathIgnorePatterns: [
-    '<rootDir>/src/platform/packages/shared/kbn-unified-field-list/src/benchmarks/',
+  testMatch: [
+    '<rootDir>/src/platform/packages/shared/kbn-unified-field-list/src/benchmarks/**/*.bench.test.tsx',
   ],
 };
