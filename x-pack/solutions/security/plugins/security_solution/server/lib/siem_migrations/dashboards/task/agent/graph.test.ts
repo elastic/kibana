@@ -65,6 +65,8 @@ const setupAgent = (responses: NodeResponse[]) => {
       getConnectorById: jest.fn(),
       getInferenceEndpoints: jest.fn(),
       getInferenceEndpointById: jest.fn(),
+      isAnonymizationEnabled: jest.fn().mockReturnValue(false),
+      deanonymizeText: jest.fn(),
       ...model,
     },
     request: httpServerMock.createKibanaRequest(),
