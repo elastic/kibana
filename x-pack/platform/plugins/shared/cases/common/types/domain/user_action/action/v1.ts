@@ -27,6 +27,10 @@ export const UserActionTypes = {
   category: 'category',
   customFields: 'customFields',
   observables: 'observables',
+  create_task: 'create_task',
+  update_task: 'update_task',
+  delete_task: 'delete_task',
+  apply_task_template: 'apply_task_template',
 } as const;
 
 type UserActionActionTypeKeys = keyof typeof UserActionTypes;

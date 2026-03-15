@@ -40,6 +40,12 @@ import type {
   UserActionFindRequest,
 } from '../../../common/types/api';
 import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
+import type {
+  CreateTaskUserActionPayload,
+  UpdateTaskUserActionPayload,
+  DeleteTaskUserActionPayload,
+  ApplyTaskTemplateUserActionPayload,
+} from '../../../common/types/domain/user_action/task/v1';
 
 export interface BuilderParameters {
   title: {
@@ -102,6 +108,18 @@ export interface BuilderParameters {
         observables: { actionType: ObservablesActionType; count: number };
       };
     };
+  };
+  create_task: {
+    parameters: { payload: CreateTaskUserActionPayload };
+  };
+  update_task: {
+    parameters: { payload: UpdateTaskUserActionPayload };
+  };
+  delete_task: {
+    parameters: { payload: DeleteTaskUserActionPayload };
+  };
+  apply_task_template: {
+    parameters: { payload: ApplyTaskTemplateUserActionPayload };
   };
 }
 
