@@ -519,7 +519,8 @@ export class WorkflowsExecutionEnginePlugin
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
-      request: KibanaRequest
+      request: KibanaRequest,
+      options: { refresh: boolean | 'wait_for' } = { refresh: 'wait_for' }
     ): Promise<{
       workflowExecution: Partial<EsWorkflowExecution>;
       repository: WorkflowExecutionRepository;
@@ -557,7 +558,13 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
       }
 
-      await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      // Caller specifies the refresh strategy: manual/UI paths use refresh:true (immediate,
+      // no latency for the user); async paths use refresh:'wait_for' (waits for the next
+      // scheduled refresh cycle, lower cluster cost). Either way the execution must be visible
+      // to the search-based concurrency check that follows before it runs.
+      await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
+        refresh: options.refresh,
+      });
 
       return { workflowExecution, repository: workflowExecutionRepository };
     };
@@ -606,7 +613,8 @@ export class WorkflowsExecutionEnginePlugin
         workflow,
         context,
         'manual',
-        request
+        request,
+        { refresh: true }
       );
 
       // Check concurrency limits and apply collision strategy if needed
@@ -663,7 +671,8 @@ export class WorkflowsExecutionEnginePlugin
         workflow,
         context,
         'alert',
-        request
+        request,
+        { refresh: 'wait_for' }
       );
 
       // Check concurrency limits and apply collision strategy if needed
