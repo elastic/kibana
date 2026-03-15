@@ -25,6 +25,7 @@ import {
   registerResolutionLink,
   registerResolutionUnlink,
   registerResolutionGroup,
+  registerUpdate,
 } from './apis';
 import type { EntityStorePluginRouter } from '../types';
 
@@ -40,6 +41,7 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerCRUDUpsertBulk(router);
   registerCRUDDelete(router);
   registerStart(router);
+  registerUpdate(router);
   registerResolutionLink(router);
   registerResolutionUnlink(router);
   registerResolutionGroup(router);
