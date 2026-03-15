@@ -15,17 +15,18 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
-  EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { TRIGGER_TABS_LABELS } from './translations';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/use_workflow_executions';
+import { formatDuration } from '../../../shared/lib/format_duration';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
@@ -58,24 +59,25 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
 
     const { data: executionsList } = useWorkflowExecutions({
       workflowId: workflowId ?? null,
+      omitStepRuns: true,
       size: 100,
     });
 
     const executionOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
-      const total = executionsList?.total ?? 0;
       const results = executionsList?.results ?? [];
       if (!results.length) return [];
-      return results.map((execution, index): EuiComboBoxOptionOption<string> => {
-        const runNumber = total - index;
-        const formattedDateTime =
-          getFormattedDateTime(new Date(execution.startedAt)) ?? execution.startedAt;
-        const statusIcon = getExecutionStatusIcon(euiTheme, execution.status);
+      return results.map((execution): EuiComboBoxOptionOption<string> => {
+        const { id, startedAt, status, isTestRun, duration, stepId } = execution;
+        const formattedDateTime = getFormattedDateTime(new Date(startedAt)) ?? startedAt;
+        const timeAgo = moment(startedAt).fromNow();
+        const stepDuration = formatDuration(duration ?? 0);
+        const statusIcon = getExecutionStatusIcon(euiTheme, status);
         return {
-          key: execution.id,
-          value: execution.id,
-          label: translations.getRunLabel(runNumber, formattedDateTime),
+          key: id,
+          value: id,
+          label: translations.getRunLabel(formattedDateTime, timeAgo, stepDuration, stepId),
           prepend: <EuiFlexItem grow={false}>{statusIcon}</EuiFlexItem>,
-          ...(execution.isTestRun && {
+          ...(isTestRun && {
             append: <EuiIconTip type="flask" aria-hidden={true} content={translations.testRun} />,
           }),
           css: css`
@@ -85,7 +87,7 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
           `,
         };
       });
-    }, [euiTheme, executionsList?.results, executionsList?.total, getFormattedDateTime]);
+    }, [euiTheme, executionsList?.results, getFormattedDateTime]);
 
     const { data: selectedExecution, isLoading: isLoadingExecution } = useWorkflowExecution({
       executionId: selectedExecutionId,
@@ -136,7 +138,6 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
 
     return (
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiSpacer size="s" />
         <EuiFlexItem grow={false}>
           <EuiFormRow label={translations.selectExecutionLabel} fullWidth>
             <EuiComboBox
@@ -239,11 +240,12 @@ function getTriggerTypeLabel(context?: Record<string, unknown>): string {
 }
 
 const translations = {
-  getRunLabel: (runNumber: number, dateTime: string) =>
-    i18n.translate('workflows.workflowExecuteModal.replayOptionLabel', {
-      defaultMessage: 'Run #{runNumber} - {dateTime}',
-      values: { runNumber, dateTime },
-    }),
+  getRunLabel: (dateTime: string, timeAgo: string, stepDuration: string, stepId?: string) => {
+    return i18n.translate('workflows.workflowExecuteModal.replayOptionLabel', {
+      defaultMessage: 'Workflow run - {dateTime} ({timeAgo}) - took {stepDuration}',
+      values: { dateTime, timeAgo, stepDuration },
+    });
+  },
   testRun: i18n.translate('workflows.workflowExecuteModal.testRun', {
     defaultMessage: 'Test run',
   }),
