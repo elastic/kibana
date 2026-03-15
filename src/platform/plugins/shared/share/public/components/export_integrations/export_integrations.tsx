@@ -39,8 +39,10 @@ import {
   useShareTypeContext,
   useShareContext,
 } from '../context';
-import type { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
+import type { ExportShareConfig, ExportShareDerivativesConfig, ShareContext } from '../../types';
 import { DraftModeCallout } from '../common/draft_mode_callout';
+import { isTimeRangeAbsoluteTime } from '../../lib/time_utils';
+import { TimeTypeSelection } from '../common/time_type_selection';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
@@ -59,7 +61,7 @@ interface LayoutOptionsProps {
   printLayoutChange: (evt: EuiSwitchEvent) => void;
 }
 
-export interface ManagedFlyoutProps {
+export interface ManagedExportFlyoutProps {
   exportIntegration: ExportShareConfig;
   intl: InjectedIntl;
   isDirty: boolean;
@@ -75,6 +77,7 @@ export interface ManagedFlyoutProps {
   sharingData: {
     [key: string]: unknown;
   };
+  shareableUrlLocatorParams?: ShareContext['shareableUrlLocatorParams'];
 }
 
 function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOptionsProps) {
@@ -128,7 +131,7 @@ function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOption
   );
 }
 
-export function ManagedFlyout({
+export function ManagedExportFlyout({
   exportIntegration,
   intl,
   isDirty,
@@ -140,7 +143,8 @@ export function ManagedFlyout({
   onSave,
   isSaving,
   sharingData,
-}: ManagedFlyoutProps) {
+  shareableUrlLocatorParams,
+}: ManagedExportFlyoutProps) {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
 
@@ -153,21 +157,30 @@ export function ManagedFlyout({
     return null;
   }, [exportIntegration.config, sharingData.totalHits]);
 
+  const timeRange = shareableUrlLocatorParams?.params?.timeRange;
+  const isAbsoluteTimeByDefault = isTimeRangeAbsoluteTime(timeRange);
+  const [isAbsoluteTime, setIsAbsoluteTime] = useState(isAbsoluteTimeByDefault);
+
   const getReport = useCallback(async () => {
     try {
       setIsCreatingExport(true);
       await exportIntegration.config.generateAssetExport({
         intl,
         optimizedForPrinting: usePrintLayout,
+        useAbsoluteTime: isAbsoluteTime,
       });
     } finally {
       setIsCreatingExport(false);
       onCloseFlyout();
     }
-  }, [exportIntegration.config, intl, onCloseFlyout, usePrintLayout]);
+  }, [exportIntegration.config, intl, onCloseFlyout, usePrintLayout, isAbsoluteTime]);
 
   const draftModeCallout = shareObjectTypeMeta.config?.[exportIntegration.id]?.draftModeCallOut;
   const draftModeCalloutContent = typeof draftModeCallout === 'object' ? draftModeCallout : {};
+
+  const handleTimeTypeChange = useCallback((value: boolean) => {
+    setIsAbsoluteTime(value);
+  }, []);
 
   return (
     <React.Fragment>
@@ -193,6 +206,17 @@ export function ManagedFlyout({
                 <LayoutOptionsSwitch
                   usePrintLayout={usePrintLayout}
                   printLayoutChange={(evt) => setPrintLayout(evt.target.checked)}
+                />
+              </EuiFlexItem>
+            )}
+          </Fragment>
+          <Fragment>
+            {exportIntegration.config.supportsAbsoluteTime && (
+              <EuiFlexItem>
+                <TimeTypeSelection
+                  timeRange={timeRange}
+                  onTimeTypeChange={handleTimeTypeChange}
+                  isAbsoluteTimeByDefault={isAbsoluteTimeByDefault}
                 />
               </EuiFlexItem>
             )}
@@ -228,6 +252,7 @@ export function ManagedFlyout({
                         {exportIntegration.config.copyAssetURIConfig.generateAssetURIValue({
                           intl,
                           optimizedForPrinting: usePrintLayout,
+                          useAbsoluteTime: isAbsoluteTime,
                         })}
                       </EuiCodeBlock>
                     </EuiFlexItem>
@@ -296,6 +321,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     objectTypeAlias,
     objectTypeMeta,
     sharingData,
+    shareableUrlLocatorParams,
   } = useShareTypeContext('integration', 'export');
   const { shareMenuItems: exportDerivatives } = useShareTypeContext(
     'integration',
@@ -314,6 +340,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     id: string;
     group: keyof typeof selectionOptions.current;
   }>();
+
   const selectedMenuItem = useMemo<ExportShareConfig | ExportShareDerivativesConfig | null>(() => {
     let result: ExportShareConfig | ExportShareDerivativesConfig | null = null;
 
@@ -346,6 +373,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
           .generateAssetExport({
             intl,
             optimizedForPrinting: false,
+            useAbsoluteTime: false,
           })
           .finally(() => {
             onClose();
@@ -432,6 +460,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
       </EuiWrappingPopover>
       {isFlyoutVisible && (
         <EuiFlyout
+          aria-label="export item details flyout"
           data-test-subj="exportItemDetailsFlyout"
           size="s"
           onClose={flyoutOnCloseHandler}
@@ -460,7 +489,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             }}
           />
           {selectedMenuItemMeta!.group === 'export' ? (
-            <ManagedFlyout
+            <ManagedExportFlyout
               exportIntegration={selectedMenuItem as ExportShareConfig}
               shareObjectType={objectType}
               shareObjectTypeAlias={objectTypeAlias}
@@ -472,6 +501,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
               onSave={onSave}
               isSaving={isSaving}
               sharingData={sharingData}
+              shareableUrlLocatorParams={shareableUrlLocatorParams}
             />
           ) : (
             (selectedMenuItem as ExportShareDerivativesConfig)?.config.flyoutContent({

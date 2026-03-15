@@ -10,7 +10,7 @@
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiCallOut, EuiSpacer, EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage, FormattedRelativeTime, FormattedDate } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -18,6 +18,7 @@ import {
   convertRelativeTimeStringToAbsoluteTimeDate,
   getRelativeTimeValueAndUnitFromTimeString,
 } from '../../../lib/time_utils';
+import { timeTypeSelectionStyles } from './time_type_selection.styles';
 
 const BoldText = ({ children }: { children: ReactNode }) => {
   const { euiTheme } = useEuiTheme();
@@ -69,7 +70,7 @@ const RelativeTimeText = ({
     if (isToDate) {
       return (
         <FormattedMessage
-          id="share.link.timeRange.endOfRoundingUnit"
+          id="share.common.timeRange.endOfRoundingUnit"
           defaultMessage="<bold>the end of the {roundingUnit}</bold>"
           values={{
             roundingUnit,
@@ -80,7 +81,7 @@ const RelativeTimeText = ({
     }
     return (
       <FormattedMessage
-        id="share.link.timeRange.startOfRoundingUnit"
+        id="share.common.timeRange.startOfRoundingUnit"
         defaultMessage="<bold>the start of the {roundingUnit}</bold>"
         values={{
           roundingUnit,
@@ -94,7 +95,7 @@ const RelativeTimeText = ({
   if (value === 0 && unit === 'second' && !roundingUnit) {
     return (
       <FormattedMessage
-        id="share.link.timeRange.now"
+        id="share.common.timeRange.now"
         defaultMessage="<bold>now</bold>"
         values={{
           bold: (chunks) => <BoldText>{chunks}</BoldText>,
@@ -112,7 +113,7 @@ const RelativeTimeText = ({
       />
       {roundingUnit && (
         <FormattedMessage
-          id="share.link.timeRange.relativeTimeInfoText.roundingUnit"
+          id="share.common.timeRange.relativeTimeInfoText.roundingUnit"
           defaultMessage=" rounded to the {roundingUnit}"
           values={{
             roundingUnit,
@@ -154,7 +155,7 @@ const getTimeRangeText = (timeRange: TimeRange) => {
 
   return (
     <FormattedMessage
-      id="share.link.timeRange.relativeTimeInfoText"
+      id="share.common.timeRange.relativeTimeInfoText"
       defaultMessage="The users will see all data from {from} to {to}, based on when they view it."
       values={{
         from: fromValue,
@@ -164,12 +165,14 @@ const getTimeRangeText = (timeRange: TimeRange) => {
   );
 };
 
-export const TimeTypeSection = ({
+export const TimeTypeSelection = ({
   timeRange,
   onTimeTypeChange,
   isAbsoluteTimeByDefault,
 }: Props) => {
   const [isAbsoluteTime, setIsAbsoluteTime] = useState(isAbsoluteTimeByDefault);
+
+  const styles = useMemo(timeTypeSelectionStyles, []);
 
   const handleTimeTypeChange = (e: EuiSwitchEvent) => {
     const newIsAbsolute = e.target.checked;
@@ -186,7 +189,7 @@ export const TimeTypeSection = ({
       {!isAbsoluteTimeByDefault && (
         <>
           <EuiSwitch
-            label={i18n.translate('share.link.timeRange.switchLabel', {
+            label={i18n.translate('share.common.timeRange.switchLabel', {
               defaultMessage: 'Use absolute time range',
             })}
             checked={isAbsoluteTime}
@@ -196,11 +199,11 @@ export const TimeTypeSection = ({
           <EuiSpacer size="m" />
         </>
       )}
-      <EuiText size="s">
+      <EuiText size="s" css={styles.timeInfoText}>
         {isAbsoluteTime ? (
           <div data-test-subj="absoluteTimeInfoText">
             <FormattedMessage
-              id="share.link.timeRange.absoluteTimeInfoText"
+              id="share.common.timeRange.absoluteTimeInfoText"
               defaultMessage="The users will see all data from {from} to {to}."
               values={{
                 from: <AbsoluteTimeText date={timeRange?.from} />,
@@ -217,7 +220,7 @@ export const TimeTypeSection = ({
         <EuiCallOut
           announceOnMount
           size="s"
-          title={i18n.translate('share.link.timeRange.relativeTimeCallout', {
+          title={i18n.translate('share.common.timeRange.relativeTimeCallout', {
             defaultMessage: 'To use a relative time range, select it in the time picker first.',
           })}
           data-test-subj="relativeTimeCallout"

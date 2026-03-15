@@ -158,6 +158,10 @@ export interface ExportShare
       requiresSavedState?: boolean;
       supportedLayoutOptions?: Array<'print'>;
       renderLayoutOptionSwitch?: boolean;
+      /**
+       * indicates if the export integration supports generating it exports with absolute time ranges
+       */
+      supportsAbsoluteTime?: boolean;
       renderTotalHitsSizeWarning?: (totalHits?: number) => ReactNode | undefined;
     } & (
       | {
@@ -296,7 +300,7 @@ export type BrowserUrlService = UrlService<
   BrowserShortUrlClient
 >;
 
-export type ShareableUrlLocatorParams = {
+export type ShareableLocatorParams = {
   timeRange: TimeRange | undefined;
 } & Record<string, unknown>;
 
@@ -347,7 +351,7 @@ export interface ShareContext {
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<any>;
-    params: ShareableUrlLocatorParams;
+    params: ShareableLocatorParams;
   };
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
@@ -384,6 +388,7 @@ export interface ShareMenuItemLegacy extends ShareMenuItemBase {
 export interface ExportGenerationOpts {
   optimizedForPrinting?: boolean;
   intl: InjectedIntl;
+  useAbsoluteTime: boolean;
 }
 
 interface UrlParamExtensionProps {

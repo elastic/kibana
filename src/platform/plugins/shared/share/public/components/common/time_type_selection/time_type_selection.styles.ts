@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  ExportMenu,
-  ManagedExportFlyout,
-  type ManagedExportFlyoutProps,
-} from './export_integrations';
+import { css } from '@emotion/react';
+
+export const timeTypeSelectionStyles = () => {
+  return {
+    timeInfoText: css({
+      lineHeight: '1.25',
+      minHeight: 'calc(1.25em * 3)',
+    }),
+  };
+};

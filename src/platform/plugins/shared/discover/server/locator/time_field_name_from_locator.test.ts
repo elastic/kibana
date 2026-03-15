@@ -47,3 +47,40 @@ test(`returns undefined if there is no timeFieldName in DiscoverAppLocatorParams
   const timeField = await timeFieldNameFromLocatorFn(params);
   expect(timeField).toBeUndefined();
 });
+
+test(`resolves timeFieldName from dataViewId when dataViewSpec is not provided`, async () => {
+  soClient.get = jest.fn().mockResolvedValue({
+    id: 'test-data-view-id',
+    type: 'index-pattern',
+    attributes: { timeFieldName: '@timestamp' },
+    references: [],
+  });
+
+  const params = { dataViewId: 'test-data-view-id' };
+  const timeFieldNameFromLocatorFn = timeFieldNameFromLocatorFactory(mockServices);
+  const timeField = await timeFieldNameFromLocatorFn(params);
+  expect(timeField).toBe('@timestamp');
+  expect(soClient.get).toHaveBeenCalledWith('index-pattern', 'test-data-view-id');
+});
+
+test(`returns undefined when dataViewId lookup fails`, async () => {
+  soClient.get = jest.fn().mockRejectedValue(new Error('Not found'));
+
+  const params = { dataViewId: 'nonexistent-id' };
+  const timeFieldNameFromLocatorFn = timeFieldNameFromLocatorFactory(mockServices);
+  const timeField = await timeFieldNameFromLocatorFn(params);
+  expect(timeField).toBeUndefined();
+});
+
+test(`prefers dataViewSpec.timeFieldName over dataViewId lookup`, async () => {
+  soClient.get = jest.fn();
+
+  const params = {
+    dataViewSpec: { timeFieldName: 'event.timestamp' },
+    dataViewId: 'test-data-view-id',
+  };
+  const timeFieldNameFromLocatorFn = timeFieldNameFromLocatorFactory(mockServices);
+  const timeField = await timeFieldNameFromLocatorFn(params);
+  expect(timeField).toBe('event.timestamp');
+  expect(soClient.get).not.toHaveBeenCalled();
+});
