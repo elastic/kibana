@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import fetch, { FetchError } from 'node-fetch';
-import type { RequestInit, Response } from 'node-fetch';
+import type { Agent as HttpAgent } from 'http';
+import type { Agent as HttpsAgent } from 'https';
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
+
 import pRetry from 'p-retry';
 
 import { streamToString } from '../streams';
@@ -16,10 +19,8 @@ import { RegistryError, RegistryConnectionError, RegistryResponseError } from '.
 import { airGappedUtils } from '../airgapped';
 
 import { getProxyAgent, getRegistryProxyUrl } from './proxy';
-import type { Agent as HttpAgent } from 'http';
-import type { Agent as HttpsAgent } from 'https';
 
-type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
+type FailedAttemptErrors = pRetry.FailedAttemptError | Error;
 
 // not sure what to call this function, but we're not exporting it
 async function registryFetch(url: string) {
@@ -92,8 +93,8 @@ export async function getResponseStream(
   const logger = appContextService.getLogger();
   const res = await getResponse(url, retries);
   try {
-    if (res) {
-      return res?.body;
+    if (res?.body) {
+      return Readable.fromWeb(res.body as WebReadableStream);
     }
     throw new RegistryResponseError('getResponseStream - Error connecting to the registry');
   } catch (error) {
@@ -109,12 +110,12 @@ export async function getResponseStreamWithSize(
   const logger = appContextService.getLogger();
   try {
     const res = await getResponse(url, retries);
-    if (res) {
+    if (res?.body) {
       const contentLengthHeader = res.headers.get('Content-Length');
       const contentLength = contentLengthHeader ? parseInt(contentLengthHeader, 10) : undefined;
 
       return {
-        stream: res.body,
+        stream: Readable.fromWeb(res.body as WebReadableStream),
         size: contentLength && !isNaN(contentLength) ? contentLength : undefined,
       };
     }
@@ -135,15 +136,50 @@ export async function fetchUrl(url: string, retries?: number): Promise<string> {
   }
 }
 
-// node-fetch throws a FetchError for those types of errors and
-// "All errors originating from Node.js core are marked with error.type = 'system'"
-// https://github.com/node-fetch/node-fetch/blob/master/docs/ERROR-HANDLING.md#error-handling-with-node-fetch
-function isFetchError(error: FailedAttemptErrors): error is FetchError {
-  return error instanceof FetchError || error.name === 'FetchError';
-}
-
+// Native fetch throws TypeError for network errors
+// We check for common network error codes in the error cause
 function isSystemError(error: FailedAttemptErrors): boolean {
-  return isFetchError(error) && error.type === 'system';
+  const networkErrorCodes = [
+    'ECONNREFUSED',
+    'ECONNRESET',
+    'ENOTFOUND',
+    'ETIMEDOUT',
+    'EPIPE',
+    'EAI_AGAIN',
+  ];
+
+  // Check for error codes commonly associated with network issues
+  // pRetry wraps errors in FailedAttemptError which may not preserve custom properties,
+  // so we need to check multiple potential locations for the code
+  const errorAny = error as any;
+  const possibleCodes = [
+    errorAny.code,
+    errorAny.cause?.code,
+    errorAny.originalError?.code,
+    errorAny.originalError?.cause?.code,
+  ].filter(Boolean);
+
+  for (const code of possibleCodes) {
+    if (networkErrorCodes.includes(code)) {
+      return true;
+    }
+  }
+
+  // Native fetch throws TypeError for network errors
+  if (error instanceof TypeError) {
+    // Check if the error message indicates a network issue
+    const message = error.message.toLowerCase();
+    if (
+      message.includes('fetch failed') ||
+      message.includes('network') ||
+      message.includes('econnreset') ||
+      message.includes('econnrefused')
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function isRegistry5xxError(error: FailedAttemptErrors): boolean {
@@ -156,7 +192,7 @@ function isRegistry5xxError(error: FailedAttemptErrors): boolean {
 export function getFetchOptions(targetUrl: string): RequestInit | undefined {
   const options: RequestInit = {
     headers: {
-      'User-Agent': `Kibana/${appContextService.getKibanaVersion()} node-fetch`,
+      'User-Agent': `Kibana/${appContextService.getKibanaVersion()}`,
     },
   };
   const proxyUrl = getRegistryProxyUrl();
@@ -167,6 +203,9 @@ export function getFetchOptions(targetUrl: string): RequestInit | undefined {
   const logger = appContextService.getLogger();
   logger.debug(`Using ${proxyUrl} as proxy for ${targetUrl}`);
 
-  options.agent = getProxyAgent({ proxyUrl, targetUrl }) as unknown as HttpAgent | HttpsAgent;
+  (options as RequestInit & { agent: HttpAgent | HttpsAgent }).agent = getProxyAgent({
+    proxyUrl,
+    targetUrl,
+  }) as unknown as HttpAgent | HttpsAgent;
   return options;
 }

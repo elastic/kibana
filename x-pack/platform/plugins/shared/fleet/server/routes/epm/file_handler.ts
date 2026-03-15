@@ -160,7 +160,7 @@ export const getFileHandler: FleetRequestHandler<
     validateContentTypeIsAllowed(proxiedHeaders['content-type']);
 
     return response.custom({
-      body: registryResponse.body,
+      body: registryResponse.body ?? undefined,
       statusCode: registryResponse.status,
       headers: { ...CACHE_CONTROL_10_MINUTES_HEADER, ...proxiedHeaders },
     });
