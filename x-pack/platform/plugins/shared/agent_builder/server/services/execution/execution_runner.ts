@@ -155,6 +155,7 @@ export const handleAgentExecution = async ({
           anonymizationEnabled,
           deanonymizeTitle,
           abortSignal,
+          logger,
         })
       : of(conversation.title);
 
