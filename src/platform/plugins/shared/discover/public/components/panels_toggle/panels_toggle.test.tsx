@@ -23,7 +23,7 @@ describe('Panels toggle component', () => {
     isChartAvailable,
     renderedFor,
     hideChart,
-  }: Omit<PanelsToggleProps, 'stateContainer'> & { hideChart: boolean }) => {
+  }: PanelsToggleProps & { hideChart: boolean }) => {
     const toolkit = getDiscoverInternalStateMock();
 
     await toolkit.initializeTabs();

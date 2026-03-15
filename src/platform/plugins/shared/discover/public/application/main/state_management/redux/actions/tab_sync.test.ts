@@ -82,7 +82,7 @@ describe('tab_sync actions', () => {
             tabId,
           })
         );
-      }).toThrow('State container is not initialized');
+      }).toThrow(/Data state container is not initialized/);
     });
   });
 

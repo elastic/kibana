@@ -32,7 +32,7 @@ describe('test useInspector', () => {
     const lensRequests = new RequestAdapter();
     const toolkit = getDiscoverInternalStateMock({ services });
     await toolkit.initializeTabs();
-    const { stateContainer } = await toolkit.initializeSingleTab({
+    await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
     });
     toolkit.internalState.dispatch(
@@ -43,10 +43,7 @@ describe('test useInspector', () => {
     );
     const { result } = renderHook(
       () => {
-        return useInspector({
-          stateContainer,
-          inspector: services.inspector,
-        });
+        return useInspector({ inspector: services.inspector });
       },
       {
         wrapper: ({ children }) => (

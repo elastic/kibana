@@ -19,7 +19,10 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import {
+  getDiscoverInternalStateMock,
+  type InternalStateMockToolkit,
+} from '../../../../__mocks__/discover_state.mock';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
 import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -28,7 +31,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import type { SearchBarCustomization } from '../../../../customizations';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import { internalStateActions } from '../../state_management/redux';
@@ -186,16 +189,21 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps 
   };
 }
 
-function getStateContainer({
+async function setupToolkit({
   query,
   fieldListUiState,
+  services,
 }: {
   query?: Query | AggregateQuery;
   fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
-}) {
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.internalState.dispatch(
-    stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+  services?: DiscoverServices;
+}): Promise<InternalStateMockToolkit> {
+  const toolkit = getDiscoverInternalStateMock({ services });
+  await toolkit.initializeTabs();
+  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+  toolkit.internalState.dispatch(
+    toolkit.injectCurrentTab(internalStateActions.setAppState)({
       appState: {
         query: query ?? { query: '', language: 'lucene' },
         filters: [],
@@ -203,13 +211,13 @@ function getStateContainer({
     })
   );
   if (fieldListUiState) {
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.setFieldListUiState)({
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setFieldListUiState)({
         fieldListUiState,
       })
     );
   }
-  return stateContainer;
+  return toolkit;
 }
 
 async function renderComponent(
@@ -220,8 +228,9 @@ async function renderComponent(
   } = {},
   services?: DiscoverServices
 ) {
-  const stateContainer = getStateContainer(appStateParams);
   const mockedServices = services ?? createMockServices();
+  const toolkit = await setupToolkit({ ...appStateParams, services: mockedServices });
+
   mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
     props.selectedDataView
       ? [{ id: props.selectedDataView.id!, title: props.selectedDataView.title! }]
@@ -232,20 +241,21 @@ async function renderComponent(
   });
   mockedServices.data.query.getState = jest
     .fn()
-    .mockImplementation(() => stateContainer.getCurrentTab().appState);
+    .mockImplementation(() => toolkit.getCurrentTab().appState);
+
+  // Set the current data view in runtime state
+  toolkit.internalState.dispatch(
+    internalStateActions.setDataView({
+      tabId: toolkit.getCurrentTab().id,
+      dataView: props.selectedDataView,
+    })
+  );
 
   const user = userEvent.setup();
   const result = render(
-    <DiscoverTestProvider
-      services={mockedServices}
-      stateContainer={stateContainer}
-      runtimeState={{
-        currentDataView: props.selectedDataView!,
-        adHocDataViews: [],
-      }}
-    >
+    <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverSidebarResponsive {...props} />
-    </DiscoverTestProvider>
+    </DiscoverToolkitTestProvider>
   );
 
   await act(async () => {

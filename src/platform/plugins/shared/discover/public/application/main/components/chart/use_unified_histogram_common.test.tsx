@@ -22,11 +22,11 @@ describe('useUnifiedHistogramCommon', () => {
 
     await toolkit.initializeTabs();
 
-    const { stateContainer } = await toolkit.initializeSingleTab({
+    await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
     });
 
-    return { toolkit, stateContainer };
+    return { toolkit };
   };
 
   const renderUseUnifiedHistogramCommon = async ({
@@ -36,13 +36,13 @@ describe('useUnifiedHistogramCommon', () => {
     panelsToggle?: DiscoverMainContentProps['panelsToggle'];
     options?: UseUnifiedHistogramOptions;
   } = {}) => {
-    const { toolkit, stateContainer } = await setup();
+    const { toolkit } = await setup();
+    const currentTabId = toolkit.getCurrentTab().id;
 
     const hook = renderHook(
-      ({ stateContainerProp, layoutProps }) =>
+      ({ layoutProps }) =>
         useUnifiedHistogramCommon({
-          currentTabId: stateContainerProp.getCurrentTab().id,
-          stateContainer: stateContainerProp,
+          currentTabId,
           layoutProps,
           panelsToggle,
         }),
@@ -51,13 +51,12 @@ describe('useUnifiedHistogramCommon', () => {
           <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
         ),
         initialProps: {
-          stateContainerProp: stateContainer,
           layoutProps: options?.initialLayoutProps,
         },
       }
     );
 
-    return { hook, toolkit, stateContainer };
+    return { hook, toolkit };
   };
 
   it('should update unifiedHistogramConfig$ with new layoutProps', async () => {
@@ -65,7 +64,7 @@ describe('useUnifiedHistogramCommon', () => {
       topPanelHeight: 50,
     };
 
-    const { hook, toolkit, stateContainer } = await renderUseUnifiedHistogramCommon();
+    const { hook, toolkit } = await renderUseUnifiedHistogramCommon();
     const histogramConfig = selectTabRuntimeState(
       toolkit.runtimeStateManager,
       toolkit.getCurrentTab().id
@@ -76,7 +75,6 @@ describe('useUnifiedHistogramCommon', () => {
     );
 
     hook.rerender({
-      stateContainerProp: stateContainer,
       layoutProps,
     });
 

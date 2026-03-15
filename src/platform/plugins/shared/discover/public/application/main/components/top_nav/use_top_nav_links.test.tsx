@@ -47,7 +47,7 @@ describe('useTopNavLinks', () => {
 
     await toolkit.initializeTabs();
 
-    const { stateContainer } = await toolkit.initializeSingleTab({
+    await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
     });
 
@@ -57,7 +57,6 @@ describe('useTopNavLinks', () => {
           dataView: dataViewMock,
           onOpenInspector: jest.fn(),
           services,
-          state: stateContainer,
           hasUnsavedChanges: false,
           isEsqlMode: false,
           adHocDataViews: [],

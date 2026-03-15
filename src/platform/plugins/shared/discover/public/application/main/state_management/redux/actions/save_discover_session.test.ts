@@ -229,7 +229,7 @@ describe('saveDiscoverSession', () => {
     ): { timeRestore?: boolean; timeRange?: unknown; refreshInterval?: unknown } | undefined =>
       saveDiscoverSessionSpy.mock.calls[0][0].tabs.find((t: { id: string }) => t.id === tabId);
 
-    describe('when tab has a stateContainer (initialized tab)', () => {
+    describe('when an initialized tab', () => {
       it.each([
         {
           scenario: 'newTimeRestore is true',
@@ -277,7 +277,7 @@ describe('saveDiscoverSession', () => {
       );
     });
 
-    describe('when tab does not have a stateContainer (uninitialized tab)', () => {
+    describe('when an uninitialized tab', () => {
       it.each([
         {
           scenario: 'newTimeRestore is true',
