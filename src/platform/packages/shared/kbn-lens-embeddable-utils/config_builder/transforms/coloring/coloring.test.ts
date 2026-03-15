@@ -563,12 +563,19 @@ describe('Color util transforms', () => {
 
     it('should convert gradient color mapping from palette', () => {
       const originalColorMapping: ColorMapping.Config = {
-        paletteId: 'kibana_palette',
+        paletteId: 'kibana_palette' as KbnPaletteId,
         specialAssignments: [],
         assignments: [],
         colorMode: {
           type: 'gradient',
-          steps: [{ type: 'categorical', colorIndex: 1, paletteId: 'no_default', touched: true }],
+          steps: [
+            {
+              type: 'categorical',
+              colorIndex: 1,
+              paletteId: 'no_default' as KbnPaletteId,
+              touched: true,
+            },
+          ],
           sort: 'desc',
         },
       };
@@ -585,7 +592,7 @@ describe('Color util transforms', () => {
 
     it('should convert gradient color mapping from color code', () => {
       const originalColorMapping: ColorMapping.Config = {
-        paletteId: 'kibana_palette',
+        paletteId: 'kibana_palette' as KbnPaletteId,
         specialAssignments: [],
         assignments: [],
         colorMode: {
