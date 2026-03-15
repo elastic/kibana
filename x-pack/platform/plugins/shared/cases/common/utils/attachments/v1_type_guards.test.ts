@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { AttachmentAttributes } from '../types/domain';
-import { AttachmentType } from '../types/domain';
+import type { AttachmentAttributes } from '../../types/domain';
+import { AttachmentType } from '../../types/domain';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
-} from './attachments';
+} from './v1_type_guards';
 
-describe('attachments utils', () => {
+describe('v1_type_guards', () => {
   describe('isCommentRequestTypeExternalReference', () => {
     const externalReferenceAttachment = {
       type: AttachmentType.externalReference as const,
@@ -22,7 +22,7 @@ describe('attachments utils', () => {
       (type) => type !== AttachmentType.externalReference
     );
 
-    it('returns false for type: externalReference', () => {
+    it('returns true for type: externalReference', () => {
       expect(isCommentRequestTypeExternalReference(externalReferenceAttachment)).toBe(true);
     });
 
@@ -44,7 +44,7 @@ describe('attachments utils', () => {
       (type) => type !== AttachmentType.persistableState
     );
 
-    it('returns false for type: persistableState', () => {
+    it('returns true for type: persistableState', () => {
       expect(isCommentRequestTypePersistableState(persistableStateAttachment)).toBe(true);
     });
 

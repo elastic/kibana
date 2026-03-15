@@ -15,6 +15,7 @@ import { UserActionActions } from '../../../../common/types/domain';
 import {
   alertComment,
   basicCase,
+  basicCommentUnified,
   eventComment,
   externalReferenceAttachment,
   getAlertUserAction,
@@ -60,6 +61,7 @@ describe('createCommentUserActionBuilder', () => {
       const userAction = getUserAction('comment', UserActionActions.update);
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -79,6 +81,7 @@ describe('createCommentUserActionBuilder', () => {
       const userAction = getUserAction('comment', UserActionActions.delete);
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -92,6 +95,7 @@ describe('createCommentUserActionBuilder', () => {
       const userAction = getAlertUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -105,6 +109,7 @@ describe('createCommentUserActionBuilder', () => {
       const userAction = getMultipleAlertsUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -118,6 +123,7 @@ describe('createCommentUserActionBuilder', () => {
       const userAction = getExternalReferenceUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -186,6 +192,7 @@ describe('createCommentUserActionBuilder', () => {
       const userAction = getPersistableStateUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -261,6 +268,7 @@ describe('createCommentUserActionBuilder', () => {
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -271,7 +279,7 @@ describe('createCommentUserActionBuilder', () => {
         </CommentRenderingProvider>
       );
 
-      expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(await screen.findByText('Solve this fast!')).toBeInTheDocument();
     });
 
     it('deletes a user comment correctly', async () => {
@@ -282,6 +290,7 @@ describe('createCommentUserActionBuilder', () => {
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -292,7 +301,7 @@ describe('createCommentUserActionBuilder', () => {
         </CommentRenderingProvider>
       );
 
-      expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(await screen.findByText('Solve this fast!')).toBeInTheDocument();
 
       await deleteAttachment('trash', 'Delete');
 
@@ -309,6 +318,7 @@ describe('createCommentUserActionBuilder', () => {
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -319,7 +329,7 @@ describe('createCommentUserActionBuilder', () => {
         </CommentRenderingProvider>
       );
 
-      expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(await screen.findByText('Solve this fast!')).toBeInTheDocument();
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
@@ -341,6 +351,7 @@ describe('createCommentUserActionBuilder', () => {
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        attachments: [basicCommentUnified],
         userAction,
       });
 
@@ -351,7 +362,7 @@ describe('createCommentUserActionBuilder', () => {
         </CommentRenderingProvider>
       );
 
-      expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(await screen.findByText('Solve this fast!')).toBeInTheDocument();
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));

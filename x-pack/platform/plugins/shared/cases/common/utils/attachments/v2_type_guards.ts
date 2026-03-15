@@ -4,40 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { AttachmentRequest, AttachmentRequestV2 } from '../types/api';
+import type { AttachmentRequestV2 } from '../../types/api';
 import type {
-  ExternalReferenceAttachmentPayload,
-  PersistableStateAttachmentPayload,
   UnifiedAttachmentPayload,
   UnifiedReferenceAttachmentPayload,
   UnifiedValueAttachmentPayload,
-} from '../types/domain';
-import { AttachmentType } from '../types/domain';
+} from '../../types/domain';
+import { COMMENT_ATTACHMENT_TYPE } from '../../constants/attachments';
 
-/**
- * A type narrowing function for external reference attachments.
- */
-export const isCommentRequestTypeExternalReference = (
-  context: AttachmentRequest | UnifiedAttachmentPayload
-): context is ExternalReferenceAttachmentPayload => {
-  return context.type === AttachmentType.externalReference;
-};
-
-/**
- * A type narrowing function for persistable state attachments.
- */
-export const isCommentRequestTypePersistableState = (
-  context: Partial<AttachmentRequest> | UnifiedAttachmentPayload
-): context is PersistableStateAttachmentPayload => {
-  return context.type === AttachmentType.persistableState;
-};
-
-export const isLegacyAttachmentRequest = (
-  context: AttachmentRequestV2
-): context is AttachmentRequest => {
-  return Object.values(AttachmentType).includes(context.type as AttachmentType);
-};
 /**
  * A type narrowing function for  reference-based unified attachment.
  */
@@ -64,3 +38,16 @@ export const isUnifiedAttachmentRequest = (
 ): context is UnifiedAttachmentPayload => {
   return isUnifiedReferenceAttachmentRequest(context) || isUnifiedValueAttachmentRequest(context);
 };
+
+/**
+ * A type narrowing function for unified comment attachment.
+ */
+export const isUnifiedCommentAttachment = (
+  attachment: AttachmentRequestV2
+): attachment is UnifiedValueAttachmentPayload & {
+  type: 'comment';
+  data: { content: string };
+} =>
+  isUnifiedValueAttachmentRequest(attachment) &&
+  attachment.type === COMMENT_ATTACHMENT_TYPE &&
+  typeof attachment.data.content === 'string';

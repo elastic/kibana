@@ -41,6 +41,7 @@ Array [
       />
     </React.Suspense>,
     "className": "comment-user-attachment-test",
+    "css": undefined,
     "data-test-subj": "comment-user-test",
     "event": <React.Fragment>
       My event
@@ -137,6 +138,7 @@ Array [
       />
     </React.Suspense>,
     "className": "comment-user-attachment-test",
+    "css": undefined,
     "data-test-subj": "comment-user-test",
     "event": <React.Fragment>
       My event
@@ -220,6 +222,7 @@ Array [
       />
     </React.Suspense>,
     "className": "comment-user-attachment-test",
+    "css": undefined,
     "data-test-subj": "comment-user-test",
     "event": <React.Fragment>
       My event

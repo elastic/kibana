@@ -40,8 +40,10 @@ describe('common/attachments', () => {
       );
     });
 
-    it('returns COMMENT_ATTACHMENT_TYPE when attributes have no type and no comment', () => {
-      expect(getAttachmentTypeFromAttributes({ foo: 'bar' })).toBe(COMMENT_ATTACHMENT_TYPE);
+    it('throws when attributes have no recognizable attachment type', () => {
+      expect(() => getAttachmentTypeFromAttributes({ foo: 'bar' })).toThrow(
+        'Invalid attributes: missing attachment type'
+      );
     });
   });
 

@@ -43,6 +43,7 @@ import type {
   CasesFindResponseUI,
   CasesUI,
   AttachmentUI,
+  AttachmentUIV2,
   CaseUICustomField,
   CasesConfigurationUICustomField,
   CasesConfigurationUITemplate,
@@ -95,6 +96,21 @@ export const basicComment: AttachmentUI = {
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
   owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
+export const basicCommentUnified: AttachmentUIV2 = {
+  id: basicCommentId,
+  type: 'comment',
+  owner: SECURITY_SOLUTION_OWNER,
+  data: { content: 'Solve this fast!' },
+  metadata: null,
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
   pushedAt: null,
   pushedBy: null,
   updatedAt: null,
@@ -276,6 +292,11 @@ export const basicCase: CaseUI = {
   observables: [],
   totalObservables: 0,
   incrementalId: undefined,
+};
+
+export const basicCaseWithUnifiedComments: CaseUI = {
+  ...basicCase,
+  comments: [basicCommentUnified],
 };
 
 export const basicFileMock: FileJSON = {

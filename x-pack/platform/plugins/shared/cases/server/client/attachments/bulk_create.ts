@@ -27,7 +27,7 @@ export const bulkCreate = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
-  const { attachments, caseId } = args;
+  const { attachments, caseId, mode = 'legacy' } = args;
 
   const {
     logger,
@@ -84,7 +84,7 @@ export const bulkCreate = async (
       attachments: attachmentsWithIds,
     });
 
-    return await updatedModel.encodeWithComments();
+    return await updatedModel.encodeWithComments({ mode });
   } catch (error) {
     throw createCaseError({
       message: `Failed while bulk creating attachment to case id: ${caseId} error: ${error}`,

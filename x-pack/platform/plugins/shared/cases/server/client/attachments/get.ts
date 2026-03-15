@@ -9,8 +9,8 @@ import type { SavedObject } from '@kbn/core/server';
 
 import type {
   AlertAttachmentAttributes,
-  Attachment,
-  Attachments,
+  AttachmentsV2,
+  AttachmentV2,
   EventAttachmentAttributes,
 } from '../../../common/types/domain';
 import { AttachmentType } from '../../../common';
@@ -30,15 +30,15 @@ import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_typ
 import {
   defaultSortField,
   transformComments,
-  flattenCommentSavedObject,
-  flattenCommentSavedObjects,
+  flattenAttachmentSavedObject,
+  flattenAttachmentSavedObjects,
   getIDsAndIndicesAsArrays,
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../utils';
 import { Operations } from '../../authorization';
-import { AttachmentRt, AttachmentsRt } from '../../../common/types/domain';
+import { AttachmentRtV2, AttachmentsRtV2 } from '../../../common/types/domain';
 
 const normalizeDocumentResponse = (
   documents: Array<SavedObject<AlertAttachmentAttributes | EventAttachmentAttributes>>
@@ -116,7 +116,7 @@ export const getAllDocumentsAttachedToCase = async (
  * Retrieves the attachments for a case entity. This support pagination.
  */
 export async function find(
-  { caseID, findQueryParams }: FindCommentsArgs,
+  { caseID, findQueryParams, mode = 'legacy' }: FindCommentsArgs,
   clientArgs: CasesClientArgs
 ): Promise<AttachmentsFindResponse> {
   const {
@@ -150,6 +150,7 @@ export async function find(
         hasReference: { type: CASE_SAVED_OBJECT, id: caseID },
         filter,
       },
+      mode,
     });
 
     ensureSavedObjectsAreAuthorized(
@@ -175,9 +176,9 @@ export async function find(
  * Retrieves a single attachment by its ID.
  */
 export async function get(
-  { attachmentID, caseID }: GetArgs,
+  { attachmentID, caseID, mode = 'legacy' }: GetArgs,
   clientArgs: CasesClientArgs
-): Promise<Attachment> {
+): Promise<AttachmentV2> {
   const {
     services: { attachmentService },
     logger,
@@ -187,6 +188,7 @@ export async function get(
   try {
     const comment = await attachmentService.getter.get({
       attachmentId: attachmentID,
+      mode,
     });
 
     await authorization.ensureAuthorized({
@@ -194,9 +196,9 @@ export async function get(
       operation: Operations.getComment,
     });
 
-    const res = flattenCommentSavedObject(comment);
+    const res = flattenAttachmentSavedObject(comment);
 
-    return decodeOrThrow(AttachmentRt)(res);
+    return decodeOrThrow(AttachmentRtV2)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get comment case id: ${caseID} attachment id: ${attachmentID}: ${error}`,
@@ -210,9 +212,9 @@ export async function get(
  * Retrieves all the attachments for a case.
  */
 export async function getAll(
-  { caseID }: GetAllArgs,
+  { caseID, mode = 'legacy' }: GetAllArgs,
   clientArgs: CasesClientArgs
-): Promise<Attachments> {
+): Promise<AttachmentsV2> {
   const {
     services: { caseService },
     logger,
@@ -230,15 +232,16 @@ export async function getAll(
         filter,
         sortField: defaultSortField,
       },
+      mode,
     });
 
     ensureSavedObjectsAreAuthorized(
       comments.saved_objects.map((comment) => ({ id: comment.id, owner: comment.attributes.owner }))
     );
 
-    const res = flattenCommentSavedObjects(comments.saved_objects);
+    const res = flattenAttachmentSavedObjects(comments.saved_objects);
 
-    return decodeOrThrow(AttachmentsRt)(res);
+    return decodeOrThrow(AttachmentsRtV2)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get all comments case id: ${caseID}: ${error}`,
