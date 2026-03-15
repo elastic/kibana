@@ -17,13 +17,13 @@ export const ConfigSchema = schema.object({
   analytics: schema.object({
     index: schema.object({
       enabled: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: false }),
-        traditional: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: true }),
+        traditional: schema.boolean({ defaultValue: true }),
       }),
     }),
   }),
   attachments: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   markdownPlugins: schema.object({
     lens: schema.boolean({ defaultValue: true }),
@@ -61,7 +61,7 @@ export const ConfigSchema = schema.object({
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
   // WARN: enabling this feature and disabling it later is not supported (saved objects will throw errors)
   templates: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
 });
