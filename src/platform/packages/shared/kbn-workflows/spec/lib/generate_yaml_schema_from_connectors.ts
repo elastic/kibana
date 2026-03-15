@@ -14,8 +14,6 @@ import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
   BaseConnectorStepSchema,
   DataSetStepSchema,
-  LoopBreakStepSchema,
-  LoopContinueStepSchema,
   getForEachStepSchema,
   getIfStepSchema,
   getMergeStepSchema,
@@ -24,6 +22,8 @@ import {
   getTriggerSchema,
   getWhileStepSchema,
   getWorkflowSettingsSchema,
+  LoopBreakStepSchema,
+  LoopContinueStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,

@@ -11,11 +11,11 @@ import { monaco } from '@kbn/monaco';
 import type { BuiltInStepType, ConnectorTypeInfo } from '@kbn/workflows';
 import {
   DataSetStepSchema,
-  LoopBreakStepSchema,
-  LoopContinueStepSchema,
   ForEachStepSchema,
   getBuiltInStepStability,
   IfStepSchema,
+  LoopBreakStepSchema,
+  LoopContinueStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
   WaitStepSchema,
