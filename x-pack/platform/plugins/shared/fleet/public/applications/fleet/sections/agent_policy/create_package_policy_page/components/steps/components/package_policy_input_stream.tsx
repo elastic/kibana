@@ -61,7 +61,6 @@ import { useIndexTemplateExists } from '../../datastream_hooks';
 
 import type { RegistryPolicyInputOnlyTemplate } from '../../../../../../../../../common/types/models/epm';
 import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
-import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
@@ -101,12 +100,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
   }) => {
     const { docLinks } = useStartServices();
     const { isAgentlessEnabled } = useAgentless();
-    const { enableVarGroups } = ExperimentalFeaturesService.get();
-
-    const pkgVarGroups =
-      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
-    const streamVarGroups =
-      enableVarGroups && packageInputStream.var_groups ? packageInputStream.var_groups : undefined;
+    const pkgVarGroups = packageInfo.var_groups;
+    const streamVarGroups = packageInputStream.var_groups;
 
     const {
       params: { packagePolicyId },

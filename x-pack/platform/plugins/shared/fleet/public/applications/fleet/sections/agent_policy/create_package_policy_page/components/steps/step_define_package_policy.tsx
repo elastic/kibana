@@ -40,8 +40,6 @@ import {
 import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
-
 import { PackagePolicyInputVarField, VarGroupSelector, useVarGroupSelections } from './components';
 import { useOutputs } from './components/hooks';
 
@@ -77,10 +75,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     isAgentlessSelected = false,
   }) => {
     const { docLinks, cloud } = useStartServices();
-    const { enableVarGroups } = ExperimentalFeaturesService.get();
-
-    const varGroups =
-      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
+    const varGroups = packageInfo.var_groups;
 
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
