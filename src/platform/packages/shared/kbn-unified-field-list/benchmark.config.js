@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { InitialBenchConfig } from '@kbn/bench';
-
-const config: InitialBenchConfig = {
+module.exports = {
   name: 'kbn-unified-field-list',
   runs: 5,
   benchmarks: [
@@ -18,13 +16,10 @@ const config: InitialBenchConfig = {
       name: 'sidebar-render-benchmark',
       description:
         'Measures dense field list render/open cost with many multi-fields using a benchmark-only jest file',
-      run: `node scripts/jest --watchman=false --runInBand --config src/platform/packages/shared/kbn-unified-field-list/jest.benchmark.config.js src/platform/packages/shared/kbn-unified-field-list/benchmarks/field_list_sidebar_render.benchmark.test.tsx`,
+      run: `node scripts/jest --watchman=false --runInBand --config src/platform/packages/shared/kbn-unified-field-list/jest.benchmark.config.js src/platform/packages/shared/kbn-unified-field-list/src/benchmarks/field_list_sidebar_render.bench.test.tsx`,
       compare: {
         missing: 'skip',
       },
     },
   ],
 };
-
-// eslint-disable-next-line import/no-default-export
-export default config;

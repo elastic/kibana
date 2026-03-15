@@ -12,6 +12,6 @@ module.exports = {
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/shared/kbn-unified-field-list'],
   testMatch: [
-    '<rootDir>/src/platform/packages/shared/kbn-unified-field-list/benchmarks/**/*.benchmark.test.tsx',
+    '<rootDir>/src/platform/packages/shared/kbn-unified-field-list/src/benchmarks/**/*.bench.test.tsx',
   ],
 };

@@ -14,12 +14,12 @@ import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event'
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { FIELDS_LIMIT_SETTING } from '@kbn/discover-utils';
-import { getServicesMock } from '../__mocks__/services.mock';
-import UnifiedFieldListSidebarContainer from '../src/containers/unified_field_list_sidebar/field_list_sidebar_container';
-import { resetExistingFieldsCache } from '../src/hooks/use_existing_fields';
-import { ExistenceFetchStatus } from '../src/types';
+import { getServicesMock } from '../../__mocks__/services.mock';
+import UnifiedFieldListSidebarContainer from '../containers/unified_field_list_sidebar/field_list_sidebar_container';
+import { resetExistingFieldsCache } from '../hooks/use_existing_fields';
+import { ExistenceFetchStatus } from '../types';
 
-jest.mock('../src/services/field_stats', () => ({
+jest.mock('../services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
     totalDocuments: 1624,
     sampledDocuments: 1624,
@@ -128,8 +128,8 @@ const renderSidebar = async () => {
     dataView.fields.map((field) => [field.name, true])
   );
 
-  services.dataViews.get.mockResolvedValue(dataView);
-  services.core.uiSettings.get.mockImplementation((key: string) => {
+  (services.dataViews.get as jest.Mock).mockResolvedValue(dataView);
+  (services.core.uiSettings.get as jest.Mock).mockImplementation((key: string) => {
     if (key === FIELDS_LIMIT_SETTING) {
       return 0;
     }
