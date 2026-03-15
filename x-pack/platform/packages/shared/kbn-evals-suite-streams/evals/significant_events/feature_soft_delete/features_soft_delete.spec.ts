@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { identifyFeatures } from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { GcsConfig } from '../../../src/data_generators/replay';
 import {
   SIGEVENTS_SNAPSHOT_RUN,
@@ -18,29 +15,31 @@ import {
   replaySignificantEventsSnapshot,
 } from '../../../src/data_generators/replay';
 import { evaluate } from '../../../src/evaluate';
-import { createFeatureExtractionEvaluators } from '../../../src/evaluators/feature_extraction_evaluators';
 import {
   getActiveDatasets,
-  MANAGED_STREAM_NAME,
-  MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
   snapshotCatalogKey,
+  MANAGED_STREAM_SEARCH_PATTERN,
+  type FeatureSoftDeleteScenario,
 } from '../datasets';
-import { collectSampleDocuments } from './collect_sample_documents';
+import { createSoftDeleteSemanticEvaluator } from '../../../src/evaluators/soft_delete';
+import { runSoftDeleteExperiment } from './run_soft_delete_experiment';
+
+evaluate.describe.configure({ timeout: 600_000 });
 
 evaluate.describe(
-  'Streams feature extraction',
+  'Streams features soft delete',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
-    const featureExtractionRuns = activeDatasets.flatMap((dataset) =>
-      dataset.featureExtraction.map((scenario) => ({ dataset, scenario }))
+    const softDeleteRuns = activeDatasets.flatMap((dataset) =>
+      dataset.featureSoftDelete.map((scenario) => ({ dataset, scenario }))
     );
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
     evaluate.beforeAll(async ({ esClient, log }) => {
       const uniqueCatalogSources = new Map<string, GcsConfig>();
-      for (const { dataset, scenario } of featureExtractionRuns) {
+      for (const { dataset, scenario } of softDeleteRuns) {
         const source = resolveScenarioSnapshotSource({
           scenarioId: scenario.input.scenario_id,
           datasetGcs: dataset.gcs,
@@ -55,10 +54,10 @@ evaluate.describe(
       }
     });
 
-    for (const { dataset, scenario } of featureExtractionRuns) {
-      evaluate.describe(`${dataset.id} / ${scenario.input.scenario_id}`, () => {
-        let sampleDocuments: Array<SearchHit<Record<string, unknown>>> = [];
+    for (const { dataset, scenario } of softDeleteRuns) {
+      const scenarioLabel = `${dataset.id} / ${scenario.input.scenario_id} (delete ${scenario.input.delete_count})`;
 
+      evaluate.describe(scenarioLabel, () => {
         evaluate.beforeAll(async ({ esClient, log }) => {
           const source = resolveScenarioSnapshotSource({
             scenarioId: scenario.input.scenario_id,
@@ -82,57 +81,47 @@ evaluate.describe(
           await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
 
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
-
-          sampleDocuments = await collectSampleDocuments({ esClient, scenario, log });
-          if (sampleDocuments.length === 0) {
-            throw new Error(
-              `No log documents found after replaying snapshot ${source.snapshotName}`
-            );
-          }
         });
 
         evaluate(
-          'feature extraction',
-          async ({ executorClient, evaluators, inferenceClient, logger, traceEsClient, log }) => {
+          scenarioLabel,
+          async ({
+            esClient,
+            inferenceClient,
+            evaluationConnector,
+            evaluators,
+            traceEsClient,
+            log,
+            logger,
+            executorClient,
+          }) => {
+            const evaluatorInferenceClient = inferenceClient.bindTo({
+              connectorId: evaluationConnector.id,
+            });
+
             await executorClient.runExperiment(
               {
                 dataset: {
-                  name: `sigevents: feature extraction: ${scenario.input.scenario_id} (${dataset.id})`,
-                  description: `[${dataset.id}] Feature extraction from ${scenario.metadata.failure_domain} / ${scenario.metadata.failure_mode}`,
-                  examples: [
-                    {
-                      input: { sample_documents: sampleDocuments },
-                      output: {
-                        ...scenario.output,
-                        expected: scenario.output.expected_ground_truth,
-                      },
-                      metadata: scenario.metadata,
-                    },
-                  ],
+                  name: `sigevents: soft delete: ${scenario.input.scenario_id} (${dataset.id}, delete ${scenario.input.delete_count})`,
+                  description: `[${dataset.id}] Soft-delete ${scenario.input.delete_count} feature(s) from ${scenario.input.scenario_id}, verify exclusion across ${scenario.input.follow_up_runs} follow-up runs`,
+                  examples: [{ input: scenario.input }],
                 },
-                concurrency: 1,
-                task: async ({ input }) => {
-                  const taskSampleDocuments = (
-                    input as { sample_documents: Array<SearchHit<Record<string, unknown>>> }
-                  ).sample_documents;
-
-                  const { features } = await identifyFeatures({
-                    streamName: MANAGED_STREAM_NAME,
-                    sampleDocuments: taskSampleDocuments,
-                    systemPrompt: featuresPrompt,
+                task: async ({ input }: { input: FeatureSoftDeleteScenario['input'] }) => {
+                  const result = await runSoftDeleteExperiment({
+                    esClient,
+                    deleteCount: input.delete_count,
+                    followUpRuns: input.follow_up_runs,
                     inferenceClient,
                     logger,
-                    signal: new AbortController().signal,
+                    sampleSize: input.sample_document_count,
+                    log,
                   });
-
-                  return { features, traceId: getCurrentTraceId() };
+                  const traceId = getCurrentTraceId();
+                  return { ...result, traceId };
                 },
               },
               [
-                ...createFeatureExtractionEvaluators({
-                  criteriaFn: evaluators.criteria.bind(evaluators),
-                  criteria: scenario.output.criteria,
-                }),
+                createSoftDeleteSemanticEvaluator({ inferenceClient: evaluatorInferenceClient }),
                 evaluators.traceBasedEvaluators.inputTokens,
                 evaluators.traceBasedEvaluators.outputTokens,
                 evaluators.traceBasedEvaluators.cachedTokens,

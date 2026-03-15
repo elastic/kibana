@@ -1,0 +1,7 @@
+Analyze the following data for soft-delete compliance violations.
+
+Deleted features:
+{{{deleted_features}}}
+
+Follow-up runs:
+{{{follow_up_runs}}}

@@ -79,7 +79,7 @@ export function DeleteFeatureModal({
         <EuiText>
           {i18n.translate('xpack.streams.deleteFeatureModal.consequenceMessage', {
             defaultMessage:
-              'This will permanently delete {count, plural, one {the feature} other {the selected features}}.',
+              'This will delete {count, plural, one {the feature} other {the selected features}}.',
             values: { count: features.length },
           })}
         </EuiText>
@@ -145,7 +145,7 @@ const MODAL_ARIA_LABEL = i18n.translate(
 );
 
 const WARNING_MESSAGE = i18n.translate('xpack.streams.deleteFeatureModal.warningMessage', {
-  defaultMessage: 'This action cannot be undone.',
+  defaultMessage: 'Deleted features can be restored from the Deleted tab.',
 });
 
 const TABLE_CAPTION = i18n.translate('xpack.streams.deleteFeatureModal.tableCaption', {

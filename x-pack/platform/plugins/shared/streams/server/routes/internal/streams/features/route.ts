@@ -97,7 +97,7 @@ export const deleteFeatureRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
-    await featureClient.deleteFeature(params.path.name, params.path.uuid);
+    await featureClient.softDeleteFeature(params.path.name, params.path.uuid);
 
     return { acknowledged: true };
   },
@@ -120,6 +120,7 @@ export const listFeaturesRoute = createServerRoute({
     query: z.optional(
       z.object({
         type: z.string().optional(),
+        include_deleted: z.coerce.boolean().optional(),
       })
     ),
   }),
@@ -138,6 +139,7 @@ export const listFeaturesRoute = createServerRoute({
 
     const { hits: features } = await featureClient.getFeatures(params.path.name, {
       type: params.query?.type ? [params.query.type] : [],
+      includeDeleted: params.query?.include_deleted,
     });
 
     return {
@@ -168,7 +170,7 @@ export const listAllFeaturesRoute = createServerRoute({
     const streams = await streamsClient.listStreams();
     const streamNames = streams.map((stream) => stream.name);
 
-    const { hits: features } = await featureClient.getAllFeatures(streamNames);
+    const { hits: features } = await featureClient.getFeatures(streamNames);
 
     return {
       features,
@@ -181,7 +183,7 @@ export const bulkFeaturesRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Bulk changes to features',
-    description: 'Add or delete features in bulk for a given stream',
+    description: 'Add, delete, or restore features in bulk for a given stream',
   },
   security: {
     authz: {
@@ -200,6 +202,11 @@ export const bulkFeaturesRoute = createServerRoute({
           }),
           z.object({
             delete: z.object({
+              id: z.string(),
+            }),
+          }),
+          z.object({
+            restore: z.object({
               id: z.string(),
             }),
           }),

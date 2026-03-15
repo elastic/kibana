@@ -265,6 +265,26 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
       description: 'The total number of tokens used for the identification request',
     },
   },
+  deleted_features_count: {
+    type: 'long',
+    _meta: {
+      description: 'The total number of soft-deleted features for the stream',
+    },
+  },
+  llm_ignored_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of features the LLM self-reported as ignored because they matched a soft-deleted feature',
+    },
+  },
+  code_ignored_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'The number of features dropped by the server-side isDuplicateFeature safety net after LLM inference',
+    },
+  },
   total_duration_ms: {
     type: 'long',
     _meta: {
