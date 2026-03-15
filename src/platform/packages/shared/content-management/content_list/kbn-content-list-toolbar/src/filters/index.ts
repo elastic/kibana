@@ -24,6 +24,13 @@ export {
   type StarredFilterRendererProps,
   useStarredQueryParser,
 } from './starred';
+export {
+  CreatedByFilter,
+  type CreatedByFilterProps,
+  CreatedByRenderer,
+  type CreatedByRendererProps,
+  useCreatedByQueryParser,
+} from './created_by';
 
 // Common popover components.
 export { FilterPopover, useFilterPopover, type FilterPopoverProps } from './filter_popover';

@@ -13,7 +13,6 @@ import { MOCK_DASHBOARDS, type DashboardMockItem } from './dashboards';
 import { MOCK_MAPS, type MapMockItem } from './maps';
 import { MOCK_FILES, type FileMockItem } from './files';
 import { MOCK_VISUALIZATIONS, type VisualizationMockItem } from './visualizations';
-import { MOCK_USER_PROFILES } from './user_profiles';
 import { mockFavoritesClient } from './services';
 
 /** Shape compatible with `ActiveFilters` from `@kbn/content-list-provider`. Defined locally to avoid circular dependency. */
@@ -21,7 +20,7 @@ interface MockFindItemsFilters {
   search?: string;
   tag?: { include?: string[]; exclude?: string[] };
   starredOnly?: boolean;
-  users?: string[];
+  user?: { include: string[]; exclude: string[] };
 }
 
 /**
@@ -125,6 +124,30 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
       );
     }
 
+    // Compute faceted counts BEFORE applying user filter so the
+    // popover always shows the full set of creators for the current
+    // search/tag context — standard faceted-search behavior.
+    const tagCounts: Record<string, number> = {};
+    const createdByCounts: Record<string, number> = {};
+    items.forEach((item) => {
+      item.references?.forEach((ref) => {
+        if (ref.type === 'tag') {
+          const key = ref.id ?? ref.name;
+          tagCounts[key] = (tagCounts[key] || 0) + 1;
+        }
+      });
+      if ((item as { managed?: boolean }).managed) {
+        createdByCounts[MANAGED_SENTINEL] = (createdByCounts[MANAGED_SENTINEL] || 0) + 1;
+      } else if (item.createdBy) {
+        createdByCounts[item.createdBy] = (createdByCounts[item.createdBy] || 0) + 1;
+      } else {
+        createdByCounts[NO_CREATOR_SENTINEL] = (createdByCounts[NO_CREATOR_SENTINEL] || 0) + 1;
+      }
+    });
+
+    // Apply user (createdBy) filter after counts are collected.
+    items = applyUserFilter(items, filters.user);
+
     // Apply starred filter.
     if (filters.starredOnly) {
       const client = configFavoritesClient ?? mockFavoritesClient;
@@ -160,18 +183,6 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
       return sort.direction === 'asc' ? comparison : -comparison;
     });
 
-    // Compute per-tag item counts from the full (pre-paginated) result set.
-    // Key by id (or name) to match TagFilterRenderer lookup.
-    const tagCounts: Record<string, number> = {};
-    items.forEach((item) => {
-      item.references?.forEach((ref) => {
-        if (ref.type === 'tag') {
-          const key = ref.id ?? ref.name;
-          tagCounts[key] = (tagCounts[key] || 0) + 1;
-        }
-      });
-    });
-
     // Apply pagination.
     const total = items.length;
     const start = page.index * page.size;
@@ -181,7 +192,7 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     return {
       items: paginatedItems,
       total,
-      counts: { tag: tagCounts },
+      counts: { tag: tagCounts, createdBy: createdByCounts },
     };
   };
 }
@@ -371,58 +382,63 @@ const EXAMPLE_MOCK_ITEMS: ItemWithStatus[] = [
   },
 ];
 
-/** Sentinel value for filtering items without a creator */
-export const NULL_USER = 'no-user';
+/** Sentinel UID for system-managed items. Matches `MANAGED_USER_FILTER` in `@kbn/content-list-provider`. */
+const MANAGED_SENTINEL = '__managed__';
+
+/** Sentinel UID for items with no creator. Matches `NO_CREATOR_USER_FILTER` in `@kbn/content-list-provider`. */
+const NO_CREATOR_SENTINEL = '__no_creator__';
+
+/** @deprecated Alias kept for backwards compatibility with older example code. */
+export const NULL_USER = NO_CREATOR_SENTINEL;
 
 /**
- * Build a map of email → uid for user profile lookup.
- * Used to resolve email-based createdBy filters to user IDs.
+ * Check if a mock item matches the user include filter.
+ *
+ * Handles real UIDs and sentinel values (`__managed__`, `__no_creator__`).
  */
-const EMAIL_TO_UID_MAP: Record<string, string> = MOCK_USER_PROFILES.reduce<Record<string, string>>(
-  (acc, profile) => {
-    if (profile.user.email) {
-      acc[profile.user.email] = profile.uid;
+const itemMatchesUserInclude = (
+  item: UserContentCommonSchema & { managed?: boolean },
+  includeUids: string[]
+): boolean => {
+  return includeUids.some((uid) => {
+    if (uid === MANAGED_SENTINEL) {
+      return item.managed === true;
     }
-    return acc;
-  },
-  {}
-);
+    if (uid === NO_CREATOR_SENTINEL) {
+      return !item.createdBy && !item.managed;
+    }
+    return item.createdBy === uid;
+  });
+};
 
 /**
- * Resolve a filter value (email or uid) to a user ID.
- * Supports both email-based filtering (new) and uid-based filtering (legacy).
+ * Apply `filters.user` (include/exclude) to a set of items.
+ *
+ * Include narrows to items matching any listed UID; exclude removes items
+ * matching any listed UID. When both are present, include is applied first.
  */
-function resolveToUid(filterValue: string): string | undefined {
-  // If it's an email, resolve to uid
-  if (EMAIL_TO_UID_MAP[filterValue]) {
-    return EMAIL_TO_UID_MAP[filterValue];
-  }
-  // If it's already a uid (or unknown value), return as-is
-  return filterValue;
-}
-
-/**
- * Check if an item's creator matches the filter values.
- * Handles both email and uid filter values for backwards compatibility.
- */
-function matchesUserFilter(itemCreatedBy: string | undefined, filterValues: string[]): boolean {
-  // Resolve all filter values to uids
-  const resolvedUids = filterValues
-    .filter((v) => v !== NULL_USER)
-    .map(resolveToUid)
-    .filter((uid): uid is string => uid !== undefined);
-
-  // Check if NULL_USER is in the filter (matches items without creator)
-  const includesNullUser = filterValues.includes(NULL_USER);
-
-  // Item has no creator
-  if (!itemCreatedBy) {
-    return includesNullUser;
+const applyUserFilter = <T extends UserContentCommonSchema & { managed?: boolean }>(
+  items: T[],
+  userFilter: MockFindItemsFilters['user']
+): T[] => {
+  if (!userFilter) {
+    return items;
   }
 
-  // Check if item's createdBy matches any resolved uid
-  return resolvedUids.includes(itemCreatedBy);
-}
+  let filtered = items;
+
+  const { include, exclude } = userFilter;
+
+  if (include.length > 0) {
+    filtered = filtered.filter((item) => itemMatchesUserInclude(item, include));
+  }
+
+  if (exclude.length > 0) {
+    filtered = filtered.filter((item) => !itemMatchesUserInclude(item, exclude));
+  }
+
+  return filtered;
+};
 
 /**
  * Create mock findItems function for dashboard stories.
@@ -485,11 +501,27 @@ export const createSimpleMockFindItems = (
       );
     }
 
-    // Apply user filters (createdBy) - supports both email and uid filter values
-    const usersFilter = (filters as { users?: string[] }).users;
-    if (usersFilter && usersFilter.length > 0) {
-      items = items.filter((item) => matchesUserFilter(item.createdBy, usersFilter));
-    }
+    // Compute faceted counts BEFORE applying user filter so the
+    // popover always shows the full set of creators for the current
+    // search/tag context — standard faceted-search behavior.
+    const tagCounts: Record<string, number> = {};
+    const createdByCounts: Record<string, number> = {};
+    items.forEach((item) => {
+      item.references?.forEach((ref) => {
+        if (ref.type === 'tag') {
+          const key = ref.id ?? ref.name;
+          tagCounts[key] = (tagCounts[key] || 0) + 1;
+        }
+      });
+      if (item.createdBy) {
+        createdByCounts[item.createdBy] = (createdByCounts[item.createdBy] || 0) + 1;
+      } else {
+        createdByCounts[NO_CREATOR_SENTINEL] = (createdByCounts[NO_CREATOR_SENTINEL] || 0) + 1;
+      }
+    });
+
+    // Apply user (createdBy) filter after counts are collected.
+    items = applyUserFilter(items, filters.user);
 
     // Apply starred filter.
     if (filters.starredOnly) {
@@ -521,18 +553,6 @@ export const createSimpleMockFindItems = (
       return sort.direction === 'asc' ? comparison : -comparison;
     });
 
-    // Compute per-tag item counts from the full (pre-paginated) result set.
-    // Key by id (or name) to match TagFilterRenderer lookup.
-    const tagCounts: Record<string, number> = {};
-    items.forEach((item) => {
-      item.references?.forEach((ref) => {
-        if (ref.type === 'tag') {
-          const key = ref.id ?? ref.name;
-          tagCounts[key] = (tagCounts[key] || 0) + 1;
-        }
-      });
-    });
-
     // Apply pagination.
     const total = items.length;
     const start = page.index * page.size;
@@ -542,7 +562,7 @@ export const createSimpleMockFindItems = (
     return {
       items: paginatedItems,
       total,
-      counts: { tag: tagCounts },
+      counts: { tag: tagCounts, createdBy: createdByCounts },
     };
   };
 };

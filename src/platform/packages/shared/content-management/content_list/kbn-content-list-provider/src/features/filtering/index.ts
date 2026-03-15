@@ -11,4 +11,18 @@ export type { FilterDisplayState, UseContentListFiltersReturn } from './types';
 export { useFilterDisplay } from './use_filter_display';
 export { useContentListFilters } from './use_content_list_filters';
 export { useTagFilterToggle } from './use_tag_filter_toggle';
-export { TAG_FILTER_ID } from '../../datasource';
+export { TAG_FILTER_ID, CREATED_BY_FILTER_ID } from '../../datasource';
+
+export type {
+  CreatorsList,
+  UseContentListUserFilterReturn,
+  UserFilterToggleFn,
+} from './user_profile';
+export {
+  useContentListUserFilter,
+  useUserFilterToggle,
+  MANAGED_USER_FILTER,
+  NO_CREATOR_USER_FILTER,
+  MANAGED_QUERY_VALUE,
+  NO_CREATOR_QUERY_VALUE,
+} from './user_profile';

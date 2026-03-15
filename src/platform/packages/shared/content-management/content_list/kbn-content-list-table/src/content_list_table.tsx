@@ -23,6 +23,7 @@ import {
   UpdatedAtColumn,
   ActionsColumn,
   StarredColumn,
+  CreatedByColumn,
 } from './column';
 import { Action as BaseAction, EditAction, DeleteAction } from './action';
 import { useColumns, useSorting, useSelection } from './hooks';
@@ -175,6 +176,7 @@ export const Column = Object.assign(BaseColumn, {
   UpdatedAt: UpdatedAtColumn,
   Actions: ActionsColumn,
   Starred: StarredColumn,
+  CreatedBy: CreatedByColumn,
 });
 
 // Create Action namespace with sub-components.

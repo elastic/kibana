@@ -38,12 +38,14 @@ export const useFilterDisplay = (): FilterDisplayState => {
   const hasSearch = supports.search;
   const hasTags = supports.tags;
   const hasStarred = supports.starred;
+  const hasCreatedBy = supports.createdBy;
 
   return {
     hasSorting,
     hasSearch,
     hasTags,
     hasStarred,
-    hasFilters: hasSorting || hasTags || hasStarred,
+    hasCreatedBy,
+    hasFilters: hasSorting || hasTags || hasStarred || hasCreatedBy,
   };
 };

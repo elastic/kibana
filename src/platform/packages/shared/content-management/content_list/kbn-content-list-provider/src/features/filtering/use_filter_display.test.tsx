@@ -14,6 +14,7 @@ import type { ContentListProviderProps } from '../../context';
 import type { FindItemsResult, FindItemsParams } from '../../datasource';
 import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
+import type { UserProfileService } from '../../services/user_profile';
 import { useFilterDisplay } from './use_filter_display';
 
 describe('useFilterDisplay', () => {
@@ -38,6 +39,16 @@ describe('useFilterDisplay', () => {
     getFavoriteType: () => 'mock',
     reportAddFavoriteClick: () => {},
     reportRemoveFavoriteClick: () => {},
+  };
+
+  const mockUserProfileService: UserProfileService = {
+    getUserProfile: jest.fn(async () => ({
+      uid: 'u_1',
+      enabled: true,
+      data: {},
+      user: { username: 'test' },
+    })),
+    bulkGetUserProfiles: jest.fn(async () => []),
   };
 
   const createWrapper = (props?: Partial<ContentListProviderProps>) => {
@@ -152,6 +163,35 @@ describe('useFilterDisplay', () => {
     });
   });
 
+  describe('hasCreatedBy', () => {
+    it('returns true when userProfile service is provided', () => {
+      const { result } = renderHook(() => useFilterDisplay(), {
+        wrapper: createWrapper({ services: { userProfile: mockUserProfileService } }),
+      });
+
+      expect(result.current.hasCreatedBy).toBe(true);
+    });
+
+    it('returns false when no userProfile service is provided', () => {
+      const { result } = renderHook(() => useFilterDisplay(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.hasCreatedBy).toBe(false);
+    });
+
+    it('returns false when createdBy is explicitly disabled even with service', () => {
+      const { result } = renderHook(() => useFilterDisplay(), {
+        wrapper: createWrapper({
+          features: { createdBy: false },
+          services: { userProfile: mockUserProfileService },
+        }),
+      });
+
+      expect(result.current.hasCreatedBy).toBe(false);
+    });
+  });
+
   describe('hasFilters', () => {
     it('returns true when sorting is available', () => {
       const { result } = renderHook(() => useFilterDisplay(), {
@@ -183,7 +223,18 @@ describe('useFilterDisplay', () => {
       expect(result.current.hasFilters).toBe(true);
     });
 
-    it('returns false when neither sorting, tags, nor starred are available', () => {
+    it('returns true when createdBy is available', () => {
+      const { result } = renderHook(() => useFilterDisplay(), {
+        wrapper: createWrapper({
+          features: { sorting: false },
+          services: { userProfile: mockUserProfileService },
+        }),
+      });
+
+      expect(result.current.hasFilters).toBe(true);
+    });
+
+    it('returns false when no filter dimensions are available', () => {
       const { result } = renderHook(() => useFilterDisplay(), {
         wrapper: createWrapper({ features: { sorting: false } }),
       });

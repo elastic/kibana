@@ -22,6 +22,8 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/content-management-tags'
   - '@kbn/content-management-favorites-public'
+  - '@kbn/user-profile-components'
+  - '@kbn/content-management-user-profiles'
   - '@kbn/i18n'
 tags:
   - shared-browser

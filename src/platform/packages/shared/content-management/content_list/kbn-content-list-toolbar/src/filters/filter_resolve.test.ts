@@ -22,6 +22,7 @@ const createContext = (overrides: Partial<FilterContext> = {}): FilterContext =>
   hasSorting: false,
   hasTags: false,
   hasStarred: false,
+  hasCreatedBy: false,
   ...overrides,
 });
 
