@@ -62,7 +62,11 @@ const generateConversationTitle = async ({
     'GenerateTitle',
     { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
     async (span) => {
-      const structuredModel = chatModel.withStructuredOutput(
+      const modelForRequest = replacementsId
+        ? chatModel.withAnonymization({ replacementsId })
+        : chatModel;
+
+      const structuredModel = modelForRequest.withStructuredOutput(
         z
           .object({
             title: z.string().describe('The title for the conversation'),
@@ -89,9 +93,7 @@ Now, generate a title for the following conversation.`,
         createUserMessage(nextInput.message ?? '[no message]'),
       ];
 
-      const { title } = await structuredModel.invoke(prompt, {
-        anonymization: replacementsId ? { replacementsId } : undefined,
-      });
+      const { title } = await structuredModel.invoke(prompt);
 
       const resolvedTitle = deanonymizeTitle ? await deanonymizeTitle(title) : title;
 

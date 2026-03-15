@@ -13,6 +13,10 @@ import type { ProfileFormProps } from '../profile_form/profile_form_props';
 import type { ProfileFormContextValue } from '../profile_form/profile_form_context';
 import type { UseTargetIdFieldResult } from '../profile_form/hooks/use_target_id_field';
 
+jest.mock('../profile_form/hooks/use_ner_model_availability', () => ({
+  useNerModelAvailability: jest.fn().mockReturnValue({ unavailableNerModels: [] }),
+}));
+
 const createBaseTargetIdField = (): UseTargetIdFieldResult => ({
   targetIdOptions: [],
   selectedTargetIdOptions: [],

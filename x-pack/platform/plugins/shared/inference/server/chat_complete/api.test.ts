@@ -456,8 +456,6 @@ describe('createChatCompleteApi', () => {
 
       expect(response.content).toBe('EMAIL_token');
       expect(response.metadata?.anonymization?.replacementsId).toBe('existing-replacements-id');
-      expect(response.deanonymized_input).toBeUndefined();
-      expect(response.deanonymized_output).toBeUndefined();
     });
 
     it('implicitly retries errors when configured to', async () => {

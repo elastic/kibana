@@ -66,7 +66,11 @@ export const createAnswerAgentStructured = ({
           "Use this structured format to respond to the user's request with the required data.",
       });
 
-      const structuredModel = chatModel
+      const modelForRequest = anonymizationMetadata
+        ? chatModel.withAnonymization(anonymizationMetadata)
+        : chatModel;
+
+      const structuredModel = modelForRequest
         .withStructuredOutput(schemaToUse, {
           name: 'structured_answer',
           includeRaw: true,
@@ -80,9 +84,7 @@ export const createAnswerAgentStructured = ({
         answerActions: state.answerActions,
       });
 
-      const output = await structuredModel.invoke(prompt, {
-        anonymization: anonymizationMetadata,
-      });
+      const output = await structuredModel.invoke(prompt);
       let response = output.parsed;
       const replacementsId = extractReplacementsId(output.raw.additional_kwargs);
       // unwrap response if schema was wrapped
