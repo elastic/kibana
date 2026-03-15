@@ -316,6 +316,11 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     });
 
     const responseIterator = toAsyncIterator(response$);
+    // The inference stream attaches anonymization metadata (replacementsId) to every chunk
+    // as it is assembled. LangChain merges AIMessageChunks by summing their additional_kwargs,
+    // so if replacementsId appears on multiple chunks it gets duplicated in the merged message.
+    // We emit it only on the first chunk that carries it and strip it from all subsequent ones
+    // so callers receive exactly one copy in the final assembled AIMessage.
     let hasEmittedAnonymizationMetadata = false;
     for await (const event of responseIterator) {
       if (isChatCompletionChunkEvent(event)) {
