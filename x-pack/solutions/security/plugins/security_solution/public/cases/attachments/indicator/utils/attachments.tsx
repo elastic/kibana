@@ -52,10 +52,10 @@ export const generateIndicatorAttachmentType = (): ExternalReferenceAttachmentTy
         defaultMessage="added an indicator of compromise"
       />
     ),
-    timelineAvatar: <EuiAvatar name="indicator" color="subdued" iconType="crosshairs" />,
+    timelineAvatar: <EuiAvatar name="indicator" color="subdued" iconType="crosshair" />,
     children: IndicatorAttachmentChildrenLazy,
   }),
-  icon: 'crosshairs',
+  icon: 'crosshair',
 });
 
 /**

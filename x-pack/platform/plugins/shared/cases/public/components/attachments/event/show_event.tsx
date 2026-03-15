@@ -41,7 +41,7 @@ const UserActionShowEventComponent = ({
         aria-label={i18n.SHOW_EVENT_TOOLTIP}
         data-test-subj={`comment-action-show-event-${id}`}
         onClick={onClick}
-        iconType="arrowRight"
+        iconType="chevronSingleRight"
         id={`${id}-show-event`}
       />
     </EuiToolTip>

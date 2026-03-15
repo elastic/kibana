@@ -61,7 +61,7 @@ const renderUsers = (
         <EuiButtonIcon
           data-test-subj="user-list-email-button"
           onClick={handleSendEmail.bind(null, userInfo.user?.email)}
-          iconType="email"
+          iconType="mail"
           aria-label={i18n.SEND_EMAIL_ARIA(
             userInfo.user?.full_name ? userInfo.user?.full_name : userInfo.user?.username ?? ''
           )}

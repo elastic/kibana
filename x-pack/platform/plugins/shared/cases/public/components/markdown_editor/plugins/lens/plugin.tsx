@@ -296,7 +296,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   }, [embeddable, storage, timefilter, currentAppId, handleAdd, handleUpdate, draftComment]);
 
   const createLensButton = (
-    <EuiButton onClick={handleCreateInLensClick} iconType="plusInCircle">
+    <EuiButton onClick={handleCreateInLensClick} iconType="plusCircle">
       <FormattedMessage
         id="xpack.cases.markdownEditor.plugins.lens.createVisualizationButtonLabel"
         defaultMessage="Create new"

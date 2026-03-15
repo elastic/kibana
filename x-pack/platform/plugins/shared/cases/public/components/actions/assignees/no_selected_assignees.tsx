@@ -21,7 +21,7 @@ const NoSelectedAssigneesComponent: React.FC<{ totalSelectedCases: number }> = (
       data-test-subj="case-user-profiles-assignees-no-selected-assignees"
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type="userAvatar" size="xl" />
+        <EuiIcon type="user" size="xl" />
         <EuiSpacer size="xs" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

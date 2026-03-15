@@ -111,7 +111,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
     <EuiFlexItem grow={false}>
       <EuiButton
         data-test-subj="cases-files-add"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isDisabled={isLoading}
         isLoading={isLoading}
         onClick={showModal}

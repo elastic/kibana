@@ -188,7 +188,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                               onClick={togglePopover}
                               size="xs"
                               iconSide="right"
-                              iconType="arrowDown"
+                              iconType="chevronSingleDown"
                               flush="left"
                               data-test-subj="case-table-bulk-actions-link-icon"
                             >

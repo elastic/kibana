@@ -120,7 +120,7 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
           },
           {
             name: i18n.EXPORT_TEMPLATE,
-            icon: 'exportAction',
+            icon: 'upload',
             onClick: handleExport,
             'data-test-subj': `template-action-export-${template.templateId}`,
           },
@@ -145,7 +145,7 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
       button={
         <EuiButtonIcon
           onClick={togglePopover}
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           aria-label={i18n.ACTIONS}
           color="text"
           data-test-subj={`template-action-popover-button-${template.templateId}`}
