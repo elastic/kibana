@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   useEuiTheme,
   useGeneratedHtmlId,
+  type EuiAutoSize,
 } from '@elastic/eui';
 import { CascadeHeaderPrimitive } from './data_cascade_header';
 import { CascadeRowPrimitive, CascadeRowHeaderSlotsScrollSyncProvider } from './data_cascade_row';
@@ -38,7 +39,7 @@ import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps
  * @description Public Component for configuring the rendering of a data cascade row cell
  */
 export const DataCascadeRowCell = <G extends GroupNode, L extends LeafNode>(
-  props: DataCascadeRowCellProps<G, L>
+  _props: DataCascadeRowCellProps<G, L>
 ) => {
   return null;
 };
@@ -47,13 +48,12 @@ export const DataCascadeRowCell = <G extends GroupNode, L extends LeafNode>(
  * @description Public Component for configuring the rendering of a data cascade row
  */
 export const DataCascadeRow = <G extends GroupNode, L extends LeafNode>(
-  props: DataCascadeRowProps<G, L>
+  _props: DataCascadeRowProps<G, L>
 ) => {
   return null;
 };
 
 export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
-  data,
   onCascadeGroupingChange,
   size = 'm',
   tableTitleSlot: TableTitleSlot,
@@ -63,7 +63,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   enableRowSelection = false,
   enableStickyGroupHeader = true,
   allowMultipleRowToggle = false,
-  initialScrollOffset,
+  initialAnchorItemIndex,
   initialRect,
   cascadeRef,
 }: DataCascadeImplProps<G, L>) {
@@ -128,7 +128,6 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   );
 
   const { headerColumns, rows } = useCascadeTable<G, L>({
-    initialData: data,
     enableRowSelection,
     allowMultipleRowToggle,
     header: cascadeHeaderElement,
@@ -138,6 +137,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   const { collectVirtualizerStateChanges } = useExposePublicApi<G, L>(cascadeRef, {
     rows,
     enableStickyGroupHeader,
+    childController: virtualizerInstance.current?.childController,
   });
 
   // persist the virtualizer instance to ref, so that invocations of getVirtualizer will always return the latest instance
@@ -148,33 +148,22 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     enableStickyGroupHeader,
     estimatedRowHeight: size === 's' ? 32 : size === 'm' ? 40 : 48,
     onStateChange: collectVirtualizerStateChanges,
-    initialOffset: initialScrollOffset,
     initialRect,
+    initialAnchorItemIndex,
   });
-
-  const {
-    getVirtualItems,
-    getTotalSize,
-    range,
-    measureElement,
-    virtualizedRowComputedTranslateValue,
-    scrollToVirtualizedIndex,
-    scrollOffset: virtualizerScrollOffset,
-    isScrolling,
-  } = virtualizerInstance.current;
 
   // Calculate activeStickyIndex directly from the virtualizer's current range.
   // This ensures the value is always current and never stale from intermediate memoization.
   const activeStickyIndex = calculateActiveStickyIndex(
     rows,
-    range?.startIndex ?? 0,
+    virtualizerInstance.current?.range?.startIndex ?? 0,
     enableStickyGroupHeader
   );
 
   useRegisterCascadeAccessibilityHelpers<G>({
     tableRows: rows,
     tableWrapperElement: cascadeWrapperRef.current!,
-    scrollToRowIndex: scrollToVirtualizedIndex,
+    scrollToRowIndex: virtualizerInstance.current!.scrollToVirtualizedIndex,
   });
 
   const virtualCascadeRowRenderer = useCallback<VirtualizedCascadeListProps<G>['listItemRenderer']>(
@@ -187,13 +176,15 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
           rowInstance: row,
           virtualRow: virtualItem,
           virtualRowStyle,
-          innerRef: measureElement,
+          innerRef: virtualizerInstance.current!.measureElement,
+          // getVirtualizer will not return undefined here as it is set immediately after the first render
+          getVirtualizer: getVirtualizer as () => ReturnType<typeof useCascadeVirtualizer>,
           activeStickyRenderSlotRef,
           ...rowElement.props,
         }}
       />
     ),
-    [size, enableRowSelection, rowElement.props, measureElement]
+    [size, enableRowSelection, getVirtualizer, rowElement.props]
   );
 
   const treeGridContainerARIAAttributes = useTreeGridContainerARIAAttributes(headerId);
@@ -202,14 +193,63 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     return (
       enableStickyGroupHeader &&
       activeStickyIndex !== null &&
-      (virtualizerScrollOffset ?? 0) > (virtualizedRowComputedTranslateValue.get(0) ?? 0)
+      (virtualizerInstance.current?.scrollOffset ?? 0) >
+        (virtualizerInstance.current?.virtualizedRowComputedTranslateValue.get(0) ?? 0)
     );
-  }, [
-    activeStickyIndex,
-    enableStickyGroupHeader,
-    virtualizerScrollOffset,
-    virtualizedRowComputedTranslateValue,
-  ]);
+  }, [activeStickyIndex, enableStickyGroupHeader]);
+
+  const cascadeTreeGridRenderer = useCallback(
+    (containerSize: EuiAutoSize) => (
+      <div
+        ref={scrollElementRef}
+        css={styles.cascadeTreeGridBlock}
+        style={containerSize}
+        data-test-subj="data-cascade-scroll-container"
+      >
+        {/* Always render the slot so the ref is available immediately.
+          Use hidden style when not visible to avoid layout impact. */}
+        <div
+          css={
+            shouldRenderStickyHeader
+              ? styles.cascadeTreeGridHeaderStickyRenderSlot
+              : styles.cascadeTreeGridHeaderStickyRenderSlotHidden
+          }
+        >
+          <div ref={activeStickyRenderSlotRef} />
+        </div>
+        <div
+          css={styles.cascadeTreeGridWrapper}
+          style={{ height: virtualizerInstance.current?.getTotalSize() }}
+        >
+          <div {...treeGridContainerARIAAttributes} css={relativePosition}>
+            <CascadeRowHeaderSlotsScrollSyncProvider
+              disableScrollSync={virtualizerInstance.current?.isScrolling}
+            >
+              <VirtualizedCascadeRowList<G>
+                {...{
+                  activeStickyIndex,
+                  getVirtualItems: virtualizerInstance.current!.getVirtualItems,
+                  virtualizedRowComputedTranslateValue:
+                    virtualizerInstance.current!.virtualizedRowComputedTranslateValue,
+                  rows,
+                  listItemRenderer: virtualCascadeRowRenderer,
+                }}
+              />
+            </CascadeRowHeaderSlotsScrollSyncProvider>
+          </div>
+        </div>
+      </div>
+    ),
+    [
+      styles,
+      shouldRenderStickyHeader,
+      activeStickyRenderSlotRef,
+      treeGridContainerARIAAttributes,
+      rows,
+      virtualCascadeRowRenderer,
+      activeStickyIndex,
+    ]
+  );
 
   return (
     <div ref={cascadeWrapperRef} data-test-subj="data-cascade" css={styles.container}>
@@ -218,43 +258,12 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
           <TableHeader headerColumns={headerColumns} />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          <EuiAutoSizer doNotBailOutOnEmptyChildren>
-            {(scrollContainerSize) => (
-              <div
-                ref={scrollElementRef}
-                css={styles.cascadeTreeGridBlock}
-                style={{
-                  ...scrollContainerSize,
-                }}
-              >
-                {/* Always render the slot so the ref is available immediately.
-                    Use hidden style when not visible to avoid layout impact. */}
-                <div
-                  css={
-                    shouldRenderStickyHeader
-                      ? styles.cascadeTreeGridHeaderStickyRenderSlot
-                      : styles.cascadeTreeGridHeaderStickyRenderSlotHidden
-                  }
-                >
-                  <div ref={activeStickyRenderSlotRef} />
-                </div>
-                <div css={styles.cascadeTreeGridWrapper} style={{ height: getTotalSize() }}>
-                  <div {...treeGridContainerARIAAttributes} css={relativePosition}>
-                    <CascadeRowHeaderSlotsScrollSyncProvider disableScrollSync={isScrolling}>
-                      <VirtualizedCascadeRowList<G>
-                        {...{
-                          activeStickyIndex,
-                          getVirtualItems,
-                          virtualizedRowComputedTranslateValue,
-                          rows,
-                          listItemRenderer: virtualCascadeRowRenderer,
-                        }}
-                      />
-                    </CascadeRowHeaderSlotsScrollSyncProvider>
-                  </div>
-                </div>
-              </div>
-            )}
+          <EuiAutoSizer
+            defaultHeight={initialRect?.height}
+            defaultWidth={initialRect?.width}
+            doNotBailOutOnEmptyChildren
+          >
+            {cascadeTreeGridRenderer}
           </EuiAutoSizer>
         </EuiFlexItem>
       </EuiFlexGroup>

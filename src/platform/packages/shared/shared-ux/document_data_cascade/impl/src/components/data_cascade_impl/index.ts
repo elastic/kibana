@@ -13,4 +13,5 @@ export type {
   DataCascadeRowProps,
   DataCascadeRowCellProps,
   CascadeRowCellNestedVirtualizationAnchorProps,
+  CascadeGroupNodeUIInteraction,
 } from './types';

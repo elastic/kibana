@@ -48,13 +48,13 @@ describe('createStoreReducers', () => {
     `);
   });
 
-  describe('setInitialState', () => {
-    it('should set the initial state correctly', () => {
+  describe('setInitialGroupNodes', () => {
+    it('should set the initial group nodes correctly', () => {
       const groupNodes = Array.from<GroupNode>(
         new Array(3).fill(null).map((_, i) => ({ id: `group-${i}` }))
       );
 
-      const newState = reducers.setInitialState(initialState, groupNodes);
+      const newState = reducers.setInitialGroupNodes(initialState, groupNodes);
       expect(newState.groupNodes).toStrictEqual(groupNodes);
     });
   });
