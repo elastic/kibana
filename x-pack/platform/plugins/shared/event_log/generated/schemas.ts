@@ -216,16 +216,18 @@ export const EventSchema = schema.maybe(
                       })
                     ),
                     errors: schema.maybe(
-                      schema.object({
-                        '@timestamp': ecsDate(),
-                        message: ecsString(),
-                      })
+                      schema.arrayOf(
+                        schema.object({
+                          message: ecsString(),
+                        })
+                      )
                     ),
                     warnings: schema.maybe(
-                      schema.object({
-                        '@timestamp': ecsDate(),
-                        message: ecsString(),
-                      })
+                      schema.arrayOf(
+                        schema.object({
+                          message: ecsString(),
+                        })
+                      )
                     ),
                   })
                 ),

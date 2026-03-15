@@ -612,6 +612,8 @@ export class TaskRunner<
       executionStatus: execStatus,
       executionMetrics: execMetrics,
       consumerExecutionMetrics: consumerExecMetrics,
+      errors: executionErrors,
+      warnings: executionWarnings,
     } = await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
       const {
         params: { alertId: ruleId },
@@ -627,13 +629,14 @@ export class TaskRunner<
         nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
       }
 
-      const { executionStatus, executionMetrics, lastRun, outcome } = processRunResults({
-        logger: this.logger,
-        logPrefix: `${this.ruleType.id}:${ruleId}`,
-        result: this.ruleResult,
-        runDate: this.runDate,
-        runRuleResult,
-      });
+      const { executionStatus, executionMetrics, lastRun, outcome, errors, warnings } =
+        processRunResults({
+          logger: this.logger,
+          logPrefix: `${this.ruleType.id}:${ruleId}`,
+          result: this.ruleResult,
+          runDate: this.runDate,
+          runRuleResult,
+        });
 
       if (apm.currentTransaction) {
         apm.currentTransaction.setOutcome(outcome);
@@ -692,6 +695,8 @@ export class TaskRunner<
         executionStatus,
         executionMetrics: executionMetrics,
         consumerExecutionMetrics: this.ruleMonitoring.getExecutorMetrics(),
+        errors,
+        warnings,
       };
     });
 
@@ -699,6 +704,8 @@ export class TaskRunner<
       status: execStatus,
       metrics: execMetrics,
       consumerMetrics: consumerExecMetrics,
+      errors: executionErrors,
+      warnings: executionWarnings,
       timings: this.timer.toJson(),
     });
   }

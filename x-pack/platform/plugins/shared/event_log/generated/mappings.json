@@ -505,10 +505,8 @@
                                             }
                                         },
                                         "errors": {
+                                            "type": "nested",
                                             "properties": {
-                                                "@timestamp": {
-                                                    "type": "date"
-                                                },
                                                 "message": {
                                                     "norms": false,
                                                     "type": "text"
@@ -516,10 +514,8 @@
                                             }
                                         },
                                         "warnings": {
+                                            "type": "nested",
                                             "properties": {
-                                                "@timestamp": {
-                                                    "type": "date"
-                                                },
                                                 "message": {
                                                     "norms": false,
                                                     "type": "text"
