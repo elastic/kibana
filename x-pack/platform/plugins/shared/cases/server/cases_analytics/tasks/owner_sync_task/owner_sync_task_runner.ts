@@ -193,26 +193,37 @@ export class OwnerSyncTaskRunner implements CancellableTask {
       }
 
       // ── Phase 2: Partition into idle / runable ────────────────────────────
+      //
+      // Three buckets:
+      //   runableSpaces     — never-idle; processed fully this run
+      //   expiredIdleSpaces — idle window elapsed; msearch is checked but the space
+      //                       only resumes if new docs exist (idle is never exited
+      //                       purely on a timer — only activity wakes a space up)
+      //   waitingIdleSpaces — idle window still open; skipped entirely this run
       const now = new Date();
-      const idleSpaces: string[] = [];
+      const waitingIdleSpaces: string[] = [];
+      const expiredIdleSpaces: string[] = [];
       const runableSpaces: string[] = [];
 
       for (const spaceId of enabledSpaces) {
         const state = spaceStates[spaceId];
-        if (state.nextSyncAt && new Date(state.nextSyncAt) > now) {
-          idleSpaces.push(spaceId);
-        } else {
-          // Clear idle marker — this space is eligible for a run
-          delete state.nextSyncAt;
+        if (!state.nextSyncAt) {
           runableSpaces.push(spaceId);
+        } else if (new Date(state.nextSyncAt) > now) {
+          waitingIdleSpaces.push(spaceId);
+        } else {
+          // Idle window elapsed — check for new docs before deciding whether to resume
+          expiredIdleSpaces.push(spaceId);
         }
       }
 
       this.logDebug(
-        `Partition: ${runableSpaces.length} runable, ${idleSpaces.length} idle (skipped).`
+        `Partition: ${runableSpaces.length} runable, ` +
+          `${expiredIdleSpaces.length} idle (checking docs), ` +
+          `${waitingIdleSpaces.length} idle (waiting).`
       );
 
-      if (runableSpaces.length === 0) {
+      if (runableSpaces.length === 0 && expiredIdleSpaces.length === 0) {
         return { state: { spaceStates } };
       }
 
@@ -222,96 +233,52 @@ export class OwnerSyncTaskRunner implements CancellableTask {
         const spaceState = spaceStates[spaceId];
         for (const syncType of CAISyncTypes) {
           const sub = spaceState.syncTasks[syncType];
-          if (!sub?.esReindexTaskId) continue;
-
-          const status = await this.getReindexStatus(esClient, sub.esReindexTaskId);
-          if (status === ReindexStatus.RUNNING) {
-            ongoingCount++;
-          } else if (status === ReindexStatus.COMPLETED) {
-            sub.lastSyncSuccess = sub.lastSyncAttempt;
-            sub.esReindexTaskId = undefined;
-          } else {
-            // FAILED or MISSING — clear so we retry next run
-            sub.esReindexTaskId = undefined;
+          if (sub?.esReindexTaskId) {
+            const status = await this.getReindexStatus(esClient, sub.esReindexTaskId);
+            if (status === ReindexStatus.RUNNING) {
+              ongoingCount++;
+            } else if (status === ReindexStatus.COMPLETED) {
+              sub.lastSyncSuccess = sub.lastSyncAttempt;
+              sub.esReindexTaskId = undefined;
+            } else {
+              // FAILED or MISSING — clear so we retry next run
+              sub.esReindexTaskId = undefined;
+            }
+            spaceState.syncTasks[syncType] = sub;
           }
-          spaceState.syncTasks[syncType] = sub;
         }
       }
 
       this.logDebug(`In-flight reindex tasks: ${ongoingCount} running.`);
 
       // ── Phase 4: msearch — detect new source docs per (space, syncType) ───
-      const spaceHasNewDocs = await this.batchCheckForNewDocs(esClient, runableSpaces, spaceStates);
+      // Include expired-idle spaces so we can decide whether to resume them.
+      const spaceHasNewDocs = await this.batchCheckForNewDocs(
+        esClient,
+        [...runableSpaces, ...expiredIdleSpaces],
+        spaceStates
+      );
+
+      // ── Phase 4b: Resolve expired-idle spaces ─────────────────────────────
+      // Only promote to runable when new docs exist; otherwise extend the idle
+      // window so the space stays idle until something actually changes.
+      this.resolveExpiredIdleSpaces(
+        expiredIdleSpaces,
+        spaceStates,
+        spaceHasNewDocs,
+        now,
+        runableSpaces
+      );
 
       // ── Phase 5: Fan-out — start new reindexes / update idle counters ─────
-      const concurrencyCap = this.analyticsConfig.index.reindexConcurrency;
-      const spacesWithSuccessfulSync: string[] = [];
-
-      for (const spaceId of runableSpaces) {
-        const spaceState = spaceStates[spaceId];
-        const hasNewDocs = spaceHasNewDocs[spaceId] ?? false;
-        const hasOngoing = CAISyncTypes.some(
-          (st) => spaceState.syncTasks[st]?.esReindexTaskId !== undefined
-        );
-
-        if (!hasNewDocs && !hasOngoing) {
-          // Nothing to do this run — track toward idle
-          spaceState.consecutiveEmptyRuns++;
-          this.logDebug(
-            `[${spaceId}] No new docs. Consecutive empty runs: ${spaceState.consecutiveEmptyRuns}.`
-          );
-
-          if (spaceState.consecutiveEmptyRuns >= IDLE_THRESHOLD) {
-            spaceState.nextSyncAt = new Date(now.getTime() + IDLE_INTERVAL_MS).toISOString();
-            this.logger.info(
-              `[owner-sync-task][${this.owner}][${spaceId}] Entering idle mode after ` +
-                `${spaceState.consecutiveEmptyRuns} consecutive empty runs. ` +
-                `Next sync at ${spaceState.nextSyncAt}.`,
-              { tags: ['cai-owner-sync', `cai-owner-sync-${this.owner}`] }
-            );
-          }
-          continue;
-        }
-
-        // Has new docs (or an ongoing reindex from a previous run) — stay active
-        if (hasNewDocs) {
-          spaceState.consecutiveEmptyRuns = 0;
-        }
-
-        // Check whether all destination indices exist for this space
-        const indices = getIndicesForOwnerAndSpace(spaceId, this.owner);
-        const indicesExist = await esClient.indices.exists({ index: indices });
-        if (!indicesExist) {
-          this.logDebug(`[${spaceId}] Destination index missing, skipping until creation.`);
-          continue;
-        }
-
-        // Start new reindexes for sync types that don't already have a running task
-        for (const syncType of CAISyncTypes) {
-          const sub: SyncSubTaskState = spaceState.syncTasks[syncType] ?? {};
-
-          if (sub.esReindexTaskId) {
-            // Already running (counted in phase 3)
-            continue;
-          }
-
-          if (ongoingCount >= concurrencyCap) {
-            this.logDebug(
-              `[${spaceId}][${syncType}] Concurrency cap (${concurrencyCap}) reached — deferring.`
-            );
-            continue;
-          }
-
-          const taskId = await this.startReindex(esClient, spaceId, syncType, sub);
-          if (taskId) {
-            sub.lastSyncAttempt = now.toISOString();
-            sub.esReindexTaskId = String(taskId);
-            ongoingCount++;
-            spacesWithSuccessfulSync.push(spaceId);
-          }
-          spaceState.syncTasks[syncType] = sub;
-        }
-      }
+      const spacesWithSuccessfulSync = await this.fanOutReindexes(
+        esClient,
+        runableSpaces,
+        spaceHasNewDocs,
+        spaceStates,
+        now,
+        ongoingCount
+      );
 
       // ── Phase 6: Persist configure SO updates (fire-and-forget) ──────────
       this.updateConfigureSOs(soClient, spaceStates, now, spacesWithSuccessfulSync).catch(
@@ -346,6 +313,117 @@ export class OwnerSyncTaskRunner implements CancellableTask {
   }
 
   // ── Private helpers ────────────────────────────────────────────────────────
+
+  /**
+   * For each space whose idle window just elapsed, check whether new docs were found.
+   * Spaces with new docs are promoted to runable; spaces without docs have their idle
+   * window extended — they never leave idle mode purely because of time.
+   */
+  private resolveExpiredIdleSpaces(
+    expiredIdleSpaces: string[],
+    spaceStates: Record<string, SpaceSyncState>,
+    spaceHasNewDocs: Record<string, boolean>,
+    now: Date,
+    runableSpaces: string[]
+  ): void {
+    for (const spaceId of expiredIdleSpaces) {
+      if (spaceHasNewDocs[spaceId]) {
+        delete spaceStates[spaceId].nextSyncAt;
+        spaceStates[spaceId].consecutiveEmptyRuns = 0;
+        runableSpaces.push(spaceId);
+        this.logDebug(`[${spaceId}] New docs detected while idle — resuming sync.`);
+      } else {
+        spaceStates[spaceId].nextSyncAt = new Date(now.getTime() + IDLE_INTERVAL_MS).toISOString();
+        this.logDebug(
+          `[${spaceId}] Still idle, no new docs. Next check at ${spaceStates[spaceId].nextSyncAt}.`
+        );
+      }
+    }
+  }
+
+  /**
+   * Phase 5: for each runable space, start new reindexes or advance idle counters.
+   * Returns the list of spaces for which a reindex was successfully started this run.
+   */
+  private async fanOutReindexes(
+    esClient: ElasticsearchClient,
+    runableSpaces: string[],
+    spaceHasNewDocs: Record<string, boolean>,
+    spaceStates: Record<string, SpaceSyncState>,
+    now: Date,
+    ongoingCount: number
+  ): Promise<string[]> {
+    const concurrencyCap = this.analyticsConfig.index.reindexConcurrency;
+    const spacesWithSuccessfulSync: string[] = [];
+    // Local copy so we can increment without mutating the parameter (no-param-reassign).
+    let runningCount = ongoingCount;
+
+    for (const spaceId of runableSpaces) {
+      const spaceState = spaceStates[spaceId];
+      const hasNewDocs = spaceHasNewDocs[spaceId] ?? false;
+      const hasOngoing = CAISyncTypes.some(
+        (st) => spaceState.syncTasks[st]?.esReindexTaskId !== undefined
+      );
+
+      if (!hasNewDocs && !hasOngoing) {
+        // Nothing to do this run — track toward idle
+        spaceState.consecutiveEmptyRuns++;
+        this.logDebug(
+          `[${spaceId}] No new docs. Consecutive empty runs: ${spaceState.consecutiveEmptyRuns}.`
+        );
+
+        if (spaceState.consecutiveEmptyRuns >= IDLE_THRESHOLD) {
+          spaceState.nextSyncAt = new Date(now.getTime() + IDLE_INTERVAL_MS).toISOString();
+          // Reset counter so re-entry into idle after the backoff window produces one clean
+          // log line rather than an ever-growing "after N consecutive empty runs" message.
+          spaceState.consecutiveEmptyRuns = 0;
+          this.logger.info(
+            `[owner-sync-task][${this.owner}][${spaceId}] Idle mode: no activity detected. ` +
+              `Next sync at ${spaceState.nextSyncAt}.`,
+            { tags: ['cai-owner-sync', `cai-owner-sync-${this.owner}`] }
+          );
+        }
+      } else {
+        // Has new docs (or an ongoing reindex from a previous run) — stay active
+        if (hasNewDocs) {
+          spaceState.consecutiveEmptyRuns = 0;
+        }
+
+        // Check whether all destination indices exist for this space
+        const indices = getIndicesForOwnerAndSpace(spaceId, this.owner);
+        const indicesExist = await esClient.indices.exists({ index: indices });
+        if (!indicesExist) {
+          this.logDebug(`[${spaceId}] Destination index missing, skipping until creation.`);
+        } else {
+          // Start new reindexes for sync types that don't already have a running task
+          for (const syncType of CAISyncTypes) {
+            const existingSub: SyncSubTaskState = spaceState.syncTasks[syncType] ?? {};
+
+            if (!existingSub.esReindexTaskId) {
+              if (runningCount < concurrencyCap) {
+                const taskId = await this.startReindex(esClient, spaceId, syncType, existingSub);
+                if (taskId) {
+                  spaceState.syncTasks[syncType] = {
+                    ...(spaceState.syncTasks[syncType] ?? {}),
+                    lastSyncAttempt: now.toISOString(),
+                    esReindexTaskId: String(taskId),
+                  };
+                  runningCount++;
+                  spacesWithSuccessfulSync.push(spaceId);
+                }
+              } else {
+                this.logDebug(
+                  `[${spaceId}][${syncType}] Concurrency cap (${concurrencyCap}) reached — deferring.`
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return spacesWithSuccessfulSync;
+  }
 
   /**
    * Check the status of an existing ES reindex task.
@@ -438,18 +516,17 @@ export class OwnerSyncTaskRunner implements CancellableTask {
         );
         // Err on the side of triggering a sync when uncertain
         result[spaceId] = true;
-        continue;
-      }
+      } else {
+        const total =
+          typeof resp.hits?.total === 'number'
+            ? resp.hits.total
+            : (resp.hits?.total as { value: number } | undefined)?.value ?? 0;
 
-      const total =
-        typeof resp.hits?.total === 'number'
-          ? resp.hits.total
-          : (resp.hits?.total as { value: number } | undefined)?.value ?? 0;
-
-      if (total > 0) {
-        result[spaceId] = true;
-      } else if (result[spaceId] === undefined) {
-        result[spaceId] = false;
+        if (total > 0) {
+          result[spaceId] = true;
+        } else if (result[spaceId] === undefined) {
+          result[spaceId] = false;
+        }
       }
     }
 
@@ -562,15 +639,15 @@ export class OwnerSyncTaskRunner implements CancellableTask {
           perPage: 1,
         });
 
-        if (results.saved_objects.length === 0) continue;
-
-        const so = results.saved_objects[0];
-        await soClient.update<ConfigurationPersistedAttributes>(
-          CASE_CONFIGURE_SAVED_OBJECT,
-          so.id,
-          updates,
-          { namespace: spaceId === 'default' ? undefined : spaceId }
-        );
+        if (results.saved_objects.length > 0) {
+          const so = results.saved_objects[0];
+          await soClient.update<ConfigurationPersistedAttributes>(
+            CASE_CONFIGURE_SAVED_OBJECT,
+            so.id,
+            updates,
+            { namespace: spaceId === 'default' ? undefined : spaceId }
+          );
+        }
       } catch (err) {
         this.logger.warn(
           `[owner-sync-task][${this.owner}][${spaceId}] ` +

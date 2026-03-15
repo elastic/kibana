@@ -19,13 +19,13 @@ describe('getSpacesWithAnalyticsEnabled', () => {
   it('returns owner+space pairs from configure SOs with analytics_enabled: true', async () => {
     soClient.find.mockResolvedValue({
       saved_objects: [
-        { namespaces: ['default'], attributes: { owner: 'securitySolution' } } as any,
-        { namespaces: ['my-space'], attributes: { owner: 'observability' } } as any,
+        { namespaces: ['default'], attributes: { owner: 'securitySolution' } },
+        { namespaces: ['my-space'], attributes: { owner: 'observability' } },
       ],
       total: 2,
       page: 1,
       per_page: 10000,
-    });
+    } as unknown as Awaited<ReturnType<typeof soClient.find>>);
 
     const result = await getSpacesWithAnalyticsEnabled(soClient);
 
@@ -61,13 +61,13 @@ describe('getSpacesWithAnalyticsEnabled', () => {
   it('deduplicates when the same owner+space appears in multiple SOs', async () => {
     soClient.find.mockResolvedValue({
       saved_objects: [
-        { namespaces: ['default'], attributes: { owner: 'securitySolution' } } as any,
-        { namespaces: ['default'], attributes: { owner: 'securitySolution' } } as any,
+        { namespaces: ['default'], attributes: { owner: 'securitySolution' } },
+        { namespaces: ['default'], attributes: { owner: 'securitySolution' } },
       ],
       total: 2,
       page: 1,
       per_page: 10000,
-    });
+    } as unknown as Awaited<ReturnType<typeof soClient.find>>);
 
     const result = await getSpacesWithAnalyticsEnabled(soClient);
 
@@ -77,13 +77,13 @@ describe('getSpacesWithAnalyticsEnabled', () => {
   it('does NOT deduplicate different owners in the same space', async () => {
     soClient.find.mockResolvedValue({
       saved_objects: [
-        { namespaces: ['default'], attributes: { owner: 'securitySolution' } } as any,
-        { namespaces: ['default'], attributes: { owner: 'observability' } } as any,
+        { namespaces: ['default'], attributes: { owner: 'securitySolution' } },
+        { namespaces: ['default'], attributes: { owner: 'observability' } },
       ],
       total: 2,
       page: 1,
       per_page: 10000,
-    });
+    } as unknown as Awaited<ReturnType<typeof soClient.find>>);
 
     const result = await getSpacesWithAnalyticsEnabled(soClient);
 
@@ -98,13 +98,11 @@ describe('getSpacesWithAnalyticsEnabled', () => {
 
   it('excludes the wildcard namespace "*"', async () => {
     soClient.find.mockResolvedValue({
-      saved_objects: [
-        { namespaces: ['*', 'default'], attributes: { owner: 'securitySolution' } } as any,
-      ],
+      saved_objects: [{ namespaces: ['*', 'default'], attributes: { owner: 'securitySolution' } }],
       total: 1,
       page: 1,
       per_page: 10000,
-    });
+    } as unknown as Awaited<ReturnType<typeof soClient.find>>);
 
     const result = await getSpacesWithAnalyticsEnabled(soClient);
 
@@ -114,12 +112,12 @@ describe('getSpacesWithAnalyticsEnabled', () => {
   it('excludes SOs with unknown owners', async () => {
     soClient.find.mockResolvedValue({
       saved_objects: [
-        { namespaces: ['default'], attributes: { owner: 'securitySolutionFixture' } } as any,
+        { namespaces: ['default'], attributes: { owner: 'securitySolutionFixture' } },
       ],
       total: 1,
       page: 1,
       per_page: 10000,
-    });
+    } as unknown as Awaited<ReturnType<typeof soClient.find>>);
 
     const result = await getSpacesWithAnalyticsEnabled(soClient);
 
@@ -128,11 +126,11 @@ describe('getSpacesWithAnalyticsEnabled', () => {
 
   it('handles SOs with no namespaces', async () => {
     soClient.find.mockResolvedValue({
-      saved_objects: [{ namespaces: undefined, attributes: { owner: 'securitySolution' } } as any],
+      saved_objects: [{ namespaces: undefined, attributes: { owner: 'securitySolution' } }],
       total: 1,
       page: 1,
       per_page: 10000,
-    });
+    } as unknown as Awaited<ReturnType<typeof soClient.find>>);
 
     const result = await getSpacesWithAnalyticsEnabled(soClient);
 

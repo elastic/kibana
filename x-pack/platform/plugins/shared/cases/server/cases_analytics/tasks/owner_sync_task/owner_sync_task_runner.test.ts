@@ -139,26 +139,36 @@ describe('OwnerSyncTaskRunner', () => {
     esClient.indices.exists.mockResolvedValue(true);
 
     // Default: msearch returns no new docs
-    esClient.msearch.mockResolvedValue(buildEmptyMsearchResponse(1) as any);
+    esClient.msearch.mockResolvedValue(
+      buildEmptyMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+    );
 
     // Default: mapping returns script id
-    esClient.indices.getMapping.mockResolvedValue(mappingWithScript as any);
+    esClient.indices.getMapping.mockResolvedValue(
+      mappingWithScript as unknown as Awaited<ReturnType<typeof esClient.indices.getMapping>>
+    );
 
     // Default: script exists
-    esClient.getScript.mockResolvedValue({ found: true, script: {} } as any);
+    esClient.getScript.mockResolvedValue({ found: true, script: {} } as unknown as Awaited<
+      ReturnType<typeof esClient.getScript>
+    >);
 
     // Default: reindex returns a task id
-    esClient.reindex.mockResolvedValue({ task: 'reindex-task-1' } as any);
+    esClient.reindex.mockResolvedValue({ task: 'reindex-task-1' } as unknown as Awaited<
+      ReturnType<typeof esClient.reindex>
+    >);
 
     // Default: in-flight task check returns completed
-    esClient.tasks.get.mockResolvedValue(completedTaskResponse as any);
+    esClient.tasks.get.mockResolvedValue(
+      completedTaskResponse as unknown as Awaited<ReturnType<typeof esClient.tasks.get>>
+    );
 
     // Default: SO find/update succeed
     soClient.find.mockResolvedValue({
       saved_objects: [{ id: 'cfg-1', attributes: {} }],
       total: 1,
-    } as any);
-    soClient.update.mockResolvedValue({} as any);
+    } as unknown as Awaited<ReturnType<typeof soClient.find>>);
+    soClient.update.mockResolvedValue({} as unknown as Awaited<ReturnType<typeof soClient.update>>);
   });
 
   // ── 1. Guard clauses ─────────────────────────────────────────────────────────
@@ -242,15 +252,17 @@ describe('OwnerSyncTaskRunner', () => {
       expect(esClient.msearch).not.toHaveBeenCalled();
     });
 
-    it('runs spaces whose nextSyncAt has passed (idle → runable)', async () => {
+    it('checks for new docs when the idle window expires', async () => {
       const nextSyncAt = new Date(Date.now() - 60_000).toISOString(); // 1 min ago
       const state: OwnerSyncTaskState = {
         spaceStates: {
-          [SPACE]: { consecutiveEmptyRuns: 5, nextSyncAt, syncTasks: {} },
+          [SPACE]: { consecutiveEmptyRuns: 0, nextSyncAt, syncTasks: {} },
         },
       };
 
-      esClient.msearch.mockResolvedValue(buildEmptyMsearchResponse(1) as any);
+      esClient.msearch.mockResolvedValue(
+        buildEmptyMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(state),
@@ -262,8 +274,36 @@ describe('OwnerSyncTaskRunner', () => {
 
       await runner.run();
 
-      // Space was allowed to run — msearch was called
+      // msearch is called to check for new docs even while in idle
       expect(esClient.msearch).toHaveBeenCalledTimes(1);
+    });
+
+    it('stays idle and extends nextSyncAt when no new docs are found after idle window expires', async () => {
+      const nextSyncAt = new Date(Date.now() - 60_000).toISOString(); // 1 min ago
+      const state: OwnerSyncTaskState = {
+        spaceStates: {
+          [SPACE]: { consecutiveEmptyRuns: 0, nextSyncAt, syncTasks: {} },
+        },
+      };
+
+      esClient.msearch.mockResolvedValue(
+        buildEmptyMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
+
+      const runner = new OwnerSyncTaskRunner({
+        taskInstance: makeTaskInstance(state),
+        getESClient,
+        getUnsecureSavedObjectsClient,
+        logger,
+        analyticsConfig,
+      });
+
+      const result = (await runner.run()) as { state: OwnerSyncTaskState };
+
+      // Space must remain idle — nextSyncAt is extended, not cleared
+      const nextSyncAtResult = result?.state.spaceStates[SPACE].nextSyncAt;
+      expect(nextSyncAtResult).toBeDefined();
+      expect(new Date(nextSyncAtResult!).getTime()).toBeGreaterThan(Date.now());
     });
 
     it('resets consecutiveEmptyRuns when new docs are found after idle', async () => {
@@ -274,7 +314,9 @@ describe('OwnerSyncTaskRunner', () => {
         },
       };
 
-      esClient.msearch.mockResolvedValue(buildHitMsearchResponse(1) as any);
+      esClient.msearch.mockResolvedValue(
+        buildHitMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(state),
@@ -309,8 +351,12 @@ describe('OwnerSyncTaskRunner', () => {
         },
       };
 
-      esClient.tasks.get.mockResolvedValue(runningTaskResponse as any);
-      esClient.msearch.mockResolvedValue(buildHitMsearchResponse(1) as any);
+      esClient.tasks.get.mockResolvedValue(
+        runningTaskResponse as unknown as Awaited<ReturnType<typeof esClient.tasks.get>>
+      );
+      esClient.msearch.mockResolvedValue(
+        buildHitMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(state),
@@ -347,8 +393,12 @@ describe('OwnerSyncTaskRunner', () => {
         },
       };
 
-      esClient.tasks.get.mockResolvedValue(completedTaskResponse as any);
-      esClient.msearch.mockResolvedValue(buildEmptyMsearchResponse(1) as any);
+      esClient.tasks.get.mockResolvedValue(
+        completedTaskResponse as unknown as Awaited<ReturnType<typeof esClient.tasks.get>>
+      );
+      esClient.msearch.mockResolvedValue(
+        buildEmptyMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(state),
@@ -377,8 +427,12 @@ describe('OwnerSyncTaskRunner', () => {
         },
       };
 
-      esClient.tasks.get.mockResolvedValue(failedTaskResponse as any);
-      esClient.msearch.mockResolvedValue(buildEmptyMsearchResponse(1) as any);
+      esClient.tasks.get.mockResolvedValue(
+        failedTaskResponse as unknown as Awaited<ReturnType<typeof esClient.tasks.get>>
+      );
+      esClient.msearch.mockResolvedValue(
+        buildEmptyMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(state),
@@ -399,7 +453,9 @@ describe('OwnerSyncTaskRunner', () => {
 
   describe('msearch new-doc detection', () => {
     it('starts a reindex when msearch reports new docs', async () => {
-      esClient.msearch.mockResolvedValue(buildHitMsearchResponse(1) as any);
+      esClient.msearch.mockResolvedValue(
+        buildHitMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(),
@@ -415,7 +471,9 @@ describe('OwnerSyncTaskRunner', () => {
     });
 
     it('does NOT start a reindex when msearch reports zero docs and no ongoing tasks', async () => {
-      esClient.msearch.mockResolvedValue(buildEmptyMsearchResponse(1) as any);
+      esClient.msearch.mockResolvedValue(
+        buildEmptyMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(),
@@ -436,7 +494,7 @@ describe('OwnerSyncTaskRunner', () => {
           { error: { reason: 'index missing', type: 'index_not_found_exception' } },
           { hits: { total: { value: 0 }, hits: [] } },
         ],
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof esClient.msearch>>);
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(),
@@ -453,7 +511,9 @@ describe('OwnerSyncTaskRunner', () => {
     });
 
     it('skips reindex when destination index does not exist', async () => {
-      esClient.msearch.mockResolvedValue(buildHitMsearchResponse(1) as any);
+      esClient.msearch.mockResolvedValue(
+        buildHitMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
       esClient.indices.exists.mockResolvedValue(false);
 
       const runner = new OwnerSyncTaskRunner({
@@ -483,15 +543,17 @@ describe('OwnerSyncTaskRunner', () => {
       esClient.indices.exists.mockResolvedValue(true);
 
       // Both spaces have new docs
-      esClient.msearch.mockResolvedValue(buildHitMsearchResponse(2) as any);
+      esClient.msearch.mockResolvedValue(
+        buildHitMsearchResponse(2) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       // Each getMapping call returns the script id for the respective index
-      esClient.indices.getMapping.mockImplementation((params: any) => {
+      esClient.indices.getMapping.mockImplementation((params) => {
         return Promise.resolve({
-          [params.index]: {
+          [String(params?.index)]: {
             mappings: { _meta: { painless_script_id: 'test-script-id' } },
           },
-        } as any);
+        } as unknown as Awaited<ReturnType<typeof esClient.indices.getMapping>>);
       });
 
       const runner = new OwnerSyncTaskRunner({
@@ -514,7 +576,9 @@ describe('OwnerSyncTaskRunner', () => {
 
   describe('idle threshold', () => {
     it('increments consecutiveEmptyRuns when no new docs found', async () => {
-      esClient.msearch.mockResolvedValue(buildEmptyMsearchResponse(1) as any);
+      esClient.msearch.mockResolvedValue(
+        buildEmptyMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(),
@@ -536,7 +600,9 @@ describe('OwnerSyncTaskRunner', () => {
         },
       };
 
-      esClient.msearch.mockResolvedValue(buildEmptyMsearchResponse(1) as any);
+      esClient.msearch.mockResolvedValue(
+        buildEmptyMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(state),
@@ -549,7 +615,8 @@ describe('OwnerSyncTaskRunner', () => {
       const result = (await runner.run()) as { state: OwnerSyncTaskState };
 
       const spaceState = result?.state.spaceStates[SPACE];
-      expect(spaceState.consecutiveEmptyRuns).toBe(5);
+      // Counter is reset to 0 on idle entry so re-wakeups produce a clean single log line
+      expect(spaceState.consecutiveEmptyRuns).toBe(0);
       expect(spaceState.nextSyncAt).toBeDefined();
 
       // nextSyncAt should be approximately 30 minutes from now
@@ -566,7 +633,9 @@ describe('OwnerSyncTaskRunner', () => {
         },
       };
 
-      esClient.msearch.mockResolvedValue(buildHitMsearchResponse(1) as any);
+      esClient.msearch.mockResolvedValue(
+        buildHitMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(state),
@@ -612,7 +681,9 @@ describe('OwnerSyncTaskRunner', () => {
     });
 
     it('stores the ES reindex task id in state after starting a reindex', async () => {
-      esClient.msearch.mockResolvedValue(buildHitMsearchResponse(1) as any);
+      esClient.msearch.mockResolvedValue(
+        buildHitMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
       esClient.reindex.mockResolvedValue({ task: 'new-task-42' });
 
       const runner = new OwnerSyncTaskRunner({
@@ -635,7 +706,9 @@ describe('OwnerSyncTaskRunner', () => {
 
   describe('configure SO updates', () => {
     it('writes analytics_sync_status=active to the configure SO when syncing', async () => {
-      esClient.msearch.mockResolvedValue(buildHitMsearchResponse(1) as any);
+      esClient.msearch.mockResolvedValue(
+        buildHitMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(),
@@ -665,7 +738,9 @@ describe('OwnerSyncTaskRunner', () => {
         },
       };
 
-      esClient.msearch.mockResolvedValue(buildEmptyMsearchResponse(1) as any);
+      esClient.msearch.mockResolvedValue(
+        buildEmptyMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(state),
@@ -689,7 +764,9 @@ describe('OwnerSyncTaskRunner', () => {
     });
 
     it('writes analytics_last_sync_at when new reindexes are started', async () => {
-      esClient.msearch.mockResolvedValue(buildHitMsearchResponse(1) as any);
+      esClient.msearch.mockResolvedValue(
+        buildHitMsearchResponse(1) as unknown as Awaited<ReturnType<typeof esClient.msearch>>
+      );
 
       const runner = new OwnerSyncTaskRunner({
         taskInstance: makeTaskInstance(),

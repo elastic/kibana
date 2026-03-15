@@ -83,17 +83,17 @@ export function buildExtendedFieldsForAnalytics(
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(soExtendedFields)) {
-    if (value == null) continue;
-
-    try {
-      result[key] = castExtendedFieldValue(key, value);
-    } catch (error) {
-      if (logger) {
-        logger.warn(
-          `Failed to cast extended field "${key}" with value "${value}": ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
+    if (value != null) {
+      try {
+        result[key] = castExtendedFieldValue(key, value);
+      } catch (error) {
+        if (logger) {
+          logger.warn(
+            `Failed to cast extended field "${key}" with value "${value}": ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
       }
     }
   }

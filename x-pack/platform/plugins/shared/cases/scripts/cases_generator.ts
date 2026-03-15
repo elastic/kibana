@@ -1251,7 +1251,7 @@ async function interactiveMode(): Promise<GeneratorConfig> {
   }
   console.log(`  Owners:     ${owners.join(', ')}`);
   if (ownerDistribution) {
-    const distStr = owners.map((o) => `${o}:${ownerDistribution![o] ?? 0}`).join(', ');
+    const distStr = owners.map((o) => `${o}:${ownerDistribution[o] ?? 0}`).join(', ');
     console.log(`  Weights:    ${distStr}`);
   }
   if (analyticsOwners && analyticsOwners.length > 0) {
@@ -1309,7 +1309,7 @@ function logFinalSummary(config: GeneratorConfig) {
   }
   if (config.ownerDistribution) {
     const distStr = config.owners
-      .map((o) => `${o}:${config.ownerDistribution![o] ?? 0}`)
+      .map((o) => `${o}:${config.ownerDistribution?.[o] ?? 0}`)
       .join(', ');
     logger.info(`Owner distribution weights: ${distStr}`);
   }
@@ -1321,7 +1321,6 @@ function logFinalSummary(config: GeneratorConfig) {
     );
   }
   if (config.analyticsOwners && config.analyticsOwners.length > 0) {
-    const numSpaces = config.spaces ? config.spaces.count : 1;
     logger.info(
       `Analytics enabled for [${config.analyticsOwners.join(', ')}] across ${numSpaces} space(s)`
     );
