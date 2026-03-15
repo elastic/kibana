@@ -15,6 +15,7 @@ import type {
 import { registerObservabilityAgent } from './agent/register_observability_agent';
 import { registerTools } from './tools/register_tools';
 import { registerAttachments } from './attachments/register_attachments';
+import { registerSkills } from './skills/register_skills';
 import type {
   ObservabilityAgentBuilderPluginSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -68,6 +69,10 @@ export class ObservabilityAgentBuilderPlugin
       dataRegistry: this.dataRegistry,
     }).catch((error) => {
       this.logger.error(`Error registering observability attachments: ${error}`);
+    });
+
+    registerSkills(plugins.agentBuilder).catch((error) => {
+      this.logger.error(`Error registering observability skills: ${error}`);
     });
 
     registerServerRoutes({ core, plugins, logger: this.logger, dataRegistry: this.dataRegistry });

@@ -30,7 +30,11 @@ export type SkillsDirectoryStructure = Directory<{
       visualization: FileDirectory;
       workflows: FileDirectory;
     }>;
-    observability: FileDirectory<{}>;
+    observability: FileDirectory<{
+      services: FileDirectory;
+      logs: FileDirectory;
+      infrastructure: FileDirectory;
+    }>;
     security: FileDirectory<{
       alerts: FileDirectory<{
         rules: FileDirectory;
