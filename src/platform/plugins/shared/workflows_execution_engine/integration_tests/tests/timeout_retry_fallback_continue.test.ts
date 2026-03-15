@@ -101,7 +101,7 @@ steps:
       failingStepByTimeoutExecutions.forEach((se) => {
         expect(se.status).toBe(ExecutionStatus.FAILED);
         expect(se.error).toEqual({
-          type: 'Error',
+          type: 'TimeoutError',
           message: 'TimeoutError: Step execution exceeded the configured timeout of 2s.',
         });
       });
@@ -123,7 +123,7 @@ steps:
       expect(logErrorStepExecutions.length).toBe(1);
       expect(logErrorStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
       expect(logErrorStepExecutions[0].output).toBe(
-        `Error logged: {"type":"Error","message":"TimeoutError: Step execution exceeded the configured timeout of 2s."}`
+        `Error logged: {"type":"TimeoutError","message":"TimeoutError: Step execution exceeded the configured timeout of 2s."}`
       );
     });
   });
@@ -143,7 +143,7 @@ steps:
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
       expect(workflowExecutionDoc?.error).toEqual({
-        type: 'Error',
+        type: 'TimeoutError',
         message: 'TimeoutError: Step execution exceeded the configured timeout of 2s.',
       });
       expect(workflowExecutionDoc?.scopeStack).toEqual([]);

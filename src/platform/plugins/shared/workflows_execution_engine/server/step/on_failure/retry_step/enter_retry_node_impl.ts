@@ -10,6 +10,7 @@
 import type { SerializedError } from '@kbn/workflows';
 import type { EnterRetryNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import { computeRetryDelayMs } from '../../../utils/retry_delay/retry_delay';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
@@ -80,17 +81,49 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   private advanceRetryAttempt(): void {
-    if (
-      this.node.configuration.delay &&
-      this.stepExecutionRuntime.tryEnterDelay(this.node.configuration.delay)
-    ) {
-      this.workflowLogger.logDebug(`Delaying retry for ${this.node.configuration.delay}.`);
-      // Enter a new scope for the new attempt. Since attempt is 0 based, we add 1 to it.
+    const retryState = this.stepExecutionRuntime.getCurrentStepState();
+    if (!retryState) {
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
+    // If we have resumeAt in state, we're exiting a previous wait period - proceed to retry without delay
+    if (retryState.resumeAt) {
+      const attempt = retryState.attempt + 1;
+      this.workflowLogger.logDebug(`Retrying "${this.node.stepId}" step. (attempt ${attempt}).`);
+      // Clear resumeAt and increment attempt
+      this.stepExecutionRuntime.setCurrentStepState({ attempt });
+      this.workflowRuntime.enterScope(`${attempt + 1}-attempt`);
+      this.workflowRuntime.navigateToNextNode();
+      return;
+    }
+
+    const config = this.node.configuration;
+    const strategy = config.strategy ?? 'fixed';
+
+    // Fixed strategy with delay string: use tryEnterDelay for backward compatibility (same behavior as before).
+    const fixedDelayStr =
+      strategy === 'fixed' && config.delay != null && config.delay.length > 0
+        ? config.delay
+        : undefined;
+
+    if (fixedDelayStr && this.stepExecutionRuntime.tryEnterDelay(fixedDelayStr)) {
+      this.workflowLogger.logDebug(`Delaying retry for ${fixedDelayStr}.`);
+      return;
+    }
+
+    if (!fixedDelayStr) {
+      const delayMs = computeRetryDelayMs(config, retryState.attempt);
+      if (
+        delayMs > 0 &&
+        this.stepExecutionRuntime.tryEnterWaitUntil(new Date(Date.now() + delayMs))
+      ) {
+        this.workflowLogger.logDebug(
+          `Delaying retry for ${delayMs}ms (attempt ${retryState.attempt + 1}).`
+        );
+        return;
+      }
+    }
+
     const attempt = retryState.attempt + 1;
     this.workflowLogger.logDebug(`Retrying "${this.node.stepId}" step. (attempt ${attempt}).`);
     this.stepExecutionRuntime.setCurrentStepState({ ...retryState, attempt });

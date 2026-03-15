@@ -36,9 +36,11 @@ export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, Monitor
 
     if (currentStepDuration > timeoutMs) {
       monitoredContext.abortController.abort();
-      throw new Error(
+      const error = new Error(
         `TimeoutError: Step execution exceeded the configured timeout of ${this.node.timeout}.`
       );
+      error.name = 'TimeoutError';
+      throw error;
     }
   }
 }
