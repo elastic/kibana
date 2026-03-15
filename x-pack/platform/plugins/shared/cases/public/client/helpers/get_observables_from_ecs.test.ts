@@ -209,4 +209,121 @@ describe('getObservablesFromEcsDataArray', () => {
       },
     ]);
   });
+
+  it('should extract user.name as user observable', () => {
+    const result = getObservablesFromEcs([[{ field: 'user.name', value: ['admin'] }]]);
+    expect(result).toEqual([
+      {
+        typeKey: 'observable-type-user',
+        value: 'admin',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should extract user.email as email observable', () => {
+    const result = getObservablesFromEcs([[{ field: 'user.email', value: ['test@example.com'] }]]);
+    expect(result).toEqual([
+      {
+        typeKey: 'observable-type-email',
+        value: 'test@example.com',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should extract process.name as process observable', () => {
+    const result = getObservablesFromEcs([[{ field: 'process.name', value: ['svchost.exe'] }]]);
+    expect(result).toEqual([
+      {
+        typeKey: 'observable-type-process',
+        value: 'svchost.exe',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should extract process.executable as process observable', () => {
+    const result = getObservablesFromEcs([
+      [{ field: 'process.executable', value: ['C:\\Windows\\System32\\cmd.exe'] }],
+    ]);
+    expect(result).toEqual([
+      {
+        typeKey: 'observable-type-process',
+        value: 'C:\\Windows\\System32\\cmd.exe',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should extract url.full as URL observable', () => {
+    const result = getObservablesFromEcs([
+      [{ field: 'url.full', value: ['https://example.com/payload'] }],
+    ]);
+    expect(result).toEqual([
+      {
+        typeKey: 'observable-type-url',
+        value: 'https://example.com/payload',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should extract url.original as URL observable', () => {
+    const result = getObservablesFromEcs([
+      [{ field: 'url.original', value: ['http://evil.test'] }],
+    ]);
+    expect(result).toEqual([
+      {
+        typeKey: 'observable-type-url',
+        value: 'http://evil.test',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should extract registry.path as registry observable', () => {
+    const result = getObservablesFromEcs([
+      [{ field: 'registry.path', value: ['HKLM\\Software\\Evil'] }],
+    ]);
+    expect(result).toEqual([
+      {
+        typeKey: 'observable-type-registry',
+        value: 'HKLM\\Software\\Evil',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should extract service.name as service observable', () => {
+    const result = getObservablesFromEcs([[{ field: 'service.name', value: ['malicious-svc'] }]]);
+    expect(result).toEqual([
+      {
+        typeKey: 'observable-type-service',
+        value: 'malicious-svc',
+        description: 'Auto extracted observable',
+      },
+    ]);
+  });
+
+  it('should deduplicate process.name and process.executable with same value', () => {
+    const result = getObservablesFromEcs([
+      [
+        { field: 'process.name', value: ['cmd.exe'] },
+        { field: 'process.executable', value: ['cmd.exe'] },
+      ],
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].value).toBe('cmd.exe');
+  });
+
+  it('should deduplicate url.full and url.original with same value', () => {
+    const result = getObservablesFromEcs([
+      [
+        { field: 'url.full', value: ['https://example.com'] },
+        { field: 'url.original', value: ['https://example.com'] },
+      ],
+    ]);
+    expect(result).toHaveLength(1);
+  });
 });
