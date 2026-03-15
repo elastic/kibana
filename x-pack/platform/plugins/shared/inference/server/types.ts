@@ -173,8 +173,11 @@ export interface InferenceServerStart {
    * (`getScopedClient(request).getCurrentNamespace() ?? 'default'`), never from
    * user-controlled input. This function uses elevated (internal) ES privileges;
    * all tenant isolation relies on the namespace matching the document's stored namespace.
-   * A `ReplacementsNamespaceMismatchError` is thrown — and must not be caught — when
-   * the namespace does not match, to prevent cross-space reads.
+   * A `ReplacementsNamespaceMismatchError` is thrown when the namespace does not match,
+   * to prevent cross-space reads. Unlike transient errors (which are logged and return the
+   * original text), this error propagates to the caller. Callers must not swallow it in a
+   * way that returns wrong-namespace decrypted content; falling back to a safe default
+   * (e.g. an existing title, or the original tokenized text) is acceptable.
    */
   deanonymizeText: (namespace: string, replacementsId: string, text: string) => Promise<string>;
 

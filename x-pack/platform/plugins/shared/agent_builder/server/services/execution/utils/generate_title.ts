@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import { defer, shareReplay } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
+import type { Logger } from '@kbn/logging';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { Conversation, ConversationRound, ConverseInput } from '@kbn/agent-builder-common';
@@ -24,6 +25,7 @@ export const generateTitle = ({
   anonymizationEnabled,
   deanonymizeTitle,
   abortSignal,
+  logger,
 }: {
   nextInput: ConverseInput;
   conversation: Conversation;
@@ -31,6 +33,7 @@ export const generateTitle = ({
   anonymizationEnabled: boolean;
   deanonymizeTitle?: (title: string) => Promise<string>;
   abortSignal?: AbortSignal;
+  logger: Logger;
 }): Observable<string> => {
   return defer(async () => {
     try {
@@ -43,6 +46,11 @@ export const generateTitle = ({
         abortSignal,
       });
     } catch (e) {
+      logger.warn(
+        `[agent_builder.generateTitle] Failed to generate title, falling back to default: ${
+          e instanceof Error ? e.message : String(e)
+        }`
+      );
       return conversation.title;
     }
   }).pipe(shareReplay());
