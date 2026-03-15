@@ -69,6 +69,7 @@ interface UseIlmLifecycleSummaryResult {
   onAddIlmPhase?: (phase: PhaseName) => void;
   isEditLifecycleFlyoutOpen: boolean;
   hasUnsavedEditLifecycleFlyoutChanges: boolean;
+  flyoutInvalidPhases: PhaseName[];
 }
 
 export const useIlmLifecycleSummary = ({
@@ -542,10 +543,19 @@ export const useIlmLifecycleSummary = ({
 
       {uiState.isEditLifecycleFlyoutOpen && uiState.editFlyoutInitialPhases && (
         <EditIlmPhasesFlyout
-          initialPhases={uiState.editFlyoutInitialPhases}
+          initialPhases={uiState.previewPhases ?? uiState.editFlyoutInitialPhases}
           selectedPhase={uiState.editingPhase}
           setSelectedPhase={(phase) => dispatchUi({ type: 'setEditingPhase', payload: phase })}
-          onChange={(next) => dispatchUi({ type: 'setPreviewPhases', payload: next })}
+          onChange={(next, meta) => {
+            const currentPreview = uiState.previewPhases ?? uiState.editFlyoutInitialPhases;
+            if (!isEqual(next, currentPreview)) {
+              dispatchUi({ type: 'setPreviewPhases', payload: next });
+            }
+            dispatchUi({
+              type: 'setFlyoutInvalidPhases',
+              payload: meta.invalidPhases,
+            });
+          }}
           onSave={handleFlyoutSave}
           onClose={closeEditFlyout}
           isSaving={uiState.isSavingEditFlyout}
@@ -584,5 +594,6 @@ export const useIlmLifecycleSummary = ({
     onAddIlmPhase: isIlm ? handleAddIlmPhase : undefined,
     isEditLifecycleFlyoutOpen: uiState.isEditLifecycleFlyoutOpen,
     hasUnsavedEditLifecycleFlyoutChanges,
+    flyoutInvalidPhases: uiState.flyoutInvalidPhases,
   };
 };

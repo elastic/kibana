@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { mapValues } from 'lodash';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { AggregatedPrebuiltRuleError, DiffableAllFields, ThreeWayDiffConflict } from '../model';

@@ -332,7 +332,12 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       async clickPanelLink(navId: string) {
         // TODO: properly distinguish between panel link and main nav link
         // https://github.com/elastic/kibana/issues/236242
-        await testSubjects.click(`~nav-item-id-${navId}`);
+        await retry.try(async () => {
+          const link = await testSubjects.find(`~nav-item-id-${navId}`, 2500);
+          await link.scrollIntoViewIfNecessary();
+          await link.moveMouseTo();
+          await link.click();
+        });
       },
 
       async expectPanelExists(sectionId: NavigationId) {

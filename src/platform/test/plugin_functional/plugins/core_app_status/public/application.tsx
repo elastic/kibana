@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   EuiPage,
@@ -48,12 +48,12 @@ export const renderApp = async (
   { element }: AppMountParameters,
   core: CoreStart
 ) => {
-  render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <AppStatusApp appId={appId} />
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };

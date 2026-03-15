@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PhaseName } from '@kbn/streams-schema';
 import {
   getFieldValidityAndErrorMessage,
+  type FieldHook,
   UseField,
   useFormContext,
   useFormData,
@@ -27,6 +28,132 @@ export interface MinAgeFieldProps {
   dataTestSubj: string;
   timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
 }
+
+const MinAgeFieldControl = ({
+  phaseName,
+  dataTestSubj,
+  timeUnitOptions,
+  fieldLabel,
+  fieldAriaLabel,
+  minAgeValueField,
+  minAgeUnitField,
+  minAgeMillisField,
+}: {
+  phaseName: Exclude<PhaseName, 'hot'>;
+  dataTestSubj: string;
+  timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
+  fieldLabel: string;
+  fieldAriaLabel: string;
+  minAgeValueField: FieldHook<string>;
+  minAgeUnitField: FieldHook<PreservedTimeUnit>;
+  minAgeMillisField: FieldHook<number>;
+}) => {
+  const form = useFormContext();
+
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(minAgeValueField);
+
+  const committedValue = String(minAgeValueField.value ?? '');
+  const currentUnit = String(minAgeUnitField.value ?? 'd') as PreservedTimeUnit;
+
+  const isEditingRef = useRef(false);
+  const [draftValue, setDraftValue] = useState<string>(committedValue);
+
+  useEffect(() => {
+    if (isEditingRef.current) return;
+    setDraftValue(committedValue);
+  }, [committedValue]);
+
+  const getPhaseMinAgeMs = (phase: 'warm' | 'cold' | 'frozen' | 'delete'): number | null =>
+    getPhaseDurationMs(form, phase, {
+      valuePathSuffix: 'minAgeValue',
+      unitPathSuffix: 'minAgeUnit',
+    });
+
+  const minAgePhases = ['warm', 'cold', 'frozen', 'delete'] as const;
+  type MinAgePhase = (typeof minAgePhases)[number];
+  const { lowerBoundMs, upperBoundMs } = getRelativeBoundsInMs(
+    minAgePhases,
+    phaseName as MinAgePhase,
+    getPhaseMinAgeMs
+  );
+
+  const { min, max } = getBoundsHelpTextValues({
+    lowerBoundMs,
+    upperBoundMs,
+    unit: currentUnit,
+  });
+
+  const helpText =
+    upperBoundMs === undefined
+      ? i18n.translate('xpack.streams.editIlmPhasesFlyout.minAgeHelpLowerBound', {
+          defaultMessage: 'Must be larger than {min} based on current configuration.',
+          values: { min },
+        })
+      : i18n.translate('xpack.streams.editIlmPhasesFlyout.minAgeHelpRange', {
+          defaultMessage:
+            'Must be larger than {min} and smaller than {max} based on current configuration.',
+          values: {
+            min,
+            max,
+          },
+        });
+
+  return (
+    <EuiFormRow label={fieldLabel} helpText={helpText} isInvalid={isInvalid} error={errorMessage}>
+      <EuiFlexGroup gutterSize="s" responsive={false}>
+        <EuiFlexItem>
+          <EuiFieldNumber
+            compressed
+            min={0}
+            fullWidth
+            aria-label={fieldAriaLabel}
+            value={draftValue}
+            isInvalid={isInvalid}
+            data-test-subj={`${dataTestSubj}MoveAfterValue`}
+            onChange={(e) => {
+              isEditingRef.current = true;
+              const nextValue = e.target.value;
+              setDraftValue(nextValue);
+            }}
+            onBlur={() => {
+              isEditingRef.current = false;
+              const nextValue = draftValue.trim();
+              if (nextValue === '') {
+                setDraftValue(committedValue);
+                return;
+              }
+
+              // Commit only on blur.
+              if (nextValue !== committedValue.trim()) {
+                minAgeValueField.setValue(nextValue);
+                minAgeMillisField.setValue(toMilliseconds(nextValue, currentUnit));
+              }
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSelect
+            compressed
+            fullWidth
+            aria-label={i18n.translate('xpack.streams.editIlmPhasesFlyout.moveAfterUnitAriaLabel', {
+              defaultMessage: 'Move data after unit',
+            })}
+            options={getUnitSelectOptions(timeUnitOptions, currentUnit)}
+            value={currentUnit}
+            data-test-subj={`${dataTestSubj}MoveAfterUnit`}
+            onChange={(e) => {
+              const nextUnit = e.target.value as PreservedTimeUnit;
+              minAgeUnitField.setValue(nextUnit);
+              const millis =
+                committedValue.trim() === '' ? -1 : toMilliseconds(committedValue, nextUnit);
+              minAgeMillisField.setValue(millis);
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+};
 
 export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAgeFieldProps) => {
   const form = useFormContext();
@@ -60,18 +187,12 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
   const minAgeUnitPath = `_meta.${phaseName}.minAgeUnit`;
   const minAgeMillisPath = `_meta.${phaseName}.minAgeToMilliSeconds`;
 
-  const getPhaseMinAgeMs = (phase: 'warm' | 'cold' | 'frozen' | 'delete'): number | null =>
-    getPhaseDurationMs(form, phase, {
-      valuePathSuffix: 'minAgeValue',
-      unitPathSuffix: 'minAgeUnit',
-    });
-
   const fieldLabel = isDeletePhase
     ? i18n.translate('xpack.streams.editIlmPhasesFlyout.deleteAfterLabel', {
         defaultMessage: 'Delete after data stored',
       })
     : i18n.translate('xpack.streams.editIlmPhasesFlyout.moveAfterLabel', {
-        defaultMessage: 'Move after data stored',
+        defaultMessage: 'Move data after',
       });
 
   const fieldAriaLabel = isDeletePhase
@@ -79,7 +200,7 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
         defaultMessage: 'Delete after value',
       })
     : i18n.translate('xpack.streams.editIlmPhasesFlyout.moveAfterAriaLabel', {
-        defaultMessage: 'Move after value',
+        defaultMessage: 'Move data after value',
       });
 
   return (
@@ -91,99 +212,18 @@ export const MinAgeField = ({ phaseName, dataTestSubj, timeUnitOptions }: MinAge
         <UseField path={minAgeUnitPath}>
           {(minAgeUnitField) => (
             <UseField path={minAgeMillisPath}>
-              {(minAgeMillisField) => {
-                const { isInvalid, errorMessage } =
-                  getFieldValidityAndErrorMessage(minAgeValueField);
-
-                const currentValue = String(minAgeValueField.value ?? '');
-                const currentUnit = String(minAgeUnitField.value ?? 'd') as PreservedTimeUnit;
-
-                const unitOptions = getUnitSelectOptions(timeUnitOptions, currentUnit);
-
-                const minAgePhases = ['warm', 'cold', 'frozen', 'delete'] as const;
-                type MinAgePhase = (typeof minAgePhases)[number];
-                const { lowerBoundMs, upperBoundMs } = getRelativeBoundsInMs(
-                  minAgePhases,
-                  phaseName as MinAgePhase,
-                  getPhaseMinAgeMs
-                );
-                const { min, max } = getBoundsHelpTextValues({
-                  lowerBoundMs,
-                  upperBoundMs,
-                  unit: currentUnit,
-                });
-
-                const helpText =
-                  upperBoundMs === undefined
-                    ? i18n.translate('xpack.streams.editIlmPhasesFlyout.minAgeHelpLowerBound', {
-                        defaultMessage: 'Must be larger than {min} based on current configuration.',
-                        values: { min },
-                      })
-                    : i18n.translate('xpack.streams.editIlmPhasesFlyout.minAgeHelpRange', {
-                        defaultMessage:
-                          'Must be larger than {min} and smaller than {max} based on current configuration.',
-                        values: {
-                          min,
-                          max,
-                        },
-                      });
-
-                return (
-                  <EuiFormRow
-                    label={fieldLabel}
-                    helpText={isInvalid ? undefined : helpText}
-                    isInvalid={isInvalid}
-                    error={errorMessage}
-                  >
-                    <EuiFlexGroup gutterSize="s" responsive={false}>
-                      <EuiFlexItem>
-                        <EuiFieldNumber
-                          compressed
-                          min={0}
-                          fullWidth
-                          aria-label={fieldAriaLabel}
-                          value={currentValue}
-                          isInvalid={isInvalid}
-                          data-test-subj={`${dataTestSubj}MoveAfterValue`}
-                          onChange={(e) => {
-                            minAgeValueField.onChange(e);
-                            const nextValue = e.target.value;
-
-                            const millis =
-                              nextValue.trim() === '' ? -1 : toMilliseconds(nextValue, currentUnit);
-                            minAgeMillisField.setValue(millis);
-                          }}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiSelect
-                          compressed
-                          fullWidth
-                          aria-label={i18n.translate(
-                            'xpack.streams.editIlmPhasesFlyout.moveAfterUnitAriaLabel',
-                            {
-                              defaultMessage: 'Move after unit',
-                            }
-                          )}
-                          options={unitOptions}
-                          value={currentUnit}
-                          data-test-subj={`${dataTestSubj}MoveAfterUnit`}
-                          onChange={(e) => {
-                            const nextUnit = e.target.value as PreservedTimeUnit;
-                            minAgeUnitField.setValue(nextUnit);
-
-                            const millis =
-                              currentValue.trim() === ''
-                                ? -1
-                                : toMilliseconds(currentValue, nextUnit);
-                            minAgeMillisField.setValue(millis);
-                          }}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFormRow>
-                );
-              }}
+              {(minAgeMillisField) => (
+                <MinAgeFieldControl
+                  phaseName={phaseName}
+                  dataTestSubj={dataTestSubj}
+                  timeUnitOptions={timeUnitOptions}
+                  fieldLabel={fieldLabel}
+                  fieldAriaLabel={fieldAriaLabel}
+                  minAgeValueField={minAgeValueField as FieldHook<string>}
+                  minAgeUnitField={minAgeUnitField as FieldHook<PreservedTimeUnit>}
+                  minAgeMillisField={minAgeMillisField as FieldHook<number>}
+                />
+              )}
             </UseField>
           )}
         </UseField>
