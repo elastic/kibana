@@ -7,8 +7,24 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
-.buildkite/scripts/setup_es_snapshot_cache.sh
+
+# Run distribution download and ES snapshot cache setup in parallel.
+# These steps are independent of each other and together take 30-60s sequentially.
+.buildkite/scripts/download_build_artifacts.sh &
+DOWNLOAD_PID=$!
+
+.buildkite/scripts/setup_es_snapshot_cache.sh &
+ES_CACHE_PID=$!
+
+# Wait for both to complete; fail if either fails
+PARALLEL_EXIT=0
+wait $DOWNLOAD_PID || PARALLEL_EXIT=$?
+wait $ES_CACHE_PID || PARALLEL_EXIT=$?
+
+if [[ "$PARALLEL_EXIT" != "0" ]]; then
+  echo "One or more parallel setup steps failed (exit code: $PARALLEL_EXIT)"
+  exit $PARALLEL_EXIT
+fi
 
 is_test_execution_step
 
