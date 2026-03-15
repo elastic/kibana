@@ -1371,11 +1371,9 @@ function getVisualizationInfo(
         });
 
         if (!layer.collapseFn) {
-          palette.push(
-            ...paletteService
-              .get(getLayerPaletteName(layer))
-              .getCategoricalColors(10, layer.palette?.params)
-          );
+          const paletteDefinition =
+            paletteService.get(getLayerPaletteName(layer)) ?? paletteService.get('default');
+          palette.push(...paletteDefinition.getCategoricalColors(10, layer.palette?.params));
         }
       }
     }

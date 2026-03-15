@@ -278,5 +278,45 @@ describe('color_assignment', () => {
       expect(paletteService.get).toHaveBeenCalledWith(KbnPalette.ElasticLineOptimized);
       expect(getCategoricalColor).toHaveBeenCalled();
     });
+
+    it('should fallback to default palette when colorMapping.paletteId is unsupported', () => {
+      const layerWithUnsupportedPalette: XYDataLayerConfig = {
+        ...layers[0],
+        splitAccessors: undefined,
+        colorMapping: {
+          ...DEFAULT_COLOR_MAPPING_CONFIG,
+          paletteId: 'eui_amsterdam_color_blind',
+        },
+      };
+      const assignments = getColorAssignments([layerWithUnsupportedPalette], data, formatFactory);
+      const defaultGetCategoricalColor = jest.fn(() => '#54b399');
+      const paletteService = {
+        get: jest.fn((name: string) => {
+          if (name === 'default') {
+            return { getCategoricalColor: defaultGetCategoricalColor };
+          }
+          return undefined;
+        }),
+      };
+
+      const assigned = getAssignedColorConfig(
+        layerWithUnsupportedPalette,
+        'y1',
+        assignments,
+        {
+          datasourceLayers: {
+            [layerWithUnsupportedPalette.layerId]: {
+              getOperationForColumnId: () => undefined,
+            },
+          },
+        } as never,
+        paletteService as never
+      );
+
+      expect(assigned.color).toEqual('#54b399');
+      expect(paletteService.get).toHaveBeenCalledWith('eui_amsterdam_color_blind');
+      expect(paletteService.get).toHaveBeenCalledWith('default');
+      expect(defaultGetCategoricalColor).toHaveBeenCalled();
+    });
   });
 });

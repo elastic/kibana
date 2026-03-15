@@ -33,6 +33,9 @@ export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 export const getLayerPaletteName = (layer: XYDataLayerConfig): string =>
   layer.colorMapping?.paletteId ?? layer.palette?.name ?? 'default';
 
+const getPaletteDefinition = (paletteService: PaletteRegistry, paletteName: string) =>
+  paletteService.get(paletteName) ?? paletteService.get('default');
+
 export type ColorAssignments = Record<
   string,
   {
@@ -156,7 +159,7 @@ export function getAssignedColorConfig(
   );
   const assignedColor =
     totalSeriesCount != null
-      ? paletteService.get(currentPaletteName).getCategoricalColor(
+      ? getPaletteDefinition(paletteService, currentPaletteName).getCategoricalColor(
           [
             {
               name: columnToLabel[accessor] || accessor,
