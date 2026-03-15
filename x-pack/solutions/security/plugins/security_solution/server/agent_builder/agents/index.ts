@@ -9,6 +9,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
+import { createPciComplianceAgent } from './pci_compliance_agent';
 import { createThreatHuntingAgent } from './threat_hunting_agent';
 
 /**
@@ -20,4 +21,5 @@ export const registerAgents = async (
   logger: Logger
 ) => {
   agentBuilder.agents.register(createThreatHuntingAgent(core, logger));
+  agentBuilder.agents.register(createPciComplianceAgent(core, logger));
 };

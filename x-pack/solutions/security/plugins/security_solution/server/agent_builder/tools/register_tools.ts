@@ -13,6 +13,9 @@ import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { entityRiskScoreTool } from './entity_risk_score_tool';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
+import { pciComplianceCheckTool } from './pci_compliance_check_tool';
+import { pciComplianceReportTool } from './pci_compliance_report_tool';
+import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -29,4 +32,7 @@ export const registerTools = async (
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
+  agentBuilder.tools.register(pciScopeDiscoveryTool(core, logger));
+  agentBuilder.tools.register(pciComplianceCheckTool(core, logger));
+  agentBuilder.tools.register(pciComplianceReportTool(core, logger));
 };
