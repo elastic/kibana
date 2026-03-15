@@ -37,7 +37,6 @@ import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/in
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
-import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
 import type {
   PublishesWritableSavedSearch,
   SearchEmbeddableSerializedAttributes,
@@ -129,8 +128,6 @@ export const initializeSearchEmbeddableApi = async ({
   );
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);
-
-  const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
 
   /** This is the state that can be initialized from the saved initial state */
   const columns$ = new BehaviorSubject<string[] | undefined>(initialState.columns);
@@ -296,17 +293,16 @@ export const initializeSearchEmbeddableApi = async ({
     stateManager,
     anyStateChange$: onAnyStateChange.pipe(map(() => undefined)),
     comparators: {
-      sort: (a, b) => deepEqual(a ?? [], b ?? []),
-      columns: 'deepEquality',
-      grid: (a, b) => deepEqual(a ?? {}, b ?? {}),
-      sampleSize: (a, b) => (a ?? defaults.sampleSize) === (b ?? defaults.sampleSize),
-      rowsPerPage: (a, b) => (a ?? defaults.rowsPerPage) === (b ?? defaults.rowsPerPage),
-      rowHeight: (a, b) => (a ?? defaults.rowHeight) === (b ?? defaults.rowHeight),
-      headerRowHeight: (a, b) =>
-        (a ?? defaults.headerRowHeight) === (b ?? defaults.headerRowHeight),
+      sort: 'skip',
+      columns: 'skip',
+      grid: 'skip',
+      sampleSize: 'skip',
+      rowsPerPage: 'skip',
+      rowHeight: 'skip',
+      headerRowHeight: 'skip',
       serializedSearchSource: 'referenceEquality',
       viewMode: 'referenceEquality',
-      density: 'referenceEquality',
+      density: 'skip',
     },
     reinitializeState,
   };

@@ -125,7 +125,7 @@ describe('Serialization utils', () => {
 
       const serializedState: SearchEmbeddableState = {
         title: 'test panel title',
-        sort: [['order_date', 'asc']], // overwrite the saved object sort
+        sort: [['order_date', 'asc']], // dashboard override — should be ignored
         savedObjectId: 'savedSearch',
       };
 
@@ -136,8 +136,8 @@ describe('Serialization utils', () => {
       expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
       expect(Object.keys(deserializedState)).toContain('savedObjectId');
       expect(deserializedState.title).toEqual('test panel title');
-      // For a valid/default tab, dashboard overrides win on top of resolved tab attributes
-      expect(deserializedState.sort).toEqual([['order_date', 'asc']]);
+      // Dashboard overrides are dropped; sort comes from tab-1
+      expect(deserializedState.sort).toEqual([['order_date', 'desc']]);
       expect(deserializedState.columns).toEqual(['_source']); // from tab-1
       expect(deserializedState.selectedTabId).toEqual('tab-1');
       expect(deserializedState.tabs).toEqual(sessionTabs);
@@ -204,7 +204,7 @@ describe('Serialization utils', () => {
       expect(deserializedState.sort).toBeUndefined();
     });
 
-    test('by reference - valid selectedTabId with dashboard overrides', async () => {
+    test('by reference - valid selectedTabId with dashboard overrides dropped', async () => {
       const sessionTabs = [
         mockTab('tab-1', 'Tab 1'),
         mockTab('tab-2', 'Tab 2', {
@@ -220,7 +220,7 @@ describe('Serialization utils', () => {
         title: 'test panel title',
         savedObjectId: 'savedSearch',
         selectedTabId: 'tab-2',
-        // Dashboard override for columns on top of tab-2
+        // Dashboard overrides — should be ignored
         columns: ['custom-col'],
       };
 
@@ -228,8 +228,8 @@ describe('Serialization utils', () => {
         serializedState,
         discoverServices: discoverServiceMock,
       });
-      // For a valid tab, dashboard overrides should win on top of tab-2 attributes
-      expect(deserializedState.columns).toEqual(['custom-col']);
+      // Dashboard overrides are dropped; attributes come from tab-2
+      expect(deserializedState.columns).toEqual(['col-a', 'col-b']);
       expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
     });
   });
@@ -303,7 +303,7 @@ describe('Serialization utils', () => {
         });
       });
 
-      test('overwrite state', () => {
+      test('overwrite state is no longer persisted', () => {
         const serializedState = serializeState({
           uuid,
           initialState: {
@@ -318,8 +318,6 @@ describe('Serialization utils', () => {
         });
 
         expect(serializedState).toEqual({
-          sampleSize: 500,
-          sort: [['order_date', 'asc']],
           savedObjectId: 'test-id',
           selectedTabId: 'tab-1',
         });

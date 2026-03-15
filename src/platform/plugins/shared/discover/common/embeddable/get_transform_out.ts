@@ -20,6 +20,7 @@ import type {
   StoredSearchEmbeddableState,
 } from './types';
 import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './get_transform_in';
+import { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 function isByValue(
   state: StoredSearchEmbeddableState
@@ -78,7 +79,7 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
       (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
     );
     return {
-      ...state,
+      ...omit(state, EDITABLE_SAVED_SEARCH_KEYS),
       ...(savedObjectRef?.id ? { savedObjectId: savedObjectRef.id } : {}),
     } as SearchEmbeddableByReferenceState;
   }
