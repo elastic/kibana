@@ -37,8 +37,7 @@ export const LlmCoherenceEvaluationPrompt = createPrompt({
           properties: {
             topic_consistency: {
               type: 'number',
-              description:
-                'Score from 0 to 1 indicating how well the conversation stays on topic.',
+              description: 'Score from 0 to 1 indicating how well the conversation stays on topic.',
             },
             context_retention: {
               type: 'number',

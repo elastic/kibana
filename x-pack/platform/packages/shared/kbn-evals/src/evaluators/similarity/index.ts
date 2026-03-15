@@ -129,8 +129,12 @@ export function createSimilarityEvaluator(config?: { threshold?: number }): Eval
         explanation: [
           `Cosine similarity: ${score.toFixed(3)}`,
           `Threshold: ${threshold}`,
-          `Matching terms (${matchingTerms.length}): ${matchingTerms.slice(0, 10).join(', ')}${matchingTerms.length > 10 ? '...' : ''}`,
-          `Missing terms (${missingTerms.length}): ${missingTerms.slice(0, 10).join(', ')}${missingTerms.length > 10 ? '...' : ''}`,
+          `Matching terms (${matchingTerms.length}): ${matchingTerms.slice(0, 10).join(', ')}${
+            matchingTerms.length > 10 ? '...' : ''
+          }`,
+          `Missing terms (${missingTerms.length}): ${missingTerms.slice(0, 10).join(', ')}${
+            missingTerms.length > 10 ? '...' : ''
+          }`,
         ].join('. '),
         metadata: {
           similarity: score,

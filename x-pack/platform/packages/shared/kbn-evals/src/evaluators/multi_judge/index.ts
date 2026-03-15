@@ -78,7 +78,9 @@ export function createMultiJudgeEvaluator(config: {
       return {
         score: aggregatedScore,
         label: `${strategy}(${scores.length} judges)`,
-        explanation: `Aggregated via ${strategy}: ${aggregatedScore.toFixed(3)}. Individual scores — ${explanation}`,
+        explanation: `Aggregated via ${strategy}: ${aggregatedScore.toFixed(
+          3
+        )}. Individual scores — ${explanation}`,
         metadata: {
           strategy,
           judgeCount: judges.length,
