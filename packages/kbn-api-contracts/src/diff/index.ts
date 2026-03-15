@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { loadOas } from './src/input/load_oas';
-export { runOasdiff, parseOasdiff, applyAllowlist } from './src/diff';
-export type { OasdiffEntry, BreakingChange, FilterResult } from './src/diff';
-export { formatFailure } from './src/report/format_failure';
-export { ESCALATION_LINK } from './src/report/links';
-export { loadAllowlist } from './src/allowlist/load_allowlist';
-export { checkTerraformImpact } from './src/terraform/check_terraform_impact';
+export { runOasdiff } from './run_oasdiff';
+export { parseOasdiff } from './parse_oasdiff';
+export type { OasdiffEntry } from './parse_oasdiff';
+export { applyAllowlist } from './breaking_rules';
+export type { BreakingChange, FilterResult } from './breaking_rules';
