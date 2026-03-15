@@ -115,6 +115,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/fs'
   - '@kbn/anonymization-ui'
+  - '@kbn/anonymization-common'
 tags:
   - plugin
   - prod
