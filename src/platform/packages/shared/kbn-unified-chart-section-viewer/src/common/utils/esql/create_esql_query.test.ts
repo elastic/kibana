@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { MetricField } from '../../../types';
-import { createESQLQuery } from './create_esql_query';
+import { createESQLQuery, createM4DownsampledESQLQuery } from './create_esql_query';
+import { M4_VALUE_COLUMN } from './create_aggregation';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 const mockMetric: MetricField = {
@@ -377,5 +378,35 @@ TS metrics-*
 `.trim()
       );
     });
+  });
+});
+
+describe('createM4DownsampledESQLQuery', () => {
+  it('should generate a two-stage pipeline: AVG aggregation followed by M4 downsampling', () => {
+    const query = createM4DownsampledESQLQuery({
+      metric: mockMetric,
+      sourceBuckets: 1000,
+      targetBuckets: 100,
+    });
+
+    // Stage 1: standard aggregation with fine-grained buckets
+    expect(query).toContain('FROM metrics-*');
+    expect(query).toContain('STATS agg_val = AVG(cpu.usage) BY _ts = BUCKET(@timestamp, 1000');
+
+    // Stage 2: M4 downsamples the intermediate result
+    const firstStats = query.indexOf('STATS agg_val');
+    const secondStats = query.indexOf('STATS', firstStats + 1);
+    expect(secondStats).toBeGreaterThan(firstStats);
+    expect(query).toContain('first_t = MIN(_ts)');
+    expect(query).toContain('first_t_v = TOP(_ts, 1, "asc", agg_val)');
+    expect(query).toContain('min_v = MIN(agg_val)');
+
+    // MV_EXPAND unrolls the 4 M4 values per bucket into flat rows
+    expect(query).toContain('MV_EXPAND idx');
+
+    // Final output: flat (@timestamp, value) table for Lens
+    expect(query).toContain(`KEEP @timestamp, ${M4_VALUE_COLUMN}`);
+    expect(query).toContain('SORT @timestamp ASC');
+    expect(query).toContain('LIMIT 400');
   });
 });

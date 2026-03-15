@@ -12,6 +12,9 @@ import {
   replaceFunctionParams,
   getAggregationTemplate,
   createTimeBucketAggregation,
+  createM4Pipeline,
+  M4_VALUE_COLUMN,
+  M4_TIMESTAMP_COLUMN,
 } from './create_aggregation';
 
 describe('replaceFunctionParams', () => {
@@ -107,5 +110,40 @@ describe('createTimeBucketAggregation', () => {
       timestampField: '@timestamp',
     });
     expect(result).toBe('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+  });
+});
+
+describe('createM4Pipeline', () => {
+  it('should keep 4 representative points per bucket (first, last, min, max) with their timestamps', () => {
+    const result = createM4Pipeline({ metricField: '`cpu.usage`' });
+
+    // M4 aggregates: first/last timestamp and their values, min/max values and their timestamps
+    expect(result).toContain('first_t = MIN(@timestamp)');
+    expect(result).toContain('last_t = MAX(@timestamp)');
+    expect(result).toContain('first_t_v = TOP(@timestamp, 1, "asc", `cpu.usage`)');
+    expect(result).toContain('last_t_v = TOP(@timestamp, 1, "desc", `cpu.usage`)');
+    expect(result).toContain('min_v = MIN(`cpu.usage`)');
+    expect(result).toContain('max_v = MAX(`cpu.usage`)');
+    expect(result).toContain('BY _m4_bucket = BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+  });
+
+  it('should unroll the 4 values per bucket into flat rows via MV_EXPAND for Lens compatibility', () => {
+    const result = createM4Pipeline({ metricField: '`cpu.usage`' });
+
+    expect(result).toContain('EVAL idx = [0, 1, 2, 3]');
+    expect(result).toContain('MV_EXPAND idx');
+    expect(result).toContain(
+      '@timestamp = CASE(idx == 0, first_t, idx == 1, last_t, idx == 2, min_v_t, idx == 3, max_v_t)'
+    );
+    expect(result).toContain(`KEEP @timestamp, ${M4_VALUE_COLUMN}`);
+    expect(result).toContain('SORT @timestamp ASC');
+    expect(result).toContain('LIMIT 400');
+  });
+});
+
+describe('M4 constants', () => {
+  it('should export the expected column names', () => {
+    expect(M4_VALUE_COLUMN).toBe('value');
+    expect(M4_TIMESTAMP_COLUMN).toBe('@timestamp');
   });
 });
