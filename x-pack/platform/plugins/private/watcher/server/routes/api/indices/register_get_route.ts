@@ -73,7 +73,12 @@ async function getIndices(dataClient: IScopedClusterClient, pattern: string, lim
   return indices.buckets ? indices.buckets.map((bucket) => bucket.key) : [];
 }
 
-export function registerGetRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
+export function registerGetRoute({
+  router,
+  license,
+  lib: { handleEsError },
+  getStartServices,
+}: RouteDependencies) {
   router.post(
     {
       path: '/api/watcher/indices',
@@ -87,11 +92,12 @@ export function registerGetRoute({ router, license, lib: { handleEsError } }: Ro
         body: bodySchema,
       },
     },
-    license.guardApiRoute(async (ctx, request, response) => {
+    license.guardApiRoute(async (_ctx, request, response) => {
       const { pattern } = request.body;
 
       try {
-        const esClient = (await ctx.core).elasticsearch.client;
+        const [{ elasticsearch }] = await getStartServices();
+        const esClient = elasticsearch.client.asScoped(request, { projectRouting: 'space' });
         const indices = await getIndices(esClient, pattern);
         return response.ok({ body: { indices } });
       } catch (e) {

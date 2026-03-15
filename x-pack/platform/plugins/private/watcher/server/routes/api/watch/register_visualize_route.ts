@@ -38,6 +38,7 @@ export function registerVisualizeRoute({
   license,
   lib: { handleEsError },
   kibanaVersion,
+  getStartServices,
 }: RouteDependencies) {
   router.post(
     {
@@ -52,13 +53,14 @@ export function registerVisualizeRoute({
         body: bodySchema,
       },
     },
-    license.guardApiRoute(async (ctx, request, response) => {
+    license.guardApiRoute(async (_ctx, request, response) => {
       const watch = Watch.fromDownstreamJson(request.body.watch);
       const options = VisualizeOptions.fromDownstreamJson(request.body.options);
       const body = watch.getVisualizeQuery(options, kibanaVersion);
 
       try {
-        const esClient = (await ctx.core).elasticsearch.client;
+        const [{ elasticsearch }] = await getStartServices();
+        const esClient = elasticsearch.client.asScoped(request, { projectRouting: 'space' });
         const hits = await fetchVisualizeData(esClient, watch.index, body);
         const visualizeData = watch.formatVisualizeData(hits);
 

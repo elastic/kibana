@@ -31,6 +31,7 @@ export function registerListFieldsRoute({
   router,
   license,
   lib: { handleEsError },
+  getStartServices,
 }: RouteDependencies) {
   router.post(
     {
@@ -45,11 +46,12 @@ export function registerListFieldsRoute({
         body: bodySchema,
       },
     },
-    license.guardApiRoute(async (ctx, request, response) => {
+    license.guardApiRoute(async (_ctx, request, response) => {
       const { indexes } = request.body;
 
       try {
-        const esClient = (await ctx.core).elasticsearch.client;
+        const [{ elasticsearch }] = await getStartServices();
+        const esClient = elasticsearch.client.asScoped(request, { projectRouting: 'space' });
         const fieldsResponse = await fetchFields(esClient, indexes);
         const json = fieldsResponse.statusCode === 404 ? { fields: [] } : fieldsResponse.body;
         const fields = Fields.fromUpstreamJson(json);
