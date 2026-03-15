@@ -55,6 +55,8 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/response-ops-rules-apis'
   - '@kbn/core-test-helpers-model-versions'
+  - '@kbn/rule-data-utils'
+  - '@kbn/alerts-as-data-utils'
 tags:
   - plugin
   - prod
