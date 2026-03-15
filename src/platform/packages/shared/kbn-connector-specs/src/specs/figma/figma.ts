@@ -27,6 +27,7 @@ export const FigmaConnector: ConnectorSpec = {
         'Browse Figma design files, inspect structure, render images, and explore team projects',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows'],
   },
 

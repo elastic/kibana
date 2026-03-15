@@ -40,6 +40,7 @@ export const SharepointOnline: ConnectorSpec = {
       defaultMessage: 'Kibana Stack Connector for SharePoint Online.',
     }),
     minimumLicense: 'enterprise',
+    isTechnicalPreview: true,
     supportedFeatureIds: ['workflows'],
   },
 
