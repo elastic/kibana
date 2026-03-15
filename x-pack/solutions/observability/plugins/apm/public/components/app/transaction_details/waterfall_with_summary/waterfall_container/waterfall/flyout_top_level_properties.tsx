@@ -14,6 +14,7 @@ import {
   ENVIRONMENT_NOT_DEFINED,
   getNextEnvironmentUrlParam,
 } from '../../../../../../../common/environment_filter_values';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../../common/i18n';
 import { LatencyAggregationType } from '../../../../../../../common/latency_aggregation_types';
 import type { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
@@ -48,15 +49,20 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
     currentEnvironmentUrlParam: query?.environment ?? ENVIRONMENT_ALL.value,
   });
 
+  const serviceName = transaction.service?.name;
+  const agentName = transaction.agent?.name;
+  const transactionName = transaction.transaction?.name;
+  const transactionType = transaction.transaction?.type;
+
   const stickyProperties = [
     {
       label: i18n.translate('xpack.apm.transactionDetails.serviceLabel', {
         defaultMessage: 'Service',
       }),
       fieldName: SERVICE_NAME,
-      val: (
+      val: serviceName ? (
         <ServiceLink
-          agentName={transaction.agent.name}
+          agentName={agentName}
           query={{
             kuery: query.kuery,
             latencyAggregationType,
@@ -64,12 +70,14 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
             rangeFrom: query.rangeFrom,
             rangeTo: query.rangeTo,
             comparisonEnabled: query.comparisonEnabled,
-            transactionType: transaction.transaction.type,
+            transactionType,
             serviceGroup,
             environment: nextEnvironment,
           }}
-          serviceName={transaction.service.name}
+          serviceName={serviceName}
         />
+      ) : (
+        NOT_AVAILABLE_LABEL
       ),
       width: '25%',
     },
@@ -78,22 +86,25 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
         defaultMessage: 'Transaction',
       }),
       fieldName: TRANSACTION_NAME,
-      val: (
-        <TransactionDetailLink
-          transactionName={transaction.transaction.name}
-          href={link('/services/{serviceName}/transactions/view', {
-            path: { serviceName: transaction.service.name },
-            query: {
-              ...query,
-              serviceGroup,
-              latencyAggregationType,
-              transactionName: transaction.transaction.name,
-            },
-          })}
-        >
-          {transaction.transaction.name}
-        </TransactionDetailLink>
-      ),
+      val:
+        transactionName && serviceName ? (
+          <TransactionDetailLink
+            transactionName={transactionName}
+            href={link('/services/{serviceName}/transactions/view', {
+              path: { serviceName },
+              query: {
+                ...query,
+                serviceGroup,
+                latencyAggregationType,
+                transactionName,
+              },
+            })}
+          >
+            {transactionName}
+          </TransactionDetailLink>
+        ) : (
+          transactionName ?? NOT_AVAILABLE_LABEL
+        ),
       width: '25%',
     },
   ];

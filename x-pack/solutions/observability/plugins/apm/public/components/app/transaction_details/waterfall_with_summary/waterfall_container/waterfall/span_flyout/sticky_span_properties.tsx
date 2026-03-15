@@ -58,8 +58,12 @@ export function StickySpanProperties({ span, transaction }: Props) {
     currentEnvironmentUrlParam: environment,
   });
 
-  const spanName = span.span.name;
-  const dependencyName = span.span.destination?.service.resource;
+  const spanName = span.span?.name;
+  const dependencyName = span.span?.destination?.service.resource;
+
+  const transactionServiceName = transaction?.service?.name;
+  const transactionAgentName = transaction?.agent?.name;
+  const transactionName = transaction?.transaction?.name;
 
   const transactionStickyProperties = transaction
     ? [
@@ -68,16 +72,18 @@ export function StickySpanProperties({ span, transaction }: Props) {
             defaultMessage: 'Service',
           }),
           fieldName: SERVICE_NAME,
-          val: (
+          val: transactionServiceName ? (
             <ServiceLink
-              agentName={transaction.agent.name}
+              agentName={transactionAgentName}
               query={{
                 ...query,
                 serviceGroup,
                 environment: nextEnvironment,
               }}
-              serviceName={transaction.service.name}
+              serviceName={transactionServiceName}
             />
+          ) : (
+            NOT_AVAILABLE_LABEL
           ),
           width: '25%',
         },
@@ -86,23 +92,26 @@ export function StickySpanProperties({ span, transaction }: Props) {
             defaultMessage: 'Transaction',
           }),
           fieldName: TRANSACTION_NAME,
-          val: (
-            <TransactionDetailLink
-              transactionName={transaction.transaction.name}
-              href={router.link('/services/{serviceName}/transactions/view', {
-                path: { serviceName: transaction.service.name },
-                query: {
-                  ...query,
-                  environment: nextEnvironment,
-                  serviceGroup,
-                  latencyAggregationType,
-                  transactionName: transaction.transaction.name,
-                },
-              })}
-            >
-              {transaction.transaction.name}
-            </TransactionDetailLink>
-          ),
+          val:
+            transactionName && transactionServiceName ? (
+              <TransactionDetailLink
+                transactionName={transactionName}
+                href={router.link('/services/{serviceName}/transactions/view', {
+                  path: { serviceName: transactionServiceName },
+                  query: {
+                    ...query,
+                    environment: nextEnvironment,
+                    serviceGroup,
+                    latencyAggregationType,
+                    transactionName,
+                  },
+                })}
+              >
+                {transactionName}
+              </TransactionDetailLink>
+            ) : (
+              transactionName ?? NOT_AVAILABLE_LABEL
+            ),
           width: '25%',
         },
       ]
@@ -121,8 +130,8 @@ export function StickySpanProperties({ span, transaction }: Props) {
                 ...query,
                 dependencyName,
               }}
-              subtype={span.span.subtype}
-              type={span.span.type}
+              subtype={span.span?.subtype}
+              type={span.span?.type}
               onClick={() => {
                 trackEvent({
                   app: 'apm',
