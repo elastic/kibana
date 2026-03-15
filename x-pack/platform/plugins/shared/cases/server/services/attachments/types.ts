@@ -86,7 +86,6 @@ export interface CreateAttachmentArgs extends IndexRefresh {
   attributes: AttachmentAttributesV2;
   references: SavedObjectReference[];
   id: string;
-  owner: string;
 }
 
 export interface BulkCreateAttachments extends IndexRefresh {
@@ -95,19 +94,16 @@ export interface BulkCreateAttachments extends IndexRefresh {
     references: SavedObjectReference[];
     id: string;
   }>;
-  owner: string;
 }
 
 export interface UpdateArgs {
   attachmentId: string;
   updatedAttributes: AttachmentPatchAttributesV2;
   options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributesV2>, 'upsert'>;
-  owner?: string;
 }
 
 export type UpdateAttachmentArgs = UpdateArgs;
 
 export interface BulkUpdateAttachmentArgs extends IndexRefresh {
   comments: UpdateArgs[];
-  owner: string;
 }
