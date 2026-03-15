@@ -417,21 +417,30 @@ By default, these evaluators query traces from the same Elasticsearch cluster as
 
 #### Prerequisites
 
-To enable trace-based evaluators, configure the HTTP exporter in `kibana.dev.yml` to export traces via OpenTelemetry.
+To enable trace-based evaluators, configure a tracing exporter. For Elasticsearch 9.x+, the `proto` exporter pointed at the native OTLP endpoint is recommended:
+
+```yaml
+telemetry.tracing.exporters:
+  - proto:
+      url: 'http://elastic:changeme@localhost:9220/_otlp/v1/traces'
+```
+
 You can also include the Phoenix exporter if you want traces visible in Phoenix (optional):
 
 ```yaml
 telemetry.tracing.exporters:
+  - proto:
+      url: 'http://elastic:changeme@localhost:9220/_otlp/v1/traces'
   - phoenix:
       base_url: 'https://<my-phoenix-host>'
       public_url: 'https://<my-phoenix-host>'
       project_name: '<my-name>'
       api_key: '<my-api-key>'
-  - http:
-      url: 'http://localhost:4318/v1/traces'
 ```
 
-#### Start EDOT Collector
+#### Start EDOT Collector (ES 8.x only)
+
+> **Note:** For ES 9.x+, skip this section — traces are sent directly to Elasticsearch via native OTLP.
 
 Start the EDOT (Elastic Distribution of OpenTelemetry) Gateway Collector to receive and store traces. Ensure Docker is running, then execute:
 
@@ -441,7 +450,7 @@ Start the EDOT (Elastic Distribution of OpenTelemetry) Gateway Collector to rece
 ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
 ```
 
-The EDOT Collector receives traces from Kibana via the HTTP exporter and stores them in your local Elasticsearch cluster. Alternatively, you can use a managed OTLP endpoint instead of running EDOT Collector locally (this hasn't been tested yet though).
+The EDOT Collector receives traces from Kibana via the HTTP exporter and stores them in your local Elasticsearch cluster. For ES 9.x+, use the `proto` exporter pointed at `/_otlp/v1/traces` instead — no collector required.
 
 #### Using a Separate Monitoring Cluster
 
