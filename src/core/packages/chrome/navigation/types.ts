@@ -97,6 +97,17 @@ export interface MenuItem {
 }
 
 /**
+ * A primary navigation menu item, which may be hidden by user customization.
+ */
+export interface PrimaryMenuItem extends MenuItem {
+  /**
+   * (optional) Whether the item has been hidden by the user.
+   * Hidden items are moved to the overflow menu.
+   */
+  hiddenByUser?: boolean;
+}
+
+/**
  * The complete navigation structure containing primary and footer menu items.
  * This is the main data structure passed to the Navigation component.
  */
@@ -108,7 +119,7 @@ export interface NavigationStructure {
   /**
    * The primary navigation items displayed in the navigation main menu.
    */
-  primaryItems: MenuItem[];
+  primaryItems: PrimaryMenuItem[];
 }
 
 export interface MenuCalculations {

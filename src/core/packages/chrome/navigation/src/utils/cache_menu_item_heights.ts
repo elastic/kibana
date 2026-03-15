@@ -27,9 +27,10 @@ export const cacheMenuItemHeights = (
   if (ref.current?.length !== items.length) {
     const children: Element[] = Array.from(menu.children);
 
-    // Only cache if the DOM has rendered all the items we expect
-    if (children.length === items.length) {
-      ref.current = children.map((child) => child.clientHeight);
+    // Cache if all items are rendered. The DOM may also contain the "More"
+    // button as an extra trailing child — only cache the first items.length.
+    if (children.length >= items.length && children.length <= items.length + 1) {
+      ref.current = children.slice(0, items.length).map((child) => child.clientHeight);
     }
   }
 };

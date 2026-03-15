@@ -7,15 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Navigation, type NavigationProps } from './src/components/navigation';
-export { LOCKED_ITEM_IDS } from './src/constants';
-export { useNavigation } from './src/hooks/use_navigation';
-export type {
-  BadgeType,
-  MenuItem,
-  NavigationStructure,
-  PrimaryMenuItem,
-  SecondaryMenuItem,
-  SecondaryMenuSection,
-  SideNavLogo,
-} from './types';
+export { CustomizeNavigationModal } from '@kbn/core-chrome-browser-components';

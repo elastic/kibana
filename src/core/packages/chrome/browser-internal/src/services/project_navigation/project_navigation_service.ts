@@ -15,6 +15,7 @@ import type {
   ChromeProjectNavigationNode,
   ChromeNavLink,
   CloudURLs,
+  NavigationCustomization,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   CloudLinks,
@@ -43,6 +44,7 @@ import type { Logger } from '@kbn/logging';
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
+import { ProjectNavigationCustomizationService } from './project_navigation_customization_service';
 
 interface StartDeps {
   history: History;
@@ -62,6 +64,7 @@ interface ParsedNavigation {
 
 export class ProjectNavigationService {
   private readonly stop$ = new ReplaySubject<void>(1);
+  private readonly customizationService = new ProjectNavigationCustomizationService();
 
   constructor(private isServerless: boolean) {}
 
@@ -100,41 +103,66 @@ export class ProjectNavigationService {
       )
     );
 
-    // Core derived pipeline: nav source -> parsed tree (with deep link resolution)
-    const parsedNavigation$: Observable<ParsedNavigation | null> = currentNavSource$.pipe(
-      switchMap((source) => {
-        if (!source) return of(null);
-        return combineLatest([source.navTreeDefinition$, deepLinksMap$, cloudLinks$]).pipe(
-          map(([def, deepLinks, links]) => {
-            const { navigationTree, navigationTreeUI } = parseNavigationTree(source.id, def, {
-              deepLinks,
-              cloudLinks: links,
-            });
-            return {
-              id: source.id,
-              treeUI: navigationTreeUI,
-              tree: navigationTree,
-              flattened: flattenNav(navigationTree),
-            };
-          }),
-          catchError((err) => {
-            logger.error(err);
-            return of(null);
-          })
-        );
-      }),
-      takeUntil(this.stop$),
-      shareReplay(1)
-    );
+    const customizations$ = this.customizationService.getCustomizations$();
 
-    const navigation$ = combineLatest([parsedNavigation$, location$]).pipe(
-      filter((args): args is [ParsedNavigation, Location] => args[0] !== null),
-      map(([parsed, location]) => {
+    const parsedNavigation$ = new BehaviorSubject<ParsedNavigation | null>(null);
+
+    // Core derived pipeline: nav source -> parsed tree (with deep link resolution)
+    currentNavSource$
+      .pipe(
+        switchMap((source) => {
+          if (!source) return of(null);
+          return combineLatest([
+            source.navTreeDefinition$,
+            deepLinksMap$,
+            cloudLinks$,
+            customizations$,
+          ]).pipe(
+            map(([def, deepLinks, links, customizations]) => {
+              const customizedDef = this.customizationService.applyCustomization(
+                def,
+                customizations[source.id]
+              );
+              const { navigationTree, navigationTreeUI } = parseNavigationTree(
+                source.id,
+                customizedDef,
+                {
+                  deepLinks,
+                  cloudLinks: links,
+                }
+              );
+              return {
+                id: source.id,
+                treeUI: navigationTreeUI,
+                tree: navigationTree,
+                flattened: flattenNav(navigationTree),
+              };
+            }),
+            catchError((err) => {
+              logger.error(err);
+              return of(null);
+            })
+          );
+        }),
+        takeUntil(this.stop$)
+      )
+      .subscribe(parsedNavigation$);
+
+    const isEditing$ = this.customizationService.getIsEditing$();
+
+    const navigation$ = combineLatest([
+      parsedNavigation$.asObservable(),
+      location$,
+      isEditing$,
+    ]).pipe(
+      filter((args): args is [ParsedNavigation, Location, boolean] => args[0] !== null),
+      map(([parsed, location, isEditing]) => {
         const pathname = stripQueryParams(`${prependBasePath(location.pathname)}${location.hash}`);
         return {
           solutionId: parsed.id,
           navigationTree: parsed.treeUI,
           activeNodes: findActiveNodes(pathname, parsed.flattened, location, prependBasePath),
+          isEditing,
         };
       }),
       distinctUntilChanged(deepEqual),
@@ -228,6 +256,18 @@ export class ProjectNavigationService {
       },
       getActiveSolutionNavId$: () => activeSolutionNavId$,
       getActiveSolutionNavId: () => currentNavSource$.getValue()?.id ?? null,
+      getNavigationCustomizations$: () => this.customizationService.getCustomizations$(),
+      getIsEditingNavigation$: () => this.customizationService.getIsEditing$(),
+      setNavigationCustomization: (
+        id: SolutionId,
+        customization: NavigationCustomization | undefined
+      ) => this.customizationService.setNavigationCustomization(id, customization),
+      setIsEditingNavigation: (isEditing: boolean) =>
+        this.customizationService.setIsEditingNavigation(isEditing),
+      getNavigationPrimaryItems: () =>
+        this.customizationService.getNavigationPrimaryItems(
+          parsedNavigation$.getValue()?.treeUI ?? null
+        ),
     };
   }
 

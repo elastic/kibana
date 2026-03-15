@@ -29,4 +29,7 @@ export const layoutLevels = {
 
   // Debug and development tools - highest priority
   debug: 9999,
+
+  // Navigation editing mode - needs to appear above mask (6000) but below modal (8000)
+  navigationEditing: 7000,
 };

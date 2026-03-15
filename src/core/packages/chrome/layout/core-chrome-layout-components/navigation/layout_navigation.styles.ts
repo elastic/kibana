@@ -18,6 +18,11 @@ const root: EmotionFn = ({ euiTheme }) => css`
   width: ${layoutVar('navigation.width')};
   z-index: ${layoutLevels.navigation};
   display: flex;
+
+  /* When navigation is being edited, remove stacking context so children can establish their own z-index */
+  &:has([data-editing='true']) {
+    z-index: auto;
+  }
 `;
 
 export const styles = {

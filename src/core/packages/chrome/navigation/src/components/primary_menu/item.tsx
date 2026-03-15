@@ -13,13 +13,13 @@ import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { MenuItem } from '../../../types';
+import type { PrimaryMenuItem as PrimaryMenuItemData } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { MenuItem as MenuItemComponent } from '../menu_item';
 import { NAVIGATION_SELECTOR_PREFIX, TOOLTIP_OFFSET } from '../../constants';
 import { useTooltip } from '../../hooks/use_tooltip';
 
-export interface PrimaryMenuItemProps extends Omit<MenuItem, 'href'> {
+export interface PrimaryMenuItemProps extends Omit<PrimaryMenuItemData, 'href' | 'hiddenByUser'> {
   as?: 'a' | 'button';
   children: ReactNode;
   hasContent?: boolean;

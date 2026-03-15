@@ -75,6 +75,12 @@ export function createChromeApi({
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
     getProjectHome$: () => projectNavigation.getProjectHome$(),
+    getNavigationPrimaryItems: () => projectNavigation.getNavigationPrimaryItems(),
+    getIsEditing$: () => projectNavigation.getIsEditingNavigation$(),
+    setIsEditingNavigation: (isEditing: boolean) =>
+      projectNavigation.setIsEditingNavigation(isEditing),
+    setNavigationCustomization: (id, customization) =>
+      projectNavigation.setNavigationCustomization(id, customization),
   };
 
   const chromeStart: InternalChromeStart = {

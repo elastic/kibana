@@ -15,13 +15,15 @@ import { MAX_MENU_ITEMS } from '../constants';
  * @param heights - The heights of the menu items.
  * @param gap - The gap between the menu items.
  * @param menuHeight - The height of the menu.
- *
+ * @param hasUserHiddenItems - Whether there are user-hidden items that would be moved to the
+ * overflow menu (affects available height).
  * @returns The number of visible menu items.
  */
 export const countVisibleMenuItems = (
   heights: number[],
   gap: number,
-  menuHeight: number
+  menuHeight: number,
+  hasUserHiddenItems: boolean = false
 ): number => {
   const countItemsToFit = (availableHeight: number, limit: number) => {
     let itemCount = 0;
@@ -45,8 +47,9 @@ export const countVisibleMenuItems = (
   // 1. Calculate how many items can fit without considering the "More" button
   const initialVisibleCount = countItemsToFit(menuHeight, MAX_MENU_ITEMS);
 
-  // 2. If not all items are visible, we need the "More" button
-  if (heights.length > initialVisibleCount) {
+  // 2. If not all items are visible, or the "More" button is always present
+  // (e.g. due to hidden-by-user items), reserve space for the "More" button.
+  if (heights.length > initialVisibleCount || hasUserHiddenItems) {
     const moreItemHeight = heights[0]; // Approximately the same height as any other item
     const availableHeight = menuHeight - moreItemHeight - gap;
 
