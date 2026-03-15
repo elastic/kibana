@@ -11,6 +11,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import {
   EntityMaintainerTaskStatus,
+  EntityMaintainerTelemetryEventType,
   type EntityMaintainerStatus,
   type EntityMaintainerTaskMethod,
   type RegisterEntityMaintainerConfig,
@@ -20,6 +21,8 @@ import { EntityStoreTaskType } from '../constants';
 import type { EntityStoreCoreSetup } from '../../types';
 import { entityMaintainersRegistry } from './entity_maintainers_registry';
 import { CRUDClient } from '../../domain/crud';
+import type { TelemetryReporter } from '../../telemetry/events';
+import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { wrapTaskRun } from '../../telemetry/traces';
 
 function getTaskType(id: string): string {
@@ -63,11 +66,13 @@ export function registerEntityMaintainerTask({
   logger,
   config,
   core,
+  analytics,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   config: RegisterEntityMaintainerConfig;
   core: EntityStoreCoreSetup;
+  analytics: TelemetryReporter;
 }): void {
   logger.debug(`Registering entity maintainer task: ${config.id}`);
   const { title } = TasksConfig[EntityStoreTaskType.enum.entityMaintainer];
@@ -143,6 +148,8 @@ export function registerEntityMaintainerTask({
                     abortController,
                     esClient,
                     crudClient,
+                    id,
+                    analytics,
                   }),
               });
             },
@@ -153,6 +160,10 @@ export function registerEntityMaintainerTask({
     .catch((err) => {
       logger.error(`Failed to register entity maintainer task: ${err?.message}`);
     });
+  analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+    id,
+    type: EntityMaintainerTelemetryEventType.REGISTER,
+  });
 }
 
 async function runEntityMaintainerTask({
@@ -164,6 +175,8 @@ async function runEntityMaintainerTask({
   abortController,
   esClient,
   crudClient,
+  id,
+  analytics,
 }: {
   currentStatus: EntityMaintainerStatus;
   fakeRequest: KibanaRequest;
@@ -173,8 +186,20 @@ async function runEntityMaintainerTask({
   abortController: AbortController;
   esClient: ElasticsearchClient;
   crudClient: CRUDClient;
+  id: string;
+  analytics: TelemetryReporter;
 }): Promise<{ state: EntityMaintainerStatus }> {
+  const namespace = currentStatus.metadata.namespace;
+  const onAbort = () => {
+    logger.debug(`Abort signal received, stopping Entity Maintainer`);
+    analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+      id,
+      namespace,
+      type: EntityMaintainerTelemetryEventType.ABORT,
+    });
+  };
   try {
+    abortController.signal.addEventListener('abort', onAbort);
     const isFirstRun = currentStatus.metadata.runs === 0;
     if (isFirstRun && setup) {
       logger.debug(`First run, executing setup`);
@@ -186,6 +211,11 @@ async function runEntityMaintainerTask({
         esClient,
         crudClient,
       });
+      analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+        id,
+        namespace,
+        type: EntityMaintainerTelemetryEventType.SETUP,
+      });
     }
     logger.debug(`Executing run`);
     currentStatus.state = await run({
@@ -196,12 +226,24 @@ async function runEntityMaintainerTask({
       esClient,
       crudClient,
     });
+    analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+      id,
+      namespace,
+      type: EntityMaintainerTelemetryEventType.RUN,
+    });
     currentStatus.metadata.lastSuccessTimestamp = new Date().toISOString();
   } catch (err) {
     currentStatus.metadata.lastErrorTimestamp = new Date().toISOString();
     logger.debug(`Run failed - ${err?.message}`);
+    analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+      id,
+      namespace,
+      type: EntityMaintainerTelemetryEventType.ERROR,
+      errorMessage: err?.message?.substring(0, 500), // limit error message length to prevent excessively long strings in telemetry
+    });
   } finally {
     currentStatus.metadata.runs++;
+    abortController.signal.removeEventListener('abort', onAbort);
   }
 
   return {
@@ -229,12 +271,14 @@ export async function stopEntityMaintainer({
   namespace,
   logger,
   request,
+  analytics,
 }: {
   taskManager: TaskManagerStartContract;
   id: string;
   namespace: string;
   logger: Logger;
   request: KibanaRequest;
+  analytics: TelemetryReporter;
 }): Promise<void> {
   const taskId = getTaskId(id, namespace);
   await updateTaskStatus({
@@ -242,6 +286,11 @@ export async function stopEntityMaintainer({
     taskId,
     taskStatus: EntityMaintainerTaskStatus.STOPPED,
     request,
+  });
+  analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+    id,
+    namespace,
+    type: EntityMaintainerTelemetryEventType.STOP,
   });
   logger.debug(`Stopped entity maintainer task: ${taskId}`);
 }
@@ -252,12 +301,14 @@ export async function startEntityMaintainer({
   namespace,
   logger,
   request,
+  analytics,
 }: {
   taskManager: TaskManagerStartContract;
   id: string;
   namespace: string;
   logger: Logger;
   request: KibanaRequest;
+  analytics: TelemetryReporter;
 }): Promise<void> {
   const taskId = getTaskId(id, namespace);
   await updateTaskStatus({
@@ -265,6 +316,11 @@ export async function startEntityMaintainer({
     taskId,
     taskStatus: EntityMaintainerTaskStatus.STARTED,
     request,
+  });
+  analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+    id,
+    namespace,
+    type: EntityMaintainerTelemetryEventType.START,
   });
   logger.debug(`Start entity maintainer task: ${taskId}`);
 }
@@ -274,13 +330,20 @@ export async function removeEntityMaintainer({
   id,
   namespace,
   logger,
+  analytics,
 }: {
   taskManager: TaskManagerStartContract;
   id: string;
   namespace: string;
   logger: Logger;
+  analytics: TelemetryReporter;
 }): Promise<void> {
   const taskId = getTaskId(id, namespace);
   await taskManager.removeIfExists(taskId);
+  analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
+    id,
+    namespace,
+    type: EntityMaintainerTelemetryEventType.DELETE,
+  });
   logger.debug(`Removed entity maintainer task: ${taskId}`);
 }
