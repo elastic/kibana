@@ -52,7 +52,7 @@ export const ServicenowSearch: ConnectorSpec = {
       defaultMessage: 'Search and retrieve records from ServiceNow',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
