@@ -24,6 +24,11 @@ import type { InferenceServerStart, InferenceStartDependencies } from '../../../
 
 const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
 
+// replaceTokensWithOriginals is O(n × m) for text length n and replacement count m.
+// With MAX_REPLACEMENTS=10000 entries an unbounded payload could cause excessive CPU usage,
+// so we cap the input at 1 MB of text — well above any realistic LLM response size.
+const DEANONYMIZE_TEXT_MAX_LENGTH = 1_000_000;
+
 const assertReplacementsEncryptionKeyConfigured = (encryptionKey?: string): void => {
   if (!encryptionKey) {
     const error = new Error(
@@ -159,7 +164,7 @@ export const registerReplacementsRoutes = (
         validate: {
           request: {
             body: schema.object({
-              text: schema.string({ maxLength: 1_000_000 }),
+              text: schema.string({ maxLength: DEANONYMIZE_TEXT_MAX_LENGTH }),
               replacementsId: schema.string(),
             }),
           },
