@@ -432,26 +432,4 @@ describe('buildInputsZodValidator', () => {
     expect(validator.safeParse({ enabled: 'yes' }).success).toBe(false);
     expect(validator.safeParse({ enabled: true }).success).toBe(true);
   });
-
-  it('should reject duplicate array items when uniqueItems is true', () => {
-    const schema = {
-      type: 'array',
-      items: { type: 'string' },
-      uniqueItems: true,
-    } as Parameters<typeof convertJsonSchemaToZod>[0];
-    const validator = convertJsonSchemaToZod(schema);
-    expect(validator.safeParse(['a', 'b', 'a']).success).toBe(false);
-    expect(validator.safeParse(['a', 'b', 'c']).success).toBe(true);
-  });
-
-  it('should reject extra properties when additionalProperties is false', () => {
-    const schema = {
-      type: 'object',
-      properties: { name: { type: 'string' } },
-      additionalProperties: false,
-    } as Parameters<typeof buildInputsZodValidator>[0];
-    const validator = buildInputsZodValidator(schema);
-    expect(validator.safeParse({ name: 'Alice', extra: 'should fail' }).success).toBe(false);
-    expect(validator.safeParse({ name: 'Alice' }).success).toBe(true);
-  });
 });

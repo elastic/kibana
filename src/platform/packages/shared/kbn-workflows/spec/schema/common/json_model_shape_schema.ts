@@ -60,7 +60,6 @@ export interface JsonSchema {
 
   // Structure
   properties?: Record<string, JsonSchema>;
-  additionalProperties?: boolean | JsonSchema;
   items?: JsonSchema | JsonSchema[];
   required?: string[];
 
@@ -81,7 +80,6 @@ export interface JsonSchema {
   pattern?: string;
   minItems?: number;
   maxItems?: number;
-  uniqueItems?: boolean;
 }
 
 /**
@@ -99,7 +97,6 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
   'enum',
   'const',
   'properties',
-  'additionalProperties',
   'required',
   'items',
   'anyOf',
@@ -116,13 +113,13 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
   'multipleOf',
   'minItems',
   'maxItems',
-  'uniqueItems',
 ] as const satisfies readonly (keyof JsonSchema)[];
 
 /**
  * Zod schema representing any JSON Schema node (Draft 7 / 2020-12).
  * Used recursively inside property definitions, anyOf/oneOf, etc.
- * Only includes keywords that the fromJSONSchema converter actually enforces
+ * Only includes keywords that the fromJSONSchema converter actually enforces,
+ * so autocomplete suggestions are never misleading.
  */
 export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
   .lazy(() =>
@@ -142,14 +139,12 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
 
       // --- Object Properties ---
       properties: z.record(z.string(), JsonModelShapeSchema).optional(),
-      additionalProperties: z.union([z.boolean(), JsonModelShapeSchema]).optional(),
       required: z.array(z.string()).optional(),
 
       // --- Array Properties ---
       items: z.union([JsonModelShapeSchema, z.array(JsonModelShapeSchema)]).optional(),
       minItems: z.number().int().nonnegative().optional(),
       maxItems: z.number().int().nonnegative().optional(),
-      uniqueItems: z.boolean().optional(),
 
       // --- Reusability ---
       definitions: z.record(z.string(), JsonModelShapeSchema).optional(),
@@ -185,7 +180,6 @@ export const JsonModelRootShapeSchema = z
     description: z.string().optional(),
     $ref: z.string().optional(),
     properties: z.record(z.string(), JsonModelShapeSchema).optional(),
-    additionalProperties: z.union([z.boolean(), JsonModelShapeSchema]).optional(),
     required: z.array(z.string()).optional(),
     definitions: z.record(z.string(), JsonModelShapeSchema).optional(),
     $defs: z.record(z.string(), JsonModelShapeSchema).optional(),

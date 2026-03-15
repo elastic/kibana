@@ -23,7 +23,23 @@ import { convertJsonSchemaToZod, convertJsonSchemaToZodWithRefs } from './json_s
  *   yarn test:jest src/platform/plugins/shared/workflows_management/common/lib/json_schema_to_zod.ignored_keywords.test.ts
  */
 describe('convertJsonSchemaToZod – unimplemented keyword gaps', () => {
-  // ─── additionalProperties: {schema} ─────────────────────────────────────────
+  // ─── additionalProperties ────────────────────────────────────────────────────
+  // Note: a shallow fix via .strict() / .superRefine() only works when the keyword
+  // appears at the top-level schema node passed to convertJsonSchemaToZod. Because
+  // fromJSONSchema processes the whole tree first, enrichment cannot reach into
+  // already-compiled nested Zod schemas. A proper fix requires recursive traversal.
+  describe('additionalProperties: false', () => {
+    it('does not reject extra properties when additionalProperties is false', () => {
+      const schema = convertJsonSchemaToZod({
+        type: 'object',
+        properties: { name: { type: 'string' } },
+        additionalProperties: false,
+      } as JSONSchema7);
+      const result = schema.safeParse({ name: 'Alice', extra: 'should fail' });
+      expect(result.success).toBe(true); // Should be false when implemented
+    });
+  });
+
   describe('additionalProperties: schema', () => {
     it('does not validate extra properties against the additionalProperties schema', () => {
       const schema = convertJsonSchemaToZod({
@@ -32,6 +48,21 @@ describe('convertJsonSchemaToZod – unimplemented keyword gaps', () => {
         additionalProperties: { type: 'number' },
       } as JSONSchema7);
       const result = schema.safeParse({ name: 'Alice', extra: 'not a number' });
+      expect(result.success).toBe(true); // Should be false when implemented
+    });
+  });
+
+  // ─── uniqueItems ─────────────────────────────────────────────────────────────
+  // Same limitation as additionalProperties — shallow enrichment only; requires
+  // recursive traversal to handle uniqueItems nested inside object properties.
+  describe('uniqueItems', () => {
+    it('does not reject duplicate array items', () => {
+      const schema = convertJsonSchemaToZod({
+        type: 'array',
+        items: { type: 'string' },
+        uniqueItems: true,
+      } as JSONSchema7);
+      const result = schema.safeParse(['a', 'b', 'a']);
       expect(result.success).toBe(true); // Should be false when implemented
     });
   });

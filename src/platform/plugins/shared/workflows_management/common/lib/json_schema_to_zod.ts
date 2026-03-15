@@ -12,42 +12,6 @@ import { resolveRef } from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 
-/**
- * Applies `.strict()` to a ZodObject when `additionalProperties: false` is set,
- * so extra keys are rejected at validation time.
- */
-function applyAdditionalProperties(jsonSchema: JSONSchema7, zodResult: z.ZodType): z.ZodType {
-  if (jsonSchema.additionalProperties === false && zodResult instanceof z.ZodObject) {
-    return zodResult.strict();
-  }
-  return zodResult;
-}
-
-/**
- * Applies a uniqueness refinement to a ZodArray when `uniqueItems: true` is set.
- * Items are compared by their JSON-serialised form, which handles both primitives and objects.
- */
-function applyUniqueItems(jsonSchema: JSONSchema7, zodResult: z.ZodType): z.ZodType {
-  if (jsonSchema.uniqueItems === true && zodResult instanceof z.ZodArray) {
-    return zodResult.refine(
-      (arr) => new Set(arr.map((v) => JSON.stringify(v))).size === arr.length,
-      { message: 'Items must be unique' }
-    );
-  }
-  return zodResult;
-}
-
-/**
- * Enriches a Zod schema with constraints that the fromJSONSchema polyfill does not implement.
- * Add a new `apply` call here whenever a new keyword is supported in this wrapper.
- */
-function enrichZodSchema(jsonSchema: JSONSchema7, zodResult: z.ZodType): z.ZodType {
-  let result = zodResult;
-  result = applyAdditionalProperties(jsonSchema, result);
-  result = applyUniqueItems(jsonSchema, result);
-  return result;
-}
-
 /** Root schema type for $ref resolution (same as resolveRef's second parameter). */
 type RootSchemaType = Parameters<typeof resolveRef>[1];
 
@@ -100,8 +64,13 @@ export function convertJsonSchemaToZod(jsonSchema: JSONSchema7 | null | undefine
   // Use fromJSONSchema polyfill - it handles objects, arrays, strings, numbers, booleans,
   // enums, defaults, required fields, validation constraints, etc.
   const zodSchema = fromJSONSchema(jsonSchema as Record<string, unknown>);
-  const result = zodSchema ?? convertJsonSchemaToZodRecursive(jsonSchema);
-  return enrichZodSchema(jsonSchema, result);
+  if (zodSchema !== undefined) {
+    return zodSchema;
+  }
+
+  // If fromJSONSchema returns undefined (should be rare), fall back to recursive converter
+  // This is a safety net for edge cases the polyfill might not handle
+  return convertJsonSchemaToZodRecursive(jsonSchema);
 }
 
 /**
@@ -122,7 +91,7 @@ export function convertJsonSchemaToZodWithRefs(
 
   const zodSchema = fromJSONSchema(schemaToConvert as Record<string, unknown>);
   if (zodSchema !== undefined) {
-    return enrichZodSchema(schemaToConvert, zodSchema);
+    return zodSchema;
   }
 
   if (schemaToConvert.type === 'object' && schemaToConvert.properties) {
@@ -138,7 +107,7 @@ export function convertJsonSchemaToZodWithRefs(
       }
       shape[key] = zodProp;
     }
-    return enrichZodSchema(schemaToConvert, z.object(shape));
+    return z.object(shape);
   }
 
   return convertJsonSchemaToZod(schemaToConvert);
@@ -173,7 +142,5 @@ export function buildInputsZodValidator(
       shape[propertyName] = zodSchema;
     }
   }
-  return enrichZodSchema(schema as JSONSchema7, z.object(shape)) as z.ZodType<
-    Record<string, unknown>
-  >;
+  return z.object(shape) as z.ZodType<Record<string, unknown>>;
 }
