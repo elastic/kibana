@@ -185,16 +185,15 @@ run(
       try {
         diffEntries = runOasdiff(basePath, currentPath, { matchPath });
       } catch (error: unknown) {
-        // oasdiff can't parse valid OpenAPI specs that use $ref inside example
-        // objects (e.g. `$ref: '#/components/examples/...'`). This is valid per
-        // the OpenAPI 3.0/3.1 spec but unsupported by oasdiff. Rather than
-        // failing CI for every PR, we skip breaking change detection and warn.
-        // This can be removed once oasdiff supports example $refs.
-        // TODO: file an issue upstream at https://github.com/Tufin/oasdiff
+        // Some older branch specs (e.g. 9.3) have example objects incorrectly
+        // placed under `#/components/schemas/` instead of `#/components/examples/`.
+        // oasdiff rightfully rejects these malformed specs. Rather than failing
+        // CI when comparing against affected branches, we warn and skip.
+        // This can be removed once all supported base branches have correct specs.
         if ((error as Error)?.message?.includes('expecting ref to example object')) {
           log.warning(
-            'oasdiff cannot parse example $ref in the OpenAPI spec. ' +
-              'Skipping breaking change detection until oasdiff supports example refs.'
+            'oasdiff cannot parse the base spec (likely due to example objects ' +
+              'misplaced under components/schemas). Skipping breaking change detection.'
           );
           return;
         }

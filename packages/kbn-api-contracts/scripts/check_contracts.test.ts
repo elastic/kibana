@@ -165,7 +165,7 @@ describe('check_contracts', () => {
     await runCallback({ flags: defaultFlags, log: mockLog });
 
     expect(mockLog.warning).toHaveBeenCalledWith(
-      expect.stringContaining('oasdiff cannot parse example')
+      expect.stringContaining('oasdiff cannot parse the base spec')
     );
   });
 
