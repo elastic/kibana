@@ -19,6 +19,8 @@ export const COMMON_HEADERS = {
  */
 export const ENTITY_STORE_ROUTES = {
   INSTALL: 'internal/security/entity_store/install',
+  UPDATE: 'internal/security/entity_store',
+  STATUS: 'internal/security/entity_store/status',
   ENTITY_MAINTAINERS_INIT: 'internal/security/entity_store/entity_maintainers/init',
   START: 'internal/security/entity_store/start',
   STOP: 'internal/security/entity_store/stop',
