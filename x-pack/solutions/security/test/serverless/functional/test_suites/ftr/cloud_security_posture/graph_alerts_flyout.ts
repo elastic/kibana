@@ -12,12 +12,13 @@ import {
   initEntityEnginesWithRetry,
 } from '../../../../../cloud_security_posture_api/utils';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../../services';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
   const logger = getService('log');
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const pageObjects = getPageObjects([
@@ -28,12 +29,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'expandedFlyoutGraph',
   ]);
   const alertsPage = pageObjects.alerts;
+  let adminSupertest: SupertestWithRoleScopeType;
 
   describe('Security Alerts Page - Graph visualization in Serverless', function () {
     // See details: https://github.com/elastic/kibana/issues/208903
     this.tags(['failsOnMKI', 'cloud_security_posture_graph_viz']);
 
     before(async () => {
+      adminSupertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        useCookieHeader: true,
+        withInternalHeaders: true,
+      });
+
       // Delete the alerts data stream to allow archive to recreate it with proper mappings
       // This is necessary in serverless where the data stream already exists
       try {
@@ -53,18 +60,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'x-pack/solutions/security/test/serverless/functional/es_archives/logs_gcp_audit'
       );
 
-      await waitForPluginInitialized({ retry, supertest, logger });
+      await waitForPluginInitialized({ retry, supertest: adminSupertest, logger });
 
       // Enable asset inventory setting (required for entity store with 'generic' type)
       await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
 
       // Initialize security-solution-default data-view (required by entity store)
-      const dataView = dataViewRouteHelpersFactory(supertest);
+      const dataView = dataViewRouteHelpersFactory(adminSupertest);
       await dataView.create('security-solution');
 
       // Initialize entity engine (required for graph visualization)
       await initEntityEnginesWithRetry({
-        supertest,
+        supertest: adminSupertest,
         retry,
         logger,
         entityTypes: ['generic'],
@@ -72,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await cleanupEntityStore({ supertest, logger });
+      await cleanupEntityStore({ supertest: adminSupertest, logger });
       // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
       // Instead we delete all alerts from the index
       await es.deleteByQuery({
@@ -83,6 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload(
         'x-pack/solutions/security/test/serverless/functional/es_archives/logs_gcp_audit'
       );
+      await adminSupertest.destroy();
     });
 
     describe('Editor role', () => {
