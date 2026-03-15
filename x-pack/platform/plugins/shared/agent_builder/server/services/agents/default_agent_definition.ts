@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  agentBuilderDefaultAgentId,
-  AgentVisibility,
-} from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, AgentVisibility } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest } from '../../../common/agents';
 
 export const getDefaultAgentCreateRequest = (): AgentCreateRequest => ({
