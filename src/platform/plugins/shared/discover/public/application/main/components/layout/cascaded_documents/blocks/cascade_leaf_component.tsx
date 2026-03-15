@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiPanel, EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
+import { EuiText, type EuiDataGridCustomBodyProps, useEuiTheme } from '@elastic/eui';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   getRenderCustomToolbarWithElements,
@@ -287,35 +287,33 @@ export const ESQLDataCascadeLeafCell = React.memo(
     );
 
     return (
-      <EuiPanel paddingSize="none">
-        <UnifiedDataTable
-          isPlainRecord
-          dataView={dataView}
-          showTimeCol={showTimeCol}
-          showKeyboardShortcuts={showKeyboardShortcuts}
-          services={services}
-          sort={EMPTY_SORT}
-          isSortEnabled={false}
-          enableInTableSearch
-          ariaLabelledBy="data-cascade-leaf-cell"
-          consumer={`discover_esql_cascade_row_leaf_${cellId}`}
-          rows={cellData}
-          loadingState={DataLoadingState.loaded}
-          columns={selectedColumns}
-          onSetColumns={setSelectedColumns}
-          renderCustomToolbar={renderCustomToolbarWithElements}
-          expandedDoc={expandedDoc}
-          setExpandedDoc={setExpandedDocFn}
-          dataGridDensityState={cascadeDataGridDensityState}
-          onUpdateDataGridDensity={setCascadeDataGridDensityState}
-          renderDocumentView={renderDocumentView}
-          renderCustomGridBody={renderCustomCascadeGridBodyCallback}
-          onFullScreenChange={setIsCellInFullScreenMode}
-          externalCustomRenderers={externalCustomRenderers}
-          paginationMode="infinite"
-          sampleSizeState={cellData.length}
-        />
-      </EuiPanel>
+      <UnifiedDataTable
+        isPlainRecord
+        dataView={dataView}
+        showTimeCol={showTimeCol}
+        showKeyboardShortcuts={showKeyboardShortcuts}
+        services={services}
+        sort={EMPTY_SORT}
+        isSortEnabled={false}
+        enableInTableSearch
+        ariaLabelledBy="data-cascade-leaf-cell"
+        consumer={`discover_esql_cascade_row_leaf_${cellId}`}
+        rows={cellData}
+        loadingState={DataLoadingState.loaded}
+        columns={selectedColumns}
+        onSetColumns={setSelectedColumns}
+        renderCustomToolbar={renderCustomToolbarWithElements}
+        expandedDoc={expandedDoc}
+        setExpandedDoc={setExpandedDocFn}
+        dataGridDensityState={cascadeDataGridDensityState}
+        onUpdateDataGridDensity={setCascadeDataGridDensityState}
+        renderDocumentView={renderDocumentView}
+        renderCustomGridBody={renderCustomCascadeGridBodyCallback}
+        onFullScreenChange={setIsCellInFullScreenMode}
+        externalCustomRenderers={externalCustomRenderers}
+        paginationMode="infinite"
+        sampleSizeState={cellData.length}
+      />
     );
   }
 );
