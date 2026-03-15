@@ -13,6 +13,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
@@ -22,6 +23,10 @@ import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 interface WorkflowExecutionOverviewProps {
   stepExecution: WorkflowStepExecutionDto;
   workflowExecutionDuration?: number;
+  showResumeUI?: boolean;
+  executionId?: string;
+  resumeMessage?: string;
+  shouldAutoResume?: boolean;
 }
 
 const formatExecutionDate = (date: string) => {
@@ -45,7 +50,14 @@ const formatExecutionDate = (date: string) => {
 };
 
 export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewProps>(
-  ({ stepExecution, workflowExecutionDuration }) => {
+  ({
+    stepExecution,
+    workflowExecutionDuration,
+    showResumeUI = false,
+    executionId,
+    resumeMessage,
+    shouldAutoResume = false,
+  }) => {
     const { euiTheme } = useEuiTheme();
 
     const context = stepExecution.input as Record<string, unknown> | undefined;
@@ -66,6 +78,15 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
+          {showResumeUI && executionId && (
+            <EuiFlexItem grow={false}>
+              <ResumeExecutionButton
+                executionId={executionId}
+                resumeMessage={resumeMessage}
+                autoOpen={shouldAutoResume}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
@@ -95,14 +116,14 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   {isTestRun && (
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="beaker" size="s" color="subdued" />
+                      <EuiIcon type="beaker" size="s" color="subdued" aria-hidden={true} />
                     </EuiFlexItem>
                   )}
                   {workflowExecutionDuration && (
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                         <EuiFlexItem grow={false}>
-                          <EuiIcon type="clock" size="s" color="subdued" />
+                          <EuiIcon type="clock" size="s" color="subdued" aria-hidden={true} />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiText size="xs" color="subdued">
