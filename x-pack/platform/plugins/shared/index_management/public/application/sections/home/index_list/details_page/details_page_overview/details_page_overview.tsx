@@ -37,11 +37,11 @@ import { formatBytes } from '../../../../../lib/format_bytes';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService, useLoadIndexMappings } from '../../../../../services';
 import { languageDefinitions, curlDefinition } from './languages';
-import { StatusDetails } from './status_details';
-import { DataStreamDetails } from './data_stream_details';
-import { StorageDetails } from './storage_details';
-import { AliasesDetails } from './aliases_details';
-import { SizeDocCountDetails } from './size_doc_count_details';
+import { StatusDetails } from '../quick_stats/status_details';
+import { DataStreamDetails } from '../quick_stats/data_stream_details';
+import { StorageDetails } from '../quick_stats/storage_details';
+import { AliasesDetails } from '../quick_stats/aliases_details';
+import { SizeDocCountDetails } from '../quick_stats/size_doc_count_details';
 
 import { UpdateElserMappingsModal } from '../update_elser_mappings/update_elser_mappings_modal';
 import { useMappingsState } from '../../../../../components/mappings_editor/mappings_state_context';

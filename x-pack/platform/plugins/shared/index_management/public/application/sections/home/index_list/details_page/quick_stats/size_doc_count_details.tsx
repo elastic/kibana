@@ -8,7 +8,6 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,22 +16,22 @@ import {
   EuiTextColor,
   useEuiFontSize,
 } from '@elastic/eui';
-
-import { useAppContext } from '../../../../../app_context';
+import { i18n } from '@kbn/i18n';
+import { EuiI18nNumber } from '@elastic/eui';
 import type { Index } from '../../../../../../../common';
+import { useAppContext } from '../../../../../app_context';
 import { OverviewCard } from './overview_card';
 
-export const StorageDetails: FunctionComponent<{
-  primarySize: string;
+export const SizeDocCountDetails: FunctionComponent<{
   size: string;
-  primary: Index['primary'];
-  replica: Index['replica'];
-}> = ({ primarySize, size, primary, replica }) => {
+  documents: Index['documents'];
+}> = ({ size, documents }) => {
   const largeFontSize = useEuiFontSize('l').fontSize;
   const { config } = useAppContext();
-  if (!config.enableIndexStats) {
+  if (!config.enableSizeAndDocCount) {
     return null;
   }
+
   return (
     <OverviewCard
       data-test-subj="indexDetailsStorage"
@@ -41,26 +40,6 @@ export const StorageDetails: FunctionComponent<{
       })}
       content={{
         left: (
-          <EuiFlexGroup gutterSize="xs" alignItems="baseline">
-            <EuiFlexItem grow={false}>
-              <EuiText
-                css={css`
-                  font-size: ${largeFontSize};
-                `}
-              >
-                {primarySize}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTextColor color="subdued">
-                {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.primarySizeLabel', {
-                  defaultMessage: 'Primary',
-                })}
-              </EuiTextColor>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        right: (
           <EuiFlexGroup gutterSize="xs" alignItems="baseline">
             <EuiFlexItem grow={false}>
               <EuiText
@@ -80,36 +59,31 @@ export const StorageDetails: FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
+        right: null,
       }}
       footer={{
         left: (
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="shard" color="subdued" />
+              <EuiIcon type="documents" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiI18nNumber value={documents || 0} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTextColor color="subdued">
-                {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.storage.shardsLabel', {
-                  defaultMessage: 'Shards',
-                })}
+                {i18n.translate(
+                  'xpack.idxMgmt.indexDetails.overviewTab.status.meteringDocumentsLabel',
+                  {
+                    defaultMessage: '{documents, plural, one {Document} other {Documents}}',
+                    values: {
+                      documents,
+                    },
+                  }
+                )}
               </EuiTextColor>
             </EuiFlexItem>
           </EuiFlexGroup>
-        ),
-        right: (
-          <EuiTextColor color="subdued">
-            {i18n.translate(
-              'xpack.idxMgmt.indexDetails.overviewTab.storage.primariesReplicasLabel',
-              {
-                defaultMessage:
-                  '{primary, plural, one {# Primary} other {# Primaries}} / {replica, plural, one {# Replica} other {# Replicas}} ',
-                values: {
-                  primary,
-                  replica,
-                },
-              }
-            )}
-          </EuiTextColor>
         ),
       }}
     />
