@@ -91,13 +91,23 @@ export const suggestionsApi = ({
 
   const query = 'query' in context ? context.query : undefined;
 
+  // When preferred visualization attributes are provided, pass the prior visualization state
+  // so that each visualization's suggestion logic can preserve its own settings (e.g. XY chart
+  // preserves legend, axis titles, etc. via its buildSuggestion when it receives currentState).
+  const preferredVisualization = preferredVisAttributes
+    ? visualizationMap[preferredVisAttributes.visualizationType] ?? initialVisualization
+    : initialVisualization;
+  const previousVisualizationState = preferredVisAttributes
+    ? preferredVisAttributes.state.visualization
+    : undefined;
+
   // find the active visualizations from the context
   const suggestions = getSuggestions({
     datasourceMap,
     datasourceStates,
     visualizationMap,
-    activeVisualization: initialVisualization,
-    visualizationState: undefined,
+    activeVisualization: preferredVisualization,
+    visualizationState: previousVisualizationState,
     visualizeTriggerFieldContext: context,
     subVisualizationId: isInitialSubTypeSupported ? preferredChartType?.toLowerCase() : undefined,
     dataViews,

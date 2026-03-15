@@ -78,8 +78,11 @@ export function getSuggestions({
   datasourceId,
   query,
 }: SuggestionRequest<XYState>): Array<VisualizationSuggestion<XYState>> {
+  // Text-based datasource always sets isMultiRow: false regardless of actual data shape,
+  // so skip that check for textBased to avoid incorrectly rejecting valid suggestions
+  const isTextBased = datasourceId === 'textBased';
   const incompleteTable =
-    !table.isMultiRow ||
+    (!isTextBased && !table.isMultiRow) ||
     table.columns.length <= 1 ||
     table.columns.every((col) => col.operation.dataType !== 'number') ||
     table.columns.some((col) => !Object.hasOwn(COLUMN_SORT_ORDER, col.operation.dataType));

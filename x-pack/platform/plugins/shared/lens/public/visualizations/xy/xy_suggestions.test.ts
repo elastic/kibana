@@ -1682,4 +1682,200 @@ describe('xy_suggestions', () => {
       expect(suggestions[0].state.preferredSeriesType).toBe('bar_stacked');
     });
   });
+
+  describe('preserves chart-level config when columns change', () => {
+    test('preserves legend, axis titles, fitting function, and other chart-level settings', () => {
+      const currentState: XYState = {
+        legend: { isVisible: false, position: 'bottom' },
+        valueLabels: 'show',
+        preferredSeriesType: 'line',
+        fittingFunction: 'Carry',
+        curveType: 'CURVE_MONOTONE_X',
+        fillOpacity: 0.3,
+        xTitle: 'Custom X',
+        yTitle: 'Custom Y',
+        yRightTitle: 'Custom Y Right',
+        hideEndzones: true,
+        showCurrentTimeMarker: true,
+        yLeftExtent: { mode: 'custom', lowerBound: 0, upperBound: 100 },
+        yRightExtent: { mode: 'full' },
+        yLeftScale: 'log',
+        yRightScale: 'sqrt',
+        axisTitlesVisibilitySettings: { x: false, yLeft: false, yRight: false },
+        tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: false },
+        labelsOrientation: { x: -90, yLeft: -45, yRight: 0 },
+        gridlinesVisibilitySettings: { x: false, yLeft: false, yRight: true },
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            xAccessor: 'date',
+            accessors: ['avgBytes'],
+            splitAccessors: undefined,
+          },
+        ],
+      };
+
+      // Simulate a column change: table now has different accessor IDs
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('maxBytes'), dateCol('timestamp')],
+          layerId: 'first',
+          changeType: 'extended',
+        },
+        keptLayerIds: ['first'],
+        state: currentState,
+      });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      const suggestion = suggestions[0];
+
+      // Chart-level settings should be preserved from currentState
+      expect(suggestion.state.legend).toEqual({ isVisible: false, position: 'bottom' });
+      expect(suggestion.state.valueLabels).toBe('show');
+      expect(suggestion.state.fittingFunction).toBe('Carry');
+      expect(suggestion.state.curveType).toBe('CURVE_MONOTONE_X');
+      expect(suggestion.state.fillOpacity).toBe(0.3);
+      expect(suggestion.state.xTitle).toBe('Custom X');
+      expect(suggestion.state.yTitle).toBe('Custom Y');
+      expect(suggestion.state.yRightTitle).toBe('Custom Y Right');
+      expect(suggestion.state.hideEndzones).toBe(true);
+      expect(suggestion.state.showCurrentTimeMarker).toBe(true);
+      expect(suggestion.state.yLeftExtent).toEqual({
+        mode: 'custom',
+        lowerBound: 0,
+        upperBound: 100,
+      });
+      expect(suggestion.state.yRightExtent).toEqual({ mode: 'full' });
+      expect(suggestion.state.yLeftScale).toBe('log');
+      expect(suggestion.state.yRightScale).toBe('sqrt');
+      expect(suggestion.state.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: false,
+        yRight: false,
+      });
+      expect(suggestion.state.tickLabelsVisibilitySettings).toEqual({
+        x: false,
+        yLeft: true,
+        yRight: false,
+      });
+      expect(suggestion.state.labelsOrientation).toEqual({ x: -90, yLeft: -45, yRight: 0 });
+      expect(suggestion.state.gridlinesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: false,
+        yRight: true,
+      });
+
+      // Column-dependent layer config should use the new columns, not the old ones
+      const dataLayer = suggestion.state.layers[0] as XYDataLayerConfig;
+      expect(dataLayer.accessors).toContain('maxBytes');
+      expect(dataLayer.xAccessor).toBe('timestamp');
+    });
+
+    test('preserves chart-level settings when columns are added', () => {
+      const currentState: XYState = {
+        legend: { isVisible: false, position: 'left' },
+        valueLabels: 'show',
+        preferredSeriesType: 'area',
+        axisTitlesVisibilitySettings: { x: false, yLeft: false, yRight: true },
+        tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: true },
+        labelsOrientation: { x: 0, yLeft: -90, yRight: 0 },
+        gridlinesVisibilitySettings: { x: true, yLeft: false, yRight: false },
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            xAccessor: 'date',
+            accessors: ['bytes'],
+            splitAccessors: undefined,
+          },
+        ],
+      };
+
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('bytes'), numCol('memory'), dateCol('date')],
+          layerId: 'first',
+          changeType: 'extended',
+        },
+        keptLayerIds: ['first'],
+        state: currentState,
+      });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      const suggestion = suggestions[0];
+
+      expect(suggestion.state.legend).toEqual({ isVisible: false, position: 'left' });
+      expect(suggestion.state.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: false,
+        yRight: true,
+      });
+      expect(suggestion.state.tickLabelsVisibilitySettings).toEqual({
+        x: true,
+        yLeft: false,
+        yRight: true,
+      });
+
+      const dataLayer = suggestion.state.layers[0] as XYDataLayerConfig;
+      expect(dataLayer.accessors).toEqual(expect.arrayContaining(['bytes', 'memory']));
+    });
+
+    test('preserves chart-level settings for textBased datasource with isMultiRow: false', () => {
+      const currentState: XYState = {
+        legend: { isVisible: false, position: 'bottom' },
+        valueLabels: 'show',
+        preferredSeriesType: 'line',
+        fittingFunction: 'Carry',
+        xTitle: 'Custom X',
+        yTitle: 'Custom Y',
+        yRightTitle: 'Custom Y Right',
+        axisTitlesVisibilitySettings: { x: false, yLeft: false, yRight: true },
+        tickLabelsVisibilitySettings: { x: true, yLeft: false, yRight: true },
+        labelsOrientation: { x: 0, yLeft: -90, yRight: 0 },
+        gridlinesVisibilitySettings: { x: true, yLeft: false, yRight: false },
+        layers: [
+          {
+            layerId: 'oldLayer',
+            layerType: LayerTypes.DATA,
+            seriesType: 'line',
+            xAccessor: 'timestamp',
+            accessors: ['avgBytes'],
+            splitAccessors: undefined,
+          },
+        ],
+      };
+
+      const suggestions = getSuggestions({
+        table: {
+          isMultiRow: false,
+          columns: [numCol('maxBytes'), dateCol('date')],
+          layerId: 'newLayer',
+          changeType: 'initial',
+        },
+        keptLayerIds: ['newLayer'],
+        state: currentState,
+        datasourceId: 'textBased',
+      });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+      const suggestion = suggestions[0];
+
+      expect(suggestion.state.legend).toEqual({ isVisible: false, position: 'bottom' });
+      expect(suggestion.state.valueLabels).toBe('show');
+      expect(suggestion.state.fittingFunction).toBe('Carry');
+      expect(suggestion.state.xTitle).toBe('Custom X');
+      expect(suggestion.state.yTitle).toBe('Custom Y');
+      expect(suggestion.state.yRightTitle).toBe('Custom Y Right');
+      expect(suggestion.state.preferredSeriesType).toBe('line');
+
+      const dataLayer = suggestion.state.layers[0] as XYDataLayerConfig;
+      expect(dataLayer.accessors).toContain('maxBytes');
+      expect(dataLayer.xAccessor).toBe('date');
+    });
+  });
 });
