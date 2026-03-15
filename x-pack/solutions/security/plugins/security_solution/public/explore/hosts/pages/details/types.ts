@@ -15,11 +15,13 @@ import type { hostsModel } from '../../store';
 
 interface HostBodyComponentDispatchProps {
   detailName: string;
+  entityIdentifiers: Record<string, string>;
   hostDetailsPagePath: string;
 }
 
 export interface HostDetailsProps {
   detailName: string;
+  entityIdentifiers: Record<string, string>;
   hostDetailsPagePath: string;
 }
 

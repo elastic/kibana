@@ -9,13 +9,15 @@ import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import type { StatItems } from '../../../../components/stat_items';
 import { KpiBaseComponent } from '../../../../components/kpi';
-import { kpiTotalUsersMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_metric';
+import { getKpiTotalUsersMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_metric';
 import { getKpiTotalUsersAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_area';
+import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import * as i18n from './translations';
 import type { UsersKpiProps } from '../types';
 
 export const useGetUsersStatItems: () => Readonly<StatItems[]> = () => {
   const { euiTheme } = useEuiTheme();
+  const spaceId = useSpaceId();
   return useMemo(
     () => [
       {
@@ -25,15 +27,15 @@ export const useGetUsersStatItems: () => Readonly<StatItems[]> = () => {
             key: 'users',
             color: euiTheme.colors.vis.euiColorVis0,
             icon: 'storage',
-            lensAttributes: kpiTotalUsersMetricLensAttributes,
+            lensAttributes: getKpiTotalUsersMetricLensAttributes(spaceId),
           },
         ],
         enableAreaChart: true,
         description: i18n.USERS,
-        getAreaChartLensAttributes: getKpiTotalUsersAreaLensAttributes,
+        getAreaChartLensAttributes: getKpiTotalUsersAreaLensAttributes(spaceId),
       },
     ],
-    [euiTheme.colors.vis.euiColorVis0]
+    [euiTheme.colors.vis.euiColorVis0, spaceId]
   );
 };
 

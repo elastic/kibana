@@ -11,16 +11,16 @@ import { TestProviders } from '../../../../common/mock';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HostRiskScoreQueryTabBody } from './host_risk_score_tab_body';
 import { HostsType } from '../../store/model';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useHostRiskScoresFromEntityStore } from '../../../../entity_analytics/api/hooks/use_host_risk_scores_from_entity_store';
 import { useRiskScoreKpi } from '../../../../entity_analytics/api/hooks/use_risk_score_kpi';
 
 jest.mock('../../../../entity_analytics/api/hooks/use_risk_score_kpi');
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
+jest.mock('../../../../entity_analytics/api/hooks/use_host_risk_scores_from_entity_store');
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../../common/lib/kibana');
 
 describe('Host risk score query tab body', () => {
-  const mockUseRiskScore = useRiskScore as jest.Mock;
+  const mockUseHostRiskScoresFromEntityStore = useHostRiskScoresFromEntityStore as jest.Mock;
   const mockUseRiskScoreKpi = useRiskScoreKpi as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const defaultProps = {
@@ -44,22 +44,14 @@ describe('Host risk score query tab body', () => {
         critical: 12,
       },
     });
-    mockUseRiskScore.mockReturnValue([
-      false,
-      {
-        hosts: [],
-        id: '123',
-        inspect: {
-          dsl: [],
-          response: [],
-        },
-        isInspected: false,
-        totalCount: 0,
-        pageInfo: { activePage: 1, fakeTotalCount: 100, showMorePagesIndicator: false },
-        loadPage: jest.fn(),
-        refetch: jest.fn(),
-      },
-    ]);
+    mockUseHostRiskScoresFromEntityStore.mockReturnValue({
+      data: [],
+      totalCount: 0,
+      loading: false,
+      refetch: jest.fn(),
+      inspect: { dsl: [], response: [], indexPattern: [] },
+      hasEngineBeenInstalled: true,
+    });
   });
   it('toggleStatus=true, do not skip', () => {
     render(
@@ -67,7 +59,7 @@ describe('Host risk score query tab body', () => {
         <HostRiskScoreQueryTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
+    expect(mockUseHostRiskScoresFromEntityStore.mock.calls[0][0].skip).toEqual(false);
     expect(mockUseRiskScoreKpi.mock.calls[0][0].skip).toEqual(false);
   });
   it('toggleStatus=false, skip', () => {
@@ -77,7 +69,7 @@ describe('Host risk score query tab body', () => {
         <HostRiskScoreQueryTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
+    expect(mockUseHostRiskScoresFromEntityStore.mock.calls[0][0].skip).toEqual(true);
     expect(mockUseRiskScoreKpi.mock.calls[0][0].skip).toEqual(true);
   });
 });

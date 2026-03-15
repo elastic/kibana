@@ -6,16 +6,18 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
+import { euid } from '../../../../../../../../plugins/entity_store/common';
 import type { RelatedHostsRequestOptions } from '../../../../../../common/api/search_strategy';
 
 export const buildRelatedHostsQuery = ({
-  userName,
+  entityIdentifiers,
   defaultIndex,
   from,
 }: RelatedHostsRequestOptions): ISearchRequestParams => {
   const now = new Date();
+  const entityFilters = euid.getEuidDslFilterBasedOnDocument('host', entityIdentifiers);
   const filter = [
-    { term: { 'user.name': userName } },
+    ...(entityFilters ? [entityFilters] : []),
     { term: { 'event.category': 'authentication' } },
     { term: { 'event.outcome': 'success' } },
     {

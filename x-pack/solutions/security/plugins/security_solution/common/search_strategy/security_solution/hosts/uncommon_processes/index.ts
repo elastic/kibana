@@ -32,11 +32,16 @@ export interface HostsUncommonProcessesEdges {
   cursor: CursorType;
 }
 
+/** Host with entityIdentifiers for HostDetailsLink URL resolution */
+export type HostsUncommonProcessHostItem = HostEcs & {
+  entityIdentifiers?: Record<string, string>;
+};
+
 export interface HostsUncommonProcessItem {
   _id: string;
   instances: number;
   process: ProcessEcs;
-  hosts: HostEcs[];
+  hosts: HostsUncommonProcessHostItem[];
   user?: Maybe<UserEcs>;
 }
 
@@ -48,12 +53,16 @@ type ProcessUserFields = CommonFields &
     [Property in keyof UserEcs as `user.${Property}`]: unknown[];
   }>;
 
+export interface HostsUncommonProcessHost {
+  id: string[] | undefined;
+  name: string[] | undefined;
+  /** Entity identifiers for HostDetailsLink URL resolution (host.entity.id, host.id, host.name, host.hostname) */
+  entityIdentifiers?: Record<string, string>;
+}
+
 export interface HostsUncommonProcessHit extends Hit {
   total: TotalHit;
-  host: Array<{
-    id: string[] | undefined;
-    name: string[] | undefined;
-  }>;
+  host: HostsUncommonProcessHost[];
   fields: ProcessUserFields;
   cursor: string;
   sort: StringOrNumber[];

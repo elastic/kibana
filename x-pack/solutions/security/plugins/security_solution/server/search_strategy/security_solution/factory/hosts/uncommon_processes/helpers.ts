@@ -41,12 +41,57 @@ export const getHits = (
     host: getHosts(bucket.hosts.buckets),
   }));
 
+/**
+ * Display name always uses host.name.
+ * entityIdentifiers use EUID priority for link URL resolution.
+ */
+const HOST_EUID_FIELDS = [
+  'host.entity.id',
+  'host.id',
+  'host.name',
+  'host.hostname',
+] as const;
+
+const getHostDisplayNameFromFields = (
+  fields: Record<string, unknown> | undefined
+): string[] | undefined => {
+  if (!fields) return undefined;
+  const value = get('host.name', fields);
+  if (Array.isArray(value) && value.length > 0 && value[0] != null && value[0] !== '') {
+    return value as string[];
+  }
+  return undefined;
+};
+
+export type HostEntityIdentifiers = Record<string, string>;
+
+/**
+ * Builds entityIdentifiers from host fields (same priority as entity store EUID).
+ * Used for HostDetailsLink to resolve the correct entity in the URL.
+ */
+const getHostEntityIdentifiersFromFields = (
+  fields: Record<string, unknown> | undefined
+): HostEntityIdentifiers | undefined => {
+  if (!fields) return undefined;
+  const identifiers: HostEntityIdentifiers = {};
+  for (const field of HOST_EUID_FIELDS) {
+    const value = get(field, fields);
+    if (Array.isArray(value) && value.length > 0 && value[0] != null && value[0] !== '') {
+      identifiers[field] = String(value[0]);
+      return identifiers;
+    }
+  }
+  return Object.keys(identifiers).length > 0 ? identifiers : undefined;
+};
+
 export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>) =>
   buckets.map((bucket) => {
     const fields = get('host.hits.hits[0].fields', bucket);
+    const fieldsRecord = fields as Record<string, unknown>;
     return {
       id: [bucket.key],
-      name: get('host.name', fields),
+      name: getHostDisplayNameFromFields(fieldsRecord),
+      entityIdentifiers: getHostEntityIdentifiersFromFields(fieldsRecord),
     };
   });
 
