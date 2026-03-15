@@ -472,7 +472,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       request
     );
 
-    const agentPolicies = [];
+    const agentPolicies: AgentPolicy[] = [];
 
     for (const policyId of enrichedPackagePolicy.policy_ids) {
       const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
@@ -654,6 +654,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           created_by: options?.user?.username ?? 'system',
           updated_at: isoDate,
           updated_by: options?.user?.username ?? 'system',
+          package_agent_version_condition: pkgInfo.conditions?.agent?.version,
         },
 
         { ...options, id: packagePolicyId }
@@ -1645,6 +1646,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           revision: oldPackagePolicy.revision + 1,
           updated_at: new Date().toISOString(),
           updated_by: options?.user?.username ?? 'system',
+          package_agent_version_condition: pkgInfo?.conditions?.agent?.version,
         },
         {
           version,
@@ -2258,7 +2260,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     ];
 
     const hostedAgentPolicies: string[] = [];
-    const agentlessAgentPolicies = [];
+    const agentlessAgentPolicies: string[] = [];
 
     for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {

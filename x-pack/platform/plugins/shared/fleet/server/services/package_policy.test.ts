@@ -681,6 +681,47 @@ describe('Package policy service', () => {
       );
     });
 
+    it('should store package_agent_version_condition on saved object when package manifest has agent version condition', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: {},
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet();
+
+      await packagePolicyService.create(
+        soClient,
+        esClient,
+        {
+          name: 'Test Package Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: {
+            name: 'apache',
+            title: 'Apache',
+            version: '1.3.2',
+          },
+        },
+        { id: 'test-package-policy', skipUniqueNameVerification: true }
+      );
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          package_agent_version_condition: '>=9.3.0',
+        }),
+        expect.anything()
+      );
+    });
+
     it('should set hasAgentVersionConditions in bumpRevision when package has agent version condition in hbs template', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
