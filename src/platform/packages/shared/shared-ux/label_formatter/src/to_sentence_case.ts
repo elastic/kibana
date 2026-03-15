@@ -43,6 +43,8 @@ const TITLE_CASE_GLOSSARY = [
   'AI',
   'Ingest and Integrations',
   'API keys',
+  'API Endpoint',
+  'Platform Migration',
   'Detection rules (SIEM)',
   'SLOs',
   'TLS certificates',

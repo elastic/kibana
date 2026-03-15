@@ -298,7 +298,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Fleet server unhealthy status
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
   const { isFleetServerStandalone } = useFleetServerStandalone();
-  const showUnhealthyCallout = isFleetServerUnhealthy && !isFleetServerStandalone;
+  const showUnhealthyCallout = false;
 
   const { shouldDisplayAgentSoftLimit } = useAgentSoftLimit();
 

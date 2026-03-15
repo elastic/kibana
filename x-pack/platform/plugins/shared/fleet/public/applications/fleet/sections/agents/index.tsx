@@ -68,35 +68,14 @@ export const AgentsApp: React.FunctionComponent = () => {
     return <NoAccessPage />;
   }
 
-  const rightColumn = displayInstructions ? (
-    <>
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            onClick={() => flyoutContext.openEnrollmentFlyout()}
-            data-test-subj="addAgentBtnTop"
-          >
-            <FormattedMessage id="xpack.fleet.addAgentButton" defaultMessage="Add Agent" />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  ) : undefined;
-
   return (
     <Routes>
       <Route path={FLEET_ROUTING_PATHS.agent_details}>
         <AgentDetailsPage />
       </Route>
       <Route path={FLEET_ROUTING_PATHS.agents}>
-        <DefaultLayout section="agents" rightColumn={rightColumn}>
-          {displayInstructions ? (
-            <FleetServerRequirementPage showEnrollmentRecommendation={false} />
-          ) : (
-            <AgentListPage />
-          )}
+        <DefaultLayout section="agents">
+          <AgentListPage />
         </DefaultLayout>
       </Route>
     </Routes>
