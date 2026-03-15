@@ -28,6 +28,8 @@ describe('CertificateList', () => {
         sort={sort}
         onChange={jest.fn()}
         certificates={{ isLoading: false, total: 0, certs: [] }}
+        expiryThreshold={30}
+        ageThreshold={730}
       />
     );
 
@@ -71,6 +73,8 @@ describe('CertificateList', () => {
             } as Cert,
           ],
         }}
+        expiryThreshold={30}
+        ageThreshold={730}
       />
     );
 
