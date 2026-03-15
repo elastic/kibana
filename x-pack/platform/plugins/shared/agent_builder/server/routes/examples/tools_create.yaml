@@ -3,7 +3,7 @@ requestBody:
     application/json:
       examples:
         createEsqlToolRequest:
-          description: "Example request to create an ESQL query tool with a pre-defined query"
+          description: "Example request to create an ES|QL query tool with a pre-defined query and a default fallback value for an optional parameter"
           value:
             id: example-esql-tool
             type: esql
@@ -20,6 +20,8 @@ requestBody:
                 limit:
                   type: integer
                   description: Maximum number of results to return
+                  optional: true
+                  defaultValue: 10
         createIndexSearchToolRequest:
           description: "Example request to create an index_search tool with a pre-defined index pattern"
           value:
@@ -55,6 +57,8 @@ responses:
                   limit:
                     type: integer
                     description: Maximum number of results to return
+                    optional: true
+                    defaultValue: 10
               readonly: false
               schema:
                 type: object
@@ -65,10 +69,10 @@ responses:
                     description: Start time for the analysis in ISO format
                   limit:
                     type: integer
+                    default: 10
                     description: Maximum number of results to return
                 required:
                   - startTime
-                  - limit
                 additionalProperties: false
                 description: Parameters needed to execute the query
                 "$schema": http://json-schema.org/draft-07/schema#
@@ -116,7 +120,9 @@ x-codeSamples:
            },
            "limit": {
              "type": "integer",
-             "description": "Maximum number of results to return"
+             "description": "Maximum number of results to return",
+             "optional": true,
+             "defaultValue": 10
            }
          }
        }
@@ -138,7 +144,9 @@ x-codeSamples:
           },
           "limit": {
             "type": "integer",
-            "description": "Maximum number of results to return"
+            "description": "Maximum number of results to return",
+            "optional": true,
+            "defaultValue": 10
           }
         }
       }
