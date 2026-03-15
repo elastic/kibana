@@ -57,6 +57,8 @@ import type {
   SavedObjectsChangeAccessControlObject,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
+  SavedObjectsEsqlOptions,
+  SavedObjectsEsqlResponse,
 } from './apis';
 
 /**
@@ -196,6 +198,16 @@ export interface ISavedObjectsRepository {
   search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
     options: SavedObjectsSearchOptions
   ): Promise<SavedObjectsSearchResponse<T, A>>;
+
+  /**
+   * Performs an ES|QL query against the saved objects indices, returning the raw Elasticsearch response
+   * @param options {@link SavedObjectsEsqlOptions} - options for the ES|QL query operation
+   * @returns the {@link SavedObjectsEsqlResponse}
+   *
+   * @remarks While the `esql` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Use the `esql` tagged template from `@kbn/esql-language` or ES|QL params (`?` placeholders) to safely interpolate user input. Carefully consider how you would like to use this method in your plugin to unlock value for users.
+   * @remarks See tutorial https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects-esql
+   */
+  esql(options: SavedObjectsEsqlOptions): Promise<SavedObjectsEsqlResponse>;
 
   /**
    * Returns an array of objects by id

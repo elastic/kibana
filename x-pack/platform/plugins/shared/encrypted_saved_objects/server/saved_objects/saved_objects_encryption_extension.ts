@@ -72,6 +72,10 @@ export class SavedObjectsEncryptionExtension implements ISavedObjectsEncryptionE
     return response;
   }
 
+  getEncryptedAttributes(type: string): ReadonlySet<string> | undefined {
+    return this._service.getEncryptedAttributes(type);
+  }
+
   async encryptAttributes<T extends Record<string, unknown>>(
     descriptor: EncryptedObjectDescriptor,
     attributes: T
