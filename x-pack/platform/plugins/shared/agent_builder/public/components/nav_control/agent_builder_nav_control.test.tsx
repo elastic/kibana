@@ -56,7 +56,7 @@ describe('AgentBuilderNavControl', () => {
       </IntlProvider>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Open Agent Builder' }));
+    fireEvent.click(screen.getByRole('button', { name: 'AI Agent' }));
     expect(toggleChat).toHaveBeenCalledTimes(1);
   });
 

@@ -21,7 +21,7 @@ const resolvedIconType = (iconType: AiButtonIconType): IconType =>
   iconType === 'aiAssistantLogo' ? AiAssistantLogo : iconType;
 
 // Per design: only xs uses small icon; s and m both use medium icon.
-const getSyncedIconSize = (size?: string): 's' | 'm' => (size === 'xs' ? 's' : 'm');
+const getSyncedIconSize = (size?: 'xs' | 's' | 'm') => (size === 'xs' ? 's' : 'm');
 
 export const AiButtonBase = (props: AiButtonProps) => {
   const variant: AiButtonVariant = props.variant ?? 'base';
