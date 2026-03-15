@@ -69,6 +69,7 @@ export const addRoundCompleteEvent = ({
   stateManager,
   attachmentStateManager,
   configurationOverrides,
+  estimatedPreviousContextTokens = 0,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -79,6 +80,7 @@ export const addRoundCompleteEvent = ({
   attachmentStateManager: AttachmentStateManager;
   endTime?: Date;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  estimatedPreviousContextTokens?: number;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -98,6 +100,7 @@ export const addRoundCompleteEvent = ({
                 modelProvider,
                 attachmentRefs,
                 configurationOverrides,
+                estimatedPreviousContextTokens,
               })
             : createRound({
                 events,
@@ -107,6 +110,7 @@ export const addRoundCompleteEvent = ({
                 modelProvider,
                 attachmentRefs,
                 configurationOverrides,
+                estimatedPreviousContextTokens,
               });
 
           round.state = buildRoundState({ round, events, stateManager });
@@ -137,6 +141,7 @@ const resumeRound = ({
   modelProvider,
   attachmentRefs,
   configurationOverrides,
+  estimatedPreviousContextTokens = 0,
 }: {
   pendingRound: ConversationRound;
   events: SourceEvents[];
@@ -146,6 +151,7 @@ const resumeRound = ({
   modelProvider: ModelProvider;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  estimatedPreviousContextTokens?: number;
 }): ConversationRound => {
   // resuming / replaying tool events for the pending step
   const lastStep = pendingRound.steps[pendingRound.steps.length - 1];
@@ -173,6 +179,7 @@ const resumeRound = ({
     modelProvider,
     attachmentRefs,
     configurationOverrides,
+    estimatedPreviousContextTokens,
   });
 
   return mergeRounds(pendingRound, followUp);
@@ -248,6 +255,7 @@ const createRound = ({
   modelProvider,
   attachmentRefs,
   configurationOverrides,
+  estimatedPreviousContextTokens = 0,
 }: {
   events: SourceEvents[];
   input: RoundInput;
@@ -256,6 +264,7 @@ const createRound = ({
   modelProvider: ModelProvider;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  estimatedPreviousContextTokens?: number;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -298,6 +307,19 @@ const createRound = ({
     ? thinkingCompleteEvent.data.time_to_first_token
     : timeToLastToken;
 
+  const steps = stepEvents.flatMap(eventToStep);
+  const response = lastMessage
+    ? {
+        message: lastMessage.message_content,
+        structured_output: lastMessage.structured_output,
+      }
+    : { message: '' };
+
+  const currentRoundTokens = Math.ceil(
+    (JSON.stringify(steps).length + JSON.stringify(input).length + JSON.stringify(response).length) /
+      4
+  );
+
   const round: ConversationRound = {
     id: uuidv4(),
     status: promptRequest
@@ -309,18 +331,16 @@ const createRound = ({
       ...input,
       ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
     },
-    steps: stepEvents.flatMap(eventToStep),
+    steps,
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,
-    model_usage: getModelUsage(modelProvider.getUsageStats()),
-    response: lastMessage
-      ? {
-          message: lastMessage.message_content,
-          structured_output: lastMessage.structured_output,
-        }
-      : { message: '' },
+    model_usage: {
+      ...getModelUsage(modelProvider.getUsageStats()),
+      estimated_context_tokens: estimatedPreviousContextTokens + currentRoundTokens,
+    },
+    response,
     configuration_overrides: configurationOverrides,
   };
 
@@ -431,5 +451,6 @@ const mergeModelUsage = (
     input_tokens: a.input_tokens + b.input_tokens,
     output_tokens: a.output_tokens + b.output_tokens,
     model: a.model ?? b.model,
+    estimated_context_tokens: b.estimated_context_tokens ?? a.estimated_context_tokens,
   };
 };
