@@ -59,7 +59,7 @@ export interface JsonSchema {
 
   // Structure
   properties?: Record<string, JsonSchema>;
-  additionalProperties?: boolean | JsonSchema;
+  additionalProperties?: boolean;
   items?: JsonSchema | JsonSchema[];
   required?: string[];
 
@@ -140,7 +140,7 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
 
       // --- Object Properties ---
       properties: z.record(z.string(), JsonModelShapeSchema).optional(),
-      additionalProperties: z.union([z.boolean(), JsonModelShapeSchema]).optional(),
+      additionalProperties: z.boolean().optional(),
       required: z.array(z.string()).optional(),
 
       // --- Array Properties ---

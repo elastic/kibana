@@ -159,10 +159,7 @@ describe('Security Workflow Example - JSON Schema Showcase', () => {
                   },
                   iocs: {
                     type: 'object',
-                    additionalProperties: {
-                      type: 'array',
-                      items: { type: 'string' },
-                    },
+                    additionalProperties: false,
                     description: 'Additional indicators of compromise',
                   },
                 },

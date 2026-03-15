@@ -121,9 +121,7 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
               },
               preferences: {
                 type: 'object',
-                additionalProperties: {
-                  type: 'string',
-                },
+                additionalProperties: false,
                 properties: {
                   newsletter: {
                     type: 'boolean',
