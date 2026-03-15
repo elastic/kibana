@@ -275,7 +275,7 @@ describe('Exceptions List Api Client', () => {
         headers: { 'Content-Type': undefined },
         body: expect.any(FormData),
         query: {
-          overwrite: false,
+          overwrite: true,
         },
       });
     });
