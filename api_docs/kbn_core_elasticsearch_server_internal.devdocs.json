@@ -2984,7 +2984,7 @@
           "<string | undefined>; }>"
         ],
         "path": "src/core/packages/elasticsearch/server-internal/src/elasticsearch_config.ts",
-        "lineNumber": 61,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
