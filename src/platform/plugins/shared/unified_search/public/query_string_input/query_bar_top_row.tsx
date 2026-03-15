@@ -42,6 +42,7 @@ import {
   EuiToolTip,
   EuiButton,
   EuiButtonIcon,
+  EuiIcon,
   EuiIconTip,
   useEuiTheme,
   type EuiTimeZoneDisplayProps,
@@ -67,6 +68,10 @@ import { shallowEqual } from '../utils/shallow_equal';
 const BUTTON_MIN_WIDTH = 108;
 
 export const strings = {
+  getFilterToggleTooltip: () =>
+    i18n.translate('unifiedSearch.queryBar.filterPanelToggle.tooltip', {
+      defaultMessage: 'Tip: double click or use Cmd+Shift+F (Ctrl+Shift+F on Windows) to add a filter',
+    }),
   getNeedsUpdatingLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
       defaultMessage: 'Needs updating',
@@ -174,6 +179,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
   filterBar?: React.ReactNode;
+  isFiltersVisible?: boolean;
+  onToggleFiltersVisible?: () => void;
+  onDoubleClickFilterToggle?: () => void;
+  addFilterOpenFromToggle?: boolean;
+  onAddFilterFromToggleClose?: () => void;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
   /**
@@ -288,9 +298,11 @@ export const QueryBarTopRow = React.memo(
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
+    const [suppressFilterToggleTooltip, setSuppressFilterToggleTooltip] = useState(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
     const { euiTheme } = useEuiTheme();
+    const filterToggleClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -314,6 +326,12 @@ export const QueryBarTopRow = React.memo(
         setIsCancelling(false);
       }
     }, [props.isLoading]);
+
+    useEffect(() => {
+      return () => {
+        if (filterToggleClickTimer.current) clearTimeout(filterToggleClickTimer.current);
+      };
+    }, []);
 
     const {
       showQueryInput = true,
@@ -901,17 +919,122 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
-    function renderFilterButtonGroup() {
+    function renderFilterToggleButton() {
+      if (!props.showAddFilter) return null;
+      const hasFilters = Boolean(props.filters?.length);
+
+      function handleFilterToggleClick() {
+        setSuppressFilterToggleTooltip(true);
+        if (filterToggleClickTimer.current) {
+          clearTimeout(filterToggleClickTimer.current);
+          filterToggleClickTimer.current = null;
+          props.onDoubleClickFilterToggle?.();
+        } else {
+          filterToggleClickTimer.current = setTimeout(() => {
+            filterToggleClickTimer.current = null;
+            props.onToggleFiltersVisible?.();
+          }, 300);
+        }
+      }
+
+      const filterCount = props.filters?.length ?? 0;
+      const isActive = Boolean(props.isFiltersVisible);
+      const toggleButton = (
+        <button
+          aria-label={i18n.translate('unifiedSearch.queryBar.filterPanelToggle.label', {
+            defaultMessage: 'Toggle filters panel',
+          })}
+          onClick={handleFilterToggleClick}
+          data-test-subj="unifiedFilterPanelToggle"
+          css={css({
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: euiTheme.size.s,
+            padding: `0 ${euiTheme.size.s}`,
+            height: euiTheme.size.xl,
+            minWidth: 0,
+            border: 'none',
+            borderRadius: euiTheme.border.radius.medium,
+            backgroundColor: isActive ? euiTheme.colors.darkShade : '#EDF1F9',
+            color: isActive ? euiTheme.colors.ghost : euiTheme.colors.text,
+            cursor: 'pointer',
+            fontFamily: euiTheme.font.family,
+            fontSize: euiTheme.size.m,
+            fontWeight: euiTheme.font.weight.medium,
+            lineHeight: 1,
+            '&:hover': {
+              backgroundColor: isActive
+                ? euiTheme.colors.darkShade
+                : euiTheme.colors.mediumShade,
+            },
+            '&:focus-visible': {
+              outline: `${euiTheme.focus.width} solid ${euiTheme.focus.color}`,
+              outlineOffset: 2,
+            },
+          })}
+        >
+          <EuiIcon type="filter" size="s" />
+          <span aria-hidden>{filterCount}</span>
+        </button>
+      );
+
       return (
-        (Boolean(props.showAddFilter) || Boolean(props.prepend)) && (
-          <EuiFlexItem grow={false} className="kbnQueryBar__filterButtonGroup">
-            <FilterButtonGroup
-              items={[props.prepend, renderAddButton()]}
-              attached={renderFilterMenuOnly()}
-              size="s"
-            />
-          </EuiFlexItem>
-        )
+        <EuiFlexItem grow={false}>
+          <div
+            css={{ position: 'relative', display: 'inline-flex' }}
+            onMouseLeave={() => setSuppressFilterToggleTooltip(false)}
+          >
+            {suppressFilterToggleTooltip ? (
+              toggleButton
+            ) : (
+              <EuiToolTip position="bottom" content={strings.getFilterToggleTooltip()} delay="long">
+                {toggleButton}
+              </EuiToolTip>
+            )}
+            {props.addFilterOpenFromToggle !== undefined && (
+              <AddFilterPopover
+                indexPatterns={props.indexPatterns}
+                filters={props.filters ?? []}
+                timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                filtersForSuggestions={props.filtersForSuggestions}
+                onFiltersUpdated={props.onFiltersUpdated}
+                buttonProps={{
+                  size: 's',
+                  display: 'empty',
+                  style: {
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                    pointerEvents: 'none',
+                  },
+                }}
+                isDisabled={props.isDisabled}
+                suggestionsAbstraction={props.suggestionsAbstraction}
+                isOpen={props.addFilterOpenFromToggle}
+                onClose={props.onAddFilterFromToggleClose}
+              />
+            )}
+          </div>
+        </EuiFlexItem>
+      );
+    }
+
+    function renderFilterButtonGroup() {
+      // In filter-bar mode the toggle button moves to the top-level row and the
+      // QueryBarMenu moves into the filter panel, so nothing goes here.
+      // In query-only mode (no filter bar) the QueryBarMenu stays in the query row.
+      if (!props.prepend || props.showAddFilter) return null;
+      return (
+        <EuiFlexItem grow={false} className="kbnQueryBar__filterButtonGroup">
+          <FilterButtonGroup
+            items={[props.prepend]}
+            attached={false}
+            size="s"
+          />
+        </EuiFlexItem>
       );
     }
 
@@ -1077,19 +1200,20 @@ export const QueryBarTopRow = React.memo(
                 )}
                 {renderEsqlMenuPopover()}
               </EuiFlexGroup>
-              {!shouldShowDatePickerAsBadge() && props.filterBar}
+              {!shouldShowDatePickerAsBadge() && props.isFiltersVisible && props.filterBar}
               {renderTextLangEditor()}
             </EsqlEditorActionsProvider>
           ) : (
             <>
               <EuiFlexGroup {...queryBarFlexGroupProps}>
+                {renderFilterToggleButton()}
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
                 {renderQueryInput()}
                 {props.renderQueryInputAppend?.()}
                 {shouldShowDatePickerAsBadge() && props.filterBar}
                 {renderDatePickerWithUpdateBtn()}
               </EuiFlexGroup>
-              {!shouldShowDatePickerAsBadge() && props.filterBar}
+              {!shouldShowDatePickerAsBadge() && props.isFiltersVisible && props.filterBar}
               {renderTextLangEditor()}
             </>
           ))}

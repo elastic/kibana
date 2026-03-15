@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { css } from '@emotion/react';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { EuiFlexItem, EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
@@ -35,6 +35,10 @@ interface AddFilterPopoverProps extends WithCloseFilterEditorConfirmModalProps {
   isDisabled?: boolean;
   buttonProps?: Partial<EuiButtonIconProps>;
   suggestionsAbstraction?: SuggestionsAbstraction;
+  /** Externally control the open state (e.g. from double-click on the filter toggle) */
+  isOpen?: boolean;
+  /** Called when the popover closes so the parent can reset its open state */
+  onClose?: () => void;
 }
 
 const customButtonStyles = css({
@@ -54,8 +58,14 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   onLocalFilterUpdate,
   onLocalFilterCreate,
   suggestionsAbstraction,
+  isOpen,
+  onClose,
 }: AddFilterPopoverProps) {
   const [showAddFilterPopover, setShowAddFilterPopover] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) setShowAddFilterPopover(true);
+  }, [isOpen]);
 
   const button = (
     <EuiToolTip delay="long" content={strings.getAddFilterButtonLabel()} disableScreenReaderOutput>
@@ -74,8 +84,11 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   );
 
   const closePopover = useCallback(() => {
-    onCloseFilterPopover([() => setShowAddFilterPopover(false)]);
-  }, [onCloseFilterPopover]);
+    onCloseFilterPopover([() => {
+      setShowAddFilterPopover(false);
+      onClose?.();
+    }]);
+  }, [onCloseFilterPopover, onClose]);
 
   return (
     <EuiFlexItem grow={false}>
