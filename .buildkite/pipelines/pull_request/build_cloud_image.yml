@@ -2,8 +2,10 @@ steps:
   - command: .buildkite/scripts/steps/cloud/build_cloud_image.sh
     label: 'Build Cloud Image'
     agents:
-      machineType: n2-standard-2
+      machineType: c4d-standard-2
+      diskType: hyperdisk-balanced
       preemptible: true
+      spotZones: us-central1-c,us-central1-a
     depends_on:
       - build
     timeout_in_minutes: 60

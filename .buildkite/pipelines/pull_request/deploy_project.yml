@@ -3,10 +3,12 @@ steps:
     label: 'Build Project Image'
     key: build_project_image
     agents:
-      machineType: n2-standard-16
+      machineType: c4d-standard-32
+      diskType: hyperdisk-balanced
       preemptible: true
+      spotZones: us-central1-c,us-central1-a
       diskSizeGb: 150
-    timeout_in_minutes: 90
+    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
