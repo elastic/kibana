@@ -21,7 +21,6 @@ export function getReadResponseBodySchema(isDashboardAppRequest: boolean) {
     id: schema.string(),
     data: getDashboardStateSchema(isDashboardAppRequest),
     meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, resolveMetaSchema]),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
     warnings: schema.maybe(schema.arrayOf(schema.string())),
   });
 }

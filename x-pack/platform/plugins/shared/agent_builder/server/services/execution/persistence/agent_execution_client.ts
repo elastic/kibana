@@ -5,16 +5,17 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import type { AgentExecution, SerializedExecutionError } from '../types';
+import type { AgentExecution, SerializedExecutionError, FindExecutionsOptions } from '../types';
 import { ExecutionStatus } from '../types';
 import type { AgentExecutionProperties, AgentExecutionStorage } from './agent_execution_storage';
 import { agentExecutionIndexName, createStorage } from './agent_execution_storage';
 
 type CreateExecutionParams = Pick<
   AgentExecution,
-  'executionId' | 'agentId' | 'spaceId' | 'agentParams'
+  'executionId' | 'agentId' | 'spaceId' | 'agentParams' | 'metadata'
 >;
 
 /**
@@ -38,6 +39,7 @@ const fromEs = (source: AgentExecutionProperties): AgentExecution => {
     eventCount: source.event_count ?? 0,
     events: source.events ?? [],
     ...(source.error ? { error: source.error } : {}),
+    ...(source.metadata ? { metadata: source.metadata } : {}),
   };
 };
 
@@ -77,6 +79,9 @@ export interface AgentExecutionClient {
     executionId: string,
     since?: number
   ): Promise<{ events: ChatEvent[]; status: ExecutionStatus; error?: SerializedExecutionError }>;
+
+  /** Search executions by metadata and/or status filters. */
+  find(options: FindExecutionsOptions): Promise<AgentExecution[]>;
 }
 
 export const createAgentExecutionClient = ({
@@ -110,7 +115,16 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     agentId,
     spaceId,
     agentParams,
+    metadata,
   }: CreateExecutionParams): Promise<AgentExecution> {
+    if (metadata) {
+      for (const key of Object.keys(metadata)) {
+        if (!key) {
+          throw new Error(`Invalid metadata key "${key}": keys must be non-empty`);
+        }
+      }
+    }
+
     const now = new Date().toISOString();
     const document: AgentExecutionProperties = {
       execution_id: executionId,
@@ -121,6 +135,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       agent_params: agentParams,
       event_count: 0,
       events: [],
+      ...(metadata ? { metadata } : {}),
     };
 
     await this.storage.getClient().index({
@@ -137,6 +152,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       agentParams,
       eventCount: 0,
       events: [],
+      ...(metadata ? { metadata } : {}),
     };
   }
 
@@ -222,6 +238,48 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       status: source.status,
       ...(source.error ? { error: source.error } : {}),
     };
+  }
+
+  async find(options: FindExecutionsOptions): Promise<AgentExecution[]> {
+    const {
+      spaceId,
+      filter = {},
+      size = 10,
+      sort = { field: '@timestamp', order: 'desc' },
+    } = options;
+
+    if (!spaceId) {
+      throw new Error('findExecutions requires a spaceId');
+    }
+
+    const must: QueryDslQueryContainer[] = [{ term: { space_id: spaceId } }];
+
+    if (filter.metadata) {
+      for (const [key, value] of Object.entries(filter.metadata)) {
+        must.push({ term: { [`metadata.${key}`]: value } });
+      }
+    }
+
+    if (filter.status?.length) {
+      must.push({ terms: { status: filter.status } });
+    }
+
+    try {
+      const response = await this.esClient.search<AgentExecutionProperties>({
+        index: agentExecutionIndexName,
+        size,
+        sort: [{ [sort.field]: { order: sort.order } }],
+        _source_excludes: ['events'],
+        query: { bool: { must } },
+      });
+
+      return response.hits.hits.flatMap((hit) => (hit._source ? [fromEs(hit._source)] : []));
+    } catch (err) {
+      if (err?.meta?.statusCode === 404) {
+        return [];
+      }
+      throw err;
+    }
   }
 
   /**
