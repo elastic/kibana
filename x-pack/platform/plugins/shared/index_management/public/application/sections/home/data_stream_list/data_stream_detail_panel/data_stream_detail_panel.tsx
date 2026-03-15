@@ -50,12 +50,14 @@ import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
 import {
   isDataStreamFullyManagedByILM,
   isDataStreamFullyManagedByDSL,
+  isIlmPreferred,
 } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { useIlmLocator } from '../../../../services/use_ilm_locator';
 import { StreamsPromotion } from './streams_promotion';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '../../../../..';
+import { DataRetentionValue } from '../data_retention_value';
 
 interface Detail {
   name: string;
@@ -396,10 +398,13 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         }),
         content: (
           <ConditionalWrap
-            condition={isDataStreamFullyManagedByILM(dataStream)}
+            /** I suspect this is duplicate / conflicting */
+            condition={isDataStreamFullyManagedByILM(dataStream) && !isIlmPreferred(dataStream)}
             wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
           >
-            <>{getLifecycleValue(lifecycle)}</>
+            <>
+              <DataRetentionValue dataStream={dataStream} />
+            </>
           </ConditionalWrap>
         ),
         dataTestSubj: 'dataRetentionDetail',
@@ -585,7 +590,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                   }
                 ),
                 'data-test-subj': 'editDataRetentionButton',
-                icon: <EuiIcon type="pencil" size="m" />,
+                icon: <EuiIcon type="pencil" size="m" aria-hidden={true} />,
                 onClick: () => {
                   closePopover();
                   setIsEditingDataRetention(true);
@@ -601,7 +606,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                   defaultMessage: 'Configure failure store',
                 }),
                 'data-test-subj': 'configureFailureStoreButton',
-                icon: <EuiIcon type="gear" size="m" />,
+                icon: <EuiIcon type="gear" size="m" aria-hidden={true} />,
                 onClick: () => {
                   closePopover();
                   setIsConfiguringFailureStore(true);
@@ -617,7 +622,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                   defaultMessage: 'Delete',
                 }),
                 'data-test-subj': 'deleteDataStreamButton',
-                icon: <EuiIcon type="trash" size="m" color="danger" />,
+                icon: <EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />,
                 onClick: () => {
                   closePopover();
                   setIsDeleting(true);

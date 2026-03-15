@@ -1343,7 +1343,7 @@ describe('Data Streams tab', () => {
         await actions.clickNameAt(1);
         await detailPanelActions.waitForDetailPanel();
 
-        expect(await screen.findByTestId('dataRetentionDetail')).toHaveTextContent('7 days');
+        expect(await screen.findByTestId('dataRetentionDetail')).toHaveTextContent('testILM');
 
         await actions.clickEditDataRetentionButton();
 
