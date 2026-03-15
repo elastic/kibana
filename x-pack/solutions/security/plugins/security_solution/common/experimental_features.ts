@@ -245,6 +245,13 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
+
+  /**
+   * Enables the alert vectorization engine for similarity-based deduplication.
+   * When enabled, alerts can be converted to vector embeddings via inference
+   * endpoints and searched by semantic similarity using kNN.
+   */
+  alertVectorizationEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
