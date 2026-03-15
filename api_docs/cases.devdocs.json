@@ -54,7 +54,7 @@
           "AppDeepLink",
           "<string> = ",
           "AppDeepLink",
-          "<string>>({ basePath, extend, }: { basePath?: string | undefined; extend?: Partial<Record<",
+          "<string>>({ basePath, extend, templatesEnabled, }: { basePath?: string | undefined; extend?: Partial<Record<",
           {
             "pluginId": "cases",
             "scope": "public",
@@ -62,10 +62,18 @@
             "section": "def-public.ICasesDeepLinkId",
             "text": "ICasesDeepLinkId"
           },
-          ", Partial<T>>> | undefined; }) => { id: \"cases\"; path: string; deepLinks: ({ id: \"cases_create\"; path: string; title: string; keywords?: T[\"keywords\"] | undefined; visibleIn?: T[\"visibleIn\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; } | { id: \"cases_configure\"; path: string; title: string; keywords?: T[\"keywords\"] | undefined; visibleIn?: T[\"visibleIn\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; })[]; title: string; keywords?: T[\"keywords\"] | undefined; visibleIn?: T[\"visibleIn\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; }"
+          ", Partial<T>>> | undefined; templatesEnabled?: boolean | undefined; }) => { id: \"cases\"; path: string; deepLinks: (T & { id: ",
+          {
+            "pluginId": "cases",
+            "scope": "public",
+            "docId": "kibCasesPluginApi",
+            "section": "def-public.ICasesDeepLinkId",
+            "text": "ICasesDeepLinkId"
+          },
+          "; })[]; title: string; keywords?: T[\"keywords\"] | undefined; visibleIn?: T[\"visibleIn\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts",
-        "lineNumber": 20,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -75,10 +83,10 @@
             "id": "def-public.getCasesDeepLinks.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  basePath = DEFAULT_BASE_PATH,\n  extend = {},\n}",
+            "label": "{\n  basePath = DEFAULT_BASE_PATH,\n  extend = {},\n  templatesEnabled = false,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts",
-            "lineNumber": 23,
+            "lineNumber": 30,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -94,7 +102,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts",
-                "lineNumber": 24,
+                "lineNumber": 31,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -118,7 +126,23 @@
                   ", Partial<T>>> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts",
-                "lineNumber": 25,
+                "lineNumber": 32,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "cases",
+                "id": "def-public.getCasesDeepLinks.$1.templatesEnabled",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "templatesEnabled",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts",
+                "lineNumber": 33,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -145,7 +169,7 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-        "lineNumber": 194,
+        "lineNumber": 197,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -163,7 +187,7 @@
           "[]"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-        "lineNumber": 196,
+        "lineNumber": 199,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -423,10 +447,10 @@
         "label": "ICasesDeepLinkId",
         "description": [],
         "signature": [
-          "\"cases\" | \"cases_create\" | \"cases_configure\""
+          "\"cases\" | \"cases_create\" | \"cases_configure\" | \"cases_templates\""
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts",
-        "lineNumber": 18,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -442,10 +466,10 @@
         "label": "CasesDeepLinkId",
         "description": [],
         "signature": [
-          "{ readonly cases: \"cases\"; readonly casesCreate: \"cases_create\"; readonly casesConfigure: \"cases_configure\"; }"
+          "{ readonly cases: \"cases\"; readonly casesCreate: \"cases_create\"; readonly casesConfigure: \"cases_configure\"; readonly casesTemplates: \"cases_templates\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts",
-        "lineNumber": 12,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -465,6 +489,22 @@
       "deprecated": false,
       "trackAdoption": false,
       "children": [
+        {
+          "parentPluginId": "cases",
+          "id": "def-public.CasesPublicStart.config",
+          "type": "Object",
+          "tags": [],
+          "label": "config",
+          "description": [],
+          "signature": [
+            "{ templatesEnabled: boolean; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
+          "lineNumber": 129,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
         {
           "parentPluginId": "cases",
           "id": "def-public.CasesPublicStart.api",
@@ -716,7 +756,7 @@
             "; }; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; })) & { id: string; version: string; })[] | undefined; })[]; errors: { error: string; message: string; status: number | undefined; caseId: string; }[]; }>; }; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-          "lineNumber": 129,
+          "lineNumber": 132,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -770,7 +810,7 @@
             ">; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-          "lineNumber": 140,
+          "lineNumber": 143,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -808,7 +848,7 @@
             "; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-          "lineNumber": 164,
+          "lineNumber": 167,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -846,7 +886,7 @@
             "[][]) => { typeKey: string; value: string; description: string | null; }[]; }"
           ],
           "path": "x-pack/platform/plugins/shared/cases/public/types.ts",
-          "lineNumber": 169,
+          "lineNumber": 172,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1571,7 +1611,7 @@
         "label": "CasesCapabilities",
         "description": [],
         "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-        "lineNumber": 356,
+        "lineNumber": 357,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1584,7 +1624,7 @@
             "label": "[CREATE_CASES_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 357,
+            "lineNumber": 358,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1597,7 +1637,7 @@
             "label": "[READ_CASES_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 358,
+            "lineNumber": 359,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1610,7 +1650,7 @@
             "label": "[UPDATE_CASES_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 359,
+            "lineNumber": 360,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1623,7 +1663,7 @@
             "label": "[DELETE_CASES_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 360,
+            "lineNumber": 361,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1636,7 +1676,7 @@
             "label": "[PUSH_CASES_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 361,
+            "lineNumber": 362,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1649,7 +1689,7 @@
             "label": "[CASES_CONNECTORS_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 362,
+            "lineNumber": 363,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1662,7 +1702,7 @@
             "label": "[CASES_SETTINGS_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 363,
+            "lineNumber": 364,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1675,7 +1715,7 @@
             "label": "[CREATE_COMMENT_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 364,
+            "lineNumber": 365,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1688,7 +1728,7 @@
             "label": "[CASES_REOPEN_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 365,
+            "lineNumber": 366,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1701,7 +1741,7 @@
             "label": "[ASSIGN_CASE_CAPABILITY]",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 366,
+            "lineNumber": 367,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1717,7 +1757,7 @@
         "label": "CasesPermissions",
         "description": [],
         "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-        "lineNumber": 342,
+        "lineNumber": 343,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1730,7 +1770,7 @@
             "label": "all",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 343,
+            "lineNumber": 344,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1743,7 +1783,7 @@
             "label": "create",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 344,
+            "lineNumber": 345,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1756,7 +1796,7 @@
             "label": "read",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 345,
+            "lineNumber": 346,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1769,7 +1809,7 @@
             "label": "update",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 346,
+            "lineNumber": 347,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1782,7 +1822,7 @@
             "label": "delete",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 347,
+            "lineNumber": 348,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1795,7 +1835,7 @@
             "label": "push",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 348,
+            "lineNumber": 349,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1808,7 +1848,7 @@
             "label": "connectors",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 349,
+            "lineNumber": 350,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1821,7 +1861,7 @@
             "label": "settings",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 350,
+            "lineNumber": 351,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1834,7 +1874,7 @@
             "label": "reopenCase",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 351,
+            "lineNumber": 352,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1847,7 +1887,7 @@
             "label": "createComment",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 352,
+            "lineNumber": 353,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1860,7 +1900,7 @@
             "label": "assign",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 353,
+            "lineNumber": 354,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2004,7 +2044,7 @@
         "label": "Ecs",
         "description": [],
         "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-        "lineNumber": 329,
+        "lineNumber": 330,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2017,7 +2057,7 @@
             "label": "_id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 330,
+            "lineNumber": 331,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2033,7 +2073,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 331,
+            "lineNumber": 332,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2050,7 +2090,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 332,
+            "lineNumber": 333,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2068,7 +2108,7 @@
               "; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts",
-            "lineNumber": 333,
+            "lineNumber": 334,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4080,7 +4120,7 @@
             "section": "def-common.AttachmentType",
             "text": "AttachmentType"
           },
-          ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; } | ({ type: string; attachmentId: string; } & { data?: { [x: string]: ",
+          ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; } | ({ type: string; attachmentId: string; owner: string; } & { data?: { [x: string]: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -4104,7 +4144,7 @@
             "section": "def-common.JsonValue",
             "text": "JsonValue"
           },
-          "; }; } & { metadata?: { [x: string]: ",
+          "; }; owner: string; } & { metadata?: { [x: string]: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",

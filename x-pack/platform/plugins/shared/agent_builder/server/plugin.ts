@@ -32,6 +32,7 @@ import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/regist
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/runner/model_provider';
+import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 
 export class AgentBuilderPlugin
   implements
@@ -43,9 +44,8 @@ export class AgentBuilderPlugin
     >
 {
   private logger: Logger;
-  // @ts-expect-error unused for now
   private config: AgentBuilderConfig;
-  private serviceManager = new ServiceManager();
+  private serviceManager: ServiceManager;
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
@@ -53,6 +53,7 @@ export class AgentBuilderPlugin
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
+    this.serviceManager = new ServiceManager(this.config);
   }
 
   setup(
@@ -100,6 +101,19 @@ export class AgentBuilderPlugin
     });
 
     registerFeatures({ features: setupDeps.features });
+
+    // Phantom capability: not a registered feature privilege. Used as an admin check
+    // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
+    coreSetup.capabilities.registerProvider(() => ({
+      agentBuilder: {
+        isAdmin: false,
+      },
+    }));
+
+    coreSetup.capabilities.registerSwitcher(
+      createAdminPrivilegeSwitcher(coreSetup.getStartServices, this.logger.get('capabilities')),
+      { capabilityPath: 'agentBuilder.*' }
+    );
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
@@ -206,6 +220,7 @@ export class AgentBuilderPlugin
       execution: {
         executeAgent: execution.executeAgent.bind(execution),
         getExecution: execution.getExecution.bind(execution),
+        findExecutions: execution.findExecutions.bind(execution),
       },
       runtime: {
         createModelProvider: modelProviderFactory,

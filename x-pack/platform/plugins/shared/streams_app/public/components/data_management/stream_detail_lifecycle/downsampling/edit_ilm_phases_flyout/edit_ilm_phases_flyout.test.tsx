@@ -9,6 +9,7 @@ import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
+import { isEqual } from 'lodash';
 import { EditIlmPhasesFlyout } from './edit_ilm_phases_flyout';
 
 jest.mock('../../hooks/use_ilm_phases_color_and_description', () => ({
@@ -857,6 +858,65 @@ describe('EditIlmPhasesFlyout', () => {
 
       fireEvent.click(removeButton);
       expect(getTab('delete')).toBeInTheDocument();
+    });
+  });
+
+  describe('parent-owned draft rehydration', () => {
+    it('keeps the latest draft across a remount', async () => {
+      const initialPhases: IlmPolicyPhases = {
+        hot: { name: 'hot', size_in_bytes: 0, rollover: {} },
+        warm: { name: 'warm', size_in_bytes: 0, min_age: '30d' },
+      };
+
+      const WrapperWithDraft = () => {
+        const [draft, setDraft] = React.useState<IlmPolicyPhases>(initialPhases);
+        const [selectedPhase, setSelectedPhase] = React.useState<PhaseName | undefined>('warm');
+        const [instanceKey, setInstanceKey] = React.useState(0);
+
+        return (
+          <>
+            <button
+              type="button"
+              data-test-subj="remountFlyout"
+              onClick={() => setInstanceKey((k) => k + 1)}
+            >
+              remount
+            </button>
+            <EditIlmPhasesFlyout
+              key={instanceKey}
+              initialPhases={draft}
+              selectedPhase={selectedPhase}
+              setSelectedPhase={setSelectedPhase}
+              searchableSnapshotRepositories={[]}
+              onClose={jest.fn()}
+              onChange={(next) => setDraft((prev) => (isEqual(prev, next) ? prev : next))}
+              onSave={jest.fn()}
+              isMetricsStream={true}
+              onChangeDebounceMs={0}
+            />
+          </>
+        );
+      };
+
+      render(
+        <I18nProvider>
+          <WrapperWithDraft />
+        </I18nProvider>
+      );
+      await tick();
+
+      const warmPanel = withinPhase('warm');
+      const moveAfterInput = warmPanel.getByTestId(
+        `${DATA_TEST_SUBJ}MoveAfterValue`
+      ) as HTMLInputElement;
+
+      fireEvent.change(moveAfterInput, { target: { value: '10' } });
+      fireEvent.blur(moveAfterInput);
+      await tick();
+
+      fireEvent.click(screen.getByTestId('remountFlyout'));
+      await tick();
+      expect(withinPhase('warm').getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`)).toHaveValue(10);
     });
   });
 

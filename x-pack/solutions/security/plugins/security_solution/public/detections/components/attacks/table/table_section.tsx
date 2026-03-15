@@ -40,6 +40,7 @@ import type { AssigneesIdsSelection } from '../../../../common/components/assign
 import { AttackDetailsContainer } from './attack_details/attack_details_container';
 import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsPrompt } from './empty_results_prompt';
+import { dsl } from '../utils/dsl';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
 import { buildConnectorIdFilter, buildAttacksOnlyFilter } from './filtering_configs';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
@@ -48,8 +49,10 @@ import { useGroupStats } from './grouping_settings/use_group_stats';
 import { AttacksTableSortSelect, DEFAULT_ATTACKS_SORT } from './attacks_table_sort_select';
 import { AlertActionItems } from './alerts_action_items';
 import { AttacksViewOptionsPopover } from './attacks_view_options_popover';
+import { useLocalStorage } from '../../../../common/components/local_storage';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
+export const ATTACKS_TABLE_SORT_STORAGE_KEY = 'securitySolution:attacksTableSort';
 
 export interface TableSectionProps {
   /**
@@ -254,7 +257,13 @@ export const TableSection = React.memo(
       (props) => {
         const attack = getAttack(props.selectedGroup, props.groupBucket);
         if (!attack) return <AlertActionItems statusFilter={statusFilter} {...props} />;
-        return <AttacksGroupTakeActionItems attack={attack} closePopover={props.closePopover} />;
+        return (
+          <AttacksGroupTakeActionItems
+            attack={attack}
+            closePopover={props.closePopover}
+            telemetrySource="attacks_page_group_take_action"
+          />
+        );
       },
       [getAttack, statusFilter]
     );
@@ -270,7 +279,13 @@ export const TableSection = React.memo(
       [openSchedulesFlyout]
     );
 
-    const [sort, setSort] = useState<GroupingSort>(DEFAULT_ATTACKS_SORT);
+    const [sort, setSort] = useLocalStorage<GroupingSort>({
+      key: ATTACKS_TABLE_SORT_STORAGE_KEY,
+      defaultValue: DEFAULT_ATTACKS_SORT,
+      isInvalidDefault: (value) => {
+        return value == null || (Array.isArray(value) && value.length === 0);
+      },
+    });
 
     const attacksTableSortSelect = useMemo(
       () => (
@@ -286,8 +301,10 @@ export const TableSection = React.memo(
           <EuiSpacer />
         </EuiFlexGroup>
       ),
-      [sort]
+      [sort, setSort]
     );
+
+    const dslFilter = useMemo(() => dsl.isNotAttack(), []);
 
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>
@@ -312,6 +329,7 @@ export const TableSection = React.memo(
           settings={groupingSettings}
           emptyGroupingComponent={emptyGroupingComponent}
           sort={sort}
+          unitsCountFilter={dslFilter}
         />
       </div>
     );

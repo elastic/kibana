@@ -15,6 +15,7 @@ import {
   IfStepConfigSchema,
   WaitForInputStepInputSchema,
   WaitStepInputSchema,
+  WhileStepConfigSchema,
   WorkflowExecuteAsyncStepOutputSchema,
   WorkflowExecuteStepInputSchema,
 } from './schema';
@@ -93,6 +94,29 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       type: console
       with:
         message: "Processing item {{ foreach.index }}: {{ foreach.item._source.name }}"`,
+      ],
+    },
+  },
+  {
+    id: 'while',
+    label: 'While Loop',
+    description:
+      'Repeat steps while condition is true (do-while semantics — first iteration always runs). Access iteration index via {{ while.iteration }}',
+    category: StepCategory.FlowControl,
+    inputSchema: EmptyObjectSchema,
+    outputSchema: EmptyObjectSchema,
+    configSchema: WhileStepConfigSchema,
+    documentation: {
+      examples: [
+        `- name: poll_api
+  type: while
+  max-iterations: 10
+  condition: "steps.poll_api.inner_http.output.status_code : 200"
+  steps:
+    - name: inner_http
+      type: http
+      with:
+        url: https://api.example.com/status`,
       ],
     },
   },

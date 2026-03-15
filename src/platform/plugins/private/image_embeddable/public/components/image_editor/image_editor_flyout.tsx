@@ -36,8 +36,8 @@ import { FilePicker } from '@kbn/shared-ux-file-picker';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import type { FileImageMetadata } from '../../imports';
 import { imageEmbeddableFileKind } from '../../imports';
+import { DEFAULT_OBJECT_FIT } from '../../../common';
 import type { ImageConfig } from '../../types';
 import { ImageViewer } from '../image_viewer/image_viewer'; // use eager version to avoid flickering
 import type { DraftImageConfig } from '../../utils/validate_image_config';
@@ -68,11 +68,8 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const { validateUrl } = useImageViewerContext();
   const [fileId, setFileId] = useState<undefined | string>(() =>
-    props.initialImageConfig?.src?.type === 'file' ? props.initialImageConfig.src.fileId : undefined
-  );
-  const [fileImageMeta, setFileImageMeta] = useState<undefined | FileImageMetadata>(() =>
     props.initialImageConfig?.src?.type === 'file'
-      ? props.initialImageConfig.src.fileImageMeta
+      ? props.initialImageConfig.src.file_id
       : undefined
   );
   const [srcType, setSrcType] = useState<ImageConfig['src']['type']>(
@@ -86,12 +83,12 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
     return null;
   });
   const [isFilePickerOpen, setIsFilePickerOpen] = useState<boolean>(false);
-  const [sizingObjectFit, setSizingObjectFit] = useState<ImageConfig['sizing']['objectFit']>(
-    () => props.initialImageConfig?.sizing?.objectFit ?? 'contain'
+  const [objectFit, setObjectFit] = useState<ImageConfig['object_fit']>(
+    () => props.initialImageConfig?.object_fit ?? DEFAULT_OBJECT_FIT
   );
-  const [altText, setAltText] = useState<string>(() => props.initialImageConfig?.altText ?? '');
+  const [altText, setAltText] = useState<string>(() => props.initialImageConfig?.alt_text ?? '');
   const [color, setColor, colorErrors] = useColorPickerState(
-    props?.initialImageConfig?.backgroundColor
+    props?.initialImageConfig?.background_color
   );
   const isColorInvalid = !!color && !!colorErrors;
 
@@ -103,12 +100,10 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             type: 'url',
             url: srcUrl,
           }
-        : { type: 'file', fileId, fileImageMeta },
-    altText,
-    backgroundColor: colorErrors ? undefined : color,
-    sizing: {
-      objectFit: sizingObjectFit,
-    },
+        : { type: 'file', file_id: fileId },
+    alt_text: altText,
+    background_color: colorErrors ? undefined : color,
+    object_fit: objectFit,
   };
 
   const isDraftImageConfigValid = validateImageConfig(draftImageConfig, {
@@ -164,7 +159,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 onChange={() => setIsFilePickerOpen(true)}
                 onClear={() => {
                   setFileId(undefined);
-                  setFileImageMeta(undefined);
                 }}
                 containerCSS={css`
                   border: ${euiTheme.border.thin};
@@ -340,10 +334,8 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 }),
               },
             ]}
-            value={sizingObjectFit}
-            onChange={(e) =>
-              setSizingObjectFit(e.target.value as ImageConfig['sizing']['objectFit'])
-            }
+            value={objectFit}
+            onChange={(e) => setObjectFit(e.target.value as ImageConfig['object_fit'])}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -437,7 +429,6 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
           }}
           onDone={([file]) => {
             setFileId(file.id);
-            setFileImageMeta(file.meta as FileImageMetadata);
             setIsFilePickerOpen(false);
           }}
         />
