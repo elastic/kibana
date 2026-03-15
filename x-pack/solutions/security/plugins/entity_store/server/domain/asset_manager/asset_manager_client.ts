@@ -18,6 +18,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityType } from '../../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../../tasks/extract_entity_task';
 import { scheduleHistorySnapshotTasks } from '../../tasks/history_snapshot_task';
+import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import {
   EngineDescriptorTypeName,
@@ -139,6 +140,13 @@ export class AssetManagerClient {
           frequency: historySnapshot.frequency,
         }),
 
+        scheduleStatusReportTask({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
+        }),
+
         installEuidStoredScripts({
           esClient: this.esClient,
           logger: this.logger,
@@ -211,6 +219,11 @@ export class AssetManagerClient {
         deleteEuidStoredScripts({
           esClient: this.esClient,
           logger: this.logger,
+        }),
+        stopStatusReportTask({
+          taskManager: this.taskManager,
+          logger: this.logger,
+          namespace: this.namespace,
         }),
       ]);
 
