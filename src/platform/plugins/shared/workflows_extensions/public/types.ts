@@ -20,6 +20,10 @@ export type PublicStepDefinitionOrLoader<
   | PublicStepDefinition<Input, Output, Config>
   | (() => Promise<PublicStepDefinition<Input, Output, Config>>);
 
+export type PublicTriggerDefinitionOrLoader<EventSchema extends z.ZodType = z.ZodType> =
+  | PublicTriggerDefinition<EventSchema>
+  | (() => Promise<PublicTriggerDefinition<EventSchema>>);
+
 /**
  * Public-side plugin setup contract.
  * Exposes methods for other plugins to register public-side step and trigger definitions.
@@ -49,7 +53,7 @@ export interface WorkflowsExtensionsPublicPluginSetup {
    * @throws Error if definition for the same trigger id is already registered
    */
   registerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType>(
-    definition: PublicTriggerDefinition<EventSchema>
+    definition: PublicTriggerDefinitionOrLoader<EventSchema>
   ): void;
 }
 
