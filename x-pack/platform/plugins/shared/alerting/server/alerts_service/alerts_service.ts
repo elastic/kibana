@@ -6,12 +6,14 @@
  */
 
 import { isEmpty, isEqual, omit } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import {
   ALERT_MUTED,
   ALERT_INSTANCE_ID,
@@ -55,13 +57,15 @@ import {
 } from './lib';
 import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
-import type { IAlertsClient } from '../alerts_client/types';
+import type { IAlertsClient, IAdHocAlertsClient } from '../alerts_client/types';
 import type { SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
 import { setAlertsToUntracked } from './lib/set_alerts_to_untracked';
 import type { ClearAlertFlappingHistoryParams } from './lib/clear_alert_flapping_history';
 import { clearAlertFlappingHistory } from './lib/clear_alert_flapping_history';
 import type { IsExistingAlertParams } from './lib/is_existing_alert';
 import { isExistingAlert } from './lib/is_existing_alert';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
 export const ECS_CONTEXT = `ecs`;
@@ -80,6 +84,20 @@ interface AlertsServiceParams {
 export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
   namespace: string;
   rule: AlertRuleData;
+}
+
+export interface CreateAdHocAlertsClientParams
+  extends Omit<LegacyAlertsClientParams, 'alertingEventLogger'> {
+  alertingEventLogger?: AlertingEventLogger;
+  eventLogger?: IEventLogger;
+  namespace: string;
+  ruleData: {
+    id: string;
+    name: string;
+    consumer: string;
+    tags?: string[];
+    executionId?: string;
+  };
 }
 
 export type MuteInstances = Array<{ ruleId: string; alertInstanceIds?: string[] }>;
@@ -130,9 +148,28 @@ interface IAlertsService {
     ActionGroupIds,
     RecoveryActionGroupId
   > | null>;
+
+  createAdHocAlertsClient<
+    AlertData extends RuleAlertData,
+    LegacyState extends AlertInstanceState,
+    LegacyContext extends AlertInstanceContext,
+    ActionGroupIds extends string,
+    RecoveryActionGroupId extends string
+  >(
+    opts: CreateAdHocAlertsClientParams
+  ): Promise<IAdHocAlertsClient<
+    AlertData,
+    LegacyState,
+    LegacyContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  > | null>;
 }
 
-export type PublicAlertsService = Pick<IAlertsService, 'getContextInitializationPromise'>;
+export type PublicAlertsService = Pick<
+  IAlertsService,
+  'getContextInitializationPromise' | 'createAdHocAlertsClient'
+>;
 export type PublicFrameworkAlertsService = PublicAlertsService & {
   enabled: () => boolean;
 };
@@ -168,6 +205,107 @@ export class AlertsService implements IAlertsService {
 
   public isInitialized() {
     return this.initialized;
+  }
+
+  public async createAdHocAlertsClient<
+    AlertData extends RuleAlertData,
+    LegacyState extends AlertInstanceState,
+    LegacyContext extends AlertInstanceContext,
+    ActionGroupIds extends string,
+    RecoveryActionGroupId extends string
+  >(
+    opts: CreateAdHocAlertsClientParams
+  ): Promise<IAdHocAlertsClient<
+    AlertData,
+    LegacyState,
+    LegacyContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  > | null> {
+    const rule: AlertRuleData = {
+      id: opts.ruleData.id,
+      name: opts.ruleData.name,
+      consumer: opts.ruleData.consumer,
+      tags: opts.ruleData.tags || [],
+      executionId: opts.ruleData.executionId || uuidv4(),
+      parameters: {},
+      revision: 1,
+      spaceId: opts.spaceId,
+      alertDelay: 0,
+      muteAll: false,
+      mutedInstanceIds: [],
+    };
+
+    let alertingEventLogger = opts.alertingEventLogger;
+    if (!alertingEventLogger && opts.eventLogger) {
+      alertingEventLogger = new AlertingEventLogger(opts.eventLogger);
+      alertingEventLogger.initialize({
+        context: {
+          savedObjectId: rule.id,
+          savedObjectType: 'alert',
+          namespace: opts.namespace,
+          spaceId: opts.spaceId,
+          executionId: rule.executionId,
+          taskScheduledAt: new Date(),
+        },
+        runDate: new Date(),
+        ruleData: {
+          id: rule.id,
+          type: opts.ruleType,
+          consumer: rule.consumer,
+          name: rule.name,
+          revision: rule.revision,
+        },
+      });
+    }
+
+    if (!alertingEventLogger) {
+      throw new Error(
+        'Either alertingEventLogger or eventLogger is required for ad-hoc alerts client'
+      );
+    }
+
+    const alertsClient = await this.createAlertsClient<
+      AlertData,
+      LegacyState,
+      LegacyContext,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >({
+      ...omit(opts, ['ruleData', 'eventLogger']),
+      rule,
+      alertingEventLogger,
+    });
+
+    if (!alertsClient) {
+      return null;
+    }
+
+    await alertsClient.initializeExecution({
+      maxAlerts: 1000,
+      ruleLabel: rule.name,
+      runTimestamp: new Date(),
+      startedAt: new Date(),
+      flappingSettings: {
+        lookBackWindow: 3600000, // 1h in ms
+        statusChangeThreshold: 5,
+        enabled: false,
+      },
+      activeAlertsFromState: {},
+      recoveredAlertsFromState: {},
+    });
+
+    const publicClient = alertsClient.client();
+    if (!publicClient) {
+      return null;
+    }
+
+    return {
+      report: (alert) => publicClient.report(alert),
+      setAlertData: (alert) => publicClient.setAlertData(alert),
+      processAlerts: () => alertsClient.processAlerts(),
+      persistAlerts: () => alertsClient.persistAlerts(),
+    };
   }
 
   public async createAlertsClient<

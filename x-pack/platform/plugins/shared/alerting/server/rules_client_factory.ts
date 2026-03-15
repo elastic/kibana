@@ -31,6 +31,7 @@ import type { AlertingRulesConfig } from './config';
 import type { GetAlertIndicesAlias } from './lib';
 import type { AlertsService } from './alerts_service/alerts_service';
 import type { BackfillClient } from './backfill_client/backfill_client';
+import type { AdHocExecutionClient } from './ad_hoc_execution_client/ad_hoc_execution_client';
 import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -64,6 +65,7 @@ export interface RulesClientFactoryOpts {
   getAlertIndicesAlias: GetAlertIndicesAlias;
   alertsService: AlertsService | null;
   backfillClient: BackfillClient;
+  adHocExecutionClient: AdHocExecutionClient;
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
@@ -93,6 +95,7 @@ export class RulesClientFactory {
   private getAlertIndicesAlias!: GetAlertIndicesAlias;
   private alertsService!: AlertsService | null;
   private backfillClient!: BackfillClient;
+  private adHocExecutionClient!: AdHocExecutionClient;
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
@@ -124,6 +127,7 @@ export class RulesClientFactory {
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
     this.alertsService = options.alertsService;
     this.backfillClient = options.backfillClient;
+    this.adHocExecutionClient = options.adHocExecutionClient;
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
@@ -281,6 +285,7 @@ export class RulesClientFactory {
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
       backfillClient: this.backfillClient,
+      adHocExecutionClient: this.adHocExecutionClient,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
       shouldGrantUiam: this.shouldGrantUiam,
@@ -291,7 +296,7 @@ export class RulesClientFactory {
         const user = securityService.authc.getCurrentUser(request);
         return user?.username ?? null;
       },
-      async createAPIKey(name: string) {
+      async createAPIKey(name: string, expiration?: string) {
         if (!securityPluginStart) {
           return { apiKeysEnabled: false };
         }
@@ -306,6 +311,7 @@ export class RulesClientFactory {
             name,
             role_descriptors: {},
             metadata: { managed: true, kibana: { type: 'alerting_rule' } },
+            expiration,
           });
         } catch (err) {
           // if the ES API key creation failed, we need to invalidate the UIAM API key
