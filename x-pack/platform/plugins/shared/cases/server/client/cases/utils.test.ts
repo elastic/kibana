@@ -40,6 +40,8 @@ import type {
   CaseCustomFields,
   CustomFieldsConfiguration,
   Observable,
+  CaseConnector,
+  JiraFieldsType,
 } from '../../../common/types/domain';
 import {
   CaseStatuses,
@@ -122,6 +124,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
@@ -310,6 +313,52 @@ describe('utils', () => {
           labels: ['LOLBins'],
           issueType: 'Task',
           parent: null,
+          otherFields: null,
+          summary: 'Another bad one',
+          description: 'Oh no, a bad meanie going LOLBins all over the place!\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('includes Jira otherFields in the incident payload', async () => {
+      const caseWithOtherFields = {
+        ...flattenCaseSavedObject({
+          savedObject: {
+            ...mockCases[2],
+            attributes: {
+              ...mockCases[2].attributes,
+              connector: {
+                ...mockCases[2].attributes.connector,
+                fields: {
+                  ...(mockCases[2].attributes.connector.fields as JiraFieldsType),
+                  otherFields: '{"customfield_123456":"Blue team"}',
+                },
+              } as CaseConnector,
+            },
+          },
+        }),
+        comments: [],
+        totalComments: 0,
+      };
+
+      const res = await createIncident({
+        theCase: caseWithOtherFields,
+        userActions: [],
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          priority: 'High',
+          labels: ['LOLBins'],
+          issueType: 'Task',
+          parent: null,
+          otherFields: '{"customfield_123456":"Blue team"}',
           summary: 'Another bad one',
           description: 'Oh no, a bad meanie going LOLBins all over the place!\n\nAdded by elastic.',
           externalId: null,
@@ -430,6 +479,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/app/security/cases/mock-id-1',
@@ -456,6 +506,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.\nFor more details, view this case in Kibana.\nCase URL: https://example.com/s/test-space/app/security/cases/mock-id-1',
@@ -486,6 +537,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.',
@@ -524,6 +576,7 @@ describe('utils', () => {
           labels: ['defacement'],
           issueType: null,
           parent: null,
+          otherFields: null,
           summary: 'Super Bad Security Issue',
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by Damaged Raccoon.',
