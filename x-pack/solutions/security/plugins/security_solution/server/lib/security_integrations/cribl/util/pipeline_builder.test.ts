@@ -22,4 +22,34 @@ describe('Put cribl routing pipeline tests', () => {
       expect(processor.reroute?.if).toContain(routeEntries[i].dataId);
     });
   });
+
+  it('defaults namespace to "default" when not specified', () => {
+    const req = buildPipelineRequest(routeEntries);
+
+    req.processors?.forEach(function (processor) {
+      expect(processor.reroute?.namespace).toEqual(['default']);
+    });
+  });
+
+  it('uses custom namespace when provided', () => {
+    const entriesWithNamespace: RouteEntry[] = [
+      { dataId: 'criblSource1', datastream: 'logs-destination1.cloud', namespace: 'production' },
+      { dataId: 'criblSource2', datastream: 'logs-destination2', namespace: 'staging' },
+    ];
+    const req = buildPipelineRequest(entriesWithNamespace);
+
+    expect(req.processors?.[0].reroute?.namespace).toEqual(['production']);
+    expect(req.processors?.[1].reroute?.namespace).toEqual(['staging']);
+  });
+
+  it('mixes custom and default namespaces', () => {
+    const mixedEntries: RouteEntry[] = [
+      { dataId: 'criblSource1', datastream: 'logs-destination1.cloud', namespace: 'custom' },
+      { dataId: 'criblSource2', datastream: 'logs-destination2' },
+    ];
+    const req = buildPipelineRequest(mixedEntries);
+
+    expect(req.processors?.[0].reroute?.namespace).toEqual(['custom']);
+    expect(req.processors?.[1].reroute?.namespace).toEqual(['default']);
+  });
 });

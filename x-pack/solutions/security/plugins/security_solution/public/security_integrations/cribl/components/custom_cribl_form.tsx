@@ -44,6 +44,7 @@ interface RouteEntryComponentProps {
   datastreamOpts: string[];
   onChangeCriblDataId(index: number, value: string): void;
   onChangeDatastream(index: number, value: string): void;
+  onChangeNamespace(index: number, value: string): void;
   onDeleteEntry(index: number): void;
 }
 
@@ -54,6 +55,7 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
     datastreamOpts,
     onChangeCriblDataId,
     onChangeDatastream,
+    onChangeNamespace,
     onDeleteEntry,
   }) => {
     const routeEntry = routeEntries[index]; // the route entry for this row
@@ -76,17 +78,20 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFormRow hasEmptyLabelSpace>
-            <EuiFlexItem grow={false}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', blockSize: 40 }}>
               {i18n.translate('xpack.securitySolution.securityIntegration.cribl.mapsTo', {
                 defaultMessage: 'MAPS TO',
               })}
-            </EuiFlexItem>
+            </span>
           </EuiFormRow>
-          <EuiFlexItem>
-            <EuiFormRow label="Datastream">
+          {/* minWidth: 0 overrides flex default (min-width: auto) to prevent
+             the combo box selection pill from resizing the column */}
+          <EuiFlexItem style={{ minWidth: 0 }}>
+            <EuiFormRow label="Datastream" fullWidth>
               <EuiComboBox
                 placeholder="Select"
                 singleSelection
+                fullWidth
                 options={options}
                 selectedOptions={selectedOption}
                 onChange={(o) => {
@@ -99,16 +104,27 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
               />
             </EuiFormRow>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow label="Namespace">
+              <EuiFieldText
+                placeholder="default"
+                value={routeEntry.namespace ?? ''}
+                onChange={(e) => onChangeNamespace(index, e.currentTarget.value)}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
           <EuiFormRow hasEmptyLabelSpace>
-            <EuiButtonIcon
-              color="danger"
-              iconType="trash"
-              onClick={() => onDeleteEntry(index)}
-              isDisabled={routeEntries.length === 1}
-              aria-label="entryDeleteButton"
-              className="itemEntryDeleteButton"
-              data-test-subj="itemEntryDeleteButton"
-            />
+            <span style={{ display: 'inline-flex', alignItems: 'center', blockSize: 40 }}>
+              <EuiButtonIcon
+                color="danger"
+                iconType="trash"
+                onClick={() => onDeleteEntry(index)}
+                isDisabled={routeEntries.length === 1}
+                aria-label="entryDeleteButton"
+                className="itemEntryDeleteButton"
+                data-test-subj="itemEntryDeleteButton"
+              />
+            </span>
           </EuiFormRow>
         </EuiFlexGroup>
       </>
@@ -170,6 +186,16 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
       newValues[index] = {
         ...routeEntries[index],
         datastream: value,
+      };
+      setRouteEntries(newValues);
+      updateCriblPolicy(newValues);
+    };
+
+    const onChangeNamespace = (index: number, value: string) => {
+      const newValues = [...routeEntries];
+      newValues[index] = {
+        ...routeEntries[index],
+        namespace: value,
       };
       setRouteEntries(newValues);
       updateCriblPolicy(newValues);
@@ -252,6 +278,7 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
                 datastreamOpts={datastreamOpts}
                 onChangeCriblDataId={onChangeCriblDataId}
                 onChangeDatastream={onChangeDatastream}
+                onChangeNamespace={onChangeNamespace}
                 onDeleteEntry={onDeleteEntry}
               />
             ))}
