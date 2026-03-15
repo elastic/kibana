@@ -109,6 +109,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             projectKey: mockJira.config.projectKey,
           },
           is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 

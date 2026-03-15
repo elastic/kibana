@@ -131,7 +131,10 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
 
   return (
     <ConnectorProvider
-      value={{ services: { validateEmailAddresses, enabledEmailServices }, isServerless }}
+      value={{
+        services: { validateEmailAddresses, enabledEmailServices },
+        isServerless,
+      }}
     >
       <Routes>
         <Route

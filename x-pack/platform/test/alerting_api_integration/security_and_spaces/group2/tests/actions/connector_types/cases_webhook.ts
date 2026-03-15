@@ -137,6 +137,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: simulatorConfig,
           is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 
@@ -185,6 +186,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: newConfig,
           is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 

@@ -12,12 +12,24 @@ import type { Logger } from '@kbn/core/server';
 import { request } from './axios_utils';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { AsApiContract } from '../../common';
+import type { RefreshTokenOAuthRequestParams } from './request_oauth_refresh_token';
+import type { JWTOAuthRequestParams } from './request_oauth_jwt_token';
+import type { ClientCredentialsOAuthRequestParams } from './request_oauth_client_credentials_token';
+import type { AuthorizationCodeOAuthRequestParams } from './request_oauth_authorization_code_token';
 
 export interface OAuthTokenResponse {
   tokenType: string;
   accessToken: string;
-  expiresIn: number;
+  expiresIn?: number;
+  refreshToken?: string;
+  refreshTokenExpiresIn?: number;
 }
+
+type OAuthBodyRequest =
+  | AuthorizationCodeOAuthRequestParams
+  | ClientCredentialsOAuthRequestParams
+  | JWTOAuthRequestParams
+  | RefreshTokenOAuthRequestParams;
 
 export async function requestOAuthToken<T>(
   tokenUrl: string,
@@ -25,19 +37,33 @@ export async function requestOAuthToken<T>(
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
   bodyRequest: AsApiContract<T>,
-  basicAuth?: { username: string; password: string }
+  useBasicAuth: boolean = false
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
+
+  // Extract client credentials for Basic Auth if needed
+  const {
+    client_id: clientId,
+    client_secret: clientSecret,
+    ...restBody
+  } = bodyRequest as AsApiContract<OAuthBodyRequest>;
+
+  const requestData = {
+    ...(useBasicAuth ? restBody : bodyRequest),
+    grant_type: grantType,
+  };
+
+  const basicAuth =
+    useBasicAuth && clientId && clientSecret
+      ? { username: clientId, password: clientSecret }
+      : undefined;
 
   const res = await request({
     axios: axiosInstance,
     url: tokenUrl,
     method: 'post',
     logger,
-    data: qs.stringify({
-      ...bodyRequest,
-      grant_type: grantType,
-    }),
+    data: qs.stringify(requestData),
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
     },
@@ -51,6 +77,8 @@ export async function requestOAuthToken<T>(
       tokenType: res.data.token_type,
       accessToken: res.data.access_token,
       expiresIn: res.data.expires_in,
+      refreshToken: res.data.refresh_token,
+      refreshTokenExpiresIn: res.data.refresh_expires_in ?? res.data.refresh_token_expires_in,
     };
   } else {
     const errString = stableStringify(res.data);
