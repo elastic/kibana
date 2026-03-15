@@ -69,6 +69,25 @@ export const dialogTexts = {
   }),
 };
 
+export const calendarTexts = {
+  todayButton: i18n.translate('sharedUXPackages.dateRangePicker.calendar.todayButton', {
+    defaultMessage: 'Today',
+  }),
+};
+
+export const calendarPanelTexts = {
+  saveAsPreset: i18n.translate('sharedUXPackages.dateRangePicker.calendarPanel.saveAsPreset', {
+    defaultMessage: 'Save as preset',
+  }),
+  applyButton: i18n.translate('sharedUXPackages.dateRangePicker.calendarPanel.applyButton', {
+    defaultMessage: 'Apply',
+  }),
+  selectEndDateTooltip: i18n.translate(
+    'sharedUXPackages.dateRangePicker.calendarPanel.selectEndDateTooltip',
+    { defaultMessage: 'Select an end date to apply' }
+  ),
+};
+
 export const customTimeRangePanelTexts = {
   heading: i18n.translate('sharedUXPackages.dateRangePicker.customTimeRangePanel.heading', {
     defaultMessage: 'Custom time range',
