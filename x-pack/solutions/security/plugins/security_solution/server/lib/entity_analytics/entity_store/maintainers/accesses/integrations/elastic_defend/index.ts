@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { AccessesIntegrationConfig } from './types';
-import { getIndexPattern } from '../constants';
-import { buildCompositeAggQuery, buildBucketUserFilter } from '../build_composite_agg';
-import { buildEsqlQuery } from '../build_esql_query';
+import type { AccessesIntegrationConfig } from '../types';
+import { getIndexPattern } from './constants';
+import { buildCompositeAggQuery, buildBucketUserFilter } from './build_composite_agg';
+import { buildEsqlQuery } from './build_esql_query';
 
 export const elasticDefendIntegration: AccessesIntegrationConfig = {
   id: 'elastic_defend',

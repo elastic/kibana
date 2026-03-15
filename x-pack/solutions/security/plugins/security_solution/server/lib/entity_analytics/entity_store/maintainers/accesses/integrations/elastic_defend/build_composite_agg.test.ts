@@ -6,8 +6,8 @@
  */
 
 import { buildCompositeAggQuery, buildBucketUserFilter } from './build_composite_agg';
-import { COMPOSITE_PAGE_SIZE, LOOKBACK_WINDOW } from './constants';
-import type { CompositeAfterKey, CompositeBucket } from './types';
+import { COMPOSITE_PAGE_SIZE, LOOKBACK_WINDOW } from '../../constants';
+import type { CompositeAfterKey, CompositeBucket } from '../../types';
 
 describe('buildCompositeAggQuery', () => {
   describe('afterKey handling', () => {

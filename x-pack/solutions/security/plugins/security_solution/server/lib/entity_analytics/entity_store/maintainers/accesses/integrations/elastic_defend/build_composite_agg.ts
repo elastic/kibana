@@ -8,8 +8,8 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 
-import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE } from './constants';
-import type { CompositeAfterKey, CompositeBucket } from './types';
+import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE } from '../../constants';
+import type { CompositeAfterKey, CompositeBucket } from '../../types';
 
 const USER_IDENTITY_FIELDS = euid.getEuidSourceFields('user').requiresOneOf;
 

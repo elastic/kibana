@@ -7,7 +7,8 @@
 
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 
-import { getIndexPattern, COMPOSITE_PAGE_SIZE } from './constants';
+import { COMPOSITE_PAGE_SIZE } from '../../constants';
+import { getIndexPattern } from './constants';
 
 /**
  * Strips CASE branches that reference *.entity.* fields from an euid EVAL expression.
