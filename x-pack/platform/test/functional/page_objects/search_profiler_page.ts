@@ -27,7 +27,7 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       return JSON.parse(await monacoEditor.getCodeEditorValue(0));
     },
     async setIndexName(indexName: string) {
-      await testSubjects.setValue('indexName', indexName);
+      await testSubjects.setValue('indexName', indexName, { clearWithKeyboard: true });
     },
     async getIndexName() {
       const indexInput = await testSubjects.find('indexName');
@@ -37,7 +37,7 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('profileButton');
     },
     async getProfileContent() {
-      const profileTree = await testSubjects.find('profileTree');
+      const profileTree = await testSubjects.find('profileTree', 30_000);
       return profileTree.getVisibleText();
     },
     getUrlWithIndexAndQuery({ indexName, query }: { indexName: string; query: any }) {

@@ -21,6 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
   const es = getService('es');
   const log = getService('log');
+  const testSubjects = getService('testSubjects');
 
   describe('Search Profiler Editor', () => {
     before(async () => {
@@ -34,6 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           test: 'sample value',
         },
       });
+      await es.indices.refresh({ index: testIndex });
 
       expect(await PageObjects.searchProfiler.editorExists()).to.be(true);
     });
@@ -98,16 +100,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/241358
-    describe.skip('With a test index', () => {
+    describe('With a test index', () => {
       it('profiles a simple query', async () => {
+        // Reset to the base app URL, as other tests in this suite navigate with query params.
+        await PageObjects.common.navigateToApp('searchProfiler');
+        await retry.waitForWithTimeout('profile button to be enabled', 20_000, async () => {
+          return await testSubjects.exists('profileButton');
+        });
+
         await PageObjects.searchProfiler.setIndexName(testIndex);
+        await retry.waitForWithTimeout('index input to update', 5_000, async () => {
+          return (await PageObjects.searchProfiler.getIndexName()) === testIndex;
+        });
         await PageObjects.searchProfiler.setQuery(testQuery);
 
         await PageObjects.searchProfiler.clickProfileButton();
 
-        const content = await PageObjects.searchProfiler.getProfileContent();
-        expect(content).to.contain(testIndex);
+        await retry.waitForWithTimeout('profile results to render', 30_000, async () => {
+          const content = await PageObjects.searchProfiler.getProfileContent();
+          return content.includes(testIndex);
+        });
       });
     });
 
