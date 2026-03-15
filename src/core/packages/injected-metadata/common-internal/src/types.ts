@@ -73,6 +73,7 @@ export interface InjectedMetadata {
   anonymousStatusPage: boolean;
   i18n: {
     translationsUrl: string;
+    debugMode: boolean;
   };
   theme: InjectedMetadataTheme;
   csp: {

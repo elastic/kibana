@@ -13,20 +13,13 @@ import {
   FormattedTime,
   FormattedNumber,
   FormattedPlural,
-  FormattedMessage,
   FormattedRelativeTime,
 } from 'react-intl';
 
 export type { IntlShape, WrappedComponentProps };
-export {
-  FormattedDate,
-  FormattedTime,
-  FormattedNumber,
-  FormattedPlural,
-  FormattedMessage,
-  FormattedRelativeTime,
-};
+export { FormattedDate, FormattedTime, FormattedNumber, FormattedPlural, FormattedRelativeTime };
 
+export { FormattedMessage } from './src/formatted_message';
 export { FormattedRelative, __IntlProvider } from './src/compatiblity_layer';
 export type { FormattedRelativeProps, InjectedIntl } from './src/compatiblity_layer';
 export { I18nProvider } from './src/provider';

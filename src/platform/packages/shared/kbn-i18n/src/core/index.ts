@@ -17,6 +17,7 @@ export {
   translate,
   formatList,
   getIsInitialized,
+  getDebugMode,
 } from './i18n';
 export type { TranslateArguments } from './i18n';
 export { handleIntlError } from './error_handler';
