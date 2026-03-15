@@ -22,9 +22,7 @@ const createSkill = (id: string, readonly = false): InternalSkillDefinition => (
 });
 
 const createConfig = (overrides: Partial<AgentConfiguration> = {}): AgentConfiguration => ({
-  name: 'test-agent',
-  description: 'test',
-  system_prompt: '',
+  tools: [],
   ...overrides,
 });
 
