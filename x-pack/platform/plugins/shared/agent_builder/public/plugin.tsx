@@ -55,7 +55,6 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
-import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
 
 export class AgentBuilderPlugin
   implements
@@ -132,10 +131,12 @@ export class AgentBuilderPlugin
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
 
-    attachmentsService.addAttachmentType(
-      'visualization',
-      createVisualizationAttachmentDefinition({ startDependencies })
-    );
+    attachmentsService.addAttachmentType('visualization', async () => {
+      const { createVisualizationAttachmentDefinition } = await import(
+        './application/components/attachments/visualization_attachment'
+      );
+      return createVisualizationAttachmentDefinition({ startDependencies });
+    });
 
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });

@@ -369,7 +369,10 @@ Register a UI definition for your attachment type using the `attachments.addAtta
 ```ts
 class MyPlugin {
   start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
-    agentBuilder.attachments.addAttachmentType('my_type', myAttachmentDefinition);
+    agentBuilder.attachments.addAttachmentType('my_type', async () => {
+      const { myAttachmentDefinition } = await import('./path');
+      return myAttachmentDefinition;
+    });
   }
 }
 ```

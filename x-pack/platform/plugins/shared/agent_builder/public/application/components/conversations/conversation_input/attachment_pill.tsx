@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useAttachmentUiDefinition } from '../../../hooks/use_attachment_ui_definition';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentPill.removeAriaLabel', {
   defaultMessage: 'Remove attachment',
@@ -35,9 +35,8 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
   attachment,
   onRemoveAttachment,
 }) => {
-  const { attachmentsService } = useAgentBuilderServices();
   const { euiTheme } = useEuiTheme();
-  const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
+  const uiDefinition = useAttachmentUiDefinition(attachment.type);
   const [isHovered, setIsHovered] = useState(false);
 
   const displayName = uiDefinition?.getLabel(attachment) ?? attachment.type;

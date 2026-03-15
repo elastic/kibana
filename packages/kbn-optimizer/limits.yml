@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
   agentBuilder: 96771
-  agentBuilderPlatform: 64202
+  agentBuilderPlatform: 53350
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
@@ -26,14 +26,14 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10300
-  core: 556473
+  core: 546460
   cps: 9209
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
   dashboardAgent: 5135
   dashboardMarkdown: 6219
-  data: 498703
+  data: 496940
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
@@ -172,7 +172,7 @@ pageLoadAssetSize:
   share: 58677
   slo: 40437
   snapshotRestore: 22068
-  spaces: 30016
+  spaces: 29948
   stackAlerts: 31499
   stackConnectors: 85421
   streams: 10000

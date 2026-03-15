@@ -10,6 +10,7 @@ import { EuiFlyout, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
+import { useAttachmentUiDefinition } from '../../../../../hooks/use_attachment_ui_definition';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
@@ -58,10 +59,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     ]
   );
 
-  const uiDefinition = canvasState
-    ? attachmentsService.getAttachmentUiDefinition(canvasState.attachment.type)
-    : null;
-
+  const uiDefinition = useAttachmentUiDefinition(canvasState?.attachment.type);
   const [dynamicButtons, setDynamicButtons] = useState<ActionButton[]>([]);
 
   // Clear dynamic buttons when the canvas attachment changes
