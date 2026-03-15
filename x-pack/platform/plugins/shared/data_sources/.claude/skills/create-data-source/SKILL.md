@@ -57,7 +57,16 @@ Remember:
 - Use `<%= your-source-stack-connector-id %>` for connector-id, where your-source is the id of the newly created data source type
 - Use `${{ inputs.param_name }}` for input references
 
-## Step 4: Write Documentation
+## Step 4: Create Tests
+
+Add tests following the existing examples:
+
+1. **Connector spec tests** (custom connector path only) — See `google_drive/google_drive.test.ts` in `kbn-connector-specs` for the pattern.
+2. **Workflow behavioral tests** — Add `workflows.test.ts` next to `data_type.ts`. See `google_drive/workflows.test.ts` or `slack/workflows.test.ts` for the pattern.
+
+You do not need to execute the tests — just create the files.
+
+## Step 5: Write Documentation
 
 Create a connector doc page in `docs/reference/connectors-kibana/{name}-action-type.md`.
 
@@ -88,10 +97,7 @@ This step requires documentation skills from https://github.com/elastic/elastic-
 1. Add an entry in `docs/reference/toc.yml` under the data and context sources connectors section.
 2. Add a row in `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md`.
 
-## Step 5: Tell the user you're done
-
-You do not need to execute tests, linting, type-checking, etc.
-Once you are done developing the connector, data source, and documentation, let the user review your work before next steps.
+Once you are done developing the connector, data source, tests, and documentation, let the user review your work before next steps.
 
 ## Important Notes
 

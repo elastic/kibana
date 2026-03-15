@@ -39,6 +39,7 @@
     "@kbn/es-query",
     "@kbn/security-plugin",
     "@kbn/streamlang",
-    "@kbn/safer-lodash-set"
+    "@kbn/safer-lodash-set",
+    "@kbn/tracing-utils"
   ]
 }
