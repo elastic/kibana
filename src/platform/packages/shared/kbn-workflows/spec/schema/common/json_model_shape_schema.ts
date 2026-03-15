@@ -54,7 +54,7 @@ export interface JsonSchema {
   default?: string | number | boolean | null | object;
   $ref?: string;
 
-  // Logical Composition (allOf is omitted
+  // Logical Composition (allOf is omitted)
   anyOf?: JsonSchema[];
   oneOf?: JsonSchema[];
 
@@ -122,8 +122,7 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
 /**
  * Zod schema representing any JSON Schema node (Draft 7 / 2020-12).
  * Used recursively inside property definitions, anyOf/oneOf, etc.
- * Only includes keywords that the fromJSONSchema converter actually enforces,
- * so autocomplete suggestions are never misleading.
+ * Only includes keywords that the fromJSONSchema converter actually enforces
  */
 export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
   .lazy(() =>
