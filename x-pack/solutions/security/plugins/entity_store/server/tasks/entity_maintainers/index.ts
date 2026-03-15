@@ -23,6 +23,7 @@ import { entityMaintainersRegistry } from './entity_maintainers_registry';
 import { CRUDClient } from '../../domain/crud';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
+import { wrapTaskRun } from '../../telemetry/traces';
 
 function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.enum.entityMaintainer].type}:${id}`;
@@ -127,18 +128,29 @@ export function registerEntityMaintainerTask({
                 esClient,
                 namespace: maintainerStatus.metadata.namespace,
               });
+              const taskLogger = logger.get(taskInstance.id);
 
-              return await runEntityMaintainerTask({
-                currentStatus: maintainerStatus,
-                fakeRequest,
-                logger: logger.get(taskInstance.id),
-                setup,
-                run,
-                abortController,
-                esClient,
-                crudClient,
-                id,
-                analytics,
+              return await wrapTaskRun({
+                spanName: 'entityStore.task.entity_maintainer.run',
+                namespace: currentStatus?.namespace || currentStatus?.metadata?.namespace || '',
+                attributes: {
+                  'entity_store.task.id': taskInstance.id,
+                  'entity_store.task.type': type,
+                  'entity_store.entity_maintainer.id': id,
+                },
+                run: () =>
+                  runEntityMaintainerTask({
+                    currentStatus: maintainerStatus,
+                    fakeRequest,
+                    logger: taskLogger,
+                    setup,
+                    run,
+                    abortController,
+                    esClient,
+                    crudClient,
+                    id,
+                    analytics,
+                  }),
               });
             },
           }),
