@@ -76,6 +76,7 @@ export function setupSavedObjects(
     type: ACTION_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['secrets']),
     attributesToIncludeInAAD: new Set(['actionTypeId', 'isMissingSecrets', 'config']),
+    enforceRandomId: false,
   });
 
   savedObjects.registerType({

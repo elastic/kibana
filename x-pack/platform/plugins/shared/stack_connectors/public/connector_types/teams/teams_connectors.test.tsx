@@ -55,7 +55,7 @@ describe('TeamsActionFields renders', () => {
         secrets: {
           webhookUrl: 'https://test.com',
         },
-        id: 'test',
+        id: 'teams',
         actionTypeId: '.teams',
         name: 'teams',
         config: {},
@@ -81,7 +81,7 @@ describe('TeamsActionFields renders', () => {
           secrets: {
             webhookUrl: 'https://test.com',
           },
-          id: 'test',
+          id: 'teams',
           actionTypeId: '.teams',
           name: 'teams',
           isDeprecated: false,

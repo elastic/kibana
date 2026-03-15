@@ -11,3 +11,4 @@ export { createActionConnector } from './create';
 export { deleteActions } from './delete';
 export { executeAction } from './execute';
 export { updateActionConnector } from './update';
+export { checkConnectorIdAvailability } from './check_connector_id';

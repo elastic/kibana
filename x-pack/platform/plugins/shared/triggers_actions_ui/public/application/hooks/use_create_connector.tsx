@@ -7,13 +7,14 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ActionConnector, ActionConnectorWithoutId } from '../../types';
+import type { UserConfiguredActionConnector } from '@kbn/alerts-ui-shared/src/common/types/action_types';
+import type { ActionConnector } from '../../types';
 import { createActionConnector } from '../lib/action_connector_api';
 import { useKibana } from '../../common/lib/kibana';
 
 type CreateConnectorSchema = Pick<
-  ActionConnectorWithoutId,
-  'actionTypeId' | 'name' | 'config' | 'secrets'
+  UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>,
+  'actionTypeId' | 'name' | 'config' | 'secrets' | 'id'
 >;
 
 interface UseCreateConnectorReturnValue {
@@ -38,7 +39,8 @@ export const useCreateConnector = (): UseCreateConnectorReturnValue => {
     abortCtrlRef.current = new AbortController();
 
     try {
-      const res = await createActionConnector({ http, connector });
+      const { id, ...connectorData } = connector;
+      const res = await createActionConnector({ http, connector: connectorData, id });
 
       if (isMounted.current) {
         setIsLoading(false);

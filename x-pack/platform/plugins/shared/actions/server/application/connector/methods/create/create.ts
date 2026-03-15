@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectAttributes } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
@@ -155,6 +155,14 @@ export async function create({
   }
 
   if (!wasSuccessful) {
+    if (SavedObjectsErrorHelpers.isConflictError(result)) {
+      throw Boom.conflict(
+        i18n.translate('xpack.actions.serverSideErrors.connectorIdConflict', {
+          defaultMessage: 'A connector with ID "{id}" already exists.',
+          values: { id },
+        })
+      );
+    }
     throw result;
   }
 

@@ -176,6 +176,7 @@ describe('XmattersActionConnectorFields renders', () => {
             auth: 'Basic Authentication',
           },
           isDeprecated: false,
+          id: 'xmatters',
         },
         isValid: true,
       });
@@ -208,6 +209,7 @@ describe('XmattersActionConnectorFields renders', () => {
           },
           __internal__: { auth: 'URL Authentication' },
           isDeprecated: false,
+          id: 'xmatters',
         },
         isValid: true,
       });

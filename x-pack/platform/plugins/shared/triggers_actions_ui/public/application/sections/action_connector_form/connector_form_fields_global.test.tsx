@@ -10,6 +10,17 @@ import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
 import { FormTestProvider } from '../../components/test_utils';
 import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
+import { useKibana } from '../../../common/lib/kibana';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/action_connector_api', () => ({
+  ...jest.requireActual('../../lib/action_connector_api'),
+  checkConnectorIdAvailability: jest.fn(),
+}));
+
+const { checkConnectorIdAvailability } = jest.requireMock('../../lib/action_connector_api');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('ConnectorFormFieldsGlobal', () => {
   const onSubmit = jest.fn();
@@ -22,12 +33,15 @@ describe('ConnectorFormFieldsGlobal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    const httpMock = httpServiceMock.createStartContract();
+    useKibanaMock().services.http = httpMock;
+    checkConnectorIdAvailability.mockResolvedValue({ isConnectorIdAvailable: true });
   });
 
   it('submits correctly', async () => {
     render(
       <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
-        <ConnectorFormFieldsGlobal canSave={true} />
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
       </FormTestProvider>
     );
 
@@ -39,7 +53,7 @@ describe('ConnectorFormFieldsGlobal', () => {
       expect(onSubmit).toHaveBeenCalledWith({
         data: {
           actionTypeId: '.test',
-          id: 'test-id',
+          id: 'my-test-connector',
           isDeprecated: 'false',
           name: 'My test connector',
         },
@@ -57,7 +71,7 @@ describe('ConnectorFormFieldsGlobal', () => {
        * is empty.
        */
       <FormTestProvider onSubmit={onSubmit}>
-        <ConnectorFormFieldsGlobal canSave={true} />
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
       </FormTestProvider>
     );
 
@@ -70,6 +84,60 @@ describe('ConnectorFormFieldsGlobal', () => {
         data: {},
         isValid: false,
       });
+    });
+  });
+
+  it('shows error when connector ID is already in use', async () => {
+    checkConnectorIdAvailability.mockResolvedValue({ isConnectorIdAvailable: false });
+
+    render(
+      <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    const idInput = screen.getByTestId('connectorIdInput');
+    await userEvent.clear(idInput);
+    await userEvent.type(idInput, 'existing-connector-id');
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText('A connector with this ID already exists. Please choose a different ID.')
+        ).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
+  });
+
+  it('does not check connector ID availability in edit mode', async () => {
+    render(
+      <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={true} />
+      </FormTestProvider>
+    );
+
+    expect(screen.getByTestId('connectorIdInput')).toBeDisabled();
+
+    await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+    await waitFor(() => {
+      expect(checkConnectorIdAvailability).not.toHaveBeenCalled();
+    });
+  });
+
+  it('auto-populates connector ID from name when creating', async () => {
+    render(
+      <FormTestProvider onSubmit={onSubmit}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} />
+      </FormTestProvider>
+    );
+
+    const nameInput = screen.getByTestId('nameInput');
+    await userEvent.type(nameInput, 'My New Connector');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('connectorIdInput')).toHaveValue('my-new-connector');
     });
   });
 });

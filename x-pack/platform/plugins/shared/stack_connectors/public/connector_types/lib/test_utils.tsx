@@ -33,6 +33,7 @@ interface FormTestProviderProps {
 
 type ConnectorFormTestProviderProps = Omit<FormTestProviderProps, 'defaultValue'> & {
   connector: ConnectorFormSchema;
+  isEdit?: boolean;
 };
 
 const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProps> = ({
@@ -42,6 +43,7 @@ const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProp
   connectorServices,
   serializer,
   deserializer,
+  isEdit = false,
 }) => {
   return (
     <FormTestProviderComponent
@@ -51,7 +53,7 @@ const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProp
       serializer={serializer}
       deserializer={deserializer}
     >
-      <ConnectorFormFieldsGlobal canSave={true} />
+      <ConnectorFormFieldsGlobal canSave={true} isEdit={isEdit} />
       {children}
     </FormTestProviderComponent>
   );

@@ -364,7 +364,7 @@ describe('EmailActionConnectorFields', () => {
             secure: false,
             service: 'other',
           },
-          id: 'test',
+          id: 'email',
           isDeprecated: false,
           name: 'email',
           secrets: {
@@ -383,7 +383,7 @@ describe('EmailActionConnectorFields', () => {
           password: null,
           clientSecret: null,
         },
-        id: 'test',
+        id: 'email',
         actionTypeId: '.email',
         name: 'email',
         config: {
@@ -425,7 +425,7 @@ describe('EmailActionConnectorFields', () => {
             service: 'other',
             secure: false,
           },
-          id: 'test',
+          id: 'email',
           isDeprecated: false,
           name: 'email',
         },
@@ -445,7 +445,7 @@ describe('EmailActionConnectorFields', () => {
           user: 'user',
           password: 'pass',
         },
-        id: 'test',
+        id: 'email',
         actionTypeId: '.email',
         name: 'email',
         config: {
@@ -484,7 +484,7 @@ describe('EmailActionConnectorFields', () => {
             secure: false,
             service: 'gmail',
           },
-          id: 'test',
+          id: 'email',
           isDeprecated: false,
           name: 'email',
           secrets: {
@@ -678,7 +678,7 @@ describe('EmailActionConnectorFields', () => {
           user: 'user',
           password: 'pass',
         },
-        id: 'test',
+        id: 'email',
         actionTypeId: '.email',
         name: 'email',
         config: {
@@ -719,7 +719,7 @@ describe('EmailActionConnectorFields', () => {
             secure: false,
             service: 'other',
           },
-          id: 'test',
+          id: 'email',
           isDeprecated: false,
           name: 'email',
           secrets: {

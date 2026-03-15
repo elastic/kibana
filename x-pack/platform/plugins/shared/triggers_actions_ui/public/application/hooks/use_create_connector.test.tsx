@@ -37,13 +37,102 @@ describe('useCreateConnector', () => {
         name: 'test',
         config: {},
         secrets: {},
+        id: 'test-id',
       });
     });
 
     await waitFor(() =>
-      expect(useKibanaMock().services.http.post).toHaveBeenCalledWith('/api/actions/connector', {
-        body: '{"name":"test","config":{},"secrets":{},"connector_type_id":".test"}',
-      })
+      expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
+        '/api/actions/connector/test-id',
+        {
+          body: '{"name":"test","config":{},"secrets":{},"connector_type_id":".test"}',
+        }
+      )
     );
+  });
+
+  it('includes custom id in the API path when provided', async () => {
+    const { result } = renderHook(() => useCreateConnector());
+
+    act(() => {
+      result.current.createConnector({
+        actionTypeId: '.test',
+        name: 'test',
+        config: {},
+        secrets: {},
+        id: 'my-custom-id',
+      });
+    });
+
+    await waitFor(() =>
+      expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
+        '/api/actions/connector/my-custom-id',
+        {
+          body: '{"name":"test","config":{},"secrets":{},"connector_type_id":".test"}',
+        }
+      )
+    );
+  });
+
+  it('shows server error message for duplicate connector ID (409 conflict)', async () => {
+    const conflictError = {
+      name: 'Error',
+      body: {
+        statusCode: 409,
+        message: 'A connector with ID "duplicate-id" already exists.',
+      },
+    };
+    useKibanaMock().services.http.post = jest.fn().mockRejectedValue(conflictError);
+    const addErrorMock = useKibanaMock().services.notifications.toasts.addError as jest.Mock;
+
+    const { result } = renderHook(() => useCreateConnector());
+
+    await act(async () => {
+      await result.current.createConnector({
+        actionTypeId: '.test',
+        name: 'test',
+        config: {},
+        secrets: {},
+        id: 'duplicate-id',
+      });
+    });
+
+    await waitFor(() => {
+      expect(addErrorMock).toHaveBeenCalledWith(conflictError, {
+        title: 'Unable to create a connector.',
+        toastMessage: 'A connector with ID "duplicate-id" already exists.',
+      });
+    });
+  });
+
+  it('shows generic error message for non-conflict errors', async () => {
+    const genericError = {
+      name: 'Error',
+      body: {
+        statusCode: 500,
+        message: 'Internal server error',
+      },
+    };
+    useKibanaMock().services.http.post = jest.fn().mockRejectedValue(genericError);
+    const addErrorMock = useKibanaMock().services.notifications.toasts.addError as jest.Mock;
+
+    const { result } = renderHook(() => useCreateConnector());
+
+    await act(async () => {
+      await result.current.createConnector({
+        actionTypeId: '.test',
+        name: 'test',
+        config: {},
+        secrets: {},
+        id: 'test-id',
+      });
+    });
+
+    await waitFor(() => {
+      expect(addErrorMock).toHaveBeenCalledWith(genericError, {
+        title: 'Unable to create a connector.',
+        toastMessage: 'Internal server error',
+      });
+    });
   });
 });

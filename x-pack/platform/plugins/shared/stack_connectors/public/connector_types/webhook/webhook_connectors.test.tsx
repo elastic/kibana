@@ -194,6 +194,7 @@ describe('WebhookActionConnectorFields renders', () => {
               hasAuth: true,
               authType: AuthType.Basic,
             },
+            id: 'webhook',
             secrets: {
               user: 'user',
               password: 'pass',
@@ -252,6 +253,7 @@ describe('WebhookActionConnectorFields renders', () => {
             hasAuth: false,
             authType: null,
           },
+          id: 'webhook',
           secrets: {},
           __internal__: {
             hasHeaders: true,
@@ -300,6 +302,7 @@ describe('WebhookActionConnectorFields renders', () => {
             hasAuth: true,
             authType: AuthType.Basic,
           },
+          id: 'webhook',
           secrets: {
             user: 'user',
             password: 'pass',
@@ -423,6 +426,7 @@ describe('WebhookActionConnectorFields renders', () => {
             verificationMode: 'full',
             headers: { 'content-type': 'text' },
           },
+          id: 'webhook',
           secrets: {
             user: 'user',
             password: 'pass',
@@ -486,6 +490,7 @@ describe('WebhookActionConnectorFields renders', () => {
             certType: SSLCertType.CRT,
             headers: { 'content-type': 'text' },
           },
+          id: 'webhook',
           secrets: {
             crt: Buffer.from('some binary string').toString('base64'),
             key: Buffer.from('some binary string').toString('base64'),
@@ -551,6 +556,7 @@ describe('WebhookActionConnectorFields renders', () => {
           secrets: {
             pfx: Buffer.from('some binary string').toString('base64'),
           },
+          id: 'webhook',
           isDeprecated: false,
           __internal__: {
             hasHeaders: true,

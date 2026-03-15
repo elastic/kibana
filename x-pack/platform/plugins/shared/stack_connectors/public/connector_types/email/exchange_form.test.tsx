@@ -20,7 +20,7 @@ describe('ExchangeFormFields renders', () => {
     secrets: {
       clientSecret: 'secret',
     },
-    id: 'test',
+    id: 'email',
     actionTypeId: '.email',
     name: 'email',
     isDeprecated: false,
@@ -97,7 +97,7 @@ describe('ExchangeFormFields renders', () => {
             secrets: {
               clientSecret: 'secret',
             },
-            id: 'test',
+            id: 'email',
             actionTypeId: '.email',
             name: 'email',
             isDeprecated: false,

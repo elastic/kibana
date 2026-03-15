@@ -88,6 +88,7 @@ describe('TorqActionConnectorFields renders', () => {
             token: 'testtoken',
           },
           isDeprecated: false,
+          id: 'torq',
         },
         isValid: true,
       });
@@ -123,6 +124,7 @@ describe('TorqActionConnectorFields renders', () => {
             token: 'testtoken',
           },
           isDeprecated: false,
+          id: 'torq',
         },
         isValid: true,
       });

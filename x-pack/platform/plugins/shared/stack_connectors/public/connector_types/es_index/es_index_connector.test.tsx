@@ -333,7 +333,7 @@ describe('IndexActionConnectorFields', () => {
     test('connector validation succeeds when connector config is valid', async () => {
       const actionConnector = {
         secrets: {},
-        id: 'test',
+        id: 'es_index',
         actionTypeId: '.index',
         name: 'es_index',
         config: {
@@ -364,7 +364,7 @@ describe('IndexActionConnectorFields', () => {
             executionTimeField: '1',
             refresh: false,
           },
-          id: 'test',
+          id: 'es_index',
           isDeprecated: false,
           __internal__: {
             hasTimeFieldCheckbox: true,
@@ -378,7 +378,7 @@ describe('IndexActionConnectorFields', () => {
     test('connector validation succeeds when connector config is valid with minimal config', async () => {
       const actionConnector = {
         secrets: {},
-        id: 'test',
+        id: 'es_index',
         actionTypeId: '.index',
         name: 'es_index',
         config: {
@@ -405,7 +405,7 @@ describe('IndexActionConnectorFields', () => {
           config: {
             index: 'test_es_index',
           },
-          id: 'test',
+          id: 'es_index',
           isDeprecated: false,
           name: 'es_index',
         },
