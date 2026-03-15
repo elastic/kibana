@@ -520,7 +520,7 @@ export class WorkflowsExecutionEnginePlugin
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
       request: KibanaRequest,
-      options: { refresh: boolean | 'wait_for' } = { refresh: 'wait_for' }
+      options: { refresh: boolean | 'wait_for' } = { refresh: false }
     ): Promise<{
       workflowExecution: Partial<EsWorkflowExecution>;
       repository: WorkflowExecutionRepository;
