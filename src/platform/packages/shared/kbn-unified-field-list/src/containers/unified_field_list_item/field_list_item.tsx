@@ -44,6 +44,8 @@ interface GetCommonFieldItemButtonPropsParams {
   toggleDisplay: (field: DataViewField, isSelected?: boolean) => void;
 }
 
+type ResolvedMultiFields = Array<{ field: DataViewField; isSelected: boolean }>;
+
 function getCommonFieldItemButtonProps({
   stateService,
   field,
@@ -75,7 +77,7 @@ function getCommonFieldItemButtonProps({
 
 interface MultiFieldsProps {
   stateService: UnifiedFieldListSidebarContainerStateService;
-  multiFields: NonNullable<UnifiedFieldListItemProps['multiFields']>;
+  multiFields: ResolvedMultiFields;
   toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
   size: FieldItemButtonProps<DataViewField>['size'];
@@ -174,9 +176,9 @@ export interface UnifiedFieldListItemProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   /**
-   * Multi fields for the current field
+   * Multi fields provider for the current field
    */
-  multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
+  getMultiFields?: (field: DataViewField) => ResolvedMultiFields | undefined;
   /**
    * Callback to edit a field from data view
    * @param fieldName name of the field to edit
@@ -228,7 +230,7 @@ function UnifiedFieldListItemComponent({
   isEmpty,
   isSelected,
   trackUiMetric,
-  multiFields,
+  getMultiFields,
   onEditField,
   onDeleteField,
   workspaceSelectedFieldNames,
@@ -271,6 +273,11 @@ function UnifiedFieldListItemComponent({
       }
     },
     [onAddFieldToWorkspace, onRemoveFieldFromWorkspace, closePopover]
+  );
+
+  const multiFields = useMemo(
+    () => (infoIsOpen ? getMultiFields?.(field) : undefined),
+    [field, getMultiFields, infoIsOpen]
   );
 
   const rawMultiFields = useMemo(() => multiFields?.map((f) => f.field), [multiFields]);
@@ -366,40 +373,46 @@ function UnifiedFieldListItemComponent({
   const isDragDisabled =
     alwaysShowActionButton || stateService.creationOptions.disableFieldListItemDragAndDrop;
 
+  const button = (
+    <Draggable
+      dragType="copy"
+      dragClassName="unifiedFieldListItemButton__dragging"
+      order={order}
+      value={value}
+      onDragStart={closePopover}
+      isDisabled={isDragDisabled}
+      dataTestSubj={`${
+        stateService.creationOptions.dataTestSubj?.fieldListItemDndDataTestSubjPrefix ??
+        'unifiedFieldListItemDnD'
+      }-${field.name}`}
+    >
+      <FieldItemButton
+        fieldSearchHighlight={highlight}
+        isEmpty={isEmpty}
+        isActive={infoIsOpen}
+        withDragIcon={!isDragDisabled}
+        flush={alwaysShowActionButton ? 'both' : undefined}
+        shouldAlwaysShowAction={alwaysShowActionButton}
+        onClick={field.type !== '_source' ? togglePopover : undefined}
+        {...getCommonFieldItemButtonProps({
+          stateService,
+          field,
+          isSelected,
+          toggleDisplay,
+          size,
+        })}
+      />
+    </Draggable>
+  );
+
+  if (!infoIsOpen) {
+    return button;
+  }
+
   return (
     <FieldPopover
       isOpen={infoIsOpen}
-      button={
-        <Draggable
-          dragType="copy"
-          dragClassName="unifiedFieldListItemButton__dragging"
-          order={order}
-          value={value}
-          onDragStart={closePopover}
-          isDisabled={isDragDisabled}
-          dataTestSubj={`${
-            stateService.creationOptions.dataTestSubj?.fieldListItemDndDataTestSubjPrefix ??
-            'unifiedFieldListItemDnD'
-          }-${field.name}`}
-        >
-          <FieldItemButton
-            fieldSearchHighlight={highlight}
-            isEmpty={isEmpty}
-            isActive={infoIsOpen}
-            withDragIcon={!isDragDisabled}
-            flush={alwaysShowActionButton ? 'both' : undefined}
-            shouldAlwaysShowAction={alwaysShowActionButton}
-            onClick={field.type !== '_source' ? togglePopover : undefined}
-            {...getCommonFieldItemButtonProps({
-              stateService,
-              field,
-              isSelected,
-              toggleDisplay,
-              size,
-            })}
-          />
-        </Draggable>
-      }
+      button={button}
       closePopover={closePopover}
       data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemPopoverDataTestSubj}
       renderHeader={() => (
