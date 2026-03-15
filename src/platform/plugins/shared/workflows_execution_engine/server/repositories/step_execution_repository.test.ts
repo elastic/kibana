@@ -15,6 +15,7 @@ describe('StepExecutionRepository', () => {
     index: jest.Mock;
     update: jest.Mock;
     bulk: jest.Mock;
+    mget: jest.Mock;
     indices: { exists: jest.Mock; create: jest.Mock };
   };
 
@@ -23,6 +24,7 @@ describe('StepExecutionRepository', () => {
       index: jest.fn(),
       update: jest.fn(),
       bulk: jest.fn(),
+      mget: jest.fn(),
       indices: {
         exists: jest.fn().mockResolvedValue(false),
         create: jest.fn().mockResolvedValue({}),
@@ -271,6 +273,95 @@ describe('StepExecutionRepository', () => {
           refresh: false,
         })
       );
+    });
+  });
+
+  describe('getStepExecutionsByIds', () => {
+    it('should retrieve step executions by their IDs', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            _id: 'step-1',
+            found: true,
+            _source: { id: 'step-1', stepId: 'test-step-1', status: 'completed' },
+          },
+          {
+            _id: 'step-2',
+            found: true,
+            _source: { id: 'step-2', stepId: 'test-step-2', status: 'running' },
+          },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2']);
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ids: ['step-1', 'step-2'],
+      });
+      expect(result).toEqual([
+        { id: 'step-1', stepId: 'test-step-1', status: 'completed' },
+        { id: 'step-2', stepId: 'test-step-2', status: 'running' },
+      ]);
+    });
+
+    it('should skip documents that were not found', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          { _id: 'step-1', found: true, _source: { id: 'step-1', stepId: 'test-step-1' } },
+          { _id: 'step-2', found: false },
+          { _id: 'step-3', found: true, _source: { id: 'step-3', stepId: 'test-step-3' } },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2', 'step-3']);
+
+      expect(result).toEqual([
+        { id: 'step-1', stepId: 'test-step-1' },
+        { id: 'step-3', stepId: 'test-step-3' },
+      ]);
+    });
+
+    it('should return empty array when no documents are found', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          { _id: 'step-1', found: false },
+          { _id: 'step-2', found: false },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2']);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should handle a single ID', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            _id: 'step-1',
+            found: true,
+            _source: { id: 'step-1', stepId: 'test-step-1', status: 'pending' },
+          },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1']);
+
+      expect(result).toEqual([{ id: 'step-1', stepId: 'test-step-1', status: 'pending' }]);
+    });
+
+    it('should skip documents where _source is missing', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          { _id: 'step-1', found: true, _source: null },
+          { _id: 'step-2', found: true, _source: { id: 'step-2', stepId: 'test-step-2' } },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2']);
+
+      expect(result).toEqual([{ id: 'step-2', stepId: 'test-step-2' }]);
     });
   });
 });
