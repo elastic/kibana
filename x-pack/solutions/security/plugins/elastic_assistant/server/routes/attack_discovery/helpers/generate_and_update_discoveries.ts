@@ -144,6 +144,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
       }>, // TODO: remove this when the generator returns metadata: z.record(z.string(), z.unknown()) instead of metadata: z.object({}),
       apiConfig,
       attackDiscoveries: dedupedDiscoveries,
+      caseId: config.caseId,
       connectorName: connectorName ?? apiConfig.connectorId,
       enableFieldRendering,
       generationUuid: executionUuid,

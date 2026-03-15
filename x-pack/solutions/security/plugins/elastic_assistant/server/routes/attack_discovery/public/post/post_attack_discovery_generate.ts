@@ -30,6 +30,8 @@ import { buildResponse } from '../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 import { requestIsValid } from './helpers/request_is_valid';
 import { generateAndUpdateAttackDiscoveries } from '../../helpers/generate_and_update_discoveries';
+import { getAlertIdsFromCase } from '../../helpers/get_alert_ids_from_case';
+import { buildCaseAlertFilter } from '../../helpers/build_case_alert_filter';
 import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../../helpers/index_privileges';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
@@ -148,6 +150,31 @@ export const postAttackDiscoveryGenerateRoute = (
 
           const executionUuid = uuidv4();
 
+          // When a caseId is provided, derive alert IDs from the case's attached alerts
+          // and build a filter to scope the AD generation to those alerts only.
+          let configWithCaseFilter = request.body;
+          if (request.body.caseId != null) {
+            const caseAlertIds = await getAlertIdsFromCase({
+              caseId: request.body.caseId,
+              cases: (await context.elasticAssistant).cases,
+              logger,
+              request,
+            });
+
+            const caseFilter = buildCaseAlertFilter(caseAlertIds);
+
+            configWithCaseFilter = {
+              ...request.body,
+              filter: request.body.filter
+                ? {
+                    bool: {
+                      must: [request.body.filter, caseFilter],
+                    },
+                  }
+                : caseFilter,
+            };
+          }
+
           // event log details:
           const connectorId = apiConfig.connectorId;
           const spaceId = (await context.elasticAssistant).getSpaceId();
@@ -178,7 +205,7 @@ export const postAttackDiscoveryGenerateRoute = (
             enableFieldRendering: true, // the _generate API always pass true for this value. It's still possible for clients who read the generated discoveries to specify false when retrieving them.
             executionUuid,
             authenticatedUser,
-            config: request.body,
+            config: configWithCaseFilter,
             dataClient,
             esClient,
             logger,

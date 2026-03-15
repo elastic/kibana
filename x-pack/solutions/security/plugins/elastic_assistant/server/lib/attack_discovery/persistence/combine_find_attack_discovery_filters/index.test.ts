@@ -9,6 +9,7 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME,
+  ALERT_ATTACK_DISCOVERY_CASE_ID,
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
@@ -284,6 +285,27 @@ describe('combineFindAttackDiscoveryFilters', () => {
       const expectedResult = `(${expectedSearchFilter}) AND (${ALERT_WORKFLOW_STATUS}: "open") AND (${ALERT_ATTACK_DISCOVERY_ALERT_IDS}: "alert123") AND @timestamp <= "2024-12-31T23:59:59.999Z"`;
 
       expect(result).toBe(expectedResult);
+    });
+  });
+
+  describe('when a caseId filter is provided', () => {
+    it('returns the expected caseId filter', () => {
+      const result = combineFindAttackDiscoveryFilters({
+        caseId: 'case-abc-123',
+      });
+
+      expect(result).toBe(`${ALERT_ATTACK_DISCOVERY_CASE_ID}: "case\\-abc\\-123"`);
+    });
+
+    it('combines caseId with other filters', () => {
+      const result = combineFindAttackDiscoveryFilters({
+        caseId: 'case-123',
+        status: ['open'],
+      });
+
+      expect(result).toBe(
+        `(${ALERT_WORKFLOW_STATUS}: "open") AND ${ALERT_ATTACK_DISCOVERY_CASE_ID}: "case\\-123"`
+      );
     });
   });
 });

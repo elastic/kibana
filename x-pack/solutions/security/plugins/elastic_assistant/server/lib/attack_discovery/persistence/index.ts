@@ -95,6 +95,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
   }): Promise<AttackDiscoveryFindResponse> => {
     const {
       alertIds,
+      caseId,
       connectorNames, // <-- as a filter input
       enableFieldRendering,
       end,
@@ -125,6 +126,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
 
     const filter = combineFindAttackDiscoveryFilters({
       alertIds,
+      caseId,
       connectorNames,
       end,
       executionUuid,

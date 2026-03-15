@@ -110,6 +110,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       core: coreContext,
       userProfile: coreStart.userProfile,
       actions: startPlugins.actions,
+      cases: startPlugins.cases,
       rulesClient,
       frameworkAlerts: plugins.alerting.frameworkAlerts,
       auditLogger: coreStart.security.audit?.asScoped(request),

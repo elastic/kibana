@@ -12,6 +12,7 @@ export const ALERT_ATTACK_DISCOVERY = `${ALERT_NAMESPACE}.attack_discovery` as c
 export const ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT =
   `${ALERT_ATTACK_DISCOVERY}.alerts_context_count` as const;
 export const ALERT_ATTACK_DISCOVERY_ALERT_IDS = `${ALERT_ATTACK_DISCOVERY}.alert_ids` as const;
+export const ALERT_ATTACK_DISCOVERY_CASE_ID = `${ALERT_ATTACK_DISCOVERY}.case_id` as const;
 export const ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN =
   `${ALERT_ATTACK_DISCOVERY}.details_markdown` as const;
 export const ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS =

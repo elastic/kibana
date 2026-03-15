@@ -33,6 +33,10 @@ export const AttackDiscoveryFindRequestQuery = z.object({
    */
   alert_ids: ArrayFromString(z.string()).optional(),
   /**
+   * Filter results to Attack discoveries associated with the specified case ID
+   */
+  case_id: z.string().optional(),
+  /**
    * Filter results to Attack discoveries created by any of the provided human readable connector names. Note that values must match the human readable `connector_name` property of an Attack discovery, e.g. "GPT-5 Chat", which are distinct from `connector_id` values used to generate Attack discoveries.
    */
   connector_names: ArrayFromString(z.string()).optional(),
