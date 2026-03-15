@@ -8,14 +8,6 @@
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-export function parseSerializedContent<T>(rawContent: string): T | undefined {
-  try {
-    return JSON.parse(rawContent) as T;
-  } catch {
-    return undefined;
-  }
-}
-
 function joinUri(base: string, targetPath: string) {
   const cleanBase = base.replace(/\/+$/, '');
   const cleanTarget = targetPath.replace(/^\/+/, '');

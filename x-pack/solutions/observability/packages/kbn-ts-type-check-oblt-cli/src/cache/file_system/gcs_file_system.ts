@@ -11,6 +11,8 @@ import { x as tarExtract } from 'tar';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import execa from 'execa';
+import { SingleBar } from 'cli-progress';
+import { isCiEnvironment } from '../utils';
 import { GCS_BUCKET_NAME, GCS_BUCKET_PATH, GCS_BUCKET_URI, COMMITS_PATH } from '../constants';
 import { getTarCreateArgs, resolveTarEnvironment } from './utils';
 import { AbstractFileSystem } from './abstract_file_system';
@@ -31,14 +33,73 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+const SPEED_WINDOW_MS = 500;
+
+/**
+ * Creates a passthrough Transform stream that tracks bytes received and drives
+ * a `cli-progress` bar. On CI the bar is suppressed; `stop()` is always safe
+ * to call regardless.
+ */
+const createDownloadProgressBar = (
+  contentLength: number | undefined
+): { meter: Transform; stop: () => void } => {
+  const total = contentLength ?? 0;
+  const showBar = !isCiEnvironment();
+
+  let bar: SingleBar | undefined;
+
+  if (showBar) {
+    bar = new SingleBar({
+      barsize: 30,
+      format: ' Downloading [{bar}] {percentage}% | {received}/{total} | {speed}/s',
+      hideCursor: true,
+      clearOnComplete: true,
+    });
+
+    bar.start(total || 1, 0, {
+      received: formatBytes(0),
+      total: total ? formatBytes(total) : '?',
+      speed: '?',
+    });
+  }
+
+  let bytesReceived = 0;
+  let lastUpdate = Date.now();
+  let lastBytes = 0;
+
+  const meter = new Transform({
+    transform(chunk, _encoding, callback) {
+      bytesReceived += chunk.length;
+
+      if (bar) {
+        const now = Date.now();
+        const elapsed = now - lastUpdate;
+
+        if (elapsed >= SPEED_WINDOW_MS) {
+          const speed = Math.round(((bytesReceived - lastBytes) / elapsed) * 1000);
+          lastUpdate = now;
+          lastBytes = bytesReceived;
+
+          bar.update(total ? bytesReceived : 1, {
+            received: formatBytes(bytesReceived),
+            total: total ? formatBytes(total) : '?',
+            speed: formatBytes(speed),
+          });
+        }
+      }
+
+      callback(null, chunk);
+    },
+  });
+
+  const stop = () => bar?.stop();
+
+  return { meter, stop };
+};
+
 export class GcsFileSystem extends AbstractFileSystem {
   private accessToken: string | undefined;
 
-  /**
-   * @param accessToken  OAuth2 access token used for write operations (archive/metadata upload)
-   *   via native `fetch`. Not required for read operations since the bucket is public.
-   *   On CI, obtain one with `getGcloudAccessToken()` after activating the service account.
-   */
   constructor(log: SomeDevLog, accessToken?: string) {
     super(log);
     this.accessToken = accessToken;
@@ -102,23 +163,20 @@ export class GcsFileSystem extends AbstractFileSystem {
 
       const contentLength = Number(response.headers.get('content-length')) || undefined;
 
-      const sizeLabel = contentLength ? ` (${formatBytes(contentLength)})` : '';
+      const { meter, stop: stopBar } = createDownloadProgressBar(contentLength);
 
-      this.log.info(`Streaming & extracting TypeScript build artifacts${sizeLabel}...`);
-
-      let bytesReceived = 0;
-      const meter = new Transform({
-        transform(chunk, _encoding, callback) {
-          bytesReceived += chunk.length;
-          callback(null, chunk);
-        },
-      });
-
-      await pipeline(Readable.fromWeb(response.body as any), meter, tarExtract({ cwd: REPO_ROOT }));
+      try {
+        await pipeline(
+          Readable.fromWeb(response.body as any),
+          meter,
+          tarExtract({ cwd: REPO_ROOT })
+        );
+      } finally {
+        stopBar();
+      }
 
       const elapsed = Date.now() - start;
-
-      const totalSize = contentLength ?? bytesReceived;
+      const totalSize = contentLength ?? 0;
 
       const speedLabel =
         totalSize && elapsed > 0
@@ -128,7 +186,7 @@ export class GcsFileSystem extends AbstractFileSystem {
       this.log.info(
         `Restored TypeScript build artifacts (${formatBytes(totalSize)})${speedLabel} in ${(
           elapsed / 1000
-        ).toFixed(1)}`
+        ).toFixed(1)}s`
       );
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error);
