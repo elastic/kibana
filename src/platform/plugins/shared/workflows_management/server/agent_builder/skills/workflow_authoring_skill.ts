@@ -15,6 +15,14 @@ import { GET_TRIGGER_DEFINITIONS_TOOL_ID } from '../tools/get_trigger_definition
 import { GET_WORKFLOW_TOOL_ID } from '../tools/get_workflow_tool';
 import { LIST_WORKFLOWS_TOOL_ID } from '../tools/list_workflows_tool';
 import { VALIDATE_WORKFLOW_TOOL_ID } from '../tools/validate_workflow_tool';
+import {
+  WORKFLOW_DELETE_STEP_TOOL_ID,
+  WORKFLOW_INSERT_STEP_TOOL_ID,
+  WORKFLOW_MODIFY_PROPERTY_TOOL_ID,
+  WORKFLOW_MODIFY_STEP_PROPERTY_TOOL_ID,
+  WORKFLOW_MODIFY_STEP_TOOL_ID,
+  WORKFLOW_REPLACE_YAML_TOOL_ID,
+} from '../tools/workflow_edit_tools';
 
 export const workflowAuthoringSkill = defineSkillType({
   id: 'workflow-authoring',
@@ -22,32 +30,46 @@ export const workflowAuthoringSkill = defineSkillType({
   basePath: 'skills/platform/workflows',
   description:
     'Create, modify, and validate Elastic workflow YAML definitions using natural language. Covers step types, triggers, Liquid templating, connector integrations, and validation.',
-  content: `## When to Use This Skill
+  content: `## Auto-Loading Note
+
+When a \`workflow.yaml\` attachment is present, all workflow tools are already available and
+validation results are shown in the attachment. You do NOT need to load this skill to access tools
+or see validation errors — skip the \`filestore.read\` call.
+
+## When to Use This Skill
 
 Use this skill when the user wants to:
-- Create a new workflow YAML definition
-- Modify or extend an existing workflow
-- Understand available step types, triggers, or connector integrations
-- Fix workflow validation errors
+- Create a new workflow YAML definition (no \`workflow.yaml\` attachment present)
+- Understand advanced step types, triggers, or connector integrations
 - Learn workflow YAML syntax, Liquid templating, or best practices
+- Fix complex validation errors that require understanding step schemas
 
 ## Available Tools
 
+### Lookup Tools
 - **get_step_definitions**: Look up available step types, their input params (\`with\` block), config params, and examples
 - **get_trigger_definitions**: Look up available trigger types and their schemas
 - **get_examples**: Search the bundled example library for working workflow YAML patterns
 - **get_connectors**: Find connector instances configured in the user's environment
-- **validate_workflow**: Validate a complete workflow YAML string against all rules
+- **validate_workflow**: Validate a complete workflow YAML string against all rules. When validation fails, step definitions for referenced step types are automatically included.
 - **list_workflows**: List workflows in the user's environment
 - **get_workflow**: Retrieve a specific workflow by ID
 
+### Edit Tools
+- **workflow_replace_yaml**: Replace the entire workflow YAML, or **create a new workflow from scratch** when no \`workflow.yaml\` attachment exists. Use this to create new workflows.
+- **workflow_insert_step**: Insert a new step at the end of the steps list (requires existing attachment)
+- **workflow_modify_step**: Replace an entire step by name (requires existing attachment)
+- **workflow_modify_step_property**: Modify a single property of a step (requires existing attachment)
+- **workflow_modify_property**: Modify a top-level workflow property (requires existing attachment)
+- **workflow_delete_step**: Delete a step by name (requires existing attachment)
+
 ## Core Instructions
 
-### CRITICAL: Always Search Examples First
+### Search Examples Before Writing Step YAML
 
-Before generating any workflow YAML, ALWAYS use \`get_examples\` to find similar examples.
-This ensures you use the correct syntax and available step types. The example library contains
-real, working workflows that demonstrate the proper way to use each step type.
+Before writing new steps or modifying step types you haven't seen in this conversation,
+use \`get_examples\` to find similar working patterns. This applies to both new workflows
+and adding/changing steps in existing ones.
 
 ### Workflow YAML Structure
 
@@ -176,14 +198,30 @@ Skip validation for trivial changes where the risk of errors is low.
 
 ### Fixing Validation Errors
 
-When the user asks you to fix a validation error:
+When fixing validation errors:
 
-1. **ALWAYS call \`get_step_definitions\` FIRST** to get the list of all valid step types
-2. Analyze the error and identify the problematic step
-3. Compare the step type with valid step types from get_step_definitions
-4. If the step type exists: check the step definition for correct usage
-5. If the step type does NOT exist: tell the user and list similar alternatives
-6. NEVER guess or replace a step type with something unrelated
+1. Call \`validate_workflow\` — it automatically includes step definitions for all referenced step types when validation fails
+2. Analyze the errors and identify the problematic steps
+3. If a step type does NOT exist: tell the user and list similar alternatives from the included step definitions
+4. Use edit tools to fix the issues, then check the \`validation\` field in the edit tool response to confirm the fix
+5. NEVER guess or replace a step type with something unrelated
+
+### Proposing Changes (Edit Tools)
+
+When a \`workflow.yaml\` attachment is present in the conversation, you MUST use the edit tools to propose changes.
+Edit tools compute the diff on the server, emit a \`workflow.yaml.diff\` attachment visible in chat, and update
+the YAML attachment so subsequent edits see the latest state. The client-side editor will show the diff
+with an accept/decline UX. NEVER just describe changes in text when edit tools are available.
+
+When using edit tools:
+1. Provide step definitions as structured JSON objects, NOT as YAML strings
+2. Always include a \`proposalId\` — generate a unique identifier for each change
+3. Include a \`description\` explaining what the change does
+4. Validate the workflow AFTER the user accepts the proposed change
+5. For multi-step changes, call multiple edit tools — each creates a separate proposal
+6. Each edit tool reads the current YAML from the \`workflow.yaml\` attachment and updates it,
+   so sequential tool calls within a round see each other's changes
+7. After edits, you can render the workflow.yaml attachment with <render_attachment id="{attachmentId}"/> to show the user the current complete YAML
 
 ### Best Practices
 
@@ -200,5 +238,11 @@ When the user asks you to fix a validation error:
     VALIDATE_WORKFLOW_TOOL_ID,
     LIST_WORKFLOWS_TOOL_ID,
     GET_WORKFLOW_TOOL_ID,
+    WORKFLOW_INSERT_STEP_TOOL_ID,
+    WORKFLOW_MODIFY_STEP_TOOL_ID,
+    WORKFLOW_MODIFY_STEP_PROPERTY_TOOL_ID,
+    WORKFLOW_MODIFY_PROPERTY_TOOL_ID,
+    WORKFLOW_DELETE_STEP_TOOL_ID,
+    WORKFLOW_REPLACE_YAML_TOOL_ID,
   ],
 });

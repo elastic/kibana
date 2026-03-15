@@ -16,6 +16,7 @@ jest.mock('../../../common/schema', () => ({
     return getEs();
   },
   addDynamicConnectorsToCache: jest.fn(),
+  getCachedAllConnectorsMap: () => null,
 }));
 
 const MAX_CHARS_PER_STEP = 5000;

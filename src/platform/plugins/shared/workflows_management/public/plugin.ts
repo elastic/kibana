@@ -19,10 +19,14 @@ import {
   type Plugin,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOWS_AI_AGENT_SETTING_ID,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import { triggerSchemas } from './trigger_schemas';
 import type {
+  AgentBuilderPluginStartContract,
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
   WorkflowsPublicPluginStart,
@@ -46,6 +50,7 @@ export class WorkflowsPlugin
 {
   private appUpdater$: Subject<AppUpdater>;
   private telemetryService: TelemetryService;
+  private agentBuilderPromise: Promise<AgentBuilderPluginStartContract | undefined> | undefined;
 
   constructor() {
     this.appUpdater$ = new Subject<AppUpdater>();
@@ -77,6 +82,32 @@ export class WorkflowsPlugin
     };
 
     registerConnectorType();
+
+    // Resolve Agent Builder client contract lazily for AI authoring features.
+    // Eagerly kick off the dynamic import so the chunk downloads in parallel
+    // with onStart resolution, minimising the window where attachment renderers
+    // are not yet registered when the sidebar opens.
+    const isAiAgentEnabled = core.uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID, false);
+    if (isAiAgentEnabled) {
+      const aiIntegrationModule = import('./features/ai_integration');
+
+      this.agentBuilderPromise = core.plugins
+        .onStart<{ agentBuilder: AgentBuilderPluginStartContract }>('agentBuilder')
+        .then(async ({ agentBuilder }) => {
+          if (agentBuilder.found) {
+            const [coreStart] = await core.getStartServices();
+            const { registerWorkflowAttachmentRenderers } = await aiIntegrationModule;
+            registerWorkflowAttachmentRenderers(agentBuilder.contract.attachments, {
+              http: coreStart.http,
+              notifications: coreStart.notifications,
+              application: coreStart.application,
+            });
+            return agentBuilder.contract;
+          }
+          return undefined;
+        })
+        .catch(() => undefined);
+    }
 
     core.application.register({
       id: PLUGIN_ID,
@@ -128,9 +159,14 @@ export class WorkflowsPlugin
     // Get start services as specified in kibana.jsonc
     const [coreStart, depsStart] = await core.getStartServices();
 
+    const agentBuilder = await this.agentBuilderPromise;
+
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
-      workflowsManagement: { telemetry: this.telemetryService.getClient() },
+      workflowsManagement: {
+        telemetry: this.telemetryService.getClient(),
+        agentBuilder,
+      },
     };
 
     // Make sure the workflows extensions registries are ready before using the services
