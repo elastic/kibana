@@ -271,10 +271,8 @@ exports.EcsCustomPropertyMappings = {
                     },
                   },
                   errors: {
+                    type: 'nested',
                     properties: {
-                      '@timestamp': {
-                        type: 'date',
-                      },
                       message: {
                         norms: false,
                         type: 'text',
@@ -282,10 +280,8 @@ exports.EcsCustomPropertyMappings = {
                     },
                   },
                   warnings: {
+                    type: 'nested',
                     properties: {
-                      '@timestamp': {
-                        type: 'date',
-                      },
                       message: {
                         norms: false,
                         type: 'text',

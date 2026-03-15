@@ -19,7 +19,10 @@ import {
   executionStatusFromState,
 } from '../../lib/rule_execution_status';
 import type { RuleRunMetrics } from '../../lib/rule_run_metrics_store';
-import type { RuleResultService } from '../../monitoring/rule_result_service';
+import type {
+  RuleResultService,
+  RuleResultServiceResults,
+} from '../../monitoring/rule_result_service';
 import type { RunRuleResult } from '../types';
 
 interface ProcessRuleRunOpts {
@@ -35,6 +38,8 @@ interface ProcessRuleRunResult {
   executionMetrics: RuleRunMetrics | null;
   lastRun: RuleLastRun;
   outcome: Outcome;
+  errors?: RuleResultServiceResults['errors'];
+  warnings?: RuleResultServiceResults['warnings'];
 }
 
 export function processRunResults({
@@ -61,7 +66,12 @@ export function processRunResults({
   );
 
   // New consolidated statuses for lastRun
-  const { lastRun, metrics: executionMetrics } = map<RunRuleResult, ElasticsearchError, ILastRun>(
+  const {
+    lastRun,
+    metrics: executionMetrics,
+    errors,
+    warnings,
+  } = map<RunRuleResult, ElasticsearchError, ILastRun>(
     runRuleResult,
     ({ metrics }) => lastRunFromState(metrics, result),
     (err: ElasticsearchError) => lastRunFromError(err)
@@ -86,5 +96,5 @@ export function processRunResults({
     outcome = 'failure';
   }
 
-  return { executionStatus, executionMetrics, lastRun, outcome };
+  return { executionStatus, executionMetrics, lastRun, outcome, errors, warnings };
 }
