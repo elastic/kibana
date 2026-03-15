@@ -43,12 +43,8 @@ import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
-import {
-  getColorMode,
-  getDefaultConfigForMode,
-  getTrendPalette,
-  isSecondaryTrendConfigInvalid,
-} from './helpers';
+import { getColorMode, getTrendPalette, isSecondaryTrendConfigInvalid } from './helpers';
+import { getDefaultConfigForMode } from './palette_config';
 import { getAccessorType } from '../../shared_components';
 import { MetricAppearanceSettings } from './toolbar';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';

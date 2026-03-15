@@ -425,6 +425,23 @@
       },
       {
         "parentPluginId": "savedSearch",
+        "id": "def-public.SavedSearchType",
+        "type": "string",
+        "tags": [],
+        "label": "SavedSearchType",
+        "description": [],
+        "signature": [
+          "\"search\""
+        ],
+        "path": "src/platform/plugins/shared/saved_search/common/constants.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
         "id": "def-public.SortOrder",
         "type": "Type",
         "tags": [],

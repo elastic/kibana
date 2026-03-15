@@ -27,7 +27,7 @@ const MINIMAL_STEPS: WorkflowYaml['steps'] = [
 
 /** Builds a minimal valid WorkflowYaml. Triggers are cast so custom trigger types can be passed in tests. */
 function minimalWorkflow(
-  triggers: Array<{ type: string; with?: { condition?: string } }>
+  triggers: Array<{ type: string; on?: { condition?: string } }>
 ): WorkflowYaml {
   return {
     version: '1',
@@ -41,7 +41,7 @@ function minimalWorkflow(
 describe('validateTriggerConditionsForWorkflow', () => {
   it('trigger with valid condition passes', () => {
     const workflow = minimalWorkflow([
-      { type: CUSTOM_TRIGGER_TYPE, with: { condition: 'event.severity: "high"' } },
+      { type: CUSTOM_TRIGGER_TYPE, on: { condition: 'event.severity: "high"' } },
     ]);
 
     const result = validateTriggerConditionsForWorkflow(workflow, getTriggerDefinition);
@@ -51,7 +51,7 @@ describe('validateTriggerConditionsForWorkflow', () => {
 
   it('trigger with invalid KQL fails', () => {
     const workflow = minimalWorkflow([
-      { type: CUSTOM_TRIGGER_TYPE, with: { condition: 'invalid ( unclosed' } },
+      { type: CUSTOM_TRIGGER_TYPE, on: { condition: 'invalid ( unclosed' } },
     ]);
 
     const result = validateTriggerConditionsForWorkflow(workflow, getTriggerDefinition);
@@ -65,7 +65,7 @@ describe('validateTriggerConditionsForWorkflow', () => {
 
   it('trigger with unknown field fails', () => {
     const workflow = minimalWorkflow([
-      { type: CUSTOM_TRIGGER_TYPE, with: { condition: 'event.unknown: "x"' } },
+      { type: CUSTOM_TRIGGER_TYPE, on: { condition: 'event.unknown: "x"' } },
     ]);
 
     const result = validateTriggerConditionsForWorkflow(workflow, getTriggerDefinition);
@@ -93,8 +93,8 @@ describe('validateTriggerConditionsForWorkflow', () => {
   it('trigger without condition is valid', () => {
     const workflow = minimalWorkflow([
       { type: CUSTOM_TRIGGER_TYPE },
-      { type: CUSTOM_TRIGGER_TYPE, with: {} },
-      { type: CUSTOM_TRIGGER_TYPE, with: { condition: '' } },
+      { type: CUSTOM_TRIGGER_TYPE, on: {} },
+      { type: CUSTOM_TRIGGER_TYPE, on: { condition: '' } },
     ]);
 
     const result = validateTriggerConditionsForWorkflow(workflow, getTriggerDefinition);
@@ -106,7 +106,7 @@ describe('validateTriggerConditionsForWorkflow', () => {
 describe('validateTriggers', () => {
   it('delegates to validateTriggerConditionsForWorkflow with definition lookup', () => {
     const workflow = minimalWorkflow([
-      { type: CUSTOM_TRIGGER_TYPE, with: { condition: 'event.severity: "high"' } },
+      { type: CUSTOM_TRIGGER_TYPE, on: { condition: 'event.severity: "high"' } },
     ]);
     const triggerDefinitions = [{ id: CUSTOM_TRIGGER_TYPE, eventSchema }];
 
@@ -117,7 +117,7 @@ describe('validateTriggers', () => {
 
   it('returns validation errors when condition is invalid', () => {
     const workflow = minimalWorkflow([
-      { type: CUSTOM_TRIGGER_TYPE, with: { condition: 'event.unknown: "x"' } },
+      { type: CUSTOM_TRIGGER_TYPE, on: { condition: 'event.unknown: "x"' } },
     ]);
     const triggerDefinitions = [{ id: CUSTOM_TRIGGER_TYPE, eventSchema }];
 

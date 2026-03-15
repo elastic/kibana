@@ -15,7 +15,7 @@ import {
   LOGS_ECS_STREAM_NAME,
   namespacePrefixes,
 } from '@kbn/streams-schema';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { executePipelineSimulation } from '../../../routes/internal/streams/processing/simulation_handler';
 import { baseMappings } from '../component_templates/logs_layer';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
@@ -36,15 +36,16 @@ export function validateAncestorFields({
       if (!Object.hasOwn(fields, fieldName)) {
         continue;
       }
-      if (
-        Object.entries(ancestor.ingest.wired.fields).some(
-          ([ancestorFieldName, attr]) =>
-            attr.type !== fields[fieldName].type && ancestorFieldName === fieldName
-        )
-      ) {
-        throw new MalformedFieldsError(
-          `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
-        );
+      const ancestorField = ancestor.ingest.wired.fields[fieldName];
+      if (ancestorField) {
+        const fieldType = fields[fieldName].type;
+        // Check for incompatible type changes
+        // Allow: parent has no type (doc-only) → child can set any type
+        if (fieldType !== undefined && ancestorField.type && ancestorField.type !== fieldType) {
+          throw new MalformedFieldsError(
+            `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
+          );
+        }
       }
       // Skip OTEL namespace validation for logs.ecs streams which use ECS field conventions
       if (!isEcsStream) {
@@ -105,7 +106,7 @@ export function validateClassicFields(definition: Streams.ClassicStream.Definiti
 
 export async function validateSimulation(
   definition: Streams.ClassicStream.Definition | Streams.WiredStream.Definition,
-  scopedClusterClient: IScopedClusterClient
+  esClient: ElasticsearchClient
 ) {
   if (definition.ingest.processing.steps.length === 0) {
     return;
@@ -121,7 +122,7 @@ export async function validateSimulation(
       processors: transpileIngestPipeline(definition.ingest.processing).processors,
     },
   };
-  const simulationResult = await executePipelineSimulation(scopedClusterClient, simulationBody);
+  const simulationResult = await executePipelineSimulation(esClient, simulationBody);
   if (simulationResult.status === 'failure') {
     throw new MalformedFieldsError(simulationResult.error.message);
   }
@@ -136,11 +137,15 @@ export function validateDescendantFields({
 }) {
   for (const descendant of descendants) {
     for (const fieldName in fields) {
+      if (!Object.hasOwn(fields, fieldName)) {
+        continue;
+      }
+      const fieldType = fields[fieldName].type;
       if (
-        Object.hasOwn(fields, fieldName) &&
+        fieldType !== undefined &&
         Object.entries(descendant.ingest.wired.fields).some(
           ([descendantFieldName, attr]) =>
-            attr.type !== fields[fieldName].type && descendantFieldName === fieldName
+            descendantFieldName === fieldName && attr.type !== undefined && attr.type !== fieldType
         )
       ) {
         throw new MalformedFieldsError(

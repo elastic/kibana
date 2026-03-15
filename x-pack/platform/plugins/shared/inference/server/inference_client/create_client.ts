@@ -20,6 +20,7 @@ import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
+import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 interface CreateClientOptions {
   request: KibanaRequest;
@@ -30,6 +31,7 @@ interface CreateClientOptions {
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
   replacementsEsClient?: ElasticsearchClient;
+  endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
   anonymization?: InferenceAnonymizationOptions;
 }
@@ -51,8 +53,9 @@ export function createClient(
     anonymizationRulesPromise,
     esClient,
     regexWorker,
-    callbacks,
     replacementsEsClient,
+    endpointIdCache,
+    callbacks,
     anonymization,
   } = options;
   const client = createInferenceClient({
@@ -64,6 +67,7 @@ export function createClient(
     regexWorker,
     esClient,
     replacementsEsClient,
+    endpointIdCache,
     callbacks,
     anonymization,
   });

@@ -32,7 +32,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   AsyncSearchGetResponse,
   ErrorResponseBase,
-  SqlGetAsyncResponse,
+  EsqlAsyncQueryResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -549,7 +549,7 @@ export class SearchInterceptor {
               ...getTotalLoaded(shimmedResponse),
             };
           case ESQL_ASYNC_SEARCH_STRATEGY:
-            const esqlResponse = rawResponse.body as unknown as SqlGetAsyncResponse;
+            const esqlResponse = rawResponse.body as unknown as EsqlAsyncQueryResponse;
             return {
               id: esqlResponse.id,
               rawResponse: esqlResponse,

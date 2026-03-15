@@ -312,6 +312,7 @@ describe('validateVariables', () => {
         if (pos.lineNumber === 1 && pos.column === 1) return variableOffsetInDoc;
         return 0;
       }),
+      getValue: jest.fn(() => ''),
     } as any;
     const mockYamlDocument = {} as any;
     mockGetScalarValueAtOffset.mockReturnValue({

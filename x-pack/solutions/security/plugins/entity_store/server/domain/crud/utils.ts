@@ -8,7 +8,7 @@
 import { createHash } from 'crypto';
 import { getFlattenedObject } from '@kbn/std';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
-import { BadCRUDRequestError } from '../errors';
+import { getEuidSourceFields } from '../../../common/domain/euid';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import type { EntityType } from '../../../common';
@@ -16,6 +16,7 @@ import type {
   EntityField,
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
+import { BadCRUDRequestError } from '../errors';
 
 const GENERIC_TYPE = 'generic' as EntityType;
 
@@ -29,8 +30,7 @@ export function validateAndTransformDocForUpsert(
   entityType: EntityType,
   namespace: string,
   doc: Entity,
-  force: boolean,
-  timestampGenerator?: () => string
+  force: boolean
 ): Record<string, unknown> {
   const definition = getEntityDefinition(entityType, namespace);
   if (!force) {
@@ -38,7 +38,7 @@ export function validateAndTransformDocForUpsert(
     const fieldDescriptions = getFieldDescriptions(flat, definition);
     assertOnlyNonForcedAttributesInReq(fieldDescriptions);
   }
-  return transformDocForUpsert(entityType, doc, timestampGenerator);
+  return transformDocForUpsert(entityType, doc);
 }
 
 function getFieldDescriptions(
@@ -53,8 +53,9 @@ function getFieldDescriptions(
   const invalid: string[] = [];
   const descriptions: Record<string, EntityField & { value: unknown }> = {};
 
+  const identitySourceFields = getEuidSourceFields(description.type).identitySourceFields;
   for (const [key, value] of Object.entries(flatProps)) {
-    if (key === ENTITY_ID_FIELD || description.identityField.requiresOneOfFields.includes(key)) {
+    if (key === ENTITY_ID_FIELD || identitySourceFields.includes(key)) {
       continue;
     }
 
@@ -98,14 +99,10 @@ function assertOnlyNonForcedAttributesInReq(fields: Record<string, EntityField>)
   }
 }
 
-function transformDocForUpsert(
-  type: EntityType,
-  data: Partial<Entity>,
-  timestampGenerator?: () => string
-): Record<string, unknown> {
+function transformDocForUpsert(type: EntityType, data: Partial<Entity>): Record<string, unknown> {
   const doc: Record<string, unknown> = {
     ...data,
-    '@timestamp': timestampGenerator ? timestampGenerator() : new Date().toISOString(),
+    '@timestamp': new Date().toISOString(),
   };
 
   if (type === GENERIC_TYPE) {

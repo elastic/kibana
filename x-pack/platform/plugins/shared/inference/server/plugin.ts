@@ -16,6 +16,7 @@ import type {
 } from '@kbn/inference-common';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
 import { registerRoutes } from './routes';
@@ -32,6 +33,9 @@ import { getUiSettings } from '../common/ui_settings';
 import { getConnectorList } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById } from './util/get_connector_by_id';
+import { getInferenceEndpoints } from './util/get_inference_endpoints';
+import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
+import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 
 const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
   let parsed: unknown = value;
@@ -87,10 +91,12 @@ export class InferencePlugin
   private logger: Logger;
   private config: InferenceConfig;
   private regexWorker?: RegexWorkerService;
+  private endpointIdCache: InferenceEndpointIdCache;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get<InferenceConfig>();
+    this.endpointIdCache = new InferenceEndpointIdCache();
   }
   setup(
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
@@ -111,6 +117,7 @@ export class InferencePlugin
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
+    this.endpointIdCache.setEsClient(core.elasticsearch.client.asInternalUser);
 
     if (anonymizationEnabled) {
       this.logger.info(
@@ -211,6 +218,8 @@ export class InferencePlugin
           ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
           logger: this.logger.get('client'),
+          esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
+          endpointIdCache: this.endpointIdCache,
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -222,18 +231,49 @@ export class InferencePlugin
           callbacks: options.callbacks,
           ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
+          anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
+          regexWorker: this.regexWorker!,
+          esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
+          endpointIdCache: this.endpointIdCache,
           logger: this.logger,
         });
       },
 
       getConnectorList: async (request: KibanaRequest) => {
-        return getConnectorList({ actions: pluginsStart.actions, request });
+        const esClient = core.elasticsearch.client.asInternalUser;
+        return getConnectorList({
+          actions: pluginsStart.actions,
+          request,
+          esClient,
+          logger: this.logger,
+        });
       },
       getDefaultConnector: async (request: KibanaRequest) => {
-        return loadDefaultConnector({ actions: pluginsStart.actions, request });
+        const esClient = core.elasticsearch.client.asInternalUser;
+        return loadDefaultConnector({
+          actions: pluginsStart.actions,
+          request,
+          esClient,
+          logger: this.logger,
+        });
       },
       getConnectorById: async (id: string, request: KibanaRequest) => {
-        return getConnectorById({ connectorId: id, actions: pluginsStart.actions, request });
+        const esClient = core.elasticsearch.client.asInternalUser;
+        return getConnectorById({
+          connectorId: id,
+          actions: pluginsStart.actions,
+          request,
+          esClient,
+          logger: this.logger,
+        });
+      },
+      getInferenceEndpoints: async (taskType?: InferenceTaskType) => {
+        const esClient = core.elasticsearch.client.asInternalUser;
+        return getInferenceEndpoints({ esClient, taskType });
+      },
+      getInferenceEndpointById: async (inferenceId: string) => {
+        const esClient = core.elasticsearch.client.asInternalUser;
+        return getInferenceEndpointById({ inferenceId, esClient });
       },
     };
   }

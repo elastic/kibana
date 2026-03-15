@@ -23,6 +23,12 @@ export class ConsoleMonitor implements Monitor<ConsoleErrorInfo | null> {
     // We're ignoring this error until we migrate to React 18's createRoot API.
     // https://github.com/elastic/kibana/issues/199100
     'Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead.',
+    /**
+     * React 18 concurrent mode logs a “race-condition” warning on unmount of nested roots.
+     * Tests show no real breakage, so we silence it for now.
+     * Revisit if the warning ever surfaces as an actual bug.
+     */
+    'Warning: Attempted to synchronously unmount a root while React was already rendering.',
   ] as const;
 
   private static readonly DEBOUNCE_DELAY = 100 as const; // ms

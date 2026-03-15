@@ -103,7 +103,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
           aria-hidden="true"
           class="euiButtonIcon__icon"
           color="inherit"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
       </button>
       <button
@@ -286,7 +286,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
           aria-hidden="true"
           class="euiButtonIcon__icon"
           color="inherit"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
       </button>
       <button
@@ -416,7 +416,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
           aria-hidden="true"
           class="euiButtonIcon__icon"
           color="inherit"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
       </button>
       <button

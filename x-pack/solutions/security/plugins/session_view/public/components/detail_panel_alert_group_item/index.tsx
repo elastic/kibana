@@ -18,7 +18,7 @@ export const ALERT_GROUP_ITEM_TITLE_TEST_ID = 'sessionView:detailPanelAlertGroup
 interface DetailPanelAlertsGroupItemDeps {
   alerts: ProcessEvent[];
   onJumpToEvent: (event: ProcessEvent) => void;
-  onShowAlertDetails: (alertId: string) => void;
+  onShowAlertDetails: (alertId: string, alertIndex: string) => void;
 }
 
 /**

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/shared-ux-toolbar-selector'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-exploration-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/shared-ux-toolbar-selector'
+  title: '@kbn/shared-ux-toolbar-selector'
   description: Moon project for @kbn/shared-ux-toolbar-selector
   channel: ''
   owner: '@elastic/obs-exploration-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/shared-ux/toolbar_selector
+  sourceRoot: src/platform/packages/shared/shared-ux/toolbar_selector
 dependsOn:
   - '@kbn/shared-ux-button-toolbar'
   - '@kbn/i18n-react'
@@ -36,14 +35,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

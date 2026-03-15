@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/index-adapter'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-threat-hunting'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/index-adapter'
+  title: '@kbn/index-adapter'
   description: Moon project for @kbn/index-adapter
   channel: ''
   owner: '@elastic/security-threat-hunting'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/index-adapter
+  sourceRoot: x-pack/solutions/security/packages/index-adapter
 dependsOn:
   - '@kbn/core'
   - '@kbn/std'
@@ -36,14 +35,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

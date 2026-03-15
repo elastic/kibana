@@ -13,6 +13,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { ManagementStart } from '@kbn/management-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionEssPluginSetup {}
@@ -30,4 +31,5 @@ export interface SecuritySolutionEssPluginStartDeps {
   navigation: NavigationPublicPluginStart;
   management: ManagementStart;
   cloud: CloudStart;
+  cases: CasesPublicStart;
 }

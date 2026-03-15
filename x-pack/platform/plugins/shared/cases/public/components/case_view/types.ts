@@ -37,8 +37,8 @@ export interface CaseViewPageProps extends CaseViewBaseProps {
 }
 
 export interface OnUpdateFields {
-  key: keyof CaseUI;
-  value: CaseUI[keyof CaseUI];
+  key: keyof CaseUI | string;
+  value: CaseUI[keyof CaseUI] | unknown;
   onSuccess?: () => void;
   onError?: () => void;
 }

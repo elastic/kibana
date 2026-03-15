@@ -1,0 +1,57 @@
+{
+  "10.7.0": [
+    {
+      "taskType": "string",
+      "scheduledAt": "string",
+      "startedAt": "string?|null",
+      "retryAt": "string?|null",
+      "runAt": "string",
+      "params": "string",
+      "state": "string",
+      "stateVersion": "number?",
+      "traceparent": "string",
+      "user": "string?",
+      "scope": "array?",
+      "ownerId": "string?|null",
+      "enabled": "boolean?",
+      "timeoutOverride": "string?",
+      "attempts": "number",
+      "status": "idle|claiming|running|failed|unrecognized|dead_letter",
+      "version": "string?",
+      "partition": "number?",
+      "priority": "number?",
+      "interval": "string",
+      "apiKey": "string?",
+      "userScope": "object?",
+      "schedule": "object?"
+    }
+  ],
+  "10.8.0": [
+    {
+      "taskType": "string",
+      "scheduledAt": "string",
+      "startedAt": "string?|null",
+      "retryAt": "string?|null",
+      "runAt": "string",
+      "params": "string",
+      "state": "string",
+      "stateVersion": "number?",
+      "traceparent": "string",
+      "user": "string?",
+      "scope": "array?",
+      "ownerId": "string?|null",
+      "enabled": "boolean?",
+      "timeoutOverride": "string?",
+      "attempts": "number",
+      "status": "idle|claiming|running|failed|unrecognized|dead_letter",
+      "version": "string?",
+      "partition": "number?",
+      "priority": "number?",
+      "interval": "string",
+      "apiKey": "string?",
+      "userScope": "object?",
+      "schedule": "object?",
+      "cost": "tiny?|normal?|extralarge?"
+    }
+  ]
+}

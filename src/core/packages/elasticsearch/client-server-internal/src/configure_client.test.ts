@@ -151,6 +151,7 @@ describe('configureClient', () => {
       scoped: false,
       getExecutionContext,
       onRequest,
+      logger,
     });
 
     createTransportMock.mockClear();
@@ -170,6 +171,7 @@ describe('configureClient', () => {
       scoped: true,
       getExecutionContext,
       onRequest,
+      logger,
     });
   });
 
@@ -191,6 +193,7 @@ describe('configureClient', () => {
       scoped: true,
       getExecutionContext,
       onRequest,
+      logger,
     });
   });
 

@@ -80,5 +80,45 @@ describe('GenAI Settings Plugin', () => {
 
       expect(management.sections.section.ai.registerApp).toHaveBeenCalledTimes(1);
     });
+
+    it('registers the app when enterprise license and anonymization capabilities allow it', async () => {
+      const plugin = createPlugin();
+      const management = createManagementMock();
+
+      const license$ = new BehaviorSubject<any>({
+        hasAtLeast: (level: string) => level === 'enterprise',
+      });
+      const coreStart: Partial<CoreStart> = {
+        application: {
+          capabilities: {
+            anonymization: { show: true, manage: false },
+          },
+        },
+      } as any;
+      const coreSetup = createCoreSetupMock(coreStart, { license$ });
+
+      await plugin.setup(coreSetup, { management });
+
+      expect(management.sections.section.ai.registerApp).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not register the app when anonymization capabilities exist but license is not enterprise', async () => {
+      const plugin = createPlugin();
+      const management = createManagementMock();
+
+      const license$ = new BehaviorSubject<any>({ hasAtLeast: () => false });
+      const coreStart: Partial<CoreStart> = {
+        application: {
+          capabilities: {
+            anonymization: { show: true, manage: true },
+          },
+        },
+      } as any;
+      const coreSetup = createCoreSetupMock(coreStart, { license$ });
+
+      await plugin.setup(coreSetup, { management });
+
+      expect(management.sections.section.ai.registerApp).not.toHaveBeenCalled();
+    });
   });
 });

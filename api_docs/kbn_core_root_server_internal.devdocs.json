@@ -224,6 +224,25 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-root-server-internal",
+            "id": "def-server.Root.getConfigService",
+            "type": "Function",
+            "tags": [],
+            "label": "getConfigService",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ConfigService"
+            ],
+            "path": "src/core/packages/root/server-internal/src/root/index.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

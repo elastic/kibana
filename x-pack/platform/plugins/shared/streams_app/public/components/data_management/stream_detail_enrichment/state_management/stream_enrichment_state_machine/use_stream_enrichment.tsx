@@ -117,6 +117,13 @@ export const useStreamEnrichmentEvents = () => {
       mapField: (field: SchemaField) => {
         service.send({ type: 'simulation.fields.map', field: field as MappedSchemaField });
       },
+      stageDocOnlyOverride: (params: { fieldName: string; description?: string }) => {
+        service.send({
+          type: 'simulation.fields.stageDocOnlyOverride',
+          fieldName: params.fieldName,
+          description: params.description,
+        });
+      },
       unmapField: (fieldName: string) => {
         service.send({ type: 'simulation.fields.unmap', fieldName });
       },

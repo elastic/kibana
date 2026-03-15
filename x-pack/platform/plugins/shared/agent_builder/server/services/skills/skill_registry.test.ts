@@ -18,7 +18,9 @@ const createMockInternalSkillDefinition = (
   description: 'A test skill',
   content: 'Skill body content',
   readonly: true,
+  basePath: 'skills/platform',
   getRegistryTools: () => [],
+  referencedContentCount: 0,
   ...overrides,
 });
 
@@ -48,7 +50,9 @@ const createMockPersistedProvider = (
     create: jest.fn(async (params) => ({
       ...params,
       readonly: false,
+      basePath: '/skills',
       getRegistryTools: () => params.tool_ids ?? [],
+      referencedContentCount: params.referenced_content?.length ?? 0,
     })),
     update: jest.fn(async (id, update) => ({
       id,
@@ -56,7 +60,9 @@ const createMockPersistedProvider = (
       description: update.description ?? 'original-description',
       content: update.content ?? 'original-content',
       readonly: false,
+      basePath: '/skills',
       getRegistryTools: () => update.tool_ids ?? [],
+      referencedContentCount: 0,
     })),
     delete: jest.fn(async (_skillId: string) => undefined),
   };
@@ -148,14 +154,14 @@ describe('createSkillRegistry', () => {
       expect(await registry.get('builtin-skill-1')).toEqual(builtinSkill1);
     });
 
-    it('throws for non-existent skill', async () => {
+    it('returns undefined for non-existent skill', async () => {
       const registry = createSkillRegistry({
         builtinProvider: createMockBuiltinProvider([]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry: createMockToolRegistry(),
       });
 
-      await expect(registry.get('non-existent')).rejects.toThrow('Skill non-existent not found');
+      expect(await registry.get('non-existent')).toBeUndefined();
     });
   });
 
@@ -175,6 +181,24 @@ describe('createSkillRegistry', () => {
 
       const persisted = result.find((s) => s.id === 'custom-skill-1');
       expect(persisted?.readonly).toBe(false);
+    });
+  });
+
+  describe('list with summaryOnly', () => {
+    it('forwards options to both providers', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
+      const persistedProvider = createMockPersistedProvider([persistedSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.list({ summaryOnly: true });
+      expect(result).toHaveLength(2);
+
+      expect(builtinProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
+      expect(persistedProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
     });
   });
 
@@ -308,18 +332,6 @@ describe('createSkillRegistry', () => {
       );
     });
 
-    it('throws when skill does not exist', async () => {
-      const registry = createSkillRegistry({
-        builtinProvider: createMockBuiltinProvider([]),
-        persistedProvider: createMockPersistedProvider([]),
-        toolRegistry: createMockToolRegistry(),
-      });
-
-      await expect(registry.update('non-existent', { name: 'Updated' })).rejects.toThrow(
-        'Skill non-existent not found'
-      );
-    });
-
     it('throws when updating with more than 5 tool IDs', async () => {
       const toolIds = ['tool-1', 'tool-2', 'tool-3', 'tool-4', 'tool-5', 'tool-6'];
       const registry = createSkillRegistry({
@@ -359,14 +371,16 @@ describe('createSkillRegistry', () => {
       );
     });
 
-    it('throws when skill does not exist', async () => {
+    it('delegates to persisted provider for non-existent skill', async () => {
+      const persistedProvider = createMockPersistedProvider([]);
       const registry = createSkillRegistry({
         builtinProvider: createMockBuiltinProvider([]),
-        persistedProvider: createMockPersistedProvider([]),
+        persistedProvider,
         toolRegistry: createMockToolRegistry(),
       });
 
-      await expect(registry.delete('non-existent')).rejects.toThrow('Skill non-existent not found');
+      await registry.delete('non-existent');
+      expect(persistedProvider.delete).toHaveBeenCalledWith('non-existent');
     });
   });
 });

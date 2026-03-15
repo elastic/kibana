@@ -75,10 +75,11 @@ export const request = async <T = unknown>({
     }
   }
 
-  const { maxContentLength, timeout: settingsTimeout } =
+  const { maxContentLength: defaultMaxContentLength, timeout: settingsTimeout } =
     configurationUtilities.getResponseSettings();
 
-  const { auth, ...restConfig } = config;
+  const { auth, maxContentLength: callerMaxContentLength, ...restConfig } = config;
+  const maxContentLength = callerMaxContentLength || defaultMaxContentLength;
 
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: auth?.username,

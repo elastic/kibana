@@ -33,7 +33,7 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/serverless/settings/common/index.ts",
-        "lineNumber": 49,
+        "lineNumber": 50,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

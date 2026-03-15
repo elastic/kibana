@@ -31,7 +31,6 @@ import {
 describe('CaseCommentModel', () => {
   const theCase = mockCases[0];
   const closedCase = mockCases[3];
-  const owner = SECURITY_SOLUTION_OWNER;
 
   const clientArgs = createCasesClientMockArgs();
   const createdDate = '2023-04-07T12:18:36.941Z';
@@ -67,7 +66,6 @@ describe('CaseCommentModel', () => {
         id: 'comment-1',
         commentReq: comment,
         createdDate,
-        owner,
       });
 
       expect(clientArgs.services.attachmentService.create.mock.calls).toMatchInlineSnapshot(`
@@ -91,7 +89,6 @@ describe('CaseCommentModel', () => {
                 "updated_by": null,
               },
               "id": "comment-1",
-              "owner": "securitySolution",
               "references": Array [
                 Object {
                   "id": "mock-id-1",
@@ -111,7 +108,6 @@ describe('CaseCommentModel', () => {
         id: 'comment-1',
         commentReq: alertComment,
         createdDate,
-        owner,
       });
 
       expect(clientArgs.services.attachmentService.create.mock.calls).toMatchInlineSnapshot(`
@@ -144,7 +140,6 @@ describe('CaseCommentModel', () => {
                 "updated_by": null,
               },
               "id": "comment-1",
-              "owner": "securitySolution",
               "references": Array [
                 Object {
                   "id": "mock-id-1",
@@ -164,7 +159,6 @@ describe('CaseCommentModel', () => {
         id: 'comment-1',
         commentReq: multipleAlert,
         createdDate,
-        owner,
       });
 
       expect(clientArgs.services.attachmentService.create.mock.calls).toMatchInlineSnapshot(`
@@ -199,7 +193,6 @@ describe('CaseCommentModel', () => {
                 "updated_by": null,
               },
               "id": "comment-1",
-              "owner": "securitySolution",
               "references": Array [
                 Object {
                   "id": "mock-id-1",
@@ -223,7 +216,6 @@ describe('CaseCommentModel', () => {
         id: 'comment-1',
         commentReq: multipleAlert,
         createdDate,
-        owner,
       });
 
       expect(clientArgs.services.attachmentService.create.mock.calls).toMatchInlineSnapshot(`
@@ -256,7 +248,6 @@ describe('CaseCommentModel', () => {
                 "updated_by": null,
               },
               "id": "comment-1",
-              "owner": "securitySolution",
               "references": Array [
                 Object {
                   "id": "mock-id-1",
@@ -280,7 +271,6 @@ describe('CaseCommentModel', () => {
         id: 'comment-1',
         commentReq: multipleAlert,
         createdDate,
-        owner,
       });
 
       expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
@@ -295,7 +285,6 @@ describe('CaseCommentModel', () => {
         id: 'comment-1',
         commentReq: alertComment,
         createdDate,
-        owner,
       });
 
       expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
@@ -306,7 +295,6 @@ describe('CaseCommentModel', () => {
         id: 'comment-1',
         commentReq: comment,
         createdDate,
-        owner,
       });
 
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
@@ -335,7 +323,6 @@ describe('CaseCommentModel', () => {
         id: 'comment-1',
         commentReq: comment,
         createdDate,
-        owner,
       });
 
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
@@ -365,7 +352,6 @@ describe('CaseCommentModel', () => {
         id: 'comment-1',
         commentReq: alertComment,
         createdDate,
-        owner,
       });
 
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
@@ -389,7 +375,6 @@ describe('CaseCommentModel', () => {
             id: 'comment-1',
             commentReq: commentPersistableState,
             createdDate,
-            owner,
           })
         ).rejects.toThrow(
           `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
@@ -402,7 +387,6 @@ describe('CaseCommentModel', () => {
             id: 'comment-1',
             commentReq: commentExternalReference,
             createdDate,
-            owner,
           })
         ).rejects.toThrow(
           `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
@@ -417,7 +401,6 @@ describe('CaseCommentModel', () => {
             id: 'comment-1',
             commentReq: commentFileExternalReference,
             createdDate,
-            owner,
           })
         ).resolves.not.toThrow();
       });
@@ -433,7 +416,6 @@ describe('CaseCommentModel', () => {
             id: 'comment-1',
             commentReq: alertComment,
             createdDate,
-            owner,
           })
         ).rejects.toThrow();
 
@@ -442,7 +424,6 @@ describe('CaseCommentModel', () => {
             id: 'comment-1',
             commentReq: eventComment,
             createdDate,
-            owner: SECURITY_SOLUTION_OWNER,
           })
         ).rejects.toThrow();
       });
@@ -452,7 +433,6 @@ describe('CaseCommentModel', () => {
   describe('bulkCreate', () => {
     it('does not remove user comments when filtering out duplicate alerts', async () => {
       await model.bulkCreate({
-        owner: SECURITY_SOLUTION_OWNER,
         attachments: [
           {
             id: 'comment-1',
@@ -504,7 +484,6 @@ describe('CaseCommentModel', () => {
             ...multipleAlert,
           },
         ],
-        owner,
       });
 
       const attachments =
@@ -534,7 +513,6 @@ describe('CaseCommentModel', () => {
             ...alertComment,
           },
         ],
-        owner,
       });
 
       const attachments = clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0]
@@ -554,7 +532,6 @@ describe('CaseCommentModel', () => {
             ...multipleAlert,
           },
         ],
-        owner: SECURITY_SOLUTION_OWNER,
       });
 
       const attachments = clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0]
@@ -578,7 +555,6 @@ describe('CaseCommentModel', () => {
             ...multipleAlert,
           },
         ],
-        owner,
       });
 
       const attachments = clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0]
@@ -602,7 +578,6 @@ describe('CaseCommentModel', () => {
             ...multipleAlert,
           },
         ],
-        owner,
       });
 
       expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
@@ -617,7 +592,6 @@ describe('CaseCommentModel', () => {
         id: 'comment-1',
         commentReq: alertComment,
         createdDate,
-        owner: SECURITY_SOLUTION_OWNER,
       });
 
       expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
@@ -647,7 +621,6 @@ describe('CaseCommentModel', () => {
             ...multipleAlert,
           },
         ],
-        owner,
       });
 
       const attachments =
@@ -692,7 +665,6 @@ describe('CaseCommentModel', () => {
             index: ['test-index-1', 'test-index-4', 'test-index-5'],
           },
         ],
-        owner,
       });
 
       const attachments =
@@ -738,7 +710,6 @@ describe('CaseCommentModel', () => {
             ...multipleAlert,
           },
         ],
-        owner,
       });
 
       const attachments =
@@ -762,7 +733,6 @@ describe('CaseCommentModel', () => {
             ...comment,
           },
         ],
-        owner,
       });
 
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
@@ -815,7 +785,6 @@ describe('CaseCommentModel', () => {
             ...alertComment,
           },
         ],
-        owner,
       });
 
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
@@ -837,7 +806,6 @@ describe('CaseCommentModel', () => {
         await expect(
           model.bulkCreate({
             attachments: [commentPersistableState],
-            owner,
           })
         ).rejects.toThrow(
           `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
@@ -845,9 +813,7 @@ describe('CaseCommentModel', () => {
       });
 
       it('throws if limit is reached when creating external reference', async () => {
-        await expect(
-          model.bulkCreate({ attachments: [commentExternalReference], owner })
-        ).rejects.toThrow(
+        await expect(model.bulkCreate({ attachments: [commentExternalReference] })).rejects.toThrow(
           `Case has reached the maximum allowed number (${MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES}) of attached persistable state and external reference attachments.`
         );
       });
@@ -858,7 +824,6 @@ describe('CaseCommentModel', () => {
         await expect(
           model.bulkCreate({
             attachments: [commentFileExternalReference],
-            owner,
           })
         ).resolves.not.toThrow();
       });

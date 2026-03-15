@@ -2660,6 +2660,24 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
+          type: 'dense_vector',
+          optional: false,
+          description: 'Expression to evaluate.',
+        },
+        {
+          name: 'rest',
+          type: 'dense_vector',
+          optional: true,
+          description: 'Other expression to evaluate.',
+        },
+      ],
+      returnType: 'dense_vector',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
           type: 'exponential_histogram',
           optional: false,
           description: 'Expression to evaluate.',
@@ -4662,7 +4680,7 @@ const decayDefinition: FunctionDefinition = {
           mapParams:
             "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4693,7 +4711,7 @@ const decayDefinition: FunctionDefinition = {
           mapParams:
             "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4724,7 +4742,7 @@ const decayDefinition: FunctionDefinition = {
           mapParams:
             "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4755,7 +4773,7 @@ const decayDefinition: FunctionDefinition = {
           mapParams:
             "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4786,7 +4804,7 @@ const decayDefinition: FunctionDefinition = {
           mapParams:
             "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4817,7 +4835,7 @@ const decayDefinition: FunctionDefinition = {
           mapParams:
             "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4848,7 +4866,7 @@ const decayDefinition: FunctionDefinition = {
           mapParams:
             "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -4879,7 +4897,7 @@ const decayDefinition: FunctionDefinition = {
           mapParams:
             "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}",
           optional: true,
-          description: '',
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
       ],
       returnType: 'double',
@@ -6084,6 +6102,7 @@ const jsonExtractDefinition: FunctionDefinition = {
     Location.STATS_WHERE,
     Location.STATS_TIMESERIES,
     Location.COMPLETION,
+    Location.MMR,
     Location.RERANK,
     Location.JOIN,
   ],
@@ -17433,6 +17452,60 @@ const stSimplifyDefinition: FunctionDefinition = {
       params: [
         {
           name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'float',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'integer',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'long',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
           type: 'cartesian_shape',
           optional: false,
           description:
@@ -17441,6 +17514,60 @@ const stSimplifyDefinition: FunctionDefinition = {
         {
           name: 'tolerance',
           type: 'double',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'float',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'integer',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'long',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
@@ -17469,6 +17596,60 @@ const stSimplifyDefinition: FunctionDefinition = {
       params: [
         {
           name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'float',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'integer',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'long',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
           type: 'geo_shape',
           optional: false,
           description:
@@ -17477,6 +17658,60 @@ const stSimplifyDefinition: FunctionDefinition = {
         {
           name: 'tolerance',
           type: 'double',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'float',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'integer',
+          optional: false,
+          description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geometry',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'tolerance',
+          type: 'long',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
         },
@@ -21480,7 +21715,7 @@ const topSnippetsDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='num_words', values=[300], description='The maximum number of words to return in each snippet.\nThis allows better control of inference costs by limiting the size of tokens per snippet.\n', type=[integer]}, {name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}",
+            "{name='num_words', values=[300], description='The maximum number of words to return in each snippet.\n', type=[integer]}, {name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}",
           optional: true,
           description:
             '(Optional) `TOP_SNIPPETS` additional options as [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params).',
@@ -21527,7 +21762,7 @@ const topSnippetsDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='num_words', values=[300], description='The maximum number of words to return in each snippet.\nThis allows better control of inference costs by limiting the size of tokens per snippet.\n', type=[integer]}, {name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}",
+            "{name='num_words', values=[300], description='The maximum number of words to return in each snippet.\n', type=[integer]}, {name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}",
           optional: true,
           description:
             '(Optional) `TOP_SNIPPETS` additional options as [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params).',
@@ -21553,6 +21788,7 @@ const topSnippetsDefinition: FunctionDefinition = {
   examples: [
     'FROM books\n| EVAL snippets = TOP_SNIPPETS(description, "Tolkien")',
     'FROM books\n| WHERE MATCH(title, "Return")\n| EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "num_snippets": 3, "num_words": 25 })',
+    'FROM books\n| WHERE MATCH(title, "return")\n| RERANK "Tolkien" ON TOP_SNIPPETS(description, "Tolkien", { "num_snippets": 3, "num_words": 25 }) WITH { "inference_id" : "test_reranker" }',
   ],
 };
 

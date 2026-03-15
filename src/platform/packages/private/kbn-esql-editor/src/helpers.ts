@@ -320,6 +320,10 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       z-index: ${theme.euiTheme.levels.toast} !important;
     }
 
+    .suggest-widget.message {
+      display: none !important;
+    }
+
     .suggest-details-container {
       background-color: ${theme.euiTheme.colors.backgroundBasePlain};
       line-height: 1.5rem;

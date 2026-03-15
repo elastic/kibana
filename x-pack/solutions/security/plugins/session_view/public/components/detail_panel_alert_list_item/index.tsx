@@ -32,7 +32,7 @@ export const ALERT_LIST_ITEM_TIMESTAMP_TEST_ID = 'sessionView:detailPanelAlertLi
 
 interface DetailPanelAlertsListItemDeps {
   event: ProcessEvent;
-  onShowAlertDetails: (alertId: string) => void;
+  onShowAlertDetails: (alertId: string, alertIndex: string) => void;
   onJumpToEvent: (event: ProcessEvent) => void;
   isInvestigated?: boolean;
   minimal?: boolean;

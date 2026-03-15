@@ -8,12 +8,12 @@
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
 import * as selectors from '../../store/selectors';
-import { NodeEventsInCategory, type NodeEventOnClick } from './node_events_of_type';
+import { type NodeEventOnClick, NodeEventsInCategory } from './node_events_of_type';
 import { NodeEvents } from './node_events';
 import { NodeDetail } from './node_detail';
 import { NodeList } from './node_list';
 import { EventDetail } from './event_detail';
-import type { PanelViewAndParameters } from '../../types';
+import type { PanelViewAndParameters, ResolverCellActionRenderer } from '../../types';
 import type { State } from '../../../common/store/types';
 
 /**
@@ -24,9 +24,11 @@ import type { State } from '../../../common/store/types';
 export const PanelRouter = memo(function ({
   id,
   nodeEventOnClick,
+  renderCellActions,
 }: {
   id: string;
   nodeEventOnClick?: NodeEventOnClick;
+  renderCellActions: ResolverCellActionRenderer;
 }) {
   const params: PanelViewAndParameters = useSelector((state: State) =>
     selectors.panelViewAndParameters(state.analyzer[id])
@@ -37,6 +39,7 @@ export const PanelRouter = memo(function ({
         id={id}
         nodeID={params.panelParameters.nodeID}
         nodeEventOnClick={nodeEventOnClick}
+        renderCellActions={renderCellActions}
       />
     );
   } else if (params.panelView === 'nodeEvents') {
@@ -56,10 +59,11 @@ export const PanelRouter = memo(function ({
         id={id}
         nodeID={params.panelParameters.nodeID}
         eventCategory={params.panelParameters.eventCategory}
+        renderCellActions={renderCellActions}
       />
     );
   } else {
     /* The default 'Event List' / 'List of all processes' view */
-    return <NodeList id={id} />;
+    return <NodeList id={id} renderCellActions={renderCellActions} />;
   }
 });

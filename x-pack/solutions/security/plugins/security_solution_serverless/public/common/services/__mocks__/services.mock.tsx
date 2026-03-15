@@ -10,6 +10,7 @@ import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { securitySolutionMock } from '@kbn/security-solution-plugin/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { Services } from '..';
 import { allowedExperimentalValues as genericAllowedExperimentalValues } from '@kbn/security-solution-plugin/common';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
@@ -22,4 +23,11 @@ export const mockServices: Services = {
   securitySolution: securitySolutionMock.createStart(),
   management: managementPluginMock.createStartContract(),
   cloud: cloudMock.createStart(),
+  cases: {
+    config: {
+      templatesEnabled: false,
+    },
+    api: {},
+    ui: {},
+  } as CasesPublicStart,
 };

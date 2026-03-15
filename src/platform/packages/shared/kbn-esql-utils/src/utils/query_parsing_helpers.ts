@@ -16,7 +16,7 @@ import {
   BasicPrettyPrinter,
   isStringLiteral,
 } from '@elastic/esql';
-import { esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '@kbn/esql-language';
+import { CommandNames, esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '@kbn/esql-language';
 
 import type {
   ESQLSource,
@@ -610,5 +610,19 @@ export const hasOnlySourceCommand = (query: string): boolean => {
     root.commands.length > 0 &&
     root.commands.every(({ name }) => name !== 'promql') &&
     root.commands.every((command) => sourceCommands.includes(command.name))
+  );
+};
+
+/**
+ * Determines if an ES|QL query contains the METRICS_INFO or TS_INFO commands.
+ *
+ * @param esql - The ES|QL query string to analyze
+ * @returns true if the query contains the METRICS_INFO or TS_INFO commands, false otherwise
+ */
+export const hasTimeseriesInfoCommand = (esql?: string): boolean => {
+  if (!esql) return false;
+  const { root } = Parser.parse(esql);
+  return root.commands.some(
+    ({ name }) => name === CommandNames.METRICS_INFO || name === CommandNames.TS_INFO
   );
 };

@@ -30,6 +30,7 @@ export function useValidateFieldRequest() {
       timeRange: { from: number; to: number },
       queryIn: QueryDslQueryContainer,
       runtimeMappings: MappingRuntimeFields | undefined,
+      projectRouting: string | undefined,
       headers?: HttpFetchOptions['headers']
     ) => {
       const query = createDefaultQuery(queryIn, timeField, timeRange);
@@ -45,6 +46,7 @@ export function useValidateFieldRequest() {
             start: timeRange.from,
             end: timeRange.to,
             runtimeMappings,
+            projectRouting,
             indicesOptions: undefined,
             includeExamples: false,
           }),

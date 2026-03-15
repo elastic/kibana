@@ -22,7 +22,13 @@ import React, {
 
 import { useGeneratedHtmlId } from '@elastic/eui';
 
-import type { TimeRangeBounds, TimeRangeBoundsOption, TimeRange, InitialFocus } from './types';
+import type {
+  TimeRangeBounds,
+  TimeRangeBoundsOption,
+  TimeRange,
+  InitialFocus,
+  CalendarOptions,
+} from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
 import {
@@ -102,6 +108,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   disabled: boolean;
   /** Whether a loading spinner is shown inside the form control. */
   isLoading: boolean;
+  /** Calendar-specific options (e.g. first day of week). */
+  calendarOptions?: CalendarOptions;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -139,6 +147,7 @@ export function DateRangePickerProvider({
   onPresetDelete,
   onInputChange,
   width = 'auto',
+  calendarOptions,
 }: PropsWithChildren<DateRangePickerProps>) {
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -254,6 +263,7 @@ export function DateRangePickerProvider({
       width,
       disabled,
       isLoading,
+      calendarOptions,
     }),
     [
       text,
@@ -277,6 +287,7 @@ export function DateRangePickerProvider({
       width,
       disabled,
       isLoading,
+      calendarOptions,
     ]
   );
 

@@ -207,6 +207,10 @@ const createAliasesForNamespacedFields = (
   targetCollection: InheritedFieldDefinition
 ) => {
   getSortedFields(fields).forEach(([key, fieldDef]) => {
+    // Skip doc-only fields (typeless `{ description }`) - they don't have actual ES mappings.
+    if (!fieldDef.type) {
+      return;
+    }
     if (namespacePrefixes.some((prefix) => key.startsWith(prefix))) {
       const aliasKey = key.replace(allNamespacesRegex, '');
       const from = typeof fromSource === 'function' ? fromSource(key) : fromSource;
@@ -221,6 +225,10 @@ const createAliasesForNamespacedFields = (
   // check whether the field has an otel equivalent. If yes, set the ECS equivalent as an alias
   // This needs to be done after the initial properties are set, so the ECS equivalent aliases win out
   getSortedFields(fields).forEach(([key, fieldDef]) => {
+    // Skip doc-only fields (typeless `{ description }`) - they don't have actual ES mappings.
+    if (!fieldDef.type) {
+      return;
+    }
     if (namespacePrefixes.some((prefix) => key.startsWith(prefix))) {
       const aliasKey = key.replace(allNamespacesRegex, '');
       const from = typeof fromSource === 'function' ? fromSource(key) : fromSource;
@@ -259,8 +267,13 @@ export function addAliasesForNamespacedFields(
   const rootStream = getRoot(streamDefinition.name);
   Object.entries(otelBaseMappings).forEach(([key, fieldDef]) => {
     if (fieldDef.type === 'alias') {
+      const targetField = otelBaseFields[fieldDef.path!];
+      const targetType = targetField.type;
+      if (!targetType) {
+        return;
+      }
       inheritedFields[key] = {
-        type: otelBaseFields[fieldDef.path!].type,
+        type: targetType,
         alias_for: fieldDef.path,
         from: rootStream,
       };

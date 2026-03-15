@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-solution-test-api-clients'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-detection-rule-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-solution-test-api-clients'
+  title: '@kbn/security-solution-test-api-clients'
   description: Moon project for @kbn/security-solution-test-api-clients
   channel: ''
   owner: '@elastic/security-detection-rule-management'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/test-api-clients
+  sourceRoot: x-pack/solutions/security/packages/test-api-clients
 dependsOn:
   - '@kbn/core-http-common'
   - '@kbn/openapi-common'

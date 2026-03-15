@@ -12,6 +12,7 @@ import * as settings from '@kbn/management-settings-ids';
 const GENERAL_SETTINGS = [
   settings.CSV_QUOTE_VALUES_ID,
   settings.DATE_FORMAT_DOW_ID,
+  settings.DATE_FORMAT_ID,
   settings.DATE_FORMAT_SCALED_ID,
   settings.DATE_FORMAT_TZ_ID,
   settings.DATE_FORMAT_NANOS_ID,

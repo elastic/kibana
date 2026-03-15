@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { getDocument, getFieldValue, getFieldsToBeFilteredOn } from './commons';
+import { getDocument, getFieldValue } from './commons';
 
 describe('getDocument', () => {
   it('returns _source when doc is an Elasticsearch hit', () => {
@@ -47,26 +46,6 @@ describe('getFieldValue', () => {
 
     it('returns undefined when path is missing', () => {
       expect(getFieldValue({ user: {} }, 'user.id')).toBeUndefined();
-    });
-  });
-});
-
-describe('getFieldsToBeFilteredOn', () => {
-  const genericEuidFields = getEntityDefinitionWithoutId('generic').identityField.euidFields;
-
-  describe('flattened documents', () => {
-    it('returns values for flattened doc', () => {
-      const result = getFieldsToBeFilteredOn({ 'entity.id': 'e-flat' }, genericEuidFields);
-      expect(result.rankingPosition).toBe(0);
-      expect(result.values).toEqual({ 'entity.id': 'e-flat' });
-    });
-  });
-
-  describe('nested documents (existing behavior)', () => {
-    it('returns values for nested doc', () => {
-      const result = getFieldsToBeFilteredOn({ entity: { id: 'e-nested' } }, genericEuidFields);
-      expect(result.rankingPosition).toBe(0);
-      expect(result.values).toEqual({ 'entity.id': 'e-nested' });
     });
   });
 });

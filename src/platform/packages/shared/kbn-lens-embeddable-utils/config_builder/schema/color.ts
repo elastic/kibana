@@ -244,7 +244,7 @@ const categoricalColorMappingSchema = schema.object(
       }),
       { maxSize: 1000 }
     ),
-    unassignedColor: schema.maybe(colorCodeSchema),
+    unassignedColor: schema.maybe(colorDefSchema),
   },
   { meta: { id: 'categoricalColorMapping', title: 'Categorical Color Mapping' } }
 );
@@ -255,6 +255,11 @@ const gradientColorMappingSchema = schema.object(
     palette: schema.string({
       meta: { description: 'The palette name to use for color assignment.' },
     }),
+    sort: schema.maybe(
+      schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+        meta: { description: 'Sort direction' },
+      })
+    ),
     mapping: schema.maybe(
       schema.arrayOf(
         schema.object({
@@ -264,7 +269,7 @@ const gradientColorMappingSchema = schema.object(
       )
     ),
     gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
-    unassignedColor: schema.maybe(colorCodeSchema),
+    unassignedColor: schema.maybe(colorDefSchema),
   },
   { meta: { id: 'gradientColorMapping', title: 'Gradient Color Mapping' } }
 );

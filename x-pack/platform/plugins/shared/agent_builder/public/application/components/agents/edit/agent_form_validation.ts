@@ -56,6 +56,7 @@ export const agentFormSchema = z.object({
       defaultMessage: 'Agent description is required.',
     }),
   }),
+  visibility: z.enum(['private', 'public', 'shared']),
   labels: z.array(z.string()).optional(),
   avatar_color: z
     .string()
@@ -87,6 +88,13 @@ export const agentFormSchema = z.object({
         tool_ids: z.array(z.string()),
       })
     ),
+    skills: z
+      .array(
+        z.object({
+          skill_ids: z.array(z.string()),
+        })
+      )
+      .optional(),
     workflow_ids: z.array(z.string()).optional(),
   }),
 });

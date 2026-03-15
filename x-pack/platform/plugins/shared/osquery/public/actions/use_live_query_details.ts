@@ -36,13 +36,13 @@ export interface PackQueriesQuery {
 
 export interface LiveQueryDetailsItem {
   action_id: string;
-  expiration: string;
+  expiration?: string;
   '@timestamp': string;
   agent_all: boolean;
   agent_ids: string[];
   agent_platforms: string[];
   agent_policy_ids: string[];
-  agents: string[];
+  agents?: string[];
   user_id?: string;
   pack_id?: string;
   pack_name?: string;

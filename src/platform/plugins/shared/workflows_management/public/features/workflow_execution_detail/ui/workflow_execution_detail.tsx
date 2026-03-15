@@ -9,6 +9,7 @@
 
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { useQueryClient } from '@kbn/react-query';
@@ -26,18 +27,40 @@ import {
 } from './workflow_pseudo_step_context';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
+import {
+  HIGHLIGHTED_STEP_TRIGGER,
+  setHighlightedStepId,
+} from '../../../entities/workflows/store/workflow_detail/slice';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useStepExecution } from '../model/use_step_execution';
 
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
 const DefaultSidebarWidth = 300;
+
+const PSEUDO_STEP_OVERVIEW = '__overview';
+const PSEUDO_STEP_TRIGGER = 'trigger';
+
 export interface WorkflowExecutionDetailProps {
   executionId: string;
   onClose: () => void;
 }
 
+function assignSelectedStepId(
+  selectedStepExecutionId: string | undefined,
+  executionIdToStepId: Map<string, string>
+) {
+  if (!selectedStepExecutionId || selectedStepExecutionId === PSEUDO_STEP_OVERVIEW) {
+    return undefined;
+  }
+  if (selectedStepExecutionId === PSEUDO_STEP_TRIGGER) {
+    return HIGHLIGHTED_STEP_TRIGGER;
+  }
+  return executionIdToStepId.get(selectedStepExecutionId);
+}
+
 export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = React.memo(
   ({ executionId, onClose }) => {
+    const dispatch = useDispatch();
     const { workflowExecution, error } = useWorkflowExecutionPolling(executionId);
     const queryClient = useQueryClient();
 
@@ -61,7 +84,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         executionId === workflowExecution?.id && // execution id matches (not stale execution used)
         workflowExecution?.stepExecutions?.length // step executions are loaded
       ) {
-        setSelectedStepExecution('__overview');
+        setSelectedStepExecution(PSEUDO_STEP_OVERVIEW);
       }
     }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, executionId]);
 
@@ -81,7 +104,33 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
 
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
-      selectedStepExecutionId === '__overview' || selectedStepExecutionId === 'trigger';
+      selectedStepExecutionId &&
+      [PSEUDO_STEP_OVERVIEW, PSEUDO_STEP_TRIGGER].includes(selectedStepExecutionId);
+
+    // Stable map: step-execution-id → workflow step-id (new ref only when entries change)
+    const executionIdToStepId = useMemo(() => {
+      const map = new Map<string, string>();
+      for (const step of workflowExecution?.stepExecutions ?? []) {
+        map.set(step.id, step.stepId);
+      }
+      return map;
+    }, [workflowExecution?.stepExecutions]);
+
+    // Sync selected step execution → Redux highlightedStepId for editor scroll & decorations.
+    useEffect(() => {
+      dispatch(
+        setHighlightedStepId({
+          stepId: assignSelectedStepId(selectedStepExecutionId, executionIdToStepId),
+        })
+      );
+    }, [selectedStepExecutionId, executionIdToStepId, dispatch]);
+
+    // Clear highlighted step when execution detail unmounts
+    useEffect(() => {
+      return () => {
+        dispatch(setHighlightedStepId({ stepId: undefined }));
+      };
+    }, [dispatch]);
 
     // Find the lightweight step from the polled execution (has status/duration but no I/O)
     const lightweightStep = useMemo(() => {
@@ -103,11 +152,11 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         return undefined;
       }
 
-      if (selectedStepExecutionId === '__overview' && workflowExecution) {
+      if (selectedStepExecutionId === PSEUDO_STEP_OVERVIEW && workflowExecution) {
         return buildOverviewStepExecutionFromContext(workflowExecution);
       }
 
-      if (selectedStepExecutionId === 'trigger' && workflowExecution?.context) {
+      if (selectedStepExecutionId === PSEUDO_STEP_TRIGGER && workflowExecution?.context) {
         return buildTriggerStepExecutionFromContext(workflowExecution) ?? undefined;
       }
 

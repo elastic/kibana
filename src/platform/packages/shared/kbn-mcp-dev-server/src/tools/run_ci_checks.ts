@@ -60,7 +60,7 @@ interface CiChecksResult {
 const CI_CHECKS = {
   build: {
     name: 'Build Kibana Distribution',
-    command: 'node --no-experimental-require-module scripts/build_kibana_platform_plugins',
+    command: 'node scripts/build_kibana_platform_plugins',
     description: 'Build Kibana platform plugins',
   },
   quick_checks: {
@@ -80,12 +80,12 @@ const CI_CHECKS = {
   },
   linting_with_types: {
     name: 'Linting (with types)',
-    command: 'node --no-experimental-require-module scripts/eslint_with_types',
+    command: 'node scripts/eslint_with_types',
     description: 'Run ESLint with type checking',
   },
   oas_snapshot: {
     name: 'OAS Snapshot',
-    command: 'node --no-experimental-require-module scripts/validate_oas_docs',
+    command: 'node scripts/validate_oas_docs',
     description: 'Validate OpenAPI documentation',
   },
 };

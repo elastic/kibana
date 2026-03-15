@@ -23,8 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Search Sessions Management UI', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/255668
-    describe.skip('New search sessions', () => {
+    describe('New search sessions', () => {
       before(async () => {
         await searchSessions.deleteAllSearchSessions();
         await PageObjects.common.navigateToApp('dashboard');
@@ -43,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const searchSessionName = `Session - ${uuidv4()}`;
 
         await searchSessions.save({ withRefresh: true, isSubmitButton: true });
+        await PageObjects.dashboard.waitForRenderComplete();
         await searchSessions.openFlyout();
         const list = await PageObjects.searchSessionsManagement.getList();
         await list[0].rename(searchSessionName);

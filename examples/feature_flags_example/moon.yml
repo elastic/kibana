@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/feature-flags-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/feature-flags-example-plugin'
+  title: '@kbn/feature-flags-example-plugin'
   description: Moon project for @kbn/feature-flags-example-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: examples/feature_flags_example
+  sourceRoot: examples/feature_flags_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/core-feature-flags-server'

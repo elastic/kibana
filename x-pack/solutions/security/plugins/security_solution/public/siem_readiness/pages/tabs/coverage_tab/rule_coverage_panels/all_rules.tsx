@@ -24,30 +24,19 @@ import {
   useIntegrationDisplayNames,
   useSiemReadinessApi,
 } from '@kbn/siem-readiness';
-import type { SiemReadinessPackageInfo } from '@kbn/siem-readiness';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
 
 export const AllRuleCoveragePanel: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
-  const { getIntegrations, getDetectionRules } = useSiemReadinessApi();
+  const { getDetectionRules } = useSiemReadinessApi();
 
   const allRules = useMemo(
     () => getDetectionRules.data?.data || [],
     [getDetectionRules.data?.data]
   );
 
-  const getInstalledIntegrations = useMemo(() => {
-    return (
-      getIntegrations?.data?.items?.filter(
-        (pkg: SiemReadinessPackageInfo) => pkg.status === 'installed'
-      ) || []
-    );
-  }, [getIntegrations?.data?.items]);
-
-  const integrationNames = getInstalledIntegrations?.map((item) => item.name) || [];
-
-  const installedIntegrationRules = useDetectionRulesByIntegration(integrationNames);
+  const installedIntegrationRules = useDetectionRulesByIntegration();
 
   const integrationDisplayNames = useIntegrationDisplayNames();
 
@@ -60,8 +49,8 @@ export const AllRuleCoveragePanel: React.FC = () => {
 
   // Create a Set for O(1) lookups instead of O(n) with .includes()
   const installedIntegrationSet = useMemo(
-    () => new Set(getInstalledIntegrations.map((item) => item.name)),
-    [getInstalledIntegrations]
+    () => new Set(installedIntegrationRules.ruleIntegrationCoverage?.installedIntegrations || []),
+    [installedIntegrationRules.ruleIntegrationCoverage?.installedIntegrations]
   );
 
   // Get enabled rules from all rules
@@ -198,7 +187,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
     [installedIntegrationAssociatedRulesCount, missingIntegrationAssociatedRulesCount]
   );
 
-  const isLoading = getIntegrations.isLoading || getDetectionRules.isLoading;
+  const isLoading = getDetectionRules.isLoading;
   const DONUT_CHART_DATA = useMemo(
     () => [
       {

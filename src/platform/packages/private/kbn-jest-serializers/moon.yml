@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/jest-serializers'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/jest-serializers'
+  title: '@kbn/jest-serializers'
   description: Moon project for @kbn/jest-serializers
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-jest-serializers
+  sourceRoot: src/platform/packages/private/kbn-jest-serializers
 dependsOn:
   - '@kbn/repo-info'
 tags:

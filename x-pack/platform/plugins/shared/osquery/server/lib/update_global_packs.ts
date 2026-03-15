@@ -15,13 +15,14 @@ import { convertShardsToObject } from '../routes/utils';
 import { packSavedObjectType } from '../../common/types';
 import type { OsqueryAppContextService } from './osquery_app_context_services';
 import type { PackSavedObject } from '../common/types';
-import { convertSOQueriesToPackConfig } from '../routes/pack/utils';
+import { convertSOQueriesToPackConfig, makePackKey } from '../routes/pack/utils';
 
 export const updateGlobalPacksCreateCallback = async (
   packagePolicy: NewPackagePolicy,
   packsClient: SavedObjectsClient,
   allPacks: PackSavedObject[],
-  osqueryContext: OsqueryAppContextService
+  osqueryContext: OsqueryAppContextService,
+  spaceId?: string
 ) => {
   const agentPolicyService = osqueryContext.getAgentPolicyService();
 
@@ -71,10 +72,13 @@ export const updateGlobalPacksCreateCallback = async (
         set(draft, 'inputs[0].streams', []);
       }
 
+      const resolvedSpaceId = spaceId || 'default';
       map(packsContainingShardForPolicy, (pack) => {
-        set(draft, `inputs[0].config.osquery.value.packs.${pack.name}`, {
+        const packKey = makePackKey(pack.name, resolvedSpaceId);
+        set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
           shard: 100,
-          queries: convertSOQueriesToPackConfig(pack.queries),
+          pack_id: pack.saved_object_id,
+          queries: convertSOQueriesToPackConfig(pack.queries, resolvedSpaceId),
         });
       });
 

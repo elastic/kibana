@@ -22,7 +22,7 @@ import { createStoryFindItems, mockTagsService, StateDiagnosticPanel } from './s
 // =============================================================================
 
 const meta: Meta = {
-  title: 'Content List/Tags Features',
+  title: 'Content List/Core Features + Tags',
   decorators: [
     (Story) => (
       <div style={{ padding: '20px', maxWidth: '1200px' }}>
@@ -194,6 +194,6 @@ const TagsFeaturesWrapper = () => {
  * Type `tag:Production` directly in the search bar to see query sync.
  */
 export const TagsFeatures: StoryObj = {
-  name: 'Tags Features',
+  name: 'Core Features + Tags',
   render: () => <TagsFeaturesWrapper />,
 };

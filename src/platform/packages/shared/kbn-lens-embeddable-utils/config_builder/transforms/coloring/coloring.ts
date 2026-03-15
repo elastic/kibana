@@ -253,9 +253,6 @@ function fromUnassignedColorLensStateToAPI(
     return {};
   }
   const unassignedColor = fromColorLensStateToAPI(color);
-  if (unassignedColor.type === 'from_palette') {
-    return {};
-  }
   return { unassignedColor };
 }
 
@@ -290,14 +287,11 @@ export function fromColorMappingLensStateToAPI(
       ...unassignedColor,
     };
   }
-  const colorAssignments = colorMapping.assignments.filter(
-    (
-      assignment
-    ): assignment is ColorMapping.AssignmentBase<
-      ColorMapping.ColorRule,
-      ColorMapping.CategoricalColor | ColorMapping.ColorCode
-    > => assignment.color.type !== 'gradient'
-  );
+
+  // because of early return above, we know it is a gradient at this point so casting is safe
+  const colorMode = colorMapping.colorMode as ColorMapping.GradientColorMode;
+  const colorAssignments = colorMapping.assignments;
+
   return {
     mode: 'gradient',
     palette: colorMapping.paletteId,
@@ -306,7 +300,8 @@ export function fromColorMappingLensStateToAPI(
         values: fromRulesLensStateToAPI(rules),
       };
     }),
-    gradient: colorAssignments.map(({ color }) => fromColorLensStateToAPI(color)),
+    sort: (colorMapping.colorMode as ColorMapping.GradientColorMode).sort,
+    gradient: colorMode.steps.map((color) => fromColorLensStateToAPI(color)),
     ...unassignedColor,
   };
 }
@@ -362,11 +357,10 @@ function fromAPIMappingToAssignments(
       };
     });
   }
-  return colorMapping.mapping.map((assignment, index) => {
-    const step = colorMapping.gradient?.[index];
+  return colorMapping.mapping.map((assignment) => {
     return {
       rules: fromRulesAPIToLensState(assignment.values),
-      color: fromColorDefAPIToLensState(step!),
+      color: { type: 'gradient' },
       touched: false,
     };
   });
@@ -383,6 +377,7 @@ export function fromColorMappingAPIToLensState(
       palette: { type: 'palette', name: colorMapping.palette.replace(LEGACY_PALETTE_PREFIX, '') }, // remove the prefix
     };
   }
+
   const specialAssignments: ColorMapping.SpecialAssignment[] = [
     {
       rules: [
@@ -391,10 +386,7 @@ export function fromColorMappingAPIToLensState(
         },
       ],
       color: colorMapping.unassignedColor
-        ? {
-            type: 'colorCode',
-            colorCode: colorMapping.unassignedColor.value,
-          }
+        ? fromColorDefAPIToLensState(colorMapping.unassignedColor)
         : { type: 'loop' },
       touched: false,
     },
@@ -409,8 +401,7 @@ export function fromColorMappingAPIToLensState(
             ...step,
             touched: false,
           })),
-          // in the conversion we've lost the actual sort order, so default to "asc"
-          sort: 'asc',
+          sort: colorMapping.sort ?? 'asc',
         };
 
   return {

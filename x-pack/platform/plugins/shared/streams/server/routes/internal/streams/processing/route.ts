@@ -66,12 +66,20 @@ export const simulateProcessorRoute = createServerRoute({
       request,
     });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+    });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
-    return simulateProcessing({ params, scopedClusterClient, streamsClient, fieldsMetadataClient });
+    return simulateProcessing({
+      params,
+      esClient: scopedClusterClient.asCurrentUser,
+      streamsClient,
+      fieldsMetadataClient,
+    });
   },
 });
 
@@ -227,7 +235,7 @@ export const processingDateSuggestionsRoute = createServerRoute({
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const { name } = params.path;
 
-    const { read } = await checkAccess({ name, scopedClusterClient });
+    const { read } = await checkAccess({ name, esClient: scopedClusterClient.asCurrentUser });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
     }
@@ -270,7 +278,10 @@ export const failureStoreSamplesRoute = createServerRoute({
       request,
     });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+    });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
@@ -297,7 +308,7 @@ export const failureStoreSamplesRoute = createServerRoute({
 
     return getFailureStoreSamples({
       params,
-      scopedClusterClient,
+      esClient: scopedClusterClient.asCurrentUser,
       streamsClient,
       fieldsMetadataClient,
     });

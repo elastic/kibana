@@ -111,6 +111,7 @@ describe('EQL Tab', () => {
       false,
       {
         events: mockTimelineData.slice(0, 1),
+        rawEvents: [],
         pageInfo: {
           activePage: 0,
           totalPages: 10,
@@ -181,6 +182,7 @@ describe('EQL Tab', () => {
           false,
           {
             events: [],
+            rawEvents: [],
             pageInfo: {
               activePage: 0,
               totalPages: 10,
@@ -208,6 +210,7 @@ describe('EQL Tab', () => {
           false,
           {
             events: structuredClone(mockTimelineData.slice(0, 5)),
+            rawEvents: [],
             pageInfo: {
               activePage: 0,
               totalPages: 5,

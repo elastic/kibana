@@ -18,7 +18,7 @@ exports[`InTableSearchInput renders input 1`] = `
           <span
             aria-hidden="true"
             class="euiFormControlLayoutCustomIcon__icon"
-            data-euiicon-type="search"
+            data-euiicon-type="magnify"
           />
         </span>
       </div>
@@ -104,7 +104,7 @@ exports[`InTableSearchInput renders input when loading 1`] = `
           <span
             aria-hidden="true"
             class="euiFormControlLayoutCustomIcon__icon"
-            data-euiicon-type="search"
+            data-euiicon-type="magnify"
           />
         </span>
       </div>

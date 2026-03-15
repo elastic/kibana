@@ -18,6 +18,8 @@ import {
 import { css } from '@emotion/react';
 import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import { useCasesCreateTemplateNavigation } from '../../../common/navigation/hooks';
+import { useCasesTemplatesBreadcrumbs } from '../../use_breadcrumbs';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../../templates/translations';
 import { useTemplatesColumns } from '../hooks/use_templates_columns';
 import { useTemplatesState } from '../hooks/use_templates_state';
@@ -34,14 +36,18 @@ import { TemplatesTableEmptyPrompt } from '../components/templates_table_empty_p
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
 
 export const AllTemplatesPage: React.FC = () => {
+  useCasesTemplatesBreadcrumbs();
   const { euiTheme } = useEuiTheme();
+  const { owner } = useCasesContext();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
 
   const { queryParams, setQueryParams, sorting, selectedTemplates, selection, deselectTemplates } =
     useTemplatesState();
 
-  const { data, isLoading, refetch } = useGetTemplates({ queryParams });
+  const { data, isLoading, refetch } = useGetTemplates({
+    queryParams: { ...queryParams, owner },
+  });
   const { data: tags = [], isLoading: isLoadingTags } = useGetTemplateTags();
   const { data: creators = [], isLoading: isLoadingCreators } = useGetTemplateCreators();
   const { pagination, onTableChange } = useTemplatesPagination({

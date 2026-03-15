@@ -35,6 +35,63 @@ const createWiredStreamDefinition = (
 });
 
 describe('validateAncestorFields', () => {
+  describe('type validation', () => {
+    it('should allow same type with description override', () => {
+      const ancestor = createWiredStreamDefinition('logs', {
+        'attributes.field1': { type: 'keyword' },
+      });
+
+      const fields = {
+        'attributes.field1': { type: 'keyword' as const, description: 'child description' },
+      };
+
+      expect(() =>
+        validateAncestorFields({
+          ancestors: [ancestor],
+          fields,
+          streamName: 'logs.otel',
+        })
+      ).not.toThrow();
+    });
+
+    it('should allow setting a real type when parent has doc-only field (no type)', () => {
+      // When parent has a doc-only override (no type), child should be able to map it
+      const ancestor = createWiredStreamDefinition('logs', {
+        'attributes.field1': { description: 'Parent documentation' },
+      });
+
+      const fields = {
+        'attributes.field1': { type: 'keyword' as const },
+      };
+
+      expect(() =>
+        validateAncestorFields({
+          ancestors: [ancestor],
+          fields,
+          streamName: 'logs.otel',
+        })
+      ).not.toThrow();
+    });
+
+    it('should allow setting a real type with description when parent has doc-only field', () => {
+      const ancestor = createWiredStreamDefinition('logs', {
+        'attributes.field1': { description: 'Parent documentation' },
+      });
+
+      const fields = {
+        'attributes.field1': { type: 'keyword' as const, description: 'Child description' },
+      };
+
+      expect(() =>
+        validateAncestorFields({
+          ancestors: [ancestor],
+          fields,
+          streamName: 'logs.otel',
+        })
+      ).not.toThrow();
+    });
+  });
+
   describe('namespace prefix validation', () => {
     it('should accept fields with valid namespace prefixes', () => {
       for (const prefix of namespacePrefixes) {

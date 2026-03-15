@@ -42,6 +42,12 @@ const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
   query: { apiVersion: '2' },
 };
 
+const initEntityMaintainersRequest: HttpFetchOptionsWithPath = {
+  path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT,
+  body: JSON.stringify({}),
+  query: { apiVersion: '2' },
+};
+
 /**
  * Hook to install Entity Store V2. Should be called from the root Security Solution app component.
  * @param services - Kibana services required to install Entity Store V2
@@ -60,9 +66,18 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
           getStatusRequest
         );
-        if (isEntityStoreInstalled(statusResponse.status)) return;
-
-        await services.http.post(installAllEntitiesRequest);
+        const isEntityStoreV2Installed = isEntityStoreInstalled(statusResponse.status);
+        // Entity store already installed → init entity maintainers only (any space).
+        if (isEntityStoreV2Installed) {
+          await services.http.post(initEntityMaintainersRequest);
+          return;
+        }
+        // Entity store not installed and default space → install entity store, then init entity maintainers.
+        if (space.id === 'default') {
+          await services.http.post(installAllEntitiesRequest);
+          await services.http.post(initEntityMaintainersRequest);
+        }
+        // Entity store not installed and non-default space → do nothing.
       } catch (e) {
         services.logger.error('Failed to initialize Entity Store V2');
         services.logger.error(e);
@@ -78,5 +93,5 @@ const isEntityStoreInstalled = (status: EntityStoreStatus): boolean =>
 export const isEntityStoreV1Installed = async (http: HttpSetup): Promise<boolean> => {
   const response = await http.get<EntityStoreV1StatusResponse>(getStatusV1Request);
 
-  return response.status !== EntityStoreStatus.enum.not_installed;
+  return isEntityStoreInstalled(response.status);
 };

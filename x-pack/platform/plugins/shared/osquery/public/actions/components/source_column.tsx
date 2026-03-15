@@ -6,27 +6,30 @@
  */
 
 import React from 'react';
+import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { UnifiedHistorySource } from '../../../common/api/unified_history/types';
 
-const LIVE_LABEL = i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumn.live', {
-  defaultMessage: 'Live',
-});
+const SOURCE_LABELS: Record<UnifiedHistorySource, string> = {
+  Live: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumn.live', {
+    defaultMessage: 'Live',
+  }),
+  Rule: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumn.rule', {
+    defaultMessage: 'Rule',
+  }),
+  Scheduled: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumn.scheduled', {
+    defaultMessage: 'Scheduled',
+  }),
+};
 
-const RULE_LABEL = i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumn.rule', {
-  defaultMessage: 'Rule',
-});
-
-export const getSourceLabel = (userId: string | undefined): string =>
-  userId ? LIVE_LABEL : RULE_LABEL;
-
-interface SourceColumnProps {
-  userId: string | undefined;
+interface SourceBadgeProps {
+  source: UnifiedHistorySource;
 }
 
-const SourceColumnComponent: React.FC<SourceColumnProps> = ({ userId }) => (
-  <>{getSourceLabel(userId)}</>
+const SourceBadgeComponent: React.FC<SourceBadgeProps> = ({ source }) => (
+  <EuiText size="s">{SOURCE_LABELS[source]}</EuiText>
 );
 
-SourceColumnComponent.displayName = 'SourceColumn';
+SourceBadgeComponent.displayName = 'SourceBadge';
 
-export const SourceColumn = React.memo(SourceColumnComponent);
+export const SourceBadge = React.memo(SourceBadgeComponent);

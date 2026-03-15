@@ -115,6 +115,21 @@ describe('Lens inline editing helpers', () => {
       );
     });
 
+    it('does not populate the title from the suggestion', async () => {
+      const suggestionsAttributes = await getSuggestions(
+        query,
+        startDependencies.data,
+        httpMock,
+        uiSettingsMock,
+        mockDatasourceMap(),
+        mockVisualizationMap(),
+        dataviewSpecArr,
+        jest.fn()
+      );
+      expect(mockAllSuggestions[0].title).not.toBe('');
+      expect(suggestionsAttributes?.title).toBe('');
+    });
+
     it('returns undefined if no suggestions are computed', async () => {
       mockSuggestionApi.mockResolvedValueOnce([]);
       const suggestionsAttributes = await getSuggestions(

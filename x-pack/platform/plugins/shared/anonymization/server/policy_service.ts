@@ -10,14 +10,11 @@ import { resolveEffectivePolicy, type FieldRule } from '@kbn/anonymization-commo
 import type { Logger } from '@kbn/logging';
 import type { ProfilesRepository } from './repository';
 import type { SaltService } from './salt';
-import type { AnonymizationPolicyService } from './types';
+import type { AnonymizationPolicyService, AnonymizationProfileInitializer } from './types';
 import {
-  getAlertsDataViewTargetId,
-  ALERTS_DATA_VIEW_TARGET_TYPE,
   GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID,
   GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE,
   LEGACY_ANONYMIZATION_UI_SETTING_KEY,
-  ensureAlertsDataViewProfile,
   ensureGlobalProfileForNamespace,
 } from './initialization';
 
@@ -28,6 +25,7 @@ interface CreateAnonymizationPolicyServiceParams {
   ensureProfilesIndexReady: () => Promise<void>;
   profilesRepo: ProfilesRepository;
   saltService: SaltService;
+  getProfileInitializers: () => AnonymizationProfileInitializer[];
 }
 
 export const createAnonymizationPolicyService = ({
@@ -37,6 +35,7 @@ export const createAnonymizationPolicyService = ({
   ensureProfilesIndexReady,
   profilesRepo,
   saltService,
+  getProfileInitializers,
 }: CreateAnonymizationPolicyServiceParams): AnonymizationPolicyService => {
   const getDataViewIndexPatternTargets = async (
     namespace: string,
@@ -72,10 +71,10 @@ export const createAnonymizationPolicyService = ({
     }
   };
 
-  const alertsDataViewExists = async (namespace: string): Promise<boolean> => {
+  const dataViewExists = async (namespace: string, dataViewId: string): Promise<boolean> => {
     const client = core.savedObjects.getUnsafeInternalClient().asScopedToNamespace(namespace);
     try {
-      await client.get('index-pattern', getAlertsDataViewTargetId(namespace));
+      await client.get('index-pattern', dataViewId);
       return true;
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
@@ -107,17 +106,20 @@ export const createAnonymizationPolicyService = ({
         getLegacySettingsString: () => getLegacySettingsForNamespace(namespace),
       });
 
-      if (
-        target.type === ALERTS_DATA_VIEW_TARGET_TYPE &&
-        target.id === getAlertsDataViewTargetId(namespace)
-      ) {
-        // Lazily ensure the alerts profile in the request namespace.
-        await ensureAlertsDataViewProfile({
+      for (const initializer of getProfileInitializers()) {
+        if (!initializer.shouldInitialize({ namespace, target })) {
+          continue;
+        }
+
+        await initializer.initialize({
           namespace,
-          profilesRepo,
-          saltService,
+          target,
           logger,
-          checkDataViewExists: () => alertsDataViewExists(namespace),
+          findProfileByTarget: (targetType, targetId) =>
+            profilesRepo.findByTarget(namespace, targetType, targetId),
+          createProfile: (params) => profilesRepo.create(params),
+          ensureSalt: () => saltService.getSalt(namespace),
+          checkDataViewExists: (dataViewId) => dataViewExists(namespace, dataViewId),
         });
       }
 

@@ -7,12 +7,12 @@
 
 import React, { useState, useMemo, type MouseEvent } from 'react';
 import {
-  EuiPageTemplate,
   EuiAccordion,
   EuiBasicTable,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPageSection,
   EuiStat,
   EuiPanel,
   EuiSpacer,
@@ -21,6 +21,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutResizable,
   EuiTitle,
+  useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -132,6 +133,7 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
 export const RunDetailPage: React.FC = () => {
   const { runId } = useParams<{ runId: string }>();
   const history = useHistory();
+  const { euiTheme } = useEuiTheme();
   const { data: runDetail, isLoading: runLoading, error: runError } = useEvaluationRun(runId);
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
 
@@ -205,15 +207,12 @@ export const RunDetailPage: React.FC = () => {
   );
 
   return (
-    <EuiPageTemplate>
-      <EuiPageTemplate.Header
-        pageTitle={i18n.getPageTitle(runIdShort)}
-        breadcrumbs={[
-          { text: i18n.BREADCRUMB_EVALUATIONS, onClick: () => history.push('/') },
-          { text: i18n.getBreadcrumbRun(runIdShort) },
-        ]}
-      />
-      <EuiPageTemplate.Section>
+    <>
+      <EuiTitle size="l">
+        <h2>{i18n.getPageTitle(runIdShort)}</h2>
+      </EuiTitle>
+
+      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         {runError ? (
           <>
             <EuiText color="danger" size="s">
@@ -274,7 +273,7 @@ export const RunDetailPage: React.FC = () => {
             onDatasetClick={(targetDatasetId) => history.push(`/datasets/${targetDatasetId}`)}
           />
         ))}
-      </EuiPageTemplate.Section>
+      </EuiPageSection>
 
       {selectedTraceId && (
         <EuiFlyoutResizable
@@ -309,6 +308,6 @@ export const RunDetailPage: React.FC = () => {
           </EuiFlyoutBody>
         </EuiFlyoutResizable>
       )}
-    </EuiPageTemplate>
+    </>
   );
 };

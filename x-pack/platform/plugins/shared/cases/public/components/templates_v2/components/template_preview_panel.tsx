@@ -82,7 +82,7 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
       description: template.description,
       tags: template.tags ?? undefined,
       severity: template.severity as 'low' | 'medium' | 'high' | 'critical' | undefined,
-      category: template.category,
+      category: template.category ?? undefined,
       fields: template.definition.fields,
     };
   }, [template]);

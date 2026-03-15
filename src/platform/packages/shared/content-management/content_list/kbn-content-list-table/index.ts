@@ -38,6 +38,12 @@ export {
   UpdatedAtCell,
   type UpdatedAtColumnProps,
   type UpdatedAtCellProps,
+  StarredColumn,
+  StarredCell,
+  StarButton,
+  type StarredColumnProps,
+  type StarredCellProps,
+  type StarButtonProps,
 } from './src/column';
 export type { ColumnNamespace, ColumnProps } from './src/column';
 

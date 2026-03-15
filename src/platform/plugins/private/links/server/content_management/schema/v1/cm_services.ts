@@ -45,14 +45,14 @@ export const dashboardLinkSchema = schema.object({
 
 export const externalLinkOptionsSchema = schema.object(
   {
-    openInNewTab: schema.maybe(
+    open_in_new_tab: schema.maybe(
       schema.boolean({
         meta: {
           description: 'Whether to open this link in a new tab when clicked',
         },
       })
     ),
-    encodeUrl: schema.maybe(
+    encode_url: schema.maybe(
       schema.boolean({
         meta: {
           description: 'Whether to escape the URL with percent encoding',

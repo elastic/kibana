@@ -247,6 +247,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           config: connectorWithId.config,
           connectorId: connectorWithId.id,
           name: connectorWithId.name,
+          isInferenceEndpoint: false,
           capabilities: {
             contextWindowSize: 32000,
           },
@@ -255,7 +256,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         const model: Model = {
           family: getConnectorFamily(inferenceConnector),
           provider: getConnectorProvider(inferenceConnector),
-          id: getConnectorModel(inferenceConnector),
+          id: getConnectorModel(inferenceConnector) ?? connectorWithId.name,
         };
 
         return model;

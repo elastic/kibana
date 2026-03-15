@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export const SLO_ALERTS_EMBEDDABLE_ID = 'SLO_ALERTS_EMBEDDABLE';
+//
+// Do not change constant value - part of public REST APIs
+//
+export const SLO_ALERTS_EMBEDDABLE_ID = 'slo_alerts';
+
 export const ADD_SLO_ALERTS_ACTION_ID = 'CREATE_SLO_ALERTS_EMBEDDABLE';

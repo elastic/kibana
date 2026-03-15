@@ -148,8 +148,8 @@ export const samlAuthentication = async (
     getFullname: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE
     ): Promise<string> => {
-      const { full_name: fullName } = await sessionManager.getUserData(role);
-      return fullName;
+      const { full_name: fullName, email, username } = await sessionManager.getUserData(role);
+      return fullName || email || username;
     },
     getUsername: async (
       role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE

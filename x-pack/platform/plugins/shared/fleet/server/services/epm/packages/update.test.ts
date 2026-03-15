@@ -5,78 +5,193 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { createAppContextStartContractMock } from '../../../mocks';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
-import { appContextService } from '../../app_context';
+import { reviewUpgrade, updatePackage } from './update';
 
-import { auditLoggingService } from '../../audit_logging';
+jest.mock('./get', () => ({
+  getInstallationObject: jest.fn(),
+  getPackageInfo: jest.fn(),
+}));
+jest.mock('../../audit_logging', () => ({
+  auditLoggingService: { writeCustomSoAuditLog: jest.fn() },
+}));
 
-import { updatePackage } from './update';
-import { getPackageInfo, getInstallationObject } from './get';
+const { getInstallationObject, getPackageInfo } = jest.requireMock('./get');
 
-jest.mock('./get');
-jest.mock('../../audit_logging');
+const pendingReview = {
+  target_version: '2.0.0',
+  reason: 'deprecated' as const,
+  created_at: '2026-01-01T00:00:00.000Z',
+  deprecation_details: { description: 'Deprecated input' },
+};
 
-const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
-const mockGetPackageInfo = getPackageInfo as jest.MockedFunction<typeof getPackageInfo>;
-const mockGetInstallationObject = getInstallationObject as jest.MockedFunction<
-  typeof getInstallationObject
->;
-
-describe('updatePackage', () => {
-  let mockContract: ReturnType<typeof createAppContextStartContractMock>;
-
-  beforeEach(() => {
-    mockContract = createAppContextStartContractMock();
-    appContextService.start(mockContract);
-  });
-
+describe('reviewUpgrade', () => {
   afterEach(() => {
-    appContextService.stop();
+    jest.clearAllMocks();
   });
 
-  it('should call audit logger', async () => {
-    const savedObjectsClient = savedObjectsClientMock.create();
+  it('should throw when package is not installed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    getInstallationObject.mockResolvedValueOnce(null);
 
-    mockGetPackageInfo.mockResolvedValueOnce({
-      name: 'test-package',
-      title: 'Test package',
-      description: 'Test package',
-      format_version: '1.0.0',
-      version: '1.0.0',
-      latestVersion: '1.0.0',
-      owner: {
-        github: 'elastic',
-      },
-      assets: {
-        elasticsearch: {},
-        kibana: {},
-      },
-    } as any);
+    await expect(
+      reviewUpgrade({
+        savedObjectsClient: soClient,
+        pkgName: 'test-pkg',
+        action: 'accept',
+        targetVersion: '2.0.0',
+      })
+    ).rejects.toThrow('Error while reviewing upgrade: test-pkg is not installed');
+  });
 
-    mockGetInstallationObject.mockResolvedValueOnce({
-      id: 'test-package',
-      attributes: {
-        name: 'test-package',
-      } as any,
-      references: [],
-      type: PACKAGES_SAVED_OBJECT_TYPE,
+  it('should throw when no pending review exists for the target version', async () => {
+    const soClient = savedObjectsClientMock.create();
+    getInstallationObject.mockResolvedValueOnce({
+      id: 'test-pkg',
+      attributes: { name: 'test-pkg', version: '2.0.0', pending_upgrade_review: undefined },
     });
 
+    await expect(
+      reviewUpgrade({
+        savedObjectsClient: soClient,
+        pkgName: 'test-pkg',
+        action: 'accept',
+        targetVersion: '2.0.0',
+      })
+    ).rejects.toThrow('No pending upgrade review for test-pkg@2.0.0');
+  });
+
+  it('should set action to accepted on accept', async () => {
+    const soClient = savedObjectsClientMock.create();
+    getInstallationObject.mockResolvedValueOnce({
+      id: 'test-pkg',
+      attributes: {
+        name: 'test-pkg',
+        version: '2.0.0',
+        pending_upgrade_review: pendingReview,
+      },
+    });
+
+    await reviewUpgrade({
+      savedObjectsClient: soClient,
+      pkgName: 'test-pkg',
+      action: 'accept',
+      targetVersion: '2.0.0',
+    });
+
+    expect(soClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'test-pkg', {
+      pending_upgrade_review: {
+        ...pendingReview,
+        action: 'accepted',
+      },
+    });
+  });
+
+  it('should set action to declined on decline', async () => {
+    const soClient = savedObjectsClientMock.create();
+    getInstallationObject.mockResolvedValueOnce({
+      id: 'test-pkg',
+      attributes: {
+        name: 'test-pkg',
+        version: '2.0.0',
+        pending_upgrade_review: pendingReview,
+      },
+    });
+
+    await reviewUpgrade({
+      savedObjectsClient: soClient,
+      pkgName: 'test-pkg',
+      action: 'decline',
+      targetVersion: '2.0.0',
+    });
+
+    expect(soClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'test-pkg', {
+      pending_upgrade_review: {
+        ...pendingReview,
+        action: 'declined',
+      },
+    });
+  });
+
+  it('should set action to pending when re-enabling a declined review', async () => {
+    const soClient = savedObjectsClientMock.create();
+    getInstallationObject.mockResolvedValueOnce({
+      id: 'test-pkg',
+      attributes: {
+        name: 'test-pkg',
+        version: '2.0.0',
+        pending_upgrade_review: { ...pendingReview, action: 'declined' },
+      },
+    });
+
+    await reviewUpgrade({
+      savedObjectsClient: soClient,
+      pkgName: 'test-pkg',
+      action: 'pending',
+      targetVersion: '2.0.0',
+    });
+
+    expect(soClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'test-pkg', {
+      pending_upgrade_review: {
+        ...pendingReview,
+        action: 'pending',
+      },
+    });
+  });
+});
+
+describe('updatePackage', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should clear pending_upgrade_review when disabling keep_policies_up_to_date', async () => {
+    const soClient = savedObjectsClientMock.create();
+    getInstallationObject.mockResolvedValueOnce({
+      id: 'test-pkg',
+      attributes: {
+        name: 'test-pkg',
+        version: '1.0.0',
+        pending_upgrade_review: pendingReview,
+      },
+    });
+    getPackageInfo.mockResolvedValueOnce({});
+
     await updatePackage({
-      savedObjectsClient,
-      pkgName: 'test-package',
+      savedObjectsClient: soClient,
+      pkgName: 'test-pkg',
+      keepPoliciesUpToDate: false,
+    });
+
+    expect(soClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'test-pkg', {
+      keep_policies_up_to_date: false,
+      pending_upgrade_review: undefined,
+    });
+  });
+
+  it('should not clear pending_upgrade_review when enabling keep_policies_up_to_date', async () => {
+    const soClient = savedObjectsClientMock.create();
+    getInstallationObject.mockResolvedValueOnce({
+      id: 'test-pkg',
+      attributes: {
+        name: 'test-pkg',
+        version: '1.0.0',
+        pending_upgrade_review: pendingReview,
+      },
+    });
+    getPackageInfo.mockResolvedValueOnce({});
+
+    await updatePackage({
+      savedObjectsClient: soClient,
+      pkgName: 'test-pkg',
       keepPoliciesUpToDate: true,
     });
 
-    expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
-      action: 'update',
-      id: 'test-package',
-      name: 'test-package',
-      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    expect(soClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'test-pkg', {
+      keep_policies_up_to_date: true,
     });
   });
 });

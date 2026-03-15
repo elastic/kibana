@@ -57,6 +57,16 @@ describe('Template schema', () => {
               },
             ],
           },
+          "extendedFields": Object {
+            "defaultValue": Object {},
+            "labelAppend": <EuiText
+              color="subdued"
+              data-test-subj="form-optional-field-label"
+              size="xs"
+            >
+              Optional
+            </EuiText>,
+          },
           "extractObservables": Object {
             "defaultValue": true,
             "helpText": "Enabling this option will extract observables from the alert automatically.",
@@ -110,6 +120,26 @@ describe('Template schema', () => {
                 "validator": [Function],
               },
             ],
+          },
+          "templateId": Object {
+            "defaultValue": "",
+            "labelAppend": <EuiText
+              color="subdued"
+              data-test-subj="form-optional-field-label"
+              size="xs"
+            >
+              Optional
+            </EuiText>,
+          },
+          "templateVersion": Object {
+            "defaultValue": 1,
+            "labelAppend": <EuiText
+              color="subdued"
+              data-test-subj="form-optional-field-label"
+              size="xs"
+            >
+              Optional
+            </EuiText>,
           },
           "title": Object {
             "label": "Name",

@@ -124,6 +124,20 @@ describe('autocomplete', () => {
       .flat();
   };
 
+  /** Suggestion text for commands that are only available when source is TS (requiresTimeseriesSource) */
+  const getRequiresTimeseriesSourceSuggestionTexts = (): string[] =>
+    esqlCommandRegistry
+      .getAllCommands()
+      .filter((c) => c.metadata?.requiresTimeseriesSource === true)
+      .map((c) => c.name.toUpperCase() + ' ');
+
+  /** Suggestion text for commands that have hiddenAfterCommands (not suggested when any of those commands appear in the pipeline) */
+  const getCommandsWithHiddenAfterCommandsSuggestionTexts = (): string[] =>
+    esqlCommandRegistry
+      .getAllCommands()
+      .filter((c) => (c.metadata?.hiddenAfterCommands?.length ?? 0) > 0)
+      .map((c) => c.name.toUpperCase() + ' ');
+
   describe('New command', () => {
     const recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
       'FROM logs*',
@@ -137,11 +151,13 @@ describe('autocomplete', () => {
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
     const commands = getNonSourceHeaderCommands();
+    const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
+    const commandsAfterNonTsSource = commands.filter((c) => !tsOnlySuggestionTexts.includes(c));
 
-    testSuggestions('from a | /', commands);
-    testSuggestions('from a metadata _id | /', commands);
-    testSuggestions('from a | eval col0 = a | /', commands);
-    testSuggestions('from a metadata _id | eval col0 = a | /', commands);
+    testSuggestions('from a | /', commandsAfterNonTsSource);
+    testSuggestions('from a metadata _id | /', commandsAfterNonTsSource);
+    testSuggestions('from a | eval col0 = a | /', commandsAfterNonTsSource);
+    testSuggestions('from a metadata _id | eval col0 = a | /', commandsAfterNonTsSource);
 
     const promqlPipedQueries = [
       'PROMQL index=metrics (sum by (instance) rate(http_requests_total[5m])) | /',
@@ -152,7 +168,48 @@ describe('autocomplete', () => {
     ];
 
     promqlPipedQueries.forEach((query) => {
-      testSuggestions(query, commands);
+      testSuggestions(query, commandsAfterNonTsSource);
+    });
+  });
+
+  describe('command filtering by metadata (requiresTimeseriesSource, hiddenAfterCommands)', () => {
+    const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
+    const hiddenAfterCommandsSuggestionTexts = getCommandsWithHiddenAfterCommandsSuggestionTexts();
+
+    it('does not suggest commands with requiresTimeseriesSource when source is not TS (e.g. after FROM)', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn('FROM index | /')).map((s) => s.text);
+      for (const text of tsOnlySuggestionTexts) {
+        expect(suggestedTexts).not.toContain(text);
+      }
+    });
+
+    it('suggests commands with requiresTimeseriesSource when source is TS and cursor is after pipe', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn('TS index | /')).map((s) => s.text);
+      for (const text of tsOnlySuggestionTexts) {
+        expect(suggestedTexts).toContain(text);
+      }
+    });
+
+    it('does not suggest commands with hiddenAfterCommands when a listed command is the previous command', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn('TS index | STATS x = count(*) | /')).map(
+        (s) => s.text
+      );
+      for (const text of hiddenAfterCommandsSuggestionTexts) {
+        expect(suggestedTexts).not.toContain(text);
+      }
+    });
+
+    it('does not suggest commands with hiddenAfterCommands when a listed command appears anywhere in the pipeline', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (
+        await suggestFn('TS index | STATS AVG(field1) | EVAL test = "hello" | /')
+      ).map((s) => s.text);
+      for (const text of hiddenAfterCommandsSuggestionTexts) {
+        expect(suggestedTexts).not.toContain(text);
+      }
     });
   });
 
@@ -270,9 +327,11 @@ describe('autocomplete', () => {
     ]);
 
     const commands = getNonSourceHeaderCommands();
+    const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
+    const commandsAfterNonTsSource = commands.filter((c) => !tsOnlySuggestionTexts.includes(c));
 
     // pipe command
-    testSuggestions('FROM k | E/', commands);
+    testSuggestions('FROM k | E/', commandsAfterNonTsSource);
 
     describe('function arguments', () => {
       // function argument
@@ -498,11 +557,12 @@ describe('autocomplete', () => {
     ]);
 
     const commands = getNonSourceHeaderCommands();
-
+    const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
+    const commandsAfterNonTsSource = commands.filter((c) => !tsOnlySuggestionTexts.includes(c));
     // Pipe command
     testSuggestions(
       'FROM a | E/',
-      commands.map((name) => attachTriggerCommand(name))
+      commandsAfterNonTsSource.map((name) => attachTriggerCommand(name))
     );
 
     describe('function arguments', () => {

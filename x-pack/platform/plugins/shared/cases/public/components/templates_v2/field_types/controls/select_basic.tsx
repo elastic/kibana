@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';

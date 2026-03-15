@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';

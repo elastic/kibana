@@ -7,8 +7,9 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
@@ -26,28 +27,40 @@ const UNCOMMON = (
     defaultMessage="Uncommon"
   />
 );
-const DEFAULT_TIME_RANGE_LABEL = (
+const TIME_RANGE_LABEL = (timeSavedInLocalStorage: boolean) => (
   <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.defaultTimeRangeApplied.badgeLabel"
-    defaultMessage="Time range applied"
+    id="xpack.securitySolution.flyout.right.insights.prevalence.timeRangeApplied.badgeLabel"
+    defaultMessage="{state} range applied"
+    values={{ state: timeSavedInLocalStorage ? 'Custom time' : 'Time' }}
   />
 );
-const CUSTOM_TIME_RANGE_LABEL = (
+const TIME_RANGE_TOOLTIP = (timeSavedInLocalStorage: boolean) => (
   <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.customTimeRangeApplied.badgeLabel"
-    defaultMessage="Custom time range applied"
+    id="xpack.securitySolution.flyout.right.insights.prevalence.timeRangeApplied.tooltipLabel"
+    defaultMessage="Prevalence measures how frequently data from this alert is observed across hosts or users in your environment over the {state}"
+    values={{
+      state: timeSavedInLocalStorage
+        ? 'time range that you chose. To choose a different custom time range, click the section title, then use the date time picker in the left panel.'
+        : 'last 30 days. To choose a custom time range, click the section title, then use the date time picker in the left panel.',
+    }}
   />
 );
-const DEFAULT_TIME_RANGE_TOOLTIP = (
+const COLD_FROZEN_TIER_LABEL = (isColdAndFrozenTiersExcluded: boolean) => (
   <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.defaultTimeRangeApplied.tooltipLabel"
-    defaultMessage="Prevalence measures how frequently data from this alert is observed across hosts or users in your environment over the last 30 days. To choose a custom time range, click the section title, then use the date time picker in the left panel."
+    id="xpack.securitySolution.flyout.right.insights.prevalence.coldAndFrozenTiers.badgeLabel"
+    defaultMessage="Cold/Frozen tiers {state}"
+    values={{ state: isColdAndFrozenTiersExcluded ? 'off' : 'on' }}
   />
 );
-const CUSTOM_TIME_RANGE_TOOLTIP = (
+const COLD_FROZEN_TIER_TOOLTIP = (isColdAndFrozenTiersExcluded: boolean) => (
   <FormattedMessage
-    id="xpack.securitySolution.flyout.right.insights.threatIntelligence.customTimeRangeApplied.tooltipLabel"
-    defaultMessage="Prevalence measures how frequently data from this alert is observed across hosts or users in your environment over the time range that you chose. To choose a different custom time range, click the section title, then use the date time picker in the left panel."
+    id="xpack.securitySolution.flyout.right.insights.prevalence.coldAndFrozenTiers.tooltipLabel"
+    defaultMessage="{state}"
+    values={{
+      state: isColdAndFrozenTiersExcluded
+        ? 'Cold and frozen tiers are excluded to improve performance. To include them, go to Advanced Settings or contact your administrator.'
+        : 'This view loads more slowly because cold and frozen tiers are included. To change this, go to Advanced Settings or contact your administrator.',
+    }}
   />
 );
 
@@ -60,7 +73,11 @@ const DEFAULT_TO = 'now';
  * The component fetches the necessary data at once. The loading and error states are handled by the ExpandablePanel component.
  */
 export const PrevalenceOverview: FC = () => {
-  const { storage } = useKibana().services;
+  const { storage, uiSettings, serverless } = useKibana().services;
+  const isServerless = !!serverless;
+  const isColdAndFrozenTiersExcluded = uiSettings.get<boolean>(
+    EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE
+  );
   const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.PREVALENCE_TIME_RANGE);
 
   const { dataFormattedForFieldBrowser, investigationFields, isPreviewMode } =
@@ -117,15 +134,24 @@ export const PrevalenceOverview: FC = () => {
         link,
         iconType: !isPreviewMode ? 'arrowStart' : undefined,
         headerContent: (
-          <EuiToolTip
-            content={
-              timeSavedInLocalStorage ? CUSTOM_TIME_RANGE_TOOLTIP : DEFAULT_TIME_RANGE_TOOLTIP
-            }
-          >
-            <EuiBadge color="hollow" iconSide="left" iconType="clock" tabIndex={0}>
-              {timeSavedInLocalStorage ? CUSTOM_TIME_RANGE_LABEL : DEFAULT_TIME_RANGE_LABEL}
-            </EuiBadge>
-          </EuiToolTip>
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            {!isServerless && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={COLD_FROZEN_TIER_TOOLTIP(isColdAndFrozenTiersExcluded)}>
+                  <EuiBadge color="hollow" iconSide="left" iconType="snowflake" tabIndex={0}>
+                    {COLD_FROZEN_TIER_LABEL(isColdAndFrozenTiersExcluded)}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={TIME_RANGE_TOOLTIP(timeSavedInLocalStorage)}>
+                <EuiBadge color="hollow" iconSide="left" iconType="clock" tabIndex={0}>
+                  {TIME_RANGE_LABEL(timeSavedInLocalStorage)}
+                </EuiBadge>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       }}
       content={{ loading, error }}

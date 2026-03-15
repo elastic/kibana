@@ -22,7 +22,8 @@
     "@kbn/content-list-table",
     "@kbn/content-list-toolbar",
     "@kbn/content-list-footer",
-    "@kbn/content-list-mock-data"
+    "@kbn/content-list-mock-data",
+    "@kbn/content-management-favorites-public"
   ],
   "exclude": [
     "target/**/*"

@@ -6,6 +6,7 @@
  */
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import type { SearchHit } from '../../../common/search_strategy';
 import type { AttackDetailsProps } from './types';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
@@ -19,6 +20,10 @@ export interface AttackDetailsContext {
    * Id of the attack document
    */
   attackId: string;
+  /**
+   * The attack discovery alert object constructed from the search hit
+   */
+  attack: AttackDiscoveryAlert | null;
   /**
    * Index name where the attack document is stored
    */
@@ -66,6 +71,7 @@ export const AttackDetailsProvider = memo(
     const scopeId = useSpaceId();
     // data view side: browserFields + field-browser data
     const {
+      attack,
       browserFields,
       dataFormattedForFieldBrowser,
       searchHit,
@@ -80,6 +86,7 @@ export const AttackDetailsProvider = memo(
     const contextValue = useMemo<AttackDetailsContext | undefined>(
       () =>
         attackId &&
+        attack &&
         browserFields &&
         dataFormattedForFieldBrowser &&
         indexName &&
@@ -87,6 +94,7 @@ export const AttackDetailsProvider = memo(
         scopeId
           ? {
               attackId,
+              attack,
               browserFields,
               indexName,
               scopeId,
@@ -98,6 +106,7 @@ export const AttackDetailsProvider = memo(
           : undefined,
       [
         attackId,
+        attack,
         browserFields,
         indexName,
         scopeId,

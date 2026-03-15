@@ -71,6 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
         maps: 2,
         maps_v2: 2,
         canvas: 2,
+        cloudConnect: 0,
         ml: 0,
         fleetv2: 0,
         fleet: 0,

@@ -7,6 +7,10 @@
 
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
-export const SLO_ERROR_BUDGET_ID = 'SLO_ERROR_BUDGET_EMBEDDABLE';
+//
+// Do not change constant value - part of public REST APIs
+//
+export const SLO_ERROR_BUDGET_ID = 'slo_error_budget';
+
 export const ADD_SLO_ERROR_BUDGET_ACTION_ID = 'CREATE_SLO_ERROR_BUDGET_EMBEDDABLE';
 export const SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS = [ON_OPEN_PANEL_MENU];

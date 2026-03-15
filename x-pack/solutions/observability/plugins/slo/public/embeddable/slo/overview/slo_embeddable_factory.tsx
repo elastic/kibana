@@ -81,7 +81,7 @@ export const getOverviewEmbeddableFactory = ({
     const groupSloManager = initializeStateManager<Omit<GroupOverviewCustomState, 'overview_mode'>>(
       state as GroupOverviewCustomState,
       {
-        group_filters: undefined,
+        group_filters: { group_by: 'status' as const },
       }
     );
     const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());

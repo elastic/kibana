@@ -23,15 +23,33 @@ jest.mock('../../shared/components/flyout_body', () => ({
   ),
 }));
 
-jest.mock('../hooks/use_attack_details', () => ({
-  useAttackDetails: jest.fn().mockReturnValue({
-    loading: false,
-    browserFields: {},
-    dataFormattedForFieldBrowser: [],
-    searchHit: { _index: 'test', _id: 'test-id' },
-    getFieldsData: jest.fn(),
-  }),
-}));
+jest.mock('../hooks/use_attack_details', () => {
+  return {
+    useAttackDetails: jest.fn().mockReturnValue({
+      loading: false,
+      attack: {
+        id: 'test-alert-1',
+        alertIds: ['alert-1'],
+        detectionEngineRuleId: 'rule-1',
+        ruleStatus: 'enabled',
+        ruleVersion: 1,
+        timestamp: '2024-01-01T00:00:00Z',
+        entities: {
+          users: [],
+          hosts: [],
+        },
+        summaryMarkdown: '# Test Alert Summary',
+        mitreTactics: [],
+        mitreTechniques: [],
+      },
+      browserFields: {},
+      dataFormattedForFieldBrowser: [],
+      searchHit: { _index: 'test', _id: 'test-id' },
+      getFieldsData: jest.fn(),
+      refetch: jest.fn(),
+    }),
+  };
+});
 
 jest.mock('../hooks/use_header_data', () => ({
   useHeaderData: jest.fn().mockReturnValue({ timestamp: '2024-01-01T00:00:00Z' }),

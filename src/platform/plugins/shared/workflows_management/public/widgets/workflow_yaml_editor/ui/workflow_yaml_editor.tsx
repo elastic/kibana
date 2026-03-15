@@ -45,15 +45,18 @@ import {
   setYamlString,
 } from '../../../entities/workflows/store';
 import {
+  selectEditorWorkflowLookup,
   selectEditorYaml,
   selectExecution,
   selectHasChanges,
+  selectHighlightedStepId,
   selectIsExecutionsTab,
   selectIsSavingYaml,
   selectStepExecutions,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
+  HIGHLIGHTED_STEP_TRIGGER,
   setHasYamlSchemaValidationErrors,
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
@@ -215,6 +218,9 @@ export const WorkflowYAMLEditor = ({
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
+
+  const highlightedStepId = useSelector(selectHighlightedStepId);
+  const workflowLookup = useSelector(selectEditorWorkflowLookup);
 
   // Data
   const connectorsData = useAvailableConnectors();
@@ -490,6 +496,23 @@ export const WorkflowYAMLEditor = ({
 
     return () => disposable.dispose();
   }, [isEditorMounted, dispatch]);
+
+  // Scroll editor to highlighted step when selected from execution flyout.
+  // workflowLookup is a dependency because the line numbers may shift, but in
+  // practice this only fires in execution mode where the editor is read-only,
+  // so re-scrolling on lookup changes is harmless.
+  useEffect(() => {
+    if (!isEditorMounted || !highlightedStepId || !workflowLookup) {
+      return;
+    }
+    const lineStart =
+      highlightedStepId === HIGHLIGHTED_STEP_TRIGGER
+        ? workflowLookup.triggersLineStart
+        : workflowLookup.steps[highlightedStepId]?.lineStart;
+    if (lineStart != null) {
+      editorRef.current?.revealLineInCenter(lineStart);
+    }
+  }, [isEditorMounted, highlightedStepId, workflowLookup]);
 
   // Actions
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);

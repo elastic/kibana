@@ -31,7 +31,8 @@ export const checkAggregatableFieldsExistRequest = (
   earliestMs?: number | string,
   latestMs?: number | string,
   datafeedConfig?: estypes.MlDatafeed,
-  runtimeMappings?: estypes.MappingRuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields,
+  projectRouting?: string
 ): estypes.SearchRequest => {
   const index = dataViewTitle;
   const size = 0;
@@ -86,6 +87,7 @@ export const checkAggregatableFieldsExistRequest = (
     ...(isPopulatedObject(combinedRuntimeMappings)
       ? { runtime_mappings: combinedRuntimeMappings }
       : {}),
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 
   return {
@@ -93,6 +95,7 @@ export const checkAggregatableFieldsExistRequest = (
     track_total_hits: false,
     size,
     ...searchBody,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 };
 
@@ -219,7 +222,8 @@ export const checkNonAggregatableFieldExistsRequest = (
   timeFieldName: string | undefined,
   earliestMs: number | string | undefined,
   latestMs: number | string | undefined,
-  runtimeMappings?: estypes.MappingRuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields,
+  projectRouting?: string
 ): estypes.SearchRequest => {
   const index = dataViewTitle;
   const size = 0;
@@ -236,6 +240,7 @@ export const checkNonAggregatableFieldExistsRequest = (
       },
     },
     ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 
   return {
@@ -261,7 +266,8 @@ export const getSampleOfDocumentsForNonAggregatableFields = (
   timeFieldName: string | undefined,
   earliestMs: number | string | undefined,
   latestMs: number | string | undefined,
-  runtimeMappings?: estypes.MappingRuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields,
+  projectRouting?: string
 ): estypes.SearchRequest => {
   const index = dataViewTitle;
   const filterCriteria = buildFilterCriteria(timeFieldName, earliestMs, latestMs, query);
@@ -277,6 +283,7 @@ export const getSampleOfDocumentsForNonAggregatableFields = (
     },
     ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     size: DEFAULT_DOCS_SAMPLE_OF_TEXT_FIELDS_SIZE,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 };
 

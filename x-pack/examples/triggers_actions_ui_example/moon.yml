@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/triggers-actions-ui-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/triggers-actions-ui-example-plugin'
+  title: '@kbn/triggers-actions-ui-example-plugin'
   description: Moon project for @kbn/triggers-actions-ui-example-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/examples/triggers_actions_ui_example
+  sourceRoot: x-pack/examples/triggers_actions_ui_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/kibana-react-plugin'

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { QueryClient } from '@kbn/react-query';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { FormData, ValidationFunc, ValidationFuncArg } from '../../../../../shared_imports';
@@ -17,7 +16,13 @@ jest.mock('@kbn/esql-utils', () => ({
 }));
 jest.mock('../../../../../common/lib/kibana');
 
+const getESQLQueryColumnsMock = getESQLQueryColumns as jest.Mock;
+
 describe('esqlQueryValidator', () => {
+  beforeEach(() => {
+    getESQLQueryColumnsMock.mockResolvedValue([{ id: '_id' }]);
+  });
+
   describe('ES|QL query syntax', () => {
     it.each([['incorrect syntax'], ['from test* metadata']])(
       'reports incorrect syntax in "%s"',
@@ -57,68 +62,9 @@ describe('esqlQueryValidator', () => {
     );
   });
 
-  describe('METADATA operator validation', () => {
-    it.each([
-      ['from test*'],
-      ['from metadata*'],
-      ['from test* | keep metadata'],
-      ['from test* | eval x="metadata _id"'],
-    ])('reports when METADATA operator is missing in a NON aggregating query "%s"', (esqlQuery) =>
-      expect(
-        createValidator()({
-          value: createEsqlQueryFieldValue(esqlQuery),
-        } as EsqlQueryValidatorArgs)
-      ).resolves.toMatchObject({
-        code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-      })
-    );
-
-    it.each([
-      ['from test* metadata _id'],
-      ['from test* metadata _id, _index'],
-      ['from test* metadata _index, _id'],
-      ['from test*  metadata _id '],
-      ['from test*    metadata _id '],
-      ['from test*  metadata _id | limit 10'],
-      [
-        `from packetbeat* metadata
-
-        _id
-        | limit 100`,
-      ],
-    ])(
-      'succeeds validation when METADATA operator EXISTS in a NON aggregating query "%s"',
-      (esqlQuery) =>
-        expect(
-          createValidator()({
-            value: createEsqlQueryFieldValue(esqlQuery),
-          } as EsqlQueryValidatorArgs)
-        ).resolves.toBeUndefined()
-    );
-
-    it('succeeds validation when METADATA operator is missing in an aggregating query "from test* | stats c = count(*) by fieldA"', () =>
-      expect(
-        createValidator()({
-          value: createEsqlQueryFieldValue('from test* | stats c = count(*) by fieldA'),
-        } as EsqlQueryValidatorArgs)
-      ).resolves.toBeUndefined());
-  });
-
-  describe('METADATA _id field validation for NON aggregating queries', () => {
-    it('reports when METADATA "_id" field is missing', () => {
-      getESQLQueryColumnsMock.mockResolvedValue([{ id: 'column1' }, { id: 'column2' }]);
-
-      return expect(
-        createValidator()({
-          value: createEsqlQueryFieldValue('from test*'),
-        } as EsqlQueryValidatorArgs)
-      ).resolves.toMatchObject({
-        code: ESQL_ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-      });
-    });
-
-    it('succeeds validation when METADATA "_id" field EXISTS', async () => {
-      getESQLQueryColumnsMock.mockResolvedValue([{ id: '_id' }, { id: 'column1' }]);
+  describe('_id column validation for non-aggregating queries', () => {
+    it('succeeds when _id column is present in response', () => {
+      getESQLQueryColumnsMock.mockResolvedValue([{ id: '_id' }, { id: 'agent.name' }]);
 
       return expect(
         createValidator()({
@@ -126,17 +72,49 @@ describe('esqlQueryValidator', () => {
         } as EsqlQueryValidatorArgs)
       ).resolves.toBeUndefined();
     });
-  });
 
-  describe('METADATA _id field validation for aggregating queries', () => {
-    it('succeeds validation when METADATA operator with "_id" field is missing', () => {
-      getESQLQueryColumnsMock.mockResolvedValue([{ id: 'column1' }, { id: 'column2' }]);
+    it('returns MISSING_ID_FIELD warning when _id column is absent', () => {
+      getESQLQueryColumnsMock.mockResolvedValue([{ id: 'agent.name' }]);
 
       return expect(
         createValidator()({
-          value: createEsqlQueryFieldValue(
-            'from test* metadata someField | stats c = count(*) by fieldA'
-          ),
+          value: createEsqlQueryFieldValue('from test* metadata _id | drop _id'),
+        } as EsqlQueryValidatorArgs)
+      ).resolves.toMatchObject({
+        code: ESQL_ERROR_CODES.MISSING_ID_FIELD,
+      });
+    });
+
+    it('returns MISSING_ID_FIELD warning when columns are empty', () => {
+      getESQLQueryColumnsMock.mockResolvedValue([]);
+
+      return expect(
+        createValidator()({
+          value: createEsqlQueryFieldValue('from test*'),
+        } as EsqlQueryValidatorArgs)
+      ).resolves.toMatchObject({
+        code: ESQL_ERROR_CODES.MISSING_ID_FIELD,
+      });
+    });
+
+    it('succeeds for non-aggregating query without explicit metadata when injection adds _id', () => {
+      getESQLQueryColumnsMock.mockResolvedValue([{ id: '_id' }, { id: 'agent.name' }]);
+
+      return expect(
+        createValidator()({
+          value: createEsqlQueryFieldValue('from test*'),
+        } as EsqlQueryValidatorArgs)
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('_id column validation for aggregating queries', () => {
+    it('succeeds when _id is absent for aggregating query', () => {
+      getESQLQueryColumnsMock.mockResolvedValue([{ id: 'count' }]);
+
+      return expect(
+        createValidator()({
+          value: createEsqlQueryFieldValue('from test* | stats count() by agent.name'),
         } as EsqlQueryValidatorArgs)
       ).resolves.toBeUndefined();
     });
@@ -144,7 +122,6 @@ describe('esqlQueryValidator', () => {
 
   describe('when getESQLQueryColumns fails', () => {
     it('returns a validation error', () => {
-      // suppress the expected error messages
       jest.spyOn(console, 'error').mockReturnValue();
 
       getESQLQueryColumnsMock.mockRejectedValue(new Error('some error'));
@@ -162,8 +139,6 @@ describe('esqlQueryValidator', () => {
 });
 
 type EsqlQueryValidatorArgs = ValidationFuncArg<FormData, FieldValueQueryBar>;
-
-const getESQLQueryColumnsMock = getESQLQueryColumns as jest.Mock;
 
 function createValidator(): ValidationFunc<FormData, string, FieldValueQueryBar> {
   const queryClient = new QueryClient({

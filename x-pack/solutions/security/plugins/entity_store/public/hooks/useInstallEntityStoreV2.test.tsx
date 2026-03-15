@@ -72,7 +72,7 @@ describe('useInstallEntityStoreV2', () => {
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
     mockServices.http.get
       .mockResolvedValueOnce({ status: EntityStoreStatus.enum.running })
-      .mockResolvedValueOnce({ status: EntityStoreStatus.enum.not_installed });
+      .mockResolvedValueOnce({ status: EntityStoreStatus.enum.running });
     mockServices.http.post.mockResolvedValueOnce({});
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
@@ -95,70 +95,7 @@ describe('useInstallEntityStoreV2', () => {
     mockServices.uiSettings.get.mockReturnValue(true);
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
     mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.running });
-
-    renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
-
-    await waitFor(() => {
-      expect(mockServices.http.get).toHaveBeenCalledWith({
-        path: ENTITY_STORE_ROUTES.STATUS,
-        query: { apiVersion: '2', include_components: false },
-      });
-    });
-
-    expect(mockServices.http.post).not.toHaveBeenCalled();
-  });
-
-  it("should not install when entity store status is 'installing'", async () => {
-    const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockReturnValue(true);
-    mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
-    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.installing });
-
-    renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
-
-    await waitFor(() => {
-      expect(mockServices.http.get).toHaveBeenCalledTimes(1);
-    });
-
-    expect(mockServices.http.post).not.toHaveBeenCalled();
-  });
-
-  it("should not install when entity store status is 'stopped'", async () => {
-    const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockReturnValue(true);
-    mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
-    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.stopped });
-
-    renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
-
-    await waitFor(() => {
-      expect(mockServices.http.get).toHaveBeenCalledTimes(1);
-    });
-
-    expect(mockServices.http.post).not.toHaveBeenCalled();
-  });
-
-  it("should not install when entity store status is 'error'", async () => {
-    const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockReturnValue(true);
-    mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
-    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.error });
-
-    renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
-
-    await waitFor(() => {
-      expect(mockServices.http.get).toHaveBeenCalledTimes(1);
-    });
-
-    expect(mockServices.http.post).not.toHaveBeenCalled();
-  });
-
-  it('should install when entity store is not installed', async () => {
-    const mockServices = createMockServices();
-    mockServices.uiSettings.get.mockReturnValue(true);
-    mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
-    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.not_installed });
-    mockServices.http.post.mockResolvedValueOnce({});
+    mockServices.http.post.mockResolvedValue({});
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
 
@@ -171,7 +108,41 @@ describe('useInstallEntityStoreV2', () => {
       query: { apiVersion: '2', include_components: false },
     });
     expect(mockServices.http.post).toHaveBeenCalledWith({
+      path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT,
+      body: JSON.stringify({}),
+      query: { apiVersion: '2' },
+    });
+    expect(mockServices.http.post).not.toHaveBeenCalledWith({
       path: ENTITY_STORE_ROUTES.INSTALL,
+      body: JSON.stringify({}),
+      query: { apiVersion: '2' },
+    });
+  });
+
+  it('when entity store is not installed and space is default, installs entity store then inits entity maintainers', async () => {
+    const mockServices = createMockServices();
+    mockServices.uiSettings.get.mockReturnValue(true);
+    mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
+    mockServices.http.get.mockResolvedValueOnce({ status: EntityStoreStatus.enum.not_installed });
+    mockServices.http.post.mockResolvedValue({});
+
+    renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
+
+    await waitFor(() => {
+      expect(mockServices.http.post).toHaveBeenCalledTimes(2);
+    });
+
+    expect(mockServices.http.get).toHaveBeenCalledWith({
+      path: ENTITY_STORE_ROUTES.STATUS,
+      query: { apiVersion: '2', include_components: false },
+    });
+    expect(mockServices.http.post).toHaveBeenNthCalledWith(1, {
+      path: ENTITY_STORE_ROUTES.INSTALL,
+      body: JSON.stringify({}),
+      query: { apiVersion: '2' },
+    });
+    expect(mockServices.http.post).toHaveBeenNthCalledWith(2, {
+      path: ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT,
       body: JSON.stringify({}),
       query: { apiVersion: '2' },
     });

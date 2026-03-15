@@ -24,7 +24,7 @@
           "<T>) => ({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: T[]; total: number; counts: { tag: Record<string, number>; }; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 60,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -47,7 +47,7 @@
               "<T>"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 64,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -67,7 +67,15 @@
           "\nCreate mock findItems function for dashboard stories.\nSimplified API for examples - just pass optional delay.\n\nThis function uses inline mock data with pre-assigned status values.\n"
         ],
         "signature": [
-          "(delay?: number) => ({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
+          "(delay?: number, favoritesClient?: ",
+          {
+            "pluginId": "@kbn/content-management-favorites-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+            "section": "def-public.FavoritesClientPublic",
+            "text": "FavoritesClientPublic"
+          },
+          "<void> | undefined) => ({ searchQuery, filters, sort, page, }: { searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }) => Promise<{ items: ",
           {
             "pluginId": "@kbn/content-list-mock-data",
             "scope": "public",
@@ -78,7 +86,7 @@
           "[]; total: number; counts: { tag: Record<string, number>; }; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 419,
+        "lineNumber": 438,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -90,17 +98,43 @@
             "tags": [],
             "label": "delay",
             "description": [
-              "- Optional delay in milliseconds to simulate network latency"
+              "- Optional delay in milliseconds to simulate network latency."
             ],
             "signature": [
               "number"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 419,
-            "columnNumber": 43,
+            "lineNumber": 439,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/content-management-storybook",
+            "id": "def-public.createSimpleMockFindItems.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "favoritesClient",
+            "description": [
+              "- Optional favorites client. Defaults to the module-level"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-favorites-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+                "section": "def-public.FavoritesClientPublic",
+                "text": "FavoritesClientPublic"
+              },
+              "<void> | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 440,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -127,7 +161,7 @@
           "[]; total: number; counts: { tag: Record<string, number>; }; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 180,
+        "lineNumber": 196,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -144,7 +178,7 @@
               "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 68,
+            "lineNumber": 83,
             "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
@@ -173,7 +207,7 @@
           "[]; total: number; counts: { tag: Record<string, number>; }; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 194,
+        "lineNumber": 210,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -190,7 +224,7 @@
               "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 68,
+            "lineNumber": 83,
             "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
@@ -219,7 +253,7 @@
           "[]; total: number; counts: { tag: Record<string, number>; }; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 187,
+        "lineNumber": 203,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -236,7 +270,7 @@
               "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 68,
+            "lineNumber": 83,
             "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
@@ -265,7 +299,7 @@
           "[]; total: number; counts: { tag: Record<string, number>; }; }>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 201,
+        "lineNumber": 217,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -282,7 +316,7 @@
               "{ searchQuery?: string | undefined; filters: MockFindItemsFilters; sort: { field: string; direction: \"asc\" | \"desc\"; }; page: { index: number; size: number; }; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 68,
+            "lineNumber": 83,
             "columnNumber": 17,
             "deprecated": false,
             "trackAdoption": false
@@ -503,7 +537,7 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 209,
+        "lineNumber": 225,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -519,7 +553,7 @@
               "{ title: string; description?: string | undefined; timeRestore: boolean; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 214,
+            "lineNumber": 230,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -537,7 +571,7 @@
               "true"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 219,
+            "lineNumber": 235,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -648,7 +682,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 48,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -660,13 +694,13 @@
             "tags": [],
             "label": "items",
             "description": [
-              "The source array of mock items"
+              "The source array of mock items."
             ],
             "signature": [
               "T[]"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -678,13 +712,13 @@
             "tags": [],
             "label": "delay",
             "description": [
-              "Optional delay in milliseconds to simulate network latency"
+              "Optional delay in milliseconds to simulate network latency."
             ],
             "signature": [
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -696,13 +730,13 @@
             "tags": [],
             "label": "statusSortFn",
             "description": [
-              "Optional function to handle status field sorting"
+              "Optional function to handle status field sorting."
             ],
             "signature": [
               "((a: T, b: T, direction: \"asc\" | \"desc\") => number) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -718,7 +752,7 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -735,7 +769,7 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -752,7 +786,7 @@
                   "\"asc\" | \"desc\""
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -760,6 +794,31 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-storybook",
+            "id": "def-public.MockFindItemsConfig.favoritesClient",
+            "type": "Object",
+            "tags": [],
+            "label": "favoritesClient",
+            "description": [
+              "\nFavorites client instance used to resolve starred-item filtering.\n\nDefaults to the module-level {@link mockFavoritesClient} singleton.\nPass a story-specific client to ensure the same instance is shared\nbetween the provider (`services.favorites`) and `findItems`, so that\nstarred items are immediately visible when `starredOnly` is toggled."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-favorites-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+                "section": "def-public.FavoritesClientPublic",
+                "text": "FavoritesClientPublic"
+              },
+              "<void> | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1178,7 +1237,7 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1214,7 +1273,7 @@
           "\"no-user\""
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data/storybook/helpers.ts",
-        "lineNumber": 359,
+        "lineNumber": 375,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

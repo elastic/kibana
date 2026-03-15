@@ -32,10 +32,22 @@ export type SortFilterProps = Record<string, never>;
  */
 export type TagFilterProps = Record<string, never>;
 
+/**
+ * Props for the {@link StarredFilter} declarative component.
+ *
+ * Note: `StarredFilter` is a non-rendering declarative component whose props are
+ * parsed as attributes during filter resolution. Because `EuiSearchBar`
+ * instantiates `custom_component` filters itself, attributes cannot be
+ * forwarded to the underlying {@link StarredFilterRenderer}. Extend this interface
+ * only with props the `resolve` callback can act on directly.
+ */
+export type StarredFilterProps = Record<string, never>;
+
 /** Preset-to-props mapping for toolbar filters. */
 export interface FilterPresets {
   sort: SortFilterProps;
   tags: TagFilterProps;
+  starred: StarredFilterProps;
 }
 
 /** Context passed to filter `resolve` callbacks. */
@@ -44,6 +56,8 @@ export interface FilterContext {
   hasSorting: boolean;
   /** Whether tags filtering is available from the provider. */
   hasTags: boolean;
+  /** Whether starred filtering is available from the provider. */
+  hasStarred: boolean;
 }
 
 /** Part factory for toolbar filters. */

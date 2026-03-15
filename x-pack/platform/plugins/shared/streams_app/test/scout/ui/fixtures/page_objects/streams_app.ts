@@ -31,6 +31,17 @@ export class StreamsApp {
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
+  public readonly createQueryStreamButton;
+  public readonly childStreamTypeSelector;
+  public readonly queryStreamFlyout;
+  public readonly queryStreamFlyoutSaveButton;
+  public readonly queryStreamCreatedSuccessToast;
+  public readonly childQueryStreamCreatedSuccessToast;
+  public readonly queryStreamUpdatedSuccessToast;
+  public readonly queryStreamDetailsQueryViewerCodeBlock;
+  public readonly deleteQueryStreamModalInput;
+  public readonly queryStreamDeletedSuccessToast;
+  public readonly queryStreamCreateErrorToast;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -66,6 +77,23 @@ export class StreamsApp {
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
     this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
+    this.createQueryStreamButton = this.page.getByTestId('streamsAppCreateQueryStreamButton');
+    this.childStreamTypeSelector = this.page.getByTestId('streamsAppChildStreamTypeSelector');
+    this.queryStreamFlyout = this.page.getByTestId('streamsAppQueryStreamFlyout');
+    this.queryStreamFlyoutSaveButton = this.page.getByTestId(
+      'streamsAppQueryStreamFlyoutSaveButton'
+    );
+    this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
+    this.childQueryStreamCreatedSuccessToast = this.page.getByText('Query stream created');
+    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated successfully');
+    this.queryStreamDetailsQueryViewerCodeBlock = this.page.getByTestId(
+      'queryStreamDetailsQueryViewerCodeBlock'
+    );
+    this.deleteQueryStreamModalInput = this.page.getByTestId(
+      'streamsAppDeleteStreamModalStreamNameInput'
+    );
+    this.queryStreamDeletedSuccessToast = this.page.getByText('Stream deleted');
+    this.queryStreamCreateErrorToast = this.page.getByText('Error creating query stream');
   }
 
   async goto() {
@@ -212,6 +240,38 @@ export class StreamsApp {
       return 'FROM';
     }
     return null;
+  }
+
+  /**
+   * Verifies that the Discover button for a wired stream links to the ES|QL view ($.streamname)
+   * rather than the raw glob pattern.
+   */
+  async verifyWiredStreamDiscoverLinkUsesView(streamName: string) {
+    const locator = this.page.locator(
+      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
+    );
+    await locator.waitFor();
+
+    const href = await locator.getAttribute('href');
+    if (!href) {
+      throw new Error(`Missing href for Discover action button of stream ${streamName}`);
+    }
+
+    // Wired streams should use the ES|QL view ($.streamname), not the raw pattern.
+    const decodedHref = decodeURIComponent(href);
+    const viewFragment = `FROM $.${streamName}`;
+    const rawFragment = `FROM ${streamName}, ${streamName}.*`;
+
+    if (decodedHref.includes(rawFragment)) {
+      throw new Error(
+        `Discover link for wired stream ${streamName} still uses raw glob pattern. Expected view reference ($.${streamName}).`
+      );
+    }
+    if (!decodedHref.includes(viewFragment)) {
+      throw new Error(
+        `Discover link for wired stream ${streamName} does not contain expected view fragment. href=${href} expected=FROM $.${streamName}`
+      );
+    }
   }
 
   async verifyStreamsAreInTable(streamNames: string[]) {
@@ -813,6 +873,24 @@ export class StreamsApp {
   }
 
   /**
+   * Confirms changes in the review modal if it appears, otherwise does nothing.
+   * The review modal only appears when there are mapping-affecting changes (not just
+   * description-only or unmapped field changes). Use this when the save operation
+   * might or might not trigger the modal depending on the type of changes.
+   */
+  async confirmChangesInReviewModalIfPresent() {
+    const submitButton = this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton');
+    const appeared = await submitButton
+      .waitFor({ state: 'visible', timeout: 3_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (appeared) {
+      await expect(submitButton).toBeEnabled({ timeout: 30_000 });
+      await submitButton.click();
+    }
+  }
+
+  /**
    * Utility for data preview
    */
   async getPreviewTableRows() {
@@ -910,6 +988,16 @@ export class StreamsApp {
 
   async stageFieldMappingChanges() {
     await this.page.getByTestId('streamsAppSchemaEditorFieldStageButton').click();
+  }
+
+  async fillFieldDescription(description: string) {
+    const textarea = this.page.getByTestId('streamsAppFieldSummaryDescriptionTextArea');
+    await expect(textarea).toBeVisible();
+    await textarea.fill(description);
+  }
+
+  async clickEditFieldButton() {
+    await this.page.getByTestId('streamsAppFieldSummaryEditButton').click();
   }
 
   async unmapField() {
@@ -1200,5 +1288,49 @@ export class StreamsApp {
 
   async fillConcatLiteralInput(value: string) {
     await this.concatLiteralInput.fill(value);
+  }
+
+  async clickCreateQueryStreamButton() {
+    await this.createQueryStreamButton.click();
+  }
+
+  async clickQueryStreamFlyoutSaveButton() {
+    await this.queryStreamFlyoutSaveButton.click();
+  }
+
+  async selectChildStreamType(type: 'Query' | 'Index') {
+    await this.childStreamTypeSelector.getByRole('button', { name: type }).click();
+  }
+
+  async clickQueryModeCreateQueryStreamButton() {
+    await this.page.getByTestId('streamsAppQueryModeCreateButton').click();
+  }
+
+  async clickQueryStreamFormCreateButton() {
+    await this.page.getByTestId('streamsAppQueryStreamFormCreateButton').click();
+  }
+
+  async clickQueryStreamLink(streamName: string) {
+    await this.page.getByTestId(`streamsAppQueryStreamEntryButton-${streamName}`).click();
+  }
+
+  async clickQueryStreamDetailsTab(tabName: string) {
+    await this.page.getByTestId(`queryStreamDetails-${tabName}-tab`).click();
+  }
+
+  async clickQueryStreamDetailsEditQueryButton() {
+    await this.page.getByTestId('queryStreamDetailsEditQueryButton').click();
+  }
+
+  async clickDeleteQueryStreamButton() {
+    await this.page.getByTestId('deleteQueryStreamButton').click();
+  }
+
+  async fillDeleteQueryStreamModalInput(value: string) {
+    await this.deleteQueryStreamModalInput.fill(value);
+  }
+
+  async clickDeleteQueryStreamModalDeleteButton() {
+    await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
   }
 }

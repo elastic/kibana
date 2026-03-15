@@ -35,6 +35,7 @@ export const HardcodedIcons: Record<string, string> = {
   console,
   'data.set': database,
   foreach: refresh,
+  while: refresh,
   if: branch,
   wait: clock,
   alert: warning,

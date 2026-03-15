@@ -9,6 +9,10 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/private/gen_ai_settings'],
+  moduleNameMapper: {
+    '^@kbn/anonymization-ui$':
+      '<rootDir>/x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/index.ts',
+  },
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/private/gen_ai_settings',
   coverageReporters: ['text', 'html'],

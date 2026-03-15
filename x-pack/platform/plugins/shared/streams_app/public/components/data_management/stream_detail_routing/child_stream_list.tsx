@@ -151,6 +151,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
           onChange={(mode) => changeChildStreamsMode(mode as ChildStreamMode)}
           buttonSize="compressed"
           color="primary"
+          data-test-subj="streamsAppChildStreamTypeSelector"
         />
       )}
       {idSelected === 'ingestMode' && (

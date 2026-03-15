@@ -29,7 +29,7 @@ export function AgentBuilderNavControl() {
   const { show: hasShowPrivilege } = useUiPrivileges();
 
   const toggleSidebar = useCallback(() => {
-    agentBuilder.toggleConversationFlyout();
+    agentBuilder.toggleChat();
   }, [agentBuilder]);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function AgentBuilderNavControl() {
 
     const openChatSubscription = aiAssistantManagementSelection.openChat$.subscribe((selection) => {
       if (selection === AIChatExperience.Agent) {
-        agentBuilder.openConversationFlyout();
+        agentBuilder.openChat();
         aiAssistantManagementSelection.completeOpenChat();
       }
     });

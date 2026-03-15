@@ -49,7 +49,8 @@ import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './pa
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { metricIconsSet } from '../../shared_components/icon_set';
-import { getColorMode, getDefaultConfigForMode, getSecondaryLabelSelected } from './helpers';
+import { getColorMode, getSecondaryLabelSelected } from './helpers';
+import { getDefaultConfigForMode } from './palette_config';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 

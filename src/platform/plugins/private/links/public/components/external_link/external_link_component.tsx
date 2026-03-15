@@ -33,7 +33,7 @@ export const ExternalLinkComponent = ({
   }, [link.options]);
 
   const destination = useMemo(() => {
-    return link.destination && linkOptions.encodeUrl
+    return link.destination && linkOptions.encode_url
       ? encodeURI(link.destination)
       : link.destination;
   }, [linkOptions, link.destination]);
@@ -69,7 +69,7 @@ export const ExternalLinkComponent = ({
         const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;
         if (!modifiedClick) {
           event.preventDefault();
-          if (linkOptions.openInNewTab) {
+          if (linkOptions.open_in_new_tab) {
             window.open(destination, '_blank');
           } else {
             await coreServices.application.navigateToUrl(destination);

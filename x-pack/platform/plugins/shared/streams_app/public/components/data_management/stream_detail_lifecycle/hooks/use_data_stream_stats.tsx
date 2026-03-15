@@ -12,6 +12,7 @@ import {
   type FailureStoreStatsResponse,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { TimeState } from '@kbn/es-query';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import type { CalculatedStats } from '../helpers/get_calculated_stats';
@@ -19,7 +20,15 @@ import { getCalculatedStats } from '../helpers/get_calculated_stats';
 import { getAggregations } from './use_ingestion_rate';
 import { formatBytes } from '../helpers/format_bytes';
 
-export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number];
+export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number] & {
+  /**
+   * The number of distinct time series when the underlying data stream is in
+   * `time_series` mode.
+   *
+   * Computed via ES|QL `TS_INFO` on the stream.
+   */
+  timeSeriesCount?: number;
+};
 
 export type EnhancedDataStreamStats = DataStreamStats & CalculatedStats;
 export type EnhancedFailureStoreStats = FailureStoreStatsResponse & CalculatedStats;
@@ -124,10 +133,64 @@ export const useDataStreamStats = ({
     }
   );
 
+  // Only fetch time series count if the index mode is time_series
+  const shouldFetchTimeSeriesCount = definition.index_mode === 'time_series';
+
+  const timeSeriesCountFetch = useStreamsAppFetch(
+    async ({ signal }) => {
+      if (!shouldFetchTimeSeriesCount) {
+        return undefined;
+      }
+
+      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/time_series/_count', {
+        signal,
+        params: {
+          path: { name: definition.stream.name },
+        },
+      });
+    },
+    [streamsRepositoryClient, definition.stream.name, shouldFetchTimeSeriesCount],
+    {
+      withTimeRange: false,
+      withRefresh: false,
+      clearValueOnNext: true,
+      unsetValueOnError: true,
+      disableToastOnError: true,
+    }
+  );
+
+  const timeSeriesCount =
+    typeof timeSeriesCountFetch.value?.timeSeriesCount === 'number'
+      ? timeSeriesCountFetch.value.timeSeriesCount
+      : undefined;
+
+  const stats = statsFetch.value
+    ? {
+        ...statsFetch.value,
+        ds: {
+          ...statsFetch.value.ds,
+          stats: {
+            ...statsFetch.value.ds.stats,
+            ...(timeSeriesCount !== undefined ? { timeSeriesCount } : {}),
+          },
+        },
+      }
+    : undefined;
+
+  const timeSeriesCountError =
+    timeSeriesCountFetch.error && !isRequestAbortedError(timeSeriesCountFetch.error)
+      ? timeSeriesCountFetch.error
+      : undefined;
+
   return {
-    stats: statsFetch.value,
+    stats,
     isLoading: statsFetch.loading,
-    refresh: statsFetch.refresh,
+    refresh: () => {
+      statsFetch.refresh();
+      timeSeriesCountFetch.refresh();
+    },
     error: statsFetch.error,
+    timeSeriesCountLoading: shouldFetchTimeSeriesCount && timeSeriesCountFetch.loading,
+    timeSeriesCountError,
   };
 };

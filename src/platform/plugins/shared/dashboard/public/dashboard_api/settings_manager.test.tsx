@@ -12,27 +12,13 @@ import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
 import { initializeSettingsManager } from './settings_manager';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
+import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 
 describe('initializeSettingsManager', () => {
-  describe('default values', () => {
-    test('Should set syncCursor to false when value not provided', () => {
-      const settingsManager = initializeSettingsManager({
-        title: 'dashboard 1',
-      });
-      expect(settingsManager.api.getSettings().sync_colors).toBe(false);
-    });
-
-    test('Should set sync_tooltips to false when value not provided', () => {
-      const settingsManager = initializeSettingsManager({
-        title: 'dashboard 1',
-      });
-      expect(settingsManager.api.getSettings().sync_tooltips).toBe(false);
-    });
-  });
-
   describe('setSettings', () => {
     test('Should not overwrite settings when setting partial state', () => {
       const settingsManager = initializeSettingsManager({
+        ...DEFAULT_DASHBOARD_STATE,
         title: 'dashboard 1',
         options: {
           ...DEFAULT_DASHBOARD_OPTIONS,

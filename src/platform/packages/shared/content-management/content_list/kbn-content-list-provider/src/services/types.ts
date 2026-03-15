@@ -8,6 +8,7 @@
  */
 
 import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
+import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
 
 /**
  * Services provided to the content list provider to enable additional capabilities.
@@ -25,4 +26,13 @@ export interface ContentListServices {
    * for extracting tag filters from the search bar query text.
    */
   tags?: ContentManagementTagsServices;
+
+  /**
+   * Favorites service for starring items.
+   *
+   * Uses the `FavoritesClientPublic` interface from `@kbn/content-management-favorites-public`.
+   * When provided, enables the starred feature (star button in table rows, starred
+   * filter in toolbar) unless explicitly disabled via `features.starred: false`.
+   */
+  favorites?: FavoritesClientPublic;
 }

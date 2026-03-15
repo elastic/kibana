@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { errors } from '@elastic/elasticsearch';
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { buildElasticsearchRequest } from '@kbn/workflows';
 
@@ -42,7 +44,10 @@ describe('ElasticsearchActionStepImpl', () => {
 
     mockContextManager = {
       getContext: jest.fn().mockReturnValue({
-        workflow: { spaceId: 'default' },
+        workflow: { id: 'test', name: 'test', enabled: true, spaceId: 'default' },
+      }),
+      getDependencies: jest.fn().mockReturnValue({
+        config: { maxResponseSize: new ByteSizeValue(10 * 1024 * 1024) },
       }),
       renderValueAccordingToContext: jest.fn((value) => value),
       getEsClientAsUser: jest.fn().mockReturnValue(mockEsClient),
@@ -100,12 +105,15 @@ describe('ElasticsearchActionStepImpl', () => {
       await (esStep as any)._run(step.with);
 
       expect(mockedBuildRequest).toHaveBeenCalledWith('elasticsearch.search', step.with);
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'GET',
-        path: '/my-test/_search?size=10',
-        body: { query: { match_all: {} } },
-        bulkBody: undefined,
-      });
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        {
+          method: 'GET',
+          path: '/my-test/_search?size=10',
+          body: { query: { match_all: {} } },
+          bulkBody: undefined,
+        },
+        expect.objectContaining({ maxResponseSize: expect.any(Number) })
+      );
     });
 
     it('should call transport.request with bulkBody for bulk requests', async () => {
@@ -141,12 +149,15 @@ describe('ElasticsearchActionStepImpl', () => {
       await (esStep as any)._run(step.with);
 
       expect(mockedBuildRequest).toHaveBeenCalledWith('elasticsearch.bulk', step.with);
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'POST',
-        path: '/my-test/_bulk',
-        body: undefined,
-        bulkBody: bulkOperations,
-      });
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        {
+          method: 'POST',
+          path: '/my-test/_bulk',
+          body: undefined,
+          bulkBody: bulkOperations,
+        },
+        expect.objectContaining({ maxResponseSize: expect.any(Number) })
+      );
     });
 
     it('should append query params to path when present', async () => {
@@ -178,12 +189,15 @@ describe('ElasticsearchActionStepImpl', () => {
 
       await (esStep as any)._run(step.with);
 
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'POST',
-        path: '/my-test/_bulk?refresh=wait_for&pipeline=my-pipeline',
-        body: undefined,
-        bulkBody: [{ index: {} }, { field: 'value' }],
-      });
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        {
+          method: 'POST',
+          path: '/my-test/_bulk?refresh=wait_for&pipeline=my-pipeline',
+          body: undefined,
+          bulkBody: [{ index: {} }, { field: 'value' }],
+        },
+        expect.objectContaining({ maxResponseSize: expect.any(Number) })
+      );
     });
   });
 
@@ -213,11 +227,14 @@ describe('ElasticsearchActionStepImpl', () => {
 
       // Should not call buildElasticsearchRequest for raw format
       expect(mockedBuildRequest).not.toHaveBeenCalled();
-      expect(mockEsClient.transport.request).toHaveBeenCalledWith({
-        method: 'PUT',
-        path: '/my-index/_settings',
-        body: { 'index.number_of_replicas': 2 },
-      });
+      expect(mockEsClient.transport.request).toHaveBeenCalledWith(
+        {
+          method: 'PUT',
+          path: '/my-index/_settings',
+          body: { 'index.number_of_replicas': 2 },
+        },
+        expect.objectContaining({ maxResponseSize: expect.any(Number) })
+      );
     });
 
     it('should use raw API format for elasticsearch.request step type', async () => {
@@ -244,7 +261,7 @@ describe('ElasticsearchActionStepImpl', () => {
       expect(mockedBuildRequest).not.toHaveBeenCalled();
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         { method: 'DELETE', path: '/my-index', body: undefined },
-        {}
+        expect.objectContaining({ maxResponseSize: expect.any(Number) })
       );
     });
 
@@ -272,8 +289,73 @@ describe('ElasticsearchActionStepImpl', () => {
 
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         { method: 'GET', path: '/my-index/_search', body: { query: { match_all: {} } } },
-        { headers: { 'X-Custom-Header': 'value' } }
+        expect.objectContaining({
+          maxResponseSize: expect.any(Number),
+          headers: { 'X-Custom-Header': 'value' },
+        })
       );
+    });
+  });
+
+  describe('response size limit enforcement (Layer 1)', () => {
+    it('should map RequestAbortedError with size message to StepSizeLimitExceeded', async () => {
+      const sizeError = new errors.RequestAbortedError(
+        'The content length (15000000) is bigger than the maximum allowed string (10485760)'
+      );
+      mockEsClient.transport.request = jest.fn().mockRejectedValue(sizeError);
+
+      const step: ElasticsearchActionStep = {
+        name: 'size_limit_step',
+        type: 'elasticsearch.search',
+        spaceId: 'default',
+        with: {
+          index: 'large-index',
+          body: { query: { match_all: {} }, size: 10000 },
+        },
+      };
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (esStep as any)._run(step.with);
+
+      expect(result.error).toBeDefined();
+      expect(result.error.type).toBe('StepSizeLimitExceeded');
+      expect(result.error.message).toContain('size_limit_step');
+      expect(result.error.details.limitBytes).toBe(10 * 1024 * 1024);
+      expect(result.output).toBeUndefined();
+    });
+
+    it('should NOT map other RequestAbortedError (non-size) to StepSizeLimitExceeded', async () => {
+      const abortError = new errors.RequestAbortedError('Request aborted by user');
+      mockEsClient.transport.request = jest.fn().mockRejectedValue(abortError);
+
+      const step: ElasticsearchActionStep = {
+        name: 'abort_step',
+        type: 'elasticsearch.search',
+        spaceId: 'default',
+        with: {
+          index: 'test',
+          body: { query: { match_all: {} } },
+        },
+      };
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (esStep as any)._run(step.with);
+
+      expect(result.error).toBeDefined();
+      // Should be a generic error, not StepSizeLimitExceeded
+      expect(result.error.type).not.toBe('StepSizeLimitExceeded');
     });
   });
 });

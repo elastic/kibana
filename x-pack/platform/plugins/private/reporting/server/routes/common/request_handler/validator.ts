@@ -7,24 +7,50 @@
 
 import moment from 'moment-timezone';
 import { z } from '@kbn/zod';
-import DOMPurify from 'dompurify';
-import { JSDOM } from 'jsdom';
+import { load } from 'cheerio';
 import type { BaseParams } from '@kbn/reporting-common/types';
 
-const window = new JSDOM('').window;
-const purify = DOMPurify(window);
+/**
+ * Strip all HTML tags from a string while preserving text content.
+ */
 
-const sanitizeString = (input: string) => {
+/** Elements whose content is stripped together with the tag, as a CSS selector. */
+const FULLY_REMOVED_ELEMENTS = [
+  'script',
+  'style',
+  'template',
+  'svg',
+  'math',
+  'annotation-xml',
+  'audio',
+  'colgroup',
+  'desc',
+  'foreignobject',
+  'head',
+  'iframe',
+  'mi',
+  'mn',
+  'mo',
+  'ms',
+  'mtext',
+  'noembed',
+  'noframes',
+  'noscript',
+  'plaintext',
+  'thead',
+  'title',
+  'video',
+  'xmp',
+].join(',');
+
+const sanitizeString = (input: string): string => {
   if (typeof input !== 'string') {
     return '';
   }
-  return purify.sanitize(input, {
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: [],
-    KEEP_CONTENT: true,
-    SAFE_FOR_TEMPLATES: true,
-    RETURN_TRUSTED_TYPE: false,
-  });
+
+  const $ = load(input);
+  $(FULLY_REMOVED_ELEMENTS).remove();
+  return $.root().text();
 };
 
 export function validateTimezone(timezone: string) {

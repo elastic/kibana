@@ -6,17 +6,14 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiPanel } from '@elastic/eui';
 import type { Process } from '@kbn/session-view-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { PageScope } from '../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { CustomProcess } from '../../session_view/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { SESSION_VIEW_TEST_ID } from './test_ids';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import {
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsSessionViewPanelKey,
@@ -28,7 +25,6 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import { useSessionViewConfig } from '../../shared/hooks/use_session_view_config';
 import { SessionViewNoDataMessage } from '../../shared/components/session_view_no_data_message';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 export const SESSION_VIEW_ID = 'session-view';
 
@@ -68,20 +64,9 @@ export const SessionView: FC = memo(() => {
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(PageScope.alerts);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.alerts);
-
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-
-  const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
-
   const { openPreviewPanel, closePreviewPanel } = useExpandableFlyoutApi();
   const openAlertDetailsPreview = useCallback(
-    (evtId?: string, onClose?: () => void) => {
+    (alertId: string, alertIndex: string, onClose?: () => void) => {
       // In the SessionView component, when the user clicks on the
       // expand button to open a alert in the preview panel, this actually also selects the row and opens
       // the detailed panel in preview.
@@ -91,8 +76,8 @@ export const SessionView: FC = memo(() => {
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
-            id: evtId,
-            indexName: alertsIndex,
+            id: alertId,
+            indexName: alertIndex,
             scopeId,
             banner: ALERT_PREVIEW_BANNER,
             isPreviewMode: true,
@@ -104,7 +89,7 @@ export const SessionView: FC = memo(() => {
         panel: 'preview',
       });
     },
-    [openPreviewPanel, alertsIndex, scopeId, telemetry]
+    [openPreviewPanel, scopeId, telemetry]
   );
 
   const openDetailsInPreview = useCallback(

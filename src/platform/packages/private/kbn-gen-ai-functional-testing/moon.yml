@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/gen-ai-functional-testing'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-ai-infra'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/gen-ai-functional-testing'
+  title: '@kbn/gen-ai-functional-testing'
   description: Moon project for @kbn/gen-ai-functional-testing
   channel: ''
   owner: '@elastic/appex-ai-infra'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-gen-ai-functional-testing
+  sourceRoot: src/platform/packages/private/kbn-gen-ai-functional-testing
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/repo-info'
@@ -33,14 +32,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

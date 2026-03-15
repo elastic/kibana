@@ -11,6 +11,7 @@ import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
 import { OtelKubernetesOverviewDashboardPage } from './pom/pages/otel_kubernetes_overview_dashboard.page';
 import { ApmServiceInventoryPage } from './pom/pages/apm_service_inventory.page';
+import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_helpers';
 
 /**
  * In case you need to run this test locally, you can use https://github.com/elastic/oblt-reference-stack
@@ -29,10 +30,16 @@ test.beforeEach(async ({ page }) => {
 const INSTRUMENTED_APP_CONTAINER_NAMESPACE = 'java';
 const INSTRUMENTED_APP_NAME = 'java-app';
 
-test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPage }) => {
+test('Otel Kubernetes', async ({
+  page,
+  onboardingHomePage,
+  otelKubernetesFlowPage,
+  wiredStreamsSelector,
+}) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
   const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
+  const useWiredStreams = process.env.USE_WIRED_STREAMS === 'true';
   const fileName = 'code_snippet_otel_kubernetes.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
@@ -42,12 +49,16 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
   await otelKubernetesFlowPage.copyHelmRepositorySnippetToClipboard();
   const helmRepoSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
 
+  if (useWiredStreams) {
+    await wiredStreamsSelector.selectWiredStreamsMode();
+  }
+
   await otelKubernetesFlowPage.copyInstallStackSnippetToClipboard();
   const installStackSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
 
   let codeSnippet: string;
 
-  if (!isLogsEssentialsMode) {
+  if (!isLogsEssentialsMode && !useWiredStreams) {
     /**
      * Getting the snippets and replacing placeholder
      * with the values used by Ensemble
@@ -85,7 +96,21 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
    */
   await page.waitForTimeout(5 * 60000);
 
-  if (!isLogsEssentialsMode) {
+  /**
+   * Wired streams only reroutes logs (to logs.otel); metrics and traces are
+   * unaffected. So for wired streams we validate log delivery via Discover and
+   * the Streams page, and intentionally skip the Cluster Overview dashboard
+   * and APM Service Inventory checks. Dashboard/APM validation is already
+   * covered by the non-wired test variants.
+   *
+   * Both "wired streams" and "wired streams + logs essentials" fall into this
+   * single branch because the validation path is identical for both.
+   */
+  if (useWiredStreams) {
+    await otelKubernetesFlowPage.clickExploreLogsCTA();
+    await assertDiscoverHasData(page, { assertHitCount: true });
+    await assertStreamHasData(page, 'logs.otel');
+  } else if (!isLogsEssentialsMode) {
     const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
       await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
     );
@@ -101,9 +126,7 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
     await apmServiceInventoryPage.page.getByTestId(serviceTestId).click();
     await apmServiceInventoryPage.assertTransactionExists();
   } else {
-    const discoverValidation =
-      await otelKubernetesFlowPage.clickExploreLogsAndGetDiscoverValidation();
-    await discoverValidation.waitForDiscoverToLoad();
-    await discoverValidation.assertHasAnyLogData();
+    await otelKubernetesFlowPage.clickExploreLogsCTA();
+    await assertDiscoverHasData(page);
   }
 });

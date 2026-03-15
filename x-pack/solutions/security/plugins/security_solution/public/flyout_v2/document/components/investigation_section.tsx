@@ -9,8 +9,10 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
-import { useKibana } from '../../../common/lib/kibana';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
+import { useKibana } from '../../../common/lib/kibana';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { PREFIX } from '../../../flyout/shared/test_ids';
@@ -43,6 +45,8 @@ export interface InvestigationSectionProps {
 export const InvestigationSection = memo(({ hit }: InvestigationSectionProps) => {
   const { services } = useKibana();
   const { overlays } = services;
+  const store = useStore();
+  const history = useHistory();
 
   const isAlert = useMemo(() => {
     const eventKind = getFieldValue(hit, 'event.kind') as string;
@@ -59,17 +63,18 @@ export const InvestigationSection = memo(({ hit }: InvestigationSectionProps) =>
     overlays.openSystemFlyout(
       flyoutProviders({
         services,
+        store,
+        history,
         children: <InvestigationGuideToolsFlyout hit={hit} />,
       }),
       {
         ownFocus: false,
-        // @ts-ignore EUI to fix this typing issue
         resizable: true,
         size: 'm',
         type: 'overlay',
       }
     );
-  }, [hit, overlays, services]);
+  }, [history, hit, overlays, services, store]);
 
   return (
     <ExpandableSection

@@ -1,0 +1,134 @@
+{
+  "id": "@kbn/core-chrome-browser-hooks",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-hooks",
+        "id": "def-public.useActiveSolutionNavId",
+        "type": "Function",
+        "tags": [],
+        "label": "useActiveSolutionNavId",
+        "description": [
+          "\nReturns the ID of the currently active solution navigation, or `null` when\nno solution nav is active (e.g. in classic nav mode)."
+        ],
+        "signature": [
+          "() => \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null"
+        ],
+        "path": "src/core/packages/chrome/browser-hooks/use_active_solution_nav_id.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-hooks",
+        "id": "def-public.useChromeStyle",
+        "type": "Function",
+        "tags": [],
+        "label": "useChromeStyle",
+        "description": [
+          "\nReturns the current chrome UI style (`'classic'` or `'project'`).\nDefaults to `'classic'` until explicitly changed."
+        ],
+        "signature": [
+          "() => ",
+          "ChromeStyle"
+        ],
+        "path": "src/core/packages/chrome/browser-hooks/use_chrome_style.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-hooks",
+        "id": "def-public.useIsChromeVisible",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsChromeVisible",
+        "description": [
+          "\nReturns `true` when the chrome UI (header and navigation) is currently\nvisible."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/core/packages/chrome/browser-hooks/use_is_chrome_visible.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-hooks",
+        "id": "def-public.useSidebarWidth",
+        "type": "Function",
+        "tags": [],
+        "label": "useSidebarWidth",
+        "description": [
+          "\nReturns the effective sidebar pixel width. Returns `0` when the sidebar is\nclosed so callers can use the value directly for layout calculations."
+        ],
+        "signature": [
+          "() => number"
+        ],
+        "path": "src/core/packages/chrome/browser-hooks/use_sidebar_width.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-hooks",
+        "id": "def-public.useSideNavCollapsed",
+        "type": "Function",
+        "tags": [],
+        "label": "useSideNavCollapsed",
+        "description": [
+          "\nReturns the side nav collapsed state and a setter to toggle it.\n**Internal** — used by `GridLayoutProjectSideNav`."
+        ],
+        "signature": [
+          "() => { isCollapsed: boolean; setIsCollapsed: (isCollapsed: boolean) => void; }"
+        ],
+        "path": "src/core/packages/chrome/browser-hooks/use_side_nav_collapsed.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

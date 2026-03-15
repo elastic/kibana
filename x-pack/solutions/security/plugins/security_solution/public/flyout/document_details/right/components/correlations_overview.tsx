@@ -38,8 +38,15 @@ import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_
  * and the SummaryPanel component for data rendering.
  */
 export const CorrelationsOverview: React.FC = () => {
-  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isRulePreview, isPreviewMode } =
-    useDocumentDetailsContext();
+  const {
+    dataAsNestedObject,
+    eventId,
+    getFieldsData,
+    scopeId,
+    isRulePreview,
+    isPreviewMode,
+    searchHit,
+  } = useDocumentDetailsContext();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const oldSecurityDefaultPatterns =
@@ -56,7 +63,7 @@ export const CorrelationsOverview: React.FC = () => {
 
   const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
-    dataAsNestedObject,
+    searchHit,
     eventId,
     isRulePreview,
   });

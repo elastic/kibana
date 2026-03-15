@@ -19,9 +19,6 @@ import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { AlertStatusExceptClosed } from '../../../model/alert.gen';
 
-/**
- * The reason for closing the alerts
- */
 export type ReasonEnum = z.infer<typeof ReasonEnum>;
 export const ReasonEnum = z.enum([
   'false_positive',
@@ -33,6 +30,12 @@ export const ReasonEnum = z.enum([
 ]);
 export type ReasonEnumEnum = typeof ReasonEnum.enum;
 export const ReasonEnumEnum = ReasonEnum.enum;
+
+/**
+ * The reason for closing the alerts. Can be one of following predefined reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user through the advanced settings.
+ */
+export type Reason = z.infer<typeof Reason>;
+export const Reason = z.union([ReasonEnum, z.string()]);
 
 export type SetAlertsStatusByIdsBase = z.infer<typeof SetAlertsStatusByIdsBase>;
 export const SetAlertsStatusByIdsBase = z.object({
@@ -50,7 +53,7 @@ export const CloseAlertsByIds = z.object({
    */
   signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
   status: z.literal('closed'),
-  reason: ReasonEnum.optional(),
+  reason: Reason.optional(),
 });
 
 export type SetAlertsStatusByIds = z.infer<typeof SetAlertsStatusByIds>;
@@ -71,7 +74,7 @@ export const CloseAlertsByQuery = z.object({
   query: z.object({}).catchall(z.unknown()),
   status: z.literal('closed'),
   conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
-  reason: ReasonEnum.optional(),
+  reason: Reason.optional(),
 });
 
 export type SetAlertsStatusByQuery = z.infer<typeof SetAlertsStatusByQuery>;

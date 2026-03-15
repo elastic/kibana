@@ -14,9 +14,6 @@ import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 
-const ATTACK_DISCOVERY_ALERT_IDS_FIELD = 'kibana.alert.attack_discovery.alert_ids';
-const ATTACK_DISCOVERY_ALERT_INDEX_PREFIX = '.internal.alerts-security.attack.discovery.alerts-';
-
 const createEventData = (
   overrides: Partial<DataTableRecord & TimelineItem> = {}
 ): DataTableRecord & TimelineItem =>
@@ -27,12 +24,12 @@ const createEventData = (
   } as DataTableRecord & TimelineItem);
 
 describe('isAttackDiscoveryRow', () => {
-  it('returns true when attack discovery alert ids are present', () => {
+  it('returns false when only attack discovery alert ids are present', () => {
     const eventData = createEventData({
-      data: [{ field: ATTACK_DISCOVERY_ALERT_IDS_FIELD, value: ['alert-id'] }],
+      data: [{ field: 'kibana.alert.attack_discovery.alert_ids', value: ['alert-id'] }],
     });
 
-    expect(isAttackDiscoveryRow(eventData)).toBe(true);
+    expect(isAttackDiscoveryRow(eventData)).toBe(false);
   });
 
   it('returns true when the rule type is attack discovery', () => {
@@ -51,15 +48,7 @@ describe('isAttackDiscoveryRow', () => {
     expect(isAttackDiscoveryRow(eventData)).toBe(true);
   });
 
-  it('returns true when only index name matches internal attack discovery prefix', () => {
-    const eventData = createEventData({
-      ecs: { _id: 'event-id', _index: `${ATTACK_DISCOVERY_ALERT_INDEX_PREFIX}default-000001` },
-    });
-
-    expect(isAttackDiscoveryRow(eventData)).toBe(true);
-  });
-
-  it('returns false when index name matches non-internal attack discovery prefix', () => {
+  it('returns false when rule type is absent', () => {
     const eventData = createEventData({
       ecs: { _id: 'event-id', _index: '.alerts-security.attack.discovery.alerts-default-000001' },
     });

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/elasticsearch-client-xpack-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/elasticsearch-client-xpack-plugin'
+  title: '@kbn/elasticsearch-client-xpack-plugin'
   description: Moon project for @kbn/elasticsearch-client-xpack-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client
+  sourceRoot: x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client
 dependsOn:
   - '@kbn/core'
 tags:

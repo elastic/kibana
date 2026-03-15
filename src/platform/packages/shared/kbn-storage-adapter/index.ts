@@ -18,8 +18,18 @@ import type {
   Result,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { TransportRequestOptions } from '@elastic/transport';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { StorageFieldTypeOf, StorageMappingProperty } from './types';
+
+/**
+ * Curated subset of transport-level options that can be forwarded
+ * to the underlying Elasticsearch client on a per-request basis.
+ */
+export type StorageTransportOptions = Pick<
+  TransportRequestOptions,
+  'requestTimeout' | 'maxResponseSize' | 'maxCompressedResponseSize' | 'signal'
+>;
 
 interface StorageSchemaProperties {
   [x: string]: StorageMappingProperty;
@@ -97,7 +107,8 @@ export type StorageClientGetResponse<TDocument extends { _id?: string }> = GetRe
 export type StorageClientSearch<TDocumentType = never> = <
   TSearchRequest extends StorageClientSearchRequest
 >(
-  request: TSearchRequest
+  request: TSearchRequest,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientSearchResponse<TDocumentType, TSearchRequest>>;
 
 /**
@@ -108,21 +119,25 @@ export type StorageClientSearch<TDocumentType = never> = <
  * to throw a BulkOperationError when any operation fails.
  */
 export type StorageClientBulk<TDocumentType extends { _id?: string } = never> = (
-  request: StorageClientBulkRequest<TDocumentType>
+  request: StorageClientBulkRequest<TDocumentType>,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientBulkResponse>;
 
 export type StorageClientIndex<TDocumentType = never> = (
-  request: StorageClientIndexRequest<TDocumentType>
+  request: StorageClientIndexRequest<TDocumentType>,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientIndexResponse>;
 
 export type StorageClientDelete = (
-  request: StorageClientDeleteRequest
+  request: StorageClientDeleteRequest,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientDeleteResponse>;
 
 export type StorageClientClean = () => Promise<StorageClientCleanResponse>;
 
 export type StorageClientGet<TDocumentType extends { _id?: string } = never> = (
-  request: StorageClientGetRequest
+  request: StorageClientGetRequest,
+  transportOptions?: StorageTransportOptions
 ) => Promise<StorageClientGetResponse<TDocumentType>>;
 
 export type StorageClientExistsIndex = () => Promise<boolean>;

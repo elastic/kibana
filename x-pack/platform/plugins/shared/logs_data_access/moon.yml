@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/logs-data-access-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-exploration-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/logs-data-access-plugin'
+  title: '@kbn/logs-data-access-plugin'
   description: Moon project for @kbn/logs-data-access-plugin
   channel: ''
   owner: '@elastic/obs-exploration-team'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/logs_data_access
+  sourceRoot: x-pack/platform/plugins/shared/logs_data_access
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -52,14 +51,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

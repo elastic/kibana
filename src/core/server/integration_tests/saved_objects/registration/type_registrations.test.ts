@@ -102,6 +102,7 @@ const previouslyRegisteredTypes = [
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'infra-custom-dashboards',
+  'inference-settings',
   'ingest-agent-policies',
   'ingest-download-sources',
   'ingest-outputs',

@@ -7,10 +7,6 @@
 
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { embeddableFunctionFactory } from './embeddable';
-import { savedLens } from './saved_lens';
-import { savedMap } from './saved_map';
-import { savedSearch } from './saved_search';
-import { savedVisualization } from './saved_visualization';
 
 export interface InitializeArguments {
   embeddablePersistableStateService: {
@@ -21,11 +17,5 @@ export interface InitializeArguments {
 }
 
 export function initFunctions(initialize: InitializeArguments) {
-  return [
-    embeddableFunctionFactory(initialize),
-    savedLens,
-    savedMap,
-    savedSearch,
-    savedVisualization,
-  ];
+  return [embeddableFunctionFactory(initialize)];
 }

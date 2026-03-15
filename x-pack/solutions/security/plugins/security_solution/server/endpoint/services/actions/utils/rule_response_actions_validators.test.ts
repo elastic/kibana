@@ -379,6 +379,27 @@ describe('Rules Endpoint response actions validators', () => {
 
         await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
       });
+
+      it('should only validate script ID if it is included in rule update payload', async () => {
+        // IDs in existing rule that are not being used in rule update should not have a need to be validated
+        rulePayload.response_actions = [];
+        existingRule.params.responseActions = [
+          {
+            actionTypeId: '.endpoint',
+            params: {
+              command: 'runscript',
+              config: {
+                linux: { scriptId: '1-2-3' },
+                macos: { scriptId: '' },
+                windows: { scriptId: '' },
+              },
+            },
+          },
+        ];
+
+        await expect(validateRuleResponseActions(options)).resolves.toBeUndefined();
+        expect(scriptsClientMock.list).not.toHaveBeenCalled();
+      });
     });
   });
 

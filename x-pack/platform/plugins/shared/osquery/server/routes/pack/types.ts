@@ -6,21 +6,13 @@
  */
 
 import type { SOShard } from '../../common/types';
-interface PackQuery {
-  id: string;
-  name: string;
-  query: string;
-  interval: number;
-  snapshot?: boolean;
-  removed?: boolean;
-  ecs_mapping?: Record<string, unknown>;
-}
+import type { PackQueryInput } from './utils';
 
 export interface PackResponseData {
   saved_object_id: string;
   name: string;
   description: string | undefined;
-  queries: PackQuery[];
+  queries: PackQueryInput[];
   version?: number;
   enabled: boolean | undefined;
   created_at: string;
@@ -35,7 +27,7 @@ export interface ReadPackResponseData {
   saved_object_id: string;
   name: string;
   description: string | undefined;
-  queries: Record<string, PackQuery>;
+  queries: Record<string, PackQueryInput>;
   version?: number;
   enabled: boolean | undefined;
   created_at: string;

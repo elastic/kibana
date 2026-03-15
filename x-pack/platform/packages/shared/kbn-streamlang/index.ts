@@ -50,3 +50,5 @@ export {
   BASE_GROK_PATTERNS,
 } from './types/utils/grok_to_regex';
 export type { CompiledRedactPattern } from './types/utils/grok_to_regex';
+export { streamlangOasDefinitions } from './src/oas_definitions';
+export type { StreamlangOasDefinitions } from './src/oas_definitions';

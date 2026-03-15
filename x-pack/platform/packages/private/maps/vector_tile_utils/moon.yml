@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/maps-vector-tile-utils'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/maps-vector-tile-utils'
+  title: '@kbn/maps-vector-tile-utils'
   description: Moon project for @kbn/maps-vector-tile-utils
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: x-pack/platform/packages/private/maps/vector_tile_utils
+  sourceRoot: x-pack/platform/packages/private/maps/vector_tile_utils
 dependsOn:
   - '@kbn/rison'
 tags:
@@ -33,14 +32,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

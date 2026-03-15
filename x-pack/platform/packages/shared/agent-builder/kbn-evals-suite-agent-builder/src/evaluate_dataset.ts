@@ -15,6 +15,7 @@ import {
   selectEvaluators,
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
+  createSkillInvocationEvaluator,
   createRagEvaluators,
   type GroundTruth,
   type ExperimentTask,
@@ -188,6 +189,11 @@ function configureExperiment({
         log,
         spanName: 'Converse',
       }),
+    }),
+    createSkillInvocationEvaluator({
+      traceEsClient,
+      log,
+      skillName: 'data-exploration',
     }),
   ]);
 

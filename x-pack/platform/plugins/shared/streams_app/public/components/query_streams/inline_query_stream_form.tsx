@@ -173,6 +173,7 @@ export function InlineQueryStreamForm({
             onClick={handleSave}
             isLoading={isSaving}
             disabled={!canSave || isSaving || readOnly}
+            data-test-subj="streamsAppQueryStreamFormCreateButton"
           >
             {i18n.translate('xpack.streams.inlineQueryStreamForm.createButton', {
               defaultMessage: 'Create query stream',

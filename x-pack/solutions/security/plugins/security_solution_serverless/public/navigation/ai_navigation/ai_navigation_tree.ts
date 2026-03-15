@@ -22,7 +22,8 @@ const SOLUTION_NAME = i18n.translate(
 
 export const createAiNavigationTree = (
   chatExperience: AIChatExperience = AIChatExperience.Classic,
-  workflowsUiEnabled: boolean = false
+  workflowsUiEnabled: boolean = false,
+  templatesEnabled: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
     {
@@ -45,7 +46,7 @@ export const createAiNavigationTree = (
     {
       breadcrumbStatus: 'hidden',
       children: [
-        defaultNavigationTree.cases(),
+        defaultNavigationTree.cases(templatesEnabled),
         {
           id: SecurityPageName.configurations,
           link: securityLink(SecurityPageName.configurations),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isNotEmptyCondition } from '../../../common/domain/definitions/common_fields';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import {
   type EntityField,
@@ -15,7 +16,10 @@ import { getEntityDefinition } from '../../../common/domain/definitions/registry
 import { BadCRUDRequestError } from '../errors';
 import { hashEuid, validateAndTransformDocForUpsert } from './utils';
 
-jest.mock('../../../common/domain/definitions/registry');
+jest.mock('../../../common/domain/definitions/registry', () => ({
+  ...jest.requireActual('../../../common/domain/definitions/registry'),
+  getEntityDefinition: jest.fn(),
+}));
 
 const mockGetEntityDefinition = getEntityDefinition as jest.MockedFunction<
   typeof getEntityDefinition
@@ -29,18 +33,14 @@ const createField = (source: string, allowAPIUpdate = true): EntityField => ({
   retention: { operation: 'prefer_newest_value' },
 });
 
-const createDefinition = (
-  type: EntityType,
-  fields: EntityField[],
-  requiresOneOfFields: string[] = []
-): ManagedEntityDefinition => ({
+const createDefinition = (type: EntityType, fields: EntityField[]): ManagedEntityDefinition => ({
   id: `security_${type}_default`,
   name: `${type} definition`,
   type,
   fields,
   identityField: {
-    requiresOneOfFields,
     euidFields: [[{ field: 'entity.id' }]],
+    documentsFilter: isNotEmptyCondition('entity.id'),
   },
   indexPatterns: ['logs-*'],
 });
@@ -89,7 +89,7 @@ describe('crud_client utils', () => {
   });
 
   it('getFieldDescriptions: ignores identity source fields from validation', () => {
-    mockGetEntityDefinition.mockReturnValue(createDefinition('host', [], ['host.name']));
+    mockGetEntityDefinition.mockReturnValue(createDefinition('host', []));
 
     const doc: Entity = {
       entity: { id: 'entity-host-identity' },

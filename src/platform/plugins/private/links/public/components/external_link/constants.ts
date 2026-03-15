@@ -8,6 +8,6 @@
  */
 
 export const DEFAULT_EXTERNAL_LINK_OPTIONS = {
-  encodeUrl: true,
-  openInNewTab: true,
+  encode_url: true,
+  open_in_new_tab: true,
 };

@@ -34,8 +34,19 @@ export async function requestOAuthClientCredentialsToken(
   tokenUrl: string,
   logger: Logger,
   params: ClientCredentialsOAuthRequestParams,
-  configurationUtilities: ActionsConfigurationUtilities
+  configurationUtilities: ActionsConfigurationUtilities,
+  tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic'
 ): Promise<OAuthTokenResponse> {
+  if (tokenEndpointAuthMethod === 'client_secret_basic') {
+    const { clientId, clientSecret, ...rest } = params;
+    return await requestOAuthToken<
+      Omit<ClientCredentialsOAuthRequestParams, 'clientId' | 'clientSecret'>
+    >(tokenUrl, OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE, configurationUtilities, logger, rest, {
+      username: clientId ?? '',
+      password: clientSecret ?? '',
+    });
+  }
+
   return await requestOAuthToken<ClientCredentialsOAuthRequestParams>(
     tokenUrl,
     OAUTH_CLIENT_CREDENTIALS_GRANT_TYPE,

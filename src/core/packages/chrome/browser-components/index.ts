@@ -8,7 +8,11 @@
  */
 
 export { ChromeComponentsProvider, useChromeComponentsDeps } from './src/context';
-export type { ChromeApplicationContext, ChromeComponentsDeps } from './src/context';
+export type {
+  ChromeApplicationContext,
+  ChromeComponentsConfig,
+  ChromeComponentsDeps,
+} from './src/context';
 
 export { ClassicHeader } from './src/classic';
 export { ProjectHeader } from './src/project';
@@ -21,3 +25,4 @@ export {
   HeaderTopBanner,
   ChromelessHeader,
 } from './src/shared';
+export { useHasAppMenu } from './src/shared/chrome_hooks';

@@ -6,11 +6,21 @@
  */
 
 import { render } from '@testing-library/react';
-import { BulkAlertClosingReason, closingReasons } from './alert_bulk_closing_reason';
+import { BulkAlertClosingReason, defaultClosingReasons } from './alert_bulk_closing_reason';
 import React from 'react';
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      uiSettings: {
+        get: jest.fn(() => []),
+      },
+    },
+  }),
+}));
+
 describe('BulkAlertClosingReason', () => {
-  closingReasons.forEach((item) => {
+  defaultClosingReasons.forEach((item) => {
     it(`"${item.label}" should be visible in the document`, () => {
       const { getByText } = render(<BulkAlertClosingReason onSubmit={jest.fn()} />);
       expect(getByText(item.label)).toBeInTheDocument();

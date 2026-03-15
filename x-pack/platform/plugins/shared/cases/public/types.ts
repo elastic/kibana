@@ -126,6 +126,9 @@ export interface CasesPublicSetup {
 }
 
 export interface CasesPublicStart {
+  config: {
+    templatesEnabled: boolean;
+  };
   api: {
     getRelatedCases: (
       alertId: string,

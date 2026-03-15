@@ -25,12 +25,12 @@ export const getTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest, {}>(
     access: 'internal',
     summary: 'Get all case templates',
   },
-  handler: async ({ context, request, response }) => {
+  handler: async ({ context, request, response, logger }) => {
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const { page, perPage, sortField, sortOrder, search, tags, author, isDeleted } =
+      const { page, perPage, sortField, sortOrder, search, tags, author, owner, isDeleted } =
         request.query;
       const { templates, ...pagination } = await casesClient.templates.getAllTemplates({
         page: Number(page),
@@ -40,16 +40,30 @@ export const getTemplatesRoute = createCasesRoute<{}, TemplatesFindRequest, {}>(
         search,
         tags: tags ? castArray(tags).filter(Boolean) : [],
         author: author ? castArray(author).filter(Boolean) : [],
+        owner: owner ? castArray(owner).filter(Boolean) : [],
         isDeleted: String(isDeleted) === 'true',
       });
+
+      const parsedTemplates = templates
+        .map((template) => {
+          try {
+            return {
+              ...parseTemplate(template),
+              fieldSearchMatches: template.fieldSearchMatches,
+            };
+          } catch (parseError) {
+            logger.warn(
+              `Skipping invalid template "${template.name}" (ID: ${template.templateId}): ${parseError}`
+            );
+            return null;
+          }
+        })
+        .filter((template): template is NonNullable<typeof template> => template !== null);
 
       return response.ok({
         body: {
           ...pagination,
-          templates: templates.map((template) => ({
-            ...parseTemplate(template),
-            fieldSearchMatches: template.fieldSearchMatches,
-          })),
+          templates: parsedTemplates,
         },
       });
     } catch (error) {

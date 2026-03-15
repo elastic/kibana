@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type EngineMetadata = z.infer<typeof EngineMetadata>;
 export const EngineMetadata = z
@@ -76,6 +76,32 @@ export const EntityField = z
         owns: z.array(z.string()).optional(),
         accesses_frequently: z.array(z.string()).optional(),
         supervises: z.array(z.string()).optional(),
+        resolution: z
+          .object({
+            /**
+             * entity.id of the entity this one resolves to
+             */
+            resolved_to: z.string().optional(),
+            risk: z
+              .object({
+                /**
+                 * Lexical description of the resolution group's aggregated risk.
+                 */
+                calculated_level: EntityRiskLevels.optional(),
+                /**
+                 * The raw numeric value of the resolution group's aggregated risk score.
+                 */
+                calculated_score: z.number().optional(),
+                /**
+                 * The normalized numeric value of the resolution group's aggregated risk score.
+                 */
+                calculated_score_norm: z.number().min(0).max(100).optional(),
+              })
+              .strict()
+              .optional(),
+          })
+          .strict()
+          .optional(),
       })
       .strict()
       .optional(),

@@ -35,6 +35,17 @@ paths:
                 value:
                   instructions: ./collect_host_data.sh --help
 
+              PatchUpdateScriptEntryToArchive:
+                summary: Update script entry to be an archive
+                value:
+                  fileType: archive
+                  pathToExecutable: ./bin/collect_host_data.sh
+
+              PatchUpdateScriptEntryFromArchiveToScript:
+                summary: Update script entry from an archive to a script
+                value:
+                  fileType: script
+
       responses:
         '200':
           description: Action request was successfully updated
@@ -63,6 +74,10 @@ components:
           type: object
           format: binary
           description: The script file upload
+        fileType:
+          $ref: './common.yaml#/components/schemas/EndpointScriptFileType'
+        pathToExecutable:
+          $ref: "./common.yaml#/components/schemas/ArchivePathToExecutableSchema"
         tags:
           type: array
           description: Tags to categorize the script
@@ -80,13 +95,7 @@ components:
         requiresInput:
           type: boolean
           description: Whether the script requires input arguments
-        pathToExecutable:
-          type: string
-          description: >
-            Used only for when the uploaded script is an archive (.zip file for example).
-            This property defines the relative path to the file included in the archive that should be executed
-            once its contents are extracted. The path should be relative to the root of the archive.
-          example: ./bin/script.sh
+
 
 
 

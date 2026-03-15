@@ -55,6 +55,30 @@ export class StepExecutionRepository {
     });
   }
 
+  /*
+   * Retrieves step executions by their IDs using mget (O(1) operation).
+   * This is real-time (reads from translog) and doesn't require index refresh.
+   *
+   * @param stepExecutionIds - The IDs of the step executions to retrieve.
+   * @returns A promise that resolves to an array of step executions.
+   */
+  public async getStepExecutionsByIds(
+    stepExecutionIds: string[]
+  ): Promise<EsWorkflowStepExecution[]> {
+    const response = await this.esClient.mget<EsWorkflowStepExecution>({
+      index: this.indexName,
+      ids: stepExecutionIds,
+    });
+
+    const stepExecutions: EsWorkflowStepExecution[] = [];
+    for (const doc of response.docs) {
+      if ('found' in doc && doc.found && doc._source) {
+        stepExecutions.push(doc._source as EsWorkflowStepExecution);
+      }
+    }
+    return stepExecutions;
+  }
+
   public async bulkUpsert(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {
     if (stepExecutions.length === 0) {
       return;

@@ -28,5 +28,6 @@
     "@kbn/content-management-tags",
     "@kbn/i18n",
     "@kbn/shared-ux-utility",
+    "@kbn/content-management-favorites-public",
   ]
 }

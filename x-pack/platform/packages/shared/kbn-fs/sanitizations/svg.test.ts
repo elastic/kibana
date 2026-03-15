@@ -75,6 +75,12 @@ describe('isBase64Encoded', () => {
 });
 
 describe('sanitizeSvg', () => {
+  beforeAll(() => {
+    // Pre-warm the lazy-loaded jsdom/dompurify modules so individual test
+    // timings are not skewed by the one-time CJS module resolution cost.
+    sanitizeSvg(Buffer.from('<svg></svg>'));
+  });
+
   it('should process a simple SVG string and return a Buffer', () => {
     const svg = '<svg width="100" height="100"><circle cx="50" cy="50" r="40" /></svg>';
     const result = sanitizeSvg(Buffer.from(svg));

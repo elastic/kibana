@@ -188,6 +188,7 @@ const updateDataStreamPipelineRoute = (
             dataStreamId,
             ingestPipeline,
             esClient: automaticImportv2.esClient,
+            fieldsMetadataClient: automaticImportv2.fieldsMetadataClient,
           });
 
           return response.ok({ body: updatedResults });

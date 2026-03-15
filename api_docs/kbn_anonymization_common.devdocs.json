@@ -140,6 +140,60 @@
       },
       {
         "parentPluginId": "@kbn/anonymization-common",
+        "id": "def-common.isGlobalAnonymizationProfileTarget",
+        "type": "Function",
+        "tags": [],
+        "label": "isGlobalAnonymizationProfileTarget",
+        "description": [],
+        "signature": [
+          "(targetType: string, targetId: string) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-common/src/global_profile.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-common",
+            "id": "def-common.isGlobalAnonymizationProfileTarget.$1",
+            "type": "string",
+            "tags": [],
+            "label": "targetType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-common/src/global_profile.ts",
+            "lineNumber": 11,
+            "columnNumber": 52,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-common",
+            "id": "def-common.isGlobalAnonymizationProfileTarget.$2",
+            "type": "string",
+            "tags": [],
+            "label": "targetId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-common/src/global_profile.ts",
+            "lineNumber": 11,
+            "columnNumber": 72,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-common",
         "id": "def-common.replaceTokensWithOriginals",
         "type": "Function",
         "tags": [],
@@ -957,6 +1011,40 @@
       },
       {
         "parentPluginId": "@kbn/anonymization-common",
+        "id": "def-common.GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID",
+        "type": "string",
+        "tags": [],
+        "label": "GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID",
+        "description": [],
+        "signature": [
+          "\"__kbn_global_anonymization_profile__\""
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-common/src/global_profile.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-common",
+        "id": "def-common.GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE",
+        "description": [],
+        "signature": [
+          "\"index\""
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-common/src/global_profile.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-common",
         "id": "def-common.NER_MODEL_ID",
         "type": "string",
         "tags": [],
@@ -1058,7 +1146,7 @@
           "\nA single token source entry describing where a token was produced."
         ],
         "signature": [
-          "{ entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; sourceType: \"message\" | \"workflow\" | \"tool_call\" | \"artifact\"; token: string; sourceId: string; pointer: string; field?: string | undefined; ruleId?: string | undefined; sourceRef?: Record<string, string | number | boolean> | undefined; spanStart?: number | undefined; spanEnd?: number | undefined; fieldRef?: string | undefined; ruleType?: string | undefined; firstSeenAt?: string | undefined; }"
+          "{ entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; token: string; sourceId: string; pointer: string; sourceType: \"message\" | \"workflow\" | \"tool_call\" | \"artifact\"; field?: string | undefined; ruleId?: string | undefined; sourceRef?: Record<string, string | number | boolean> | undefined; spanStart?: number | undefined; spanEnd?: number | undefined; fieldRef?: string | undefined; ruleType?: string | undefined; firstSeenAt?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/anonymization-common/src/types.ts",
         "lineNumber": 61,
@@ -2394,7 +2482,7 @@
           "ZodString",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; sourceType: \"message\" | \"workflow\" | \"tool_call\" | \"artifact\"; token: string; sourceId: string; pointer: string; field?: string | undefined; ruleId?: string | undefined; sourceRef?: Record<string, string | number | boolean> | undefined; spanStart?: number | undefined; spanEnd?: number | undefined; fieldRef?: string | undefined; ruleType?: string | undefined; firstSeenAt?: string | undefined; }, { entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; sourceType: \"message\" | \"workflow\" | \"tool_call\" | \"artifact\"; token: string; sourceId: string; pointer: string; field?: string | undefined; ruleId?: string | undefined; sourceRef?: Record<string, string | number | boolean> | undefined; spanStart?: number | undefined; spanEnd?: number | undefined; fieldRef?: string | undefined; ruleType?: string | undefined; firstSeenAt?: string | undefined; }>, { entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; sourceType: \"message\" | \"workflow\" | \"tool_call\" | \"artifact\"; token: string; sourceId: string; pointer: string; field?: string | undefined; ruleId?: string | undefined; sourceRef?: Record<string, string | number | boolean> | undefined; spanStart?: number | undefined; spanEnd?: number | undefined; fieldRef?: string | undefined; ruleType?: string | undefined; firstSeenAt?: string | undefined; }, { entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; sourceType: \"message\" | \"workflow\" | \"tool_call\" | \"artifact\"; token: string; sourceId: string; pointer: string; field?: string | undefined; ruleId?: string | undefined; sourceRef?: Record<string, string | number | boolean> | undefined; spanStart?: number | undefined; spanEnd?: number | undefined; fieldRef?: string | undefined; ruleType?: string | undefined; firstSeenAt?: string | undefined; }>"
+          ", { entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; token: string; sourceId: string; pointer: string; sourceType: \"message\" | \"workflow\" | \"tool_call\" | \"artifact\"; field?: string | undefined; ruleId?: string | undefined; sourceRef?: Record<string, string | number | boolean> | undefined; spanStart?: number | undefined; spanEnd?: number | undefined; fieldRef?: string | undefined; ruleType?: string | undefined; firstSeenAt?: string | undefined; }, { entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; token: string; sourceId: string; pointer: string; sourceType: \"message\" | \"workflow\" | \"tool_call\" | \"artifact\"; field?: string | undefined; ruleId?: string | undefined; sourceRef?: Record<string, string | number | boolean> | undefined; spanStart?: number | undefined; spanEnd?: number | undefined; fieldRef?: string | undefined; ruleType?: string | undefined; firstSeenAt?: string | undefined; }>, { entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; token: string; sourceId: string; pointer: string; sourceType: \"message\" | \"workflow\" | \"tool_call\" | \"artifact\"; field?: string | undefined; ruleId?: string | undefined; sourceRef?: Record<string, string | number | boolean> | undefined; spanStart?: number | undefined; spanEnd?: number | undefined; fieldRef?: string | undefined; ruleType?: string | undefined; firstSeenAt?: string | undefined; }, { entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; token: string; sourceId: string; pointer: string; sourceType: \"message\" | \"workflow\" | \"tool_call\" | \"artifact\"; field?: string | undefined; ruleId?: string | undefined; sourceRef?: Record<string, string | number | boolean> | undefined; spanStart?: number | undefined; spanEnd?: number | undefined; fieldRef?: string | undefined; ruleType?: string | undefined; firstSeenAt?: string | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/anonymization-common/src/schemas.ts",
         "lineNumber": 196,

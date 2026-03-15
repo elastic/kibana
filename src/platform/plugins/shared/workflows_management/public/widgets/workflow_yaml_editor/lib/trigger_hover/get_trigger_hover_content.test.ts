@@ -66,8 +66,8 @@ describe('getTriggerHoverContent', () => {
             documentation: {
               details: 'Filter when this workflow runs using KQL on event properties.',
               examples: [
-                '## Exact severity\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    with:\n      condition: \'event.severity == "high"\'\n```',
-                '## Multiple severities\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    with:\n      condition: \'event.severity in ["high", "critical"]\'\n```',
+                '## Exact severity\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    on:\n      condition: \'event.severity == "high"\'\n```',
+                '## Multiple severities\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    on:\n      condition: \'event.severity in ["high", "critical"]\'\n```',
               ],
             },
           }

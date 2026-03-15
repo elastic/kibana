@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { monaco } from '@kbn/monaco';
 import type { TemplatesFindRequest } from '../../../common/types/api/template/v1';
 
 export const PAGE_SIZE_OPTIONS: number[] = [10, 25, 50, 100];
@@ -21,6 +22,7 @@ export const DEFAULT_QUERY_PARAMS: TemplatesFindRequest = {
   search: '',
   tags: [],
   author: [],
+  owner: [],
   isDeleted: false,
 };
 
@@ -29,3 +31,24 @@ export const LINE_CLAMP = 3;
 export const MAX_TEMPLATES_PER_FILE = 100;
 
 export const MAX_TOTAL_IMPORT_TEMPLATES = 100;
+
+export const TEMPLATE_PREVIEW_WIDTH_KEY = 'CASES_TEMPLATE_PREVIEW_WIDTH';
+export const MIN_PREVIEW_WIDTH = 250;
+export const MIN_EDITOR_WIDTH = 400;
+
+export const YAML_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
+  minimap: { enabled: false },
+  scrollBeyondLastLine: false,
+  wordWrap: 'on',
+  automaticLayout: true,
+  lineNumbers: 'on',
+  glyphMargin: true,
+  tabSize: 2,
+  lineNumbersMinChars: 2,
+  insertSpaces: true,
+  fontSize: 14,
+  renderWhitespace: 'all',
+  wordWrapColumn: 80,
+  wrappingIndent: 'indent',
+  formatOnType: true,
+};

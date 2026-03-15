@@ -10,7 +10,7 @@
         "tags": [],
         "label": "ContentListProvider",
         "description": [
-          "\nMain provider component for content list functionality, including data fetching\n(via React Query), sorting, search, and tags filtering.\n\nProps like `dataSource`, `features`, and `services` should be stable references to avoid\nunnecessary re-renders. Configuration from `features.sorting`, `features.pagination`, and\n`features.search` is read once at mount; use a `key` prop to remount if you need to change\ninitial state dynamically.\n\nWhen `services.tags` is provided (and `features.tags` is not `false`), the provider\nautomatically wraps children with the tags service context, enabling tag display\nand filtering in child components. The tags service's `parseSearchQuery` (if present)\nis passed through to support extracting tag filters from the search bar query text."
+          "\nMain provider component for content list functionality, including data fetching\n(via React Query), sorting, search, and tags filtering.\n\nProps like `dataSource`, `features`, and `services` should be stable references to avoid\nunnecessary re-renders. Configuration from `features.sorting`, `features.pagination`, and\n`features.search` is read once at mount; use a `key` prop to remount if you need to change\ninitial state dynamically.\n\nWhen `services.tags` is provided (and `features.tags` is not `false`), the provider\nautomatically wraps children with the tags service context, enabling tag display\nand filtering in child components. The tags service's `parseSearchQuery` (if present)\nis passed through to support extracting tag filters from the search bar query text.\n\nWhen `services.favorites` is provided (and `features.starred` is not `false`), the provider\nwraps children with `FavoritesContextProvider`, enabling star buttons and starred\nfiltering in child components."
         ],
         "signature": [
           "({ children, dataSource, labels, item, isReadOnly, id, queryKeyScope: queryKeyScopeProp, features, services, }: ",
@@ -24,7 +24,7 @@
           ") => JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/provider.tsx",
-        "lineNumber": 72,
+        "lineNumber": 77,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -46,7 +46,7 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/provider.tsx",
-            "lineNumber": 72,
+            "lineNumber": 77,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -178,7 +178,7 @@
           "ContentListProviderContextValue"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/provider.tsx",
-        "lineNumber": 160,
+        "lineNumber": 177,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -562,13 +562,31 @@
           },
           {
             "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ActiveFilters.starredOnly",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "starredOnly",
+            "description": [
+              "When `true`, restrict results to starred items only."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
             "id": "def-public.ActiveFilters.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[filterId: string]: string | IncludeExcludeFilter | undefined",
+            "label": "[filterId: string]: string | boolean | IncludeExcludeFilter | undefined",
             "description": [],
             "signature": [
-              "[filterId: string]:  string | ",
+              "[filterId: string]:  string | boolean | ",
               {
                 "pluginId": "@kbn/content-list-provider",
                 "scope": "public",
@@ -579,7 +597,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -712,6 +730,24 @@
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
             "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListFeatures.starred",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "starred",
+            "description": [
+              "\nStarred feature configuration.\n\n- `true` or `undefined`: Auto-enabled when `services.favorites` is provided.\n- `false`: Explicitly disables starring even if `services.favorites` is present."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1157,7 +1193,7 @@
           "\nServices provided to the content list provider to enable additional capabilities.\n\nEach service follows a pattern where providing the service enables the corresponding\nfeature by default. Features can be explicitly disabled via the `features` prop\neven when the service is present."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/services/types.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1175,7 +1211,32 @@
               "Services | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/services/types.ts",
-            "lineNumber": 20,
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListServices.favorites",
+            "type": "Object",
+            "tags": [],
+            "label": "favorites",
+            "description": [
+              "\nFavorites service for starring items.\n\nUses the `FavoritesClientPublic` interface from `@kbn/content-management-favorites-public`.\nWhen provided, enables the starred feature (star button in table rows, starred\nfilter in toolbar) unless explicitly disabled via `features.starred: false`."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-favorites-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+                "section": "def-public.FavoritesClientPublic",
+                "text": "FavoritesClientPublic"
+              },
+              "<void> | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/services/types.ts",
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1193,7 +1254,7 @@
           "\nResolved feature support flags.\n\nThese flags represent the **effective** availability of features after evaluating:\n- Explicit configuration (e.g., `features.sorting: true` or `features.sorting: { ... }`)\n- Implicit enablement (e.g., providing required services enabling a feature)\n- Explicit disablement (e.g., `features.sorting: false` overrides defaults)\n- Implicit disablement (e.g., missing services)\n\nUse these flags to conditionally render UI elements or enable functionality based on\nwhat's actually available, rather than checking raw configuration values.\n"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-        "lineNumber": 63,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1208,7 +1269,7 @@
               "Whether sorting is supported."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 88,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1223,7 +1284,7 @@
               "Whether pagination is supported."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 90,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1238,7 +1299,7 @@
               "Whether search is supported."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 92,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1253,7 +1314,7 @@
               "Whether item selection and bulk actions are supported."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 94,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1268,7 +1329,22 @@
               "Whether tags filtering and display is supported."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 96,
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListSupports.starred",
+            "type": "boolean",
+            "tags": [],
+            "label": "starred",
+            "description": [
+              "Whether starring items is supported."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1286,7 +1362,7 @@
           "\nData source configuration properties."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-        "lineNumber": 124,
+        "lineNumber": 127,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1320,7 +1396,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-            "lineNumber": 128,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1343,7 +1419,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-                "lineNumber": 122,
+                "lineNumber": 125,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1371,7 +1447,7 @@
               ") => void) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-            "lineNumber": 131,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1393,7 +1469,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-                "lineNumber": 132,
+                "lineNumber": 135,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1636,7 +1712,7 @@
             "tags": [],
             "label": "hasFilters",
             "description": [
-              "Whether any filter popover buttons should be shown (sorting or tags). Search is separate."
+              "Whether any filter popover buttons should be shown (sorting, tags, or starred). Search is separate."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/filtering/types.ts",
             "lineNumber": 16,
@@ -1688,6 +1764,21 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.FilterDisplayState.hasStarred",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasStarred",
+            "description": [
+              "Whether the starred filter toggle should be shown."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/filtering/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1702,7 +1793,7 @@
           "\nParameters for the `findItems` function."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-        "lineNumber": 55,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1717,7 +1808,7 @@
               "\nSearch query text with filter syntax already extracted.\n\nThis is a convenience alias for `filters.search ?? ''`. When building\nqueries, prefer this over accessing `filters.search` directly."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-            "lineNumber": 59,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1741,7 +1832,7 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-            "lineNumber": 67,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1759,7 +1850,7 @@
               "{ field: string; direction: \"asc\" | \"desc\"; } | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-            "lineNumber": 70,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1777,7 +1868,7 @@
               "{ index: number; size: number; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1795,7 +1886,7 @@
               "AbortSignal | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-            "lineNumber": 91,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1813,7 +1904,7 @@
           "\nResult from the `findItems` function."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-        "lineNumber": 95,
+        "lineNumber": 98,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1838,7 +1929,7 @@
               "<Record<string, unknown>>[]"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-            "lineNumber": 99,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1853,7 +1944,7 @@
               "Total matching items for pagination."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-            "lineNumber": 102,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1879,7 +1970,7 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-            "lineNumber": 105,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2277,7 +2368,7 @@
           "\nReturn type for the {@link useContentListFilters} hook."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/filtering/types.ts",
-        "lineNumber": 26,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2301,7 +2392,7 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/filtering/types.ts",
-            "lineNumber": 30,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2319,7 +2410,7 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/filtering/types.ts",
-            "lineNumber": 32,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3228,7 +3319,7 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/provider.tsx",
-        "lineNumber": 46,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3247,7 +3338,7 @@
           "{ [x: string]: number; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-        "lineNumber": 50,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3282,7 +3373,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-        "lineNumber": 119,
+        "lineNumber": 122,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3305,7 +3396,7 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
-            "lineNumber": 122,
+            "lineNumber": 125,
             "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false

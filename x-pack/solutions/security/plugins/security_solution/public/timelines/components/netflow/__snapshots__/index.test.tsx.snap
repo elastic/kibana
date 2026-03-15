@@ -537,7 +537,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                             9987
                                             <span
                                               class="emotion-EuiExternalLinkIcon"
-                                              data-euiicon-type="popout"
+                                              data-euiicon-type="external"
                                               role="presentation"
                                             />
                                             <span
@@ -1026,7 +1026,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                                             80
                                             <span
                                               class="emotion-EuiExternalLinkIcon"
-                                              data-euiicon-type="popout"
+                                              data-euiicon-type="external"
                                               role="presentation"
                                             />
                                             <span
@@ -1281,7 +1281,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                           tls.fingerprints.ja3.hash-value
                           <span
                             class="emotion-EuiExternalLinkIcon"
-                            data-euiicon-type="popout"
+                            data-euiicon-type="external"
                             role="presentation"
                           />
                           <span
@@ -1345,7 +1345,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                           tls.client_certificate.fingerprint.sha1-value
                           <span
                             class="emotion-EuiExternalLinkIcon"
-                            data-euiicon-type="popout"
+                            data-euiicon-type="external"
                             role="presentation"
                           />
                           <span
@@ -1409,7 +1409,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                           tls.server_certificate.fingerprint.sha1-value
                           <span
                             class="emotion-EuiExternalLinkIcon"
-                            data-euiicon-type="popout"
+                            data-euiicon-type="external"
                             role="presentation"
                           />
                           <span

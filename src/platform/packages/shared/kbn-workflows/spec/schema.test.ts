@@ -9,8 +9,10 @@
 
 import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
+  BaseEventSchema,
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
+  EventTimestampSchema,
   WorkflowSchema,
   WorkflowSchemaForAutocomplete,
   WorkflowSettingsSchema,
@@ -567,5 +569,49 @@ describe('JsonModelSchema', () => {
     };
     const result = WorkflowSchemaForAutocomplete.safeParse(workflow);
     expect(result.success).toBe(true);
+  });
+});
+
+describe('BaseEventSchema', () => {
+  it('should have only spaceId (no timestamp)', () => {
+    const shape = BaseEventSchema.shape;
+    expect(Object.keys(shape)).toEqual(['spaceId']);
+    expect(shape).not.toHaveProperty('timestamp');
+  });
+
+  it('should accept valid event with spaceId', () => {
+    const result = BaseEventSchema.safeParse({ spaceId: 'default' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual({ spaceId: 'default' });
+    }
+  });
+
+  it('should reject event without spaceId', () => {
+    const result = BaseEventSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('EventTimestampSchema', () => {
+  it('should have timestamp field', () => {
+    const shape = EventTimestampSchema.shape;
+    expect(Object.keys(shape)).toEqual(['timestamp']);
+    expect(shape.timestamp).toBeDefined();
+  });
+
+  it('should accept valid ISO 8601 timestamp string', () => {
+    const result = EventTimestampSchema.safeParse({
+      timestamp: '2025-01-01T00:00:00.000Z',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.timestamp).toBe('2025-01-01T00:00:00.000Z');
+    }
+  });
+
+  it('should reject missing timestamp', () => {
+    const result = EventTimestampSchema.safeParse({});
+    expect(result.success).toBe(false);
   });
 });

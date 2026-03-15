@@ -189,7 +189,10 @@ export function createEvaluateDataset({
         task: async ({ input, output, metadata }) => {
           const response = await chatClient.converse({ messages: [{ message: input.question }] });
 
-          const [correctnessResult, groundednessResult] = await Promise.all([
+          let correctnessResult: { metadata?: unknown } | undefined;
+          let groundednessResult: { metadata?: unknown } | undefined;
+
+          const result = await Promise.all([
             withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
               evaluators.correctnessAnalysis().evaluate({
                 input,
@@ -206,7 +209,14 @@ export function createEvaluateDataset({
                 metadata,
               })
             ),
-          ]);
+          ]).catch(() => {
+            // Catch cases where these optional evaluators fail so that entire evaluation doesn't fail
+          });
+
+          if (result) {
+            correctnessResult = result[0];
+            groundednessResult = result[1];
+          }
 
           return {
             errors: response.errors,

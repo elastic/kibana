@@ -15,6 +15,22 @@ import { textToTimeRange } from './parse';
 import { dateMathToRelativeParts, timeRangeToDisplayText } from './format';
 
 /**
+ * Formats a Date as a local ISO-8601 string with full precision but no UTC offset ("Z").
+ * e.g. a local 14:12:59.531 → "2026-03-04T14:12:59.531"
+ *
+ * Use this for display strings that should match what the user sees in their timezone,
+ * rather than `.toISOString()` which always emits UTC.
+ */
+export function toLocalPreciseString(d: Date): string {
+  const p2 = (n: number) => String(n).padStart(2, '0');
+  const p3 = (n: number) => String(n).padStart(3, '0');
+  return (
+    `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}` +
+    `T${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}.${p3(d.getMilliseconds())}`
+  );
+}
+
+/**
  * Check a time range is valid
  */
 export function isValidTimeRange(range: TimeRange): boolean {
@@ -105,6 +121,50 @@ export function getOptionInputText(option: TimeRangeBoundsOption): string {
   if (endFragment.isNow) return startFragment.text;
 
   return `${startFragment.text} ${DATE_RANGE_INPUT_DELIMITER} ${endFragment.text}`;
+}
+
+/**
+ * Formats a date range as a local ISO-8601 string pair with the standard delimiter.
+ * e.g. "2026-03-04T10:00:00.000 to 2026-03-05T23:30:00.000"
+ */
+export function formatDateRange(start: Date, end: Date): string {
+  return `${toLocalPreciseString(start)} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(
+    end
+  )}`;
+}
+
+/**
+ * Parses a `HH:mm:ss.SSS` time string into its numeric components.
+ */
+function parseTimeString(time: string): [number, number, number, number] {
+  const [hms, ms = '0'] = time.split('.');
+  const [h = '0', m = '0', s = '0'] = hms.split(':');
+  return [Number(h), Number(m), Number(s), Number(ms)];
+}
+
+/**
+ * Combines date (year/month/day) from `date` with time from `timeSource`.
+ * Falls back to `defaultTime` (`HH:mm:ss.SSS`) when timeSource is null.
+ */
+export function combineDateAndTime(
+  date: Date,
+  timeSource: Date | null,
+  defaultTime = '00:00:00.000'
+): Date {
+  if (timeSource) {
+    return new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      timeSource.getHours(),
+      timeSource.getMinutes(),
+      timeSource.getSeconds(),
+      timeSource.getMilliseconds()
+    );
+  }
+
+  const [h, m, s, ms] = parseTimeString(defaultTime);
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), h, m, s, ms);
 }
 
 /**

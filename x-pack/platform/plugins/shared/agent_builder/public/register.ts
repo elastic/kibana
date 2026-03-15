@@ -8,8 +8,9 @@
 import type { AppMountParameters } from '@kbn/core-application-browser';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { AnalyticsServiceSetup, AppUpdater } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { BehaviorSubject } from 'rxjs';
 import { agentBuilderPublicEbtEvents } from '@kbn/agent-builder-common/telemetry';
 import {
   AGENT_BUILDER_FULL_TITLE,
@@ -20,12 +21,47 @@ import {
 import type { AgentBuilderInternalService } from './services';
 import type { AgentBuilderStartDependencies } from './types';
 
+const BASE_DEEP_LINKS = [
+  {
+    id: 'conversations',
+    path: '/conversations',
+    title: i18n.translate('xpack.agentBuilder.chat.conversationsTitle', {
+      defaultMessage: 'Agent Chat',
+    }),
+  },
+  {
+    id: 'tools',
+    path: '/tools',
+    title: i18n.translate('xpack.agentBuilder.tools.title', { defaultMessage: 'Tools' }),
+    keywords: ['mcp'],
+  },
+  {
+    id: 'agents',
+    path: '/agents',
+    title: i18n.translate('xpack.agentBuilder.agents.title', { defaultMessage: 'Agents' }),
+  },
+];
+
+const SKILLS_DEEP_LINK = {
+  id: 'skills',
+  path: '/skills',
+  title: i18n.translate('xpack.agentBuilder.skills.title', { defaultMessage: 'Skills' }),
+};
+
+export const enableSkillsDeepLink = (appUpdater$: BehaviorSubject<AppUpdater>) => {
+  appUpdater$.next(() => ({
+    deepLinks: [...BASE_DEEP_LINKS, SKILLS_DEEP_LINK],
+  }));
+};
+
 export const registerApp = ({
   core,
   getServices,
+  appUpdater$,
 }: {
   core: CoreSetup<AgentBuilderStartDependencies>;
   getServices: () => AgentBuilderInternalService;
+  appUpdater$: BehaviorSubject<AppUpdater>;
 }) => {
   core.application.register({
     id: AGENTBUILDER_APP_ID,
@@ -35,26 +71,8 @@ export const registerApp = ({
     euiIconType: 'logoElasticsearch',
     visibleIn: ['sideNav', 'globalSearch'],
     keywords: ['agent builder', 'ai agent', 'chat agent'],
-    deepLinks: [
-      {
-        id: 'conversations',
-        path: '/conversations',
-        title: i18n.translate('xpack.agentBuilder.chat.conversationsTitle', {
-          defaultMessage: 'Agent Chat',
-        }),
-      },
-      {
-        id: 'tools',
-        path: '/tools',
-        title: i18n.translate('xpack.agentBuilder.tools.title', { defaultMessage: 'Tools' }),
-        keywords: ['mcp'],
-      },
-      {
-        id: 'agents',
-        path: '/agents',
-        title: i18n.translate('xpack.agentBuilder.agents.title', { defaultMessage: 'Agents' }),
-      },
-    ],
+    updater$: appUpdater$,
+    deepLinks: BASE_DEEP_LINKS,
     async mount({ element, history, onAppLeave }: AppMountParameters) {
       const { mountApp } = await import('./application');
       const [coreStart, startDependencies] = await core.getStartServices();

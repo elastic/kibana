@@ -233,7 +233,17 @@
         "signature": [
           "React.ForwardRefExoticComponent<Omit<Omit<",
           "DocViewRenderProps",
-          " & { renderAIAssistant?: ((deps: ",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<",
+          "TraceWaterfallRestorableState",
+          "> & { renderAIAssistant?: ((deps: ",
           {
             "pluginId": "discoverShared",
             "scope": "public",
@@ -419,7 +429,17 @@
         "signature": [
           "React.ForwardRefExoticComponent<Omit<Omit<",
           "DocViewRenderProps",
-          " & { indexes: ",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<",
+          "TraceWaterfallRestorableState",
+          "> & { indexes: ",
           "ObservabilityIndexes",
           "; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; docViewActions?: ",
           "DocViewActions",
@@ -524,7 +544,7 @@
         "label": "LogsOverviewApi",
         "description": [],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-        "lineNumber": 55,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -540,7 +560,7 @@
               "(section: \"stacktrace\" | \"quality_issues\") => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-            "lineNumber": 56,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -556,7 +576,7 @@
                   "\"stacktrace\" | \"quality_issues\""
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-                "lineNumber": 56,
+                "lineNumber": 61,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1125,7 +1145,17 @@
         "description": [],
         "signature": [
           "DocViewRenderProps",
-          " & { renderAIAssistant?: ((deps: ",
+          " & ",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<",
+          "TraceWaterfallRestorableState",
+          "> & { renderAIAssistant?: ((deps: ",
           {
             "pluginId": "discoverShared",
             "scope": "public",
@@ -1164,7 +1194,7 @@
           " | undefined; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-        "lineNumber": 45,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

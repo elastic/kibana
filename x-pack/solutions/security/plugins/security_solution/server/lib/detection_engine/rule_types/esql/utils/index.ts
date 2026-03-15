@@ -12,3 +12,6 @@ export * from './get_mv_expand_usage';
 export * from './get_source_document';
 export * from './initiate_excluded_documents';
 export * from './update_excluded_documents';
+export * from './get_transformed_query';
+export * from './validate_esql_query';
+export * from './check_missing_id_field_warning';

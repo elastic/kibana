@@ -14,7 +14,10 @@ import { useHttp } from '../../../common/lib/kibana';
 import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
 import { isEditableScriptField } from './common';
 
-type CreateRequestBody = Omit<CreateScriptRequestBody, 'file'> & { file?: File };
+type CreateRequestBody = Omit<CreateScriptRequestBody, 'file' | 'pathToExecutable'> & {
+  file?: File;
+  pathToExecutable?: string;
+};
 export const usePostEndpointScript = (
   scriptData: CreateRequestBody,
   options: UseMutationOptions<

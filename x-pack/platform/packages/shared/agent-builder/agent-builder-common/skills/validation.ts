@@ -7,16 +7,24 @@
 
 import { z } from '@kbn/zod/v4';
 
+/** Maximum allowed length for a skill ID. */
 export const skillIdMaxLength = 64;
+/** Maximum allowed length for a skill name. */
+export const skillNameMaxLength = 64;
+/** Regex for valid skill IDs (lowercase alphanumeric, hyphens, underscores). */
 export const skillIdRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
+/** Regex for valid skill names. */
+export const skillNameRegexp = /^[a-zA-Z0-9](?:[a-zA-Z0-9 _-]*[a-zA-Z0-9])?$/;
+/** Maximum number of tools a skill can reference. */
+export const maxToolsPerSkill = 5;
 
 const skillNameSchema = z
   .string()
   .min(1, 'Name must be non-empty')
-  .max(skillIdMaxLength, `Name must be at most ${skillIdMaxLength} characters`)
+  .max(skillNameMaxLength, `Name must be at most ${skillNameMaxLength} characters`)
   .regex(
-    skillIdRegexp,
-    'Name must start and end with a letter or number, and contain only lowercase letters, numbers, hyphens, and underscores'
+    skillNameRegexp,
+    'Name must start and end with a letter or number, and contain only letters, numbers, spaces, hyphens, and underscores'
   );
 
 const skillDescriptionSchema = z
@@ -45,7 +53,9 @@ const referencedContentItemSchema = z.object({
   content: z.string().min(1, 'Content must be non-empty'),
 });
 
-const toolIdsSchema = z.array(z.string().min(1, 'Tool ID must be non-empty'));
+const toolIdsSchema = z
+  .array(z.string().min(1, 'Tool ID must be non-empty'))
+  .max(maxToolsPerSkill, `A skill can reference at most ${maxToolsPerSkill} tools`);
 
 /**
  * Zod schema for validating skill create request bodies.
@@ -80,6 +90,7 @@ export const skillUpdateRequestSchema = z.object({
 /**
  * Validates a skill ID has the right format.
  * Returns an error message if it fails, undefined otherwise.
+ * @param skillId - Skill ID to validate
  */
 export const validateSkillId = (skillId: string): string | undefined => {
   if (!skillIdRegexp.test(skillId)) {

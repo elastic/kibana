@@ -9,6 +9,7 @@
 
 import { textToTimeRange } from './parse_text';
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
+import { toLocalPreciseString } from '../utils';
 
 // :warning: This is not exhaustive and it's not aiming at 100% coverage, it's a start!
 
@@ -105,5 +106,25 @@ describe('textToTimeRange', () => {
     expect(range.isInvalid).toBe(true);
     expect(range.start).toBe('2026-02-03');
     expect(range.end).toBe('2016-02-03');
+  });
+
+  it('parses local precise format (no Z) as local time', () => {
+    const range = textToTimeRange('2026-03-09T15:36:07.801');
+
+    expect(range.isInvalid).toBe(false);
+    expect(range.start).toBe('2026-03-09T15:36:07.801');
+    expect(range.end).toBe('now');
+    expect(range.startDate).not.toBeNull();
+    expect(range.startDate?.getHours()).toBe(15);
+    expect(range.startDate?.getMinutes()).toBe(36);
+  });
+
+  it('round-trips toLocalPreciseString through parse', () => {
+    const original = new Date(2026, 2, 9, 15, 36, 7, 801);
+    const formatted = toLocalPreciseString(original);
+    const range = textToTimeRange(formatted);
+
+    expect(range.isInvalid).toBe(false);
+    expect(range.startDate?.getTime()).toBe(original.getTime());
   });
 });

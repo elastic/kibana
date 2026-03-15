@@ -39,9 +39,17 @@ export async function updatePackage(
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
-  await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
+  const updateAttrs: Partial<Installation> = {
     keep_policies_up_to_date: keepPoliciesUpToDate ?? false,
-  });
+  };
+  if (keepPoliciesUpToDate === false) {
+    updateAttrs.pending_upgrade_review = undefined;
+  }
+  await savedObjectsClient.update<Installation>(
+    PACKAGES_SAVED_OBJECT_TYPE,
+    installedPackage.id,
+    updateAttrs
+  );
 
   const packageInfo = await getPackageInfo({
     savedObjectsClient,
@@ -50,6 +58,42 @@ export async function updatePackage(
   });
 
   return packageInfo;
+}
+
+export async function reviewUpgrade(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  action: 'accept' | 'decline' | 'pending';
+  targetVersion: string;
+}) {
+  const { savedObjectsClient, pkgName, action: userAction, targetVersion } = options;
+  const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
+
+  if (!installedPackage) {
+    throw new PackageNotFoundError(`Error while reviewing upgrade: ${pkgName} is not installed`);
+  }
+
+  const review = installedPackage.attributes.pending_upgrade_review;
+  if (!review || review.target_version !== targetVersion) {
+    throw new PackageNotFoundError(`No pending upgrade review for ${pkgName}@${targetVersion}`);
+  }
+
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: installedPackage.id,
+    name: installedPackage.attributes.name,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
+  await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
+    pending_upgrade_review: {
+      ...review,
+      action: { accept: 'accepted', decline: 'declined', pending: 'pending' }[userAction] as
+        | 'accepted'
+        | 'declined'
+        | 'pending',
+    },
+  });
 }
 
 export async function updateDatastreamExperimentalFeatures(

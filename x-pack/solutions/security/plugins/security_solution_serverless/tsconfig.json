@@ -51,5 +51,6 @@
     "@kbn/ai-assistant-common",
     "@kbn/workflows",
     "@kbn/usage-api-plugin",
+    "@kbn/cases-plugin",
   ]
 }

@@ -379,6 +379,31 @@ describe('getNormalizedDataStreams', () => {
     expect(useApmVar?.default).toEqual(true);
     expect(useApmVar?.title).toEqual('Enable Elastic APM Enrichment');
   });
+
+  it('should add use_apm var when otel input has dynamic_signal_types true', () => {
+    const result = getNormalizedDataStreams({
+      ...integrationPkg,
+      type: 'input',
+      policy_templates: [
+        {
+          input: 'otelcol',
+          type: 'logs',
+          name: 'otel-dynamic',
+          template_path: 'some/path.hbl',
+          title: 'OTel Dynamic',
+          description: 'OTel with dynamic signal types',
+          dynamic_signal_types: true,
+          vars: [],
+        },
+      ],
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0].streams).toHaveLength(1);
+    const vars = result[0].streams![0].vars;
+    const useApmVar = vars?.find((v) => v.name === 'use_apm');
+    expect(useApmVar).toBeDefined();
+    expect(useApmVar?.default).toEqual(true);
+  });
 });
 
 describe('filterPolicyTemplatesTiles', () => {

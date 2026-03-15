@@ -431,6 +431,10 @@ function getWaterfallErrors(
   { 'parentId': 2 }
   */
 function getErrorCountByParentId(errorDocs: TraceAPIResponse['traceItems']['errorDocs']) {
+  if (!Array.isArray(errorDocs)) {
+    return {};
+  }
+
   return errorDocs.reduce<Record<string, number>>((acc, doc) => {
     const parentId = doc.parent?.id;
 

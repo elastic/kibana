@@ -52,7 +52,16 @@ describe('DetailPanelAlertActions component', () => {
     });
 
     it('calls alert flyout callback when View details clicked', async () => {
-      const mockEvent = mockAlerts[0];
+      const mockEvent = {
+        ...mockAlerts[0],
+        kibana: {
+          ...mockAlerts[0].kibana,
+          alert: {
+            ...mockAlerts[0].kibana?.alert,
+            index: '.alerts-security.alerts-default',
+          },
+        },
+      };
 
       renderResult = mockedContext.render(
         <DetailPanelAlertActions
@@ -66,7 +75,10 @@ describe('DetailPanelAlertActions component', () => {
       await waitForEuiPopoverOpen();
       await userEvent.click(renderResult.getByTestId(SHOW_DETAILS_TEST_ID));
       expect(mockShowAlertDetails.mock.calls.length).toBe(1);
-      expect(mockShowAlertDetails.mock.results[0].value).toBe(mockEvent.kibana?.alert?.uuid);
+      expect(mockShowAlertDetails.mock.calls[0]).toEqual([
+        mockEvent.kibana?.alert?.uuid,
+        mockEvent.kibana?.alert?.index,
+      ]);
       expect(mockOnJumpToEvent.mock.calls.length).toBe(0);
     });
 

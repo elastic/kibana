@@ -38,6 +38,8 @@ import { promqlCommand } from './promql';
 import { mergeCommandWithGeneratedCommandData } from './elastisearch_command_data_loader';
 import { setCommand } from './set';
 import { mmrCommand } from './mmr';
+import { metricsInfoCommand } from './metrics_info';
+import { tsInfoCommand } from './ts_info';
 
 const esqlCommandRegistry = new CommandRegistry();
 
@@ -71,6 +73,8 @@ const baseCommands = [
   rerankCommand,
   promqlCommand,
   mmrCommand,
+  metricsInfoCommand,
+  tsInfoCommand,
 ];
 
 baseCommands.forEach((command) => {

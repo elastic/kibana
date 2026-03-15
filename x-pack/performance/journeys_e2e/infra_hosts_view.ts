@@ -10,6 +10,8 @@ import { subj } from '@kbn/test-subj-selector';
 import { generateHostsData } from '../synthtrace_data/hosts_data';
 
 export const journey = new Journey({
+  // Failing: See https://github.com/elastic/kibana/issues/203345
+  skipped: true,
   synthtrace: {
     type: 'infra',
     generator: generateHostsData,

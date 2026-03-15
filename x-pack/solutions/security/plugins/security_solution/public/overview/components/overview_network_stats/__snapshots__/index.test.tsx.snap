@@ -27,7 +27,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
           aria-hidden="true"
           class="euiButtonIcon__icon"
           color="inherit"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
       </button>
       <button
@@ -197,7 +197,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
           aria-hidden="true"
           class="euiButtonIcon__icon"
           color="inherit"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
       </button>
       <button
@@ -611,7 +611,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
           aria-hidden="true"
           class="euiButtonIcon__icon"
           color="inherit"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
       </button>
       <button

@@ -20,7 +20,7 @@ export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references?: SavedObjectReference[],
   isDashboardAppRequest: boolean = false
-): DashboardState | Partial<DashboardState> {
+): Partial<Omit<DashboardState, 'options'> & { options: Partial<DashboardState['options']> }> {
   const {
     pinned_panels,
     controlGroupInput: legacyControls,
@@ -54,17 +54,19 @@ export function transformDashboardOut(
 
   const options = transformOptionsOut(optionsJSON ?? '{}', legacyControls?.showApplySelections);
 
+  const { filters, query } = transformSearchSourceOut(kibanaSavedObjectMeta, references);
+
   // try to maintain a consistent (alphabetical) order of keys
   return {
     ...(description && { description }),
-    ...transformSearchSourceOut(kibanaSavedObjectMeta, references),
+    ...(filters && { filters }),
     ...(Object.keys(options).length && { options }),
     ...((panelsJSON || sections) && {
       panels: transformPanelsOut(panelsJSON, sections, references, isDashboardAppRequest),
     }),
-
-    ...(pinnedPanelsOut && { pinned_panels: pinnedPanelsOut }),
+    ...(pinnedPanelsOut.length && { pinned_panels: pinnedPanelsOut }),
     ...(projectRouting !== undefined && { project_routing: projectRouting }),
+    ...(query && { query }),
     ...(refreshInterval && {
       refresh_interval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),

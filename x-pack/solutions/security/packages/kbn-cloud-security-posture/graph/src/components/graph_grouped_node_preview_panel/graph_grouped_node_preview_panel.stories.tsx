@@ -19,6 +19,8 @@ import { LoadingBody } from './components/loading_body';
 import { EmptyBody } from './components/empty_body';
 import { ContentBody } from './components/content_body';
 
+const STORYBOOK_SCOPE_ID = 'storybook-graph-grouped-panel';
+
 // Interface for ContentTemplate args that includes the items property
 interface ContentTemplateArgs extends Partial<GraphGroupedNodePreviewPanelProps> {
   items?: PanelItems;
@@ -108,6 +110,7 @@ const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
   return (
     <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
       <ContentBody
+        scopeId={STORYBOOK_SCOPE_ID}
         items={items}
         totalHits={items.length}
         icon={icon}
@@ -358,6 +361,7 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
   return (
     <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
       <ContentBody
+        scopeId={STORYBOOK_SCOPE_ID}
         items={pageItems}
         totalHits={allItems.length}
         icon={icon}

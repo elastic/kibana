@@ -208,6 +208,38 @@ describe('initNavigation()', () => {
       expect(node.children?.[0].href).toBe('https://elastic.co');
     });
 
+    test('should filter out missing deepLinks (e.g. evals) from the navigation tree', async () => {
+      const { projectNavigation: projectNavigationService } = setup({
+        navLinkIds: ['management:genAiSettings'],
+      });
+
+      projectNavigationService.initNavigation<any>(
+        'es',
+        of({
+          body: [
+            {
+              id: 'group1',
+              type: 'navGroup',
+              children: [
+                { link: 'management:genAiSettings' },
+                { link: 'management:evals' }, // will be filtered out if evals is disabled
+              ],
+            },
+          ],
+        })
+      );
+
+      const treeDefinition = await lastValueFrom(
+        projectNavigationService.getNavigation$().pipe(
+          take(1),
+          map((nav) => nav.navigationTree)
+        )
+      );
+
+      const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
+      expect(node.children?.map((c) => c.id)).toEqual(['management:genAiSettings']);
+    });
+
     test('should throw if href is not an absolute links', async () => {
       const { projectNavigation: projNavigation } = setupInitNavigation();
 

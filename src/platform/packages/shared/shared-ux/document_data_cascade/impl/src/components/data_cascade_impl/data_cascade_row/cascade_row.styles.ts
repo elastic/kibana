@@ -174,6 +174,7 @@ export const styles = (
       display: 'flex',
       position: 'absolute',
       width: '100%',
+      contain: 'layout style',
       padding: euiSizing[size],
       backgroundColor: euiTheme.colors.backgroundBasePlain,
       outlineColor: OUTLINE_COLOR,

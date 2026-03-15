@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { conditionSchema as streamlangConditionSchema } from '@kbn/streamlang';
 import { z } from '@kbn/zod/v4';
 
 export type EntityType = z.infer<typeof EntityType>;
@@ -33,21 +34,64 @@ const euidFieldSchema = z.object({
 });
 
 const euidSeparatorSchema = z.object({
-  separator: z.string(),
+  sep: z.string(),
+});
+
+// Field evaluation: pre-evaluate a field before euid generation (first match wins; fallback to source value or fallbackValue).
+const fieldEvaluationWhenClauseSchema = z.object({
+  sourceMatchesAny: z.array(z.string()),
+  then: z.string(),
+});
+
+const fieldEvaluationSourceSchema = z.union([
+  z.object({ field: z.string() }),
+  z.object({ firstChunkOfField: z.string(), splitBy: z.string() }),
+]);
+
+const fieldEvaluationSchema = z.object({
+  destination: z.string(),
+  sources: z.array(fieldEvaluationSourceSchema),
+  fallbackValue: z.string(),
+  whenClauses: z.array(fieldEvaluationWhenClauseSchema),
 });
 
 // Any field used in the euid calculation must be mapped in the fields array,
 // otherwise we won't have guarantees of field being available
 const calculatedIdentityFieldLogicSchema = z.object({
-  // Filter to be applied before evaluating the evaluation logic
-  requiresOneOfFields: z.array(z.string()),
-
   // Sequential order of fields to be used to generate the identity field.
   // The ids that are generated using the esqlEvaluation will also be prepended
   // with the type (e.g. `host:`). The fields found on the default id won't be prepended.
   // ALL THE FIELDS MUST BE OF MAPPING TYPE 'keyword'
   euidFields: z.array(z.array(z.union([euidFieldSchema, euidSeparatorSchema]))),
+
+  // Optional pre-evaluated fields (e.g. entity.namespace from event.module). Applied before
+  // euid generation and translated to ESQL, Painless, and in-memory.
+  fieldEvaluations: z.optional(z.array(fieldEvaluationSchema)),
+
+  // Document-level filter (Condition from @kbn/streamlang). Only documents matching this
+  // filter are considered for this entity type. Must express "at least one identity field
+  // present" (and any entity-specific rules, e.g. user IDP pre-conditions). Translated to
+  // DSL and ESQL via conditionToQueryDsl and conditionToESQL.
+  documentsFilter: streamlangConditionSchema,
+
+  // When true, the entity id is not prefixed with the entity type (e.g. output "a" instead of "generic:a").
+  skipTypePrepend: z.optional(z.boolean()),
 });
+
+/**
+ * Single-field identity: entity is identified by one field only (e.g. service.name, entity.id).
+ * No composition, no field evaluations. ESQL/DSL use a simplified path for this shape.
+ */
+export const singleFieldIdentitySchema = z.object({
+  singleField: z.string(),
+  // When true, the entity id is not prefixed with the entity type (e.g. output "a" instead of "generic:a").
+  skipTypePrepend: z.optional(z.boolean()),
+});
+
+const identityFieldSchema = z.union([
+  calculatedIdentityFieldLogicSchema,
+  singleFieldIdentitySchema,
+]);
 
 export const entitySchema = z.object({
   id: z.string(),
@@ -56,15 +100,27 @@ export const entitySchema = z.object({
   filter: z.string().optional(),
   entityTypeFallback: z.string().optional(),
   fields: z.array(fieldSchema),
-  identityField: calculatedIdentityFieldLogicSchema,
+  identityField: identityFieldSchema,
   indexPatterns: z.array(z.string()),
+  // Optional filter (Condition from @kbn/streamlang) applied in ESQL only, right after the
+  // LOOKUP JOIN, to filter rows (e.g. keep already-stored entities or IDP-like events). No DSL equivalent.
+  postAggFilter: z.optional(streamlangConditionSchema),
 });
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields
-export type EntityIdentity = z.infer<typeof calculatedIdentityFieldLogicSchema>; // logic to generate identity field
+export type CalculatedEntityIdentity = z.infer<typeof calculatedIdentityFieldLogicSchema>; // full identity (euidFields + documentsFilter + optional fieldEvaluations)
+export type SingleFieldIdentity = z.infer<typeof singleFieldIdentitySchema>;
+export type EntityIdentity = z.infer<typeof identityFieldSchema>; // definition-time identity (full or singleField)
 export type EntityDefinition = z.infer<typeof entitySchema>; // entity with id generated in runtime
 export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
 export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; // entity with a known 'type'
 export type EuidField = z.infer<typeof euidFieldSchema>;
 export type EuidSeparator = z.infer<typeof euidSeparatorSchema>;
 export type EuidAttribute = EuidField | EuidSeparator;
+export type FieldEvaluationWhenClause = z.infer<typeof fieldEvaluationWhenClauseSchema>;
+export type FieldEvaluationSource = z.infer<typeof fieldEvaluationSourceSchema>;
+export type FieldEvaluation = z.infer<typeof fieldEvaluationSchema>;
+
+export function isSingleFieldIdentity(identity: EntityIdentity): identity is SingleFieldIdentity {
+  return 'singleField' in identity;
+}

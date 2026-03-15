@@ -524,13 +524,20 @@ export function StreamsTreeTable({
           align: 'left',
           sortable: false,
           dataType: 'string',
-          render: (_: unknown, item: TableRow) => (
-            <DiscoverBadgeButton
-              hasDataStream={!!item.data_stream || Streams.QueryStream.Definition.is(item.stream)}
-              indexMode={item.data_stream?.index_mode}
-              stream={item.stream}
-            />
-          ),
+          render: (_: unknown, item: TableRow) => {
+            const hasDataStream =
+              !!item.data_stream || Streams.QueryStream.Definition.is(item.stream);
+            if (Streams.QueryStream.Definition.is(item.stream)) {
+              return <DiscoverBadgeButton hasDataStream={hasDataStream} stream={item.stream} />;
+            }
+            return (
+              <DiscoverBadgeButton
+                hasDataStream={hasDataStream}
+                indexMode={item.data_stream?.index_mode ?? 'standard'}
+                stream={item.stream}
+              />
+            );
+          },
         },
       ]}
       itemId="name"

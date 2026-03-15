@@ -14,8 +14,6 @@ import type {
 import { ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { isLiteral } from '@elastic/esql';
-import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import type {
   GetColumnsByTypeFn,
   ICommandCallbacks,
@@ -23,10 +21,7 @@ import type {
   ISuggestionItem,
 } from '../../../registry/types';
 import { Location } from '../../../registry/types';
-import { EDITOR_MARKER } from '../../constants';
-import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
-import { argMatchesParamType, getExpressionType, getParamAtPosition } from '../expressions';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
@@ -385,141 +380,6 @@ export function getControlSuggestionIfSupported(
   );
 
   return controlSuggestion;
-}
-
-function getValidFunctionSignaturesForPreviousArgs(
-  fnDefinition: FunctionDefinition,
-  enrichedArgs: Array<
-    ESQLAstItem & {
-      dataType: SupportedDataType | 'unknown';
-    }
-  >,
-  argIndex: number
-) {
-  // Filter down to signatures that match every params up to the current argIndex
-  // e.g. BUCKET(longField, /) => all signatures with first param as long column type
-  // or BUCKET(longField, 2, /) => all signatures with (longField, integer, ...)
-  const relevantFuncSignatures = fnDefinition.signatures.filter(
-    (s) =>
-      s.params?.length >= argIndex &&
-      s.params
-        .slice(0, argIndex)
-        .every(({ type: dataType }, idx) =>
-          argMatchesParamType(
-            enrichedArgs[idx].dataType,
-            dataType,
-            isLiteral(enrichedArgs[idx]),
-            true
-          )
-        )
-  );
-  return relevantFuncSignatures;
-}
-
-/**
- * Given a function signature, returns the compatible types to suggest for the next argument
- *
- * @param fnDefinition: the function definition
- * @param enrichedArgs: AST args with enriched esType info to match with function signatures
- * @param argIndex: the index of the argument to suggest for
- * @returns
- */
-function getCompatibleParamDefs(
-  fnDefinition: FunctionDefinition,
-  enrichedArgs: Array<
-    ESQLAstItem & {
-      dataType: SupportedDataType | 'unknown';
-    }
-  >,
-  argIndex: number
-) {
-  // First, narrow down to valid function signatures based on previous arguments
-  const relevantFuncSignatures = getValidFunctionSignaturesForPreviousArgs(
-    fnDefinition,
-    enrichedArgs,
-    argIndex
-  );
-
-  // Then, get the compatible types to suggest for the next argument
-  const compatibleTypesToSuggestForArg = uniqBy(
-    relevantFuncSignatures
-      .map((signature) => getParamAtPosition(signature, argIndex))
-      .filter(
-        (param): param is NonNullable<ReturnType<typeof getParamAtPosition>> => param != null
-      ),
-    (param) => `${param.type}-${param.constantOnly}`
-  );
-  return compatibleTypesToSuggestForArg;
-}
-
-/**
- * Given a function signature, returns the parameter at the given position, even if it's undefined or null
- *
- * @param {params}
- * @param position
- * @returns
- */
-function strictlyGetParamAtPosition(
-  { params }: FunctionDefinition['signatures'][number],
-  position: number
-) {
-  return params[position] ? params[position] : null;
-}
-
-export function getValidSignaturesAndTypesToSuggestNext(
-  node: ESQLFunction,
-  context: ICommandContext,
-  fnDefinition: FunctionDefinition
-) {
-  const argTypes = node.args.map((arg) =>
-    getExpressionType(arg, context?.columns, context?.unmappedFieldsStrategy)
-  );
-  const enrichedArgs = node.args.map((arg, idx) => ({
-    ...arg,
-    dataType: argTypes[idx],
-  })) as Array<
-    ESQLAstItem & {
-      dataType: SupportedDataType | 'unknown';
-    }
-  >;
-
-  // pick the type of the next arg
-  const shouldGetNextArgument = node.text.includes(EDITOR_MARKER); // NOTE: I think this is checking if the cursor is after a comma.
-  let argIndex = Math.max(node.args.length, 0);
-  if (!shouldGetNextArgument && argIndex) {
-    argIndex -= 1;
-  }
-
-  // For signature filtering: check ALL arguments to eliminate incompatible signatures
-  // BUT only for functions with multiple signatures (overloaded functions like BUCKET)
-  // For single-signature or variadic functions, use the original behavior
-  const isVariadic = fnDefinition.signatures.some((sig) => sig.minParams != null);
-  const hasMultipleSignatures = fnDefinition.signatures.length > 1;
-  const argsToCheckForFiltering =
-    isVariadic || shouldGetNextArgument || !hasMultipleSignatures ? argIndex : enrichedArgs.length;
-
-  const validSignatures = getValidFunctionSignaturesForPreviousArgs(
-    fnDefinition,
-    enrichedArgs,
-    argsToCheckForFiltering
-  );
-  // Retrieve unique of types that are compatiable for the current arg
-  const compatibleParamDefs = getCompatibleParamDefs(fnDefinition, enrichedArgs, argIndex);
-  const hasMoreMandatoryArgs = !validSignatures
-    // Types available to suggest next after this argument is completed
-    .map((signature) => strictlyGetParamAtPosition(signature, argIndex + 1))
-    // when a param is null, it means param is optional
-    // If there's at least one param that is optional, then
-    // no need to suggest comma
-    .some((p) => p === null || p?.optional === true);
-
-  return {
-    compatibleParamDefs,
-    hasMoreMandatoryArgs,
-    enrichedArgs,
-    argIndex,
-    validSignatures,
-  };
 }
 
 export function createInferenceEndpointToCompletionItem(

@@ -50,6 +50,12 @@ export const FakeConnectors = {
     actionTypeId: 'inference',
     name: 'slow_3sec_failing_inference_connector',
   },
+  /** Returns a large payload (configurable size via params.sizeBytes, default 5KB) */
+  large_response: {
+    id: 'f6a7b8c9-d0e1-2345-fa67-bc89de012345',
+    actionTypeId: 'inference',
+    name: 'large_response_connector',
+  },
 };
 
 async function getMockedConnectorResult(
@@ -103,6 +109,16 @@ async function getMockedConnectorResult(
             result: 'Hello! How can I help you?',
           },
         ],
+      };
+    }
+    case FakeConnectors.large_response.name: {
+      // Generate a payload of the requested size (default 5KB)
+      const sizeBytes = params?.sizeBytes ?? 5 * 1024;
+      const largePayload = 'x'.repeat(sizeBytes);
+      return {
+        status: 'ok' as const,
+        actionId: id,
+        data: { payload: largePayload },
       };
     }
   }

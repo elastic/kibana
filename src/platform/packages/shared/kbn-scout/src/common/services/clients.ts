@@ -53,6 +53,34 @@ export function getEsClient(config: ScoutTestConfig, log: ScoutLogger) {
   return esClientInstance;
 }
 
+let linkedEsClientInstance: EsClient | null = null;
+
+export function getLinkedEsClient(config: ScoutTestConfig, log: ScoutLogger) {
+  if (!linkedEsClientInstance) {
+    const linkedProject = config.linkedProject;
+    if (!linkedProject) {
+      throw new Error('linkedProject is not configured in ScoutTestConfig');
+    }
+
+    const { username, password } = linkedProject.auth;
+    const elasticsearchUrl = createClientUrlWithAuth({
+      serviceName: 'linkedEs',
+      url: linkedProject.hosts.elasticsearch,
+      username,
+      password,
+      log,
+    });
+
+    linkedEsClientInstance = createEsClientForTesting({
+      esUrl: elasticsearchUrl,
+      isCloud: config.isCloud,
+      authOverride: { username, password },
+    });
+  }
+
+  return linkedEsClientInstance;
+}
+
 export function getKbnClient(config: ScoutTestConfig, log: ScoutLogger) {
   if (!kbnClientInstance) {
     const kibanaUrl = createClientUrlWithAuth({

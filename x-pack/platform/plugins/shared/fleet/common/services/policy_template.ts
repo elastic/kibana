@@ -113,9 +113,11 @@ export const getNormalizedDataStreams = (
     const dataset = datasetName || createDefaultDatasetName(packageInfo, policyTemplate);
 
     let vars = addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name);
+    const isOtelTraces = (dataStreamType || policyTemplate.type) === dataTypes.Traces;
+    const isOtelDynamicSignalTypes = policyTemplate.dynamic_signal_types === true;
     if (
       policyTemplate.input === OTEL_COLLECTOR_INPUT_TYPE &&
-      (dataStreamType || policyTemplate.type) === dataTypes.Traces
+      (isOtelTraces || isOtelDynamicSignalTypes)
     ) {
       vars = addUseAPMVarIfNotPresent(vars);
     }

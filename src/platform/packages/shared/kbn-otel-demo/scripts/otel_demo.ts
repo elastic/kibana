@@ -19,7 +19,7 @@ import {
 } from '../src/demo_registry';
 
 run(
-  ({ log, addCleanupTask, flags }) => {
+  async ({ log, addCleanupTask, flags }) => {
     const demoType = (flags.demo as DemoType | undefined) || 'otel-demo';
 
     // Validate demo type
@@ -81,6 +81,7 @@ run(
     const teardown = Boolean(flags.teardown);
     const patch = Boolean(flags.patch);
     const reset = Boolean(flags.reset);
+    const forceRebuildImages = Boolean(flags['rebuild-images']);
 
     // Parse scenario flags
     const scenarioIds: string[] = [];
@@ -118,6 +119,7 @@ run(
       version,
       teardown,
       scenarioIds,
+      forceRebuildImages,
     }).catch((error) => {
       throw new Error(`Failed to manage ${demoConfig.displayName}`, { cause: error });
     });
@@ -130,13 +132,17 @@ run(
       Supports multiple demo environments:
         - otel-demo: OpenTelemetry Demo (default)
         - online-boutique: Google Online Boutique
+        - bank-of-anthos: Google Bank of Anthos
+        - quarkus-super-heroes: Quarkus Super Heroes
+        - aws-retail-store: AWS Retail Store Sample
+        - rust-k8s-demo: Rust K8s Demo
       
       Reads Elasticsearch connection details from kibana.dev.yml and supports
       failure scenario injection for testing observability.
     `,
     flags: {
       string: ['config', 'logs-index', 'scenario', 'demo', 'version'],
-      boolean: ['teardown', 'list-demos', 'list-scenarios', 'patch', 'reset'],
+      boolean: ['teardown', 'list-demos', 'list-scenarios', 'patch', 'reset', 'rebuild-images'],
       alias: {
         c: 'config',
         s: 'scenario',
@@ -150,16 +156,17 @@ run(
         'logs-index': 'logs.otel',
       },
       help: `
-        --demo, -d         Demo environment to run (otel-demo, online-boutique)
+        --demo, -d         Demo environment to run (otel-demo, online-boutique, bank-of-anthos, etc.)
         --version, -v      Demo version (defaults to demo's defaultVersion)
         --config, -c       Path to Kibana config file (defaults to config/kibana.dev.yml)
         --logs-index       Index name for logs (defaults to "logs.otel")
         --list-demos       List all available demo environments
         --list-scenarios   List failure scenarios for selected demo
-        --scenario, -s     Apply a failure scenario (can be repeated for multiple scenarios)
-        --patch, -p        Patch scenarios onto running cluster (no redeploy)
-        --reset, -r        Reset all scenarios to defaults (no redeploy)
+        --scenario, -s     Apply a failure scenario (can be repeated)
+        --patch, -p        Patch scenarios onto running cluster (works with --scenario)
+        --reset, -r        Reset all scenarios to defaults
         --teardown         Stop and remove demo deployment
+        --rebuild-images   Force rebuild of custom images (for demos that require building from source)
       `,
     },
   }

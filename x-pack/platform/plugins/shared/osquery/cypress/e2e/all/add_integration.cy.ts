@@ -96,7 +96,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       checkDataStreamsInPolicyDetails();
       cy.contains(`version: ${oldVersion}`);
       cy.getBySel('euiFlyoutCloseButton').click();
-      cy.getBySel('PackagePoliciesTableUpgradeButton').click();
+      cy.getBySel('integrationPolicyUpgradeBtn').click();
       cy.getBySel('saveIntegration').click();
       cy.contains(`Successfully updated '${integrationName}'`);
       policyContainsIntegration(integrationName, policyName);
@@ -182,7 +182,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
         .parents('tr')
         .within(() => {
           cy.contains('Osquery Manager');
-          cy.getBySel('PackagePoliciesTableUpgradeButton');
+          cy.getBySel('integrationPolicyUpgradeBtn');
           cy.contains(`v${oldVersion}`);
           cy.getBySel('agentActionsBtn').click();
         });
@@ -209,7 +209,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       closeFleetTourIfVisible();
       cy.get(`[title="${policyName}"]`).click();
       closeFleetTourIfVisible();
-      cy.getBySel('PackagePoliciesTableUpgradeButton').click();
+      cy.getBySel('integrationPolicyUpgradeBtn').click();
       cy.contains(/^Advanced$/).click();
       cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
       cy.getBySel('saveIntegration').click();
@@ -221,7 +221,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(`[title="${integrationName}"]`)
         .parents('tr')
         .within(() => {
-          cy.getBySel('PackagePoliciesTableUpgradeButton').should('not.exist');
+          cy.getBySel('integrationPolicyUpgradeBtn').should('not.exist');
           cy.contains('Osquery Manager').and('not.contain', `v${oldVersion}`);
         });
       integrationExistsWithinPolicyDetails(integrationName);

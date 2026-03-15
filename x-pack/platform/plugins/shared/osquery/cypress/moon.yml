@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/osquery-plugin-cypress'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-defend-workflows'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/osquery-plugin-cypress'
+  title: '@kbn/osquery-plugin-cypress'
   description: Moon project for @kbn/osquery-plugin-cypress
   channel: ''
   owner: '@elastic/security-defend-workflows'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/osquery/cypress
+  sourceRoot: x-pack/platform/plugins/shared/osquery/cypress
 dependsOn:
   - '@kbn/cypress-config'
   - '@kbn/fleet-plugin'

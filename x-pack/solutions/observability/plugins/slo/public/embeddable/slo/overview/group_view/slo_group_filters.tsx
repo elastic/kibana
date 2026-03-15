@@ -101,9 +101,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
   const { dataView } = useCreateDataView({
     indexPatternString: SUMMARY_DESTINATION_INDEX_NAME,
   });
-  const [selectedGroupBy, setSelectedGroupBy] = useState<GroupBy>(
-    selectedFilters.group_by ?? 'status'
-  );
+  const [selectedGroupBy, setSelectedGroupBy] = useState<GroupBy>(selectedFilters.group_by);
   const [filters, setFilters] = useState<Filter[]>(() =>
     ensureFiltersHaveState(toStoredFilters(selectedFilters.filters) ?? [])
   );

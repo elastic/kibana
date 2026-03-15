@@ -156,6 +156,7 @@ export interface ProcessEventAlertRule {
 
 export interface ProcessEventAlert {
   uuid?: string;
+  index?: string;
   reason?: string;
   workflow_status?: string;
   status?: string;

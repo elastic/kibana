@@ -17,7 +17,7 @@ import type { State } from '../../store';
 import { selectTimelineById } from '../../../timelines/store/selectors';
 import { getEventType } from '../../../timelines/components/timeline/body/helpers';
 import { isTimelineScope } from '../../../helpers';
-import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsAnalyzerEnabled } from '../../../detections/hooks/use_is_analyzer_enabled';
 import type { ActionProps } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
 import { AddEventNoteAction } from './add_note_icon_item';
@@ -50,6 +50,7 @@ export type ActionsComponentProps = Pick<
   | 'ecsData'
   | 'eventId'
   | 'eventIdToNoteIds'
+  | 'hit'
   | 'isEventViewer'
   | 'onEventDetailsPanelOpened'
   | 'onRuleChange'
@@ -68,6 +69,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   ecsData,
   eventId,
   eventIdToNoteIds,
+  hit,
   isEventViewer = false,
   onEventDetailsPanelOpened,
   onRuleChange,
@@ -158,7 +160,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
 
   // we hide the analyzer icon if the data is not available for the resolver
   // or if we are on the cases alerts table and the visualization in flyout advanced setting is disabled
-  const showAnalyzerIcon = useIsInvestigateInResolverActionEnabled(ecsData);
+  const showAnalyzerIcon = useIsAnalyzerEnabled(hit);
 
   // we hide the session view icon if the session view is not available
   // or if we are on the cases alerts table and the visualization in flyout advanced setting is disabled

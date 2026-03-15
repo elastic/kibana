@@ -24,7 +24,9 @@ type StorageMappingPropertyType = AllMappingPropertyType &
     | 'double'
     | 'long'
     | 'object'
+    | 'nested'
     | 'semantic_text'
+    | 'flattened'
   );
 
 type StorageMappingPropertyObjectType = Required<MappingObjectProperty, 'type'>;
@@ -74,7 +76,9 @@ const types = {
   byte: createFactory('byte'),
   float: createFactory('float'),
   object: createFactory('object'),
+  nested: createFactory('nested'),
   semantic_text: createFactory('semantic_text'),
+  flattened: createFactory('flattened'),
 } satisfies {
   [TKey in StorageMappingPropertyType]: MappingPropertyFactory<TKey, any>;
 };
@@ -98,7 +102,13 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
         [key in keyof TProperty['properties']]?: StorageFieldTypeOf<TProperty['properties'][key]>;
       }
     : object;
+  nested: TProperty extends { properties: Record<string, StorageMappingProperty> }
+    ? Array<{
+        [key in keyof TProperty['properties']]?: StorageFieldTypeOf<TProperty['properties'][key]>;
+      }>
+    : Array<object>;
   semantic_text: string;
+  flattened: Record<string, unknown>;
 }[TProperty['type']];
 
 export type StorageFieldTypeOf<TProperty extends StorageMappingProperty> = PrimitiveOf<TProperty>;

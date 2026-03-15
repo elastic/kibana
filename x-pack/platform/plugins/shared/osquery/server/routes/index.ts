@@ -16,6 +16,8 @@ import { initPackRoutes } from './pack';
 import { initPrivilegesCheckRoutes } from './privileges_check';
 import { initAssetRoutes } from './asset';
 import { initActionResultsRoutes } from './action_results';
+import { initUnifiedHistoryRoutes } from './unified_history';
+import { initScheduledResultsRoutes } from './scheduled_results';
 
 export const defineRoutes = (
   router: IRouter<DataRequestHandlerContext>,
@@ -29,4 +31,6 @@ export const defineRoutes = (
   initSavedQueryRoutes(router, context);
   initAssetRoutes(router, context);
   initActionResultsRoutes(router, context);
+  initUnifiedHistoryRoutes(router, context);
+  initScheduledResultsRoutes(router, context);
 };

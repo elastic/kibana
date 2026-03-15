@@ -17,6 +17,7 @@ import { getPrintableSessionId, Session, type SessionValueContentToEncrypt } fro
 import type { SessionCookie } from './session_cookie';
 import {
   SessionConcurrencyLimitError,
+  SessionErrorReason,
   SessionExpiredError,
   SessionMissingError,
   SessionUnexpectedError,
@@ -124,10 +125,10 @@ describe('Session', () => {
         })
       );
 
-      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toEqual({
-        error: expect.any(SessionExpiredError),
-        value: null,
-      });
+      const result = await session.get(httpServerMock.createKibanaRequest());
+      expect(result.value).toBeNull();
+      expect(result.error).toBeInstanceOf(SessionExpiredError);
+      expect(result.error!.code).toBe(SessionErrorReason.SESSION_IDLE_TIMEOUT);
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
       expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
     });
@@ -149,10 +150,10 @@ describe('Session', () => {
         })
       );
 
-      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toEqual({
-        error: expect.any(SessionExpiredError),
-        value: null,
-      });
+      const result = await session.get(httpServerMock.createKibanaRequest());
+      expect(result.value).toBeNull();
+      expect(result.error).toBeInstanceOf(SessionExpiredError);
+      expect(result.error!.code).toBe(SessionErrorReason.SESSION_LIFESPAN_TIMEOUT);
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
       expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
     });

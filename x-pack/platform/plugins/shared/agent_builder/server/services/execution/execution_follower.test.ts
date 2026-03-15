@@ -26,6 +26,7 @@ const createMockExecutionClient = () =>
     appendEvents: jest.fn(),
     peek: jest.fn(),
     readEvents: jest.fn(),
+    find: jest.fn().mockResolvedValue([]),
   } as jest.Mocked<AgentExecutionClient>);
 
 const messageChunkEvent = (text: string): ChatEvent =>

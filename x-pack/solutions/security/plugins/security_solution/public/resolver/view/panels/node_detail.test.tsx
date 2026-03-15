@@ -12,6 +12,7 @@ import { TestProviders } from '../../../common/mock';
 import { NodeDetailView } from './node_detail';
 import { useCubeAssets } from '../use_cube_assets';
 import { useLinkProps } from '../use_link_props';
+import type { ResolverCellActionRendererProps } from '../../types';
 
 const mockUseCubeAssets = useCubeAssets as jest.Mock;
 jest.mock('../use_cube_assets');
@@ -31,6 +32,8 @@ const processEvent = {
 };
 
 describe('<NodeDetailView />', () => {
+  const renderCellActions = jest.fn(({ children }: ResolverCellActionRendererProps) => children);
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseLinkProps.mockReturnValue({ href: '#', onClick: jest.fn() });
@@ -44,7 +47,12 @@ describe('<NodeDetailView />', () => {
   it('should render', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <NodeDetailView id="test" nodeID="test" processEvent={processEvent} />
+        <NodeDetailView
+          id="test"
+          nodeID="test"
+          processEvent={processEvent}
+          renderCellActions={renderCellActions}
+        />
       </TestProviders>
     );
     expect(getByTestId('resolver:panel:node-detail')).toBeInTheDocument();
@@ -63,6 +71,7 @@ describe('<NodeDetailView />', () => {
           nodeID="test"
           nodeEventOnClick={nodeEventOnClick}
           processEvent={processEvent}
+          renderCellActions={renderCellActions}
         />
       </TestProviders>
     );

@@ -18,6 +18,7 @@ export {
   ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
   DeleteAutoImportIntegrationRequestParams,
+  DownloadAutoImportIntegrationRequestParams,
   GetAutoImportIntegrationRequestParams,
 } from './model/api/integrations/integration.gen';
 

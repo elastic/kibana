@@ -8,10 +8,12 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { MetricField } from '../../types';
 import { OverviewTab } from './overview_tab';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { METRIC_TYPE_DESCRIPTIONS } from './metric_type_badge';
 
 jest.mock('../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {
@@ -108,6 +110,35 @@ describe('Metric Flyout Overview Tab', () => {
         expect(getByText(instrument)).toBeInTheDocument();
 
         rerender(<div />); // Clear between tests
+      });
+    });
+
+    it.each(['gauge', 'counter', 'histogram'] as const)(
+      'shows tooltip with description when hovering over %s badge',
+      async (instrument) => {
+        const metric = createMockMetric({ instrument });
+        render(<OverviewTab metric={metric} />);
+
+        const badge = screen.getByText(instrument);
+        await userEvent.hover(badge);
+
+        await waitFor(() => {
+          expect(screen.getByRole('tooltip')).toHaveTextContent(
+            METRIC_TYPE_DESCRIPTIONS[instrument]!
+          );
+        });
+      }
+    );
+
+    it('does not show tooltip for unknown instrument type', async () => {
+      const metric = createMockMetric({ instrument: 'position' });
+      render(<OverviewTab metric={metric} />);
+
+      const badge = screen.getByText('position');
+      await userEvent.hover(badge);
+
+      await waitFor(() => {
+        expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
       });
     });
   });
