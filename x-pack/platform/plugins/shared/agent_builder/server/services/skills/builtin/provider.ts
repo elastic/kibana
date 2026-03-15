@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { InternalSkillDefinition, SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ReadonlySkillProvider } from '../skill_provider';
 import type { SkillListOptions } from '../persisted/client';
 import { convertBuiltinSkill } from './converter';
@@ -22,7 +22,7 @@ export const createBuiltinSkillProvider = (skills: SkillDefinition[]): ReadonlyS
       return skill ? convertBuiltinSkill(skill) : undefined;
     },
     bulkGet: (ids) => {
-      const result = new Map<string, ReturnType<typeof convertBuiltinSkill>>();
+      const result = new Map<string, InternalSkillDefinition>();
       for (const id of ids) {
         const skill = skillsMap.get(id);
         if (skill) {
