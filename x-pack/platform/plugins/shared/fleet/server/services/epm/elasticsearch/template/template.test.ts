@@ -151,6 +151,38 @@ describe('EPM template', () => {
       ]);
     });
 
+    it('sets auto_expand_replicas to 0-1 for templates in AUTO_EXPAND_REPLICAS_TEMPLATES', () => {
+      const autoExpandPatterns = [
+        'logs-elastic_agent.status_change-*',
+        'metrics-fleet_server.agent_versions-*',
+        'metrics-fleet_server.agent_status-*',
+      ];
+
+      for (const templateIndexPattern of autoExpandPatterns) {
+        const template = getTemplate({
+          templateIndexPattern,
+          type: templateIndexPattern.startsWith('logs-') ? 'logs' : 'metrics',
+          packageName: 'fleet',
+          composedOfTemplates: [],
+          templatePriority: 200,
+          isIndexModeTimeSeries: false,
+        });
+        expect(template.template.settings?.index?.auto_expand_replicas).toBe('0-1');
+      }
+    });
+
+    it('does not set auto_expand_replicas for templates not in AUTO_EXPAND_REPLICAS_TEMPLATES', () => {
+      const template = getTemplate({
+        templateIndexPattern: 'logs-nginx.access-*',
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates: [],
+        templatePriority: 200,
+        isIndexModeTimeSeries: false,
+      });
+      expect(template.template.settings?.index?.auto_expand_replicas).toBeUndefined();
+    });
+
     it('does not create fleet agent id verification component template if agentIdVerification is disabled', () => {
       appContextService.start(
         createAppContextStartContractMock({

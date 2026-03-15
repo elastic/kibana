@@ -21,11 +21,16 @@ import { bulkUpdateAgents, fetchAllAgentsByKuery } from '../services/agents';
 
 import type { Agent } from '../types';
 
+import { ensureInstalledPackage } from '../services/epm/packages';
+
 import { AgentStatusChangeTask, TYPE, VERSION } from './agent_status_change_task';
 
 jest.mock('../services');
 jest.mock('../services/agents');
 jest.mock('../services/outputs/helpers');
+jest.mock('../services/epm/packages', () => ({
+  ensureInstalledPackage: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock('../services/agent_policy', () => ({
   getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('fleet-agent-policies'),
   agentPolicyService: {
@@ -131,6 +136,29 @@ describe('AgentStatusChangeTask', () => {
       const result = await runTask({ ...MOCK_TASK_INSTANCE, id: 'old-id' });
 
       expect(result).toEqual(getDeleteTaskRunResult());
+    });
+
+    it('should ensure elastic agent package is installed before persisting status changes', async () => {
+      const agents = [
+        {
+          id: 'agent-1',
+          policy_id: 'agentless-policy-1',
+          status: 'unhealthy',
+          namespaces: ['default'],
+          local_metadata: { host: { hostname: 'host1' } },
+        },
+      ] as unknown as Agent[];
+      mockedFetchAllAgentsByKuery
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents))
+        .mockResolvedValue(getMockFetchAllAgentsByKuery([]));
+
+      await runTask();
+
+      expect(ensureInstalledPackage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pkgName: 'elastic_agent',
+        })
+      );
     });
 
     it('should record agent status change', async () => {

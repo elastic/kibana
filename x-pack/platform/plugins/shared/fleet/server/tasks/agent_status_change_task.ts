@@ -15,6 +15,8 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors, type estypes } from '@elastic/elasticsearch';
 
+import { FLEET_ELASTIC_AGENT_PACKAGE } from '../../common';
+
 import {
   AGENT_STATUS_CHANGE_DATA_STREAM,
   AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
@@ -24,6 +26,8 @@ import { bulkUpdateAgents, fetchAllAgentsByKuery } from '../services/agents';
 import type { Agent } from '../types';
 import { SO_SEARCH_LIMIT } from '../constants';
 import { getAgentPolicySavedObjectType } from '../services/agent_policy';
+
+import { ensureInstalledPackage } from '../services/epm/packages';
 
 import { throwIfAborted } from './utils';
 
@@ -155,6 +159,11 @@ export class AgentStatusChangeTask {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
     try {
+      await ensureInstalledPackage({
+        esClient,
+        pkgName: FLEET_ELASTIC_AGENT_PACKAGE,
+        savedObjectsClient: soClient,
+      });
       await this.persistAgentStatusChanges(esClient, soClient, abortController);
 
       this.endRun('success');

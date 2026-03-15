@@ -15,6 +15,8 @@ import type {
 import pMap from 'p-map';
 import { isResponseError } from '@kbn/es-errors';
 
+import type { estypes } from '@elastic/elasticsearch';
+
 import {
   FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
   OTEL_LOGS_COMPONENT_TEMPLATES,
@@ -913,6 +915,12 @@ const flattenFieldsToNameAndType = (
   return newFields;
 };
 
+const AUTO_EXPAND_REPLICAS_TEMPLATES = [
+  'logs-elastic_agent.status_change-*',
+  'metrics-fleet_server.agent_versions-*',
+  'metrics-fleet_server.agent_status-*',
+];
+
 function getBaseTemplate({
   templateIndexPattern,
   packageName,
@@ -932,11 +940,14 @@ function getBaseTemplate({
 }): IndexTemplate {
   const _meta = getESAssetMetadata({ packageName });
 
-  let settingsIndex = {};
+  let settingsIndex: estypes.IndicesIndexSettings = {};
   if (isIndexModeTimeSeries) {
     settingsIndex = {
       mode: 'time_series',
     };
+  }
+  if (AUTO_EXPAND_REPLICAS_TEMPLATES.includes(templateIndexPattern)) {
+    settingsIndex.auto_expand_replicas = '0-1';
   }
 
   return {
