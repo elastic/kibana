@@ -20,7 +20,7 @@ import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import { ReplacementsRepository } from './anonymization/replacements/replacements_repository';
 import { ReplacementsNamespaceMismatchError } from './anonymization/replacements/replacements_errors';
 import { ensureReplacementsIndex } from './anonymization/replacements/replacements_index';
-import { isConflictError, isRetryableShardRecoveryError, withShardRecoveryRetry } from './utils';
+import { isConflictError, withShardRecoveryRetry } from './utils';
 
 interface PrepareAnonymizationOptions {
   namespace: string;
@@ -113,13 +113,14 @@ export const prepareAnonymization = async ({
             return await repo?.get(namespace, carriedReplacementsId);
           } catch (error) {
             if (error instanceof ReplacementsNamespaceMismatchError) {
+              // The carried replacementsId belongs to a different namespace (e.g. after a space
+              // migration). Fall back to generating a fresh document rather than hard-erroring —
+              // callers that persisted an old ID before migration should not receive a 409.
               logger.warn(
-                `[inference.anonymization.namespace_mismatch] replacements_id=${carriedReplacementsId} requested_namespace=${namespace} actual_namespace=${error.actualNamespace}`
+                `[inference.anonymization.namespace_mismatch] replacements_id=${carriedReplacementsId} requested_namespace=${namespace} actual_namespace=${error.actualNamespace} — falling back to new replacements document`
               );
-              throw createInferenceRequestError(
-                `Carried replacementsId "${carriedReplacementsId}" does not belong to namespace "${namespace}"`,
-                409
-              );
+              replacementsId = uuidv4();
+              return null;
             }
             throw error;
           }
@@ -190,9 +191,13 @@ export const prepareAnonymization = async ({
         existingReplacements = null;
       }
     } catch (updateErr) {
-      if (isRetryableShardRecoveryError(updateErr)) {
+      if (updateErr instanceof ReplacementsNamespaceMismatchError) {
+        // The document was moved to a different namespace between the get and update.
+        // Propagate rather than silently allocating a new UUID for the wrong tenant.
         throw updateErr;
       }
+      // isRetryableShardRecoveryError is already handled inside withShardRecoveryRetry;
+      // if retries are exhausted the error propagates normally here.
       logger.warn(
         `Replacements update failed for ${replacementsId}, creating new document: ${
           updateErr instanceof Error ? updateErr.message : String(updateErr)
@@ -204,13 +209,16 @@ export const prepareAnonymization = async ({
   }
 
   if (!existingReplacements) {
+    // replacementsId is always a string here (set by ??= above or by fallback paths),
+    // but TypeScript can't narrow let-bindings inside closures — capture as a const.
+    const replacementsIdToCreate = replacementsId as string;
     try {
       await withShardRecoveryRetry({
         logger,
         operation: 'create_replacements',
         action: () =>
           repo.create({
-            id: replacementsId,
+            id: replacementsIdToCreate,
             namespace,
             createdBy: 'inference',
             replacements,
@@ -222,16 +230,16 @@ export const prepareAnonymization = async ({
         throw createErr;
       }
       logger.warn(
-        `[inference.anonymization.create_conflict_fallback] replacements_id=${replacementsId} namespace=${namespace} triggered=true`
+        `[inference.anonymization.create_conflict_fallback] replacements_id=${replacementsIdToCreate} namespace=${namespace} triggered=true`
       );
       const updatedAfterConflict = await withShardRecoveryRetry({
         logger,
         operation: 'update_replacements_after_conflict',
-        action: () => repo.update(namespace, replacementsId, { replacements }),
+        action: () => repo.update(namespace, replacementsIdToCreate, { replacements }),
       });
       if (!updatedAfterConflict) {
         throw createInferenceRequestError(
-          `Unable to persist replacements after create conflict for replacementsId "${replacementsId}"`,
+          `Unable to persist replacements after create conflict for replacementsId "${replacementsIdToCreate}"`,
           409
         );
       }

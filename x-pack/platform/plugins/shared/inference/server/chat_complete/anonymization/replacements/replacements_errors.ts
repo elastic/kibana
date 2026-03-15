@@ -13,9 +13,7 @@ export class ReplacementsNamespaceMismatchError extends Error {
     public readonly requestedNamespace: string,
     public readonly actualNamespace: string
   ) {
-    super(
-      `Replacements namespace mismatch for id "${replacementsId}": requested "${requestedNamespace}" but found "${actualNamespace}"`
-    );
+    super(`Replacements namespace mismatch for id "${replacementsId}": access denied`);
     this.name = 'ReplacementsNamespaceMismatchError';
   }
 }

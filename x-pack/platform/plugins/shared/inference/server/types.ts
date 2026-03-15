@@ -80,7 +80,7 @@ export interface InferenceServerStart {
   /**
    * Returns whether anonymization platform integration is active.
    */
-  isAnonymizationEnabled?: () => boolean;
+  isAnonymizationEnabled: () => boolean;
 
   /**
    * Creates an {@link InferenceClient}, scoped to a request.
@@ -168,8 +168,15 @@ export interface InferenceServerStart {
    * @param namespace - The space namespace the replacements document belongs to
    * @param replacementsId - The ID of the replacements document
    * @param text - The text containing anonymization tokens to replace
+   *
+   * SECURITY: `namespace` MUST be derived from the request-scoped SO client
+   * (`getScopedClient(request).getCurrentNamespace() ?? 'default'`), never from
+   * user-controlled input. This function uses elevated (internal) ES privileges;
+   * all tenant isolation relies on the namespace matching the document's stored namespace.
+   * A `ReplacementsNamespaceMismatchError` is thrown — and must not be caught — when
+   * the namespace does not match, to prevent cross-space reads.
    */
-  deanonymizeText?: (namespace: string, replacementsId: string, text: string) => Promise<string>;
+  deanonymizeText: (namespace: string, replacementsId: string, text: string) => Promise<string>;
 
   /**
    * Lists available Elasticsearch inference endpoints, optionally filtered by task type.

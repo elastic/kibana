@@ -281,7 +281,10 @@ describe('createChatCompleteApi', () => {
       expect(response.metadata?.anonymization?.replacementsId).toBe('stale-replacements-id');
     });
 
-    it('fails when carried replacementsId belongs to another namespace', async () => {
+    it('falls back to a new replacements document when carried replacementsId belongs to another namespace', async () => {
+      // Simulate a document that was created in a different space (e.g. after a space migration).
+      // The old behaviour threw a 409; the new behaviour silently allocates a fresh UUID so that
+      // clients that persisted a pre-migration ID are not hard-errored.
       mockEsClient.get.mockResolvedValueOnce({
         _source: {
           id: 'cross-space-replacements-id',
@@ -294,24 +297,24 @@ describe('createChatCompleteApi', () => {
       });
       inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
 
-      await expect(
-        chatComplete({
-          connectorId: 'connectorId',
-          messages: [{ role: MessageRole.User, content: 'question' }],
-          metadata: {
-            anonymization: {
-              replacementsId: 'cross-space-replacements-id',
-            },
+      const response = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        metadata: {
+          anonymization: {
+            replacementsId: 'cross-space-replacements-id',
           },
-          maxRetries: 0,
-        })
-      ).rejects.toThrow(
-        'Carried replacementsId "cross-space-replacements-id" does not belong to namespace "default"'
-      );
+        },
+        maxRetries: 0,
+      });
 
-      expect(mockEsClient.index).toHaveBeenCalledTimes(0);
-      expect(mockEsClient.update).toHaveBeenCalledTimes(0);
-      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(0);
+      // A fresh replacementsId must have been allocated (different from the cross-space one).
+      expect(response.metadata?.anonymization?.replacementsId).toBeDefined();
+      expect(response.metadata?.anonymization?.replacementsId).not.toBe(
+        'cross-space-replacements-id'
+      );
+      // The agent call must have gone through.
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
     });
 
     it('handles create conflict by falling back to update', async () => {

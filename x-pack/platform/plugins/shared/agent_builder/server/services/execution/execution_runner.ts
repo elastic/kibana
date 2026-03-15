@@ -95,7 +95,7 @@ export const handleAgentExecution = async ({
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
-  const anonymizationEnabled = deps.inference.isAnonymizationEnabled?.() ?? false;
+  const anonymizationEnabled = deps.inference.isAnonymizationEnabled();
 
   // Resolve scoped services
   const { conversationClient, chatModel, selectedConnectorId } = await resolveServices({
@@ -139,12 +139,22 @@ export const handleAgentExecution = async ({
   });
 
   // Generate title (for CREATE) or use existing title (for UPDATE)
+  // Token format produced by the anonymizer: ENTITY_CLASS_<hex-suffix>, e.g. HOST_NAME_ae687f3b
+  const TOKEN_PATTERN = /\b[A-Z][A-Z_]*_[0-9a-f]{8,}\b/;
+
   const deanonymizeTitle =
-    anonymizationEnabled && conversation.replacementsId && deps.inference.deanonymizeText
+    anonymizationEnabled && conversation.replacementsId
       ? async (title: string) => {
           const namespace =
             deps.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
-          return deps.inference.deanonymizeText!(namespace, conversation.replacementsId!, title);
+          const result = await deps.inference.deanonymizeText(
+            namespace,
+            conversation.replacementsId!,
+            title
+          );
+          // Guard: if deanonymization failed silently and tokens remain, don't persist them
+          // as the conversation title (would be a PII leak into an unencrypted field).
+          return TOKEN_PATTERN.test(result) ? 'New conversation' : result;
         }
       : undefined;
 
