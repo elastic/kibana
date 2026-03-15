@@ -24,6 +24,12 @@ export interface EmbeddableConversationProps {
   newConversation?: boolean;
 
   /**
+   * Specific conversation ID to open. When provided, opens this conversation directly
+   * instead of looking up the persisted conversation for the sessionTag/agentId combination.
+   */
+  conversationId?: string;
+
+  /**
    * Session tag for conversation context. Used to maintain separate conversation
    * histories for different parts of the application.
    *
