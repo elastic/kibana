@@ -1,0 +1,83 @@
+name: Assign backport reviewer
+
+on:
+  pull_request_target:
+    branches:
+      - '8.19'
+      - '9.*'
+      - '[1-9][0-9]*.*'
+    types:
+      - opened
+
+jobs:
+  assign-reviewer:
+    name: Assign team reviewer for manual backport
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.user.login != 'kibanamachine' &&
+      contains(github.event.pull_request.labels.*.name, 'backport')
+    steps:
+      - name: Get affected codeowners
+        id: codeowners
+        uses: dytab/affected-codeowners@4f89e2b82e991c1dfc9f7000e8989212d8bfe086 # v1.0.0
+
+      - name: Find matching teams
+        id: match-teams
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          script: |
+            const owners = JSON.parse('${{ steps.codeowners.outputs.individual-owners }}');
+            const normalize = (s) => s.replace(/^@/, '');
+
+            const codeownerTeams = owners.map(normalize).filter((t) => t.startsWith('elastic/'));
+            if (codeownerTeams.length === 0) {
+              core.info('No elastic teams found in CODEOWNERS for changed files');
+              core.setOutput('teams', '[]');
+              return;
+            }
+            core.info(`CODEOWNERS teams: ${codeownerTeams.join(', ')}`);
+
+            const author = context.payload.pull_request.user.login;
+            let authorTeams;
+            try {
+              const result = await github.graphql(
+                `query($login: String!) {
+                  organization(login: "elastic") {
+                    teams(first: 100, userLogins: [$login]) {
+                      nodes { combinedSlug }
+                    }
+                  }
+                }`,
+                { login: author }
+              );
+              authorTeams = result.organization.teams.nodes.map((t) => normalize(t.combinedSlug));
+            } catch (error) {
+              core.warning(`Failed to query author's org teams: ${error.message}`);
+              core.setOutput('teams', '[]');
+              return;
+            }
+            core.info(`Author ${author} teams: ${authorTeams.join(', ')}`);
+
+            const authorTeamSet = new Set(authorTeams);
+            const matchedTeams = codeownerTeams.filter((t) => authorTeamSet.has(t));
+
+            core.info(matchedTeams.length > 0
+              ? `Matched teams: ${matchedTeams.join(', ')}`
+              : 'No overlap between author teams and CODEOWNERS teams');
+            core.setOutput('teams', JSON.stringify(matchedTeams));
+
+      - name: Update reviewers
+        env:
+          GH_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
+        run: |
+          TEAMS='${{ steps.match-teams.outputs.teams }}'
+          if [ "$TEAMS" = "[]" ] || [ -z "$TEAMS" ]; then
+            echo "No matching teams, nothing to do"
+            exit 0
+          fi
+
+          REVIEWER_ARGS=$(echo "$TEAMS" | jq -r '.[]' | paste -sd,)
+          gh pr edit "${{ github.event.pull_request.number }}" \
+            --add-reviewer "$REVIEWER_ARGS" \
+            --remove-reviewer kibanamachine
