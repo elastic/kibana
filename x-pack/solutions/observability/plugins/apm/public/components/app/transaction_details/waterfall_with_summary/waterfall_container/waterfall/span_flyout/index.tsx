@@ -162,6 +162,7 @@ export function SpanFlyout({
                   queryParams={{
                     kuery,
                     spanId,
+                    sortDirection: 'DESC',
                   }}
                 />
               </EuiFlexItem>
