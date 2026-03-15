@@ -27,13 +27,13 @@ export function DataSourceTypeSelectorField({
       {
         id: DataSourceType.index_patterns,
         label: i18n.INDEX_PATTERNS,
-        iconType: field.value === DataSourceType.index_patterns ? 'checkInCircleFilled' : 'empty',
+        iconType: field.value === DataSourceType.index_patterns ? 'checkCircleFill' : 'empty',
         'data-test-subj': `rule-index-toggle-${DataSourceType.index_patterns}`,
       },
       {
         id: DataSourceType.data_view,
         label: i18n.DATA_VIEW,
-        iconType: field.value === DataSourceType.data_view ? 'checkInCircleFilled' : 'empty',
+        iconType: field.value === DataSourceType.data_view ? 'checkCircleFill' : 'empty',
         'data-test-subj': `rule-index-toggle-${DataSourceType.data_view}`,
       },
     ],

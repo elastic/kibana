@@ -94,7 +94,7 @@ const expanderColumn = ({ toggleRowExpanded, isRowExpanded }: UseColumnsArgs): T
       <EuiButtonIcon
         onClick={() => toggleRowExpanded(item)}
         aria-label={isRowExpanded(item) ? 'Collapse' : 'Expand'}
-        iconType={isRowExpanded(item) ? 'arrowUp' : 'arrowDown'}
+        iconType={isRowExpanded(item) ? 'chevronSingleUp' : 'chevronSingleDown'}
         data-test-subj={
           isRowExpanded(item)
             ? 'executionEventsTable-collapseButton'

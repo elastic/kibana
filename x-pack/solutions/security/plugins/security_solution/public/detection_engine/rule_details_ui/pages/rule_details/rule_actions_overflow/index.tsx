@@ -150,7 +150,7 @@ const RuleActionsOverflowComponent = ({
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
-              icon="exportAction"
+              icon="upload"
               disabled={!canReadRules}
               data-test-subj="rules-details-export-rule"
               onClick={async () => {
@@ -203,7 +203,7 @@ const RuleActionsOverflowComponent = ({
                         : undefined,
                       'data-test-subj': 'rules-details-revert-rule-tooltip',
                     }}
-                    icon="timeRefresh"
+                    icon="refreshTime"
                     disabled={!canEditRules || !doesBaseVersionExist}
                     data-test-subj="rules-details-revert-rule"
                     onClick={() => {
@@ -268,7 +268,7 @@ const RuleActionsOverflowComponent = ({
     () => (
       <EuiToolTip position="top" content={i18n.ALL_ACTIONS}>
         <MyEuiButtonIcon
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           aria-label={i18n.ALL_ACTIONS}
           isDisabled={isDisabled}
           data-test-subj="rules-details-popover-button-icon"
