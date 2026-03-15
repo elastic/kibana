@@ -244,7 +244,7 @@ export function SloCardChart({
                   }}
                 />
               ),
-              icon: () => <EuiIcon type="visGauge" size="l" />,
+              icon: () => <EuiIcon type="chartGauge" size="l" />,
               color: cardColor,
               body: badges,
             },

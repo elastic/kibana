@@ -224,7 +224,7 @@ export function ActionsPopover({
           {runTestManually}
         </NoPermissionsTooltip>
       ),
-      icon: 'beaker',
+      icon: 'flask',
       disabled: testInProgress || !canUsePublicLocations || !isServiceAllowed,
       onClick: () => {
         dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
@@ -260,7 +260,7 @@ export function ActionsPopover({
           {CREATE_SLO}
         </NoPermissionsTooltip>
       ),
-      icon: 'visGauge',
+      icon: 'chartGauge',
       disabled: !canEditSynthetics || !isServiceAllowed,
       onClick: () => {
         setIsPopoverOpen(false);
@@ -277,7 +277,7 @@ export function ActionsPopover({
           {enableLabel}
         </NoPermissionsTooltip>
       ),
-      icon: 'invert',
+      icon: 'contrast',
       disabled: !canEditSynthetics || !canUsePublicLocations,
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
@@ -338,7 +338,7 @@ export function ActionsPopover({
               <EuiButtonIcon
                 data-test-subj="syntheticsActionsPopoverButton"
                 aria-label={openActionsMenuAria}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 color="primary"
                 size={iconSize}
                 display="empty"

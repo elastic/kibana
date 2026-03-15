@@ -40,7 +40,7 @@ export const StepDetailsLinkIcon = ({
         data-test-subj="syntheticsStepDetailsLinkIconButton"
         {...commonProps}
         flush="left"
-        iconType="apmTrace"
+        iconType="chartWaterfall"
         href={stepDetailsLink}
       >
         {/* @ts-expect-error Type '(stepIndex?: number) => string' is not assignable to type 'ReactNode'.*/}
@@ -57,7 +57,7 @@ export const StepDetailsLinkIcon = ({
       size="s"
       href={stepDetailsLink}
       target={target}
-      iconType="apmTrace"
+      iconType="chartWaterfall"
     />
   );
 };

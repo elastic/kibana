@@ -34,7 +34,7 @@ export const MonitorNotFoundPage: React.FC = () => {
         <CreateMonitorButton />,
         <EuiButtonEmpty
           data-test-subj="syntheticsMonitorNotFoundPageGoToHomeButton"
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           flush="both"
           onClick={() => {
             application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID);

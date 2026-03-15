@@ -40,7 +40,7 @@ export function LabelsFieldFilter(props: FilterProps) {
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       isSelected={isPopoverOpen}
       onClick={onButtonClick}
@@ -57,7 +57,7 @@ export function LabelsFieldFilter(props: FilterProps) {
     return {
       label: field.name,
       searchableLabel: field.name,
-      append: <EuiIcon type="arrowRight" />,
+      append: <EuiIcon type="chevronSingleRight" />,
       showIcons: false,
     };
   });
@@ -79,7 +79,7 @@ export function LabelsFieldFilter(props: FilterProps) {
           <EuiPopoverTitle>
             <EuiButtonEmpty
               data-test-subj="o11yLabelsFieldFilterButton"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               iconSide="left"
               onClick={() => setSelectedLabel('')}
             >

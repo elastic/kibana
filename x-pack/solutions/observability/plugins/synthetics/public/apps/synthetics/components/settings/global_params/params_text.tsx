@@ -17,7 +17,7 @@ export const ParamsText = ({ text }: { text: string }) => {
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           data-test-subj="syntheticsParamsTextButton"
-          iconType={!isViewing ? 'eye' : 'eyeClosed'}
+          iconType={!isViewing ? 'eye' : 'eyeSlash'}
           aria-label={i18n.translate('xpack.synthetics.settingsRoute.viewParam', {
             defaultMessage: 'View parameter value',
           })}

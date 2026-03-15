@@ -27,7 +27,7 @@ export const CreateMonitorButton: React.FC = () => {
         color="primary"
         fill
         iconSide="left"
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
         href={`${basePath}/app/synthetics${MONITOR_ADD_ROUTE}`}
         isDisabled={!isEnabled || !canEditSynthetics || !isServiceAllowed}
         data-test-subj="syntheticsAddMonitorBtn"

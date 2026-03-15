@@ -28,7 +28,7 @@ export function createOverviewPanelAction(
     id: ADD_SLO_OVERVIEW_ACTION_ID,
     grouping: COMMON_OBSERVABILITY_GROUPING,
     order: 20,
-    getIconType: () => 'visGauge',
+    getIconType: () => 'chartGauge',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },

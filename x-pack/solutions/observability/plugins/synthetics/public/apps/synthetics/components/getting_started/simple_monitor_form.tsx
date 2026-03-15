@@ -99,7 +99,7 @@ export const SimpleMonitorForm = () => {
             <EuiButton
               type="submit"
               fill
-              iconType="plusInCircleFilled"
+              iconType="plusCircle"
               isLoading={loading}
               data-test-subj="syntheticsMonitorConfigSubmitButton"
               disabled={!canEditSynthetics}

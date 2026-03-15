@@ -110,7 +110,7 @@ function StaleAlert({
               data-test-subj="o11yAlertDetailsAlertStaleCalloutMarkAsUntrackedButton"
               color="warning"
               fill
-              iconType="eyeClosed"
+              iconType="eyeSlash"
               onClick={handleUntrackAlert}
             >
               {i18n.translate(

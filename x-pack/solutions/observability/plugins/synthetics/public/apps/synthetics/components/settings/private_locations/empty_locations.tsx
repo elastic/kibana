@@ -47,7 +47,7 @@ export const EmptyLocations = ({
           {redirectToSettings ? (
             <EuiButton
               data-test-subj="syntheticsEmptyLocationsButton"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               color="primary"
               fill
               isDisabled={!canSave}
@@ -60,7 +60,7 @@ export const EmptyLocations = ({
           ) : (
             <EuiButton
               data-test-subj="syntheticsEmptyLocationsButton"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               isDisabled={!canSave}
               color="primary"
               fill

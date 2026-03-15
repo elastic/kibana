@@ -115,7 +115,7 @@ export const AlertDropdown = () => {
           <EuiHeaderLink
             color="primary"
             iconSide={'right'}
-            iconType={'arrowDown'}
+            iconType={'chevronSingleDown'}
             onClick={openPopover}
           >
             <FormattedMessage id="xpack.infra.alerting.logs.alertsButton" defaultMessage="Alerts" />
