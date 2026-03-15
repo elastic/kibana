@@ -49,6 +49,7 @@ export const EndpointScriptEditFlyout = memo<EndpointScriptEditFlyoutProps>(
         <EndpointScriptEditFlyoutHeader show={show} data-test-subj={getTestId('header')} />
         <EuiFlyoutBody data-test-subj={getTestId('body')}>
           <EndpointScriptEditForm
+            isUploading={show === 'create'}
             scriptItem={scriptItem}
             onChange={onChange}
             data-test-subj={getTestId('form')}
