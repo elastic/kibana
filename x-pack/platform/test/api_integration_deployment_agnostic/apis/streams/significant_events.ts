@@ -94,6 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
           title: 'OOM Error',
+          description: '',
           esql: { query: esqlQuery },
         });
       });
@@ -278,6 +279,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
           title: 'OOM Error',
+          description: '',
           esql: { query: esqlQuery },
         });
 
