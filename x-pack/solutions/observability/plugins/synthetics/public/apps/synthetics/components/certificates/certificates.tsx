@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants/settings_defaults';
 import { setCertificatesTotalAction } from '../../state/certificates/certificates';
+import { getDynamicSettingsAction } from '../../state/settings';
+import { selectDynamicSettings } from '../../state/settings/selectors';
 import { CertificateSearch } from './cert_search';
 import { useCertSearch } from './use_cert_search';
 import type { CertSort } from './certificates_list';
 import { CertificateList } from './certificates_list';
 import { useBreadcrumbs } from '../../hooks';
+import { useFetchCertAlerts } from './use_fetch_cert_alerts';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
@@ -40,6 +44,18 @@ export const CertificatesPage: React.FC = () => {
   const [search, setSearch] = useState('');
 
   const dispatch = useDispatch();
+  const { settings } = useSelector(selectDynamicSettings);
+
+  useEffect(() => {
+    if (!settings) {
+      dispatch(getDynamicSettingsAction.get());
+    }
+  }, [dispatch, settings]);
+
+  const certExpirationThreshold =
+    settings?.certExpirationThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold;
+  const certAgeThreshold =
+    settings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold;
 
   const certificates = useCertSearch({
     search,
@@ -48,6 +64,13 @@ export const CertificatesPage: React.FC = () => {
     sortBy: sort.field,
     direction: sort.direction,
   });
+
+  const certSha256List = useMemo(
+    () => (certificates?.certs ?? []).map((cert) => cert.sha256).filter(Boolean),
+    [certificates?.certs]
+  );
+
+  const { alertsByCert } = useFetchCertAlerts(certSha256List);
 
   useEffect(() => {
     dispatch(setCertificatesTotalAction({ total: certificates.total }));
@@ -67,6 +90,9 @@ export const CertificatesPage: React.FC = () => {
         }}
         sort={sort}
         certificates={certificates}
+        alertsByCert={alertsByCert}
+        certExpirationThreshold={certExpirationThreshold}
+        certAgeThreshold={certAgeThreshold}
       />
     </>
   );
