@@ -194,7 +194,7 @@ describe('ServiceMapGraph - Screen Reader Announcements', () => {
     );
   });
 
-  it('has proper role and tabIndex on service map container', () => {
+  it('marks the service map container as a group without adding it to the tab order', () => {
     render(
       <ReactFlowProvider>
         <ServiceMapGraph {...defaultProps} />
@@ -203,10 +203,10 @@ describe('ServiceMapGraph - Screen Reader Announcements', () => {
 
     const serviceMapContainer = screen.getByTestId('serviceMapGraph');
     expect(serviceMapContainer).toHaveAttribute('role', 'group');
-    expect(serviceMapContainer).toHaveAttribute('tabIndex', '0');
+    expect(serviceMapContainer).not.toHaveAttribute('tabIndex', '0');
   });
 
-  it('instructions contain keyboard navigation guidance', () => {
+  it('tells the user to navigate with Arrow keys and Tab to leave the map', () => {
     render(
       <ReactFlowProvider>
         <ServiceMapGraph {...defaultProps} />
@@ -214,8 +214,9 @@ describe('ServiceMapGraph - Screen Reader Announcements', () => {
     );
 
     const instructions = screen.getByText(/This is an interactive service map/i);
-    expect(instructions.textContent).toContain('Tab');
     expect(instructions.textContent).toContain('Arrow keys');
+    expect(instructions.textContent).not.toContain('Use Tab to navigate between service nodes');
+    expect(instructions.textContent).toContain('Tab to leave');
     expect(instructions.textContent).toContain('Enter or Space');
     expect(instructions.textContent).toContain('Escape');
   });

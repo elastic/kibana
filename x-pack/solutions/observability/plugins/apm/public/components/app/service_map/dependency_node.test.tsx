@@ -108,4 +108,19 @@ describe('DependencyNode', () => {
     renderDependencyNode(createDependencyNodeData({ spanType: undefined }));
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
+
+  describe('accessibility', () => {
+    it('removes the inner diamond from the tab order', () => {
+      renderDependencyNode();
+      const button = screen.getByRole('button');
+      expect(button).not.toHaveAttribute('tabIndex', '0');
+    });
+
+    it('keeps role, aria-label, and aria-pressed on the inner diamond', () => {
+      renderDependencyNode(createDependencyNodeData(), true);
+      const button = screen.getByRole('button');
+      expect(button).toHaveAttribute('aria-label', expect.stringContaining('postgresql:5432'));
+      expect(button).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
 });
