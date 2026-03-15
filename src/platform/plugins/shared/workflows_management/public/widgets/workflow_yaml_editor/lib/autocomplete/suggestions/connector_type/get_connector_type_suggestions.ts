@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { BuiltInStepType, ConnectorTypeInfo } from '@kbn/workflows';
+import type { BuiltInStepType, ConnectorTypeInfo, WorkflowOutput } from '@kbn/workflows';
 import {
   DataSetStepSchema,
   ForEachStepSchema,
@@ -20,6 +20,8 @@ import {
   WhileStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
+  WorkflowOutputStepSchema,
 } from '@kbn/workflows';
 import { getCachedAllConnectors } from '../../../connectors_cache';
 import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';
@@ -34,7 +36,8 @@ const connectorTypeSuggestionsCache = new Map<string, monaco.languages.Completio
 export function getConnectorTypeSuggestions(
   typePrefix: string,
   range: monaco.IRange,
-  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
+  workflowOutputs?: WorkflowOutput[]
 ): monaco.languages.CompletionItem[] {
   // Create a cache key based on the type prefix and context
   const cacheKey = `${typePrefix}|${JSON.stringify(range)}`;
@@ -116,7 +119,11 @@ export function getConnectorTypeSuggestions(
     );
 
     matchingBuiltInTypes.forEach((stepType) => {
-      const snippetText = generateBuiltInStepSnippet(stepType.type as BuiltInStepType, {});
+      const snippetText = generateBuiltInStepSnippet(
+        stepType.type as BuiltInStepType,
+        {},
+        workflowOutputs
+      );
       const extendedRange = {
         startLineNumber: range.startLineNumber,
         endLineNumber: range.endLineNumber,
@@ -258,6 +265,16 @@ function getBuiltInStepTypesFromSchema(): Array<{
       schema: WorkflowExecuteAsyncStepSchema,
       description: 'Execute another workflow (asynchronous)',
       icon: monaco.languages.CompletionItemKind.Function,
+    },
+    {
+      schema: WorkflowOutputStepSchema,
+      description: 'Output values from the workflow',
+      icon: monaco.languages.CompletionItemKind.Property,
+    },
+    {
+      schema: WorkflowFailStepSchema,
+      description: 'Fail the workflow with a message',
+      icon: monaco.languages.CompletionItemKind.Constant,
     },
   ];
 

@@ -24,6 +24,8 @@ export type {
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowOutputGraphNode,
+  WorkflowOutputGraphNodeSchema,
 } from './nodes/base';
 export type {
   EnterConditionBranchNode,
@@ -83,6 +85,7 @@ export {
   isKibana,
   isWait,
   isWaitForInput,
+  isWorkflowOutput,
   isEnterForeach,
   isEnterWhile,
   isEnterIf,

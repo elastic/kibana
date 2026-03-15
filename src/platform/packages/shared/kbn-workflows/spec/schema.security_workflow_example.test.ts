@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { normalizeInputsToJsonSchema } from './lib/input_conversion';
+import { type NormalizableFieldSchema, normalizeFieldsToJsonSchema } from './lib/field_conversion';
 import { WorkflowSchema } from './schema';
 
 /**
@@ -282,7 +282,9 @@ describe('Security Workflow Example - JSON Schema Showcase', () => {
     ).toBe(100);
 
     // Test 3: Verify normalization works
-    const normalizedInputs = normalizeInputsToJsonSchema(parsedWorkflow.inputs);
+    const normalizedInputs = normalizeFieldsToJsonSchema(
+      parsedWorkflow.inputs as NormalizableFieldSchema
+    );
     expect(normalizedInputs).toBeDefined();
     expect(normalizedInputs?.properties?.analyst.properties?.email.format).toBe('email');
   });

@@ -27,7 +27,7 @@ import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
+import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import { ENABLED_TRIGGER_TABS } from './constants';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
 import type { WorkflowTriggerTab } from './types';
@@ -44,7 +44,7 @@ function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab 
 
   const hasManualTrigger = definition.triggers?.some((trigger) => trigger.type === 'manual');
   // Check if inputs exist and have properties (handles both new and legacy formats)
-  const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs);
+  const normalizedInputs = normalizeFieldsToJsonSchema(definition.inputs);
   const hasInputs =
     normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
 
@@ -119,8 +119,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         return false;
       }
       const hasAlertTrigger = definition.triggers?.some((trigger) => trigger.type === 'alert');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const normalizedInputs = normalizeInputsToJsonSchema(inputs as any);
+      const normalizedInputs = normalizeFieldsToJsonSchema(inputs);
       const hasInputs =
         normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
       if (!hasAlertTrigger && !hasInputs) {
@@ -143,8 +142,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setSelectedTrigger('alert');
         return;
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const normalizedInputs = normalizeInputsToJsonSchema(inputs as any);
+      const normalizedInputs = normalizeFieldsToJsonSchema(inputs);
       const hasInputs =
         normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
       if (hasInputs) {

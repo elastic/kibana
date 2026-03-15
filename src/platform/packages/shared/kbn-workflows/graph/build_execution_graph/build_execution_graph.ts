@@ -27,7 +27,9 @@ import type {
   WhileStep,
   WorkflowExecuteAsyncStep,
   WorkflowExecuteStep,
+  WorkflowFailStep,
   WorkflowOnFailure,
+  WorkflowOutputStep,
   WorkflowRetry,
   WorkflowSettings,
   WorkflowYaml,
@@ -56,6 +58,7 @@ import type {
   GraphNodeUnion,
   WaitForInputGraphNode,
   WorkflowGraphType,
+  WorkflowOutputGraphNode,
 } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
@@ -168,6 +171,20 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return visitWorkflowExecuteAsyncStep(currentStep as WorkflowExecuteAsyncStep, context);
   }
 
+  if (currentStep.type === 'workflow.output') {
+    return visitWorkflowOutputStep(currentStep, context);
+  }
+
+  if (currentStep.type === 'workflow.fail') {
+    const transformedStep: WorkflowOutputStep = {
+      ...currentStep,
+      type: 'workflow.output',
+      status: 'failed',
+      with: (currentStep as WorkflowFailStep).with ?? {},
+    };
+    return visitWorkflowOutputStep(transformedStep, context);
+  }
+
   return visitAtomicStep(currentStep, context);
 }
 
@@ -271,6 +288,23 @@ export function visitWorkflowExecuteAsyncStep(
   context: GraphBuildContext
 ): WorkflowGraphType {
   return createLeafStepGraph(currentStep, context, 'workflow.executeAsync');
+}
+
+export function visitWorkflowOutputStep(
+  currentStep: BaseStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const workflowOutputNode: WorkflowOutputGraphNode = {
+    id: stepId,
+    type: 'workflow.output',
+    stepId,
+    stepType: 'workflow.output',
+    configuration: currentStep as WorkflowOutputStep,
+  };
+  graph.setNode(workflowOutputNode.id, workflowOutputNode);
+  return graph;
 }
 
 export function visitAtomicStep(

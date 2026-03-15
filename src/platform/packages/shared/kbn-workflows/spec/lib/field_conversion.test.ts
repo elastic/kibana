@@ -10,13 +10,13 @@
 import type { z } from '@kbn/zod/v4';
 import {
   applyInputDefaults,
-  convertLegacyInputsToJsonSchema,
-  normalizeInputsToJsonSchema,
-} from './input_conversion';
+  convertLegacyFieldsToJsonSchema,
+  normalizeFieldsToJsonSchema,
+} from './field_conversion';
 import type { WorkflowInputSchema } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 
-describe('convertLegacyInputsToJsonSchema', () => {
+describe('convertLegacyFieldsToJsonSchema', () => {
   it('should convert array of legacy inputs to JSON Schema object format', () => {
     const legacyInputs = [
       {
@@ -33,7 +33,7 @@ describe('convertLegacyInputsToJsonSchema', () => {
       },
     ];
 
-    const result = convertLegacyInputsToJsonSchema(
+    const result = convertLegacyFieldsToJsonSchema(
       legacyInputs as Array<z.infer<typeof WorkflowInputSchema>>
     );
 
@@ -64,7 +64,7 @@ describe('convertLegacyInputsToJsonSchema', () => {
       },
     ];
 
-    const result = convertLegacyInputsToJsonSchema(
+    const result = convertLegacyFieldsToJsonSchema(
       legacyInputs as Array<z.infer<typeof WorkflowInputSchema>>
     );
 
@@ -85,7 +85,7 @@ describe('convertLegacyInputsToJsonSchema', () => {
       },
     ];
 
-    const result = convertLegacyInputsToJsonSchema(
+    const result = convertLegacyFieldsToJsonSchema(
       legacyInputs as Array<z.infer<typeof WorkflowInputSchema>>
     );
 
@@ -100,7 +100,7 @@ describe('convertLegacyInputsToJsonSchema', () => {
   });
 
   it('should handle empty array', () => {
-    const result = convertLegacyInputsToJsonSchema([]);
+    const result = convertLegacyFieldsToJsonSchema([]);
     expect(result).toEqual({
       properties: {},
       additionalProperties: false,
@@ -116,7 +116,7 @@ describe('convertLegacyInputsToJsonSchema', () => {
       },
     ];
 
-    const result = convertLegacyInputsToJsonSchema(
+    const result = convertLegacyFieldsToJsonSchema(
       legacyInputs as Array<z.infer<typeof WorkflowInputSchema>>
     );
 
@@ -138,7 +138,7 @@ describe('convertLegacyInputsToJsonSchema', () => {
       },
     ];
 
-    const result = convertLegacyInputsToJsonSchema(legacyInputs as any);
+    const result = convertLegacyFieldsToJsonSchema(legacyInputs as any);
 
     expect(result.properties?.username).toEqual({ type: 'string' });
     expect(result.properties?.age).toEqual({ type: 'number' });
@@ -148,7 +148,7 @@ describe('convertLegacyInputsToJsonSchema', () => {
   });
 });
 
-describe('normalizeInputsToJsonSchema', () => {
+describe('normalizeFieldsToJsonSchema', () => {
   it('should return new format inputs as-is', () => {
     const inputs: JsonModelSchemaType = {
       properties: {
@@ -161,7 +161,7 @@ describe('normalizeInputsToJsonSchema', () => {
       additionalProperties: false,
     };
 
-    const result = normalizeInputsToJsonSchema(inputs);
+    const result = normalizeFieldsToJsonSchema(inputs);
     expect(result).toEqual(inputs);
   });
 
@@ -174,7 +174,7 @@ describe('normalizeInputsToJsonSchema', () => {
       },
     ];
 
-    const result = normalizeInputsToJsonSchema(legacyInputs as any);
+    const result = normalizeFieldsToJsonSchema(legacyInputs as any);
 
     expect(result?.properties?.username).toEqual({
       type: 'string',
@@ -183,60 +183,60 @@ describe('normalizeInputsToJsonSchema', () => {
   });
 
   it('should return undefined for undefined input', () => {
-    const result = normalizeInputsToJsonSchema(undefined);
+    const result = normalizeFieldsToJsonSchema(undefined);
     expect(result).toBeUndefined();
   });
 
   describe('edge cases - partially parsed YAML (defensive checks)', () => {
     it('should handle string input (partially typed "properties")', () => {
       // Simulates user typing "properties:" in YAML editor
-      const result = normalizeInputsToJsonSchema('properties' as any);
+      const result = normalizeFieldsToJsonSchema('properties' as any);
       expect(result).toBeUndefined();
     });
 
     it('should handle number input', () => {
-      const result = normalizeInputsToJsonSchema(123 as any);
+      const result = normalizeFieldsToJsonSchema(123 as any);
       expect(result).toBeUndefined();
     });
 
     it('should handle boolean input', () => {
-      const result = normalizeInputsToJsonSchema(true as any);
+      const result = normalizeFieldsToJsonSchema(true as any);
       expect(result).toBeUndefined();
     });
 
     it('should handle null input', () => {
-      const result = normalizeInputsToJsonSchema(null as any);
+      const result = normalizeFieldsToJsonSchema(null as any);
       expect(result).toBeUndefined();
     });
 
     it('should handle empty string input', () => {
-      const result = normalizeInputsToJsonSchema('' as any);
+      const result = normalizeFieldsToJsonSchema('' as any);
       expect(result).toBeUndefined();
     });
 
     it('should handle object without properties key', () => {
-      const result = normalizeInputsToJsonSchema({ foo: 'bar' } as any);
+      const result = normalizeFieldsToJsonSchema({ foo: 'bar' } as any);
       expect(result).toBeUndefined();
     });
 
     it('should handle object with null properties', () => {
-      const result = normalizeInputsToJsonSchema({ properties: null } as any);
+      const result = normalizeFieldsToJsonSchema({ properties: null } as any);
       expect(result).toBeUndefined();
     });
 
     it('should handle object with string properties', () => {
-      const result = normalizeInputsToJsonSchema({ properties: 'invalid' } as any);
+      const result = normalizeFieldsToJsonSchema({ properties: 'invalid' } as any);
       expect(result).toBeUndefined();
     });
 
     it('should handle object with array properties (invalid)', () => {
-      const result = normalizeInputsToJsonSchema({ properties: [] } as any);
+      const result = normalizeFieldsToJsonSchema({ properties: [] } as any);
       // Should return undefined or handle gracefully (array is not valid properties)
       expect(result).toBeUndefined();
     });
 
     it('should handle object with properties containing null values', () => {
-      const result = normalizeInputsToJsonSchema({
+      const result = normalizeFieldsToJsonSchema({
         properties: {
           name: null,
           age: { type: 'number' },
@@ -248,7 +248,7 @@ describe('normalizeInputsToJsonSchema', () => {
     });
 
     it('should handle object with properties containing string values (invalid schema)', () => {
-      const result = normalizeInputsToJsonSchema({
+      const result = normalizeFieldsToJsonSchema({
         properties: {
           name: 'invalid string schema',
           age: { type: 'number' },
@@ -259,7 +259,7 @@ describe('normalizeInputsToJsonSchema', () => {
     });
 
     it('should handle deeply nested null values', () => {
-      const result = normalizeInputsToJsonSchema({
+      const result = normalizeFieldsToJsonSchema({
         properties: {
           user: {
             type: 'object',
@@ -303,14 +303,14 @@ describe('normalizeInputsToJsonSchema', () => {
       additionalProperties: false,
     };
 
-    const result = normalizeInputsToJsonSchema(inputs);
+    const result = normalizeFieldsToJsonSchema(inputs);
     expect(result).toEqual(inputs);
   });
 });
 
 describe('applyInputDefaults', () => {
   it('should apply defaults when inputs are undefined', () => {
-    const inputsSchema = normalizeInputsToJsonSchema({
+    const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {
         name: { type: 'string', default: 'Default Name' },
         age: { type: 'number', default: 25 },
@@ -327,7 +327,7 @@ describe('applyInputDefaults', () => {
   });
 
   it('should apply defaults for missing properties', () => {
-    const inputsSchema = normalizeInputsToJsonSchema({
+    const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {
         name: { type: 'string', default: 'Default Name' },
         age: { type: 'number', default: 25 },
@@ -344,7 +344,7 @@ describe('applyInputDefaults', () => {
   });
 
   it('should apply defaults for nested objects', () => {
-    const inputsSchema = normalizeInputsToJsonSchema({
+    const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {
         analyst: {
           type: 'object',
@@ -372,7 +372,7 @@ describe('applyInputDefaults', () => {
   });
 
   it('should apply defaults for partial nested objects', () => {
-    const inputsSchema = normalizeInputsToJsonSchema({
+    const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {
         analyst: {
           type: 'object',
@@ -400,7 +400,7 @@ describe('applyInputDefaults', () => {
   });
 
   it('should apply defaults for arrays', () => {
-    const inputsSchema = normalizeInputsToJsonSchema({
+    const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {
         notifyTeams: {
           type: 'array',
@@ -418,7 +418,7 @@ describe('applyInputDefaults', () => {
   });
 
   it('should apply defaults for $ref references', () => {
-    const inputsSchema = normalizeInputsToJsonSchema({
+    const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {
         user: {
           $ref: '#/definitions/UserSchema',
@@ -461,7 +461,7 @@ describe('applyInputDefaults', () => {
   });
 
   it('should pre-fill Threat Intelligence Enrichment workflow with all defaults', () => {
-    const inputsSchema = normalizeInputsToJsonSchema({
+    const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {
         analyst: {
           type: 'object',
@@ -636,7 +636,7 @@ describe('applyInputDefaults', () => {
   });
 
   it('should handle the security workflow example with all defaults', () => {
-    const inputsSchema = normalizeInputsToJsonSchema({
+    const inputsSchema = normalizeFieldsToJsonSchema({
       properties: {
         analyst: {
           type: 'object',
