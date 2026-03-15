@@ -107,7 +107,7 @@ export function RootCauseAnalysisContainer({
       onClick={() => {
         onClearAnalysisClick();
       }}
-      iconType="crossInCircle"
+      iconType="crossCircle"
     >
       {i18n.translate('xpack.observabilityAiAssistant.rca.clearButtonLabel', {
         defaultMessage: 'Clear',
@@ -157,7 +157,7 @@ export function RootCauseAnalysisContainer({
             errorMessage: error.message,
           },
         })}
-        iconType="alert"
+        iconType="warning"
         color="danger"
         button={
           <EuiFlexGroup direction="row" gutterSize="s">
@@ -183,7 +183,7 @@ export function RootCauseAnalysisContainer({
             })}
           </EuiText>
         }
-        iconType="checkInCircleFilled"
+        iconType="checkCircleFill"
         color="primary"
         button={
           <EuiFlexGroup direction="row" gutterSize="s">
@@ -280,7 +280,7 @@ function getToolResponseErrorItem(response: ToolErrorMessage['response']) {
           errorMessage: response.error.message,
         },
       })}
-      iconType="alert"
+      iconType="warning"
       color="danger"
     />
   );

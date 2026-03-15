@@ -312,7 +312,7 @@ export function KnowledgeBaseTab() {
                       fill
                       data-test-subj="knowledgeBaseNewEntryButton"
                       iconSide="right"
-                      iconType="arrowDown"
+                      iconType="chevronSingleDown"
                       onClick={() => setIsNewEntryPopoverOpen((prevValue) => !prevValue)}
                     >
                       {i18n.translate(
