@@ -158,10 +158,6 @@ export const customTimeRangePanelTexts = {
       defaultMessage: '{unit}s from now',
       values: { unit },
     }),
-  separatorOption: i18n.translate(
-    'sharedUXPackages.dateRangePicker.customTimeRangePanel.separatorOption',
-    { defaultMessage: '─────' }
-  ),
 };
 
 export const mainPanelTexts = {

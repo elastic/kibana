@@ -50,7 +50,7 @@ import {
 } from '../date_range_picker_panel_ui';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { dateMathToRelativeParts } from '../format';
-import { getOptionInputText, getOptionShorthand } from '../utils';
+import { getOptionShorthand } from '../utils';
 import type { DateType, DateOffset, TimeUnit } from '../types';
 import {
   DATE_TYPE_ABSOLUTE,
@@ -58,6 +58,7 @@ import {
   DATE_TYPE_NOW,
   DEFAULT_DATE_FORMAT,
   UNIT_SHORT_TO_FULL_MAP,
+  DATE_RANGE_INPUT_DELIMITER,
 } from '../constants';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 import { customTimeRangePanelTexts } from '../translations';
@@ -68,7 +69,8 @@ const UNIT_DIRECTION_OPTIONS = [
     value: `${short}_past`,
     text: customTimeRangePanelTexts.unitPastSuffix(full),
   })),
-  { value: '', text: customTimeRangePanelTexts.separatorOption, disabled: true },
+  // EuiSelect does not support grouping, this is temporary workaround
+  { value: '', text: '---', disabled: true },
   ...Object.entries(UNIT_SHORT_TO_FULL_MAP).map(([short, full]) => ({
     value: `${short}_future`,
     text: customTimeRangePanelTexts.unitFutureSuffix(full),
@@ -85,15 +87,15 @@ interface DatePartState {
 }
 
 interface DatePartPickerProps {
-  /** "Start date" or "End date" */
   label: string;
+  side: 'start' | 'end';
   state: DatePartState;
   onChange: (next: DatePartState) => void;
   error?: string;
 }
 
 /** Picker for one side of the range: tab group (Relative / Absolute / Now) plus conditional controls. */
-const DatePartPicker = ({ label, state, onChange, error }: DatePartPickerProps) => {
+const DatePartPicker = ({ label, side, state, onChange, error }: DatePartPickerProps) => {
   const tabGroupId = useGeneratedHtmlId({ prefix: 'datePartTab' });
   const fonts = useEuiFontSize('xs');
 
@@ -150,7 +152,7 @@ const DatePartPicker = ({ label, state, onChange, error }: DatePartPickerProps) 
     [state, onChange]
   );
 
-  const isStart = label === customTimeRangePanelTexts.startDateLabel;
+  const isStart = side === 'start';
 
   return (
     <div>
@@ -322,8 +324,11 @@ export function CustomTimeRangePanel() {
   const endDateString = useMemo(() => datePartStateToDateString(endState), [endState]);
 
   const inputText = useMemo(
-    () => getOptionInputText({ start: startDateString, end: endDateString }),
-    [startDateString, endDateString]
+    () =>
+      `${datePartStateToInputFragment(
+        startState
+      )} ${DATE_RANGE_INPUT_DELIMITER} ${datePartStateToInputFragment(endState)}`,
+    [startState, endState]
   );
   const shorthandValue = useMemo(
     () => getOptionShorthand({ start: startDateString, end: endDateString }),
@@ -331,20 +336,35 @@ export function CustomTimeRangePanel() {
   );
 
   const isInternalChangeRef = useRef(false);
+  const isPanelDrivenChangeRef = useRef(false);
+
+  const handleStartStateChange = useCallback((next: DatePartState) => {
+    isPanelDrivenChangeRef.current = true;
+    setStartState(next);
+  }, []);
+
+  const handleEndStateChange = useCallback((next: DatePartState) => {
+    isPanelDrivenChangeRef.current = true;
+    setEndState(next);
+  }, []);
 
   useEffect(() => {
     if (isInternalChangeRef.current) {
       isInternalChangeRef.current = false;
       return;
     }
+    // Both bounds must be present; skip when input is partial or unparseable.
+    if (!timeRange.start || !timeRange.end) return;
     setStartState(deriveInitialState(timeRange.start, timeRange.startDate, timeRange.type[0]));
     setEndState(deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1]));
   }, [timeRange.start, timeRange.end, timeRange.startDate, timeRange.endDate, timeRange.type]);
 
   useEffect(() => {
+    if (!isPanelDrivenChangeRef.current) return;
+    isPanelDrivenChangeRef.current = false;
     isInternalChangeRef.current = true;
     setText(inputText);
-  }, [inputText, startDateString, endDateString, setText]);
+  }, [inputText, setText]);
 
   const endBeforeStart =
     timeRange.startDate != null &&
@@ -383,13 +403,15 @@ export function CustomTimeRangePanel() {
             <EuiFlexGroup gutterSize="l" direction="column" responsive={false}>
               <DatePartPicker
                 label={customTimeRangePanelTexts.startDateLabel}
+                side="start"
                 state={startState}
-                onChange={setStartState}
+                onChange={handleStartStateChange}
               />
               <DatePartPicker
                 label={customTimeRangePanelTexts.endDateLabel}
+                side="end"
                 state={endState}
-                onChange={setEndState}
+                onChange={handleEndStateChange}
                 error={endError}
               />
               <ShorthandDisplay
@@ -460,6 +482,20 @@ function deriveInitialState(
       ? moment(date).format(DEFAULT_DATE_FORMAT)
       : dateString || formatAbsolute(null),
   };
+}
+
+/**
+ * Converts a DatePartState to the text fragment shown in the main input field.
+ * RELATIVE dates strip the leading `now` (e.g. `now-15m` → `-15m`);
+ * NOW type emits the literal string `"now"`;
+ * ABSOLUTE type returns the user's typed text as-is.
+ */
+function datePartStateToInputFragment(state: DatePartState): string {
+  if (state.type === DATE_TYPE_NOW) return 'now';
+  if (state.type === DATE_TYPE_RELATIVE) {
+    return datePartStateToDateString(state).replace(/^now/, '');
+  }
+  return state.absoluteText;
 }
 
 function datePartStateToDateString(state: DatePartState): string {

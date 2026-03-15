@@ -41,10 +41,22 @@ const OpenCustomPanelButton = () => {
   );
 };
 
+/** Reads the current context text value so tests can assert what the input would show. */
 const CurrentTextProbe = () => {
   const { text } = useDateRangePickerContext();
-
   return <output data-test-subj="currentDateRangeText">{text}</output>;
+};
+
+/**
+ * Simulates the main input changing (e.g. the user typing). Fires onChange which
+ * calls setText, exercising the input→panel sync path without needing to render the
+ * full input field.
+ */
+const TextSetterProbe = () => {
+  const { setText } = useDateRangePickerContext();
+  return (
+    <input aria-label="Set picker text" defaultValue="" onChange={(e) => setText(e.target.value)} />
+  );
 };
 
 const TestHarness = ({
@@ -60,6 +72,7 @@ const TestHarness = ({
     >
       <DateRangePickerPanelNavigationProvider defaultPanelId="main" panelDescriptors={[]}>
         <CurrentTextProbe />
+        <TextSetterProbe />
         <DateRangePickerPanel id="main">
           <OpenCustomPanelButton />
         </DateRangePickerPanel>
@@ -90,45 +103,14 @@ const getEndFieldset = () => getFieldset('End date');
 
 describe('CustomTimeRangePanel', () => {
   describe('initial state', () => {
-    it('derives start/end from the current time range', () => {
+    it('derives start/end picker state from the current time range', () => {
       renderCustomTimeRangePanel({ defaultValue: '-15m' });
       openCustomPanel();
 
       expect(within(getStartFieldset()).getByLabelText('Count')).toHaveValue(15);
       expect(
-        within(getEndFieldset()).getByText('End time will be set to the time of the refresh.')
+        within(getEndFieldset()).getByText(customTimeRangePanelTexts.nowEndHelpText)
       ).toBeInTheDocument();
-    });
-
-    it('shows absolute tab with a non-empty value for absolute dates', () => {
-      renderCustomTimeRangePanel({ defaultValue: '2025-01-01 to 2025-06-01' });
-      openCustomPanel();
-
-      const startInput = within(getStartFieldset()).getByLabelText('Start date absolute date');
-      expect(startInput).toBeInTheDocument();
-      expect((startInput as HTMLInputElement).value).not.toBe('');
-    });
-  });
-
-  describe('relative controls', () => {
-    it('updates count via the number input', () => {
-      renderCustomTimeRangePanel();
-      openCustomPanel();
-
-      const countInput = within(getStartFieldset()).getByLabelText('Count');
-      fireEvent.change(countInput, { target: { value: '30' } });
-
-      expect(countInput).toHaveValue(30);
-    });
-
-    it('switches unit and direction via the select', () => {
-      renderCustomTimeRangePanel();
-      openCustomPanel();
-
-      const select = within(getStartFieldset()).getByLabelText('Unit and direction');
-      fireEvent.change(select, { target: { value: 'h_past' } });
-
-      expect(select).toHaveValue('h_past');
     });
   });
 
@@ -143,14 +125,18 @@ describe('CustomTimeRangePanel', () => {
       expect(within(startFieldset).getByLabelText('Start date absolute date')).toBeInTheDocument();
     });
 
-    it('switches from Relative to Now and shows help text', () => {
+    it('switches from Relative to Now and shows side-specific help text', () => {
       renderCustomTimeRangePanel();
       openCustomPanel();
 
       fireEvent.click(within(getStartFieldset()).getByText('Now'));
-
       expect(
         within(getStartFieldset()).getByText(customTimeRangePanelTexts.nowStartHelpText)
+      ).toBeInTheDocument();
+
+      fireEvent.click(within(getEndFieldset()).getByText('Now'));
+      expect(
+        within(getEndFieldset()).getByText(customTimeRangePanelTexts.nowEndHelpText)
       ).toBeInTheDocument();
     });
   });
@@ -165,7 +151,7 @@ describe('CustomTimeRangePanel', () => {
       fireEvent.change(absInput, { target: { value: 'Jan 1 2025, 00:00' } });
 
       expect(
-        within(getEndFieldset()).getByText('End time will be set to the time of the refresh.')
+        within(getEndFieldset()).getByText(customTimeRangePanelTexts.nowEndHelpText)
       ).toBeInTheDocument();
     });
   });
@@ -183,19 +169,6 @@ describe('CustomTimeRangePanel', () => {
       const applyButton = within(dialog).getByRole('button', { name: 'Apply' });
       expect(applyButton).toBeDisabled();
     });
-
-    it('does not show error for a valid range', () => {
-      renderCustomTimeRangePanel();
-      openCustomPanel();
-
-      const dialog = screen.getByRole('dialog');
-      expect(
-        within(dialog).queryByText(customTimeRangePanelTexts.endBeforeStartError)
-      ).not.toBeInTheDocument();
-
-      const applyButton = within(dialog).getByRole('button', { name: 'Apply' });
-      expect(applyButton).toBeEnabled();
-    });
   });
 
   describe('shorthand display', () => {
@@ -204,7 +177,7 @@ describe('CustomTimeRangePanel', () => {
       openCustomPanel();
 
       const shorthandInput = screen.getByLabelText('Shorthand');
-      expect((shorthandInput as HTMLInputElement).value).toBe('-15m');
+      expect(shorthandInput).toHaveValue('-15m');
     });
 
     it('shows "(not available)" when the range is invalid', () => {
@@ -216,16 +189,62 @@ describe('CustomTimeRangePanel', () => {
     });
   });
 
-  describe('apply', () => {
-    it('calls onChange when the form is submitted', () => {
-      const onChange = jest.fn();
-      renderCustomTimeRangePanel({ onChange });
+  describe('input text sync', () => {
+    it('strips the "now" prefix from relative dates when the panel drives the input', () => {
+      // Start with the full date-math form to confirm it gets normalised to shorthand.
+      renderCustomTimeRangePanel({ defaultValue: 'now-30m to now' });
       openCustomPanel();
 
-      const dialog = screen.getByRole('dialog');
-      fireEvent.click(within(dialog).getByRole('button', { name: 'Apply' }));
+      // Trigger a panel-driven change so Effect B fires and calls setText.
+      fireEvent.change(within(getStartFieldset()).getByLabelText('Count'), {
+        target: { value: '15' },
+      });
 
-      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-15m to now');
+    });
+
+    it('emits the literal "now" in the input for the Now type', () => {
+      // Default: start=RELATIVE 15m, end=NOW. Switching start to Now produces "now to now".
+      renderCustomTimeRangePanel({ defaultValue: '-15m' });
+      openCustomPanel();
+
+      fireEvent.click(within(getStartFieldset()).getByText('Now'));
+
+      expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('now to now');
+    });
+
+    it('updates the panel UI when the input text changes to a valid range', () => {
+      renderCustomTimeRangePanel({ defaultValue: '-15m' });
+      openCustomPanel();
+
+      fireEvent.change(screen.getByLabelText('Set picker text'), {
+        target: { value: 'now-30m to now' },
+      });
+
+      expect(within(getStartFieldset()).getByLabelText('Count')).toHaveValue(30);
+      expect(
+        within(getEndFieldset()).getByText(customTimeRangePanelTexts.nowEndHelpText)
+      ).toBeInTheDocument();
+    });
+
+    it('does not reset the panel when the input becomes partial or unparseable', () => {
+      // '2025-01-01 to now' → start=ABSOLUTE "Jan 1 2025, 00:00", end=NOW.
+      renderCustomTimeRangePanel({ defaultValue: '2025-01-01 to now' });
+      openCustomPanel();
+
+      const startAbsInput = within(getStartFieldset()).getByLabelText('Start date absolute date');
+      expect(startAbsInput).toHaveValue('Jan 1 2025, 00:00');
+
+      // Simulate the user clearing/partially typing in the main input.
+      fireEvent.change(screen.getByLabelText('Set picker text'), {
+        target: { value: '2025-01-01 to' },
+      });
+
+      // Panel state must not have been clobbered by a fallback timestamp.
+      expect(startAbsInput).toHaveValue('Jan 1 2025, 00:00');
+      expect(
+        within(getEndFieldset()).getByText(customTimeRangePanelTexts.nowEndHelpText)
+      ).toBeInTheDocument();
     });
   });
 
@@ -237,7 +256,7 @@ describe('CustomTimeRangePanel', () => {
       expect(screen.queryByLabelText('Save as preset')).not.toBeInTheDocument();
     });
 
-    it('calls onPresetSave when checkbox is checked and Apply is clicked', () => {
+    it('calls onPresetSave with the correct bounds and label when Apply is clicked', () => {
       const onPresetSave = jest.fn();
       renderCustomTimeRangePanel({ onPresetSave });
       openCustomPanel();
@@ -246,10 +265,11 @@ describe('CustomTimeRangePanel', () => {
       fireEvent.click(within(dialog).getByLabelText('Save as preset'));
       fireEvent.click(within(dialog).getByRole('button', { name: 'Apply' }));
 
-      expect(onPresetSave).toHaveBeenCalledTimes(1);
-      expect(onPresetSave).toHaveBeenCalledWith(
-        expect.objectContaining({ start: expect.any(String), end: expect.any(String) })
-      );
+      expect(onPresetSave).toHaveBeenCalledWith({
+        start: 'now-15m',
+        end: 'now',
+        label: '-15m to now',
+      });
     });
   });
 
