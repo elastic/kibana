@@ -54,4 +54,13 @@ export interface ChatCompleteAnonymizationMetadata {
   profileId?: string;
   replacementsId?: string;
   target?: ChatCompleteAnonymizationTarget;
+  /**
+   * When true, inference suppresses server-side deanonymization so the LLM
+   * response is stored with tokens intact. The UI is then responsible for
+   * resolving originals via the replacements API.
+   *
+   * RFC §7.5: preferred approach for consumers that own their own rendering
+   * layer (e.g. Agent Builder) and want permission-gated reveal.
+   */
+  keepTokenized?: boolean;
 }

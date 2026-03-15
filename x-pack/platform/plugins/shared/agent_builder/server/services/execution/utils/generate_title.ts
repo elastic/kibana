@@ -23,12 +23,14 @@ export const generateTitle = ({
   chatModel,
   anonymizationEnabled,
   deanonymizeTitle,
+  abortSignal,
 }: {
   nextInput: ConverseInput;
   conversation: Conversation;
   chatModel: InferenceChatModel;
   anonymizationEnabled: boolean;
   deanonymizeTitle?: (title: string) => Promise<string>;
+  abortSignal?: AbortSignal;
 }): Observable<string> => {
   return defer(async () => {
     try {
@@ -38,6 +40,7 @@ export const generateTitle = ({
         chatModel,
         replacementsId: anonymizationEnabled ? conversation.replacementsId : undefined,
         deanonymizeTitle,
+        abortSignal,
       });
     } catch (e) {
       return conversation.title;
@@ -51,12 +54,14 @@ const generateConversationTitle = async ({
   chatModel,
   replacementsId,
   deanonymizeTitle,
+  abortSignal,
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   chatModel: InferenceChatModel;
   replacementsId?: string;
   deanonymizeTitle?: (title: string) => Promise<string>;
+  abortSignal?: AbortSignal;
 }) => {
   return withActiveInferenceSpan(
     'GenerateTitle',
@@ -93,7 +98,7 @@ Now, generate a title for the following conversation.`,
         createUserMessage(nextInput.message ?? '[no message]'),
       ];
 
-      const { title } = await structuredModel.invoke(prompt);
+      const { title } = await structuredModel.invoke(prompt, { signal: abortSignal });
 
       const resolvedTitle = deanonymizeTitle ? await deanonymizeTitle(title) : title;
 

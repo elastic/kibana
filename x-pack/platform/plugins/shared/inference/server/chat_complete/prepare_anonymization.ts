@@ -101,6 +101,7 @@ export const prepareAnonymization = async ({
     });
     repo = new ReplacementsRepository(replacementsClient, {
       encryptionKey,
+      logger,
     });
   }
 
@@ -170,6 +171,7 @@ export const prepareAnonymization = async ({
     });
     repo = new ReplacementsRepository(replacementsClient, {
       encryptionKey,
+      logger,
     });
   }
 
