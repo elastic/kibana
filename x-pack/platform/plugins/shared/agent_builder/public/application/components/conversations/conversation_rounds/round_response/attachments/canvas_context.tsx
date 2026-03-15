@@ -11,13 +11,19 @@ import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 interface CanvasState {
   attachment: UnknownAttachment;
   isSidebar: boolean;
+  /** Version number of the attachment being previewed */
+  version?: number;
+  /** When true, automatically update to show the latest version when new versions arrive */
+  followLatest: boolean;
 }
 
 interface CanvasContextValue {
   canvasState: CanvasState | null;
-  openCanvas: (attachment: UnknownAttachment, isSidebar: boolean) => void;
+  openCanvas: (attachment: UnknownAttachment, isSidebar: boolean, version?: number) => void;
   closeCanvas: () => void;
   setCanvasAttachmentOrigin: (origin: unknown) => void;
+  /** Update canvas with new attachment data (used for live updates when following latest) */
+  updateCanvasAttachment: (attachment: UnknownAttachment, version: number) => void;
 }
 
 const CanvasContext = createContext<CanvasContextValue | null>(null);
@@ -29,8 +35,20 @@ interface CanvasProviderProps {
 export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
   const [canvasState, setCanvasState] = useState<CanvasState | null>(null);
 
-  const openCanvas = useCallback((attachment: UnknownAttachment, isSidebar: boolean) => {
-    setCanvasState({ attachment, isSidebar });
+  const openCanvas = useCallback(
+    (attachment: UnknownAttachment, isSidebar: boolean, version?: number) => {
+      // If no version specified, follow latest; otherwise show specific version
+      const followLatest = version === undefined;
+      setCanvasState({ attachment, isSidebar, version, followLatest });
+    },
+    []
+  );
+
+  const updateCanvasAttachment = useCallback((attachment: UnknownAttachment, version: number) => {
+    setCanvasState((prev) => {
+      if (!prev || !prev.followLatest) return prev;
+      return { ...prev, attachment, version };
+    });
   }, []);
 
   const closeCanvas = useCallback(() => {
@@ -48,8 +66,14 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
   }, []);
 
   const value = useMemo(
-    () => ({ canvasState, openCanvas, closeCanvas, setCanvasAttachmentOrigin }),
-    [canvasState, openCanvas, closeCanvas, setCanvasAttachmentOrigin]
+    () => ({
+      canvasState,
+      openCanvas,
+      closeCanvas,
+      setCanvasAttachmentOrigin,
+      updateCanvasAttachment,
+    }),
+    [canvasState, openCanvas, closeCanvas, setCanvasAttachmentOrigin, updateCanvasAttachment]
   );
 
   return <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>;

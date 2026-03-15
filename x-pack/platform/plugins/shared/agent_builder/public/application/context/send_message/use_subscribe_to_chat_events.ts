@@ -112,6 +112,10 @@ export const useSubscribeToChatEvents = ({
       const { tool_call_id: toolCallId, results } = event.data;
       conversationActions.setToolCallResult({ results, toolCallId });
     } else if (isRoundCompleteEvent(event)) {
+      // Update attachments if they were modified during this round
+      if (event.data.attachments) {
+        conversationActions.updateAttachments({ attachments: event.data.attachments });
+      }
       // Now we have the full response and can stop the loading indicators
       setIsResponseLoading(false);
     } else if (isConversationCreatedEvent(event)) {

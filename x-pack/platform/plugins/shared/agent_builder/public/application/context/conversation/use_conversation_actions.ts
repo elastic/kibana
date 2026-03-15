@@ -16,6 +16,7 @@ import type {
   ToolCallStep,
   Conversation,
 } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { isToolCallStep, ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -71,6 +72,7 @@ export interface ConversationActions {
     conversationId: string;
     title: string;
   }) => void;
+  updateAttachments: ({ attachments }: { attachments: VersionedAttachment[] }) => void;
   deleteConversation: (id: string) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<void>;
 }
@@ -244,6 +246,15 @@ const createConversationActions = ({
         round.pending_prompt = undefined;
         round.status = ConversationRoundStatus.inProgress;
       });
+    },
+    updateAttachments: ({ attachments }: { attachments: VersionedAttachment[] }) => {
+      setConversation(
+        produce((draft) => {
+          if (draft) {
+            draft.attachments = attachments;
+          }
+        })
+      );
     },
     onConversationCreated: ({
       conversationId: id,

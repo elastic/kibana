@@ -10,15 +10,51 @@ import { EuiFlyout, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
+import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
+import { useConversation } from '../../../../../hooks/use_conversation';
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
 
 const FLYOUT_ARIA_LABEL = i18n.translate('xpack.agentBuilder.canvasFlyout.ariaLabel', {
   defaultMessage: 'Attachment preview',
 });
+
+interface CanvasContentWrapperProps {
+  uiDefinition: NonNullable<ReturnType<AttachmentsService['getAttachmentUiDefinition']>>;
+  attachment: UnknownAttachment;
+  isSidebar: boolean;
+  registerActionButtons: (buttons: ActionButton[]) => void;
+  updateOrigin: (origin: unknown) => Promise<unknown>;
+  closeCanvas: () => void;
+  conversationId: string | undefined;
+}
+
+/**
+ * Wrapper component for canvas content that forces remount when key changes.
+ * This ensures the content fully re-renders when switching between attachments.
+ */
+const CanvasContentWrapper: React.FC<CanvasContentWrapperProps> = ({
+  uiDefinition,
+  attachment,
+  isSidebar,
+  registerActionButtons,
+  updateOrigin,
+  closeCanvas,
+  conversationId,
+}) => {
+  return (
+    <>
+      {uiDefinition.renderCanvasContent?.(
+        { attachment, isSidebar, conversationId },
+        { registerActionButtons, updateOrigin, closeCanvas }
+      )}
+    </>
+  );
+};
 
 interface CanvasFlyoutProps {
   attachmentsService: AttachmentsService;
@@ -31,9 +67,11 @@ interface CanvasFlyoutProps {
  */
 export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }) => {
   const { euiTheme } = useEuiTheme();
-  const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
+  const { canvasState, closeCanvas, setCanvasAttachmentOrigin, updateCanvasAttachment } =
+    useCanvasContext();
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
+  const { conversation } = useConversation();
 
   // Track previous conversation ID to detect changes
   const prevConversationIdRef = useRef(conversationId);
@@ -45,6 +83,46 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       prevConversationIdRef.current = conversationId;
     }
   }, [conversationId, closeCanvas]);
+
+  // Auto-update canvas when following latest and a new version arrives
+  useEffect(() => {
+    if (!canvasState?.followLatest || !conversation?.attachments) {
+      return;
+    }
+
+    const versionedAttachment = conversation.attachments.find(
+      (att) => att.id === canvasState.attachment.id
+    );
+
+    if (!versionedAttachment) {
+      return;
+    }
+
+    const latestVersion = getLatestVersion(versionedAttachment);
+    if (!latestVersion) {
+      return;
+    }
+
+    // Only update if the version has changed
+    if (latestVersion.version !== canvasState.version) {
+      updateCanvasAttachment(
+        {
+          id: versionedAttachment.id,
+          type: versionedAttachment.type,
+          data: latestVersion.data,
+          hidden: versionedAttachment.hidden,
+          origin: versionedAttachment.origin,
+        },
+        latestVersion.version
+      );
+    }
+  }, [
+    canvasState?.followLatest,
+    canvasState?.attachment.id,
+    canvasState?.version,
+    conversation?.attachments,
+    updateCanvasAttachment,
+  ]);
 
   const updateOrigin = useCallback(
     async (origin: unknown) => {
@@ -141,10 +219,16 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         showPreviewBadge
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        {uiDefinition.renderCanvasContent(
-          { attachment, isSidebar },
-          { registerActionButtons, updateOrigin }
-        )}
+        <CanvasContentWrapper
+          key={`${attachment.id}-${canvasState.version ?? 'latest'}`}
+          uiDefinition={uiDefinition}
+          attachment={attachment}
+          isSidebar={isSidebar}
+          registerActionButtons={registerActionButtons}
+          updateOrigin={updateOrigin}
+          closeCanvas={closeCanvas}
+          conversationId={conversationId}
+        />
       </EuiFlyoutBody>
     </EuiFlyout>
   );
