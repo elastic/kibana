@@ -15,6 +15,7 @@ export const internalNamespaces = {
   filestore: 'filestore',
   attachments: 'attachments',
   observability: 'observability',
+  search: 'search',
   security: 'security',
   workflows: 'platform.workflows',
 } as const;
@@ -28,6 +29,7 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.filestore,
   internalNamespaces.observability,
   internalNamespaces.platformDashboard, // Owned by dashboard_agent plugin
+  internalNamespaces.search,
   internalNamespaces.security,
   internalNamespaces.workflows,
 ];
