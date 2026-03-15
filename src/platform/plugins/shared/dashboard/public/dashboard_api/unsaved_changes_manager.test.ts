@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, skip, Subject } from 'rxjs';
+import { BehaviorSubject, skip } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
@@ -24,7 +24,7 @@ import { getSampleDashboardState } from '../mocks';
 
 jest.mock('../services/dashboard_backup_service', () => ({}));
 
-const forcePublishOnReset$ = new Subject<void>();
+const setStateMock = () => {};
 
 const layoutUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
 const layoutManagerMock = {
@@ -99,7 +99,7 @@ describe('unsavedChangesManager', () => {
           settingsManager,
           unifiedSearchManager: unifiedSearchManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
-          forcePublishOnReset$,
+          setState: setStateMock,
         });
 
         unsavedChangesManager.api.hasUnsavedChanges$
@@ -124,7 +124,7 @@ describe('unsavedChangesManager', () => {
           settingsManager: settingsManagerMock,
           unifiedSearchManager: unifiedSearchManagerMock,
           projectRoutingManager: projectRoutingManagerMock,
-          forcePublishOnReset$,
+          setState: setStateMock,
         });
 
         setBackupStateMock.mockImplementation((id, backupState) => {
@@ -178,7 +178,7 @@ describe('unsavedChangesManager', () => {
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
-        forcePublishOnReset$,
+        setState: setStateMock,
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
@@ -212,7 +212,7 @@ describe('unsavedChangesManager', () => {
         settingsManager: settingsManagerMock,
         unifiedSearchManager: unifiedSearchManagerMock,
         projectRoutingManager: customProjectRoutingManagerMock,
-        forcePublishOnReset$,
+        setState: setStateMock,
       });
 
       unsavedChangesManager.api.hasUnsavedChanges$.pipe(skip(1)).subscribe((hasChanges) => {
