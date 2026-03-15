@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
-
-type TextBasedColumnTypes = Record<string, DatatableColumnMeta>;
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
 
 /**
  * Columns meta for text based searches
@@ -17,9 +16,13 @@ type TextBasedColumnTypes = Record<string, DatatableColumnMeta>;
  */
 export const getTextBasedColumnsMeta = (
   textBasedColumns: DatatableColumn[]
-): TextBasedColumnTypes => {
-  return textBasedColumns.reduce<TextBasedColumnTypes>((map, next) => {
-    map[next.name] = next.meta;
+): DataTableColumnsMeta => {
+  return textBasedColumns.reduce<DataTableColumnsMeta>((map, next) => {
+    map[next.name] = {
+      type: next.meta.type,
+      esType: next.meta.esType,
+      isComputedColumn: next.isComputedColumn,
+    };
     return map;
   }, {});
 };

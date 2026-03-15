@@ -364,8 +364,15 @@ export function getDataStateContainer({
           );
 
           const dataView = currentDataView$.getValue();
+          const query = getCurrentTab().appState.query;
+          const isEsqlQuery = isOfAggregateQueryType(query);
           const defaultProfileState = dataView
-            ? getDefaultProfileState({ scopedProfilesManager, resetDefaultProfileState, dataView })
+            ? getDefaultProfileState({
+                scopedProfilesManager,
+                resetDefaultProfileState,
+                dataView,
+                isEsqlMode: isEsqlQuery,
+              })
             : undefined;
           const preFetchStateUpdate = defaultProfileState?.getPreFetchState();
 
@@ -381,8 +388,6 @@ export function getDataStateContainer({
 
           abortController = new AbortController();
 
-          const query = getCurrentTab().appState.query;
-          const isEsqlQuery = isOfAggregateQueryType(query);
           const latestFetchDetails: DiscoverLatestFetchDetails = {
             abortController,
           };

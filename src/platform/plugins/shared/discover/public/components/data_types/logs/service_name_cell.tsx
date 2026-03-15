@@ -11,6 +11,7 @@ import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import type { AgentName } from '@kbn/elastic-agent-utils';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
@@ -36,7 +37,11 @@ export const getServiceNameCell =
   (props: DataGridCellValueElementProps) => {
     const { core, share } = useDiscoverServices();
     const serviceNameValue = getFieldValue(props.row, serviceNameField);
-    const field = props.dataView.getFieldByName(serviceNameField);
+    const field = getDataViewFieldOrCreateFromColumnMeta({
+      dataView: props.dataView,
+      fieldName: serviceNameField,
+      columnMeta: props.columnsMeta?.[serviceNameField],
+    });
     const agentName = getFieldValue(props.row, AGENT_NAME_FIELD) as AgentName;
     const otelSdkLanguage = getFieldValue(
       props.row,

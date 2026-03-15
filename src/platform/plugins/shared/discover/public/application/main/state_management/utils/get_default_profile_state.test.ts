@@ -37,6 +37,7 @@ describe('getDefaultProfileState', () => {
           hideChart: false,
         },
         dataView: dataViewWithTimefieldMock,
+        isEsqlMode: false,
       }).getPreFetchState();
       expect(appState).toEqual({
         breakdownField: 'extension',
@@ -51,8 +52,27 @@ describe('getDefaultProfileState', () => {
           hideChart: false,
         },
         dataView: emptyDataView,
+        isEsqlMode: false,
       }).getPreFetchState();
       expect(appState).toEqual(undefined);
+    });
+
+    it('should return breakdownField in ES|QL mode even with empty data view', () => {
+      const appState = getDefaultProfileState({
+        scopedProfilesManager,
+        resetDefaultProfileState: {
+          resetId: 'test',
+          columns: false,
+          rowHeight: false,
+          breakdownField: true,
+          hideChart: false,
+        },
+        dataView: emptyDataView,
+        isEsqlMode: true,
+      }).getPreFetchState();
+      expect(appState).toEqual({
+        breakdownField: 'extension',
+      });
     });
 
     it('should return expected hideChart', () => {
@@ -66,6 +86,7 @@ describe('getDefaultProfileState', () => {
           hideChart: true,
         },
         dataView: dataViewWithTimefieldMock,
+        isEsqlMode: false,
       }).getPreFetchState();
       expect(appState).toEqual({
         hideChart: true,
@@ -80,6 +101,7 @@ describe('getDefaultProfileState', () => {
           hideChart: false,
         },
         dataView: emptyDataView,
+        isEsqlMode: false,
       }).getPreFetchState();
       expect(appState).toEqual(undefined);
     });
@@ -97,6 +119,7 @@ describe('getDefaultProfileState', () => {
           hideChart: false,
         },
         dataView: dataViewWithTimefieldMock,
+        isEsqlMode: false,
       }).getPostFetchState({
         defaultColumns: ['messsage', 'bytes'],
         esqlQueryColumns: undefined,
@@ -124,6 +147,7 @@ describe('getDefaultProfileState', () => {
           hideChart: false,
         },
         dataView: emptyDataView,
+        isEsqlMode: true,
       }).getPostFetchState({
         defaultColumns: ['messsage', 'bytes'],
         esqlQueryColumns: [
@@ -154,6 +178,7 @@ describe('getDefaultProfileState', () => {
           hideChart: false,
         },
         dataView: dataViewWithTimefieldMock,
+        isEsqlMode: false,
       }).getPostFetchState({
         defaultColumns: [],
         esqlQueryColumns: undefined,
@@ -174,6 +199,7 @@ describe('getDefaultProfileState', () => {
           hideChart: false,
         },
         dataView: dataViewWithTimefieldMock,
+        isEsqlMode: false,
       }).getPostFetchState({
         defaultColumns: [],
         esqlQueryColumns: undefined,
