@@ -20,11 +20,11 @@ export const getFlyoutPanelProps = ({
   value: string | number | undefined;
 }): FlyoutPanelProps | null => {
   if (isHostName(fieldName) && typeof value === 'string') {
-    return getHostFlyoutPanelProps({ contextId, hostName: value });
+    return getHostFlyoutPanelProps({ contextId, entityIdentifiers: { [fieldName]: value } });
   }
 
   if (isUserName(fieldName) && typeof value === 'string') {
-    return getUserFlyoutPanelProps({ contextId, userName: value });
+    return getUserFlyoutPanelProps({ contextId, entityIdentifiers: { [fieldName]: value } });
   }
 
   return null;

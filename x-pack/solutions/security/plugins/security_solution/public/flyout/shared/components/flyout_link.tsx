@@ -14,6 +14,7 @@ import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { PreviewLink } from './preview_link';
 import { getRightPanelParams } from '../utils/link_utils';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 interface FlyoutLinkProps {
   /**
@@ -24,6 +25,10 @@ interface FlyoutLinkProps {
    * Value to display in EuiLink
    */
   value: string;
+  /**
+   * Entity identifiers - key-value pairs of field names and their values
+   */
+  entityIdentifiers?: EntityIdentifiers;
   /**
    * Scope id to use for the preview panel
    */
@@ -58,6 +63,7 @@ interface FlyoutLinkProps {
 export const FlyoutLink: FC<FlyoutLinkProps> = ({
   field,
   value,
+  entityIdentifiers,
   scopeId,
   isFlyoutOpen = false,
   ruleId,
@@ -72,12 +78,13 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   const rightPanelParams = useMemo(
     () =>
       getRightPanelParams({
-        value,
+        entityIdentifiers,
         field,
+        value,
         scopeId,
         ruleId,
       }),
-    [value, field, scopeId, ruleId]
+    [entityIdentifiers, field, value, scopeId, ruleId]
   );
 
   const onClick = useCallback(() => {
@@ -98,7 +105,11 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   // If the flyout is open, render the preview link
   if (renderPreview) {
     return (
-      <PreviewLink field={field} value={value} scopeId={scopeId} data-test-subj={dataTestSubj}>
+      <PreviewLink
+        entityIdentifiers={entityIdentifiers ?? { [field]: value }}
+        scopeId={scopeId}
+        data-test-subj={dataTestSubj}
+      >
         {children}
       </PreviewLink>
     );

@@ -29,6 +29,7 @@ import type { IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import { allowedExperimentalValues } from '../../../../common';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common/entity_analytics/entity_store/constants';
 
 const definition: EntityDefinition = convertToEntityManagerDefinition(
   {
@@ -179,6 +180,9 @@ describe('EntityStoreDataClient', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       esClientMock.search.mockResolvedValue(emptySearchResponse);
+      uiSettingsClientGetMock.mockImplementation((key: string) =>
+        Promise.resolve(key === FF_ENABLE_ENTITY_STORE_V2 ? true : undefined)
+      );
     });
 
     it('searches in the entities store indices', async () => {
@@ -189,10 +193,27 @@ describe('EntityStoreDataClient', () => {
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: [
+          index: ['.entities.v2.latest.security_default'],
+        })
+      );
+    });
+
+    it('uses v1 indices when entity store v2 feature flag is disabled', async () => {
+      uiSettingsClientGetMock.mockImplementation((key: string) =>
+        Promise.resolve(key === FF_ENABLE_ENTITY_STORE_V2 ? false : undefined)
+      );
+
+      await dataClient.searchEntities({
+        ...defaultSearchParams,
+        entityTypes: [EntityType.host, EntityType.user],
+      });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: expect.arrayContaining([
             '.entities.v1.latest.security_host_default',
             '.entities.v1.latest.security_user_default',
-          ],
+          ]),
         })
       );
     });
@@ -204,7 +225,13 @@ describe('EntityStoreDataClient', () => {
       });
 
       expect(esClientMock.search).toHaveBeenCalledWith(
-        expect.objectContaining({ query: { match_all: {} } })
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [{ terms: { 'entity.EngineMetadata.Type': ['host'] } }, { match_all: {} }],
+            },
+          },
+        })
       );
     });
 
@@ -266,7 +293,7 @@ describe('EntityStoreDataClient', () => {
           total: 1,
           hits: [
             {
-              _index: '.entities.v1.latest.security_host_default',
+              _index: '.entities.v2.latest.security_default',
               _source: fakeEntityRecord,
             },
           ],
@@ -287,7 +314,7 @@ describe('EntityStoreDataClient', () => {
           total: 1,
           hits: [
             {
-              _index: '.entities.v1.latest.security_host_default',
+              _index: '.entities.v2.latest.security_default',
               _source: { asset: { criticality: 'deleted' }, ...fakeEntityRecord },
             },
           ],
@@ -296,7 +323,8 @@ describe('EntityStoreDataClient', () => {
 
       const response = await dataClient.searchEntities(defaultSearchParams);
 
-      expect(response.records[0]).toEqual(fakeEntityRecord);
+      expect(response.records[0]).toMatchObject(fakeEntityRecord);
+      expect(response.records[0]).toHaveProperty('asset', { criticality: 'deleted' });
     });
   });
 

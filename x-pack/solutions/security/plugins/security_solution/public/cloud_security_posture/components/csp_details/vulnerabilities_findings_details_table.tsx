@@ -9,7 +9,11 @@ import React, { memo, useCallback, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { buildVulnerabilityEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import {
+  buildEntityFlyoutPreviewQueryWithStatus,
+  VULNERABILITY_QUERY_FIELD,
+} from '@kbn/cloud-security-posture-common';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type {
   VulnerabilitiesFindingDetailFields,
@@ -44,11 +48,11 @@ import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { get } from 'lodash/fp';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { buildEntityFlyoutPreviewCspOptions } from '../../utils/entity_flyout_preview_options';
 
 import { VulnerabilityFindingsPreviewPanelKey } from '../../../flyout/csp_details/vulnerabilities_flyout/constants';
-import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 
 type VulnerabilitySortFieldType =
   | 'score'
@@ -64,8 +68,9 @@ type VulnerabilitySortFieldType =
 const EMPTY_VALUE = '-';
 
 export const VulnerabilitiesFindingsDetailsTable = memo(
-  ({ value, scopeId }: { value: string; scopeId: string }) => {
+  ({ entityIdentifiers, scopeId }: { entityIdentifiers: EntityIdentifiers; scopeId: string }) => {
     const { getSeverityStatusColor } = useGetSeverityStatusColor();
+    const euidApi = useEntityStoreEuidApi();
 
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -94,13 +99,19 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     };
 
     const { data } = useVulnerabilitiesFindings({
-      query: buildVulnerabilityEntityFlyoutPreviewQuery('host.name', value, currentFilter),
+      query: buildEntityFlyoutPreviewQueryWithStatus(
+        euidApi?.buildEntityFiltersFromEntityIdentifiers(entityIdentifiers) ?? [],
+        currentFilter || undefined,
+        VULNERABILITY_QUERY_FIELD
+      ),
       sort: [sortFieldDirection],
-      enabled: true,
+      enabled: !!euidApi,
       pageSize: 1,
     });
 
-    const { counts } = useHasVulnerabilities('host.name', value);
+    const { counts } = useHasVulnerabilities(
+      buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+    );
 
     const { critical = 0, high = 0, medium = 0, low = 0, none = 0 } = counts || {};
 
@@ -151,8 +162,8 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     const getNavUrlParams: ReturnType<typeof useGetNavigationUrlParams> =
       useGetNavigationUrlParams();
 
-    const getVulnerabilityUrl = (name: string, queryField: CloudPostureEntityIdentifier) => {
-      return getNavUrlParams({ [queryField]: name }, 'vulnerabilities');
+    const getVulnerabilityUrl = (identifiers: EntityIdentifiers) => {
+      return getNavUrlParams(identifiers, 'vulnerabilities');
     };
 
     const vulnerabilityStats = getVulnerabilityStats(
@@ -342,7 +353,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
         <EuiPanel hasShadow={false}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-            path={`${getVulnerabilityUrl(value, EntityIdentifierFields.hostName)}`}
+            path={`${getVulnerabilityUrl(entityIdentifiers)}`}
             target={'_blank'}
             external={false}
             onClick={() => {
@@ -372,9 +383,9 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
             data-test-subj={'securitySolutionFlyoutVulnerabilitiesFindingsTable'}
             sorting={sorting}
             tableCaption={i18n.translate(
-              'xpack.securitySolution.flyout.left.insights.vulnerability.findingsTableCaption',
+              'xpack.securitySolution.flyout.left.insights.vulnerability.table.caption',
               {
-                defaultMessage: 'List of vulnerability findings',
+                defaultMessage: 'Vulnerabilities findings table',
               }
             )}
           />

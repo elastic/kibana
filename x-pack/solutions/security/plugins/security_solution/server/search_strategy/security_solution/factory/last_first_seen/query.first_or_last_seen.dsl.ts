@@ -5,14 +5,25 @@
  * 2.0.
  */
 
+import { euid } from '@kbn/entity-store/common';
 import type { FirstLastSeenRequestOptions } from '../../../../../common/api/search_strategy';
 
 import { createQueryFilterClauses } from '../../../../utils/build_query';
 
 export const buildFirstOrLastSeenQuery = (options: FirstLastSeenRequestOptions) => {
-  const { field, value, defaultIndex, order, filterQuery } = options;
+  const { field, value, defaultIndex, order, filterQuery, hostEntityIdentifiers } = options;
 
-  const filter = [...createQueryFilterClauses(filterQuery), { term: { [field]: value } }];
+  const entityFilters =
+    hostEntityIdentifiers && Object.keys(hostEntityIdentifiers).length > 0
+      ? euid.getEuidDslFilterBasedOnDocument('host', hostEntityIdentifiers, {
+          includeEuidSourceFilter: false,
+        })
+      : { term: { [field]: value } };
+
+  const filter = [
+    ...createQueryFilterClauses(filterQuery),
+    ...(entityFilters ? [entityFilters] : []),
+  ];
 
   const dslQuery = {
     allow_no_indices: true,

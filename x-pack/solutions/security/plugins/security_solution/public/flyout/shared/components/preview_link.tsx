@@ -12,16 +12,13 @@ import { useKibana } from '../../../common/lib/kibana';
 import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { getPreviewPanelParams } from '../utils/link_utils';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 interface PreviewLinkProps {
   /**
-   * Field name
+   * Entity identifiers - key-value pairs of field names and their values
    */
-  field: string;
-  /**
-   * Value to display in EuiLink
-   */
-  value: string;
+  entityIdentifiers: EntityIdentifiers;
   /**
    * Scope id to use for the preview panel
    */
@@ -43,6 +40,12 @@ interface PreviewLinkProps {
    * when clicking on "Source event" id
    */
   ancestorsIndexName?: string;
+  /**
+   * When entityIdentifiers contain both host and user fields (e.g. from document context),
+   * use this to force which entity flyout (host vs user) to open. E.g. in Prevalence tab
+   * user.name row should open user flyout even when identifiers include host fields.
+   */
+  preferredField?: 'host.name' | 'user.name';
 }
 
 /**
@@ -50,27 +53,48 @@ interface PreviewLinkProps {
  * If the field is not previewable, the link will not be rendered
  */
 export const PreviewLink: FC<PreviewLinkProps> = ({
-  field,
-  value,
+  entityIdentifiers,
   scopeId,
   ruleId,
   children,
   ancestorsIndexName,
+  preferredField,
   'data-test-subj': dataTestSubj = FLYOUT_PREVIEW_LINK_TEST_ID,
 }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
 
+  // Extract primary field and value from entityIdentifiers.
+  // When preferredField is set (e.g. from Prevalence tab), use it so the correct entity flyout opens
+  // even when entityIdentifiers include both host and user fields.
+  const primaryField = useMemo(() => {
+    if (
+      preferredField &&
+      (preferredField === 'host.name' || preferredField === 'user.name') &&
+      entityIdentifiers[preferredField]
+    ) {
+      return preferredField;
+    }
+    if (entityIdentifiers['host.name']) return 'host.name';
+    if (entityIdentifiers['user.name']) return 'user.name';
+    return Object.keys(entityIdentifiers)[0] ?? '';
+  }, [entityIdentifiers, preferredField]);
+
+  const primaryValue = useMemo(() => {
+    return primaryField ? entityIdentifiers[primaryField] : '';
+  }, [entityIdentifiers, primaryField]);
+
   const previewParams = useMemo(
     () =>
       getPreviewPanelParams({
-        value,
-        field,
+        entityIdentifiers,
+        field: primaryField,
+        value: primaryValue,
         scopeId,
         ruleId,
         ancestorsIndexName,
       }),
-    [value, field, scopeId, ruleId, ancestorsIndexName]
+    [entityIdentifiers, primaryField, primaryValue, scopeId, ruleId, ancestorsIndexName]
   );
 
   const onClick = useCallback(() => {
@@ -88,9 +112,9 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
 
   return previewParams ? (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
-      {children ?? value}
+      {children ?? primaryValue}
     </EuiLink>
   ) : (
-    <>{children ?? value}</>
+    <>{children ?? primaryValue}</>
   );
 };

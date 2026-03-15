@@ -31,18 +31,24 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/constants';
+import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
+import type { RiskSeverity, HostItem } from '../../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
+import {
+  DefaultFieldRenderer,
+  toFieldRendererItems,
+} from '../../../../timelines/components/field_renderers/default_renderer';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { CellActions } from '../../shared/components/cell_actions';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -68,7 +74,7 @@ import {
   HOST_IP_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { PreviewLink } from '../../../shared/components/preview_link';
@@ -82,6 +88,15 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import type { EntityIdentifiers } from '../../shared/utils';
+import type { EntityFromStoreResult } from '../../../entity_details/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+import { useObservedHost } from '../../../entity_details/host_right/hooks/use_observed_host';
+import {
+  buildRiskScoreStateFromEntityRecord,
+  getRiskFromEntityRecord,
+} from '../../../entity_details/shared/entity_store_risk_utils';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -91,10 +106,10 @@ const HostOverviewManage = manageQuery(HostOverview);
 const RelatedUsersManage = manageQuery(InspectButtonContainer);
 
 export interface HostDetailsProps {
-  /**
-   * Host name for the entities details
-   */
-  hostName: string;
+  /* 
+  EntityIdentifiers - key-value pairs of field names and their values used for entity identification (following entity store EUID priority)
+  */
+  entityIdentifiers: EntityIdentifiers;
   /**
    * timestamp of alert or event
    */
@@ -108,17 +123,26 @@ export interface HostDetailsProps {
    * Set to false for attack flyout so multiple entity panels start collapsed.
    */
   expandedOnFirstRender?: boolean;
+  /**
+   * When provided (e.g. from EntitiesDetails), use this for entity/risk so the left panel
+   * shows host risk level even when global time is still initializing.
+   */
+  hostEntityFromStoreResult?: EntityFromStoreResult<HostItem> | null;
 }
 
 /**
  * Host details and related users, displayed in the document details expandable flyout left section under the Insights tab, Entities tab
  */
 export const HostDetails: React.FC<HostDetailsProps> = ({
-  hostName,
+  entityIdentifiers,
   timestamp,
   scopeId,
   expandedOnFirstRender = true,
+  hostEntityFromStoreResult: hostEntityFromStoreResultProp,
 }) => {
+  // Get the primary field value (first key in priority order, following EUID logic)
+  const primaryField = Object.keys(entityIdentifiers)[0] || 'host.name';
+  const hostName = entityIdentifiers[primaryField] || '';
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
@@ -166,7 +190,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     openPreviewPanel({
       id: HostPreviewPanelKey,
       params: {
-        hostName,
+        entityIdentifiers,
         scopeId,
         banner: HOST_PREVIEW_BANNER,
       },
@@ -175,42 +199,102 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       location: scopeId,
       panel: 'preview',
     });
-  }, [openPreviewPanel, hostName, scopeId, telemetry]);
+  }, [openPreviewPanel, entityIdentifiers, scopeId, telemetry]);
 
-  const [isHostLoading, { inspect, hostDetails, refetch }] = useHostDetails({
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const euidApi = useEntityStoreEuidApi();
+  const entityFromStoreResult = useEntityFromStore({
+    entityIdentifiers,
+    entityType: 'host',
+    skip: !entityStoreV2Enabled,
+  });
+  const effectiveHostEntityFromStore = hostEntityFromStoreResultProp ?? entityFromStoreResult;
+  const observedHost = useObservedHost(
+    entityIdentifiers,
+    scopeId,
+    entityStoreV2Enabled ? effectiveHostEntityFromStore : undefined
+  );
+
+  const spaceId = useSpaceId();
+  const relatedUsersIndexNames = useMemo((): string[] => {
+    if (entityStoreV2Enabled && spaceId != null) {
+      const namespace = spaceId || 'default';
+      return [`.entities.v2.latest.security_${namespace}`];
+    }
+    return selectedPatterns;
+  }, [entityStoreV2Enabled, spaceId, selectedPatterns]);
+
+  const [isHostLoadingFromDetails, hostDetailsArgs, refetch] = useHostDetails({
     id: hostDetailsQueryId,
     startDate: from,
     endDate: to,
-    hostName,
+    entityIdentifiers,
+    hostName: entityIdentifiers['host.name'],
     indexNames: selectedPatterns,
-    skip: selectedPatterns.length === 0,
+    skip: entityStoreV2Enabled || selectedPatterns.length === 0,
   });
 
   const filterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
     [hostName]
   );
-  const { data: hostRisk } = useRiskScore({
+  const riskScoreStateFromApi = useRiskScore({
     filterQuery,
     riskEntity: EntityType.host,
     skip: hostName == null,
     timerange,
   });
-  const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
-  const isRiskScoreExist = !!hostRiskData?.host.risk;
+  const hostRiskData =
+    riskScoreStateFromApi.data && riskScoreStateFromApi.data.length > 0
+      ? riskScoreStateFromApi.data[0]
+      : undefined;
+  const hostDetails = entityStoreV2Enabled ? observedHost.details : hostDetailsArgs.hostDetails;
+  const isHostLoading = entityStoreV2Enabled ? observedHost.isLoading : isHostLoadingFromDetails;
+  const hostRiskScoreStateFromEntityStore = useMemo(
+    () =>
+      entityStoreV2Enabled && observedHost.entityRecord
+        ? buildRiskScoreStateFromEntityRecord(EntityType.host, observedHost.entityRecord, {
+            refetch: observedHost.refetchEntityStore ?? (() => {}),
+            isLoading: observedHost.isLoading,
+            error: null,
+            inspect: effectiveHostEntityFromStore?.inspect,
+          })
+        : undefined,
+    [
+      entityStoreV2Enabled,
+      observedHost.entityRecord,
+      observedHost.refetchEntityStore,
+      observedHost.isLoading,
+      effectiveHostEntityFromStore?.inspect,
+    ]
+  );
+  const effectiveRiskScoreState = useMemo(
+    () =>
+      hostRiskScoreStateFromEntityStore ??
+      (riskScoreStateFromApi.data?.length ? riskScoreStateFromApi : undefined),
+    [hostRiskScoreStateFromEntityStore, riskScoreStateFromApi]
+  );
+
+  const isRiskScoreExist =
+    entityStoreV2Enabled && observedHost.entityRecord
+      ? !!getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level
+      : !!hostRiskData?.host?.risk;
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: EntityIdentifierFields.hostName,
-    value: hostName,
+    entityIdentifiers,
     to,
     from,
     queryId: 'HostEntityOverview',
   });
-  const { hasMisconfigurationFindings } = useHasMisconfigurations('host.name', hostName);
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+  );
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+  );
 
   const openDetailsPanel = useNavigateToHostDetails({
-    hostName,
+    entityIdentifiers,
     scopeId,
     isRiskScoreExist,
     hasMisconfigurationFindings,
@@ -227,10 +311,12 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     totalCount,
     refetch: refetchRelatedUsers,
   } = useHostRelatedUsers({
-    hostName,
-    indexNames: selectedPatterns,
+    entityIdentifiers,
+    indexNames: relatedUsersIndexNames,
     from: timestamp, // related users are users who were successfully authenticated onto this host AFTER alert time
-    skip: selectedPatterns.length === 0,
+    skip:
+      (entityStoreV2Enabled && spaceId == null) ||
+      (!entityStoreV2Enabled && selectedPatterns.length === 0),
   });
 
   const relatedUsersColumns: Array<EuiBasicTableColumn<RelatedUser>> = useMemo(
@@ -247,8 +333,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
           <EuiText grow={false} size="xs">
             <CellActions field={USER_NAME_FIELD_NAME} value={user}>
               <PreviewLink
-                field={USER_NAME_FIELD_NAME}
-                value={user}
+                entityIdentifiers={{ [USER_NAME_FIELD_NAME]: user }}
                 scopeId={scopeId}
                 data-test-subj={HOST_DETAILS_RELATED_USERS_LINK_TEST_ID}
               />
@@ -267,7 +352,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
         render: (ips: string[]) => {
           return (
             <DefaultFieldRenderer
-              rowItems={ips}
+              rowItems={toFieldRendererItems(ips)}
               attrName={HOST_IP_FIELD_NAME}
               idPrefix={''}
               render={(ip) =>
@@ -275,8 +360,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
                   getEmptyTagValue()
                 ) : (
                   <PreviewLink
-                    field={HOST_IP_FIELD_NAME}
-                    value={ip}
+                    entityIdentifiers={{ ...entityIdentifiers, [HOST_IP_FIELD_NAME]: ip }}
                     scopeId={scopeId}
                     data-test-subj={HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID}
                   />
@@ -305,14 +389,14 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized, scopeId]
+    [entityIdentifiers, isEntityAnalyticsAuthorized, scopeId]
   );
 
   const relatedUsersCount = useMemo(
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="user" />
+          <EuiIcon type="user" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">
@@ -349,7 +433,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   return (
     <ExpandablePanel
       header={{
-        title: hostName,
+        title: entityIdentifiers['host.name'],
         iconType: 'storage',
         headerContent: relatedUsersCount,
         link: hostLink,
@@ -375,7 +459,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
         {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
           <HostOverviewManage
             id={hostDetailsQueryId}
-            hostName={hostName}
+            entityIdentifiers={entityIdentifiers}
             data={hostDetails}
             indexNames={selectedPatterns}
             jobNameById={jobNameById}
@@ -387,11 +471,21 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
             endDate={to}
             narrowDateRange={narrowDateRange}
             setQuery={setQuery}
-            refetch={refetch}
-            inspect={inspect}
+            refetch={entityStoreV2Enabled ? observedHost.refetchEntityStore ?? (() => {}) : refetch}
+            inspect={
+              entityStoreV2Enabled ? effectiveHostEntityFromStore?.inspect : hostDetailsArgs.inspect
+            }
             deleteQuery={deleteQuery}
             scopeId={scopeId}
             isFlyoutOpen={true}
+            riskScoreState={effectiveRiskScoreState}
+            firstSeenFromEntityStore={
+              entityStoreV2Enabled ? observedHost.firstSeen?.date ?? undefined : undefined
+            }
+            lastSeenFromEntityStore={
+              entityStoreV2Enabled ? observedHost.lastSeen?.date ?? undefined : undefined
+            }
+            showInspectButtonAlways={true}
           />
         )}
       </AnomalyTableProvider>
@@ -400,22 +494,20 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
         <AlertCountInsight
-          fieldName={'host.name'}
-          name={hostName}
+          entityIdentifiers={entityIdentifiers}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={HOST_DETAILS_ALERT_COUNT_TEST_ID}
         />
         <MisconfigurationsInsight
-          fieldName={'host.name'}
-          name={hostName}
+          entityIdentifiers={entityIdentifiers}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={HOST_DETAILS_MISCONFIGURATIONS_TEST_ID}
           telemetryKey={MISCONFIGURATION_INSIGHT_HOST_DETAILS}
         />
         <VulnerabilitiesInsight
-          hostName={hostName}
+          entityIdentifiers={entityIdentifiers}
           direction="column"
           openDetailsPanel={openDetailsPanel}
           data-test-subj={HOST_DETAILS_VULNERABILITIES_TEST_ID}
@@ -441,7 +533,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
                 <FormattedMessage
                   id="xpack.securitySolution.flyout.left.insights.entities.relatedUsersTooltip"
                   defaultMessage="After this event, these users logged into {hostName}. Check if this activity is normal."
-                  values={{ hostName }}
+                  values={{ hostName: entityIdentifiers['host.name'] }}
                 />
               }
               type="info"

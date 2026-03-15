@@ -172,6 +172,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     startDate: from,
     userName: detailName,
     indexNames: selectedPatterns,
+    isExploreContext: true,
     skip: selectedPatterns.length === 0,
   });
 
@@ -216,7 +217,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({
-    entity,
+    entity: { ...entity, identifiers: { 'user.name': detailName } },
     enabled: canReadAssetCriticality,
     onChange: calculateEntityRiskScore,
   });
@@ -255,7 +256,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                 <EuiHorizontalRule margin="m" />
                 <AssetCriticalityTitle />
                 <EuiSpacer size="s" />
-                <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
+                <AssetCriticalitySelector
+                  compressed
+                  criticality={criticality}
+                  entity={{ ...entity, identifiers: { 'user.name': detailName } }}
+                />
                 <EuiHorizontalRule margin="m" />
               </>
             )}
@@ -268,8 +273,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             >
               {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
                 <UserOverview
-                  userName={detailName}
+                  entityIdentifiers={{ 'user.name': detailName }}
                   id={QUERY_ID}
+                  isExploreContext
                   isInDetailsSidePanel={false}
                   data={userDetails}
                   anomaliesData={anomaliesData}
@@ -295,6 +301,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                       signalIndexName={signalIndexName}
                       entityFilter={entityFilter}
                       additionalFilters={additionalFilters}
+                      entityIdentifiers={{ 'user.name': detailName }}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -302,6 +309,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                       entityFilter={entityFilter}
                       signalIndexName={signalIndexName}
                       additionalFilters={additionalFilters}
+                      isExploreContext
+                      entityIdentifiers={{ 'user.name': detailName }}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

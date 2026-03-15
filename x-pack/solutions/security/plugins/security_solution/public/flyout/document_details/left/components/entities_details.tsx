@@ -9,10 +9,13 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { getField } from '../../shared/utils';
+import { getField, getUserEntityIdentifiers, getHostEntityIdentifiers } from '../../shared/utils';
 import { UserDetails } from './user_details';
 import { HostDetails } from './host_details';
 import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
 export const ENTITIES_TAB_ID = 'entity';
 
@@ -20,14 +23,33 @@ export const ENTITIES_TAB_ID = 'entity';
  * Entities displayed in the document details expandable flyout left section under the Insights tab
  */
 export const EntitiesDetails: React.FC = () => {
-  const { getFieldsData, scopeId } = useDocumentDetailsContext();
-  const hostName = getField(getFieldsData('host.name'));
-  const userName = getField(getFieldsData('user.name'));
+  const { getFieldsData, scopeId, dataAsNestedObject } = useDocumentDetailsContext();
   const timestamp = getField(getFieldsData('@timestamp'));
 
-  const showDetails = timestamp && (hostName || userName);
-  const showUserDetails = userName && timestamp;
-  const showHostDetails = hostName && timestamp;
+  const userEntityIdentifiers = getUserEntityIdentifiers(dataAsNestedObject, getFieldsData);
+  const hostEntityIdentifiers = getHostEntityIdentifiers(dataAsNestedObject, getFieldsData);
+
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const userEntityFromStore = useEntityFromStore({
+    entityIdentifiers: userEntityIdentifiers ?? {},
+    entityType: 'user',
+    skip: !userEntityIdentifiers || !entityStoreV2Enabled,
+  });
+  const hostEntityFromStore = useEntityFromStore({
+    entityIdentifiers: hostEntityIdentifiers ?? {},
+    entityType: 'host',
+    skip: !hostEntityIdentifiers || !entityStoreV2Enabled,
+  });
+
+  const showUserDetails =
+    userEntityIdentifiers &&
+    timestamp &&
+    (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
+  const showHostDetails =
+    hostEntityIdentifiers &&
+    timestamp &&
+    (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
+  const showDetails = timestamp && (showUserDetails || showHostDetails);
 
   return (
     <>
@@ -44,7 +66,11 @@ export const EntitiesDetails: React.FC = () => {
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <UserDetails userName={userName} timestamp={timestamp} scopeId={scopeId} />
+              <UserDetails
+                entityIdentifiers={userEntityIdentifiers}
+                timestamp={timestamp}
+                scopeId={scopeId}
+              />
             </EuiFlexItem>
           )}
           {showHostDetails && (
@@ -59,7 +85,12 @@ export const EntitiesDetails: React.FC = () => {
               </EuiTitle>
               <EuiSpacer size="s" />
 
-              <HostDetails hostName={hostName} timestamp={timestamp} scopeId={scopeId} />
+              <HostDetails
+                entityIdentifiers={hostEntityIdentifiers}
+                timestamp={timestamp}
+                scopeId={scopeId}
+                hostEntityFromStoreResult={entityStoreV2Enabled ? hostEntityFromStore : undefined}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

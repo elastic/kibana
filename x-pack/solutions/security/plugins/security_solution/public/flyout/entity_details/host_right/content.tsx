@@ -7,6 +7,9 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import type { Entity } from '../../../../common/api/entity_analytics';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
+import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
@@ -18,25 +21,38 @@ import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_ris
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import type { HostItem } from '../../../../common/search_strategy';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
 interface HostPanelContentProps {
-  hostName: string;
   observedHost: ObservedHostData;
   riskScoreState: RiskScoreState<EntityType.host>;
   contextID: string;
   scopeId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  entityIdentifiers: EntityIdentifiers;
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
   isPreviewMode: boolean;
+  /** When entity store v2 is enabled: entity record from the store. */
+  entity?: EntityStoreRecord;
+  /** When using Entity Store v2: entity record for asset criticality upsert. */
+  entityRecord?: Entity;
+  /** When using Entity Store v2: criticality from store. */
+  criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
+  /** When using Entity Store v2: save criticality via entity store API. */
+  onSaveAssetCriticalityViaEntityStore?: (updatedRecord: Entity) => Promise<void>;
+  /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
+  skipRiskAndCriticality?: boolean;
+  /** When true, Risk Summary Visualization uses entity store v2 index instead of risk-score.risk-score-*. */
+  useEntityStoreV2?: boolean;
 }
 
 export const HostPanelContent = ({
-  hostName,
+  entityIdentifiers,
   observedHost,
   riskScoreState,
   recalculatingScore,
@@ -45,43 +61,61 @@ export const HostPanelContent = ({
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
+  entity,
+  entityRecord,
+  criticalityFromEntityStore,
+  onSaveAssetCriticalityViaEntityStore,
+  skipRiskAndCriticality = false,
+  useEntityStoreV2 = false,
 }: HostPanelContentProps) => {
   const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
     'entityDetailsHighlightsEnabled'
   );
 
+  // Extract hostName from entityIdentifiers for components that need a string
+  // Priority: entityIdentifiers['host.name'] > entityIdentifiers[first key]
+  const hostName =
+    entityIdentifiers[EntityIdentifierFields.hostName] || Object.values(entityIdentifiers)[0] || '';
+
   return (
     <FlyoutBody>
-      {isEntityDetailsHighlightsAIEnabled && (
+      {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
         <EntityHighlightsAccordion entityIdentifier={hostName} entityType={EntityType.host} />
       )}
-      {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
-        <>
-          <FlyoutRiskSummary
-            entityType={EntityType.host}
-            riskScoreData={riskScoreState}
-            recalculatingScore={recalculatingScore}
-            queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
-            openDetailsPanel={openDetailsPanel}
-            isPreviewMode={isPreviewMode}
-          />
-          <EuiHorizontalRule />
-        </>
+      {!skipRiskAndCriticality &&
+        riskScoreState.hasEngineBeenInstalled &&
+        (riskScoreState.loading || (riskScoreState.data?.length ?? 0) > 0) && (
+          <>
+            <FlyoutRiskSummary
+              entityType={EntityType.host}
+              riskScoreData={riskScoreState}
+              recalculatingScore={recalculatingScore}
+              queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
+              openDetailsPanel={openDetailsPanel}
+              isPreviewMode={isPreviewMode}
+              useEntityStoreV2={useEntityStoreV2}
+            />
+            <EuiHorizontalRule />
+          </>
+        )}
+      {!skipRiskAndCriticality && (
+        <AssetCriticalityAccordion
+          entity={{ identifiers: entityIdentifiers, name: hostName, type: EntityType.host }}
+          onChange={onAssetCriticalityChange}
+          entityRecord={entityRecord}
+          criticalityFromEntityStore={criticalityFromEntityStore}
+          onSaveViaEntityStore={onSaveAssetCriticalityViaEntityStore}
+        />
       )}
-      <AssetCriticalityAccordion
-        entity={{ name: hostName, type: EntityType.host }}
-        onChange={onAssetCriticalityChange}
-      />
       <EntityInsight
-        value={hostName}
-        field={EntityIdentifierFields.hostName}
+        entityIdentifiers={entityIdentifiers}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
       />
       <ObservedDataSection
-        hostName={hostName}
         observedHost={observedHost}
         contextID={contextID}
+        entityIdentifiers={entityIdentifiers}
         scopeId={scopeId}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />

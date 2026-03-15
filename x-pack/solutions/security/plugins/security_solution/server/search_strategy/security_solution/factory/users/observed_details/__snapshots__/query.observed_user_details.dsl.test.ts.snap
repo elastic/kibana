@@ -129,8 +129,31 @@ Object {
           },
         },
         Object {
-          "term": Object {
-            "user.name": "bastion00.siem.estc.dev",
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "term": Object {
+                  "user.name": "bastion00.siem.estc.dev",
+                },
+              },
+            ],
+            "must_not": Array [
+              Object {
+                "exists": Object {
+                  "field": "user.email",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "user.id",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "user.domain",
+                },
+              },
+            ],
           },
         },
         Object {

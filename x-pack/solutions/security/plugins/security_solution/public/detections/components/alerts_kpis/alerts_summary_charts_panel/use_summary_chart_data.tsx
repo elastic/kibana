@@ -12,13 +12,17 @@ import type { Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { SummaryChartsAgg, SummaryChartsData } from './types';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { EntityFilter } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import { useInspectButton } from '../common/hooks';
 import { parseData } from './helpers';
+
+export interface EntityFilter {
+  field: string;
+  value: string;
+}
 
 export type UseAlerts = (props: UseAlertsQueryProps) => {
   items: SummaryChartsData[];

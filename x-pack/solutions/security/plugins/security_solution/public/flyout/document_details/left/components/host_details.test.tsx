@@ -38,7 +38,6 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
-import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../../../data_view_manager/mocks/mock_data_view';
@@ -128,7 +127,7 @@ const mockAlertData = {
 const timestamp = '2022-07-25T08:20:18.966Z';
 
 const defaultProps = {
-  hostName: 'test host',
+  entityIdentifiers: { 'host.name': 'test host' },
   timestamp,
   scopeId: 'scopeId',
 };
@@ -200,7 +199,7 @@ describe('<HostDetails />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: HostPreviewPanelKey,
       params: {
-        hostName: defaultProps.hostName,
+        entityIdentifiers: defaultProps.entityIdentifiers,
         scopeId: defaultProps.scopeId,
         banner: HOST_PREVIEW_BANNER,
       },
@@ -210,14 +209,16 @@ describe('<HostDetails />', () => {
   describe('Host overview', () => {
     it('should render the HostOverview with correct dates and indices', () => {
       const { getByTestId } = renderHostDetails(mockContextValue);
-      expect(mockUseHostDetails).toBeCalledWith({
-        id: 'entities-hosts-details-uuid',
-        startDate: from,
-        endDate: to,
-        hostName: 'test host',
-        indexNames: ['index'],
-        skip: false,
-      });
+      expect(mockUseHostDetails).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'entities-hosts-details-uuid',
+          startDate: from,
+          endDate: to,
+          hostName: 'test host',
+          indexNames: ['index'],
+          skip: false,
+        })
+      );
       expect(getByTestId(HOST_DETAILS_INFO_TEST_ID)).toBeInTheDocument();
     });
 
@@ -244,7 +245,7 @@ describe('<HostDetails />', () => {
       const { getByTestId } = renderHostDetails(mockContextValue);
       expect(mockUseHostsRelatedUsers).toBeCalledWith({
         from: timestamp,
-        hostName: 'test host',
+        entityIdentifiers: defaultProps.entityIdentifiers,
         indexNames: ['index'],
         skip: false,
       });
@@ -262,7 +263,6 @@ describe('<HostDetails />', () => {
       const { queryAllByRole } = renderHostDetails(mockContextValue);
       expect(queryAllByRole('columnheader').length).toBe(3);
       expect(queryAllByRole('row')[1].textContent).toContain('test user');
-      expect(queryAllByRole('row')[1].textContent).toContain('100.XXX.XXX');
       expect(queryAllByRole('row')[1].textContent).toContain('Low');
     });
 
@@ -303,6 +303,8 @@ describe('<HostDetails />', () => {
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
         id: UserPreviewPanelKey,
         params: {
+          contextID: defaultProps.scopeId,
+          entityIdentifiers: { 'user.name': 'test user' },
           userName: 'test user',
           scopeId: defaultProps.scopeId,
           banner: USER_PREVIEW_BANNER,
@@ -310,13 +312,17 @@ describe('<HostDetails />', () => {
       });
 
       getAllByTestId(HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID)[0].click();
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-        id: NetworkPreviewPanelKey,
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenNthCalledWith(2, {
+        id: HostPreviewPanelKey,
         params: {
-          ip: '100.XXX.XXX',
-          flowTarget: 'source',
+          contextID: defaultProps.scopeId,
+          entityIdentifiers: {
+            ...defaultProps.entityIdentifiers,
+            'host.ip': '100.XXX.XXX',
+          },
+          hostName: 'test host',
           scopeId: defaultProps.scopeId,
-          banner: NETWORK_PREVIEW_BANNER,
+          banner: HOST_PREVIEW_BANNER,
         },
       });
     });

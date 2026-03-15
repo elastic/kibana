@@ -40,13 +40,9 @@ const ORDER = ['Low', 'Medium', 'High', 'Critical'];
 
 interface AlertCountInsightProps {
   /**
-   * The name of the entity to filter the alerts by.
+   * Entity identifiers used to filter the alerts by.
    */
-  name: string;
-  /**
-   * The field name to filter the alerts by.
-   */
-  fieldName: 'host.name' | 'user.name';
+  entityIdentifiers: Record<string, string>;
   /**
    * The direction of the flex group.
    */
@@ -100,19 +96,17 @@ export const getFormattedAlertStats = (
  * Displays a distribution bar with the total alert count for a given entity
  */
 export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
-  name,
-  fieldName,
+  entityIdentifiers,
   direction,
   openDetailsPanel,
   'data-test-subj': dataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
   const { to, from } = useGlobalTime();
   const { signalIndexName } = useSignalIndex();
 
   const { items, isLoading } = useAlertsByStatus({
-    entityFilter,
+    entityIdentifiers,
     signalIndexName,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
     to,

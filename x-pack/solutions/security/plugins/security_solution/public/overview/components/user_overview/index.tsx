@@ -20,7 +20,10 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
+import {
+  DefaultFieldRenderer,
+  toFieldRendererItems,
+} from '../../../timelines/components/field_renderers/default_renderer';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -40,6 +43,9 @@ import { OverviewDescriptionList } from '../../../common/components/overview_des
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
 import { RiskScoreDocTooltip } from '../common';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
+import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
 
 export interface UserSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -53,10 +59,20 @@ export interface UserSummaryProps {
   startDate: string;
   endDate: string;
   narrowDateRange: NarrowDateRange;
-  userName: string;
+  entityIdentifiers: EntityIdentifiers;
   indexPatterns: string[];
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
+  /** When using Entity Store v2: pre-fetched risk state from entity store. */
+  riskScoreState?: RiskScoreState<EntityType.user>;
+  /** When using Entity Store v2: first seen from entity lifecycle. */
+  firstSeenFromEntityStore?: string;
+  /** When using Entity Store v2: last seen from entity lifecycle. */
+  lastSeenFromEntityStore?: string;
+  /** When true (e.g. from explore pages), only user.name from entityIdentifiers is used with a terms filter; entityIdentifiers filter is not applied. */
+  isExploreContext?: boolean;
+  /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
+  showInspectButtonAlways?: boolean;
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -81,14 +97,36 @@ export const UserOverview = React.memo<UserSummaryProps>(
     narrowDateRange,
     startDate,
     endDate,
-    userName,
+    entityIdentifiers,
     indexPatterns,
     jobNameById,
     isFlyoutOpen = false,
+    riskScoreState: riskScoreStateFromEntityStore,
+    firstSeenFromEntityStore,
+    lastSeenFromEntityStore,
+    isExploreContext = false,
+    showInspectButtonAlways = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
+
+    // Extract user name: when isExploreContext only use user.name and apply terms filter;
+    // otherwise use entityIdentifiers with priority fallback for buildUserNamesFilter (terms).
+    const userName = useMemo(() => {
+      if (isExploreContext) {
+        return entityIdentifiers['user.name'] ?? '';
+      }
+      return (
+        entityIdentifiers['user.name'] ||
+        entityIdentifiers['user.id'] ||
+        entityIdentifiers['user.email'] ||
+        entityIdentifiers['user.entity.id'] ||
+        Object.values(entityIdentifiers)[0] ||
+        ''
+      );
+    }, [entityIdentifiers, isExploreContext]);
+
     const filterQuery = useMemo(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
       [userName]
@@ -96,32 +134,36 @@ export const UserOverview = React.memo<UserSummaryProps>(
     const { deleteQuery, setQuery } = useGlobalTime();
 
     const {
-      data: userRisk,
-      isAuthorized,
+      data: userRiskFromSearch,
+      isAuthorized: isRiskScoreAuthorized,
       inspect: inspectRiskScore,
       loading: loadingRiskScore,
       refetch: refetchRiskScore,
     } = useRiskScore({
       filterQuery,
-      skip: userName == null,
+      skip:
+        !!riskScoreStateFromEntityStore || !userName || Object.keys(entityIdentifiers).length === 0,
       riskEntity: EntityType.user,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
     });
 
+    const userRisk = riskScoreStateFromEntityStore?.data ?? userRiskFromSearch;
+    const isAuthorized = riskScoreStateFromEntityStore ? true : isRiskScoreAuthorized;
+
     useQueryInspector({
       deleteQuery,
-      inspect: inspectRiskScore,
-      loading: loadingRiskScore,
+      inspect: riskScoreStateFromEntityStore ? { dsl: [], response: [] } : inspectRiskScore,
+      loading: riskScoreStateFromEntityStore ? false : loadingRiskScore,
       queryId: USER_OVERVIEW_RISK_SCORE_QUERY_ID,
-      refetch: refetchRiskScore,
+      refetch: riskScoreStateFromEntityStore ? () => {} : refetchRiskScore,
       setQuery,
     });
 
     const getDefaultRenderer = useCallback(
       (fieldName: string, fieldData: UserItem) => (
         <DefaultFieldRenderer
-          rowItems={getOr([], fieldName, fieldData)}
+          rowItems={toFieldRendererItems(getOr([], fieldName, fieldData))}
           attrName={fieldName}
           idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
           scopeId={scopeId}
@@ -228,25 +270,35 @@ export const UserOverview = React.memo<UserSummaryProps>(
         [
           {
             title: i18n.FIRST_SEEN,
-            description: (
-              <FirstLastSeen
-                indexPatterns={indexPatterns}
-                field={'user.name'}
-                value={userName}
-                type={FirstLastSeenType.FIRST_SEEN}
-              />
-            ),
+            description:
+              firstSeenFromEntityStore != null ? (
+                <PreferenceFormattedDateFromPrimitive value={firstSeenFromEntityStore} />
+              ) : userName != null && userName !== '' ? (
+                <FirstLastSeen
+                  indexPatterns={indexPatterns}
+                  field="user.name"
+                  value={userName}
+                  type={FirstLastSeenType.FIRST_SEEN}
+                />
+              ) : (
+                getEmptyTagValue()
+              ),
           },
           {
             title: i18n.LAST_SEEN,
-            description: (
-              <FirstLastSeen
-                indexPatterns={indexPatterns}
-                field={'user.name'}
-                value={userName}
-                type={FirstLastSeenType.LAST_SEEN}
-              />
-            ),
+            description:
+              lastSeenFromEntityStore != null ? (
+                <PreferenceFormattedDateFromPrimitive value={lastSeenFromEntityStore} />
+              ) : userName != null && userName !== '' ? (
+                <FirstLastSeen
+                  indexPatterns={indexPatterns}
+                  field="user.name"
+                  value={userName}
+                  type={FirstLastSeenType.LAST_SEEN}
+                />
+              ) : (
+                getEmptyTagValue()
+              ),
           },
         ],
         [
@@ -263,14 +315,14 @@ export const UserOverview = React.memo<UserSummaryProps>(
             title: i18n.HOST_IP,
             description: (
               <DefaultFieldRenderer
-                rowItems={getOr([], 'host.ip', data)}
+                rowItems={toFieldRendererItems(getOr([], 'host.ip', data))}
                 attrName={'host.ip'}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
                 scopeId={scopeId}
                 render={(ip) =>
                   ip != null ? (
                     <FlyoutLink
-                      field={'host.ip'}
+                      field="host.ip"
                       value={ip}
                       scopeId={scopeId}
                       isFlyoutOpen={isFlyoutOpen}
@@ -291,13 +343,15 @@ export const UserOverview = React.memo<UserSummaryProps>(
         contextID,
         scopeId,
         userName,
+        firstSeenFromEntityStore,
+        lastSeenFromEntityStore,
         firstColumn,
         isFlyoutOpen,
       ]
     );
     return (
       <>
-        <InspectButtonContainer>
+        <InspectButtonContainer show={!showInspectButtonAlways}>
           <OverviewWrapper
             direction={isInDetailsSidePanel ? 'column' : 'row'}
             data-test-subj="user-overview"

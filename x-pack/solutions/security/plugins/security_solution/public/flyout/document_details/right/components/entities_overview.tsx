@@ -11,20 +11,41 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { getField } from '../../shared/utils';
+import { getHostEntityIdentifiers, getUserEntityIdentifiers } from '../../shared/utils';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
  */
 export const EntitiesOverview: React.FC = () => {
-  const { getFieldsData, isPreviewMode } = useDocumentDetailsContext();
-  const hostName = getField(getFieldsData('host.name'));
-  const userName = getField(getFieldsData('user.name'));
+  const { getFieldsData, dataAsNestedObject, isPreviewMode } = useDocumentDetailsContext();
+  const hostEntityIdentifiers = getHostEntityIdentifiers(dataAsNestedObject, getFieldsData);
+  const userEntityIdentifiers = getUserEntityIdentifiers(dataAsNestedObject, getFieldsData);
+
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const userEntityFromStore = useEntityFromStore({
+    entityIdentifiers: userEntityIdentifiers ?? {},
+    entityType: 'user',
+    skip: !userEntityIdentifiers || !entityStoreV2Enabled,
+  });
+  const hostEntityFromStore = useEntityFromStore({
+    entityIdentifiers: hostEntityIdentifiers ?? {},
+    entityType: 'host',
+    skip: !hostEntityIdentifiers || !entityStoreV2Enabled,
+  });
+
+  const showUserOverview =
+    userEntityIdentifiers && (!entityStoreV2Enabled || userEntityFromStore.entityRecord != null);
+  const showHostOverview =
+    hostEntityIdentifiers && (!entityStoreV2Enabled || hostEntityFromStore.entityRecord != null);
+  const hasAnyEntity = showUserOverview || showHostOverview;
 
   const navigateToLeftPanel = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
@@ -59,19 +80,27 @@ export const EntitiesOverview: React.FC = () => {
         }}
         data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
       >
-        {userName || hostName ? (
+        {hasAnyEntity ? (
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            {userName && (
+            {showUserOverview && userEntityIdentifiers && (
               <>
                 <EuiFlexItem>
-                  <UserEntityOverview userName={userName} />
+                  <UserEntityOverview
+                    entityIdentifiers={userEntityIdentifiers}
+                    entityRecord={
+                      entityStoreV2Enabled ? userEntityFromStore.entityRecord : undefined
+                    }
+                  />
                 </EuiFlexItem>
                 <EuiSpacer size="s" />
               </>
             )}
-            {hostName && (
+            {showHostOverview && hostEntityIdentifiers && (
               <EuiFlexItem>
-                <HostEntityOverview hostName={hostName} />
+                <HostEntityOverview
+                  entityIdentifiers={hostEntityIdentifiers}
+                  entityRecord={entityStoreV2Enabled ? hostEntityFromStore.entityRecord : undefined}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

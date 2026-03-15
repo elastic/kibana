@@ -51,10 +51,8 @@ import { EntityIconByType, getEntityType, sourceFieldToText } from '../entity_st
 import { CRITICALITY_LEVEL_TITLE } from '../asset_criticality/translations';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { RiskScoreLevel } from '../severity/common';
-import {
-  EntityPanelKeyByType,
-  EntityPanelParamByType,
-} from '../../../flyout/entity_details/shared/constants';
+import { EntityPanelKeyByType } from '../../../flyout/entity_details/shared/constants';
+import { buildEntityIdentifiers } from '../entity_store/hooks/use_entities_list_columns';
 
 const THREAT_HUNTING_TABLE_ID = 'threat-hunting-table';
 
@@ -150,15 +148,20 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
         const handleFlyoutClick = () => {
           const id = EntityPanelKeyByType[entityType];
 
-          if (id && entityName) {
-            openRightPanel({
-              id,
-              params: {
-                [EntityPanelParamByType[entityType] ?? '']: entityName,
-                contextID: THREAT_HUNTING_TABLE_ID,
-                scopeId: THREAT_HUNTING_TABLE_ID,
-              },
-            });
+          if (id) {
+            // Build entityIdentifiers following EUID priority logic
+            const entityIdentifiers = buildEntityIdentifiers(record);
+
+            if (entityIdentifiers) {
+              openRightPanel({
+                id,
+                params: {
+                  entityIdentifiers,
+                  contextID: THREAT_HUNTING_TABLE_ID,
+                  scopeId: THREAT_HUNTING_TABLE_ID,
+                },
+              });
+            }
           }
         };
 

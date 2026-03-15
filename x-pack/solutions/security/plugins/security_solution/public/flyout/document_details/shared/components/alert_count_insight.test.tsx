@@ -30,7 +30,6 @@ jest.mock(
   '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
 );
 
-const fieldName = 'host.name';
 const name = 'test host';
 const testId = 'test';
 const mockAlertData: ParsedAlertsData = {
@@ -69,8 +68,7 @@ const renderAlertCountInsight = () => {
   return render(
     <TestProviders>
       <AlertCountInsight
-        name={name}
-        fieldName={fieldName}
+        entityIdentifiers={{ 'host.name': name }}
         data-test-subj={testId}
         openDetailsPanel={openDetailsPanel}
       />

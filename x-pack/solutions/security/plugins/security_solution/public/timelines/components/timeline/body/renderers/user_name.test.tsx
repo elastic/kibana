@@ -110,7 +110,7 @@ describe('UserName', () => {
         right: {
           id: 'user-panel',
           params: {
-            userName: props.value,
+            entityIdentifiers: { 'user.name': props.value },
             contextID: props.contextId,
             scopeId: TableId.alertsOnAlertsPage,
           },
@@ -140,7 +140,7 @@ describe('UserName', () => {
         right: {
           id: 'user-panel',
           params: {
-            userName: props.value,
+            entityIdentifiers: { 'user.name': props.value },
             contextID: props.contextId,
             scopeId: 'timeline-1',
           },

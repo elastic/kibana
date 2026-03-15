@@ -107,6 +107,29 @@ describe('EntityStoreCrudClient', () => {
         },
       });
     });
+
+    it('when entity store v2 is enabled uses v2 index and entity type filter', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValueOnce(Promise.resolve(true));
+      esClientMock.deleteByQuery.mockReturnValueOnce(Promise.resolve({ deleted: 1 }));
+
+      const response = await client.deleteEntity('host', { id: 'host-1' });
+      expect(response).toStrictEqual({ deleted: true });
+
+      expect(esClientMock.deleteByQuery).toBeCalledWith({
+        conflicts: 'proceed',
+        index: '.entities.v2.latest.security_default',
+        query: {
+          bool: {
+            must: [
+              { term: { 'entity.id': 'host-1' } },
+              { term: { 'entity.EngineMetadata.Type': 'host' } },
+            ],
+          },
+        },
+      });
+    });
   });
 
   describe('update single entity', () => {
@@ -195,6 +218,7 @@ describe('EntityStoreCrudClient', () => {
     it('when valid update entity', async () => {
       dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValueOnce(Promise.resolve(false));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 1 }));
 
       const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
@@ -236,6 +260,7 @@ describe('EntityStoreCrudClient', () => {
             `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
             `ctx._source['entity']['attributes']['Privileged'] = true;`,
         },
+        refresh: true,
       });
 
       expect(esClientMock.create).toBeCalledWith({
@@ -259,9 +284,56 @@ describe('EntityStoreCrudClient', () => {
       expect(v4Spy).toBeCalledTimes(1);
     });
 
+    it('when entity store v2 is enabled uses v2 index and updates stream and skips createLatestIndexEntity when 0 updated', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValue(Promise.resolve(true));
+      esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
+
+      const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(mockedDate);
+      const v4Spy = jest.spyOn(uuid, 'v4').mockImplementationOnce((() => '123') as typeof uuid.v4);
+
+      const doc: Entity = {
+        entity: {
+          id: 'host-1',
+          attributes: {
+            privileged: true,
+          },
+        },
+      };
+
+      await client.upsertEntity('host', doc);
+
+      expect(esClientMock.updateByQuery).toBeCalledWith({
+        conflicts: 'proceed',
+        index: '.entities.v2.latest.security_default',
+        query: {
+          bool: {
+            must: [
+              { term: { 'entity.id': 'host-1' } },
+              { term: { 'entity.EngineMetadata.Type': 'host' } },
+            ],
+          },
+        },
+        script: expect.any(Object),
+        refresh: true,
+      });
+      expect(esClientMock.create).toBeCalledWith({
+        index: '.entities.v2.updates.security_default',
+        id: '123',
+        document: expect.any(Object),
+        refresh: 'wait_for',
+      });
+      expect(esClientMock.transform.previewTransform).not.toHaveBeenCalled();
+      expect(v4Spy).toBeCalledTimes(1);
+    });
+
     it('when valid update entity for generic type', async () => {
       dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValueOnce(Promise.resolve(false));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 1 }));
 
       const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
@@ -310,6 +382,7 @@ describe('EntityStoreCrudClient', () => {
             `ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];` +
             `ctx._source['entity']['lifecycle']['First_seen'] = '1995-12-17T03:24:00';`,
         },
+        refresh: true,
       });
 
       expect(esClientMock.create).toBeCalledWith({
@@ -338,6 +411,7 @@ describe('EntityStoreCrudClient', () => {
     it('when valid update entity using force', async () => {
       dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValueOnce(Promise.resolve(false));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 1 }));
 
       const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
@@ -400,6 +474,7 @@ describe('EntityStoreCrudClient', () => {
             `ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];` +
             `ctx._source['entity']['lifecycle']['First_seen'] = '1995-12-17T03:24:00';`,
         },
+        refresh: true,
       });
 
       expect(esClientMock.create).toBeCalledWith({
@@ -431,6 +506,7 @@ describe('EntityStoreCrudClient', () => {
     it('when valid update entity, but no entity found, just create', async () => {
       dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValueOnce(Promise.resolve(false));
       esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
       esClientMock.transform.previewTransform.mockReturnValue(
         Promise.resolve({
@@ -470,7 +546,7 @@ describe('EntityStoreCrudClient', () => {
         EntityStoreCapability.CRUD_API
       );
       expect(esClientMock.updateByQuery).toBeCalledTimes(1);
-      expect(esClientMock.create).toBeCalledWith({
+      expect(esClientMock.create).toHaveBeenNthCalledWith(1, {
         index: '.entities.v1.updates.security_host_default',
         id: '123',
         document: {
@@ -517,7 +593,7 @@ describe('EntityStoreCrudClient', () => {
         },
         { querystring: { as_index_request: true } }
       );
-      expect(esClientMock.create).toBeCalledWith({
+      expect(esClientMock.create).toHaveBeenNthCalledWith(2, {
         index: '.entities.v1.latest.security_host_default',
         id: 'some-id',
         document: {
@@ -543,6 +619,7 @@ describe('EntityStoreCrudClient', () => {
     it('when creating entity synchronously and entity is not in preview transform docs, throw error', async () => {
       dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
       dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValue(Promise.resolve(false));
       esClientMock.updateByQuery.mockReturnValue(Promise.resolve({ updated: 0 }));
       esClientMock.transform.previewTransform.mockReturnValue(
         Promise.resolve({
@@ -746,6 +823,7 @@ describe('EntityStoreCrudClient', () => {
     it('when valid create entities', async () => {
       dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValue(Promise.resolve(false));
 
       const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
       jest.useFakeTimers();
@@ -816,9 +894,33 @@ describe('EntityStoreCrudClient', () => {
       expect(esClientMock.bulk).toMatchSnapshot();
     });
 
+    it('when entity store v2 is enabled bulk writes to single v2 updates stream', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValue(Promise.resolve(true));
+
+      const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(mockedDate);
+
+      await client.upsertEntitiesBulk([
+        { type: 'user', record: { entity: { id: 'user-1', attributes: { privileged: true } } } },
+        { type: 'host', record: { entity: { id: 'host-1', attributes: { privileged: true } } } },
+      ]);
+
+      expect(esClientMock.bulk).toHaveBeenCalledTimes(1);
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        index: '.entities.v2.updates.security_default',
+        operations: expect.any(Array),
+      });
+      const ops = esClientMock.bulk.mock.calls[0][0].operations ?? [];
+      expect(ops.length).toBe(4); // create + doc for user, create + doc for host
+    });
+
     it('when valid create entity using force', async () => {
       dataClientMock.isCapabilityEnabled.mockReturnValue(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValue(Promise.resolve(true));
+      dataClientMock.isEntityStoreV2Enabled.mockReturnValue(Promise.resolve(false));
 
       const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
       jest.useFakeTimers();

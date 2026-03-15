@@ -13,7 +13,8 @@ import { timerange } from '../model/timerange';
 import { UsersQueries } from '../model/factory_query_type';
 
 export const observedUserDetailsSchema = requestBasicOptionsSchema.extend({
-  userName: z.string(),
+  entityIdentifiers: z.record(z.string(), z.string()),
+  isExploreContext: z.boolean().optional(),
   skip: z.boolean().optional(),
   timerange,
   inspect,

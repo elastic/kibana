@@ -17,12 +17,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import {
   type CloudSecurityUiCounters,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { useGetFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -34,13 +34,9 @@ import {
 
 interface MisconfigurationsInsightProps {
   /**
-   *  Entity name to retrieve misconfigurations for
+   * Entity identifiers used to filter the misconfigurations by.
    */
-  name: string;
-  /**
-   * Indicator whether the entity is host or user
-   */
-  fieldName: 'host.name' | 'user.name';
+  entityIdentifiers: Record<string, string>;
   /**
    * The direction of the flex group
    */
@@ -63,8 +59,7 @@ interface MisconfigurationsInsightProps {
  * Displays a distribution bar with the count of total misconfigurations for a given entity
  */
 export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> = ({
-  name,
-  fieldName,
+  entityIdentifiers,
   direction,
   'data-test-subj': dataTestSubj,
   telemetryKey,
@@ -72,10 +67,15 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
 }) => {
   const renderingId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
+  const euidApi = useEntityStoreEuidApi();
+  const buildPreviewQuery =
+    euidApi && typeof euidApi.buildGenericEntityFlyoutPreviewQuery === 'function'
+      ? euidApi.buildGenericEntityFlyoutPreviewQuery
+      : null;
   const { data } = useMisconfigurationPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(fieldName, name),
+    query: buildPreviewQuery ? buildPreviewQuery(entityIdentifiers) : { bool: { filter: [] } },
     sort: [],
-    enabled: true,
+    enabled: !!buildPreviewQuery,
     pageSize: 1,
   });
 

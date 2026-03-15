@@ -14,10 +14,14 @@ import type {
 } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
 import { useSelectedTab, useTabs } from './hooks';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 export interface HostDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
-  name: string;
+  /**
+   * Entity identifiers for the host (following entity store EUID logic)
+   */
+  entityIdentifiers: EntityIdentifiers;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
   hasVulnerabilitiesFindings?: boolean;

@@ -2457,9 +2457,11 @@ describe('Exception helpers', () => {
           id: 'kibana.alert.ancestors.id',
           overrideField: 'Source event',
         },
-        {
-          id: 'host.name',
-        },
+        // Host EUID fields (entity store priority: host.entity.id > host.id > host.name > host.hostname)
+        { id: 'host.entity.id' },
+        { id: 'host.id' },
+        { id: 'host.name' },
+        { id: 'host.hostname' },
         // Fields used in support of Response Actions
         ...SUPPORTED_AGENT_ID_ALERT_FIELDS.map((fieldPath) => {
           return {
@@ -2471,9 +2473,11 @@ describe('Exception helpers', () => {
         {
           id: 'Endpoint.policy.applied.artifacts.global.channel',
         },
-        {
-          id: 'user.name',
-        },
+        // User EUID fields (entity store priority: user.entity.id > user.id > user.email > user.name)
+        { id: 'user.entity.id' },
+        { id: 'user.id' },
+        { id: 'user.email' },
+        { id: 'user.name' },
         {
           id: 'cloud.provider',
         },

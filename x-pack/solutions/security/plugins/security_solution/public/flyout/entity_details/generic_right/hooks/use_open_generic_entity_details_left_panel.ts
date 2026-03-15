@@ -8,6 +8,9 @@
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { buildEntityFlyoutPreviewCspOptions } from '../../../../cloud_security_posture/utils/entity_flyout_preview_options';
+import type { EntityIdentifiers } from '../../../document_details/shared/utils';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -18,19 +21,22 @@ import { type UseGetGenericEntityParams } from './use_get_generic_entity';
 
 export const useOpenGenericEntityDetailsLeftPanel = (
   params: {
-    insightsField: string;
-    insightsValue: string;
+    entityIdentifiers: EntityIdentifiers;
     scopeId: string;
   } & UseGetGenericEntityParams
 ) => {
-  const { insightsField, insightsValue, entityDocId, entityId, scopeId } = params;
+  const { entityIdentifiers, entityDocId, entityId, scopeId } = params;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(insightsField, insightsValue);
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(insightsField, insightsValue);
+  const euidApi = useEntityStoreEuidApi();
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+  );
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+  );
   const { to, from } = useGlobalTime();
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: insightsField as 'related.entity',
-    value: insightsValue,
+    entityIdentifiers,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-generic-entity-alerts`,
@@ -42,8 +48,7 @@ export const useOpenGenericEntityDetailsLeftPanel = (
       params: {
         entityDocId,
         entityId,
-        field: insightsField,
-        value: insightsValue,
+        entityIdentifiers,
         scopeId,
         isRiskScoreExist: false,
         hasMisconfigurationFindings,

@@ -11,17 +11,18 @@ import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FlyoutFooter } from '../../shared/components/flyout_footer';
 import { UserPanelKey } from '../shared/constants';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 export interface UserPreviewPanelFooterProps {
   contextID: string;
   scopeId: string;
-  userName: string;
+  entityIdentifiers: EntityIdentifiers;
 }
 
 export const UserPreviewPanelFooter = ({
   contextID,
   scopeId,
-  userName,
+  entityIdentifiers,
 }: UserPreviewPanelFooterProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
 
@@ -31,12 +32,12 @@ export const UserPreviewPanelFooter = ({
         id: UserPanelKey,
         params: {
           contextID,
-          userName,
+          entityIdentifiers,
           scopeId,
         },
       },
     });
-  }, [openFlyout, userName, contextID, scopeId]);
+  }, [openFlyout, entityIdentifiers, contextID, scopeId]);
 
   return (
     <FlyoutFooter data-test-subj={'user-preview-footer'}>

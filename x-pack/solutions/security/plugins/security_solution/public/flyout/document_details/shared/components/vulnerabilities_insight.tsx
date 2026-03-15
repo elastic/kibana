@@ -18,13 +18,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import {
   type CloudSecurityUiCounters,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
@@ -32,12 +32,13 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityIdentifiers } from '../utils';
 
 interface VulnerabilitiesInsightProps {
   /**
-   *  Host name to retrieve vulnerabilities for
+   * Entity identifiers used to filter the vulnerabilities by.
    */
-  hostName: string;
+  entityIdentifiers: EntityIdentifiers;
   /**
    * The direction of the flex group
    */
@@ -57,10 +58,10 @@ interface VulnerabilitiesInsightProps {
 }
 
 /*
- * Displays a distribution bar and the total vulnerabilities count for a given host
+ * Displays a distribution bar and the total vulnerabilities count for a given entity
  */
 export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
-  hostName,
+  entityIdentifiers,
   direction,
   'data-test-subj': dataTestSubj,
   telemetryKey,
@@ -69,10 +70,16 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   const renderingId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const { getSeverityStatusColor } = useGetSeverityStatusColor();
+  const euidApi = useEntityStoreEuidApi();
+  const buildPreviewQuery =
+    euidApi && typeof euidApi.buildGenericEntityFlyoutPreviewQuery === 'function'
+      ? euidApi.buildGenericEntityFlyoutPreviewQuery
+      : null;
+  const query = buildPreviewQuery ? buildPreviewQuery(entityIdentifiers) : { bool: { filter: [] } };
   const { data } = useVulnerabilitiesPreview({
-    query: buildGenericEntityFlyoutPreviewQuery('host.name', hostName),
+    query: query as Parameters<typeof useVulnerabilitiesPreview>[0]['query'],
     sort: [],
-    enabled: true,
+    enabled: !!buildPreviewQuery,
     pageSize: 1,
   });
 

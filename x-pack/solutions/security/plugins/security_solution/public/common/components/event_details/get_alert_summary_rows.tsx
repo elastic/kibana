@@ -50,13 +50,29 @@ const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleT
   defaultMessage: 'Rule type',
 });
 
+/** Host EUID fields (entity store priority: host.entity.id > host.id > host.name > host.hostname) */
+const HOST_EUID_FIELDS: EventSummaryField[] = [
+  { id: 'host.entity.id' },
+  { id: 'host.id' },
+  { id: 'host.name' },
+  { id: 'host.hostname' },
+];
+
+/** User EUID fields (entity store priority: user.entity.id > user.id > user.email > user.name) */
+const USER_EUID_FIELDS: EventSummaryField[] = [
+  { id: 'user.entity.id' },
+  { id: 'user.id' },
+  { id: 'user.email' },
+  { id: 'user.name' },
+];
+
 /** Always show these fields */
 export const alwaysDisplayedFields: EventSummaryField[] = [
   {
     id: EVENT_SOURCE_FIELD_NAME,
     overrideField: EVENT_SOURCE_FIELD_DESCRIPTOR,
   },
-  { id: 'host.name' },
+  ...HOST_EUID_FIELDS,
 
   // Add all fields used to identify the agent ID in alert events and override them to
   // show the `agent.status` field name/value
@@ -70,7 +86,7 @@ export const alwaysDisplayedFields: EventSummaryField[] = [
 
   // ** //
   { id: 'Endpoint.policy.applied.artifacts.global.channel' },
-  { id: 'user.name' },
+  ...USER_EUID_FIELDS,
   { id: 'rule.name' },
   { id: 'cloud.provider' },
   { id: 'cloud.region' },

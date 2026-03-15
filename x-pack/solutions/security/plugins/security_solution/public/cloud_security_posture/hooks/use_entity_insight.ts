@@ -6,9 +6,11 @@
  */
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { buildEntityFlyoutPreviewCspOptions } from '../utils/entity_flyout_preview_options';
 import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
 import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
 import { EntityDetailsLeftPanelTab } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -16,37 +18,71 @@ import { useGlobalTime } from '../../common/containers/use_global_time';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
 import { useNonClosedAlerts } from './use_non_closed_alerts';
 import { useHasRiskScore } from './use_risk_score_data';
+import type { EntityIdentifiers } from '../../flyout/document_details/shared/utils';
 import type { CloudPostureEntityIdentifier } from '../components/entity_insight';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../common/entity_analytics/entity_store/constants';
+import { useUiSetting } from '../../common/lib/kibana';
+import { useEntityFromStore } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { getRiskFromEntityRecord } from '../../flyout/entity_details/shared/entity_store_risk_utils';
 
 export const useNavigateEntityInsight = ({
-  field,
-  value,
+  entityIdentifiers,
   subTab,
   queryIdExtension,
 }: {
-  field: CloudPostureEntityIdentifier;
-  value: string;
+  entityIdentifiers: EntityIdentifiers;
   subTab: string;
   queryIdExtension: string;
 }) => {
-  const isHostNameField = field === 'host.name';
+  const isHostNameField = 'host.name' in entityIdentifiers;
   const { to, from } = useGlobalTime();
+  const euidApi = useEntityStoreEuidApi();
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field,
-    value,
+    entityIdentifiers,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}${queryIdExtension}`,
   });
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, value);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+  );
 
-  const { hasRiskScore } = useHasRiskScore({
-    field,
-    value,
+  const primaryField = useMemo(() => {
+    if (entityIdentifiers['host.name']) return 'host.name';
+    if (entityIdentifiers['user.name']) return 'user.name';
+    return Object.keys(entityIdentifiers)[0] || '';
+  }, [entityIdentifiers]);
+
+  const value = useMemo(() => {
+    return entityIdentifiers[primaryField] || Object.values(entityIdentifiers)[0] || '';
+  }, [entityIdentifiers, primaryField]);
+
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityType = primaryField === 'host.name' ? 'host' : 'user';
+
+  const entityFromStore = useEntityFromStore({
+    entityIdentifiers,
+    entityType,
+    skip: !entityStoreV2Enabled,
   });
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(field, value);
+
+  const hasRiskScoreFromStore = useMemo(() => {
+    const record = entityFromStore.entityRecord;
+    return record ? !!getRiskFromEntityRecord(record)?.calculated_level : false;
+  }, [entityFromStore.entityRecord]);
+
+  const { hasRiskScore: hasRiskScoreFromSearch } = useHasRiskScore({
+    field: primaryField as CloudPostureEntityIdentifier,
+    value,
+    skip: entityStoreV2Enabled,
+  });
+
+  const hasRiskScore = entityStoreV2Enabled ? hasRiskScoreFromStore : hasRiskScoreFromSearch;
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    buildEntityFlyoutPreviewCspOptions(entityIdentifiers, euidApi)
+  );
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToEntityInsightTab = useCallback(() => {

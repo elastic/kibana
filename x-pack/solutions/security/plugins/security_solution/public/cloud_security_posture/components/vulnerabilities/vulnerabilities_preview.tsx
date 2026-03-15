@@ -12,23 +12,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
-import {
-  buildGenericEntityFlyoutPreviewQuery,
-  getAbbreviatedNumber,
-} from '@kbn/cloud-security-posture-common';
+import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
+import type { EntityIdentifiers } from '../../../flyout/document_details/shared/utils';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
@@ -64,13 +62,11 @@ const VulnerabilitiesCount = ({
 };
 
 export const VulnerabilitiesPreview = ({
-  value,
-  field,
+  entityIdentifiers,
   isPreviewMode,
   openDetailsPanel,
 }: {
-  value: string;
-  field: CloudPostureEntityIdentifier;
+  entityIdentifiers: EntityIdentifiers;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
@@ -78,10 +74,15 @@ export const VulnerabilitiesPreview = ({
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW);
   }, []);
 
+  const euidApi = useEntityStoreEuidApi();
+  const buildPreviewQuery =
+    euidApi && typeof euidApi?.buildGenericEntityFlyoutPreviewQuery === 'function'
+      ? euidApi.buildGenericEntityFlyoutPreviewQuery
+      : null;
   const { data } = useVulnerabilitiesPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(field, value),
+    query: buildPreviewQuery ? buildPreviewQuery(entityIdentifiers) : { bool: { filter: [] } },
     sort: [],
-    enabled: true,
+    enabled: !!buildPreviewQuery,
     pageSize: 1,
   });
 

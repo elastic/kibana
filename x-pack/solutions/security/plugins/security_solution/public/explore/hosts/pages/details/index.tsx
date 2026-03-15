@@ -146,6 +146,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     startDate: from,
     hostName: detailName,
     indexNames: selectedPatterns,
+    isExploreContext: true,
     skip: selectedPatterns.length === 0,
   });
 
@@ -205,7 +206,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
 
   const entity = useMemo(
-    () => ({ type: EntityType.host as const, name: detailName }),
+    () => ({
+      type: EntityType.host as const,
+      name: detailName,
+      identifiers: { 'host.name': detailName },
+    }),
     [detailName]
   );
   const privileges = useAssetCriticalityPrivileges(entity.name);
@@ -291,7 +296,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     setQuery={setQuery}
                     refetch={refetch}
                     inspect={inspect}
-                    hostName={detailName}
+                    entityIdentifiers={{ [ES_HOST_FIELD]: detailName }}
                     indexNames={selectedPatterns}
                     jobNameById={jobNameById}
                     scopeId={PageScope.explore}
@@ -316,6 +321,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                         entityFilter={entityFilter}
                         signalIndexName={signalIndexName}
                         additionalFilters={additionalFilters}
+                        entityIdentifiers={{ 'host.name': detailName }}
+                        isExploreContext
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

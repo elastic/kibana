@@ -52,7 +52,7 @@ const useOpenUserFlyout = () => {
         id: UserPanelKey,
         params: {
           contextID: PRIVILEGED_USERS_TABLE_ID,
-          userName,
+          entityIdentifiers: { 'user.name': userName },
           scopeId: PRIVILEGED_USERS_TABLE_ID,
         },
       },

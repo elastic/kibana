@@ -14,10 +14,12 @@ import {
 } from '@elastic/eui';
 import { useEntityAnalyticsTypes } from '../../../hooks/use_enabled_entity_types';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common/entity_analytics/entity_store/constants';
 import { EntitiesList } from '../entities_list';
 import { useEntityStoreStatus } from '../hooks/use_entity_store';
 import { EntityAnalyticsRiskScores } from '../../entity_analytics_risk_score';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
+import { useUiSetting } from '../../../../common/lib/kibana';
 
 import { EnablementPanel } from './dashboard_enablement_panel';
 import { EntityStoreErrorCallout } from './entity_store_error_callout';
@@ -26,6 +28,7 @@ const EntityStoreDashboardPanelsComponent = () => {
   const riskEngineStatus = useRiskEngineStatus();
   const storeStatusQuery = useEntityStoreStatus({});
   const entityTypes = useEntityAnalyticsTypes();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   const callouts = (storeStatusQuery.data?.engines ?? [])
     .filter((engine) => engine.status === 'error')
@@ -61,12 +64,13 @@ const EntityStoreDashboardPanelsComponent = () => {
           ))}
         </>
       )}
-      {storeStatusQuery.data?.status !== 'not_installed' &&
-        storeStatusQuery.data?.status !== 'installing' && (
-          <EuiFlexItem data-test-subj="entitiesListPanel">
-            <EntitiesList />
-          </EuiFlexItem>
-        )}
+      {(storeStatusQuery.data?.status !== 'not_installed' &&
+        storeStatusQuery.data?.status !== 'installing') ||
+      entityStoreV2Enabled ? (
+        <EuiFlexItem data-test-subj="entitiesListPanel">
+          <EntitiesList />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };

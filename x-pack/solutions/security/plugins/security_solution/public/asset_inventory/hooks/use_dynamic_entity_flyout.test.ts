@@ -16,6 +16,7 @@ import {
   HostPanelKey,
   ServicePanelKey,
 } from '../../flyout/entity_details/shared/constants';
+import { getEntityIdentifiersFromSource } from '../utils/entity_identifiers_from_source';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -27,6 +28,14 @@ jest.mock('../../common/lib/kibana', () => ({
 
 jest.mock('../../flyout/shared/hooks/use_on_expandable_flyout_close', () => ({
   useOnExpandableFlyoutClose: jest.fn(),
+}));
+
+jest.mock('@kbn/entity-store/public', () => ({
+  useEntityStoreEuidApi: jest.fn(() => ({ euid: null })),
+}));
+
+jest.mock('../utils/entity_identifiers_from_source', () => ({
+  getEntityIdentifiersFromSource: jest.fn(),
 }));
 
 describe('useDynamicEntityFlyout', () => {
@@ -49,6 +58,7 @@ describe('useDynamicEntityFlyout', () => {
       services: { notifications: { toasts: toastsMock } },
     });
     (useOnExpandableFlyoutClose as jest.Mock).mockImplementation(({ callback }) => callback);
+    (getEntityIdentifiersFromSource as jest.Mock).mockReturnValue(null);
   });
 
   it('should open the flyout with correct params for a generic entity', () => {
@@ -58,6 +68,9 @@ describe('useDynamicEntityFlyout', () => {
 
     act(() => {
       result.current.openDynamicFlyout({
+        rawSource: {
+          entity: { id: 'entity-123', EngineMetadata: { Type: 'container' } },
+        } as never,
         entityDocId: '123',
         entityType: 'container',
         scopeId: 'scope1',
@@ -70,6 +83,7 @@ describe('useDynamicEntityFlyout', () => {
         id: GenericEntityPanelKey,
         params: {
           entityDocId: '123',
+          entityIdentifiers: {},
           scopeId: 'scope1',
           contextId: 'context1',
           isEngineMetadataExist: true,
@@ -79,14 +93,20 @@ describe('useDynamicEntityFlyout', () => {
   });
 
   it('should open the flyout with correct params for a user entity', () => {
+    (getEntityIdentifiersFromSource as jest.Mock).mockReturnValue({
+      'user.name': 'testUser',
+    });
     const { result } = renderHook(() =>
       useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
     );
 
     act(() => {
       result.current.openDynamicFlyout({
+        rawSource: {
+          user: { name: 'testUser' },
+          entity: { EngineMetadata: { Type: 'user' } },
+        } as never,
         entityType: 'user',
-        entityName: 'testUser',
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -95,20 +115,62 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: UserPanelKey,
-        params: { userName: 'testUser', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          entityIdentifiers: { 'user.name': 'testUser' },
+          scopeId: 'scope1',
+          contextID: 'context1',
+        },
       },
     });
   });
 
-  it('should open the flyout with correct params for a host entity', () => {
+  it('should use EUID priority for user (user.entity.id over user.name) via entity store euid', () => {
+    (getEntityIdentifiersFromSource as jest.Mock).mockReturnValue({
+      'user.entity.id': 'user-euid-123',
+    });
     const { result } = renderHook(() =>
       useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
     );
 
     act(() => {
       result.current.openDynamicFlyout({
+        rawSource: {
+          user: { name: 'testUser', entity: { id: 'user-euid-123' } },
+          entity: { EngineMetadata: { Type: 'user' } },
+        } as never,
+        entityType: 'user',
+        scopeId: 'scope1',
+        contextId: 'context1',
+      });
+    });
+
+    expect(openFlyoutMock).toHaveBeenCalledWith({
+      right: {
+        id: UserPanelKey,
+        params: {
+          entityIdentifiers: { 'user.entity.id': 'user-euid-123' },
+          scopeId: 'scope1',
+          contextID: 'context1',
+        },
+      },
+    });
+  });
+
+  it('should open the flyout with correct params for a host entity', () => {
+    (getEntityIdentifiersFromSource as jest.Mock).mockReturnValue({
+      'host.name': 'testHost',
+    });
+    const { result } = renderHook(() =>
+      useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
+    );
+
+    act(() => {
+      result.current.openDynamicFlyout({
+        rawSource: {
+          host: { name: 'testHost' },
+          entity: { EngineMetadata: { Type: 'host' } },
+        } as never,
         entityType: 'host',
-        entityName: 'testHost',
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -117,20 +179,31 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: HostPanelKey,
-        params: { hostName: 'testHost', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          entityIdentifiers: { 'host.name': 'testHost' },
+          scopeId: 'scope1',
+          contextID: 'context1',
+          isPreviewMode: false,
+        },
       },
     });
   });
 
   it('should open the flyout with correct params for a service entity', () => {
+    (getEntityIdentifiersFromSource as jest.Mock).mockReturnValue({
+      'service.name': 'testService',
+    });
     const { result } = renderHook(() =>
       useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
     );
 
     act(() => {
       result.current.openDynamicFlyout({
+        rawSource: {
+          service: { name: 'testService' },
+          entity: { EngineMetadata: { Type: 'service' } },
+        } as never,
         entityType: 'service',
-        entityName: 'testService',
         scopeId: 'scope1',
         contextId: 'context1',
       });
@@ -139,18 +212,27 @@ describe('useDynamicEntityFlyout', () => {
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: ServicePanelKey,
-        params: { serviceName: 'testService', scopeId: 'scope1', contextId: 'context1' },
+        params: {
+          entityIdentifiers: { 'service.name': 'testService' },
+          scopeId: 'scope1',
+          contextID: 'context1',
+        },
       },
     });
   });
 
-  it('should show an error toast if entity name is missing for user, host, or service entities', () => {
+  it('should show an error toast if entityIdentifiers are missing for user, host, or service entities', () => {
     const { result } = renderHook(() =>
       useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
     );
 
     act(() => {
-      result.current.openDynamicFlyout({ entityType: 'user' });
+      result.current.openDynamicFlyout({
+        rawSource: { entity: { EngineMetadata: { Type: 'user' } } } as never,
+        entityType: 'user',
+        scopeId: 'scope1',
+        contextId: 'context1',
+      });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalled();

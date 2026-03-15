@@ -266,6 +266,9 @@ describe('Search Strategy EQL helper', () => {
                   ],
                 },
                 "host": Object {
+                  "hostname": Array [
+                    "win2019-endpoint-mr-pedro",
+                  ],
                   "id": Array [
                     "d8ad572e-d224-4044-a57d-f5a84c0dfe5d",
                   ],
@@ -274,6 +277,9 @@ describe('Search Strategy EQL helper', () => {
                     "fe80::9ced:8f1c:880b:3e1f",
                     "127.0.0.1",
                     "::1",
+                  ],
+                  "mac": Array [
+                    "42:01:0a:80:00:39",
                   ],
                   "name": Array [
                     "win2019-endpoint-mr-pedro",
@@ -399,6 +405,9 @@ describe('Search Strategy EQL helper', () => {
                   ],
                 },
                 "host": Object {
+                  "hostname": Array [
+                    "win2019-endpoint-mr-pedro",
+                  ],
                   "id": Array [
                     "d8ad572e-d224-4044-a57d-f5a84c0dfe5d",
                   ],
@@ -407,6 +416,9 @@ describe('Search Strategy EQL helper', () => {
                     "fe80::9ced:8f1c:880b:3e1f",
                     "127.0.0.1",
                     "::1",
+                  ],
+                  "mac": Array [
+                    "42:01:0a:80:00:39",
                   ],
                   "name": Array [
                     "win2019-endpoint-mr-pedro",
@@ -539,6 +551,9 @@ describe('Search Strategy EQL helper', () => {
                   "type": Array [],
                 },
                 "host": Object {
+                  "hostname": Array [
+                    "win2019-endpoint-mr-pedro",
+                  ],
                   "id": Array [
                     "d8ad572e-d224-4044-a57d-f5a84c0dfe5d",
                   ],
@@ -547,6 +562,9 @@ describe('Search Strategy EQL helper', () => {
                     "fe80::9ced:8f1c:880b:3e1f",
                     "127.0.0.1",
                     "::1",
+                  ],
+                  "mac": Array [
+                    "42:01:0a:80:00:39",
                   ],
                   "name": Array [
                     "win2019-endpoint-mr-pedro",
@@ -668,6 +686,9 @@ describe('Search Strategy EQL helper', () => {
                   ],
                 },
                 "host": Object {
+                  "hostname": Array [
+                    "win2019-endpoint-mr-pedro",
+                  ],
                   "id": Array [
                     "d8ad572e-d224-4044-a57d-f5a84c0dfe5d",
                   ],
@@ -676,6 +697,9 @@ describe('Search Strategy EQL helper', () => {
                     "fe80::9ced:8f1c:880b:3e1f",
                     "127.0.0.1",
                     "::1",
+                  ],
+                  "mac": Array [
+                    "42:01:0a:80:00:39",
                   ],
                   "name": Array [
                     "win2019-endpoint-mr-pedro",

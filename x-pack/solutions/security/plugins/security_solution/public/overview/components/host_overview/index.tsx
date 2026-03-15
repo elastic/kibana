@@ -11,18 +11,21 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { buildHostNamesFilter, type HostItem } from '../../../../common/search_strategy';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { hostIdRenderer } from '../../../explore/network/components/field_renderers/field_renderers';
-import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
+import { HostIdRenderer } from '../../../explore/network/components/field_renderers/field_renderers';
+import {
+  DefaultFieldRenderer,
+  toFieldRendererItems,
+} from '../../../timelines/components/field_renderers/default_renderer';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -39,6 +42,9 @@ import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import { RiskScoreDocTooltip } from '../common';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -53,9 +59,17 @@ interface HostSummaryProps {
   startDate: string;
   endDate: string;
   narrowDateRange: NarrowDateRange;
-  hostName: string;
+  entityIdentifiers: Record<string, string>;
   jobNameById: Record<string, string | undefined>;
   isFlyoutOpen?: boolean;
+  /** When using Entity Store v2: pre-fetched risk state from entity store. */
+  riskScoreState?: RiskScoreState<EntityType.host>;
+  /** When using Entity Store v2: first seen from entity lifecycle. */
+  firstSeenFromEntityStore?: string;
+  /** When using Entity Store v2: last seen from entity lifecycle. */
+  lastSeenFromEntityStore?: string;
+  /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
+  showInspectButtonAlways?: boolean;
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -81,46 +95,69 @@ export const HostOverview = React.memo<HostSummaryProps>(
     loading,
     narrowDateRange,
     startDate,
-    hostName,
+    entityIdentifiers,
     jobNameById,
     isFlyoutOpen = false,
+    riskScoreState: riskScoreStateFromEntityStore,
+    firstSeenFromEntityStore,
+    lastSeenFromEntityStore,
+    showInspectButtonAlways = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const darkMode = useKibanaIsDarkMode();
-    const filterQuery = useMemo(
-      () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
-      [hostName]
+    const euidApi = useEntityStoreEuidApi();
+    const effectiveHostName = useMemo(
+      () =>
+        entityIdentifiers['host.name'] ||
+        entityIdentifiers['host.hostname'] ||
+        Object.entries(entityIdentifiers).find(([k]) => k.startsWith('host.'))?.[1],
+      [entityIdentifiers]
     );
+    const useEntityStoreV2AsDataSource = Boolean(riskScoreStateFromEntityStore);
+    const filterQuery = useMemo(() => {
+      const euidFilter = euidApi?.euid?.getEuidDslFilterBasedOnDocument('host', entityIdentifiers, {
+        includeEuidSourceFilter: useEntityStoreV2AsDataSource,
+      });
+      if (euidFilter) {
+        return JSON.stringify(euidFilter);
+      }
+      return effectiveHostName
+        ? JSON.stringify(buildHostNamesFilter([effectiveHostName]))
+        : undefined;
+    }, [euidApi?.euid, entityIdentifiers, effectiveHostName, useEntityStoreV2AsDataSource]);
     const { deleteQuery, setQuery } = useGlobalTime();
 
     const {
-      data: hostRisk,
-      isAuthorized,
+      data: hostRiskFromSearch,
+      isAuthorized: isRiskScoreAuthorized,
       inspect: inspectRiskScore,
       loading: loadingRiskScore,
       refetch: refetchRiskScore,
     } = useRiskScore({
       filterQuery,
       riskEntity: EntityType.host,
-      skip: hostName == null,
+      skip: !!riskScoreStateFromEntityStore || effectiveHostName == null,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
     });
 
+    const hostRisk = riskScoreStateFromEntityStore?.data ?? hostRiskFromSearch;
+    const isAuthorized = riskScoreStateFromEntityStore ? true : isRiskScoreAuthorized;
+
     useQueryInspector({
       deleteQuery,
-      inspect: inspectRiskScore,
-      loading: loadingRiskScore,
+      inspect: riskScoreStateFromEntityStore ? { dsl: [], response: [] } : inspectRiskScore,
+      loading: riskScoreStateFromEntityStore ? false : loadingRiskScore,
       queryId: HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
-      refetch: refetchRiskScore,
+      refetch: riskScoreStateFromEntityStore ? () => {} : refetchRiskScore,
       setQuery,
     });
 
     const getDefaultRenderer = useCallback(
       (fieldName: string, fieldData: HostItem) => (
         <DefaultFieldRenderer
-          rowItems={getOr([], fieldName, fieldData)}
+          rowItems={toFieldRendererItems(getOr([], fieldName, fieldData))}
           attrName={fieldName}
           idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
           scopeId={scopeId}
@@ -179,39 +216,59 @@ export const HostOverview = React.memo<HostSummaryProps>(
         {
           title: i18n.HOST_ID,
           description:
-            data && data.host
-              ? hostIdRenderer({
-                  host: data.host,
-                  noLink: true,
-                  scopeId,
-                  isFlyoutOpen,
-                })
-              : getEmptyTagValue(),
+            data && data.host ? (
+              <HostIdRenderer
+                host={data.host}
+                noLink={true}
+                scopeId={scopeId}
+                isFlyoutOpen={isFlyoutOpen}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
         {
           title: i18n.FIRST_SEEN,
-          description: (
-            <FirstLastSeen
-              indexPatterns={indexNames}
-              field={'host.name'}
-              value={hostName}
-              type={FirstLastSeenType.FIRST_SEEN}
-            />
-          ),
+          description:
+            firstSeenFromEntityStore != null ? (
+              <PreferenceFormattedDateFromPrimitive value={firstSeenFromEntityStore} />
+            ) : effectiveHostName != null ? (
+              <FirstLastSeen
+                indexPatterns={indexNames}
+                field="host.name"
+                value={effectiveHostName}
+                type={FirstLastSeenType.FIRST_SEEN}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
         {
           title: i18n.LAST_SEEN,
-          description: (
-            <FirstLastSeen
-              indexPatterns={indexNames}
-              field={'host.name'}
-              value={hostName}
-              type={FirstLastSeenType.LAST_SEEN}
-            />
-          ),
+          description:
+            lastSeenFromEntityStore != null ? (
+              <PreferenceFormattedDateFromPrimitive value={lastSeenFromEntityStore} />
+            ) : effectiveHostName != null ? (
+              <FirstLastSeen
+                indexPatterns={indexNames}
+                field="host.name"
+                value={effectiveHostName}
+                type={FirstLastSeenType.LAST_SEEN}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
       ],
-      [data, scopeId, indexNames, hostName, isFlyoutOpen]
+      [
+        data,
+        scopeId,
+        indexNames,
+        isFlyoutOpen,
+        effectiveHostName,
+        firstSeenFromEntityStore,
+        lastSeenFromEntityStore,
+      ]
     );
     const firstColumn = useMemo(
       () =>
@@ -253,7 +310,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             title: i18n.IP_ADDRESSES,
             description: (
               <DefaultFieldRenderer
-                rowItems={getOr([], 'host.ip', data)}
+                rowItems={toFieldRendererItems(getOr([], 'host.ip', data))}
                 attrName={'host.ip'}
                 idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
                 scopeId={scopeId}
@@ -307,7 +364,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     );
     return (
       <>
-        <InspectButtonContainer>
+        <InspectButtonContainer show={!showInspectButtonAlways}>
           <OverviewWrapper
             direction={isInDetailsSidePanel ? 'column' : 'row'}
             data-test-subj="host-overview"

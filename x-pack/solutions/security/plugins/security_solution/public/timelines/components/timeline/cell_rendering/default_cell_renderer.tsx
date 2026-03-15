@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { useGetMappedNonEcsValue } from '../../../../common/utils/get_mapped_non_ecs_value';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
+import { mergeTimelineDataWithEcs } from '../body/renderers/merge_timeline_data_with_ecs';
 import type { CellValueElementProps } from '.';
 import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
 
@@ -44,6 +45,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     data,
     fieldName: header.id,
   });
+  const mergedData = useMemo(() => mergeTimelineDataWithEcs(data, ecsData), [data, ecsData]);
   const styledContentClassName = isDetails
     ? 'eui-textBreakWord'
     : 'eui-displayInlineBlock eui-textTruncate';
@@ -62,6 +64,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
         truncate,
         values,
         context,
+        data: mergedData,
       })}
     </StyledContent>
   );

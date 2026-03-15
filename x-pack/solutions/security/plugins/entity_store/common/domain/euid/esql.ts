@@ -23,6 +23,7 @@ import {
   isEuidField,
   isEuidSeparator,
 } from './commons';
+import type { GetEuidFilterOptions } from './dsl';
 import {
   applyFieldEvaluations,
   getSourceMatchSpec,
@@ -47,11 +48,13 @@ import {
  *
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
+ * @param options - Optional. Set includeEuidSourceFilter: false when entity store v2 is not the data source to omit event.module / data_stream.dataset from the filter.
  * @returns An ESQL filter string, or undefined if the document does not contain enough identifying information.
  */
 export function getEuidEsqlFilterBasedOnDocument(
   entityType: EntityType,
-  doc: any
+  doc: any,
+  options?: GetEuidFilterOptions
 ): string | undefined {
   if (!doc) {
     return undefined;
@@ -93,7 +96,8 @@ export function getEuidEsqlFilterBasedOnDocument(
 
   const allParts: string[] = [...onExpressions, ...outExpressions];
 
-  if (identityField.fieldEvaluations?.length) {
+  const includeEuidSourceFilter = options?.includeEuidSourceFilter !== false;
+  if (includeEuidSourceFilter && identityField.fieldEvaluations?.length) {
     for (const evaluation of identityField.fieldEvaluations) {
       const spec = getSourceMatchSpec(doc, evaluation);
       allParts.push(buildSourceClauseEsql(evaluation, spec));

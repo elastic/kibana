@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 import { useTabs } from './tabs';
 import type {
   EntityDetailsLeftPanelTab,
@@ -16,14 +17,12 @@ import type {
 import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 
-interface ServiceParam {
-  name: string;
-  email: string[];
-}
+const getServiceNameFromEntityIdentifiers = (entityIdentifiers: EntityIdentifiers): string =>
+  entityIdentifiers['service.name'] || Object.values(entityIdentifiers)[0] || '';
 
 export interface ServiceDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
-  service: ServiceParam;
+  entityIdentifiers: EntityIdentifiers;
   path?: PanelPath;
   scopeId: string;
 }
@@ -35,13 +34,23 @@ export const ServiceDetailsPanelKey: ServiceDetailsExpandableFlyoutProps['key'] 
 
 export const ServiceDetailsPanel = ({
   isRiskScoreExist,
-  service,
+  entityIdentifiers,
   path,
   scopeId,
 }: ServiceDetailsPanelProps) => {
-  const tabs = useTabs(service.name, scopeId);
+  const serviceName = useMemo(
+    () => getServiceNameFromEntityIdentifiers(entityIdentifiers ?? {}),
+    [entityIdentifiers]
+  );
+  const tabs = useTabs(serviceName, scopeId);
 
-  const { selectedTabId, setSelectedTabId } = useSelectedTab(isRiskScoreExist, service, tabs, path);
+  const { selectedTabId, setSelectedTabId } = useSelectedTab(
+    isRiskScoreExist,
+    entityIdentifiers ?? {},
+    scopeId,
+    tabs,
+    path
+  );
 
   if (!selectedTabId) {
     return null;
@@ -61,7 +70,8 @@ export const ServiceDetailsPanel = ({
 
 const useSelectedTab = (
   isRiskScoreExist: boolean,
-  service: ServiceParam,
+  entityIdentifiers: EntityIdentifiers,
+  scopeId: string,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined
 ) => {
@@ -78,8 +88,9 @@ const useSelectedTab = (
     openLeftPanel({
       id: ServiceDetailsPanelKey,
       params: {
-        service,
+        entityIdentifiers,
         isRiskScoreExist,
+        scopeId,
         path: {
           tab: tabId,
         },

@@ -28,6 +28,7 @@ import { RulePanelKey, RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../ru
 import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { EVENT_PREVIEW_BANNER } from '../../document_details/preview/constants';
 import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../common/components/event_details/translations';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 // Helper function to check if the field has a flyout link
 export const isFlyoutLink = ({
@@ -52,6 +53,7 @@ interface GetFlyoutParams {
   scopeId: string;
   ruleId?: string;
   ancestorsIndexName?: string;
+  entityIdentifiers?: EntityIdentifiers;
 }
 
 const FLYOUT_FIELDS = [
@@ -65,6 +67,7 @@ const FLYOUT_FIELDS = [
 // If flyout is currently open, preview panel params are returned
 // If flyout is not currently open, flyout rightpanel params are returned
 export const getRightPanelParams = ({
+  entityIdentifiers,
   value,
   field,
   scopeId,
@@ -94,6 +97,8 @@ export const getRightPanelParams = ({
         params: {
           hostName: value,
           scopeId,
+          contextID: scopeId,
+          entityIdentifiers,
         },
       };
     case USER_NAME_FIELD_NAME:
@@ -102,6 +107,8 @@ export const getRightPanelParams = ({
         params: {
           userName: value,
           scopeId,
+          contextID: scopeId,
+          entityIdentifiers,
         },
       };
     case SIGNAL_RULE_NAME_FIELD_NAME:
@@ -122,6 +129,7 @@ export const getPreviewPanelParams = ({
   scopeId,
   ruleId,
   ancestorsIndexName,
+  entityIdentifiers,
 }: GetFlyoutParams): FlyoutPanelProps | null => {
   if (!isFlyoutLink({ field, ruleId, scopeId })) {
     return null;
@@ -149,6 +157,8 @@ export const getPreviewPanelParams = ({
           hostName: value,
           scopeId,
           banner: HOST_PREVIEW_BANNER,
+          contextID: scopeId || 'highlighted-fields-host-preview',
+          entityIdentifiers,
         },
       };
     case USER_NAME_FIELD_NAME:
@@ -158,6 +168,8 @@ export const getPreviewPanelParams = ({
           userName: value,
           scopeId,
           banner: USER_PREVIEW_BANNER,
+          contextID: scopeId || 'highlighted-fields-user-preview',
+          entityIdentifiers,
         },
       };
     case SIGNAL_RULE_NAME_FIELD_NAME:

@@ -24,7 +24,7 @@ import { mockManagedUserData, mockObservedUser } from './mocks';
 import { mockRiskScoreState } from '../../shared/mocks';
 
 const mockProps: UserPanelProps = {
-  userName: 'test',
+  entityIdentifiers: { 'user.name': 'test' },
   contextID: 'test-user-panel',
   scopeId: 'test-scope-id',
   isPreviewMode: false,

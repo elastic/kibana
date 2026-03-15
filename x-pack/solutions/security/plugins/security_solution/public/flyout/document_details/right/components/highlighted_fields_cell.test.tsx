@@ -62,6 +62,10 @@ describe('<HighlightedFieldsCell />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
   });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render a basic cell', () => {
     const { getByTestId } = renderHighlightedFieldsCell(['value'], 'field', true);
 
@@ -76,6 +80,8 @@ describe('<HighlightedFieldsCell />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: HostPreviewPanelKey,
       params: {
+        contextID: SCOPE_ID,
+        entityIdentifiers: { 'host.name': 'test host' },
         hostName: 'test host',
         scopeId: SCOPE_ID,
         banner: HOST_PREVIEW_BANNER,
@@ -91,6 +97,8 @@ describe('<HighlightedFieldsCell />', () => {
     expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: UserPreviewPanelKey,
       params: {
+        contextID: SCOPE_ID,
+        entityIdentifiers: { 'user.name': 'test user' },
         userName: 'test user',
         scopeId: SCOPE_ID,
         banner: USER_PREVIEW_BANNER,

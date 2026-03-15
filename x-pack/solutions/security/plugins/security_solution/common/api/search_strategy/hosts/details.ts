@@ -15,6 +15,9 @@ import { sort } from './model/sort';
 
 export const hostDetailsSchema = requestBasicOptionsSchema.extend({
   hostName: z.string(),
+  entityIdentifiers: z.record(z.string(), z.string()).optional(),
+  /** When true, use only host.name term filter (no EUID must_not). Used by explore host details page. */
+  isExploreContext: z.boolean().optional(),
   skip: z.boolean().optional(),
   inspect,
   pagination: pagination.optional(),

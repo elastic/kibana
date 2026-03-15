@@ -135,7 +135,7 @@ describe('HostName', () => {
         right: {
           id: 'host-panel',
           params: {
-            hostName: props.value,
+            entityIdentifiers: { 'host.name': props.value },
             contextID: props.contextId,
             scopeId: TableId.alertsOnAlertsPage,
           },
@@ -165,7 +165,7 @@ describe('HostName', () => {
         right: {
           id: 'host-panel',
           params: {
-            hostName: props.value,
+            entityIdentifiers: { 'host.name': props.value },
             contextID: props.contextId,
             scopeId: 'timeline-1',
           },

@@ -22,6 +22,14 @@ import { useHostRelatedUsers } from '../../../../common/containers/related_entit
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
+
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return { ...actual, useUiSetting: jest.fn() };
+});
+jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -96,6 +104,8 @@ const mockUseObservedUserDetails = useObservedUserDetails as jest.Mock;
 
 jest.mock('../../../../common/containers/related_entities/related_hosts');
 const mockUseUsersRelatedHosts = useUserRelatedHosts as jest.Mock;
+const mockUseUiSetting = useUiSetting as jest.Mock;
+const mockUseEntityFromStore = useEntityFromStore as jest.Mock;
 
 const USER_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(USER_DETAILS_TEST_ID);
 const HOST_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID);
@@ -113,6 +123,16 @@ const renderEntitiesDetails = (contextValue: DocumentDetailsContext) =>
 
 describe('<EntitiesDetails />', () => {
   beforeEach(() => {
+    mockUseUiSetting.mockReturnValue(false);
+    mockUseEntityFromStore.mockImplementation(({ entityType }: { entityType: string }) => ({
+      entityRecord: null,
+      entity: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    }));
     mockUseMlUserPermissions.mockReturnValue({ isPlatinumOrTrialLicense: false, capabilities: {} });
     mockUseHasSecurityCapability.mockReturnValue(false);
     mockUseHostDetails.mockReturnValue([false, {}]);
@@ -167,6 +187,23 @@ describe('<EntitiesDetails />', () => {
       },
     };
     const { getByText, queryByTestId } = renderEntitiesDetails(contextValue);
+    expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+    expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('does not render user or host section when entity store v2 is enabled and no entity record exists', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseEntityFromStore.mockReturnValue({
+      entityRecord: null,
+      entity: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    const { getByText, queryByTestId } = renderEntitiesDetails(mockContextValue);
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();

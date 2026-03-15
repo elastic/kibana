@@ -11,17 +11,21 @@ import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FlyoutFooter } from '../../shared/components/flyout_footer';
 import { HostPanelKey } from '../shared/constants';
+import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 
 export interface HostPreviewPanelFooterProps {
   contextID: string;
   scopeId: string;
-  hostName: string;
+  entityIdentifiers: Record<string, string>;
+  /** When entity store v2 is enabled: entity record from the store. */
+  entity?: EntityStoreRecord;
 }
 
 export const HostPreviewPanelFooter = ({
   contextID,
   scopeId,
-  hostName,
+  entityIdentifiers,
+  entity,
 }: HostPreviewPanelFooterProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
 
@@ -31,12 +35,12 @@ export const HostPreviewPanelFooter = ({
         id: HostPanelKey,
         params: {
           contextID,
-          hostName,
+          entityIdentifiers,
           scopeId,
         },
       },
     });
-  }, [openFlyout, hostName, contextID, scopeId]);
+  }, [openFlyout, entityIdentifiers, contextID, scopeId]);
 
   return (
     <FlyoutFooter data-test-subj={'host-preview-footer'}>

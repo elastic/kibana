@@ -7,20 +7,29 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ISearchRequestParams } from '@kbn/search-types';
+import { euid } from '@kbn/entity-store/common';
 import type { ObservedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { buildFieldsTermAggregation } from '../../hosts/details/helpers';
 import { USER_FIELDS } from './helpers';
 
 export const buildObservedUserDetailsQuery = ({
-  userName,
+  entityIdentifiers,
   defaultIndex,
   timerange: { from, to },
   filterQuery,
+  isExploreContext,
 }: ObservedUserDetailsRequestOptions): ISearchRequestParams => {
+  const userName = entityIdentifiers['user.name'];
+  const entityFilters =
+    isExploreContext && userName
+      ? { term: { 'user.name': userName } }
+      : euid.getEuidDslFilterBasedOnDocument('user', entityIdentifiers, {
+          includeEuidSourceFilter: false,
+        });
   const filter: QueryDslQueryContainer[] = [
     ...createQueryFilterClauses(filterQuery),
-    { term: { 'user.name': userName } },
+    ...(entityFilters ? [entityFilters] : []),
     {
       range: {
         '@timestamp': {

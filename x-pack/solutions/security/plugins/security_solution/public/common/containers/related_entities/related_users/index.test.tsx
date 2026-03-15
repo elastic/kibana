@@ -18,7 +18,7 @@ const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 const mockSearch = jest.fn();
 
 const defaultProps = {
-  hostName: 'host1',
+  entityIdentifiers: { 'host.name': 'host1' },
   indexNames: ['index-*'],
   from: '2020-07-07T08:20:18.966Z',
   skip: false,

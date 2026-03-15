@@ -13,7 +13,13 @@ import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
+import {
+  getHostEntityIdentifiersFromTimelineData,
+  getUserEntityIdentifiersFromTimelineData,
+  getServiceEntityIdentifiersFromTimelineData,
+} from './entity_identifiers_utils';
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {
   ALERT_HOST_CRITICALITY,
@@ -76,6 +82,7 @@ const FormattedFieldValueComponent: React.FC<{
   truncate?: boolean;
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
+  data?: TimelineNonEcsData[];
 }> = ({
   asPlainText,
   Component,
@@ -95,6 +102,7 @@ const FormattedFieldValueComponent: React.FC<{
   truncate = true,
   value,
   linkValue,
+  data,
 }) => {
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
@@ -130,6 +138,7 @@ const FormattedFieldValueComponent: React.FC<{
   } else if (fieldName === EVENT_DURATION_FIELD_NAME) {
     return <Duration fieldName={fieldName} value={`${value}`} />;
   } else if (fieldName === EntityTypeToIdentifierField.host) {
+    const hostEntityIdentifiers = data ? getHostEntityIdentifiersFromTimelineData(data) : undefined;
     return (
       <HostName
         Component={Component}
@@ -138,9 +147,11 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
+        entityIdentifiers={hostEntityIdentifiers}
       />
     );
   } else if (fieldName === EntityTypeToIdentifierField.user) {
+    const userEntityIdentifiers = data ? getUserEntityIdentifiersFromTimelineData(data) : undefined;
     return (
       <UserName
         Component={Component}
@@ -149,9 +160,13 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
+        entityIdentifiers={userEntityIdentifiers}
       />
     );
   } else if (fieldName === EntityTypeToIdentifierField.service) {
+    const serviceEntityIdentifiers = data
+      ? getServiceEntityIdentifiersFromTimelineData(data)
+      : undefined;
     return (
       <ServiceName
         Component={Component}
@@ -160,6 +175,7 @@ const FormattedFieldValueComponent: React.FC<{
         onClick={onClick}
         title={title}
         value={value}
+        entityIdentifiers={serviceEntityIdentifiers}
       />
     );
   } else if (fieldFormat === BYTES_FORMAT) {
