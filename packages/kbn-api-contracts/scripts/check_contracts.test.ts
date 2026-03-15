@@ -46,7 +46,7 @@ jest.mock('../src/report/format_failure', () => ({
 }));
 
 import { execSync } from 'child_process';
-import { rmSync } from 'fs';
+import { writeFileSync, rmSync } from 'fs';
 import { runOasdiff, parseOasdiff, applyAllowlist } from '../src/diff';
 import type { BreakingChange } from '../src/diff';
 import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
@@ -55,6 +55,7 @@ import { formatFailure } from '../src/report/format_failure';
 
 const mockRun = jest.requireMock('@kbn/dev-cli-runner').run as jest.Mock;
 const mockExecSync = execSync as jest.MockedFunction<typeof execSync>;
+const mockWriteFileSync = writeFileSync as jest.MockedFunction<typeof writeFileSync>;
 const mockRunOasdiff = runOasdiff as jest.MockedFunction<typeof runOasdiff>;
 const mockParseOasdiff = parseOasdiff as jest.MockedFunction<typeof parseOasdiff>;
 const mockCheckTerraformImpact = checkTerraformImpact as jest.MockedFunction<
@@ -331,6 +332,31 @@ describe('check_contracts', () => {
     );
 
     expect(rmSync).toHaveBeenCalled();
+  });
+
+  describe('temp filename includes distribution', () => {
+    it('includes distribution in temp filename for remote path', async () => {
+      mockRunOasdiff.mockReturnValue([]);
+      mockParseOasdiff.mockReturnValue([]);
+
+      await runCallback({ flags: defaultFlags, log: mockLog });
+
+      const writtenPath = mockWriteFileSync.mock.calls[0][0] as string;
+      expect(writtenPath).toMatch(/base-stack-\d+\.yaml$/);
+    });
+
+    it('includes distribution in temp filename for merge base path', async () => {
+      mockRunOasdiff.mockReturnValue([]);
+      mockParseOasdiff.mockReturnValue([]);
+
+      await runCallback({
+        flags: { ...defaultFlags, distribution: 'serverless', mergeBase: 'abc123' },
+        log: mockLog,
+      });
+
+      const writtenPath = mockWriteFileSync.mock.calls[0][0] as string;
+      expect(writtenPath).toMatch(/base-serverless-\d+\.yaml$/);
+    });
   });
 
   it('logs allowlisted change count when some are allowlisted', async () => {

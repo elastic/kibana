@@ -70,9 +70,13 @@ const isFileNotInCommit = (error: unknown): boolean => {
   return stderr.includes('does not exist in') || stderr.includes('path not found');
 };
 
-const getBaseOasFromMergeBase = (specPath: string, mergeBase: string): string | null => {
+const getBaseOasFromMergeBase = (
+  specPath: string,
+  mergeBase: string,
+  distribution: Distribution
+): string | null => {
   mkdirSync(TMP_DIR, { recursive: true });
-  const tmpPath = resolve(TMP_DIR, `base-${Date.now()}.yaml`);
+  const tmpPath = resolve(TMP_DIR, `base-${distribution}-${Date.now()}.yaml`);
 
   try {
     const baseContent = execSync(`git show ${mergeBase}:${specPath}`, {
@@ -93,10 +97,11 @@ const getBaseOasFromMergeBase = (specPath: string, mergeBase: string): string | 
 const getBaseOasFromRemote = (
   specPath: string,
   baseBranch: string,
-  remote: string
+  remote: string,
+  distribution: Distribution
 ): string | null => {
   mkdirSync(TMP_DIR, { recursive: true });
-  const tmpPath = resolve(TMP_DIR, `base-${Date.now()}.yaml`);
+  const tmpPath = resolve(TMP_DIR, `base-${distribution}-${Date.now()}.yaml`);
 
   try {
     const baseContent = execSync(`git show ${remote}/${baseBranch}:${specPath}`, {
@@ -155,11 +160,11 @@ run(
     let basePath: string | null;
     if (opts.mergeBase) {
       log.info(`Using merge base: ${opts.mergeBase}`);
-      basePath = getBaseOasFromMergeBase(opts.specPath, opts.mergeBase);
+      basePath = getBaseOasFromMergeBase(opts.specPath, opts.mergeBase, opts.distribution);
     } else {
       const remote = resolveElasticRemote();
       log.info(`Base: ${remote}/${opts.baseBranch}`);
-      basePath = getBaseOasFromRemote(opts.specPath, opts.baseBranch, remote);
+      basePath = getBaseOasFromRemote(opts.specPath, opts.baseBranch, remote, opts.distribution);
     }
 
     if (!basePath) {
