@@ -93,9 +93,9 @@ export const allowedExperimentalValues = Object.freeze({
   entityDetailsHighlightsEnabled: true,
 
   /**
-   * Enables the experimental Threat Hunting home experience.
+   * Enables the new Entity Analytics home page experience.
    */
-  entityThreatHuntingEnabled: false,
+  entityAnalyticsNewHomePageEnabled: false,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.

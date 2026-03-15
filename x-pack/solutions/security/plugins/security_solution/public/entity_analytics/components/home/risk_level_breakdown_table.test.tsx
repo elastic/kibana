@@ -152,6 +152,6 @@ describe('RiskLevelBreakdownTable', () => {
 
     expect(screen.getByText('Risk level')).toBeInTheDocument();
     expect(screen.getByText('Risk score')).toBeInTheDocument();
-    expect(screen.getByText('Number of entities')).toBeInTheDocument();
+    expect(screen.getByText('Entities')).toBeInTheDocument();
   });
 });

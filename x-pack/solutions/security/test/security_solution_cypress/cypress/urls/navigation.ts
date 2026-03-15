@@ -100,7 +100,7 @@ export const ADVANCED_SETTINGS_URL = '/app/management/kibana/settings';
 export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';
 export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL =
   '/app/security/entity_analytics_privileged_user_monitoring';
-export const ENTITY_ANALYTICS_THREAT_HUNTING_URL = '/app/security/entity_analytics_threat_hunting';
+export const ENTITY_ANALYTICS_HOME_PAGE_URL = '/app/security/entity_analytics_home_page';
 export const ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL =
   '/app/security/entity_analytics_watchlists';
 

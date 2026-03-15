@@ -44,19 +44,19 @@ export const CombinedRiskDonutChart = () => {
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.threatHunting.entityRiskLevels"
+              id="xpack.securitySolution.entityAnalytics.homePage.entityRiskLevels"
               defaultMessage="Entity risk levels"
             />
           </h3>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="l" responsive={false}>
-          <EuiFlexItem grow={1}>
+        <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+          <EuiFlexItem grow={4}>
             <RiskLevelBreakdownTable severityCount={severityCount} loading={loading} />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
-            <RiskScoreDonutChart severityCount={severityCount} />
+            <RiskScoreDonutChart showLegend={false} severityCount={severityCount} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

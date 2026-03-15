@@ -25,8 +25,8 @@ export const createEntityAnalyticsNavigationTree = (): NodeDefinition => ({
       link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
     },
     {
-      id: SecurityPageName.entityAnalyticsThreatHunting,
-      link: securityLink(SecurityPageName.entityAnalyticsThreatHunting),
+      id: SecurityPageName.entityAnalyticsHomePage,
+      link: securityLink(SecurityPageName.entityAnalyticsHomePage),
     },
     {
       id: SecurityPageName.entityAnalyticsWatchlists,
