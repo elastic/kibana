@@ -34,7 +34,7 @@ export const UpdateQueryInFormButton: FC<PropsWithChildren<UpdateQueryInFormButt
       flush="both"
       size="xs"
     >
-      <EuiIconTip content={UPDATE_QUERY_IN_FORM_TOOLTIP} position="right" type="documentEdit" />
+      <EuiIconTip content={UPDATE_QUERY_IN_FORM_TOOLTIP} position="right" type="pencil" />
     </EuiButtonEmpty>
   );
 };

@@ -184,7 +184,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
           aria-label={'alerts-to-analyze'}
           key={'alerts-to-analyze'}
           onClick={handleShowAlertsModal}
-          icon={'magnifyWithExclamation'}
+          icon={'magnifyExclamation'}
           data-test-subj={'alerts-to-analyze'}
         >
           <EuiFlexGroup justifyContent="spaceBetween">

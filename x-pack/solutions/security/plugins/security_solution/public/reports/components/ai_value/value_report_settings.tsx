@@ -38,7 +38,7 @@ const ValueReportSettingsComponent: React.FC<Props> = ({ minutesPerAlert, analys
       <EuiLink onClick={goToKibanaSettings}>
         {i18n.CHANGE_RATE}
         <EuiIcon
-          type="popout"
+          type="external"
           size="s"
           css={css`
             margin-left: 4px;
