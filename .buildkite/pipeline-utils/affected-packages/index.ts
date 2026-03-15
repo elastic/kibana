@@ -1,0 +1,141 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { findPackageForPath } from './package_lookup';
+import { getAffectedPackagesGit } from './strategy_git';
+import { getAffectedPackagesMoon } from './strategy_moon';
+
+/**
+ * Configuration for affected package detection
+ */
+export interface AffectedPackagesConfig {
+  /**
+   * Strategy to use: 'git' | 'moon' | 'disabled'
+   */
+  strategy: 'git' | 'moon' | 'disabled';
+
+  /**
+   * Include downstream dependencies
+   */
+  includeDownstream: boolean;
+
+  /**
+   * Enable detailed logging
+   */
+  logging: boolean;
+}
+
+/**
+ * Get configuration from environment variables
+ *
+ * Environment variables:
+ * - AFFECTED_STRATEGY: 'git' | 'moon' | 'disabled' (default: 'moon')
+ * - AFFECTED_DOWNSTREAM: 'true' | 'false' (default: 'true')
+ * - AFFECTED_LOGGING: 'true' | 'false' (default: 'true')
+ *
+ * Note: Also supports legacy JEST_AFFECTED_* prefixed variables for backwards compatibility
+ */
+function getConfigFromEnv(): AffectedPackagesConfig {
+  const strategy = (process.env.AFFECTED_STRATEGY ||
+    process.env.JEST_AFFECTED_STRATEGY ||
+    'moon') as 'git' | 'moon' | 'disabled';
+  const includeDownstream =
+    (process.env.AFFECTED_DOWNSTREAM || process.env.JEST_AFFECTED_DOWNSTREAM) !== 'false';
+  const logging = (process.env.AFFECTED_LOGGING || process.env.JEST_AFFECTED_LOGGING) !== 'false';
+
+  return {
+    strategy,
+    includeDownstream,
+    logging,
+  };
+}
+
+/**
+ * Filter file paths to only those in affected packages
+ *
+ * @param files - Array of file paths (relative to repo root)
+ * @param affectedPackages - Set of affected package IDs
+ *                           Pass null to skip filtering and return all files
+ * @returns Filtered array of file paths
+ */
+export function filterFilesByAffectedPackages(
+  files: string[],
+  affectedPackages: Set<string> | null
+): string[] {
+  // If null, return all files (filtering disabled/skipped)
+  if (affectedPackages === null) {
+    return files;
+  }
+
+  // If empty set, no packages affected - return empty array
+  if (affectedPackages.size === 0) {
+    return [];
+  }
+
+  const filtered: string[] = [];
+
+  for (const filePath of files) {
+    const pkgId = findPackageForPath(filePath);
+
+    if (pkgId && affectedPackages.has(pkgId)) {
+      filtered.push(filePath);
+    } else if (!pkgId) {
+      // File is not in a package (e.g., root-level) - include it to be safe
+      filtered.push(filePath);
+    }
+  }
+
+  return filtered;
+}
+
+/**
+ * Get affected packages for filtering files
+ * Returns null if filtering should be skipped (disabled, no merge base, critical files, etc.)
+ * Returns empty Set if no affected packages found
+ *
+ * @param mergeBase - Git commit to compare against (e.g., GITHUB_PR_MERGE_BASE)
+ * @returns Set of affected package IDs, or null to skip filtering
+ */
+export async function getAffectedPackages(
+  mergeBase: string | undefined,
+  config: AffectedPackagesConfig = getConfigFromEnv()
+): Promise<Set<string> | null> {
+  const log = config.logging ? console.warn : () => {};
+
+  // Check if filtering is disabled
+  if (config.strategy === 'disabled') {
+    log('Affected package filtering is disabled');
+    return null;
+  }
+
+  // Check if we have a merge base
+  if (!mergeBase) {
+    log('No merge base found - skipping filtering');
+    return null;
+  }
+
+  log('--- Detecting Affected Packages');
+
+  // Get affected packages
+  try {
+    const affectedPackages =
+      config.strategy === 'git'
+        ? getAffectedPackagesGit(mergeBase, config.includeDownstream)
+        : getAffectedPackagesMoon(mergeBase, config.includeDownstream);
+
+    if (affectedPackages.size === 0) {
+      log('Warning: No affected packages found');
+    }
+
+    return affectedPackages;
+  } catch (error) {
+    console.error('Error during affected package detection:', error);
+    return null;
+  }
+}
