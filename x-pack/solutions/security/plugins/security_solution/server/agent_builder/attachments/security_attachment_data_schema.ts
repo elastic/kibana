@@ -15,4 +15,11 @@ import { z } from '@kbn/zod/v4';
  */
 export const securityAttachmentDataSchema = z.object({
   attachmentLabel: z.string(),
+  replacementsId: z.string().optional(),
+  anonymizationTarget: z
+    .object({
+      targetType: z.enum(['data_view', 'index_pattern', 'index']),
+      targetId: z.string().min(1),
+    })
+    .optional(),
 });

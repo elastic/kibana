@@ -36,6 +36,7 @@ import {
   handleCancellation,
   handleLifecycleCallbacks,
   streamToResponse,
+  isNotFoundError,
 } from './utils';
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
@@ -137,16 +138,16 @@ export function createChatCompleteCallbackApi({
         stream,
         namespace,
         anonymization,
-      })
-    ).pipe(
-      retryWithExponentialBackoff({
-        maxRetry: maxRetries,
-        backoffMultiplier: retryConfiguration.backoffMultiplier,
-        initialDelay: retryConfiguration.initialDelay,
-        errorFilter: getRetryFilter(retryConfiguration.retryOn),
-      }),
-      callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
-      abortSignal ? handleCancellation(abortSignal) : identity
+      }).pipe(
+        retryWithExponentialBackoff({
+          maxRetry: maxRetries,
+          backoffMultiplier: retryConfiguration.backoffMultiplier,
+          initialDelay: retryConfiguration.initialDelay,
+          errorFilter: getRetryFilter(retryConfiguration.retryOn),
+        }),
+        callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
+        abortSignal ? handleCancellation(abortSignal) : identity
+      )
     );
 
     if (stream) {
@@ -220,6 +221,12 @@ function createChatCompletePipeline({
         })
       ).pipe(
         switchMap(({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
+          // RFC §7.5 / §1: consumers that own their rendering layer (e.g. Agent Builder)
+          // can opt in to keeping the LLM response tokenized so they can apply
+          // permission-gated reveal via the replacements API. When keepTokenized is true,
+          // deanonymizeMessage receives an empty anonymizations array so no substitution
+          // occurs, while replacementsId is still attached for downstream resolution.
+          const isAgentBuilderRequest = metadata?.anonymization?.keepTokenized === true;
           const systemWithAnonymizationInstructions = preparedAnonymization.system
             ? addAnonymizationInstruction(
                 preparedAnonymization.system,
@@ -255,7 +262,17 @@ function createChatCompletePipeline({
                 stream,
               }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
             }
-          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
+          ).pipe(
+            deanonymizeMessage(
+              isAgentBuilderRequest
+                ? {
+                    ...preparedAnonymization,
+                    anonymizations: [],
+                    replacementsId,
+                  }
+                : { ...preparedAnonymization, replacementsId }
+            )
+          );
         })
       );
     })
@@ -368,7 +385,7 @@ function resolveAndCreatePipeline({
         anonymization,
       }).pipe(
         catchError((error) => {
-          if (error?.meta?.status === 404 || error?.statusCode === 404) {
+          if (isNotFoundError(error)) {
             if (isInferenceEndpoint) {
               endpointIdCache.invalidate();
               return throwError(() => error);

@@ -24,55 +24,69 @@ export interface RoundResponseProps {
   isLoading: boolean;
   hasError: boolean;
   isLastRound: boolean;
+  conversationReplacementsId?: string;
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  showAnonymized?: boolean;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
   hasError,
-  response: { message },
+  response: { message, replacements_id: responseReplacementsId },
   steps,
   isLoading,
   isLastRound,
+  conversationReplacementsId,
   conversationAttachments,
   attachmentRefs,
   conversationId,
-}) => (
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="m"
-    aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
-      defaultMessage: 'Assistant response',
-    })}
-    data-test-subj="agentBuilderRoundResponse"
-    css={css`
-      position: relative;
-    `}
-  >
-    <EuiFlexItem>
-      {isLoading ? (
-        <StreamingText
-          content={message}
-          steps={steps}
-          conversationAttachments={conversationAttachments}
-          attachmentRefs={attachmentRefs}
-          conversationId={conversationId}
-        />
-      ) : (
-        <ChatMessageText
-          content={message}
-          steps={steps}
-          conversationAttachments={conversationAttachments}
-          attachmentRefs={attachmentRefs}
-          conversationId={conversationId}
-        />
-      )}
-    </EuiFlexItem>
-    {!isLoading && !hasError && (
-      <EuiFlexItem grow={false}>
-        <RoundResponseActions content={message} isVisible isLastRound={isLastRound} />
+  showAnonymized = false,
+}) => {
+  // Conversation-level replacementsId is authoritative for 3a continuity and
+  // can outlive earlier round-level IDs from intermediate plumbing iterations.
+  const replacementsId = conversationReplacementsId ?? responseReplacementsId;
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="m"
+      aria-label={i18n.translate('xpack.agentBuilder.round.assistantResponse', {
+        defaultMessage: 'Assistant response',
+      })}
+      data-test-subj="agentBuilderRoundResponse"
+      css={css`
+        position: relative;
+      `}
+    >
+      <EuiFlexItem>
+        {isLoading ? (
+          <StreamingText
+            content={message}
+            steps={steps}
+            replacementsId={replacementsId}
+            conversationAttachments={conversationAttachments}
+            attachmentRefs={attachmentRefs}
+            conversationId={conversationId}
+            showAnonymized={showAnonymized}
+          />
+        ) : (
+          <ChatMessageText
+            content={message}
+            steps={steps}
+            replacementsId={replacementsId}
+            conversationAttachments={conversationAttachments}
+            attachmentRefs={attachmentRefs}
+            conversationId={conversationId}
+            showAnonymized={showAnonymized}
+          />
+        )}
       </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+      {!isLoading && !hasError && (
+        <EuiFlexItem grow={false}>
+          <RoundResponseActions content={message} isVisible isLastRound={isLastRound} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};

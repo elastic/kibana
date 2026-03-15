@@ -28,3 +28,5 @@ export {
   handleConnectorDataResponse,
 } from './handle_connector_response';
 export { handleLifecycleCallbacks } from './handle_lifecycle_callbacks';
+export { isRetryableShardRecoveryError, withShardRecoveryRetry } from './retry_shard_recovery';
+export { isConflictError, isNotFoundError } from './es_error_utils';

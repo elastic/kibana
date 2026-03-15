@@ -33,6 +33,7 @@ import {
 } from '@kbn/anonymization-common';
 import { i18n } from '@kbn/i18n';
 import { useProfileFormContext } from '../../profile_form_context';
+import { useNerModelAvailability } from '../../hooks/use_ner_model_availability';
 import { useNerRulesPanelState } from '../../hooks/use_ner_rules_panel_state';
 
 const NER_RULE_STATE_ENABLED = 'enabled';
@@ -282,6 +283,7 @@ export const NerRulesPanel = () => {
     listTrustedNerModels,
     onNerRulesChange,
     nerRulesError,
+    fetch,
   } = useProfileFormContext();
 
   const {
@@ -311,6 +313,13 @@ export const NerRulesPanel = () => {
     isSubmitting,
     listTrustedNerModels,
     nerRulesError,
+  });
+
+  const { unavailableNerModels } = useNerModelAvailability({
+    nerRules,
+    draftModelId: nerDraft.modelId,
+    usesTrustedNerModelProvider,
+    fetch,
   });
 
   return (
@@ -345,6 +354,28 @@ export const NerRulesPanel = () => {
               defaultMessage: 'No trusted NER model available. NER rules are unavailable.',
             })}
           />
+          <EuiSpacer size="s" />
+        </>
+      )}
+      {!usesTrustedNerModelProvider && unavailableNerModels.length > 0 && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            iconType="warning"
+            title={i18n.translate('anonymizationUi.profiles.nerRules.unavailableModelTitle', {
+              defaultMessage: 'Some configured NER models are unavailable or not deployed.',
+            })}
+            data-test-subj="anonymizationProfilesNerRulesModelAvailabilityWarning"
+          >
+            <p>
+              {i18n.translate('anonymizationUi.profiles.nerRules.unavailableModelDescription', {
+                defaultMessage:
+                  'NER anonymization may be skipped until the model is downloaded and deployment is started.',
+              })}
+            </p>
+            <p>{unavailableNerModels.join(', ')}</p>
+          </EuiCallOut>
           <EuiSpacer size="s" />
         </>
       )}

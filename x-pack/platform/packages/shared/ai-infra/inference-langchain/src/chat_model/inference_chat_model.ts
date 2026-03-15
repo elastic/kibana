@@ -36,6 +36,7 @@ import type {
   FunctionCallingMode,
   ConnectorTelemetryMetadata,
   ChatCompleteResponse,
+  ChatCompleteAnonymizationMetadata,
 } from '@kbn/inference-common';
 import {
   isChatCompletionChunkEvent,
@@ -66,6 +67,7 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   signal?: AbortSignal;
   timeout?: number;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  anonymization?: ChatCompleteAnonymizationMetadata;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -75,6 +77,7 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   temperature?: number;
   model?: string;
   timeout?: number;
+  anonymization?: ChatCompleteAnonymizationMetadata;
 }
 
 type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
@@ -106,6 +109,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   protected model?: string;
   protected signal?: AbortSignal;
   protected timeout?: number;
+  protected anonymization?: ChatCompleteAnonymizationMetadata;
 
   constructor(args: InferenceChatModelParams) {
     super(args);
@@ -119,6 +123,29 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.signal = args.signal;
     this.timeout = args.timeout;
     this.maxRetries = args.maxRetries;
+    this.anonymization = args.anonymization;
+  }
+
+  /**
+   * Returns a new InferenceChatModel instance with the given anonymization metadata bound,
+   * so that it flows through withStructuredOutput chains without needing to be passed at
+   * invoke time (which is not type-safe on the Runnable<I, O, RunnableConfig> return type).
+   */
+  withAnonymization(
+    anonymization: ChatCompleteAnonymizationMetadata | undefined
+  ): InferenceChatModel {
+    return new InferenceChatModel({
+      chatComplete: this.chatComplete,
+      connector: this.connector,
+      telemetryMetadata: this.telemetryMetadata,
+      temperature: this.temperature,
+      functionCallingMode: this.functionCallingMode,
+      model: this.model,
+      signal: this.signal,
+      timeout: this.timeout,
+      maxRetries: this.maxRetries,
+      anonymization,
+    });
   }
 
   static lc_name() {
@@ -188,6 +215,11 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     const inferredTools = options.tools ? toolDefinitionToInference(options.tools) : undefined;
     const hasTools = inferredTools ? Object.keys(inferredTools).length > 0 : false;
     const resolvedToolChoice = options.tool_choice ?? 'auto';
+    const resolvedAnonymization = options.anonymization ?? this.anonymization;
+    const metadata = {
+      ...(this.telemetryMetadata ? { connectorTelemetry: this.telemetryMetadata } : {}),
+      ...(resolvedAnonymization ? { anonymization: resolvedAnonymization } : {}),
+    };
 
     return {
       connectorId: this.connector.connectorId,
@@ -203,7 +235,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       toolChoice: hasTools ? toolChoiceToInference(resolvedToolChoice) : undefined,
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
-      metadata: { connectorTelemetry: this.telemetryMetadata },
+      metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
       timeout: options.timeout ?? this.timeout,
     };
   }
@@ -284,9 +316,29 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     });
 
     const responseIterator = toAsyncIterator(response$);
+    // The inference stream attaches anonymization metadata (replacementsId) to every chunk
+    // as it is assembled. LangChain merges AIMessageChunks by summing their additional_kwargs,
+    // so if replacementsId appears on multiple chunks it gets duplicated in the merged message.
+    // We emit it only on the first chunk that carries it and strip it from all subsequent ones
+    // so callers receive exactly one copy in the final assembled AIMessage.
+    let hasEmittedAnonymizationMetadata = false;
     for await (const event of responseIterator) {
       if (isChatCompletionChunkEvent(event)) {
-        const chunk = completionChunkToLangchain(event);
+        const shouldStripAnonymizationMetadata =
+          hasEmittedAnonymizationMetadata && Boolean(event.metadata?.anonymization?.replacementsId);
+        const eventWithoutAnonymizationMetadata = shouldStripAnonymizationMetadata
+          ? {
+              ...event,
+              metadata: {
+                ...event.metadata,
+                anonymization: undefined,
+              },
+            }
+          : event;
+        const chunk = completionChunkToLangchain(eventWithoutAnonymizationMetadata);
+        if (event.metadata?.anonymization?.replacementsId) {
+          hasEmittedAnonymizationMetadata = true;
+        }
         const generationChunk = new ChatGenerationChunk({
           message: chunk,
           text: event.content,

@@ -7,7 +7,34 @@
 
 import { useQuery } from '@kbn/react-query';
 import { replacementsQueryKeys } from '../cache_keys';
+import type { ReplacementsApiError } from '../errors';
+import type { AnonymizationReplacementsClient } from '../client';
 import type { UseGetReplacementsParams } from './types';
+
+export const buildGetReplacementsQueryFn =
+  (client: AnonymizationReplacementsClient, replacementsId: string | undefined) => async () => {
+    if (!replacementsId) {
+      return null;
+    }
+    try {
+      return await client.getReplacements(replacementsId);
+    } catch (error) {
+      // Missing replacement sets are expected for some conversations and should
+      // not fail rendering or trigger noisy retries.
+      if ((error as ReplacementsApiError)?.kind === 'not_found') {
+        return null;
+      }
+      throw error;
+    }
+  };
+
+export const buildGetReplacementsRetryFn = () => (failureCount: number, error: unknown) => {
+  const kind = (error as ReplacementsApiError)?.kind;
+  if (kind === 'not_found' || kind === 'forbidden' || kind === 'unauthorized') {
+    return false;
+  }
+  return failureCount < 3;
+};
 
 export const useGetReplacements = ({
   client,
@@ -18,11 +45,8 @@ export const useGetReplacements = ({
     queryKey: replacementsId
       ? replacementsQueryKeys.detail(replacementsId)
       : [...replacementsQueryKeys.root(), 'detail', 'none'],
-    queryFn: async () => {
-      if (!replacementsId) {
-        return undefined;
-      }
-      return client.getReplacements(replacementsId);
-    },
+    queryFn: buildGetReplacementsQueryFn(client, replacementsId),
     enabled: enabled && Boolean(replacementsId),
+    staleTime: Infinity,
+    retry: buildGetReplacementsRetryFn(),
   });

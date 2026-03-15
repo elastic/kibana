@@ -107,22 +107,28 @@ export const createToolResultEvent = (data: {
   };
 };
 
+interface MessageEventContext {
+  messageId?: string;
+  replacementsId?: string;
+}
+
 export const createTextChunkEvent = (
   chunk: string,
-  { messageId = 'unknown' }: { messageId?: string } = {}
+  { messageId = 'unknown', replacementsId }: MessageEventContext = {}
 ): MessageChunkEvent => {
   return {
     type: ChatEventType.messageChunk,
     data: {
       message_id: messageId,
       text_chunk: chunk,
+      ...(replacementsId ? { replacements_id: replacementsId } : {}),
     },
   };
 };
 
 export const createMessageEvent = (
   content: string | object,
-  { messageId = 'unknown' }: { messageId?: string } = {}
+  { messageId = 'unknown', replacementsId }: MessageEventContext = {}
 ): MessageCompleteEvent => {
   return {
     type: ChatEventType.messageComplete,
@@ -130,6 +136,7 @@ export const createMessageEvent = (
       message_id: messageId,
       message_content: typeof content === 'string' ? content : '',
       ...(typeof content === 'object' ? { structured_output: content } : {}),
+      ...(replacementsId ? { replacements_id: replacementsId } : {}),
     },
   };
 };

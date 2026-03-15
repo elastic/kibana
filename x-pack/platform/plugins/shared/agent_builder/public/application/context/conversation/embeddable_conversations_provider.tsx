@@ -183,6 +183,8 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     }));
   }, []);
 
+  const [showAnonymized, setShowAnonymized] = useState(false);
+
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
@@ -199,6 +201,8 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       resetAttachments,
       removeAttachment,
       conversationActions,
+      showAnonymized,
+      setShowAnonymized,
     }),
     [
       conversationId,
@@ -213,6 +217,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       resetAttachments,
       removeAttachment,
       conversationActions,
+      showAnonymized,
     ]
   );
 

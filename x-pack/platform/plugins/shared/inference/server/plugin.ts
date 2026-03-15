@@ -17,8 +17,11 @@ import type {
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { replaceTokensWithOriginals } from '@kbn/anonymization-common';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
+import { ReplacementsRepository } from './chat_complete/anonymization/replacements/replacements_repository';
+import { ReplacementsNamespaceMismatchError } from './chat_complete/anonymization/replacements/replacements_errors';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
 import type {
@@ -98,6 +101,7 @@ export class InferencePlugin
     this.config = context.config.get<InferenceConfig>();
     this.endpointIdCache = new InferenceEndpointIdCache();
   }
+
   setup(
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
@@ -212,6 +216,42 @@ export class InferencePlugin
     };
 
     return {
+      isAnonymizationEnabled: () => anonymizationEnabled,
+
+      deanonymizeText: async (namespace: string, replacementsId: string, text: string) => {
+        if (!anonymizationEnabled) {
+          return text;
+        }
+        try {
+          const policyService = pluginsStart.anonymization?.getPolicyService();
+          const encryptionKey = await resolveReplacementsEncryptionKey({
+            namespace,
+            anonymizationEnabled,
+            policyService,
+          });
+          const repo = new ReplacementsRepository(core.elasticsearch.client.asInternalUser, {
+            encryptionKey,
+          });
+          const replacementsSet = await repo.get(namespace, replacementsId);
+          if (!replacementsSet) {
+            return text;
+          }
+          const tokenToOriginal = repo.toTokenToOriginalMap(replacementsSet);
+          return replaceTokensWithOriginals(text, tokenToOriginal);
+        } catch (err) {
+          if (err instanceof ReplacementsNamespaceMismatchError) {
+            // Never silently swallow cross-namespace reads — propagate so callers can guard.
+            throw err;
+          }
+          this.logger.warn(
+            `[inference.deanonymizeText] Failed to deanonymize text for replacementsId=${replacementsId}: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+          return text;
+        }
+      },
+
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
         return createInferenceClient({
           ...options,

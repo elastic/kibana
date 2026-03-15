@@ -68,6 +68,7 @@ export interface AssistantResponse {
    */
   message: string;
   structured_output?: object;
+  replacements_id?: string;
 }
 
 export enum ConversationRoundStepType {
@@ -246,6 +247,8 @@ export interface Conversation {
   created_at: string;
   /** update date */
   updated_at: string;
+  /** replacements document id used for anonymization continuity across turns */
+  replacementsId?: string;
   /** list of round for this conversation */
   rounds: ConversationRound[];
   /**

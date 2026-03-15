@@ -61,6 +61,7 @@ export {
   type ConnectorTelemetryMetadata,
   type ChatCompleteAnonymizationMetadata,
   type ChatCompleteAnonymizationTarget,
+  isChatCompleteAnonymizationTargetType,
   type AnonymizationRule,
   type RegexAnonymizationRule,
   type NamedEntityRecognitionRule,

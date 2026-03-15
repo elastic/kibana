@@ -28,6 +28,8 @@ interface RoundLayoutProps {
   rawRound: ConversationRound;
   conversationAttachments?: VersionedAttachment[];
   conversationId?: string;
+  conversationReplacementsId?: string;
+  showAnonymized?: boolean;
 }
 
 const labels = {
@@ -42,6 +44,8 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   rawRound,
   conversationAttachments,
   conversationId,
+  conversationReplacementsId,
+  showAnonymized = false,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
@@ -155,9 +159,11 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               steps={steps}
               isLoading={isLoadingCurrentRound}
               isLastRound={isCurrentRound}
+              conversationReplacementsId={conversationReplacementsId}
               conversationAttachments={conversationAttachments}
               attachmentRefs={input.attachment_refs}
               conversationId={conversationId}
+              showAnonymized={showAnonymized}
             />
           </EuiFlexItem>
           <EuiSpacer />

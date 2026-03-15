@@ -23,12 +23,14 @@ export const createConversation$ = ({
   agentId,
   conversationClient,
   conversationId,
+  replacementsId,
   title$,
   roundCompletedEvents$,
 }: {
   agentId: string;
   conversationClient: ConversationClient;
   conversationId?: string;
+  replacementsId?: string;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
 }) => {
@@ -41,6 +43,7 @@ export const createConversation$ = ({
         id: conversationId,
         title,
         agent_id: agentId,
+        replacementsId: roundCompletedEvent.data.replacements_id ?? replacementsId,
         state: roundCompletedEvent.data.conversation_state,
         rounds: [roundCompletedEvent.data.round],
         ...(roundCompletedEvent.data.attachments
@@ -85,6 +88,7 @@ export const updateConversation$ = ({
       return conversationClient.update({
         id: conversation.id,
         title,
+        replacementsId: roundCompletedEvent.data.replacements_id ?? conversation.replacementsId,
         rounds: updatedRound,
         state: conversation_state,
         ...(roundCompletedEvent.data.attachments !== undefined
@@ -125,24 +129,31 @@ export const getConversation = async ({
   conversationId,
   autoCreateConversationWithId = false,
   conversationClient,
+  anonymizationEnabled,
 }: {
   agentId: string;
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
+  anonymizationEnabled: boolean;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
     return {
-      ...placeholderConversation({ agentId }),
+      ...placeholderConversation({ agentId, anonymizationEnabled }),
       operation: 'CREATE',
     };
   }
 
   // Case 2: Conversation ID specified and autoCreate is false - update existing
   if (!autoCreateConversationWithId) {
+    const conversation = await conversationClient.get(conversationId);
     return {
-      ...(await conversationClient.get(conversationId)),
+      ...conversation,
+      replacementsId:
+        anonymizationEnabled && !conversation.replacementsId
+          ? uuidv4()
+          : conversation.replacementsId,
       operation: 'UPDATE',
     };
   }
@@ -150,13 +161,18 @@ export const getConversation = async ({
   // Case 3: Conversation ID specified and autoCreate is true - check if exists
   const exists = await conversationExists({ conversationId, conversationClient });
   if (exists) {
+    const conversation = await conversationClient.get(conversationId);
     return {
-      ...(await conversationClient.get(conversationId)),
+      ...conversation,
+      replacementsId:
+        anonymizationEnabled && !conversation.replacementsId
+          ? uuidv4()
+          : conversation.replacementsId,
       operation: 'UPDATE',
     };
   } else {
     return {
-      ...placeholderConversation({ conversationId, agentId }),
+      ...placeholderConversation({ conversationId, agentId, anonymizationEnabled }),
       operation: 'CREATE',
     };
   }
@@ -165,9 +181,11 @@ export const getConversation = async ({
 export const placeholderConversation = ({
   agentId,
   conversationId,
+  anonymizationEnabled,
 }: {
   agentId: string;
   conversationId?: string;
+  anonymizationEnabled: boolean;
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
@@ -175,6 +193,7 @@ export const placeholderConversation = ({
     agent_id: agentId,
     rounds: [],
     updated_at: new Date().toISOString(),
+    replacementsId: anonymizationEnabled ? uuidv4() : undefined,
     created_at: new Date().toISOString(),
     user: {
       id: 'unknown',

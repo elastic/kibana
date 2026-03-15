@@ -111,5 +111,7 @@
     "@kbn/usage-api-plugin",
     "@kbn/es-query",
     "@kbn/fs",
+    "@kbn/anonymization-ui",
+    "@kbn/anonymization-common",
   ]
 }

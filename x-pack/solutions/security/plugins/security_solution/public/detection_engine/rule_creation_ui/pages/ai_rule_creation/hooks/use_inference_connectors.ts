@@ -38,7 +38,7 @@ export const useInferenceConnectors = () => {
   const { inference } = useKibana().services;
   const { addError } = useAppToasts();
 
-  const { data: inferenceConnectors, isLoading } = useQuery({
+  const { data: inferenceConnectorsResult, isLoading } = useQuery({
     queryKey: ['security-detection-engine-ai-rule-creation-inference-connectors'],
     queryFn: () => inference.getConnectors(),
     retry: 1,
@@ -50,11 +50,11 @@ export const useInferenceConnectors = () => {
   });
 
   const aiConnectors: ActionConnector[] = useMemo(() => {
-    if (!inferenceConnectors) {
+    if (!inferenceConnectorsResult) {
       return [];
     }
-    return inferenceConnectors.map(inferenceConnectorToActionConnector);
-  }, [inferenceConnectors]);
+    return inferenceConnectorsResult.connectors.map(inferenceConnectorToActionConnector);
+  }, [inferenceConnectorsResult]);
 
   return {
     aiConnectors,

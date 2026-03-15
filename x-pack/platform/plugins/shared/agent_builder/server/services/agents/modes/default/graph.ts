@@ -10,6 +10,7 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { ChatCompleteAnonymizationMetadata } from '@kbn/inference-common';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
@@ -50,14 +51,12 @@ const MAX_ERROR_COUNT = 2;
 export const createAgentGraph = ({
   chatModel,
   toolManager,
-  configuration,
-  capabilities,
   logger,
   events,
   structuredOutput = false,
   outputSchema,
-  processedConversation,
   promptFactory,
+  anonymizationMetadata,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -69,6 +68,7 @@ export const createAgentGraph = ({
   outputSchema?: Record<string, unknown>;
   processedConversation: ProcessedConversation;
   promptFactory: PromptFactory;
+  anonymizationMetadata?: ChatCompleteAnonymizationMetadata;
 }) => {
   const init = async () => {
     return {};
@@ -83,11 +83,12 @@ export const createAgentGraph = ({
       events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     }
     try {
-      const response = await researcherModel.invoke(
-        await promptFactory.getMainPrompt({
-          actions: state.mainActions,
-        })
-      );
+      const prompt = await promptFactory.getMainPrompt({
+        actions: state.mainActions,
+      });
+      const response = await researcherModel.invoke(prompt, {
+        anonymization: anonymizationMetadata,
+      });
 
       const action = processResearchResponse(response);
 
@@ -195,12 +196,13 @@ export const createAgentGraph = ({
       events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
     }
     try {
-      const response = await answeringModel.invoke(
-        await promptFactory.getAnswerPrompt({
-          actions: state.mainActions,
-          answerActions: state.answerActions,
-        })
-      );
+      const prompt = await promptFactory.getAnswerPrompt({
+        actions: state.mainActions,
+        answerActions: state.answerActions,
+      });
+      const response = await answeringModel.invoke(prompt, {
+        anonymization: anonymizationMetadata,
+      });
 
       const action = processAnswerResponse(response);
 
@@ -226,7 +228,7 @@ export const createAgentGraph = ({
     promptFactory,
     events,
     outputSchema,
-    logger,
+    anonymizationMetadata,
   });
 
   const answerAgentEdge = async (state: StateType) => {

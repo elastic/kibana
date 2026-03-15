@@ -6,14 +6,13 @@
  */
 
 import { of } from 'rxjs';
-import type { RoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ChatEventType } from '@kbn/agent-builder-common';
+import { type RoundCompleteEvent, ChatEventType } from '@kbn/agent-builder-common';
 import {
   createEmptyConversation,
   createRound,
   createConversationClientMock,
 } from '../../../test_utils';
-import { getConversation, updateConversation$ } from './conversations';
+import { createConversation$, getConversation, updateConversation$ } from './conversations';
 
 describe('conversations utils', () => {
   describe('getConversation', () => {
@@ -25,6 +24,7 @@ describe('conversations utils', () => {
           agentId: 'test-agent',
           conversationId: undefined,
           conversationClient,
+          anonymizationEnabled: true,
         });
 
         expect(result.operation).toBe('CREATE');
@@ -38,10 +38,28 @@ describe('conversations utils', () => {
           agentId: 'test-agent',
           conversationId: 'test-conversation',
           conversationClient,
+          anonymizationEnabled: true,
         });
 
         expect(result.operation).toBe('UPDATE');
         expect(conversationClient.get).toHaveBeenCalledWith('test-conversation');
+      });
+
+      it('assigns replacementsId when legacy conversation does not have one', async () => {
+        const conversationClient = createConversationClientMock();
+        conversationClient.get.mockResolvedValue(
+          createEmptyConversation({ replacementsId: undefined })
+        );
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          conversationId: 'test-conversation',
+          conversationClient,
+          anonymizationEnabled: true,
+        });
+
+        expect(result.operation).toBe('UPDATE');
+        expect(result.replacementsId).toBeDefined();
       });
 
       it('returns CREATE operation when autoCreateConversationWithId=true and conversation does not exist', async () => {
@@ -53,6 +71,7 @@ describe('conversations utils', () => {
           conversationId: 'new-conversation',
           autoCreateConversationWithId: true,
           conversationClient,
+          anonymizationEnabled: true,
         });
 
         expect(result.operation).toBe('CREATE');
@@ -69,14 +88,64 @@ describe('conversations utils', () => {
           conversationId: 'existing-conversation',
           autoCreateConversationWithId: true,
           conversationClient,
+          anonymizationEnabled: true,
         });
 
         expect(result.operation).toBe('UPDATE');
+      });
+
+      it('does not assign replacementsId when anonymization is disabled', async () => {
+        const conversationClient = createConversationClientMock();
+        conversationClient.get.mockResolvedValue(
+          createEmptyConversation({ replacementsId: undefined })
+        );
+
+        const result = await getConversation({
+          agentId: 'test-agent',
+          conversationId: 'test-conversation',
+          conversationClient,
+          anonymizationEnabled: false,
+        });
+
+        expect(result.operation).toBe('UPDATE');
+        expect(result.replacementsId).toBeUndefined();
       });
     });
   });
 
   describe('updateConversation$', () => {
+    it('persists inference-returned replacements id when present', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = createEmptyConversation({ replacementsId: 'existing-id' });
+      const newRound = createRound({ id: 'round-2', input: { message: 'new' } });
+      const roundCompleteEvent: RoundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: newRound,
+          replacements_id: 'inference-id',
+        },
+      };
+
+      conversationClient.update.mockResolvedValue(conversation);
+
+      const result$ = updateConversation$({
+        conversationClient,
+        conversation,
+        title$: of('Test Title'),
+        roundCompletedEvents$: of(roundCompleteEvent),
+      });
+
+      await new Promise<void>((resolve) => {
+        result$.subscribe({ complete: resolve });
+      });
+
+      expect(conversationClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          replacementsId: 'inference-id',
+        })
+      );
+    });
+
     describe('action parameter', () => {
       it('replaces last round when action=regenerate', async () => {
         const conversationClient = createConversationClientMock();
@@ -187,6 +256,39 @@ describe('conversations utils', () => {
           })
         );
       });
+    });
+  });
+
+  describe('createConversation$', () => {
+    it('falls back to provided replacements id when event does not include one', async () => {
+      const conversationClient = createConversationClientMock();
+      const newRound = createRound({ id: 'round-1', input: { message: 'new' } });
+      const roundCompleteEvent: RoundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: newRound,
+        },
+      };
+      conversationClient.create.mockResolvedValue(createEmptyConversation());
+
+      const result$ = createConversation$({
+        agentId: 'test-agent',
+        conversationClient,
+        conversationId: 'conversation-id',
+        replacementsId: 'fallback-replacements-id',
+        title$: of('Test Title'),
+        roundCompletedEvents$: of(roundCompleteEvent),
+      });
+
+      await new Promise<void>((resolve) => {
+        result$.subscribe({ complete: resolve });
+      });
+
+      expect(conversationClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          replacementsId: 'fallback-replacements-id',
+        })
+      );
     });
   });
 });

@@ -18,7 +18,9 @@ import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { anonymizeMessages } from './anonymization/anonymize_messages';
 import type { RegexWorkerService } from './anonymization/regex_worker_service';
 import { ReplacementsRepository } from './anonymization/replacements/replacements_repository';
+import { ReplacementsNamespaceMismatchError } from './anonymization/replacements/replacements_errors';
 import { ensureReplacementsIndex } from './anonymization/replacements/replacements_index';
+import { isConflictError, withShardRecoveryRetry } from './utils';
 
 interface PrepareAnonymizationOptions {
   namespace: string;
@@ -92,19 +94,40 @@ export const prepareAnonymization = async ({
         400
       );
     }
-    await ensureReplacementsIndex({ esClient: replacementsClient, logger });
+    await withShardRecoveryRetry({
+      logger,
+      operation: 'ensure_replacements_index',
+      action: () => ensureReplacementsIndex({ esClient: replacementsClient, logger }),
+    });
     repo = new ReplacementsRepository(replacementsClient, {
       encryptionKey,
+      logger,
     });
   }
 
   let existingReplacements = carriedReplacementsId
-    ? await repo?.get(namespace, carriedReplacementsId)
+    ? await withShardRecoveryRetry({
+        logger,
+        operation: 'get_replacements',
+        action: async () => {
+          try {
+            return await repo?.get(namespace, carriedReplacementsId);
+          } catch (error) {
+            if (error instanceof ReplacementsNamespaceMismatchError) {
+              // The carried replacementsId belongs to a different namespace (e.g. after a space
+              // migration). Fall back to generating a fresh document rather than hard-erroring —
+              // callers that persisted an old ID before migration should not receive a 409.
+              logger.warn(
+                `[inference.anonymization.namespace_mismatch] replacements_id=${carriedReplacementsId} requested_namespace=${namespace} actual_namespace=${error.actualNamespace} — falling back to new replacements document`
+              );
+              replacementsId = uuidv4();
+              return null;
+            }
+            throw error;
+          }
+        },
+      })
     : null;
-  if (carriedReplacementsId && !existingReplacements) {
-    // Recover by allocating a new doc ID when caller carries a stale/unknown one.
-    replacementsId = uuidv4();
-  }
 
   const anonymization = await anonymizeMessages({
     system,
@@ -141,20 +164,42 @@ export const prepareAnonymization = async ({
   replacementsId ??= uuidv4();
 
   if (!repo) {
-    await ensureReplacementsIndex({ esClient: replacementsClient, logger });
+    await withShardRecoveryRetry({
+      logger,
+      operation: 'ensure_replacements_index',
+      action: () => ensureReplacementsIndex({ esClient: replacementsClient, logger }),
+    });
     repo = new ReplacementsRepository(replacementsClient, {
       encryptionKey,
+      logger,
     });
   }
 
   if (existingReplacements) {
     try {
-      const updated = await repo.update(namespace, replacementsId, { replacements });
+      if (!replacementsId) {
+        throw new Error(
+          'Invariant violation: existing replacements found without a replacementsId'
+        );
+      }
+      const replacementsIdForUpdate = replacementsId;
+      const updated = await withShardRecoveryRetry({
+        logger,
+        operation: 'update_replacements',
+        action: () => repo.update(namespace, replacementsIdForUpdate, { replacements }),
+      });
       if (!updated) {
         replacementsId = uuidv4();
         existingReplacements = null;
       }
     } catch (updateErr) {
+      if (updateErr instanceof ReplacementsNamespaceMismatchError) {
+        // The document was moved to a different namespace between the get and update.
+        // Propagate rather than silently allocating a new UUID for the wrong tenant.
+        throw updateErr;
+      }
+      // isRetryableShardRecoveryError is already handled inside withShardRecoveryRetry;
+      // if retries are exhausted the error propagates normally here.
       logger.warn(
         `Replacements update failed for ${replacementsId}, creating new document: ${
           updateErr instanceof Error ? updateErr.message : String(updateErr)
@@ -166,12 +211,41 @@ export const prepareAnonymization = async ({
   }
 
   if (!existingReplacements) {
-    await repo.create({
-      id: replacementsId,
-      namespace,
-      createdBy: 'inference',
-      replacements,
-    });
+    // replacementsId is always a string here (set by ??= above or by fallback paths),
+    // but TypeScript can't narrow let-bindings inside closures — capture as a const.
+    const replacementsIdToCreate = replacementsId as string;
+    try {
+      await withShardRecoveryRetry({
+        logger,
+        operation: 'create_replacements',
+        action: () =>
+          repo.create({
+            id: replacementsIdToCreate,
+            namespace,
+            createdBy: 'inference',
+            replacements,
+          }),
+      });
+    } catch (createErr) {
+      // Another concurrent request may have created this replacements document first.
+      if (!isConflictError(createErr)) {
+        throw createErr;
+      }
+      logger.warn(
+        `[inference.anonymization.create_conflict_fallback] replacements_id=${replacementsIdToCreate} namespace=${namespace} triggered=true`
+      );
+      const updatedAfterConflict = await withShardRecoveryRetry({
+        logger,
+        operation: 'update_replacements_after_conflict',
+        action: () => repo.update(namespace, replacementsIdToCreate, { replacements }),
+      });
+      if (!updatedAfterConflict) {
+        throw createInferenceRequestError(
+          `Unable to persist replacements after create conflict for replacementsId "${replacementsIdToCreate}"`,
+          409
+        );
+      }
+    }
   }
 
   return { anonymization, replacementsId, effectivePolicy };

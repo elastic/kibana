@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ReplacementsRepository } from './replacements_repository';
+import { ReplacementsNamespaceMismatchError } from './replacements_errors';
 
 describe('ReplacementsRepository', () => {
   const esClient = {
@@ -214,6 +215,28 @@ describe('ReplacementsRepository', () => {
 
     await expect(repo.get('default', id)).rejects.toThrow(
       'Invalid replacements entry for token "TOKEN_A": missing original payload'
+    );
+  });
+
+  it('throws a typed error when replacements namespace does not match', async () => {
+    const repo = new ReplacementsRepository(esClient, {
+      encryptionKey: 'test-encryption-key',
+    });
+    const id = 'replacements-other-namespace';
+
+    (esClient.get as jest.Mock).mockResolvedValue({
+      _source: {
+        id,
+        replacements: [{ anonymized: 'TOKEN_A', original: 'original-a' }],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: 'test',
+        namespace: 'other-space',
+      },
+    });
+
+    await expect(repo.get('default', id)).rejects.toBeInstanceOf(
+      ReplacementsNamespaceMismatchError
     );
   });
 });

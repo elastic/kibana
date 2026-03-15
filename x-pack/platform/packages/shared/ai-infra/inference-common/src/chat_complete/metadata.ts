@@ -31,6 +31,21 @@ export interface ChatCompleteAnonymizationTarget {
   targetId: string;
 }
 
+const CHAT_COMPLETE_ANONYMIZATION_TARGET_TYPES = new Set<
+  ChatCompleteAnonymizationTarget['targetType']
+>(['data_view', 'index_pattern', 'index']);
+
+export const isChatCompleteAnonymizationTargetType = (
+  value: unknown
+): value is ChatCompleteAnonymizationTarget['targetType'] => {
+  return (
+    typeof value === 'string' &&
+    CHAT_COMPLETE_ANONYMIZATION_TARGET_TYPES.has(
+      value as ChatCompleteAnonymizationTarget['targetType']
+    )
+  );
+};
+
 /**
  * Optional anonymization metadata consumers can pass so inference can resolve
  * field-based policy for a target.
@@ -39,4 +54,13 @@ export interface ChatCompleteAnonymizationMetadata {
   profileId?: string;
   replacementsId?: string;
   target?: ChatCompleteAnonymizationTarget;
+  /**
+   * When true, inference suppresses server-side deanonymization so the LLM
+   * response is stored with tokens intact. The UI is then responsible for
+   * resolving originals via the replacements API.
+   *
+   * RFC §7.5: preferred approach for consumers that own their own rendering
+   * layer (e.g. Agent Builder) and want permission-gated reveal.
+   */
+  keepTokenized?: boolean;
 }
