@@ -17,16 +17,10 @@ import type {
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
-  enableFilter,
-  disableFilter,
-  toggleFilterNegated,
-  pinFilter,
-  unpinFilter,
   COMPARE_ALL_OPTIONS,
   compareFilters,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   KIBANA_USER_QUERY_LANGUAGE_KEY,
@@ -214,8 +208,7 @@ export function useQueryBarMenuPanels({
   setRenderedComponent,
 }: QueryBarMenuPanelsProps) {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { appName, usageCollection, uiSettings, http, storage, application } = kibana.services;
-  const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
+  const { uiSettings, http, storage, application } = kibana.services;
   const showSavedQueries =
     showSavedQueryControls &&
     showQueryInput &&
@@ -291,51 +284,6 @@ export function useQueryBarMenuPanels({
     };
   };
 
-  const onEnableAll = () => {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:enable_all`);
-    const enabledFilters = filters?.map(enableFilter);
-    if (enabledFilters) {
-      onFiltersUpdated?.(enabledFilters);
-    }
-  };
-
-  const onDisableAll = () => {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:disable_all`);
-    const disabledFilters = filters?.map(disableFilter);
-    if (disabledFilters) {
-      onFiltersUpdated?.(disabledFilters);
-    }
-  };
-
-  const onToggleAllNegated = () => {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:invert_all`);
-    const negatedFilters = filters?.map(toggleFilterNegated);
-    if (negatedFilters) {
-      onFiltersUpdated?.(negatedFilters);
-    }
-  };
-
-  const onRemoveAll = () => {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:remove_all`);
-    onFiltersUpdated?.([]);
-  };
-
-  const onPinAll = () => {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:pin_all`);
-    const pinnedFilters = filters?.map(pinFilter);
-    if (pinnedFilters) {
-      onFiltersUpdated?.(pinnedFilters);
-    }
-  };
-
-  const onUnpinAll = () => {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:unpin_all`);
-    const unPinnedFilters = filters?.map(unpinFilter);
-    if (unPinnedFilters) {
-      onFiltersUpdated?.(unPinnedFilters);
-    }
-  };
-
   const onSelectLanguage = (lang: string) => {
     http.post('/internal/kql_opt_in_stats', {
       version: KQL_TELEMETRY_ROUTE_LATEST_VERSION,
@@ -367,13 +315,6 @@ export function useQueryBarMenuPanels({
         setRenderedComponent('addFilter');
       },
     },
-    {
-      name: strings.getOptionsApplyAllFiltersButtonLabel(),
-      icon: 'filter',
-      panel: QueryBarMenuPanel.applyToAllFilters,
-      disabled: !Boolean(filters && filters.length > 0),
-      'data-test-subj': 'filter-sets-applyToAllFilters',
-    },
   ];
 
   const queryAndFiltersRelatedPanels: EuiContextMenuPanelItemDescriptor[] = [
@@ -402,26 +343,9 @@ export function useQueryBarMenuPanels({
   if (showFilterBar) {
     items.push(...filtersRelatedPanels);
   }
-  // clear all actions are only shown when there are filters or query
+  // separator before additional items / saved queries
   if (showFilterBar || showQueryInput) {
-    items.push(
-      {
-        name: strings.getClearAllFiltersButtonLabel(),
-        disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
-        icon: 'cross',
-        'data-test-subj': 'filter-sets-removeAllFilters',
-        onClick: () => {
-          closePopover();
-          onQueryBarSubmit({
-            query: { query: '', language },
-            dateRange: getDateRange(),
-          });
-          onRemoveAll();
-          onClearSavedQuery?.();
-        },
-      },
-      { isSeparator: true }
-    );
+    items.push({ isSeparator: true });
   }
 
   if (showFilterBar && additionalQueryBarMenuItems.items?.length) {
@@ -481,58 +405,6 @@ export function useQueryBarMenuPanels({
         </>
       ) : undefined,
       items,
-    },
-    {
-      id: QueryBarMenuPanel.applyToAllFilters,
-      initialFocusedItemIndex: 1,
-      title: strings.getApplyAllFiltersButtonLabel(),
-      items: [
-        {
-          name: strings.getEnableAllFiltersButtonLabel(),
-          icon: 'eye',
-          'data-test-subj': 'filter-sets-enableAllFilters',
-          onClick: () => {
-            closePopover();
-            onEnableAll();
-          },
-        },
-        {
-          name: strings.getDisableAllFiltersButtonLabel(),
-          'data-test-subj': 'filter-sets-disableAllFilters',
-          icon: 'eyeClosed',
-          onClick: () => {
-            closePopover();
-            onDisableAll();
-          },
-        },
-        {
-          name: strings.getInvertNegatedFiltersButtonLabel(),
-          'data-test-subj': 'filter-sets-invertAllFilters',
-          icon: 'invert',
-          onClick: () => {
-            closePopover();
-            onToggleAllNegated();
-          },
-        },
-        {
-          name: strings.getPinAllFiltersButtonLabel(),
-          'data-test-subj': 'filter-sets-pinAllFilters',
-          icon: 'pin',
-          onClick: () => {
-            closePopover();
-            onPinAll();
-          },
-        },
-        {
-          name: strings.getUnpinAllFiltersButtonLabel(),
-          'data-test-subj': 'filter-sets-unpinAllFilters',
-          icon: 'pin',
-          onClick: () => {
-            closePopover();
-            onUnpinAll();
-          },
-        },
-      ],
     },
     {
       id: QueryBarMenuPanel.updateCurrentQuery,

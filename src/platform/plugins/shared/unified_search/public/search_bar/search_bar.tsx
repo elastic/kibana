@@ -11,7 +11,8 @@ import { compact } from 'lodash';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
-import React, { Component, createRef } from 'react';
+import React, { Component, createRef, useRef, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import type { EuiIconProps, WithEuiThemeProps } from '@elastic/eui';
 import { EuiLink, withEuiTheme } from '@elastic/eui';
 import type { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
@@ -54,6 +55,56 @@ import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_ro
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
+
+const CollapsibleFilterBar: React.FC<{
+  isCollapsed: boolean;
+  children: React.ReactNode;
+}> = ({ isCollapsed, children }) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number | 'auto'>('auto');
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (isCollapsed) {
+        setHeight(0);
+      }
+      return;
+    }
+
+    if (!contentRef.current) return;
+
+    if (isCollapsed) {
+      setHeight(contentRef.current.scrollHeight);
+      requestAnimationFrame(() => {
+        setHeight(0);
+      });
+    } else {
+      setHeight(contentRef.current.scrollHeight);
+      const onTransitionEnd = () => {
+        setHeight('auto');
+        contentRef.current?.removeEventListener('transitionend', onTransitionEnd);
+      };
+      contentRef.current.addEventListener('transitionend', onTransitionEnd);
+    }
+  }, [isCollapsed]);
+
+  return (
+    <div
+      ref={contentRef}
+      css={css`
+        overflow: hidden;
+        transition: height 250ms ease, opacity 200ms ease;
+        opacity: ${isCollapsed ? 0 : 1};
+      `}
+      style={{ height: height === 'auto' ? 'auto' : `${height}px` }}
+      aria-hidden={isCollapsed}
+    >
+      {children}
+    </div>
+  );
+};
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
@@ -179,6 +230,7 @@ export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBa
 
 export interface SearchBarState<QT extends Query | AggregateQuery = Query> {
   isFiltersVisible: boolean;
+  isFilterBarCollapsed: boolean;
   openQueryBarMenu: boolean;
   showSavedQueryPopover: boolean;
   currentProps?: SearchBarProps;
@@ -314,6 +366,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   */
   public state = this.prefillWithInitialDraftState({
     isFiltersVisible: true,
+    isFilterBarCollapsed: false,
     openQueryBarMenu: false,
     showSavedQueryPopover: false,
     currentProps: this.props,
@@ -476,6 +529,19 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     this.setState({
       openQueryBarMenu: value,
     });
+  };
+
+  public toggleFilterBarCollapsed = () => {
+    this.setState((prevState) => ({
+      isFilterBarCollapsed: !prevState.isFilterBarCollapsed,
+    }));
+  };
+
+  public onAddFilter = () => {
+    const addFilterButton = document.querySelector<HTMLButtonElement>(
+      '[data-test-subj="addFilter"]'
+    );
+    addFilterButton?.click();
   };
 
   public onTextLangQuerySubmit = (query?: Query | AggregateQuery) => {
@@ -715,7 +781,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
     let filterBar;
     if (this.shouldRenderFilterBar()) {
-      filterBar = this.shouldShowDatePickerAsBadge() ? (
+      const filterBarContent = this.shouldShowDatePickerAsBadge() ? (
         <FilterItems
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
@@ -740,6 +806,12 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           prepend={this.props.prependFilterBar}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
         />
+      );
+
+      filterBar = (
+        <CollapsibleFilterBar isCollapsed={this.state.isFilterBarCollapsed}>
+          {filterBarContent}
+        </CollapsibleFilterBar>
       );
     }
 
@@ -812,6 +884,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
           enableResourceBrowser={this.props.enableResourceBrowser}
+          onToggleFilterBarCollapsed={this.toggleFilterBarCollapsed}
+          isFilterBarCollapsed={this.state.isFilterBarCollapsed}
+          onAddFilter={this.onAddFilter}
         />
       </div>
     );

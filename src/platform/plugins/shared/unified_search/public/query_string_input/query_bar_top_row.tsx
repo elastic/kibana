@@ -58,6 +58,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import { AddFilterPopover } from './add_filter_popover';
+import { FilterCountButton } from './filter_count_button';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
 import { NoDataPopover } from './no_data_popover';
@@ -241,6 +242,9 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    */
   enableResourceBrowser?: ESQLEditorProps['enableResourceBrowser'];
   useBackgroundSearchButton?: boolean;
+  onToggleFilterBarCollapsed?: () => void;
+  isFilterBarCollapsed?: boolean;
+  onAddFilter?: () => void;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -901,17 +905,34 @@ export const QueryBarTopRow = React.memo(
       );
     }
 
-    function renderFilterButtonGroup() {
+    function renderFilterCountButton() {
       return (
-        (Boolean(props.showAddFilter) || Boolean(props.prepend)) && (
+        <FilterCountButton
+          filters={props.filters ?? []}
+          onFiltersUpdated={props.onFiltersUpdated}
+          onToggleFilterBarCollapsed={props.onToggleFilterBarCollapsed}
+          onAddFilter={props.onAddFilter}
+          isFilterBarCollapsed={props.isFilterBarCollapsed}
+          isDisabled={props.isDisabled}
+        />
+      );
+    }
+
+    function renderFilterButtonGroup() {
+      if (!Boolean(props.showAddFilter) && !Boolean(props.prepend)) {
+        return null;
+      }
+      return (
+        <>
           <EuiFlexItem grow={false} className="kbnQueryBar__filterButtonGroup">
             <FilterButtonGroup
-              items={[props.prepend, renderAddButton()]}
+              items={[renderAddButton(), props.prepend]}
               attached={renderFilterMenuOnly()}
               size="s"
             />
           </EuiFlexItem>
-        )
+          {renderFilterCountButton()}
+        </>
       );
     }
 

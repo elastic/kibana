@@ -28,25 +28,15 @@ export interface Props {
   intl: IntlShape;
   filtersForSuggestions?: Filter[];
   hiddenPanelOptions?: FilterItemsProps['hiddenPanelOptions'];
-  /**
-   * Applies extra styles necessary when coupled with the query bar
-   */
   afterQueryBar?: boolean;
-  /**
-   * Disable all interactive actions
-   */
   isDisabled?: boolean;
-  /**
-   * Prepends custom filter controls to the search bar
-   */
   prepend?: ReactNode;
-  /** Array of suggestion abstraction that controls the render of the field */
   suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
-  const euiTheme = useEuiTheme();
-  const styles = filterBarStyles(euiTheme, props.afterQueryBar);
+  const { euiTheme } = useEuiTheme();
+  const styles = filterBarStyles({ euiTheme }, props.afterQueryBar);
   const groupRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -55,7 +45,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       ref={groupRef}
       wrap={true}
       responsive={false}
-      gutterSize="none" // We use `gap` in the styles instead for better truncation of badges
+      gutterSize="none"
       alignItems="center"
       tabIndex={-1}
       data-test-subj="filter-items-group"
