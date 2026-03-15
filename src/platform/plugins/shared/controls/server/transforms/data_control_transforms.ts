@@ -68,7 +68,7 @@ export function transformDataControlOut<
 
   return {
     title,
-    data_view_id: dataViewRef?.id ?? '', // get the data view ID from the reference
+    data_view_id: dataViewRef?.id ?? state.dataViewId ?? '', // get the data view ID from the reference, or fall back to an explicitly stored dataViewId
     use_global_filters,
     ignore_validations,
     field_name: field_name ?? '',

@@ -64,5 +64,26 @@ describe('options list control transforms', () => {
         }
       `);
     });
+
+    it('falls back to a data view id stored explicitly in state if no reference can be found', () => {
+      const result = transformOut(
+        {
+          ...baseState,
+          dataViewRefName: 'broken',
+          dataViewId: 'data-view-id',
+        },
+        panelReferences,
+        undefined,
+        undefined
+      );
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "data_view_id": "data-view-id",
+          "field_name": "test",
+          "title": "Test",
+        }
+      `);
+    });
   });
 });
