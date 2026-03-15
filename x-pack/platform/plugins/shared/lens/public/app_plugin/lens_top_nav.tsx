@@ -462,7 +462,7 @@ export const LensTopNavMenu = ({
 
   useEffect(() => {
     const setCurrentPattern = async () => {
-      if (activeDatasourceId && datasourceStates[activeDatasourceId].state) {
+      if (!isOnTextBasedMode && activeDatasourceId && datasourceStates[activeDatasourceId].state) {
         const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
           datasourceStates[activeDatasourceId].state
         );
