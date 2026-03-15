@@ -121,15 +121,27 @@ export const useLayoutStyles = () => {
         }
       }
 
+      // show accent background on hover of the section header (edit mode only)
+      .dshLayout--editing & .kbnGridSectionHeader:hover {
+        background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)};
+        border-radius: ${euiTheme.border.radius.medium};
+      }
+
+      // highlight the section panel area when hovering the section header (edit mode only)
+      .kbnGridSection--headerHovered {
+        z-index: -1;
+        background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)};
+        border-radius: ${euiTheme.border.radius.medium};
+      }
+
       // styling for what the grid section header looks like when being dragged
       .kbnGridSectionHeader--active {
         background-color: ${euiTheme.colors.backgroundBasePlain};
         outline: var(--dashboardActivePanelBorderStyle);
         border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
         padding-left: 8px;
-        // hide accordian arrow + panel count text when row is being dragged
-        & .kbnGridSectionTitle--button svg,
-        & .kbnGridLayout--panelCount {
+        // hide accordion arrow when row is being dragged
+        & .kbnGridSectionTitle--button svg {
           display: none;
         }
       }
@@ -161,7 +173,7 @@ export const useLayoutStyles = () => {
         height: calc(100% + 2px);
       }
 
-      &:has(.kbnGridSection--blocked) .kbnGridSection--dragHandle {
+      &:has(.kbnGridSection--blocked) .kbnGridSectionHeader {
         cursor: not-allowed !important;
       }
     `;
