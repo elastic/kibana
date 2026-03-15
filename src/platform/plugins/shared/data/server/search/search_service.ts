@@ -46,7 +46,7 @@ import type {
 
 import { AggsService } from './aggs';
 
-import { registerSearchRoute, registerSessionRoutes } from './routes';
+import { registerSearchRoute, registerSessionRoutes, registerStatusRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
 import type { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { usageProvider } from './collectors/search/usage';
@@ -158,6 +158,7 @@ export class SearchService {
     const router = core.http.createRouter<DataRequestHandlerContext>();
     registerSearchRoute(router, this.logger, core.executionContext);
     registerSessionRoutes(router, this.logger);
+    registerStatusRoute(router, this.logger);
 
     this.sessionService.setup(core, {});
 
