@@ -26,6 +26,7 @@ import {
   CoreKibanaRequest,
   lifecycleResponseFactory,
 } from '@kbn/core-http-router-server-internal';
+import { context, trace } from '@opentelemetry/api';
 
 const authResult = {
   authenticated(data: AuthResultParams = {}): AuthResult {
@@ -74,6 +75,9 @@ export function adoptToHapiAuthFormat(
     request: Request,
     responseToolkit: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
+    if (fn.name) {
+      trace.getSpan(context.active())?.updateName(`ext - auth - ${fn.name}`);
+    }
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     const kibanaRequest = CoreKibanaRequest.from(request, undefined, false);
 

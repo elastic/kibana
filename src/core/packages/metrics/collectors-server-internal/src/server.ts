@@ -29,10 +29,11 @@ export class ServerMetricsCollector implements MetricsCollector<OpsServerMetrics
   };
 
   constructor(private readonly server: HapiServer) {
-    this.server.ext('onRequest', (request, h) => {
-      this.requests.total++;
+    const _self = this;
+    this.server.ext('onRequest', function metricsCollector(request, h) {
+      _self.requests.total++;
       request.events.once('disconnect', () => {
-        this.requests.disconnects++;
+        _self.requests.disconnects++;
       });
       return h.continue;
     });

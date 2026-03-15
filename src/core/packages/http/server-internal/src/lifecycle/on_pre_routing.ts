@@ -24,6 +24,7 @@ import {
   CoreKibanaRequest,
   lifecycleResponseFactory,
 } from '@kbn/core-http-router-server-internal';
+import { context, trace } from '@opentelemetry/api';
 
 const preRoutingResult = {
   next(): OnPreRoutingResult {
@@ -55,6 +56,9 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
     request: Request,
     responseToolkit: HapiResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
+    if (fn.name) {
+      trace.getSpan(context.active())?.updateName(`ext - onPreRouting - ${fn.name}`);
+    }
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
 
     try {

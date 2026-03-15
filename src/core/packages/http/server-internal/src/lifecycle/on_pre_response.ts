@@ -27,6 +27,7 @@ import type {
 } from '@kbn/core-http-server';
 import { OnPreResponseResultType } from '@kbn/core-http-server';
 import { HapiResponseAdapter, CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { context, trace } from '@opentelemetry/api';
 
 const preResponseResult = {
   render(responseRender: OnPreResponseRender): OnPreResponseResult {
@@ -63,6 +64,9 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
     responseToolkit: HapiResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
     const response = request.response;
+    if (fn.name) {
+      trace.getSpan(context.active())?.updateName(`ext - onPreResponse - ${fn.name}`);
+    }
 
     try {
       if (response) {

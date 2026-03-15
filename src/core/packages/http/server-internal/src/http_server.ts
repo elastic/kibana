@@ -500,13 +500,13 @@ export class HttpServer {
     const { enabled, referrerWhitelist: list } = config.compression;
     if (!enabled) {
       this.log.debug('HTTP compression is disabled');
-      this.server.ext('onRequest', (request, h) => {
+      this.server.ext('onRequest', function conditionalCompression(request, h) {
         request.info.acceptEncoding = '';
         return h.continue;
       });
     } else if (list) {
       this.log.debug(`HTTP compression is only enabled for any referrer in the following: ${list}`);
-      this.server.ext('onRequest', (request, h) => {
+      this.server.ext('onRequest', function conditionalCompression(request, h) {
         const { referrer } = request.info;
         if (referrer !== '') {
           const { hostname } = url.parse(referrer);
@@ -544,7 +544,9 @@ export class HttpServer {
     executionContext?: InternalExecutionContextSetup,
     userActivity?: InternalUserActivityServiceSetup
   ) {
-    this.server!.ext('onPreResponse', (request, responseToolkit) => {
+    const _self = this;
+
+    this.server!.ext('onPreResponse', function requestStateAssignment(request, responseToolkit) {
       const stop = (request.app as KibanaRequestState).measureElu;
 
       if (!stop) {
@@ -562,8 +564,8 @@ export class HttpServer {
       return responseToolkit.continue;
     });
 
-    this.server!.ext('onRequest', (request, responseToolkit) => {
-      const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
+    this.server!.ext('onRequest', function requestStateAssignment(request, responseToolkit) {
+      const stop = startEluMeasurement(request.path, _self.log, _self.config?.eluMonitor);
 
       const requestId = getRequestId(request, config.requestId);
 
@@ -601,15 +603,15 @@ export class HttpServer {
       return responseToolkit.continue;
     });
 
-    this.server!.ext('onPostAuth', async (request, responseToolkit) => {
-      if (this.redactedSessionIdGetter) {
+    this.server!.ext('onPostAuth', async function requestStateAssignment(request, responseToolkit) {
+      if (_self.redactedSessionIdGetter) {
         // Store the redacted session ID on the request state so the user
         // activity service can read it later. We cannot call the service
         // directly here because this handler is async and would use its
         // own user-activity
         try {
           const kibanaRequest = CoreKibanaRequest.from(request);
-          const redactedSessionId = await this.redactedSessionIdGetter(kibanaRequest);
+          const redactedSessionId = await _self.redactedSessionIdGetter(kibanaRequest);
           (request.app as KibanaRequestState).redactedSessionId = redactedSessionId;
         } catch {
           // just leave the session id as undefined
@@ -618,11 +620,11 @@ export class HttpServer {
       return responseToolkit.continue;
     });
 
-    this.server!.ext('onPreHandler', (request, responseToolkit) => {
+    this.server!.ext('onPreHandler', function requestStateAssignment(request, responseToolkit) {
       (request.app as KibanaRequestState).span?.end();
       (request.app as KibanaRequestState).span = null;
 
-      const user = this.authState.get<AuthenticatedUser>(request).state ?? null;
+      const user = _self.authState.get<AuthenticatedUser>(request).state ?? null;
       const { redactedSessionId } = request.app as KibanaRequestState;
       const remoteAddress = request.info.remoteAddress;
       userActivity?.setInjectedContext({
@@ -703,7 +705,7 @@ export class HttpServer {
     }
 
     // Using onPreAuth instead of onRequest because we want the request.route.path
-    this.server!.ext('onPreAuth', (request, responseToolkit) => {
+    this.server!.ext('onPreAuth', function instrumentMetrics(request, responseToolkit) {
       const attributes = getBaseAttributes(request);
 
       requestTotalServed.add(1, attributes);
@@ -725,7 +727,7 @@ export class HttpServer {
       return responseToolkit.continue;
     });
 
-    this.server!.ext('onPostResponse', (request, responseToolkit) => {
+    this.server!.ext('onPostResponse', function instrumentMetrics(request, responseToolkit) {
       const startTime = (request.app as KibanaRequestState).startTime;
       const stopTime = performance.now();
 

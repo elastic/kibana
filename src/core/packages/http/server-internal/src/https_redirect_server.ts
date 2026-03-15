@@ -37,19 +37,22 @@ export class HttpsRedirectServer {
       port: config.ssl.redirectHttpFromPort,
     });
 
-    this.server.ext('onRequest', (request: Request, responseToolkit: ResponseToolkit) => {
-      return responseToolkit
-        .redirect(
-          formatUrl({
-            hostname: request.url.hostname,
-            pathname: request.url.pathname,
-            port: config.port,
-            protocol: 'https',
-            search: request.url.search,
-          })
-        )
-        .takeover();
-    });
+    this.server.ext(
+      'onRequest',
+      function httpsRedirect(request: Request, responseToolkit: ResponseToolkit) {
+        return responseToolkit
+          .redirect(
+            formatUrl({
+              hostname: request.url.hostname,
+              pathname: request.url.pathname,
+              port: config.port,
+              protocol: 'https',
+              search: request.url.search,
+            })
+          )
+          .takeover();
+      }
+    );
 
     try {
       await this.server.start();
