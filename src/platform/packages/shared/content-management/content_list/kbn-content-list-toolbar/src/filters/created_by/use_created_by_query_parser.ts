@@ -9,10 +9,8 @@
 
 import { useMemo } from 'react';
 import { Query } from '@elastic/eui';
-import { useContentListUserFilter } from '@kbn/content-list-provider';
+import { useContentListUserFilter, CREATED_BY_FILTER_ID } from '@kbn/content-list-provider';
 import type { QueryParser, QueryParserResult } from '../query_parser';
-
-const FIELD_NAME = 'createdBy';
 
 /**
  * Returns a {@link QueryParser} that strips `createdBy:` field clauses from
@@ -39,15 +37,27 @@ export const useCreatedByQueryParser = (): QueryParser | null => {
         try {
           let query = Query.parse(queryText);
 
-          const hasSimple = (query.ast.getFieldClauses(FIELD_NAME)?.length ?? 0) > 0;
-          const hasOrInclude = !!query.ast.getOrFieldClause(FIELD_NAME, undefined, true, 'eq');
-          const hasOrExclude = !!query.ast.getOrFieldClause(FIELD_NAME, undefined, false, 'eq');
+          const hasSimple = (query.ast.getFieldClauses(CREATED_BY_FILTER_ID)?.length ?? 0) > 0;
+          const hasOrInclude = !!query.ast.getOrFieldClause(
+            CREATED_BY_FILTER_ID,
+            undefined,
+            true,
+            'eq'
+          );
+          const hasOrExclude = !!query.ast.getOrFieldClause(
+            CREATED_BY_FILTER_ID,
+            undefined,
+            false,
+            'eq'
+          );
 
           if (!hasSimple && !hasOrInclude && !hasOrExclude) {
             return { searchQuery: queryText, filters: {} };
           }
 
-          query = query.removeSimpleFieldClauses(FIELD_NAME).removeOrFieldClauses(FIELD_NAME);
+          query = query
+            .removeSimpleFieldClauses(CREATED_BY_FILTER_ID)
+            .removeOrFieldClauses(CREATED_BY_FILTER_ID);
           return { searchQuery: query.text, filters: {} };
         } catch {
           return { searchQuery: queryText, filters: {} };

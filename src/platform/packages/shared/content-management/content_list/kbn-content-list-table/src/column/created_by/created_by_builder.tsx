@@ -27,6 +27,15 @@ const columnName = i18n.translate('contentManagement.contentList.column.createdB
 export interface CreatedByColumnProps {
   /** Column width (CSS value). Defaults to `'60px'`. */
   width?: string;
+  /**
+   * Whether the column is sortable. Defaults to `false`.
+   *
+   * When `true`, clicking the column header sends `sort.field='createdBy'`
+   * to `findItems`. The data source is responsible for resolving UIDs to
+   * display names and sorting accordingly. Client-side data sources cannot
+   * sort by creator name since items only carry UIDs.
+   */
+  sortable?: boolean;
 }
 
 /**
@@ -43,12 +52,12 @@ export const buildCreatedByColumn = (
     return undefined;
   }
 
-  const { width = DEFAULT_WIDTH } = attributes;
+  const { width = DEFAULT_WIDTH, sortable = false } = attributes;
 
   return {
     field: 'createdBy',
     name: columnName,
-    sortable: false,
+    sortable,
     width,
     'data-test-subj': 'content-list-table-column-createdBy',
     render: (_value: string | undefined, item: ContentListItem) => {

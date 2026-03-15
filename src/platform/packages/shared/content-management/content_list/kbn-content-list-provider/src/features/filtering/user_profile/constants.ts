@@ -23,14 +23,6 @@ export const MANAGED_USER_FILTER = '__managed__';
 export const NO_CREATOR_USER_FILTER = '__no_creator__';
 
 /**
- * EUI query field name for the `createdBy` filter clause.
- *
- * Used by the query parser and resolver to read/write `createdBy:(...)` syntax
- * in `EuiSearchBar` queries.
- */
-export const CREATED_BY_FIELD_NAME = 'createdBy';
-
-/**
  * Query-bar value written for the {@link MANAGED_USER_FILTER} sentinel.
  *
  * This is the display string that appears in the search bar when the

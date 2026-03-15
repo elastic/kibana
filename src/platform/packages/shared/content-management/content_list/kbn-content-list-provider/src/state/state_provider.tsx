@@ -159,7 +159,8 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     // accumulator resets when the result set changes but persists across
     // page changes and user-filter toggles.
     const { user: _u, ...nonUserFilters } = clientState.filters;
-    const resetKey = `${clientState.search.queryText}\0${JSON.stringify(nonUserFilters)}`;
+    const sortedEntries = Object.entries(nonUserFilters).sort(([a], [b]) => a.localeCompare(b));
+    const resetKey = `${clientState.search.queryText}\0${JSON.stringify(sortedEntries)}`;
 
     const acc = creatorAccRef.current;
     if (acc.resetKey !== resetKey) {

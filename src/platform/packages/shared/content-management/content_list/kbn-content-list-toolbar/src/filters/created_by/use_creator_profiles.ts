@@ -9,28 +9,29 @@
 
 import { useMemo } from 'react';
 import {
-  useContentListItems,
+  useFilterMetadata,
   useContentListUserFilter,
   MANAGED_USER_FILTER,
   NO_CREATOR_USER_FILTER,
+  type FilterFacet,
 } from '@kbn/content-list-provider';
-import { useUserProfiles } from '@kbn/content-management-user-profiles';
 import type { UserProfile } from '@kbn/user-profile-components';
-import type { CreatorsList } from '@kbn/content-list-provider';
-import { MANAGED_QUERY_VALUE, NO_CREATOR_QUERY_VALUE } from './constants';
+import { MANAGED_QUERY_VALUE, NO_CREATOR_QUERY_VALUE } from '@kbn/content-list-provider';
 
 /**
  * Return value from {@link useCreatorProfiles}.
  */
 export interface UseCreatorProfilesReturn {
-  /** Summary of all unique creators from the item set. */
-  allCreators: CreatorsList;
+  /** Display-ready facets from `getMetadata`. `undefined` while loading. */
+  facets: FilterFacet[] | undefined;
+  /** Whether the metadata query is currently loading. */
+  isLoading: boolean;
   /** UIDs currently selected (including sentinel values). */
   selectedCreators: readonly string[];
-  /** Resolved profiles for real creators. `undefined` while loading or on error. */
-  resolvedCreators: readonly UserProfile[] | undefined;
   /**
-   * `true` when profile data is available for UID resolution.
+   * `true` when the resolver can attempt UID resolution. Always `true`
+   * because sentinel mappings are seeded unconditionally and the suggest
+   * fallback handles real user values before facets are loaded.
    */
   isReady: boolean;
   /** Maps a UID (or sentinel) to its query-bar display string. */
@@ -45,14 +46,14 @@ interface LookupMaps {
 }
 
 /**
- * Build lookup maps from resolved profiles in a single pass.
+ * Build lookup maps from filter facets in a single pass.
  *
  * Sentinel values (`managed`, `none`) are seeded so the resolver can
  * map them to UIDs without special-case logic.
  *
- * Phase 2 adds a `queryValueToUids` map here for full-name matching.
+ * For user facets, the `data.user` object provides email and username for resolution.
  */
-const buildLookupMaps = (profiles: readonly UserProfile[]): LookupMaps => {
+const buildLookupMaps = (facets: readonly FilterFacet[]): LookupMaps => {
   const uidToQueryValue = new Map<string, string>();
   const emailToUid = new Map<string, string>();
 
@@ -61,7 +62,12 @@ const buildLookupMaps = (profiles: readonly UserProfile[]): LookupMaps => {
   emailToUid.set(MANAGED_QUERY_VALUE, MANAGED_USER_FILTER);
   emailToUid.set(NO_CREATOR_QUERY_VALUE, NO_CREATOR_USER_FILTER);
 
-  for (const { uid, user } of profiles) {
+  for (const facet of facets) {
+    const user = facet.data?.user as UserProfile['user'] | undefined;
+    if (!user) {
+      continue;
+    }
+    const { key: uid } = facet;
     if (!uidToQueryValue.has(uid)) {
       uidToQueryValue.set(uid, user.email ?? user.username);
     }
@@ -80,39 +86,29 @@ const buildLookupMaps = (profiles: readonly UserProfile[]): LookupMaps => {
 /**
  * Fetches and indexes user profiles for the "Created by" filter.
  *
- * Combines two UID sources:
- * - `allCreators.uids` — creators visible in the current item set.
- * - `selectedCreators` — UIDs from the active user filter that may no
- *   longer appear in `allCreators` when a search narrows the result set.
+ * Consumes `useFilterMetadata('createdBy')` to get display-ready facets from
+ * the provider's `getMetadata` implementation. Builds lookup maps for the
+ * query-bar resolver.
  *
- * Sentinel values are excluded from the profile fetch (they are not real
- * user IDs) and seeded directly into the lookup maps.
- *
- * Phase 2 adds `useSuggestUserProfiles` and a `queryValueToUids` map here.
+ * @param popoverOpen - When `true`, enables the metadata query so it fires lazily on popover open.
  */
-export const useCreatorProfiles = (): UseCreatorProfilesReturn => {
-  const { allCreators } = useContentListItems();
+export const useCreatorProfiles = (popoverOpen: boolean): UseCreatorProfilesReturn => {
   const { selectedUsers: selectedCreators } = useContentListUserFilter();
+  const metadataQuery = useFilterMetadata('createdBy', { enabled: popoverOpen });
 
-  const profileUids = useMemo(() => {
-    const uids = new Set([...allCreators.uids, ...selectedCreators]);
-    uids.delete(MANAGED_USER_FILTER);
-    uids.delete(NO_CREATOR_USER_FILTER);
-    return Array.from(uids);
-  }, [allCreators.uids, selectedCreators]);
+  const { facets } = metadataQuery.data ? { facets: metadataQuery.data } : { facets: undefined };
 
-  const profilesQuery = useUserProfiles(profileUids);
-
-  const { uidToQueryValue, emailToUid } = useMemo(
-    () => buildLookupMaps(profilesQuery.data ?? []),
-    [profilesQuery.data]
-  );
+  const { uidToQueryValue, emailToUid } = useMemo(() => buildLookupMaps(facets ?? []), [facets]);
 
   return {
-    allCreators,
+    facets,
+    isLoading: metadataQuery.isLoading,
     selectedCreators,
-    resolvedCreators: profilesQuery.data,
-    isReady: !!profilesQuery.data,
+    // Always ready: sentinel mappings are seeded unconditionally by
+    // `buildLookupMaps`, and the suggest fallback in the resolver handles
+    // real user values before the popover has been opened. Once facets load,
+    // `emailToUid` gains full user mappings and the effect re-runs.
+    isReady: true,
     uidToQueryValue,
     emailToUid,
   };

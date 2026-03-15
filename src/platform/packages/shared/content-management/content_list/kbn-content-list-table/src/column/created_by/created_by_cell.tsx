@@ -74,12 +74,13 @@ export const CreatedByCell = ({ item }: CreatedByCellProps) => {
   const toggle = useUserFilterToggle();
   const { createdBy, managed } = item;
 
-  const handleSentinelClick = useCallback(
-    (uid: string, queryValue: string) => {
-      toggle?.(uid, queryValue);
-    },
-    [toggle]
-  );
+  const handleManagedClick = useCallback(() => {
+    toggle?.(MANAGED_USER_FILTER, MANAGED_QUERY_VALUE);
+  }, [toggle]);
+
+  const handleNoCreatorClick = useCallback(() => {
+    toggle?.(NO_CREATOR_USER_FILTER, NO_CREATOR_QUERY_VALUE);
+  }, [toggle]);
 
   if (managed) {
     const avatar = <ManagedAvatarTip />;
@@ -88,7 +89,7 @@ export const CreatedByCell = ({ item }: CreatedByCellProps) => {
     }
     return (
       <EuiButtonEmpty
-        onClick={() => handleSentinelClick(MANAGED_USER_FILTER, MANAGED_QUERY_VALUE)}
+        onClick={handleManagedClick}
         flush="both"
         css={{ blockSize: 'auto' }}
         data-test-subj="content-list-table-createdBy-toggle"
@@ -111,7 +112,7 @@ export const CreatedByCell = ({ item }: CreatedByCellProps) => {
   }
   return (
     <EuiButtonEmpty
-      onClick={() => handleSentinelClick(NO_CREATOR_USER_FILTER, NO_CREATOR_QUERY_VALUE)}
+      onClick={handleNoCreatorClick}
       flush="both"
       css={{ blockSize: 'auto' }}
       data-test-subj="content-list-table-createdBy-toggle"

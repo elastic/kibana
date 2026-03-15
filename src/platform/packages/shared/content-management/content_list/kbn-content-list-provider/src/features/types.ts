@@ -10,6 +10,55 @@
 import type { SortingConfig } from './sorting';
 import type { PaginationConfig } from './pagination';
 import type { SearchConfig } from './search';
+import type { ActiveFilters } from '../datasource';
+
+/**
+ * A single display-ready facet for a filter popover option.
+ *
+ * @template T - Additional data associated with the facet (e.g. avatar info, tag color).
+ */
+export interface FilterFacet<T = Record<string, unknown>> {
+  /** Unique key identifying this facet (e.g. user UID, tag ID). */
+  key: string;
+  /** Human-readable display label. */
+  label: string;
+  /** Optional item count for this facet value. */
+  count?: number;
+  /** Optional additional data (e.g. `{ user, avatar }` for profiles, `{ color }` for tags). */
+  data?: T;
+}
+
+/**
+ * Parameters passed to {@link FilterFeatureConfig.getMetadata}.
+ */
+export interface FilterMetadataParams {
+  /** Current active filters (excluding the filter being fetched, for faceted-search semantics). */
+  filters: ActiveFilters;
+  /** Abort signal for request cancellation. */
+  signal?: AbortSignal;
+}
+
+/**
+ * Configuration for a filter feature that provides popover metadata.
+ *
+ * How the implementation accesses the item set is provider-specific:
+ * - Client provider: captures `getItems()` from the strategy via closure.
+ * - Server provider: calls a server aggregation endpoint, ignoring items.
+ */
+export interface FilterFeatureConfig {
+  /**
+   * Fetch display-ready facets for the filter popover.
+   * Called lazily when the popover opens, with its own React Query lifecycle.
+   */
+  getMetadata: (params: FilterMetadataParams) => Promise<FilterFacet[]>;
+}
+
+/**
+ * Type guard to check if a filter feature config is a {@link FilterFeatureConfig} object (not boolean).
+ */
+export const isFilterFeatureConfig = (
+  value?: boolean | FilterFeatureConfig
+): value is FilterFeatureConfig => typeof value === 'object' && value !== null;
 
 /**
  * Feature configuration for enabling/customizing content list capabilities.
@@ -33,8 +82,9 @@ export interface ContentListFeatures {
    *
    * - `true` or `undefined`: Auto-enabled when `services.tags` is provided.
    * - `false`: Explicitly disables tags even if `services.tags` is present.
+   * - `FilterFeatureConfig`: Enables tags with popover metadata from `getMetadata`.
    */
-  tags?: boolean;
+  tags?: boolean | FilterFeatureConfig;
 
   /**
    * Starred feature configuration.
@@ -49,8 +99,9 @@ export interface ContentListFeatures {
    *
    * - `true` or `undefined`: Auto-enabled when `services.userProfile` is provided.
    * - `false`: Explicitly disables created-by column and filter even if the service is present.
+   * - `FilterFeatureConfig`: Enables created-by with popover metadata from `getMetadata`.
    */
-  createdBy?: boolean;
+  createdBy?: boolean | FilterFeatureConfig;
 }
 
 /**

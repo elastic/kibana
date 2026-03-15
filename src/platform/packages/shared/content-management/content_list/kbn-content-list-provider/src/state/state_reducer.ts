@@ -10,7 +10,7 @@
 import { Query } from '@elastic/eui';
 import type { IncludeExcludeFilter, ActiveFilters, UserFilter } from '../datasource';
 import { getIncludeExcludeFilter } from '../datasource';
-import { CREATED_BY_FIELD_NAME } from '../features/filtering/user_profile/constants';
+import { CREATED_BY_FILTER_ID } from '../datasource';
 import type { ContentListClientState, ContentListAction } from './types';
 import { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './types';
 
@@ -39,7 +39,7 @@ const collectCreatedByQueryValues = (q: Query): { include: Set<string>; exclude:
   const include = new Set<string>();
   const exclude = new Set<string>();
 
-  const simpleClauses = q.ast.getFieldClauses(CREATED_BY_FIELD_NAME);
+  const simpleClauses = q.ast.getFieldClauses(CREATED_BY_FILTER_ID);
   if (simpleClauses) {
     for (const clause of simpleClauses) {
       const target = clause.match === 'must' ? include : exclude;
@@ -48,13 +48,13 @@ const collectCreatedByQueryValues = (q: Query): { include: Set<string>; exclude:
     }
   }
 
-  const includeOr = q.ast.getOrFieldClause(CREATED_BY_FIELD_NAME, undefined, true, 'eq');
+  const includeOr = q.ast.getOrFieldClause(CREATED_BY_FILTER_ID, undefined, true, 'eq');
   if (includeOr) {
     const vs = Array.isArray(includeOr.value) ? includeOr.value : [includeOr.value];
     vs.forEach((v) => include.add(String(v)));
   }
 
-  const excludeOr = q.ast.getOrFieldClause(CREATED_BY_FIELD_NAME, undefined, false, 'eq');
+  const excludeOr = q.ast.getOrFieldClause(CREATED_BY_FILTER_ID, undefined, false, 'eq');
   if (excludeOr) {
     const vs = Array.isArray(excludeOr.value) ? excludeOr.value : [excludeOr.value];
     vs.forEach((v) => exclude.add(String(v)));
@@ -111,8 +111,8 @@ const applyToggleUserFilter = (
   try {
     const q = nextQueryText ? Query.parse(nextQueryText) : Query.parse('');
     let rebuilt = q
-      .removeSimpleFieldClauses(CREATED_BY_FIELD_NAME)
-      .removeOrFieldClauses(CREATED_BY_FIELD_NAME);
+      .removeSimpleFieldClauses(CREATED_BY_FILTER_ID)
+      .removeOrFieldClauses(CREATED_BY_FILTER_ID);
 
     const { include: existingInclude, exclude: existingExclude } = collectCreatedByQueryValues(q);
 
@@ -125,10 +125,10 @@ const applyToggleUserFilter = (
     }
 
     for (const v of existingInclude) {
-      rebuilt = rebuilt.addOrFieldValue(CREATED_BY_FIELD_NAME, v, true, 'eq');
+      rebuilt = rebuilt.addOrFieldValue(CREATED_BY_FILTER_ID, v, true, 'eq');
     }
     for (const v of existingExclude) {
-      rebuilt = rebuilt.addOrFieldValue(CREATED_BY_FIELD_NAME, v, false, 'eq');
+      rebuilt = rebuilt.addOrFieldValue(CREATED_BY_FILTER_ID, v, false, 'eq');
     }
 
     nextQueryText = rebuilt.text;

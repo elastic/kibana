@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import type { Query } from '@elastic/eui';
 import { useContentListUserFilter, type UserFilter } from '@kbn/content-list-provider';
+import { useUserProfilesServices } from '@kbn/content-management-user-profiles';
 
 const toArray = (item: unknown): unknown[] => (Array.isArray(item) ? item : [item]);
 
@@ -35,21 +36,25 @@ const isUserFilterEqual = (a: UserFilter | undefined, b: UserFilter | undefined)
 /**
  * Resolve an array of query-bar values to UIDs using the `emailToUid` map.
  *
- * Phase 1: exact lookup only — `emailToUid.get(value.toLowerCase())`.
+ * Returns resolved UIDs and any values that could not be resolved.
  * Sentinels (`managed`, `none`) resolve via the same map (seeded in
  * `buildLookupMaps`).
- *
- * Phase 2 adds prefix scan and `queryValueToUids` fallback as additional steps.
  */
-export const resolveToUids = (values: string[], emailToUid: Map<string, string>): string[] => {
-  const seen = new Set<string>();
+export const resolveToUids = (
+  values: string[],
+  emailToUid: Map<string, string>
+): { resolved: string[]; unresolved: string[] } => {
+  const resolved = new Set<string>();
+  const unresolved: string[] = [];
   for (const value of values) {
     const uid = emailToUid.get(value.toLowerCase());
     if (uid) {
-      seen.add(uid);
+      resolved.add(uid);
+    } else {
+      unresolved.push(value);
     }
   }
-  return Array.from(seen);
+  return { resolved: Array.from(resolved), unresolved };
 };
 
 /**
@@ -118,12 +123,13 @@ export const extractCreatedByFieldValues = (
  * via the `emailToUid` map, and dispatches `SET_USER_FILTER` when the
  * resolved filter differs from the current state.
  *
- * The `userFilter` ref is updated on every render (not as a dep) so the
- * effect does not re-run when the filter changes from an external dispatch
- * (e.g. avatar click). It re-runs only when `query` or `emailToUid` changes.
+ * For unresolved values, falls back to `suggestUserProfiles` (when available)
+ * to attempt resolution by name/email. Suggest-resolved mappings are stored
+ * in a stable `useRef` cache that persists across re-renders (unlike
+ * `emailToUid`, which is rebuilt each time facets change).
  *
  * @param query - The current EUI `Query` from `EuiSearchBar`.
- * @param emailToUid - Lowercased email/username/sentinel → UID map.
+ * @param emailToUid - Lowercased email/username/sentinel -> UID map.
  * @param ready - `true` once profiles have been fetched; skips resolution while loading.
  */
 export const useCreatedByQueryResolver = (
@@ -132,24 +138,96 @@ export const useCreatedByQueryResolver = (
   ready: boolean
 ): void => {
   const { userFilter, setSelectedUsers } = useContentListUserFilter();
+  const { suggestUserProfiles } = useUserProfilesServices();
 
   const userFilterRef = useRef<UserFilter | undefined>(undefined);
   userFilterRef.current = userFilter;
+
+  // Stable cache for suggest-resolved mappings. Unlike `emailToUid` (which
+  // is rebuilt from facets on each render), this persists across re-renders
+  // so suggest resolutions are not lost when the facet list refreshes.
+  const suggestCacheRef = useRef(new Map<string, string>());
+
+  // Merged view: facet-derived map + suggest cache, recomputed when either changes.
+  const mergedEmailToUid = useMemo(() => {
+    const merged = new Map(emailToUid);
+    for (const [key, value] of suggestCacheRef.current) {
+      if (!merged.has(key)) {
+        merged.set(key, value);
+      }
+    }
+    return merged;
+  }, [emailToUid]);
+
+  const resolveWithSuggest = useCallback(
+    async (values: string[]): Promise<string[]> => {
+      if (!suggestUserProfiles || values.length === 0) {
+        return [];
+      }
+      const resolvedUids: string[] = [];
+      for (const value of values) {
+        try {
+          // Suggest is a fuzzy search — the first result may not be an exact
+          // match for the typed value (e.g., "jane" could match "jane.smith"
+          // before "jane@elastic.co"). This is a best-effort heuristic; an
+          // exact-match API would be more precise but is not available.
+          const profiles = await suggestUserProfiles(value);
+          if (profiles.length > 0) {
+            const { uid } = profiles[0];
+            resolvedUids.push(uid);
+            suggestCacheRef.current.set(value.toLowerCase(), uid);
+          }
+        } catch {
+          // Suggest failure is non-fatal.
+        }
+      }
+      return resolvedUids;
+    },
+    [suggestUserProfiles]
+  );
 
   useEffect(() => {
     if (!ready) {
       return;
     }
 
-    const { includeValues, excludeValues } = extractCreatedByFieldValues(query);
-    const include = resolveToUids(includeValues, emailToUid);
-    const exclude = resolveToUids(excludeValues, emailToUid);
+    let cancelled = false;
 
-    const next: UserFilter | undefined =
-      include.length > 0 || exclude.length > 0 ? { include, exclude } : undefined;
+    const resolve = async () => {
+      const { includeValues, excludeValues } = extractCreatedByFieldValues(query);
+      const { resolved: includeResolved, unresolved: includeUnresolved } = resolveToUids(
+        includeValues,
+        mergedEmailToUid
+      );
+      const { resolved: excludeResolved, unresolved: excludeUnresolved } = resolveToUids(
+        excludeValues,
+        mergedEmailToUid
+      );
 
-    if (!isUserFilterEqual(userFilterRef.current, next)) {
-      setSelectedUsers(next);
-    }
-  }, [query, emailToUid, ready, setSelectedUsers]);
+      const [suggestedInclude, suggestedExclude] = await Promise.all([
+        resolveWithSuggest(includeUnresolved),
+        resolveWithSuggest(excludeUnresolved),
+      ]);
+
+      if (cancelled) {
+        return;
+      }
+
+      const include = [...includeResolved, ...suggestedInclude];
+      const exclude = [...excludeResolved, ...suggestedExclude];
+
+      const next: UserFilter | undefined =
+        include.length > 0 || exclude.length > 0 ? { include, exclude } : undefined;
+
+      if (!isUserFilterEqual(userFilterRef.current, next)) {
+        setSelectedUsers(next);
+      }
+    };
+
+    resolve();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [query, mergedEmailToUid, ready, setSelectedUsers, resolveWithSuggest]);
 };

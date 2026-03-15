@@ -49,7 +49,10 @@ export const useContentListUserFilter = (): UseContentListUserFilterReturn => {
     [dispatch]
   );
 
-  const hasActiveFilter = selectedUsers.length > 0 || (userFilter?.exclude?.length ?? 0) > 0;
+  const hasActiveFilter = useMemo(
+    () => selectedUsers.length > 0 || (userFilter?.exclude?.length ?? 0) > 0,
+    [selectedUsers, userFilter]
+  );
 
   return {
     selectedUsers,

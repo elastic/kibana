@@ -15,7 +15,6 @@ export { useUserFilterToggle } from './use_user_filter_toggle';
 export {
   MANAGED_USER_FILTER,
   NO_CREATOR_USER_FILTER,
-  CREATED_BY_FIELD_NAME,
   MANAGED_QUERY_VALUE,
   NO_CREATOR_QUERY_VALUE,
 } from './constants';

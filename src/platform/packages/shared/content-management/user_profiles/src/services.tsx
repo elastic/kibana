@@ -17,13 +17,20 @@ export interface UserProfilesKibanaDependencies {
   core: {
     userProfile: {
       bulkGet: UserProfileServiceStart['bulkGet'];
+      suggest?: UserProfileServiceStart['suggest'];
     };
   };
+  /**
+   * Path to the consumer's suggest endpoint (e.g. `/internal/content_management/_suggest_user_profiles`).
+   * Required alongside `core.userProfile.suggest` for the suggest feature to work.
+   */
+  suggestPath?: string;
 }
 
 export interface UserProfilesServices {
   bulkGetUserProfiles: (uids: string[]) => Promise<UserProfile[]>;
   getUserProfile: (uid: string) => Promise<UserProfile>;
+  suggestUserProfiles?: (name: string) => Promise<UserProfile[]>;
 }
 
 const UserProfilesContext = React.createContext<UserProfilesServices | null>(null);
@@ -38,6 +45,7 @@ export const UserProfilesProvider: FC<PropsWithChildren<UserProfilesServices>> =
 export const UserProfilesKibanaProvider: FC<PropsWithChildren<UserProfilesKibanaDependencies>> = ({
   children,
   core,
+  suggestPath,
 }) => {
   const bulkGetUserProfiles = useCallback<(userProfileIds: string[]) => Promise<UserProfile[]>>(
     async (uids: string[]) => {
@@ -55,8 +63,21 @@ export const UserProfilesKibanaProvider: FC<PropsWithChildren<UserProfilesKibana
     }).fetch;
   }, [bulkGetUserProfiles]);
 
+  const suggestUserProfiles = useMemo(() => {
+    if (!core.userProfile.suggest || !suggestPath) {
+      return undefined;
+    }
+    const { suggest } = core.userProfile;
+    return async (name: string): Promise<UserProfile[]> =>
+      suggest(suggestPath, { name, dataPath: 'avatar' });
+  }, [core.userProfile, suggestPath]);
+
   return (
-    <UserProfilesProvider getUserProfile={getUserProfile} bulkGetUserProfiles={bulkGetUserProfiles}>
+    <UserProfilesProvider
+      getUserProfile={getUserProfile}
+      bulkGetUserProfiles={bulkGetUserProfiles}
+      suggestUserProfiles={suggestUserProfiles}
+    >
       {children}
     </UserProfilesProvider>
   );

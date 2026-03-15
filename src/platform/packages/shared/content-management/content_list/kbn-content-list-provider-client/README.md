@@ -66,16 +66,16 @@ const findItems = useCallback(
 </ContentListClientProvider>
 ```
 
-### Using the Adapter Function Directly
+### Using the Strategy Directly
 
-If you need more control, you can use the adapter function directly:
+If you need more control, you can use `createClientStrategy` directly to get both `findItems` and `getItems`:
 
 ```tsx
-import { createFindItemsFn } from '@kbn/content-list-provider-client';
+import { createClientStrategy } from '@kbn/content-list-provider-client';
 import { ContentListProvider } from '@kbn/content-list-provider';
 
-// Wrap your existing findItems.
-const findItems = createFindItemsFn(myExistingFindItems);
+// Create the strategy, which caches the full item set for use by getMetadata.
+const { findItems, getItems } = createClientStrategy({ findItems: myExistingFindItems });
 
 // Use with the base provider.
 <ContentListProvider
@@ -87,6 +87,29 @@ const findItems = createFindItemsFn(myExistingFindItems);
 </ContentListProvider>
 ```
 
+### Enabling Services
+
+Pass `services` to enable user profile and tag features. The provider automatically constructs `FilterFeatureConfig` objects that scan the cached item set and resolve profiles/tags on demand.
+
+```tsx
+<ContentListClientProvider
+  id="my-dashboards"
+  labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+  findItems={myExistingFindItems}
+  services={{
+    userProfile: {
+      getUserProfile: (uid) => userProfileService.get(uid),
+      bulkGetUserProfiles: (uids) => userProfileService.bulkGet(uids),
+      suggestUserProfiles: (name) => userProfileService.suggest(name),
+    },
+    tags: myTagsService,
+    favorites: myFavoritesClient,
+  }}
+>
+  <MyContentList />
+</ContentListClientProvider>
+```
+
 ## Props
 
 | Prop | Type | Required | Description |
@@ -96,6 +119,7 @@ const findItems = createFindItemsFn(myExistingFindItems);
 | `labels` | `ContentListLabels` | Yes | User-facing entity labels (should be i18n-translated). |
 | `findItems` | `TableListViewFindItemsFn` | Yes | Your existing `TableListView` findItems function. |
 | `features` | `ContentListFeatures` | No | Feature configuration. |
+| `services` | `ContentListServices` | No | Services for user profiles, tags, and favorites. |
 | `item` | `ContentListItemConfig` | No | Per-item configuration for links. |
 | `isReadOnly` | `boolean` | No | Disable mutation actions. |
 
@@ -132,8 +156,9 @@ This is the same signature expected by `TableListView.findItems`.
 export { ContentListClientProvider } from './provider';
 export type { ContentListClientProviderProps } from './provider';
 
-// Adapter for direct usage.
-export { createFindItemsFn } from './strategy';
+// Strategy for direct usage.
+export { createClientStrategy } from './strategy';
+export type { ClientStrategy, ClientStrategyOptions } from './strategy';
 
 // Types.
 export type {

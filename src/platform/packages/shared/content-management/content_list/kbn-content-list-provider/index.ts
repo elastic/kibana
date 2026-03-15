@@ -29,6 +29,7 @@ export type { UserProfileService } from './src/services';
 export { useContentListItems, useContentListState } from './src/state';
 export type { ContentListQueryData } from './src/state';
 export {
+  isFilterFeatureConfig,
   useContentListSort,
   useContentListSearch,
   useContentListPagination,
@@ -36,6 +37,7 @@ export {
   useFilterDisplay,
   useContentListFilters,
   useTagFilterToggle,
+  useFilterMetadata,
   useContentListUserFilter,
   useUserFilterToggle,
   TAG_FILTER_ID,
@@ -58,6 +60,9 @@ export type { ContentListItem, ContentListItemConfig } from './src/item';
 export type {
   ContentListFeatures,
   ContentListSupports,
+  FilterFacet,
+  FilterMetadataParams,
+  FilterFeatureConfig,
   SortField,
   SortOption,
   SortingConfig,
@@ -89,4 +94,4 @@ export type {
 } from './src/datasource';
 
 // Utilities.
-export { contentListKeys } from './src/query';
+export { contentListKeys, contentListQueryClient } from './src/query';

@@ -9,7 +9,7 @@
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { FindItemsParams } from '@kbn/content-list-provider';
-import { createFindItemsFn } from './strategy';
+import { createClientStrategy } from './strategy';
 import type { TableListViewFindItemsFn } from './types';
 
 /**
@@ -23,7 +23,7 @@ const createParams = (overrides?: Partial<FindItemsParams>): FindItemsParams => 
   ...overrides,
 });
 
-describe('createFindItemsFn', () => {
+describe('createClientStrategy', () => {
   const createMockItem = (id: string): UserContentCommonSchema => ({
     id,
     type: 'dashboard',
@@ -45,7 +45,7 @@ describe('createFindItemsFn', () => {
     it('calls the consumer findItems with searchQuery and signal', async () => {
       const mockItems = [createMockItem('1')];
       const mockFindItems = createMockFindItems(mockItems);
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
 
       await findItems(createParams({ searchQuery: 'test query' }));
 
@@ -56,7 +56,7 @@ describe('createFindItemsFn', () => {
     it('forwards abort signal to consumer findItems', async () => {
       const mockItems = [createMockItem('1')];
       const mockFindItems = createMockFindItems(mockItems);
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
       const controller = new AbortController();
 
       await findItems(createParams({ signal: controller.signal }));
@@ -67,7 +67,7 @@ describe('createFindItemsFn', () => {
     it('returns transformed items and total from consumer findItems', async () => {
       const mockItems = [createMockItem('1'), createMockItem('2')];
       const mockFindItems = createMockFindItems(mockItems);
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
 
       const result = await findItems(createParams());
 
@@ -93,7 +93,7 @@ describe('createFindItemsFn', () => {
 
     it('handles empty results', async () => {
       const mockFindItems = createMockFindItems([]);
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
 
       const result = await findItems(createParams());
 
@@ -103,7 +103,7 @@ describe('createFindItemsFn', () => {
 
     it('propagates errors from consumer findItems', async () => {
       const mockFindItems = jest.fn().mockRejectedValue(new Error('Network error'));
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
 
       await expect(findItems(createParams())).rejects.toThrow('Network error');
     });
@@ -125,7 +125,7 @@ describe('createFindItemsFn', () => {
         createItemWithTitle('2', 'Bravo'),
       ];
       const mockFindItems = createMockFindItems(mockItems);
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
 
       const result = await findItems(createParams({ sort: { field: 'title', direction: 'asc' } }));
 
@@ -139,7 +139,7 @@ describe('createFindItemsFn', () => {
         createItemWithTitle('2', 'Bravo'),
       ];
       const mockFindItems = createMockFindItems(mockItems);
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
 
       const result = await findItems(createParams({ sort: { field: 'id', direction: 'desc' } }));
 
@@ -160,7 +160,7 @@ describe('createFindItemsFn', () => {
         createItemWithTitle('3', 'Also has date'),
       ];
       const mockFindItems = createMockFindItems(mockItems);
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
 
       // Ascending order - nulls should be last.
       const resultAsc = await findItems(
@@ -180,7 +180,7 @@ describe('createFindItemsFn', () => {
     it('returns paginated subset of items', async () => {
       const mockItems = Array.from({ length: 10 }, (_, i) => createMockItem(String(i + 1)));
       const mockFindItems = createMockFindItems(mockItems);
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
 
       // Use sort: undefined to test pagination without sorting interference.
       const result = await findItems(
@@ -195,7 +195,7 @@ describe('createFindItemsFn', () => {
     it('returns correct page for non-zero index', async () => {
       const mockItems = Array.from({ length: 10 }, (_, i) => createMockItem(String(i + 1)));
       const mockFindItems = createMockFindItems(mockItems);
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
 
       // Use sort: undefined to test pagination without sorting interference.
       const result = await findItems(
@@ -209,7 +209,7 @@ describe('createFindItemsFn', () => {
     it('returns remaining items for last partial page', async () => {
       const mockItems = Array.from({ length: 5 }, (_, i) => createMockItem(String(i + 1)));
       const mockFindItems = createMockFindItems(mockItems);
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
 
       const result = await findItems(createParams({ page: { index: 1, size: 3 } }));
 
@@ -220,7 +220,7 @@ describe('createFindItemsFn', () => {
     it('returns empty array for out-of-bounds page', async () => {
       const mockItems = [createMockItem('1')];
       const mockFindItems = createMockFindItems(mockItems);
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
 
       const result = await findItems(createParams({ page: { index: 10, size: 20 } }));
 
@@ -236,7 +236,7 @@ describe('createFindItemsFn', () => {
         createMockItem('2'),
       ];
       const mockFindItems = createMockFindItems(mockItems);
-      const findItems = createFindItemsFn(mockFindItems);
+      const { findItems } = createClientStrategy({ findItems: mockFindItems });
 
       const result = await findItems(
         createParams({ sort: { field: 'id', direction: 'asc' }, page: { index: 0, size: 2 } })

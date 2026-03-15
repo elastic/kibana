@@ -8,8 +8,19 @@
  */
 
 // Feature types.
-export type { ContentListFeatures, ContentListSupports } from './types';
-export { isSortingConfig, isPaginationConfig, isSearchConfig } from './types';
+export type {
+  ContentListFeatures,
+  ContentListSupports,
+  FilterFacet,
+  FilterMetadataParams,
+  FilterFeatureConfig,
+} from './types';
+export {
+  isSortingConfig,
+  isPaginationConfig,
+  isSearchConfig,
+  isFilterFeatureConfig,
+} from './types';
 
 // Sorting feature.
 export type { SortField, SortOption, SortingConfig, UseContentListSortReturn } from './sorting';
@@ -39,6 +50,7 @@ export {
   useFilterDisplay,
   useContentListFilters,
   useTagFilterToggle,
+  useFilterMetadata,
   useContentListUserFilter,
   useUserFilterToggle,
   TAG_FILTER_ID,

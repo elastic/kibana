@@ -7,12 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, createContext, useContext, type ReactNode } from 'react';
+import React, { useMemo, useCallback, createContext, useContext, type ReactNode } from 'react';
 import { ContentManagementTagsProvider } from '@kbn/content-management-tags';
 import { FavoritesContextProvider } from '@kbn/content-management-favorites-public';
-import { UserProfilesProvider } from '@kbn/content-management-user-profiles';
+import {
+  UserProfilesProvider,
+  userProfileKeys,
+  createBatcher,
+} from '@kbn/content-management-user-profiles';
 import type { ContentListCoreConfig, ContentListConfig, ContentListServices } from './types';
-import type { ContentListFeatures, ContentListSupports } from '../features';
+import {
+  isFilterFeatureConfig,
+  type ContentListFeatures,
+  type ContentListSupports,
+  type FilterFeatureConfig,
+} from '../features';
 import type { DataSourceConfig } from '../datasource';
 import { ContentListStateProvider } from '../state';
 import { QueryClientProvider, contentListQueryClient } from '../query';
@@ -96,28 +105,58 @@ export const ContentListProvider = ({
     userProfile: userProfileService,
   } = services ?? {};
 
-  // Service-dependent features: enabled by default when service exists, unless explicitly disabled.
-  const supportsTags = features.tags !== false && !!tagsService;
-  const supportsStarred = features.starred !== false && !!favoritesService;
-  const supportsCreatedBy = features.createdBy !== false && !!userProfileService;
+  // Auto-build a `FilterFeatureConfig` for tags when `tagsService.getTagList` is
+  // available but the consumer did not provide an explicit config. This returns
+  // tag facets without counts (the client provider overrides this with a
+  // count-aware version). Without this, `TagFilterRenderer` — which now reads
+  // exclusively from `useFilterMetadata` — would render an empty popover.
+  const effectiveFeatures: ContentListFeatures = useMemo(() => {
+    if (
+      features.tags === false ||
+      isFilterFeatureConfig(features.tags) ||
+      !tagsService?.getTagList
+    ) {
+      return features;
+    }
+    const { getTagList } = tagsService;
+    const tagConfig: FilterFeatureConfig = {
+      getMetadata: async () =>
+        getTagList().map((tag) => ({
+          key: tag.id ?? tag.name,
+          label: tag.name,
+          data: { color: tag.color, description: tag.description },
+        })),
+    };
+    return { ...features, tags: tagConfig };
+  }, [features, tagsService]);
+
+  // Service-dependent features: enabled when the service exists (and not explicitly
+  // disabled) OR when a `FilterFeatureConfig` is provided directly.
+  const supportsTags =
+    effectiveFeatures.tags !== false &&
+    (!!tagsService || isFilterFeatureConfig(effectiveFeatures.tags));
+  const supportsStarred = effectiveFeatures.starred !== false && !!favoritesService;
+  const supportsCreatedBy =
+    effectiveFeatures.createdBy !== false &&
+    (!!userProfileService || isFilterFeatureConfig(effectiveFeatures.createdBy));
 
   // Resolve feature support flags.
   // Selection is disabled when explicitly set to `false` or when the list is read-only.
   const supports: ContentListSupports = useMemo(
     () => ({
-      sorting: features.sorting !== false,
-      pagination: features.pagination !== false,
-      search: features.search !== false,
-      selection: features.selection !== false && !isReadOnly,
+      sorting: effectiveFeatures.sorting !== false,
+      pagination: effectiveFeatures.pagination !== false,
+      search: effectiveFeatures.search !== false,
+      selection: effectiveFeatures.selection !== false && !isReadOnly,
       tags: supportsTags,
       starred: supportsStarred,
       createdBy: supportsCreatedBy,
     }),
     [
-      features.sorting,
-      features.pagination,
-      features.search,
-      features.selection,
+      effectiveFeatures.sorting,
+      effectiveFeatures.pagination,
+      effectiveFeatures.search,
+      effectiveFeatures.selection,
       isReadOnly,
       supportsTags,
       supportsStarred,
@@ -134,11 +173,57 @@ export const ContentListProvider = ({
       id,
       queryKeyScope,
       dataSource,
-      features,
+      features: effectiveFeatures,
       supports,
       services,
     }),
-    [labels, item, isReadOnly, id, queryKeyScope, dataSource, features, supports, services]
+    [labels, item, isReadOnly, id, queryKeyScope, dataSource, effectiveFeatures, supports, services]
+  );
+
+  // Cross-seeding wrappers: every bulk or suggest profile fetch also seeds
+  // per-UID cache entries so avatar cells, popovers, and suggest results
+  // share a single React Query cache keyed by `['user-profile', uid]`.
+  const crossSeedingBulkGet = useCallback(
+    async (uids: string[]) => {
+      if (!userProfileService) {
+        return [];
+      }
+      const profiles = await userProfileService.bulkGetUserProfiles(uids);
+      for (const profile of profiles) {
+        contentListQueryClient.setQueryData(userProfileKeys.get(profile.uid), profile);
+      }
+      return profiles;
+    },
+    [userProfileService]
+  );
+
+  const crossSeedingSuggest = useMemo(() => {
+    const original = userProfileService?.suggestUserProfiles;
+    if (!original) {
+      return undefined;
+    }
+    return async (name: string) => {
+      const profiles = await original(name);
+      for (const profile of profiles) {
+        contentListQueryClient.setQueryData(userProfileKeys.get(profile.uid), profile);
+      }
+      return profiles;
+    };
+  }, [userProfileService]);
+
+  const batchedGetUserProfile = useMemo(
+    () =>
+      createBatcher({
+        fetcher: crossSeedingBulkGet,
+        resolver: (users, uid) => {
+          const profile = users.find((u) => u.uid === uid);
+          if (!profile) {
+            throw new Error(`User profile not found for UID: ${uid}`);
+          }
+          return profile;
+        },
+      }).fetch,
+    [crossSeedingBulkGet]
   );
 
   // Build provider tree conditionally based on service availability.
@@ -170,11 +255,13 @@ export const ContentListProvider = ({
   }
 
   // Wrap with user profiles provider when user profile service is available.
+  // Uses cross-seeding wrappers so all profile fetches populate the per-UID cache.
   if (supportsCreatedBy && userProfileService) {
     content = (
       <UserProfilesProvider
-        getUserProfile={userProfileService.getUserProfile}
-        bulkGetUserProfiles={userProfileService.bulkGetUserProfiles}
+        getUserProfile={batchedGetUserProfile}
+        bulkGetUserProfiles={crossSeedingBulkGet}
+        suggestUserProfiles={crossSeedingSuggest}
       >
         {content}
       </UserProfilesProvider>

@@ -7,20 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme, type Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  MANAGED_USER_FILTER,
-  NO_CREATOR_USER_FILTER,
-  useContentListItems,
-  CREATED_BY_FILTER_ID,
-} from '@kbn/content-list-provider';
+import { MANAGED_USER_FILTER, NO_CREATOR_USER_FILTER } from '@kbn/content-list-provider';
 import {
   UserAvatarTip,
   ManagedAvatarTip,
   NoCreatorTip,
 } from '@kbn/content-management-user-profiles';
+import { MANAGED_QUERY_VALUE, NO_CREATOR_QUERY_VALUE } from '@kbn/content-list-provider';
 import {
   SelectableFilterPopover,
   StandardFilterOption,
@@ -28,7 +24,6 @@ import {
 } from '../selectable_filter_popover';
 import { useCreatorProfiles } from './use_creator_profiles';
 import { useCreatedByQueryResolver } from './use_created_by_query_resolver';
-import { MANAGED_QUERY_VALUE, NO_CREATOR_QUERY_VALUE } from './constants';
 
 const i18nText = {
   title: i18n.translate('contentManagement.contentList.createdByFilter.title', {
@@ -39,9 +34,6 @@ const i18nText = {
   }),
   managedLabel: i18n.translate('contentManagement.contentList.createdByFilter.managed', {
     defaultMessage: 'Managed',
-  }),
-  loadingLabel: i18n.translate('contentManagement.contentList.createdByFilter.loading', {
-    defaultMessage: 'Loading…',
   }),
 };
 
@@ -67,11 +59,10 @@ interface CreatorOptionData {
  *
  * Delegates to {@link SelectableFilterPopover} with `fieldName="createdBy"`,
  * gaining include/exclude via modifier key, selection count, clear link,
- * and consistent layout for free.
+ * and consistent layout for free. The built-in `EuiSelectable` search box
+ * is used for filtering the option list.
  *
- * Query → `filters.user` sync is handled by {@link useCreatedByQueryResolver}.
- *
- * Phase 2 adds a search input powered by `useSuggestUserProfiles`.
+ * Query -> `filters.user` sync is handled by {@link useCreatedByQueryResolver}.
  */
 export const CreatedByRenderer = ({
   query,
@@ -79,56 +70,47 @@ export const CreatedByRenderer = ({
   'data-test-subj': dataTestSubj = 'contentListCreatedByFilter',
 }: CreatedByRendererProps) => {
   const { euiTheme } = useEuiTheme();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const { allCreators, resolvedCreators, isReady, emailToUid } = useCreatorProfiles();
+  const { facets, isLoading, isReady, emailToUid } = useCreatorProfiles(isPopoverOpen);
 
   useCreatedByQueryResolver(query, emailToUid, isReady);
 
-  const { counts } = useContentListItems();
-  const creatorCounts = counts?.[CREATED_BY_FILTER_ID];
-
-  // Only build interactive options once profiles have resolved. While
-  // loading, pass an empty list and `isLoading` to the popover so the
-  // user cannot select placeholder entries that produce unresolvable
-  // query values. Sentinel options (managed, no-creator) are safe to
-  // show immediately since their query values are statically known.
+  // Build options from facets provided by `getMetadata`.
   const options = useMemo((): Array<SelectableFilterOption<CreatorOptionData>> => {
-    const result: Array<SelectableFilterOption<CreatorOptionData>> = [];
-
-    if (allCreators.hasManaged) {
-      result.push({
-        key: MANAGED_USER_FILTER,
-        label: i18nText.managedLabel,
-        value: MANAGED_QUERY_VALUE,
-        count: creatorCounts?.[MANAGED_USER_FILTER],
-        data: { uid: MANAGED_USER_FILTER, kind: 'managed' },
-      });
+    if (!facets) {
+      return [];
     }
-
-    if (resolvedCreators) {
-      for (const { uid, user } of resolvedCreators) {
-        result.push({
-          key: uid,
-          label: user.full_name ?? user.username,
-          value: user.email ?? user.username,
-          count: creatorCounts?.[uid],
-          data: { uid, kind: 'user' },
-        });
+    return facets.map((facet) => {
+      const kind = facet.data?.kind as string | undefined;
+      if (kind === 'managed') {
+        return {
+          key: MANAGED_USER_FILTER,
+          label: i18nText.managedLabel,
+          value: MANAGED_QUERY_VALUE,
+          count: facet.count,
+          data: { uid: MANAGED_USER_FILTER, kind: 'managed' as const },
+        };
       }
-    }
-
-    if (allCreators.hasNoCreator) {
-      result.push({
-        key: NO_CREATOR_USER_FILTER,
-        label: i18nText.noCreatorLabel,
-        value: NO_CREATOR_QUERY_VALUE,
-        count: creatorCounts?.[NO_CREATOR_USER_FILTER],
-        data: { uid: NO_CREATOR_USER_FILTER, kind: 'no_creator' },
-      });
-    }
-
-    return result;
-  }, [allCreators, resolvedCreators, creatorCounts]);
+      if (kind === 'no_creator') {
+        return {
+          key: NO_CREATOR_USER_FILTER,
+          label: i18nText.noCreatorLabel,
+          value: NO_CREATOR_QUERY_VALUE,
+          count: facet.count,
+          data: { uid: NO_CREATOR_USER_FILTER, kind: 'no_creator' as const },
+        };
+      }
+      const user = facet.data?.user as { email?: string; username: string } | undefined;
+      return {
+        key: facet.key,
+        label: facet.label,
+        value: user?.email ?? user?.username ?? facet.label,
+        count: facet.count,
+        data: { uid: facet.key, kind: 'user' as const },
+      };
+    });
+  }, [facets]);
 
   const renderOption = useCallback(
     (
@@ -161,14 +143,19 @@ export const CreatedByRenderer = ({
     []
   );
 
+  const onPopoverToggle = useCallback((open: boolean) => {
+    setIsPopoverOpen(open);
+  }, []);
+
   return (
     <SelectableFilterPopover<CreatorOptionData>
       fieldName="createdBy"
       title={i18nText.title}
-      isLoading={allCreators.uids.length > 0 && !resolvedCreators}
+      isLoading={isLoading}
       {...{ query, onChange, options, renderOption }}
       panelWidth={euiTheme.base * 20}
       data-test-subj={dataTestSubj}
+      onToggle={onPopoverToggle}
     />
   );
 };

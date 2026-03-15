@@ -21,4 +21,12 @@ export interface UserProfileService {
   getUserProfile: (uid: string) => Promise<UserProfile>;
   /** Fetch multiple user profiles by UIDs. */
   bulkGetUserProfiles: (uids: string[]) => Promise<UserProfile[]>;
+  /**
+   * Search for user profiles by name, email, or username.
+   *
+   * Optional because basic/OSS deployments may not have the suggest API.
+   * When absent, the filter popover has no search input and the query bar
+   * only resolves exact email/username matches from already-fetched profiles.
+   */
+  suggestUserProfiles?: (name: string) => Promise<UserProfile[]>;
 }
