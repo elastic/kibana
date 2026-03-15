@@ -155,7 +155,8 @@ export const serviceDetailRoute = {
             defaultMessage: 'Overview',
           }),
           searchBarOptions: {
-            hidden: true,
+            showTimeComparison: true,
+            showTransactionTypeSelector: true,
           },
         }),
         params: t.partial({
@@ -328,7 +329,7 @@ export const serviceDetailRoute = {
         }),
         element: <ServiceMapServiceDetail />,
         searchBarOptions: {
-          hidden: true,
+          showTimeComparison: true,
         },
       }),
       '/services/{serviceName}/logs': page({

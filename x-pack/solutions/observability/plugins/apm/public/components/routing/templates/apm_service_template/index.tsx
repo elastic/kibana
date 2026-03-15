@@ -142,43 +142,36 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
     <ServiceSloContextProvider serviceName={serviceName} environment={environment}>
       <ApmMainTemplate
         showActionsMenu
+        searchBar={<SearchBar {...searchBarOptions} showEnvironmentFilter />}
         pageHeader={{
           tabs,
+          rightSideItems: [<AnalyzeDataButton />],
           pageTitle: (
-            <>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="l">
-                        <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <ServiceIcons
-                        serviceName={serviceName}
-                        environment={environment}
-                        start={start}
-                        end={end}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <AnalyzeDataButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <ServiceHeaderBadges
-                serviceName={serviceName}
-                environment={environment}
-                start={start}
-                end={end}
-                onSloClick={openSloOverviewFlyout}
-                alertsTabHref={alertsTabHref}
-              />
-            </>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ServiceIcons
+                  serviceName={serviceName}
+                  environment={environment}
+                  start={start}
+                  end={end}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          children: (
+            <ServiceHeaderBadges
+              serviceName={serviceName}
+              environment={environment}
+              start={start}
+              end={end}
+              onSloClick={openSloOverviewFlyout}
+              alertsTabHref={alertsTabHref}
+            />
           ),
         }}
       >
@@ -190,12 +183,9 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <>
-            <SearchBar {...searchBarOptions} />
-            <ServiceAnomalyTimeseriesContextProvider>
-              {children}
-            </ServiceAnomalyTimeseriesContextProvider>
-          </>
+          <ServiceAnomalyTimeseriesContextProvider>
+            {children}
+          </ServiceAnomalyTimeseriesContextProvider>
         )}
         {sloOverviewFlyout && (
           <SloOverviewFlyout

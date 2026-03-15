@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { EuiSuperUpdateButtonProps } from '@elastic/eui';
 import { EuiSuperDatePicker } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import type { MutableRefObject } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { clearCache } from '../../../services/rest/call_api';
 import { fromQuery, isInactiveHistoryError, toQuery } from '../links/url_helpers';
 import type { TimePickerQuickRange } from './typings';
@@ -20,16 +23,27 @@ export function DatePicker({
   refreshPaused,
   refreshInterval,
   onTimeRangeRefresh,
+  compressed,
+  pendingKuery,
+  submitActionRef,
+  updateButtonProps,
 }: {
   rangeFrom?: string;
   rangeTo?: string;
   refreshPaused?: boolean;
   refreshInterval?: number;
   onTimeRangeRefresh: () => void;
+  compressed?: boolean;
+  pendingKuery?: string;
+  submitActionRef?: MutableRefObject<(() => void) | undefined>;
+  updateButtonProps?: EuiSuperUpdateButtonProps & { needsUpdate?: boolean };
 }) {
   const history = useHistory();
   const location = useLocation();
   const { core, plugins } = useApmPluginContext();
+  const { isXSmall, isSmall } = useBreakpoints();
+
+  const isMobile = isXSmall || isSmall;
 
   const timePickerQuickRanges =
     core?.uiSettings?.get<TimePickerQuickRange[]>(UI_SETTINGS.TIMEPICKER_QUICK_RANGES) ?? [];
@@ -45,6 +59,7 @@ export function DatePicker({
     rangeTo?: string;
     refreshPaused?: boolean;
     refreshInterval?: number;
+    kuery?: string;
   }) {
     try {
       history.push({
@@ -75,8 +90,25 @@ export function DatePicker({
   }
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
-    updateUrl({ rangeFrom: start, rangeTo: end });
+    updateUrl({
+      rangeFrom: start,
+      rangeTo: end,
+      ...(pendingKuery !== undefined && { kuery: pendingKuery }),
+    });
   }
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const clickSubmitButton = useCallback(() => {
+    wrapperRef.current
+      ?.querySelector<HTMLButtonElement>('[data-test-subj="querySubmitButton"]')
+      ?.click();
+  }, []);
+
+  useEffect(() => {
+    if (submitActionRef) {
+      submitActionRef.current = clickSubmitButton;
+    }
+  }, [submitActionRef, clickSubmitButton]);
 
   useEffect(() => {
     // set time if both to and from are given in the url
@@ -90,22 +122,32 @@ export function DatePicker({
   }, [rangeFrom, rangeTo, plugins]);
 
   return (
-    <EuiSuperDatePicker
-      start={rangeFrom}
-      end={rangeTo}
-      isPaused={refreshPaused}
-      refreshInterval={refreshInterval}
-      onTimeChange={onTimeChange}
-      onRefresh={() => {
-        clearCache();
-        onTimeRangeRefresh();
-      }}
-      onRefreshChange={({ isPaused: nextRefreshPaused, refreshInterval: nextRefreshInterval }) => {
-        onRefreshChange({ nextRefreshPaused, nextRefreshInterval });
-      }}
-      showUpdateButton={true}
-      commonlyUsedRanges={commonlyUsedRanges}
-      width={'auto'}
-    />
+    <div ref={wrapperRef}>
+      <EuiSuperDatePicker
+        compressed={compressed}
+        start={rangeFrom}
+        end={rangeTo}
+        isPaused={refreshPaused}
+        refreshInterval={refreshInterval}
+        onTimeChange={onTimeChange}
+        onRefresh={() => {
+          if (pendingKuery !== undefined) {
+            updateUrl({ kuery: pendingKuery });
+          }
+          clearCache();
+          onTimeRangeRefresh();
+        }}
+        onRefreshChange={({
+          isPaused: nextRefreshPaused,
+          refreshInterval: nextRefreshInterval,
+        }) => {
+          onRefreshChange({ nextRefreshPaused, nextRefreshInterval });
+        }}
+        showUpdateButton={true}
+        updateButtonProps={updateButtonProps}
+        commonlyUsedRanges={commonlyUsedRanges}
+        width={isMobile ? 'full' : 'auto'}
+      />
+    </div>
   );
 }
