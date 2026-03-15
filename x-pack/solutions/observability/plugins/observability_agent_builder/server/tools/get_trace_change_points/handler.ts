@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
 import type { ChangePointType } from '@kbn/es-types/src';
 import { intervalToSeconds } from '@kbn/apm-data-access-plugin/common/utils/get_preferred_bucket_size_and_data_source';
 import type {
@@ -21,9 +22,12 @@ import {
   type LatencyAggregationType,
   type DocumentType,
   getLatencyAggregation,
+  getSpanLatencyAggregation,
   getLatencyValue,
+  type AggregationLatency,
   getFailureRateAggregation,
   getThroughputAggregation,
+  getSpanThroughputAggregation,
 } from '../../utils/trace_metrics_aggregations';
 
 interface Bucket {
@@ -59,7 +63,7 @@ function getChangePointsAggs(bucketsPath: string) {
   return changePointAggs;
 }
 
-export async function getToolHandler({
+export async function getTraceChangePoints({
   core,
   plugins,
   request,
@@ -82,7 +86,7 @@ export async function getToolHandler({
   kqlFilter?: string;
   groupBy: string;
   latencyType: LatencyAggregationType | undefined;
-}): Promise<BucketChangePoints[]> {
+}) {
   const { apmEventClient, apmDataAccessServices } = await buildApmResources({
     core,
     plugins,
@@ -92,16 +96,17 @@ export async function getToolHandler({
 
   const startMs = parseDatemath(start);
   const endMs = parseDatemath(end);
-  const source = await getPreferredDocumentSource({
-    apmDataAccessServices,
-    start: startMs,
-    end: endMs,
-    groupBy,
-    kqlFilter,
-  });
 
-  const { rollupInterval, hasDurationSummaryField } = source;
-  const documentType = source.documentType as DocumentType;
+  const { documentType, rollupInterval, hasDurationSummaryField } =
+    await getPreferredDocumentSource({
+      apmEventClient,
+      apmDataAccessServices,
+      start: startMs,
+      end: endMs,
+      groupBy,
+      kqlFilter,
+    });
+
   const bucketSizeInSeconds = intervalToSeconds(rollupInterval);
 
   const response = await apmEventClient.search('get_trace_change_points', {
@@ -133,13 +138,17 @@ export async function getToolHandler({
               fixed_interval: `${bucketSizeInSeconds}s`,
             },
             aggs: {
-              ...getLatencyAggregation({
-                latencyAggregationType: latencyType,
-                hasDurationSummaryField,
-                documentType,
-              }),
+              ...(documentType === ApmDocumentType.ServiceDestinationMetric
+                ? getSpanLatencyAggregation()
+                : getLatencyAggregation({
+                    latencyAggregationType: latencyType,
+                    hasDurationSummaryField,
+                    documentType: documentType as DocumentType,
+                  })),
               ...getFailureRateAggregation(documentType),
-              ...getThroughputAggregation(bucketSizeInSeconds / 60),
+              ...(documentType === ApmDocumentType.ServiceDestinationMetric
+                ? getSpanThroughputAggregation(bucketSizeInSeconds / 60)
+                : getThroughputAggregation(bucketSizeInSeconds / 60)),
             },
           },
           changes_latency: getChangePointsAggs('time_series>latency'),
@@ -149,8 +158,44 @@ export async function getToolHandler({
       },
     },
   });
+  return response.aggregations?.groups?.buckets ?? [];
+}
 
-  const buckets = response.aggregations?.groups?.buckets ?? [];
+export async function getToolHandler({
+  core,
+  plugins,
+  request,
+  logger,
+  start,
+  end,
+  kqlFilter,
+  groupBy,
+  latencyType = 'avg',
+}: {
+  core: CoreSetup<
+    ObservabilityAgentBuilderPluginStartDependencies,
+    ObservabilityAgentBuilderPluginStart
+  >;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
+  request: KibanaRequest;
+  logger: Logger;
+  start: string;
+  end: string;
+  kqlFilter?: string;
+  groupBy: string;
+  latencyType: LatencyAggregationType | undefined;
+}): Promise<BucketChangePoints[]> {
+  const buckets = await getTraceChangePoints({
+    core,
+    plugins,
+    request,
+    logger,
+    start,
+    end,
+    kqlFilter,
+    groupBy,
+    latencyType,
+  });
 
   const changePoints = buckets.map((bucket) => {
     const timeSeries = bucket.time_series.buckets.map((tsBucket) => {
@@ -158,7 +203,7 @@ export async function getToolHandler({
         group: bucket.key as string,
         latency: getLatencyValue({
           latencyAggregationType: latencyType,
-          aggregation: tsBucket.latency,
+          aggregation: tsBucket.latency as AggregationLatency,
         }),
         throughput: tsBucket.throughput.value,
         failure_rate: tsBucket.failure_rate ? tsBucket.failure_rate.value : null,

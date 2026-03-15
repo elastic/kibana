@@ -90,7 +90,7 @@ export async function getDocumentSources({
   ];
 }
 
-const getDocumentTypesInfo = async ({
+export const getDocumentTypesInfo = async ({
   apmEventClient,
   start,
   end,

@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import expect from '@kbn/expect';
 import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { generateApmErrorData, indexAll, type ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import {
+  generateApmErrorData,
+  indexAll,
+  type ApmSynthtraceEsClient,
+  generateTraceChangePointsData,
+} from '@kbn/synthtrace';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { timerange } from '@kbn/synthtrace-client';
@@ -17,12 +23,12 @@ import { setupLlmProxy, teardownLlmProxy } from '../utils/llm_proxy/llm_test_hel
 import { createRule, deleteRules } from '../utils/alerts/alerting_rules';
 
 const MOCKED_AI_SUMMARY = 'This is a mocked AI insight summary for the alert.';
-
+const ENVIRONMENT = 'production';
 const alertRuleData = {
   ruleTypeId: ApmRuleType.TransactionErrorRate,
   indexName: APM_ALERTS_INDEX,
   consumer: 'apm',
-  environment: 'production',
+  environment: ENVIRONMENT,
   threshold: 1,
   windowSize: 1,
   windowUnit: 'h',
@@ -61,7 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             range: timerange('now-15m', 'now'),
             apmEsClient: apmSynthtraceEsClient,
             serviceName: 'test-service',
-            environment: 'production',
+            environment: ENVIRONMENT,
             language: 'go',
           })
         );
@@ -100,6 +106,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         alertId = alertDoc._id as string;
         alertIndexName = alertDoc._index as string;
 
+        const alertStartValue = (alertDoc._source as Record<string, unknown>)['kibana.alert.start'];
+
+        const alertStart = moment(alertStartValue!).toISOString();
+
+        const start = moment(alertStart)
+          .clone()
+          .subtract(6 * 60, 'minutes')
+          .toISOString();
+
+        const end = alertStart;
+
+        const { client, generator } = generateTraceChangePointsData({
+          apmEsClient: apmSynthtraceEsClient,
+          range: timerange(start, end),
+          changeWindow: {
+            start: moment(alertStart).subtract(45, 'minutes').toISOString(),
+            end: moment(alertStart).subtract(15, 'minutes').toISOString(),
+          },
+          environment: ENVIRONMENT,
+        });
+        await client.index(generator);
+
         ({ llmProxy, connectorId } = await setupLlmProxy(getService));
       });
 
@@ -114,9 +142,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           consumer: 'apm',
         });
         await deleteRules({ getService, roleAuthc, internalReqHeader });
-
         await kibanaServer.savedObjects.cleanStandardList();
         await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await apmSynthtraceEsClient.clean();
       });
 
       it('returns summary and context for a valid alert', async () => {
@@ -135,6 +163,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(body).to.have.property('summary');
         expect(body).to.have.property('context');
         expect(body.summary).to.be(MOCKED_AI_SUMMARY);
+      });
+
+      it('includes apmServiceChangePoints data', async () => {
+        llmProxy.clear();
+
+        void llmProxy.interceptors.userMessage({
+          response: MOCKED_AI_SUMMARY,
+        });
+
+        const { status, body } = await observabilityAgentBuilderApi.editor({
+          endpoint: 'POST /internal/observability_agent_builder/ai_insights/alert',
+          params: { body: { alertId } },
+        });
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        expect(status).to.be(200);
+        expect(body.context).to.be.a('string');
+
+        expect(body.context).to.contain('</apmServiceChangePoints>');
       });
 
       it('returns context with APM data when service.name is present', async () => {

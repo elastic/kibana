@@ -51,22 +51,31 @@ export const TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW = {
 
 export function generateTraceChangePointsData({
   range,
+  changeWindow = {
+    start: TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW.start,
+    end: TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW.end,
+  },
+  environment = 'test',
+  transactionType = 'request',
   apmEsClient,
 }: {
   range?: Timerange;
+  changeWindow?: { start: string; end: string };
+  environment?: string;
+  transactionType?: string;
   apmEsClient: ApmSynthtraceEsClient;
 }): ScenarioReturnType<ApmFields> {
   const effectiveRange =
     range ??
     timerange(TRACE_CHANGE_POINTS_ANALYSIS_WINDOW.start, TRACE_CHANGE_POINTS_ANALYSIS_WINDOW.end);
 
-  const spikeStart = datemath.parse(TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW.start)!.valueOf();
-  const spikeEnd = datemath.parse(TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW.end)!.valueOf();
+  const spikeStart = datemath.parse(changeWindow.start)!.valueOf();
+  const spikeEnd = datemath.parse(changeWindow.end)!.valueOf();
 
   const instance = apm
     .service({
       name: TRACE_CHANGE_POINTS_SERVICE_NAME,
-      environment: 'test',
+      environment,
       agentName: 'test-agent',
     })
     .instance('instance-test');
@@ -86,7 +95,7 @@ export function generateTraceChangePointsData({
       for (let i = 0; i < 25; i++) {
         traces.push(
           instance
-            .transaction({ transactionName })
+            .transaction({ transactionName, transactionType })
             .timestamp(timestamp)
             .duration(txDurationUs)
             .children(

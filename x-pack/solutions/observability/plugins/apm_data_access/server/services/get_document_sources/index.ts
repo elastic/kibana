@@ -5,7 +5,11 @@
  * 2.0.
  */
 import type { ApmDataAccessServicesParams } from '../get_services';
-import { getDocumentSources, type DocumentSourcesRequest } from './get_document_sources';
+import {
+  getDocumentSources,
+  type DocumentSourcesRequest,
+  getDocumentTypesInfo,
+} from './get_document_sources';
 
 export function createGetDocumentSources({ apmEventClient }: ApmDataAccessServicesParams) {
   return async ({ end, kuery, start }: Omit<DocumentSourcesRequest, 'apmEventClient'>) => {
@@ -18,4 +22,4 @@ export function createGetDocumentSources({ apmEventClient }: ApmDataAccessServic
   };
 }
 
-export { getDocumentSources, type DocumentSourcesRequest };
+export { getDocumentSources, type DocumentSourcesRequest, getDocumentTypesInfo };
