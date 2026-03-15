@@ -192,6 +192,8 @@ describe('chat_message_text', () => {
     useConversationContextMock.mockReturnValue({
       isEmbeddedContext: false,
       browserApiTools: undefined,
+      showAnonymized: false,
+      setShowAnonymized: jest.fn(),
       conversationActions: {
         removeNewConversationQuery: jest.fn(),
         invalidateConversation: jest.fn(),
@@ -510,7 +512,7 @@ Area Chart
       expect(callArgs).toContainEqual(expect.objectContaining({ preferredChartType: 'Area' }));
     });
 
-    it('enables replacements lookup when replacements_id is present', () => {
+    it('enables replacements lookup when replacements_id is present and showAnonymized is false (default)', () => {
       render(<ChatMessageText content="response" steps={[]} replacementsId="repl-1" />);
 
       expect(
@@ -545,7 +547,7 @@ Area Chart
       ).toBe(true);
     });
 
-    it('holds streaming content while replacements are loading when enabled', () => {
+    it('holds streaming content while replacements are loading when showAnonymized is false (default)', () => {
       useResolveAnonymizedValuesMock.mockReturnValueOnce({
         tokenToOriginalMap: {},
         resolveText: (value: string) => value,

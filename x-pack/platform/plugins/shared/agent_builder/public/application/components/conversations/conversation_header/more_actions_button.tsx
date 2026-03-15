@@ -28,8 +28,11 @@ import {
   useHasActiveConversation,
   useAgentId,
   useHasPersistedConversation,
+  useConversation,
 } from '../../../hooks/use_conversation';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
 import { DeleteConversationModal } from '../delete_conversation_modal';
@@ -90,6 +93,12 @@ const fullscreenLabels = {
   genAiSettings: i18n.translate('xpack.agentBuilder.conversationActions.genAiSettings', {
     defaultMessage: 'GenAI Settings',
   }),
+  showAnonymized: i18n.translate('xpack.agentBuilder.conversationActions.showAnonymized', {
+    defaultMessage: 'Show anonymized',
+  }),
+  showOriginalValues: i18n.translate('xpack.agentBuilder.conversationActions.showOriginalValues', {
+    defaultMessage: 'Show original values',
+  }),
   externalLinkAriaLabel: i18n.translate(
     'xpack.agentBuilder.conversationActions.externalLinkAriaLabel',
     {
@@ -141,6 +150,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const isDataSourcesEnabled = uiSettings.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID, false);
+  const { showAnonymized, setShowAnonymized } = useConversationContext();
+  const { conversation } = useConversation();
+  const { accessChecker } = useAgentBuilderServices();
+  const anonymizationEnabled = accessChecker.getAccess().hasAnonymizationEnabled;
+  const showAnonymizationToggle = anonymizationEnabled && Boolean(conversation?.replacementsId);
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -217,7 +231,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     />,
     <EuiContextMenuItem
       key="agents"
-      icon={<EuiIcon type="productAgent" />}
+      icon={<EuiIcon type="productAgent" aria-hidden={true} />}
       onClick={closePopover}
       href={createAgentBuilderUrl(appPaths.agents.list)}
       data-test-subj="agentBuilderActionsAgents"
@@ -268,6 +282,22 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
           </EuiContextMenuItem>,
         ]
       : []),
+    ...(showAnonymizationToggle
+      ? [
+          <EuiContextMenuItem
+            key="anonymizationToggle"
+            icon={showAnonymized ? 'eye' : 'eyeClosed'}
+            size="s"
+            data-test-subj="agentBuilderAnonymizationToggle"
+            onClick={() => {
+              setShowAnonymized(!showAnonymized);
+              closePopover();
+            }}
+          >
+            {showAnonymized ? fullscreenLabels.showOriginalValues : fullscreenLabels.showAnonymized}
+          </EuiContextMenuItem>,
+        ]
+      : []),
     ...(hasAccessToGenAiSettings
       ? [
           <EuiContextMenuItem
@@ -305,6 +335,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
         closePopover={closePopover}
         panelPaddingSize="xs"
         anchorPosition="downCenter"
+        aria-label={fullscreenLabels.actionsAriaLabel}
         panelProps={{
           css: popoverMinWidthStyles,
         }}

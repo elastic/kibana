@@ -56,6 +56,7 @@ interface Props {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  showAnonymized?: boolean;
 }
 
 /**
@@ -71,6 +72,7 @@ export function ChatMessageText({
   conversationAttachments,
   attachmentRefs,
   conversationId,
+  showAnonymized = false,
 }: Props) {
   const { euiTheme } = useEuiTheme();
 
@@ -104,6 +106,7 @@ export function ChatMessageText({
     replacementsId,
     holdContentWhileResolvingReplacements,
     holdContentMaxMs,
+    showAnonymized,
   });
 
   const handleLinkClick = useCallback(
