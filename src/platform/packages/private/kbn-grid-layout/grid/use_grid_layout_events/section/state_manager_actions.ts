@@ -206,7 +206,7 @@ export const moveAction = (
     targetSection: targetSectionId,
     translate: {
       top: currentPointer.clientY - startingPointer.clientY,
-      left: currentPointer.clientX - startingPointer.clientX,
+      left: 0, // since section dragging is only allowed vertically, we don't update the left position
     },
   });
 };
