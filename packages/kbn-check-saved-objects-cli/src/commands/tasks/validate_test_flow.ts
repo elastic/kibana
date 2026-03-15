@@ -8,29 +8,27 @@
  */
 
 import type { ListrTask } from 'listr2';
-import { takeSnapshot } from '../../snapshots';
 import type { Task, TaskContext } from '../types';
-import { TEST_TYPES_V1 } from './types';
+import { TEST_TYPES_V2, getTestSnapshots } from '../test';
+import { validateSOChanges } from './validate_so_changes';
 
-export const getTestSnapshots: Task = async (ctx, task) => {
+export const validateTestFlow: Task = (ctx, task) => {
   const subtasks: ListrTask<TaskContext>[] = [
     {
-      title: `Obtain snapshot for baseline (test mode)`,
+      title: 'Obtain type registry (test mode)',
       task: async () => {
-        ctx.from = await takeSnapshot(TEST_TYPES_V1);
-      },
-      retry: {
-        delay: 2000,
-        tries: 5,
+        ctx.registeredTypes = TEST_TYPES_V2;
       },
     },
     {
-      title: `Take snapshot of current SO type definitions`,
-      task: async () => {
-        ctx.to = await takeSnapshot(ctx.registeredTypes!);
-      },
+      title: 'Get type registry snapshots (test mode)',
+      task: getTestSnapshots,
+    },
+    {
+      title: 'Validate SO changes',
+      task: validateSOChanges,
     },
   ];
 
-  return task.newListr<TaskContext>(subtasks, { concurrent: true });
+  return task.newListr<TaskContext>(subtasks);
 };
