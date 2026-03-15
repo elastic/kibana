@@ -180,5 +180,4 @@ describe('ExitForeachNodeImpl', () => {
       expect(wfExecutionRuntimeManager.navigateToNode).not.toHaveBeenCalled();
     });
   });
-
 });
