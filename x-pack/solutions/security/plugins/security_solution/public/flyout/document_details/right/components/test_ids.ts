@@ -73,10 +73,6 @@ export const EVENT_KIND_DESCRIPTION_TEXT_TEST_ID = `${EVENT_KIND_DESCRIPTION_TES
 export const EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID =
   `${EVENT_KIND_DESCRIPTION_TEST_ID}Categories` as const;
 
-const MITRE_ATTACK_TEST_ID = `${PREFIX}MitreAttack` as const;
-export const MITRE_ATTACK_TITLE_TEST_ID = `${MITRE_ATTACK_TEST_ID}Title` as const;
-export const MITRE_ATTACK_DETAILS_TEST_ID = `${MITRE_ATTACK_TEST_ID}Details` as const;
-
 export const EVENT_RENDERER_TEST_ID = `${PREFIX}EventRenderer` as const;
 
 export const WORKFLOW_STATUS_TEST_ID = `${PREFIX}WorkflowStatus` as const;
