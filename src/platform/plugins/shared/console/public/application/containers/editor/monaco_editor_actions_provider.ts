@@ -310,6 +310,9 @@ export class MonacoEditorActionsProvider {
     } = context;
     const { toasts } = notifications;
     try {
+      // Update request state immediately so the UI can reflect progress
+      // even if parsing / sending the request is slow.
+      dispatch({ type: 'setRequestInFlight', payload: true });
       const allRequests = await this.getRequests();
       const selectedRequests = await this.getSelectedParsedRequests();
       if (selectedRequests.length) {
@@ -328,6 +331,7 @@ export class MonacoEditorActionsProvider {
               },
             })
           );
+          dispatch({ type: 'setRequestInFlight', payload: false });
           return;
         }
       }
@@ -349,14 +353,17 @@ export class MonacoEditorActionsProvider {
             defaultMessage: 'The selected request is not valid.',
           })
         );
+        dispatch({ type: 'setRequestInFlight', payload: false });
         return;
       } else if (!requests.length) {
-        toasts.add(
-          i18n.translate('console.notification.monaco.error.noRequestSelectedTitle', {
+        toasts.add({
+          title: i18n.translate('console.notification.monaco.error.noRequestSelectedTitle', {
             defaultMessage:
               'No request selected. Select a request by placing the cursor inside it.',
-          })
-        );
+          }),
+          color: 'primary',
+        });
+        dispatch({ type: 'setRequestInFlight', payload: false });
         return;
       }
 

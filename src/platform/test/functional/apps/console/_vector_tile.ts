@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header', 'home']);
   const retry = getService('retry');
   const security = getService('security');
-  const testSubjects = getService('testSubjects');
 
   describe('console vector tiles response validation', function describeIndexTests() {
     before(async () => {
@@ -34,10 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.enterText(`GET kibana_sample_data_logs/_mvt/geo.coordinates/0/0/0`);
       await PageObjects.console.clickPlay();
 
-      await retry.waitFor('console response status badge to appear', async () => {
-        return await testSubjects.exists('consoleResponseStatusBadge');
-      });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.console.waitForRequestToComplete();
 
       await retry.try(async () => {
         const actualResponse = await PageObjects.console.getOutputText();

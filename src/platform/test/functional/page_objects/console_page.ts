@@ -247,6 +247,47 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('sendRequestButton');
   }
 
+  public async waitForRequestToComplete() {
+    const hadStatusBadge = await this.testSubjects.exists('consoleResponseStatusBadge');
+    const initialStatusText = hadStatusBadge
+      ? await this.testSubjects.getVisibleText('consoleResponseStatusBadge')
+      : '';
+    const hadOutput = await this.testSubjects.exists('consoleMonacoOutput');
+    const initialOutputText = hadOutput ? await this.getOutputText() : '';
+
+    // Wait for a visual "request started" signal.
+    await this.retry.try(async () => {
+      const loadingIndicatorsVisible =
+        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+        (await this.testSubjects.exists('consoleRequestInProgressBadge'));
+      const hasStatusBadge = await this.testSubjects.exists('consoleResponseStatusBadge');
+      const currentStatusText = hasStatusBadge
+        ? await this.testSubjects.getVisibleText('consoleResponseStatusBadge')
+        : '';
+      const statusChanged = currentStatusText !== initialStatusText;
+      const hasOutput = await this.testSubjects.exists('consoleMonacoOutput');
+      const currentOutputText = hasOutput ? await this.getOutputText() : '';
+      const outputChanged = currentOutputText !== initialOutputText;
+
+      if (!loadingIndicatorsVisible && !statusChanged && !outputChanged) {
+        throw new Error('Expected console request to update the UI');
+      }
+    });
+
+    // Wait for the request to finish: loading indicators go away and output/status are present.
+    await this.retry.try(async () => {
+      const inProgress =
+        (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
+        (await this.testSubjects.exists('consoleRequestInProgressBadge'));
+      const outputReady = await this.testSubjects.exists('consoleMonacoOutput');
+      const statusReady = await this.testSubjects.exists('consoleResponseStatusBadge');
+
+      if (inProgress || !outputReady || !statusReady) {
+        throw new Error('Expected console request to finish and render output');
+      }
+    });
+  }
+
   public async isPlayButtonVisible() {
     return await this.testSubjects.exists('sendRequestButton');
   }
