@@ -7,27 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FlowBreakNode } from '@kbn/workflows/graph';
+import type { LoopBreakNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import { FlowBreakNodeImpl } from '../flow_break_node_impl';
+import { LoopBreakNodeImpl } from '../loop_break_node_impl';
 
-describe('FlowBreakNodeImpl', () => {
-  let node: FlowBreakNode;
+describe('LoopBreakNodeImpl', () => {
+  let node: LoopBreakNode;
   let stepExecutionRuntime: StepExecutionRuntime;
   let wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
   let stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
-  let underTest: FlowBreakNodeImpl;
+  let underTest: LoopBreakNodeImpl;
 
   beforeEach(() => {
     node = {
       id: 'break_step',
       stepId: 'break_step',
-      stepType: 'flow.break',
-      type: 'flow-break',
+      stepType: 'loop.break',
+      type: 'loop-break',
       loopExitNodeId: 'exitForeach_my_loop',
       loopStepId: 'my_loop',
     };
@@ -50,7 +50,7 @@ describe('FlowBreakNodeImpl', () => {
 
     stepExecutionRuntimeFactory = {} as StepExecutionRuntimeFactory;
 
-    underTest = new FlowBreakNodeImpl(
+    underTest = new LoopBreakNodeImpl(
       node,
       stepExecutionRuntime,
       wfExecutionRuntimeManager,

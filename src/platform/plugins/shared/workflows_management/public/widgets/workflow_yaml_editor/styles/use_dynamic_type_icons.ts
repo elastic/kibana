@@ -85,11 +85,11 @@ export const predefinedStepTypes = [
     displayName: 'Workflow Execute Async',
   },
   {
-    actionTypeId: 'flow.break',
+    actionTypeId: 'loop.break',
     displayName: 'Break',
   },
   {
-    actionTypeId: 'flow.continue',
+    actionTypeId: 'loop.continue',
     displayName: 'Continue',
   },
   {

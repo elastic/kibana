@@ -22,8 +22,8 @@ import type {
   ExitNormalPathNode,
   ExitRetryNode,
   ExitWhileNode,
-  FlowBreakNode,
-  FlowContinueNode,
+  LoopBreakNode,
+  LoopContinueNode,
   WaitForInputGraphNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
@@ -40,7 +40,7 @@ import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { CustomStepImpl } from './custom_step_impl';
 import { DataSetStepImpl } from './data_set_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
-import { FlowBreakNodeImpl, FlowContinueNodeImpl } from './flow_control_step';
+import { LoopBreakNodeImpl, LoopContinueNodeImpl } from './flow_control_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import {
   EnterConditionBranchNodeImpl,
@@ -195,17 +195,17 @@ export class NodesFactory {
           this.workflowRuntime,
           stepLogger
         );
-      case 'flow-break':
-        return new FlowBreakNodeImpl(
-          node as FlowBreakNode,
+      case 'loop-break':
+        return new LoopBreakNodeImpl(
+          node as LoopBreakNode,
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger,
           this.stepExecutionRuntimeFactory
         );
-      case 'flow-continue':
-        return new FlowContinueNodeImpl(
-          node as FlowContinueNode,
+      case 'loop-continue':
+        return new LoopContinueNodeImpl(
+          node as LoopContinueNode,
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger,

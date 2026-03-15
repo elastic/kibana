@@ -91,8 +91,8 @@ export function generateBuiltInStepSnippet(
         },
       };
       break;
-    case 'flow.break':
-    case 'flow.continue':
+    case 'loop.break':
+    case 'loop.continue':
       parameters = {};
       break;
     default:

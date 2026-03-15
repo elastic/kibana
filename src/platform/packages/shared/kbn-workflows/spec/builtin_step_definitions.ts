@@ -120,7 +120,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     },
   },
   {
-    id: 'flow.break',
+    id: 'loop.break',
     label: 'Break',
     description: 'Exit the enclosing loop immediately. Valid only inside a foreach or while body',
     category: StepCategory.FlowControl,
@@ -129,13 +129,13 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     documentation: {
       examples: [
         `- name: stop_on_done
-  type: flow.break
+  type: loop.break
   if: "foreach.item.status : 'done'"`,
       ],
     },
   },
   {
-    id: 'flow.continue',
+    id: 'loop.continue',
     label: 'Continue',
     description:
       'Skip remaining steps in the current iteration and advance to the next one. Valid only inside a foreach or while body',
@@ -145,7 +145,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     documentation: {
       examples: [
         `- name: skip_processed
-  type: flow.continue
+  type: loop.continue
   if: "foreach.item.processed : true"`,
       ],
     },

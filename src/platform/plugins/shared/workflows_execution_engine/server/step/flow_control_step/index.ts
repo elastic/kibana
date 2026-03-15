@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlowBreakNodeImpl } from './flow_break_node_impl';
-export { FlowContinueNodeImpl } from './flow_continue_node_impl';
+export { LoopBreakNodeImpl } from './loop_break_node_impl';
+export { LoopContinueNodeImpl } from './loop_continue_node_impl';

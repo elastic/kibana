@@ -35,7 +35,7 @@ const DEPRECATED_TYPE_ALIASES = new Set([
  * The monaco-yaml schema provider suggests them everywhere, so the
  * completion provider must strip them when the cursor is outside a loop.
  */
-const LOOP_ONLY_STEP_TYPES = new Set(['flow.break', 'flow.continue']);
+const LOOP_ONLY_STEP_TYPES = new Set(['loop.break', 'loop.continue']);
 
 /**
  * Get the deduplication key for a suggestion.

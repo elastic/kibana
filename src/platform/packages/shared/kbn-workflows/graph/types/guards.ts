@@ -21,7 +21,7 @@ import type {
   ExitConditionBranchNode,
   ExitIfNode,
 } from './nodes/branching_nodes';
-import type { FlowBreakNode, FlowContinueNode } from './nodes/flow_control_nodes';
+import type { LoopBreakNode, LoopContinueNode } from './nodes/flow_control_nodes';
 import type {
   EnterForeachNode,
   EnterWhileNode,
@@ -123,11 +123,11 @@ export const isEnterStepTimeoutZone = (node: GraphNodeUnion): node is EnterTimeo
 export const isExitStepTimeoutZone = (node: GraphNodeUnion): node is ExitTimeoutZoneNode =>
   node.type === 'exit-timeout-zone' && node.stepType !== 'workflow_level_timeout';
 
-export const isFlowBreak = (node: GraphNodeUnion): node is FlowBreakNode =>
-  node.type === 'flow-break';
+export const isLoopBreak = (node: GraphNodeUnion): node is LoopBreakNode =>
+  node.type === 'loop-break';
 
-export const isFlowContinue = (node: GraphNodeUnion): node is FlowContinueNode =>
-  node.type === 'flow-continue';
+export const isLoopContinue = (node: GraphNodeUnion): node is LoopContinueNode =>
+  node.type === 'loop-continue';
 
 /**
  * Returns true for step types whose inner steps have guaranteed execution

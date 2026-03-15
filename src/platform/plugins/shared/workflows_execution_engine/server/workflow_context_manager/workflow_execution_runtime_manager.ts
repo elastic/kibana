@@ -225,8 +225,8 @@ export class WorkflowExecutionRuntimeManager {
    *   popped and finished. Defaults to false (stop *before* the matching scope).
    *
    * Used by:
-   * - flow.break — stop at and *include* the enclosing loop enter node (inclusive)
-   * - flow.continue — stop *before* the enclosing loop enter node (exclusive)
+   * - loop.break — stop at and *include* the enclosing loop enter node (inclusive)
+   * - loop.continue — stop *before* the enclosing loop enter node (exclusive)
    * - workflow.output / workflow.fail — unwind the entire stack (no predicate)
    */
   public unwindScopes(

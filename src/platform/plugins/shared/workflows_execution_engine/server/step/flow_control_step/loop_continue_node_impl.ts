@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FlowBreakNode } from '@kbn/workflows/graph';
+import type { LoopContinueNode } from '@kbn/workflows/graph';
 import { isLoopEnterScope } from './is_loop_enter_scope';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
@@ -15,9 +15,9 @@ import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_man
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
-export class FlowBreakNodeImpl implements NodeImplementation {
+export class LoopContinueNodeImpl implements NodeImplementation {
   constructor(
-    private node: FlowBreakNode,
+    private node: LoopContinueNode,
     private stepExecutionRuntime: StepExecutionRuntime,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger,
@@ -28,17 +28,13 @@ export class FlowBreakNodeImpl implements NodeImplementation {
     this.stepExecutionRuntime.startStep();
 
     this.workflowLogger.logDebug(
-      `flow.break triggered in step "${this.node.stepId}". Exiting enclosing loop.`,
+      `loop.continue triggered in step "${this.node.stepId}". Skipping to next iteration.`,
       { workflow: { step_id: this.node.stepId } }
     );
 
     this.stepExecutionRuntime.finishStep({ navigateToNode: this.node.loopExitNodeId });
 
-    this.wfExecutionRuntimeManager.unwindScopes(
-      this.stepExecutionRuntimeFactory,
-      isLoopEnterScope,
-      { inclusive: true }
-    );
-    this.wfExecutionRuntimeManager.navigateToAfterNode(this.node.loopExitNodeId);
+    this.wfExecutionRuntimeManager.unwindScopes(this.stepExecutionRuntimeFactory, isLoopEnterScope);
+    this.wfExecutionRuntimeManager.navigateToNode(this.node.loopExitNodeId);
   }
 }

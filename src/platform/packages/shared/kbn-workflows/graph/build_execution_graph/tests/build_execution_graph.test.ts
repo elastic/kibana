@@ -11,8 +11,8 @@ import { graphlib } from '@dagrejs/dagre';
 import type {
   ConnectorStep,
   ElasticsearchStep,
-  FlowBreakStep,
-  FlowContinueStep,
+  LoopBreakStep,
+  LoopContinueStep,
   ForEachStep,
   IfStep,
   KibanaStep,
@@ -29,8 +29,8 @@ import type {
   ExitConditionBranchNode,
   ExitForeachNode,
   ExitIfNode,
-  FlowBreakNode,
-  FlowContinueNode,
+  LoopBreakNode,
+  LoopContinueNode,
   KibanaGraphNode,
   WaitGraphNode,
 } from '../../types';
@@ -1186,8 +1186,8 @@ describe('convertToWorkflowGraph', () => {
     });
   });
 
-  describe('flow.break and flow.continue', () => {
-    it('should create flow-break node inside a foreach loop', () => {
+  describe('loop.break and loop.continue', () => {
+    it('should create loop-break node inside a foreach loop', () => {
       const workflowDefinition = {
         steps: [
           {
@@ -1196,22 +1196,22 @@ describe('convertToWorkflowGraph', () => {
             foreach: '{{ items }}',
             steps: [
               { name: 'step_a', type: 'console' } as ConnectorStep,
-              { name: 'stop_early', type: 'flow.break' } as FlowBreakStep,
+              { name: 'stop_early', type: 'loop.break' } as LoopBreakStep,
             ],
           } as ForEachStep,
         ],
       } as Partial<WorkflowYaml>;
 
       const graph = convertToWorkflowGraph(workflowDefinition as any);
-      const breakNode = graph.node('stop_early') as FlowBreakNode;
+      const breakNode = graph.node('stop_early') as LoopBreakNode;
 
       expect(breakNode).toBeDefined();
-      expect(breakNode.type).toBe('flow-break');
+      expect(breakNode.type).toBe('loop-break');
       expect(breakNode.loopExitNodeId).toBe('exitForeach_my_loop');
       expect(breakNode.loopStepId).toBe('my_loop');
     });
 
-    it('should create flow-continue node inside a foreach loop', () => {
+    it('should create loop-continue node inside a foreach loop', () => {
       const workflowDefinition = {
         steps: [
           {
@@ -1219,7 +1219,7 @@ describe('convertToWorkflowGraph', () => {
             type: 'foreach',
             foreach: '{{ items }}',
             steps: [
-              { name: 'skip_item', type: 'flow.continue' } as FlowContinueStep,
+              { name: 'skip_item', type: 'loop.continue' } as LoopContinueStep,
               { name: 'step_a', type: 'console' } as ConnectorStep,
             ],
           } as ForEachStep,
@@ -1227,35 +1227,35 @@ describe('convertToWorkflowGraph', () => {
       } as Partial<WorkflowYaml>;
 
       const graph = convertToWorkflowGraph(workflowDefinition as any);
-      const continueNode = graph.node('skip_item') as FlowContinueNode;
+      const continueNode = graph.node('skip_item') as LoopContinueNode;
 
       expect(continueNode).toBeDefined();
-      expect(continueNode.type).toBe('flow-continue');
+      expect(continueNode.type).toBe('loop-continue');
       expect(continueNode.loopExitNodeId).toBe('exitForeach_my_loop');
     });
 
-    it('should create flow-break node inside a while loop', () => {
+    it('should create loop-break node inside a while loop', () => {
       const workflowDefinition = {
         steps: [
           {
             name: 'my_while',
             type: 'while',
             condition: 'true',
-            steps: [{ name: 'stop_loop', type: 'flow.break' } as FlowBreakStep],
+            steps: [{ name: 'stop_loop', type: 'loop.break' } as LoopBreakStep],
           } as WhileStep,
         ],
       } as Partial<WorkflowYaml>;
 
       const graph = convertToWorkflowGraph(workflowDefinition as any);
-      const breakNode = graph.node('stop_loop') as FlowBreakNode;
+      const breakNode = graph.node('stop_loop') as LoopBreakNode;
 
       expect(breakNode).toBeDefined();
-      expect(breakNode.type).toBe('flow-break');
+      expect(breakNode.type).toBe('loop-break');
       expect(breakNode.loopExitNodeId).toBe('exitWhile_my_while');
       expect(breakNode.loopStepId).toBe('my_while');
     });
 
-    it('should support conditional flow.break via the generic inline if mechanism', () => {
+    it('should support conditional loop.break via the generic inline if mechanism', () => {
       const workflowDefinition = {
         steps: [
           {
@@ -1265,9 +1265,9 @@ describe('convertToWorkflowGraph', () => {
             steps: [
               {
                 name: 'conditional_break',
-                type: 'flow.break',
+                type: 'loop.break',
                 if: 'foreach.item.status : "done"',
-              } as FlowBreakStep,
+              } as LoopBreakStep,
             ],
           } as ForEachStep,
         ],
@@ -1282,15 +1282,15 @@ describe('convertToWorkflowGraph', () => {
         expect.objectContaining({ condition: 'foreach.item.status : "done"' })
       );
 
-      const breakNode = graph.node('conditional_break') as FlowBreakNode;
+      const breakNode = graph.node('conditional_break') as LoopBreakNode;
       expect(breakNode).toBeDefined();
-      expect(breakNode.type).toBe('flow-break');
+      expect(breakNode.type).toBe('loop-break');
       expect(breakNode.loopExitNodeId).toBe('exitForeach_my_loop');
     });
 
-    it('should throw when flow.break is used outside a loop', () => {
+    it('should throw when loop.break is used outside a loop', () => {
       const workflowDefinition = {
-        steps: [{ name: 'break_outside', type: 'flow.break' } as FlowBreakStep],
+        steps: [{ name: 'break_outside', type: 'loop.break' } as LoopBreakStep],
       } as Partial<WorkflowYaml>;
 
       expect(() => convertToWorkflowGraph(workflowDefinition as any)).toThrow(
@@ -1298,9 +1298,9 @@ describe('convertToWorkflowGraph', () => {
       );
     });
 
-    it('should throw when flow.continue is used outside a loop', () => {
+    it('should throw when loop.continue is used outside a loop', () => {
       const workflowDefinition = {
-        steps: [{ name: 'continue_outside', type: 'flow.continue' } as FlowContinueStep],
+        steps: [{ name: 'continue_outside', type: 'loop.continue' } as LoopContinueStep],
       } as Partial<WorkflowYaml>;
 
       expect(() => convertToWorkflowGraph(workflowDefinition as any)).toThrow(
@@ -1320,7 +1320,7 @@ describe('convertToWorkflowGraph', () => {
                 name: 'inner_loop',
                 type: 'foreach',
                 foreach: '{{ inner_items }}',
-                steps: [{ name: 'break_inner', type: 'flow.break' } as FlowBreakStep],
+                steps: [{ name: 'break_inner', type: 'loop.break' } as LoopBreakStep],
               } as ForEachStep,
             ],
           } as ForEachStep,
@@ -1328,10 +1328,10 @@ describe('convertToWorkflowGraph', () => {
       } as Partial<WorkflowYaml>;
 
       const graph = convertToWorkflowGraph(workflowDefinition as any);
-      const breakNode = graph.node('break_inner') as FlowBreakNode;
+      const breakNode = graph.node('break_inner') as LoopBreakNode;
 
       expect(breakNode).toBeDefined();
-      expect(breakNode.type).toBe('flow-break');
+      expect(breakNode.type).toBe('loop-break');
       expect(breakNode.loopExitNodeId).toBe('exitForeach_inner_loop');
       expect(breakNode.loopStepId).toBe('inner_loop');
     });

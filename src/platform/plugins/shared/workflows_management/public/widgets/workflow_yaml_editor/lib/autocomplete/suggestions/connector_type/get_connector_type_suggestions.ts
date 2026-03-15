@@ -11,8 +11,8 @@ import { monaco } from '@kbn/monaco';
 import type { BuiltInStepType, ConnectorTypeInfo } from '@kbn/workflows';
 import {
   DataSetStepSchema,
-  FlowBreakStepSchema,
-  FlowContinueStepSchema,
+  LoopBreakStepSchema,
+  LoopContinueStepSchema,
   ForEachStepSchema,
   getBuiltInStepStability,
   IfStepSchema,
@@ -237,13 +237,13 @@ function getBuiltInStepTypesFromSchema(): Array<{
       icon: monaco.languages.CompletionItemKind.Keyword,
     },
     {
-      schema: FlowBreakStepSchema,
+      schema: LoopBreakStepSchema,
       description: 'Exit the enclosing loop immediately',
       icon: monaco.languages.CompletionItemKind.Keyword,
       loopOnly: true,
     },
     {
-      schema: FlowContinueStepSchema,
+      schema: LoopContinueStepSchema,
       description: 'Skip to the next loop iteration',
       icon: monaco.languages.CompletionItemKind.Keyword,
       loopOnly: true,

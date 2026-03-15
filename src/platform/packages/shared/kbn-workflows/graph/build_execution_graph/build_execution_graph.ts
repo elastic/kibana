@@ -13,8 +13,8 @@ import type {
   BaseStep,
   DataSetStep,
   ElasticsearchStep,
-  FlowBreakStep,
-  FlowContinueStep,
+  LoopBreakStep,
+  LoopContinueStep,
   ForEachStep,
   IfStep,
   KibanaStep,
@@ -55,8 +55,8 @@ import type {
   ExitTimeoutZoneNode,
   ExitTryBlockNode,
   ExitWhileNode,
-  FlowBreakNode,
-  FlowContinueNode,
+  LoopBreakNode,
+  LoopContinueNode,
   GraphNodeUnion,
   LoopEnterNode,
   WaitForInputGraphNode,
@@ -65,7 +65,7 @@ import type {
 import { isLoopEnterNode } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
-const flowControlStepTypes = new Set(['if', 'foreach', 'while', 'flow.break', 'flow.continue']);
+const flowControlStepTypes = new Set(['if', 'foreach', 'while', 'loop.break', 'loop.continue']);
 const disallowedWorkflowLevelOnFailureSteps = new Set(['wait']);
 
 /** Context used during the graph construction to keep track of settings and avoid cycles */
@@ -123,12 +123,12 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return createIfGraph(getStepId(currentStep, context), currentStep as IfStep, context);
   }
 
-  if (currentStep.type === 'flow.break') {
-    return visitFlowBreakStep(currentStep as FlowBreakStep, context);
+  if (currentStep.type === 'loop.break') {
+    return visitLoopBreakStep(currentStep as LoopBreakStep, context);
   }
 
-  if (currentStep.type === 'flow.continue') {
-    return visitFlowContinueStep(currentStep as FlowContinueStep, context);
+  if (currentStep.type === 'loop.continue') {
+    return visitLoopContinueStep(currentStep as LoopContinueStep, context);
   }
 
   if ((currentStep as TimeoutProp).timeout) {
@@ -909,13 +909,13 @@ function findEnclosingLoop(context: GraphBuildContext): LoopEnterNode {
     }
   }
   throw new Error(
-    'flow.break and flow.continue are only valid inside a loop body (foreach or while). ' +
+    'loop.break and loop.continue are only valid inside a loop body (foreach or while). ' +
       'Move the step inside a loop, or remove it.'
   );
 }
 
-function visitFlowBreakStep(
-  currentStep: FlowBreakStep,
+function visitLoopBreakStep(
+  currentStep: LoopBreakStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
   const enclosingLoop = findEnclosingLoop(context);
@@ -924,20 +924,20 @@ function visitFlowBreakStep(
 
   const { exitNodeId: loopExitNodeId } = enclosingLoop;
 
-  const flowBreakNode: FlowBreakNode = {
+  const loopBreakNode: LoopBreakNode = {
     id: stepId,
-    type: 'flow-break',
+    type: 'loop-break',
     stepId,
     stepType: currentStep.type,
     loopExitNodeId,
     loopStepId: enclosingLoop.stepId,
   };
-  graph.setNode(flowBreakNode.id, flowBreakNode);
+  graph.setNode(loopBreakNode.id, loopBreakNode);
   return graph;
 }
 
-function visitFlowContinueStep(
-  currentStep: FlowContinueStep,
+function visitLoopContinueStep(
+  currentStep: LoopContinueStep,
   context: GraphBuildContext
 ): WorkflowGraphType {
   const enclosingLoop = findEnclosingLoop(context);
@@ -946,14 +946,14 @@ function visitFlowContinueStep(
 
   const { exitNodeId: loopExitNodeId } = enclosingLoop;
 
-  const flowContinueNode: FlowContinueNode = {
+  const loopContinueNode: LoopContinueNode = {
     id: stepId,
-    type: 'flow-continue',
+    type: 'loop-continue',
     stepId,
     stepType: currentStep.type,
     loopExitNodeId,
   };
-  graph.setNode(flowContinueNode.id, flowContinueNode);
+  graph.setNode(loopContinueNode.id, loopContinueNode);
   return graph;
 }
 

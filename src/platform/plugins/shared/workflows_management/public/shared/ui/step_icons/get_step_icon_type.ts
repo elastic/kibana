@@ -67,10 +67,10 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
     case 'while-iteration':
       iconType = 'tokenNumber';
       break;
-    case 'flow.break':
-    case 'flow.continue':
-    case 'flow-break':
-    case 'flow-continue':
+    case 'loop.break':
+    case 'loop.continue':
+    case 'loop-break':
+    case 'loop-continue':
       iconType = 'controls';
       break;
 

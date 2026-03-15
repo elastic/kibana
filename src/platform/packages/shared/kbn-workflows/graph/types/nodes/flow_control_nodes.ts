@@ -10,19 +10,19 @@
 import { z } from '@kbn/zod/v4';
 import { GraphNodeSchema } from './base';
 
-export const FlowBreakNodeSchema = GraphNodeSchema.extend({
+export const LoopBreakNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
-  type: z.literal('flow-break'),
+  type: z.literal('loop-break'),
   loopExitNodeId: z.string(),
   loopStepId: z.string(),
 });
 
-export type FlowBreakNode = z.infer<typeof FlowBreakNodeSchema>;
+export type LoopBreakNode = z.infer<typeof LoopBreakNodeSchema>;
 
-export const FlowContinueNodeSchema = GraphNodeSchema.extend({
+export const LoopContinueNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
-  type: z.literal('flow-continue'),
+  type: z.literal('loop-continue'),
   loopExitNodeId: z.string(),
 });
 
-export type FlowContinueNode = z.infer<typeof FlowContinueNodeSchema>;
+export type LoopContinueNode = z.infer<typeof LoopContinueNodeSchema>;

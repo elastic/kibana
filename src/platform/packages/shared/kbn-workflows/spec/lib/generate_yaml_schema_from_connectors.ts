@@ -14,8 +14,8 @@ import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
   BaseConnectorStepSchema,
   DataSetStepSchema,
-  FlowBreakStepSchema,
-  FlowContinueStepSchema,
+  LoopBreakStepSchema,
+  LoopContinueStepSchema,
   getForEachStepSchema,
   getIfStepSchema,
   getMergeStepSchema,
@@ -129,8 +129,8 @@ function createRecursiveStepSchema(
       DataSetStepSchema,
       WorkflowExecuteStepSchema,
       WorkflowExecuteAsyncStepSchema,
-      FlowBreakStepSchema,
-      FlowContinueStepSchema,
+      LoopBreakStepSchema,
+      LoopContinueStepSchema,
       ...connectorSchemas,
       ...aliasSchemas,
     ]);
