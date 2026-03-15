@@ -23,6 +23,7 @@ import {
 import type { ObservabilityOnboardingAppServices } from '..';
 import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
 import { useManagedOtlpServiceAvailability } from './shared/use_managed_otlp_service_availability';
+import { useCloudForwarderAvailability } from './shared/use_cloud_forwarder_availability';
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,7 @@ export function ObservabilityOnboardingFlow() {
   const { pathname } = useLocation();
   const {
     services: {
-      context: { isDev, isCloud, isServerless },
+      context: { isDev, isCloud },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
@@ -41,6 +42,7 @@ export function ObservabilityOnboardingFlow() {
   }, [pathname]);
 
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+  const isCloudForwarderAvailable = useCloudForwarderAvailability();
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -67,7 +69,7 @@ export function ObservabilityOnboardingFlow() {
             <OtelApmPage />
           </Route>
         )}
-        {(isServerless || isDev) && (
+        {(isCloudForwarderAvailable || isDev) && (
           <Route path="/cloudforwarder">
             <CloudForwarderPage />
           </Route>
