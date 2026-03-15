@@ -127,6 +127,12 @@ Mapping updates will apply to the current write-index and your index template. T
 > !IMPORTANT
 > Mapping updates will only be applied once you INCREMENT the template version number in your data stream definition. As you update your definition it is highly recommended that you retain past definitions so that you can test your upgrade path before releasing new mappings.
 
+## Lifecycle management
+
+`@kbn/data-streams` supports data stream lifecycle (DSL) through index template lifecycle settings.
+
+Define `template.lifecycle` (for example `data_retention`) to configure data stream lifecycle behavior when the data stream is created or updated.
+
 ### A note on backwards compatibility
 
 These tools assume that you will be introducing backwards compatible changes to your mappings. If you do not apply bwc mappings you will hit a runtime error initializing your client as it will try to update the current write index with your new mappings.
