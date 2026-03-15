@@ -17,6 +17,8 @@ export function buildRiskScoreServiceForRequest(
   logger: Logger
 ) {
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
+  const soClient = coreContext.savedObjects.client;
+
   const spaceId = securityContext.getSpaceId();
   const assetCriticalityDataClient = securityContext.getAssetCriticalityDataClient();
   const assetCriticalityService = assetCriticalityServiceFactory({
@@ -32,6 +34,7 @@ export function buildRiskScoreServiceForRequest(
   return riskScoreServiceFactory({
     assetCriticalityService,
     esClient,
+    soClient,
     logger,
     riskEngineDataClient,
     riskScoreDataClient,

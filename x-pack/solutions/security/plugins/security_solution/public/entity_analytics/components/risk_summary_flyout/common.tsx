@@ -110,6 +110,13 @@ export const getItems: (
         : entityData?.risk.category_2_score ?? 0,
       count: undefined,
     },
+    ...(entityData?.risk.modifiers
+      ?.filter((modifier) => modifier.type === 'watchlist' && modifier.subtype !== 'privmon')
+      .map((watchlistModifier) => ({
+        category: watchlistModifier.subtype,
+        score: watchlistModifier.contribution ?? 0,
+        count: undefined,
+      })) ?? []),
   ];
 
   if (isPrivmonEnabled) {

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IUiSettingsClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
@@ -26,6 +31,8 @@ import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
 import type { ResetToZeroDependencies } from './reset_to_zero';
 import { resetToZero } from './reset_to_zero';
 import { createPrivilegedUsersCrudService } from '../privilege_monitoring/users/privileged_users_crud';
+import { WatchlistConfigClient } from '../watchlists/management/watchlist_config';
+import { createWatchlistEntitiesService } from '../watchlists/entities/service';
 
 export type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;
@@ -48,6 +55,7 @@ export interface RiskScoreService {
 
 export interface RiskScoreServiceFactoryParams {
   assetCriticalityService: AssetCriticalityService;
+  soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   logger: Logger;
   riskEngineDataClient: RiskEngineDataClient;
@@ -61,6 +69,7 @@ export interface RiskScoreServiceFactoryParams {
 export const riskScoreServiceFactory = ({
   assetCriticalityService,
   esClient,
+  soClient,
   logger,
   riskEngineDataClient,
   riskScoreDataClient,
@@ -73,12 +82,26 @@ export const riskScoreServiceFactory = ({
     esClient,
     logger,
   });
+
+  const watchlistConfigClient = new WatchlistConfigClient({
+    namespace: spaceId,
+    esClient,
+    soClient,
+    logger,
+  });
+
+  const watchlistEntitiesService = createWatchlistEntitiesService({
+    esClient,
+    namespace: spaceId,
+  });
   return {
     calculateScores: async (params) => {
       return calculateScoresWithESQL({
         ...params,
         assetCriticalityService,
         privmonUserCrudService,
+        watchlistConfigClient,
+        watchlistEntitiesService,
         esClient,
         logger,
         experimentalFeatures,
@@ -90,6 +113,8 @@ export const riskScoreServiceFactory = ({
         ...params,
         assetCriticalityService,
         privmonUserCrudService,
+        watchlistConfigClient,
+        watchlistEntitiesService,
         esClient,
         logger,
         riskScoreDataClient,

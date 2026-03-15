@@ -257,6 +257,9 @@ const ContextsSection = <T extends EntityType>({
     const privmon = riskScore[entityType].risk.modifiers?.find(
       (mod) => mod.type === 'watchlist' && mod.subtype === 'privmon'
     );
+    const watchlists = riskScore[entityType].risk.modifiers?.filter(
+      (mod) => mod.type === 'watchlist' && mod.subtype !== 'privmon'
+    );
     const criticality = riskScore[entityType].risk.modifiers?.find(
       (mod) => mod.type === 'asset_criticality'
     );
@@ -274,13 +277,17 @@ const ContextsSection = <T extends EntityType>({
         isPrivileged: privmon ? privmon.metadata?.is_privileged_user : false,
         contribution: privmon?.contribution ?? 0,
       },
+      watchlists: watchlists?.map((mod) => ({
+        name: mod.subtype,
+        contribution: mod.contribution ?? 0,
+      })),
     };
   }, [entityType, riskScore, isPrivmonEnabled]);
 
   if (loading || contributions === undefined) {
     return null;
   }
-  const { criticality, privmon } = contributions;
+  const { criticality, privmon, watchlists } = contributions;
 
   const items = [
     {
@@ -298,6 +305,23 @@ const ContextsSection = <T extends EntityType>({
       ),
       contribution: formatContribution(criticality.contribution || 0),
     },
+    ...(watchlists ?? []).map((watchlist) => ({
+      field: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.riskInputs.watchlistField"
+          defaultMessage="{watchlistName} watchlist"
+          values={{ watchlistName: watchlist.name }}
+        />
+      ),
+      value: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.riskInputs.watchlistValue"
+          defaultMessage="{value}"
+          values={{ value: 'Yes' }}
+        />
+      ),
+      contribution: formatContribution(watchlist.contribution),
+    })),
   ];
 
   if (isPrivmonEnabled) {

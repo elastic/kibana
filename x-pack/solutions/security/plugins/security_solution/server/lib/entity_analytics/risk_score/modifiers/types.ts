@@ -13,10 +13,12 @@ interface ModifierTypeMap {
     metadata: { criticality_level: AssetCriticalityRecord['criticality_level'] | undefined };
   };
   // NOTE: When we introduce more watchlists, we'll extend this by adding a descriminated union
-  watchlist: {
-    subtype: 'privmon';
-    metadata: { is_privileged_user: boolean | undefined };
-  };
+  watchlist:
+    | {
+        subtype: 'privmon';
+        metadata: { is_privileged_user: boolean | undefined };
+      }
+    | { subtype: string; metadata: Record<string, unknown> };
 }
 export type MODIFIER_TYPE = keyof ModifierTypeMap;
 
