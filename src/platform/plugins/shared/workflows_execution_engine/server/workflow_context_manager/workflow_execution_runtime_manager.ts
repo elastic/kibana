@@ -20,6 +20,7 @@ import { buildWorkflowContext } from './build_workflow_context';
 import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -65,7 +66,6 @@ export class WorkflowExecutionRuntimeManager {
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;
   private telemetryReported: boolean = false;
-  private loopBreakRequests = new Set<string>();
   private get topologicalOrder(): string[] {
     return this.workflowGraph.topologicalOrder;
   }
@@ -125,12 +125,19 @@ export class WorkflowExecutionRuntimeManager {
 
   public navigateToNextNode(): void {
     const currentNodeId = this.workflowExecution.currentNodeId;
-    const currentNodeIndex = this.topologicalOrder.findIndex((nodeId) => nodeId === currentNodeId);
-    if (currentNodeIndex < this.topologicalOrder.length - 1) {
-      this.nextNodeId = this.topologicalOrder[currentNodeIndex + 1];
-      return;
+    this.nextNodeId = this.nodeAfter(currentNodeId);
+  }
+
+  public navigateToAfterNode(nodeId: string): void {
+    this.nextNodeId = this.nodeAfter(nodeId);
+  }
+
+  private nodeAfter(nodeId: string | undefined): string | undefined {
+    const index = this.topologicalOrder.findIndex((id) => id === nodeId);
+    if (index >= 0 && index < this.topologicalOrder.length - 1) {
+      return this.topologicalOrder[index + 1];
     }
-    this.nextNodeId = undefined;
+    return undefined;
   }
 
   public getCurrentNodeScope(): StackFrame[] {
@@ -210,27 +217,36 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   /**
-   * Pops intermediate scopes (e.g. enter-if wrappers) from the scope stack until
-   * the enclosing loop scope (enter-while or enter-foreach) is on top.
-   * Called by flow.break/flow.continue before navigating to the loop exit node,
-   * so that exitScope() in run_node.ts can correctly pop the loop scope.
+   * Pops scopes from the scope stack, finishing each one, until {@link shouldStop}
+   * returns true for the current scope (or the stack is exhausted when no predicate
+   * is provided).
    *
-   * For each unwound scope, creates a StepExecutionRuntime via the factory and
-   * calls finishStep() to properly tear down any started container steps
-   * (e.g. enter-if steps that were left RUNNING).
+   * @param inclusive — when true the scope that matches {@link shouldStop} is also
+   *   popped and finished. Defaults to false (stop *before* the matching scope).
+   *
+   * Used by:
+   * - flow.break — stop at and *include* the enclosing loop enter node (inclusive)
+   * - flow.continue — stop *before* the enclosing loop enter node (exclusive)
+   * - workflow.output / workflow.fail — unwind the entire stack (no predicate)
    */
-  public unwindScopesToLoop(stepExecutionRuntimeFactory: StepExecutionRuntimeFactory): void {
+  public unwindScopes(
+    stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    shouldStop?: (scope: ScopeData) => boolean,
+    { inclusive = false }: { inclusive?: boolean } = {}
+  ): void {
     let scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
 
     while (!scopeStack.isEmpty()) {
       const currentScope = scopeStack.getCurrentScope();
-      if (
-        !currentScope ||
-        currentScope.nodeType === 'enter-while' ||
-        currentScope.nodeType === 'enter-foreach'
-      ) {
+      if (!currentScope) {
         break;
       }
+
+      const matched = shouldStop?.(currentScope) ?? false;
+      if (matched && !inclusive) {
+        break;
+      }
+
       scopeStack = scopeStack.exitScope();
 
       const scopeStepRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
@@ -240,23 +256,15 @@ export class WorkflowExecutionRuntimeManager {
       if (scopeStepRuntime.stepExecutionExists()) {
         scopeStepRuntime.finishStep();
       }
+
+      if (matched && inclusive) {
+        break;
+      }
     }
 
     this.workflowExecutionState.updateWorkflowExecution({
       scopeStack: scopeStack.stackFrames,
     });
-  }
-
-  public requestLoopBreak(loopStepId: string): void {
-    this.loopBreakRequests.add(loopStepId);
-  }
-
-  public isLoopBreakRequested(loopStepId: string): boolean {
-    return this.loopBreakRequests.has(loopStepId);
-  }
-
-  public clearLoopBreak(loopStepId: string): void {
-    this.loopBreakRequests.delete(loopStepId);
   }
 
   public setWorkflowError(error: Error | undefined): void {

@@ -40,8 +40,8 @@ describe('FlowBreakNodeImpl', () => {
     wfExecutionRuntimeManager = {
       navigateToNextNode: jest.fn(),
       navigateToNode: jest.fn(),
-      unwindScopesToLoop: jest.fn(),
-      requestLoopBreak: jest.fn(),
+      navigateToAfterNode: jest.fn(),
+      unwindScopes: jest.fn(),
     } as unknown as WorkflowExecutionRuntimeManager;
 
     workflowLogger = {
@@ -68,13 +68,16 @@ describe('FlowBreakNodeImpl', () => {
     });
   });
 
-  it('should unwind scopes, request loop break, and navigate to exit node', () => {
+  it('should unwind scopes inclusively and navigate past the exit node', () => {
     underTest.run();
 
-    expect(wfExecutionRuntimeManager.unwindScopesToLoop).toHaveBeenCalledWith(
-      stepExecutionRuntimeFactory
+    expect(wfExecutionRuntimeManager.unwindScopes).toHaveBeenCalledWith(
+      stepExecutionRuntimeFactory,
+      expect.any(Function),
+      { inclusive: true }
     );
-    expect(wfExecutionRuntimeManager.requestLoopBreak).toHaveBeenCalledWith('my_loop');
-    expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith('exitForeach_my_loop');
+    expect(wfExecutionRuntimeManager.navigateToAfterNode).toHaveBeenCalledWith(
+      'exitForeach_my_loop'
+    );
   });
 });

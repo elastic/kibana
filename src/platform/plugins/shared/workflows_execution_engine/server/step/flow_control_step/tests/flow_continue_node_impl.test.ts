@@ -39,7 +39,7 @@ describe('FlowContinueNodeImpl', () => {
     wfExecutionRuntimeManager = {
       navigateToNextNode: jest.fn(),
       navigateToNode: jest.fn(),
-      unwindScopesToLoop: jest.fn(),
+      unwindScopes: jest.fn(),
     } as unknown as WorkflowExecutionRuntimeManager;
 
     workflowLogger = {
@@ -69,8 +69,9 @@ describe('FlowContinueNodeImpl', () => {
   it('should unwind scopes and navigate to the loop exit node', () => {
     underTest.run();
 
-    expect(wfExecutionRuntimeManager.unwindScopesToLoop).toHaveBeenCalledWith(
-      stepExecutionRuntimeFactory
+    expect(wfExecutionRuntimeManager.unwindScopes).toHaveBeenCalledWith(
+      stepExecutionRuntimeFactory,
+      expect.any(Function)
     );
     expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith('exitForeach_my_loop');
   });

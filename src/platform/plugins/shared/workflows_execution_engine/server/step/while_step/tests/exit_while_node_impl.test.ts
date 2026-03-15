@@ -32,8 +32,6 @@ describe('ExitWhileNodeImpl', () => {
     wfExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
     wfExecutionRuntimeManager.navigateToNextNode = jest.fn();
     wfExecutionRuntimeManager.navigateToNode = jest.fn();
-    wfExecutionRuntimeManager.isLoopBreakRequested = jest.fn().mockReturnValue(false);
-    wfExecutionRuntimeManager.clearLoopBreak = jest.fn();
 
     stepExecutionRuntime = {} as unknown as StepExecutionRuntime;
     stepExecutionRuntime.finishStep = jest.fn();
@@ -222,35 +220,4 @@ describe('ExitWhileNodeImpl', () => {
     });
   });
 
-  describe('when loop break is requested', () => {
-    beforeEach(() => {
-      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
-        iteration: 1,
-      });
-      wfExecutionRuntimeManager.isLoopBreakRequested = jest.fn().mockReturnValue(true);
-      wfExecutionRuntimeManager.clearLoopBreak = jest.fn();
-    });
-
-    it('should finish the step and navigate to next node', () => {
-      underTest.run();
-
-      expect(wfExecutionRuntimeManager.clearLoopBreak).toHaveBeenCalledWith(node.stepId);
-      expect(stepExecutionRuntime.finishStep).toHaveBeenCalled();
-      expect(wfExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
-    });
-
-    it('should not evaluate the condition', () => {
-      underTest.run();
-
-      expect(
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext
-      ).not.toHaveBeenCalled();
-    });
-
-    it('should not navigate to start node', () => {
-      underTest.run();
-
-      expect(wfExecutionRuntimeManager.navigateToNode).not.toHaveBeenCalled();
-    });
-  });
 });

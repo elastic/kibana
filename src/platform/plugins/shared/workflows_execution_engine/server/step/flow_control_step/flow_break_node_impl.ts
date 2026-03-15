@@ -8,6 +8,7 @@
  */
 
 import type { FlowBreakNode } from '@kbn/workflows/graph';
+import { isLoopEnterScope } from './is_loop_enter_scope';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -33,8 +34,11 @@ export class FlowBreakNodeImpl implements NodeImplementation {
 
     this.stepExecutionRuntime.finishStep({ navigateToNode: this.node.loopExitNodeId });
 
-    this.wfExecutionRuntimeManager.unwindScopesToLoop(this.stepExecutionRuntimeFactory);
-    this.wfExecutionRuntimeManager.requestLoopBreak(this.node.loopStepId);
-    this.wfExecutionRuntimeManager.navigateToNode(this.node.loopExitNodeId);
+    this.wfExecutionRuntimeManager.unwindScopes(
+      this.stepExecutionRuntimeFactory,
+      isLoopEnterScope,
+      { inclusive: true }
+    );
+    this.wfExecutionRuntimeManager.navigateToAfterNode(this.node.loopExitNodeId);
   }
 }
