@@ -6,7 +6,11 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-.buildkite/scripts/bootstrap.sh
+if [[ "${CYPRESS_LIGHTWEIGHT_BOOTSTRAP:-}" == "true" ]]; then
+  .buildkite/scripts/bootstrap_cypress.sh
+else
+  .buildkite/scripts/bootstrap.sh
+fi
 .buildkite/scripts/download_build_artifacts.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
