@@ -28,7 +28,6 @@ import {
   INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { getDefaultArguments } from '@kbn/langchain/server';
 import type { StructuredTool } from '@langchain/core/tools';
 import { omit } from 'lodash/fp';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -318,7 +317,6 @@ export const postEvaluateRoute = (
                       connectorId: connector.id,
                       chatModelOptions: {
                         signal: abortSignal,
-                        temperature: getDefaultArguments(llmType).temperature,
                         // prevents the agent from retrying on failure
                         // failure could be due to bad connector, we should deliver that result to the client asap
                         maxRetries: 0,
@@ -335,7 +333,7 @@ export const postEvaluateRoute = (
                       llmType,
                       logger,
                       model: connector.config?.defaultModel,
-                      temperature: getDefaultArguments(llmType).temperature,
+                      // Temperature is not set here to allow connector config temperature to be used
                       signal: abortSignal,
                       streaming: false,
                       maxRetries: 0,

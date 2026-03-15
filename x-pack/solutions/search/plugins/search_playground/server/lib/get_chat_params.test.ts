@@ -110,7 +110,6 @@ describe('getChatParams', () => {
       connectorId: '1',
       chatModelOptions: expect.objectContaining({
         model: 'gemini-2.5-pro',
-        temperature: 0,
         maxRetries: 0,
       }),
     });
@@ -143,7 +142,6 @@ describe('getChatParams', () => {
       connectorId: '2',
       chatModelOptions: expect.objectContaining({
         model: 'custom-model',
-        temperature: 0,
         maxRetries: 0,
       }),
     });
@@ -194,7 +192,6 @@ describe('getChatParams', () => {
       connectorId: '2',
       chatModelOptions: expect.objectContaining({
         model: 'local',
-        temperature: 0.2,
         maxRetries: 0,
       }),
     });
