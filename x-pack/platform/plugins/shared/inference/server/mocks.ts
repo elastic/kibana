@@ -9,6 +9,8 @@ import type { InferenceServerStart } from './types';
 
 const createStartContractMock = (): jest.Mocked<InferenceServerStart> => {
   return {
+    isAnonymizationEnabled: jest.fn().mockReturnValue(false),
+    deanonymizeText: jest.fn().mockResolvedValue(''),
     getClient: jest.fn(),
     getChatModel: jest.fn(),
     getConnectorList: jest.fn(),

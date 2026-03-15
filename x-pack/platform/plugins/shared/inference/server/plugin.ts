@@ -21,6 +21,7 @@ import { replaceTokensWithOriginals } from '@kbn/anonymization-common';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
 import { ReplacementsRepository } from './chat_complete/anonymization/replacements/replacements_repository';
+import { ReplacementsNamespaceMismatchError } from './chat_complete/anonymization/replacements/replacements_errors';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
 import type {
@@ -238,6 +239,10 @@ export class InferencePlugin
           const tokenToOriginal = repo.toTokenToOriginalMap(replacementsSet);
           return replaceTokensWithOriginals(text, tokenToOriginal);
         } catch (err) {
+          if (err instanceof ReplacementsNamespaceMismatchError) {
+            // Never silently swallow cross-namespace reads — propagate so callers can guard.
+            throw err;
+          }
           this.logger.warn(
             `[inference.deanonymizeText] Failed to deanonymize text for replacementsId=${replacementsId}: ${
               err instanceof Error ? err.message : String(err)
