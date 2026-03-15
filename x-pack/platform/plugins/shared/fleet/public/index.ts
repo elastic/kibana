@@ -115,6 +115,7 @@ export { useGetDataStreams } from './hooks/use_request/data_stream';
 export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_request/epm';
 export { useGetSettingsQuery } from './hooks/use_request/settings';
 export { useLink } from './hooks/use_link';
+export { useCompletionBaseUrl } from './components/cloud_connector/hooks';
 export { NamespaceComboBox } from './components/namespace_combo_box';
 
 // Cloud Connector Setup - lazy loaded component for external plugins

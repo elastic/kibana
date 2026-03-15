@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 
 import type { NewPackagePolicy, PackageInfo, PackagePolicyConfigRecord } from '../../../../common';
 import {
@@ -30,6 +30,7 @@ import {
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
 } from '../constants';
+import type { CloudConnectorPrefillParams } from './use_cloud_connector_prefill';
 
 export interface UseCloudConnectorSetupReturn {
   // State for new connection form
@@ -151,14 +152,27 @@ export const useCloudConnectorSetup = (
   newPolicy: NewPackagePolicy,
   updatePolicy: UpdatePolicy,
   packageInfo: PackageInfo,
-  cloudProvider?: CloudProvider
+  cloudProvider?: CloudProvider,
+  prefill?: CloudConnectorPrefillParams
 ): UseCloudConnectorSetupReturn => {
   // State for new connection form
   const [newConnectionCredentials, setNewConnectionCredentials] =
     useState<CloudConnectorCredentials>(() => {
       // Use accessor to get vars from the correct location
       const vars = extractRawCredentialVars(newPolicy, packageInfo) ?? {};
-      return createInitialCredentials(vars);
+      const initialCredentials = createInitialCredentials(vars);
+
+      if (cloudProvider === 'aws' && prefill?.isPrefilled) {
+        const initialAwsCredentials = initialCredentials as AwsCloudConnectorCredentials;
+        return {
+          ...initialAwsCredentials,
+          roleArn: prefill.roleArn ?? initialAwsCredentials.roleArn,
+          externalId: prefill.externalId ?? initialAwsCredentials.externalId,
+          name: prefill.stackName ?? initialAwsCredentials.name,
+        } as AwsCloudConnectorCredentials;
+      }
+
+      return initialCredentials;
     });
 
   // State for existing connection form
@@ -248,6 +262,52 @@ export const useCloudConnectorSetup = (
     },
     [newPolicy, updatePolicy, packageInfo]
   );
+
+  // Idempotent prefill: re-applies prefill values whenever the current policy
+  // diverges from the expected prefill state (e.g., due to other effects
+  // overwriting the policy during initialization).
+  useEffect(() => {
+    if (cloudProvider !== 'aws' || !prefill?.isPrefilled) {
+      return;
+    }
+
+    const currentVars = extractRawCredentialVars(newPolicy, packageInfo);
+    if (!currentVars) {
+      return;
+    }
+
+    const currentRoleArn =
+      extractVarValue(currentVars.role_arn) ??
+      extractVarValue(currentVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]);
+    const currentExternalId =
+      extractVarValue(currentVars.external_id) ??
+      extractVarValue(currentVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]);
+
+    const needsUpdate =
+      (prefill.roleArn && currentRoleArn !== prefill.roleArn) ||
+      (prefill.externalId && currentExternalId !== prefill.externalId);
+
+    if (!needsUpdate) {
+      return;
+    }
+
+    updatePolicyWithNewCredentials({
+      ...newConnectionCredentials,
+      roleArn: prefill.roleArn ?? newConnectionCredentials.roleArn,
+      externalId: prefill.externalId ?? newConnectionCredentials.externalId,
+      name: prefill.stackName ?? newConnectionCredentials.name,
+    });
+  }, [
+    cloudProvider,
+    newPolicy,
+    packageInfo,
+    newConnectionCredentials,
+    prefill?.externalId,
+    prefill?.isPrefilled,
+    prefill?.roleArn,
+    prefill?.stackName,
+    updatePolicyWithNewCredentials,
+  ]);
 
   return {
     newConnectionCredentials,

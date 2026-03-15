@@ -127,6 +127,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   addIntegrationFlyoutProps,
   defaultPolicyData,
   noBreadcrumb,
+  isCompleteSetup,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
@@ -232,6 +233,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     setSelectedPolicyTab,
     isAddIntegrationFlyout,
     defaultPolicyData,
+    isCompleteSetup,
   });
 
   if (addIntegrationFlyoutProps?.agentPolicy) {
@@ -551,6 +553,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             submitAttempted={formState === 'INVALID'}
             isAgentlessSelected={isAgentlessSelected}
+            integration={integration}
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}

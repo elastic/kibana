@@ -44,6 +44,7 @@ export type DynamicPage =
   | 'integration_policy_copy_from_installed'
   | 'policy_details'
   | 'add_integration_to_policy'
+  | 'complete_integration_setup'
   | 'edit_integration'
   | 'copy_integration'
   | 'upgrade_package_policy'
@@ -98,6 +99,9 @@ export const FLEET_ROUTING_PATHS = {
 
   // TODO: Move this to the integrations app
   add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
+
+  // Same form as add-integration, but with prefilled Cloud Connector data from CloudFormation callback
+  complete_integration_setup: '/integrations/:pkgkey/complete-integration-setup/:integration?',
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
@@ -274,6 +278,13 @@ export const pagePathGetters: {
       FLEET_BASE_PATH,
       // prettier-ignore
       `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
+    ];
+  },
+  complete_integration_setup: ({ pkgkey, integration }) => {
+    return [
+      FLEET_BASE_PATH,
+      // prettier-ignore
+      `/integrations/${pkgkey}/complete-integration-setup${integration ? `/${integration}` : ''}`,
     ];
   },
   edit_integration: ({ policyId, packagePolicyId }) => [

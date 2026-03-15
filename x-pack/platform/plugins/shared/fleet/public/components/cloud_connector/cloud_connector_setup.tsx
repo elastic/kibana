@@ -17,6 +17,7 @@ import { NewCloudConnectorForm } from './form/new_cloud_connector_form';
 import { ReusableCloudConnectorForm } from './form/reusable_cloud_connector_form';
 import { useGetCloudConnectors } from './hooks/use_get_cloud_connectors';
 import { useCloudConnectorSetup } from './hooks/use_cloud_connector_setup';
+import { useCloudConnectorPrefill } from './hooks/use_cloud_connector_prefill';
 import { CloudConnectorTabs, type CloudConnectorTab } from './cloud_connector_tabs';
 import type { UpdatePolicy } from './types';
 import { TABS, CLOUD_FORMATION_EXTERNAL_DOC_URL, SINGLE_ACCOUNT } from './constants';
@@ -35,6 +36,8 @@ export interface CloudConnectorSetupProps {
   accountType?: AccountType;
   /** Optional IaC template URL from var_group selection. When provided, overrides template URL from packageInfo.policy_templates. */
   iacTemplateUrl?: string;
+  /** Kibana callback URL for frictionless CloudFormation flow */
+  completionBaseUrl?: string;
 }
 
 export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
@@ -48,7 +51,11 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   templateName,
   accountType = SINGLE_ACCOUNT,
   iacTemplateUrl,
+  completionBaseUrl,
 }) => {
+  const prefill = useCloudConnectorPrefill();
+  const effectiveAccountType = prefill.accountType ?? accountType;
+
   const reusableFeatureEnabled = isCloudConnectorReusableEnabled(
     cloudProvider || '',
     packageInfo.version,
@@ -60,22 +67,27 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
     existingConnectionCredentials,
     updatePolicyWithNewCredentials,
     updatePolicyWithExistingCredentials,
-  } = useCloudConnectorSetup(newPolicy, updatePolicy, packageInfo, cloudProvider);
+  } = useCloudConnectorSetup(newPolicy, updatePolicy, packageInfo, cloudProvider, prefill);
 
   const { data: cloudConnectors } = useGetCloudConnectors({
     cloudProvider,
-    accountType,
+    accountType: effectiveAccountType,
   });
   const cloudConnectorsCount = cloudConnectors?.length;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
 
   useEffect(() => {
+    if (prefill.isPrefilled) {
+      setSelectedTabId(TABS.NEW_CONNECTION);
+      return;
+    }
+
     setSelectedTabId(
       cloudConnectorsCount && cloudConnectorsCount > 0
         ? TABS.EXISTING_CONNECTION
         : TABS.NEW_CONNECTION
     );
-  }, [cloudConnectorsCount]);
+  }, [cloudConnectorsCount, prefill.isPrefilled]);
 
   // Ensure root-level supports_cloud_connector is true when this component is rendered
   // NOTE: This must be in a useEffect, NOT during render, to avoid React errors
@@ -136,8 +148,9 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
             cloudProvider={cloudProvider}
             credentials={newConnectionCredentials}
             setCredentials={updatePolicyWithNewCredentials}
-            accountType={accountType}
+            accountType={effectiveAccountType}
             iacTemplateUrl={iacTemplateUrl}
+            completionBaseUrl={completionBaseUrl}
           />
         </>
       ),
@@ -157,7 +170,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           cloudProvider={cloudProvider}
           credentials={existingConnectionCredentials}
           setCredentials={updatePolicyWithExistingCredentials}
-          accountType={accountType}
+          accountType={effectiveAccountType}
         />
       ),
     },
@@ -195,8 +208,9 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
           cloudProvider={cloudProvider}
           credentials={newConnectionCredentials}
           setCredentials={updatePolicyWithNewCredentials}
-          accountType={accountType}
+          accountType={effectiveAccountType}
           iacTemplateUrl={iacTemplateUrl}
+          completionBaseUrl={completionBaseUrl}
         />
       )}
       {reusableFeatureEnabled && (

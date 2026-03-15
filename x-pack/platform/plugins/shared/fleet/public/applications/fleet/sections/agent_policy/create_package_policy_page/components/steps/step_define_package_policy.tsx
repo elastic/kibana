@@ -29,6 +29,7 @@ import styled from 'styled-components';
 
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
 import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector';
+import { useCompletionBaseUrl } from '../../../../../../../components/cloud_connector/hooks';
 import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
 import { Loading } from '../../../../../components';
 import {
@@ -64,6 +65,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   isEditPage?: boolean;
   noAdvancedToggle?: boolean;
   isAgentlessSelected?: boolean;
+  integration?: string;
 }> = memo(
   ({
     namespacePlaceholder,
@@ -75,6 +77,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     noAdvancedToggle = false,
     isEditPage = false,
     isAgentlessSelected = false,
+    integration,
   }) => {
     const { docLinks, cloud } = useStartServices();
     const { enableVarGroups } = ExperimentalFeaturesService.get();
@@ -105,6 +108,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       varGroupSelections,
       updatePackagePolicy,
     });
+
+    const completionBaseUrl = useCompletionBaseUrl(packageInfo.name, integration);
 
     // Package-level vars, filtered by var_group visibility
     // and hiding deprecated vars on new installations
@@ -314,6 +319,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   templateName={packageInfo.name}
                   iacTemplateUrl={iacTemplateUrl}
                   accountType="single-account"
+                  completionBaseUrl={completionBaseUrl}
                 />
               </EuiFlexItem>
             )}

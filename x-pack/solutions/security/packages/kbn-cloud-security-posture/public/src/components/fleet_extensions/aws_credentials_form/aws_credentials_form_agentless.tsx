@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Suspense } from 'react';
+import React, { Suspense, useMemo, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   EuiAccordion,
   EuiButton,
@@ -22,7 +23,7 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { LazyCloudConnectorSetup } from '@kbn/fleet-plugin/public';
+import { LazyCloudConnectorSetup, useCompletionBaseUrl } from '@kbn/fleet-plugin/public';
 import {
   AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ,
   AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
@@ -145,6 +146,7 @@ export const AwsCredentialsFormAgentless = ({
   setupTechnology,
   hasInvalidRequiredVars,
 }: AwsAgentlessFormProps) => {
+  const { pathname, search } = useLocation();
   const {
     awsOverviewPath,
     awsPolicyType,
@@ -154,9 +156,42 @@ export const AwsCredentialsFormAgentless = ({
     shortName,
     isAwsCloudConnectorEnabled,
   } = useCloudSetup();
+  const completionBaseUrl = useCompletionBaseUrl(packageInfo.name, templateName);
 
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
   const awsCredentialsType = getAgentlessCredentialsType(input, isAwsCloudConnectorEnabled);
+  const prefillFromUrl = useMemo(() => {
+    if (!pathname.includes('complete-integration-setup')) {
+      return { isPrefilled: false as const };
+    }
+
+    const params = new URLSearchParams(search);
+    const hasCredentials = Boolean(params.get('role_arn') && params.get('external_id'));
+    const urlAccountType = params.get('account_type');
+    return {
+      isPrefilled: hasCredentials,
+      accountType:
+        urlAccountType === SINGLE_ACCOUNT || urlAccountType === ORGANIZATION_ACCOUNT
+          ? urlAccountType
+          : undefined,
+    };
+  }, [pathname, search]);
+  const isPrefilledCloudConnectorFlow = prefillFromUrl.isPrefilled;
+
+  React.useEffect(() => {
+    if (!prefillFromUrl.accountType || accountType === prefillFromUrl.accountType) {
+      return;
+    }
+
+    updatePolicy({
+      updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
+        'aws.account_type': {
+          value: prefillFromUrl.accountType,
+          type: 'text',
+        },
+      }),
+    });
+  }, [accountType, awsPolicyType, newPolicy, prefillFromUrl.accountType, updatePolicy]);
 
   // Update cloud connector support when relevant values change
   React.useEffect(() => {
@@ -173,6 +208,40 @@ export const AwsCredentialsFormAgentless = ({
     input,
     awsPolicyType,
     newPolicy,
+    updatePolicy,
+  ]);
+
+  const hasAppliedPrefillRef = useRef(false);
+
+  React.useEffect(() => {
+    if (
+      !isPrefilledCloudConnectorFlow ||
+      !isAwsCloudConnectorEnabled ||
+      hasAppliedPrefillRef.current
+    ) {
+      return;
+    }
+
+    hasAppliedPrefillRef.current = true;
+
+    updatePolicy({
+      updatedPolicy: updatePolicyWithInputs(
+        { ...newPolicy, supports_cloud_connector: true },
+        awsPolicyType,
+        getCloudCredentialVarsConfig({
+          setupTechnology,
+          optionId: AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
+          showCloudConnectors: isAwsCloudConnectorEnabled,
+          provider: AWS_PROVIDER,
+        })
+      ),
+    });
+  }, [
+    awsPolicyType,
+    isAwsCloudConnectorEnabled,
+    isPrefilledCloudConnectorFlow,
+    newPolicy,
+    setupTechnology,
     updatePolicy,
   ]);
 
@@ -359,6 +428,7 @@ export const AwsCredentialsFormAgentless = ({
               templateName ?? '',
               SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
             )}
+            completionBaseUrl={completionBaseUrl}
           />
         </Suspense>
       )}

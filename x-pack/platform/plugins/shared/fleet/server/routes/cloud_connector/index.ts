@@ -358,4 +358,5 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       getCloudConnectorUsageHandler
     );
+
 };

@@ -61,6 +61,8 @@ export interface NewCloudConnectorFormProps {
   accountType?: AccountType;
   /** IaC template URL from var_group selection for generating cloud connector setup instructions. */
   iacTemplateUrl?: string;
+  /** Kibana callback URL for frictionless CloudFormation flow */
+  completionBaseUrl?: string;
 }
 
 // Define the interface for connector options
@@ -95,6 +97,8 @@ export interface CloudConnectorFormProps {
   accountType?: AccountType;
   /** IaC template URL from var_group selection for generating cloud connector setup instructions. */
   iacTemplateUrl?: string;
+  /** Kibana callback URL for frictionless CloudFormation flow */
+  completionBaseUrl?: string;
 }
 
 export type CloudSetupForCloudConnector = Pick<
@@ -112,6 +116,8 @@ export interface GetCloudConnectorRemoteRoleTemplateParams {
   accountType: AccountType;
   /** IaC template URL to use for generating the cloud connector remote role template. */
   iacTemplateUrl?: string;
+  /** Kibana callback URL. Appended as &param_CompletionBaseUrl=<encoded> to the CF launch URL. */
+  completionBaseUrl?: string;
 }
 
 export interface CloudConnectorField {
