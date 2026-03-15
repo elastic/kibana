@@ -115,6 +115,8 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
                 Expand {keyboardShortcutLabel}
                 <br />
                 Right click to hide
+                <br />
+                <em>developer_toolbar.enabled: false in kibana.dev.yml to disable</em>
               </>
             }
             disableScreenReaderOutput={true}
@@ -150,12 +152,26 @@ const DeveloperToolbarInternal: React.FC<DeveloperToolbarProps> = ({ envInfo, on
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={`Minimize ${keyboardShortcutLabel}`}>
+                <EuiToolTip
+                  content={
+                    <>
+                      Minimize {keyboardShortcutLabel}
+                      <br />
+                      Right click to hide
+                      <br />
+                      <em>developer_toolbar.enabled: false in kibana.dev.yml to disable</em>
+                    </>
+                  }
+                >
                   <EuiButtonIcon
                     iconType="minimize"
                     size="xs"
                     color="text"
                     onClick={toggleMinimized}
+                    onContextMenu={(e: React.MouseEvent) => {
+                      setIsHidden(true);
+                      e.preventDefault();
+                    }}
                     aria-label="Minimize developer toolbar"
                   />
                 </EuiToolTip>
