@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './management';
-export * as WatchlistDataSources from './data_source';
+export { registerEntitySourceRoutes } from './register_entity_source_routes';
