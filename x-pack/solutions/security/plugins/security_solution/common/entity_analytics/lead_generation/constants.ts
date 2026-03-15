@@ -7,6 +7,7 @@
 
 export const LEAD_GENERATION_URL = '/internal/entity_analytics/leads' as const;
 export const GENERATE_LEADS_URL = `${LEAD_GENERATION_URL}/generate` as const;
+export const GET_LEADS_URL = LEAD_GENERATION_URL as string;
 export const LEAD_GENERATION_STATUS_URL = `${LEAD_GENERATION_URL}/status` as const;
 
 export type LeadGenerationMode = 'adhoc' | 'scheduled';
