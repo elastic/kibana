@@ -9,6 +9,7 @@ import React, { memo, useMemo, type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EntityItem } from '@kbn/cloud-security-posture-common/types/graph_entities/v1';
 import type { EventOrAlertItem } from '@kbn/cloud-security-posture-common/types/graph_events/v1';
+import { isEntityItem } from '../utils';
 import { useFetchDocumentDetails } from './use_fetch_document_details';
 import { LoadingBody } from './components/loading_body';
 import { EmptyBody } from './components/empty_body';
@@ -71,8 +72,8 @@ const useContentMetadata = (
     const isEntityMode = type === 'entities';
 
     if (isEntityMode && items.length > 0) {
-      const entityItems = items as EntityItem[];
-      const firstType = entityItems[0].type;
+      const entityItems = items.filter(isEntityItem);
+      const firstType = entityItems[0]?.type;
       const allSameType = entityItems.every((e) => e.type === firstType);
 
       if (allSameType && firstType !== undefined) {

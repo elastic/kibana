@@ -109,39 +109,31 @@ export const useFetchDocumentDetails = ({
         return { items: [], totalRecords: 0 };
       }
 
-      if (type === 'entities') {
-        const response = await http.post<EntitiesResponse>(ENTITIES_API, {
-          version: '1',
-          body: JSON.stringify({
-            page: {
-              index: page.index,
-              size: page.size,
-            },
-            query: {
-              entityIds: normalizedIds,
-              start,
-              end,
-            },
-          }),
-        });
-        return { items: response.entities, totalRecords: response.totalRecords };
-      } else {
-        const response = await http.post<EventsResponse>(EVENTS_API, {
-          version: '1',
-          body: JSON.stringify({
-            page: {
-              index: page.index,
-              size: page.size,
-            },
-            query: {
-              eventIds: normalizedIds,
-              start,
-              end,
-            },
-          }),
-        });
-        return { items: response.events, totalRecords: response.totalRecords };
-      }
+      const isEntities = type === 'entities';
+      const api = isEntities ? ENTITIES_API : EVENTS_API;
+      const idKey = isEntities ? 'entityIds' : 'eventIds';
+
+      const response = await http.post<EntitiesResponse | EventsResponse>(api, {
+        version: '1',
+        body: JSON.stringify({
+          page: {
+            index: page.index,
+            size: page.size,
+          },
+          query: {
+            [idKey]: normalizedIds,
+            start,
+            end,
+          },
+        }),
+      });
+
+      return {
+        items: isEntities
+          ? (response as EntitiesResponse).entities
+          : (response as EventsResponse).events,
+        totalRecords: response.totalRecords,
+      };
     },
     {
       enabled: (options?.enabled ?? true) && normalizedIds.length > 0,
