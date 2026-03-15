@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { format, parse } from 'url';
 import { KIBANA_DEFAULT_URL } from './constants';
 
 let kibanaUrl: string;
@@ -21,35 +20,28 @@ export async function getKibanaUrl() {
       redirect: 'manual',
     });
 
-    const discoveredKibanaUrl =
+    const discoveredKibanaUrl = new URL(
       unredirectedResponse.headers
         .get('location')
         ?.replace('/spaces/enter', '')
-        ?.replace('spaces/space_selector', '') || KIBANA_DEFAULT_URL;
+        ?.replace('spaces/space_selector', '') || KIBANA_DEFAULT_URL,
+      KIBANA_DEFAULT_URL
+    );
 
-    const parsedTarget = parse(KIBANA_DEFAULT_URL);
-
-    const parsedDiscoveredUrl = parse(discoveredKibanaUrl);
-
-    const discoveredKibanaUrlWithAuth = format({
-      ...parsedDiscoveredUrl,
-      auth: parsedTarget.auth,
-    });
-
-    const redirectedResponse = await fetch(discoveredKibanaUrlWithAuth, {
+    const redirectedResponse = await fetch(discoveredKibanaUrl.toString(), {
       method: 'HEAD',
     });
 
     if (redirectedResponse.status !== 200) {
       throw new Error(
-        `Expected HTTP 200 from ${discoveredKibanaUrlWithAuth}, got ${redirectedResponse.status}`
+        `Expected HTTP 200 from ${discoveredKibanaUrl}, got ${redirectedResponse.status}`
       );
     }
 
     // eslint-disable-next-line no-console
-    console.log(`Discovered kibana running at: ${discoveredKibanaUrlWithAuth}`);
+    console.log(`Discovered kibana running at: ${discoveredKibanaUrl}`);
 
-    kibanaUrl = discoveredKibanaUrlWithAuth.replace(/\/$/, '');
+    kibanaUrl = discoveredKibanaUrl.toString().replace(/\/$/, '');
     return kibanaUrl;
   } catch (error) {
     throw new Error(`Could not connect to Kibana: ` + error.message);

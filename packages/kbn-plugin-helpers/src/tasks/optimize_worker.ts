@@ -12,7 +12,7 @@ import type { WorkerConfig } from '@kbn/optimizer/src/common';
 import { parseBundles, BundleRemotes } from '@kbn/optimizer/src/common';
 import { getWebpackConfig } from '@kbn/optimizer/src/worker/webpack.config';
 
-const send = process.send;
+const send = process.send?.bind(process);
 if (!send) {
   throw new Error('must be run as a node.js fork');
 }
@@ -36,25 +36,34 @@ process.on('message', (msg: any) => {
     },
     (error, stats) => {
       if (error) {
-        send.call(process, {
-          success: false,
-          error: error.message,
-        });
+        send(
+          {
+            success: false,
+            error: error.message,
+          },
+          undefined
+        );
         return;
       }
 
       if (stats?.hasErrors()) {
-        send.call(process, {
-          success: false,
-          error: `Failed to compile with webpack:\n${stats.toString()}`,
-        });
+        send(
+          {
+            success: false,
+            error: `Failed to compile with webpack:\n${stats.toString()}`,
+          },
+          undefined
+        );
         return;
       }
 
-      send.call(process, {
-        success: true,
-        warnings: stats?.hasWarnings() ? stats.toString() : '',
-      });
+      send(
+        {
+          success: true,
+          warnings: stats?.hasWarnings() ? stats.toString() : '',
+        },
+        undefined
+      );
     }
   );
 });

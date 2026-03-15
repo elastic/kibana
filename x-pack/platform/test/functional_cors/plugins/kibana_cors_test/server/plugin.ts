@@ -15,7 +15,7 @@ import type { ConfigSchema } from './config';
 const apiToken = Buffer.from(kbnTestConfig.getUrlParts().auth!).toString('base64');
 
 function renderBody(kibanaUrl: string) {
-  const url = Url.resolve(kibanaUrl, '/cors-test');
+  const url = new URL('/cors-test', kibanaUrl).toString();
   return `
 <!DOCTYPE html>
 <html>
@@ -23,7 +23,7 @@ function renderBody(kibanaUrl: string) {
     <meta charset="utf-8">
     <title>Request to CORS Kibana</title>
   </head>
-  <script>
+      <script>
 fetch('${url}', {
   method: 'POST',
   headers: {

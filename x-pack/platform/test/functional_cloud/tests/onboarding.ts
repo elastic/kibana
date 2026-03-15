@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { parse } from 'url';
-
 import expect from '@kbn/expect';
 
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
@@ -53,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/observability/landing');
     });
 
@@ -67,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/elasticsearch/getting_started');
       expect(currentURL.hash).to.eql('#some=hash-value');
 
@@ -94,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/security/get_started');
       expect(currentURL.hash).to.eql('#some=hash-value');
 
@@ -130,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/security/get_started');
       expect(currentURL.hash).to.eql('#some=hash-value');
 
@@ -199,7 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/security/get_started');
       expect(currentURL.hash).to.eql('#some=hash-value');
 
@@ -236,7 +234,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/security/get_started');
       expect(currentURL.hash).to.eql('#some=hash-value');
 
@@ -306,7 +304,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/security/get_started');
       expect(currentURL.hash).to.eql('#some=hash-value');
 
@@ -342,7 +340,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/security/get_started');
       expect(currentURL.hash).to.eql('#some=hash-value');
 
@@ -411,7 +409,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/security/get_started');
       expect(currentURL.hash).to.eql('#some=hash-value');
 

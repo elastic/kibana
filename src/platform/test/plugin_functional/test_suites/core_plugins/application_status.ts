@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Url from 'url';
 import expect from '@kbn/expect';
 import type { AppUpdatableFields } from '@kbn/core-application-browser';
 import { AppStatus } from '@kbn/core-application-browser';
 import type { PluginFunctionalProviderContext } from '../../services';
 import '@kbn/core-app-status-plugin/public/types';
 
-const getKibanaUrl = (pathname?: string, search?: string) =>
-  Url.format({
-    protocol: 'http:',
-    hostname: process.env.TEST_KIBANA_HOST || 'localhost',
-    port: process.env.TEST_KIBANA_PORT || '5620',
-    pathname,
-    search,
-  });
+const getKibanaUrl = (pathname?: string, search?: string) => {
+  const url = new URL(
+    pathname ?? '/',
+    `http://${process.env.TEST_KIBANA_HOST || 'localhost'}:${
+      process.env.TEST_KIBANA_PORT || '5620'
+    }`
+  );
+
+  if (search !== undefined) {
+    url.search = search;
+  }
+
+  return pathname === undefined && search === undefined ? url.origin : url.toString();
+};
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
@@ -101,7 +106,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await navigateToApp('app_status');
       expect(await testSubjects.exists('appStatusApp')).to.eql(true);
       const currentUrl = await browser.getCurrentUrl();
-      expect(Url.parse(currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
+      expect(new URL(currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
     });
 
     it('can change the state of the currently mounted app', async () => {

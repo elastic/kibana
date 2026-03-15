@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { parse } from 'url';
-
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -62,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.security.loginSelector.verifyLoginFormIsVisible();
       await PageObjects.security.loginPage.login(undefined, undefined, { expectSuccess: true });
 
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/management/security/users');
       expect((await PageObjects.security.getCurrentUser())?.authentication_provider).to.eql({
         type: 'basic',
@@ -80,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.common.waitUntilUrlIncludes('/app/management/security/users');
 
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/management/security/users');
       expect((await PageObjects.security.getCurrentUser())?.authentication_provider).to.eql({
         type: 'saml',
@@ -118,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.common.waitUntilUrlIncludes('/app/management/security/users');
 
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/management/security/users');
       expect((await PageObjects.security.getCurrentUser())?.authentication_provider).to.eql({
         type: 'saml',
@@ -136,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.common.waitUntilUrlIncludes('/app/management/security/users');
 
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/management/security/users');
       expect((await PageObjects.security.getCurrentUser())?.authentication_provider).to.eql({
         type: 'anonymous',

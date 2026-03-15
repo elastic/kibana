@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { parse } from 'url';
-
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -62,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.security.loginSelector.login('basic', 'basic1');
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
 
       expect(currentURL.pathname).to.eql('/app/management/security/users');
     });
@@ -98,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.waitUntilUrlIncludes('next=');
         await PageObjects.security.loginSelector.login('basic', 'basic1');
         // We need to make sure that both path and hash are respected.
-        const currentURL = parse(await browser.getCurrentUrl());
+        const currentURL = new URL(await browser.getCurrentUrl());
 
         expect(currentURL.pathname).to.eql('/app/home');
         await PageObjects.security.forceLogout();
@@ -116,7 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.security.loginSelector.login('saml', 'saml1');
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/management/security/users');
     });
 
@@ -136,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.security.loginSelector.login('anonymous', 'anonymous1');
 
       // We need to make sure that both path and hash are respected.
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/management/security/users');
 
       await security.user.delete('anonymous_user');
@@ -162,8 +160,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectedLoginResult: () => testSubjects.waitForEnabled('testEndpointsAuthenticationApp'),
       });
 
-      const currentURL = parse(await browser.getCurrentUrl());
-      expect(currentURL.path).to.eql('/authentication/app?one=two');
+      const currentURL = new URL(await browser.getCurrentUrl());
+      expect(`${currentURL.pathname}${currentURL.search}`).to.eql('/authentication/app?one=two');
     });
 
     it('can login after `Unauthorized` error during request authentication preserving original URL', async () => {
@@ -175,7 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // By default, login waits till chrome appears, but the test authentication app is a chromeless app.
         expectedLoginResult: () => testSubjects.waitForEnabled('testEndpointsAuthenticationApp'),
       });
-      expect(parse(await browser.getCurrentUrl()).pathname).to.eql('/authentication/app');
+      expect(new URL(await browser.getCurrentUrl()).pathname).to.eql('/authentication/app');
 
       // 2. Now disable user and try to refresh page causing authentication to fail.
       await security.user.disable(testCredentials.username);
@@ -190,7 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // By default, login waits till chrome appears, but the test authentication app is a chromeless app.
         expectedLoginResult: () => testSubjects.waitForEnabled('testEndpointsAuthenticationApp'),
       });
-      expect(parse(await browser.getCurrentUrl()).pathname).to.eql('/authentication/app');
+      expect(new URL(await browser.getCurrentUrl()).pathname).to.eql('/authentication/app');
     });
 
     it('should show toast with error if SSO fails', async () => {

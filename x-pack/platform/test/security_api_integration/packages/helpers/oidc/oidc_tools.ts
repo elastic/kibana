@@ -7,11 +7,13 @@
 
 import { createHash, createSign } from 'crypto';
 import fs from 'fs';
-import url from 'url';
 
 export function getStateAndNonce(urlWithStateAndNonce: string) {
-  const parsedQuery = url.parse(urlWithStateAndNonce, true).query;
-  return { state: parsedQuery.state as string, nonce: parsedQuery.nonce as string };
+  const parsedUrl = new URL(urlWithStateAndNonce);
+  return {
+    state: parsedUrl.searchParams.get('state') as string,
+    nonce: parsedUrl.searchParams.get('nonce') as string,
+  };
 }
 
 function fromBase64(base64: string) {

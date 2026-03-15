@@ -6,9 +6,8 @@
  */
 import { Client } from '@elastic/elasticsearch';
 import { compact } from 'lodash';
-import { format, parse } from 'node:url';
 import Path from 'path';
-import type { UrlWithParsedQuery } from 'url';
+import type { UrlObject } from 'url';
 import { FetchResponseError } from './kibana_fetch_response_error';
 import { createProxyTransport } from './proxy_transport';
 import { getInternalKibanaHeaders } from './get_internal_kibana_headers';
@@ -42,15 +41,16 @@ function combineSignal(left: AbortSignal, right?: AbortSignal | null | undefined
 export class KibanaClient {
   public readonly es: Client;
   constructor(private readonly options: KibanaClientOptions) {
-    const parsedBaseUrl = parse(options.baseUrl, true);
-
-    const [username, password] = (parsedBaseUrl.auth ?? '').split(':');
-
-    const node = format({
-      ...parsedBaseUrl,
-      auth: null,
-      pathname: null,
-    });
+    const parsedBaseUrl = new URL(options.baseUrl);
+    const username = decodeURIComponent(parsedBaseUrl.username);
+    const password = decodeURIComponent(parsedBaseUrl.password);
+    const nodeUrl = new URL(parsedBaseUrl.toString());
+    nodeUrl.username = '';
+    nodeUrl.password = '';
+    nodeUrl.pathname = '';
+    nodeUrl.search = '';
+    nodeUrl.hash = '';
+    const node = nodeUrl.toString().replace(/\/$/, '');
 
     this.es = new Client({
       auth: {
@@ -59,7 +59,7 @@ export class KibanaClient {
       },
       node,
       Transport: createProxyTransport({
-        pathname: parsedBaseUrl.pathname!,
+        pathname: parsedBaseUrl.pathname,
         headers: getInternalKibanaHeaders(),
       }),
     });
@@ -76,39 +76,52 @@ export class KibanaClient {
     options: FetchInputOptions,
     init?: FetchInitOptions & { asRawResponse?: boolean }
   ): Promise<T | Response> {
-    const urlObject =
-      typeof options === 'string'
-        ? {
-            pathname: options,
-          }
-        : options;
-
-    const formattedBaseUrl = parse(this.options.baseUrl, true);
-
-    const urlOptions: UrlWithParsedQuery = {
-      ...formattedBaseUrl,
-      ...urlObject,
-      pathname: Path.posix.join(
-        ...compact([
-          '/',
-          formattedBaseUrl.pathname,
-          ...(this.options.spaceId ? ['s', this.options.spaceId] : []),
-          urlObject.pathname,
-        ])
-      ),
-      auth: null,
-    };
+    const baseUrl = new URL(this.options.baseUrl);
+    const requestUrl = typeof options === 'string' ? undefined : options;
+    const requestPathname = typeof options === 'string' ? options : options.pathname;
+    const url = new URL(baseUrl.toString());
+    url.pathname = Path.posix.join(
+      ...compact([
+        '/',
+        baseUrl.pathname,
+        ...(this.options.spaceId ? ['s', this.options.spaceId] : []),
+        requestPathname,
+      ])
+    );
+    url.search = requestUrl?.search ?? '';
+    url.hash = '';
 
     const body = init?.body ? JSON.stringify(init?.body) : undefined;
 
-    const response = await fetch(format(urlOptions), {
+    const headers: Record<string, string> = {
+      ['content-type']: 'application/json',
+      ...getInternalKibanaHeaders(),
+      ...((baseUrl.username || baseUrl.password) && {
+        Authorization: `Basic ${Buffer.from(
+          `${decodeURIComponent(baseUrl.username)}:${decodeURIComponent(baseUrl.password)}`
+        ).toString('base64')}`,
+      }),
+      ...(init?.headers as Record<string, string> | undefined),
+    };
+
+    const query = (requestUrl as unknown as { query?: UrlObject['query'] } | undefined)?.query;
+    if (query) {
+      for (const [key, value] of Object.entries(query)) {
+        if (value == null) {
+          continue;
+        }
+
+        if (Array.isArray(value)) {
+          value.forEach((item) => url.searchParams.append(key, String(item)));
+        } else {
+          url.searchParams.set(key, String(value));
+        }
+      }
+    }
+
+    const response = await fetch(url.toString(), {
       ...init,
-      headers: {
-        ['content-type']: 'application/json',
-        ...getInternalKibanaHeaders(),
-        Authorization: `Basic ${Buffer.from(formattedBaseUrl.auth!).toString('base64')}`,
-        ...init?.headers,
-      },
+      headers,
       signal: combineSignal(this.options.signal, init?.signal),
       body,
     });

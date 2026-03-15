@@ -9,7 +9,6 @@
 
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
-import { parse as parseUrl } from 'url';
 import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { getMetricsField } from '../../lib/get_metrics_field';
@@ -48,7 +47,7 @@ function getColor(rules, colorKey, value) {
 }
 
 function sanitizeUrl(url) {
-  const { protocol } = parseUrl(url);
+  const { protocol } = new URL(url, window.location.href);
   // eslint-disable-next-line no-script-url
   if (protocol === 'javascript:' || protocol === 'data:' || protocol === 'vbscript:') {
     return '';

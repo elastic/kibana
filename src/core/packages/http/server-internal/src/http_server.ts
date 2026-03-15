@@ -9,7 +9,6 @@
 
 import type { Request, Server } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
-import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { createServer, getRequestId, getServerOptions, setTlsConfig } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
@@ -64,6 +63,14 @@ import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { type InternalStaticAssets, StaticAssets } from './static_assets';
+
+const getReferrerHostname = (referrer: string): string | undefined => {
+  try {
+    return new URL(referrer).hostname;
+  } catch {
+    return;
+  }
+};
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -509,7 +516,7 @@ export class HttpServer {
       this.server.ext('onRequest', (request, h) => {
         const { referrer } = request.info;
         if (referrer !== '') {
-          const { hostname } = url.parse(referrer);
+          const hostname = getReferrerHostname(referrer);
           if (!hostname || !list.includes(hostname)) {
             request.info.acceptEncoding = '';
           }

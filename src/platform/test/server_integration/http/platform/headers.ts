@@ -8,7 +8,6 @@
  */
 
 import Http from 'http';
-import Url from 'url';
 import { getUrl } from '@kbn/test';
 import type { FtrProviderContext } from '../../services/types';
 
@@ -23,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
       const agent = new Http.Agent({
         keepAlive: true,
       });
-      const { protocol, hostname, port } = Url.parse(getUrl.baseUrl(config.get('servers.kibana')));
+      const { protocol, hostname, port } = new URL(getUrl.baseUrl(config.get('servers.kibana')));
 
       function performRequest() {
         return new Promise((resolve, reject) => {

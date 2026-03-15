@@ -7,7 +7,6 @@
 
 import _ from 'lodash';
 import { parseXmlString } from '../../../../common/parse_xml_string';
-import { parse, format } from 'url';
 
 export class WmsClient {
   constructor({ serviceUrl }) {
@@ -19,18 +18,13 @@ export class WmsClient {
   }
 
   _createUrl(defaultQueryParams) {
-    const serviceUrl = parse(this._serviceUrl, true);
-    const queryParams = {
-      ...serviceUrl.query,
-      ...defaultQueryParams,
-    };
-    return format({
-      protocol: serviceUrl.protocol,
-      hostname: serviceUrl.hostname,
-      port: serviceUrl.port,
-      pathname: serviceUrl.pathname,
-      query: queryParams,
+    const serviceUrl = new URL(this._serviceUrl);
+
+    Object.entries(defaultQueryParams).forEach(([key, value]) => {
+      serviceUrl.searchParams.set(key, value);
     });
+
+    return serviceUrl.toString();
   }
 
   getUrlTemplate(layers, styles) {
@@ -55,24 +49,12 @@ export class WmsClient {
    * (ex. service must be WMS)
    */
   async _fetchCapabilities() {
-    const getCapabilitiesUrl = parse(this._serviceUrl, true);
-    const queryParams = {
-      ...getCapabilitiesUrl.query,
-      ...{
-        version: '1.1.1',
-        request: 'GetCapabilities',
-        service: 'WMS',
-      },
-    };
-    const resp = await this._fetch(
-      format({
-        protocol: getCapabilitiesUrl.protocol,
-        hostname: getCapabilitiesUrl.hostname,
-        port: getCapabilitiesUrl.port,
-        pathname: getCapabilitiesUrl.pathname,
-        query: queryParams,
-      })
-    );
+    const getCapabilitiesUrl = new URL(this._serviceUrl);
+    getCapabilitiesUrl.searchParams.set('version', '1.1.1');
+    getCapabilitiesUrl.searchParams.set('request', 'GetCapabilities');
+    getCapabilitiesUrl.searchParams.set('service', 'WMS');
+
+    const resp = await this._fetch(getCapabilitiesUrl.toString());
     if (resp.status >= 400) {
       throw new Error(`Unable to access ${this.state.serviceUrl}`);
     }

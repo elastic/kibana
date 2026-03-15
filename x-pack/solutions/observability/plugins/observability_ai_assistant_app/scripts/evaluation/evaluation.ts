@@ -10,13 +10,12 @@ import { run } from '@kbn/dev-cli-runner';
 import * as fastGlob from 'fast-glob';
 import yargs from 'yargs';
 import chalk from 'chalk';
-import { castArray, omit } from 'lodash';
+import { castArray } from 'lodash';
 // @ts-expect-error
 import Mocha from 'mocha';
 import Path from 'path';
 import * as table from 'table';
 import type { TableUserConfig } from 'table';
-import { format, parse } from 'url';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { EvaluateWith, options } from './cli';
 import { getServiceUrls } from './get_service_urls';
@@ -143,6 +142,12 @@ function runEvaluations() {
               { wrapWord: true, width: 60 },
             ],
           };
+          const kibanaUrlWithoutAuth = (() => {
+            const kibanaUrl = new URL(serviceUrls.kibanaUrl);
+            kibanaUrl.username = '';
+            kibanaUrl.password = '';
+            return kibanaUrl.toString().replace(/\/$/, '');
+          })();
 
           const results: EvaluationResult[] = [];
           const failedScenarios: string[][] = [
@@ -161,7 +166,7 @@ function runEvaluations() {
               ],
               result.conversationId
                 ? [
-                    `${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${
+                    `${kibanaUrlWithoutAuth}/${
                       argv.spaceId ? `s/${argv.spaceId}/` : ''
                     }app/observabilityAIAssistant/conversations/${result.conversationId}`,
                     '',
@@ -197,7 +202,7 @@ function runEvaluations() {
             if (failedResults / totalResults > 0) {
               const reasoningConcat = result.scores.map((score) => score.reasoning).join(' ');
               failedScenarios.push([
-                `${result.name} : ${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${
+                `${result.name} : ${kibanaUrlWithoutAuth}/${
                   argv.spaceId ? `s/${argv.spaceId}/` : ''
                 }app/observabilityAIAssistant/conversations/${result.conversationId}`,
                 `Average score ${Math.round(

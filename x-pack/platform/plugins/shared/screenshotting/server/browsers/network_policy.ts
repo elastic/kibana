@@ -6,7 +6,6 @@
  */
 
 import { every } from 'lodash';
-import { parse } from 'url';
 
 interface NetworkPolicyRule {
   allow: boolean;
@@ -27,10 +26,15 @@ const isHostMatch = (actualHost: string, ruleHost: string) => {
 };
 
 export function allowRequest(url: string, rules: NetworkPolicyRule[]): boolean {
-  const parsed = parse(url);
-
   if (!rules.length) {
     return true;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
   }
 
   // Accumulator has three potential values here:
@@ -42,7 +46,7 @@ export function allowRequest(url: string, rules: NetworkPolicyRule[]): boolean {
       return result;
     }
 
-    const hostMatch = rule.host ? isHostMatch(parsed.host || '', rule.host) : true;
+    const hostMatch = rule.host ? isHostMatch(parsed.host, rule.host) : true;
 
     const protocolMatch = rule.protocol ? parsed.protocol === rule.protocol : true;
 

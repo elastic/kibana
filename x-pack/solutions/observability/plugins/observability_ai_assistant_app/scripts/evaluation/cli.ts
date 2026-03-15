@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { format, parse } from 'url';
 import type { Argv } from 'yargs';
 import { readKibanaConfig } from './read_kibana_config';
 
@@ -24,13 +23,16 @@ export const elasticsearchOption = {
   alias: 'es',
   describe: 'Where Elasticsearch is running',
   string: true as const,
-  default: format({
-    ...parse(config.elasticsearch.hosts || 'http://localhost:9200'),
-    auth:
-      config.elasticsearch.username && config.elasticsearch.password
-        ? `${config.elasticsearch.username}:${config.elasticsearch.password}`
-        : '',
-  }),
+  default: (() => {
+    const elasticsearchUrl = new URL(config.elasticsearch.hosts || 'http://localhost:9200');
+
+    if (config.elasticsearch.username && config.elasticsearch.password) {
+      elasticsearchUrl.username = config.elasticsearch.username;
+      elasticsearchUrl.password = config.elasticsearch.password;
+    }
+
+    return elasticsearchUrl.toString();
+  })(),
 };
 
 export const connectorIdOption = {

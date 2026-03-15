@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Url from 'url';
 import Https from 'https';
 import Qs from 'querystring';
 
@@ -96,7 +95,7 @@ export class KbnClientRequester {
   constructor(private readonly log: ToolingLog, options: Options) {
     this.url = options.url;
     this.httpsAgent =
-      Url.parse(options.url).protocol === 'https:'
+      new URL(options.url).protocol === 'https:'
         ? new Https.Agent({
             ca: options.certificateAuthorities,
             rejectUnauthorized: false,
@@ -113,8 +112,7 @@ export class KbnClientRequester {
     if (!baseUrl.endsWith('/')) {
       baseUrl += '/';
     }
-    const relative = relativeUrl.startsWith('/') ? relativeUrl.slice(1) : relativeUrl;
-    return Url.resolve(baseUrl, relative);
+    return new URL(relativeUrl, baseUrl).toString();
   }
 
   async request<T>(options: ReqOptions): Promise<AxiosResponse<T>> {

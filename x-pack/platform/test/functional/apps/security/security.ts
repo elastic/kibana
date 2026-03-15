@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { parse } from 'url';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -80,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.security.logout();
 
           const currentUrl = await browser.getCurrentUrl();
-          const url = parse(currentUrl);
+          const url = new URL(currentUrl);
           expect(url.pathname).to.eql('/login');
         });
       });

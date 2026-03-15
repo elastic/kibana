@@ -6,7 +6,6 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { parse } from 'url';
 
 import expect from '@kbn/expect';
 import { SESSION_ERROR_REASON_HEADER } from '@kbn/security-plugin/common/constants';
@@ -45,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         shouldLoginIfPrompted: false,
       });
 
-      const currentURL = parse(await browser.getCurrentUrl());
+      const currentURL = new URL(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/login');
 
       expect(await PageObjects.security.loginPage.getInfoMessage()).to.be(
@@ -88,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // session expires, isn't scheduled.
       async function goToAnonymousPath() {
         await browser.get(`${deployment.getHostPort()}/app/expired_session_test`);
-        const currentURL = parse(await browser.getCurrentUrl());
+        const currentURL = new URL(await browser.getCurrentUrl());
         expect(currentURL.pathname).to.eql('/app/expired_session_test');
       }
 
@@ -96,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Ensure we're on the expected page and haven't, for instance, been
         // logged out and redirected to `/login`. If we're not on this page,
         // getting `window.kibanaFetch` later on will not work.
-        const currentURL = parse(await browser.getCurrentUrl());
+        const currentURL = new URL(await browser.getCurrentUrl());
         expect(currentURL.pathname).to.eql('/app/expired_session_test');
 
         // Exectue an AJAX request from within the browser to the Kibana server

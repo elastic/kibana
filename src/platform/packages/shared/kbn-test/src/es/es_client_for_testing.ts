@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Url from 'url';
+import { format as formatUrl } from 'url';
 import * as Fs from 'fs';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
@@ -49,7 +49,7 @@ export function createEsClientForFtrConfig(
   config: Config,
   overrides?: Omit<EsClientForTestingOptions, 'esUrl'>
 ) {
-  const esUrl = Url.format(config.get('servers.elasticsearch'));
+  const esUrl = formatUrl(config.get('servers.elasticsearch'));
   return createEsClientForTesting({
     esUrl,
     requestTimeout: config.get('timeouts.esRequestTimeout'),
@@ -61,10 +61,12 @@ export function createEsClientForTesting(options: EsClientForTestingOptions) {
   const { esUrl, authOverride, isCloud = !!process.env.TEST_CLOUD, ...otherOptions } = options;
 
   const url = options.authOverride
-    ? Url.format({
-        ...Url.parse(options.esUrl),
-        auth: `${options.authOverride.username}:${options.authOverride.password}`,
-      })
+    ? (() => {
+        const parsedUrl = new URL(options.esUrl);
+        parsedUrl.username = options.authOverride.username;
+        parsedUrl.password = options.authOverride.password;
+        return parsedUrl.toString();
+      })()
     : options.esUrl;
 
   return new EsClient({

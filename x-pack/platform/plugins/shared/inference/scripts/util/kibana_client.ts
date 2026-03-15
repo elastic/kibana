@@ -12,7 +12,6 @@ import type { IncomingMessage } from 'http';
 import { omit, pick } from 'lodash';
 import { from, map, switchMap, throwError } from 'rxjs';
 import type { UrlObject } from 'url';
-import { format, parse } from 'url';
 import { inspect } from 'util';
 import { isReadable } from 'stream';
 import type {
@@ -58,21 +57,33 @@ export class KibanaClient {
   }
 
   private getUrl(props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean }) {
-    const parsed = parse(this.url);
+    const url = new URL(this.url);
+    const baseUrl = url.pathname.replaceAll('/', '');
 
-    const baseUrl = parsed.pathname?.replaceAll('/', '') ?? '';
+    url.pathname = `/${[
+      ...(baseUrl ? [baseUrl] : []),
+      ...(props.ignoreSpaceId || !this.spaceId ? [] : ['s', this.spaceId]),
+      props.pathname.startsWith('/') ? props.pathname.substring(1) : props.pathname,
+    ].join('/')}`;
+    url.search = '';
 
-    const url = format({
-      ...parsed,
-      pathname: `/${[
-        ...(baseUrl ? [baseUrl] : []),
-        ...(props.ignoreSpaceId || !this.spaceId ? [] : ['s', this.spaceId]),
-        props.pathname.startsWith('/') ? props.pathname.substring(1) : props.pathname,
-      ].join('/')}`,
-      query: props.query,
-    });
+    if (props.query) {
+      for (const [key, value] of Object.entries(props.query)) {
+        if (value == null) {
+          continue;
+        }
 
-    return url;
+        if (Array.isArray(value)) {
+          value.forEach((item) => {
+            url.searchParams.append(key, String(item));
+          });
+        } else {
+          url.searchParams.set(key, String(value));
+        }
+      }
+    }
+
+    return url.toString();
   }
 
   callKibana<T>(

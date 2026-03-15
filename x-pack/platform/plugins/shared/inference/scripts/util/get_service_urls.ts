@@ -6,24 +6,59 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { omit } from 'lodash';
-import type { Url } from 'url';
-import { format, parse } from 'url';
 
-async function discoverAuth(parsedTarget: Url, log: ToolingLog) {
+const getAuth = (url: URL): string | undefined => {
+  if (!url.username && !url.password) {
+    return undefined;
+  }
+
+  return `${decodeURIComponent(url.username)}:${decodeURIComponent(url.password)}`;
+};
+
+const setAuth = (url: URL, auth?: string): URL => {
+  const nextUrl = new URL(url.toString());
+
+  if (!auth) {
+    return nextUrl;
+  }
+
+  const separatorIndex = auth.indexOf(':');
+  nextUrl.username = separatorIndex >= 0 ? auth.slice(0, separatorIndex) : auth;
+  nextUrl.password = separatorIndex >= 0 ? auth.slice(separatorIndex + 1) : '';
+
+  return nextUrl;
+};
+
+const stripAuth = (url: URL): URL => {
+  const nextUrl = new URL(url.toString());
+  nextUrl.username = '';
+  nextUrl.password = '';
+  return nextUrl;
+};
+
+const getAuthHeaders = (url: URL): Record<string, string> => {
+  const auth = getAuth(url);
+
+  if (!auth) {
+    return {};
+  }
+
+  return { Authorization: `Basic ${Buffer.from(auth).toString('base64')}` };
+};
+
+async function discoverAuth(parsedTarget: URL, log: ToolingLog) {
   const possibleCredentials = [`admin:changeme`, `elastic:changeme`];
   for (const auth of possibleCredentials) {
-    const url = format({
-      ...parsedTarget,
-      auth,
-    });
+    const url = setAuth(parsedTarget, auth);
     let status: number;
     try {
-      log.debug(`Fetching ${url}`);
-      const response = await fetch(url);
+      log.debug(`Fetching ${stripAuth(url)}`);
+      const response = await fetch(stripAuth(url).toString(), {
+        headers: getAuthHeaders(url),
+      });
       status = response.status;
     } catch (err) {
-      log.debug(`${url} resulted in ${err.message}`);
+      log.debug(`${stripAuth(url)} resulted in ${err.message}`);
       status = 0;
     }
 
@@ -32,27 +67,22 @@ async function discoverAuth(parsedTarget: Url, log: ToolingLog) {
     }
   }
 
-  throw new Error(`Failed to authenticate user for ${format(parsedTarget)}`);
+  throw new Error(`Failed to authenticate user for ${stripAuth(parsedTarget)}`);
 }
 
 async function getKibanaUrl({ kibana, log }: { kibana: string; log: ToolingLog }) {
   try {
     const isCI = process.env.CI?.toLowerCase() === 'true';
 
-    const parsedKibanaUrl = parse(kibana);
-
-    const kibanaUrlWithoutAuth = format(omit(parsedKibanaUrl, 'auth'));
+    const parsedKibanaUrl = new URL(kibana);
+    const kibanaUrlWithoutAuth = stripAuth(parsedKibanaUrl);
 
     log.debug(`Checking Kibana URL ${kibanaUrlWithoutAuth} for a redirect`);
 
     let unredirectedResponse;
     try {
-      unredirectedResponse = await fetch(kibanaUrlWithoutAuth, {
-        headers: {
-          ...(parsedKibanaUrl.auth
-            ? { Authorization: `Basic ${Buffer.from(parsedKibanaUrl.auth).toString('base64')}` }
-            : {}),
-        },
+      unredirectedResponse = await fetch(kibanaUrlWithoutAuth.toString(), {
+        headers: getAuthHeaders(parsedKibanaUrl),
         method: 'HEAD',
         redirect: 'manual',
       });
@@ -62,38 +92,24 @@ async function getKibanaUrl({ kibana, log }: { kibana: string; log: ToolingLog }
 
     log.debug('Unredirected response', unredirectedResponse.headers.get('location'));
 
-    const discoveredKibanaUrl =
+    const discoveredKibanaUrl = new URL(
       unredirectedResponse.headers
         .get('location')
         ?.replace('/spaces/enter', '')
-        ?.replace('spaces/space_selector', '') || kibanaUrlWithoutAuth;
+        ?.replace('spaces/space_selector', '') || kibanaUrlWithoutAuth.toString(),
+      kibanaUrlWithoutAuth
+    );
 
     log.debug(`Discovered Kibana URL at ${discoveredKibanaUrl}`);
 
-    const parsedTarget = parse(kibana);
-
-    const parsedDiscoveredUrl = parse(discoveredKibanaUrl);
-
-    const discoveredKibanaUrlWithAuth = format({
-      ...parsedDiscoveredUrl,
-      auth: parsedTarget.auth,
-    });
-
-    // Strip credentials from URL for fetch (Node.js fetch doesn't support credentials in URLs)
-    const discoveredKibanaUrlWithoutAuth = format({
-      ...parsedDiscoveredUrl,
-      auth: undefined,
-    });
+    const discoveredKibanaUrlWithAuth = setAuth(discoveredKibanaUrl, getAuth(parsedKibanaUrl));
+    const discoveredKibanaUrlWithoutAuth = stripAuth(discoveredKibanaUrlWithAuth);
 
     let redirectedResponse;
     try {
-      redirectedResponse = await fetch(discoveredKibanaUrlWithoutAuth, {
+      redirectedResponse = await fetch(discoveredKibanaUrlWithoutAuth.toString(), {
         method: 'HEAD',
-        headers: {
-          ...(parsedTarget.auth
-            ? { Authorization: `Basic ${Buffer.from(parsedTarget.auth).toString('base64')}` }
-            : {}),
-        },
+        headers: getAuthHeaders(discoveredKibanaUrlWithAuth),
       });
     } catch (fetchError: any) {
       throw fetchError;
@@ -111,10 +127,9 @@ async function getKibanaUrl({ kibana, log }: { kibana: string; log: ToolingLog }
       }`
     );
 
-    return discoveredKibanaUrlWithAuth.replace(/\/$/, '');
+    return discoveredKibanaUrlWithAuth.toString().replace(/\/$/, '');
   } catch (error: any) {
-    const parsedKibanaUrl = parse(kibana);
-    const kibanaUrlWithoutAuth = format(omit(parsedKibanaUrl, 'auth'));
+    const kibanaUrlWithoutAuth = stripAuth(new URL(kibana));
     const errorCode = error?.code || error?.cause?.code;
     const isConnectionError =
       errorCode === 'ECONNREFUSED' ||
@@ -150,27 +165,18 @@ export async function getServiceUrls({
     elasticsearch = 'http://127.0.0.1:9200';
   }
 
-  const parsedTarget = parse(elasticsearch);
+  const parsedTarget = new URL(elasticsearch);
+  let auth = getAuth(parsedTarget);
 
-  let auth = parsedTarget.auth;
-
-  if (!parsedTarget.auth) {
+  if (!auth) {
     auth = await discoverAuth(parsedTarget, log);
   }
 
-  const formattedEsUrl = format({
-    ...parsedTarget,
-    auth,
-  });
+  const formattedEsUrl = setAuth(parsedTarget, auth).toString();
 
   const suspectedKibanaUrl = kibana || elasticsearch.replace('.es', '.kb');
-
-  const parsedKibanaUrl = parse(suspectedKibanaUrl);
-
-  const kibanaUrlWithAuth = format({
-    ...parsedKibanaUrl,
-    auth: parsedKibanaUrl.auth || auth,
-  });
+  const parsedKibanaUrl = new URL(suspectedKibanaUrl);
+  const kibanaUrlWithAuth = setAuth(parsedKibanaUrl, getAuth(parsedKibanaUrl) || auth).toString();
 
   const validatedKibanaUrl = await getKibanaUrl({ kibana: kibanaUrlWithAuth, log });
 

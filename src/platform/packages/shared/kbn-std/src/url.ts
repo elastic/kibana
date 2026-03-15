@@ -8,8 +8,105 @@
  */
 
 import type { UrlObject } from 'url';
-import { format as formatUrl, parse as parseUrl } from 'url';
+import { format as formatUrl } from 'url';
 import type { ParsedQuery } from 'query-string';
+
+const parseAbsoluteUrl = (url: string): URL | undefined => {
+  try {
+    return new URL(url);
+  } catch {
+    return undefined;
+  }
+};
+
+const parseProtocolRelativeUrl = (url: string): URL | undefined => {
+  if (!url.startsWith('//')) {
+    return undefined;
+  }
+
+  try {
+    return new URL(`http:${url}`);
+  } catch {
+    return undefined;
+  }
+};
+
+const splitRelativeUrl = (url: string) => {
+  const hashIndex = url.indexOf('#');
+  const beforeHash = hashIndex === -1 ? url : url.slice(0, hashIndex);
+  const hash = hashIndex === -1 ? null : url.slice(hashIndex) || null;
+  const searchIndex = beforeHash.indexOf('?');
+  const pathname =
+    searchIndex === -1 ? beforeHash || null : beforeHash.slice(0, searchIndex) || null;
+  const search = searchIndex === -1 ? null : beforeHash.slice(searchIndex) || null;
+
+  return { hash, pathname, search };
+};
+
+const parseQuery = (searchParams: URLSearchParams): ParsedQuery => {
+  const query: ParsedQuery = {};
+
+  for (const [key, value] of searchParams.entries()) {
+    const existingValue = query[key];
+
+    if (existingValue === undefined) {
+      query[key] = value;
+      continue;
+    }
+
+    query[key] = Array.isArray(existingValue)
+      ? [...existingValue.filter((item): item is string => item !== null), value]
+      : existingValue === null
+      ? value
+      : [existingValue, value];
+  }
+
+  return query;
+};
+
+const formatAuth = (username: string, password: string): string | null => {
+  if (!username && !password) {
+    return null;
+  }
+
+  if (!password) {
+    return decodeURIComponent(username);
+  }
+
+  return `${decodeURIComponent(username)}:${decodeURIComponent(password)}`;
+};
+
+const parseMeaningfulUrlParts = (url: string): URLMeaningfulParts => {
+  const absoluteUrl = parseAbsoluteUrl(url);
+  const protocolRelativeUrl = absoluteUrl ? undefined : parseProtocolRelativeUrl(url);
+  const parsedUrl = absoluteUrl ?? protocolRelativeUrl;
+
+  if (!parsedUrl) {
+    const { hash, pathname, search } = splitRelativeUrl(url);
+
+    return {
+      auth: null,
+      hash,
+      hostname: null,
+      pathname,
+      port: null,
+      protocol: null,
+      query: parseQuery(new URLSearchParams(search?.slice(1) ?? '')),
+      slashes: null,
+    };
+  }
+
+  return {
+    auth: formatAuth(parsedUrl.username, parsedUrl.password),
+    hash: parsedUrl.hash || null,
+    hostname: parsedUrl.hostname || null,
+    pathname: parsedUrl.pathname || null,
+    port: parsedUrl.port || null,
+    protocol: absoluteUrl ? parsedUrl.protocol || null : null,
+    query: parseQuery(parsedUrl.searchParams),
+    slashes: true,
+  };
+};
 
 /**
  * We define our own typings because the current version of @types/node
@@ -63,7 +160,15 @@ export function modifyUrl(
   url: string,
   urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void
 ) {
-  const parsed = parseUrl(url, true) as URLMeaningfulParts;
+  if (typeof url !== 'string') {
+    throw new TypeError('Expected URL to be a string');
+  }
+
+  if (typeof urlModifier !== 'function') {
+    throw new TypeError('Expected urlModifier to be a function');
+  }
+
+  const parsed = parseMeaningfulUrlParts(url);
 
   // Copy over the most specific version of each property. By default, the parsed url includes several
   // conflicting properties (like path and pathname + search, or search and query) and keeping track
@@ -102,28 +207,27 @@ export function modifyUrl(
  * @public
  */
 export function isRelativeUrl(candidatePath: string) {
-  // validate that `candidatePath` is not attempting a redirect to somewhere
-  // outside of this Kibana install
-  const all = parseUrl(candidatePath, false /* parseQueryString */, true /* slashesDenoteHost */);
-  const { protocol, hostname, port } = all;
-  // We should explicitly compare `protocol`, `port` and `hostname` to null to make sure these are not
-  // detected in the URL at all. For example `hostname` can be empty string for Node URL parser, but
-  // browser (because of various bwc reasons) processes URL differently (e.g. `///abc.com` - for browser
-  // hostname is `abc.com`, but for Node hostname is an empty string i.e. everything between schema (`//`)
-  // and the first slash that belongs to path.
-  if (protocol !== null || hostname !== null || port !== null) {
+  if (candidatePath.trimStart().startsWith('//')) {
     return false;
   }
-  return true;
+
+  return parseAbsoluteUrl(candidatePath) === undefined;
 }
 
 /**
  * Returns the origin (protocol + host + port) from given `url` if `url` is a valid absolute url, or null otherwise
  */
 export function getUrlOrigin(url: string): string | null {
-  const obj = parseUrl(url);
-  if (!obj.protocol && !obj.hostname) {
+  const parsedUrl = parseAbsoluteUrl(url);
+
+  if (!parsedUrl?.protocol || !parsedUrl.hostname) {
     return null;
   }
-  return `${obj.protocol}//${obj.hostname}${obj.port ? `:${obj.port}` : ''}`;
+
+  const authority = url.slice(parsedUrl.protocol.length + 2).split(/[/?#]/, 1)[0];
+  const explicitPort = authority.match(/:(\d+)$/)?.[1];
+
+  return `${parsedUrl.protocol}//${parsedUrl.hostname}${
+    explicitPort ? `:${explicitPort}` : parsedUrl.port ? `:${parsedUrl.port}` : ''
+  }`;
 }
