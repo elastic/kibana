@@ -96,6 +96,55 @@ export class AppMenuRegistry {
   }
 
   /**
+   * Get a menu item by ID.
+   * @param id The ID of the menu item to retrieve
+   * @returns The menu item or undefined if not found
+   */
+  public getItem(id: string): DiscoverAppMenuItemType | undefined {
+    const item = this.items.get(id);
+    if (item) {
+      const { isCustom, ...cleanItem } = item;
+      return cleanItem;
+    }
+    return undefined;
+  }
+
+  /**
+   * Merge popover items from a source menu into a target submenu.
+   * @param targetMenuId The ID of the target menu item
+   * @param targetSubmenuId The ID of the submenu within the target menu to merge items into
+   * @param sourceMenuId The ID of the source menu item whose items should be merged
+   */
+  public mergePopoverItems(
+    targetMenuId: string,
+    targetSubmenuId: string,
+    sourceMenuId: string
+  ): void {
+    const targetMenu = this.items.get(targetMenuId);
+    const sourceMenu = this.items.get(sourceMenuId);
+
+    if (!targetMenu || !sourceMenu || !sourceMenu.items?.length) {
+      return;
+    }
+
+    const updatedItems = targetMenu.items?.map((item) => {
+      if (item.id === targetSubmenuId && item.items) {
+        // Sort items by order, putting source items before "manage rules" (which has MAX_SAFE_INTEGER order)
+        const mergedItems = [...item.items, ...sourceMenu.items!].sort(
+          (a, b) => (a.order ?? 0) - (b.order ?? 0)
+        );
+        return { ...item, items: mergedItems };
+      }
+      return item;
+    });
+
+    this.items.set(targetMenuId, {
+      ...targetMenu,
+      items: updatedItems,
+    });
+  }
+
+  /**
    * Get the complete AppMenuConfig.
    * Items with registered popover items will have their items property populated.
    */

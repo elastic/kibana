@@ -128,8 +128,9 @@
     "@kbn/as-code-filters-schema",
     "@kbn/scout",
     "@kbn/synthtrace-client",
+    "@kbn/alerting-v2-rule-form",
     "@kbn/cps-utils",
-    "@kbn/es-types",
+    "@kbn/es-types"
   ],
   "exclude": ["target/**/*"]
 }

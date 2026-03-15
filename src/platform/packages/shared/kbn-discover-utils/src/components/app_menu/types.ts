@@ -24,6 +24,7 @@ export enum AppMenuActionId {
   alerts = 'alerts',
   inspect = 'inspect',
   createRule = 'createRule',
+  legacyRules = 'legacyRules',
   backgroundsearch = 'backgroundSearch',
   manageRulesAndConnectors = 'manageRulesAndConnectors',
 }
@@ -51,10 +52,14 @@ export type DiscoverAppMenuRunAction = (
 ) => ReactElement | void | null | ReactNode | Promise<ReactElement | void | null | ReactNode>;
 
 /**
- * Discover-specific popover item with typed run action
+ * Discover-specific popover item with typed run action and nested items
  */
-export type DiscoverAppMenuPopoverItem = Omit<AppMenuPopoverItem, 'run'> & {
+export type DiscoverAppMenuPopoverItem = Omit<AppMenuPopoverItem, 'run' | 'items'> & {
   run?: DiscoverAppMenuRunAction;
+  /**
+   * Sub-items for nested submenus (e.g., "Create legacy rules" submenu)
+   */
+  items?: DiscoverAppMenuPopoverItem[];
 };
 
 /**
