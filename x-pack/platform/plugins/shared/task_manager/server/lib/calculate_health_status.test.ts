@@ -8,9 +8,9 @@ import { set } from '@kbn/safer-lodash-set';
 import type { RawMonitoringStats } from '../monitoring';
 import { HealthStatus } from '../monitoring';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { ApiKeyType } from '../config';
 import { calculateHealthStatus } from './calculate_health_status';
 import { cloneDeep } from 'lodash';
-import { ApiKeyType } from '../config';
 
 const now = '2023-05-09T13:00:00.000Z';
 Date.now = jest.fn().mockReturnValue(new Date(now));

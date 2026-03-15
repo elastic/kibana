@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, SecurityServiceStart, IBasePath } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger, SecurityServiceStart, IBasePath } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { truncate } from 'lodash';
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
+import { isUiamCredential } from '@kbn/core-security-server';
 import type { TaskInstance, TaskUserScope } from '../task';
 
 export interface APIKeyResult {
@@ -16,14 +17,59 @@ export interface APIKeyResult {
   api_key: string;
 }
 
-export interface EncodedApiKeyResult {
+/** ES API key only (header or system-created without UIAM) */
+export interface EncodedApiKeyResultEsOnly {
   apiKey: string;
   apiKeyId: string;
 }
 
-export interface ApiKeyAndUserScope {
+/** UIAM API key only (header with UIAM credential) */
+export interface EncodedApiKeyResultUiamOnly {
+  uiamApiKey: string;
+  uiamApiKeyId: string;
+}
+
+/** Both ES and UIAM API keys (system-created when shouldGrantUiam) */
+export interface EncodedApiKeyResultBoth {
+  apiKey: string;
+  apiKeyId: string;
+  uiamApiKey: string;
+  uiamApiKeyId: string;
+}
+
+export type EncodedApiKeyResult =
+  | EncodedApiKeyResultEsOnly
+  | EncodedApiKeyResultUiamOnly
+  | EncodedApiKeyResultBoth;
+
+/** ES API key only */
+export interface ApiKeyAndUserScopeEsOnly {
   apiKey: string;
   userScope: TaskUserScope;
+}
+
+/** UIAM API key only */
+export interface ApiKeyAndUserScopeUiamOnly {
+  uiamApiKey: string;
+  userScope: TaskUserScope;
+}
+
+/** Both ES and UIAM API keys */
+export interface ApiKeyAndUserScopeBoth {
+  apiKey: string;
+  uiamApiKey: string;
+  userScope: TaskUserScope;
+}
+
+/** At least one of apiKey or uiamApiKey is always present */
+export type ApiKeyAndUserScope =
+  | ApiKeyAndUserScopeEsOnly
+  | ApiKeyAndUserScopeUiamOnly
+  | ApiKeyAndUserScopeBoth;
+
+export interface CreateApiKeyOptions {
+  shouldGrantUiam: boolean;
+  logger?: Logger;
 }
 
 const getCredentialsFromRequest = (request: KibanaRequest) => {
@@ -57,15 +103,32 @@ export const getApiKeyFromRequest = (request: KibanaRequest) => {
   return null;
 };
 
+const invalidateUiamApiKey = async (
+  security: SecurityServiceStart,
+  request: KibanaRequest,
+  uiamApiKeyId: string,
+  logger?: Logger
+) => {
+  const result = await security.authc.apiKeys.uiam?.invalidate(request, { id: uiamApiKeyId });
+  if (result && result.error_count > 0 && logger) {
+    const details = result.error_details?.length ? `: ${JSON.stringify(result.error_details)}` : '';
+    logger.error(
+      `Failed to invalidate UIAM API key ${uiamApiKeyId} (error_count=${result.error_count})${details}`
+    );
+  }
+};
+
 export const createApiKey = async (
   taskInstances: TaskInstance[],
   request: KibanaRequest,
-  security: SecurityServiceStart
-) => {
+  security: SecurityServiceStart,
+  options: CreateApiKeyOptions
+): Promise<Map<string, EncodedApiKeyResult>> => {
   if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
     throw Error('API keys are not enabled, cannot create API key.');
   }
 
+  const { shouldGrantUiam, logger } = options;
   const user = security.authc.getCurrentUser(request);
 
   const apiKeyByTaskIdMap = new Map<string, EncodedApiKeyResult>();
@@ -81,24 +144,43 @@ export const createApiKey = async (
     }
 
     const { id, api_key: apiKey } = apiKeyCreateResult;
+    const isUiam = shouldGrantUiam && isUiamCredential(apiKey);
 
     taskInstances.forEach((task) => {
-      apiKeyByTaskIdMap.set(task.id!, {
-        apiKey: Buffer.from(`${id}:${apiKey}`).toString('base64'),
-        apiKeyId: apiKeyCreateResult.id,
-      });
+      if (isUiam) {
+        apiKeyByTaskIdMap.set(task.id!, {
+          uiamApiKey: Buffer.from(`${id}:${apiKey}`).toString('base64'),
+          uiamApiKeyId: id,
+        });
+      } else {
+        apiKeyByTaskIdMap.set(task.id!, {
+          apiKey: Buffer.from(`${id}:${apiKey}`).toString('base64'),
+          apiKeyId: id,
+        });
+      }
     });
 
     return apiKeyByTaskIdMap;
   }
-  // If the user did not pass in their own API key, we need to create 1 key per task
-  // type (due to naming requirements).
+
+  // System-created keys: when shouldGrantUiam we grant both ES and UIAM per task type
   const taskTypes = [...new Set(taskInstances.map((task) => task.taskType))];
   const apiKeyByTaskTypeMap = new Map<string, EncodedApiKeyResult>();
 
   for (const taskType of taskTypes) {
     const apiKeyNamePrefix = `TaskManager: ${taskType}`;
     const apiKeyName = user ? `${apiKeyNamePrefix} - ${user.username}` : apiKeyNamePrefix;
+
+    let uiamResult: APIKeyResult | null = null;
+    if (shouldGrantUiam && security.authc.apiKeys.uiam) {
+      uiamResult = await security.authc.apiKeys.uiam.grant(request, {
+        name: truncate(`uiam - ${apiKeyName}`, { length: 256 }),
+      });
+      if (!uiamResult) {
+        logger?.error(`Failed to create UIAM API key for task type ${taskType}`);
+      }
+    }
+
     const apiKeyCreateResult = await security.authc.apiKeys.grantAsInternalUser(request, {
       name: truncate(apiKeyName, { length: 256 }),
       role_descriptors: {},
@@ -106,18 +188,34 @@ export const createApiKey = async (
     });
 
     if (!apiKeyCreateResult) {
+      if (uiamResult) {
+        await invalidateUiamApiKey(security, request, uiamResult.id, logger);
+      }
       throw Error('Could not create API key.');
     }
 
-    const { id, api_key: apiKey } = apiKeyCreateResult;
-
-    apiKeyByTaskTypeMap.set(taskType, {
-      apiKey: Buffer.from(`${id}:${apiKey}`).toString('base64'),
-      apiKeyId: apiKeyCreateResult.id,
-    });
+    try {
+      const { id, api_key: apiKey } = apiKeyCreateResult;
+      const encoded: EncodedApiKeyResult = uiamResult
+        ? {
+            apiKey: Buffer.from(`${id}:${apiKey}`).toString('base64'),
+            apiKeyId: id,
+            uiamApiKey: Buffer.from(`${uiamResult.id}:${uiamResult.api_key}`).toString('base64'),
+            uiamApiKeyId: uiamResult.id,
+          }
+        : {
+            apiKey: Buffer.from(`${id}:${apiKey}`).toString('base64'),
+            apiKeyId: id,
+          };
+      apiKeyByTaskTypeMap.set(taskType, encoded);
+    } catch (err) {
+      if (uiamResult) {
+        await invalidateUiamApiKey(security, request, uiamResult.id, logger);
+      }
+      throw err;
+    }
   }
 
-  // Assign each of the created API keys to the task ID
   taskInstances.forEach((task) => {
     const encodedApiKeyResult = apiKeyByTaskTypeMap.get(task.taskType);
     if (encodedApiKeyResult) {
@@ -132,9 +230,10 @@ export const getApiKeyAndUserScope = async (
   taskInstances: TaskInstance[],
   request: KibanaRequest,
   security: SecurityServiceStart,
-  basePath: IBasePath
+  basePath: IBasePath,
+  options: CreateApiKeyOptions
 ): Promise<Map<string, ApiKeyAndUserScope>> => {
-  const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security);
+  const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security, options);
 
   const requestBasePath = basePath.get(request);
   const space = getSpaceIdFromPath(requestBasePath, basePath.serverBasePath);
@@ -142,19 +241,42 @@ export const getApiKeyAndUserScope = async (
   const apiKeyAndUserScopeByTaskId = new Map<string, ApiKeyAndUserScope>();
 
   taskInstances.forEach((task) => {
-    const encodedApiKeyResult = apiKeyByTaskIdMap.get(task.id!);
-    if (encodedApiKeyResult) {
-      apiKeyAndUserScopeByTaskId.set(task.id!, {
-        apiKey: encodedApiKeyResult.apiKey,
-        userScope: {
-          apiKeyId: encodedApiKeyResult.apiKeyId,
-          spaceId: space?.spaceId || 'default',
-          // Set apiKeyCreatedByUser to true if the request includes its own API key, since we do
-          // not want to invalidate a specific API key that was not created by the task manager
-          apiKeyCreatedByUser: requestHasApiKey(security, request),
-        },
-      });
+    const encoded = apiKeyByTaskIdMap.get(task.id!);
+    if (!encoded) return;
+
+    const hasEs = 'apiKey' in encoded && encoded.apiKey;
+    const hasUiam = 'uiamApiKey' in encoded && encoded.uiamApiKey;
+    if (!hasEs && !hasUiam) {
+      throw new Error(`Invalid encoded API key result: ${JSON.stringify(encoded)}`);
     }
+
+    const spaceId = space?.spaceId || 'default';
+    let entry: ApiKeyAndUserScope;
+    if (hasEs && hasUiam) {
+      const userScope: TaskUserScope = {
+        apiKeyId: encoded.apiKeyId,
+        uiamApiKeyId: encoded.uiamApiKeyId,
+        spaceId,
+        apiKeyCreatedByUser: false,
+      };
+      entry = { apiKey: encoded.apiKey, uiamApiKey: encoded.uiamApiKey, userScope };
+    } else if (hasUiam) {
+      const userScope: TaskUserScope = {
+        uiamApiKeyId: encoded.uiamApiKeyId,
+        spaceId,
+        apiKeyCreatedByUser: requestHasApiKey(security, request),
+      };
+      entry = { uiamApiKey: encoded.uiamApiKey, userScope };
+    } else {
+      const esOnly = encoded as EncodedApiKeyResultEsOnly;
+      const userScope: TaskUserScope = {
+        apiKeyId: esOnly.apiKeyId,
+        spaceId,
+        apiKeyCreatedByUser: requestHasApiKey(security, request),
+      };
+      entry = { apiKey: esOnly.apiKey, userScope };
+    }
+    apiKeyAndUserScopeByTaskId.set(task.id!, entry);
   });
 
   return apiKeyAndUserScopeByTaskId;

@@ -87,3 +87,16 @@ export const taskSchemaV8 = taskSchemaV7.extends({
     schema.oneOf([schema.literal('tiny'), schema.literal('normal'), schema.literal('extralarge')])
   ),
 });
+
+/** userScope: at least one of apiKeyId or uiamApiKeyId; when both present, apiKeyCreatedByUser is false */
+const userScopeSchemaV9 = schema.object({
+  apiKeyId: schema.maybe(schema.string()),
+  uiamApiKeyId: schema.maybe(schema.string()),
+  spaceId: schema.string(),
+  apiKeyCreatedByUser: schema.boolean(),
+});
+
+export const taskSchemaV9 = taskSchemaV7.extends({
+  uiamApiKey: schema.maybe(schema.string()),
+  userScope: schema.maybe(userScopeSchemaV9),
+});

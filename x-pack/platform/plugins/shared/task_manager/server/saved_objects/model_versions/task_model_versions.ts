@@ -115,4 +115,22 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
       create: taskSchemaV8,
     },
   },
+  '9': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          userScope: {
+            properties: {
+              uiamApiKeyId: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: taskSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV8,
+    },
+  },
 };

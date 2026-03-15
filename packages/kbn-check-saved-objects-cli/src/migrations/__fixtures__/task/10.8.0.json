@@ -49,6 +49,7 @@
       "priority": "number?",
       "interval": "string",
       "apiKey": "string?",
+      "uiamApiKey": "string?",
       "userScope": "object?",
       "schedule": "object?",
       "cost": "tiny?|normal?|extralarge?"
