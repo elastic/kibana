@@ -8,7 +8,12 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { extractCategorizeTokens, getCategorizeColumns, getCategorizeField } from '@kbn/esql-utils';
+import {
+  extractCategorizeTokens,
+  getCategorizeColumns,
+  getCategorizeField,
+  getSparklineColumns,
+} from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
@@ -16,6 +21,7 @@ import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
+import { getSparklineCellRenderer } from './sparkline_cell_renderer';
 
 const DOC_LIMIT = 10000;
 
@@ -23,14 +29,15 @@ export const createPatternsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider<{
   patternColumns: string[];
+  sparklineColumns: string[];
 }> => ({
-  profileId: 'patterns-data-source-profile',
+  profileId: 'patterns1-data-source-profile',
   profile: {
     getCellRenderers:
       (prev, { context }) =>
       (params) => {
         const { rowHeight } = params;
-        const { patternColumns } = context;
+        const { patternColumns, sparklineColumns } = context;
         if (!patternColumns || patternColumns.length === 0) {
           return prev(params);
         }
@@ -47,9 +54,24 @@ export const createPatternsDataSourceProfileProvider = (
           {}
         );
 
+        const sparklineRenderers = sparklineColumns.reduce(
+          (acc, column) =>
+            Object.assign(acc, {
+              [column]: (props: DataGridCellValueElementProps) =>
+                getSparklineCellRenderer(
+                  services,
+                  props.row.flattened[props.columnId],
+                  props.isDetails,
+                  rowHeight
+                ),
+            }),
+          {}
+        );
+
         return {
           ...prev(params),
           ...patternRenderers,
+          ...sparklineRenderers,
         };
       },
     getAdditionalCellActions:
@@ -137,11 +159,14 @@ export const createPatternsDataSourceProfileProvider = (
       return { isMatch: false };
     }
 
+    const sparklineColumns = getSparklineColumns(query.esql);
+
     return {
       isMatch: true,
       context: {
         category: DataSourceCategory.Default,
         patternColumns,
+        sparklineColumns,
       },
     };
   },
