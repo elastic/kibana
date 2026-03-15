@@ -7,17 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Fast local confidence gate: run quick checks on current pending local changes
-// to address failures before PR CI.
-const argv = process.argv.slice(2);
-const hasFlag = (flag: string) => argv.some((arg) => arg === flag || arg.startsWith(`${flag}=`));
-
-if (!hasFlag('--ref')) {
-  process.argv.push('--ref', 'HEAD');
-}
-
-if (!hasFlag('--include-untracked') && !hasFlag('--no-include-untracked')) {
-  process.argv.push('--include-untracked');
-}
-
-require('./precommit_hook');
+require('@kbn/setup-node-env');
+require('../src/dev/run_check_changes');

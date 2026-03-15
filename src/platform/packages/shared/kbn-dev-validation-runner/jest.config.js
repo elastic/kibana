@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
-
-if (process.env.KBN_JEST_CONTRACT_DISABLED === 'true') {
-  require('@kbn/test').runJest();
-} else {
-  require('@kbn/test').runJestContract();
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-dev-validation-runner'],
+};

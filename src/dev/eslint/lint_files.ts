@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Path from 'path';
+
 import { ESLint } from 'eslint';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { File } from '../file';
+import { LINT_LOG_PREFIX } from './constants';
+
+export interface LintFilesResult {
+  fixedFiles: string[];
+  lintedFileCount: number;
+}
 
 /**
  * Lints a list of files with eslint. eslint reports are written to the log
@@ -20,9 +28,13 @@ import type { File } from '../file';
  *
  * @param  {ToolingLog} log
  * @param  {Array<File>} files
- * @return {undefined}
+ * @return lint summary details, including any files updated by --fix
  */
-export async function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boolean } = {}) {
+export async function lintFiles(
+  log: ToolingLog,
+  files: File[],
+  { fix }: { fix?: boolean } = {}
+): Promise<LintFilesResult> {
   const eslint = new ESLint({
     cache: true,
     cwd: REPO_ROOT,
@@ -35,6 +47,14 @@ export async function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?:
   if (fix) {
     await ESLint.outputFixes(reports);
   }
+
+  const fixedFiles = fix
+    ? reports
+        .filter((report) => report.output !== undefined)
+        .map((report) => report.filePath)
+        .map((filePath) => Path.relative(REPO_ROOT, filePath))
+        .sort((left, right) => left.localeCompare(right))
+    : [];
 
   let foundError = false;
   let foundWarning = false;
@@ -53,9 +73,21 @@ export async function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?:
     log[foundError ? 'error' : 'warning'](msg);
 
     if (foundError) {
-      throw createFailError(`[eslint] errors`);
+      throw createFailError(`${LINT_LOG_PREFIX} errors`);
     }
   }
 
-  log.success('[eslint] %d files linted successfully', files.length);
+  log.success(`${LINT_LOG_PREFIX} %d files linted successfully`, files.length);
+
+  if (fixedFiles.length > 0) {
+    log.info(`${LINT_LOG_PREFIX} auto-fixed %d file(s):`, fixedFiles.length);
+    for (const fixedFile of fixedFiles) {
+      log.info('  %s', fixedFile);
+    }
+  }
+
+  return {
+    fixedFiles,
+    lintedFileCount: files.length,
+  };
 }

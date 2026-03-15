@@ -14,7 +14,7 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 const TYPE_CHECK_CONFIG_FILENAME = 'tsconfig.type_check.json';
 const PROJECT_CONFIG_FILENAME = 'tsconfig.json';
 
-const formatPathForLog = (path: string) => {
+export const formatPathForLog = (path: string) => {
   if (!Path.isAbsolute(path)) {
     return path;
   }

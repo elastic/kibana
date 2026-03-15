@@ -20,6 +20,8 @@
   ],
   "kbn_references": [
     "@kbn/dev-utils",
+    "@kbn/dev-validation-runner",
+    "@kbn/moon",
     "@kbn/std",
     "@kbn/tooling-log",
     "@kbn/get-repo-files",
