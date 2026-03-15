@@ -57,7 +57,7 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
     return (
       <EuiPageTemplate.EmptyPrompt
         color="subdued"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="policy-artifacts-empty-unexisting"
         title={<h2>{labels.emptyUnexistingTitle}</h2>}
         body={labels.emptyUnexistingMessage}

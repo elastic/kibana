@@ -41,7 +41,7 @@ export const AVCResultsBanner: React.FC<{ onDismiss: () => void }> = ({ onDismis
     <EuiCallOut
       title={bannerTitle}
       color="success"
-      iconType="cheer"
+      iconType="popper"
       onDismiss={onDismiss}
       className={calloutStyles}
       data-test-subj="avcResultsBanner"

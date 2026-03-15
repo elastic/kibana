@@ -70,7 +70,7 @@ const PackDetailsPageComponent = () => {
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...packsListProps} flush="left" size="xs">
+          <EuiButtonEmpty iconType="chevronSingleLeft" {...packsListProps} flush="left" size="xs">
             <FormattedMessage
               id="xpack.osquery.packDetails.viewAllPackListTitle"
               defaultMessage="View all packs"

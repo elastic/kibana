@@ -33,7 +33,7 @@ export const ActionsContextMenu = memo<ActionsContextMenuProps>(
   ({
     items,
     'data-test-subj': dataTestSubj,
-    icon = 'boxesHorizontal',
+    icon = 'boxesVertical',
     isDisabled = false,
     disabledTooltip,
   }) => {
