@@ -35,7 +35,7 @@ const getDataView = (name: string, dataViewFields: DataView['fields'], timeField
 };
 
 describe('getInitialESQLQuery', () => {
-  it('should NOT add the where clause if there is @timestamp in the index', () => {
+  it('should add SORT by timeFieldName when @timestamp exists in the index', () => {
     const fields = [
       {
         name: '@timestamp',
@@ -55,10 +55,10 @@ describe('getInitialESQLQuery', () => {
       },
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, '@timestamp');
-    expect(getInitialESQLQuery(dataView)).toBe('FROM logs*');
+    expect(getInitialESQLQuery(dataView)).toBe('FROM logs* | SORT @timestamp DESC');
   });
 
-  it('should NOT add the where clause if there is @timestamp in the index although the dataview timefielName is different', () => {
+  it('should add SORT by timeFieldName when @timestamp exists even if timeFieldName differs', () => {
     const fields = [
       {
         name: '@timestamp',
@@ -78,7 +78,32 @@ describe('getInitialESQLQuery', () => {
       },
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, 'timestamp');
-    expect(getInitialESQLQuery(dataView)).toBe('FROM logs*');
+    expect(getInitialESQLQuery(dataView)).toBe('FROM logs* | SORT timestamp DESC');
+  });
+
+  it('should NOT add SORT when appendSortByTimestamp is false', () => {
+    const fields = [
+      {
+        name: '@timestamp',
+        displayName: '@timestamp',
+        type: 'date',
+        scripted: false,
+        filterable: true,
+        aggregatable: true,
+        sortable: true,
+      },
+      {
+        name: 'message',
+        displayName: 'message',
+        type: 'string',
+        scripted: false,
+        filterable: false,
+      },
+    ] as DataView['fields'];
+    const dataView = getDataView('logs*', fields, '@timestamp');
+    expect(getInitialESQLQuery(dataView, undefined, { appendSortByTimestamp: false })).toBe(
+      'FROM logs*'
+    );
   });
 
   it('should append a where clause correctly if there is no @timestamp in the index fields', () => {
@@ -102,7 +127,7 @@ describe('getInitialESQLQuery', () => {
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, '@custom_timestamp');
     expect(getInitialESQLQuery(dataView)).toBe(
-      'FROM logs* | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend'
+      'FROM logs* | SORT @custom_timestamp DESC | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend'
     );
   });
 
@@ -127,7 +152,7 @@ describe('getInitialESQLQuery', () => {
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, '@custom_timestamp');
     expect(getInitialESQLQuery(dataView, { language: 'kuery', query: 'error' })).toBe(
-      'FROM logs* | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend AND KQL("""error""")'
+      'FROM logs* | SORT @custom_timestamp DESC | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend AND KQL("""error""")'
     );
   });
 
@@ -152,7 +177,7 @@ describe('getInitialESQLQuery', () => {
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, 'timestamp');
     expect(getInitialESQLQuery(dataView, { language: 'lucene', query: 'error' })).toBe(
-      'FROM logs* | WHERE QSTR("""error""")'
+      'FROM logs* | SORT timestamp DESC | WHERE QSTR("""error""")'
     );
   });
 
@@ -177,7 +202,7 @@ describe('getInitialESQLQuery', () => {
     ] as DataView['fields'];
     const dataView = getDataView('logs*', fields, 'timestamp');
     expect(getInitialESQLQuery(dataView, { language: 'unknown', query: 'error' })).toBe(
-      'FROM logs*'
+      'FROM logs* | SORT timestamp DESC'
     );
   });
 
@@ -203,6 +228,6 @@ describe('getInitialESQLQuery', () => {
     ] as DataView['fields'];
     const dataView = getDataView('metrics-*', fields, '@timestamp');
 
-    expect(getInitialESQLQuery(dataView)).toBe('TS metrics-*');
+    expect(getInitialESQLQuery(dataView)).toBe('TS metrics-* | SORT @timestamp DESC');
   });
 });
