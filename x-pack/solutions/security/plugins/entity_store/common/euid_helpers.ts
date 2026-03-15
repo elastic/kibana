@@ -27,4 +27,5 @@ export const euid = {
   getEuidEsqlEvaluation: euidModule.getEuidEsqlEvaluation,
   getEuidEsqlFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
   getEuidSourceFields: euidModule.getEuidSourceFields,
+  getFieldEvaluationsEsql: euidModule.getFieldEvaluationsEsql,
 };

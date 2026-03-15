@@ -132,6 +132,7 @@ import {
   registerEntityStoreSnapshotTask,
   registerEntityStoreHealthTask,
 } from './lib/entity_analytics/entity_store/tasks';
+import { accessesFrequentlyMaintainer } from './lib/entity_analytics/entity_store/maintainers/accesses';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   allRiskScoreIndexPattern,
@@ -329,6 +330,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     if (!experimentalFeatures.entityStoreDisabled) {
+      plugins.entityStore.registerEntityMaintainer(accessesFrequentlyMaintainer);
+
       registerEntityStoreFieldRetentionEnrichTask({
         getStartServices: core.getStartServices,
         logger: this.logger,
