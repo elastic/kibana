@@ -194,7 +194,7 @@ tags:
 
       To use key-based authentication, create an API key, then specify the key in the header of your API calls.
 
-      To use basic authentication, provide a username and password; this automatically creates an API key that matches the current user’s privileges.
+      To use basic authentication, provide a username and password; this automatically creates an API key that matches the current user's privileges.
 
       In both cases, the API key is subsequently used for authorization when the rule runs.
       > warn
@@ -203,6 +203,36 @@ tags:
       > If the API key that created a rule is deleted, or the user that created the rule becomes inactive, the rule will stop running.
 
       To create and run rules, the user must meet specific requirements for the Kibana space. Refer to the [Detections requirements](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html) for a complete list of requirements.
+
+
+      ## Security Detections API Alerting API Key Behavior
+
+      The following table shows how Security Solution Detections APIs affect the rule's API key:
+
+      | Security Solution API | API key behavior |
+      |----------------------|------------------|
+      | Create Rule (enabled) (`POST /api/detection_engine/rules`) | Creates new key |
+      | Create Rule (disabled) (`POST /api/detection_engine/rules`) | No effect |
+      | Update Rule (`PUT /api/detection_engine/rules`) | Regenerates if exists* |
+      | Patch Rule (`PATCH /api/detection_engine/rules`) | Regenerates if exists* |
+      | Delete Rule (`DELETE /api/detection_engine/rules`) | Deletes with rule |
+      | Bulk Enable (`POST /api/detection_engine/rules/_bulk_action`, action: enable) | Creates if missing |
+      | Bulk Disable (`POST /api/detection_engine/rules/_bulk_action`, action: disable) | No effect |
+      | Bulk Delete (`POST /api/detection_engine/rules/_bulk_action`, action: delete) | Deletes with rule |
+      | Bulk Duplicate (`POST /api/detection_engine/rules/_bulk_action`, action: duplicate) | Creates new key |
+      | Bulk Edit (`POST /api/detection_engine/rules/_bulk_action`, action: edit) | Regenerates if exists* |
+      | Bulk Export (`POST /api/detection_engine/rules/_bulk_action`, action: export) | No effect |
+      | Bulk Run (`POST /api/detection_engine/rules/_bulk_action`, action: run) | No effect |
+      | Import Rules - new (`POST /api/detection_engine/rules/_import`) | Creates new key |
+      | Import Rules - overwrite (`POST /api/detection_engine/rules/_import`) | Regenerates if exists* |
+      | Install Prebuilt Rules (`POST /api/detection_engine/rules/prepackaged/_perform`) | No effect |
+      | Upgrade Prebuilt Rules - same type (`POST /api/detection_engine/prebuilt_rules/upgrade/_perform`) | Regenerates if exists* |
+      | Upgrade Prebuilt Rules - type change (`POST /api/detection_engine/prebuilt_rules/upgrade/_perform`) | Creates new key |
+
+      ### \* Notes
+      - **Exception list changes (9.2+)**: After version 9.2, editing only exception list parameters will not regenerate the API key.
+      - **Enabling during update**: If an update, patch, or import operation also enables the rule (changes `enabled` from `false` to `true`), and no API key exists, a new key will be created.
+      - **Exported rules**: Rules are exported with `enabled: false` and API key values are stripped. When re-imported, the enable behavior applies.
     name: Security Detections API
     x-displayName: Security detections
   - description: Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
@@ -14471,7 +14501,7 @@ paths:
 
         The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
         > warn
-        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules and invalidates the old API key. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: PatchRule
@@ -14521,7 +14551,7 @@ paths:
                   query: |
                     FROM logs-abc*
                     | STATS count = COUNT(*), min_timestamp = MIN(@timestamp)
-                    | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) 
+                    | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW())
                     | KEEP event_rate
               example6:
                 summary: Patch indicator match rule
@@ -15300,7 +15330,7 @@ paths:
 
         The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
         > warn
-        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules and invalidates the old API key. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: UpdateRule
@@ -15479,10 +15509,12 @@ paths:
 
         Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
 
-        The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
+        The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once.
         The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
         > warn
         > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+        >Invalidation of the old API key is dependent on the bulk action. Refer to the [API key behavior](https://www.elastic.co/guide/en/security/current/detections-api-key-behavior.html) for more details.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: PerformRulesBulkAction
@@ -16819,7 +16851,7 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
         > warn
-        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules and invalidates the old API key. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
@@ -73433,7 +73465,7 @@ components:
         - value
     Security_Detections_API_BulkActionEditPayloadSchedule:
       description: |
-        Overwrites schedule of rules. 
+        Overwrites schedule of rules.
 
         - `set_schedule` sets a schedule for rules. If the same schedule already exists for a rule, no changes are made.
 
