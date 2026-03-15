@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
@@ -28,7 +29,7 @@ interface CanvasContentWrapperProps {
   attachment: UnknownAttachment;
   isSidebar: boolean;
   registerActionButtons: (buttons: ActionButton[]) => void;
-  updateOrigin: (origin: unknown) => Promise<unknown>;
+  updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
   closeCanvas: () => void;
   conversationId: string | undefined;
 }
@@ -125,7 +126,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   ]);
 
   const updateOrigin = useCallback(
-    async (origin: unknown) => {
+    async (origin: unknown): Promise<UpdateOriginResponse | undefined> => {
       if (!conversationId || !canvasState) {
         return;
       }
