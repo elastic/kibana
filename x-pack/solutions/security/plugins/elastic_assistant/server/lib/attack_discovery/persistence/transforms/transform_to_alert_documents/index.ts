@@ -23,6 +23,7 @@ import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
   ALERT_ATTACK_DISCOVERY_API_CONFIG,
+  ALERT_ATTACK_DISCOVERY_CASE_ID,
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
@@ -116,7 +117,7 @@ export const transformToBaseAlertDocument = ({
   publicBaseUrl?: string;
   spaceId: string;
 }): AttackDiscoveryAlertDocumentBase => {
-  const { alertsContextCount, anonymizedAlerts, apiConfig, connectorName, replacements } =
+  const { alertsContextCount, anonymizedAlerts, apiConfig, caseId, connectorName, replacements } =
     alertsParams;
 
   const {
@@ -149,6 +150,7 @@ export const transformToBaseAlertDocument = ({
       name: connectorName,
       provider: apiConfig.provider,
     },
+    ...(caseId != null ? { [ALERT_ATTACK_DISCOVERY_CASE_ID]: caseId } : {}),
     [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN]: detailsMarkdown,
     [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS]:
       replaceAnonymizedValuesWithOriginalValues({

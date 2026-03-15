@@ -9,6 +9,7 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_API_CONFIG_NAME,
+  ALERT_ATTACK_DISCOVERY_CASE_ID,
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
@@ -20,6 +21,7 @@ const escapeQueryString = (str: string) => str.replace(/[+\-=&|><!(){}[\]^"~*?:\
 // returns a KQL filter by combining the provided filters with `AND`
 export const combineFindAttackDiscoveryFilters = ({
   alertIds,
+  caseId,
   connectorNames,
   end,
   executionUuid,
@@ -29,6 +31,7 @@ export const combineFindAttackDiscoveryFilters = ({
   status,
 }: {
   alertIds?: string[];
+  caseId?: string;
   connectorNames?: string[];
   end?: string;
   executionUuid?: string;
@@ -67,6 +70,7 @@ export const combineFindAttackDiscoveryFilters = ({
     ...(alertIds && alertIds.length > 0
       ? [`(${alertIds.map((id) => `${ALERT_ATTACK_DISCOVERY_ALERT_IDS}: "${id}"`).join(' OR ')})`]
       : []),
+    ...(caseId ? [`${ALERT_ATTACK_DISCOVERY_CASE_ID}: "${escapeQueryString(caseId)}"`] : []),
     ...(executionUuid ? [`kibana.alert.rule.execution.uuid: "${executionUuid}"`] : []),
     ...(start ? [`@timestamp >= "${start}"`] : []),
     ...(end ? [`@timestamp <= "${end}"`] : []),

@@ -9,6 +9,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
+import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type {
@@ -111,6 +112,9 @@ const createElasticAssistantRequestContextMock = (
 ): jest.Mocked<ElasticAssistantApiRequestHandlerContext> => {
   return {
     actions: clients.elasticAssistant.actions as unknown as ActionsPluginStart,
+    cases: {
+      getCasesClientWithRequest: jest.fn(),
+    } as unknown as CasesServerStart,
     rulesClient: {
       create: jest.fn(),
       runSoon: jest.fn(),

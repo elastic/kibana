@@ -23,6 +23,7 @@ import type {
   SavedObjectsClientContract,
   UserProfileServiceStart,
 } from '@kbn/core/server';
+import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { StructuredToolInterface } from '@langchain/core/tools';
@@ -145,6 +146,7 @@ export interface ElasticAssistantPluginSetupDependencies {
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   alerting: AlertingServerStart;
+  cases: CasesServerStart;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
@@ -157,6 +159,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
   auditLogger?: AuditLogger;
+  cases: CasesServerStart;
   rulesClient: RulesClient;
   frameworkAlerts: PublicFrameworkAlertsService;
   eventLogger: IEventLogger;

@@ -18,6 +18,7 @@
     "requiredPlugins": [
       "actions",
       "alerting",
+      "cases",
       "data",
       "eventLog",
       "ml",

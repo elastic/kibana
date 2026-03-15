@@ -211,6 +211,10 @@ export const CreateAttackDiscoveryAlertsParams = z.object({
    */
   attackDiscoveries: AttackDiscoveries,
   /**
+   * The case ID that this attack discovery is associated with
+   */
+  caseId: z.string().optional(),
+  /**
    * The name of the connector that generated the attack discovery
    */
   connectorName: z.string(),
@@ -238,6 +242,10 @@ export const FindAttackDiscoveryAlertsParams = z.object({
    * filter by alert IDs within Attack discovery
    */
   alertIds: z.array(z.string()).optional(),
+  /**
+   * Filter by case ID to return only Attack discoveries associated with a specific case
+   */
+  caseId: z.string().optional(),
   /**
    * filter by connector names
    */
@@ -309,6 +317,10 @@ Example: .alerts-security.alerts-default
    * LLM API configuration.
    */
   apiConfig: ApiConfig,
+  /**
+   * Optional case ID to scope the attack discovery to. When provided, the server will derive alert IDs from the alerts attached to this case and use them as the alert filter. The generated discoveries will be associated with this case for later retrieval.
+   */
+  caseId: z.string().optional(),
   connectorName: z.string().optional(),
   end: z.string().optional(),
   /**
