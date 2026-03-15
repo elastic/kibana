@@ -15,7 +15,11 @@ import {
   InspectorContextProvider,
 } from '@kbn/observability-shared-plugin/public';
 import { Route } from '@kbn/shared-ux-router';
-import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import {
+  RouteRenderer,
+  RouteSelfHealErrorBoundary,
+  RouterProvider,
+} from '@kbn/typed-react-router-config';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { KibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/kibana_environment_context';
@@ -69,31 +73,33 @@ export function ApmAppRoot({
                   <RouterProvider history={history} router={apmRouter as any}>
                     <PerformanceContextProvider>
                       <ApmErrorBoundary>
-                        <RedirectDependenciesToDependenciesInventory>
-                          <RedirectWithDefaultEnvironment>
-                            <RedirectWithDefaultDateRange>
-                              <RedirectWithOffset>
-                                <TrackPageview>
-                                  <UpdateExecutionContextOnRouteChange>
-                                    <BreadcrumbsContextProvider>
-                                      <UrlParamsProvider>
-                                        <LicenseProvider>
-                                          <AnomalyDetectionJobsContextProvider>
-                                            <InspectorContextProvider>
-                                              <MountApmHeaderActionMenu />
-                                              <Route component={ScrollToTopOnPathChange} />
-                                              <RouteRenderer />
-                                            </InspectorContextProvider>
-                                          </AnomalyDetectionJobsContextProvider>
-                                        </LicenseProvider>
-                                      </UrlParamsProvider>
-                                    </BreadcrumbsContextProvider>
-                                  </UpdateExecutionContextOnRouteChange>
-                                </TrackPageview>
-                              </RedirectWithOffset>
-                            </RedirectWithDefaultDateRange>
-                          </RedirectWithDefaultEnvironment>
-                        </RedirectDependenciesToDependenciesInventory>
+                        <RouteSelfHealErrorBoundary>
+                          <RedirectDependenciesToDependenciesInventory>
+                            <RedirectWithDefaultEnvironment>
+                              <RedirectWithDefaultDateRange>
+                                <RedirectWithOffset>
+                                  <TrackPageview>
+                                    <UpdateExecutionContextOnRouteChange>
+                                      <BreadcrumbsContextProvider>
+                                        <UrlParamsProvider>
+                                          <LicenseProvider>
+                                            <AnomalyDetectionJobsContextProvider>
+                                              <InspectorContextProvider>
+                                                <MountApmHeaderActionMenu />
+                                                <Route component={ScrollToTopOnPathChange} />
+                                                <RouteRenderer />
+                                              </InspectorContextProvider>
+                                            </AnomalyDetectionJobsContextProvider>
+                                          </LicenseProvider>
+                                        </UrlParamsProvider>
+                                      </BreadcrumbsContextProvider>
+                                    </UpdateExecutionContextOnRouteChange>
+                                  </TrackPageview>
+                                </RedirectWithOffset>
+                              </RedirectWithDefaultDateRange>
+                            </RedirectWithDefaultEnvironment>
+                          </RedirectDependenciesToDependenciesInventory>
+                        </RouteSelfHealErrorBoundary>
                       </ApmErrorBoundary>
                     </PerformanceContextProvider>
                   </RouterProvider>
