@@ -24,10 +24,13 @@ import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import SHARDED_JEST_CONFIGS from '../../sharded_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
+import { getAffectedPackages, filterFilesByAffectedPackages } from '../affected-packages';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
+import { NO_SELECTIVE_TESTS_LABEL } from '#pipeline-utils/affected-packages/const';
+
+const NO_SELECTIVE_TESTS = process.env.GITHUB_LABELS?.includes(NO_SELECTIVE_TESTS_LABEL);
 
 const SHARD_ANNOTATION_SEP = '||shard=';
-
 /**
  * Expands configs that appear in the shard map into N shard-annotated entries.
  * For example, if `fleet/jest.integration.config.js` has 2 shards, it becomes:
@@ -221,7 +224,32 @@ export async function pickTestGroupRunOrder() {
   // Expand sharded integration configs into shard-annotated entries
   const jestIntegrationConfigs = expandShardedJestConfigs(jestIntegrationConfigsRaw);
 
-  if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
+  // Apply affected package filtering
+  const affectedPackages = await getAffectedPackages(process.env.GITHUB_PR_MERGE_BASE, {
+    strategy: 'git',
+    includeDownstream: true,
+    logging: false,
+  });
+  const filteredJestUnitConfigs =
+    !NO_SELECTIVE_TESTS && affectedPackages
+      ? filterFilesByAffectedPackages(jestUnitConfigs, affectedPackages)
+      : jestUnitConfigs;
+  console.warn(
+    `Filtering Jest unit tests for affected packages: ${jestUnitConfigs.length} -> ${filteredJestUnitConfigs.length}`
+  );
+  const filteredJestIntegrationConfigs =
+    !NO_SELECTIVE_TESTS && affectedPackages
+      ? filterFilesByAffectedPackages(jestIntegrationConfigs, affectedPackages)
+      : jestIntegrationConfigs;
+  console.warn(
+    `Filtering Jest integration tests for affected packages: ${jestIntegrationConfigs.length} -> ${filteredJestIntegrationConfigs.length}`
+  );
+
+  if (
+    !ftrConfigsByQueue.size &&
+    !filteredJestUnitConfigs.length &&
+    !filteredJestIntegrationConfigs.length
+  ) {
     throw new Error('unable to find any unit, integration, or FTR configs');
   }
 
@@ -288,7 +316,7 @@ export async function pickTestGroupRunOrder() {
         overheadMin: 0.2,
         warmupMin: 4,
         concurrency: 3,
-        names: jestUnitConfigs,
+        names: filteredJestUnitConfigs,
       },
       {
         type: INTEGRATION_TYPE,
@@ -297,7 +325,7 @@ export async function pickTestGroupRunOrder() {
         overheadMin: 0.2,
         warmupMin: 2,
         concurrency: 1,
-        names: jestIntegrationConfigs,
+        names: filteredJestIntegrationConfigs,
       },
       ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
         type: FUNCTIONAL_TYPE,

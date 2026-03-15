@@ -1,0 +1,15 @@
+$schema: https://moonrepo.dev/schemas/tasks.json
+
+tasks:
+  jest:
+    command: node
+    args:
+      - scripts/jest.js
+      - '--runInBand'
+      - '--passWithNoTests'
+    deps:
+      - '~:source'
+      - '~:source-upstream'
+    options:
+      mergeArgs: append
+      runFromWorkspaceRoot: true

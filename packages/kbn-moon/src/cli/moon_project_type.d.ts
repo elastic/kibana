@@ -43,11 +43,13 @@ export interface MoonTaskConfig {
   command?: string;
   script?: string;
   args?: string[];
+  deps?: (string | { target: string; optional?: boolean })[];
   inputs?: string[];
   outputs?: string[];
   options?: Record<string, unknown> & {
     env?: Record<string, string>;
     cache?: boolean | 'local' | 'remote';
+    internal?: boolean;
   };
   tags?: string[];
   dependsOn?: string[];
