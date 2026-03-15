@@ -127,6 +127,9 @@ describe('convertJsonSchemaToZod – unimplemented keyword gaps', () => {
       );
       const validResult = userSchema.safeParse({ name: 'Alice' });
       expect(validResult.success).toBe(true);
+      // Also verify that invalid data fails, proving the $ref is enforced
+      const invalidResult = userSchema.safeParse({});
+      expect(invalidResult.success).toBe(false);
     });
   });
 
@@ -149,7 +152,7 @@ describe('convertJsonSchemaToZod – unimplemented keyword gaps', () => {
       const schema = convertJsonSchemaToZod({
         type: 'array',
         items: [{ type: 'string' }, { type: 'number' }],
-      } as unknown as JSONSchema7);
+      } as JSONSchema7);
       const result = schema.safeParse([42, 'wrong']);
       expect(result.success).toBe(true); // Should be false when implemented
     });

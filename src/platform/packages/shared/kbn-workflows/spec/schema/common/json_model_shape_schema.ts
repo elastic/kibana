@@ -30,8 +30,7 @@ export type JsonSchemaType = (typeof JSON_SCHEMA_TYPE_VALUES)[number];
  * Common JSON Schema format annotation values (Draft 7 / 2020-12 standard).
  * Single source of truth for autocomplete suggestions.
  * Reference: https://json-schema.org/draft-07/schema#section-7.3
- */
-/**
+ *
  * Only formats that fromJSONSchema actively validates are listed here.
  * Omitted formats (ipv4, ipv6, hostname, regex, etc.) are not enforced by the
  * converter, so we don't suggest them — users can use `pattern` instead.
