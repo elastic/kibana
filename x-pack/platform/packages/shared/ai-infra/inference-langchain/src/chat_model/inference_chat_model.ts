@@ -67,6 +67,7 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   signal?: AbortSignal;
   timeout?: number;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  anonymization?: ChatCompleteAnonymizationMetadata;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -108,6 +109,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   protected model?: string;
   protected signal?: AbortSignal;
   protected timeout?: number;
+  protected anonymization?: ChatCompleteAnonymizationMetadata;
 
   constructor(args: InferenceChatModelParams) {
     super(args);
@@ -121,6 +123,29 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.signal = args.signal;
     this.timeout = args.timeout;
     this.maxRetries = args.maxRetries;
+    this.anonymization = args.anonymization;
+  }
+
+  /**
+   * Returns a new InferenceChatModel instance with the given anonymization metadata bound,
+   * so that it flows through withStructuredOutput chains without needing to be passed at
+   * invoke time (which is not type-safe on the Runnable<I, O, RunnableConfig> return type).
+   */
+  withAnonymization(
+    anonymization: ChatCompleteAnonymizationMetadata | undefined
+  ): InferenceChatModel {
+    return new InferenceChatModel({
+      chatComplete: this.chatComplete,
+      connector: this.connector,
+      telemetryMetadata: this.telemetryMetadata,
+      temperature: this.temperature,
+      functionCallingMode: this.functionCallingMode,
+      model: this.model,
+      signal: this.signal,
+      timeout: this.timeout,
+      maxRetries: this.maxRetries,
+      anonymization,
+    });
   }
 
   static lc_name() {
@@ -190,9 +215,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     const inferredTools = options.tools ? toolDefinitionToInference(options.tools) : undefined;
     const hasTools = inferredTools ? Object.keys(inferredTools).length > 0 : false;
     const resolvedToolChoice = options.tool_choice ?? 'auto';
+    const resolvedAnonymization = options.anonymization ?? this.anonymization;
     const metadata = {
       ...(this.telemetryMetadata ? { connectorTelemetry: this.telemetryMetadata } : {}),
-      ...(options.anonymization ? { anonymization: options.anonymization } : {}),
+      ...(resolvedAnonymization ? { anonymization: resolvedAnonymization } : {}),
     };
 
     return {
@@ -343,25 +369,17 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
     outputSchema: InteropZodType<RunOutput> | Record<string, any>,
     config?: StructuredOutputMethodOptions<false>
-  ): Runnable<BaseLanguageModelInput, RunOutput, InferenceChatModelCallOptions>;
+  ): Runnable<BaseLanguageModelInput, RunOutput>;
   withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
     outputSchema: InteropZodType<RunOutput> | Record<string, any>,
     config?: StructuredOutputMethodOptions<true>
-  ): Runnable<
-    BaseLanguageModelInput,
-    { raw: BaseMessage; parsed: RunOutput },
-    InferenceChatModelCallOptions
-  >;
+  ): Runnable<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }>;
   withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
     outputSchema: InteropZodType<RunOutput> | Record<string, any>,
     config?: StructuredOutputMethodOptions<boolean>
   ):
-    | Runnable<BaseLanguageModelInput, RunOutput, InferenceChatModelCallOptions>
-    | Runnable<
-        BaseLanguageModelInput,
-        { raw: BaseMessage; parsed: RunOutput },
-        InferenceChatModelCallOptions
-      > {
+    | Runnable<BaseLanguageModelInput, RunOutput>
+    | Runnable<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }> {
     const schema: InteropZodType<RunOutput> | Record<string, any> = outputSchema;
     const name = config?.name;
     const description =

@@ -24,7 +24,6 @@ import { useConversationContext } from '../../../../context/conversation/convers
 import { useKibana } from '../../../../hooks/use_kibana';
 import { VisualizeESQL } from '../../../tools/esql/visualize_esql';
 import type { AgentBuilderStartDependencies } from '../../../../../types';
-import type { AgentBuilderInternalService } from '../../../../../services';
 import { setWith } from '@kbn/safer-lodash-set';
 import { ChartType } from '@kbn/visualization-utils';
 import { useResolveAnonymizedValues } from '@kbn/anonymization-ui';
@@ -74,9 +73,7 @@ jest.mock(
 );
 
 const mockVisualizeESQL = VisualizeESQL as jest.MockedFunction<any>;
-const useAgentBuilderServicesMock = useAgentBuilderServices as jest.MockedFunction<
-  typeof useAgentBuilderServices
->;
+const useAgentBuilderServicesMock = useAgentBuilderServices as jest.Mock;
 const useStepsFromPrevRoundsMock = useStepsFromPrevRounds as jest.MockedFunction<
   typeof useStepsFromPrevRounds
 >;
@@ -120,9 +117,7 @@ function createStartDependencies() {
   } as AgentBuilderStartDependencies;
 }
 
-function createMockAgentBuilderServices(
-  hasAnonymizationEnabled: boolean = true
-): AgentBuilderInternalService {
+function createMockAgentBuilderServices(hasAnonymizationEnabled: boolean = true) {
   return {
     agentService: {},
     attachmentsService: {

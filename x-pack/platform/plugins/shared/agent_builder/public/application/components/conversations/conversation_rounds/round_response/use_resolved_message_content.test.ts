@@ -13,8 +13,11 @@ import {
 import { useReplacementsHold } from './use_replacements_hold';
 import { useResolvedMessageContent } from './use_resolved_message_content';
 
-jest.mock('@kbn/anonymization-ui', () => ({
+jest.mock('@kbn/anonymization-ui/src/common/services/replacements/client', () => ({
   createAnonymizationReplacementsClient: jest.fn(),
+}));
+
+jest.mock('@kbn/anonymization-ui/src/common/hooks/use_resolve_anonymized_values', () => ({
   useResolveAnonymizedValues: jest.fn(),
 }));
 
