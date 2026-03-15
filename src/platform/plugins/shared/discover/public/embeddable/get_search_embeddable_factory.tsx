@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
+import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, firstValueFrom, merge, skip, map } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -39,6 +40,7 @@ import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
+import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
@@ -154,6 +156,7 @@ export const getSearchEmbeddableFactory = ({
           inlineEditingApi.anyStateChange$
         ),
         getComparators: () => {
+          const isByValue = !savedObjectId$.getValue();
           const isDeleted = isSelectedTabDeleted(selectedTabId$.getValue());
           const shouldSkipTabComparators = isDeleted || inlineEditingApi.isEditing();
 
@@ -171,7 +174,19 @@ export const getSearchEmbeddableFactory = ({
                 )
               : {}),
             selectedTabId: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
-            attributes: 'skip',
+            // By-value panels store editable state (EDITABLE_SAVED_SEARCH_KEYS) in attributes;
+            // compare only those keys. Treat missing and undefined the same (e.g. rowsPerPage
+            // absent in saved vs undefined in current) so we don't get false unsaved-changes.
+            attributes: isByValue
+              ? (a: unknown, b: unknown) => {
+                  const aAttr = (a as Record<string, unknown>) ?? {};
+                  const bAttr = (b as Record<string, unknown>) ?? {};
+                  for (const key of EDITABLE_SAVED_SEARCH_KEYS) {
+                    if (!deepEqual(aAttr[key] ?? undefined, bAttr[key] ?? undefined)) return false;
+                  }
+                  return true;
+                }
+              : 'skip',
             breakdownField: 'skip',
             hideAggregatedPreview: 'skip',
             hideChart: 'skip',
