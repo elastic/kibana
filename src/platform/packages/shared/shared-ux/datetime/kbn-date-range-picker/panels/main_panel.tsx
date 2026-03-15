@@ -119,9 +119,9 @@ const SubPanelMenu = () => {
       <PanelNavItem onClick={() => navigateTo('calendar-panel')} icon="calendar">
         {mainPanelTexts.calendarPanelTitle}
       </PanelNavItem>
-      <PanelNavItem onClick={() => navigateTo('custom-time-range-panel')} icon="controls">
+      {/* <PanelNavItem onClick={() => navigateTo('custom-time-range-panel')} icon="controls">
         {mainPanelTexts.customTimeRangePanelTitle}
-      </PanelNavItem>
+      </PanelNavItem> */}
       {panelDescriptors.map(({ id, title, icon }) => (
         <PanelNavItem key={id} onClick={() => navigateTo(id)} icon={icon}>
           {title}
