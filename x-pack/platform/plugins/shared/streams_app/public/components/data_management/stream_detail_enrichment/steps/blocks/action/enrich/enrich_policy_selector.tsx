@@ -9,19 +9,26 @@ import { EuiFormRow, EuiLink, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
-import React, { useMemo } from 'react';
+import React, { type ReactNode, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 
-// TODO - add return type
-export const useEnrichPolicies = () => {
+interface UseEnrichPoliciesResponse {
+  policies: SerializedEnrichPolicy[];
+  isLoading: boolean;
+  isFetched: boolean;
+  isError: boolean;
+}
+
+export const useEnrichPolicies = (): UseEnrichPoliciesResponse => {
   const {
     dependencies: {
       start: { indexManagement },
     },
   } = useKibana();
 
-  const { data, isLoading, isFetched } = useQuery({
+  const { data, isLoading, isFetched, isError } = useQuery({
     queryKey: ['enrichPolicies'],
     queryFn: async () => {
       const response = await indexManagement.apiService.getAllEnrichPolicies();
@@ -29,13 +36,48 @@ export const useEnrichPolicies = () => {
     },
   });
 
-  return { policies: data ?? [], isLoading, isFetched };
+  return { policies: data ?? [], isLoading, isFetched, isError };
 };
 
-// TODO - handle errors and prompt to create a policy if no policies are found
+const getErrorMessage = (
+  noPoliciesFound: boolean,
+  isError: boolean,
+  defaultMessage: string | undefined,
+  createEnrichPolicyUrl: string
+): ReactNode => {
+  if (noPoliciesFound) {
+    return (
+      <FormattedMessage
+        id="xpack.streams.enrichPolicySelector.noPoliciesFoundError"
+        defaultMessage="No enrich policies found. {createEnrichPolicyUrl}"
+        values={{
+          createEnrichPolicyUrl: (
+            <EuiLink href={createEnrichPolicyUrl} target="_blank">
+              {i18n.translate('xpack.streams.enrichPolicySelector.createEnrichPolicyLinkLabel', {
+                defaultMessage: 'Create an enrich policy',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+    );
+  }
+
+  if (isError) {
+    return (
+      <FormattedMessage
+        id="xpack.streams.enrichPolicySelector.errorMessage"
+        defaultMessage="Error fetching enrich policies"
+      />
+    );
+  }
+
+  return defaultMessage;
+};
+
 export const EnrichPolicySelector = () => {
   const { control } = useFormContext();
-  const { policies, isLoading, isFetched } = useEnrichPolicies();
+  const { policies, isLoading, isFetched, isError } = useEnrichPolicies();
   const { core } = useKibana();
   const createEnrichPolicyUrl = core.application.getUrlForApp('management', {
     path: '/data/index_management/enrich_policies/create',
@@ -61,26 +103,12 @@ export const EnrichPolicySelector = () => {
             { defaultMessage: 'Enrich policy' }
           )}
           isInvalid={fieldState.invalid || noPoliciesFound}
-          error={
-            noPoliciesFound ? (
-              <FormattedMessage
-                id="xpack.streams.enrichPolicySelector.noPoliciesFoundError"
-                defaultMessage="No enrich policies found. {createEnrichPolicyUrl}"
-                values={{
-                  createEnrichPolicyUrl: (
-                    <EuiLink href={createEnrichPolicyUrl} target="_blank">
-                      {i18n.translate(
-                        'xpack.streams.enrichPolicySelector.createEnrichPolicyLinkLabel',
-                        { defaultMessage: 'Create enrich policy' }
-                      )}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            ) : (
-              fieldState.error?.message
-            )
-          }
+          error={getErrorMessage(
+            noPoliciesFound,
+            isError,
+            fieldState.error?.message,
+            createEnrichPolicyUrl
+          )}
         >
           <EuiSelect
             isInvalid={fieldState.invalid || noPoliciesFound}
