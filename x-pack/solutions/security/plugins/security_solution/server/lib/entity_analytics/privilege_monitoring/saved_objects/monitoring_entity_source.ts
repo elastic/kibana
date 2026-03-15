@@ -153,11 +153,20 @@ export class MonitoringEntitySourceDescriptorClient {
     return updateFn({ id: existing.id, ...attrs });
   }
 
-  private getQueryFilters = (query?: ListEntitySourcesRequestQuery) => {
+  private getQueryFilters = (query?: ListEntitySourcesRequestQuery, ids?: string[]) => {
     const queryParts = _.pick(query ?? {}, ['type', 'managed', 'name']);
-    return Object.entries(queryParts)
-      .map(([key, value]) => `${monitoringEntitySourceTypeName}.attributes.${key}: ${value}`)
-      .join(' and ');
+    const filters = Object.entries(queryParts).map(
+      ([key, value]) => `${monitoringEntitySourceTypeName}.attributes.${key}: ${value}`
+    );
+
+    if (ids?.length) {
+      const idFilter = ids
+        .map((id) => `${monitoringEntitySourceTypeName}.id: "${id}"`)
+        .join(' or ');
+      filters.push(`(${idFilter})`);
+    }
+
+    return filters.join(' and ');
   };
 
   async get(id: string): Promise<MonitoringEntitySource> {
@@ -204,9 +213,12 @@ export class MonitoringEntitySourceDescriptorClient {
     };
   }
 
-  public async list(query: ListEntitySourcesRequestQuery): Promise<ListEntitySourcesResponse> {
+  public async list(
+    query: ListEntitySourcesRequestQuery,
+    ids?: string[]
+  ): Promise<ListEntitySourcesResponse> {
     return this.find({
-      kuery: this.getQueryFilters(query),
+      kuery: this.getQueryFilters(query, ids),
       sortField: query?.sort_field ?? undefined,
       sortOrder: query?.sort_order ?? undefined,
       page: query?.page ?? 1,
