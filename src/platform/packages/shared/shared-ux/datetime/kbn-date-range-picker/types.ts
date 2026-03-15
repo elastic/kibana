@@ -42,9 +42,27 @@ export interface CalendarOptions {
   firstDayOfWeek?: 0 | 1;
 }
 
+/** Canonical date-math time units */
+export type TimeUnit = 'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'M' | 'y';
+
+/** Structured offset extracted from a relative date-math string like `now-7d/d` */
+export interface DateOffset {
+  /** Signed offset. Negative = past, positive = future. */
+  count: number;
+  /** Time unit for the offset */
+  unit: TimeUnit;
+  /** Optional rounding unit (the `/d` in `now-1d/d`) */
+  roundTo?: TimeUnit;
+}
+
 export interface TimeRangeTransformOptions {
   presets?: TimeRangeBoundsOption[];
+  /** Additional accepted delimiter (on top of the built-in `'to'`, `'until'`, and `'-'`) */
   delimiter?: string;
+  /**
+   * Format string used for both displaying and parsing absolute dates.
+   * Prepended to built-in formats so custom-formatted dates round-trip correctly.
+   */
   dateFormat?: string;
 }
 
@@ -57,4 +75,8 @@ export interface TimeRange {
   type: [DateType, DateType];
   isNaturalLanguage: boolean;
   isInvalid: boolean;
+  /** Non-null only when the start bound is RELATIVE */
+  startOffset: DateOffset | null;
+  /** Non-null only when the end bound is RELATIVE */
+  endOffset: DateOffset | null;
 }
