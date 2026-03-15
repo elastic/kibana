@@ -239,7 +239,7 @@ async function runEntityMaintainerTask({
       id,
       namespace,
       type: EntityMaintainerTelemetryEventType.ERROR,
-      errorMessage: err?.message,
+      errorMessage: err?.message?.substring(0, 500), // limit error message length to prevent excessively long strings in telemetry
     });
   } finally {
     currentStatus.metadata.runs++;
