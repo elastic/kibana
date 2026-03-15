@@ -1379,6 +1379,12 @@
   "usage-counters": [
     "domainId"
   ],
+  "user-storage": [
+    "userId"
+  ],
+  "user-storage-global": [
+    "userId"
+  ],
   "visualization": [
     "description",
     "kibanaSavedObjectMeta",

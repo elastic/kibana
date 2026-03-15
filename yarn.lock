@@ -6179,6 +6179,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-storage-common@link:src/core/packages/user-storage/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-storage-server-internal@link:src/core/packages/user-storage/server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-storage-server-mocks@link:src/core/packages/user-storage/server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-storage-server@link:src/core/packages/user-storage/server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core@link:src/core":
   version "0.0.0"
   uid ""
@@ -9500,6 +9516,10 @@
   uid ""
 
 "@kbn/user-profiles-consumer-plugin@link:x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/user-storage-test-plugin@link:src/core/packages/user-storage/test/plugins/user_storage_test":
   version "0.0.0"
   uid ""
 
