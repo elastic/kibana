@@ -24,15 +24,27 @@ const validateFilePath = (filePath: string, label: string): void => {
   }
 };
 
-export const runOasdiff = (basePath: string, currentPath: string): OasdiffEntry[] => {
+interface OasdiffOptions {
+  matchPath?: string;
+}
+
+export const runOasdiff = (
+  basePath: string,
+  currentPath: string,
+  options?: OasdiffOptions
+): OasdiffEntry[] => {
   validateFilePath(basePath, 'basePath');
   validateFilePath(currentPath, 'currentPath');
 
   const bin = process.env.OASDIFF_BIN ?? 'oasdiff';
+  const args = ['breaking', basePath, currentPath, '--format', 'json'];
+  if (options?.matchPath) {
+    args.push('--match-path', options.matchPath);
+  }
   let output: string;
 
   try {
-    output = execFileSync(bin, ['breaking', basePath, currentPath, '--format', 'json'], {
+    output = execFileSync(bin, args, {
       encoding: 'utf-8',
       maxBuffer: MAX_BUFFER,
       stdio: ['pipe', 'pipe', 'pipe'],

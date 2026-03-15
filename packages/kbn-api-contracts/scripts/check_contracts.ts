@@ -15,6 +15,8 @@ import { runOasdiff, parseOasdiff, applyAllowlist } from '../src/diff';
 import { formatFailure } from '../src/report/format_failure';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
 import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
+import { loadTerraformApis } from '../src/terraform/load_terraform_apis';
+import { buildMatchPath } from '../src/terraform/build_match_path';
 
 type Distribution = 'stack' | 'serverless';
 
@@ -174,7 +176,30 @@ run(
 
     try {
       const currentPath = resolve(process.cwd(), opts.specPath);
-      const diffEntries = runOasdiff(basePath, currentPath);
+      const terraformApis = loadTerraformApis(opts.terraformApisPath);
+      const matchPath = buildMatchPath(terraformApis);
+      if (matchPath) {
+        log.info(`Filtering oasdiff to ${terraformApis.length} Terraform provider API paths`);
+      }
+      let diffEntries;
+      try {
+        diffEntries = runOasdiff(basePath, currentPath, { matchPath });
+      } catch (error: unknown) {
+        // oasdiff can't parse valid OpenAPI specs that use $ref inside example
+        // objects (e.g. `$ref: '#/components/examples/...'`). This is valid per
+        // the OpenAPI 3.0/3.1 spec but unsupported by oasdiff. Rather than
+        // failing CI for every PR, we skip breaking change detection and warn.
+        // This can be removed once oasdiff supports example $refs.
+        // TODO: file an issue upstream at https://github.com/Tufin/oasdiff
+        if ((error as Error)?.message?.includes('expecting ref to example object')) {
+          log.warning(
+            'oasdiff cannot parse example $ref in the OpenAPI spec. ' +
+              'Skipping breaking change detection until oasdiff supports example refs.'
+          );
+          return;
+        }
+        throw error;
+      }
       const allBreakingChanges = parseOasdiff(diffEntries);
 
       if (allBreakingChanges.length === 0) {

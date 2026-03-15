@@ -120,6 +120,40 @@ describe('runOasdiff', () => {
     );
   });
 
+  it('passes --match-path when matchPath option is provided', () => {
+    mockExecFileSync.mockReturnValue('[]');
+
+    runOasdiff('/tmp/base.yaml', '/tmp/current.yaml', {
+      matchPath: '/api/actions/connector|/api/alerting/rule',
+    });
+
+    expect(mockExecFileSync).toHaveBeenCalledWith(
+      'oasdiff',
+      [
+        'breaking',
+        '/tmp/base.yaml',
+        '/tmp/current.yaml',
+        '--format',
+        'json',
+        '--match-path',
+        '/api/actions/connector|/api/alerting/rule',
+      ],
+      expect.any(Object)
+    );
+  });
+
+  it('does not pass --match-path when option is omitted', () => {
+    mockExecFileSync.mockReturnValue('[]');
+
+    runOasdiff('/tmp/base.yaml', '/tmp/current.yaml');
+
+    expect(mockExecFileSync).toHaveBeenCalledWith(
+      'oasdiff',
+      ['breaking', '/tmp/base.yaml', '/tmp/current.yaml', '--format', 'json'],
+      expect.any(Object)
+    );
+  });
+
   it('uses OASDIFF_BIN env var when set', () => {
     process.env.OASDIFF_BIN = '/usr/local/bin/oasdiff';
     mockExecFileSync.mockReturnValue('[]');

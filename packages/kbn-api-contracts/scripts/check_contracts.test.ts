@@ -33,6 +33,14 @@ jest.mock('../src/terraform/check_terraform_impact', () => ({
   checkTerraformImpact: jest.fn(),
 }));
 
+jest.mock('../src/terraform/load_terraform_apis', () => ({
+  loadTerraformApis: jest.fn().mockReturnValue([]),
+}));
+
+jest.mock('../src/terraform/build_match_path', () => ({
+  buildMatchPath: jest.fn().mockReturnValue(undefined),
+}));
+
 jest.mock('../src/allowlist/load_allowlist', () => ({
   loadAllowlist: jest.fn(),
 }));
@@ -147,6 +155,28 @@ describe('check_contracts', () => {
 
     await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow('ENOBUFS');
     expect(mockRunOasdiff).not.toHaveBeenCalled();
+  });
+
+  it('warns and skips when oasdiff fails due to example $ref parsing', async () => {
+    mockRunOasdiff.mockImplementation(() => {
+      throw new Error('bad data in "#/components/schemas/Foo" (expecting ref to example object)');
+    });
+
+    await runCallback({ flags: defaultFlags, log: mockLog });
+
+    expect(mockLog.warning).toHaveBeenCalledWith(
+      expect.stringContaining('oasdiff cannot parse example')
+    );
+  });
+
+  it('still throws on non-example oasdiff errors', async () => {
+    mockRunOasdiff.mockImplementation(() => {
+      throw new Error('some other oasdiff failure');
+    });
+
+    await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
+      'some other oasdiff failure'
+    );
   });
 
   it('reports success when no breaking changes', async () => {
