@@ -946,7 +946,9 @@ export const RulesList = ({
                   <EuiButtonIcon
                     onClick={() => toggleErrorMessage(_executionStatus, rule)}
                     aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
-                    iconType={itemIdToExpandedRowMap[rule.id] ? 'arrowUp' : 'arrowDown'}
+                    iconType={
+                      itemIdToExpandedRowMap[rule.id] ? 'chevronSingleUp' : 'chevronSingleDown'
+                    }
                   />
                 ) : null;
               }}

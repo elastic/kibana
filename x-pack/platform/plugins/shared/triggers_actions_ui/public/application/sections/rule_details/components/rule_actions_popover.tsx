@@ -106,7 +106,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
           disabled={false}
           data-test-subj="ruleActionsButton"
           data-testid="ruleActionsButton"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           aria-label={i18n.translate(
             'xpack.triggersActionsUI.sections.ruleDetails.popoverButtonTitle',

@@ -108,7 +108,7 @@ export const FilterGroupContextMenu = () => {
     () => (
       <EuiContextMenuItem
         key="edit"
-        icon={isViewMode ? 'pencil' : 'minusInCircle'}
+        icon={isViewMode ? 'pencil' : 'minusCircle'}
         aria-label={isViewMode ? EDIT_CONTROLS : DISCARD_CHANGES}
         onClick={
           isViewMode
@@ -136,7 +136,7 @@ export const FilterGroupContextMenu = () => {
           aria-label={FILTER_GROUP_MENU}
           display="empty"
           size="s"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={toggleContextMenu}
           data-test-subj={TEST_IDS.CONTEXT_MENU.BTN}
         />

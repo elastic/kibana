@@ -104,7 +104,7 @@ export const RulePage = (props: RulePageProps) => {
                 data-test-subj="rulePageReturnButton"
                 onClick={onCancelInternal}
                 style={{ padding: 0 }}
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 iconSide="left"
                 aria-label="Return link"
               >

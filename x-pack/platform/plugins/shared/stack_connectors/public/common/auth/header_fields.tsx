@@ -62,7 +62,7 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders, required =
                 <EuiFlexItem grow={false}>
                   {!limitOfHeaderExceeded && (
                     <EuiButton
-                      iconType="plusInCircle"
+                      iconType="plusCircle"
                       onClick={addItem}
                       data-test-subj="webhookAddHeaderButton"
                     >
@@ -232,7 +232,7 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders, required =
                               <EuiButtonIcon
                                 color="danger"
                                 onClick={() => removeItem(item.id)}
-                                iconType="minusInCircle"
+                                iconType="minusCircle"
                                 aria-label={i18n.DELETE_BUTTON}
                                 data-test-subj="webhookRemoveHeaderButton"
                                 css={{

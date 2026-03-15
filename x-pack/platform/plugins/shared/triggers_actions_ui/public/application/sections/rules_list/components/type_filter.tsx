@@ -41,7 +41,7 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
       closePopover={() => setIsPopoverOpen(false)}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           isSelected={isPopoverOpen}
           hasActiveFilters={filters.length > 0}
           numActiveFilters={filters.length}

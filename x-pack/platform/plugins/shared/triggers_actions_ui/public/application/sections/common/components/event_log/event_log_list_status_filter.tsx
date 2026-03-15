@@ -50,7 +50,7 @@ export const EventLogListStatusFilter = (props: EventLogListStatusFilterProps) =
         button={
           <EuiFilterButton
             data-test-subj="eventLogStatusFilterButton"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             isSelected={isPopoverOpen}
             hasActiveFilters={selectedOptions.length > 0}
             numActiveFilters={selectedOptions.length}

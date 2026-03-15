@@ -67,7 +67,7 @@ export const AlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (props)
                 color="text"
                 data-test-subj="alertsTableRowActionMore"
                 display="empty"
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={toggleActionsPopover}
                 size="s"
               />

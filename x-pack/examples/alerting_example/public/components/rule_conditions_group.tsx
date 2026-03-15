@@ -37,7 +37,7 @@ export const RuleConditionsGroup = <ConditionProps extends unknown>({
         onResetConditionsFor &&
         !actionGroup.isRequired && (
           <EuiButtonIcon
-            iconType="minusInCircle"
+            iconType="minusCircle"
             color="danger"
             aria-label={i18n.translate(
               'xpack.triggersActionsUI.sections.ruleForm.conditions.removeConditionLabel',

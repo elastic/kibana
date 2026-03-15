@@ -326,7 +326,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           <Fragment>
             <EuiEmptyPrompt
               data-test-subj="visualizationPlaceholder"
-              iconType="visBarVertical"
+              iconType="chartBarVertical"
               body={
                 <EuiText color="subdued">
                   <FormattedMessage

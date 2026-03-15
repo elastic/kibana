@@ -255,7 +255,7 @@ export const AlertsFiltersForm = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     size="xs"
                     onClick={() => addOperand('or')}
                     isDisabled={isDisabled}
@@ -266,7 +266,7 @@ export const AlertsFiltersForm = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     size="xs"
                     onClick={() => addOperand('and')}
                     isDisabled={isDisabled}
