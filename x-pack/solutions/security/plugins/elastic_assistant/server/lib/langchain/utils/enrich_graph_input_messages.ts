@@ -55,10 +55,10 @@ const getUserPrompt = (
     const messagesCopy = [...messages]; // Create a copy to avoid mutating the original messages
     const lastMessage = messagesCopy[messagesCopy.length - 1];
     if (lastMessage instanceof HumanMessage) {
-      messagesCopy[messagesCopy.length - 1] = new HumanMessage(
-        `${userPrompt} ${lastMessage.content}`.trim(),
-        lastMessage.additional_kwargs
-      );
+      messagesCopy[messagesCopy.length - 1] = new HumanMessage({
+        content: `${userPrompt} ${lastMessage.content}`.trim(),
+        ...lastMessage.additional_kwargs,
+      });
     }
     return messagesCopy;
   };
