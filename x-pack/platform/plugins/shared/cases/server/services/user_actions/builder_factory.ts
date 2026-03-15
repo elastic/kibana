@@ -45,6 +45,10 @@ const builderMap = {
   extended_fields: ExtendedFieldsUserActionBuilder,
   template: TemplateUserActionBuilder,
   workflow: WorkflowUserActionBuilder,
+  create_task: NoopUserActionBuilder,
+  update_task: NoopUserActionBuilder,
+  delete_task: NoopUserActionBuilder,
+  apply_task_template: NoopUserActionBuilder,
 };
 
 export class BuilderFactory {

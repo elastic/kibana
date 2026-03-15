@@ -11,7 +11,13 @@ import type { SupportedUserActionTypes } from './types';
 
 export const DRAFT_COMMENT_STORAGE_ID = 'xpack.cases.commentDraft';
 
-export const UNSUPPORTED_ACTION_TYPES = ['delete_case'] as const;
+export const UNSUPPORTED_ACTION_TYPES = [
+  'delete_case',
+  'create_task',
+  'update_task',
+  'delete_task',
+  'apply_task_template',
+] as const;
 export const SUPPORTED_ACTION_TYPES: SupportedUserActionTypes[] = Object.keys(
   omit(UserActionTypes, UNSUPPORTED_ACTION_TYPES)
 ) as SupportedUserActionTypes[];
