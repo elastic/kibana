@@ -12,6 +12,8 @@ import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-ob
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { DashboardState } from './types';
 import { transformDashboardOut } from './transforms';
+import type { getDashboardStateSchema } from './dashboard_state_schemas';
+import { stripUnmappedKeys } from './scope_tooling';
 
 export function getDashboardMeta(
   savedObject:
@@ -37,14 +39,29 @@ export function getDashboardCRUResponseBody(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>,
-  operation: 'create' | 'read' | 'update' | 'search'
+  operation: 'create' | 'read' | 'update' | 'search',
+  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
+  isDashboardAppRequest: boolean = false
 ) {
-  let dashboardState: DashboardState;
+  let sanatizedDashboardState: DashboardState;
+  let warnings: string[] = [];
   try {
-    dashboardState = transformDashboardOut(
+    let dashboardState = transformDashboardOut(
       savedObject.attributes,
-      savedObject.references
-    ) as DashboardState;
+      savedObject.references,
+      isDashboardAppRequest
+    );
+    if (!isDashboardAppRequest && operation === 'read') {
+      const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
+        dashboardState as Partial<DashboardState>
+      );
+      dashboardState = scopedDashboardState;
+      warnings = scopeWarnings;
+    }
+
+    // Route does not apply defaults to response
+    // Instead, call validate to ensure defaults are applied to response
+    sanatizedDashboardState = dashboardStateSchema.validate(dashboardState);
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
   }
@@ -52,7 +69,7 @@ export function getDashboardCRUResponseBody(
   return {
     id: savedObject.id,
     data: {
-      ...dashboardState,
+      ...sanatizedDashboardState,
       ...(savedObject?.accessControl && {
         access_control: {
           access_mode: savedObject.accessControl.accessMode,
@@ -61,6 +78,6 @@ export function getDashboardCRUResponseBody(
       }),
     },
     meta: getDashboardMeta(savedObject, operation),
-    spaces: savedObject.namespaces,
+    ...(warnings?.length && { warnings }),
   };
 }

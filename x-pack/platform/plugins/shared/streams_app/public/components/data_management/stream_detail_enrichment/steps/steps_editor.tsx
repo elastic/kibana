@@ -26,6 +26,7 @@ import { validationErrorTypeLabels } from '@kbn/streamlang';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { GenerateSuggestionButton } from '../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
+import { AdditionalChargesCallout } from '../../shared/additional_charges_callout';
 import { NoStepsEmptyPrompt } from '../empty_prompts';
 import { PipelineSuggestion } from '../pipeline_suggestions/pipeline_suggestion';
 import {
@@ -281,7 +282,8 @@ export const StepsEditor = React.memo(() => {
   } = useStreamDetail();
 
   const canUsePipelineSuggestions = aiFeatures && aiFeatures.enabled && hasValidMessageFields;
-  const canUsePipelineSuggestionsPending = !aiFeatures || (aiFeatures.enabled && isLoadingSamples);
+  const canUsePipelineSuggestionsPending =
+    aiFeatures !== null && (aiFeatures.loading || (aiFeatures.enabled && isLoadingSamples));
 
   if (aiFeatures && aiFeatures.enabled) {
     if (isLoadingSuggestion) {
@@ -371,15 +373,23 @@ export const StepsEditor = React.memo(() => {
       !canUsePipelineSuggestions && canUsePipelineSuggestionsPending ? null : (
         <NoStepsEmptyPrompt canUsePipelineSuggestions={!!canUsePipelineSuggestions}>
           {canUsePipelineSuggestions && (
-            <GenerateSuggestionButton
-              aiFeatures={aiFeatures}
-              isLoading={isLoadingSuggestion}
-              onClick={(connectorId) => suggestPipeline({ connectorId, streamName: stream.name })}
-            >
-              {i18n.translate('xpack.streams.stepsEditor.suggestPipelineButtonLabel', {
-                defaultMessage: 'Suggest a pipeline',
-              })}
-            </GenerateSuggestionButton>
+            <>
+              <GenerateSuggestionButton
+                aiFeatures={aiFeatures}
+                isLoading={isLoadingSuggestion}
+                onClick={(connectorId) => suggestPipeline({ connectorId, streamName: stream.name })}
+              >
+                {i18n.translate('xpack.streams.stepsEditor.suggestPipelineButtonLabel', {
+                  defaultMessage: 'Suggest a pipeline',
+                })}
+              </GenerateSuggestionButton>
+              {aiFeatures.isManagedAIConnector && !aiFeatures.hasAcknowledgedAdditionalCharges && (
+                <>
+                  <EuiSpacer size="s" />
+                  <AdditionalChargesCallout aiFeatures={aiFeatures} />
+                </>
+              )}
+            </>
           )}
         </NoStepsEmptyPrompt>
       )}

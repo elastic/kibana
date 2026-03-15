@@ -8,7 +8,7 @@
  */
 
 import type { Step, WorkflowYaml } from '@kbn/workflows';
-import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
+import { DynamicStepContextSchema, ForEachContextSchema, WhileContextSchema } from '@kbn/workflows';
 import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
@@ -195,6 +195,132 @@ describe('getContextSchemaForPath', () => {
     expect(Object.keys((context.shape as any).steps.shape).sort()).toEqual(
       ['first-step', 'second-step', 'if-split', 'if-true-1'].sort()
     );
+  });
+
+  it('should return while context for inner step of while loop', () => {
+    const definitionWithWhile = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      consts: {},
+      steps: [
+        {
+          name: 'poll_loop',
+          type: 'while',
+          condition: 'steps.poll_loop.check_status.output: "ready"',
+          steps: [
+            {
+              name: 'check_status',
+              type: 'console',
+            },
+          ],
+        },
+      ],
+    } as WorkflowYaml;
+    const workflowGraphWithWhile = WorkflowGraph.fromWorkflowDefinition(definitionWithWhile);
+    const context = getContextSchemaForPath(definitionWithWhile, workflowGraphWithWhile, [
+      'steps',
+      0,
+      'steps',
+      0,
+    ]);
+    expect((context.shape as any).while).toBeDefined();
+    expectZodSchemaEqual((context.shape as any).while, WhileContextSchema);
+  });
+
+  it('should return while context for the condition field of a while step', () => {
+    const definitionWithWhile = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      consts: {},
+      steps: [
+        {
+          name: 'poll_loop',
+          type: 'while',
+          condition: 'while.iteration < 10',
+          steps: [
+            {
+              name: 'check_status',
+              type: 'console',
+            },
+          ],
+        },
+      ],
+    } as WorkflowYaml;
+    const workflowGraphWithWhile = WorkflowGraph.fromWorkflowDefinition(definitionWithWhile);
+    const context = getContextSchemaForPath(definitionWithWhile, workflowGraphWithWhile, [
+      'steps',
+      0,
+      'condition',
+    ]);
+    expect((context.shape as any).while).toBeDefined();
+    expectZodSchemaEqual((context.shape as any).while, WhileContextSchema);
+  });
+
+  it('should return item and index context for data.map step with.fields', () => {
+    const definitionWithDataMap = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      steps: [
+        {
+          name: 'map-step',
+          type: 'data.map',
+          items: '${{ consts.items }}',
+          with: {
+            fields: {
+              title: '${{ item.title }}',
+              pos: '${{ index }}',
+            },
+          },
+        },
+      ],
+      consts: { items: [{ title: 'hello' }] },
+    } as unknown as WorkflowYaml;
+
+    const graph = WorkflowGraph.fromWorkflowDefinition(definitionWithDataMap);
+    const context = getContextSchemaForPath(definitionWithDataMap, graph, [
+      'steps',
+      0,
+      'with',
+      'fields',
+      'title',
+    ]);
+
+    expect((context.shape as any).item).toBeDefined();
+    expect((context.shape as any).index).toBeDefined();
+  });
+
+  it('should add item/index context for data.map step outside with block', () => {
+    const definitionWithDataMap = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      steps: [
+        {
+          name: 'map-step',
+          type: 'data.map',
+          items: '${{ consts.items }}',
+          with: {
+            fields: {
+              title: '${{ item.title }}',
+            },
+          },
+        },
+      ],
+      consts: { items: [{ title: 'hello' }] },
+    } as unknown as WorkflowYaml;
+
+    const graph = WorkflowGraph.fromWorkflowDefinition(definitionWithDataMap);
+    const context = getContextSchemaForPath(definitionWithDataMap, graph, ['steps', 0, 'items']);
+
+    expect((context.shape as any).item).toBeDefined();
+    expect((context.shape as any).index).toBeDefined();
   });
 
   it('should return the context for first step in false branch of if-split', () => {
