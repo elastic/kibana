@@ -26,30 +26,12 @@ function computeTermFrequency(tokens: string[]): Map<string, number> {
   return tf;
 }
 
-function computeIDF(documents: string[][]): Map<string, number> {
-  const idf = new Map<string, number>();
-  const totalDocs = documents.length;
-
-  const allTerms = new Set(documents.flat());
-
-  for (const term of allTerms) {
-    const docsWithTerm = documents.filter((doc) => doc.includes(term)).length;
-    idf.set(term, Math.log((totalDocs + 1) / (docsWithTerm + 1)) + 1);
-  }
-
-  return idf;
+function buildVocabulary(a: string[], b: string[]): string[] {
+  return Array.from(new Set([...a, ...b]));
 }
 
-function computeTfIdfVector(
-  tf: Map<string, number>,
-  idf: Map<string, number>,
-  vocabulary: string[]
-): number[] {
-  return vocabulary.map((term) => {
-    const tfVal = tf.get(term) ?? 0;
-    const idfVal = idf.get(term) ?? 0;
-    return tfVal * idfVal;
-  });
+function computeTfVector(tf: Map<string, number>, vocabulary: string[]): number[] {
+  return vocabulary.map((term) => tf.get(term) ?? 0);
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {
@@ -105,15 +87,13 @@ export function createSimilarityEvaluator(config?: { threshold?: number }): Eval
         };
       }
 
-      const documents = [expectedTokens, outputTokens];
-      const idf = computeIDF(documents);
-      const vocabulary = Array.from(idf.keys());
+      const vocabulary = buildVocabulary(expectedTokens, outputTokens);
 
       const expectedTf = computeTermFrequency(expectedTokens);
       const outputTf = computeTermFrequency(outputTokens);
 
-      const expectedVector = computeTfIdfVector(expectedTf, idf, vocabulary);
-      const outputVector = computeTfIdfVector(outputTf, idf, vocabulary);
+      const expectedVector = computeTfVector(expectedTf, vocabulary);
+      const outputVector = computeTfVector(outputTf, vocabulary);
 
       const score = cosineSimilarity(expectedVector, outputVector);
 
