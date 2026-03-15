@@ -10,6 +10,7 @@ import type {
   ToolCallWithResult,
   ConversationRoundStepMixin,
   ReasoningStep,
+  CompactionStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
@@ -22,7 +23,7 @@ export type ConversationCreateRequest = Omit<
 };
 
 export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
-  Partial<Pick<Conversation, 'title' | 'rounds' | 'attachments' | 'state'>>;
+  Partial<Pick<Conversation, 'title' | 'rounds' | 'attachments' | 'state' | 'compaction_summary'>>;
 
 export interface ConversationListOptions {
   agentId?: string;
@@ -46,7 +47,10 @@ export type PersistentToolCallStep = ConversationRoundStepMixin<
 /**
  * A union of all possible persistent step types.
  */
-export type PersistentConversationRoundStep = PersistentToolCallStep | ReasoningStep;
+export type PersistentConversationRoundStep =
+  | PersistentToolCallStep
+  | ReasoningStep
+  | CompactionStep;
 
 /**
  * Represents a conversation round suitable for persistence, with tool
