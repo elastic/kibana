@@ -112,6 +112,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   );
 
   // One-time initialization per provider instance:
+  // - If conversationId is explicitly provided, validates and uses it directly.
   // - If newConversation flag is set, clears the conversation ID to start fresh.
   // - Otherwise, if there's a persisted conversation ID, validates and restores it.
   // - Otherwise, clears the conversation ID.
@@ -119,7 +120,9 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   useEffect(() => {
     if (hasInitializedConversationIdRef.current) return;
 
-    if (contextProps.newConversation) {
+    if (contextProps.conversationId) {
+      validateAndSetConversationId(contextProps.conversationId);
+    } else if (contextProps.newConversation) {
       setConversationId(undefined);
     } else if (persistedConversationId) {
       validateAndSetConversationId(persistedConversationId);
@@ -128,6 +131,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     }
     hasInitializedConversationIdRef.current = true;
   }, [
+    contextProps.conversationId,
     contextProps.newConversation,
     persistedConversationId,
     setConversationId,

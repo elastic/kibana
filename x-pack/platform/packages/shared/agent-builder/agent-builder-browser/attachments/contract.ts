@@ -29,6 +29,8 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   isSidebar: boolean;
   /** Data from the screen context attachment, if present in the conversation */
   screenContext?: ScreenContextAttachmentData;
+  /** The current conversation ID */
+  conversationId: string | undefined;
 }
 
 /**
