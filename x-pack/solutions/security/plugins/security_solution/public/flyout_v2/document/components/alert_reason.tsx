@@ -9,9 +9,9 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eu
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { isAlert } from '../../../flyout/shared/utils/document_utils';
 import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,
@@ -45,7 +45,6 @@ export interface AlertReasonProps {
 }
 
 export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => {
-  const isAlert = useMemo(() => (getFieldValue(hit, EVENT_KIND) as string) === 'signal', [hit]);
   const reason = useMemo(() => getFieldValue(hit, 'kibana.alert.reason') as string, [hit]);
 
   const viewPreview = useMemo(
@@ -90,7 +89,7 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => 
       <EuiFlexItem data-test-subj={REASON_TITLE_TEST_ID}>
         <EuiTitle size="xxs">
           <h5>
-            {isAlert ? (
+            {isAlert(hit) ? (
               <EuiFlexGroup
                 justifyContent="spaceBetween"
                 alignItems="center"
@@ -119,7 +118,7 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => 
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={REASON_DETAILS_TEST_ID}>
-        {isAlert ? alertReasonText : '-'}
+        {isAlert(hit) ? alertReasonText : '-'}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

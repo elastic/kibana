@@ -233,8 +233,9 @@ describe('AttacksGroupTakeActionItems', () => {
   });
 
   describe('investigate in timeline', () => {
-    it('should render the `Investigate in timeline` action item', async () => {
+    it('renders the `Investigate in timeline` action item when user has timeline read privileges', async () => {
       const { findByText } = renderAttack(mockAttack);
+
       expect(await findByText('Investigate in timeline')).toBeInTheDocument();
     });
   });

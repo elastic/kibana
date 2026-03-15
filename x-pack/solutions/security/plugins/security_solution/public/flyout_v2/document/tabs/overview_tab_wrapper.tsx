@@ -14,6 +14,9 @@ import type { ResolverCellActionRenderer } from '../../../resolver/types';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
 import { OverviewTab } from './overview_tab';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { FlyoutMissingAlertsPrivilege } from '../../../flyout/shared/components/flyout_missing_alerts_privilege';
+import { isAlert } from '../../../flyout/shared/utils/document_utils';
 
 const DATA_VIEW_ERROR = i18n.translate(
   'xpack.securitySolution.analyzer.eventOverviewFlyout.dataViewError',
@@ -73,6 +76,9 @@ export const OverviewTabWrapper = memo(
       skip: shouldSkipSearch,
     });
 
+    const { hasAlertsRead } = useAlertsPrivileges();
+    const missingAlertsPrivilege = !hasAlertsRead && hit && isAlert(hit);
+
     if (isDataViewLoading) {
       return (
         <EuiPanel hasBorder={false} hasShadow={false}>
@@ -84,6 +90,10 @@ export const OverviewTabWrapper = memo(
           </EuiCallOut>
         </EuiPanel>
       );
+    }
+
+    if (missingAlertsPrivilege) {
+      return <FlyoutMissingAlertsPrivilege />;
     }
 
     if (isDataViewInvalid) {

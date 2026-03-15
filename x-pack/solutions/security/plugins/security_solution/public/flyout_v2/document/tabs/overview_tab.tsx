@@ -13,6 +13,9 @@ import { AboutSection } from '../components/about_section';
 import { InvestigationSection } from '../components/investigation_section';
 import { VisualizationsSection } from '../components/visualizations_section';
 import type { ResolverCellActionRenderer } from '../../../resolver/types';
+import { FlyoutMissingAlertsPrivilege } from '../../../flyout/shared/components/flyout_missing_alerts_privilege';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { isAlert } from '../../../flyout/shared/utils/document_utils';
 
 const OVERVIEW_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.document.overview.overviewContentAriaLabel',
@@ -34,6 +37,13 @@ export interface OverviewTabProps {
  * Overview view displayed in the document details expandable flyout right section
  */
 export const OverviewTab = memo(({ hit, renderCellActions }: OverviewTabProps) => {
+  const { hasAlertsRead } = useAlertsPrivileges();
+  const missingAlertsPrivilege = !hasAlertsRead && hit && isAlert(hit);
+
+  if (missingAlertsPrivilege) {
+    return <FlyoutMissingAlertsPrivilege />;
+  }
+
   return (
     <EuiPanel hasBorder={false} hasShadow={false} aria-label={OVERVIEW_ARIA_LABEL}>
       <AboutSection hit={hit} />

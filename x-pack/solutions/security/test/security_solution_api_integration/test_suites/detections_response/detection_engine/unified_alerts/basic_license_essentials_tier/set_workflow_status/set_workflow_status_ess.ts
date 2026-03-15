@@ -16,8 +16,13 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { noKibanaPrivileges, rulesReadUser } from '../../utils/auth/users';
-import { getMissingSecurityKibanaPrivilegesError } from '../../utils/privileges_errors';
+import {
+  noKibanaPrivileges,
+  alertsReadUser,
+  alertsAllUser,
+  alertsUpdateLegacyUser,
+} from '../../utils/auth/users';
+import { getMissingAlertsUpdatePrivilegesError } from '../../utils/privileges_errors';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -25,10 +30,10 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess Set Workflow Status - ESS', () => {
     describe('RBAC', () => {
       describe('Kibana privileges', () => {
-        it('should update alerts with rules read privileges', async () => {
+        it('should update alerts with alerts all privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL)
-            .auth(rulesReadUser.username, rulesReadUser.password)
+            .auth(alertsAllUser.username, alertsAllUser.password)
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -41,7 +46,23 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).toHaveProperty('updated');
         });
 
-        it('should not update alerts without rules read privileges', async () => {
+        it('should update alerts with legacy alerts update privileges', async () => {
+          const { body } = await supertestWithoutAuth
+            .post(DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL)
+            .auth(alertsUpdateLegacyUser.username, alertsUpdateLegacyUser.password)
+            .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .send({
+              signal_ids: ['test-id'],
+              status: 'closed',
+            })
+            .expect(200);
+
+          expect(body).toHaveProperty('updated');
+        });
+
+        it('should not update alerts without privileges', async () => {
           const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL)
             .auth(noKibanaPrivileges.username, noKibanaPrivileges.password)
@@ -55,7 +76,27 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(403);
 
           expect(body).toEqual(
-            getMissingSecurityKibanaPrivilegesError({
+            getMissingAlertsUpdatePrivilegesError({
+              routeDetails: `POST ${DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL}`,
+            })
+          );
+        });
+
+        it('should not update alerts with alerts read privileges', async () => {
+          const { body } = await supertestWithoutAuth
+            .post(DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL)
+            .auth(alertsReadUser.username, alertsReadUser.password)
+            .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .send({
+              signal_ids: ['test-id'],
+              status: 'closed',
+            })
+            .expect(403);
+
+          expect(body).toEqual(
+            getMissingAlertsUpdatePrivilegesError({
               routeDetails: `POST ${DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL}`,
             })
           );

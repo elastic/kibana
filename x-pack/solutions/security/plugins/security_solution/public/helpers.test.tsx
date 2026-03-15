@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import type { Capabilities } from '@kbn/core/public';
-import { CASES_FEATURE_ID, SECURITY_FEATURE_ID } from '../common/constants';
+import { ALERTS_FEATURE_ID, CASES_FEATURE_ID, SECURITY_FEATURE_ID } from '../common/constants';
 import { mockEcsDataWithAlert } from './common/mock';
 import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import {
@@ -201,8 +201,29 @@ describe('#isSubPluginAvailable', () => {
 
   it('cases plugin should NOT be available if cases privilege is none independently of siem privileges', () => {
     expect(
-      isSubPluginAvailable('pluginKey', {
+      isSubPluginAvailable('cases', {
         [SECURITY_FEATURE_ID]: { show: false, crud: false },
+        [CASES_FEATURE_ID]: noCasesCapabilities(),
+      } as unknown as Capabilities)
+    ).toBeFalsy();
+  });
+
+  it('attackDiscovery plugin should be available when user has Security access and Alerts read', () => {
+    expect(
+      isSubPluginAvailable('attackDiscovery', {
+        [SECURITY_FEATURE_ID]: { show: true },
+        [ALERTS_FEATURE_ID]: { read_alerts: true },
+        [CASES_FEATURE_ID]: noCasesCapabilities(),
+      } as unknown as Capabilities)
+    ).toBeTruthy();
+  });
+
+  it('attackDiscovery plugin should NOT be available when user has attack-discovery but not Alerts read', () => {
+    expect(
+      isSubPluginAvailable('attackDiscovery', {
+        [SECURITY_FEATURE_ID]: { show: false },
+        securitySolutionAttackDiscovery: { 'attack-discovery': true },
+        [ALERTS_FEATURE_ID]: { read_alerts: false },
         [CASES_FEATURE_ID]: noCasesCapabilities(),
       } as unknown as Capabilities)
     ).toBeFalsy();
