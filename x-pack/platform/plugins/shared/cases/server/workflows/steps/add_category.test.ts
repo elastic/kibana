@@ -1,0 +1,45 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
+import { setCategoryStepDefinition } from './set_category';
+import { createBulkUpdateCasesClientMock, createStepHandlerContext } from './test_utils';
+
+const createContext = (input: unknown) =>
+  createStepHandlerContext({ input, stepType: 'cases.setCategory' });
+
+describe('setCategoryStepDefinition', () => {
+  it('updates case category', async () => {
+    const category = 'Malware';
+    const { get, bulkUpdate, getCasesClient } = createBulkUpdateCasesClientMock({
+      ...createCaseResponseFixture,
+      category,
+    });
+    const definition = setCategoryStepDefinition(getCasesClient);
+
+    const result = await definition.handler(
+      createContext({ case_id: 'case-1', version: 'provided-version', category })
+    );
+
+    expect(definition.id).toBe('cases.setCategory');
+    expect(get).not.toHaveBeenCalled();
+    expect(bulkUpdate).toHaveBeenCalledWith({
+      cases: [
+        expect.objectContaining({
+          id: 'case-1',
+          version: 'provided-version',
+          category,
+        }),
+      ],
+    });
+    expect(result).toEqual({
+      output: {
+        case: { ...createCaseResponseFixture, category },
+      },
+    });
+  });
+});

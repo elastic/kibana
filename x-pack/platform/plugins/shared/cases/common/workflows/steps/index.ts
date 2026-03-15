@@ -10,7 +10,24 @@ import { getCaseStepCommonDefinition } from './get_case';
 import { createCaseStepCommonDefinition } from './create_case';
 import { createCaseFromTemplateStepCommonDefinition } from './create_case_from_template';
 import { updateCaseStepCommonDefinition } from './update_case';
+import { updateCasesStepCommonDefinition } from './update_cases';
+import { setCustomFieldStepCommonDefinition } from './set_custom_field';
 import { addCommentStepCommonDefinition } from './add_comment';
+import { findCasesStepCommonDefinition } from './find_cases';
+import { setSeverityStepCommonDefinition } from './set_severity';
+import { setStatusStepCommonDefinition } from './set_status';
+import { closeCaseStepCommonDefinition } from './close_case';
+import { deleteCasesStepCommonDefinition } from './delete_cases';
+import { assignCaseStepCommonDefinition } from './assign_case';
+import { unassignCaseStepCommonDefinition } from './unassign_case';
+import { addAlertsStepCommonDefinition } from './add_alerts';
+import { addEventsStepCommonDefinition } from './add_events';
+import { findSimilarCasesStepCommonDefinition } from './find_similar_cases';
+import { setDescriptionStepCommonDefinition } from './set_description';
+import { setTitleStepCommonDefinition } from './set_title';
+import { addObservablesStepCommonDefinition } from './add_observables';
+import { addTagsStepCommonDefinition } from './add_tags';
+import { setCategoryStepCommonDefinition } from './set_category';
 
 export { GetCaseStepTypeId, getCaseStepCommonDefinition } from './get_case';
 export { CreateCaseStepTypeId, createCaseStepCommonDefinition } from './create_case';
@@ -19,14 +36,51 @@ export {
   createCaseFromTemplateStepCommonDefinition,
 } from './create_case_from_template';
 export { UpdateCaseStepTypeId, updateCaseStepCommonDefinition } from './update_case';
+export { UpdateCasesStepTypeId, updateCasesStepCommonDefinition } from './update_cases';
+export { SetCustomFieldStepTypeId, setCustomFieldStepCommonDefinition } from './set_custom_field';
 export { AddCommentStepTypeId, addCommentStepCommonDefinition } from './add_comment';
+export { FindCasesStepTypeId, findCasesStepCommonDefinition } from './find_cases';
+export { SetSeverityStepTypeId, setSeverityStepCommonDefinition } from './set_severity';
+export { SetStatusStepTypeId, setStatusStepCommonDefinition } from './set_status';
+export { CloseCaseStepTypeId, closeCaseStepCommonDefinition } from './close_case';
+export { DeleteCasesStepTypeId, deleteCasesStepCommonDefinition } from './delete_cases';
+export { AssignCaseStepTypeId, assignCaseStepCommonDefinition } from './assign_case';
+export { UnassignCaseStepTypeId, unassignCaseStepCommonDefinition } from './unassign_case';
+export { AddAlertsStepTypeId, addAlertsStepCommonDefinition } from './add_alerts';
+export { AddEventsStepTypeId, addEventsStepCommonDefinition } from './add_events';
+export {
+  FindSimilarCasesStepTypeId,
+  findSimilarCasesStepCommonDefinition,
+} from './find_similar_cases';
+export { SetDescriptionStepTypeId, setDescriptionStepCommonDefinition } from './set_description';
+export { SetTitleStepTypeId, setTitleStepCommonDefinition } from './set_title';
+export { AddObservablesStepTypeId, addObservablesStepCommonDefinition } from './add_observables';
+export { AddTagsStepTypeId, addTagsStepCommonDefinition } from './add_tags';
+export { SetCategoryStepTypeId, setCategoryStepCommonDefinition } from './set_category';
 
 export const casesWorkflowSteps: ReadonlyArray<CommonStepDefinition> = Object.freeze([
   getCaseStepCommonDefinition,
   createCaseStepCommonDefinition,
   createCaseFromTemplateStepCommonDefinition,
   updateCaseStepCommonDefinition,
+  updateCasesStepCommonDefinition,
+  setCustomFieldStepCommonDefinition,
   addCommentStepCommonDefinition,
+  findCasesStepCommonDefinition,
+  setSeverityStepCommonDefinition,
+  setStatusStepCommonDefinition,
+  closeCaseStepCommonDefinition,
+  deleteCasesStepCommonDefinition,
+  assignCaseStepCommonDefinition,
+  unassignCaseStepCommonDefinition,
+  addAlertsStepCommonDefinition,
+  addEventsStepCommonDefinition,
+  findSimilarCasesStepCommonDefinition,
+  setDescriptionStepCommonDefinition,
+  setTitleStepCommonDefinition,
+  addObservablesStepCommonDefinition,
+  addTagsStepCommonDefinition,
+  setCategoryStepCommonDefinition,
 ]);
 
 export const registerCasesWorkflowStep = (
