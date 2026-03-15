@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Calculate risk scores with ESQL ESQL query matches snapshot 1`] = `
+exports[`Calculate risk scores with ESQL ESQL query V1 (legacy, idBasedRiskScoringEnabled=false) matches snapshot 1`] = `
 "
   FROM .alerts-security.alerts-default METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND KQL(\\"host.name > abel and host.name <= zuzanna\\")
@@ -21,4 +21,40 @@ exports[`Calculate risk scores with ESQL ESQL query matches snapshot 1`] = `
     | SORT scores DESC
     | LIMIT 3500
   "
+`;
+
+exports[`Calculate risk scores with ESQL ESQL query V2 (entity store v2, idBasedRiskScoringEnabled=true) matches snapshot 1`] = `
+"
+    FROM .alerts-security.alerts-default METADATA _index
+      | WHERE kibana.alert.risk_score IS NOT NULL
+      | WHERE (host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\")
+      | RENAME kibana.alert.risk_score as risk_score,
+               kibana.alert.rule.name as rule_name,
+               kibana.alert.rule.uuid as rule_id,
+               kibana.alert.uuid as alert_id,
+               event.kind as category,
+               @timestamp as time
+      | EVAL host_id = CONCAT(\\"host:\\", CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
+(host.id IS NOT NULL AND host.id != \\"\\"), host.id,
+(host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
+(host.hostname IS NOT NULL AND host.hostname != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.hostname, \\".\\", host.domain),
+(host.name IS NOT NULL AND host.name != \\"\\"), host.name,
+(host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL))
+      | WHERE host_id > \\"host:abel\\" AND host_id <= \\"host:zuzanna\\"
+      | EVAL rule_name_b64 = TO_BASE64(rule_name),
+             category_b64 = TO_BASE64(category)
+      | EVAL input = CONCAT(\\"\\"\\" {\\"risk_score\\": \\"\\"\\"\\", risk_score::keyword, \\"\\"\\"\\", \\"time\\": \\"\\"\\"\\", time::keyword, \\"\\"\\"\\", \\"index\\": \\"\\"\\"\\", _index, \\"\\"\\"\\", \\"rule_name_b64\\": \\"\\"\\"\\", rule_name_b64, \\"\\"\\"\\", \\"category_b64\\": \\"\\"\\"\\", category_b64, \\"\\"\\"\\", \\"id\\": \\"\\"\\"\\", alert_id, \\"\\"\\"\\" } \\"\\"\\")
+      | STATS
+          alert_count = count(risk_score),
+          scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, 10000, \\"desc\\"), 1.5),
+          risk_inputs = TOP(input, 10, \\"desc\\"),
+          id_src_0 = FIRST(TO_STRING(host.entity.id), time),
+          id_src_1 = FIRST(TO_STRING(host.id), time),
+          id_src_2 = FIRST(TO_STRING(host.name), time),
+          id_src_3 = FIRST(TO_STRING(host.domain), time),
+          id_src_4 = FIRST(TO_STRING(host.hostname), time)
+      BY host_id
+      | SORT scores DESC
+      | LIMIT 3500
+    "
 `;

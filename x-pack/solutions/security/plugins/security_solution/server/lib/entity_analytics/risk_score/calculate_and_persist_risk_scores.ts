@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 
 import type { ExperimentalFeatures } from '../../../../common';
 import type { EntityType } from '../../../../common/search_strategy';
@@ -15,6 +16,7 @@ import type { CalculateAndPersistScoresParams } from '../types';
 import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
+import { persistRiskScoresToEntityStore } from './persist_risk_scores_to_entity_store';
 
 export type CalculationResults = RiskScoresCalculationResponse & {
   entities: Record<EntityType, string[]>;
@@ -29,6 +31,8 @@ export const calculateAndPersistRiskScores = async (
     spaceId: string;
     riskScoreDataClient: RiskScoreDataClient;
     experimentalFeatures: ExperimentalFeatures;
+    idBasedRiskScoringEnabled: boolean;
+    entityStoreCRUDClient?: EntityStoreCRUDClient;
   }
 ): Promise<CalculationResults> => {
   const { riskScoreDataClient, spaceId, returnScores, refresh, ...rest } = params;
@@ -47,7 +51,9 @@ export const calculateAndPersistRiskScores = async (
     generic: scores.generic?.map((score: { id_value: string }) => score.id_value) || [],
   };
 
-  if (!scores.host?.length && !scores.user?.length && !scores.service?.length) {
+  const hasAnyScores = Object.values(entities).some((entityIds) => entityIds.length > 0);
+
+  if (!hasAnyScores) {
     return {
       after_keys: {},
       errors: [],
@@ -64,14 +70,30 @@ export const calculateAndPersistRiskScores = async (
     );
   }
 
+  const allErrors: string[] = [];
+
+  if (params.idBasedRiskScoringEnabled && params.entityStoreCRUDClient) {
+    const entityStoreErrors = await persistRiskScoresToEntityStore({
+      entityStoreCRUDClient: params.entityStoreCRUDClient,
+      logger: params.logger,
+      scores,
+    });
+    allErrors.push(...entityStoreErrors);
+  }
+
   const { errors, docs_written: scoresWritten } = await writer.bulk({ ...scores, refresh });
+  allErrors.push(...errors);
 
   const result = {
     after_keys: afterKeys,
-    errors,
+    errors: allErrors,
     scores_written: scoresWritten,
     entities,
   };
 
-  return returnScores ? { ...result, scores } : result;
+  if (returnScores) {
+    return { ...result, scores };
+  }
+
+  return result;
 };

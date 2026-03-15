@@ -28,3 +28,5 @@ export const ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES = ['read', 'view_i
 export const ENTITY_STORE_INDEX_PATTERN = '.entities.*';
 export const ENTITY_STORE_HISTORY_INDEX_PATTERN = '.entities.*history*';
 export const ENTITY_STORE_UPDATES_INDEX_PATTERN = '.entities.v1.updates.*';
+
+export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';

@@ -78,7 +78,7 @@ export const registerRiskScoringTask = ({
   }
 
   const getRiskScoreService: GetRiskScoreService = (namespace) =>
-    getStartServices().then(([coreStart, _]) => {
+    getStartServices().then(([coreStart, startPlugins]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
 
@@ -112,6 +112,7 @@ export const registerRiskScoringTask = ({
       });
 
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+      const entityStoreCRUDClient = startPlugins.entityStore.createCRUDClient(esClient, namespace);
 
       return riskScoreServiceFactory({
         assetCriticalityService,
@@ -122,6 +123,7 @@ export const registerRiskScoringTask = ({
         spaceId: namespace,
         experimentalFeatures,
         uiSettingsClient,
+        entityStoreCRUDClient,
       });
     });
 

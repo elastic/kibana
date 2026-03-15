@@ -141,7 +141,7 @@ describe('applyPrivmonModifier', () => {
         experimentalFeatures,
       });
 
-      expect(privmonUserCrudService.list).toHaveBeenCalledWith('user.name > test-user-a');
+      expect(privmonUserCrudService.list).toHaveBeenCalledWith('user.name > "test-user-a"');
     });
 
     it('should accept only upper bound', async () => {
@@ -161,7 +161,7 @@ describe('applyPrivmonModifier', () => {
         experimentalFeatures,
       });
 
-      expect(privmonUserCrudService.list).toHaveBeenCalledWith('user.name <= test-user-z');
+      expect(privmonUserCrudService.list).toHaveBeenCalledWith('user.name <= "test-user-z"');
     });
 
     it('should combine both bounds with "and"', async () => {
@@ -176,7 +176,30 @@ describe('applyPrivmonModifier', () => {
       });
 
       expect(privmonUserCrudService.list).toHaveBeenCalledWith(
-        'user.name > test-user-a and user.name <= test-user-z'
+        'user.name > "test-user-a" and user.name <= "test-user-z"'
+      );
+    });
+
+    it('should quote bound values that contain KQL reserved characters', async () => {
+      privmonUserCrudService.list.mockResolvedValue([]);
+      await applyPrivmonModifier({
+        page: {
+          buckets: [mockBucket],
+          identifierField: 'entity.id',
+          bounds: {
+            lower: 'host:host-7',
+            upper: 'host:host-9',
+          },
+        },
+        deps: {
+          privmonUserCrudService,
+          logger,
+        },
+        experimentalFeatures,
+      });
+
+      expect(privmonUserCrudService.list).toHaveBeenCalledWith(
+        'entity.id > "host:host-7" and entity.id <= "host:host-9"'
       );
     });
   });
@@ -206,7 +229,7 @@ describe('applyPrivmonModifier', () => {
       });
 
       expect(privmonUserCrudService.list).toHaveBeenCalledWith(
-        'user.name > test-user-a and user.name <= test-user-z'
+        'user.name > "test-user-a" and user.name <= "test-user-z"'
       );
     });
 
@@ -456,7 +479,9 @@ describe('applyPrivmonModifier', () => {
         },
       });
 
-      expect(privmonUserCrudService.list).toHaveBeenCalledWith('host.name > a and host.name <= z');
+      expect(privmonUserCrudService.list).toHaveBeenCalledWith(
+        'host.name > "a" and host.name <= "z"'
+      );
     });
   });
 });

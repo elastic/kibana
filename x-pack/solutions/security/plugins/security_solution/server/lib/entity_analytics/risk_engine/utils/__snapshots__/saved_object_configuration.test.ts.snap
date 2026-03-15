@@ -47,6 +47,11 @@ Object {
     "required": false,
     "type": "float",
   },
+  "host.risk.euid_fields_raw": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
   "host.risk.id_field": Object {
     "array": false,
     "required": false,
@@ -162,6 +167,11 @@ Object {
     "required": false,
     "type": "float",
   },
+  "service.risk.euid_fields_raw": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
+  },
   "service.risk.id_field": Object {
     "array": false,
     "required": false,
@@ -276,6 +286,11 @@ Object {
     "array": false,
     "required": false,
     "type": "float",
+  },
+  "user.risk.euid_fields_raw": Object {
+    "array": false,
+    "required": false,
+    "type": "keyword",
   },
   "user.risk.id_field": Object {
     "array": false,

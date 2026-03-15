@@ -121,6 +121,9 @@ export default ({ getService }: FtrProviderContext) => {
                     category_1_score: {
                       type: 'float',
                     },
+                    euid_fields_raw: {
+                      type: 'keyword',
+                    },
                     id_field: {
                       type: 'keyword',
                     },
@@ -200,6 +203,9 @@ export default ({ getService }: FtrProviderContext) => {
                     category_1_score: {
                       type: 'float',
                     },
+                    euid_fields_raw: {
+                      type: 'keyword',
+                    },
                     id_field: {
                       type: 'keyword',
                     },
@@ -278,6 +284,9 @@ export default ({ getService }: FtrProviderContext) => {
                     },
                     category_1_score: {
                       type: 'float',
+                    },
+                    euid_fields_raw: {
+                      type: 'keyword',
                     },
                     id_field: {
                       type: 'keyword',
@@ -460,6 +469,9 @@ export default ({ getService }: FtrProviderContext) => {
                     category_1_score: {
                       type: 'float',
                     },
+                    euid_fields_raw: {
+                      type: 'keyword',
+                    },
                     id_field: {
                       type: 'keyword',
                     },
@@ -539,6 +551,9 @@ export default ({ getService }: FtrProviderContext) => {
                     category_1_score: {
                       type: 'float',
                     },
+                    euid_fields_raw: {
+                      type: 'keyword',
+                    },
                     id_field: {
                       type: 'keyword',
                     },
@@ -617,6 +632,9 @@ export default ({ getService }: FtrProviderContext) => {
                     },
                     category_1_score: {
                       type: 'float',
+                    },
+                    euid_fields_raw: {
+                      type: 'keyword',
                     },
                     id_field: {
                       type: 'keyword',

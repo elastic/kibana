@@ -13,7 +13,7 @@ describe('#getDefaultRiskEngineConfiguration', () => {
     const namespace = 'default';
     const config = getDefaultRiskEngineConfiguration({ namespace });
 
-    expect(config._meta.mappingsVersion).toEqual(6);
+    expect(config._meta.mappingsVersion).toEqual(7);
     expect(riskScoreFieldMap).toMatchSnapshot();
   });
 });

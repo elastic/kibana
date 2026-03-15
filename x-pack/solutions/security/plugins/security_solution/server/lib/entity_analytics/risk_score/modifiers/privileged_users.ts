@@ -18,6 +18,7 @@ import type { RiskScoreBucket } from '../../types';
 import type { PrivmonUserCrudService } from '../../privilege_monitoring/users/privileged_users_crud';
 
 import type { ExperimentalFeatures } from '../../../../../common';
+import { prepareKQLStringParam } from '../../../../../common/utils/kql';
 import type { Modifier } from './types';
 
 interface ApplyCriticalityModifierParams {
@@ -55,8 +56,12 @@ export const applyPrivmonModifier = async ({
     return [];
   }
 
-  const lower = bounds?.lower ? `${identifierField} > ${bounds.lower}` : undefined;
-  const upper = bounds?.upper ? `${identifierField} <= ${bounds.upper}` : undefined;
+  const lower = bounds?.lower
+    ? `${identifierField} > ${prepareKQLStringParam(bounds.lower)}`
+    : undefined;
+  const upper = bounds?.upper
+    ? `${identifierField} <= ${prepareKQLStringParam(bounds.upper)}`
+    : undefined;
   if (!lower && !upper) {
     throw new Error('Either lower or upper after key must be provided for pagination');
   }

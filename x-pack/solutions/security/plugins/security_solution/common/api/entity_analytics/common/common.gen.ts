@@ -133,6 +133,10 @@ export const EntityRiskScoreRecord = z.object({
    */
   id_value: z.string(),
   /**
+   * JSON-encoded source field values keyed by ECS field path which generated the entities ID.
+   */
+  euid_fields_raw: z.string().optional(),
+  /**
    * Lexical description of the entity's risk.
    */
   calculated_level: EntityRiskLevels,

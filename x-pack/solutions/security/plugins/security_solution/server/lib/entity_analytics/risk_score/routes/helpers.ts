@@ -7,6 +7,7 @@
 
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { Logger } from '@kbn/core/server';
+import type { EntityStoreStartContract } from '@kbn/entity-store/server';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { assetCriticalityServiceFactory } from '../../asset_criticality';
 import { riskScoreServiceFactory } from '../risk_score_service';
@@ -14,7 +15,8 @@ import { riskScoreServiceFactory } from '../risk_score_service';
 export function buildRiskScoreServiceForRequest(
   securityContext: SecuritySolutionApiRequestHandlerContext,
   coreContext: CoreRequestHandlerContext,
-  logger: Logger
+  logger: Logger,
+  entityStoreStart?: EntityStoreStartContract
 ) {
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
   const spaceId = securityContext.getSpaceId();
@@ -28,6 +30,7 @@ export function buildRiskScoreServiceForRequest(
   const experimentalFeatures = securityContext.getConfig().experimentalFeatures;
 
   const uiSettingsClient = coreContext.uiSettings.client;
+  const entityStoreCRUDClient = entityStoreStart?.createCRUDClient(esClient, spaceId);
 
   return riskScoreServiceFactory({
     assetCriticalityService,
@@ -38,5 +41,6 @@ export function buildRiskScoreServiceForRequest(
     spaceId,
     experimentalFeatures,
     uiSettingsClient,
+    entityStoreCRUDClient,
   });
 }

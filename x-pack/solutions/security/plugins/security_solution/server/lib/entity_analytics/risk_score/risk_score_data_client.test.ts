@@ -251,6 +251,9 @@ const assertIndex = (namespace: string) => {
                   category_1_score: {
                     type: 'float',
                   },
+                  euid_fields_raw: {
+                    type: 'keyword',
+                  },
                   modifiers: {
                     properties: {
                       contribution: {
@@ -330,6 +333,9 @@ const assertIndex = (namespace: string) => {
                   category_1_score: {
                     type: 'float',
                   },
+                  euid_fields_raw: {
+                    type: 'keyword',
+                  },
                   modifiers: {
                     properties: {
                       contribution: {
@@ -408,6 +414,9 @@ const assertIndex = (namespace: string) => {
                   },
                   category_1_score: {
                     type: 'float',
+                  },
+                  euid_fields_raw: {
+                    type: 'keyword',
                   },
                   modifiers: {
                     properties: {

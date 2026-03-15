@@ -22,6 +22,7 @@ import {
   RISK_ENGINE_CLEANUP_URL,
   RISK_ENGINE_SCHEDULE_NOW_URL,
   RISK_ENGINE_CONFIGURE_SO_URL,
+  RISK_SCORE_PREVIEW_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import type {
   IndicesIndexSettings,
@@ -41,27 +42,53 @@ import {
   waitFor,
   routeWithNamespace,
 } from '@kbn/detections-response-ftr-services';
+import { deleteAllEntityStoreEntities } from './entity_store_v2';
 
-const sanitizeScore = (score: Partial<EntityRiskScoreRecord>): Partial<EntityRiskScoreRecord> => {
+type SanitizedRiskScore = Partial<EntityRiskScoreRecord> & {
+  euid_fields?: Record<string, string | null>;
+};
+
+const parseEuidFields = (
+  euidFieldsRaw: string | undefined
+): Record<string, string | null> | undefined => {
+  if (!euidFieldsRaw) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(euidFieldsRaw) as unknown;
+    if (parsed && typeof parsed === 'object') {
+      return parsed as Record<string, string | null>;
+    }
+  } catch {
+    // Ignore malformed identity payloads in test normalization.
+  }
+
+  return undefined;
+};
+
+const sanitizeScore = (score: Partial<EntityRiskScoreRecord>): SanitizedRiskScore => {
   const {
     '@timestamp': timestamp,
     inputs,
     notes,
     category_2_count: cat2Count,
     category_2_score: cat2Score,
+    euid_fields_raw: euidFieldsRaw,
     ...rest
   } = score;
-  return rest;
+  const euidFields = parseEuidFields(euidFieldsRaw);
+  return euidFields ? { ...rest, euid_fields: euidFields } : rest;
 };
 
 export const sanitizeScores = (
   scores: Array<Partial<EntityRiskScoreRecord>>
-): Array<Partial<EntityRiskScoreRecord>> => scores.map(sanitizeScore);
+): SanitizedRiskScore[] => scores.map(sanitizeScore);
 
-export const normalizeScores = (
-  scores: Array<Partial<EcsRiskScore>>
-): Array<Partial<EntityRiskScoreRecord>> =>
-  scores.map((score) => sanitizeScore(score.host?.risk ?? score.user?.risk ?? {}));
+export const normalizeScores = (scores: Array<Partial<EcsRiskScore>>): SanitizedRiskScore[] =>
+  scores.map((score) =>
+    sanitizeScore(score.host?.risk ?? score.user?.risk ?? score.service?.risk ?? {})
+  );
 
 export const buildDocument = (body: object, id?: string) => {
   const firstTimestamp = Date.now();
@@ -181,12 +208,16 @@ export const areRiskScoreIndicesEmpty = async ({
 
 /**
  * Deletes all risk scores from a given index or indices, defaults to `risk-score.risk-score-*`
- * For use inside of afterEach blocks of tests
+ * For use inside of afterEach blocks of tests.
+ *
+ * When `deleteIndices` is true, also removes the underlying data streams and indices so that
+ * subsequent `init()` calls don't hit "data stream conflicts with index" errors.
  */
 export const deleteAllRiskScores = async (
   log: ToolingLog,
   es: Client,
-  index: string[] = ['risk-score.risk-score-default']
+  index: string[] = ['risk-score.risk-score-default', 'risk-score.risk-score-latest-default'],
+  deleteIndices: boolean = false
 ): Promise<void> => {
   await countDownTest(
     async () => {
@@ -205,6 +236,99 @@ export const deleteAllRiskScores = async (
     'deleteAllRiskScores',
     log
   );
+
+  if (deleteIndices) {
+    for (const idx of index) {
+      await es.indices.deleteDataStream({ name: idx }).catch(() => {});
+      await es.indices.delete({ index: idx, allow_no_indices: true }).catch(() => {});
+    }
+  }
+};
+
+const getRiskScoreIndices = (namespace = 'default'): string[] => [
+  `risk-score.risk-score-${namespace}`,
+  `risk-score.risk-score-latest-${namespace}`,
+];
+
+const waitForRiskScoreIndicesToBeGone = async ({
+  es,
+  log,
+  namespace = 'default',
+}: {
+  es: Client;
+  log: ToolingLog;
+  namespace?: string;
+}): Promise<void> => {
+  const indices = getRiskScoreIndices(namespace);
+
+  await waitFor(
+    async () => {
+      for (const index of indices) {
+        await es.indices.deleteDataStream({ name: index }).catch(() => {});
+        await es.indices.delete({ index, allow_no_indices: true }).catch(() => {});
+      }
+
+      const existing = await Promise.all(
+        indices.map(async (name) => {
+          try {
+            const resolved = await es.indices.resolveIndex({
+              name,
+              expand_wildcards: 'all',
+            });
+            const hasMatchingIndex =
+              resolved.indices?.some((index) => index.name === name) ?? false;
+            const hasMatchingDataStream =
+              resolved.data_streams?.some((dataStream) => dataStream.name === name) ?? false;
+            return hasMatchingIndex || hasMatchingDataStream;
+          } catch (e) {
+            // If Elasticsearch cannot resolve due to a conflict (index + datastream with same name),
+            // treat it as still present and keep retrying cleanup.
+            const statusCode = (e as { statusCode?: number })?.statusCode;
+            if (statusCode === 404) {
+              return false;
+            }
+            log.debug(
+              `waitForRiskScoreIndicesToBeGone: resolveIndex failed for ${name} with status ${
+                statusCode ?? 'unknown'
+              }`
+            );
+            return true;
+          }
+        })
+      );
+
+      const remainingIndices = indices.filter((_, index) => existing[index]);
+      if (remainingIndices.length > 0) {
+        log.debug(
+          `waitForRiskScoreIndicesToBeGone: still present after cleanup retry: ${remainingIndices.join(
+            ', '
+          )}`
+        );
+      }
+
+      return remainingIndices.length === 0;
+    },
+    'waitForRiskScoreIndicesToBeGone',
+    log
+  );
+};
+
+export const cleanupRiskEngineV2 = async ({
+  riskEngineRoutes,
+  log,
+  es,
+  namespace = 'default',
+}: {
+  riskEngineRoutes: ReturnType<typeof riskEngineRouteHelpersFactory>;
+  log: ToolingLog;
+  es: Client;
+  namespace?: string;
+}): Promise<void> => {
+  await riskEngineRoutes.cleanUp();
+  await waitForRiskEngineTaskToBeGone({ es, log });
+  await deleteAllRiskScores(log, es, getRiskScoreIndices(namespace), true);
+  await waitForRiskScoreIndicesToBeGone({ es, log, namespace });
+  await deleteAllEntityStoreEntities(log, es, namespace);
 };
 
 /**
@@ -246,9 +370,17 @@ export const waitForRiskScoresToBePresent = async ({
   index?: string[];
   scoreCount?: number;
 }): Promise<void> => {
+  let lastSnapshot = '';
   await waitFor(
     async () => {
       const riskScores = await readRiskScores(es, index, scoreCount + 10);
+      const snapshot = JSON.stringify(riskScores);
+      if (snapshot !== lastSnapshot) {
+        lastSnapshot = snapshot;
+        log.debug(
+          `waitForRiskScoresToBePresent: found ${riskScores.length}/${scoreCount} scores: ${snapshot}`
+        );
+      }
       return riskScores.length >= scoreCount;
     },
     'waitForRiskScoresToBePresent',
@@ -502,6 +634,32 @@ export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namesp
     },
   };
 };
+
+export const riskScorePreviewFactory = (supertest: SuperTest.Agent) => ({
+  preview: async ({
+    body,
+    dataViewId = '.alerts-security.alerts-default',
+  }: {
+    body: object;
+    dataViewId?: string;
+  }): Promise<{
+    scores: {
+      host?: EntityRiskScoreRecord[];
+      service?: EntityRiskScoreRecord[];
+      user?: EntityRiskScoreRecord[];
+    };
+  }> => {
+    const { body: result } = await supertest
+      .post(RISK_SCORE_PREVIEW_URL)
+      .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .set('kbn-xsrf', 'true')
+      .send({ data_view_id: dataViewId, ...body })
+      .expect(200);
+
+    return result;
+  },
+});
 
 interface Credentials {
   username: string;
@@ -893,4 +1051,20 @@ export const getRiskScoreIndexTemplate = async (
   });
 
   return indexTemplates[0]?.index_template?.template;
+};
+
+const ENTITY_STORE_V2_SETTING = 'securitySolution:entityStoreEnableV2';
+
+export const enableEntityStoreV2 = async (
+  kibanaServer: KbnClient,
+  space?: string
+): Promise<void> => {
+  await kibanaServer.uiSettings.update({ [ENTITY_STORE_V2_SETTING]: true }, { space });
+};
+
+export const disableEntityStoreV2 = async (
+  kibanaServer: KbnClient,
+  space?: string
+): Promise<void> => {
+  await kibanaServer.uiSettings.update({ [ENTITY_STORE_V2_SETTING]: false }, { space });
 };

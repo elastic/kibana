@@ -82471,6 +82471,9 @@ components:
         criticality_modifier:
           format: double
           type: number
+        euid_fields_raw:
+          description: JSON-encoded source field values keyed by ECS field path which generated the entities ID.
+          type: string
         id_field:
           description: The identifier field defining this risk score. Coupled with `id_value`, uniquely identifies the entity being scored.
           example: host.name

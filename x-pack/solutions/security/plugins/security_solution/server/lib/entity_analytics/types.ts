@@ -54,6 +54,12 @@ export interface SearchHitRiskInput {
   contribution?: number;
 }
 
+/**
+ * Identity source field values keyed by ECS field path (e.g. host.name).
+ * Only set when useEntityStoreV2; used to populate entity store updates.
+ */
+export type IdentitySourceFieldsMap = Record<string, string | null>;
+
 export interface RiskScoreBucket {
   key: { [identifierField: string]: string };
   doc_count: number;
@@ -70,6 +76,8 @@ export interface RiskScoreBucket {
       };
     };
   };
+  /** Entity Store V2 only: identity source field values for entity store persistence */
+  euid_fields?: IdentitySourceFieldsMap;
 }
 
 export interface RiskEngineConfiguration {
