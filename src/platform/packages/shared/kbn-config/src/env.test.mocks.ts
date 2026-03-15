@@ -8,6 +8,7 @@
  */
 
 const realPath = jest.requireActual('path');
+const realFs = jest.requireActual('fs');
 
 jest.doMock('path', () => ({
   ...realPath,
@@ -20,6 +21,12 @@ export const mockPackage = {
   raw: {},
 };
 
-jest.doMock('load-json-file', () => ({
-  sync: () => mockPackage.raw,
+jest.doMock('fs', () => ({
+  ...realFs,
+  readFileSync: (filePath: string, options?: unknown) => {
+    if (filePath === '/test/kibanaRoot/package.json') {
+      return JSON.stringify(mockPackage.raw);
+    }
+    return realFs.readFileSync(filePath, options);
+  },
 }));

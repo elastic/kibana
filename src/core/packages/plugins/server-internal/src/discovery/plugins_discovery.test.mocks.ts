@@ -7,12 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { REPO_ROOT } from '@kbn/repo-info';
+import { resolve } from 'path';
+
+const realFs = jest.requireActual('fs');
+const kibanaPackagePath = resolve(REPO_ROOT, 'package.json');
+
 export const mockPackage = {
   raw: {},
 };
 
-jest.doMock('load-json-file', () => ({
-  sync: () => mockPackage.raw,
+jest.doMock('fs', () => ({
+  ...realFs,
+  readFileSync: (filePath: string, options?: unknown) => {
+    if (filePath === kibanaPackagePath) {
+      return JSON.stringify(mockPackage.raw);
+    }
+    return realFs.readFileSync(filePath, options);
+  },
 }));
 
 const { scanPluginSearchPaths } = jest.requireActual('./scan_plugin_search_paths');
