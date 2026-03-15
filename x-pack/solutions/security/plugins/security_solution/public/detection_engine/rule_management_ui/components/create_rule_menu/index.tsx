@@ -16,8 +16,15 @@ import {
   EuiContextMenuPanel,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { SecurityPageName } from '../../../../app/types';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
+import { useKibana } from '../../../../common/lib/kibana';
+import {
+  THREAT_HUNTING_AGENT_ID,
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../../../common/constants';
 
 interface CreateRuleContextMenuProps {
   loading: boolean;
@@ -28,11 +35,20 @@ interface CreateRuleContextMenuProps {
  * Alternative implementation using SecuritySolutionLinkButton components
  * for better integration with existing routing
  */
+const AI_RULE_CREATION_INITIAL_MESSAGE = `Create ES|QL SIEM detection rule (name, description, data sources, detection logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings) using dedicated detection rule creation tool. Always render inline the latest version of the rule attachment.
+
+You can review and edit everything before enabling the rule. 
+Desired behavior or activity to detect:
+
+`;
+
 export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, isDisabled }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const contextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'createRuleContextMenuLinks',
   });
+  const { services } = useKibana();
+  const { agentBuilder } = services;
 
   const m = useEuiPaddingSize('m');
   const xl = useEuiPaddingSize('xl');
@@ -43,6 +59,30 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
   }, []);
+
+  const handleAiRuleCreation = useCallback(() => {
+    closePopover();
+
+    const emptyRuleAttachment: AttachmentInput = {
+      id: SECURITY_RULE_ATTACHMENT_ID,
+      type: SecurityAgentBuilderAttachments.rule,
+      data: {
+        text: JSON.stringify({}),
+        attachmentLabel: 'New Rule',
+      },
+    };
+
+    if (agentBuilder?.openChat) {
+      agentBuilder.openChat({
+        newConversation: true,
+        initialMessage: AI_RULE_CREATION_INITIAL_MESSAGE,
+        autoSendInitialMessage: false,
+        sessionTag: 'security',
+        agentId: THREAT_HUNTING_AGENT_ID,
+        attachments: [emptyRuleAttachment],
+      });
+    }
+  }, [closePopover, agentBuilder]);
 
   const createRuleButton = (
     <EuiButton
@@ -72,22 +112,24 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
       data-test-subj={'create-rule-context-menu-popover'}
     >
       <EuiContextMenuPanel>
-        <EuiContextMenuItem key="ai-rule-creation" style={{ padding: `${m} ${xl}` }}>
-          <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.aiRuleCreation}
-            data-test-subj="ai-rule-creation"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation"
-              defaultMessage="AI rule creation"
-            />
-          </SecuritySolutionLinkAnchor>
+        <EuiContextMenuItem
+          key="ai-rule-creation"
+          style={{ padding: `${m} ${xl}` }}
+          onClick={handleAiRuleCreation}
+          data-test-subj="ai-rule-creation"
+          icon="productAgent"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation"
+            defaultMessage="AI rule creation"
+          />
         </EuiContextMenuItem>
         <EuiHorizontalRule key="separator" margin="none" />
         <EuiContextMenuItem key="manual-rule-creation" style={{ padding: `${m} ${xl}` }}>
           <SecuritySolutionLinkAnchor
             deepLinkId={SecurityPageName.rulesCreate}
             data-test-subj="manual-rule-creation"
+            color="text"
           >
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.createRule.contextMenu.manual"
