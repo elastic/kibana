@@ -117,10 +117,9 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
 ] as const satisfies readonly (keyof JsonSchema)[];
 
 /**
- * Zod schema representing any JSON Schema node (Draft 7 / 2020-12).
- * Used recursively inside property definitions, anyOf/oneOf, etc.
- * Only includes keywords that the fromJSONSchema converter actually enforces,
- * so autocomplete suggestions are never misleading.
+ * Zod schema representing any JSON Schema node (Draft 7 / 2020-12)
+ * Used recursively inside property definitions, anyOf/oneOf, etc...
+ * Only includes keywords that the fromJSONSchema converter actually enforces
  */
 export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
   .lazy(() =>
