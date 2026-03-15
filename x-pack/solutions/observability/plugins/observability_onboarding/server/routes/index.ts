@@ -11,6 +11,7 @@ import { firehoseOnboardingRouteRepository } from './firehose/route';
 import { otelHostOnboardingRouteRepository } from './otel_host/route';
 import { otelApmOnboardingRouteRepository } from './otel_apm/route';
 import { cloudforwarderOnboardingRouteRepository } from './cloudforwarder/route';
+import { agentOnboardingRouteRepository } from './agent_onboarding/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
   const repository = {
@@ -20,6 +21,7 @@ function getTypedObservabilityOnboardingServerRouteRepository() {
     ...otelHostOnboardingRouteRepository,
     ...otelApmOnboardingRouteRepository,
     ...cloudforwarderOnboardingRouteRepository,
+    ...agentOnboardingRouteRepository,
   };
 
   return repository;

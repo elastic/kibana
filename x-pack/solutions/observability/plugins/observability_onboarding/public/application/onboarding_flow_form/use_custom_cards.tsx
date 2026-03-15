@@ -55,6 +55,10 @@ export function useCustomCards(
     history,
     `/cloudforwarder/${location.search}`
   );
+  const { href: agentOnboardingUrl } = reactRouterNavigate(
+    history,
+    `/agent-onboarding/${location.search}`
+  );
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isManagedOtlpServiceAvailable ? otelApmQuickstartUrl : apmUrl;
@@ -489,6 +493,37 @@ export function useCustomCards(
       integration: '',
       isCollectionCard: false,
     },
+    ...(isDev
+      ? [
+          {
+            id: 'agent-onboarding',
+            name: 'agent-onboarding-virtual',
+            type: 'virtual' as const,
+            title: i18n.translate(
+              'xpack.observability_onboarding.useCustomCardsForCategory.agentOnboardingTitle',
+              { defaultMessage: 'AI-guided onboarding' }
+            ),
+            description: i18n.translate(
+              'xpack.observability_onboarding.useCustomCardsForCategory.agentOnboardingDescription',
+              {
+                defaultMessage:
+                  'Let Claude Code auto-detect your systems and set up observability from your terminal',
+              }
+            ),
+            categories: ['observability'] as string[],
+            icons: [
+              {
+                type: 'eui' as const,
+                src: 'sparkles',
+              },
+            ],
+            url: agentOnboardingUrl,
+            version: '',
+            integration: '',
+            isQuickstart: true,
+          },
+        ]
+      : []),
     /**
      * The new Firehose card should only be visible on Cloud
      * as Firehose integration requires additional proxy,
