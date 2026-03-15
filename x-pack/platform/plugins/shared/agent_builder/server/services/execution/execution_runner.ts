@@ -138,32 +138,13 @@ export const handleAgentExecution = async ({
     action,
   });
 
-  // Generate title (for CREATE) or use existing title (for UPDATE)
-  // Exact token format: <ENTITY_CLASS>_<32 lowercase hex chars>, e.g. HOST_NAME_ae687f3b1c2d...
-  // Using exactly 32 hex chars avoids false positives on shorter hex-suffixed identifiers.
-  const TOKEN_PATTERN = /\b[A-Z][A-Z_]*_[0-9a-f]{32}\b/;
-
-  const deanonymizeTitle =
-    anonymizationEnabled && conversation.replacementsId
-      ? async (title: string) => {
-          const namespace =
-            deps.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
-          const result = await deps.inference.deanonymizeText(
-            namespace,
-            conversation.replacementsId!,
-            title
-          );
-          // Guard: if deanonymization failed silently and tokens remain, don't persist them
-          // as the conversation title (would be a PII leak into an unencrypted field).
-          if (TOKEN_PATTERN.test(result)) {
-            logger.warn(
-              `[agent_builder.anonymization.title_guard] token_pattern_detected=true replacements_id=${conversation.replacementsId} — falling back to default title`
-            );
-            return 'New conversation';
-          }
-          return result;
-        }
-      : undefined;
+  const deanonymizeTitle = createDeanonymizeTitleFn({
+    anonymizationEnabled,
+    conversation,
+    deps,
+    request,
+    logger,
+  });
 
   const title$ =
     conversation.operation === 'CREATE'
@@ -250,6 +231,50 @@ export const handleAgentExecution = async ({
       })
     )
   );
+};
+
+// Exact token format: <ENTITY_CLASS>_<32 lowercase hex chars>, e.g. HOST_NAME_ae687f3b1c2d...
+// Using exactly 32 hex chars avoids false positives on shorter hex-suffixed identifiers.
+const ANONYMIZATION_TOKEN_PATTERN = /\b[A-Z][A-Z_]*_[0-9a-f]{32}\b/;
+
+/**
+ * Returns a deanonymizeTitle callback when anonymization is enabled and the conversation has a
+ * replacementsId, or undefined otherwise. The callback deanonymizes the generated title and
+ * guards against persisting raw tokens as the conversation title (which would be a PII leak
+ * into an unencrypted field).
+ */
+const createDeanonymizeTitleFn = ({
+  anonymizationEnabled,
+  conversation,
+  deps,
+  request,
+  logger,
+}: {
+  anonymizationEnabled: boolean;
+  conversation: ConversationWithOperation;
+  deps: AgentExecutionDeps;
+  request: KibanaRequest;
+  logger: Logger;
+}): ((title: string) => Promise<string>) | undefined => {
+  if (!anonymizationEnabled || !conversation.replacementsId) {
+    return undefined;
+  }
+
+  return async (title: string) => {
+    const namespace = deps.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
+    const result = await deps.inference.deanonymizeText(
+      namespace,
+      conversation.replacementsId!,
+      title
+    );
+    if (ANONYMIZATION_TOKEN_PATTERN.test(result)) {
+      logger.warn(
+        `[agent_builder.anonymization.title_guard] token_pattern_detected=true replacements_id=${conversation.replacementsId} — falling back to default title`
+      );
+      return 'New conversation';
+    }
+    return result;
+  };
 };
 
 /**
