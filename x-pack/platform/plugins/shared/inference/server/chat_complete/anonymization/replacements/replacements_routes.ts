@@ -29,7 +29,7 @@ const assertReplacementsEncryptionKeyConfigured = (encryptionKey?: string): void
     const error = new Error(
       'Replacements encryption key is not available — verify the anonymization plugin is active and properly initialized'
     ) as Error & { statusCode?: number };
-    error.statusCode = 400;
+    error.statusCode = 503;
     throw error;
   }
 };
@@ -49,14 +49,13 @@ const resolveEncryptionKey = async ({
   const anonymizationEnabled = anonymizationPlugin?.isEnabled() ?? false;
 
   if (!anonymizationEnabled) {
+    // Plugin is intentionally disabled — caller will receive a 503 explaining this.
     return undefined;
   }
 
-  try {
-    return await anonymizationPlugin?.getPolicyService().getReplacementsEncryptionKey(namespace);
-  } catch {
-    return undefined;
-  }
+  // Let errors propagate: a transient failure (ES down, plugin not yet started) should
+  // surface as a 5xx, not silently degrade to a misleading 400 "not configured" response.
+  return anonymizationPlugin?.getPolicyService().getReplacementsEncryptionKey(namespace);
 };
 
 const resolveReplacementsContext = async (
@@ -80,7 +79,7 @@ const resolveReplacementsContext = async (
     replacementsIndexEnsuredAt = Date.now();
   }
 
-  const repo = new ReplacementsRepository(esClient, { encryptionKey });
+  const repo = new ReplacementsRepository(esClient, { encryptionKey, logger: options.logger });
   return { namespace, repo };
 };
 
@@ -160,7 +159,7 @@ export const registerReplacementsRoutes = (
         validate: {
           request: {
             body: schema.object({
-              text: schema.string(),
+              text: schema.string({ maxLength: 1_000_000 }),
               replacementsId: schema.string(),
             }),
           },

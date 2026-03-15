@@ -192,6 +192,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const anonymizationMetadata: ChatCompleteAnonymizationMetadata | undefined =
     context.anonymizationEnabled
       ? {
+          // Keep the LLM response tokenized so Agent Builder UI can resolve originals
+          // via the replacements API with permission gating (RFC §7.5).
+          keepTokenized: true,
           ...(conversation?.replacementsId ? { replacementsId: conversation.replacementsId } : {}),
           ...(processedConversation.anonymizationTarget
             ? { target: processedConversation.anonymizationTarget }

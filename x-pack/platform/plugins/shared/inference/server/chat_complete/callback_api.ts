@@ -221,20 +221,12 @@ function createChatCompletePipeline({
         })
       ).pipe(
         switchMap(({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
-          // Temporary anonymization phase 3a hardening scope for Agent Builder:
-          // - RFC states the model should receive tokens while UI can render originals
-          //   to authorized analysts ("Reversible for UI"; "Before UI render: substitute
-          //   tokens with originals if authorized").
-          // - Agent Builder now relies on the replacements API permission boundary for reveal.
-          // - We keep this consumer-scoped for now to avoid broad behavior shifts in other
-          //   inference consumers.
-          // TODO(anonymization): Evaluate standardizing this behavior across consumers so
-          // tokenized output remains the default inference response shape and reveal stays
-          // consistently permission-gated in UI resolution paths.
-          // RFC reference: "Anonymization as a Platform Service RFC", sections 1 (Key
-          // principles: Reversible for UI) and 7.6 (Before UI render: substitute tokens
-          // with originals if authorized).
-          const isAgentBuilderRequest = metadata?.connectorTelemetry?.pluginId === 'agent_builder';
+          // RFC §7.5 / §1: consumers that own their rendering layer (e.g. Agent Builder)
+          // can opt in to keeping the LLM response tokenized so they can apply
+          // permission-gated reveal via the replacements API. When keepTokenized is true,
+          // deanonymizeMessage receives an empty anonymizations array so no substitution
+          // occurs, while replacementsId is still attached for downstream resolution.
+          const isAgentBuilderRequest = metadata?.anonymization?.keepTokenized === true;
           const systemWithAnonymizationInstructions = preparedAnonymization.system
             ? addAnonymizationInstruction(
                 preparedAnonymization.system,

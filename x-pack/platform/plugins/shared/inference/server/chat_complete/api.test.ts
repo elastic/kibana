@@ -449,9 +449,9 @@ describe('createChatCompleteApi', () => {
         connectorId: 'connectorId',
         messages: [{ role: MessageRole.User, content: 'alice@example.com' }],
         metadata: {
-          connectorTelemetry: { pluginId: 'agent_builder' },
           anonymization: {
             replacementsId: 'existing-replacements-id',
+            keepTokenized: true,
           },
         },
         maxRetries: 0,

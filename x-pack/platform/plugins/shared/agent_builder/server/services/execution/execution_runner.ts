@@ -139,8 +139,9 @@ export const handleAgentExecution = async ({
   });
 
   // Generate title (for CREATE) or use existing title (for UPDATE)
-  // Token format produced by the anonymizer: ENTITY_CLASS_<hex-suffix>, e.g. HOST_NAME_ae687f3b
-  const TOKEN_PATTERN = /\b[A-Z][A-Z_]*_[0-9a-f]{8,}\b/;
+  // Exact token format: <ENTITY_CLASS>_<32 lowercase hex chars>, e.g. HOST_NAME_ae687f3b1c2d...
+  // Using exactly 32 hex chars avoids false positives on shorter hex-suffixed identifiers.
+  const TOKEN_PATTERN = /\b[A-Z][A-Z_]*_[0-9a-f]{32}\b/;
 
   const deanonymizeTitle =
     anonymizationEnabled && conversation.replacementsId
@@ -154,7 +155,13 @@ export const handleAgentExecution = async ({
           );
           // Guard: if deanonymization failed silently and tokens remain, don't persist them
           // as the conversation title (would be a PII leak into an unencrypted field).
-          return TOKEN_PATTERN.test(result) ? 'New conversation' : result;
+          if (TOKEN_PATTERN.test(result)) {
+            logger.warn(
+              `[agent_builder.anonymization.title_guard] token_pattern_detected=true replacements_id=${conversation.replacementsId} — falling back to default title`
+            );
+            return 'New conversation';
+          }
+          return result;
         }
       : undefined;
 
@@ -166,6 +173,7 @@ export const handleAgentExecution = async ({
           nextInput,
           anonymizationEnabled,
           deanonymizeTitle,
+          abortSignal,
         })
       : of(conversation.title);
 
