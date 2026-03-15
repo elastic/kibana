@@ -116,7 +116,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
                 data-test-subj={`fieldPopoverHeader_addField-${field.name}`}
                 aria-label={addFieldToWorkspaceTooltip}
                 {...(buttonAddFieldToWorkspaceProps || {})}
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={() => {
                   closePopover();
                   onAddFieldToWorkspace(field);
@@ -131,7 +131,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
               <EuiButtonIcon
                 data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
                 aria-label={addBreakdownFieldTooltip}
-                iconType="visBarVerticalStacked"
+                iconType="chartBarVerticalStack"
                 onClick={() => {
                   closePopover();
                   onAddBreakdownField(field);

@@ -181,7 +181,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               aria-label={menuButtonLabel}
               color="text"
               data-test-subj="unifiedTabs_tabsBarMenuButton"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               onClick={() => {
                 setPopover((prev) => {
                   const willOpen = !prev;

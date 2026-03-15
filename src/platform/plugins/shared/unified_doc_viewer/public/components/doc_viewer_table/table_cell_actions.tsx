@@ -100,7 +100,7 @@ const Copy: React.FC<Omit<TableActionsProps, 'isEsqlMode'> & { toasts: IToasts }
   return (
     <Component
       data-test-subj={`copyValueButton-${name}`}
-      iconType="copyClipboard"
+      iconType="copy"
       title={copyLabel}
       flush="left"
       onClick={() => {
@@ -175,7 +175,7 @@ const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undef
   return (
     <Component
       data-test-subj={`addFilterForValueButton-${name}`}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       title={filterAddLabel}
       flush="left"
       onClick={() => onFilter!(dataViewField, flattenedValue, '+')}
@@ -219,7 +219,7 @@ const FilterOut: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | unde
   return (
     <Component
       data-test-subj={`addFilterOutValueButton-${name}`}
-      iconType="minusInCircle"
+      iconType="minusCircle"
       title={filterOutLabel}
       flush="left"
       onClick={() => onFilter!(dataViewField, flattenedValue, '-')}
@@ -329,7 +329,7 @@ const ToggleColumn: React.FC<
   return (
     <Component
       data-test-subj={`toggleColumnButton-${name}`}
-      iconType={isColumnAdded ? 'cross' : 'plusInCircle'}
+      iconType={isColumnAdded ? 'cross' : 'plusCircle'}
       title={toggleColumnLabel}
       flush="left"
       onClick={() => onToggleColumn(name)}

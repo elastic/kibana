@@ -78,7 +78,7 @@ export const ViewDetailsPopover = (props: Props) => {
             data-test-subj="searchResponseWarningsViewDetails"
           >
             <>
-              {viewDetailsLabel} <EuiIcon type="arrowRight" size="s" />
+              {viewDetailsLabel} <EuiIcon type="chevronSingleRight" size="s" />
             </>
           </EuiLink>
         ) : (
@@ -86,7 +86,7 @@ export const ViewDetailsPopover = (props: Props) => {
             color="primary"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             iconSide="right"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             data-test-subj="searchResponseWarningsViewDetails"
           >
             {viewDetailsLabel}

@@ -140,7 +140,7 @@ export function CellActionsPopover({
             <EuiButtonEmpty
               key="addToFilterAction"
               size="s"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               aria-label={actionFilterForText(value)}
               onClick={makeFilterHandlerByOperator('+')}
               data-test-subj={`dataTableCellAction_addToFilterAction_${name}`}
@@ -150,7 +150,7 @@ export function CellActionsPopover({
             <EuiButtonEmpty
               key="removeFromFilterAction"
               size="s"
-              iconType="minusInCircle"
+              iconType="minusCircle"
               aria-label={actionFilterOutText(value)}
               onClick={makeFilterHandlerByOperator('-')}
               data-test-subj={`dataTableCellAction_removeFromFilterAction_${name}`}
@@ -166,7 +166,7 @@ export function CellActionsPopover({
             <EuiButtonEmpty
               key="copyToClipboardAction"
               size="s"
-              iconType="copyClipboard"
+              iconType="copy"
               aria-label={copyValueAriaText(name)}
               onClick={copy}
               data-test-subj={`dataTableCellAction_copyToClipboardAction_${name}`}
