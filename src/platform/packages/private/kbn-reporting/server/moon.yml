@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/reporting-server'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/reporting-server'
+  title: '@kbn/reporting-server'
   description: Moon project for @kbn/reporting-server
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: src/platform/packages/private/kbn-reporting/server
+  sourceRoot: src/platform/packages/private/kbn-reporting/server
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/screenshotting-plugin'
@@ -53,14 +52,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

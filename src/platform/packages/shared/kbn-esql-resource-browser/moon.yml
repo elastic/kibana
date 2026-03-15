@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/esql-resource-browser'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/esql-resource-browser'
+  title: '@kbn/esql-resource-browser'
   description: Moon project for @kbn/esql-resource-browser
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-esql-resource-browser
+  sourceRoot: src/platform/packages/shared/kbn-esql-resource-browser
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/esql-types'

@@ -94,7 +94,6 @@ export const addFile = async (
       createdDate,
       commentReq,
       id: savedObjectID,
-      owner,
     });
 
     return await updatedModel.encodeWithComments();

@@ -42,10 +42,7 @@ describe('project_routing on non-serverless', () => {
     const response = await esClient.search({
       index: '.kibana',
       size: 0,
-      body: {
-        // @ts-expect-error - project_routing is a valid body parameter
-        project_routing: LOCAL_PROJECT_ROUTING,
-      },
+      project_routing: LOCAL_PROJECT_ROUTING,
     });
     expect(response.hits.hits).toBeDefined();
   });
