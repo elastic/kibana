@@ -12,14 +12,12 @@ import type {
 import { isGenericAttachmentPanel, isLensAttachmentPanel } from '@kbn/dashboard-agent-common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
-import { i18n } from '@kbn/i18n';
 import {
   type LensAttributes,
   LensConfigBuilder,
   type LensApiSchemaType,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
-import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 
@@ -28,23 +26,13 @@ const lensConfigBuilder = new LensConfigBuilder();
 const buildLensPanelFromApi = (
   config: LensApiSchemaType,
   uid?: string
-): Omit<DashboardPanel, 'grid'> => {
-  const lensAttributes = lensConfigBuilder.fromAPIFormat(config);
-  const lensConfig: LensSerializedAPIConfig = {
-    title:
-      lensAttributes.title ??
-      i18n.translate('xpack.dashboardAgent.attachments.dashboard.generatedPanelTitle', {
-        defaultMessage: 'Generated panel',
-      }),
-    attributes: lensAttributes,
-  };
-
-  return {
-    type: 'lens',
-    config: lensConfig,
-    uid,
-  };
-};
+): Omit<DashboardPanel, 'grid'> => ({
+  type: 'lens',
+  config: {
+    attributes: lensConfigBuilder.fromAPIFormat(config),
+  },
+  uid,
+});
 
 const isLensEmbeddableType = (
   embeddableType: string,
@@ -126,12 +114,34 @@ const normalizeDashboardWidgets = ({
 
 export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
 
-export const getStateFromAttachment = (
-  attachment: DashboardAttachment
-): Pick<DashboardState, 'title' | 'description' | 'panels' | 'time_range'> => {
+// We want to override all possible fields except for project_routing.
+const getEmptyDashboardState = (): Omit<Required<DashboardState>, 'project_routing'> => ({
+  title: '',
+  description: '',
+  panels: [],
+  time_range: DEFAULT_TIME_RANGE,
+  query: { query: '', language: 'kuery' },
+  filters: [],
+  options: {
+    hide_panel_titles: false,
+    hide_panel_borders: false,
+    use_margins: true,
+    auto_apply_filters: true,
+    sync_colors: false,
+    sync_cursor: true,
+    sync_tooltips: false,
+  },
+  pinned_panels: [],
+  refresh_interval: { pause: true, value: 0 },
+  tags: [],
+  access_control: {},
+});
+
+export const getStateFromAttachment = (attachment: DashboardAttachment): DashboardState => {
   const { title, description, panels = [], sections = [] } = attachment.data;
 
   return {
+    ...getEmptyDashboardState(),
     title: title ?? '',
     description: description ?? '',
     panels: normalizeDashboardWidgets({
