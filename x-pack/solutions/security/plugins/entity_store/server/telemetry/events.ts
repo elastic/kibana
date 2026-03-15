@@ -32,6 +32,7 @@ interface EntityMaintainerEvent {
   id: string;
   namespace?: string;
   type: EntityMaintainerTelemetryEventType;
+  errorMessage?: string;
 }
 
 // ------------------------------------
@@ -113,6 +114,13 @@ export const ENTITY_MAINTAINER_EVENT = {
       _meta: {
         description:
           'Entity maintainer telemetry event type (register, abort, setup, run, error, stop, start, delete)',
+      },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        description: 'Optional error message for error events',
+        optional: true,
       },
     },
   },

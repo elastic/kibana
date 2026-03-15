@@ -227,6 +227,7 @@ async function runEntityMaintainerTask({
       id,
       namespace,
       type: EntityMaintainerTelemetryEventType.ERROR,
+      errorMessage: err?.message,
     });
   } finally {
     currentStatus.metadata.runs++;
