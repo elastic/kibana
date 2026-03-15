@@ -728,7 +728,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'observability:streamsEnableSignificantEventsDiscovery': {
     type: 'boolean',
     _meta: {
-      description: 'Enable Significant events discovery in Streams.',
+      description: 'Enable Significant Events in Streams.',
     },
   },
   'observability:streamsEnableAttachments': {

@@ -331,7 +331,7 @@ export function StreamsTreeTable({
             },
             {
               name: ONBOARDING_STATUS_COLUMN_HEADER,
-              width: '120px',
+              width: '100px',
               align: 'left',
               render: (item: TableRow) => {
                 const onboardingResult = streamOnboardingResultMap[item.stream.name];
@@ -380,7 +380,7 @@ export function StreamsTreeTable({
             },
             {
               name: FEATURES_COLUMN_HEADER,
-              width: '120px',
+              width: '160px',
               align: 'left',
               render: (item: TableRow) => (
                 <FeaturesColumn
@@ -391,7 +391,7 @@ export function StreamsTreeTable({
             },
             {
               name: QUERIES_COLUMN_HEADER,
-              width: '120px',
+              width: '100px',
               align: 'left',
               render: (item: TableRow) => (
                 <QueriesColumn

@@ -111,7 +111,7 @@ export const EditSignificantEventFlyout = ({
                 notifications.toasts.addSuccess({
                   title: i18n.translate(
                     'xpack.streams.significantEvents.savedMultiple.successfullyToastTitle',
-                    { defaultMessage: `Saved significant events queries successfully` }
+                    { defaultMessage: `Rules were successfully created` }
                   ),
                 });
 
@@ -128,7 +128,7 @@ export const EditSignificantEventFlyout = ({
                 notifications.showErrorDialog({
                   title: i18n.translate(
                     'xpack.streams.significantEvents.savedMultiple.errorToastTitle',
-                    { defaultMessage: 'Could not save significant events queries' }
+                    { defaultMessage: 'Could not save rule' }
                   ),
                   error,
                 });

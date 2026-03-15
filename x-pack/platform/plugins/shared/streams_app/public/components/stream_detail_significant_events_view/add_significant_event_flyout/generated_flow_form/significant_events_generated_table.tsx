@@ -203,10 +203,10 @@ export function SignificantEventsGeneratedTable({
       selection={selection}
       noItemsMessage={i18n.translate(
         'xpack.streams.addSignificantEventFlyout.aiFlow.noQueriesMessage',
-        { defaultMessage: 'No significant events queries generated' }
+        { defaultMessage: 'No queries generated' }
       )}
       tableCaption={i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.tableCaption', {
-        defaultMessage: 'Significant events queries',
+        defaultMessage: 'Queries',
       })}
     />
   );

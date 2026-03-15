@@ -168,19 +168,7 @@ export function StreamListView() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  href={router.link('/_discovery')}
-                  iconType="crosshairs"
-                  data-test-subj="streamsSignificantEventsDiscoveryButton"
-                >
-                  {i18n.translate('xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel', {
-                    defaultMessage: 'SigEvents Discovery',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
+
             <FeedbackButton />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -195,6 +183,22 @@ export function StreamListView() {
                   defaultMessage: 'Settings',
                 })}
               </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {significantEventsDiscovery?.available && significantEventsDiscovery.enabled && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    href={router.link('/_discovery')}
+                    iconType="crosshairs"
+                    data-test-subj="streamsSignificantEventsDiscoveryButton"
+                  >
+                    {i18n.translate('xpack.streams.streamsListView.sigEventsDiscoveryButtonLabel', {
+                      defaultMessage: 'Significant events',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

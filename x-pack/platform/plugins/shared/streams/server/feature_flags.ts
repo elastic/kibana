@@ -49,13 +49,13 @@ export function registerFeatureFlags(
           [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: {
             category: ['observability'],
             name: i18n.translate('xpack.streams.significantEventsDiscoverySettingsName', {
-              defaultMessage: 'Streams significant events discovery',
+              defaultMessage: 'Streams Significant Events',
             }) as string,
             value: false,
             description: i18n.translate(
               'xpack.streams.significantEventsDiscoverySettingsDescription',
               {
-                defaultMessage: 'Enable streams significant events discovery.',
+                defaultMessage: 'Enable streams Significant Events.',
               }
             ),
             type: 'boolean',

@@ -222,11 +222,11 @@ export function AddSignificantEventFlyout({
             {isEditMode
               ? i18n.translate(
                   'xpack.streams.streamDetailView.addSignificantEventFlyout.editTitle',
-                  { defaultMessage: 'Edit significant events' }
+                  { defaultMessage: 'Edit rule' }
                 )
               : i18n.translate(
                   'xpack.streams.streamDetailView.addSignificantEventFlyout.createTitle',
-                  { defaultMessage: 'Add significant events' }
+                  { defaultMessage: 'Add rule' }
                 )}
           </h2>
         </EuiTitle>
@@ -280,7 +280,7 @@ export function AddSignificantEventFlyout({
                             <h4>
                               {i18n.translate(
                                 'xpack.streams.streamDetailView.addSignificantEventFlyout.previewSignificantEventsLabel',
-                                { defaultMessage: 'Preview significant events' }
+                                { defaultMessage: 'Preview rule' }
                               )}
                             </h4>
                           </EuiText>
@@ -387,11 +387,11 @@ export function AddSignificantEventFlyout({
                       ? isEditMode
                         ? i18n.translate(
                             'xpack.streams.streamDetailView.addSignificantEventFlyout.updateButtonLabel',
-                            { defaultMessage: 'Update event' }
+                            { defaultMessage: 'Update rule' }
                           )
                         : i18n.translate(
                             'xpack.streams.streamDetailView.addSignificantEventFlyout.addButtonLabel',
-                            { defaultMessage: 'Add event' }
+                            { defaultMessage: 'Add rule' }
                           )
                       : i18n.translate(
                           'xpack.streams.streamDetailView.addSignificantEventFlyout.addSelectedButtonLabel',

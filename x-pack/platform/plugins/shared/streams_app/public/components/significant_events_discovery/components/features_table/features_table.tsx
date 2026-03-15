@@ -61,7 +61,7 @@ export function FeaturesTable() {
     {
       field: 'name',
       name: i18n.translate('xpack.streams.significantEventsDiscovery.featuresTable.featureColumn', {
-        defaultMessage: 'Feature',
+        defaultMessage: 'Knowledge indicator',
       }),
       truncateText: true,
       render: (_name: string, feature: Feature) => {
@@ -124,7 +124,7 @@ export function FeaturesTable() {
       <EuiFlexItem grow={false}>
         <EuiText size="s">
           {i18n.translate('xpack.streams.significantEventsDiscovery.featuresTable.featuresCount', {
-            defaultMessage: '{count} Features',
+            defaultMessage: '{count} Knowledge indicators',
             values: { count: data?.features.length ?? 0 },
           })}
         </EuiText>
@@ -133,7 +133,7 @@ export function FeaturesTable() {
         <EuiInMemoryTable
           tableCaption={i18n.translate(
             'xpack.streams.significantEventsDiscovery.featuresTable.tableCaption',
-            { defaultMessage: 'Features table' }
+            { defaultMessage: 'Knowledge indicators table' }
           )}
           columns={columns}
           itemId="id"
@@ -144,7 +144,7 @@ export function FeaturesTable() {
               incremental: true,
               placeholder: i18n.translate(
                 'xpack.streams.significantEventsDiscovery.featuresTable.searchPlaceholder',
-                { defaultMessage: 'Search features' }
+                { defaultMessage: 'Search knowledge indicators' }
               ),
             },
             filters: [],
@@ -155,7 +155,7 @@ export function FeaturesTable() {
               ? i18n.translate(
                   'xpack.streams.significantEventsDiscovery.featuresTable.noItemsMessage',
                   {
-                    defaultMessage: 'No features found',
+                    defaultMessage: 'No Knowledge indicators found',
                   }
                 )
               : ''

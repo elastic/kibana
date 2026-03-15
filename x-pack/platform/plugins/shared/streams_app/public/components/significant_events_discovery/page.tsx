@@ -46,7 +46,7 @@ export function SignificantEventsDiscoveryPage() {
     return [
       {
         title: i18n.translate('xpack.streams.significantEventsDiscovery.breadcrumbTitle', {
-          defaultMessage: 'Significant events Discovery',
+          defaultMessage: 'Significant Events',
         }),
         path: '/_discovery',
       },
@@ -78,7 +78,7 @@ export function SignificantEventsDiscoveryPage() {
     {
       id: 'features',
       label: i18n.translate('xpack.streams.significantEventsDiscovery.featuresTab', {
-        defaultMessage: 'Features',
+        defaultMessage: 'Knowledge indicators',
       }),
       href: router.link('/_discovery/{tab}', { path: { tab: 'features' } }),
       isSelected: tab === 'features',
@@ -89,7 +89,7 @@ export function SignificantEventsDiscoveryPage() {
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
           <EuiFlexItem grow={false}>
             {i18n.translate('xpack.streams.significantEventsDiscovery.queriesTab', {
-              defaultMessage: 'Queries',
+              defaultMessage: 'Rules',
             })}
           </EuiFlexItem>
           {unbackedQueriesCount > 0 && (
@@ -105,7 +105,7 @@ export function SignificantEventsDiscoveryPage() {
     {
       id: 'insights',
       label: i18n.translate('xpack.streams.significantEventsDiscovery.insightsTab', {
-        defaultMessage: 'Insights',
+        defaultMessage: 'Significant events',
       }),
       href: router.link('/_discovery/{tab}', { path: { tab: 'insights' } }),
       isSelected: tab === 'insights',
@@ -129,7 +129,7 @@ export function SignificantEventsDiscoveryPage() {
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
                 {i18n.translate('xpack.streams.significantEventsDiscovery.pageHeaderTitle', {
-                  defaultMessage: 'Significant Events Discovery',
+                  defaultMessage: 'Significant Events',
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>

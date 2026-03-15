@@ -72,5 +72,5 @@ export const StreamFeaturesAccordion = ({
 };
 
 const BUTTON_LABEL = i18n.translate('xpack.streams.streamFeaturesAccordion.buttonLabel', {
-  defaultMessage: 'Stream features',
+  defaultMessage: 'Stream knowledge indicators',
 });
