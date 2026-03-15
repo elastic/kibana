@@ -1,0 +1,467 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import pLimit from 'p-limit';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
+import type { SmlTypeDefinition, SmlContext, SmlCrawlerStateDocument, SmlCrawler } from './types';
+import type { SmlIndexer } from './sml_indexer';
+import {
+  createSmlCrawlerStateStorage,
+  type SmlCrawlerStateStorage,
+} from './sml_crawler_state_storage';
+import { smlIndexName } from './sml_storage';
+
+export type { SmlCrawler };
+
+export interface SmlCrawlerDeps {
+  indexer: SmlIndexer;
+  logger: Logger;
+}
+
+export class SmlCrawlerImpl implements SmlCrawler {
+  private readonly indexer: SmlIndexer;
+  private readonly logger: Logger;
+
+  constructor({ indexer, logger }: SmlCrawlerDeps) {
+    this.indexer = indexer;
+    this.logger = logger;
+  }
+
+  async crawl({
+    definition,
+    esClient,
+    savedObjectsClient,
+  }: {
+    definition: SmlTypeDefinition;
+    esClient: ElasticsearchClient;
+    savedObjectsClient: ISavedObjectsRepository;
+  }): Promise<void> {
+    const crawlerStateStorage = createSmlCrawlerStateStorage({
+      logger: this.logger,
+      esClient,
+    });
+    const stateClient = crawlerStateStorage.getClient();
+
+    const context: SmlContext = {
+      esClient,
+      savedObjectsClient,
+      logger: this.logger,
+    };
+
+    this.logger.info(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
+
+    // 1. List current items from the source (all spaces at once)
+    let currentItems;
+    try {
+      currentItems = await definition.list(context);
+      this.logger.info(
+        `SML crawler: listed ${currentItems.length} item(s) from source for type '${definition.id}'`
+      );
+    } catch (error) {
+      this.logger.error(
+        `SML crawler: failed to list items for type '${definition.id}': ${(error as Error).message}`
+      );
+      return;
+    }
+
+    // 2. Load existing crawler state for this type
+    let existingState: SmlCrawlerStateDocument[];
+    try {
+      existingState = await this.loadCrawlerState({
+        stateClient,
+        attachmentType: definition.id,
+      });
+    } catch (error) {
+      this.logger.error(
+        `SML crawler: skipping crawl cycle for type '${definition.id}' — state loading failed. Will retry on next scheduled run.`
+      );
+      return;
+    }
+    this.logger.info(
+      `SML crawler: loaded ${existingState.length} existing state doc(s) for type '${definition.id}'`
+    );
+
+    // 2b. Data integrity check: if the crawler state has items but the SML data
+    // index is missing or empty for this type, the data was lost (e.g. index
+    // rename / cleanup). Reset the state so everything gets re-indexed.
+    if (existingState.length > 0) {
+      const smlDataCount = await this.countSmlDocuments({
+        esClient,
+        attachmentType: definition.id,
+      });
+      this.logger.info(
+        `SML crawler: integrity check for type '${definition.id}' — ${existingState.length} state doc(s), ${smlDataCount} SML data doc(s) in index '${smlIndexName}'`
+      );
+      if (smlDataCount === 0) {
+        this.logger.warn(
+          `SML crawler: data integrity mismatch for type '${definition.id}' — ` +
+            `${existingState.length} state doc(s) but 0 documents in SML data index. ` +
+            `Resetting crawler state to force full re-index.`
+        );
+        existingState = [];
+      }
+    }
+
+    // Build maps for comparison
+    const currentItemMap = new Map(currentItems.map((item) => [item.id, item]));
+    const existingStateMap = new Map(existingState.map((doc) => [doc.attachment_id, doc]));
+
+    const now = new Date().toISOString();
+    const operations: Array<{ id: string; document: SmlCrawlerStateDocument }> = [];
+    let newCount = 0;
+    let updatedCount = 0;
+    let deletedCount = 0;
+    let unchangedCount = 0;
+
+    // 3. Find new and updated items
+    for (const item of currentItems) {
+      const existing = existingStateMap.get(item.id);
+      if (!existing) {
+        newCount++;
+        operations.push({
+          id: `${definition.id}:${item.id}`,
+          document: {
+            attachment_id: item.id,
+            attachment_type: definition.id,
+            spaces: item.spaces,
+            created_at: now,
+            updated_at: item.updatedAt,
+            update_action: 'create',
+          },
+        });
+      } else if (
+        existing.updated_at < item.updatedAt ||
+        !arraysEqual(existing.spaces, item.spaces)
+      ) {
+        updatedCount++;
+        operations.push({
+          id: `${definition.id}:${item.id}`,
+          document: {
+            ...existing,
+            spaces: item.spaces,
+            updated_at: item.updatedAt,
+            update_action: 'update',
+          },
+        });
+      } else {
+        unchangedCount++;
+      }
+    }
+
+    // 4. Find deleted items
+    for (const [attachmentId, state] of existingStateMap) {
+      if (!currentItemMap.has(attachmentId)) {
+        deletedCount++;
+        operations.push({
+          id: `${definition.id}:${attachmentId}`,
+          document: {
+            ...state,
+            update_action: 'delete',
+          },
+        });
+      }
+    }
+
+    this.logger.info(
+      `SML crawler: diff for type '${definition.id}': ${newCount} new, ${updatedCount} updated, ${deletedCount} deleted, ${unchangedCount} unchanged`
+    );
+
+    // 5. Write state updates via storage client
+    if (operations.length > 0) {
+      this.logger.info(
+        `SML crawler: writing ${operations.length} state operation(s) for type '${definition.id}'`
+      );
+      try {
+        const bulkResponse = await stateClient.bulk({
+          refresh: 'wait_for',
+          operations: operations.map(({ id, document }) => ({
+            index: { _id: id, document },
+          })),
+        });
+        if (bulkResponse.errors) {
+          const failedOps = bulkResponse.items.filter((item) => item.index?.error);
+          this.logger.warn(
+            `SML crawler: ${failedOps.length} state write(s) failed for type '${
+              definition.id
+            }': ${JSON.stringify(failedOps.slice(0, 3))}`
+          );
+        } else {
+          this.logger.info(
+            `SML crawler: state operations written successfully for type '${definition.id}'`
+          );
+        }
+      } catch (error) {
+        this.logger.error(
+          `SML crawler: failed to update state for type '${definition.id}': ${
+            (error as Error).message
+          }`
+        );
+        return;
+      }
+    } else {
+      this.logger.info(`SML crawler: no state changes needed for type '${definition.id}'`);
+    }
+
+    // 6. Process queued actions
+    await this.processQueue({
+      attachmentType: definition.id,
+      esClient,
+      savedObjectsClient,
+      stateClient,
+    });
+  }
+
+  /**
+   * Process all queued actions (non-null update_action) for a type.
+   * Uses `search_after` to paginate through all pending items.
+   */
+  private async processQueue({
+    attachmentType,
+    esClient,
+    savedObjectsClient,
+    stateClient,
+  }: {
+    attachmentType: string;
+    esClient: ElasticsearchClient;
+    savedObjectsClient: ISavedObjectsRepository;
+    stateClient: ReturnType<SmlCrawlerStateStorage['getClient']>;
+  }): Promise<void> {
+    const pageSize = 1000;
+    const limit = pLimit(10);
+    let processedCount = 0;
+    let errorCount = 0;
+    let searchAfter: Array<string | number> | undefined;
+    let hasMore = true;
+
+    while (hasMore) {
+      const pendingResponse = await stateClient.search({
+        track_total_hits: false,
+        query: {
+          bool: {
+            filter: [
+              { term: { attachment_type: attachmentType } },
+              { exists: { field: 'update_action' } },
+            ],
+            must_not: [{ term: { update_action: '' } }],
+          },
+        },
+        size: pageSize,
+        sort: [{ attachment_id: 'asc' }],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+      });
+
+      const pendingItems = pendingResponse.hits.hits;
+      if (pendingItems.length === 0) {
+        if (processedCount === 0) {
+          this.logger.info(
+            `SML crawler: no pending actions to process for type '${attachmentType}'`
+          );
+        }
+        break;
+      }
+
+      this.logger.info(
+        `SML crawler: processing batch of ${pendingItems.length} pending action(s) for type '${attachmentType}'`
+      );
+
+      const stateAckOps: Array<
+        { index: { _id: string; document: SmlCrawlerStateDocument } } | { delete: { _id: string } }
+      > = [];
+
+      const indexPromises = pendingItems
+        .filter((hit) => {
+          if (!hit._id) {
+            this.logger.warn('SML crawler: skipping hit without _id');
+            return false;
+          }
+          const doc = hit._source;
+          if (!doc || !doc.update_action) {
+            this.logger.debug(
+              `SML crawler: skipping hit '${hit._id}' — no source or update_action`
+            );
+            return false;
+          }
+          return true;
+        })
+        .map((hit) => {
+          const doc = hit._source!;
+          const action = doc.update_action!;
+
+          return limit(async () => {
+            try {
+              this.logger.info(
+                `SML crawler: processing '${action}' for attachment '${doc.attachment_id}' (type: ${doc.attachment_type})`
+              );
+
+              await this.indexer.indexAttachment({
+                attachmentId: doc.attachment_id,
+                attachmentType: doc.attachment_type,
+                action,
+                spaces: doc.spaces,
+                esClient,
+                savedObjectsClient,
+                logger: this.logger,
+              });
+
+              if (action === 'delete') {
+                stateAckOps.push({ delete: { _id: hit._id! } });
+              } else {
+                stateAckOps.push({
+                  index: {
+                    _id: hit._id!,
+                    document: { ...doc, update_action: undefined },
+                  },
+                });
+              }
+              processedCount++;
+            } catch (error) {
+              errorCount++;
+              this.logger.error(
+                `SML crawler: failed to process action '${action}' for '${doc.attachment_id}': ${
+                  (error as Error).message
+                }`
+              );
+            }
+          });
+        });
+
+      await Promise.all(indexPromises);
+
+      if (stateAckOps.length > 0) {
+        try {
+          const bulkResponse = await stateClient.bulk({
+            refresh: 'wait_for',
+            operations: stateAckOps,
+          });
+          if (bulkResponse.errors) {
+            const failedOps = bulkResponse.items.filter(
+              (item) => (item.index?.error ?? item.delete?.error) !== undefined
+            );
+            this.logger.warn(
+              `SML crawler: ${
+                failedOps.length
+              } state ACK operation(s) failed for type '${attachmentType}': ${JSON.stringify(
+                failedOps.slice(0, 3)
+              )}`
+            );
+          }
+        } catch (error) {
+          this.logger.error(
+            `SML crawler: failed to ACK state updates for type '${attachmentType}': ${
+              (error as Error).message
+            }`
+          );
+        }
+      }
+
+      if (pendingItems.length < pageSize) {
+        hasMore = false;
+      } else {
+        const lastHit = pendingItems[pendingItems.length - 1];
+        searchAfter = lastHit.sort as Array<string | number>;
+      }
+    }
+
+    if (processedCount > 0 || errorCount > 0) {
+      this.logger.info(
+        `SML crawler: queue processing complete for type '${attachmentType}': ${processedCount} succeeded, ${errorCount} failed`
+      );
+    }
+  }
+
+  /**
+   * Count how many documents exist in the SML data index for a given attachment type.
+   * Returns 0 if the index doesn't exist yet.
+   */
+  private async countSmlDocuments({
+    esClient,
+    attachmentType,
+  }: {
+    esClient: ElasticsearchClient;
+    attachmentType: string;
+  }): Promise<number> {
+    try {
+      const response = await esClient.count({
+        index: smlIndexName,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        query: {
+          term: { type: attachmentType },
+        },
+      });
+      return response.count;
+    } catch {
+      // Index doesn't exist yet — that's fine, return 0
+      return 0;
+    }
+  }
+
+  /**
+   * Load all crawler state documents for a given attachment type.
+   */
+  private async loadCrawlerState({
+    stateClient,
+    attachmentType,
+  }: {
+    stateClient: ReturnType<SmlCrawlerStateStorage['getClient']>;
+    attachmentType: string;
+  }): Promise<SmlCrawlerStateDocument[]> {
+    const allDocs: SmlCrawlerStateDocument[] = [];
+    const pageSize = 1000;
+
+    try {
+      let searchAfter: Array<string | number> | undefined;
+      let hasMore = true;
+
+      while (hasMore) {
+        const response = await stateClient.search({
+          track_total_hits: false,
+          query: {
+            bool: {
+              filter: [{ term: { attachment_type: attachmentType } }],
+            },
+          },
+          size: pageSize,
+          sort: [{ attachment_id: 'asc' }],
+          ...(searchAfter ? { search_after: searchAfter } : {}),
+        });
+
+        const hits = response.hits.hits;
+        for (const hit of hits) {
+          if (hit._source) {
+            allDocs.push(hit._source);
+          }
+        }
+
+        if (hits.length < pageSize) {
+          hasMore = false;
+        } else {
+          const lastHit = hits[hits.length - 1];
+          searchAfter = lastHit.sort as Array<string | number>;
+        }
+      }
+    } catch (error) {
+      this.logger.error(
+        `SML crawler: failed to load crawler state for type '${attachmentType}': ${
+          (error as Error).message
+        }`
+      );
+      throw error;
+    }
+
+    return allDocs;
+  }
+}
+
+const arraysEqual = (a: string[], b: string[]): boolean => {
+  if (a.length !== b.length) return false;
+  const sortedA = [...a].sort();
+  const sortedB = [...b].sort();
+  return sortedA.every((val, i) => val === sortedB[i]);
+};

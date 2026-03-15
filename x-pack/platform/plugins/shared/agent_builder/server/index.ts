@@ -20,7 +20,20 @@ export type {
   AgentBuilderPluginStart,
   ToolsSetup,
   ToolsStart,
+  SmlStart,
 } from './types';
+
+export type {
+  SmlTypeDefinition,
+  SmlChunk,
+  SmlData,
+  SmlContext,
+  SmlToAttachmentContext,
+  SmlListItem,
+  SmlConversationAttachment,
+  SmlSearchResult,
+  SmlIndexAttachmentParams,
+} from './services/sml';
 
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
