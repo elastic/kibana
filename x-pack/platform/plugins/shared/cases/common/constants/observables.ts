@@ -50,6 +50,26 @@ export const OBSERVABLE_TYPE_AGENT_ID = {
   key: 'observable-type-agent-id',
 } as const;
 
+export const OBSERVABLE_TYPE_USER = {
+  label: 'User',
+  key: 'observable-type-user',
+} as const;
+
+export const OBSERVABLE_TYPE_PROCESS = {
+  label: 'Process',
+  key: 'observable-type-process',
+} as const;
+
+export const OBSERVABLE_TYPE_REGISTRY = {
+  label: 'Registry',
+  key: 'observable-type-registry',
+} as const;
+
+export const OBSERVABLE_TYPE_SERVICE = {
+  label: 'Service',
+  key: 'observable-type-service',
+} as const;
+
 /**
  * Exporting an array of built-in observable types for use in the application
  */
@@ -63,6 +83,10 @@ export const OBSERVABLE_TYPES_BUILTIN: { label: string; key: string }[] = [
   OBSERVABLE_TYPE_FILE_PATH,
   OBSERVABLE_TYPE_EMAIL,
   OBSERVABLE_TYPE_DOMAIN,
+  OBSERVABLE_TYPE_USER,
+  OBSERVABLE_TYPE_PROCESS,
+  OBSERVABLE_TYPE_REGISTRY,
+  OBSERVABLE_TYPE_SERVICE,
 ];
 
 export const OBSERVABLE_TYPES_BUILTIN_KEYS = OBSERVABLE_TYPES_BUILTIN.map(({ key }) => key);

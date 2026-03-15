@@ -15,6 +15,7 @@ export { AlertService } from './alerts';
 export { AttachmentService } from './attachments';
 export { UserProfileService } from './user_profiles';
 export { TemplatesService } from './templates';
+export { EntityExtractionService } from './entity_extraction';
 
 export interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
