@@ -21,6 +21,7 @@ import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
+import { useKibana } from '../../../../../utils/kibana_react';
 import { HostLink } from './host_link';
 import { formatDuration } from './lib/format_duration';
 import { MetricWithSparkline } from './metric_with_sparkline';
@@ -44,6 +45,9 @@ export function MetricsSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
+  const { services } = useKibana();
+  const OverviewHostsTable = services.infra?.OverviewHostsTable;
+
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
   const [sortField, setSortField] = useState<keyof MetricsFetchDataSeries>('uptime');
   const [sortedData, setSortedData] = useState<MetricsFetchDataResponse | null>(null);
@@ -87,6 +91,27 @@ export function MetricsSection({ bucketSize }: Props) {
 
   if (!hasDataMap.infra_metrics?.hasData) {
     return null;
+  }
+
+  // POC: Use shared OverviewHostsTable from infra when available (uses /api/metrics/infra/host)
+  if (OverviewHostsTable && absoluteStart && absoluteEnd) {
+    return (
+      <SectionContainer
+        title={i18n.translate('xpack.observability.overview.metrics.title', {
+          defaultMessage: 'Hosts',
+        })}
+        appLink={{
+          href: '/app/metrics/hosts',
+          label: i18n.translate('xpack.observability.overview.metrics.appLink', {
+            defaultMessage: 'Show inventory',
+          }),
+        }}
+      >
+        <OverviewHostsTable
+          dateRange={{ from: absoluteStart, to: absoluteEnd }}
+        />
+      </SectionContainer>
+    );
   }
 
   const isLoading = status === FETCH_STATUS.LOADING;
