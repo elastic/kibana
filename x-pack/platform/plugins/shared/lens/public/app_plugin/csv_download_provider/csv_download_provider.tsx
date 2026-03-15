@@ -135,7 +135,7 @@ export const downloadCsvLensShareProvider = ({
       return {
         id: 'csvDownloadLens',
         name: panelTitle,
-        icon: 'tableDensityNormal',
+        icon: 'table',
         sortOrder: 1,
         label: 'CSV',
         exportType: 'lens_csv',

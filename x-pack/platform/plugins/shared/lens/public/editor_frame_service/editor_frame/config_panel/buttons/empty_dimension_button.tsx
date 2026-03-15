@@ -89,7 +89,7 @@ const SuggestedValueButton = ({ columnId, group, onClick }: EmptyButtonProps) =>
       values: { value: group.suggestedValue?.(), groupLabel: group.groupLabel },
     })}
     dataTestSubj="lns-empty-dimension-suggested-value"
-    iconType="plusInCircleFilled"
+    iconType="plusCircle"
     onClick={() => onClick(columnId)}
   />
 );

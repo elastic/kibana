@@ -521,7 +521,7 @@ export function SuggestionPanel({
       </EuiText>
 
       <EuiButtonEmpty
-        iconType="checkInCircleFilled"
+        iconType="checkCircleFill"
         size="s"
         className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
         onClick={() => dispatchLens(applyChanges())}

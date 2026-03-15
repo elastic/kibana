@@ -33,7 +33,7 @@ export const horizontalBarVisTypeDefinition = {
   title: i18n.translate('visTypeXy.horizontalBar.horizontalBarTitle', {
     defaultMessage: 'Horizontal bar',
   }),
-  icon: 'visBarHorizontal',
+  icon: 'chartBarHorizontal',
   description: i18n.translate('visTypeXy.horizontalBar.horizontalBarDescription', {
     defaultMessage: 'Present data in horizontal bars on an axis.',
   }),

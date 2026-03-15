@@ -84,7 +84,7 @@ export class TableSelector extends Component<TableSelectorProps, TableSelectorSt
               id="inspectorTableChooser"
               button={
                 <EuiButtonEmpty
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   iconSide="right"
                   size="s"
                   onClick={this.togglePopover}

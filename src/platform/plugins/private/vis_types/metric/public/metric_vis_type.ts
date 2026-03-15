@@ -18,7 +18,7 @@ import type { VisParams } from './types';
 export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> => ({
   name: 'metric',
   title: i18n.translate('visTypeMetric.metricTitle', { defaultMessage: 'Metric' }),
-  icon: 'visMetric',
+  icon: 'chartMetric',
   description: i18n.translate('visTypeMetric.metricDescription', {
     defaultMessage: 'Show a calculation as a single number.',
   }),
