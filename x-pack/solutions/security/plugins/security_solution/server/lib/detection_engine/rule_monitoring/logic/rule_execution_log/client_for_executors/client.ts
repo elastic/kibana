@@ -7,10 +7,8 @@
 
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
-import { sum } from 'lodash';
-import type { Duration } from 'moment';
-
 import type {
+  ConsumerExecutionMetrics,
   PublicRuleMonitoringService,
   PublicRuleResultService,
 } from '@kbn/alerting-plugin/server/types';
@@ -21,111 +19,201 @@ import type {
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   consoleLogLevelFromExecutionStatus,
-  LogLevelSetting,
-  logLevelToNumber,
   RuleExecutionStatusEnum,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
-
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { ExtMeta } from '../../utils/console_logging';
 import { truncateValue } from '../../utils/normalization';
+import type { ExecutionResultLogEntry, IEventLogWriter } from '../event_log/event_log_writer';
+import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import {
+  LogLevelEnum,
+  LogLevelSetting,
+  logLevelToNumber,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import { SECURITY_RULE_STATUS } from '../../../../rule_types/utils/apm_field_names';
+import type { IRuleExecutionLogForExecutors, RuleExecutionContext } from './client_interface';
 import { getCorrelationIds } from './correlation_ids';
 
-import type { IEventLogWriter } from '../event_log/event_log_writer';
-import type {
-  IRuleExecutionLogForExecutors,
-  LogMessageOptions,
-  RuleExecutionContext,
-  StatusChangeArgs,
-} from './client_interface';
-import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
-import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
-import { SECURITY_RULE_STATUS } from '../../../../rule_types/utils/apm_field_names';
-
-export const createRuleExecutionLogClientForExecutors = (
+export function createRuleExecutionLogClientForExecutors(
   settings: RuleExecutionSettings,
   eventLog: IEventLogWriter,
   logger: Logger,
   context: RuleExecutionContext,
   ruleMonitoringService: PublicRuleMonitoringService,
   ruleResultService: PublicRuleResultService
-): IRuleExecutionLogForExecutors => {
+): IRuleExecutionLogForExecutors {
   const baseCorrelationIds = getCorrelationIds(context);
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
-  const baseLogMeta = baseCorrelationIds.getLogMeta();
-
   const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId } = context;
 
-  const client: IRuleExecutionLogForExecutors = {
+  // Buffers the execution related data
+  const executionResultBuffer: ExecutionResultBuffer = {
+    errors: [],
+    warnings: [],
+    executionResult: undefined,
+    closed: false,
+  };
+
+  const ruleExecutionLogClient: IRuleExecutionLogForExecutors = {
     get context() {
       return context;
     },
 
-    trace(message: string, options?: LogMessageOptions): void {
-      writeMessage(message, {
-        eventLogLevel: LogLevelEnum.trace,
-        consoleLogLevel: options?.consoleLogLevel ?? LogLevelEnum.trace,
+    trace(message: string): void {
+      writeMessageToEventLog(message, LogLevelEnum.trace);
+    },
+
+    debug(message: string): void {
+      writeMessageToEventLog(message, LogLevelEnum.debug);
+    },
+
+    info(message: string): void {
+      writeMessageToEventLog(message, LogLevelEnum.info);
+    },
+
+    warn(message: string): void {
+      if (this.closed()) {
+        throw new Error('The logger has been closed');
+      }
+
+      executionResultBuffer.warnings.push({
+        timestamp: new Date().toISOString(),
+        message,
       });
     },
 
-    debug(message: string, options?: LogMessageOptions): void {
-      writeMessage(message, {
-        eventLogLevel: LogLevelEnum.debug,
-        consoleLogLevel: options?.consoleLogLevel ?? LogLevelEnum.debug,
+    error(message: string): void {
+      if (this.closed()) {
+        throw new Error('The logger has been closed');
+      }
+
+      executionResultBuffer.warnings.push({
+        timestamp: new Date().toISOString(),
+        message,
       });
     },
 
-    info(message: string, options?: LogMessageOptions): void {
-      writeMessage(message, {
-        eventLogLevel: LogLevelEnum.info,
-        consoleLogLevel: options?.consoleLogLevel,
-      });
+    logMetric<Metric extends keyof ConsumerExecutionMetrics>(
+      metricName: Metric,
+      value: ConsumerExecutionMetrics[Metric]
+    ): void {
+      if (this.closed() || value === undefined) {
+        return;
+      }
+
+      ruleMonitoringService.setMetric(metricName, value);
     },
 
-    warn(message: string, options?: LogMessageOptions): void {
-      writeMessage(message, {
-        eventLogLevel: LogLevelEnum.warn,
-        consoleLogLevel: options?.consoleLogLevel,
-      });
+    logMetrics(metrics: Partial<ConsumerExecutionMetrics>): void {
+      if (this.closed()) {
+        return;
+      }
+
+      ruleMonitoringService.setMetrics(metrics);
     },
 
-    error(message: string, options?: LogMessageOptions): void {
-      writeMessage(message, {
-        eventLogLevel: LogLevelEnum.error,
-        consoleLogLevel: options?.consoleLogLevel,
-      });
+    logExecutionResult(args: ExecutionOutcome): void {
+      executionResultBuffer.executionResult = args;
     },
 
-    async logStatusChange(args: StatusChangeArgs): Promise<void> {
-      await withSecuritySpan('IRuleExecutionLogForExecutors.logStatusChange', async () => {
-        const correlationIds = baseCorrelationIds.withStatus(args.newStatus);
+    closed(): boolean {
+      return executionResultBuffer.closed;
+    },
+
+    async close(): Promise<void> {
+      const executionResult = executionResultBuffer.executionResult;
+
+      if (!executionResult) {
+        throw new Error(
+          'Rule execution result must be set before closing the rule execution log client'
+        );
+      }
+
+      if (this.closed()) {
+        throw new Error('The logger has been closed');
+      }
+
+      executionResultBuffer.closed = true;
+
+      await withSecuritySpan('IRuleExecutionLogForExecutors.close', async () => {
+        const correlationIds = baseCorrelationIds.withStatus(executionResult.outcome);
         const logMeta = correlationIds.getLogMeta();
 
-        agent.addLabels({ [SECURITY_RULE_STATUS]: args.newStatus });
+        agent.addLabels({ [SECURITY_RULE_STATUS]: executionResult.outcome });
 
         try {
-          const normalizedArgs = normalizeStatusChangeArgs(args);
+          const executionOutcome: ExecutionOutcome = {
+            outcome: executionResult.outcome,
+            message: truncateValue(executionResult.message) ?? '',
+            userError: executionResult.userError,
+          };
 
           await Promise.all([
-            writeStatusChangeToConsole(normalizedArgs, logMeta),
-            writeStatusChangeToRuleObject(normalizedArgs),
-            writeStatusChangeToEventLog(normalizedArgs),
+            writeExecutionResultToConsole(executionOutcome, logMeta),
+            writeExecutionResultToRuleObject(executionOutcome),
           ]);
         } catch (e) {
-          const logMessage = `Error changing rule status to "${args.newStatus}"`;
+          const logMessage = `Error logging execution result with outcome "${executionResult.outcome}"`;
           writeExceptionToConsole(e, logMessage, logMeta);
         }
       });
     },
   };
 
-  const writeMessage = (
-    message: string,
-    levels: { eventLogLevel: LogLevel; consoleLogLevel?: LogLevel }
-  ): void => {
-    writeMessageToConsole(message, levels.consoleLogLevel ?? LogLevelEnum.debug, baseLogMeta);
-    writeMessageToEventLog(message, levels.eventLogLevel);
+  const writeExceptionToConsole = (e: unknown, message: string, logMeta: ExtMeta): void => {
+    const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
+    writeMessageToConsole(`${message}. Reason: ${logReason}`, LogLevelEnum.error, logMeta);
+  };
+
+  const writeExecutionResultToConsole = (args: ExecutionOutcome, logMeta: ExtMeta): void => {
+    const messageParts: string[] = [`Changing rule status to "${args.outcome}"`, args.message];
+    const logMessage = messageParts.filter(Boolean).join('. ');
+    const logLevel = consoleLogLevelFromExecutionStatus(args.outcome, args.userError);
+
+    writeMessageToConsole(logMessage, logLevel, logMeta);
+  };
+
+  const writeExecutionResultToRuleObject = async (args: ExecutionOutcome): Promise<void> => {
+    const { outcome, message, userError } = args;
+
+    if (outcome === RuleExecutionStatusEnum.running) {
+      return;
+    }
+
+    if (outcome === RuleExecutionStatusEnum.failed) {
+      ruleResultService.addLastRunError(message, userError ?? false);
+    } else if (outcome === RuleExecutionStatusEnum['partial failure']) {
+      ruleResultService.addLastRunWarning(message);
+    }
+
+    ruleResultService.setLastRunOutcomeMessage(message);
+  };
+
+  const writeMessageToEventLog = (message: string, logLevel: LogLevel): void => {
+    const { isEnabled, minLevel } = settings.extendedLogging;
+
+    if (!isEnabled || minLevel === LogLevelSetting.off) {
+      return;
+    }
+    if (logLevelToNumber(logLevel) < logLevelToNumber(minLevel)) {
+      return;
+    }
+
+    eventLog.logMessage({
+      ruleInfo: {
+        ruleId,
+        ruleUuid,
+        ruleName,
+        ruleRevision,
+        ruleType,
+        spaceId,
+        executionId,
+      },
+      message,
+      logLevel,
+    });
   };
 
   const writeMessageToConsole = (message: string, logLevel: LogLevel, logMeta: ExtMeta): void => {
@@ -150,154 +238,19 @@ export const createRuleExecutionLogClientForExecutors = (
     }
   };
 
-  const writeMessageToEventLog = (message: string, logLevel: LogLevel): void => {
-    const { isEnabled, minLevel } = settings.extendedLogging;
+  return ruleExecutionLogClient;
+}
 
-    if (!isEnabled || minLevel === LogLevelSetting.off) {
-      return;
-    }
-    if (logLevelToNumber(logLevel) < logLevelToNumber(minLevel)) {
-      return;
-    }
-
-    eventLog.logMessage({
-      ruleId,
-      ruleUuid,
-      ruleName,
-      ruleRevision,
-      ruleType,
-      spaceId,
-      executionId,
-      message,
-      logLevel,
-    });
-  };
-
-  const writeExceptionToConsole = (e: unknown, message: string, logMeta: ExtMeta): void => {
-    const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
-    writeMessageToConsole(`${message}. Reason: ${logReason}`, LogLevelEnum.error, logMeta);
-  };
-
-  const writeStatusChangeToConsole = (args: NormalizedStatusChangeArgs, logMeta: ExtMeta): void => {
-    const messageParts: string[] = [`Changing rule status to "${args.newStatus}"`, args.message];
-    const logMessage = messageParts.filter(Boolean).join('. ');
-    const logLevel = consoleLogLevelFromExecutionStatus(args.newStatus, args.userError);
-    writeMessageToConsole(logMessage, logLevel, logMeta);
-  };
-
-  const writeStatusChangeToRuleObject = async (args: NormalizedStatusChangeArgs): Promise<void> => {
-    const { newStatus, message, metrics, userError } = args;
-
-    if (newStatus === RuleExecutionStatusEnum.running) {
-      return;
-    }
-
-    const {
-      total_search_duration_ms: totalSearchDurationMs,
-      total_indexing_duration_ms: totalIndexingDurationMs,
-      execution_gap_duration_s: executionGapDurationS,
-      gap_range: gapRange,
-    } = metrics ?? {};
-
-    if (totalSearchDurationMs) {
-      ruleMonitoringService.setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs);
-    }
-
-    if (totalIndexingDurationMs) {
-      ruleMonitoringService.setLastRunMetricsTotalIndexingDurationMs(totalIndexingDurationMs);
-    }
-
-    if (executionGapDurationS) {
-      ruleMonitoringService.setLastRunMetricsGapDurationS(executionGapDurationS);
-    }
-
-    if (gapRange) {
-      ruleMonitoringService.setLastRunMetricsGapRange(gapRange);
-    }
-
-    if (newStatus === RuleExecutionStatusEnum.failed) {
-      ruleResultService.addLastRunError(message, userError ?? false);
-    } else if (newStatus === RuleExecutionStatusEnum['partial failure']) {
-      ruleResultService.addLastRunWarning(message);
-    }
-
-    ruleResultService.setLastRunOutcomeMessage(message);
-  };
-
-  const writeStatusChangeToEventLog = (args: NormalizedStatusChangeArgs): void => {
-    const { newStatus, message, metrics } = args;
-
-    if (metrics) {
-      eventLog.logExecutionMetrics({
-        ruleId,
-        ruleUuid,
-        ruleName,
-        ruleRevision,
-        ruleType,
-        spaceId,
-        executionId,
-        metrics,
-      });
-    }
-
-    eventLog.logStatusChange({
-      ruleId,
-      ruleUuid,
-      ruleName,
-      ruleRevision,
-      ruleType,
-      spaceId,
-      executionId,
-      newStatus,
-      message,
-    });
-  };
-
-  return client;
-};
-
-interface NormalizedStatusChangeArgs {
-  newStatus: RuleExecutionStatus;
+interface ExecutionOutcome {
+  outcome: RuleExecutionStatus;
   message: string;
-  metrics?: RuleExecutionMetrics;
+  metrics?: Partial<RuleExecutionMetrics>;
   userError?: boolean;
 }
 
-const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChangeArgs => {
-  if (args.newStatus === RuleExecutionStatusEnum.running) {
-    return {
-      newStatus: args.newStatus,
-      message: '',
-    };
-  }
-  const { newStatus, message, metrics, userError } = args;
-
-  return {
-    newStatus,
-    message: truncateValue(message) ?? '',
-    metrics: metrics
-      ? {
-          total_search_duration_ms: normalizeDurations(metrics.searchDurations),
-          total_indexing_duration_ms: normalizeDurations(metrics.indexingDurations),
-          total_enrichment_duration_ms: normalizeDurations(metrics.enrichmentDurations),
-          execution_gap_duration_s: normalizeGap(metrics.executionGap),
-          gap_range: metrics.gapRange ?? undefined,
-          frozen_indices_queried_count: metrics.frozenIndicesQueriedCount,
-        }
-      : undefined,
-    userError,
-  };
-};
-
-const normalizeDurations = (durations?: string[]): number | undefined => {
-  if (durations == null) {
-    return undefined;
-  }
-
-  const sumAsFloat = sum(durations.map(Number));
-  return Math.round(sumAsFloat);
-};
-
-const normalizeGap = (duration?: Duration): number | undefined => {
-  return duration ? Math.round(duration.asSeconds()) : undefined;
-};
+interface ExecutionResultBuffer {
+  errors: ExecutionResultLogEntry[];
+  warnings: ExecutionResultLogEntry[];
+  executionResult: ExecutionOutcome | undefined;
+  closed: boolean;
+}

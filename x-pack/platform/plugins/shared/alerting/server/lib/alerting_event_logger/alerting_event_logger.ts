@@ -13,11 +13,16 @@ import { EVENT_LOG_ACTIONS } from '../../plugin';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
-import type { AlertInstanceState, RuleExecutionStatus } from '../../types';
+import type {
+  AlertInstanceState,
+  ConsumerExecutionMetrics,
+  RuleExecutionStatus,
+} from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
 import type { RuleRunMetrics } from '../rule_run_metrics_store';
 import { Gap } from '../rule_gaps/gap';
 import type { GapBase } from '../../application/gaps/types';
+import { RuleResultServiceResults } from '../../monitoring/rule_result_service';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -58,7 +63,10 @@ interface DoneOpts {
   timings?: TaskRunnerTimings;
   status?: RuleExecutionStatus;
   metrics?: RuleRunMetrics | null;
+  consumerMetrics?: Partial<ConsumerExecutionMetrics> | null;
   backfill?: BackfillOpts;
+  errors?: RuleResultServiceResults['errors'];
+  warnings?: RuleResultServiceResults['warnings'];
 }
 
 interface LogTimeoutOpts {
@@ -345,7 +353,7 @@ export class AlertingEventLogger {
     );
   }
 
-  public done({ status, metrics, timings, backfill }: DoneOpts) {
+  public done({ status, metrics, consumerMetrics, timings, backfill, errors, warnings }: DoneOpts) {
     if (!this.isInitialized || !this.event || !this.context) {
       throw new Error('AlertingEventLogger not initialized');
     }
@@ -383,6 +391,18 @@ export class AlertingEventLogger {
 
     if (metrics) {
       updateEvent(this.event, { metrics });
+    }
+
+    if (consumerMetrics) {
+      updateEvent(this.event, { consumerMetrics });
+    }
+
+    if (errors) {
+      updateEvent(this.event, { errors });
+    }
+
+    if (warnings) {
+      updateEvent(this.event, { warnings });
     }
 
     if (timings) {
@@ -607,9 +627,12 @@ interface UpdateEventOpts {
   status?: string;
   reason?: string;
   metrics?: RuleRunMetrics;
+  consumerMetrics?: Partial<ConsumerExecutionMetrics>;
   timings?: TaskRunnerTimings;
   backfill?: BackfillOpts;
   maintenanceWindowIds?: string[];
+  errors?: RuleResultServiceResults['errors'];
+  warnings?: RuleResultServiceResults['warnings'];
 }
 
 interface UpdateRuleOpts {
@@ -700,10 +723,13 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
     status,
     reason,
     metrics,
+    consumerMetrics,
     timings,
     alertingOutcome,
     backfill,
     maintenanceWindowIds,
+    errors,
+    warnings,
   } = opts;
   if (!event) {
     throw new Error('Cannot update event because it is not initialized.');
@@ -762,6 +788,35 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
       es_search_duration_ms: metrics.esSearchDurationMs ? metrics.esSearchDurationMs : 0,
       total_search_duration_ms: metrics.totalSearchDurationMs ? metrics.totalSearchDurationMs : 0,
     };
+  }
+
+  if (consumerMetrics) {
+    event.kibana = event.kibana || {};
+    event.kibana.alert = event.kibana.alert || {};
+    event.kibana.alert.rule = event.kibana.alert.rule || {};
+    event.kibana.alert.rule.execution = event.kibana.alert.rule.execution || {};
+    event.kibana.alert.rule.execution.metrics = {
+      ...event.kibana.alert.rule.execution.metrics,
+      ...consumerMetrics,
+    };
+  }
+
+  if (errors) {
+    event.kibana = event.kibana || {};
+    event.kibana.alert = event.kibana.alert || {};
+    event.kibana.alert.rule = event.kibana.alert.rule || {};
+    event.kibana.alert.rule.execution = event.kibana.alert.rule.execution || {};
+    event.kibana.alert.rule.execution.errors = errors;
+  }
+
+  if (warnings) {
+    event.kibana = event.kibana || {};
+    event.kibana.alert = event.kibana.alert || {};
+    event.kibana.alert.rule = event.kibana.alert.rule || {};
+    event.kibana.alert.rule.execution = event.kibana.alert.rule.execution || {};
+    event.kibana.alert.rule.execution.warnings = warnings.map((warning) => ({
+      message: warning,
+    }));
   }
 
   if (backfill) {

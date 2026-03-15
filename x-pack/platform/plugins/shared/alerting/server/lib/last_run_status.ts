@@ -14,11 +14,16 @@ import type { RawRuleLastRun, RuleLastRun } from '../types';
 import { RuleLastRunOutcomeValues, RuleExecutionStatusWarningReasons } from '../types';
 import { translations } from '../constants/translations';
 import type { RuleRunMetrics } from './rule_run_metrics_store';
-import type { RuleResultService } from '../monitoring/rule_result_service';
+import type {
+  RuleResultService,
+  RuleResultServiceResults,
+} from '../monitoring/rule_result_service';
 
 export interface ILastRun {
   lastRun: RuleLastRun;
   metrics: RuleRunMetrics | null;
+  errors?: RuleResultServiceResults['errors'];
+  warnings?: RuleResultServiceResults['warnings'];
 }
 
 export const lastRunFromState = (
@@ -77,6 +82,8 @@ export const lastRunFromState = (
       },
     },
     metrics,
+    errors,
+    warnings,
   };
 };
 

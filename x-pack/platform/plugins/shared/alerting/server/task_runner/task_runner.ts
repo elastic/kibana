@@ -608,23 +608,29 @@ export class TaskRunner<
     schedule: Result<IntervalSchedule, Error>;
     runRuleResult: Result<RunRuleResult, Error>;
   }) {
-    const { executionStatus: execStatus, executionMetrics: execMetrics } =
-      await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
-        const {
-          params: { alertId: ruleId },
-          startedAt,
-          schedule: taskSchedule,
-        } = this.taskInstance;
+    const {
+      executionStatus: execStatus,
+      executionMetrics: execMetrics,
+      consumerExecutionMetrics: consumerExecMetrics,
+      errors: executionErrors,
+      warnings: executionWarnings,
+    } = await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
+      const {
+        params: { alertId: ruleId },
+        startedAt,
+        schedule: taskSchedule,
+      } = this.taskInstance;
 
-        let nextRun: string | null = null;
-        if (isOk(schedule)) {
-          nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
-        } else if (taskSchedule) {
-          // rules cannot use rrule for scheduling yet
-          nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
-        }
+      let nextRun: string | null = null;
+      if (isOk(schedule)) {
+        nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
+      } else if (taskSchedule) {
+        // rules cannot use rrule for scheduling yet
+        nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+      }
 
-        const { executionStatus, executionMetrics, lastRun, outcome } = processRunResults({
+      const { executionStatus, executionMetrics, lastRun, outcome, errors, warnings } =
+        processRunResults({
           logger: this.logger,
           logPrefix: `${this.ruleType.id}:${ruleId}`,
           result: this.ruleResult,
@@ -632,65 +638,74 @@ export class TaskRunner<
           runRuleResult,
         });
 
-        if (apm.currentTransaction) {
-          apm.currentTransaction.setOutcome(outcome);
-        }
+      if (apm.currentTransaction) {
+        apm.currentTransaction.setOutcome(outcome);
+      }
 
-        // set start and duration based on event log
-        const { start, duration } = this.alertingEventLogger.getStartAndDuration();
-        if (null != start) {
-          executionStatus.lastExecutionDate = start;
-        }
-        if (null != duration) {
-          executionStatus.lastDuration = nanosToMillis(duration);
-        }
+      // set start and duration based on event log
+      const { start, duration } = this.alertingEventLogger.getStartAndDuration();
+      if (null != start) {
+        executionStatus.lastExecutionDate = start;
+      }
+      if (null != duration) {
+        executionStatus.lastDuration = nanosToMillis(duration);
+      }
 
-        // if executionStatus indicates an error, fill in fields in
-        this.ruleMonitoring.addHistory({
-          duration: executionStatus.lastDuration,
-          hasError: executionStatus.error != null,
-          runDate: this.runDate,
-        });
-
-        const gap = this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range;
-        if (gap) {
-          this.alertingEventLogger.reportGap({
-            gap,
-          });
-        }
-
-        if (!this.cancelled) {
-          this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
-          if (outcome === 'failure') {
-            this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
-          }
-          if (this.logger.isLevelEnabled('debug')) {
-            this.logger.debug(
-              `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
-                executionStatus
-              )} - ${JSON.stringify(lastRun)}`
-            );
-          }
-
-          await this.updateRuleSavedObjectPostRun(ruleId, {
-            executionStatus: ruleExecutionStatusToRaw(executionStatus),
-            nextRun,
-            lastRun: lastRunToRaw(lastRun),
-            monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-          });
-        }
-
-        if (startedAt) {
-          // Capture how long it took for the rule to run after being claimed
-          this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
-        }
-
-        return { executionStatus, executionMetrics };
+      // if executionStatus indicates an error, fill in fields in
+      this.ruleMonitoring.addHistory({
+        duration: executionStatus.lastDuration,
+        hasError: executionStatus.error != null,
+        runDate: this.runDate,
       });
+
+      const gap = this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range;
+      if (gap) {
+        this.alertingEventLogger.reportGap({
+          gap,
+        });
+      }
+
+      if (!this.cancelled) {
+        this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+        if (outcome === 'failure') {
+          this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
+        }
+        if (this.logger.isLevelEnabled('debug')) {
+          this.logger.debug(
+            `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
+              executionStatus
+            )} - ${JSON.stringify(lastRun)}`
+          );
+        }
+
+        await this.updateRuleSavedObjectPostRun(ruleId, {
+          executionStatus: ruleExecutionStatusToRaw(executionStatus),
+          nextRun,
+          lastRun: lastRunToRaw(lastRun),
+          monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+        });
+      }
+
+      if (startedAt) {
+        // Capture how long it took for the rule to run after being claimed
+        this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
+      }
+
+      return {
+        executionStatus,
+        executionMetrics: executionMetrics,
+        consumerExecutionMetrics: this.ruleMonitoring.getExecutorMetrics(),
+        errors,
+        warnings,
+      };
+    });
 
     this.alertingEventLogger.done({
       status: execStatus,
       metrics: execMetrics,
+      consumerMetrics: consumerExecMetrics,
+      errors: executionErrors,
+      warnings: executionWarnings,
       timings: this.timer.toJson(),
     });
   }

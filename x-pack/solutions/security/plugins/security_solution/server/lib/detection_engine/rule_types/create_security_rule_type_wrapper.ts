@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, partition } from 'lodash';
+import { partition, sum } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -36,7 +36,10 @@ import { getNotificationResultsLink } from '../rule_actions_legacy';
 // eslint-disable-next-line no-restricted-imports
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
-import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
+import {
+  RuleExecutionStatus,
+  RuleExecutionStatusEnum,
+} from '../../../../common/api/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from './saved_object_references';
@@ -214,10 +217,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           ruleExecutionLogger.debug(`Starting execution with interval: ${interval}`);
 
-          await ruleExecutionLogger.logStatusChange({
-            newStatus: RuleExecutionStatusEnum.running,
-          });
-
           let result = createResultObject(state);
 
           let frozenIndicesQueriedCount = 0;
@@ -272,14 +271,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               runtimeMappings = dataViewRuntimeMappings;
             } catch (exc) {
               if (SavedObjectsErrorHelpers.isNotFoundError(exc)) {
-                await ruleExecutionLogger.logStatusChange({
-                  newStatus: RuleExecutionStatusEnum.failed,
+                await ruleExecutionLogger.logExecutionResult({
+                  outcome: RuleExecutionStatusEnum.failed,
                   message: `Data view is not found.\nError: ${exc}`,
                   userError: true,
                 });
               } else {
-                await ruleExecutionLogger.logStatusChange({
-                  newStatus: RuleExecutionStatusEnum.failed,
+                await ruleExecutionLogger.logExecutionResult({
+                  outcome: RuleExecutionStatusEnum.failed,
                   message: `Check for indices to search failed.\nError: ${exc}`,
                 });
               }
@@ -401,14 +400,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               });
             }
             wrapperErrors.push(gapErrorMessage);
-            await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatusEnum.failed,
-              message: gapErrorMessage,
-              metrics: {
-                executionGap: remainingGap,
-                gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
-              },
-            });
           }
 
           try {
@@ -530,17 +521,19 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               };
             }
 
+            ruleExecutionLogger.logMetrics({
+              total_search_duration_ms: Math.round(sum(result.searchAfterTimes.map(Number))),
+              total_indexing_duration_ms: Math.round(sum(result.bulkCreateTimes.map(Number))),
+              frozen_indices_queried_count: frozenIndicesQueriedCount,
+            });
+
             const disabledActions = rule.actions.filter(
               (action) => !actions.isActionTypeEnabled(action.actionTypeId)
             );
-
-            if (result.totalEventsFound != null) {
-              ruleExecutionLogger.info(`Found matching events: ${result.totalEventsFound}`);
-            }
             const suppressedAlertsCount = result.suppressedAlertsCount ?? 0;
-            if (suppressedAlertsCount > 0) {
-              ruleExecutionLogger.info(`Alerts suppressed: ${suppressedAlertsCount}`);
-            }
+
+            ruleExecutionLogger.logMetric('events_found_count', result.totalEventsFound ?? 0);
+            ruleExecutionLogger.logMetric('suppressed_alerts', suppressedAlertsCount);
 
             const createdSignalsCount = result.createdSignals.length;
 
@@ -548,13 +541,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               const unaccountedEvents =
                 result.totalEventsFound - createdSignalsCount - suppressedAlertsCount;
               if (unaccountedEvents > 0) {
-                ruleExecutionLogger.info(
-                  `Events that did not result in alerts: ${unaccountedEvents}\nThis is typically because alerts for these events already exist from a previous rule execution, or events were excluded by value list exceptions. This number doesn't include suppressed alerts.`
-                );
+                ruleExecutionLogger.logMetric('unaccounted_events', unaccountedEvents);
               }
             }
-
-            ruleExecutionLogger.info(`Alerts created: ${createdSignalsCount}`);
 
             agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
 
@@ -566,73 +555,37 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               wrapperWarnings.push(disabledActionsWarning);
             }
 
-            if (result.warningMessages.length > 0 || wrapperWarnings.length > 0) {
-              // write warning messages first because if we have still have an error to write
-              // we want to write the error messages last, so that the errors are set
-              // as the current status of the rule.
-              await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatusEnum['partial failure'],
-                message: truncateList(result.warningMessages.concat(wrapperWarnings)).join('\n\n'),
-                metrics: {
-                  searchDurations: result.searchAfterTimes,
-                  indexingDurations: result.bulkCreateTimes,
-                  enrichmentDurations: result.enrichmentTimes,
-                  frozenIndicesQueriedCount,
-                },
-              });
-            }
-            if (wrapperErrors.length > 0 || result.errors.length > 0) {
-              await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatusEnum.failed,
-                message: truncateList(result.errors.concat(wrapperErrors)).join(', '),
-                metrics: {
-                  searchDurations: result.searchAfterTimes,
-                  indexingDurations: result.bulkCreateTimes,
-                  enrichmentDurations: result.enrichmentTimes,
-                  executionGap: remainingGap,
-                  gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
-                  frozenIndicesQueriedCount,
-                },
-                userError:
-                  result.userError ||
-                  result.errors.every((err) => checkErrorDetails(err).isUserError),
-              });
-            } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
-              ruleExecutionLogger.debug('Security Rule execution completed');
-              ruleExecutionLogger.debug(
-                `Indexed ${createdSignalsCount} alerts into "${ruleDataClient.indexNameWithNamespace(
-                  spaceId
-                )}".${
-                  !isEmpty(tuples)
-                    ? ` Searched between date ranges: ${JSON.stringify(tuples, null, 2)}.`
-                    : ''
-                }`
+            let outcome: RuleExecutionStatus = RuleExecutionStatusEnum.succeeded;
+            let outcomeMessage = 'Rule execution completed successfully';
+
+            const hasWarnings = result.warningMessages.length > 0;
+            const hasErrors = result.errors.length > 0;
+
+            if (hasErrors || hasWarnings) {
+              outcome = RuleExecutionStatusEnum['partial failure'];
+              outcomeMessage = truncateList(result.warningMessages.concat(wrapperWarnings)).join(
+                '\n\n'
               );
-              await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatusEnum.succeeded,
-                message: 'Rule execution completed successfully',
-                metrics: {
-                  searchDurations: result.searchAfterTimes,
-                  indexingDurations: result.bulkCreateTimes,
-                  enrichmentDurations: result.enrichmentTimes,
-                  frozenIndicesQueriedCount,
-                },
-              });
+            } else if (wrapperErrors.length > 0 || result.errors.length > 0) {
+              outcome = RuleExecutionStatusEnum.failed;
+              outcomeMessage = truncateList(result.errors.concat(wrapperErrors)).join(', ');
             }
+
+            ruleExecutionLogger.logExecutionResult({
+              outcome,
+              message: outcomeMessage,
+              userError: result.userError,
+            });
           } catch (error) {
             const errorMessage = error.message ?? '(no error message given)';
 
-            await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatusEnum.failed,
+            ruleExecutionLogger.logExecutionResult({
+              outcome: RuleExecutionStatusEnum.failed,
               message: `An error occurred during rule execution. ${errorMessage}`,
               userError: checkErrorDetails(errorMessage).isUserError,
-              metrics: {
-                searchDurations: result.searchAfterTimes,
-                indexingDurations: result.bulkCreateTimes,
-                enrichmentDurations: result.enrichmentTimes,
-                frozenIndicesQueriedCount,
-              },
             });
+          } finally {
+            await ruleExecutionLogger.close();
           }
 
           if (!isPreview && analytics) {
