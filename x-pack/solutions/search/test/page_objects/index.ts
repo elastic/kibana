@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SearchInferenceManagementPageProvider } from './inference_management_page';
 import { SearchHomePageProvider } from './search_homepage';
 import { SearchIndexDetailPageProvider } from './search_index_details_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
@@ -15,7 +14,6 @@ import { SearchSynonymsPageProvider } from './search_synonyms_page';
 export const searchSharedPageObjects = {
   searchHomePage: SearchHomePageProvider,
   searchIndexDetailsPage: SearchIndexDetailPageProvider,
-  searchInferenceManagementPage: SearchInferenceManagementPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
   searchQueryRules: SearchQueryRulesPageProvider,
   searchSynonyms: SearchSynonymsPageProvider,

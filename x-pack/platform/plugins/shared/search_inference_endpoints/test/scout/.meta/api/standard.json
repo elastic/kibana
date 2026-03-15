@@ -1,0 +1,427 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "28140fb5d17705d-cb6a0449ea09a5d",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user GET settings should return empty defaults when no settings exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 32,
+        "column": 16
+      }
+    },
+    {
+      "id": "28140fb5d17705d-0b98e66c9804728",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user PUT settings should create settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 54,
+        "column": 16
+      }
+    },
+    {
+      "id": "28140fb5d17705d-9d32affefbde9cf",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user PUT settings should overwrite existing settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 75,
+        "column": 16
+      }
+    },
+    {
+      "id": "28140fb5d17705d-1a9c130e41cad4f",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user PUT settings should persist settings across GET requests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 106,
+        "column": 16
+      }
+    },
+    {
+      "id": "28140fb5d17705d-9f7fb88271f449f",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user validation should reject duplicate feature_id values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 135,
+        "column": 16
+      }
+    },
+    {
+      "id": "28140fb5d17705d-cb722c60d97769a",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user validation should reject duplicate endpoints within a feature",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 149,
+        "column": 16
+      }
+    },
+    {
+      "id": "28140fb5d17705d-37a745f51ebe4aa",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user validation should reject empty feature_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 165,
+        "column": 16
+      }
+    },
+    {
+      "id": "28140fb5d17705d-a497fd5f5e72ada",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user validation should reject empty endpoints array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 176,
+        "column": 16
+      }
+    },
+    {
+      "id": "28140fb5d17705d-a11b74718af3c59",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings authorized user validation should reject missing features field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 187,
+        "column": 16
+      }
+    },
+    {
+      "id": "28140fb5d17705d-e9cf3cce9cd7bb1",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings feature-privileged user GET should return 200",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 217,
+        "column": 14
+      }
+    },
+    {
+      "id": "28140fb5d17705d-491bf9f46aee79e",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings feature-privileged user PUT should return 200",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 226,
+        "column": 14
+      }
+    },
+    {
+      "id": "28140fb5d17705d-9314ce0d2e1d731",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings unauthorized user GET should return 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 254,
+        "column": 14
+      }
+    },
+    {
+      "id": "28140fb5d17705d-e03eb926a9aef99",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings unauthorized user PUT should return 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 262,
+        "column": 14
+      }
+    },
+    {
+      "id": "28140fb5d17705d-56cb60110c0c5c6",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings space isolation settings saved in one space should not be visible in another",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 314,
+        "column": 16
+      }
+    },
+    {
+      "id": "28140fb5d17705d-cf3610547f8d68c",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings space isolation settings saved in one space should be readable from the same space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 340,
+        "column": 16
+      }
+    },
+    {
+      "id": "28140fb5d17705d-3a9e367d517a176",
+      "title": "inference_settings - /internal/search_inference_endpoints/settings space isolation each space should maintain its own independent settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout/api/tests/inference_settings.spec.ts",
+        "line": 366,
+        "column": 16
+      }
+    }
+  ]
+}
