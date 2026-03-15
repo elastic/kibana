@@ -1,0 +1,165 @@
+{
+  "sha1": "52b3433a41f0c8af2f662449cade32e9764a3e03",
+  "tests": [
+    {
+      "id": "0982ec90d5f873e-3bdf8373a7bd310",
+      "title": "SLO Burn Rate Embeddable creates a dashboard with an SLO burn rate embeddable panel via REST API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/burn_rate_embeddable.spec.ts",
+        "line": 39,
+        "column": 12
+      }
+    },
+    {
+      "id": "0982ec90d5f873e-26e2d8fa954a1a1",
+      "title": "SLO Burn Rate Embeddable rejects invalid burn rate panel config when slo_id is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/burn_rate_embeddable.spec.ts",
+        "line": 85,
+        "column": 12
+      }
+    },
+    {
+      "id": "aad151916be4e66-10dba1826963ec8",
+      "title": "SLO Error Budget Embeddable creates a dashboard with an SLO error budget embeddable panel via REST API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/error_budget_embeddable.spec.ts",
+        "line": 34,
+        "column": 12
+      }
+    },
+    {
+      "id": "aad151916be4e66-af0b0e6ee25cf3e",
+      "title": "SLO Error Budget Embeddable rejects invalid error budget panel config when slo_id is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/error_budget_embeddable.spec.ts",
+        "line": 78,
+        "column": 12
+      }
+    },
+    {
+      "id": "5f5c6f74fcba068-3244d396ab008eb",
+      "title": "SLO Overview Embeddable creates a dashboard with an SLO single overview embeddable panel via REST API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/overview_embeddable.spec.ts",
+        "line": 39,
+        "column": 12
+      }
+    },
+    {
+      "id": "5f5c6f74fcba068-d26a154690368a5",
+      "title": "SLO Overview Embeddable defaults slo_instance_id to * when omitted in single overview panel config",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/overview_embeddable.spec.ts",
+        "line": 85,
+        "column": 12
+      }
+    },
+    {
+      "id": "5f5c6f74fcba068-bad6f46c309e496",
+      "title": "SLO Overview Embeddable creates a dashboard with an SLO group overview embeddable panel via REST API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/overview_embeddable.spec.ts",
+        "line": 119,
+        "column": 12
+      }
+    },
+    {
+      "id": "5f5c6f74fcba068-dd95631f45ceb86",
+      "title": "SLO Overview Embeddable creates a dashboard with minimal group overview panel config",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/overview_embeddable.spec.ts",
+        "line": 168,
+        "column": 12
+      }
+    },
+    {
+      "id": "5f5c6f74fcba068-cca342d5d33fa86",
+      "title": "SLO Overview Embeddable rejects invalid overview panel config when overview_mode is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/overview_embeddable.spec.ts",
+        "line": 200,
+        "column": 12
+      }
+    },
+    {
+      "id": "5f5c6f74fcba068-7c57b6e91029913",
+      "title": "SLO Overview Embeddable rejects invalid single overview panel config when slo_id is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/overview_embeddable.spec.ts",
+        "line": 233,
+        "column": 12
+      }
+    }
+  ]
+}
