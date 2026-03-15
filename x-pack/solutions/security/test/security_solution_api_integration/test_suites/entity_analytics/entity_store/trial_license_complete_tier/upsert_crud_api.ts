@@ -25,7 +25,7 @@ import {
 } from './infra/constants';
 import { triggerTransform } from './infra/transforms';
 
-const LOCAL_TIMEOUT_MS = 3600; // 60s
+const LOCAL_TIMEOUT_MS = 60000; // 60s
 
 export default function (providerContext: FtrProviderContext) {
   const supertest = providerContext.getService('supertest');
@@ -35,16 +35,37 @@ export default function (providerContext: FtrProviderContext) {
   const dataView = dataViewRouteHelpersFactory(supertest);
   const securitySolutionApi = providerContext.getService('entityAnalyticsApi');
 
-  // Failing: See https://github.com/elastic/kibana/issues/236172
-  describe.skip('@ess CRUD API - Upsert', () => {
+  describe('@ess CRUD API - Upsert', () => {
     describe('upsert user', () => {
       before(async () => {
         await cleanUpEntityStore(providerContext);
+
+        // Create a test datastream FIRST to ensure it exists before data view references it
+        await es.indices.createDataStream({ name: COMMON_DATASTREAM_NAME });
+
+        // Verify the datastream is ready
+        await retry.waitForWithTimeout('Datastream to be ready', 30000, async () => {
+          const response = await es.indices.getDataStream({ name: COMMON_DATASTREAM_NAME });
+          const ready = response.data_streams.length === 1;
+          if (ready) {
+            log.info(`Datastream ${COMMON_DATASTREAM_NAME} is ready`);
+          }
+          return ready;
+        });
+
         // Initialize security solution by creating a prerequisite index pattern.
         // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
+        // The data view pattern logs-* will match our test datastream logs-elastic_agent.cloudbeat-test
         await dataView.create('security-solution');
-        // Create a test index matching transform's pattern to store test documents
-        await es.indices.createDataStream({ name: COMMON_DATASTREAM_NAME });
+
+        // Verify the data view is accessible before proceeding
+        await retry.waitForWithTimeout('Data view to be accessible', 30000, async () => {
+          const response = await supertest
+            .get('/s/default/api/data_views/data_view/security-solution-default')
+            .expect(200);
+          log.info(`Data view verified: ${response.body.data_view?.title}`);
+          return response.body.data_view?.title === 'logs-*';
+        });
 
         log.info('before complete');
       });
@@ -57,7 +78,65 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await enableEntityStore(providerContext);
+        // This test only validates user entity behavior, so enable only the user engine
+        // Note: COMMON_DATASTREAM_NAME (logs-elastic_agent.cloudbeat-test) is already covered
+        // by the default Entity Store patterns (logs-*), so no extraIndexPatterns needed
+        await enableEntityStore(providerContext, { entityTypes: ['user'] });
+
+        // Diagnostic: Log entity store status to verify user engine is running
+        const statusResponse = await supertest
+          .get('/api/entity_store/status')
+          .query({ include_components: true })
+          .expect(200);
+        log.info(`Entity Store status: ${statusResponse.body.status}`);
+        log.info(
+          `Entity Store engines: ${JSON.stringify(
+            statusResponse.body.engines?.map((e: any) => ({
+              type: e.type,
+              status: e.status,
+              indexPattern: e.indexPattern,
+            }))
+          )}`
+        );
+
+        // Wait for the user transform to be in started state with correct source indices
+        await retry.waitForWithTimeout('User transform to be ready', 60000, async () => {
+          try {
+            const transformConfig = await es.transform.getTransform({
+              transform_id: USER_TRANSFORM_ID,
+            });
+            const transform = transformConfig.transforms?.[0];
+            if (!transform) {
+              log.debug('User transform not found yet');
+              return false;
+            }
+            const sourceIndices = transform.source?.index;
+            log.info(`User transform source indices: ${JSON.stringify(sourceIndices)}`);
+
+            // Verify the transform includes logs-* pattern
+            const hasLogsPattern = Array.isArray(sourceIndices)
+              ? sourceIndices.some((idx: string) => idx.includes('logs'))
+              : String(sourceIndices).includes('logs');
+            if (!hasLogsPattern) {
+              log.warning(`User transform missing logs pattern in source: ${sourceIndices}`);
+            }
+
+            // Check transform status
+            const statsResponse = await es.transform.getTransformStats({
+              transform_id: USER_TRANSFORM_ID,
+            });
+            const stats = statsResponse.transforms?.[0];
+            log.info(`User transform state: ${stats?.state}`);
+            return stats?.state === 'started' || stats?.state === 'indexing';
+          } catch (e: any) {
+            if (e.message?.includes('resource_not_found_exception')) {
+              log.debug('User transform not found yet');
+              return false;
+            }
+            throw e;
+          }
+        });
+
         log.info('beforeEach complete');
       });
 
@@ -77,10 +156,41 @@ export default function (providerContext: FtrProviderContext) {
           COMMON_DATASTREAM_NAME
         );
 
+        // Diagnostic: Check what's in the source datastream after transform trigger
+        const sourceDocsResult = await es.search({
+          index: COMMON_DATASTREAM_NAME,
+          query: { match_all: {} },
+          size: 10,
+        });
+        log.info(
+          `Source datastream ${COMMON_DATASTREAM_NAME} has ${
+            (sourceDocsResult.hits.total as any).value
+          } documents`
+        );
+        if (sourceDocsResult.hits.hits.length > 0) {
+          log.info(`Sample source doc: ${JSON.stringify(sourceDocsResult.hits.hits[0]._source)}`);
+        }
+
         await retry.waitForWithTimeout(
           'Document to be processed and transformed',
           LOCAL_TIMEOUT_MS,
           async () => {
+            // Diagnostic: Check what's in the user index
+            const userIndexResult = await es.search({
+              index: USER_INDEX_NAME,
+              query: { match_all: {} },
+              size: 10,
+            });
+            const userIndexTotal = (userIndexResult.hits.total as any).value;
+            log.debug(`User index ${USER_INDEX_NAME} has ${userIndexTotal} documents`);
+            if (userIndexResult.hits.hits.length > 0) {
+              log.debug(
+                `User index docs: ${userIndexResult.hits.hits
+                  .map((h) => JSON.stringify(h._source))
+                  .join(', ')}`
+              );
+            }
+
             await assertEntityFromES(es, userName, USER_INDEX_NAME, (hit) => {
               expect(hit._source?.user?.name).toEqual(userName);
               expect(hit._source?.user?.domain).toEqual(['domain.com']);
@@ -176,7 +286,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await enableEntityStore(providerContext);
+        // This test validates bulk upsert across all entity types (host, user, service)
+        await enableEntityStore(providerContext, { entityTypes: ['host', 'user', 'service'] });
         log.info('beforeEach complete');
       });
 

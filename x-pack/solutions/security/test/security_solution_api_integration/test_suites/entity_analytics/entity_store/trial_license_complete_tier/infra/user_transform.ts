@@ -38,31 +38,108 @@ export async function createDocumentsAndTriggerTransform(
 ): Promise<void> {
   const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
+  const log = providerContext.getService('log');
 
-  const { count, transforms } = await es.transform.getTransformStats({
-    transform_id: USER_TRANSFORM_ID,
-  });
-  expect(count).toBe(1);
-  let transform = transforms[0];
-  expect(transform.id).toBe(USER_TRANSFORM_ID);
-  const triggerCount: number = transform.stats.trigger_count;
-  const docsProcessed: number = transform.stats.documents_processed;
+  // Phase 1: Wait for the transform to exist before attempting to get stats
+  let transform: any;
+  let triggerCount: number = 0;
+  let docsProcessed: number = 0;
+
+  await retry.waitForWithTimeout(
+    `Transform ${USER_TRANSFORM_ID} to exist`,
+    TIMEOUT_MS,
+    async () => {
+      try {
+        const { count, transforms } = await es.transform.getTransformStats({
+          transform_id: USER_TRANSFORM_ID,
+        });
+        if (count !== 1) {
+          log.debug(`Waiting for transform ${USER_TRANSFORM_ID} to exist, count: ${count}`);
+          return false;
+        }
+        transform = transforms[0];
+        triggerCount = transform.stats.trigger_count;
+        docsProcessed = transform.stats.documents_processed;
+        log.debug(
+          `Transform ${USER_TRANSFORM_ID} found, trigger_count: ${triggerCount}, docs_processed: ${docsProcessed}`
+        );
+
+        // Log transform source configuration for debugging
+        try {
+          const transformConfig = await es.transform.getTransform({
+            transform_id: USER_TRANSFORM_ID,
+          });
+          if (transformConfig.transforms?.[0]?.source) {
+            const source = transformConfig.transforms[0].source;
+            log.info(
+              `Transform ${USER_TRANSFORM_ID} source indices: ${JSON.stringify(source.index)}`
+            );
+            log.debug(
+              `Transform ${USER_TRANSFORM_ID} source query: ${JSON.stringify(source.query)}`
+            );
+          }
+        } catch (configErr) {
+          log.debug(`Could not fetch transform config: ${configErr}`);
+        }
+
+        return true;
+      } catch (e: any) {
+        if (e.message?.includes('resource_not_found_exception')) {
+          log.debug(`Transform ${USER_TRANSFORM_ID} not found yet, waiting...`);
+          return false;
+        }
+        throw e;
+      }
+    }
+  );
 
   for (let i = 0; i < docs.length; i++) {
     const { result } = await es.index(buildUserTransformDocument(docs[i], dataStream));
     expect(result).toBe('created');
   }
 
+  // Refresh the index to ensure documents are visible to the transform
+  // This is critical in CI where timing can be tighter
+  await es.indices.refresh({ index: dataStream });
+  log.debug(`Refreshed index ${dataStream} after creating ${docs.length} documents`);
+
   // Trigger the transform manually
   await triggerTransform(providerContext, USER_TRANSFORM_ID);
+
+  // Phase 2: Wait for transform to execute
   await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
-    const response = await es.transform.getTransformStats({
-      transform_id: USER_TRANSFORM_ID,
-    });
-    transform = response.transforms[0];
-    expect(transform.stats.trigger_count).toBeGreaterThan(triggerCount);
-    expect(transform.stats.documents_processed).toBeGreaterThan(docsProcessed);
-    return true;
+    try {
+      const response = await es.transform.getTransformStats({
+        transform_id: USER_TRANSFORM_ID,
+      });
+      if (!response.transforms[0]) {
+        log.debug(`Transform ${USER_TRANSFORM_ID} not found in stats response, retrying...`);
+        return false;
+      }
+      transform = response.transforms[0];
+      if (transform.stats.trigger_count <= triggerCount) {
+        log.debug(
+          `Transform trigger_count ${transform.stats.trigger_count} not greater than ${triggerCount}, waiting...`
+        );
+        return false;
+      }
+      if (transform.stats.documents_processed <= docsProcessed) {
+        log.debug(
+          `Transform docs_processed ${transform.stats.documents_processed} not greater than ${docsProcessed}, waiting...`
+        );
+        return false;
+      }
+      log.debug(
+        `Transform completed: trigger_count=${transform.stats.trigger_count}, docs_processed=${transform.stats.documents_processed}`
+      );
+      return true;
+    } catch (e: any) {
+      if (e.message?.includes('resource_not_found_exception')) {
+        log.debug(`Transform ${USER_TRANSFORM_ID} not found, retrying...`);
+        return false;
+      }
+      throw e;
+    }
   });
 }
 
