@@ -12,6 +12,8 @@ import Fs from 'node:fs';
 import chalk from 'chalk';
 import { run } from '@kbn/dev-cli-runner';
 import { validate, OAS_3_0_SCHEMA_PATH } from './validate';
+import { filtersMatch } from './filters_match';
+import { toInstancePathFilter } from './path_filters';
 
 const kibanaYamlRelativePath = './oas_docs/output/kibana.yaml';
 const kibanaServerlessYamlRelativePath = './oas_docs/output/kibana.serverless.yaml';
@@ -19,6 +21,7 @@ const kibanaServerlessYamlRelativePath = './oas_docs/output/kibana.serverless.ya
 run(
   async ({ log, flagsReader }) => {
     const paths = flagsReader.arrayOfStrings('path');
+    const instancePathFilters = paths?.map((path) => toInstancePathFilter(path));
     const only = flagsReader.string('only') as 'traditional' | 'serverless' | undefined;
     const assertNoErrorIncrease = flagsReader.boolean('assert-no-error-increase');
     const skipPrintingIssues = flagsReader.boolean('skip-printing-issues');
@@ -65,6 +68,15 @@ run(
     }
 
     for (const yamlPath of yamlPaths) {
+      if (paths?.length) {
+        if (!(await filtersMatch(paths, yamlPath))) {
+          log.warning(
+            `None of the provided --path filters matched any content in ${chalk.underline(
+              yamlPath
+            )}, are you sure these paths exist? Running the check anyway...`
+          );
+        }
+      }
       log.info(`About to validate spec at ${chalk.underline(yamlPath)}`);
       await log.indent(4, async () => {
         const result = validate(yamlPath);
@@ -82,7 +94,11 @@ run(
                   // require the use of `$ref`, it's an optional optimization.
                   error.params.missingProperty !== '$ref' &&
                   error.params.passingSchemas !== null &&
-                  (paths?.length ? paths.some((path) => error.instancePath.startsWith(path)) : true)
+                  (instancePathFilters?.length
+                    ? instancePathFilters.some((instancePathFilter) =>
+                        error.instancePath.startsWith(instancePathFilter)
+                      )
+                    : true)
               )
               .map(({ instancePath, message, schemaPath }) => {
                 errorCount++;
@@ -100,8 +116,10 @@ run(
             log.warning('Found the following issues\n\n' + errorMessage + '\n');
           }
           errorCounts[yamlPath] = errorCount;
-          log.warning(`Found ${chalk.bold(errorCount)} errors in ${chalk.underline(yamlPath)}`);
-          invalidSpec = true;
+          if (errorCount) {
+            log.warning(`Found ${chalk.bold(errorCount)} errors in ${chalk.underline(yamlPath)}`);
+            invalidSpec = true;
+          }
         } else {
           log.success(`${chalk.underline(yamlPath)} is valid`);
         }
@@ -149,6 +167,9 @@ run(
         )}: Use the "Failed check @ schema path <path>" to see the JSONSchema for the expected shape in:\n${OAS_3_0_SCHEMA_PATH}`
       );
       process.exit(1);
+    } else {
+      log.success(`No errors found in the OAS spec`);
+      process.exit(0);
     }
   },
   {
@@ -160,14 +181,14 @@ run(
       help: `
       --assert-no-error-increase  Will error if the number of errors in the OAS spec compared to the baseline has increased. Cannot be combined with other flags.
       --update-baseline          Update or create the baseline file with current error counts.
-      --path                     Pass in the (start of) a custom path to focus OAS validation error reporting, can be specified multiple times.
+      --path                     Pass in the (start of) a custom API route path (for example /api/fleet/agent_policies), can be specified multiple times.
       --only                     Validate only OAS for the a specific offering, one of "traditional" or "serverless". Omitting this will validate all offerings.
       --skip-printing-issues     Do not print the errors found in the OAS spec, only the count of errors.
 `,
       examples: `
 node ./scripts/validate_oas_docs.js
-node ./scripts/validate_oas_docs.js --path /paths/~1api~1fleet~1agent_policies --path /paths/~1api~1fleet~1agent_policies
-node ./scripts/validate_oas_docs.js --only serverless --path /paths/~1api~1fleet~1agent_policies
+node ./scripts/validate_oas_docs.js --path /api/fleet/agent_policies --path /api/fleet/agent_policies
+node ./scripts/validate_oas_docs.js --only serverless --path /api/fleet/agent_policies
 node ./scripts/validate_oas_docs.js --assert-no-error-increase --update-baseline
 `,
     },
