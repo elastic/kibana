@@ -44,6 +44,7 @@ import {
   FieldInput as FieldInputBase,
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
+import { getFirstValue } from '../../../dimension_panel/operation_support';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
@@ -493,20 +494,21 @@ export const termsOperation: OperationDefinition<
           const possibleOperations = operationSupportMatrix.operationByField.get(sourcefield);
           const termsSupported = possibleOperations?.has('terms');
           if (!termsSupported) {
-            const newFieldOp = possibleOperations?.values().next().value;
-            return updateLayer(
-              insertOrReplaceColumn({
-                layer,
-                columnId,
-                indexPattern,
-                // @ts-expect-error upgrade typescript v5.9.3
-                op: newFieldOp,
-                field: mainField,
-                visualizationGroups: dimensionGroups,
-                targetGroup: groupId,
-                incompleteParams,
-              })
-            );
+            const newFieldOp = getFirstValue(possibleOperations);
+            if (newFieldOp) {
+              return updateLayer(
+                insertOrReplaceColumn({
+                  layer,
+                  columnId,
+                  indexPattern,
+                  op: newFieldOp,
+                  field: mainField,
+                  visualizationGroups: dimensionGroups,
+                  targetGroup: groupId,
+                  incompleteParams,
+                })
+              );
+            }
           }
         }
         updateLayer({

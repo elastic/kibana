@@ -32,7 +32,7 @@ import type {
   FormBasedLayer,
 } from '@kbn/lens-common';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
-import type { OperationSupportMatrix } from './operation_support';
+import { getSingleValue, type OperationSupportMatrix } from './operation_support';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -625,13 +625,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
             const possibleFields = fieldByOperation.get(operationType) ?? new Set<string>();
 
             let newLayer: FormBasedLayer;
-            if (possibleFields.size === 1) {
+            const singleField = getSingleValue(possibleFields);
+            if (singleField) {
               newLayer = insertOrReplaceColumn({
                 layer: props.state.layers[props.layerId],
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
-                field: currentIndexPattern.getFieldByName(possibleFields.values().next().value!),
+                field: currentIndexPattern.getFieldByName(singleField),
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
               });

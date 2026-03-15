@@ -6,7 +6,6 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { apiHasDisableTriggers } from '@kbn/presentation-publishing';
 import type { GetStateType, LensInternalApi, LensPublicCallbacks } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
@@ -22,7 +21,9 @@ export function prepareCallbacks(
   getState: GetStateType,
   services: LensEmbeddableStartServices,
   executionContext: KibanaExecutionContext | undefined,
-  onDataUpdate: (adapters: Partial<DefaultInspectorAdapters | undefined>) => void,
+  onDataUpdate: <TInspectorAdapters extends unknown>(
+    adapters: TInspectorAdapters | undefined
+  ) => void,
   dispatchRenderComplete: () => void,
   callbacks: LensPublicCallbacks
 ) {
@@ -38,7 +39,10 @@ export function prepareCallbacks(
       executionContext,
       dispatchRenderComplete
     ),
-    onData: (_data: unknown, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
+    onData: <TData, TInspectorAdapters extends unknown>(
+      _data: TData,
+      adapters?: TInspectorAdapters
+    ): void => {
       addLog(`onData$`);
       onDataUpdate(adapters);
     },

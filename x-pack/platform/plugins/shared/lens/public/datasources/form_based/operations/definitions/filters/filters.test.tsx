@@ -278,7 +278,6 @@ describe('filters', () => {
             params: {
               // let's ignore terms params here
               format: { id: 'number', params: { decimals: 0 } },
-              // @ts-expect-error not defined in the generic type, only in the Terms specific type
               secondaryFields: ['dest'],
             },
           },

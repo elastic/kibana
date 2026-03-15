@@ -7,7 +7,6 @@
 
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type {
   GetStateType,
   LensInternalApi,
@@ -49,7 +48,13 @@ import {
   updateAttributesWithAnnotation,
 } from './helper';
 import { addLog } from './logger';
-import { apiHasLensComponentCallbacks, apiHasUserMessages } from './type_guards';
+import {
+  apiHasLensComponentCallbacks,
+  apiHasUserMessages,
+  hasTablesAdapter,
+  isPartialInspectorAdapters,
+  type OnDataCallback,
+} from './type_guards';
 import type { LensEmbeddableStartServices } from './types';
 import { buildUserMessagesHelpers } from './user_messages/api';
 
@@ -195,16 +200,20 @@ export function loadEmbeddableData(
       }
     };
 
-    const onDataCallback = (adapters: Partial<DefaultInspectorAdapters> | undefined) => {
+    const onDataCallback: OnDataCallback = (_data, adapters) => {
       internalApi.updateVisualizationContext({
-        activeData: adapters?.tables?.tables,
+        activeData: hasTablesAdapter(adapters) ? adapters.tables?.tables : undefined,
       });
 
       // data has loaded
       internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
       // consumer to be notified on data change
-      onLoad?.(false, adapters, api.dataLoading$);
+      onLoad?.(
+        false,
+        isPartialInspectorAdapters(adapters) ? adapters : undefined,
+        api.dataLoading$
+      );
 
       api.loadViewUnderlyingData();
 

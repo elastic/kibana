@@ -23,13 +23,12 @@ import type {
   FiltersIndexPatternColumn,
   LensAggFilter as Filter,
   LensAggFilterValue as FilterValue,
-  TermsIndexPatternColumn,
   IndexPattern,
 } from '@kbn/lens-common';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import { FilterPopover } from './filter_popover';
-import { isColumnOfType } from '../helpers';
+import { hasOperationType } from '../helpers';
 import { draggablePopoverButtonStyles } from '../styles';
 
 const generateId = htmlIdGenerator();
@@ -70,7 +69,8 @@ export const filtersOperation: OperationDefinition<
   getDefaultLabel: () => filtersLabel,
   buildColumn({ previousColumn }, columnParams) {
     let params = { filters: columnParams?.filters ?? [defaultFilter] };
-    if (previousColumn && isColumnOfType<TermsIndexPatternColumn>('terms', previousColumn)) {
+    if (hasOperationType(previousColumn, 'terms') && previousColumn?.sourceField) {
+      const secondaryFields = (previousColumn.params?.secondaryFields ?? []) as string[];
       params = {
         filters: columnParams?.filters ?? [
           {
@@ -80,15 +80,13 @@ export const filtersOperation: OperationDefinition<
               language: 'kuery',
             },
           },
-          ...((
-            previousColumn as { params?: { secondaryFields?: string[] } }
-          ).params?.secondaryFields?.map((field) => ({
+          ...secondaryFields.map((field) => ({
             label: '',
             input: {
               query: `"${field}" : *`,
               language: 'kuery',
             },
-          })) ?? []),
+          })),
         ],
       };
     }
