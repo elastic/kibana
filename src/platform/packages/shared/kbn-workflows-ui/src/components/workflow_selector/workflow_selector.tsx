@@ -14,6 +14,7 @@ import {
   EuiInputPopover,
   EuiLink,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiPopoverFooter,
   EuiSelectable,
   type EuiSelectableOption,
@@ -22,6 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -48,6 +50,7 @@ const defaultConfig: WorkflowSelectorConfig = {
     selectedWorkflowDisabled: i18n.SELECTED_WORKFLOW_DISABLED_ERROR,
     loadFailed: i18n.FAILED_TO_LOAD_WORKFLOWS,
   },
+  listView: false,
 };
 
 const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
@@ -97,73 +100,89 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   );
 
   // Custom render function for workflow options
-  const renderWorkflowOption = useCallback((option: WorkflowOption, searchValue: string) => {
-    // Prepare the namePrepend content based on the WorkflowOption properties
-    const getPrependContent = (workflowOption: WorkflowOption) => {
-      const isSelected = workflowOption.checked === 'on';
-      const isDisabled = workflowOption.disabled;
-      const wasSelectedButNowDisabled = isSelected && isDisabled;
+  const renderWorkflowOption = useCallback(
+    (option: WorkflowOption, searchValue: string) => {
+      // Prepare the namePrepend content based on the WorkflowOption properties
+      const getPrependContent = (workflowOption: WorkflowOption) => {
+        const isSelected = workflowOption.checked === 'on';
+        const isDisabled = workflowOption.disabled;
+        const wasSelectedButNowDisabled = isSelected && isDisabled;
 
-      if (wasSelectedButNowDisabled) {
-        return (
-          <EuiIcon
-            type="alert"
-            color="warning"
-            style={{ marginRight: '8px' }}
-            aria-label={i18n.WORKFLOW_DISABLED_WARNING}
-          />
+        if (wasSelectedButNowDisabled) {
+          return (
+            <EuiIcon
+              type="alert"
+              color="warning"
+              style={{ marginRight: '8px' }}
+              aria-label={i18n.WORKFLOW_DISABLED_WARNING}
+            />
+          );
+        } else if (isDisabled) {
+          return (
+            <IconDisabledWorkflow
+              size="m"
+              style={{ marginRight: '8px' }}
+              aria-label={i18n.DISABLED_BADGE_LABEL}
+            />
+          );
+        } else if (workflowOption.validationResult) {
+          return (
+            <EuiIcon
+              type="warning"
+              style={{ marginRight: '8px' }}
+              color={workflowOption.validationResult.severity === 'error' ? 'danger' : 'warning'}
+              aria-label={workflowOption.validationResult.message}
+            />
+          );
+        }
+
+        return null;
+      };
+
+      const labelContent =
+        finalConfig.listView && option.checked === 'on' ? (
+          <strong>{option.label}</strong>
+        ) : finalConfig.listView ? (
+          option.label
+        ) : (
+          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
         );
-      } else if (isDisabled) {
-        return (
-          <IconDisabledWorkflow
-            size="m"
-            style={{ marginRight: '8px' }}
-            aria-label={i18n.DISABLED_BADGE_LABEL}
-          />
-        );
-      } else if (workflowOption.validationResult) {
-        return (
-          <EuiIcon
-            type="warning"
-            style={{ marginRight: '8px' }}
-            color={workflowOption.validationResult.severity === 'error' ? 'danger' : 'warning'}
-            aria-label={workflowOption.validationResult.message}
-          />
-        );
+
+      const secondaryContent = finalConfig.listView ? (
+        (option.secondaryContent as string)
+      ) : (
+        <EuiHighlight search={searchValue}>{option.secondaryContent as string}</EuiHighlight>
+      );
+
+      const content = (
+        // @ts-expect-error upgrade typescript v5.9.3
+        <>
+          <>
+            {getPrependContent(option)}
+            {labelContent}
+          </>
+          {option.secondaryContent && (
+            <EuiText size="xs" color="subdued" className="eui-displayBlock">
+              <small>{secondaryContent}</small>
+            </EuiText>
+          )}
+        </>
+      );
+
+      const tooltipContent = option.disabled
+        ? i18n.DISABLED_WORKFLOW_TOOLTIP
+        : option.validationResult
+        ? option.validationResult.message
+        : undefined;
+
+      if (tooltipContent) {
+        return <EuiToolTip content={tooltipContent}>{content}</EuiToolTip>;
       }
 
-      return null;
-    };
-
-    const content = (
-      // @ts-expect-error upgrade typescript v5.9.3
-      <>
-        <>
-          {getPrependContent(option)}
-          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-        </>
-        {option.secondaryContent && (
-          <EuiText size="xs" color="subdued" className="eui-displayBlock">
-            <small>
-              <EuiHighlight search={searchValue}>{option.secondaryContent as string}</EuiHighlight>
-            </small>
-          </EuiText>
-        )}
-      </>
-    );
-
-    const tooltipContent = option.disabled
-      ? i18n.DISABLED_WORKFLOW_TOOLTIP
-      : option.validationResult
-      ? option.validationResult.message
-      : undefined;
-
-    if (tooltipContent) {
-      return <EuiToolTip content={tooltipContent}>{content}</EuiToolTip>;
-    }
-
-    return content;
-  }, []);
+      return content;
+    },
+    [finalConfig.listView]
+  );
 
   const handleWorkflowChange = useCallback(
     (newOptions: WorkflowOption[], event: unknown, changedOption: WorkflowOption) => {
@@ -226,12 +245,101 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     ? i18n.LOADING_WORKFLOWS
     : undefined;
 
+  const listView = useCallback(
+    (list: ReactElement, search?: ReactElement) => {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+            maxHeight: '100%',
+            minWidth: 0,
+          }}
+        >
+          {search}
+          <div
+            style={{
+              overflowY: 'auto',
+              overflowX: 'hidden',
+              minHeight: 0,
+              flex: '1 1 auto',
+              minWidth: 0,
+            }}
+          >
+            {list}
+          </div>
+          {workflowOptions.length > 0 && (
+            <EuiPanel
+              paddingSize="s"
+              hasShadow={false}
+              css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+            >
+              <EuiText size="s" textAlign="right">
+                <EuiLink {...workflowManagementLinkProps} external={false}>
+                  <FormattedMessage
+                    id="workflows.params.viewAllWorkflowsLinkText"
+                    defaultMessage="View all workflows"
+                  />
+                  <EuiIcon type="popout" size="s" aria-hidden={true} />
+                </EuiLink>
+              </EuiText>
+            </EuiPanel>
+          )}
+        </div>
+      );
+    },
+    [euiTheme.colors.backgroundBaseSubdued, workflowManagementLinkProps, workflowOptions.length]
+  );
+
+  const popoverView = useCallback(
+    (list: ReactElement, search?: ReactElement) => {
+      return (
+        <EuiInputPopover
+          closePopover={handlePopoverClose}
+          disableFocusTrap
+          closeOnScroll
+          isOpen={isPopoverOpen}
+          input={search!} // eslint-disable-line @typescript-eslint/no-non-null-assertion
+          panelPaddingSize="none"
+          fullWidth
+        >
+          {list}
+          {workflowOptions.length > 0 && (
+            <EuiPopoverFooter
+              paddingSize="s"
+              css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+            >
+              <EuiText size="s" textAlign="right">
+                <EuiLink {...workflowManagementLinkProps} external={false}>
+                  <FormattedMessage
+                    id="workflows.params.viewAllWorkflowsLinkText"
+                    defaultMessage="View all workflows"
+                  />
+                  <EuiIcon type="popout" size="s" aria-hidden={true} />
+                </EuiLink>
+              </EuiText>
+            </EuiPopoverFooter>
+          )}
+        </EuiInputPopover>
+      );
+    },
+    [
+      euiTheme.colors.backgroundBaseSubdued,
+      handlePopoverClose,
+      isPopoverOpen,
+      workflowManagementLinkProps,
+      workflowOptions.length,
+    ]
+  );
+
   return (
     <EuiFormRow
       label={finalConfig.label}
       labelAppend={
         <EuiLink {...workflowManagementLinkProps} external={false}>
-          {finalConfig.createWorkflowLinkText} <EuiIcon type="plusInCircle" size="s" />
+          {finalConfig.createWorkflowLinkText}{' '}
+          <EuiIcon type="plusInCircle" size="s" aria-hidden={true} />
         </EuiLink>
       }
       helpText={helpText}
@@ -281,35 +389,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
           }}
           renderOption={renderWorkflowOption}
         >
-          {(list, search) => (
-            <EuiInputPopover
-              closePopover={handlePopoverClose}
-              disableFocusTrap
-              closeOnScroll
-              isOpen={isPopoverOpen}
-              input={search!} // eslint-disable-line @typescript-eslint/no-non-null-assertion
-              panelPaddingSize="none"
-              fullWidth
-            >
-              {list}
-              {workflowOptions.length > 0 && (
-                <EuiPopoverFooter
-                  paddingSize="s"
-                  css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
-                >
-                  <EuiText size="s" textAlign="right">
-                    <EuiLink {...workflowManagementLinkProps} external={false}>
-                      <FormattedMessage
-                        id="workflows.params.viewAllWorkflowsLinkText"
-                        defaultMessage="View all workflows"
-                      />
-                      <EuiIcon type="popout" size="s" />
-                    </EuiLink>
-                  </EuiText>
-                </EuiPopoverFooter>
-              )}
-            </EuiInputPopover>
-          )}
+          {finalConfig.listView ? listView : popoverView}
         </EuiSelectable>
       )}
     </EuiFormRow>
