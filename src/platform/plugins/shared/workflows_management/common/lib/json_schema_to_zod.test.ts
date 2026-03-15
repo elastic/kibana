@@ -421,6 +421,17 @@ describe('buildInputsZodValidator', () => {
     expect(result.count).toBe(0);
   });
 
+  it('should reject extra properties when additionalProperties is false', () => {
+    const schema = {
+      type: 'object',
+      properties: { name: { type: 'string' } },
+      additionalProperties: false,
+    } as Parameters<typeof buildInputsZodValidator>[0];
+    const validator = buildInputsZodValidator(schema);
+    expect(validator.safeParse({ name: 'Alice', extra: 'should fail' }).success).toBe(false);
+    expect(validator.safeParse({ name: 'Alice' }).success).toBe(true);
+  });
+
   it('should reject invalid types', () => {
     const schema = {
       type: 'object',

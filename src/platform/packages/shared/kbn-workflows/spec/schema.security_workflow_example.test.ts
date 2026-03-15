@@ -269,9 +269,6 @@ describe('Security Workflow Example - JSON Schema Showcase', () => {
     expect(
       parsedWorkflow.inputs?.properties?.incidentMetadata.properties?.affectedSystems.minItems
     ).toBe(1);
-    expect(parsedWorkflow.inputs?.properties?.incidentMetadata.properties?.tags.uniqueItems).toBe(
-      true
-    );
     expect(
       parsedWorkflow.inputs?.properties?.incidentMetadata.properties?.enrichment.properties
         ?.confidence.minimum

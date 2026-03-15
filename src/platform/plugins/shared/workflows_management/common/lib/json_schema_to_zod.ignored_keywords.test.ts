@@ -23,23 +23,10 @@ import { convertJsonSchemaToZod, convertJsonSchemaToZodWithRefs } from './json_s
  *   yarn test:jest src/platform/plugins/shared/workflows_management/common/lib/json_schema_to_zod.ignored_keywords.test.ts
  */
 describe('convertJsonSchemaToZod – unimplemented keyword gaps', () => {
-  // ─── additionalProperties ────────────────────────────────────────────────────
-  // Note: a shallow fix via .strict() / .superRefine() only works when the keyword
-  // appears at the top-level schema node passed to convertJsonSchemaToZod. Because
-  // fromJSONSchema processes the whole tree first, enrichment cannot reach into
-  // already-compiled nested Zod schemas. A proper fix requires recursive traversal.
-  describe('additionalProperties: false', () => {
-    it('does not reject extra properties when additionalProperties is false', () => {
-      const schema = convertJsonSchemaToZod({
-        type: 'object',
-        properties: { name: { type: 'string' } },
-        additionalProperties: false,
-      } as JSONSchema7);
-      const result = schema.safeParse({ name: 'Alice', extra: 'should fail' });
-      expect(result.success).toBe(true); // Should be false when implemented
-    });
-  });
-
+  // ─── additionalProperties: {schema} ─────────────────────────────────────────
+  // additionalProperties: false IS enforced (see json_schema_to_zod.test.ts).
+  // The schema-value form requires superRefine to validate extra keys — tracked here.
+  // Same recursive-traversal limitation applies for deeply nested cases.
   describe('additionalProperties: schema', () => {
     it('does not validate extra properties against the additionalProperties schema', () => {
       const schema = convertJsonSchemaToZod({

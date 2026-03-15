@@ -59,6 +59,7 @@ export interface JsonSchema {
 
   // Structure
   properties?: Record<string, JsonSchema>;
+  additionalProperties?: boolean | JsonSchema;
   items?: JsonSchema | JsonSchema[];
   required?: string[];
 
@@ -96,6 +97,7 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
   'enum',
   'const',
   'properties',
+  'additionalProperties',
   'required',
   'items',
   'anyOf',
@@ -138,6 +140,7 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
 
       // --- Object Properties ---
       properties: z.record(z.string(), JsonModelShapeSchema).optional(),
+      additionalProperties: z.union([z.boolean(), JsonModelShapeSchema]).optional(),
       required: z.array(z.string()).optional(),
 
       // --- Array Properties ---
@@ -179,6 +182,7 @@ export const JsonModelRootShapeSchema = z
     description: z.string().optional(),
     $ref: z.string().optional(),
     properties: z.record(z.string(), JsonModelShapeSchema).optional(),
+    additionalProperties: z.boolean().optional(),
     required: z.array(z.string()).optional(),
     definitions: z.record(z.string(), JsonModelShapeSchema).optional(),
     $defs: z.record(z.string(), JsonModelShapeSchema).optional(),
