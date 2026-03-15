@@ -108,7 +108,6 @@
         "@smithy/node-http-handler",
         "@smithy/types",
         "@types/aws4",
-        "ajv",
         "aws4",
         "eventsource-parser",
         "fast-glob",
@@ -1081,6 +1080,25 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "ajv",
+      "matchDepNames": [
+        "ajv"
+      ],
+      "reviewers": [
+        "team:workflows-eng"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:One Workflow",
+        "backport:all-open",
+        "release_note:skip"
+      ],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
