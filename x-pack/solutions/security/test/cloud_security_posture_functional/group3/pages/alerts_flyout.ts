@@ -52,9 +52,25 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
+
+      // Enable asset inventory setting (required for entity store with 'generic' type)
+      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+
+      // Initialize security-solution-default data-view (required by entity store)
+      const dataView = dataViewRouteHelpersFactory(supertest);
+      await dataView.create('security-solution');
+
+      // Initialize entity engine (required for graph visualization)
+      await initEntityEnginesWithRetry({
+        supertest,
+        retry,
+        logger,
+        entityTypes: ['generic'],
+      });
     });
 
     after(async () => {
+      await cleanupEntityStore({ supertest, logger });
       await es.deleteByQuery({
         index: '.internal.alerts-*',
         query: { match_all: {} },
@@ -75,7 +91,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           '589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1'
         )}`
       );
-      await alertsPage.waitForListToHaveAlerts(20000);
+      await alertsPage.waitForListToHaveAlerts();
 
       await alertsPage.flyout.expandVisualizations();
       await alertsPage.flyout.assertGraphPreviewVisible();
@@ -259,12 +275,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     describe('ECS fields only', function () {
-      // Entity store is initialized once at the parent level to avoid race conditions
+      // Entity store engine is already initialized at the parent level — reused here.
       // Tests run sequentially: first v1 (ENRICH), then v2 (LOOKUP JOIN)
       before(async () => {
-        // Clean up any leftover resources from previous runs
-        await cleanupEntityStore({ supertest, logger });
-
         await es.deleteByQuery({
           index: '.internal.alerts-*',
           query: { match_all: {} },
@@ -281,21 +294,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           // Ignore if index doesn't exist
         }
 
-        // Enable asset inventory setting
-        await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
-
-        // Initialize security-solution-default data-view (required by entity store)
-        const dataView = dataViewRouteHelpersFactory(supertest);
-        await dataView.create('security-solution');
-
-        // Initialize entity engine for 'generic' type ONCE - this is reused by both v1 and v2 tests
-        await initEntityEnginesWithRetry({
-          supertest,
-          retry,
-          logger,
-          entityTypes: ['generic'],
-        });
-
         // Load alerts data (shared by both v1 and v2 tests)
         await esArchiver.load(
           'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts_ecs_only_mappings'
@@ -303,13 +301,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       });
 
       after(async () => {
-        // Clean up entity store resources
-        await cleanupEntityStore({ supertest, logger });
-
-        // Disable asset inventory setting
-        await kibanaServer.uiSettings.update({
-          'securitySolution:enableAssetInventory': false,
-        });
+        // Entity store cleanup is handled by the parent after hook
       });
 
       // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
