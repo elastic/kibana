@@ -34,6 +34,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     analytics: { index: { enabled: true } },
     templates: { enabled: true },
     attachments: { enabled: true },
+    tasks: { enabled: false },
     ...overrides,
   };
 }
