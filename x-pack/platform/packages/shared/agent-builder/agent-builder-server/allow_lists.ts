@@ -38,6 +38,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.get_entity`,
+  `${internalNamespaces.security}.search_entities`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
