@@ -43,6 +43,7 @@ import type {
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import { CaseRt } from '../../../common/types/domain';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -291,14 +292,21 @@ export const resolve = async (
       },
     });
 
+    const legacyComments = {
+      ...theComments,
+      saved_objects: theComments.saved_objects.filter(
+        (so) => so.type === CASE_COMMENT_SAVED_OBJECT
+      ),
+    };
+
     const res = {
       ...resolveData,
       case: flattenCaseSavedObject({
         savedObject: resolvedSavedObject,
-        comments: theComments.saved_objects,
+        comments: legacyComments.saved_objects,
         totalComment: theComments.total,
-        totalEvents: countEventsForID({ comments: theComments }),
-        totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
+        totalEvents: countEventsForID({ comments: legacyComments }),
+        totalAlerts: countAlertsForID({ comments: legacyComments, id: resolvedSavedObject.id }),
       }),
     };
 

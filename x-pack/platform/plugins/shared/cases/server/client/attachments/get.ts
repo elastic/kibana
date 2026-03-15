@@ -232,11 +232,15 @@ export async function getAll(
       },
     });
 
-    ensureSavedObjectsAreAuthorized(
-      comments.saved_objects.map((comment) => ({ id: comment.id, owner: comment.attributes.owner }))
+    const legacyComments = comments.saved_objects.filter(
+      (so) => so.type === CASE_COMMENT_SAVED_OBJECT
     );
 
-    const res = flattenCommentSavedObjects(comments.saved_objects);
+    ensureSavedObjectsAreAuthorized(
+      legacyComments.map((comment) => ({ id: comment.id, owner: comment.attributes.owner }))
+    );
+
+    const res = flattenCommentSavedObjects(legacyComments);
 
     return decodeOrThrow(AttachmentsRt)(res);
   } catch (error) {

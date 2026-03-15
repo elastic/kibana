@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
 import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
@@ -42,13 +42,19 @@ export async function deleteAll(
       throw Boom.notFound(`No comments found for ${caseID}.`);
     }
 
-    await authorization.ensureAuthorized({
-      operation: Operations.deleteAllComments,
-      entities: comments.saved_objects.map((comment) => ({
-        owner: comment.attributes.owner,
-        id: comment.id,
-      })),
-    });
+    const legacyComments = comments.saved_objects.filter(
+      (so) => so.type !== CASE_ATTACHMENT_SAVED_OBJECT
+    );
+
+    if (legacyComments.length > 0) {
+      await authorization.ensureAuthorized({
+        operation: Operations.deleteAllComments,
+        entities: legacyComments.map((comment) => ({
+          owner: comment.attributes.owner,
+          id: comment.id,
+        })),
+      });
+    }
 
     await attachmentService.bulkDelete({
       attachmentIds: comments.saved_objects.map((so) => so.id),
@@ -62,19 +68,23 @@ export async function deleteAll(
       user,
     });
 
-    await userActionService.creator.bulkCreateAttachmentDeletion({
-      caseId: caseID,
-      attachments: comments.saved_objects.map((comment) => ({
-        id: comment.id,
-        owner: comment.attributes.owner,
-        attachment: comment.attributes,
-      })),
-      user,
-    });
+    if (legacyComments.length > 0) {
+      await userActionService.creator.bulkCreateAttachmentDeletion({
+        caseId: caseID,
+        attachments: legacyComments.map((comment) => ({
+          id: comment.id,
+          owner: comment.attributes.owner,
+          attachment: comment.attributes,
+        })),
+        user,
+      });
 
-    const attachments = comments.saved_objects.map((comment) => comment.attributes);
-
-    await handleAlerts({ alertsService, attachments, caseId: caseID });
+      await handleAlerts({
+        alertsService,
+        attachments: legacyComments.map((comment) => comment.attributes),
+        caseId: caseID,
+      });
+    }
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete all comments case id: ${caseID}: ${error}`,
@@ -107,10 +117,14 @@ export async function deleteComment(
       throw Boom.notFound(`This comment ${attachmentID} does not exist anymore.`);
     }
 
-    await authorization.ensureAuthorized({
-      entities: [{ owner: attachment.attributes.owner, id: attachment.id }],
-      operation: Operations.deleteComment,
-    });
+    const isUnifiedAttachment = attachment.type === CASE_ATTACHMENT_SAVED_OBJECT;
+
+    if (!isUnifiedAttachment) {
+      await authorization.ensureAuthorized({
+        entities: [{ owner: attachment.attributes.owner, id: attachment.id }],
+        operation: Operations.deleteComment,
+      });
+    }
 
     const type = CASE_SAVED_OBJECT;
     const id = caseID;
@@ -132,24 +146,23 @@ export async function deleteComment(
       user,
     });
 
-    // we only want to store the fields related to the original request of the attachment, not fields like
-    // created_at etc. So we'll use the decode to strip off the other fields. This is necessary because we don't know
-    // what type of attachment this is. Depending on the type it could have various fields.
-    const attachmentRequestAttributes = decodeOrThrow(AttachmentRequestRt)(attachment.attributes);
+    if (!isUnifiedAttachment) {
+      const attachmentRequestAttributes = decodeOrThrow(AttachmentRequestRt)(attachment.attributes);
 
-    await userActionService.creator.createUserAction({
-      userAction: {
-        type: UserActionTypes.comment,
-        action: UserActionActions.delete,
-        caseId: id,
-        attachmentId: attachmentID,
-        payload: { attachment: attachmentRequestAttributes },
-        user,
-        owner: attachment.attributes.owner,
-      },
-    });
+      await userActionService.creator.createUserAction({
+        userAction: {
+          type: UserActionTypes.comment,
+          action: UserActionActions.delete,
+          caseId: id,
+          attachmentId: attachmentID,
+          payload: { attachment: attachmentRequestAttributes },
+          user,
+          owner: attachment.attributes.owner,
+        },
+      });
 
-    await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
+      await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
+    }
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete comment: ${caseID} comment id: ${attachmentID}: ${error}`,

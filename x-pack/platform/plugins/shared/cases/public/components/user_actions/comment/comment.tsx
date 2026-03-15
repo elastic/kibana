@@ -8,7 +8,7 @@
 import type { EuiCommentProps } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../../common/types';
-import type { CommentUserAction } from '../../../../common/types/domain';
+import type { CommentUserAction, UnifiedAttachment } from '../../../../common/types/domain';
 import { UserActionActions, AttachmentType } from '../../../../common/types/domain';
 import { type AttachmentTypeRegistry } from '../../../../common/registry';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
@@ -20,6 +20,7 @@ import { createAlertAttachmentUserActionBuilder } from '../../attachments/alert/
 import { createActionAttachmentUserActionBuilder } from '../../attachments/host_isolation/actions';
 import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
 import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
+import { createUnifiedValueAttachmentUserActionBuilder } from './unified_value';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 import { createEventAttachmentUserActionBuilder } from '../../attachments/event/event';
 import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
@@ -31,6 +32,7 @@ interface DeleteLabelTitle {
   caseData: UserActionBuilderArgs['caseData'];
   externalReferenceAttachmentTypeRegistry: UserActionBuilderArgs['externalReferenceAttachmentTypeRegistry'];
   persistableStateAttachmentTypeRegistry: UserActionBuilderArgs['persistableStateAttachmentTypeRegistry'];
+  unifiedAttachmentTypeRegistry: UserActionBuilderArgs['unifiedAttachmentTypeRegistry'];
 }
 
 const getDeleteLabelTitle = ({
@@ -38,6 +40,7 @@ const getDeleteLabelTitle = ({
   caseData,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
 }: DeleteLabelTitle) => {
   const { comment } = userAction.payload;
   if (isLegacyAttachmentRequest(comment)) {
@@ -71,6 +74,16 @@ const getDeleteLabelTitle = ({
         }),
       });
     }
+  } else if (unifiedAttachmentTypeRegistry?.has(comment.type)) {
+    return getDeleteLabelFromRegistry({
+      caseData,
+      registry: unifiedAttachmentTypeRegistry,
+      getId: () => comment.type,
+      getAttachmentProps: () => ({
+        data: (comment as unknown as { data: Record<string, unknown> }).data ?? {},
+        metadata: (comment as unknown as { metadata?: Record<string, unknown> }).metadata,
+      }),
+    });
   }
 
   return `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
@@ -115,6 +128,7 @@ const getDeleteCommentUserAction = ({
   caseData,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
   handleOutlineComment,
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
@@ -124,6 +138,7 @@ const getDeleteCommentUserAction = ({
   | 'userProfiles'
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
+  | 'unifiedAttachmentTypeRegistry'
   | 'caseData'
 >): EuiCommentProps[] => {
   const label = getDeleteLabelTitle({
@@ -131,6 +146,7 @@ const getDeleteCommentUserAction = ({
     caseData,
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
   });
 
   const commonBuilder = createCommonUpdateUserActionBuilder({
@@ -151,6 +167,7 @@ const getCreateCommentUserAction = ({
   caseData,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
   attachment,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -250,6 +267,19 @@ const getCreateCommentUserAction = ({
       return persistableBuilder.build();
 
     default:
+      if (unifiedAttachmentTypeRegistry?.has((attachment as unknown as { type: string }).type)) {
+        const unifiedBuilder = createUnifiedValueAttachmentUserActionBuilder({
+          userAction,
+          userProfiles,
+          attachment: attachment as unknown as SnakeToCamelCase<UnifiedAttachment>,
+          unifiedAttachmentTypeRegistry,
+          caseData,
+          isLoading: loadingCommentIds.includes((attachment as unknown as { id: string }).id),
+          handleDeleteComment,
+        });
+
+        return unifiedBuilder.build();
+      }
       return [];
   }
 };
@@ -261,6 +291,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   userProfiles,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
   userAction,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -288,6 +319,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         userProfiles,
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
       });
     }
 
@@ -306,6 +338,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         userAction: attachmentUserAction,
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
         attachment,
         manageMarkdownEditIds,
         selectedOutlineCommentId,

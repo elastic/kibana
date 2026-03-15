@@ -32,7 +32,11 @@ import {
   AttachmentType,
 } from '../../../common/types/domain';
 
-import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
+} from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
@@ -148,6 +152,7 @@ export class CaseCommentModel {
             updated_by: this.params.user,
           },
           options,
+          owner,
         }),
         this.partialUpdateCaseWithAttachmentDataSkipRefresh({ date: updatedAt }),
       ]);
@@ -263,10 +268,12 @@ export class CaseCommentModel {
     createdDate,
     commentReq,
     id,
+    owner,
   }: {
     createdDate: string;
     commentReq: AttachmentRequestV2;
     id: string;
+    owner: string;
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
@@ -291,6 +298,7 @@ export class CaseCommentModel {
         references,
         id,
         refresh: true,
+        owner,
       });
 
       const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
@@ -301,10 +309,10 @@ export class CaseCommentModel {
         isLegacyAttachmentRequest(attachment)
           ? [
               commentableCase.handleAlertComments([attachment]),
-              this.createCommentUserAction(comment, attachment),
+              this.createLegacyCommentUserAction(comment, attachment),
             ]
           : // TO-DO: handle alert comments for unified attachments
-            [this.createCommentUserAction(comment, attachment)]
+            [this.createUnifiedCommentUserAction(comment, attachment, owner)]
       );
 
       return commentableCase;
@@ -422,7 +430,13 @@ export class CaseCommentModel {
       }
     }
 
-    if (req.some((attachment) => attachment.owner !== this.caseInfo.attributes.owner)) {
+    if (
+      req.some(
+        (attachment) =>
+          isLegacyAttachmentRequest(attachment) &&
+          attachment.owner !== this.caseInfo.attributes.owner
+      )
+    ) {
       throw Boom.badRequest('The owner field of the comment must match the case');
     }
 
@@ -504,9 +518,9 @@ export class CaseCommentModel {
     });
   }
 
-  private async createCommentUserAction(
+  private async createLegacyCommentUserAction(
     comment: SavedObject<AttachmentAttributesV2>,
-    req: AttachmentRequestV2
+    req: AttachmentRequest
   ) {
     await this.params.services.userActionService.creator.createUserAction({
       userAction: {
@@ -524,16 +538,37 @@ export class CaseCommentModel {
   }
 
   private async bulkCreateCommentUserAction(
-    attachments: Array<{ id: string } & AttachmentRequestV2>
+    attachments: Array<{ id: string } & AttachmentRequestV2>,
+    owner: string
   ) {
     await this.params.services.userActionService.creator.bulkCreateAttachmentCreation({
       caseId: this.caseInfo.id,
       attachments: attachments.map(({ id, ...attachment }) => ({
         id,
-        owner: attachment.owner,
+        owner: isLegacyAttachmentRequest(attachment) ? attachment.owner : owner,
         attachment,
       })),
       user: this.params.user,
+    });
+  }
+
+  private async createUnifiedCommentUserAction(
+    comment: SavedObject<AttachmentAttributesV2>,
+    req: UnifiedAttachmentPayload,
+    owner: string
+  ) {
+    await this.params.services.userActionService.creator.createUserAction({
+      userAction: {
+        type: UserActionTypes.comment,
+        action: UserActionActions.create,
+        caseId: this.caseInfo.id,
+        attachmentId: comment.id,
+        payload: {
+          attachment: req,
+        },
+        user: this.params.user,
+        owner,
+      },
     });
   }
 
@@ -560,8 +595,12 @@ export class CaseCommentModel {
       const totalAlerts = countAlertsForID({ comments, id: this.caseInfo.id }) ?? 0;
       const totalEvents = countEventsForID({ comments }) ?? 0;
 
+      const legacyComments = comments.saved_objects.filter(
+        (so) => so.type === CASE_COMMENT_SAVED_OBJECT
+      );
+
       const caseResponse = {
-        comments: flattenCommentSavedObjects(comments.saved_objects),
+        comments: flattenCommentSavedObjects(legacyComments),
         totalAlerts,
         totalEvents,
         ...this.formatForEncoding(comments.total),
@@ -579,8 +618,10 @@ export class CaseCommentModel {
 
   public async bulkCreate({
     attachments,
+    owner,
   }: {
     attachments: CommentRequestWithId;
+    owner: string;
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest(attachments);
@@ -606,6 +647,7 @@ export class CaseCommentModel {
           };
         }),
         refresh: true,
+        owner,
       });
 
       const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
@@ -622,7 +664,7 @@ export class CaseCommentModel {
 
       await Promise.all([
         commentableCase.handleAlertComments(attachmentsWithoutErrors),
-        this.bulkCreateCommentUserAction(attachmentsWithoutErrors),
+        this.bulkCreateCommentUserAction(attachmentsWithoutErrors, owner),
       ]);
 
       return commentableCase;

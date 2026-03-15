@@ -261,7 +261,8 @@ export class AttachmentService {
     references,
     id,
     refresh,
-  }: CreateAttachmentArgs): Promise<
+    owner,
+  }: CreateAttachmentArgs & { owner?: string }): Promise<
     AttachmentSavedObjectTransformed | UnifiedAttachmentSavedObjectTransformed
   > {
     try {
@@ -290,7 +291,7 @@ export class AttachmentService {
         return Object.assign(unifiedAttachment, { attributes: validatedAttributes });
       }
 
-      const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
+      const legacyAttributes = transformer.toLegacySchema(decodedAttributes, owner);
       const { attributes: extractedAttributes, references: extractedReferences } =
         extractAttachmentSORefsFromAttributes(
           legacyAttributes,
@@ -328,7 +329,10 @@ export class AttachmentService {
   public async bulkCreate({
     attachments,
     refresh,
-  }: BulkCreateAttachments): Promise<SavedObjectsBulkResponse<AttachmentAttributesV2>> {
+    owner,
+  }: BulkCreateAttachments & { owner?: string }): Promise<
+    SavedObjectsBulkResponse<AttachmentAttributesV2>
+  > {
     try {
       this.context.log.debug(`Attempting to bulk create attachments`);
 
@@ -367,7 +371,7 @@ export class AttachmentService {
             const transformer = getAttachmentTypeTransformers(
               getAttachmentTypeFromAttributes(decodedAttributes)
             );
-            const attributesToWrite = transformer.toLegacySchema(decodedAttributes);
+            const attributesToWrite = transformer.toLegacySchema(decodedAttributes, owner);
             const { attributes: extractedAttributes, references: extractedReferences } =
               extractAttachmentSORefsFromAttributes(
                 attributesToWrite,
@@ -428,7 +432,10 @@ export class AttachmentService {
     attachmentId,
     updatedAttributes,
     options,
-  }: UpdateAttachmentArgs): Promise<SavedObjectsUpdateResponse<AttachmentAttributesV2>> {
+    owner,
+  }: UpdateAttachmentArgs & { owner?: string }): Promise<
+    SavedObjectsUpdateResponse<AttachmentAttributesV2>
+  > {
     try {
       this.context.log.debug(`Attempting to UPDATE attachment ${attachmentId}`);
 
@@ -456,7 +463,7 @@ export class AttachmentService {
         return Object.assign(res, { attributes: decodedAttributes });
       }
 
-      const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
+      const legacyAttributes = transformer.toLegacySchema(decodedAttributes, owner);
       const {
         attributes: extractedAttributes,
         references: extractedReferences,
@@ -507,7 +514,10 @@ export class AttachmentService {
   public async bulkUpdate({
     comments,
     refresh,
-  }: BulkUpdateAttachmentArgs): Promise<SavedObjectsBulkUpdateResponse<AttachmentAttributesV2>> {
+    owner,
+  }: BulkUpdateAttachmentArgs & { owner?: string }): Promise<
+    SavedObjectsBulkUpdateResponse<AttachmentAttributesV2>
+  > {
     try {
       this.context.log.debug(
         `Attempting to UPDATE attachments ${comments.map((c) => c.attachmentId).join(', ')}`
@@ -536,7 +546,7 @@ export class AttachmentService {
             }),
             { refresh }
           );
-        return this.transformAndDecodeBulkUpdateResponse(res, comments);
+        return this.transformAndDecodeBulkUpdateResponse(res, comments, undefined);
       }
 
       const res =
@@ -549,7 +559,7 @@ export class AttachmentService {
             const transformer = getAttachmentTypeTransformers(
               getAttachmentTypeFromAttributes(decodedAttributes)
             );
-            const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
+            const legacyAttributes = transformer.toLegacySchema(decodedAttributes, owner);
             const {
               attributes: extractedAttributes,
               references: extractedReferences,
@@ -578,7 +588,7 @@ export class AttachmentService {
           { refresh }
         );
 
-      return this.transformAndDecodeBulkUpdateResponse(res, comments);
+      return this.transformAndDecodeBulkUpdateResponse(res, comments, owner);
     } catch (error) {
       this.context.log.error(
         `Error on UPDATE attachments ${comments.map((c) => c.attachmentId).join(', ')}: ${error}`
@@ -591,7 +601,8 @@ export class AttachmentService {
     res: SavedObjectsBulkUpdateResponse<
       AttachmentPersistedAttributes | UnifiedAttachmentPersistedAttributes
     >,
-    comments: UpdateArgs[]
+    comments: UpdateArgs[],
+    owner?: string
   ): SavedObjectsBulkUpdateResponse<AttachmentTransformedAttributesV2> {
     const validatedAttachments: Array<
       SavedObjectsUpdateResponse<AttachmentTransformedAttributesV2>
@@ -617,7 +628,7 @@ export class AttachmentService {
         const transformer = getAttachmentTypeTransformers(
           getAttachmentTypeFromAttributes(decodedAttributes)
         );
-        const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
+        const legacyAttributes = transformer.toLegacySchema(decodedAttributes, owner);
         const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
           legacyAttributes,
           attachment,
@@ -647,33 +658,48 @@ export class AttachmentService {
   }): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
     try {
       this.context.log.debug(`Attempting to find comments`);
-      const res =
-        await this.context.unsecuredSavedObjectsClient.find<AttachmentPersistedAttributes>({
-          sortField: defaultSortField,
-          ...options,
-          type: CASE_COMMENT_SAVED_OBJECT,
-        });
+
+      const savedObjectType = getAttachmentSavedObjectType(this.context.config);
+      const types: string[] =
+        savedObjectType === CASE_ATTACHMENT_SAVED_OBJECT
+          ? [CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT]
+          : [CASE_COMMENT_SAVED_OBJECT];
+
+      const res = await this.context.unsecuredSavedObjectsClient.find<
+        AttachmentPersistedAttributes | UnifiedAttachmentAttributes
+      >({
+        sortField: defaultSortField,
+        ...options,
+        type: types,
+      });
 
       const validatedAttachments: Array<SavedObjectsFindResult<AttachmentTransformedAttributes>> =
         [];
 
       for (const so of res.saved_objects) {
-        const transformedAttachment = injectAttachmentSOAttributesFromRefs(
-          so,
-          this.context.persistableStateAttachmentTypeRegistry
-          // casting here because injectAttachmentSOAttributesFromRefs returns a SavedObject but we need a SavedObjectsFindResult
-          // which has the score in it. The score is returned but the type is not correct
-        ) as SavedObjectsFindResult<AttachmentTransformedAttributes>;
+        if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
+          const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
+          validatedAttachments.push(
+            Object.assign(so, {
+              attributes: validatedAttributes,
+            }) as SavedObjectsFindResult<AttachmentTransformedAttributes>
+          );
+        } else {
+          const transformedAttachment = injectAttachmentSOAttributesFromRefs(
+            so as SavedObjectsFindResult<AttachmentPersistedAttributes>,
+            this.context.persistableStateAttachmentTypeRegistry
+          ) as SavedObjectsFindResult<AttachmentTransformedAttributes>;
 
-        const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-          transformedAttachment.attributes
-        );
+          const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+            transformedAttachment.attributes
+          );
 
-        validatedAttachments.push(
-          Object.assign(transformedAttachment, {
-            attributes: validatedAttributes,
-          })
-        );
+          validatedAttachments.push(
+            Object.assign(transformedAttachment, {
+              attributes: validatedAttributes,
+            })
+          );
+        }
       }
 
       return Object.assign(res, { saved_objects: validatedAttachments });

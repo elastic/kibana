@@ -30,9 +30,9 @@ import {
   PersistableStateAttachmentPayloadRt,
   AttachmentType,
   AttachmentRt,
-  AttachmentsRt,
   EventAttachmentPayloadRt,
 } from '../../domain/attachment/v1';
+import { AttachmentRtV2 } from '../../domain/attachment/v2';
 
 /**
  * Files
@@ -157,7 +157,7 @@ export const BulkGetAttachmentsRequestRt = rt.strict({
 });
 
 export const BulkGetAttachmentsResponseRt = rt.strict({
-  attachments: AttachmentsRt,
+  attachments: rt.array(AttachmentRtV2),
   errors: rt.array(
     rt.strict({
       error: rt.string,
