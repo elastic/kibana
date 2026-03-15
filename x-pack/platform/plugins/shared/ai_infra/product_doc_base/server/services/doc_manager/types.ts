@@ -68,12 +68,22 @@ export interface DocumentationManagerAPI {
   }: {
     inferenceId: string;
   }): Promise<SecurityLabsStatusResponse>;
-
   /**
    * Update Security Labs content for all previously installed inference IDs to the latest version.
    * No-op if Security Labs content is not currently installed.
    */
   updateSecurityLabsAll(options?: DocUpdateAllOptions): Promise<{ inferenceIds: string[] }>;
+
+  // OpenAPI Spec methods
+
+  /**
+   * Returns the installation status of OpenAPI Spec content.
+   */
+  getOpenApiSpecStatus({
+    inferenceId,
+  }: {
+    inferenceId: string;
+  }): Promise<OpenApiSpecStatusResponse>;
 }
 
 /**
@@ -209,4 +219,15 @@ export interface DocUpdateAllOptions {
    * inferenceIds to update
    */
   inferenceIds?: string[];
+}
+
+/**
+ * Response for OpenAPI Spec status
+ */
+export interface OpenApiSpecStatusResponse {
+  status: InstallationStatus;
+  version?: string;
+  latestVersion?: string;
+  isUpdateAvailable?: boolean;
+  failureReason?: string;
 }

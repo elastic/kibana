@@ -136,6 +136,7 @@ export class ProductDocBasePlugin
           documentationManager.uninstallSecurityLabs.bind(documentationManager),
         getSecurityLabsStatus:
           documentationManager.getSecurityLabsStatus.bind(documentationManager),
+        getOpenApiSpecStatus: documentationManager.getOpenApiSpecStatus.bind(documentationManager),
       },
       search: searchService.search.bind(searchService),
     };

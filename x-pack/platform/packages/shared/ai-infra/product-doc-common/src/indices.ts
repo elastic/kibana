@@ -6,7 +6,7 @@
  */
 
 import { isImpliedDefaultElserInferenceId } from './is_default_inference_endpoint';
-import type { ProductName } from './product';
+import type { DocumentationProduct, ProductName } from './product';
 
 export const productDocIndexPrefix = '.kibana_ai_product_doc';
 export const productDocIndexPattern = `${productDocIndexPrefix}_*`;
@@ -49,10 +49,13 @@ export const openApiSpecIndexPattern = `${openApiSpecIndexPrefix}*`;
 
 /**
  * Returns the index name for OpenAPI Spec content.
- * Format: .kibana_ai_openapi_spec[-{inferenceId}]
+ * Format: .kibana_ai_openapi_spec_{productName}[-{inferenceId}]
  */
-export const getOpenApiSpecIndexName = (inferenceId?: string): string => {
-  return `${openApiSpecIndexPrefix}${
+export const getOpenApiSpecIndexName = (
+  productName: DocumentationProduct.kibana | DocumentationProduct.elasticsearch,
+  inferenceId?: string
+): string => {
+  return `${openApiSpecIndexPrefix}_${productName.toLowerCase()}${
     !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : ''
   }`;
 };
