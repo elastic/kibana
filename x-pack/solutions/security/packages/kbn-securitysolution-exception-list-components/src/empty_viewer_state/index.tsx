@@ -64,7 +64,7 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
       case ViewerStatus.EMPTY:
         return {
           color: 'subdued' as ExpressionColor,
-          iconType: 'plusInCircle',
+          iconType: 'plusCircle',
           iconColor: euiTheme.colors.darkestShade,
           title: (
             <h2 data-test-subj="emptyTitle">{title || i18n.EMPTY_VIEWER_STATE_EMPTY_TITLE}</h2>
@@ -75,7 +75,7 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
             <EuiButton
               data-test-subj="emptyStateButton"
               onClick={onEmptyButtonStateClick}
-              iconType="plusInCircle"
+              iconType="plusCircle"
               color="primary"
               isDisabled={isReadOnly}
               fill

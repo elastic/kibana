@@ -67,7 +67,7 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
         <EuiButton
           iconSide="right"
           fill
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           data-test-subj="value-list-item-add-button-show-popover"
           onClick={() => setIsPopoverOpen(true)}
         >

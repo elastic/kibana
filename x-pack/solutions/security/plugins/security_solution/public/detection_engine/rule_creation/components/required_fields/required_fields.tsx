@@ -198,7 +198,7 @@ const RequiredFieldsList = ({
           <EuiSpacer size="s" />
           <EuiButtonEmpty
             size="xs"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={addItem}
             isDisabled={isIndexPatternLoading || hasEmptyFieldName}
             data-test-subj="addRequiredFieldButton"
