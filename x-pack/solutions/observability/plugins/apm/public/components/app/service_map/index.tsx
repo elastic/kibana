@@ -8,9 +8,12 @@
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { cx } from '@emotion/css';
+import type { ServiceMapCache } from './use_service_map';
+import type { ReactFlowServiceMapResponse } from '../../../../common/service_map';
 import {
   useServiceMapFullScreen,
   applyServiceMapFullScreenBodyClasses,
@@ -34,6 +37,15 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
 import { useServiceMap } from './use_service_map';
 import { ServiceMapGraph } from './graph';
+import {
+  addServiceToKuery,
+  removeServiceFromKuery,
+  getExpandedServiceNamesFromKuery,
+  getBaseKuery,
+} from './kuery_expand_helpers';
+import { filterToVisibleSubgraph } from './filter_to_visible_subgraph';
+import { ServiceMapExpandProvider } from './service_map_expand_context';
+import { toQuery, fromQuery } from '../../shared/links/url_helpers';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -125,14 +137,37 @@ export function ServiceMap({
   const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
 
+  const enableExpandCollapse = serviceName === undefined;
+  const serviceMapCacheRef = useRef<Map<string, ReactFlowServiceMapResponse>>(new Map());
+  const cacheRef: ServiceMapCache | undefined = enableExpandCollapse
+    ? serviceMapCacheRef
+    : undefined;
+
+  // Smart cache: when expand/collapse is enabled, fetch once with base filters only
+  // (no service names). Cache key is per base kuery, so +/- only filters the cached graph.
+  const fetchKuery = enableExpandCollapse ? getBaseKuery(kuery) : kuery;
+
   const { data, status, error } = useServiceMap({
     environment,
-    kuery,
+    kuery: fetchKuery,
     start,
     end,
     serviceGroupId,
     serviceName,
+    cacheRef,
   });
+
+  const expandedServiceIds = useMemo(
+    () => new Set(getExpandedServiceNamesFromKuery(kuery)),
+    [kuery]
+  );
+
+  const { nodes: displayNodes, edges: displayEdges } = useMemo(() => {
+    if (!enableExpandCollapse || data.nodes.length === 0) {
+      return { nodes: data.nodes, edges: data.edges };
+    }
+    return filterToVisibleSubgraph(data.nodes, data.edges, expandedServiceIds);
+  }, [enableExpandCollapse, data.nodes, data.edges, expandedServiceIds]);
 
   const { ref, height } = useRefDimensions();
   const windowHeight = useWindowSize().height;
@@ -168,6 +203,50 @@ export function ServiceMap({
     });
   }, []);
 
+  const history = useHistory();
+  const location = useLocation();
+
+  const expandCollapseValue = useMemo(() => {
+    if (!enableExpandCollapse) {
+      return null;
+    }
+    const nodeIdsInEdges = new Set(data.edges.flatMap((e) => [e.source, e.target]));
+    const serviceIdsWithConnections = new Set(
+      data.nodes
+        .filter((n) => n.type === 'service')
+        .filter((n) => nodeIdsInEdges.has(n.id))
+        .map((n) => n.id)
+    );
+    return {
+      expandedServiceIds,
+      serviceIdsWithConnections,
+      onExpandService: (serviceId: string) => {
+        const newKuery = addServiceToKuery(kuery, serviceId);
+        const existingQuery = toQuery(location.search);
+        history.push({
+          ...location,
+          search: fromQuery({ ...existingQuery, kuery: newKuery }),
+        });
+      },
+      onCollapseService: (serviceId: string) => {
+        const newKuery = removeServiceFromKuery(kuery, serviceId);
+        const existingQuery = toQuery(location.search);
+        history.push({
+          ...location,
+          search: fromQuery({ ...existingQuery, kuery: newKuery }),
+        });
+      },
+    };
+  }, [
+    enableExpandCollapse,
+    kuery,
+    location,
+    history,
+    data.nodes,
+    data.edges,
+    expandedServiceIds,
+  ]);
+
   useLayoutEffect(() => {
     if (isFullscreen) {
       applyServiceMapFullScreenBodyClasses(true, bodyClassesToToggle);
@@ -198,7 +277,7 @@ export function ServiceMap({
     );
   }
 
-  const isEmpty = data.nodes.length === 0;
+  const isEmpty = displayNodes.length === 0;
 
   if (status === FETCH_STATUS.SUCCESS && isEmpty) {
     return (
@@ -255,19 +334,21 @@ export function ServiceMap({
             ref={ref}
           >
             {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-            <ServiceMapGraph
-              height={mapHeight}
-              nodes={data.nodes}
-              edges={data.edges}
-              serviceName={serviceName}
-              environment={environment}
-              kuery={kuery}
-              start={start}
-              end={end}
-              isFullscreen={isFullscreen}
-              onToggleFullscreen={onToggleFullscreen}
-              fullMapHref={fullMapHref}
-            />
+            <ServiceMapExpandProvider value={expandCollapseValue}>
+              <ServiceMapGraph
+                height={mapHeight}
+                nodes={displayNodes}
+                edges={displayEdges}
+                serviceName={serviceName}
+                environment={environment}
+                kuery={kuery}
+                start={start}
+                end={end}
+                isFullscreen={isFullscreen}
+                onToggleFullscreen={onToggleFullscreen}
+                fullMapHref={fullMapHref}
+              />
+            </ServiceMapExpandProvider>
           </div>
         </EuiPanel>
       </div>

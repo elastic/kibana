@@ -47,6 +47,7 @@ import type {
   FetchDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
+  ObservabilityRuleTypeRegistry,
 } from '@kbn/observability-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
@@ -61,6 +62,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -216,6 +218,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   private telemetry: TelemetryService;
   private kibanaVersion: string;
   private isServerlessEnv: boolean;
+  private embeddableSetupDeps!: {
+    coreSetup: CoreSetup;
+    pluginsSetup: ApmPluginSetupDeps;
+    config: ConfigSchema;
+    kibanaEnvironment: { isCloudEnv: boolean; isServerlessEnv: boolean; kibanaVersion: string };
+    observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  };
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
     this.telemetry = new TelemetryService();
@@ -430,6 +439,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       kibanaVersion: this.kibanaVersion,
     };
 
+    this.embeddableSetupDeps = {
+      coreSetup: core,
+      pluginsSetup: pluginSetupDeps as ApmPluginSetupDeps,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+    };
+
     core.application.register({
       id: 'apm',
       title: 'Applications',
@@ -518,6 +535,17 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet, discoverShared } = plugins;
 
+    const getAlertDetailsServiceMapDeps = () => ({
+      ...this.embeddableSetupDeps,
+      coreStart: core,
+      pluginsStart: plugins,
+    });
+
+    plugins.triggersActionsUi.registerAlertDetailsTrailingSectionDeps(
+      ApmRuleType.TransactionDuration,
+      getAlertDetailsServiceMapDeps
+    );
+
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
 
@@ -571,5 +599,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         tabs: [{ title: 'APM Agents', Component: getLazyApmAgentsTabExtension() }],
       });
     }
+
+    return {};
   }
 }
