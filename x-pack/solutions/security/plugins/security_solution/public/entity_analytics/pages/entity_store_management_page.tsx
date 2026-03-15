@@ -231,7 +231,7 @@ export const EntityStoreManagementPage = () => {
                   />
                 }
                 color="danger"
-                iconType="alert"
+                iconType="warning"
               >
                 <p>{(enableStoreMutation.error as { body: { message: string } }).body.message}</p>
               </EuiCallOut>
@@ -246,7 +246,7 @@ export const EntityStoreManagementPage = () => {
                   />
                 }
                 color="danger"
-                iconType="alert"
+                iconType="warning"
               >
                 <p>
                   {(deleteEntityEngineMutation.error as { body: { message: string } }).body.message}

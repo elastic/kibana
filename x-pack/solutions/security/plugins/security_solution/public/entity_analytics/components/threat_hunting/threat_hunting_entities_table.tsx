@@ -189,7 +189,7 @@ const useThreatHuntingColumns = (): ThreatHuntingEntitiesColumns => {
                   disableScreenReaderOutput
                 >
                   <EuiButtonIcon
-                    iconType="expand"
+                    iconType="maximize"
                     onClick={handleFlyoutClick}
                     aria-label={i18n.translate(
                       'xpack.securitySolution.entityAnalytics.threatHunting.entityPreview.ariaLabel',
