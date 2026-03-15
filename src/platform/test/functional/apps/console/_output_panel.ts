@@ -13,13 +13,13 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
+  const retry = getService('retry');
   const toasts = getService('toasts');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/246353
-  describe.skip('console output panel', function describeIndexTests() {
+  describe('console output panel', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -32,7 +32,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const sendRequest = async (request: string) => {
       await PageObjects.console.enterText(request);
+      await retry.tryForTime(10_000, async () => {
+        // Ensure the editor content is fully applied before executing. In CI the
+        // output panel can remain in its empty state if execution happens before
+        // Monaco has updated its model.
+        expect((await PageObjects.console.getEditorText()).trim()).to.contain(request.trim());
+      });
       await PageObjects.console.clickPlay();
+      await testSubjects.existOrFail('consoleMonacoOutput', { timeout: 60_000 });
       await PageObjects.header.waitUntilLoadingHasFinished();
     };
 
@@ -40,8 +47,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await asyncForEach(requests, async (request) => {
         await PageObjects.console.enterText(request);
       });
+      await retry.tryForTime(10_000, async () => {
+        expect((await PageObjects.console.getEditorText()).trim()).to.contain(
+          requests[requests.length - 1].trim()
+        );
+      });
       await PageObjects.console.selectAllRequests();
       await PageObjects.console.clickPlay();
+      await testSubjects.existOrFail('consoleMonacoOutput', { timeout: 60_000 });
       await PageObjects.header.waitUntilLoadingHasFinished();
     };
 
