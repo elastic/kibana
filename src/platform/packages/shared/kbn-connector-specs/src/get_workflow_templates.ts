@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * as connectorsSpecs from './src/all_specs';
-export type * from './src/connector_spec';
+import { getConnectorSpec } from './get_connector_spec';
 
-export * as authTypeSpecs from './src/all_auth_types';
-
-export { getConnectorSpec } from './src/get_connector_spec';
-export { getWorkflowTemplatesForConnector } from './src/get_workflow_templates';
+/**
+ * Returns the workflow YAML template strings for a connector type.
+ *
+ * Returns an empty array if the connector type has no workflows or doesn't exist.
+ */
+export function getWorkflowTemplatesForConnector(connectorTypeId: string): string[] {
+  return getConnectorSpec(connectorTypeId)?.agentBuilderWorkflows ?? [];
+}

@@ -65,6 +65,7 @@ export const createRuleTypeMocks = (
     getActionsConfigurationUtilities: jest.fn(),
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: () => true,
+    registerConnectorLifecycleListener: jest.fn(),
   } as ActionsPluginSetupContract;
 
   const scheduleActions = jest.fn();

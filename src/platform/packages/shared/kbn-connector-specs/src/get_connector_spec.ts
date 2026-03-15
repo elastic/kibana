@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * as connectorsSpecs from './src/all_specs';
-export type * from './src/connector_spec';
+import * as connectorsSpecs from './all_specs';
+import type { ConnectorSpec } from './connector_spec';
 
-export * as authTypeSpecs from './src/all_auth_types';
-
-export { getConnectorSpec } from './src/get_connector_spec';
-export { getWorkflowTemplatesForConnector } from './src/get_workflow_templates';
+/**
+ * Returns the ConnectorSpec for a given connector type ID, or undefined if not found.
+ */
+export function getConnectorSpec(connectorTypeId: string): ConnectorSpec | undefined {
+  const specEntries = Object.values(connectorsSpecs);
+  return specEntries.find((s) => s.metadata.id === connectorTypeId);
+}
