@@ -102,7 +102,6 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           onChange={(key, value) => {
             if (!credentials || !isAwsCredentials(credentials) || !setCredentials) return;
 
-            // Use schema-based lookup to map var names to credential properties
             const credentialKey = getCredentialKeyFromVarName('aws', key);
             if (credentialKey) {
               setCredentials({ ...credentials, [credentialKey]: value });

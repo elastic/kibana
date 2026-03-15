@@ -779,6 +779,60 @@ describe('useOnSubmit', () => {
             ],
           },
         ],
+        supports_cloud_connector: true,
+      } as any;
+
+      const newAgentPolicy = {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: false,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      updateAgentlessCloudConnectorConfig(
+        packagePolicy,
+        newAgentPolicy,
+        setNewAgentPolicy,
+        setPackagePolicy
+      );
+
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'gcp',
+          },
+        },
+      });
+      expect(setPackagePolicy).toHaveBeenCalledWith({
+        ...packagePolicy,
+        supports_cloud_connector: true,
+      });
+    });
+
+    it('should set cloud_connectors enabled to false and supports_cloud_connector to false for gcp when cloud connector input var is false', () => {
+      const setNewAgentPolicy = jest.fn();
+      const setPackagePolicy = jest.fn();
+
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'gcp',
+            enabled: true,
+            streams: [
+              {
+                vars: {
+                  'gcp.supports_cloud_connectors': { value: false },
+                },
+              },
+            ],
+          },
+        ],
         supports_cloud_connector: false,
       } as any;
 

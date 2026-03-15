@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiButton, EuiLink, EuiText } from '@elastic/eui';
 
 import {
-  AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ,
-  AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
+  GCP_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ,
+  GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ,
 } from '../../../../common/services/cloud_connectors/test_subjects';
 import {
   extractRawCredentialVars,
@@ -23,8 +23,8 @@ import type { CloudConnectorFormProps, CloudSetupForCloudConnector } from '../ty
 
 import {
   getCloudConnectorRemoteRoleTemplate,
-  isAzureCredentials,
   updateInputVarsWithCredentials,
+  isGcpCredentials,
   getDeploymentIdFromUrl,
   getKibanaComponentId,
 } from '../utils';
@@ -33,8 +33,8 @@ import { ORGANIZATION_ACCOUNT } from '../constants';
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 
-import { getAzureCloudConnectorsCredentialsFormOptions } from './azure_cloud_connector_options';
-import { AzureArmTemplateGuide } from './azure_arm_template_guide';
+import { getGcpCloudConnectorsCredentialsFormOptions } from './gcp_cloud_connector_options';
+import { GoogleCloudShellCloudCredentialsGuide } from './gcp_cloud_shell_guide';
 
 const getElasticStackId = (cloud?: CloudSetupForCloudConnector): string | undefined => {
   if (!cloud) return undefined;
@@ -53,26 +53,24 @@ const getElasticStackId = (cloud?: CloudSetupForCloudConnector): string | undefi
   return undefined;
 };
 
-export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
+export const GCPCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   newPolicy,
   packageInfo,
-  updatePolicy,
   cloud,
+  updatePolicy,
   hasInvalidRequiredVars = false,
   credentials,
   setCredentials,
   accountType = ORGANIZATION_ACCOUNT,
   iacTemplateUrl,
 }) => {
-  const armTemplateUrl = cloud
+  const cloudConnectorRemoteRoleTemplate = cloud
     ? getCloudConnectorRemoteRoleTemplate({
         cloud,
         accountType,
         iacTemplateUrl,
       })
     : undefined;
-
-  const elasticStackId = getElasticStackId(cloud);
 
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);
@@ -81,8 +79,18 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
     ? updateInputVarsWithCredentials(inputVars, credentials)
     : inputVars;
 
-  const azureFormConfig = getAzureCloudConnectorsCredentialsFormOptions(updatedInputVars);
-  const fields = azureFormConfig?.fields;
+  const fields = getGcpCloudConnectorsCredentialsFormOptions(updatedInputVars);
+
+  const elasticResourceId = getElasticStackId(cloud);
+  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
+
+  const commandText = isOrganization
+    ? `gcloud config set project <PROJECT_ID> && ORG_ID=<ORG_ID_VALUE> ELASTIC_RESOURCE_ID=${
+        elasticResourceId || '<ELASTIC_RESOURCE_ID>'
+      } ./deploy.sh`
+    : `gcloud config set project <PROJECT_ID> && ELASTIC_RESOURCE_ID=${
+        elasticResourceId || '<ELASTIC_RESOURCE_ID>'
+      } ./deploy.sh`;
 
   return (
     <>
@@ -100,41 +108,47 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
       />
       <EuiSpacer size="m" />
       <EuiAccordion
-        id="armTemplateAccordianInstructions"
-        data-test-subj={AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ}
-        buttonContent={<EuiLink>{'Steps to create Managed User Identity in Azure'}</EuiLink>}
+        id="googleCloudShellAccordianInstructions"
+        data-test-subj={GCP_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ}
+        buttonContent={
+          <EuiLink>
+            <FormattedMessage
+              id="xpack.fleet.cloudConnector.gcp.stepsToGenerateServiceAccount"
+              defaultMessage="Steps to generate GCP Service Account"
+            />
+          </EuiLink>
+        }
         paddingSize="l"
         initialIsOpen={true}
       >
-        <AzureArmTemplateGuide elasticStackId={elasticStackId} />
+        <GoogleCloudShellCloudCredentialsGuide
+          isOrganization={isOrganization}
+          commandText={commandText}
+        />
       </EuiAccordion>
       <EuiSpacer size="l" />
-      {armTemplateUrl && (
-        <>
-          <EuiButton
-            data-test-subj={AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ}
-            target="_blank"
-            iconSide="left"
-            iconType="launch"
-            href={armTemplateUrl}
-          >
-            <FormattedMessage
-              id="xpack.fleet.cloudConnector.azure.deployToAzureButton"
-              defaultMessage="Deploy to Azure"
-            />
-          </EuiButton>
-          <EuiSpacer size="m" />
-        </>
-      )}
+      <EuiButton
+        data-test-subj={GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ}
+        target="_blank"
+        iconSide="left"
+        iconType="launch"
+        href={cloudConnectorRemoteRoleTemplate}
+      >
+        <FormattedMessage
+          id="xpack.fleet.cloudConnector.gcp.launchGoogleCloudShellButton"
+          defaultMessage="Launch Google Cloud Shell"
+        />
+      </EuiButton>
+      <EuiSpacer size="m" />
 
       {fields && (
         <CloudConnectorInputFields
           fields={fields}
           packageInfo={packageInfo}
           onChange={(key, value) => {
-            const credentialKey = getCredentialKeyFromVarName('azure', key);
+            const credentialKey = getCredentialKeyFromVarName('gcp', key);
 
-            if (credentials && isAzureCredentials(credentials) && setCredentials && credentialKey) {
+            if (credentials && isGcpCredentials(credentials) && setCredentials && credentialKey) {
               setCredentials({ ...credentials, [credentialKey]: value });
               return;
             }
@@ -143,7 +157,7 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
               const updatedPolicy = writeCredentials(
                 newPolicy,
                 { [credentialKey]: value },
-                'azure',
+                'gcp',
                 packageInfo
               );
               updatePolicy({ updatedPolicy });
@@ -152,6 +166,27 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           hasInvalidRequiredVars={hasInvalidRequiredVars}
         />
       )}
+      <EuiSpacer size="m" />
+      <EuiText size="s" color="subdued">
+        <FormattedMessage
+          id="xpack.fleet.cloudConnector.gcp.readDocumentation"
+          defaultMessage="Read the {documentation} for more details"
+          values={{
+            documentation: (
+              <EuiLink
+                href="https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-gcp#cspm-gcp-agentless"
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.fleet.cloudConnector.gcp.documentationLink"
+                  defaultMessage="documentation"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
     </>
   );
 };

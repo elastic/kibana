@@ -211,6 +211,48 @@ export const getDefaultAwsCredentialConfig = ({
   return config;
 };
 
+export const getDefaultGcpCredentialConfig = (
+  packageInfo: PackageInfo,
+  templateName: string,
+  isAgentless: boolean,
+  showCloudConnectors: boolean
+): {
+  [key: string]: {
+    value: string | boolean;
+    type: 'text' | 'bool';
+  };
+} => {
+  const hasCloudShellTemplate = !!getCloudShellDefaultValue(packageInfo, templateName);
+
+  let credentialType: string = GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE;
+
+  if (!showCloudConnectors && isAgentless) {
+    credentialType = GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON;
+  } else if (showCloudConnectors && isAgentless) {
+    credentialType = GCP_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
+  } else if (hasCloudShellTemplate && !isAgentless) {
+    credentialType = GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE;
+  }
+
+  const config: {
+    [key: string]: {
+      value: string | boolean;
+      type: 'text' | 'bool';
+    };
+  } = {
+    'gcp.credentials.type': {
+      value: credentialType,
+      type: 'text',
+    },
+    'gcp.supports_cloud_connectors': {
+      value: showCloudConnectors,
+      type: 'bool',
+    },
+  };
+
+  return config;
+};
+
 export const getDefaultCloudCredentialsType = (
   isAgentless: boolean,
   provider: CloudProviders,
@@ -233,14 +275,7 @@ export const getDefaultCloudCredentialsType = (
       packageInfo,
       templateName,
     }),
-    gcp: {
-      'gcp.credentials.type': {
-        value: isAgentless
-          ? GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON
-          : GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
-        type: 'text',
-      },
-    },
+    gcp: getDefaultGcpCredentialConfig(packageInfo, templateName, isAgentless, showCloudConnectors),
     azure: getDefaultAzureCredentialsConfig(
       packageInfo,
       templateName,
@@ -379,7 +414,12 @@ export const getInputHiddenVars = (
         showCloudConnectors
       );
     case GCP_PROVIDER:
-      return getDefaultGcpHiddenVars(packageInfo, templateName, setupTechnology);
+      return getDefaultGcpCredentialConfig(
+        packageInfo,
+        templateName,
+        setupTechnology === SetupTechnology.AGENTLESS,
+        showCloudConnectors
+      );
     default:
       return undefined;
   }
