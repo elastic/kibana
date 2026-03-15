@@ -28,6 +28,7 @@ import {
 import {
   createChildFlyoutDescriptionItems,
   createMainFlyoutDescriptionItems,
+  FLYOUT_MIN_WIDTH,
   FlyoutOwnFocusSwitch,
   FlyoutTypeSwitch,
 } from '../utils';
@@ -36,7 +37,7 @@ interface SessionFlyoutProps {
   title: string;
   mainSize: 's' | 'm' | 'l' | 'fill';
   mainMaxWidth?: number;
-  childSize?: 's' | 'm' | 'fill';
+  childSize: 's' | 'm' | 'fill';
   childMaxWidth?: number;
 }
 
@@ -157,6 +158,8 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           aria-labelledby="sessionFlyoutTitle"
           size={mainSize}
           maxWidth={mainMaxWidth}
+          minWidth={FLYOUT_MIN_WIDTH}
+          resizable
           type={flyoutType}
           ownFocus={flyoutOwnFocus}
           pushAnimation={true}
@@ -187,13 +190,8 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
             <EuiSpacer size="m" />
             <EuiText>
               <p>
-                Below is some filler content to demonstrate scrolling behavior.
-                {childSize && (
-                  <>
-                    {' '}
-                    Scroll down to see the button to <strong>open the child flyout</strong>.
-                  </>
-                )}
+                Below is some filler content to demonstrate scrolling behavior. Scroll down to see
+                the button to <strong>open the child flyout</strong>.
               </p>
               <p>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nisl eros, pulvinar
@@ -227,25 +225,21 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
                 viverra est a, bibendum metus.
               </p>
             </EuiText>
-            {childSize && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiButton
-                  buttonRef={childTriggerARef}
-                  onClick={handleOpenChildFlyoutA}
-                  disabled={isChildFlyoutAOpen}
-                >
-                  Open child flyout A
-                </EuiButton>{' '}
-                <EuiButton
-                  buttonRef={childTriggerBRef}
-                  onClick={handleOpenChildFlyoutB}
-                  disabled={isChildFlyoutBOpen}
-                >
-                  Open child flyout B
-                </EuiButton>
-              </>
-            )}
+            <EuiSpacer size="m" />
+            <EuiButton
+              buttonRef={childTriggerARef}
+              onClick={handleOpenChildFlyoutA}
+              disabled={isChildFlyoutAOpen}
+            >
+              Open child flyout A
+            </EuiButton>{' '}
+            <EuiButton
+              buttonRef={childTriggerBRef}
+              onClick={handleOpenChildFlyoutB}
+              disabled={isChildFlyoutBOpen}
+            >
+              Open child flyout B
+            </EuiButton>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="flexEnd">
@@ -264,7 +258,9 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
           session="inherit"
           aria-labelledby="childFlyoutATitle"
           size={childSize}
+          hasChildBackground={true}
           maxWidth={childMaxWidth}
+          minWidth={FLYOUT_MIN_WIDTH}
           onActive={childFlyoutAOnActive}
           onClose={handleCloseChildFlyoutA}
           flyoutMenuProps={{
@@ -301,11 +297,13 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
       )}
       {isChildFlyoutBOpen && (
         <EuiFlyout
-          id={`childFlyout-${title}-a`}
+          id={`childFlyout-${title}-b`}
           session="inherit"
           aria-labelledby="childFlyoutBTitle"
           size={childSize}
+          hasChildBackground={true}
           maxWidth={childMaxWidth}
+          minWidth={FLYOUT_MIN_WIDTH}
           onActive={childFlyoutAOnActive}
           onClose={handleCloseChildFlyoutB}
           flyoutMenuProps={{
@@ -346,9 +344,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
 
 SessionFlyout.displayName = 'SessionFlyoutFromComponents';
 
-const NonSessionFlyout: React.FC = React.memo(() => {
-  const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
-  const [flyoutOwnFocus, setFlyoutOwnFocus] = useState<boolean>(false);
+const GlobalFlyout: React.FC = React.memo(() => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   // Refs for manual focus management
@@ -377,28 +373,9 @@ const NonSessionFlyout: React.FC = React.memo(() => {
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <FlyoutTypeSwitch
-                // switch for flyout type: push or overlay
-                flyoutType={flyoutType}
-                onChange={setFlyoutType}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FlyoutOwnFocusSwitch
-                // switch for ownFocus behavior
-                flyoutOwnFocus={flyoutOwnFocus}
-                onChange={setFlyoutOwnFocus}
-                disabled={flyoutType === 'push'}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
           <EuiText>
             <EuiButton buttonRef={triggerRef} disabled={isFlyoutVisible} onClick={handleOpenFlyout}>
-              Open Non-session Flyout
+              Open Global Flyout
             </EuiButton>
           </EuiText>
         </EuiFlexItem>
@@ -408,14 +385,15 @@ const NonSessionFlyout: React.FC = React.memo(() => {
           aria-labelledby="nonSessionFlyoutTitle"
           onActive={flyoutOnActive}
           onClose={flyoutOnClose}
-          type={flyoutType}
+          type="overlay"
+          container={null}
           size="m"
-          ownFocus={flyoutOwnFocus}
+          ownFocus={true}
           session="never"
         >
           <EuiFlyoutHeader hasBorder>
             <EuiText>
-              <h2 id="nonSessionFlyoutTitle">Non-session flyout</h2>
+              <h2 id="nonSessionFlyoutTitle">Global flyout</h2>
             </EuiText>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -441,7 +419,7 @@ const NonSessionFlyout: React.FC = React.memo(() => {
   );
 });
 
-NonSessionFlyout.displayName = 'NonSessionFlyoutFromComponents';
+GlobalFlyout.displayName = 'GlobalFlyoutFromComponents';
 
 export const FlyoutWithComponent: React.FC = () => (
   <>
@@ -470,8 +448,8 @@ export const FlyoutWithComponent: React.FC = () => (
             description: <SessionFlyout title="Session K" mainSize="m" childSize="s" />,
           },
           {
-            title: 'Session L: main size = fill',
-            description: <SessionFlyout title="Session L" mainSize="fill" />,
+            title: 'Session L: main size = m, child size = fill',
+            description: <SessionFlyout title="Session L" mainSize="m" childSize="fill" />,
           },
         ]}
       />
@@ -488,8 +466,8 @@ export const FlyoutWithComponent: React.FC = () => (
         type="column"
         listItems={[
           {
-            title: 'Non-session flyout: size = m',
-            description: <NonSessionFlyout />,
+            title: 'Global flyout: size = m',
+            description: <GlobalFlyout />,
           },
         ]}
       />

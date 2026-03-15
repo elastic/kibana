@@ -440,9 +440,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             isolation: 'isolate', // ensures that tooltips within this flyout render as should
           })}
           ownFocus
-          maskProps={{
-            headerZindexLocation: 'above',
-          }}
+          container={null}
           ref={flyoutRef}
           {...(selectedMenuItem?.groupId === 'exportDerivatives'
             ? selectedMenuItem.config.flyoutSizing || {}
