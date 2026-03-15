@@ -77,7 +77,7 @@ interface SkillsSelectionProps {
   skills: PublicSkillSummary[];
   skillsLoading: boolean;
   selectedSkills: string[] | undefined;
-  onSkillsChange: (skills: string[] | undefined) => void;
+  onSkillsChange: (skills: string[]) => void;
   disabled?: boolean;
   showActiveOnly: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
@@ -96,18 +96,11 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const isAllSelected = selectedSkills === undefined;
-  const selectedIdSet = useMemo(
-    () => (selectedSkills ? new Set(selectedSkills) : undefined),
-    [selectedSkills]
-  );
+  const selectedIdSet = useMemo(() => new Set(selectedSkills ?? []), [selectedSkills]);
 
   const isSkillActive = useCallback(
-    (skill: PublicSkillSummary) => {
-      if (isAllSelected) return true;
-      return selectedIdSet!.has(skill.id);
-    },
-    [isAllSelected, selectedIdSet]
+    (skill: PublicSkillSummary) => selectedIdSet.has(skill.id),
+    [selectedIdSet]
   );
 
   const displaySkills = useMemo(() => {
@@ -133,24 +126,14 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
 
   const handleToggleSkill = useCallback(
     (skillId: string) => {
-      if (isAllSelected) {
-        const remaining = skills.filter((s) => s.id !== skillId).map((s) => s.id);
-        onSkillsChange(remaining);
+      const currentIds = selectedSkills ?? [];
+      if (currentIds.includes(skillId)) {
+        onSkillsChange(currentIds.filter((id) => id !== skillId));
       } else {
-        const currentIds = selectedSkills ?? [];
-        if (currentIds.includes(skillId)) {
-          onSkillsChange(currentIds.filter((id) => id !== skillId));
-        } else {
-          const newIds = [...currentIds, skillId];
-          if (newIds.length === skills.length) {
-            onSkillsChange(undefined);
-          } else {
-            onSkillsChange(newIds);
-          }
-        }
+        onSkillsChange([...currentIds, skillId]);
       }
     },
-    [isAllSelected, selectedSkills, skills, onSkillsChange]
+    [selectedSkills, onSkillsChange]
   );
 
   const handleSearchChange = useCallback((query: string) => {
