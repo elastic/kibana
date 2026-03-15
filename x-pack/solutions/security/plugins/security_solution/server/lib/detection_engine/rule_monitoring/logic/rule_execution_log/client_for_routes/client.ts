@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
+  ReadRuleExecutionResultsResponse,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
@@ -18,6 +19,7 @@ import type { ExtMeta } from '../../utils/console_logging';
 import type {
   GetExecutionEventsArgs,
   GetExecutionResultsArgs,
+  GetUnifiedExecutionResultsArgs,
   IRuleExecutionLogForRoutes,
 } from './client_interface';
 
@@ -54,6 +56,27 @@ export const createRuleExecutionLogClientForRoutes = (
           return await eventLog.getExecutionResults(args);
         } catch (e) {
           const logMessage = 'Error getting aggregate execution results from event log';
+          const logReason = e instanceof Error ? e.message : String(e);
+          const logSuffix = `[rule id ${ruleId}]`;
+          const logMeta: ExtMeta = {
+            rule: { id: ruleId },
+          };
+
+          logger.error(`${logMessage}: ${logReason} ${logSuffix}`, logMeta);
+          throw e;
+        }
+      });
+    },
+
+    getUnifiedExecutionResults: (
+      args: GetUnifiedExecutionResultsArgs
+    ): Promise<ReadRuleExecutionResultsResponse> => {
+      return withSecuritySpan('IRuleExecutionLogForRoutes.getUnifiedExecutionResults', async () => {
+        const { ruleId } = args;
+        try {
+          return await eventLog.getUnifiedExecutionResults(args);
+        } catch (e) {
+          const logMessage = 'Error getting unified execution results from event log';
           const logReason = e instanceof Error ? e.message : String(e);
           const logSuffix = `[rule id ${ruleId}]`;
           const logMeta: ExtMeta = {

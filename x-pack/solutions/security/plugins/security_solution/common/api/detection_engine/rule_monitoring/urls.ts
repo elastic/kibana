@@ -55,3 +55,8 @@ export const GET_RULE_EXECUTION_RESULTS_URL =
   `${INTERNAL_URL}/rules/{ruleId}/execution/results` as const;
 export const getRuleExecutionResultsUrl = (ruleId: string) =>
   `${INTERNAL_URL}/rules/${ruleId}/execution/results` as const;
+
+export const READ_RULE_EXECUTION_RESULTS_URL =
+  `${INTERNAL_URL}/rules/{ruleId}/execution/results` as const;
+export const readRuleExecutionResultsUrl = (ruleId: string) =>
+  `${INTERNAL_URL}/rules/${ruleId}/execution/results` as const;

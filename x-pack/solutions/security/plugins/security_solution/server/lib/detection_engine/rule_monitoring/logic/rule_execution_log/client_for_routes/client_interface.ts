@@ -9,6 +9,8 @@ import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
   LogLevel,
+  ReadRuleExecutionResultsRequestBody,
+  ReadRuleExecutionResultsResponse,
   RuleExecutionEventType,
   RuleExecutionStatus,
   SortFieldOfRuleExecutionResult,
@@ -34,6 +36,14 @@ export interface IRuleExecutionLogForRoutes {
    * and security-solution event-log documents.
    */
   getExecutionResults(args: GetExecutionResultsArgs): Promise<GetRuleExecutionResultsResponse>;
+
+  /**
+   * Fetches unified execution results directly from the Alerting Framework's execute events,
+   * using the simpler findEventsBySavedObjectIds API instead of aggregations.
+   */
+  getUnifiedExecutionResults(
+    args: GetUnifiedExecutionResultsArgs
+  ): Promise<ReadRuleExecutionResultsResponse>;
 }
 
 export interface GetExecutionEventsArgs {
@@ -94,4 +104,21 @@ export interface GetExecutionResultsArgs {
   perPage: number;
 
   runTypeFilters: RuleRunType[];
+}
+
+export interface GetUnifiedExecutionResultsArgs {
+  /** Saved object id of the rule (`rule.id`). */
+  ruleId: RuleObjectId;
+
+  /** Filtering criteria for execution results. */
+  filter: ReadRuleExecutionResultsRequestBody['filter'];
+
+  /** Sorting configuration. */
+  sort?: ReadRuleExecutionResultsRequestBody['sort'];
+
+  /** Current page to fetch. */
+  page?: number;
+
+  /** Number of results to fetch per page. */
+  perPage?: number;
 }
