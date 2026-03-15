@@ -147,7 +147,7 @@ describe('saved search embeddable', () => {
       runtimeState = getInitialRuntimeState({ searchMock: search });
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
+        initialState: { discover_session_id: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -182,7 +182,7 @@ describe('saved search embeddable', () => {
 
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
+        initialState: { discover_session_id: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -264,7 +264,7 @@ describe('saved search embeddable', () => {
       });
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
+        initialState: { discover_session_id: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -361,7 +361,7 @@ describe('saved search embeddable', () => {
       runtimeState = getInitialRuntimeState();
       await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
+        initialState: { discover_session_id: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -386,7 +386,7 @@ describe('saved search embeddable', () => {
       };
       await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
+        initialState: { discover_session_id: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -413,7 +413,7 @@ describe('saved search embeddable', () => {
       runtimeState = getInitialRuntimeState();
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
+        initialState: { discover_session_id: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -446,7 +446,7 @@ describe('saved search embeddable', () => {
       });
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { savedObjectId: 'id' }, // runtimeState passed via mocked deserializeState
+        initialState: { discover_session_id: 'id' }, // runtimeState passed via mocked deserializeState
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,

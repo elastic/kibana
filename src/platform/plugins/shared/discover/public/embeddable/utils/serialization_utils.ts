@@ -10,46 +10,56 @@
 import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import { type SerializedTimeRange, type SerializedTitles } from '@kbn/presentation-publishing';
-import { toSavedSearchAttributes, type SavedSearch } from '@kbn/saved-search-plugin/common';
+import {
+  type SavedSearch,
+  SavedSearchType,
+  toSavedSearchAttributes,
+} from '@kbn/saved-search-plugin/common';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
-import { EDITABLE_SAVED_SEARCH_KEYS } from '../../../common/embeddable/constants';
+import {
+  byReferenceSavedSearchToDiscoverSessionEmbeddableState,
+  byValueDiscoverSessionToSavedSearchEmbeddableState,
+  byValueSavedSearchToDiscoverSessionEmbeddableState,
+  toStoredSearchEmbeddableState,
+} from '../../../common/embeddable/transform_utils';
+import { isByReferenceDiscoverSessionEmbeddableState } from '../../../common';
+import {
+  EDITABLE_SAVED_SEARCH_KEYS,
+  SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
+} from '../../../common/embeddable/constants';
 import type {
   EditableSavedSearchAttributes,
-  SearchEmbeddableByReferenceState,
-  SearchEmbeddableByValueState,
-  SearchEmbeddableState,
+  StoredSearchEmbeddableByReferenceState,
+  StoredSearchEmbeddableState,
 } from '../../../common/embeddable/types';
+import type { DiscoverSessionEmbeddableState } from '../../../server';
 import type { DiscoverServices } from '../../build_services';
 import { EDITABLE_PANEL_KEYS } from '../constants';
-import type { SearchEmbeddableRuntimeState } from '../types';
+import type { SearchEmbeddableInputState, SearchEmbeddableRuntimeState } from '../types';
 import { isTabDeleted } from './is_tab_deleted';
 
 export const deserializeState = async ({
   serializedState,
   discoverServices,
 }: {
-  serializedState: SearchEmbeddableState;
+  serializedState: SearchEmbeddableInputState;
   discoverServices: DiscoverServices;
 }): Promise<SearchEmbeddableRuntimeState> => {
   const panelState = pick(serializedState, EDITABLE_PANEL_KEYS);
-  const savedObjectId = (serializedState as SearchEmbeddableByReferenceState).savedObjectId;
-  if (savedObjectId) {
+
+  if (isByReferenceDiscoverSessionEmbeddableState(serializedState)) {
+    const savedObjectOverride = toStoredSearchEmbeddableState(serializedState.overrides ?? {});
     // by reference
     const { getDiscoverSession } = discoverServices.savedSearch;
-    const session = await getDiscoverSession(savedObjectId);
+    const session = await getDiscoverSession(serializedState.discover_session_id);
 
-    const selectedTabId = (serializedState as SearchEmbeddableByReferenceState).selectedTabId;
+    const selectedTabId = serializedState.selected_tab_id;
     const selectedTab = selectedTabId
       ? session.tabs.find((t) => t.id === selectedTabId)
       : undefined;
-
     const resolvedTab = selectedTab ?? session.tabs[0];
-
     const isSelectedTabDeleted = Boolean(selectedTabId && !selectedTab);
-
     const resolvedSelectedTabId = isSelectedTabDeleted ? selectedTabId : resolvedTab?.id;
-
-    const savedObjectOverride = pick(serializedState, EDITABLE_SAVED_SEARCH_KEYS);
 
     // Build runtime state from the resolved tab's attributes
     // ignore the time range from the tab - only global time range + panel time range matter
@@ -59,7 +69,7 @@ export const deserializeState = async ({
 
     return {
       ...runtimeSavedSearchState,
-      savedObjectId,
+      savedObjectId: serializedState.discover_session_id,
       savedObjectTitle: session.title,
       savedObjectDescription: session.description,
       selectedTabId: resolvedSelectedTabId,
@@ -70,10 +80,14 @@ export const deserializeState = async ({
     };
   } else {
     // by value
+    const [tab] = serializedState.tabs;
+    const savedObjectOverride = toStoredSearchEmbeddableState(tab ?? {});
     const { byValueToSavedSearch } = discoverServices.savedSearch;
 
+    const { state: storedState, references } =
+      byValueDiscoverSessionToSavedSearchEmbeddableState(serializedState);
     const savedSearch = await byValueToSavedSearch(
-      serializedState as SearchEmbeddableByValueState,
+      { attributes: { ...storedState.attributes, references } },
       true
     );
 
@@ -82,6 +96,7 @@ export const deserializeState = async ({
     return {
       ...savedSearchWithoutTabs,
       ...panelState,
+      ...savedObjectOverride,
       nonPersistedDisplayOptions: serializedState.nonPersistedDisplayOptions,
     };
   }
@@ -105,7 +120,7 @@ export const serializeState = ({
   serializeDynamicActions: () => SerializedDrilldowns;
   savedObjectId?: string;
   selectedTabId?: string;
-}): SearchEmbeddableState => {
+}): DiscoverSessionEmbeddableState => {
   const searchSource = savedSearch.searchSource;
   const searchSourceJSON = JSON.stringify(searchSource.getSerializedFields());
   const savedSearchAttributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
@@ -134,21 +149,24 @@ export const serializeState = ({
       }, {});
     }
 
-    return {
-      // Serialize the current dashboard state into the panel state **without** updating the saved object
+    const storedByRef: StoredSearchEmbeddableByReferenceState = {
       ...serializeTitles(),
       ...serializeTimeRange(),
       ...serializeDynamicActions?.(),
       ...overwriteState,
-      savedObjectId,
-      ...(selectedTabId ? { selectedTabId } : {}),
+      ...(selectedTabId !== undefined && { selectedTabId }),
     };
+    const refs = [
+      { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: savedObjectId },
+    ];
+    return byReferenceSavedSearchToDiscoverSessionEmbeddableState(storedByRef, refs);
   }
 
-  return {
+  const stored: StoredSearchEmbeddableState = {
     ...serializeTitles(),
     ...serializeTimeRange(),
     ...serializeDynamicActions?.(),
     attributes: savedSearchAttributes,
   };
+  return byValueSavedSearchToDiscoverSessionEmbeddableState(stored, []);
 };

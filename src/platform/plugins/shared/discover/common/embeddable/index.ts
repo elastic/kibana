@@ -8,3 +8,8 @@
  */
 
 export { getSearchEmbeddableTransforms } from './search_embeddable_transforms';
+export {
+  discoverSessionToSavedSearchEmbeddableState,
+  isByReferenceDiscoverSessionEmbeddableState,
+  isByReferenceSavedSearchEmbeddableState,
+} from './transform_utils';

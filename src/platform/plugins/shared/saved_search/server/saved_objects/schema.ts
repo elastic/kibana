@@ -9,6 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { DataGridDensity } from '@kbn/discover-utils';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
@@ -134,7 +135,11 @@ export const SCHEMA_SEARCH_MODEL_VERSION_4 = SCHEMA_SEARCH_MODEL_VERSION_3.exten
 
 export const SCHEMA_SEARCH_MODEL_VERSION_5 = SCHEMA_SEARCH_MODEL_VERSION_4.extends({
   density: schema.maybe(
-    schema.oneOf([schema.literal('compact'), schema.literal('normal'), schema.literal('expanded')])
+    schema.oneOf([
+      schema.literal(DataGridDensity.COMPACT),
+      schema.literal(DataGridDensity.EXPANDED),
+      schema.literal(DataGridDensity.NORMAL),
+    ])
   ),
 });
 

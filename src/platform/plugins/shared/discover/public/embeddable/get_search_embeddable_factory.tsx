@@ -39,7 +39,7 @@ import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeInlineEditingApi } from './initialize_inline_editing_api';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
-import type { SearchEmbeddableState } from '../../common/embeddable/types';
+import type { DiscoverSessionEmbeddableState } from '../../server';
 import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
@@ -59,7 +59,7 @@ export const getSearchEmbeddableFactory = ({
   const { save, checkForDuplicateTitle } = discoverServices.savedSearch;
 
   const savedSearchEmbeddableFactory: EmbeddableFactory<
-    SearchEmbeddableState,
+    DiscoverSessionEmbeddableState,
     SearchEmbeddableApi
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
@@ -107,9 +107,9 @@ export const getSearchEmbeddableFactory = ({
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
 
       /** Build API */
-      const titleManager = initializeTitleManager(initialState);
-      const timeRangeManager = initializeTimeRangeManager(initialState);
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const titleManager = initializeTitleManager(runtimeState);
+      const timeRangeManager = initializeTimeRangeManager(runtimeState);
+      const drilldownsManager = await initializeDrilldownsManager(uuid, runtimeState);
       const searchEmbeddable = await initializeSearchEmbeddableApi({
         initialState: runtimeState,
         dataLoading$,
@@ -138,7 +138,7 @@ export const getSearchEmbeddableFactory = ({
         dataLoading$,
       });
 
-      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
+      const unsavedChangesApi = initializeUnsavedChanges<DiscoverSessionEmbeddableState>({
         uuid,
         parentApi,
         serializeState: () => serialize(savedObjectId$.getValue()),
@@ -154,37 +154,17 @@ export const getSearchEmbeddableFactory = ({
           inlineEditingApi.anyStateChange$
         ),
         getComparators: () => {
+          const isByValue = !savedObjectId$.getValue();
           const isDeleted = isSelectedTabDeleted(selectedTabId$.getValue());
           const shouldSkipTabComparators = isDeleted || inlineEditingApi.isEditing();
-
           return {
             ...drilldownsManager.comparators,
             ...titleComparators,
             ...timeRangeComparators,
-            ...searchEmbeddable.comparators,
-            // While the selected tab is missing or inline editing is in progress,
-            // skip tab-dependent comparators so unsaved-changes badges don't appear
-            // until the user explicitly applies a tab change.
-            ...(shouldSkipTabComparators
-              ? Object.fromEntries(
-                  Object.keys(searchEmbeddable.comparators).map((k) => [k, 'skip'])
-                )
-              : {}),
-            selectedTabId: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
-            attributes: 'skip',
-            breakdownField: 'skip',
-            hideAggregatedPreview: 'skip',
-            hideChart: 'skip',
-            isTextBasedQuery: 'skip',
-            kibanaSavedObjectMeta: 'skip',
-            nonPersistedDisplayOptions: 'skip',
-            refreshInterval: 'skip',
-            savedObjectId: 'skip',
-            timeRestore: 'skip',
-            usesAdHocDataView: 'skip',
-            controlGroupJson: 'skip',
-            visContext: 'skip',
-            tabs: 'skip',
+            discover_session_id: 'skip',
+            selected_tab_id: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
+            overrides: shouldSkipTabComparators ? 'skip' : 'deepEquality',
+            tabs: !isByValue || shouldSkipTabComparators ? 'skip' : 'deepEquality',
           };
         },
         onReset: async (lastSaved) => {
