@@ -21,10 +21,21 @@ import {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,
   ATTACK_DISCOVERY_TAG,
 } from '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/constants';
+import {
+  getAdaptiveBatchSize,
+  runBatchedAttackDiscovery,
+} from '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/batch';
+import type { MergeQualityMetrics } from '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/batch';
 import { throwIfErrorCountsExceeded } from '../throw_if_error_counts_exceeded';
 import { throwIfInvalidAnonymization } from '../throw_if_invalid_anonymization';
 import { getLlmType } from '../../../../../utils';
 import { getAttackDiscoveryPrompts } from '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/prompts';
+
+export interface InvokeAttackDiscoveryGraphResult {
+  anonymizedAlerts: Document[];
+  attackDiscoveries: AttackDiscovery[] | null;
+  mergeMetrics?: MergeQualityMetrics;
+}
 
 export const invokeAttackDiscoveryGraph = async ({
   actionsClient,
@@ -60,10 +71,7 @@ export const invokeAttackDiscoveryGraph = async ({
   savedObjectsClient: SavedObjectsClientContract;
   start?: string;
   size: number;
-}): Promise<{
-  anonymizedAlerts: Document[];
-  attackDiscoveries: AttackDiscovery[] | null;
-}> => {
+}): Promise<InvokeAttackDiscoveryGraphResult> => {
   throwIfInvalidAnonymization(anonymizationFields);
 
   const llmType = getLlmType(apiConfig.actionTypeId);
@@ -87,7 +95,7 @@ export const invokeAttackDiscoveryGraph = async ({
     llmType,
     logger,
     model,
-    temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
+    temperature: 0,
     timeout: connectorTimeout,
     traceOptions,
     telemetryMetadata: {
@@ -102,12 +110,87 @@ export const invokeAttackDiscoveryGraph = async ({
   const attackDiscoveryPrompts = await getAttackDiscoveryPrompts({
     actionsClient,
     connectorId: apiConfig.connectorId,
-    // if in future oss has different prompt, add it as model here
     model,
     provider: llmType,
     savedObjectsClient,
   });
 
+  const adaptiveBatchSize = getAdaptiveBatchSize({ model });
+  const shouldBatch = size > adaptiveBatchSize;
+
+  if (shouldBatch) {
+    logger?.info(
+      `invokeAttackDiscoveryGraph: size ${size} exceeds adaptive batch size ${adaptiveBatchSize}, using batched processing`
+    );
+
+    return invokeBatchedAttackDiscoveryGraph({
+      alertsIndexPattern,
+      anonymizationFields,
+      end,
+      esClient,
+      filter,
+      llm,
+      logger,
+      model,
+      onNewReplacements,
+      prompts: attackDiscoveryPrompts,
+      replacements: latestReplacements,
+      size,
+      start,
+      tags,
+      traceOptions,
+    });
+  }
+
+  return invokeSingleAttackDiscoveryGraph({
+    alertsIndexPattern,
+    anonymizationFields,
+    attackDiscoveryPrompts,
+    end,
+    esClient,
+    filter,
+    llm,
+    logger,
+    onNewReplacements,
+    replacements: latestReplacements,
+    size,
+    start,
+    tags,
+    traceOptions,
+  });
+};
+
+const invokeSingleAttackDiscoveryGraph = async ({
+  alertsIndexPattern,
+  anonymizationFields,
+  attackDiscoveryPrompts,
+  end,
+  esClient,
+  filter,
+  llm,
+  logger,
+  onNewReplacements,
+  replacements,
+  size,
+  start,
+  tags,
+  traceOptions,
+}: {
+  alertsIndexPattern: string;
+  anonymizationFields: AnonymizationFieldResponse[];
+  attackDiscoveryPrompts: Awaited<ReturnType<typeof getAttackDiscoveryPrompts>>;
+  end?: string;
+  esClient: ElasticsearchClient;
+  filter?: Record<string, unknown>;
+  llm: ActionsClientLlm;
+  logger: Logger;
+  onNewReplacements: (newReplacements: Replacements) => void;
+  replacements: Replacements;
+  size: number;
+  start?: string;
+  tags: string[];
+  traceOptions: { tracers: unknown[] };
+}): Promise<InvokeAttackDiscoveryGraphResult> => {
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
     anonymizationFields,
@@ -118,7 +201,7 @@ export const invokeAttackDiscoveryGraph = async ({
     logger,
     onNewReplacements,
     prompts: attackDiscoveryPrompts,
-    replacements: latestReplacements,
+    replacements,
     size,
     start,
   });
@@ -154,4 +237,113 @@ export const invokeAttackDiscoveryGraph = async ({
   });
 
   return { anonymizedAlerts, attackDiscoveries };
+};
+
+const invokeBatchedAttackDiscoveryGraph = async ({
+  alertsIndexPattern,
+  anonymizationFields,
+  end,
+  esClient,
+  filter,
+  llm,
+  logger,
+  model,
+  onNewReplacements,
+  prompts,
+  replacements,
+  size,
+  start,
+  tags,
+  traceOptions,
+}: {
+  alertsIndexPattern: string;
+  anonymizationFields: AnonymizationFieldResponse[];
+  end?: string;
+  esClient: ElasticsearchClient;
+  filter?: Record<string, unknown>;
+  llm: ActionsClientLlm;
+  logger: Logger;
+  model?: string;
+  onNewReplacements: (newReplacements: Replacements) => void;
+  prompts: Awaited<ReturnType<typeof getAttackDiscoveryPrompts>>;
+  replacements: Replacements;
+  size: number;
+  start?: string;
+  tags: string[];
+  traceOptions: { tracers: unknown[] };
+}): Promise<InvokeAttackDiscoveryGraphResult> => {
+  const { getAnonymizedAlerts } = await import(
+    '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/retriever/helpers/get_anonymized_alerts'
+  );
+
+  let latestReplacements: Replacements = { ...replacements };
+  const collectReplacements = (newReplacements: Replacements) => {
+    latestReplacements = { ...latestReplacements, ...newReplacements };
+    onNewReplacements(latestReplacements);
+  };
+
+  logger?.debug(
+    () =>
+      `invokeBatchedAttackDiscoveryGraph: retrieving up to ${size} alerts for batched processing`
+  );
+
+  const rawAlerts = await getAnonymizedAlerts({
+    alertsIndexPattern,
+    anonymizationFields,
+    end,
+    esClient,
+    filter,
+    onNewReplacements: collectReplacements,
+    replacements: latestReplacements,
+    size,
+    start,
+  });
+
+  const anonymizedAlerts: Document[] = rawAlerts.map((alert) => ({
+    pageContent: alert,
+    metadata: {},
+  }));
+
+  if (anonymizedAlerts.length === 0) {
+    logger?.debug(
+      () => 'invokeBatchedAttackDiscoveryGraph: no alerts retrieved, returning empty results'
+    );
+    return { anonymizedAlerts: [], attackDiscoveries: [] };
+  }
+
+  logger?.info(
+    `invokeBatchedAttackDiscoveryGraph: retrieved ${anonymizedAlerts.length} alerts, starting batched processing`
+  );
+
+  const mergeResult = await runBatchedAttackDiscovery({
+    alertsIndexPattern,
+    anonymizationFields,
+    anonymizedAlerts,
+    end,
+    esClient,
+    filter,
+    llm,
+    logger,
+    model,
+    onNewReplacements: collectReplacements,
+    prompts,
+    replacements: latestReplacements,
+    start,
+    tags,
+    traceOptions,
+  });
+
+  logger?.info(
+    `invokeBatchedAttackDiscoveryGraph: batched processing complete. ` +
+      `Batches: ${mergeResult.mergeMetrics.batchesProcessed}, ` +
+      `Discoveries before merge: ${mergeResult.mergeMetrics.totalDiscoveriesBeforeMerge}, ` +
+      `After merge: ${mergeResult.mergeMetrics.totalDiscoveriesAfterMerge}, ` +
+      `Alert coverage: ${(mergeResult.mergeMetrics.alertCoverage * 100).toFixed(1)}%`
+  );
+
+  return {
+    anonymizedAlerts: mergeResult.anonymizedAlerts,
+    attackDiscoveries: mergeResult.attackDiscoveries,
+    mergeMetrics: mergeResult.mergeMetrics,
+  };
 };
