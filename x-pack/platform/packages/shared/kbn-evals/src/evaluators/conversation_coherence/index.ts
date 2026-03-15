@@ -51,10 +51,9 @@ export function createConversationCoherenceEvaluator(config: {
             );
           } else {
             log.warning(
-              new Error(
-                `Coherence analysis attempt ${error.attemptNumber} failed; retrying...`,
-                { cause: error }
-              )
+              new Error(`Coherence analysis attempt ${error.attemptNumber} failed; retrying...`, {
+                cause: error,
+              })
             );
           }
         },

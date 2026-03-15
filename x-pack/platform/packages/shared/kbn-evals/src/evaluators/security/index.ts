@@ -100,9 +100,7 @@ export function createPromptLeakDetectionEvaluator(): Evaluator {
   };
 }
 
-export function createScopeViolationEvaluator(config: {
-  allowedPatterns: RegExp[];
-}): Evaluator {
+export function createScopeViolationEvaluator(config: { allowedPatterns: RegExp[] }): Evaluator {
   const { allowedPatterns } = config;
 
   return {

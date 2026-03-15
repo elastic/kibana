@@ -72,7 +72,12 @@ describe('createMultiJudgeEvaluator', () => {
 
     it('returns average of two middle values for even count', async () => {
       const evaluator = createMultiJudgeEvaluator({
-        judges: [mockJudge('a', 0.2), mockJudge('b', 0.4), mockJudge('c', 0.6), mockJudge('d', 0.8)],
+        judges: [
+          mockJudge('a', 0.2),
+          mockJudge('b', 0.4),
+          mockJudge('c', 0.6),
+          mockJudge('d', 0.8),
+        ],
         strategy: 'median',
       });
 
