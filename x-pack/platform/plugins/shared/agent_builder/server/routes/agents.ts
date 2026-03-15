@@ -44,7 +44,10 @@ const SKILLS_SCHEMA = schema.arrayOf(
   schema.string({
     meta: { description: 'Skill ID to be available to the agent.' },
   }),
-  { maxSize: 100 }
+  {
+    maxSize: 100,
+    meta: { description: 'Array of skill IDs to be available to the agent.' },
+  }
 );
 
 const VISIBILITY_DISABLED_MESSAGE =
