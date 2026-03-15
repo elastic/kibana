@@ -36,19 +36,6 @@ describe('convertJsonSchemaToZod – unimplemented keyword gaps', () => {
     });
   });
 
-  // ─── uniqueItems ─────────────────────────────────────────────────────────────
-  describe('uniqueItems', () => {
-    it('does not reject duplicate array items', () => {
-      const schema = convertJsonSchemaToZod({
-        type: 'array',
-        items: { type: 'string' },
-        uniqueItems: true,
-      } as JSONSchema7);
-      const result = schema.safeParse(['a', 'b', 'a']);
-      expect(result.success).toBe(true); // Should be false when implemented
-    });
-  });
-
   // ─── allOf ──────────────────────────────────────────────────────────────────
   describe('allOf', () => {
     it('does not validate against all sub-schemas', () => {

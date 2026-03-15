@@ -54,8 +54,7 @@ export interface JsonSchema {
   default?: string | number | boolean | null | object;
   $ref?: string;
 
-  // Logical Composition
-  allOf?: JsonSchema[];
+  // Logical Composition (allOf is omitted
   anyOf?: JsonSchema[];
   oneOf?: JsonSchema[];
 
@@ -63,7 +62,6 @@ export interface JsonSchema {
   properties?: Record<string, JsonSchema>;
   additionalProperties?: boolean | JsonSchema;
   items?: JsonSchema | JsonSchema[];
-  prefixItems?: JsonSchema[];
   required?: string[];
 
   // Reusability
@@ -104,8 +102,6 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
   'additionalProperties',
   'required',
   'items',
-  'prefixItems',
-  'allOf',
   'anyOf',
   'oneOf',
   '$ref',
@@ -125,9 +121,9 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
 
 /**
  * Zod schema representing any JSON Schema node (Draft 7 / 2020-12).
- * Used recursively inside property definitions, allOf/anyOf/oneOf, etc.
- * Allows the full set of JSON Schema keywords because an individual
- * property can be any type (string, number, array, object, ...).
+ * Used recursively inside property definitions, anyOf/oneOf, etc.
+ * Only includes keywords that the fromJSONSchema converter actually enforces,
+ * so autocomplete suggestions are never misleading.
  */
 export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
   .lazy(() =>
@@ -142,7 +138,6 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
       $ref: z.string().optional(),
 
       // --- Logical Operators ---
-      allOf: z.array(JsonModelShapeSchema).optional(),
       anyOf: z.array(JsonModelShapeSchema).optional(),
       oneOf: z.array(JsonModelShapeSchema).optional(),
 
@@ -153,7 +148,6 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
 
       // --- Array Properties ---
       items: z.union([JsonModelShapeSchema, z.array(JsonModelShapeSchema)]).optional(),
-      prefixItems: z.array(JsonModelShapeSchema).optional(),
       minItems: z.number().int().nonnegative().optional(),
       maxItems: z.number().int().nonnegative().optional(),
       uniqueItems: z.boolean().optional(),

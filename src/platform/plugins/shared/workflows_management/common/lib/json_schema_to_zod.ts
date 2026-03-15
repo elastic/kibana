@@ -23,6 +23,31 @@ function applyAdditionalProperties(jsonSchema: JSONSchema7, zodResult: z.ZodType
   return zodResult;
 }
 
+/**
+ * Applies a uniqueness refinement to a ZodArray when `uniqueItems: true` is set.
+ * Items are compared by their JSON-serialised form, which handles both primitives and objects.
+ */
+function applyUniqueItems(jsonSchema: JSONSchema7, zodResult: z.ZodType): z.ZodType {
+  if (jsonSchema.uniqueItems === true && zodResult instanceof z.ZodArray) {
+    return zodResult.refine(
+      (arr) => new Set(arr.map((v) => JSON.stringify(v))).size === arr.length,
+      { message: 'Items must be unique' }
+    );
+  }
+  return zodResult;
+}
+
+/**
+ * Enriches a Zod schema with constraints that the fromJSONSchema polyfill does not implement.
+ * Add a new `apply` call here whenever a new keyword is supported in this wrapper.
+ */
+function enrichZodSchema(jsonSchema: JSONSchema7, zodResult: z.ZodType): z.ZodType {
+  let result = zodResult;
+  result = applyAdditionalProperties(jsonSchema, result);
+  result = applyUniqueItems(jsonSchema, result);
+  return result;
+}
+
 /** Root schema type for $ref resolution (same as resolveRef's second parameter). */
 type RootSchemaType = Parameters<typeof resolveRef>[1];
 
@@ -76,7 +101,7 @@ export function convertJsonSchemaToZod(jsonSchema: JSONSchema7 | null | undefine
   // enums, defaults, required fields, validation constraints, etc.
   const zodSchema = fromJSONSchema(jsonSchema as Record<string, unknown>);
   const result = zodSchema ?? convertJsonSchemaToZodRecursive(jsonSchema);
-  return applyAdditionalProperties(jsonSchema, result);
+  return enrichZodSchema(jsonSchema, result);
 }
 
 /**
@@ -97,7 +122,7 @@ export function convertJsonSchemaToZodWithRefs(
 
   const zodSchema = fromJSONSchema(schemaToConvert as Record<string, unknown>);
   if (zodSchema !== undefined) {
-    return applyAdditionalProperties(schemaToConvert, zodSchema);
+    return enrichZodSchema(schemaToConvert, zodSchema);
   }
 
   if (schemaToConvert.type === 'object' && schemaToConvert.properties) {
@@ -113,7 +138,7 @@ export function convertJsonSchemaToZodWithRefs(
       }
       shape[key] = zodProp;
     }
-    return applyAdditionalProperties(schemaToConvert, z.object(shape));
+    return enrichZodSchema(schemaToConvert, z.object(shape));
   }
 
   return convertJsonSchemaToZod(schemaToConvert);
@@ -148,8 +173,7 @@ export function buildInputsZodValidator(
       shape[propertyName] = zodSchema;
     }
   }
-  const rootObject = z.object(shape);
-  return (schema.additionalProperties === false ? rootObject.strict() : rootObject) as z.ZodType<
+  return enrichZodSchema(schema as JSONSchema7, z.object(shape)) as z.ZodType<
     Record<string, unknown>
   >;
 }
