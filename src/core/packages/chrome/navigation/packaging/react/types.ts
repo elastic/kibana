@@ -72,6 +72,8 @@ export interface MenuItem {
   badgeType?: BadgeType;
   /** Optional array of secondary menu sections for nested navigation. */
   sections?: SecondaryMenuSection[];
+  /** Optional click handler for the menu item. */
+  onClick?: () => void;
 }
 
 /**
@@ -79,7 +81,7 @@ export interface MenuItem {
  */
 export interface NavigationStructure {
   /** Items displayed in the footer area of the navigation. */
-  footerItems: MenuItem[];
+  footerItems?: MenuItem[];
   /** Items displayed in the primary/main area of the navigation. */
   primaryItems: MenuItem[];
 }

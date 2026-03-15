@@ -50,13 +50,15 @@ export const getActiveItems = (
   }
 
   // Third, search the secondary items of footer items
-  for (const footer of items.footerItems) {
-    if (!footer.sections) continue;
+  if (items.footerItems) {
+    for (const footer of items.footerItems) {
+      if (!footer.sections) continue;
 
-    for (const section of footer.sections) {
-      const secondaryItem = section.items.find((item) => item.id === activeItemId);
-      if (secondaryItem) {
-        return { primaryItem: footer, secondaryItem, isLogoActive: false };
+      for (const section of footer.sections) {
+        const secondaryItem = section.items.find((item) => item.id === activeItemId);
+        if (secondaryItem) {
+          return { primaryItem: footer, secondaryItem, isLogoActive: false };
+        }
       }
     }
   }
@@ -68,7 +70,7 @@ export const getActiveItems = (
   }
 
   // Fifth, search the footer items using their IDs
-  const footerItem = items.footerItems.find((item) => item.id === activeItemId);
+  const footerItem = items.footerItems?.find((item) => item.id === activeItemId);
   if (footerItem) {
     return { primaryItem: footerItem, secondaryItem: null, isLogoActive: false };
   }

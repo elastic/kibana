@@ -112,7 +112,7 @@ export const Navigation = ({
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
 
   const { getIsNewPrimary, getIsNewSecondary } = useNewItems(
-    [...items.primaryItems, ...items.footerItems],
+    [...items.primaryItems, ...(items.footerItems ?? [])],
     activeItemId
   );
 
@@ -340,10 +340,14 @@ export const Navigation = ({
           )}
         </SideNav.PrimaryMenu>
 
-        <SideNav.Footer isCollapsed={isCollapsed} collapseButton={collapseButton}>
+        <SideNav.Footer
+          isCollapsed={isCollapsed}
+          collapseButton={collapseButton}
+          hasFooterItems={!!items.footerItems}
+        >
           {({ footerNavigationInstructionsId }) => (
             <>
-              {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
+              {items.footerItems?.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
                 const { sections, ...itemProps } = item;
                 const isFirstItem = index === 0;
                 const ariaDescribedBy = isFirstItem ? footerNavigationInstructionsId : undefined;

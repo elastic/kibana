@@ -27,7 +27,11 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { getHighContrastSeparator } from '../../hooks/use_high_contrast_mode_styles';
 
-const getFooterWrapperStyles = (euiThemeContext: UseEuiTheme, isCollapsed: boolean) => {
+const getFooterWrapperStyles = (
+  euiThemeContext: UseEuiTheme,
+  isCollapsed: boolean,
+  hasFooterItems: boolean
+) => {
   const { euiTheme: theme } = euiThemeContext;
   return {
     root: css`
@@ -39,7 +43,7 @@ const getFooterWrapperStyles = (euiThemeContext: UseEuiTheme, isCollapsed: boole
       justify-content: center;
       padding-top: ${isCollapsed ? theme.size.s : theme.size.m};
 
-      ${getHighContrastSeparator(euiThemeContext, { side: 'top' })}
+      ${hasFooterItems ? getHighContrastSeparator(euiThemeContext, { side: 'top' }) : ''}
     `,
     collapseDivider: css`
       position: relative;
@@ -60,6 +64,7 @@ export interface FooterProps {
   children: FooterChildren;
   isCollapsed: boolean;
   collapseButton?: ReactNode;
+  hasFooterItems?: boolean;
 }
 
 interface FooterComponent
@@ -68,7 +73,7 @@ interface FooterComponent
 }
 
 const FooterBase = forwardRef<HTMLElement, FooterProps>(
-  ({ children, isCollapsed, collapseButton }, ref) => {
+  ({ children, isCollapsed, collapseButton, hasFooterItems }, ref) => {
     const euiThemeContext = useEuiTheme();
     const isSmall = useIsWithinBreakpoints(['xs', 's']);
     const footerNavigationInstructionsId = useGeneratedHtmlId({
@@ -89,8 +94,8 @@ const FooterBase = forwardRef<HTMLElement, FooterProps>(
     };
 
     const wrapperStyles = useMemo(
-      () => getFooterWrapperStyles(euiThemeContext, isCollapsed),
-      [euiThemeContext, isCollapsed]
+      () => getFooterWrapperStyles(euiThemeContext, isCollapsed, hasFooterItems ?? true),
+      [euiThemeContext, isCollapsed, hasFooterItems]
     );
 
     const renderChildren = () => {

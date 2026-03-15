@@ -94,6 +94,10 @@ export interface MenuItem {
    * (optional) The secondary menu sections belonging to the menu item.
    */
   sections?: SecondaryMenuSection[];
+  /**
+   * (optional) Click handler for the menu item. If provided, this will be called when the item is clicked.
+   */
+  onClick?: () => void;
 }
 
 /**
@@ -102,13 +106,13 @@ export interface MenuItem {
  */
 export interface NavigationStructure {
   /**
-   * The items to be displayed in the navigation footer.
-   */
-  footerItems: MenuItem[];
-  /**
    * The primary navigation items displayed in the navigation main menu.
    */
   primaryItems: MenuItem[];
+  /**
+   * The items to be displayed in the navigation footer.
+   */
+  footerItems?: MenuItem[];
 }
 
 export interface MenuCalculations {
