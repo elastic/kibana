@@ -33,6 +33,10 @@ jest.mock('../model/use_step_execution', () => ({
   useStepExecution: jest.fn(() => ({ data: undefined, isLoading: false })),
 }));
 
+jest.mock('../model/use_child_workflow_executions', () => ({
+  useChildWorkflowExecutions: jest.fn(() => ({ childExecutions: new Map(), isLoading: false })),
+}));
+
 const mockSetSelectedStepExecution = jest.fn();
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: jest.fn(() => ({
