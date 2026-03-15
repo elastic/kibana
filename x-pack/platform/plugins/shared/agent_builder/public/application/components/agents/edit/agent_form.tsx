@@ -242,8 +242,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   const agentSkills = watch('configuration.skill_ids') as string[] | undefined;
   const activeSkillsCount = useMemo(() => {
-    if (!agentSkills) return skills.length;
-    const selectedIds = new Set(agentSkills);
+    const ids = agentSkills ?? [];
+    const selectedIds = new Set(ids);
     return skills.filter((skill) => selectedIds.has(skill.id)).length;
   }, [skills, agentSkills]);
 
