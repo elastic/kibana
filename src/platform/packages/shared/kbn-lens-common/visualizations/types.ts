@@ -463,7 +463,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   toExpression: (
     state: T,
     datasourceLayers: DatasourceLayers,
-    attributes?: Partial<{ title: string; description: string }>,
+    attributes?: Partial<{ title: string; description: string; maxDataPoints: number }>,
     datasourceExpressionsByLayers?: Record<string, Ast>
   ) => ExpressionAstExpression | string | null;
   /**

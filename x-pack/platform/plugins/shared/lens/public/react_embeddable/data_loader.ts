@@ -33,6 +33,7 @@ import {
   merge,
   pipe,
   skip,
+  take,
   tap,
   type Subscription,
 } from 'rxjs';
@@ -65,7 +66,8 @@ export type ReloadReason =
   | 'overrides'
   | 'disableTriggers'
   | 'viewMode'
-  | 'searchContext';
+  | 'searchContext'
+  | 'containerWidth';
 
 function getSearchContext(parentApi: unknown) {
   const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
@@ -233,6 +235,8 @@ export function loadEmbeddableData(
       services
     );
 
+    const containerWidth = internalApi.containerWidth$.getValue();
+
     // Go concurrently: build the expression and fetch the dataViews
     const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
       getExpressionRendererParams(currentState, {
@@ -257,6 +261,7 @@ export function loadEmbeddableData(
         updateBlockingErrors,
         forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
         getDisplayOptions: internalApi.getDisplayOptions,
+        maxDataPoints: containerWidth > 0 ? containerWidth : undefined,
       }),
       getUsedDataViews(
         currentState.attributes.references,
@@ -324,7 +329,15 @@ export function loadEmbeddableData(
     // on search context change, reload
     fetch$(api)
       .pipe(debounceTime(0))
-      .subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
+      .subscribe((fetchContext) => {
+        // For ES|QL queries, defer the first reload until the panel width is measured
+        // so that downsampling can be applied. The containerWidth$ one-shot subscription
+        // handles the initial load once the ResizeObserver fires.
+        if (api.isTextBasedLanguage() && internalApi.containerWidth$.getValue() === 0) {
+          return;
+        }
+        reload('searchContext' as ReloadReason, fetchContext);
+      }),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
@@ -351,6 +364,23 @@ export function loadEmbeddableData(
         }
       }),
   ];
+
+  // For ES|QL: trigger exactly once when the panel width is first measured,
+  // so the initial query has the correct maxDataPoints for downsampling.
+  // After this, width changes are picked up passively on the next natural
+  // reload (filter/time change) — no re-query on flyout open or window resize.
+  if (internalApi.containerWidth$.getValue() === 0) {
+    subscriptions.push(
+      internalApi.containerWidth$
+        .pipe(
+          filter((w) => w > 0 && Boolean(api.isTextBasedLanguage())),
+          take(1),
+          debounceTime(0),
+          map(() => 'containerWidth' as ReloadReason)
+        )
+        .subscribe(reload)
+    );
+  }
   // There are few key moments when errors are checked and displayed:
   // * at setup time (here) before the first expression evaluation
   // * at runtime => when the expression is running and ES/Kibana server could emit errors)

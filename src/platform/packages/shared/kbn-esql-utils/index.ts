@@ -69,7 +69,8 @@ export {
   isComputedColumn,
   getQuerySummary,
   getEsqlControls,
+  applyDownsampling,
   type ESQLStatsQueryMeta,
 } from './src';
 
-export { ENABLE_ESQL } from './constants';
+export { ENABLE_ESQL, DEFAULT_ESQL_LIMIT } from './constants';
