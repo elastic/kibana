@@ -17,7 +17,7 @@ import type { PrivateLocationAttributes } from '../../../runtime_types/private_l
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { MAX_TAGS_PER_PRIVATE_LOCATION, SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, updatePrivateLocationMonitors } from './helpers';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
@@ -28,7 +28,7 @@ const EditPrivateLocationSchema = schema.object({
       minLength: 1,
     })
   ),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_TAGS_PER_PRIVATE_LOCATION })),
 });
 
 const EditPrivateLocationQuery = schema.object({

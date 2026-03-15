@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { getExistingParamsInfo } from './delete_param';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { MAX_GLOBAL_PARAMS_PER_REQUEST, SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { DeleteParamsResponse } from '../../../../common/runtime_types';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
@@ -25,7 +25,7 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
   validation: {
     request: {
       body: schema.object({
-        ids: schema.arrayOf(schema.string()),
+        ids: schema.arrayOf(schema.string(), { maxSize: MAX_GLOBAL_PARAMS_PER_REQUEST }),
       }),
     },
   },

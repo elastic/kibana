@@ -7,6 +7,8 @@
 
 export const useLogicalAndFields = ['tags', 'locations'] as const;
 
+export const MAX_FILTER_VALUES_PER_REQUEST = 1000;
+
 export type UseLogicalAndField = (typeof useLogicalAndFields)[number];
 
 export const isLogicalAndField = (field: string): field is UseLogicalAndField => {

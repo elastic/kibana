@@ -296,3 +296,5 @@ export const DEFAULT_FIELDS: MonitorDefaults = {
     ...DEFAULT_TLS_FIELDS,
   },
 };
+
+export const MAX_MONITOR_IDS_PER_REQUEST = 500;

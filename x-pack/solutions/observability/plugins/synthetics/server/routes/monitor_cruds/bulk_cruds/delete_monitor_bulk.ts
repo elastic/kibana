@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { MAX_MONITOR_IDS_PER_REQUEST, SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 
 export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
@@ -24,6 +24,7 @@ export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
       body: schema.object({
         ids: schema.arrayOf(schema.string(), {
           minSize: 1,
+          maxSize: MAX_MONITOR_IDS_PER_REQUEST,
         }),
       }),
     },
