@@ -15,6 +15,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DEFAULT_TIME_RANGE, getStateFromAttachment } from './attachment_to_dashboard_state';
 import type { SavedObjectStatus } from './use_register_action_buttons';
 import { useRegisterActionButtons } from './use_register_action_buttons';
@@ -54,15 +55,21 @@ const dashboardCanvasContentStyles = {
 };
 
 export const DashboardCanvasContent = ({
+  isSidebar,
   attachment,
   registerActionButtons,
   updateOrigin,
+  closeCanvas,
+  conversationId,
+  openChat,
   dashboardLocator,
   searchBarComponent: SearchBar,
   checkSavedDashboardExist,
 }: AttachmentRenderProps<DashboardAttachment> & {
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: DashboardAttachmentOrigin) => Promise<unknown>;
+  closeCanvas: () => void;
+  openChat: AgentBuilderPluginStart['openChat'];
   dashboardLocator?: DashboardRendererProps['locator'];
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
@@ -121,10 +128,14 @@ export const DashboardCanvasContent = ({
     dashboardApi,
     registerActionButtons,
     updateOrigin,
+    closeCanvas,
+    conversationId,
+    openChat,
     timeRange,
     dashboardState,
     linkedSavedObjectId,
     checkSavedDashboardExist,
+    isSidebar,
   });
 
   return (

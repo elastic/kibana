@@ -10,30 +10,40 @@ import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type {
   DashboardApi,
   DashboardRendererProps,
   DashboardStart,
 } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
-import { getStateFromAttachment } from './attachment_to_dashboard_state';
+import { handlePreviewInDashboard } from './dashboard_app_flow';
+import { createDashboardUpdatesManager } from '../dashboard_updates_manager';
 
 export const registerDashboardAttachmentUiDefinition = ({
-  agentBuilder: { attachments },
   dashboardLocator,
   unifiedSearch,
   dashboardPlugin,
+  agentBuilder: {
+    events: { chat$ },
+    attachments,
+    addAttachment,
+    openChat,
+  },
 }: {
-  agentBuilder: AgentBuilderPluginStart;
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dashboardPlugin: DashboardStart;
-}): (() => void) => {
+  agentBuilder: AgentBuilderPluginStart;
+}) => {
   let dashboardApi: DashboardApi | undefined;
+
+  const updatesManager = createDashboardUpdatesManager({ chat$, addAttachment });
+
   const dashboardAppApiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
     dashboardApi = api;
+    updatesManager.setDashboardApi(api);
   });
 
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
@@ -42,6 +52,12 @@ export const registerDashboardAttachmentUiDefinition = ({
     const result = await findDashboardsService.findById(dashboardId);
     return result.status === 'success';
   };
+
+  const registerAttachmentWithManager = (attachment: DashboardAttachment) => {
+    updatesManager.setCurrentAttachmentId(attachment.id);
+    updatesManager.setCurrentAttachmentOrigin(attachment.origin);
+  };
+
   attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, {
     getLabel: (attachment) => {
       return (
@@ -52,17 +68,22 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    renderCanvasContent: (props, callbacks) => (
-      <DashboardCanvasContent
-        {...props}
-        registerActionButtons={callbacks.registerActionButtons}
-        updateOrigin={callbacks.updateOrigin}
-        dashboardLocator={dashboardLocator}
-        searchBarComponent={unifiedSearch.ui.SearchBar}
-        checkSavedDashboardExist={checkSavedDashboardExist}
-      />
-    ),
+    renderCanvasContent: (props, callbacks) => {
+      return (
+        <DashboardCanvasContent
+          {...props}
+          registerActionButtons={callbacks.registerActionButtons}
+          updateOrigin={callbacks.updateOrigin}
+          closeCanvas={callbacks.closeCanvas}
+          openChat={openChat}
+          dashboardLocator={dashboardLocator}
+          searchBarComponent={unifiedSearch.ui.SearchBar}
+          checkSavedDashboardExist={checkSavedDashboardExist}
+        />
+      );
+    },
     getActionButtons: ({ attachment, openCanvas, isCanvas }) => {
+      registerAttachmentWithManager(attachment);
       if (isCanvas) {
         return [];
       }
@@ -78,9 +99,11 @@ export const registerDashboardAttachmentUiDefinition = ({
               openCanvas?.();
               return;
             }
-
-            dashboardApi.setViewMode('edit');
-            dashboardApi.setState(getStateFromAttachment(attachment));
+            handlePreviewInDashboard({
+              attachment,
+              dashboardApi,
+              checkSavedDashboardExist,
+            });
           },
         },
       ];
@@ -89,6 +112,7 @@ export const registerDashboardAttachmentUiDefinition = ({
 
   return () => {
     dashboardAppApiSubscription.unsubscribe();
+    updatesManager.stop();
     dashboardApi = undefined;
   };
 };

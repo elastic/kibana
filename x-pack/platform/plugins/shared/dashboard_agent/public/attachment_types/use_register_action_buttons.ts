@@ -11,6 +11,7 @@ import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachmentOrigin } from '@kbn/dashboard-agent-common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useLatest from 'react-use/lib/useLatest';
 
@@ -23,24 +24,33 @@ interface UseRegisterActionButtonsParams {
   dashboardApi: DashboardApi | undefined;
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: DashboardAttachmentOrigin) => Promise<unknown>;
+  closeCanvas: () => void;
+  conversationId: string | undefined;
+  openChat: AgentBuilderPluginStart['openChat'];
   timeRange: { from: string; to: string };
   dashboardState: Pick<DashboardState, 'title' | 'description' | 'panels' | 'time_range'>;
   linkedSavedObjectId: string | undefined;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  isSidebar: boolean;
 }
 
 export const useRegisterActionButtons = ({
   dashboardApi,
   registerActionButtons,
   updateOrigin,
+  closeCanvas,
+  conversationId,
+  openChat,
   timeRange,
   dashboardState,
   linkedSavedObjectId,
   checkSavedDashboardExist,
+  isSidebar,
 }: UseRegisterActionButtonsParams) => {
   const timeRangeRef = useLatest(timeRange);
   const linkedSavedObjectIdRef = useLatest(linkedSavedObjectId);
   const dashboardStateRef = useLatest(dashboardState);
+  const conversationIdRef = useLatest(conversationId);
 
   useEffect(() => {
     if (!dashboardApi) {
@@ -63,12 +73,17 @@ export const useRegisterActionButtons = ({
             (await checkSavedDashboardExist(linkedSavedObjectIdRef.current))
               ? linkedSavedObjectIdRef.current
               : undefined;
+
           await locator.navigate({
             ...dashboardStateRef.current,
             dashboardId: existingDashboardId,
             time_range: timeRangeRef.current,
             viewMode: 'edit',
           });
+          closeCanvas();
+          if (!isSidebar) {
+            openChat({ conversationId: conversationIdRef.current });
+          }
         },
       });
     }
@@ -101,8 +116,12 @@ export const useRegisterActionButtons = ({
     registerActionButtons,
     updateOrigin,
     checkSavedDashboardExist,
+    closeCanvas,
+    openChat,
     timeRangeRef,
     linkedSavedObjectIdRef,
     dashboardStateRef,
+    conversationIdRef,
+    isSidebar,
   ]);
 };
