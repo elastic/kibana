@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const fetchMock = jest.fn();
-
-jest.doMock('node-fetch', () => fetchMock);
+export const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(jest.fn());
 
 export const getNextAttemptDateMock = jest.fn();
 

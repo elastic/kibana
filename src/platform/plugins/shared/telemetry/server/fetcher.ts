@@ -24,7 +24,6 @@ import {
   EMPTY,
   retry,
 } from 'rxjs';
-import fetch from 'node-fetch';
 import type { TelemetryCollectionManagerPluginStart } from '@kbn/telemetry-collection-manager-plugin/server';
 import {
   type PluginInitializerContext,

@@ -15,7 +15,6 @@ import type {
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import { firstValueFrom, type Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import fetch from 'node-fetch';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 import type { TelemetryConfigType } from '../config';
 import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
