@@ -40,7 +40,7 @@ exports[`RevertToBasic component should display when license is about to expire 
                   subscription features
                   <span
                     class="emotion-EuiExternalLinkIcon"
-                    data-euiicon-type="popout"
+                    data-euiicon-type="external"
                     role="presentation"
                   />
                   <span
@@ -115,7 +115,7 @@ exports[`RevertToBasic component should display when license is expired 1`] = `
                   subscription features
                   <span
                     class="emotion-EuiExternalLinkIcon"
-                    data-euiicon-type="popout"
+                    data-euiicon-type="external"
                     role="presentation"
                   />
                   <span
@@ -190,7 +190,7 @@ exports[`RevertToBasic component should display when trial is active 1`] = `
                   subscription features
                   <span
                     class="emotion-EuiExternalLinkIcon"
-                    data-euiicon-type="popout"
+                    data-euiicon-type="external"
                     role="presentation"
                   />
                   <span
