@@ -47,6 +47,8 @@ export const ListNotificationPoliciesPage = () => {
   const [search, setSearch] = useState('');
   const [destinationType, setDestinationType] = useState('');
   const [enabled, setEnabled] = useState('');
+  const [sortField, setSortField] = useState<'name' | 'updatedAt'>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [policyToDelete, setPolicyToDelete] = useState<NotificationPolicyResponse | null>(null);
 
   const { navigateToUrl } = useService(CoreStart('application'));
@@ -102,6 +104,8 @@ export const ListNotificationPoliciesPage = () => {
     search: search || undefined,
     destinationType: destinationType || undefined,
     enabled: enabled === 'true' ? true : enabled === 'false' ? false : undefined,
+    sortField,
+    sortOrder: sortDirection,
   });
 
   const handleSearchChange = (value: string) => {
@@ -124,9 +128,14 @@ export const ListNotificationPoliciesPage = () => {
 
   const onTableChange = ({
     page: tablePage,
+    sort,
   }: CriteriaWithPagination<NotificationPolicyResponse>) => {
     setPage(tablePage.index);
     setPerPage(tablePage.size);
+    if (sort) {
+      setSortField(sort.field as 'name' | 'updatedAt');
+      setSortDirection(sort.direction);
+    }
   };
 
   const pagination = {
@@ -145,6 +154,7 @@ export const ListNotificationPoliciesPage = () => {
           defaultMessage="Name"
         />
       ),
+      sortable: true,
     },
 
     {
@@ -175,6 +185,7 @@ export const ListNotificationPoliciesPage = () => {
           defaultMessage="State"
         />
       ),
+      width: '120px',
       render: (_enabled: boolean, policy: NotificationPolicyResponse) => (
         <NotificationPolicyStateBadge
           policy={policy}
@@ -195,6 +206,7 @@ export const ListNotificationPoliciesPage = () => {
           defaultMessage="Notify"
         />
       ),
+      width: '120px',
       render: (_snoozedUntil: string | undefined, policy: NotificationPolicyResponse) => {
         if (!policy.enabled) {
           return null;
@@ -220,6 +232,7 @@ export const ListNotificationPoliciesPage = () => {
           defaultMessage="Last update"
         />
       ),
+      sortable: true,
       render: (updatedAt: string) =>
         new Date(updatedAt).toLocaleString(undefined, {
           month: 'short',
@@ -233,6 +246,7 @@ export const ListNotificationPoliciesPage = () => {
       name: i18n.translate('xpack.alertingV2.notificationPoliciesList.column.actions', {
         defaultMessage: 'Actions',
       }),
+      width: '120px',
       render: (policy: NotificationPolicyResponse) => (
         <NotificationPolicyActionsCell
           policy={policy}
@@ -308,6 +322,12 @@ export const ListNotificationPoliciesPage = () => {
           responsiveBreakpoint={false}
           loading={isLoading}
           pagination={pagination}
+          sorting={{
+            sort: {
+              field: sortField,
+              direction: sortDirection,
+            },
+          }}
           onChange={onTableChange}
           tableCaption={i18n.translate('xpack.alertingV2.notificationPoliciesList.tableCaption', {
             defaultMessage: 'Notification Policies',

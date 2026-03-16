@@ -18,6 +18,8 @@ interface UseFetchNotificationPoliciesParams {
   search?: string;
   destinationType?: string;
   enabled?: boolean;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const useFetchNotificationPolicies = ({
@@ -26,12 +28,22 @@ export const useFetchNotificationPolicies = ({
   search,
   destinationType,
   enabled,
+  sortField,
+  sortOrder,
 }: UseFetchNotificationPoliciesParams) => {
   const notificationPoliciesApi = useService(NotificationPoliciesApi);
   const { toasts } = useService(CoreStart('notifications'));
 
   return useQuery<FindNotificationPoliciesResponse, Error>({
-    queryKey: notificationPolicyKeys.list({ page, perPage, search, destinationType, enabled }),
+    queryKey: notificationPolicyKeys.list({
+      page,
+      perPage,
+      search,
+      destinationType,
+      enabled,
+      sortField,
+      sortOrder,
+    }),
     queryFn: () =>
       notificationPoliciesApi.listNotificationPolicies({
         page,
@@ -39,6 +51,8 @@ export const useFetchNotificationPolicies = ({
         search,
         destinationType,
         enabled,
+        sortField,
+        sortOrder,
       }),
     refetchOnWindowFocus: false,
     onError: (error: Error) => {

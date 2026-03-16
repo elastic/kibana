@@ -36,7 +36,7 @@ export interface BulkActionNotificationPoliciesResponse {
   total: number;
   errors: Array<{ id: string; message: string }>;
 }
-export type FindNotificationPoliciesSortField = 'name' | 'createdAt' | 'createdBy';
+export type FindNotificationPoliciesSortField = 'name' | 'createdAt' | 'createdBy' | 'updatedAt';
 
 export interface FindNotificationPoliciesParams {
   page?: number;

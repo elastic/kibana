@@ -331,6 +331,7 @@ export class NotificationPolicyClient {
       name: 'name.keyword',
       createdAt: 'createdAt',
       createdBy: 'createdBy',
+      updatedAt: 'updatedAt',
     };
 
     return sortFieldMap[sortField];

@@ -19,6 +19,7 @@ const sortFieldSchema = schema.oneOf([
   schema.literal('name'),
   schema.literal('createdAt'),
   schema.literal('createdBy'),
+  schema.literal('updatedAt'),
 ]);
 
 const listNotificationPoliciesQuerySchema = schema.object({

@@ -38,6 +38,8 @@ export class NotificationPoliciesApi {
     search?: string;
     destinationType?: string;
     enabled?: boolean;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
   }) {
     return this.http.get<FindNotificationPoliciesResponse>(
       INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
@@ -48,6 +50,8 @@ export class NotificationPoliciesApi {
           search: params.search || undefined,
           destinationType: params.destinationType || undefined,
           enabled: params.enabled,
+          sortField: params.sortField,
+          sortOrder: params.sortOrder,
         },
       }
     );
