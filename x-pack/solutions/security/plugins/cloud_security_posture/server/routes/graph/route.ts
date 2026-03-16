@@ -26,7 +26,7 @@ export const defineGraphRoute = (router: CspRouter) =>
       },
       security: {
         authz: {
-          requiredPrivileges: ['cloud-security-posture-read'],
+          requiredPrivileges: ['securitySolution'],
         },
       },
     })
