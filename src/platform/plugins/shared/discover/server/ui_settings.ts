@@ -29,12 +29,15 @@ import {
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
 } from '@kbn/discover-utils';
-import { MAX_SAVED_SEARCH_COLUMNS } from '@kbn/saved-search-plugin/common';
+import {
+  MAX_SAVED_SEARCH_COLUMNS,
+  MAX_SAVED_SEARCH_COLUMNS_SERVERLESS,
+} from '@kbn/saved-search-plugin/common';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
 export const getUiSettings: (
   docLinks: DocLinksServiceSetup,
-  enableValidations: boolean
+  enableValidations: boolean // More strict validation used for serverless
 ) => Record<string, UiSettingsParams> = (
   docLinks: DocLinksServiceSetup,
   enableValidations: boolean
@@ -51,7 +54,7 @@ export const getUiSettings: (
     category: ['discover'],
     schema: enableValidations
       ? schema.arrayOf(schema.string(), { maxSize: MAX_SAVED_SEARCH_COLUMNS })
-      : schema.arrayOf(schema.string()),
+      : schema.arrayOf(schema.string(), { maxSize: MAX_SAVED_SEARCH_COLUMNS_SERVERLESS }),
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
     name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {
