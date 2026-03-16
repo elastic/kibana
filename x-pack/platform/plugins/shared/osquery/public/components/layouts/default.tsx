@@ -6,9 +6,10 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
+
 export const containerCss = ({ euiTheme }: UseEuiTheme) => ({
   minHeight: `calc(100vh - ${parseFloat(euiTheme.size.xxxl) * 2}px)`,
-  background: euiTheme.colors.body,
+  background: euiTheme.colors.emptyShade,
   display: 'flex',
   flexDirection: 'column' as const,
 });
