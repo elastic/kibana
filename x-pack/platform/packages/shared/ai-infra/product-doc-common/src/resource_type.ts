@@ -10,9 +10,10 @@
  * - `product_doc`: Elastic product documentation (Kibana, Elasticsearch, etc.)
  * - `security_labs`: Elastic Security Labs content
  */
-export type ResourceType = 'product_doc' | 'security_labs';
+export type ResourceType = 'product_doc' | 'security_labs' | 'openapi_spec';
 
 export const ResourceTypes = {
   productDoc: 'product_doc',
   securityLabs: 'security_labs',
+  openapiSpec: 'openapi_spec',
 } as const;

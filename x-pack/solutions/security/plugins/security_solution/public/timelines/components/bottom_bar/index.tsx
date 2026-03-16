@@ -16,6 +16,7 @@ import { timelineActions } from '../../store';
 import { TimelineSaveStatus } from '../save_status';
 import { AddToFavoritesButton } from '../add_to_favorites';
 import TimelineQueryTabEventsCount from '../timeline/tabs/query/events_count';
+import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
 
 interface TimelineBottomBarProps {
   /**
@@ -36,6 +37,7 @@ interface TimelineBottomBarProps {
 export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(
   ({ show, timelineId, openToggleRef }) => {
     const dispatch = useDispatch();
+    const hasFullScreenContent = useHasFullScreenContent();
 
     const openTimeline = useCallback(
       () => dispatch(timelineActions.showTimeline({ id: timelineId, show: true })),
@@ -45,34 +47,36 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(
     const title = useSelector((state: State) => selectTitleByTimelineById(state, timelineId));
 
     return (
-      <EuiPanel borderRadius="none" hasShadow={false} data-test-subj="timeline-bottom-bar">
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <AddTimelineButton timelineId={timelineId} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AddToFavoritesButton timelineId={timelineId} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              aria-label={i18n.OPEN_TIMELINE_BUTTON(title)}
-              onClick={openTimeline}
-              data-test-subj="timeline-bottom-bar-title-button"
-              ref={openToggleRef}
-            >
-              {title}
-            </EuiLink>
-          </EuiFlexItem>
-          {!show && ( // We only want to show this when the timeline modal is closed
-            <EuiFlexItem grow={false} data-test-subj="timeline-event-count-badge">
-              <TimelineQueryTabEventsCount timelineId={timelineId} />
+      !hasFullScreenContent && (
+        <EuiPanel borderRadius="none" hasShadow={false} data-test-subj="timeline-bottom-bar">
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <AddTimelineButton timelineId={timelineId} />
             </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <TimelineSaveStatus timelineId={timelineId} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+            <EuiFlexItem grow={false}>
+              <AddToFavoritesButton timelineId={timelineId} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                aria-label={i18n.OPEN_TIMELINE_BUTTON(title)}
+                onClick={openTimeline}
+                data-test-subj="timeline-bottom-bar-title-button"
+                ref={openToggleRef}
+              >
+                {title}
+              </EuiLink>
+            </EuiFlexItem>
+            {!show && ( // We only want to show this when the timeline modal is closed
+              <EuiFlexItem grow={false} data-test-subj="timeline-event-count-badge">
+                <TimelineQueryTabEventsCount timelineId={timelineId} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <TimelineSaveStatus timelineId={timelineId} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      )
     );
   }
 );

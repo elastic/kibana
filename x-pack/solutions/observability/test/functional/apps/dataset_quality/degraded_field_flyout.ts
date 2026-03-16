@@ -58,7 +58,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const apmAppDatasetName = 'apm.app.tug';
   const apmAppDataStreamName = `${type}-${apmAppDatasetName}-${defaultNamespace}`;
 
-  describe('Degraded fields flyout', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/255900
+  describe.skip('Degraded fields flyout', function () {
     // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
     // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
     // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
@@ -942,7 +943,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           expect(linkURL?.includes('mapping')).to.be(true);
         });
 
-        it('should display increase field limit as a possible mitigation for special packages like apm app', async () => {
+        it.skip('should display increase field limit as a possible mitigation for special packages like apm app', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: apmAppDataStreamName,
             expandedDegradedField: 'cloud.project',

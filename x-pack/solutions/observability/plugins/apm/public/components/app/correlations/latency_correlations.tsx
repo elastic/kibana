@@ -298,7 +298,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           h.fieldValue === selectedSignificantTerm.fieldValue
       );
     } else if (pinnedSignificantTerm) {
-      return histogramTerms.find(
+      return histogramTerms?.find(
         (h) =>
           h.fieldName === pinnedSignificantTerm.fieldName &&
           h.fieldValue === pinnedSignificantTerm.fieldValue
@@ -356,6 +356,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               transactionType,
               sampleRangeFrom,
               sampleRangeTo,
+              sortDirection: 'DESC',
             }}
           />
         </EuiFlexItem>

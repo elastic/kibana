@@ -8,7 +8,7 @@
 import type { BoundInferenceClient, Prompt, ToolMessage } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from './execute_as_reasoning_agent';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { END_INTERNAL_REASONING_MARKER } from './markers';
 
 function makePrompt() {
@@ -335,5 +335,109 @@ describe('executeAsReasoningAgent', () => {
     expect(fetchDataToolIds).toEqual(['f1', 'f2']);
 
     expect(reasonToolCalls.length).toEqual(0);
+  });
+
+  test('when maxDurationMs is exceeded, agent completes gracefully with finalToolChoice', async () => {
+    const prompt = makePrompt();
+    const maxDurationMs = 500;
+    const inferenceClient = {
+      prompt: jest
+        .fn()
+        .mockResolvedValueOnce({
+          content: 'call tool',
+          toolCalls: [
+            { type: 'function', function: { name: 'fetch_data', arguments: {} }, toolCallId: 'x' },
+          ],
+          tokens: 1,
+        })
+        .mockResolvedValueOnce({
+          content: 'done',
+          toolCalls: [
+            {
+              type: 'function',
+              function: { name: 'complete', arguments: {} },
+              toolCallId: '1',
+            },
+          ],
+          tokens: 1,
+        }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    const dateNowSpy = jest
+      .spyOn(Date, 'now')
+      .mockReturnValueOnce(0)
+      .mockReturnValueOnce(100)
+      .mockReturnValue(600);
+
+    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+
+    const result = await executeAsReasoningAgent({
+      inferenceClient,
+      prompt,
+      maxDurationMs,
+      maxSteps: 2,
+      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      input: { foo: '' },
+      finalToolChoice: { type: 'function', function: 'complete' },
+    });
+
+    dateNowSpy.mockRestore();
+
+    expect(inferenceClient.prompt).toHaveBeenCalledTimes(2);
+    const secondCall = inferenceClient.prompt.mock.calls[1][0];
+    expect(secondCall.toolChoice).toEqual({ type: 'function', function: 'complete' });
+    expect(result.toolCalls).toHaveLength(1);
+    expect(result.toolCalls?.[0].function.name).toBe('complete');
+  });
+
+  test('when maxDurationMs is omitted, duration budget is not applied', async () => {
+    const prompt = makePrompt();
+    const inferenceClient = {
+      prompt: jest
+        .fn()
+        .mockResolvedValueOnce({
+          content: 'call tool',
+          toolCalls: [
+            { type: 'function', function: { name: 'fetch_data', arguments: {} }, toolCallId: 'x' },
+          ],
+          tokens: 1,
+        })
+        .mockResolvedValueOnce({
+          content: 'done',
+          toolCalls: [
+            {
+              type: 'function',
+              function: { name: 'complete', arguments: {} },
+              toolCallId: '1',
+            },
+          ],
+          tokens: 1,
+        }),
+    } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
+
+    // Elapsed would exceed 500ms on second iteration, but we don't set maxDurationMs
+    const dateNowSpy = jest
+      .spyOn(Date, 'now')
+      .mockReturnValueOnce(0)
+      .mockReturnValueOnce(100)
+      .mockReturnValue(600);
+
+    const fetchData = jest.fn().mockResolvedValue({ response: { result: 'ok' } });
+
+    await executeAsReasoningAgent({
+      inferenceClient,
+      prompt,
+      maxSteps: 2,
+      toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
+      input: { foo: '' },
+      finalToolChoice: { type: 'function', function: 'complete' },
+    });
+
+    dateNowSpy.mockRestore();
+
+    expect(inferenceClient.prompt).toHaveBeenCalledTimes(2);
+    const secondCall = inferenceClient.prompt.mock.calls[1][0];
+    // Without maxDurationMs we are not forced to complete, so toolChoice is auto (continuation)
+    expect(secondCall.toolChoice).toEqual('auto');
   });
 });
