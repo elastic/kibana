@@ -769,9 +769,11 @@ export class CaseUserActionService {
       const hasBeenDeleted = bucket.reverse?.hasDelete?.doc_count > 0;
       if (hasBeenDeleted) {
         const commentTypeBuckets = bucket.reverse?.updates?.byCommentType?.buckets ?? [];
-        const userCommentUpdates = commentTypeBuckets
-          .filter((b: { key: string }) => isComment(b.key))
-          .reduce((sum: number, b: { doc_count: number }) => sum + b.doc_count, 0);
+        const userCommentUpdates = commentTypeBuckets.reduce(
+          (sum: number, b: { key: string; doc_count: number }) =>
+            isComment(b.key) ? sum + b.doc_count : sum,
+          0
+        );
         result.total_hidden_comment_updates += userCommentUpdates;
       }
     }

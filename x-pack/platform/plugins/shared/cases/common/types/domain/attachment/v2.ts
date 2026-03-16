@@ -89,6 +89,7 @@ export const UnifiedAttachmentRt = rt.intersection([
 const UnifiedReferenceAttachmentPayloadPartialRt = rt.exact(
   rt.partial({
     type: rt.string,
+    owner: rt.string,
     attachmentId: rt.string,
     data: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
     metadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
@@ -97,6 +98,7 @@ const UnifiedReferenceAttachmentPayloadPartialRt = rt.exact(
 const UnifiedValueAttachmentPayloadPartialRt = rt.exact(
   rt.partial({
     type: rt.string,
+    owner: rt.string,
     data: rt.record(rt.string, jsonValueRt),
     metadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
   })
