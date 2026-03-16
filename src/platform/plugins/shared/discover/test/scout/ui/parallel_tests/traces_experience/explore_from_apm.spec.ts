@@ -33,7 +33,8 @@ async function expectTracesExperienceEnabled(
   await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
 }
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/257977
+spaceTest.describe.skip(
   'Traces in Discover - Explore from APM',
   {
     tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
