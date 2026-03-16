@@ -31,7 +31,7 @@ import { deletePackagePolicyRoute } from './monitor_cruds/delete_integration';
 import { createJourneyScreenshotRoute } from './pings/journey_screenshots';
 import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_blocks';
 import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
-import { createJourneyFailedStepsRoute, createJourneyRoute } from './pings/journeys';
+import { createJourneyRoute } from './pings/journeys';
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
@@ -91,7 +91,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createJourneyRoute,
   createLastSuccessfulCheckRoute,
   createJourneyScreenshotBlocksRoute,
-  createJourneyFailedStepsRoute,
   createNetworkEventsRoute,
   createJourneyScreenshotRoute,
   deletePackagePolicyRoute,
