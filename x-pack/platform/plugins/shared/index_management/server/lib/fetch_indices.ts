@@ -47,6 +47,20 @@ async function fetchIndicesCall(
   }
 
   const indicesNames = Object.keys(indices);
+  // System indices are excluded from the ES|QL doc count query because
+  // they may require elevated privileges the current user doesn't have.
+  const nonSystemIndices = indicesNames.filter((name) => !name.startsWith('.'));
+
+  const safeDocCount = async (): Promise<Record<string, number>> => {
+    if (nonSystemIndices.length === 0) {
+      return {};
+    }
+    try {
+      return await fetchDocCount(client.asCurrentUser, nonSystemIndices);
+    } catch {
+      return {};
+    }
+  };
 
   if (config.isIndexStatsEnabled) {
     const [{ indices: indicesStats }, docCounts] = await Promise.all([
@@ -56,7 +70,7 @@ async function fetchIndicesCall(
         forbid_closed_indices: false,
         metric: ['docs', 'store'],
       }),
-      fetchDocCount(client.asCurrentUser, indicesNames),
+      safeDocCount(),
     ]);
 
     return indicesNames.map((indexName: string) => {
@@ -71,7 +85,6 @@ async function fetchIndicesCall(
         hidden: indexData.settings?.index?.hidden === 'true',
         data_stream: indexData.data_stream,
         mode: indexData.settings?.index?.mode,
-        documents: docCounts[indexName] ?? 0,
       };
 
       if (indicesStats) {
@@ -82,13 +95,17 @@ async function fetchIndicesCall(
           health: indexStats?.health,
           status: indexStats?.status,
           uuid: indexStats?.uuid,
+          documents: docCounts[indexName] ?? indexStats?.primaries?.docs?.count ?? 0,
           documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
           size: indexStats?.total?.store?.size_in_bytes ?? 0,
           primary_size: indexStats?.primaries?.store?.size_in_bytes ?? 0,
         };
       }
 
-      return baseResponse;
+      return {
+        ...baseResponse,
+        documents: docCounts[indexName] ?? 0,
+      };
     });
   }
 
@@ -101,7 +118,7 @@ async function fetchIndicesCall(
         method: 'GET',
         path: `/_metering/stats/` + indexNamesString,
       }),
-      fetchDocCount(client.asCurrentUser, indicesNames),
+      safeDocCount(),
     ]);
 
     return indicesNames.map((indexName: string) => {
@@ -114,7 +131,6 @@ async function fetchIndicesCall(
         hidden: indexData.settings?.index?.hidden === 'true',
         data_stream: indexData.data_stream,
         mode: indexData.settings?.index?.mode,
-        documents: docCounts[indexName] ?? 0,
       };
 
       if (indicesStats) {
@@ -122,11 +138,15 @@ async function fetchIndicesCall(
 
         return {
           ...baseResponse,
+          documents: docCounts[indexName] ?? indexStats?.num_docs ?? 0,
           size: indexStats?.size_in_bytes ?? 0,
         };
       }
 
-      return baseResponse;
+      return {
+        ...baseResponse,
+        documents: docCounts[indexName] ?? 0,
+      };
     });
   }
 

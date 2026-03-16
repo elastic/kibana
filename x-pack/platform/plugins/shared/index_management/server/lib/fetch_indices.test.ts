@@ -209,6 +209,63 @@ describe('[Index management API Routes] fetch indices lib function', () => {
         ],
       });
     });
+
+    test('system index falls back to stats document count', async () => {
+      getIndices.mockResolvedValue({
+        '.internal_index': createTestIndexState(),
+      });
+      getIndicesStats.mockResolvedValue({
+        indices: {
+          '.internal_index': createTestIndexStats({
+            uuid: '.internal_index',
+            primaries: {
+              docs: { count: 7, deleted: 1, total_size_in_bytes: 70 },
+              store: { size_in_bytes: 100, reserved_in_bytes: 0 },
+            },
+          }),
+        },
+      });
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: [
+          createTestIndexResponse({
+            name: '.internal_index',
+            uuid: '.internal_index',
+            documents: 7,
+            documents_deleted: 1,
+          }),
+        ],
+      });
+    });
+
+    test('falls back to stats document count when ES|QL fails', async () => {
+      getIndices.mockResolvedValue({
+        regular_index: createTestIndexState(),
+      });
+      getIndicesStats.mockResolvedValue({
+        indices: {
+          regular_index: createTestIndexStats({
+            uuid: 'regular_index',
+            primaries: {
+              docs: { count: 9, deleted: 2, total_size_in_bytes: 90 },
+              store: { size_in_bytes: 100, reserved_in_bytes: 0 },
+            },
+          }),
+        },
+      });
+      getEsqlQuery.mockRejectedValue(new Error('ES|QL unavailable'));
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: [
+          createTestIndexResponse({
+            name: 'regular_index',
+            uuid: 'regular_index',
+            documents: 9,
+            documents_deleted: 2,
+          }),
+        ],
+      });
+    });
   });
 
   describe('stateless', () => {
@@ -248,6 +305,30 @@ describe('[Index management API Routes] fetch indices lib function', () => {
             hidden: false,
             data_stream: undefined,
             documents: 42,
+            size: 1000,
+          },
+        ],
+      });
+    });
+
+    test('falls back to metering document count when ES|QL fails', async () => {
+      getIndices.mockResolvedValue({
+        regular_index: createTestIndexState(),
+      });
+      getMeteringStats.mockResolvedValue({
+        indices: [{ name: 'regular_index', num_docs: 100, size_in_bytes: 1000 }],
+      });
+      getEsqlQuery.mockRejectedValue(new Error('ES|QL unavailable'));
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: [
+          {
+            name: 'regular_index',
+            isFrozen: false,
+            aliases: 'none',
+            hidden: false,
+            data_stream: undefined,
+            documents: 100,
             size: 1000,
           },
         ],
