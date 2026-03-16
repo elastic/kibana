@@ -106,6 +106,13 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
           step['connector-id']
         );
 
+      if (!this.connectorExecutor) {
+        throw new ExecutionError({
+          type: 'ConnectorExecutionError',
+          message: 'Connector executor is not set',
+        });
+      }
+
       let output: ActionTypeExecutorResult<unknown>;
       if (connectorIdRendered) {
         // Use regular connector with saved object

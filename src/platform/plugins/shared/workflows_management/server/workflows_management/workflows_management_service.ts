@@ -108,6 +108,7 @@ export class WorkflowsService {
   private getActionsClientWithRequest: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<ActionsClient>>;
+  private readonly initPromise: Promise<void>;
 
   constructor(
     logger: Logger,
@@ -120,7 +121,7 @@ export class WorkflowsService {
     this.getActionsClientWithRequest = (request: KibanaRequest) =>
       getPluginsStart().then((plugins) => plugins.actions.getActionsClientWithRequest(request));
 
-    void this.initialize(getCoreStart, getPluginsStart);
+    this.initPromise = this.initialize(getCoreStart, getPluginsStart);
   }
 
   public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
@@ -129,6 +130,10 @@ export class WorkflowsService {
 
   public setSecurityService(security: SecurityServiceStart) {
     this.security = security;
+  }
+
+  private async ensureInitialized(): Promise<void> {
+    await this.initPromise;
   }
 
   private async initialize(
@@ -152,9 +157,7 @@ export class WorkflowsService {
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     try {
       const response = await this.workflowStorage.getClient().search({
@@ -274,9 +277,7 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
@@ -321,9 +322,7 @@ export class WorkflowsService {
     created: WorkflowDetailDto[];
     failed: Array<{ index: number; error: string }>;
   }> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
@@ -580,9 +579,7 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     try {
       const { source: existingSource } = await this.getExistingWorkflowDocument(id, spaceId);
@@ -639,9 +636,7 @@ export class WorkflowsService {
   }
 
   public async deleteWorkflows(ids: string[], spaceId: string): Promise<DeleteWorkflowsResponse> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const now = new Date();
     const failures: Array<{ id: string; error: string }> = [];
@@ -778,9 +773,7 @@ export class WorkflowsService {
   }
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const { size = 100, page = 1, enabled, createdBy, tags, query } = params;
     const from = (page - 1) * size;
@@ -930,9 +923,7 @@ export class WorkflowsService {
   }
 
   public async getWorkflowStats(spaceId: string): Promise<WorkflowStatsDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const statsResponse = await this.workflowStorage.getClient().search({
       size: 0,
@@ -1031,9 +1022,7 @@ export class WorkflowsService {
   }
 
   public async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const aggs: Record<string, any> = {};
