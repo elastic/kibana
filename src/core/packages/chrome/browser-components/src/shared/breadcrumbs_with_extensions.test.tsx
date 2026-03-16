@@ -38,19 +38,17 @@ describe('BreadcrumbsWithExtensionsWrapper', () => {
     expect(screen.getByTestId('react-extension')).toBeInTheDocument();
   });
 
-  it('renders a MountPoint-based extension alongside children', () => {
-    const mount = (el: HTMLDivElement) => {
-      el.setAttribute('data-test-subj', 'mount-extension');
-      return () => {};
-    };
-    const extensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([{ mount }]);
+  it('renders a content extension alongside children', () => {
+    const extensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([
+      { content: <span data-test-subj="content-extension">Badge</span> },
+    ]);
     render(
       <BreadcrumbsWithExtensionsWrapper breadcrumbsAppendExtensions$={extensions$}>
         <span data-test-subj="breadcrumb-child">Home</span>
       </BreadcrumbsWithExtensionsWrapper>
     );
     expect(screen.getByTestId('breadcrumb-child')).toBeInTheDocument();
-    expect(screen.getByTestId('mount-extension')).toBeInTheDocument();
+    expect(screen.getByTestId('content-extension')).toBeInTheDocument();
   });
 
   it('renders updated extensions when the observable emits new values', () => {

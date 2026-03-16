@@ -5,40 +5,36 @@
  * 2.0.
  */
 
-import type { ActionResult as ActionConnector } from '@kbn/actions-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
-import {
-  createInferenceRequestError,
-  connectorToInference,
-  type InferenceConnector,
-} from '@kbn/inference-common';
+import type { KibanaRequest, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { createInferenceRequestError, type InferenceConnector } from '@kbn/inference-common';
+import { getConnectorList } from './get_connector_list';
 
 /**
- * Retrieves a connector given the provided `connectorId` and asserts it's an inference connector
+ * Retrieves a connector or inference endpoint given the provided `connectorId`.
  */
 export const getConnectorById = async ({
   connectorId,
   actions,
   request,
+  esClient,
+  logger,
 }: {
   actions: ActionsPluginStart;
   request: KibanaRequest;
   connectorId: string;
+  esClient: ElasticsearchClient;
+  logger: Logger;
 }): Promise<InferenceConnector> => {
-  let connector: ActionConnector;
-  try {
-    const actionsClient = await actions.getActionsClientWithRequest(request);
-    connector = await actionsClient.get({
-      id: connectorId,
-      throwIfSystemAction: true,
-    });
-  } catch (error) {
+  const connectors = await getConnectorList({ actions, request, esClient, logger });
+  const match = connectors.find((c) => c.connectorId === connectorId);
+
+  if (!match) {
     throw createInferenceRequestError(
-      `No connector found for id '${connectorId}'\n${error.message}`,
-      400
+      `No connector or inference endpoint found for ID '${connectorId}'`,
+      404
     );
   }
 
-  return connectorToInference(connector);
+  return match;
 };

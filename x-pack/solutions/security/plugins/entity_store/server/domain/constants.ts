@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EngineStatus } from './definitions/saved_objects';
+import type { EngineStatus } from './saved_objects';
 import type { EntityStoreStatus } from './types';
 
 export const ENTITY_LATEST = 'latest' as const;

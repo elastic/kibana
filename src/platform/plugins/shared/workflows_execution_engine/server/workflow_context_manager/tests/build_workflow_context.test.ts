@@ -502,6 +502,34 @@ describe('buildWorkflowContext', () => {
       expect(context.event?.params).toEqual({ threshold: 10 });
     });
 
+    it('should pass through event with type, timestamp, and source for scheduled trigger executions', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+        },
+        context: {
+          event: {
+            type: 'scheduled',
+            timestamp: '2025-01-15T10:00:00.000Z',
+            source: 'task-manager',
+            spaceId: 'default',
+          },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.event).toBeDefined();
+      expect(context.event).toMatchObject({
+        type: 'scheduled',
+        timestamp: '2025-01-15T10:00:00.000Z',
+        source: 'task-manager',
+        spaceId: 'default',
+      });
+    });
+
     it('should handle undefined event context gracefully', () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,

@@ -23,7 +23,13 @@ import {
   triggerSigEventsFeatureExtraction,
   waitForSigEventsFeatureExtraction,
 } from './lib/significant_events_workflow';
-import { deployOtelDemo, patchScenario, teardownOtelDemo, waitForPodsReady } from './lib/otel_demo';
+import {
+  ensureMinikube,
+  deployOtelDemo,
+  patchScenario,
+  teardownOtelDemo,
+  waitForPodsReady,
+} from './lib/otel_demo';
 
 run(
   async ({ log, flags, addCleanupTask }) => {
@@ -77,6 +83,10 @@ run(
       }
       return;
     }
+
+    log.info('');
+    log.info('Checking minikube...');
+    await ensureMinikube(log);
 
     log.info('');
     log.info('Registering GCS snapshot repository...');

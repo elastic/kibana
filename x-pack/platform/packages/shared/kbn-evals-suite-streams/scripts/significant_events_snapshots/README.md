@@ -2,9 +2,9 @@
 
 This folder contains a small CLI + helper modules for producing **repeatable Elasticsearch snapshots** that can be used as datasets for **Streams Significant Events** evaluation and experimentation.
 
-The snapshots are written to **GCS** (bucket: `obs-ai-datasets`) under a run-specific base path, and each scenario snapshot contains:
-- `logs*` — OTel demo log data generated during the run
-- `sigevents-streams-features-<scenario>` — extracted features produced by Streams feature extraction (copied out of system indices so it can be snapshotted)
+The snapshots are written to **GCS** (bucket: `significant-events-datasets`) under a run-specific base path, and each scenario snapshot contains:
+- `logs*` - OTel demo log data generated during the run
+- `sigevents-streams-features-<scenario>` - extracted features produced by Streams feature extraction (copied out of system indices so it can be snapshotted)
 
 ## What this does
 
@@ -22,7 +22,7 @@ The per-scenario deploy/teardown + data cleanup is intentional as each snapshot 
 
 ### Prerequisites
 
-- **minikube** + **kubectl**
+- **minikube** + **kubectl** - the script will automatically start minikube if it is not already running, using `--cpus=4 --memory=8g`. Ensure your system can spare these resources before running the script.
 - Local **Elasticsearch** running with access to GCS credentials: `yarn es snapshot --license trial --secure-files gcs.client.default.credentials_file=/path/to/creds.json`
 - Local **Kibana** running
 - GCS repository access configured in Elasticsearch (so ES can write snapshots to the bucket)
@@ -61,7 +61,7 @@ node scripts/capture_sigevents_otel_demo_snapshots.js \
 ### Create snapshots with a specific run ID
 
 **What `--run-id` does:** It namespaces where snapshots are stored in GCS and what the ES snapshot repository is called.
-- GCS base path: `gs://obs-ai-datasets/sigevents/otel-demo/<run-id>/`
+- GCS base path: `gs://significant-events-datasets/<run-id>/<dataset>/`
 - Snapshot repository name: `sigevents-<run-id>`
 
 **Default:** If omitted, `--run-id` defaults to today’s date in `YYYY-MM-DD` format (local time).

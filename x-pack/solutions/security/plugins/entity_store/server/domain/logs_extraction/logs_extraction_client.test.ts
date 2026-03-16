@@ -14,16 +14,14 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
-import {
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  HASHED_ID_FIELD,
-} from './logs_extraction_query_builder';
+import { HASHED_ID_FIELD } from './logs_extraction_query_builder';
+import { ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD } from './query_builder_commons';
 import {
   LogExtractionConfig,
   type EngineDescriptorClient,
   type EntityStoreGlobalState,
   type EntityStoreGlobalStateClient,
-} from '../definitions/saved_objects';
+} from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 

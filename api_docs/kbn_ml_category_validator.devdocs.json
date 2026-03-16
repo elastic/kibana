@@ -47,7 +47,7 @@
           "MappingRuntimeFields",
           " | undefined, indicesOptions: ",
           "IndicesOptions",
-          " | undefined, includeExamples?: boolean) => Promise<{ overallValidStatus: ",
+          " | undefined, projectRouting: string | undefined, includeExamples?: boolean) => Promise<{ overallValidStatus: ",
           {
             "pluginId": "@kbn/ml-category-validator",
             "scope": "common",

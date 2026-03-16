@@ -9,6 +9,7 @@ import { generateSignificantEvents } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
 import { tags } from '@kbn/scout';
 import kbnDatemath from '@kbn/datemath';
+import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { Feature } from '@kbn/streams-schema';
 import type { GcsConfig } from '../../../src/data_generators/replay';
 import {
@@ -196,6 +197,8 @@ evaluate.describe(
                 inferenceClient,
                 logger,
                 apiServices,
+                traceEsClient,
+                log,
               }) => {
                 await executorClient.runExperiment(
                   {
@@ -243,17 +246,23 @@ evaluate.describe(
                         `[DEBUG] Tool usage: add_queries calls=${toolUsage.add_queries.calls}, failures=${toolUsage.add_queries.failures}`
                       );
 
-                      return queries;
+                      return { queries, traceId: getCurrentTraceId() };
                     },
                   },
-                  createQueryGenerationEvaluators(
-                    esClient,
-                    {
-                      criteriaFn: evaluators.criteria.bind(evaluators),
-                      criteria: scenario.output.criteria,
-                    },
-                    logger
-                  )
+                  [
+                    ...createQueryGenerationEvaluators(
+                      esClient,
+                      {
+                        criteriaFn: evaluators.criteria.bind(evaluators),
+                        criteria: scenario.output.criteria,
+                      },
+                      logger
+                    ),
+                    evaluators.traceBasedEvaluators.inputTokens,
+                    evaluators.traceBasedEvaluators.outputTokens,
+                    evaluators.traceBasedEvaluators.cachedTokens,
+                    createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+                  ]
                 );
               }
             );
