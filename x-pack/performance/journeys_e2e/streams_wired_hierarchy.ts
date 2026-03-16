@@ -135,7 +135,10 @@ export const journey = new Journey({
     const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
     await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
-    await searchBox.pressSequentially(WIRED_CHILD_MIDDLE_NAME, { delay: inputDelays.TYPING });
+    await searchBox.pressSequentially(WIRED_CHILD_MIDDLE_NAME, {
+      delay: inputDelays.TYPING,
+      timeout: 60000,
+    });
     await page.waitForSelector(WIRED_CHILD_MIDDLE, { timeout: 60000 });
   })
   .step('Clear search', async ({ page }) => {
@@ -380,12 +383,18 @@ export const journey = new Journey({
 
     // First prove the UI can still find a surviving child after the deletion batch.
     await searchBox.fill('');
-    await searchBox.pressSequentially(survivingChildName, { delay: inputDelays.TYPING });
+    await searchBox.pressSequentially(survivingChildName, {
+      delay: inputDelays.TYPING,
+      timeout: 60000,
+    });
     await page.waitForSelector(survivingChildSelector, { timeout: 60000 });
 
     // Then search for a deleted child and wait for the UI to apply the new filter.
     await searchBox.fill('');
-    await searchBox.pressSequentially(deletedChildName, { delay: inputDelays.TYPING });
+    await searchBox.pressSequentially(deletedChildName, {
+      delay: inputDelays.TYPING,
+      timeout: 60000,
+    });
     await page.waitForFunction(
       ({ inputSelector, expectedInputValue, tableSelector, emptyMessage }) => {
         const input = document.querySelector<HTMLInputElement>(inputSelector);

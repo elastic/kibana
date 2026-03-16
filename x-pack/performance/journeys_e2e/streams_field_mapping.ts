@@ -40,6 +40,7 @@ export const journey = new Journey({
     await comboInput.click();
     await comboInput.pressSequentially(fieldName, {
       delay: inputDelays.TYPING,
+      timeout: 60000,
     });
     await page.keyboard.press('Enter');
 

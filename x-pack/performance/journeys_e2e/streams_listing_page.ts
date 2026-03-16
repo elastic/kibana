@@ -30,6 +30,7 @@ export const journey = new Journey({
     await searchBox.fill('');
     await searchBox.pressSequentially(CLASSIC_STREAM_TO_SEARCH, {
       delay: inputDelays.TYPING,
+      timeout: 120000,
     });
     await page.waitForSelector(subj(`streamsNameLink-${CLASSIC_STREAM_TO_SEARCH}`), {
       timeout: 120000,
@@ -69,6 +70,7 @@ export const journey = new Journey({
     await searchBox.fill('');
     await searchBox.pressSequentially('logs.otel', {
       delay: inputDelays.TYPING,
+      timeout: 60000,
     });
 
     const logsOtelExpand = page.locator(subj('expandButton-logs.otel'));
