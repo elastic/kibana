@@ -11,6 +11,7 @@
     "types": [
       "cypress",
       "node",
+      "@cypress/grep"
     ],
   },
   "kbn_references": [

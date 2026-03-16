@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-/// <reference types="@cypress/grep" />
+import type { FtrProviderContext } from '../ftr_provider_context';
+import { createScenarios } from './scenarios';
+
+export function ReportingFunctionalProvider(context: FtrProviderContext) {
+  return createScenarios(context);
+}

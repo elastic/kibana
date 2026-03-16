@@ -4,7 +4,7 @@
   "exclude": ["target/**/*"],
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["cypress", "cypress-file-upload", "cypress-real-events", "cypress-recurse", "node"]
+    "types": ["cypress", "cypress-file-upload", "cypress-real-events", "cypress-recurse", "node", "@cypress/grep"]
   },
   "kbn_references": [
     "@kbn/securitysolution-io-ts-alerting-types",

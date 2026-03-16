@@ -36,7 +36,7 @@ export default defineCypressConfig({
 
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
-    numTestsKeptInMemory: 3,
+    numTestsKeptInMemory: 0,
 
     specPattern: './cypress/e2e/space_awareness/**/*.cy.ts',
     supportFile: './cypress/support/e2e.ts',

@@ -56,7 +56,7 @@ export const getCypressBaseConfig = (
         specPattern: './cypress/e2e/**/*.cy.ts',
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
-        numTestsKeptInMemory: 3,
+        numTestsKeptInMemory: 0,
         setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
           setupUserDataLoader(on, config, { roleDefinitions, additionalRoleName: 'viewer' });
           samlAuthentication(on, config);
