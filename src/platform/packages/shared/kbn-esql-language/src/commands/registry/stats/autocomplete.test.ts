@@ -80,6 +80,7 @@ export const AVG_TYPES: Array<EsqlFieldType & FunctionReturnType> = [
   'integer',
   'long',
   'aggregate_metric_double',
+  'exponential_histogram',
   'tdigest',
 ];
 
@@ -394,6 +395,7 @@ describe('STATS Autocomplete', () => {
               'date_nanos',
               'unsigned_long',
               'aggregate_metric_double',
+              'exponential_histogram',
               'tdigest',
             ],
             {
