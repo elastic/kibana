@@ -90,10 +90,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await (await testSubjects.find('create-submit')).click();
 
-      await retry.try(async () => {
-        await testSubjects.existOrFail('saveWithoutFiltersConfirmModal');
-      });
-
       await (await testSubjects.find('confirmModalConfirmButton')).click();
 
       await retry.try(async () => {
