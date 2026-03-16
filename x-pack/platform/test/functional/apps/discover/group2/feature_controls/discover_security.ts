@@ -237,6 +237,8 @@ export default function (ctx: FtrProviderContext) {
           sort: [['@timestamp', 'desc']],
           interval: 'auto',
           filters: [],
+          hideChart: false,
+          hideDataTable: false,
           dataViewId: 'logstash-*',
           timeRange: {
             from: '2015-09-19T06:31:44.000Z',

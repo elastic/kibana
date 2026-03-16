@@ -72,17 +72,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (isChartAvailable) {
         expect(await discover.isChartVisible()).to.be(shouldHistogramBeOpen);
-        if (shouldHistogramBeOpen) {
-          await testSubjects.existOrFail('dscPanelsToggleInHistogram');
-          await testSubjects.existOrFail('dscHideHistogramButton');
 
-          await testSubjects.missingOrFail('dscPanelsToggleInPage');
+        // Chart toggle always stays in the histogram area (expanded toolbar or collapsed bar)
+        await testSubjects.existOrFail('dscPanelsToggleInHistogram');
+        // Table toggle is always present in the page area when chart is available
+        await testSubjects.existOrFail('dscPanelsToggleInPage');
+
+        if (shouldHistogramBeOpen) {
+          await testSubjects.existOrFail('dscHideHistogramButton');
           await testSubjects.missingOrFail('dscShowHistogramButton');
         } else {
-          await testSubjects.existOrFail('dscPanelsToggleInPage');
           await testSubjects.existOrFail('dscShowHistogramButton');
-
-          await testSubjects.missingOrFail('dscPanelsToggleInHistogram');
           await testSubjects.missingOrFail('dscHideHistogramButton');
         }
       } else {
@@ -190,6 +190,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
       }
+
+      if (isChartAvailable) {
+        it('table can be toggled in document level view', async () => {
+          expect(await discover.isTableVisible()).to.be(true);
+          await testSubjects.existOrFail('dscHideTableButton');
+          await testSubjects.missingOrFail('dscShowTableButton');
+
+          await discover.toggleTableVisibility();
+          expect(await discover.isTableVisible()).to.be(false);
+          await testSubjects.existOrFail('dscShowTableButton');
+          await testSubjects.missingOrFail('dscHideTableButton');
+
+          await discover.toggleTableVisibility();
+          expect(await discover.isTableVisible()).to.be(true);
+          await testSubjects.existOrFail('dscHideTableButton');
+          await testSubjects.missingOrFail('dscShowTableButton');
+        });
+      }
     }
 
     describe('time based data view', function () {
@@ -221,6 +239,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       checkPanelsToggle({ isChartAvailable: false, totalHits: '14,004' });
+
+      it('table toggle is not available when histogram is unavailable', async () => {
+        expect(await discover.isTableVisible()).to.be(true);
+        await testSubjects.missingOrFail('dscHideTableButton');
+        await testSubjects.missingOrFail('dscShowTableButton');
+      });
     });
 
     describe('ES|QL with histogram chart', function () {
