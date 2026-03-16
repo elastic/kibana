@@ -93,6 +93,7 @@ describe('user activity injected context', () => {
           message: 'ua-test',
           event: { action: 'ua_test_action' as any, type: 'user' },
           object: { id: 'obj-1', name: 'Test Object', type: 'test', tags: ['tag-a'] },
+          metadata: { a: 1, b: '2', c: { d: true } },
         });
         return response.ok({ body: { ok: true } });
       }
@@ -118,6 +119,7 @@ describe('user activity injected context', () => {
       message: 'ua-test',
       event: { action: 'ua_test_action', type: 'user' },
       object: { id: 'obj-1', name: 'Test Object', type: 'test', tags: ['tag-a'] },
+      metadata: { a: 1, b: '2', c: { d: true } },
       kibana: { space: { id: 'myspace' } },
       http: { request: { referrer } },
       session: { id: 'some-redacted-sid' },

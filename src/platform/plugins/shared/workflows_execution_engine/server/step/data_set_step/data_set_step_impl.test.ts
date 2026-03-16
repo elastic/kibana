@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { DataSetGraphNode } from '@kbn/workflows/graph';
 import { DataSetStepImpl } from './data_set_step_impl';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -31,6 +32,12 @@ describe('DataSetStepImpl', () => {
   beforeEach(() => {
     stepContextAbortController = new AbortController();
     mockContextManager = {
+      getContext: jest.fn().mockReturnValue({
+        workflow: { id: 'test', name: 'test', enabled: true, spaceId: 'default' },
+      }),
+      getDependencies: jest.fn().mockReturnValue({
+        config: { maxResponseSize: new ByteSizeValue(10 * 1024 * 1024) },
+      }),
       renderValueAccordingToContext: jest.fn(<T>(value: T): T => value),
       abortController: stepContextAbortController,
     } as any;

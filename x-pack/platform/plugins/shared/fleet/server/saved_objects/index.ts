@@ -36,6 +36,7 @@ import {
 
 import {
   AgentPolicySchemaV3,
+  EpmPackagesSchemaV6,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
@@ -1235,6 +1236,10 @@ export const getSavedObjectTypes = (
             },
           },
           previous_version: { type: 'keyword' },
+          pending_upgrade_review: {
+            dynamic: false,
+            properties: {},
+          },
         },
       },
       modelVersions: {
@@ -1285,6 +1290,23 @@ export const getSavedObjectTypes = (
               },
             },
           ],
+        },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                pending_upgrade_review: {
+                  dynamic: false,
+                  properties: {},
+                },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV6.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV6.extends({}, { unknowns: 'ignore' }),
+          },
         },
       },
       migrations: {
