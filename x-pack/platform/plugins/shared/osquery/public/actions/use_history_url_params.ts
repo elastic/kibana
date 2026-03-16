@@ -34,24 +34,26 @@ const parseCommaSeparated = (value: string | string[] | null | undefined): strin
   if (!value) return [];
   const raw = Array.isArray(value) ? value[0] : value;
   if (!raw) return [];
+
   return raw.split(',').filter(Boolean);
 };
 
-const parseSourceFilters = (value: string | string[] | null | undefined): SourceFilter[] => {
-  return parseCommaSeparated(value).filter((v): v is SourceFilter =>
+const parseSourceFilters = (value: string | string[] | null | undefined): SourceFilter[] =>
+  parseCommaSeparated(value).filter((v): v is SourceFilter =>
     VALID_SOURCES.includes(v as SourceFilter)
   );
-};
 
 const parsePageSize = (value: string | string[] | null | undefined): number | undefined => {
   if (!value) return undefined;
   const raw = Array.isArray(value) ? value[0] : value;
   const num = Number(raw);
+
   return Number.isFinite(num) && num > 0 ? num : undefined;
 };
 
 const parseString = (value: string | string[] | null | undefined): string => {
   if (!value) return '';
+
   return Array.isArray(value) ? value[0] ?? '' : value;
 };
 
@@ -70,16 +72,14 @@ export const parseHistoryUrlParams = (search: string): HistoryUrlFilters => {
 
 export const serializeHistoryUrlParams = (
   filters: HistoryUrlFilters
-): Record<string, string | undefined> => {
-  return {
-    q: filters.q || undefined,
-    sources: filters.sources.length > 0 ? filters.sources.join(',') : undefined,
-    runBy: filters.runBy.length > 0 ? filters.runBy.join(',') : undefined,
-    start: filters.start !== DEFAULTS.start ? filters.start : undefined,
-    end: filters.end !== DEFAULTS.end ? filters.end : undefined,
-    pageSize: filters.pageSize != null ? String(filters.pageSize) : undefined,
-  };
-};
+): Record<string, string | undefined> => ({
+  q: filters.q || undefined,
+  sources: filters.sources.length > 0 ? filters.sources.join(',') : undefined,
+  runBy: filters.runBy.length > 0 ? filters.runBy.join(',') : undefined,
+  start: filters.start !== DEFAULTS.start ? filters.start : undefined,
+  end: filters.end !== DEFAULTS.end ? filters.end : undefined,
+  pageSize: filters.pageSize != null ? String(filters.pageSize) : undefined,
+});
 
 export const useHistoryUrlParams = () => {
   const history = useHistory();

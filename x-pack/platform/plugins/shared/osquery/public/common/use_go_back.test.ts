@@ -18,8 +18,7 @@ jest.mock('react-router-dom', () => ({
   useLocation: () => ({ state: mockLocationState }),
 }));
 
-const createMouseEvent = () =>
-  ({ preventDefault: jest.fn() } as unknown as React.MouseEvent);
+const createMouseEvent = () => ({ preventDefault: jest.fn() } as unknown as React.MouseEvent);
 
 describe('useGoBack', () => {
   beforeEach(() => {
