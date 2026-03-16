@@ -20,7 +20,7 @@ export function generateSampleFromJsonSchema(schema: JSONSchema7): unknown {
 
   switch (schema.type) {
     case 'string':
-      return schema.format === 'email' ? 'user@example.com' : 'string';
+      return schema.format === 'email' ? 'user@example.com' : 'replace with your data';
     case 'number':
       return 0;
     case 'integer':

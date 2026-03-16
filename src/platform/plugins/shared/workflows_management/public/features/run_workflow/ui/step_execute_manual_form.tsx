@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useRef } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { z } from '@kbn/zod/v4';
+import { InputValidationCallout } from './input_validation_callout';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 const SCHEMA_URI = `inmemory://schemas/test-step-json-manual-editor-schema`;
@@ -56,19 +57,10 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiFlexGroup direction="column" gutterSize="s">
         {errors && (
           <EuiFlexItem grow={false}>
-            <EuiCallOut
-              announceOnMount
-              color="danger"
-              size="s"
-              title={i18n.translate('workflows.testStepModal.invalidJsonError', {
-                defaultMessage: 'Invalid JSON',
-              })}
-            >
-              <p>{errors}</p>
-            </EuiCallOut>
+            <InputValidationCallout errors={errors} />
           </EuiFlexItem>
         )}
         <EuiFlexItem>

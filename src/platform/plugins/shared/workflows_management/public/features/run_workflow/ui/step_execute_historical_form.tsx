@@ -9,7 +9,6 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,12 +19,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod/v4';
+import { InputValidationCallout } from './input_validation_callout';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { useWorkflowStepExecutions } from '../../../entities/workflows/model/use_workflow_step_executions';
 import { selectWorkflowId } from '../../../entities/workflows/store';
@@ -211,11 +211,9 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     );
 
     // Hook Monaco on mount to register the schema for validation + suggestions
-    const mountedOnce = useRef(false);
     const handleMount = useCallback(
       (editor: monaco.editor.IStandaloneCodeEditor) => {
-        if (!contextJsonSchema || mountedOnce.current) return;
-        mountedOnce.current = true;
+        if (!contextJsonSchema) return;
 
         try {
           // First, configure the JSON language service with schema validation
@@ -240,7 +238,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiFormRow label={translations.selectStepExecutionLabel} fullWidth>
             <EuiComboBox
@@ -262,61 +260,56 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         </EuiFlexItem>
 
         {selectedStepExecution && (
-          <>
-            {errors && errors !== NOT_READY_SENTINEL && (
-              <EuiFlexItem grow={false}>
-                <EuiCallOut
-                  announceOnMount
-                  color="danger"
-                  size="s"
-                  title={translations.invalidJson}
-                >
-                  <p>{errors}</p>
-                </EuiCallOut>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {errors && errors !== NOT_READY_SENTINEL && (
+                <EuiFlexItem grow={false}>
+                  <InputValidationCallout errors={errors} />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>
+                <EuiFormRow label={translations.contextOverrideLabel} fullWidth>
+                  <CodeEditor
+                    languageId="json"
+                    value={value}
+                    fitToContent={{
+                      minLines: 5,
+                      maxLines: 15,
+                    }}
+                    width="100%"
+                    onChange={handleChange}
+                    editorDidMount={handleMount}
+                    dataTestSubj="workflow-test-step-historical-json-editor"
+                    overflowWidgetsContainerZIndexOverride={6001}
+                    options={{
+                      language: 'json',
+                      minimap: { enabled: false },
+                      scrollBeyondLastLine: false,
+                      wordWrap: 'on',
+                      automaticLayout: true,
+                      lineNumbers: 'on',
+                      glyphMargin: true,
+                      tabSize: 2,
+                      lineNumbersMinChars: 2,
+                      insertSpaces: true,
+                      fontSize: 14,
+                      renderWhitespace: 'all',
+                      wordWrapColumn: 80,
+                      wrappingIndent: 'indent',
+                      theme: WORKFLOWS_MONACO_EDITOR_THEME,
+                      formatOnType: true,
+                      quickSuggestions: false,
+                      suggestOnTriggerCharacters: false,
+                      wordBasedSuggestions: false,
+                      parameterHints: {
+                        enabled: false,
+                      },
+                    }}
+                  />
+                </EuiFormRow>
               </EuiFlexItem>
-            )}
-            <EuiFlexItem>
-              <EuiFormRow label={translations.contextOverrideLabel} fullWidth>
-                <CodeEditor
-                  languageId="json"
-                  value={value}
-                  fitToContent={{
-                    minLines: 5,
-                    maxLines: 15,
-                  }}
-                  width="100%"
-                  onChange={handleChange}
-                  editorDidMount={handleMount}
-                  dataTestSubj="workflow-test-step-historical-json-editor"
-                  overflowWidgetsContainerZIndexOverride={6001}
-                  options={{
-                    language: 'json',
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on',
-                    automaticLayout: true,
-                    lineNumbers: 'on',
-                    glyphMargin: true,
-                    tabSize: 2,
-                    lineNumbersMinChars: 2,
-                    insertSpaces: true,
-                    fontSize: 14,
-                    renderWhitespace: 'all',
-                    wordWrapColumn: 80,
-                    wrappingIndent: 'indent',
-                    theme: WORKFLOWS_MONACO_EDITOR_THEME,
-                    formatOnType: true,
-                    quickSuggestions: false,
-                    suggestOnTriggerCharacters: false,
-                    wordBasedSuggestions: false,
-                    parameterHints: {
-                      enabled: false,
-                    },
-                  }}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         )}
         {selectedStepExecutionId && (isLoadingStepExecution || isLoadingWorkflowExecution) && (
           <EuiFlexItem>

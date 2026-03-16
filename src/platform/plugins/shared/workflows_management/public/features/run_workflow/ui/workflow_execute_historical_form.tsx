@@ -9,7 +9,6 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,9 +20,13 @@ import {
 import { css } from '@emotion/react';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CodeEditor } from '@kbn/code-editor';
+import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import type { z } from '@kbn/zod/v4';
+import { InputValidationCallout } from './input_validation_callout';
 import { TRIGGER_TABS_LABELS } from './translations';
+import { buildInputsZodValidator } from '../../../../common/lib/json_schema_to_zod';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/use_workflow_executions';
 import { formatDuration } from '../../../shared/lib/format_duration';
@@ -38,6 +41,7 @@ import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_ed
  * displaying a visible error message.
  */
 export const NOT_READY_SENTINEL = '__historical_not_ready__';
+const SCHEMA_URI = `inmemory://schemas/workflow-historical-json-editor-schema`;
 
 export interface WorkflowExecuteHistoricalFormProps {
   workflowId: string | undefined;
@@ -45,13 +49,16 @@ export interface WorkflowExecuteHistoricalFormProps {
   initialExecutionId?: string;
   value: string;
   setValue: (value: string) => void;
+  inputs?: JsonModelSchemaType; // normalized inputs
   errors: string | null;
   setErrors: (errors: string | null) => void;
 }
 
 export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistoricalFormProps>(
-  ({ workflowId, initialExecutionId, value, setValue, errors, setErrors }) => {
+  ({ workflowId, initialExecutionId, value, setValue, errors, setErrors, inputs }) => {
     const { euiTheme } = useEuiTheme();
+    const inputsValidator = useMemo(() => buildInputsZodValidator(inputs), [inputs]);
+
     const [selectedExecutionId, setSelectedExecutionId] = useState<string | null>(
       initialExecutionId ?? null
     );
@@ -114,9 +121,27 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     useEffect(() => {
       if (selectedExecution) {
         setValue(JSON.stringify(replayInputsFromContext, null, 2));
-        setErrors(null);
       }
-    }, [selectedExecution, replayInputsFromContext, setValue, setErrors]);
+    }, [selectedExecution, replayInputsFromContext, setValue]);
+
+    useEffect(() => {
+      if (value) {
+        try {
+          const res = inputsValidator.safeParse(JSON.parse(value));
+          if (!res.success) {
+            setErrors(
+              res.error.issues
+                .map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
+                .join(', ')
+            );
+          } else {
+            setErrors(null);
+          }
+        } catch (e: Error | unknown) {
+          setErrors(translations.invalidJson(e instanceof Error ? e.message : String(e)));
+        }
+      }
+    }, [inputsValidator, value, setErrors]);
 
     const handleExecutionChange = useCallback((selected: EuiComboBoxOptionOption<string>[]) => {
       const id = selected.length > 0 && selected[0].value ? String(selected[0].value) : null;
@@ -126,18 +151,37 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     const handleChange = useCallback(
       (newValue: string) => {
         setValue(newValue);
+      },
+      [setValue]
+    );
+
+    const handleMount = useCallback(
+      (editor: monaco.editor.IStandaloneCodeEditor) => {
+        if (!inputs) return;
+
         try {
-          JSON.parse(newValue);
-          setErrors(null);
+          const currentModel = editor.getModel();
+          monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+            validate: true,
+            allowComments: false,
+            enableSchemaRequest: false,
+            schemas: [
+              {
+                uri: SCHEMA_URI,
+                fileMatch: [currentModel?.uri.toString() ?? ''],
+                schema: inputs,
+              },
+            ],
+          });
         } catch {
-          setErrors(translations.invalidJson);
+          // Monaco setup failed — fall back to basic JSON editing
         }
       },
-      [setValue, setErrors]
+      [inputs]
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiFormRow label={translations.selectExecutionLabel} fullWidth>
             <EuiComboBox
@@ -159,64 +203,62 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
         </EuiFlexItem>
 
         {selectedExecution && (
-          <>
-            {errors && errors !== NOT_READY_SENTINEL && (
-              <EuiFlexItem grow={false}>
-                <EuiCallOut
-                  announceOnMount
-                  color="danger"
-                  size="s"
-                  title={translations.invalidJson}
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {errors && errors !== NOT_READY_SENTINEL && (
+                <EuiFlexItem grow={false}>
+                  <InputValidationCallout errors={errors} />
+                </EuiFlexItem>
+              )}
+
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={translations.getInputDataLabel(
+                    getTriggerTypeLabel(selectedExecution.context)
+                  )}
+                  fullWidth
                 >
-                  <p>{errors}</p>
-                </EuiCallOut>
+                  <CodeEditor
+                    languageId="json"
+                    value={value}
+                    fitToContent={{
+                      minLines: 5,
+                      maxLines: 15,
+                    }}
+                    width="100%"
+                    onChange={handleChange}
+                    editorDidMount={handleMount}
+                    dataTestSubj={'workflow-historical-json-editor'}
+                    overflowWidgetsContainerZIndexOverride={6001}
+                    options={{
+                      language: 'json',
+                      minimap: { enabled: false },
+                      scrollBeyondLastLine: false,
+                      wordWrap: 'on',
+                      automaticLayout: true,
+                      lineNumbers: 'on',
+                      glyphMargin: true,
+                      tabSize: 2,
+                      lineNumbersMinChars: 2,
+                      insertSpaces: true,
+                      fontSize: 14,
+                      renderWhitespace: 'all',
+                      wordWrapColumn: 80,
+                      wrappingIndent: 'indent',
+                      theme: WORKFLOWS_MONACO_EDITOR_THEME,
+                      formatOnType: true,
+                      quickSuggestions: false,
+                      suggestOnTriggerCharacters: false,
+                      wordBasedSuggestions: false,
+                      parameterHints: {
+                        enabled: false,
+                      },
+                    }}
+                  />
+                </EuiFormRow>
               </EuiFlexItem>
-            )}
-            <EuiFlexItem>
-              <EuiFormRow
-                label={translations.getInputDataLabel(
-                  getTriggerTypeLabel(selectedExecution.context)
-                )}
-                fullWidth
-              >
-                <CodeEditor
-                  languageId="json"
-                  value={value}
-                  fitToContent={{
-                    minLines: 5,
-                    maxLines: 15,
-                  }}
-                  width="100%"
-                  onChange={handleChange}
-                  dataTestSubj={'workflow-historical-json-editor'}
-                  options={{
-                    language: 'json',
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on',
-                    automaticLayout: true,
-                    lineNumbers: 'on',
-                    glyphMargin: true,
-                    tabSize: 2,
-                    lineNumbersMinChars: 2,
-                    insertSpaces: true,
-                    fontSize: 14,
-                    renderWhitespace: 'all',
-                    wordWrapColumn: 80,
-                    wrappingIndent: 'indent',
-                    theme: WORKFLOWS_MONACO_EDITOR_THEME,
-                    formatOnType: true,
-                    quickSuggestions: false,
-                    suggestOnTriggerCharacters: false,
-                    wordBasedSuggestions: false,
-                    parameterHints: {
-                      enabled: false,
-                    },
-                  }}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         )}
         {selectedExecutionId && isLoadingExecution && (
           <EuiFlexItem>
@@ -249,9 +291,11 @@ const translations = {
   testRun: i18n.translate('workflows.workflowExecuteModal.testRun', {
     defaultMessage: 'Test run',
   }),
-  invalidJson: i18n.translate('workflows.workflowExecuteModal.invalidJson', {
-    defaultMessage: 'Invalid JSON',
-  }),
+  invalidJson: (message: string) =>
+    i18n.translate('workflows.workflowExecuteModal.invalidJson', {
+      defaultMessage: 'Invalid JSON: {message}',
+      values: { message },
+    }),
   selectExecutionLabel: i18n.translate('workflows.workflowExecuteModal.selectExecutionLabel', {
     defaultMessage: 'Select execution',
   }),

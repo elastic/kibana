@@ -31,7 +31,6 @@ import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conve
 import { ENABLED_TRIGGER_TABS } from './constants';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
 import type { WorkflowTriggerTab } from './types';
-import { useExecutionInput } from './use_execution_input/use_execution_input';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteHistoricalForm } from './workflow_execute_historical_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
@@ -72,11 +71,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       initialExecutionId ? 'historical' : getDefaultTrigger(definition)
     );
 
-    const { executionInput, setExecutionInput } = useExecutionInput({
-      workflowName: definition?.name || '',
-      workflowId,
-      selectedTrigger,
-    });
+    const [executionInput, setExecutionInput] = useState<string>('');
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
 
     const { euiTheme } = useEuiTheme();
@@ -88,27 +83,30 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     const handleChangeTrigger = useCallback(
       (trigger: WorkflowTriggerTab): void => {
+        if (trigger === selectedTrigger) {
+          return;
+        }
         setExecutionInput('');
         setExecutionInputErrors(null);
         setSelectedTrigger(trigger);
       },
-      [setExecutionInput]
+      [setExecutionInput, selectedTrigger]
     );
 
     // Extract inputs from yamlString if definition.inputs is undefined
-    const inputs = useMemo(() => {
+    const normalizedInputs = useMemo(() => {
       if (definition?.inputs) {
-        return definition.inputs;
+        return normalizeInputsToJsonSchema(definition.inputs);
       }
       if (yamlString) {
         try {
           const yamlDoc = parseDocument(yamlString);
           const yamlJson = yamlDoc.toJSON();
           if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
-            return (yamlJson as Record<string, unknown>).inputs;
+            return normalizeInputsToJsonSchema(yamlJson.inputs);
           }
         } catch (e) {
-          // Ignore errors when extracting from YAML
+          // ignore errors when extracting from YAML
         }
       }
       return undefined;
@@ -119,15 +117,14 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         return false;
       }
       const hasAlertTrigger = definition.triggers?.some((trigger) => trigger.type === 'alert');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const normalizedInputs = normalizeInputsToJsonSchema(inputs as any);
+
       const hasInputs =
         normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
       if (!hasAlertTrigger && !hasInputs) {
         return true;
       }
       return false;
-    }, [definition, inputs]);
+    }, [definition, normalizedInputs]);
 
     useEffect(() => {
       if (shouldAutoRun) {
@@ -143,14 +140,12 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setSelectedTrigger('alert');
         return;
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const normalizedInputs = normalizeInputsToJsonSchema(inputs as any);
       const hasInputs =
         normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
       if (hasInputs) {
         setSelectedTrigger('manual');
       }
-    }, [shouldAutoRun, onSubmit, onClose, definition, inputs, initialExecutionId]);
+    }, [shouldAutoRun, onSubmit, onClose, definition, normalizedInputs, initialExecutionId]);
 
     if (shouldAutoRun) {
       // Not rendered if the workflow should auto run, will close the modal automatically
@@ -284,12 +279,8 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                 )}
                 {selectedTrigger === 'manual' && (
                   <WorkflowExecuteManualForm
-                    definition={
-                      definition
-                        ? { ...definition, inputs: inputs as WorkflowYaml['inputs'] }
-                        : null
-                    }
                     value={executionInput}
+                    inputs={normalizedInputs}
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}
                     setValue={setExecutionInput}
@@ -305,6 +296,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                 {selectedTrigger === 'historical' && (
                   <WorkflowExecuteHistoricalForm
                     workflowId={workflowId}
+                    inputs={normalizedInputs}
                     initialExecutionId={initialExecutionId}
                     value={executionInput}
                     setValue={setExecutionInput}
