@@ -19,6 +19,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { omit } from 'lodash';
 import React, { useCallback } from 'react';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
@@ -119,6 +120,8 @@ interface InferenceFlyoutWrapperProps {
   inferenceEndpoint?: InferenceEndpoint;
   enableEisPromoTour?: boolean;
   focusTrapProps?: EuiFlyoutProps['focusTrapProps'];
+  /** When set, only these task types will be available for selection in the form. */
+  allowedTaskTypes?: InferenceTaskType[];
 }
 
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
@@ -131,6 +134,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   inferenceEndpoint,
   enableEisPromoTour,
   focusTrapProps,
+  allowedTaskTypes,
 }) => {
   const inferenceCreationFlyoutId = useGeneratedHtmlId({
     prefix: 'InferenceFlyoutId',
@@ -197,6 +201,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
               isPreconfigured,
               reenterSecretsOnEdit: false,
               enableEisPromoTour,
+              allowedTaskTypes,
             }}
           />
           <EuiSpacer size="m" />

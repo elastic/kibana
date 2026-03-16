@@ -17,6 +17,9 @@ project:
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/rendering/browser-internal
 dependsOn:
+  - '@kbn/core-http-browser-internal'
+  - '@kbn/core-doc-links-browser'
+  - '@kbn/core-custom-branding-browser'
   - '@kbn/core-application-browser-internal'
   - '@kbn/core-overlays-browser'
   - '@kbn/core-chrome-browser-internal'
@@ -43,6 +46,9 @@ dependsOn:
   - '@kbn/global-redirect-app-links'
   - '@kbn/core-base-browser-internal'
   - '@kbn/core-base-browser-mocks'
+  - '@kbn/core-http-browser-mocks'
+  - '@kbn/core-doc-links-browser-mocks'
+  - '@kbn/core-custom-branding-browser-mocks'
 tags:
   - shared-browser
   - package

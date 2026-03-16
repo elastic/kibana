@@ -5,6 +5,294 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
+      <div
+        class="emotion-euiContainerCSS"
+      >
+        <table
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+          data-test-subj="infraAssetDetailsProcessesTable"
+          tabindex="-1"
+        >
+          <thead>
+            <tr>
+              <td
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                role="columnheader"
+                style="width: 24px;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                  />
+                </div>
+              </td>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="state-header"
+                role="columnheader"
+                scope="col"
+                style="width: 84px;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="State"
+                  >
+                    State
+                  </span>
+                </div>
+              </th>
+              <th
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="command-header"
+                role="columnheader"
+                scope="col"
+                style="width: 40%;"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                >
+                  <span
+                    class="eui-textTruncate"
+                    title="Command"
+                  >
+                    Command
+                  </span>
+                </div>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="startTime-header"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Time"
+                      >
+                        Time
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <th
+                aria-sort="descending"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="cpu-header"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="CPU"
+                      >
+                        CPU
+                      </span>
+                      <span
+                        class="euiTableSortIcon"
+                        data-euiicon-type="sortDown"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="memory-header"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Mem."
+                      >
+                        Mem.
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="css-x41dah-ProcessesTable"
+          >
+            <tr
+              class="euiTableRow emotion-euiTableRow-desktop"
+            >
+              <td
+                class="euiTableRowCell euiTableRowCell--isExpander emotion-euiTableRowCell-isExpander-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText-actions-desktop"
+                >
+                  <button
+                    aria-expanded="false"
+                    aria-label="Expand process details"
+                    class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
+                    data-test-subj="infraProcessRowButton"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                    >
+                      <span
+                        color="inherit"
+                        data-euiicon-type="arrowRight"
+                      />
+                      <span
+                        class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
+                      />
+                    </span>
+                  </button>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class="euiBadge emotion-euiBadge-danger"
+                    title="Dead"
+                  >
+                    <span
+                      class="euiBadge__content emotion-euiBadge__content"
+                    >
+                      <span
+                        class="euiBadge__text emotion-euiBadge__text"
+                      >
+                        Dead
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-truncateText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    <div
+                      class="css-10w4zy3-CodeLine"
+                    >
+                      <code>
+                        /some/test/command here 3
+                      </code>
+                    </div>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    112:51:24
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    0.5%
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    0.5%
+                  </span>
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isExpandable emotion-euiTableRow-desktop"
+            />
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="emotion-euiContainerCSS"
+    >
       <table
         class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
         data-test-subj="infraAssetDetailsProcessesTable"
@@ -284,286 +572,6 @@ Object {
         </tbody>
       </table>
     </div>
-  </body>,
-  "container": <div>
-    <table
-      class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
-      data-test-subj="infraAssetDetailsProcessesTable"
-      tabindex="-1"
-    >
-      <thead>
-        <tr>
-          <td
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            role="columnheader"
-            style="width: 24px;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-            >
-              <span
-                class="eui-textTruncate"
-              />
-            </div>
-          </td>
-          <th
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="state-header"
-            role="columnheader"
-            scope="col"
-            style="width: 84px;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-            >
-              <span
-                class="eui-textTruncate"
-                title="State"
-              >
-                State
-              </span>
-            </div>
-          </th>
-          <th
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="command-header"
-            role="columnheader"
-            scope="col"
-            style="width: 40%;"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-            >
-              <span
-                class="eui-textTruncate"
-                title="Command"
-              >
-                Command
-              </span>
-            </div>
-          </th>
-          <th
-            aria-sort="none"
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="startTime-header"
-            role="columnheader"
-            scope="col"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              id="generated-id-wrapper"
-            >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="Time"
-                  >
-                    Time
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
-            </span>
-          </th>
-          <th
-            aria-sort="descending"
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="cpu-header"
-            role="columnheader"
-            scope="col"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              id="generated-id-wrapper"
-            >
-              <button
-                class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="CPU"
-                  >
-                    CPU
-                  </span>
-                  <span
-                    class="euiTableSortIcon"
-                    data-euiicon-type="sortDown"
-                  />
-                </div>
-              </button>
-            </span>
-          </th>
-          <th
-            aria-sort="none"
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="memory-header"
-            role="columnheader"
-            scope="col"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-              id="generated-id-wrapper"
-            >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="Mem."
-                  >
-                    Mem.
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
-            </span>
-          </th>
-        </tr>
-      </thead>
-      <tbody
-        class="css-x41dah-ProcessesTable"
-      >
-        <tr
-          class="euiTableRow emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell euiTableRowCell--isExpander emotion-euiTableRowCell-isExpander-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText-actions-desktop"
-            >
-              <button
-                aria-expanded="false"
-                aria-label="Expand process details"
-                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
-                data-test-subj="infraProcessRowButton"
-                type="button"
-              >
-                <span
-                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-                >
-                  <span
-                    color="inherit"
-                    data-euiicon-type="arrowRight"
-                  />
-                  <span
-                    class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
-                  />
-                </span>
-              </button>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              <span
-                class="euiBadge emotion-euiBadge-danger"
-                title="Dead"
-              >
-                <span
-                  class="euiBadge__content emotion-euiBadge__content"
-                >
-                  <span
-                    class="euiBadge__text emotion-euiBadge__text"
-                  >
-                    Dead
-                  </span>
-                </span>
-              </span>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-truncateText"
-            >
-              <span
-                class="euiTableCellContent__text"
-              >
-                <div
-                  class="css-10w4zy3-CodeLine"
-                >
-                  <code>
-                    /some/test/command here 3
-                  </code>
-                </div>
-              </span>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              <span
-                class="euiTableCellContent__text"
-              >
-                112:51:24
-              </span>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              <span
-                class="euiTableCellContent__text"
-              >
-                0.5%
-              </span>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              <span
-                class="euiTableCellContent__text"
-              >
-                0.5%
-              </span>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isExpandable emotion-euiTableRow-desktop"
-        />
-      </tbody>
-    </table>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],
