@@ -547,7 +547,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       applicationLinksUpdater.update(appLinks, params);
     });
 
-    const filteredLinks = await getFilteredLinks(core, plugins);
+    const filteredLinks = await getFilteredLinks(core, plugins, {
+      experimentalFeatures: this.experimentalFeatures,
+    });
     appLinksToUpdate$.next(filteredLinks);
   }
 

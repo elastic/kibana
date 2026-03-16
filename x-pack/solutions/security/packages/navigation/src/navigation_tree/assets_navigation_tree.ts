@@ -71,7 +71,7 @@ export const createAssetsNavigationTree = (
             link: securityLink(SecurityPageName.policies),
           },
           {
-            id: 'artifacts',
+            id: SecurityPageName.artifacts,
             title: i18nStrings.assets.artifacts.title,
             link: artifactsLink,
           },
