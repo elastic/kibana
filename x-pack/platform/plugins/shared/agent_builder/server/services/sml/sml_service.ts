@@ -23,8 +23,6 @@ export interface SmlServiceSetup {
    * Should be called during plugin setup.
    */
   registerType: (definition: SmlTypeDefinition) => void;
-  /** Access the type registry (e.g. for task scheduling). */
-  getRegistry: () => SmlTypeRegistry;
 }
 
 export interface SmlServiceStartDeps {
@@ -57,7 +55,6 @@ class SmlServiceImpl implements SmlServiceInstance {
         this.registry.register(definition);
         logger.info(`Registered SML type: ${definition.id}`);
       },
-      getRegistry: () => this.registry,
     };
   }
 

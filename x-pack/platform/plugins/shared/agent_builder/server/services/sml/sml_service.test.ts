@@ -79,26 +79,27 @@ const createNotFoundError = () =>
 
 describe('createSmlService', () => {
   describe('lifecycle', () => {
-    it('setup() returns registerType and getRegistry', () => {
+    it('setup() returns registerType', () => {
       const service = createSmlService();
       const logger = createMockLogger();
       const setup = service.setup({ logger });
 
       expect(setup.registerType).toBeDefined();
       expect(typeof setup.registerType).toBe('function');
-      expect(setup.getRegistry).toBeDefined();
+
+      const def = createMockSmlTypeDefinition({ id: 'dashboard' });
+      setup.registerType(def);
+      expect(logger.info).toHaveBeenCalledWith('Registered SML type: dashboard');
+    });
+
+    it('start() returns the SmlService with registered types accessible', () => {
+      const service = createSmlService();
+      const logger = createMockLogger();
+      const setup = service.setup({ logger });
 
       const def = createMockSmlTypeDefinition({ id: 'dashboard' });
       setup.registerType(def);
 
-      expect(setup.getRegistry().has('dashboard')).toBe(true);
-      expect(logger.info).toHaveBeenCalledWith('Registered SML type: dashboard');
-    });
-
-    it('start() returns the SmlService with getCrawler', () => {
-      const service = createSmlService();
-      const logger = createMockLogger();
-      service.setup({ logger });
       const smlService = service.start({ logger });
 
       expect(smlService.search).toBeDefined();
@@ -109,6 +110,8 @@ describe('createSmlService', () => {
       expect(smlService.listTypeDefinitions).toBeDefined();
       expect(smlService.getCrawler).toBeDefined();
       expect(smlService.getCrawler()).toBeDefined();
+      expect(smlService.getTypeDefinition('dashboard')).toBe(def);
+      expect(smlService.listTypeDefinitions()).toContain(def);
     });
   });
 });

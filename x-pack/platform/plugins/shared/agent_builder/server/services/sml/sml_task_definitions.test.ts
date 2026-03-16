@@ -11,8 +11,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
-import type { SmlTypeDefinition } from './types';
-import type { SmlTypeRegistry } from './sml_type_registry';
+import type { SmlTypeDefinition, SmlService } from './types';
 import {
   SML_CRAWLER_TASK_TYPE,
   registerSmlCrawlerTaskDefinition,
@@ -23,15 +22,19 @@ const mockEsClient = {};
 const mockSoRepository = {};
 
 const mockCrawler = { crawl: jest.fn().mockResolvedValue(undefined) };
-const mockRegistry = {
-  get: jest.fn(),
-  list: jest.fn().mockReturnValue([]),
+const mockSmlService = {
+  getCrawler: jest.fn().mockReturnValue(mockCrawler),
+  getTypeDefinition: jest.fn(),
+  listTypeDefinitions: jest.fn().mockReturnValue([]),
+  search: jest.fn(),
+  checkItemsAccess: jest.fn(),
+  indexAttachment: jest.fn(),
+  getDocuments: jest.fn(),
 };
 const mockLogger = loggerMock.create();
 (mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
 const mockGetCrawlerDeps = jest.fn().mockResolvedValue({
-  crawler: mockCrawler,
-  registry: mockRegistry,
+  smlService: mockSmlService,
   elasticsearch: { client: { asInternalUser: mockEsClient } },
   savedObjects: { createInternalRepository: jest.fn().mockReturnValue(mockSoRepository) },
   logger: mockLogger,
@@ -66,13 +69,13 @@ describe('sml_task_definitions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetCrawlerDeps.mockResolvedValue({
-      crawler: mockCrawler,
-      registry: mockRegistry,
+      smlService: mockSmlService,
       elasticsearch: { client: { asInternalUser: mockEsClient } },
       savedObjects: { createInternalRepository: jest.fn().mockReturnValue(mockSoRepository) },
       logger: mockLogger,
     });
-    mockRegistry.list.mockReturnValue([]);
+    mockSmlService.listTypeDefinitions.mockReturnValue([]);
+    mockSmlService.getCrawler.mockReturnValue(mockCrawler);
   });
 
   describe('registerSmlCrawlerTaskDefinition', () => {
@@ -106,8 +109,8 @@ describe('sml_task_definitions', () => {
 
     it('awaits getCrawlerDeps and calls crawler.crawl with correct params', async () => {
       const definition = createMockDefinition({ id: 'visualization' });
-      mockRegistry.get.mockReturnValue(definition);
-      mockRegistry.list.mockReturnValue([definition]);
+      mockSmlService.getTypeDefinition.mockReturnValue(definition);
+      mockSmlService.listTypeDefinitions.mockReturnValue([definition]);
 
       const runner = getRegisteredTaskRunner({ attachmentType: 'visualization' });
       await runner.run();
@@ -121,8 +124,8 @@ describe('sml_task_definitions', () => {
     });
 
     it('warns and returns when type definition not found', async () => {
-      mockRegistry.get.mockReturnValue(undefined);
-      mockRegistry.list.mockReturnValue([{ id: 'dashboard' }]);
+      mockSmlService.getTypeDefinition.mockReturnValue(undefined);
+      mockSmlService.listTypeDefinitions.mockReturnValue([{ id: 'dashboard' }]);
 
       const runner = getRegisteredTaskRunner({ attachmentType: 'unknown-type' });
       const result = await runner.run();
@@ -136,7 +139,7 @@ describe('sml_task_definitions', () => {
 
     it('catches and logs crawler.crawl errors', async () => {
       const definition = createMockDefinition({ id: 'visualization' });
-      mockRegistry.get.mockReturnValue(definition);
+      mockSmlService.getTypeDefinition.mockReturnValue(definition);
       mockCrawler.crawl.mockRejectedValue(new Error('crawl failed'));
 
       const runner = getRegisteredTaskRunner({ attachmentType: 'visualization' });
@@ -159,11 +162,11 @@ describe('sml_task_definitions', () => {
     it('schedules a task per registered type', async () => {
       const def1 = createMockDefinition({ id: 'visualization' });
       const def2 = createMockDefinition({ id: 'dashboard' });
-      mockRegistry.list.mockReturnValue([def1, def2]);
+      mockSmlService.listTypeDefinitions.mockReturnValue([def1, def2]);
 
       await scheduleSmlCrawlerTasks({
         taskManager: mockTaskManager as unknown as TaskManagerStartContract,
-        registry: mockRegistry as unknown as SmlTypeRegistry,
+        smlService: mockSmlService as unknown as SmlService,
         logger: mockLogger as unknown as Logger,
       });
 
@@ -191,11 +194,11 @@ describe('sml_task_definitions', () => {
         id: 'visualization',
         fetchFrequency: () => '5m',
       });
-      mockRegistry.list.mockReturnValue([def]);
+      mockSmlService.listTypeDefinitions.mockReturnValue([def]);
 
       await scheduleSmlCrawlerTasks({
         taskManager: mockTaskManager as unknown as TaskManagerStartContract,
-        registry: mockRegistry as unknown as SmlTypeRegistry,
+        smlService: mockSmlService as unknown as SmlService,
         logger: mockLogger as unknown as Logger,
       });
 
@@ -208,11 +211,11 @@ describe('sml_task_definitions', () => {
 
     it('defaults to 10m interval', async () => {
       const def = createMockDefinition({ id: 'visualization' });
-      mockRegistry.list.mockReturnValue([def]);
+      mockSmlService.listTypeDefinitions.mockReturnValue([def]);
 
       await scheduleSmlCrawlerTasks({
         taskManager: mockTaskManager as unknown as TaskManagerStartContract,
-        registry: mockRegistry as unknown as SmlTypeRegistry,
+        smlService: mockSmlService as unknown as SmlService,
         logger: mockLogger as unknown as Logger,
       });
 
@@ -225,12 +228,12 @@ describe('sml_task_definitions', () => {
 
     it('logs error when ensureScheduled fails', async () => {
       const def = createMockDefinition({ id: 'visualization' });
-      mockRegistry.list.mockReturnValue([def]);
+      mockSmlService.listTypeDefinitions.mockReturnValue([def]);
       mockTaskManager.ensureScheduled.mockRejectedValue(new Error('schedule failed'));
 
       await scheduleSmlCrawlerTasks({
         taskManager: mockTaskManager as unknown as TaskManagerStartContract,
-        registry: mockRegistry as unknown as SmlTypeRegistry,
+        smlService: mockSmlService as unknown as SmlService,
         logger: mockLogger as unknown as Logger,
       });
 

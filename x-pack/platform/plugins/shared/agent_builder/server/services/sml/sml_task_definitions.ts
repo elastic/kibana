@@ -9,8 +9,7 @@ import { TaskManagerSetupContract, TaskManagerStartContract, TaskPriority, } fro
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
-import type { SmlCrawler } from './sml_crawler';
-import type { SmlTypeRegistry } from './sml_type_registry';
+import type { SmlCrawler, SmlService } from './types';
 
 /**
  * Security model:
@@ -41,8 +40,7 @@ export interface SmlCrawlerTaskParams {
 }
 
 export interface SmlCrawlerDepsProvider {
-  crawler: SmlCrawler;
-  registry: SmlTypeRegistry;
+  smlService: SmlService;
   elasticsearch: ElasticsearchServiceStart;
   savedObjects: SavedObjectsServiceStart;
   logger: Logger;
@@ -75,16 +73,16 @@ export const registerSmlCrawlerTaskDefinition = ({
               return { state: {} };
             }
 
-            const { crawler, registry, elasticsearch, savedObjects, logger } =
+            const { smlService, elasticsearch, savedObjects, logger } =
               await getCrawlerDeps();
 
             logger.info(`SML crawler task starting for type '${attachmentType}'`);
 
-            const definition = registry.get(attachmentType);
+            const definition = smlService.getTypeDefinition(attachmentType);
             if (!definition) {
               logger.warn(
-                `SML crawler task: type definition '${attachmentType}' not found — skipping. Registered types: [${registry
-                  .list()
+                `SML crawler task: type definition '${attachmentType}' not found — skipping. Registered types: [${smlService
+                  .listTypeDefinitions()
                   .map((t) => t.id)
                   .join(', ')}]`
               );
@@ -95,7 +93,7 @@ export const registerSmlCrawlerTaskDefinition = ({
             const soRepository = savedObjects.createInternalRepository();
 
             try {
-              await crawler.crawl({
+              await smlService.getCrawler().crawl({
                 definition,
                 esClient,
                 savedObjectsClient: soRepository,
@@ -124,14 +122,14 @@ export const registerSmlCrawlerTaskDefinition = ({
  */
 export const scheduleSmlCrawlerTasks = async ({
   taskManager,
-  registry,
+  smlService,
   logger,
 }: {
   taskManager: TaskManagerStartContract;
-  registry: SmlTypeRegistry;
+  smlService: SmlService;
   logger: Logger;
 }) => {
-  const types = registry.list();
+  const types = smlService.listTypeDefinitions();
 
   for (const definition of types) {
     const taskId = `${SML_CRAWLER_TASK_TYPE}:${definition.id}`;
