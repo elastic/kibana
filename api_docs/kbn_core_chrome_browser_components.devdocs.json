@@ -40,7 +40,7 @@
           "; }>) => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-        "lineNumber": 118,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -58,7 +58,7 @@
               "; }>"
             ],
             "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 118,
+            "lineNumber": 32,
             "columnNumber": 98,
             "deprecated": false,
             "trackAdoption": false,
@@ -344,8 +344,29 @@
           "ChromeComponentsDeps"
         ],
         "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-        "lineNumber": 129,
+        "lineNumber": 43,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-components",
+        "id": "def-public.useHasAppMenu",
+        "type": "Function",
+        "tags": [],
+        "label": "useHasAppMenu",
+        "description": [
+          "\nReturns `true` when an app menu is currently active — either a legacy action\nmenu mount point (`application.currentActionMenu$`) or a new `AppMenuConfig`\nregistered via `chrome.setAppMenu()`."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/core/packages/chrome/browser-components/src/shared/chrome_hooks.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -369,8 +390,8 @@
           "ApplicationStart",
           ", \"navigateToUrl\" | \"navigateToApp\" | \"currentAppId$\">"
         ],
-        "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-        "lineNumber": 34,
+        "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -390,8 +411,8 @@
               "MountPoint",
               "<HTMLElement> | undefined>"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 41,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -406,8 +427,8 @@
         "tags": [],
         "label": "ChromeComponentsDeps",
         "description": [],
-        "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-        "lineNumber": 77,
+        "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+        "lineNumber": 92,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -422,8 +443,8 @@
             "signature": [
               "ChromeComponentsConfig"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 78,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -438,8 +459,8 @@
             "signature": [
               "ChromeApplicationContext"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 79,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -454,8 +475,8 @@
             "signature": [
               "IBasePath"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 80,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -470,8 +491,8 @@
             "signature": [
               "DocLinksStart"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 81,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -486,8 +507,8 @@
             "signature": [
               "NavControlsObservables"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 82,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -504,8 +525,8 @@
             "signature": [
               "ClassicChromeObservables"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 83,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -522,8 +543,8 @@
             "signature": [
               "ProjectChromeObservables"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 85,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -539,8 +560,8 @@
               "Observable",
               "<number>"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 87,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -569,8 +590,8 @@
               "ChromeGlobalHelpExtensionMenuLink",
               "[]>; }"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 88,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -588,8 +609,8 @@
               "ChromeNavLink",
               "[]>"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 94,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 109,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -607,8 +628,8 @@
               "CustomBranding",
               ">"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 95,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -626,8 +647,8 @@
               "ChromeBreadcrumbsAppendExtension",
               "[]>"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 96,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -645,8 +666,8 @@
               "AppMenuConfig",
               " | undefined>"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 97,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -664,8 +685,8 @@
               "ChromeUserBanner",
               " | undefined>"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 98,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -682,8 +703,8 @@
               "Observable",
               "<boolean>; initialCollapsed: boolean; onToggleCollapsed: (collapsed: boolean) => void; }"
             ],
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx",
-            "lineNumber": 99,
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts",
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
