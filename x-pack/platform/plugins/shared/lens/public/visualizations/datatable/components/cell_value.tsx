@@ -113,6 +113,7 @@ export const createGridCell = (
           })}
         >
           <EuiBadge
+            data-test-subj="lnsTableCellContentBadge"
             color={badgeColor ?? 'hollow'}
             style={badgeTextColor ? { color: badgeTextColor } : undefined}
             {...clickProps}
