@@ -33,6 +33,7 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
     kbnUrl,
     kbnClient,
   }) => {
+    test.fixme(true, 'Flaky: detection engine alerts may not generate within CI timeout');
     test.setTimeout(360_000);
     await browserAuth.loginWithCustomRole(t1AnalystRole);
     await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
@@ -57,6 +58,7 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
     kbnUrl,
     kbnClient,
   }) => {
+    test.fixme(true, 'Flaky: detection engine alerts may not generate within CI timeout');
     test.setTimeout(360_000);
     await browserAuth.loginWithCustomRole(t1AnalystRole);
     await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));

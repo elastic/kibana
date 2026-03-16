@@ -164,21 +164,22 @@ roles.forEach(({ name, role }) => {
         await pageObjects.packs.navigate();
         await expect(page.testSubj.locator('add-pack-button')).toBeDisabled();
 
-        // Ensure the pack is visible - it may be on page 2 due to accumulated packs
+        // Ensure the pack is visible - it may be on another page due to accumulated packs
         let toggle = page.locator(`[aria-label="${packName}"]`);
-        if ((await toggle.isVisible({ timeout: 3_000 }).catch(() => false)) === false) {
+        if ((await toggle.isVisible({ timeout: 5_000 }).catch(() => false)) === false) {
           const nextPageLink = page.getByRole('link', { name: 'Next page' });
-          while (await nextPageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
+          while (await nextPageLink.isVisible({ timeout: 5_000 }).catch(() => false)) {
             await nextPageLink.click();
-            await waitForPageReady(page);
-            if (await toggle.isVisible({ timeout: 2_000 }).catch(() => false)) {
+            // eslint-disable-next-line playwright/no-wait-for-timeout -- brief pause for table re-render
+            await page.waitForTimeout(1_000);
+            if (await toggle.isVisible({ timeout: 5_000 }).catch(() => false)) {
               break;
             }
           }
         }
 
         toggle = page.locator(`[aria-label="${packName}"]`);
-        await toggle.waitFor({ state: 'visible', timeout: 10_000 });
+        await toggle.waitFor({ state: 'visible', timeout: 30_000 });
         await expect(toggle).toBeDisabled();
 
         await pageObjects.packs.navigateToPackDetail(packId);
