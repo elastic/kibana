@@ -310,70 +310,67 @@ export const bucketHistogramOperationSchema = schema.object(
   { meta: { id: 'histogramOperation', title: 'Histogram Operation' } }
 );
 
-export const bucketRangesOperationSchema = schema.object(
-  {
-    operation: schema.literal('range'),
-    ...formatSchema,
-    ...labelSharedProp,
-    /**
-     * Label for the operation
-     */
-    label: schema.maybe(
-      schema.string({
-        meta: {
-          description: 'Label for the operation',
-        },
-      })
-    ),
-    /**
-     * Field to be used for the range
-     */
-    field: schema.string({
+export const bucketRangesOperationSchema = schema.object({
+  operation: schema.literal('range'),
+  ...formatSchema,
+  ...labelSharedProp,
+  /**
+   * Label for the operation
+   */
+  label: schema.maybe(
+    schema.string({
       meta: {
-        description: 'Field to be used for the range',
+        description: 'Label for the operation',
       },
+    })
+  ),
+  /**
+   * Field to be used for the range
+   */
+  field: schema.string({
+    meta: {
+      description: 'Field to be used for the range',
+    },
+  }),
+  /**
+   * Ranges
+   */
+  ranges: schema.arrayOf(
+    schema.object({
+      /**
+       * Less than or equal to
+       */
+      lte: schema.maybe(
+        schema.number({
+          meta: {
+            description: 'Less than or equal to',
+          },
+        })
+      ),
+      /**
+       * Greater than
+       */
+      gt: schema.maybe(
+        schema.number({
+          meta: {
+            description: 'Greater than',
+          },
+        })
+      ),
+      /**
+       * Label
+       */
+      label: schema.maybe(
+        schema.string({
+          meta: {
+            description: 'Label',
+          },
+        })
+      ),
     }),
-    /**
-     * Ranges
-     */
-    ranges: schema.arrayOf(
-      schema.object({
-        /**
-         * Less than or equal to
-         */
-        lte: schema.maybe(
-          schema.number({
-            meta: {
-              description: 'Less than or equal to',
-            },
-          })
-        ),
-        /**
-         * Greater than
-         */
-        gt: schema.maybe(
-          schema.number({
-            meta: {
-              description: 'Greater than',
-            },
-          })
-        ),
-        /**
-         * Label
-         */
-        label: schema.maybe(
-          schema.string({
-            meta: {
-              description: 'Label',
-            },
-          })
-        ),
-      }),
-      { maxSize: 100 }
-    ),
-  },
-  { meta: { id: 'rangesOperation', title: 'Ranges Operation' } }
-);
+    { maxSize: 100, meta: { id: 'rangesOperation', title: 'Ranges Operation' } }
+  ),
+});
 
 export const bucketOperationDefinitionSchema = schema.oneOf([
   bucketDateHistogramOperationSchema,
