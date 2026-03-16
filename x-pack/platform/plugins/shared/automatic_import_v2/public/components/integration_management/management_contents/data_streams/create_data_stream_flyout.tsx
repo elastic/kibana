@@ -42,7 +42,9 @@ import {
   useGetIntegrationById,
   useUploadSamples,
   normalizeTitleName,
+  useKibana,
 } from '../../../../common';
+import { useTelemetry } from '../../../telemetry_context';
 
 interface CreateDataStreamFlyoutProps {
   onClose: () => void;
@@ -126,6 +128,8 @@ const dataCollectionMethodOptions: Array<EuiComboBoxOptionOption<string>> = [
 export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ onClose }) => {
   const styles = useLayoutStyles();
   const { integrationId: currentIntegrationId } = useParams<{ integrationId?: string }>();
+  const { reportAnalyzeLogsTriggered } = useTelemetry();
+  const { notifications } = useKibana().services;
 
   const { integration, refetch: refetchIntegration } = useGetIntegrationById(currentIntegrationId);
   const { form, formData } = useIntegrationForm();
@@ -263,37 +267,45 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       inputTypes,
     };
 
-    if (logsSourceOption === 'upload' && logSample) {
-      const samples = logSample
-        .split('\n')
-        .map((line) => line.trim())
-        .filter((line) => line.length > 0);
+    try {
+      if (logsSourceOption === 'upload' && logSample) {
+        const samples = logSample
+          .split('\n')
+          .map((line) => line.trim())
+          .filter((line) => line.length > 0);
 
-      await uploadSamplesMutation.mutateAsync({
+        await uploadSamplesMutation.mutateAsync({
+          integrationId,
+          dataStreamId,
+          samples,
+          originalSource: {
+            sourceType: 'file',
+            sourceValue: uploadedFileName ?? 'uploaded-file.log',
+          },
+        });
+      } else if (logsSourceOption === 'index' && selectedIndex) {
+        // For index source, we don't need to upload
+        // TODO: Add logic to fetch samples from the index.
+      }
+
+      await createUpdateIntegrationMutation.mutateAsync({
+        connectorId: formData.connectorId,
         integrationId,
-        dataStreamId,
-        samples,
-        originalSource: {
-          sourceType: 'file',
-          sourceValue: uploadedFileName ?? 'uploaded-file.log',
-        },
+        title: formData.title,
+        description: formData.description,
+        ...(formData.logo ? { logo: formData.logo } : {}),
+        dataStreams: [newDataStream],
       });
-    } else if (logsSourceOption === 'index' && selectedIndex) {
-      // For index source, we don't need to upload
-      // TODO: Add logic to fetch samples from the index.
+
+      refetchIntegration();
+      onClose();
+    } catch (error) {
+      notifications.toasts.addError(error instanceof Error ? error : new Error('Unknown error'), {
+        title: i18n.CREATE_DATA_STREAM_ERROR,
+      });
+    } finally {
+      reportAnalyzeLogsTriggered({ integrationId, dataStreamId, logsSource: logsSourceOption });
     }
-
-    await createUpdateIntegrationMutation.mutateAsync({
-      connectorId: formData.connectorId,
-      integrationId,
-      title: formData.title,
-      description: formData.description,
-      ...(formData.logo ? { logo: formData.logo } : {}),
-      dataStreams: [newDataStream],
-    });
-
-    refetchIntegration();
-    onClose();
   }, [
     formData,
     createUpdateIntegrationMutation,
@@ -305,6 +317,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     uploadedFileName,
     refetchIntegration,
     onClose,
+    reportAnalyzeLogsTriggered,
+    notifications,
   ]);
 
   return (

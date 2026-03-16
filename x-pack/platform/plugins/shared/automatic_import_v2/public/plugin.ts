@@ -19,6 +19,7 @@ import type {
   AutomaticImportV2PluginStart,
   AutomaticImportPluginStartDependencies,
 } from './types';
+import type { Services } from './services/types';
 import { useGetAllIntegrations } from './common/hooks/use_get_all_integrations';
 import { useGetIntegrationById } from './common/hooks/use_get_integration_by_id';
 import { getCreateIntegrationLazy } from './components/create_integration';
@@ -39,6 +40,7 @@ export class AutomaticImportV2Plugin
     // Register EBT telemetry event types
     this.telemetry.setup(core.analytics);
 
+    const telemetry = this.telemetry;
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -46,7 +48,7 @@ export class AutomaticImportV2Plugin
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, plugins] = await core.getStartServices();
-        return renderApp({ coreStart, plugins, params });
+        return renderApp({ coreStart, plugins, params, telemetryService: telemetry.start() });
       },
     });
 
@@ -57,9 +59,11 @@ export class AutomaticImportV2Plugin
     core: CoreStart,
     dependencies: AutomaticImportPluginStartDependencies
   ): AutomaticImportV2PluginStart {
-    const services = {
+    const telemetry = this.telemetry.start();
+    const services: Services = {
       ...core,
       ...dependencies,
+      telemetry,
     };
 
     return {
@@ -72,7 +76,7 @@ export class AutomaticImportV2Plugin
         CreateIntegrationSideCardButton: getCreateIntegrationSideCardButtonLazy(),
         DataStreamResultsFlyout: getDataStreamResultsFlyoutComponent(),
       },
-      telemetry: this.telemetry.start(),
+      telemetry,
     };
   }
 

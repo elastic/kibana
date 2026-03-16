@@ -266,7 +266,6 @@ const approveIntegrationRoute = (
             const integration = await automaticImportService.getIntegrationById(integrationId);
             const dataStreams = await automaticImportService.getAllDataStreams(integrationId);
 
-            // Extract processor info from all data streams
             const allProcessorTypes: string[] = [];
             let totalProcessorCount = 0;
 
@@ -293,7 +292,6 @@ const approveIntegrationRoute = (
               processorTypes: allProcessorTypes,
             });
           } catch (telemetryError) {
-            // Don't fail the request if telemetry fails
             logger.warn(`Failed to report telemetry: ${telemetryError}`);
           }
 

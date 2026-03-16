@@ -55,5 +55,8 @@ export {
   type CodeEditorCopyClickedPayload,
   type DataStreamCreationCompletePayload,
   type IntegrationInstalledPayload,
+  type ManageIntegrationsTableViewedPayload,
+  type CreateIntegrationClickedPayload,
+  type UploadIntegrationClickedPayload,
   type AIV2EventPayload,
 } from './telemetry/types';

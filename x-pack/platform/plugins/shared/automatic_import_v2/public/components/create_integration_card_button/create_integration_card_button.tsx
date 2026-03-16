@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { AIV2TelemetryEventType } from '../../../common';
 import { useKibana } from '../../common/hooks/use_kibana';
 import autoImportIntegrationsImage from '../../common/images/auto_import_integrations.svg';
 
@@ -83,10 +84,12 @@ const useStyles = (euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => ({
     }
   `,
 });
-// border-radius: ${borderRadius};
 
 export const CreateIntegrationSideCardButton = React.memo(() => {
-  const { getUrlForApp, navigateToUrl } = useKibana().services.application;
+  const services = useKibana().services;
+  const { getUrlForApp, navigateToUrl } = services.application;
+  // Component can be rendered in AIV2 context (telemetry) or Fleet context (automaticImportVTwo.telemetry)
+  const telemetry = (services as any).telemetry ?? (services as any).automaticImportVTwo?.telemetry;
   const { euiTheme } = useEuiTheme();
   const styles = useStyles(euiTheme);
 
@@ -103,17 +106,19 @@ export const CreateIntegrationSideCardButton = React.memo(() => {
   const navigateToCreate = useCallback(
     (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
+      telemetry?.reportEvent(AIV2TelemetryEventType.CreateIntegrationClicked, {});
       navigateToUrl(createHref);
     },
-    [createHref, navigateToUrl]
+    [createHref, navigateToUrl, telemetry]
   );
 
   const navigateToUpload = useCallback(
     (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
+      telemetry?.reportEvent(AIV2TelemetryEventType.UploadIntegrationClicked, {});
       navigateToUrl(uploadHref);
     },
-    [uploadHref, navigateToUrl]
+    [uploadHref, navigateToUrl, telemetry]
   );
 
   return (

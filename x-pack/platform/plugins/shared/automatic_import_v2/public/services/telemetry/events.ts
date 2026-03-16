@@ -114,4 +114,11 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
       _meta: { description: 'Data stream ID', optional: false },
     },
   },
+
+  // Fleet context events (empty payloads - just counting occurrences)
+  [AIV2TelemetryEventType.ManageIntegrationsTableViewed]: {},
+
+  [AIV2TelemetryEventType.CreateIntegrationClicked]: {},
+
+  [AIV2TelemetryEventType.UploadIntegrationClicked]: {},
 };

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { LogsSource } from '../../public/components/telemetry_context';
+
 /**
  * AIV2 Telemetry Event Types
  *
@@ -23,6 +25,10 @@ export enum AIV2TelemetryEventType {
   DataStreamCreationComplete = 'aiv2_data_stream_creation_complete',
 
   IntegrationInstalled = 'aiv2_integration_installed',
+
+  ManageIntegrationsTableViewed = 'aiv2_manage_integrations_table_viewed',
+  CreateIntegrationClicked = 'aiv2_create_integration_clicked',
+  UploadIntegrationClicked = 'aiv2_upload_integration_clicked',
 }
 
 export interface CreateIntegrationPageLoadedPayload {
@@ -31,7 +37,7 @@ export interface CreateIntegrationPageLoadedPayload {
 
 export interface DataStreamFlyoutOpenedPayload {
   sessionId: string;
-  integrationId: string;
+  integrationId?: string;
 }
 
 export interface EditDataStreamFlyoutOpenedPayload {
@@ -44,6 +50,7 @@ export interface AnalyzeLogsTriggeredPayload {
   sessionId: string;
   integrationId: string;
   dataStreamId: string;
+  logsSource: LogsSource;
 }
 
 export interface EditPipelineTabOpenedPayload {
@@ -77,6 +84,12 @@ export interface IntegrationInstalledPayload {
   processorTypes: string[];
 }
 
+export type ManageIntegrationsTableViewedPayload = Record<string, never>;
+
+export type CreateIntegrationClickedPayload = Record<string, never>;
+
+export type UploadIntegrationClickedPayload = Record<string, never>;
+
 export type AIV2EventPayload<T extends AIV2TelemetryEventType> =
   T extends AIV2TelemetryEventType.CreateIntegrationPageLoaded
     ? CreateIntegrationPageLoadedPayload
@@ -94,4 +107,10 @@ export type AIV2EventPayload<T extends AIV2TelemetryEventType> =
     ? DataStreamCreationCompletePayload
     : T extends AIV2TelemetryEventType.IntegrationInstalled
     ? IntegrationInstalledPayload
+    : T extends AIV2TelemetryEventType.ManageIntegrationsTableViewed
+    ? ManageIntegrationsTableViewedPayload
+    : T extends AIV2TelemetryEventType.CreateIntegrationClicked
+    ? CreateIntegrationClickedPayload
+    : T extends AIV2TelemetryEventType.UploadIntegrationClicked
+    ? UploadIntegrationClickedPayload
     : never;

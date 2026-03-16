@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -31,7 +31,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
-import type { DataStreamResponse, TaskStatus } from '@kbn/automatic-import-v2-plugin/common';
+import {
+  AIV2TelemetryEventType,
+  type DataStreamResponse,
+  type TaskStatus,
+} from '@kbn/automatic-import-v2-plugin/common';
 
 import { PackageIcon } from '../../../../../../../components/package_icon';
 
@@ -96,6 +100,17 @@ export const ManageIntegrationsTable: React.FC<{
     notifications,
     userProfile: userProfileService,
   } = useStartServices();
+
+  const hasReportedView = useRef(false);
+  useEffect(() => {
+    if (!isLoading && !hasReportedView.current) {
+      automaticImportVTwo?.telemetry?.reportEvent(
+        AIV2TelemetryEventType.ManageIntegrationsTableViewed,
+        {}
+      );
+      hasReportedView.current = true;
+    }
+  }, [isLoading, automaticImportVTwo]);
 
   const integrationsWithActions = useMemo(() => {
     return integrations.map((item) => {
@@ -609,6 +624,12 @@ export const ManageIntegrationsTable: React.FC<{
       <EuiFlexItem grow={false}>
         <EuiFilterGroup css={filterButtonStyle}>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actionsFilterPopover',
+              {
+                defaultMessage: 'Filter by actions',
+              }
+            )}
             button={
               <EuiFilterButton
                 iconType="arrowDown"
@@ -635,6 +656,12 @@ export const ManageIntegrationsTable: React.FC<{
       <EuiFlexItem grow={false}>
         <EuiFilterGroup css={filterButtonStyle}>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.statusFilterPopover',
+              {
+                defaultMessage: 'Filter by status',
+              }
+            )}
             button={
               <EuiFilterButton
                 iconType="arrowDown"

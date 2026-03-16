@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiBasicTableColumn, EuiTableSortingType, Criteria } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -21,6 +21,7 @@ import { InputTypesBadges } from './input_types_badges';
 import { Status } from './status';
 import { useUIState } from '../../../contexts';
 import { useIntegrationForm } from '../../../forms/integration_form';
+import { useTelemetry } from '../../../../telemetry_context';
 
 interface DataStreamsTableProps {
   integrationId: string;
@@ -33,6 +34,18 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
   const { reanalyzeDataStreamMutation } = useReanalyzeDataStream();
   const { openEditPipelineFlyout } = useUIState();
   const { formData } = useIntegrationForm();
+  const { reportEditDataStreamFlyoutOpened } = useTelemetry();
+
+  const handleOpenEditPipelineFlyout = useCallback(
+    (item: DataStreamResponse) => {
+      openEditPipelineFlyout(item);
+      reportEditDataStreamFlyoutOpened({
+        integrationId,
+        dataStreamId: item.dataStreamId,
+      });
+    },
+    [integrationId, reportEditDataStreamFlyoutOpened, openEditPipelineFlyout]
+  );
   const [dataStreamDeleteTarget, setDataStreamDeleteTarget] = useState<DataStreamResponse | null>(
     null
   );
@@ -122,7 +135,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
             type: 'icon',
             'data-test-subj': 'expandDataStreamButton',
             onClick: (item: DataStreamResponse) => {
-              openEditPipelineFlyout(item);
+              handleOpenEditPipelineFlyout(item);
             },
             enabled: (item: DataStreamResponse) => item.status === 'completed' && !isDeleting(item),
           },
@@ -198,7 +211,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         width: '80px',
       },
     ];
-  }, [reanalyzingDataStreamId, openEditPipelineFlyout, formData?.connectorId, euiTheme]);
+  }, [reanalyzingDataStreamId, formData?.connectorId, euiTheme, handleOpenEditPipelineFlyout]);
 
   return (
     <>

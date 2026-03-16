@@ -118,6 +118,13 @@ export const ANALYZE_LOGS_BUTTON = i18n.translate(
   }
 );
 
+export const CREATE_DATA_STREAM_ERROR = i18n.translate(
+  'xpack.automaticImportV2.dataStreams.createDataStreamError',
+  {
+    defaultMessage: 'Failed to create data stream',
+  }
+);
+
 export const LOG_FILE_ERROR = {
   CAN_NOT_READ: i18n.translate('xpack.automaticImportV2.dataStreams.logFileError.canNotRead', {
     defaultMessage: 'Failed to read the log file',

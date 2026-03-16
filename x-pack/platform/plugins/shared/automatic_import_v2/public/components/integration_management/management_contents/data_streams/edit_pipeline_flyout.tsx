@@ -26,12 +26,13 @@ import {
   EuiButtonEmpty,
   EuiConfirmModal,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { XJsonLang } from '@kbn/monaco';
 import type { DataStreamResponse } from '../../../../../common';
 import { useGetDataStreamResults, useUpdateDataStreamPipeline } from '../../../../common';
 import { useUIState } from '../../contexts';
+import { useTelemetry } from '../../../telemetry_context';
 import * as i18n from './translations';
 import { getIconFromType, flattenPipelineObject } from './utils';
 
@@ -57,6 +58,8 @@ export const EditPipelineFlyout = ({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
   const { selectedPipelineTab, selectPipelineTab } = useUIState();
+  const { reportCodeEditorCopyClicked, reportEditPipelineTabOpened } = useTelemetry();
+  const editorContainerRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, isError, error } = useGetDataStreamResults(
     integrationId,
@@ -178,6 +181,22 @@ export const EditPipelineFlyout = ({
     onClose();
   }, [onClose]);
 
+  const handleEditorContainerClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      const target = event.target as HTMLElement;
+      if (
+        target.closest('.euiCodeBlock__copyButton') ||
+        target.getAttribute('aria-label')?.toLowerCase().includes('copy')
+      ) {
+        reportCodeEditorCopyClicked({
+          integrationId,
+          dataStreamId: dataStream.dataStreamId,
+        });
+      }
+    },
+    [reportCodeEditorCopyClicked, integrationId, dataStream.dataStreamId]
+  );
+
   return (
     <EuiFlyout onClose={handleFlyoutClose} aria-labelledby="editPipelineFlyoutTitle">
       <EuiFlyoutHeader>
@@ -228,7 +247,13 @@ export const EditPipelineFlyout = ({
           </EuiTab>
           <EuiTab
             isSelected={selectedPipelineTab === 'pipeline'}
-            onClick={() => selectPipelineTab('pipeline')}
+            onClick={() => {
+              reportEditPipelineTabOpened({
+                integrationId,
+                dataStreamId: dataStream.dataStreamId,
+              });
+              selectPipelineTab('pipeline');
+            }}
           >
             {i18n.EDIT_PIPELINE_FLYOUT.pipelineTab}
           </EuiTab>
@@ -295,7 +320,10 @@ export const EditPipelineFlyout = ({
 
         {isEditorVisible && (
           <div
-            onKeyDownCapture={(event) => {
+            role="presentation"
+            ref={editorContainerRef}
+            onClick={handleEditorContainerClick}
+            onKeyDown={(event) => {
               if (event.key === 'Enter') {
                 // Prevent parent form handlers from intercepting Enter while editing JSON.
                 event.stopPropagation();

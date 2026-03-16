@@ -54,7 +54,6 @@ export class RequestContextFactory implements IRequestContextFactory {
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const fieldsMetadataClient = await startPlugins.fieldsMetadata.getClient(request);
 
-    // Analytics is only available during setup, so we bind it from the core object
     const reportTelemetryEvent = <TEventType extends string>(
       eventType: TEventType,
       eventData: Record<string, unknown>

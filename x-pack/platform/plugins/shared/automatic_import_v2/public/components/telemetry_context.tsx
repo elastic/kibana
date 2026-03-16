@@ -9,25 +9,25 @@ import { v4 as uuidV4 } from 'uuid';
 import { useKibana } from '../common/hooks/use_kibana';
 import { AIV2TelemetryEventType } from '../../common';
 
-// F2: Datastream flyout opens
-type ReportDataStreamFlyoutOpened = (params: { integrationId: string }) => void;
+export type LogsSource = 'upload' | 'index';
+type ReportDataStreamFlyoutOpened = (params: { integrationId?: string }) => void;
 
-// F5: Edit datastream flyout opens
 type ReportEditDataStreamFlyoutOpened = (params: {
   integrationId: string;
   dataStreamId: string;
 }) => void;
 
-// F3: "Analyze logs" trigger
-type ReportAnalyzeLogsTriggered = (params: { integrationId: string; dataStreamId: string }) => void;
+type ReportAnalyzeLogsTriggered = (params: {
+  integrationId: string;
+  dataStreamId: string;
+  logsSource: LogsSource;
+}) => void;
 
-// Edit pipeline tab opened
 type ReportEditPipelineTabOpened = (params: {
   integrationId: string;
   dataStreamId: string;
 }) => void;
 
-// Code editor copy button clicked
 type ReportCodeEditorCopyClicked = (params: {
   integrationId: string;
   dataStreamId: string;
@@ -42,21 +42,25 @@ interface TelemetryContextProps {
   reportCodeEditorCopyClicked: ReportCodeEditorCopyClicked;
 }
 
-const TelemetryContext = React.createContext<TelemetryContextProps | null>(null);
+const defaultTelemetryContext: TelemetryContextProps = {
+  sessionId: '',
+  reportDataStreamFlyoutOpened: () => {},
+  reportEditDataStreamFlyoutOpened: () => {},
+  reportAnalyzeLogsTriggered: () => {},
+  reportEditPipelineTabOpened: () => {},
+  reportCodeEditorCopyClicked: () => {},
+};
+
+const TelemetryContext = React.createContext<TelemetryContextProps>(defaultTelemetryContext);
 
 export const useTelemetry = () => {
-  const context = React.useContext(TelemetryContext);
-  if (!context) {
-    throw new Error('useTelemetry must be used within a TelemetryContextProvider');
-  }
-  return context;
+  return React.useContext(TelemetryContext);
 };
 
 export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ children }) => {
   const sessionData = useRef({ sessionId: uuidV4() });
 
-  const { automaticImportV2 } = useKibana().services;
-  const telemetry = automaticImportV2?.telemetry;
+  const { telemetry } = useKibana().services;
 
   // Report page load event once when provider mounts
   useEffect(() => {
@@ -65,7 +69,6 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
     });
   }, [telemetry]);
 
-  // F2: Datastream flyout opens
   const reportDataStreamFlyoutOpened = useCallback<ReportDataStreamFlyoutOpened>(
     ({ integrationId }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.DataStreamFlyoutOpened, {
@@ -76,7 +79,6 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
     [telemetry]
   );
 
-  // F5: Edit datastream flyout opens
   const reportEditDataStreamFlyoutOpened = useCallback<ReportEditDataStreamFlyoutOpened>(
     ({ integrationId, dataStreamId }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.EditDataStreamFlyoutOpened, {
@@ -88,19 +90,18 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
     [telemetry]
   );
 
-  // F3: "Analyze logs" trigger
   const reportAnalyzeLogsTriggered = useCallback<ReportAnalyzeLogsTriggered>(
-    ({ integrationId, dataStreamId }) => {
+    ({ integrationId, dataStreamId, logsSource }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.AnalyzeLogsTriggered, {
         sessionId: sessionData.current.sessionId,
         integrationId,
         dataStreamId,
+        logsSource,
       });
     },
     [telemetry]
   );
 
-  // Edit pipeline tab opened
   const reportEditPipelineTabOpened = useCallback<ReportEditPipelineTabOpened>(
     ({ integrationId, dataStreamId }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.EditPipelineTabOpened, {
@@ -112,7 +113,6 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
     [telemetry]
   );
 
-  // Code editor copy button clicked
   const reportCodeEditorCopyClicked = useCallback<ReportCodeEditorCopyClicked>(
     ({ integrationId, dataStreamId }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.CodeEditorCopyClicked, {

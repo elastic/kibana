@@ -39,6 +39,13 @@ jest.mock('@kbn/code-editor', () => ({
       >
         Change editor value
       </button>
+      <button
+        className="euiCodeBlock__copyButton"
+        data-test-subj="code-editor-copy"
+        aria-label="Copy"
+      >
+        Copy
+      </button>
     </div>
   )),
 }));
@@ -64,6 +71,18 @@ const mockUIState = {
 
 jest.mock('../../contexts', () => ({
   useUIState: () => mockUIState,
+}));
+
+const mockReportCodeEditorCopyClicked = jest.fn();
+jest.mock('../../../telemetry_context', () => ({
+  useTelemetry: () => ({
+    sessionId: 'test-session-id',
+    reportDataStreamFlyoutOpened: jest.fn(),
+    reportEditDataStreamFlyoutOpened: jest.fn(),
+    reportAnalyzeLogsTriggered: jest.fn(),
+    reportEditPipelineTabOpened: jest.fn(),
+    reportCodeEditorCopyClicked: mockReportCodeEditorCopyClicked,
+  }),
 }));
 
 const createMockDataStream = (overrides: Partial<DataStreamResponse> = {}): DataStreamResponse => ({
@@ -118,6 +137,7 @@ describe('EditPipelineFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockMutateAsync.mockResolvedValue(createMockResults());
+    mockReportCodeEditorCopyClicked.mockClear();
     mockUIState.selectedPipelineTab = 'table';
     mockUseGetDataStreamResults.mockReturnValue({
       data: createMockResults(),
@@ -324,6 +344,19 @@ describe('EditPipelineFlyout', () => {
         integrationId: 'integration-123',
         dataStreamId: 'ds-1',
         ingestPipeline: expect.stringContaining('"processors"'),
+      });
+    });
+
+    it('should report telemetry when copy button is clicked', async () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      const copyButton = screen.getByTestId('code-editor-copy');
+      await userEvent.click(copyButton);
+
+      expect(mockReportCodeEditorCopyClicked).toHaveBeenCalledWith({
+        integrationId: 'integration-123',
+        dataStreamId: 'ds-1',
       });
     });
   });
