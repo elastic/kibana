@@ -1081,8 +1081,8 @@ steps:
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
         items: [
-          { create: { _id: 'workflow-1', status: 201 } },
-          { create: { _id: 'workflow-2', status: 201 } },
+          { index: { _id: 'workflow-1', status: 201 } },
+          { index: { _id: 'workflow-2', status: 201 } },
         ],
         took: 10,
       } as any);
@@ -1132,9 +1132,9 @@ steps:
       mockEsClient.bulk.mockResolvedValue({
         errors: true,
         items: [
-          { create: { _id: 'workflow-1', status: 201 } },
+          { index: { _id: 'workflow-1', status: 201 } },
           {
-            create: {
+            index: {
               _id: 'workflow-2',
               status: 400,
               error: { type: 'mapper_parsing_exception', reason: 'failed to parse' },
@@ -1183,7 +1183,7 @@ steps:
     it('should handle invalid yaml in bulk create without failing entire batch', async () => {
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ create: { _id: 'workflow-1', status: 201 } }],
+        items: [{ index: { _id: 'workflow-1', status: 201 } }],
         took: 10,
       } as any);
 
@@ -1219,7 +1219,7 @@ steps:
     it('should reject malformed custom IDs and include them in failed', async () => {
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ create: { _id: 'workflow-1', status: 201 } }],
+        items: [{ index: { _id: 'workflow-1', status: 201 } }],
         took: 10,
       } as any);
 
@@ -1268,7 +1268,7 @@ steps:
 
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ create: { _id: 'workflow-1', status: 201 } }],
+        items: [{ index: { _id: 'workflow-1', status: 201 } }],
         took: 10,
       } as any);
 
@@ -1302,7 +1302,7 @@ steps:
 
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ create: { _id: 'workflow-1', status: 201 } }],
+        items: [{ index: { _id: 'workflow-1', status: 201 } }],
         took: 10,
       } as any);
 
@@ -1368,10 +1368,10 @@ steps:
       expect(firstOp).not.toHaveProperty('create');
     });
 
-    it('should use create operation by default (no overwrite)', async () => {
+    it('should use index operation by default (no overwrite)', async () => {
       mockEsClient.bulk.mockResolvedValue({
         errors: false,
-        items: [{ create: { _id: 'workflow-1', status: 201 } }],
+        items: [{ index: { _id: 'workflow-1', status: 201 } }],
         took: 10,
       } as any);
 
@@ -1397,8 +1397,8 @@ steps:
 
       const bulkCall = mockEsClient.bulk.mock.calls[0][0];
       const firstOp = bulkCall.operations[0];
-      expect(firstOp).toHaveProperty('create');
-      expect(firstOp).not.toHaveProperty('index');
+      expect(firstOp).toHaveProperty('index');
+      expect(firstOp).not.toHaveProperty('create');
     });
   });
 

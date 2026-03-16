@@ -383,7 +383,6 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const useOverwrite = options?.overwrite ?? false;
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const now = new Date();
@@ -391,10 +390,7 @@ export class WorkflowsService {
 
     const created: WorkflowDetailDto[] = [];
     const failed: Array<{ index: number; id: string; error: string }> = [];
-    type BulkOp =
-      | { index: { _id: string; document: WorkflowProperties } }
-      | { create: { _id: string; document: WorkflowProperties } };
-    const bulkOperations: BulkOp[] = [];
+    const bulkOperations: Array<{ index: { _id: string; document: WorkflowProperties } }> = [];
     const validWorkflows: Array<{
       idx: number;
       id: string;
@@ -414,15 +410,9 @@ export class WorkflowsService {
           triggerDefinitions
         );
 
-        if (useOverwrite) {
-          bulkOperations.push({
-            index: { _id: prepared.id, document: prepared.workflowData },
-          });
-        } else {
-          bulkOperations.push({
-            create: { _id: prepared.id, document: prepared.workflowData },
-          });
-        }
+        bulkOperations.push({
+          index: { _id: prepared.id, document: prepared.workflowData },
+        });
         validWorkflows.push({
           idx: i,
           id: prepared.id,
@@ -447,7 +437,7 @@ export class WorkflowsService {
 
       // Process bulk response
       bulkResponse.items.forEach((item, itemIndex) => {
-        const operation = useOverwrite ? item.index : item.create;
+        const operation = item.index;
         const validWorkflow = validWorkflows[itemIndex];
 
         if (operation?.error) {

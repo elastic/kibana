@@ -316,6 +316,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
           defaultMessage: 'Status',
         }),
         width: '70px',
+        align: 'right',
         render: (id: string) => {
           if (isImportComplete) {
             const status = importStatusMap.get(id);
@@ -451,7 +452,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <div css={{ maxHeight: 240, overflowY: 'auto' }}>
+              <div css={{ overflowY: 'auto' }}>
                 <EuiBasicTable<WorkflowPreview>
                   items={preflightResult.workflows}
                   columns={previewColumns}
@@ -492,29 +493,26 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                {hasConflicts && (
-                  <EuiFlexItem grow={false}>
-                    <EuiSelect
-                      data-test-subj="import-workflows-conflict-resolution"
-                      options={conflictResolutionSelectOptions}
-                      value={conflictResolution}
-                      onChange={(e) => {
-                        if (isConflictResolution(e.target.value)) {
-                          setConflictResolution(e.target.value);
-                        }
-                      }}
-                      compressed
-                      disabled={!canImport}
-                      prepend={i18n.translate('workflows.importFlyout.conflictResolution.label', {
-                        defaultMessage: 'On conflicts',
-                      })}
-                      aria-label={i18n.translate(
-                        'workflows.importFlyout.conflictResolution.ariaLabel',
-                        { defaultMessage: 'Conflict resolution strategy' }
-                      )}
-                    />
-                  </EuiFlexItem>
-                )}
+                <EuiFlexItem grow={false}>
+                  <EuiSelect
+                    data-test-subj="import-workflows-conflict-resolution"
+                    options={conflictResolutionSelectOptions}
+                    value={conflictResolution}
+                    onChange={(e) => {
+                      if (isConflictResolution(e.target.value)) {
+                        setConflictResolution(e.target.value);
+                      }
+                    }}
+                    compressed
+                    prepend={i18n.translate('workflows.importFlyout.conflictResolution.label', {
+                      defaultMessage: 'On conflicts',
+                    })}
+                    aria-label={i18n.translate(
+                      'workflows.importFlyout.conflictResolution.ariaLabel',
+                      { defaultMessage: 'Conflict resolution strategy' }
+                    )}
+                  />
+                </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     data-test-subj="import-workflows-confirm"
