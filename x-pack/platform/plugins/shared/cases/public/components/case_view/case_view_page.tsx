@@ -188,7 +188,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             <CaseViewSimilarCases caseData={caseWithFilteredAttachments} searchTerm={searchTerm} />
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.TASKS && (
-            <CaseViewTasks caseId={caseData.id} />
+            <CaseViewTasks caseData={caseData} searchTerm={searchTerm} />
           )}
         </EuiFlexGroup>
       </>
