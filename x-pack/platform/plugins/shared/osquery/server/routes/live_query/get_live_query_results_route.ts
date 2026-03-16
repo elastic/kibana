@@ -35,6 +35,7 @@ import {
   getLiveQueryResultsRequestParamsSchema,
   getLiveQueryResultsRequestQuerySchema,
 } from '../../../common/api';
+import { isFilters } from '@kbn/es-query';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -128,6 +129,20 @@ export const getLiveQueryResultsRoute = (
             logger.debug(
               `Built space-aware index patterns: ${JSON.stringify(spaceAwareIndexPatterns)}`
             );
+          }
+
+          if (request.query.esFilters) {
+            let parsed: unknown;
+            try {
+              parsed = JSON.parse(request.query.esFilters);
+            } catch {
+              return response.badRequest({ body: { message: 'esFilters contains invalid JSON' } });
+            }
+            if (!isFilters(parsed)) {
+              return response.badRequest({
+                body: { message: 'esFilters must be a valid filters array' },
+              });
+            }
           }
 
           const search = await context.search;

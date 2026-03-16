@@ -49,6 +49,7 @@ import {
 const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
 
 const CONTROL_COLUMN_IDS = ['openDetails', 'select'];
+
 const storageInstance = new Storage(localStorage);
 
 const resultsTableContainerCss = {
@@ -408,6 +409,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       return;
     }
 
+    let cancelled = false;
     const fieldSet = new Set(sourceFieldNamesKey.split(','));
     const spec = dataView.toSpec();
     // Strip id so dataViews.create() doesn't return the cached full DataView
@@ -415,7 +417,13 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     spec.fields = Object.fromEntries(
       Object.entries(spec.fields ?? {}).filter(([name]) => fieldSet.has(name))
     );
-    dataService.dataViews.create(spec, true).then(setFilteredDataView);
+    dataService.dataViews.create(spec, true).then((dv) => {
+      if (!cancelled) setFilteredDataView(dv);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [dataView, sourceFieldNamesKey, dataService.dataViews]);
 
   const searchBarIndexPatterns = useMemo(
