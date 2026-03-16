@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/shared-ux-column-presets
   channel: ''
   owner: '@elastic/eui'
-  sourceRoot: src/platform/packages/shared/shared-ux/column_presets
+  sourceRoot: src/platform/packages/shared/shared-ux/column-presets
 dependsOn:
   - '@kbn/i18n'
 tags:
