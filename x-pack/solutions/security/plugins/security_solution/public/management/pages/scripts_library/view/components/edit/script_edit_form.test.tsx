@@ -69,7 +69,7 @@ describe('EndpointScriptEditForm', () => {
     ]);
   });
 
-  it('does not call onChange on initial render', () => {
+  it('does NOT call onChange on initial render', () => {
     render();
 
     expect(onChangeMock).not.toHaveBeenCalled();
@@ -391,9 +391,54 @@ describe('EndpointScriptEditForm', () => {
       const fileTypeSelect = getByTestId('test-file-type-select') as HTMLSelectElement;
       fireEvent.change(fileTypeSelect, { target: { value: 'script' } });
 
-      const pathToExecutableInput = getByTestId('test-path-to-executable-input');
+      const pathToExecutableInput = getByTestId(
+        'test-path-to-executable-input'
+      ) as HTMLInputElement;
       expect(pathToExecutableInput).toHaveValue('');
       expect(pathToExecutableInput).toHaveAttribute('disabled');
+    });
+
+    it('should enable `pathToExecutable` and show validation error when `fileType` is changed from `script` to `archive` (without path value)', async () => {
+      const { getByTestId } = renderResult;
+
+      const fileTypeSelect = getByTestId('test-file-type-select') as HTMLSelectElement;
+      // Change to script first
+      fireEvent.change(fileTypeSelect, { target: { value: 'script' } });
+
+      // Verify it's disabled and cleared
+      const pathToExecutableInput = getByTestId(
+        'test-path-to-executable-input'
+      ) as HTMLInputElement;
+      expect(pathToExecutableInput).toHaveAttribute('disabled');
+
+      // Change back to archive
+      fireEvent.change(fileTypeSelect, { target: { value: 'archive' } });
+
+      // Verify it's enabled and shows validation error
+      expect(pathToExecutableInput).not.toHaveAttribute('disabled');
+      expect(pathToExecutableInput).toHaveAttribute('aria-invalid', 'true');
+
+      const pathToExecutableRow = getByTestId('test-path-to-executable-row');
+      const euiFormErrorText = pathToExecutableRow.querySelector('.euiFormErrorText');
+      expect(euiFormErrorText?.textContent).toEqual(
+        'Path to executable is required for archive files.'
+      );
+    });
+
+    it('should NOT show validation error for `pathToExecutable` when `fileType` is `script`', async () => {
+      const { getByTestId } = renderResult;
+
+      const fileTypeSelect = getByTestId('test-file-type-select') as HTMLSelectElement;
+      fireEvent.change(fileTypeSelect, { target: { value: 'script' } });
+
+      const pathToExecutableInput = getByTestId(
+        'test-path-to-executable-input'
+      ) as HTMLInputElement;
+      const pathToExecutableRow = getByTestId('test-path-to-executable-row');
+
+      expect(pathToExecutableInput).toHaveValue('');
+      const euiFormErrorText = pathToExecutableRow.querySelector('.euiFormErrorText');
+      expect(euiFormErrorText).not.toBeInTheDocument();
     });
 
     it.each([
