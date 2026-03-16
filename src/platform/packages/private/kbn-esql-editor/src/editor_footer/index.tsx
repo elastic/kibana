@@ -177,6 +177,7 @@ export const EditorFooter = memo(function EditorFooter({
           <HistoryAndStarredQueriesTabs
             containerCSS={styles.historyContainer}
             onUpdateAndSubmit={onUpdateAndSubmitQuery}
+            onClose={() => setIsHistoryOpen(false)}
             containerWidth={measuredContainerWidth}
             height={resizableContainerHeight}
             isSpaceReduced={isSpaceReduced}

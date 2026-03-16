@@ -333,12 +333,27 @@ describe('AddFieldFlyout', () => {
       });
     });
 
-    it('disables the Add field button when field name is valid but type is not selected', async () => {
+    it('enables the Add field button when field name is valid but type is not selected (wired streams allow description-only fields)', async () => {
       const user = userEvent.setup();
       renderAddFieldFlyout('wired');
 
       await typeFieldName(user, 'attributes.custom_field');
 
+      // Wired streams allow description-only field overrides without a type,
+      // so the button should be enabled with just a valid field name
+      await waitFor(() => {
+        const addFieldButton = screen.getByTestId('streamsAppSchemaEditorAddFieldButton');
+        expect(addFieldButton).not.toBeDisabled();
+      });
+    });
+
+    it('disables the Add field button when field name is valid but type is not selected (classic streams require type)', async () => {
+      const user = userEvent.setup();
+      renderAddFieldFlyout('classic');
+
+      await typeFieldName(user, 'custom_field');
+
+      // Classic streams require a type to be selected
       await waitFor(() => {
         const addFieldButton = screen.getByTestId('streamsAppSchemaEditorAddFieldButton');
         expect(addFieldButton).toBeDisabled();

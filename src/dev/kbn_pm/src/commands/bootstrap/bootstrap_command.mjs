@@ -129,9 +129,11 @@ export const command = {
         });
         log.success('shared webpack bundles built');
       }),
-      time('run install scripts', async () => {
-        await runInstallScripts(log, { quiet });
-      }),
+      shouldInstall
+        ? time('run install scripts', async () => {
+            await runInstallScripts(log, { quiet });
+          })
+        : undefined,
     ]);
 
     await time('sort package json', async () => {

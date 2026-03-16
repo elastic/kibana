@@ -8,11 +8,11 @@
  */
 
 /**
- * Grid Navigation tests: pagination and search.
+ * Grid Navigation tests: pagination, search, and breakdown.
  *
  * These tests use a dynamically created TSDB index (test-metrics-experience)
- * with 45 metric fields (23 gauge + 22 counter) to exercise pagination
- * and search scenarios.
+ * with 45 metric fields (23 gauge + 22 counter) and 30 dimensions to exercise
+ * pagination, search, and breakdown scenarios.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -27,14 +27,17 @@ import {
 const { PAGE_SIZE, TOTAL_PAGES, LAST_PAGE_CARDS } = PAGINATION;
 
 const SEARCH_METRIC_NAME = DEFAULT_CONFIG.metrics[0].name;
+const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
+const SECOND_DIMENSION = DEFAULT_CONFIG.dimensions[1].name;
+const { name: FILTER_DIMENSION_NAME, values: FILTER_DIMENSION_VALUES } =
+  DEFAULT_CONFIG.dimensions[0];
 
 const SORTED_METRICS = [...DEFAULT_CONFIG.metrics].sort((a, b) => a.name.localeCompare(b.name));
 const FIRST_CARD_PAGE_1 = `${SORTED_METRICS[0].name}-0`;
 const FIRST_CARD_PAGE_2 = `${SORTED_METRICS[PAGE_SIZE].name}-0`;
 const FIRST_CARD_LAST_PAGE = `${SORTED_METRICS[PAGE_SIZE * (TOTAL_PAGES - 1)].name}-0`;
 
-// Failing: See https://github.com/elastic/kibana/issues/254759
-spaceTest.describe.skip(
+spaceTest.describe(
   'Metrics in Discover - Grid Navigation',
   {
     tag: testData.METRICS_EXPERIENCE_TAGS,
@@ -57,7 +60,7 @@ spaceTest.describe.skip(
     });
 
     spaceTest('should paginate through metrics', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
 
       await spaceTest.step('pagination is visible', async () => {
@@ -95,7 +98,7 @@ spaceTest.describe.skip(
     });
 
     spaceTest('should filter metrics using search', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
 
@@ -116,5 +119,44 @@ spaceTest.describe.skip(
         await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
       });
     });
+
+    spaceTest(
+      'should render grid with wildcard TS query and WHERE filter',
+      async ({ pageObjects }) => {
+        const query = `${testData.ESQL_QUERIES.TS_WILDCARD} | WHERE ${FILTER_DIMENSION_NAME} == "${FILTER_DIMENSION_VALUES[0]}"`;
+        await pageObjects.discover.writeAndSubmitEsqlQuery(query);
+        const { metricsExperience } = pageObjects;
+        await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
+      }
+    );
+
+    spaceTest(
+      'should update grid when selecting a breakdown dimension',
+      async ({ pageObjects }) => {
+        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+        const { metricsExperience } = pageObjects;
+        await expect(metricsExperience.grid).toBeVisible();
+
+        await spaceTest.step('select first dimension as breakdown', async () => {
+          await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
+          await expect(
+            metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+          ).toBeVisible();
+          await expect(metricsExperience.grid).toBeVisible();
+          await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+        });
+
+        await spaceTest.step('switch to second dimension and verify grid updates', async () => {
+          await metricsExperience.breakdownSelector.selectDimension(SECOND_DIMENSION);
+          await expect(
+            metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
+          ).toBeVisible();
+          await expect(metricsExperience.grid).toBeVisible();
+          await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+        });
+      }
+    );
   }
 );

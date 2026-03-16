@@ -39,6 +39,7 @@ const createMockScoreDocument = (
   task: {
     trace_id: 'trace-task-123',
     repetition_index: 0,
+    output: null,
     model: baseTaskModel,
   },
   evaluator: {

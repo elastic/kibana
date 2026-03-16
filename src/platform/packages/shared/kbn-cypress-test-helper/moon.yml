@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cypress-test-helper'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-solution'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/cypress-test-helper'
+  title: '@kbn/cypress-test-helper'
   description: Moon project for @kbn/cypress-test-helper
   channel: ''
   owner: '@elastic/security-solution'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-cypress-test-helper
+  sourceRoot: src/platform/packages/shared/kbn-cypress-test-helper
 dependsOn:
   - '@kbn/es'
   - '@kbn/security-plugin'
@@ -44,14 +43,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

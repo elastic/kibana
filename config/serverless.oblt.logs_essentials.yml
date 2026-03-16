@@ -70,6 +70,8 @@ xpack.actions.enabledActionTypes:
     '.servicenow',
     '.tines',
     '.torq',
+    '.http',
+    '.http-system',
   ]
 
 xpack.alerting.enabledRuleTypes:

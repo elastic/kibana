@@ -6,17 +6,18 @@
  */
 
 import type React from 'react';
-import type { Store, Middleware, Dispatch, AnyAction } from 'redux';
+import type { AnyAction, Dispatch, Middleware, Store } from 'redux';
 import type { BBox } from 'rbush';
 import type { Provider } from 'react-redux';
+import type { CellActionFieldValue } from '@kbn/cell-actions';
 import type {
-  ResolverNode,
-  ResolverRelatedEvents,
-  ResolverEntityIndex,
-  SafeResolverEvent,
-  ResolverPaginatedEvents,
   NewResolverTree,
+  ResolverEntityIndex,
+  ResolverNode,
+  ResolverPaginatedEvents,
+  ResolverRelatedEvents,
   ResolverSchema,
+  SafeResolverEvent,
 } from '../../common/endpoint/types';
 import type { Tree } from '../../common/endpoint/generate_data';
 import type { State } from '../common/store/types';
@@ -815,6 +816,17 @@ export interface TimeFilters {
   to?: string;
 }
 
+export interface ResolverCellActionRendererProps {
+  children: React.ReactNode;
+  field: string;
+  scopeId: string;
+  value: CellActionFieldValue;
+}
+
+export type ResolverCellActionRenderer = (
+  props: ResolverCellActionRendererProps
+) => React.ReactNode | null;
+
 /**
  * The externally provided React props.
  */
@@ -848,14 +860,9 @@ export interface ResolverProps {
   shouldUpdate: boolean;
 
   /**
-   * If true, the details panel is not shown in the graph and a view button is shown to manage the panel visibility.
+   * Renderer used by Resolver panels for field cell actions.
    */
-  isSplitPanel?: boolean;
-
-  /**
-   * Optional callback for showing details panels separately from the graph.
-   */
-  showPanelOnClick?: () => void;
+  renderCellActions: ResolverCellActionRenderer;
 }
 
 /**

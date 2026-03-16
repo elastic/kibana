@@ -236,7 +236,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
 
         if (!documents || documents.length === 0) {
           // Check if parent stream has documents
-          const parentDocs = await fetchSampleDocuments(esClient, 'logs', 10);
+          const parentDocs = await fetchSampleDocuments(esClient, 'logs.otel', 10);
           const parentCount = parentDocs.length;
 
           // Get some sample filepaths from parent to help debug routing
@@ -247,7 +247,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
 
           throw new Error(
             `No documents found in stream ${input.stream_name}. ` +
-              `Parent stream 'logs' has ${parentCount} documents. ` +
+              `Parent stream 'logs.otel' has ${parentCount} documents. ` +
               `Sample filepaths: ${sampleFilepaths.join(', ')}. ` +
               `Expected filepath: ${input.system}.log`
           );
@@ -603,13 +603,14 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
               example.input.sample_documents && example.input.sample_documents.length > 0;
 
             if (isInlineMode) {
-              // INLINE MODE: Use parent 'logs' stream directly, pass documents in API call
+              // INLINE MODE: Use parent 'logs.otel' stream directly, pass documents in API call
               // No need to fork or index - documents are passed directly
-              example.input.stream_name = 'logs';
+              example.input.stream_name = 'logs.otel';
             } else {
               // INDEX MODE: Create system-specific stream AND index data
+              // stream_name in dataset must be logs.otel.<system> (child of logs.otel per API)
               // Route based on attributes.filepath which is set to "{System}.log" by synthtrace
-              await apiServices.streams.forkStream('logs', example.input.stream_name, {
+              await apiServices.streams.forkStream('logs.otel', example.input.stream_name, {
                 field: 'attributes.filepath',
                 eq: `${example.input.system}.log`,
               });

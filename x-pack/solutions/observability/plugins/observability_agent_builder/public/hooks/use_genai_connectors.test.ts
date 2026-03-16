@@ -23,6 +23,7 @@ const mockConnectors: InferenceConnector[] = [
     type: InferenceConnectorType.OpenAI,
     config: {},
     capabilities: {},
+    isInferenceEndpoint: false,
   },
   {
     connectorId: 'connector-2',
@@ -30,6 +31,7 @@ const mockConnectors: InferenceConnector[] = [
     type: InferenceConnectorType.Bedrock,
     config: {},
     capabilities: {},
+    isInferenceEndpoint: false,
   },
 ];
 
