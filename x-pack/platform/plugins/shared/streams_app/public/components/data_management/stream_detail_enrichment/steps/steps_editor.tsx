@@ -282,7 +282,8 @@ export const StepsEditor = React.memo(() => {
   } = useStreamDetail();
 
   const canUsePipelineSuggestions = aiFeatures && aiFeatures.enabled && hasValidMessageFields;
-  const canUsePipelineSuggestionsPending = !aiFeatures || (aiFeatures.enabled && isLoadingSamples);
+  const canUsePipelineSuggestionsPending =
+    aiFeatures !== null && (aiFeatures.loading || (aiFeatures.enabled && isLoadingSamples));
 
   if (aiFeatures && aiFeatures.enabled) {
     if (isLoadingSuggestion) {
