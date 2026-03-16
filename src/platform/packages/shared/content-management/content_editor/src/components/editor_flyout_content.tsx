@@ -58,6 +58,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
   item,
   entityName,
   flyoutTitle,
+  flyoutTitleId,
   isReadonly = true,
   readonlyReason,
   services: { TagSelector, TagList, notifyError },
