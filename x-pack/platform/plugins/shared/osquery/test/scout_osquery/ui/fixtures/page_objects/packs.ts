@@ -92,10 +92,7 @@ export class PacksPage {
     const select = this.page.testSubj.locator('savedQuerySelect');
     const input = select.locator('[data-test-subj="comboBoxSearchInput"]');
     await input.click();
-    await this.page.testSubj
-      .locator('globalLoadingIndicator')
-      .waitFor({ state: 'hidden', timeout: 15_000 })
-      .catch(() => {});
+    await this.page.waitForLoadingIndicatorHidden().catch(() => {});
     await input.fill('');
     await input.pressSequentially(queryName);
     // EUI combo box options include the query name as bold text followed by description.

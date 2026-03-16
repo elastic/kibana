@@ -37,10 +37,7 @@ export async function checkOsqueryResponseActionsPermissions(
   await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}/edit`));
 
   // Wait for the rule to fully load
-  await page.testSubj
-    .locator('globalLoadingIndicator')
-    .waitFor({ state: 'hidden', timeout: 120_000 })
-    .catch(() => {});
+  await page.waitForLoadingIndicatorHidden().catch(() => {});
 
   // Wait for the Actions tab to be available (rule form fully rendered)
   const actionsTab = page.testSubj.locator('edit-rule-actions-tab');

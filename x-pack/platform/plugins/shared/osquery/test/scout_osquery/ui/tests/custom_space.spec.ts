@@ -163,10 +163,7 @@ for (const testSpace of testSpaces) {
         const nextPageLink = page.getByRole('link', { name: 'Next page' });
         while (await nextPageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
           await nextPageLink.click();
-          await page.testSubj
-            .locator('globalLoadingIndicator')
-            .waitFor({ state: 'hidden', timeout: 1000 })
-            .catch(() => {});
+          await page.waitForLoadingIndicatorHidden().catch(() => {});
           if (await playButton.isVisible({ timeout: 2_000 }).catch(() => false)) {
             break;
           }

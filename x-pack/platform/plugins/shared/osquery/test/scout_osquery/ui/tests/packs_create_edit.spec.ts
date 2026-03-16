@@ -175,7 +175,7 @@ test.describe(
 
           await packs.clickAddQuery();
           await expect(page.getByText('Attach next query')).toBeVisible();
-          await page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });
+          await page.waitForLoadingIndicatorHidden();
           await expect(page.testSubj.locator('kibanaCodeEditor')).toBeVisible();
           await packs.selectSavedQuery(savedQueryName);
           await page.testSubj.locator('osquery-interval-field').fill('5');
@@ -293,7 +293,7 @@ test.describe(
 
           await packs.clickAddQuery();
           await expect(page.getByText('Attach next query')).toBeVisible();
-          await page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });
+          await page.waitForLoadingIndicatorHidden();
           await expect(page.testSubj.locator('kibanaCodeEditor')).toBeVisible();
           await expect(page.getByText('ID must be unique')).not.toBeVisible();
         });
@@ -631,7 +631,7 @@ test.describe(
           await packs.clickEditPack();
 
           await packs.clickAddQuery();
-          await page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });
+          await page.waitForLoadingIndicatorHidden();
           await expect(page.testSubj.locator('kibanaCodeEditor')).toBeVisible();
         });
 

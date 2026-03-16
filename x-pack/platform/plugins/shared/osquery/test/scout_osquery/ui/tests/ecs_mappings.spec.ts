@@ -118,10 +118,7 @@ test.describe(
       const searchInput = savedQuerySelect.locator('[data-test-subj="comboBoxSearchInput"]');
       for (let attempt = 0; attempt < 5; attempt++) {
         await searchInput.click();
-        await page.testSubj
-          .locator('globalLoadingIndicator')
-          .waitFor({ state: 'hidden', timeout: 15_000 })
-          .catch(() => {});
+        await page.waitForLoadingIndicatorHidden().catch(() => {});
         await searchInput.fill('');
         await searchInput.pressSequentially('users_elastic');
         const option = page.getByRole('option').filter({ hasText: /^users_elastic/ });
@@ -131,10 +128,7 @@ test.describe(
           break;
         } catch {
           await searchInput.press('Escape');
-          await page.testSubj
-            .locator('globalLoadingIndicator')
-            .waitFor({ state: 'hidden', timeout: 5_000 })
-            .catch(() => {});
+          await page.waitForLoadingIndicatorHidden().catch(() => {});
           if (attempt === 4) {
             // Final attempt — let it fail with clear error
             await searchInput.click();

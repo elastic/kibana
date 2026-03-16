@@ -20,10 +20,7 @@ export const RESULTS_TIMEOUT = 240_000;
  * was never shown (fast navigations).
  */
 export async function waitForPageReady(page: ScoutPage): Promise<void> {
-  await page.testSubj
-    .locator('globalLoadingIndicator')
-    .waitFor({ state: 'hidden', timeout: 30_000 })
-    .catch(() => {});
+  await page.waitForLoadingIndicatorHidden().catch(() => {});
 }
 
 /**

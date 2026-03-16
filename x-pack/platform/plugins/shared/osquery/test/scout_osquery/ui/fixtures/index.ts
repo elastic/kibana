@@ -20,10 +20,7 @@ interface OsqueryTestFixtures {
  * can be called from the page-wrapper without a circular import.
  */
 async function autoWaitForPageReady(page: ScoutPage): Promise<void> {
-  await page.testSubj
-    .locator('globalLoadingIndicator')
-    .waitFor({ state: 'hidden', timeout: 30_000 })
-    .catch(() => {});
+  await page.waitForLoadingIndicatorHidden().catch(() => {});
 }
 
 export const test = baseTest.extend<OsqueryTestFixtures>({

@@ -118,10 +118,7 @@ test.describe(
       const nextPageButton = page.testSubj.locator('pagination-button-next');
       if (await nextPageButton.isEnabled({ timeout: 5_000 }).catch(() => false)) {
         await nextPageButton.click();
-        await page.testSubj
-          .locator('globalLoadingIndicator')
-          .waitFor({ state: 'hidden' })
-          .catch(() => {});
+        await page.waitForLoadingIndicatorHidden().catch(() => {});
       }
 
       // Exit fullscreen
@@ -321,10 +318,7 @@ test.describe(
       await pageObjects.packs.clickAddQuery();
 
       await expect(page.getByText('Attach next query')).toBeVisible();
-      await page.testSubj
-        .locator('globalLoadingIndicator')
-        .waitFor({ state: 'hidden', timeout: 15_000 })
-        .catch(() => {});
+      await page.waitForLoadingIndicatorHidden().catch(() => {});
       await expect(page.testSubj.locator('kibanaCodeEditor')).toBeVisible({ timeout: 15_000 });
 
       await pageObjects.packs.selectSavedQuery('users_elastic');

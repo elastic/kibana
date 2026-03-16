@@ -36,10 +36,7 @@ export class LiveQueryPage {
   }
 
   async selectAllAgents() {
-    await this.page.testSubj
-      .locator('globalLoadingIndicator')
-      .waitFor({ state: 'hidden', timeout: 30_000 })
-      .catch(() => {});
+    await this.page.waitForLoadingIndicatorHidden().catch(() => {});
 
     const agentInput = this.agentSelection.locator('[data-test-subj="comboBoxSearchInput"]');
     await agentInput.waitFor({ state: 'visible', timeout: 15_000 });
@@ -94,10 +91,7 @@ export class LiveQueryPage {
   }
 
   async submitQuery() {
-    await this.page.testSubj
-      .locator('globalLoadingIndicator')
-      .waitFor({ state: 'hidden', timeout: 10_000 })
-      .catch(() => {});
+    await this.page.waitForLoadingIndicatorHidden().catch(() => {});
 
     const submitButton = this.page.testSubj.locator('liveQuerySubmitButton');
     await submitButton.waitFor({ state: 'visible' });
@@ -205,16 +199,10 @@ export class LiveQueryPage {
               await resultsTab.click();
             }
           } else {
-            await this.page.testSubj
-              .locator('globalLoadingIndicator')
-              .waitFor({ state: 'hidden', timeout: 15_000 })
-              .catch(() => {});
+            await this.page.waitForLoadingIndicatorHidden().catch(() => {});
           }
         } catch {
-          await this.page.testSubj
-            .locator('globalLoadingIndicator')
-            .waitFor({ state: 'hidden', timeout: 15_000 })
-            .catch(() => {});
+          await this.page.waitForLoadingIndicatorHidden().catch(() => {});
         }
       }
     }
@@ -252,10 +240,7 @@ export class LiveQueryPage {
     // Retry: osquery schema may still be loading from agents
     for (let attempt = 0; attempt < 5; attempt++) {
       await searchInput.click();
-      await this.page.testSubj
-        .locator('globalLoadingIndicator')
-        .waitFor({ state: 'hidden', timeout: 15_000 })
-        .catch(() => {});
+      await this.page.waitForLoadingIndicatorHidden().catch(() => {});
       await searchInput.fill('');
       await searchInput.pressSequentially(cleanText);
 
@@ -267,10 +252,7 @@ export class LiveQueryPage {
       } catch {
         // Dropdown didn't show options — schema may not be loaded yet
         await searchInput.press('Escape');
-        await this.page.testSubj
-          .locator('globalLoadingIndicator')
-          .waitFor({ state: 'hidden', timeout: 15_000 })
-          .catch(() => {});
+        await this.page.waitForLoadingIndicatorHidden().catch(() => {});
       }
     }
 
@@ -291,10 +273,7 @@ export class LiveQueryPage {
     // Retry: ECS fields may still be loading
     for (let attempt = 0; attempt < 5; attempt++) {
       await searchInput.click();
-      await this.page.testSubj
-        .locator('globalLoadingIndicator')
-        .waitFor({ state: 'hidden', timeout: 15_000 })
-        .catch(() => {});
+      await this.page.waitForLoadingIndicatorHidden().catch(() => {});
       await searchInput.fill('');
       await searchInput.pressSequentially(cleanText);
 
@@ -312,10 +291,7 @@ export class LiveQueryPage {
         return;
       } catch {
         await searchInput.press('Escape');
-        await this.page.testSubj
-          .locator('globalLoadingIndicator')
-          .waitFor({ state: 'hidden', timeout: 5_000 })
-          .catch(() => {});
+        await this.page.waitForLoadingIndicatorHidden().catch(() => {});
       }
     }
 
