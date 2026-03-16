@@ -66,6 +66,7 @@ export function FeaturesTable() {
           defaultMessage: 'Knowledge Indicator',
         }
       ),
+      sortable: (feature: Feature) => (feature.title ?? feature.id).toLowerCase(),
       truncateText: true,
       render: (_name: string, feature: Feature) => {
         const displayTitle = feature.title ?? feature.id;
@@ -97,6 +98,7 @@ export function FeaturesTable() {
           defaultMessage: 'Type',
         }
       ),
+      sortable: true,
       width: '15%',
       render: (type: string) => <EuiBadge color="hollow">{upperFirst(type ?? '–')}</EuiBadge>,
     },
@@ -108,6 +110,7 @@ export function FeaturesTable() {
           defaultMessage: 'Confidence',
         }
       ),
+      sortable: true,
       width: '12%',
       render: (confidence: number) => (
         <EuiHealth color={getConfidenceColor(confidence ?? 0)}>{confidence ?? '–'}</EuiHealth>
@@ -121,6 +124,7 @@ export function FeaturesTable() {
           defaultMessage: 'Stream',
         }
       ),
+      sortable: true,
       width: '15%',
       render: (_streamName: string, feature: Feature) => (
         <EuiBadge color="hollow">{feature.stream_name || '--'}</EuiBadge>
@@ -151,6 +155,12 @@ export function FeaturesTable() {
           itemId="id"
           items={data?.features ?? []}
           loading={loading}
+          sorting={{
+            sort: {
+              field: 'name',
+              direction: 'asc',
+            },
+          }}
           search={{
             box: {
               incremental: true,
