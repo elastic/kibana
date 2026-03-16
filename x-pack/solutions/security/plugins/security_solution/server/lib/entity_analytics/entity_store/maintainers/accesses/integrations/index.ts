@@ -8,9 +8,13 @@
 export type { AccessesIntegrationConfig } from './types';
 export { elasticDefendIntegration } from './elastic_defend';
 export { awsCloudTrailIntegration } from './aws_cloudtrail';
+export { systemAuthIntegration } from './system_auth';
+export { systemSecurityIntegration } from './system_security';
 
 import { elasticDefendIntegration } from './elastic_defend';
 import { awsCloudTrailIntegration } from './aws_cloudtrail';
+import { systemAuthIntegration } from './system_auth';
+import { systemSecurityIntegration } from './system_security';
 import type { AccessesIntegrationConfig } from './types';
 
 /**
@@ -20,4 +24,6 @@ import type { AccessesIntegrationConfig } from './types';
 export const INTEGRATION_CONFIGS: AccessesIntegrationConfig[] = [
   elasticDefendIntegration,
   awsCloudTrailIntegration,
+  systemAuthIntegration,
+  systemSecurityIntegration,
 ];

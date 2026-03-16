@@ -57,6 +57,24 @@ const TEST_CONFIGS: Record<string, IntegrationTestConfig> = {
     expectedFrequentHost: 'i-0abc111111111111a',
     expectedInfrequentHost: 'i-0abc222222222222b',
   },
+  system_auth: {
+    archivePath: `${ARCHIVES_BASE}/system_auth/events`,
+    idpArchivePath: `${ARCHIVES_BASE}/system_auth/idp_events`,
+    dataStreamName: 'logs-system.auth-default',
+    templateName: 'scout-system-auth-events',
+    entityNamespace: 'system',
+    expectedFrequentHost: 'test-linux-a',
+    expectedInfrequentHost: 'test-linux-b',
+  },
+  system_security: {
+    archivePath: `${ARCHIVES_BASE}/system_security/events`,
+    idpArchivePath: `${ARCHIVES_BASE}/system_security/idp_events`,
+    dataStreamName: 'logs-system.security-default',
+    templateName: 'scout-system-security-events',
+    entityNamespace: 'system',
+    expectedFrequentHost: 'test-win-host-id-a',
+    expectedInfrequentHost: 'test-win-host-id-b',
+  },
 };
 
 /** Normalise a field that may be a single string or an array into a string[]. */
