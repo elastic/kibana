@@ -14,7 +14,7 @@ apiTest.describe(
   'Cross-compatibility - JsonExtract Processor',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    // *** Compatible Cases ***
+    // *** Basic Extraction Tests ***
     apiTest(
       'should correctly extract a simple field from JSON string',
       async ({ testBed, esql }) => {
@@ -913,5 +913,460 @@ apiTest.describe(
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
       expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ scientific: 12300 }));
     });
+
+    apiTest('should extract using $ root selector', async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'message',
+            extractions: [{ selector: '$.user.name', target_field: 'username' }],
+          } as JsonExtractProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [{ message: '{"user": {"name": "John"}}' }];
+      await testBed.ingest('ingest-json-extract-root', docs, processors);
+      const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-root');
+
+      await testBed.ingest('esql-json-extract-root', docs);
+      const esqlResult = await esql.queryOnIndex('esql-json-extract-root', query);
+
+      expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+      expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ username: 'John' }));
+    });
+
+    apiTest(
+      'should not set target field when selector path not found',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [{ selector: 'nonexistent.path', target_field: 'result' }],
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [{ message: '{"user": "test"}' }];
+        await testBed.ingest('ingest-json-extract-notfound', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-notfound');
+
+        await testBed.ingest('esql-json-extract-notfound', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-notfound', query);
+
+        expect(ingestResult[0].result).toBeUndefined();
+        expect(esqlResult.documentsWithoutKeywords[0].result).toBeNull();
+      }
+    );
+
+    // *** Overwriting Original Field Tests ***
+    apiTest(
+      'should correctly extract to same field as source (overwrite original)',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [{ selector: 'value', target_field: 'message' }],
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [{ message: '{"value": "extracted"}' }];
+        await testBed.ingest('ingest-json-extract-overwrite', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-overwrite');
+
+        await testBed.ingest('esql-json-extract-overwrite', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-overwrite', query);
+
+        expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+        expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ message: 'extracted' }));
+      }
+    );
+
+    apiTest(
+      'should correctly extract integer to same field as source (type change)',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [{ selector: 'count', target_field: 'message', type: 'integer' }],
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [{ message: '{"count": 42}' }];
+        await testBed.ingest('ingest-json-extract-overwrite-int', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered(
+          'ingest-json-extract-overwrite-int'
+        );
+
+        await testBed.ingest('esql-json-extract-overwrite-int', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-overwrite-int', query);
+
+        expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+        expect(ingestResult[0]).toStrictEqual(expect.objectContaining({ message: 42 }));
+      }
+    );
+
+    // *** Conditional Processing Tests ***
+    apiTest(
+      'should apply conditional extraction only to matching documents',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [{ selector: 'data', target_field: 'extracted_data' }],
+              where: {
+                field: 'type',
+                eq: 'process',
+              },
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [
+          { message: '{"data": "processed"}', type: 'process', order: 1 },
+          { message: '{"data": "skipped"}', type: 'skip', order: 2 },
+          { message: '{"data": "also_processed"}', type: 'process', order: 3 },
+        ];
+        await testBed.ingest('ingest-json-extract-cond-multi', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered(
+          'ingest-json-extract-cond-multi'
+        );
+
+        await testBed.ingest('esql-json-extract-cond-multi', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-cond-multi', query);
+
+        expect(ingestResult).toHaveLength(3);
+
+        const ingestDoc1 = ingestResult.find((d: any) => d.order === 1);
+        const ingestDoc2 = ingestResult.find((d: any) => d.order === 2);
+        const ingestDoc3 = ingestResult.find((d: any) => d.order === 3);
+
+        const esqlDoc1 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 1);
+        const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 2);
+        const esqlDoc3 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 3);
+
+        expect(ingestDoc1!.extracted_data).toBe('processed');
+        expect(esqlDoc1!.extracted_data).toBe('processed');
+
+        expect(ingestDoc2!.extracted_data).toBeUndefined();
+        expect(esqlDoc2!.extracted_data).toBeNull();
+
+        expect(ingestDoc3!.extracted_data).toBe('also_processed');
+        expect(esqlDoc3!.extracted_data).toBe('also_processed');
+      }
+    );
+
+    apiTest(
+      'should apply conditional extraction with integer type casting',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [{ selector: 'count', target_field: 'count', type: 'integer' }],
+              where: {
+                field: 'should_extract',
+                eq: 'yes',
+              },
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [
+          { message: '{"count": 100}', should_extract: 'yes', order: 1 },
+          { message: '{"count": 200}', should_extract: 'no', order: 2 },
+        ];
+        await testBed.ingest('ingest-json-extract-cond-int', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-cond-int');
+
+        await testBed.ingest('esql-json-extract-cond-int', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-cond-int', query);
+
+        const ingestDoc1 = ingestResult.find((d: any) => d.order === 1);
+        const ingestDoc2 = ingestResult.find((d: any) => d.order === 2);
+
+        const esqlDoc1 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 1);
+        const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 2);
+
+        expect(ingestDoc1!.count).toBe(100);
+        expect(esqlDoc1!.count).toBe(100);
+
+        expect(ingestDoc2!.count).toBeUndefined();
+        expect(esqlDoc2!.count).toBeNull();
+      }
+    );
+
+    apiTest(
+      'should apply conditional extraction with boolean type casting',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [{ selector: 'active', target_field: 'is_active', type: 'boolean' }],
+              where: {
+                field: 'process',
+                eq: 'true',
+              },
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [
+          { message: '{"active": true}', process: 'true', order: 1 },
+          { message: '{"active": false}', process: 'false', order: 2 },
+        ];
+        await testBed.ingest('ingest-json-extract-cond-bool', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-cond-bool');
+
+        await testBed.ingest('esql-json-extract-cond-bool', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-cond-bool', query);
+
+        const ingestDoc1 = ingestResult.find((d: any) => d.order === 1);
+        const ingestDoc2 = ingestResult.find((d: any) => d.order === 2);
+
+        const esqlDoc1 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 1);
+        const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 2);
+
+        expect(ingestDoc1!.is_active).toBe(true);
+        expect(esqlDoc1!.is_active).toBe(true);
+
+        expect(ingestDoc2!.is_active).toBeUndefined();
+        expect(esqlDoc2!.is_active).toBeNull();
+      }
+    );
+
+    apiTest(
+      'should conditionally extract multiple fields with different types',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [
+                { selector: 'name', target_field: 'user_name' },
+                { selector: 'age', target_field: 'user_age', type: 'integer' },
+                { selector: 'active', target_field: 'user_active', type: 'boolean' },
+              ],
+              where: {
+                field: 'extract',
+                eq: 'yes',
+              },
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [
+          { message: '{"name": "Alice", "age": 30, "active": true}', extract: 'yes', order: 1 },
+          { message: '{"name": "Bob", "age": 25, "active": false}', extract: 'no', order: 2 },
+        ];
+        await testBed.ingest('ingest-json-extract-cond-multi-type', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered(
+          'ingest-json-extract-cond-multi-type'
+        );
+
+        await testBed.ingest('esql-json-extract-cond-multi-type', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-cond-multi-type', query);
+
+        const ingestDoc1 = ingestResult.find((d: any) => d.order === 1);
+        const ingestDoc2 = ingestResult.find((d: any) => d.order === 2);
+
+        const esqlDoc1 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 1);
+        const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 2);
+
+        expect(ingestDoc1!.user_name).toBe('Alice');
+        expect(ingestDoc1!.user_age).toBe(30);
+        expect(ingestDoc1!.user_active).toBe(true);
+
+        expect(esqlDoc1!.user_name).toBe('Alice');
+        expect(esqlDoc1!.user_age).toBe(30);
+        expect(esqlDoc1!.user_active).toBe(true);
+
+        expect(ingestDoc2!.user_name).toBeUndefined();
+        expect(ingestDoc2!.user_age).toBeUndefined();
+        expect(ingestDoc2!.user_active).toBeUndefined();
+
+        expect(esqlDoc2!.user_name).toBeNull();
+        expect(esqlDoc2!.user_age).toBeNull();
+        expect(esqlDoc2!.user_active).toBeNull();
+      }
+    );
+
+    // *** Conditional Overwriting Original Field Tests ***
+    apiTest(
+      'should conditionally overwrite original field with extracted value',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [{ selector: 'simplified', target_field: 'message' }],
+              where: {
+                field: 'simplify',
+                eq: 'yes',
+              },
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [
+          { message: '{"simplified": "short_value"}', simplify: 'yes', order: 1 },
+          { message: '{"simplified": "keep_original"}', simplify: 'no', order: 2 },
+        ];
+        await testBed.ingest('ingest-json-extract-cond-overwrite', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered(
+          'ingest-json-extract-cond-overwrite'
+        );
+
+        await testBed.ingest('esql-json-extract-cond-overwrite', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-cond-overwrite', query);
+
+        const ingestDoc1 = ingestResult.find((d: any) => d.order === 1);
+        const ingestDoc2 = ingestResult.find((d: any) => d.order === 2);
+
+        const esqlDoc1 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 1);
+        const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 2);
+
+        expect(ingestDoc1!.message).toBe('short_value');
+        expect(esqlDoc1!.message).toBe('short_value');
+
+        expect(ingestDoc2!.message).toBe('{"simplified": "keep_original"}');
+        expect(esqlDoc2!.message).toBe('{"simplified": "keep_original"}');
+      }
+    );
+
+    apiTest('should handle nested field conditional extraction', async ({ testBed, esql }) => {
+      const streamlangDSL: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'message',
+            extractions: [{ selector: 'user.profile.email', target_field: 'email' }],
+            where: {
+              field: 'extract_email',
+              eq: 'yes',
+            },
+          } as JsonExtractProcessor,
+        ],
+      };
+
+      const { processors } = transpileIngestPipeline(streamlangDSL);
+      const { query } = transpileEsql(streamlangDSL);
+
+      const docs = [
+        {
+          message: '{"user": {"profile": {"email": "alice@example.com"}}}',
+          extract_email: 'yes',
+          order: 1,
+        },
+        {
+          message: '{"user": {"profile": {"email": "bob@example.com"}}}',
+          extract_email: 'no',
+          order: 2,
+        },
+      ];
+      await testBed.ingest('ingest-json-extract-cond-nested', docs, processors);
+      const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-cond-nested');
+
+      await testBed.ingest('esql-json-extract-cond-nested', docs);
+      const esqlResult = await esql.queryOnIndex('esql-json-extract-cond-nested', query);
+
+      const ingestDoc1 = ingestResult.find((d: any) => d.order === 1);
+      const ingestDoc2 = ingestResult.find((d: any) => d.order === 2);
+
+      const esqlDoc1 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 1);
+      const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.order === 2);
+
+      expect(ingestDoc1!.email).toBe('alice@example.com');
+      expect(esqlDoc1!.email).toBe('alice@example.com');
+
+      expect(ingestDoc2!.email).toBeUndefined();
+      expect(esqlDoc2!.email).toBeNull();
+    });
+
+    // *** Complex JSON Extraction Tests ***
+    apiTest(
+      'should handle complex JSON with mixed types and array access',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'json_extract',
+              field: 'message',
+              extractions: [
+                { selector: 'user.name', target_field: 'username' },
+                { selector: 'tags[1]', target_field: 'second_tag' },
+                { selector: 'metadata.count', target_field: 'count', type: 'integer' },
+              ],
+            } as JsonExtractProcessor,
+          ],
+        };
+
+        const { processors } = transpileIngestPipeline(streamlangDSL);
+        const { query } = transpileEsql(streamlangDSL);
+
+        const docs = [
+          {
+            message:
+              '{"user": {"name": "Alice"}, "tags": ["a", "b", "c"], "metadata": {"count": 100}}',
+          },
+        ];
+        await testBed.ingest('ingest-json-extract-complex', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-json-extract-complex');
+
+        await testBed.ingest('esql-json-extract-complex', docs);
+        const esqlResult = await esql.queryOnIndex('esql-json-extract-complex', query);
+
+        expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
+        expect(ingestResult[0]).toStrictEqual(
+          expect.objectContaining({
+            username: 'Alice',
+            second_tag: 'b',
+            count: 100,
+          })
+        );
+      }
+    );
   }
 );
