@@ -14,6 +14,15 @@ import type { BehaviorSubject } from 'rxjs';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { useAppStateSelector } from '../../application/main/state_management/redux';
 import type { SidebarToggleState } from '../../application/types';
+import { VIEW_MODE } from '../../../common/constants';
+import {
+  FieldListHiddenIcon,
+  FieldListShownIcon,
+  TableHiddenIcon,
+  TableShownIcon,
+  VizHiddenIcon,
+  VizShownIcon,
+} from './panel_icons';
 import {
   internalStateActions,
   useCurrentTabAction,
@@ -41,54 +50,97 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
+  const isTableHidden = useAppStateSelector((state) => Boolean(state.hideDataTable));
+  const viewMode = useAppStateSelector((state) => state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL);
+
+  // Mutual exclusion: you can't collapse both chart and table at the same time.
+  // If one is collapsed and the user collapses the other, it acts as a swap/toggle
+  const isInDocumentView = viewMode === VIEW_MODE.DOCUMENT_LEVEL;
 
   const onToggleChart = useCallback(() => {
-    dispatch(updateAppState({ appState: { hideChart: !isChartHidden } }));
-  }, [dispatch, isChartHidden, updateAppState]);
+    const willHideChart = !isChartHidden;
+    if (willHideChart && isTableHidden && isInDocumentView) {
+      // Swap: hide chart, show table
+      dispatch(updateAppState({ appState: { hideChart: true, hideDataTable: false } }));
+    } else {
+      dispatch(updateAppState({ appState: { hideChart: willHideChart } }));
+    }
+  }, [dispatch, isChartHidden, isTableHidden, isInDocumentView, updateAppState]);
+
+  const onToggleTable = useCallback(() => {
+    const willHideTable = !isTableHidden;
+    if (willHideTable && isChartHidden && isChartAvailable) {
+      // Swap: hide table, show chart
+      dispatch(updateAppState({ appState: { hideDataTable: true, hideChart: false } }));
+    } else {
+      dispatch(updateAppState({ appState: { hideDataTable: willHideTable } }));
+    }
+  }, [dispatch, isTableHidden, isChartHidden, isChartAvailable, updateAppState]);
 
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;
 
   const isInsideHistogram = renderedFor === 'histogram';
   const isInsideDiscoverContent = !isInsideHistogram;
+  // const isInTabsContext = renderedFor === 'tabs' || renderedFor === 'root';
+  const isActualChartAvailable = isChartAvailable || renderedFor === 'histogram';
+
+  // Table toggle: only in tabs context when in document view and chart is available,
+  // since collapsing the table requires a chart to expand into
+  // const showTableToggle = isChartAvailable;
 
   const buttons = [
-    ...((isInsideHistogram && isSidebarCollapsed) ||
-    (isInsideDiscoverContent && isSidebarCollapsed && (isChartHidden || !isChartAvailable))
-      ? [
-          {
-            label: i18n.translate('discover.panelsToggle.showSidebarButton', {
-              defaultMessage: 'Show sidebar',
-            }),
-            iconType: 'transitionLeftIn',
-            'data-test-subj': 'dscShowSidebarButton',
-            'aria-expanded': !isSidebarCollapsed,
-            'aria-controls': 'discover-sidebar',
-            onClick: () => sidebarToggleState?.toggle?.(false),
-          },
-        ]
-      : []),
-    ...(isInsideHistogram || (isInsideDiscoverContent && isChartAvailable && isChartHidden)
-      ? [
-          {
-            label: isChartHidden
-              ? i18n.translate('discover.panelsToggle.showChartButton', {
-                  defaultMessage: 'Show chart',
-                })
-              : i18n.translate('discover.panelsToggle.hideChartButton', {
-                  defaultMessage: 'Hide chart',
-                }),
-            iconType: isChartHidden ? 'transitionTopIn' : 'transitionTopOut',
-            'data-test-subj': isChartHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
-            'aria-expanded': !isChartHidden,
-            'aria-controls': 'unifiedHistogramCollapsablePanel',
-            onClick: onToggleChart,
-          },
-        ]
-      : []),
+    {
+      label: i18n.translate('discover.panelsToggle.showSidebarButton', {
+        defaultMessage: 'Show sidebar',
+      }),
+      iconType: isSidebarCollapsed ? FieldListHiddenIcon : FieldListShownIcon,
+      'data-test-subj': 'dscShowSidebarButton',
+      'aria-expanded': !isSidebarCollapsed,
+      'aria-controls': 'discover-sidebar',
+      onClick: () => sidebarToggleState?.toggle?.(!sidebarToggleState.isCollapsed),
+    },
+    {
+      label: isChartHidden
+        ? i18n.translate('discover.panelsToggle.showChartButton', {
+            defaultMessage: 'Show chart',
+          })
+        : i18n.translate('discover.panelsToggle.hideChartButton', {
+            defaultMessage: 'Hide chart',
+          }),
+      iconType: isChartHidden || !isActualChartAvailable ? VizHiddenIcon : VizShownIcon,
+      'data-test-subj': isChartHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
+      'aria-expanded': !isChartHidden,
+      'aria-controls': 'unifiedHistogramCollapsablePanel',
+      onClick: onToggleChart,
+      disabled: (isTableHidden && !isChartHidden) || !isActualChartAvailable,
+    },
+
+    {
+      label: isTableHidden
+        ? i18n.translate('discover.panelsToggle.showTableButton', {
+            defaultMessage: 'Show table',
+          })
+        : i18n.translate('discover.panelsToggle.hideTableButton', {
+            defaultMessage: 'Hide table',
+          }),
+      iconType: isTableHidden ? TableHiddenIcon : TableShownIcon,
+      'data-test-subj': isTableHidden ? 'dscShowTableButton' : 'dscHideTableButton',
+      'aria-expanded': !isTableHidden,
+      'aria-controls': 'discoverDocTable',
+      onClick: onToggleTable,
+      disabled: isChartHidden || !isActualChartAvailable,
+    },
   ];
 
   if (!buttons.length) {
+    return null;
+  }
+  if (isInsideDiscoverContent && !isChartHidden && isChartAvailable) {
+    return null;
+  }
+
+  if (isInsideHistogram && (isChartHidden || !isActualChartAvailable)) {
     return null;
   }
 

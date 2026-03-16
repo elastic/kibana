@@ -22,6 +22,7 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { act } from 'react-dom/test-utils';
 import { DiscoverToolkitTestProvider } from '../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../build_services';
+import { internalStateActions } from '../../application/main/state_management/redux';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 
 describe('Document view mode toggle component', () => {
@@ -74,6 +75,12 @@ describe('Document view mode toggle component', () => {
       fetchStatus: FetchStatus.COMPLETE,
       result: 10,
     }) as DataTotalHits$;
+
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+        appState: { viewMode, hideDataTable: false },
+      })
+    );
 
     const component = mountWithIntl(
       <DiscoverToolkitTestProvider toolkit={toolkit}>
