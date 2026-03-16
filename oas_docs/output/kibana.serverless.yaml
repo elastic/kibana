@@ -62161,6 +62161,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62185,6 +62187,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62253,6 +62256,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62277,6 +62282,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62352,6 +62358,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62376,6 +62384,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62444,6 +62453,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62468,6 +62479,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62543,6 +62555,8 @@ paths:
                           items:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -62567,6 +62581,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                           type: array
                         rules:
@@ -63483,6 +63498,8 @@ paths:
                           index:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -63507,6 +63524,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                         required:
                           - index
@@ -63614,6 +63632,9 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                description:
+                  default: ''
+                  type: string
                 esql:
                   additionalProperties: false
                   type: object
@@ -83021,6 +83042,11 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entitySourceIds:
+          description: List of entity source IDs associated with the watchlist
+          items:
+            type: string
+          type: array
         id:
           description: The unique ID of the watchlist
           type: string
