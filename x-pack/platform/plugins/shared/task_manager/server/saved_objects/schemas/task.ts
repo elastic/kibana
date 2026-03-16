@@ -96,7 +96,7 @@ const userScopeSchemaV9 = schema.object({
   apiKeyCreatedByUser: schema.boolean(),
 });
 
-export const taskSchemaV9 = taskSchemaV7.extends({
+export const taskSchemaV9 = taskSchemaV8.extends({
   uiamApiKey: schema.maybe(schema.string()),
   userScope: schema.maybe(userScopeSchemaV9),
 });
