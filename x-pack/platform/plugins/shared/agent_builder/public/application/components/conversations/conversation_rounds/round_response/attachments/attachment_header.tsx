@@ -41,6 +41,14 @@ interface AttachmentHeaderProps {
   title: string;
   actionButtons?: ActionButton[];
   onClose?: () => void;
+  /**
+   * Controls preview UI state from the parent.
+   * - none: show regular action buttons
+   * - preview_only: show "Preview Only" badge
+   * - currently_previewing: show "You're previewing this" and hide action buttons
+   */
+  previewState?: 'none' | 'preview_only' | 'currently_previewing';
+  // Backward-compatible props. Prefer `previewState`.
   showPreviewBadge?: boolean;
   showCurrentlyPreviewingBadge?: boolean;
 }
@@ -49,6 +57,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   title,
   actionButtons,
   onClose,
+  previewState,
   showPreviewBadge = false,
   showCurrentlyPreviewingBadge = false,
 }) => {
@@ -80,9 +89,17 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     return null;
   }
 
+  const resolvedPreviewState =
+    previewState ??
+    (showCurrentlyPreviewingBadge
+      ? 'currently_previewing'
+      : showPreviewBadge
+      ? 'preview_only'
+      : 'none');
+
   return (
     <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
-      {showPreviewBadge && (
+      {resolvedPreviewState === 'preview_only' && (
         <EuiBadge iconType="lock" color="primary" css={badgeStyles}>
           {PREVIEW_ONLY_LABEL}
         </EuiBadge>
@@ -93,8 +110,10 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
             {title}
           </EuiText>
         </EuiFlexItem>
-        {showCurrentlyPreviewingBadge === false && <AttachmentActions buttons={actionButtons} />}
-        {showCurrentlyPreviewingBadge === true && (
+        {resolvedPreviewState !== 'currently_previewing' && (
+          <AttachmentActions buttons={actionButtons} />
+        )}
+        {resolvedPreviewState === 'currently_previewing' && (
           <EuiBadge iconType="eye" color="success">
             {CURRENTLY_PREVIEWING_LABEL}
           </EuiBadge>
