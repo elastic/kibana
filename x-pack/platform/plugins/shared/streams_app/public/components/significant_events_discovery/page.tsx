@@ -62,6 +62,10 @@ export function SignificantEventsDiscoveryPage() {
     return <RedirectTo path="/" />;
   }
 
+  if (tab === 'insights') {
+    return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'significant_events' } }} />;
+  }
+
   if (!isValidDiscoveryTab(tab)) {
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }

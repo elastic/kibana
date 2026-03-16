@@ -129,7 +129,7 @@ export function Summary({ count }: { count: number }) {
                     data-test-subj="significant_events_regenerate_insights_button"
                   >
                     {i18n.translate('xpack.streams.insights.regenerateButtonLabel', {
-                      defaultMessage: 'Re-discover significant events',
+                      defaultMessage: 'Re-discover Significant Events',
                     })}
                   </EuiButton>
                 </EuiFlexItem>
@@ -185,7 +185,7 @@ export function Summary({ count }: { count: number }) {
                   'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundDescription',
                   {
                     defaultMessage:
-                      'Discover significant events from your logs, and understand what they mean with the power of AI and Elastic Observability.',
+                      'Discover Significant Events from your logs, and understand what they mean with the power of AI and Elastic Observability.',
                   }
                 )}
               </EuiText>
@@ -200,7 +200,7 @@ export function Summary({ count }: { count: number }) {
                     children:
                       task?.status === TaskStatus.InProgress
                         ? i18n.translate('xpack.streams.insights.generatingButtonLabel', {
-                            defaultMessage: 'Discovering significant events',
+                            defaultMessage: 'Discovering Significant Events',
                           })
                         : i18n.translate('xpack.streams.insights.generateButtonLabel', {
                             defaultMessage: 'Discover Significant Events',
