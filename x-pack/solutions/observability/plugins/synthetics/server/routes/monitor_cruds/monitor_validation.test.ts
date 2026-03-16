@@ -297,9 +297,9 @@ describe('validateMonitor', () => {
       const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: false,
-        reason: 'Browser Monitor timeout is invalid',
+        reason: 'Browser monitor timeout for private locations is invalid',
         details:
-          'Invalid timeout 29 seconds supplied. Minimum timeout for browser monitors is 30 seconds.',
+          'Timeout of 29 seconds is too low. Browser monitors on private locations require a minimum timeout of 30 seconds.',
         payload: testMonitor,
       });
     });

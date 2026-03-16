@@ -548,14 +548,14 @@ export const LOCATION_REQUIRED_ERROR = i18n.translate(
 const BROWSER_INVALID_TIMEOUT_ERROR = i18n.translate(
   'xpack.synthetics.server.monitors.invalidTimeoutError',
   {
-    defaultMessage: 'Browser Monitor timeout is invalid',
+    defaultMessage: 'Browser monitor timeout for private locations is invalid',
   }
 );
 
 const BROWSER_INVALID_TIMEOUT_DETAILS = (timeout: number) =>
   i18n.translate('xpack.synthetics.server.monitors.invalidTimeoutDetails', {
     defaultMessage:
-      'Invalid timeout {timeout} seconds supplied. Minimum timeout for browser monitors is {heartbeatTimeoutOverhead} seconds.',
+      'Timeout of {timeout} seconds is too low. Browser monitors on private locations require a minimum timeout of {heartbeatTimeoutOverhead} seconds.',
     values: {
       timeout,
       heartbeatTimeoutOverhead: HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
