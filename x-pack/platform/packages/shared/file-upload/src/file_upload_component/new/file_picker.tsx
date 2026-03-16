@@ -5,10 +5,19 @@
  * 2.0.
  */
 import type { EuiFilePickerProps } from '@elastic/eui';
-import { EuiFormRow, EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  euiCanAnimate,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useCallback, useRef } from 'react';
 import type { FileUploadManager } from '../../../file_upload_manager';
@@ -20,6 +29,7 @@ interface Props {
 }
 
 export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth, large = false }) => {
+  const { euiTheme } = useEuiTheme();
   const filePickerRef = useRef<EuiFilePickerClass>(null);
 
   const onFilePickerChange = useCallback(
@@ -67,6 +77,19 @@ export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth, large = fa
               }
             )}
             onChange={(files) => onFilePickerChange(files)}
+            css={css`
+              ${euiCanAnimate} {
+                transition: box-shadow ${euiTheme.animation.normal}
+                  ${euiTheme.animation.resistance};
+              }
+
+              &:hover {
+                ${euiCanAnimate} {
+                  box-shadow: 0 0 0 1px ${euiTheme.colors.primary},
+                    0 0 8px rgba(0, 119, 204, 0.15);
+                }
+              }
+            `}
           />
         </EuiFormRow>
       </EuiFlexItem>

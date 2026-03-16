@@ -20,9 +20,11 @@ import {
   EuiFlexItem,
   EuiProgress,
   EuiToolTip,
+  euiCanAnimate,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-common';
 import { useFileUploadContext } from '../../../use_file_upload';
@@ -36,6 +38,11 @@ import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { Failures } from './failures';
 import { AnalysisExplanation } from './analysis_explanation';
 import { ResultsPreview } from './docs_preview';
+
+const panelReveal = keyframes`
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
 
 enum TAB {
   SUMMARY,
@@ -66,6 +73,7 @@ export const FileStatus: FC<Props> = ({
   showExplanationButton = true,
   showSettingsButton = true,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const {
     deleteFile,
     uploadStatus,
@@ -109,7 +117,17 @@ export const FileStatus: FC<Props> = ({
 
   return (
     <>
-      <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+      <EuiPanel
+        hasShadow={false}
+        hasBorder
+        paddingSize="s"
+        css={css`
+          ${euiCanAnimate} {
+            animation: ${panelReveal} ${euiTheme.animation.normal}
+              ${euiTheme.animation.resistance} both;
+          }
+        `}
+      >
         {uploadStarted ? (
           <>
             <UploadProgress fileStatus={fileStatus} />

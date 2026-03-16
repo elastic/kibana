@@ -7,14 +7,26 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, euiCanAnimate } from '@elastic/eui';
+import { css, keyframes } from '@emotion/react';
 import { DataViewIllustration } from '@kbn/shared-ux-prompt-no-data-views';
+
+const gentleFloat = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+`;
+
+const floatStyle = css`
+  ${euiCanAnimate} {
+    animation: ${gentleFloat} 3s ease-in-out infinite;
+  }
+`;
 
 export const UploadImage: FC = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem />
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={floatStyle}>
         <DataViewIllustration />
       </EuiFlexItem>
       <EuiFlexItem />
