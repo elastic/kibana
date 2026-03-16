@@ -149,7 +149,7 @@ async function runTask({
         isServerless: false,
         logsExtractionClient,
         security: startPlugins.security,
-        analytics: telemetryReporter,
+        analytics: core.analytics,
         savedObjectsClient: soClient,
       });
       const statusResult = await assetManagerClient.getStatus(true);
