@@ -9,6 +9,7 @@
 
 import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
+import { DEFAULT_LOOP_MAX_ITERATIONS } from '../../spec/schema';
 import type {
   BaseStep,
   DataSetStep,
@@ -799,10 +800,10 @@ function insertGraphBetweenNodes(
 }
 
 function normalizeMaxIterations(raw?: MaxIterations): {
-  maxIterations?: number;
-  onLimit?: 'continue' | 'fail';
+  maxIterations: number;
+  onLimit: 'continue' | 'fail';
 } {
-  if (raw == null) return {};
+  if (raw == null) return { maxIterations: DEFAULT_LOOP_MAX_ITERATIONS, onLimit: 'continue' };
   if (typeof raw === 'number') return { maxIterations: raw, onLimit: 'continue' };
   return { maxIterations: raw.limit, onLimit: raw['on-limit'] };
 }
