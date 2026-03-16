@@ -213,33 +213,31 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
         description={sectionTip}
         actions={actions}
       >
-        {docId ? (
-          <div
-            data-test-subj="unifiedDocViewerTraceSummaryTraceWaterfallClickArea"
-            aria-label={fullScreenButtonLabel}
-            tabIndex={0}
-            onClick={() => setShowFullScreenWaterfall(true)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setShowFullScreenWaterfall(true);
-              }
-            }}
-            css={css`
-              &,
-              & * {
-                cursor: pointer;
-              }
-            `}
-          >
-            <FocusedTraceWaterfall
-              traceId={traceId}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              docId={docId}
-            />
-          </div>
-        ) : null}
+        <div
+          data-test-subj="unifiedDocViewerTraceSummaryTraceWaterfallClickArea"
+          aria-label={fullScreenButtonLabel}
+          tabIndex={0}
+          onClick={() => setShowFullScreenWaterfall(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setShowFullScreenWaterfall(true);
+            }
+          }}
+          css={css`
+            &,
+            & * {
+              cursor: pointer;
+            }
+          `}
+        >
+          <FocusedTraceWaterfall
+            traceId={traceId}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            docId={docId}
+          />
+        </div>
         <EuiDelayRender delay={500}>
           <TraceWaterfallTourStep
             actionId={actionId}

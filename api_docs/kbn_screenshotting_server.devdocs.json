@@ -650,7 +650,7 @@
           "{ readonly enabled: boolean; readonly capture: Readonly<{ loadDelay?: number | moment.Duration | undefined; } & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; }>; readonly browser: Readonly<{} & { chromium: Readonly<{ disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; readonly networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; readonly poolSize: number; }"
         ],
         "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/schema.ts",
-        "lineNumber": 90,
+        "lineNumber": 91,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
