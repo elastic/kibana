@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JSONSchema7 } from 'json-schema';
 import { monaco } from '@kbn/monaco';
 import {
   type NormalizableFieldSchema,
   normalizeFieldsToJsonSchema,
 } from '@kbn/workflows/spec/lib/field_conversion';
+import { getPlaceholderForProperty } from './workflow_input_placeholder';
 import { getOutputsFromYamlDocument } from '../../../../../../features/validate_workflow_yaml/lib/validate_workflow_outputs_in_yaml';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
@@ -34,17 +36,17 @@ export function isInWorkflowOutputWithBlock(
 
 function createOutputSuggestion(
   name: string,
-  schema: { type?: string; description?: string; enum?: string[] },
+  schema: JSONSchema7,
   isRequired: boolean,
   range: monaco.IRange
 ): monaco.languages.CompletionItem {
-  const type = schema.type || 'string';
-  const outputValuePlaceholder = type === 'string' ? '"${1:value}"' : '${1:value}';
+  const type = (schema.type as string) || 'string';
+  const placeholder = getPlaceholderForProperty(schema);
 
   return {
     label: name,
     kind: monaco.languages.CompletionItemKind.Property,
-    insertText: `${name}: ${outputValuePlaceholder}`,
+    insertText: `${name}: ${placeholder}`,
     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
     range,
     documentation: schema.description || `${type} output`,
@@ -92,7 +94,12 @@ export async function getWorkflowOutputsSuggestions(
     }
   }
 
-  if (autocompleteContext.line.trimStart().startsWith('with:')) {
+  // Output suggestions are KEYS (property names). Only show them when the cursor
+  // is in a key position — not in a value position (after "key: ").
+  // This matches how other steps work: custom property suggestions require
+  // focusedYamlPair (value position), while output suggestions are the inverse.
+  const trimmedLine = autocompleteContext.line.trimStart();
+  if (trimmedLine.startsWith('with:') || /^[\w][\w-]*\s*:/.test(trimmedLine)) {
     return [];
   }
 
@@ -101,14 +108,7 @@ export async function getWorkflowOutputsSuggestions(
   for (const [name, propSchema] of Object.entries(normalizedOutputs.properties)) {
     if (!existingKeys.has(name) && propSchema && typeof propSchema === 'object') {
       const isRequired = normalizedOutputs.required?.includes(name) ?? false;
-      suggestions.push(
-        createOutputSuggestion(
-          name,
-          propSchema as { type?: string; description?: string; enum?: string[] },
-          isRequired,
-          range
-        )
-      );
+      suggestions.push(createOutputSuggestion(name, propSchema as JSONSchema7, isRequired, range));
     }
   }
 

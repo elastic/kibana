@@ -634,6 +634,29 @@ steps:
       expect(labels).not.toContain('result');
     });
 
+    it('should not suggest output keys when cursor is in a value position (after key:)', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+outputs:
+  - name: result
+    type: string
+  - name: count
+    type: number
+triggers:
+  - type: manual
+steps:
+  - name: emit
+    type: workflow.output
+    with:
+      a: |<-
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      const labels = suggestions.map((s) => s.label);
+      expect(labels).not.toContain('result');
+      expect(labels).not.toContain('count');
+    });
+
     it('should suggest declared output fields inside workflow.output with: block', async () => {
       const yamlContent = `
 version: "1"
