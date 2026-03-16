@@ -14,6 +14,7 @@ interface MappingProperties {
     properties?: MappingProperties; // Nested object fields
     fields?: MappingProperties; // Multi-fields (alternative analyzers/types)
     meta?: Record<string, string>; // meta
+    index?: boolean;
   };
 }
 
@@ -27,6 +28,10 @@ export const flattenMapping = (mapping: MappingTypeMapping): MappingField[] => {
     let fields: MappingField[] = [];
 
     for (const [key, value] of Object.entries(obj)) {
+      if (value.index === false) {
+        continue;
+      }
+
       const fieldPath = prefix ? `${prefix}.${key}` : key;
 
       if (value.type) {
