@@ -25,15 +25,16 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { useMemo } from 'react';
-import type { HttpStart } from '@kbn/core-http-browser';
 import type { AppCategory } from '@kbn/core-application-common';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
-import type { ApplicationStart } from '@kbn/core-application-browser';
 import {
   useRecentlyAccessed,
   useCustomNavLink,
   useNavLinks,
   useCurrentAppId,
+  useNavigateToUrl,
+  useBasePath,
+  useHomeHref,
 } from '../shared/chrome_hooks';
 import {
   createEuiListItem,
@@ -103,14 +104,10 @@ function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage) {
 }
 
 interface Props {
-  basePath: HttpStart['basePath'];
   id: string;
   isNavOpen: boolean;
-  homeHref: string;
   storage?: Storage;
   closeNav: () => void;
-  navigateToApp: ApplicationStart['navigateToApp'];
-  navigateToUrl: ApplicationStart['navigateToUrl'];
   button: EuiCollapsibleNavProps['button'];
 }
 
@@ -124,16 +121,15 @@ const overviewIDs = [
 ];
 
 export function CollapsibleNav({
-  basePath,
   id,
   isNavOpen,
-  homeHref,
   storage = window.localStorage,
   closeNav,
-  navigateToApp,
-  navigateToUrl,
   button,
 }: Props) {
+  const basePath = useBasePath();
+  const navigateToUrl = useNavigateToUrl();
+  const homeHref = useHomeHref();
   const allLinks = useNavLinks();
   const allowedLinks = useMemo(
     () =>
@@ -246,7 +242,7 @@ export function CollapsibleNav({
 
                   event.preventDefault();
                   closeNav();
-                  navigateToApp('home');
+                  navigateToUrl(homeHref);
                 },
               },
             ]}

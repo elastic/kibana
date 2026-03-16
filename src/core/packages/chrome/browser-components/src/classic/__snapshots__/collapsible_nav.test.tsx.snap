@@ -84,7 +84,7 @@ Array [
               <a
                 class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-text-isClickable"
                 data-test-subj="homeLink"
-                href="/"
+                href="/test/app/home"
                 rel="noreferrer"
               >
                 <span
@@ -698,25 +698,10 @@ Array [
 
 exports[`CollapsibleNav renders the default nav 1`] = `
 <CollapsibleNav
-  basePath={
-    BasePath {
-      "assetsHrefBase": "/test",
-      "basePath": "/test",
-      "get": [Function],
-      "prepend": [Function],
-      "publicBaseUrl": undefined,
-      "remove": [Function],
-      "serverBasePath": "/test",
-    }
-  }
   button={<button />}
   closeNav={[Function]}
-  homeHref="/"
   id="collapsibe-nav"
-  isLocked={false}
   isNavOpen={false}
-  navigateToApp={[Function]}
-  navigateToUrl={[Function]}
   storage={
     StubBrowserStorage {
       "keys": Array [],
@@ -725,7 +710,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "values": Array [],
     }
   }
-  url="/"
 >
   <EuiCollapsibleNav
     aria-label="Primary"
@@ -814,26 +798,11 @@ exports[`CollapsibleNav renders the default nav 1`] = `
 
 exports[`CollapsibleNav renders the default nav 2`] = `
 <CollapsibleNav
-  basePath={
-    BasePath {
-      "assetsHrefBase": "/test",
-      "basePath": "/test",
-      "get": [Function],
-      "prepend": [Function],
-      "publicBaseUrl": undefined,
-      "remove": [Function],
-      "serverBasePath": "/test",
-    }
-  }
   button={<button />}
   closeNav={[Function]}
-  homeHref="/"
   id="collapsibe-nav"
-  isLocked={false}
   isNavOpen={false}
   isOpen={true}
-  navigateToApp={[Function]}
-  navigateToUrl={[Function]}
   storage={
     StubBrowserStorage {
       "keys": Array [],
@@ -842,7 +811,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "values": Array [],
     }
   }
-  url="/"
 >
   <EuiCollapsibleNav
     aria-label="Primary"

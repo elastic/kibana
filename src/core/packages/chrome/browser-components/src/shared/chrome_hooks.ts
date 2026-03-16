@@ -77,14 +77,14 @@ export function useBasePath(): IBasePath {
   return useChromeComponentsDeps().http.basePath;
 }
 
+/** Returns the classic home href (`/app/home` prepended with basePath). */
+export function useHomeHref(): string {
+  return useBasePath().prepend('/app/home');
+}
+
 /** Returns `application.navigateToUrl`. */
 export function useNavigateToUrl(): ApplicationStart['navigateToUrl'] {
   return useChromeComponentsDeps().application.navigateToUrl;
-}
-
-/** Returns `application.navigateToApp`. */
-export function useNavigateToApp(): ApplicationStart['navigateToApp'] {
-  return useChromeComponentsDeps().application.navigateToApp;
 }
 
 /** Returns the `docLinks` service. */

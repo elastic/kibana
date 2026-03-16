@@ -28,22 +28,10 @@ import { HeaderNavControls } from '../shared/header_nav_controls';
 import { HeaderActionMenu } from '../shared/header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
-import {
-  useClassicBreadcrumbs,
-  useHasAppMenuConfig,
-  useNavigateToApp,
-  useNavigateToUrl,
-  useBasePath,
-} from '../shared/chrome_hooks';
+import { useClassicBreadcrumbs, useHasAppMenuConfig } from '../shared/chrome_hooks';
 
 export function ClassicHeader() {
-  const navigateToApp = useNavigateToApp();
-  const navigateToUrl = useNavigateToUrl();
-  const basePath = useBasePath();
   const breadcrumbs = useClassicBreadcrumbs();
-
-  const homeHref = basePath.prepend('/app/home');
-
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const hasAppMenuConfig = useHasAppMenuConfig();
@@ -65,10 +53,7 @@ export function ClassicHeader() {
               {
                 items: [
                   <HeaderPageAnnouncer breadcrumbs={breadcrumbs} />,
-                  <HeaderLogo
-                    href={homeHref}
-                    navigateToApp={navigateToApp}
-                  />,
+                  <HeaderLogo />,
                 ],
               },
               {
@@ -102,10 +87,6 @@ export function ClassicHeader() {
                 <CollapsibleNav
                   id={navId}
                   isNavOpen={isNavOpen}
-                  homeHref={homeHref}
-                  basePath={basePath}
-                  navigateToApp={navigateToApp}
-                  navigateToUrl={navigateToUrl}
                   closeNav={() => {
                     setIsNavOpen(false);
                   }}

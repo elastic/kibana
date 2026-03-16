@@ -14,7 +14,6 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
@@ -49,16 +48,10 @@ function mockRecentNavLink({ label = 'recent' }: Partial<ChromeRecentlyAccessedH
 
 function mockProps() {
   return {
-    basePath: httpServiceMock.createSetupContract({ basePath: '/test' }).basePath,
     id: 'collapsibe-nav',
-    isLocked: false,
     isNavOpen: false,
-    homeHref: '/',
-    url: '/',
     storage: new StubBrowserStorage(),
     closeNav: () => {},
-    navigateToApp: () => Promise.resolve(),
-    navigateToUrl: () => Promise.resolve(),
     button: <button />,
   };
 }
