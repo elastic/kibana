@@ -168,6 +168,7 @@ export function AddSignificantEventFlyout({
             id: v4(),
             esql: nextQuery.esql,
             title: nextQuery.title,
+            description: nextQuery.description,
             severity_score: nextQuery.severity_score,
             evidence: nextQuery.evidence,
           }))
