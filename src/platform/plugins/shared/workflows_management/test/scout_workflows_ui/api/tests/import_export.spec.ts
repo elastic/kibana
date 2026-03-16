@@ -159,4 +159,52 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
 
     expect(response).toHaveStatusCode(404);
   });
+
+  apiTest('should round-trip: export then re-import produces equivalent workflows', async ({
+    kbnClient,
+    apiClient,
+  }) => {
+    const createResponse = await kbnClient.request<{ id: string; yaml: string }>({
+      method: 'POST',
+      path: '/api/workflows',
+      body: { yaml: SIMPLE_WORKFLOW_YAML },
+    });
+    const originalId = createResponse.data.id;
+
+    const exportResponse = await apiClient.post('api/workflows/_export', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminCredentials.apiKeyHeader,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ids: [originalId] }),
+    });
+    expect(exportResponse).toHaveStatusCode(200);
+
+    const zipBuffer = Buffer.from(exportResponse.body as unknown as string, 'binary');
+    const zip = new AdmZip(zipBuffer);
+    const workflowEntries = zip
+      .getEntries()
+      .filter((e) => e.entryName.endsWith('.yml') && e.entryName !== 'manifest.yml');
+    expect(workflowEntries).toHaveLength(1);
+
+    const reImportedYaml = workflowEntries[0].getData().toString('utf-8');
+    const reImportedId = workflowEntries[0].entryName.replace('.yml', '');
+
+    const importResponse = await apiClient.post('api/workflows/_bulk_create?overwrite=true', {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminCredentials.apiKeyHeader,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        workflows: [{ id: reImportedId, yaml: reImportedYaml }],
+      }),
+    });
+
+    expect(importResponse).toHaveStatusCode(200);
+    expect(importResponse.body.created).toHaveLength(1);
+    expect(importResponse.body.failed).toHaveLength(0);
+    expect(importResponse.body.created[0].name).toBe('ImportTest Workflow');
+  });
 });

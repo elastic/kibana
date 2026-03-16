@@ -196,4 +196,33 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
 
     await expect(pageObjects.workflowList.getImportFlyout()).toBeHidden();
   });
+
+  test('should export selected workflows via bulk action', async ({
+    pageObjects,
+    apiServices,
+    scoutSpace,
+    page,
+  }) => {
+    const yaml1 = getListTestWorkflowYaml({
+      name: 'ExportBulk First',
+      description: 'first export target',
+      enabled: false,
+    });
+    const yaml2 = getListTestWorkflowYaml({
+      name: 'ExportBulk Second',
+      description: 'second export target',
+      enabled: false,
+    });
+    await apiServices.workflows.create(scoutSpace.id, yaml1);
+    await apiServices.workflows.create(scoutSpace.id, yaml2);
+
+    await pageObjects.workflowList.navigate();
+
+    const downloadPromise = page.waitForEvent('download');
+    await pageObjects.workflowList.performBulkExport(['ExportBulk First', 'ExportBulk Second']);
+
+    const download = await downloadPromise;
+    const filename = download.suggestedFilename();
+    expect(filename).toContain('.zip');
+  });
 });

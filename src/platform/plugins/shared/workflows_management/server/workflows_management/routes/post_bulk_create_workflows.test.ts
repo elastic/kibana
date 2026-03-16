@@ -74,6 +74,7 @@ describe('POST /api/workflows/_bulk_create', () => {
         },
         headers: {},
         url: { pathname: '/api/workflows/_bulk_create' },
+        authzResult: { [WorkflowsManagementApiActions.create]: true },
       };
       const mockResponse = createMockResponse();
 
@@ -107,6 +108,7 @@ describe('POST /api/workflows/_bulk_create', () => {
         },
         headers: {},
         url: { pathname: '/api/workflows/_bulk_create' },
+        authzResult: { [WorkflowsManagementApiActions.create]: true },
       };
       const mockResponse = createMockResponse();
 
@@ -127,6 +129,7 @@ describe('POST /api/workflows/_bulk_create', () => {
         },
         headers: {},
         url: { pathname: '/api/workflows/_bulk_create' },
+        authzResult: { [WorkflowsManagementApiActions.create]: true },
       };
       const mockResponse = createMockResponse();
 
@@ -157,6 +160,7 @@ describe('POST /api/workflows/_bulk_create', () => {
         },
         headers: {},
         url: { pathname: '/s/custom-space/api/workflows/_bulk_create' },
+        authzResult: { [WorkflowsManagementApiActions.create]: true },
       };
       const mockResponse = createMockResponse();
 
@@ -193,6 +197,7 @@ describe('POST /api/workflows/_bulk_create', () => {
         },
         headers: {},
         url: { pathname: '/api/workflows/_bulk_create' },
+        authzResult: { [WorkflowsManagementApiActions.create]: true },
       };
       const mockResponse = createMockResponse();
 
@@ -207,7 +212,7 @@ describe('POST /api/workflows/_bulk_create', () => {
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockResult });
     });
 
-    it('should pass overwrite=true to the API when query param is set and user has update privilege', async () => {
+    it('should pass overwrite=true to the API when query param is set and user has both create and update privileges', async () => {
       const mockResult = {
         created: [{ id: 'workflow-1', name: 'Workflow 1' }],
         failed: [],
@@ -223,7 +228,10 @@ describe('POST /api/workflows/_bulk_create', () => {
         },
         headers: {},
         url: { pathname: '/api/workflows/_bulk_create' },
-        authzResult: { [WorkflowsManagementApiActions.update]: true },
+        authzResult: {
+          [WorkflowsManagementApiActions.create]: true,
+          [WorkflowsManagementApiActions.update]: true,
+        },
       };
       const mockResponse = createMockResponse();
 
@@ -247,7 +255,10 @@ describe('POST /api/workflows/_bulk_create', () => {
         },
         headers: {},
         url: { pathname: '/api/workflows/_bulk_create' },
-        authzResult: { [WorkflowsManagementApiActions.update]: false },
+        authzResult: {
+          [WorkflowsManagementApiActions.create]: true,
+          [WorkflowsManagementApiActions.update]: false,
+        },
       };
       const mockResponse = createMockResponse();
 
@@ -256,6 +267,54 @@ describe('POST /api/workflows/_bulk_create', () => {
       expect(workflowsApi.bulkCreateWorkflows).not.toHaveBeenCalled();
       expect(mockResponse.forbidden).toHaveBeenCalledWith({
         body: { message: 'Overwriting workflows requires the update privilege' },
+      });
+    });
+
+    it('should return forbidden when user has only update privilege but not create', async () => {
+      const mockContext = {};
+      const mockRequest = {
+        query: { overwrite: false },
+        body: {
+          workflows: [{ yaml: 'name: Workflow 1' }],
+        },
+        headers: {},
+        url: { pathname: '/api/workflows/_bulk_create' },
+        authzResult: {
+          [WorkflowsManagementApiActions.create]: false,
+          [WorkflowsManagementApiActions.update]: true,
+        },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(workflowsApi.bulkCreateWorkflows).not.toHaveBeenCalled();
+      expect(mockResponse.forbidden).toHaveBeenCalledWith({
+        body: { message: 'Creating workflows requires the create privilege' },
+      });
+    });
+
+    it('should return forbidden when overwrite=true but user has only update privilege and no create', async () => {
+      const mockContext = {};
+      const mockRequest = {
+        query: { overwrite: true },
+        body: {
+          workflows: [{ yaml: 'name: Workflow 1', id: 'workflow-1' }],
+        },
+        headers: {},
+        url: { pathname: '/api/workflows/_bulk_create' },
+        authzResult: {
+          [WorkflowsManagementApiActions.create]: false,
+          [WorkflowsManagementApiActions.update]: true,
+        },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(workflowsApi.bulkCreateWorkflows).not.toHaveBeenCalled();
+      expect(mockResponse.forbidden).toHaveBeenCalledWith({
+        body: { message: 'Creating workflows requires the create privilege' },
       });
     });
   });
