@@ -69,7 +69,6 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     onClose,
   }) => {
     const styles = useMemoCss(componentStyles);
-
     const showCancelButton = useMemo<boolean>(
       () => Boolean(execution && isCancelableStatus(execution.status)),
       [execution]

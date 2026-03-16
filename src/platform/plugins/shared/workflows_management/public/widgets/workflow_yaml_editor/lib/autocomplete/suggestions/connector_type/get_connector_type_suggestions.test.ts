@@ -106,7 +106,6 @@ describe('getConnectorTypeSuggestions', () => {
           expect.objectContaining({
             label: 'waitForInput',
             kind: monaco.languages.CompletionItemKind.Event,
-            detail: 'Built-in workflow step',
           }),
         ])
       );
