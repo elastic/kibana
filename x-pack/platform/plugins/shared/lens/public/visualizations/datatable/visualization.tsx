@@ -18,6 +18,7 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   getFallbackDataBounds,
   getOverridePaletteStops,
+  hasPaletteStops,
 } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
@@ -88,7 +89,7 @@ const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
  */
 function reconcileCategoricalColumn(column: ColumnState): ColumnState {
   const { palette, colorMapping } = column;
-  const hasValueBasedPalette = Boolean(palette?.params?.stops?.length);
+  const hasValueBasedPalette = hasPaletteStops(palette);
   const needsTransition = hasValueBasedPalette || (palette != null && colorMapping != null);
   if (!needsTransition) return column;
 
@@ -130,7 +131,7 @@ function reconcileNumericColumn(
   const paletteEntry = paletteMap.get(palette.name);
   if (!paletteEntry) return column;
 
-  const hasStops = Boolean(palette.params?.stops?.length);
+  const hasStops = hasPaletteStops(palette);
   const needsStopsComputed = !paletteEntry.canDynamicColoring || !hasStops;
   if (!needsStopsComputed) return column;
 
