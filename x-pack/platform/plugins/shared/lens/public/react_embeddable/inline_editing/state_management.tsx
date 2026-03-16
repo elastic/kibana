@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { LensDatasourceId } from '@kbn/lens-common';
-
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type {
   DatasourceStates,
   VisualizationMap,
   DatasourceMap,
   TypedLensSerializedState,
-  SupportedDatasourceId,
+  LensDatasourceId,
 } from '@kbn/lens-common';
 import { mergeToNewDoc } from '../../state_management/shared_logic';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
@@ -29,7 +27,7 @@ export function getStateManagementForInlineEditing(
   datasourceMap: DatasourceMap,
   extractFilterReferences: FilterManager['extract']
 ) {
-  const resolveActiveDatasourceId = (explicit?: SupportedDatasourceId): SupportedDatasourceId => {
+  const resolveActiveDatasourceId = (explicit?: LensDatasourceId): LensDatasourceId => {
     return explicit ?? getActiveDatasourceIdFromDoc(getAttributes()) ?? initialDatasourceId;
   };
 
@@ -37,7 +35,7 @@ export function getStateManagementForInlineEditing(
     datasourceState: unknown,
     visualizationState: unknown,
     visualizationType?: string,
-    datasourceId?: 'formBased' | 'textBased'
+    datasourceId?: LensDatasourceId
   ) => {
     const viz = getAttributes();
     const activeDatasourceId = resolveActiveDatasourceId(datasourceId);
