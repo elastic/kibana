@@ -89,13 +89,17 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       ];
     }, [hasInput, hasError, isTriggerPseudoStep]);
 
-    const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
+    const defaultTabId =
+      stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT ? 'input' : tabs[0].id;
+    const [selectedTabId, setSelectedTabId] = useState<string>(defaultTabId);
 
     useEffect(() => {
       // reset the tab to the default one on step change
-      setSelectedTabId(tabs[0].id);
+      setSelectedTabId(
+        stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT ? 'input' : tabs[0].id
+      );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [stepExecution?.stepId, tabs[0].id]);
+    }, [stepExecution?.stepId, stepExecution?.status, tabs[0].id]);
 
     if (!stepExecution) {
       return (
@@ -151,15 +155,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
               ))}
             </EuiTabs>
           </EuiFlexItem>
-          {showResumeUI && (
-            <EuiFlexItem grow={false}>
-              <ResumeExecutionButton
-                executionId={workflowExecutionId}
-                resumeMessage={resumeMessage}
-                autoOpen={shouldAutoResume}
-              />
-            </EuiFlexItem>
-          )}
           {isFinished ? (
             <EuiFlexItem css={{ overflowY: 'auto' }}>
               {isLoadingStepData ? (
@@ -199,6 +194,16 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                   )}
                   {selectedTabId === 'input' && (
                     <>
+                      {showResumeUI && (
+                        <>
+                          <ResumeExecutionButton
+                            executionId={workflowExecutionId}
+                            resumeMessage={resumeMessage}
+                            autoOpen={shouldAutoResume}
+                          />
+                          <EuiSpacer size="m" />
+                        </>
+                      )}
                       {isTriggerPseudoStep && (
                         <>
                           <EuiCallOut
