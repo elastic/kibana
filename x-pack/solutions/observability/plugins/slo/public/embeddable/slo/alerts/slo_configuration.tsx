@@ -22,8 +22,10 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { SloSelector } from './slo_selector';
 import type { AlertsCustomState, SloItem } from './types';
 
@@ -33,18 +35,65 @@ interface SloConfigurationProps {
   onCancel: () => void;
 }
 
+function toSloItem(slo: SLOWithSummaryResponse): SloItem {
+  return {
+    slo_id: slo.id,
+    slo_instance_id: slo.instanceId,
+    name: slo.name,
+    group_by: [slo.groupBy].flat().filter(Boolean) as string[],
+  };
+}
+
 export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
-  const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(
-    initialInput?.show_all_group_by_instances ?? false
+  const hasSlosWithAllInstances = initialInput?.slos?.some(
+    (slo) => slo.slo_instance_id === ALL_VALUE
   );
-  const [selectedSlos, setSelectedSlos] = useState(initialInput?.slos ?? []);
+  const sloIdsToExpand =
+    initialInput?.slos
+      ?.filter((slo) => slo.slo_instance_id === ALL_VALUE)
+      .map((slo) => slo.slo_id) ?? [];
+
+  const { data: expandedSloList } = useFetchSloList({
+    kqlQuery: sloIdsToExpand.map((id) => `slo.id:"${id}"`).join(' or '),
+    perPage: 100,
+    disabled: sloIdsToExpand.length === 0,
+  });
+
+  const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(() => {
+    if (hasSlosWithAllInstances) {
+      return initialInput?.show_all_group_by_instances ?? true;
+    }
+    return initialInput?.show_all_group_by_instances ?? false;
+  });
+  const [selectedSlos, setSelectedSlos] = useState<SloItem[]>(initialInput?.slos ?? []);
+  const [hasExpandedSlos, setHasExpandedSlos] = useState(false);
+
+  useEffect(() => {
+    if (
+      sloIdsToExpand.length > 0 &&
+      expandedSloList?.results &&
+      expandedSloList.results.length > 0 &&
+      !hasExpandedSlos
+    ) {
+      const instancesOnly = expandedSloList.results.filter((r) => r.instanceId !== ALL_VALUE);
+      if (instancesOnly.length > 0) {
+        const expandedItems = instancesOnly.map((r) => toSloItem(r));
+        const slosWithSpecificInstances = initialInput!.slos!.filter(
+          (slo) => slo.slo_instance_id !== ALL_VALUE
+        );
+        setSelectedSlos([...slosWithSpecificInstances, ...expandedItems]);
+        setShowAllGroupByInstances(true);
+        setHasExpandedSlos(true);
+      }
+    }
+  }, [expandedSloList?.results, initialInput, sloIdsToExpand.length, hasExpandedSlos]);
 
   const [hasError, setHasError] = useState(false);
 
   const onConfirmClick = () =>
     onCreate({ slos: selectedSlos, show_all_group_by_instances: showAllGroupByInstances });
 
-  const hasGroupBy = selectedSlos?.some((slo) => slo.slo_instance_id !== ALL_VALUE);
+  const hasGroupBy = (selectedSlos?.length ?? 0) > 0;
 
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'alertsConfigurationFlyout',

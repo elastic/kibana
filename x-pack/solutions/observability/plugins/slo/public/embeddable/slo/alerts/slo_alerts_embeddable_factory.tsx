@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { FetchContext } from '@kbn/presentation-publishing';
@@ -76,10 +77,22 @@ export function getAlertsEmbeddableFactory({
       }
 
       const titleManager = initializeTitleManager(initialState);
-      const sloAlertsStateManager = initializeStateManager<AlertsCustomState>(initialState, {
-        slos: [],
-        show_all_group_by_instances: false,
-      });
+      const hasSlosWithAllInstances = initialState?.slos?.some(
+        (slo) => slo.slo_instance_id === ALL_VALUE
+      );
+      const normalizedInitialState: AlertsCustomState = {
+        ...initialState,
+        show_all_group_by_instances: hasSlosWithAllInstances
+          ? true
+          : initialState?.show_all_group_by_instances ?? false,
+      };
+      const sloAlertsStateManager = initializeStateManager<AlertsCustomState>(
+        normalizedInitialState,
+        {
+          slos: [],
+          show_all_group_by_instances: false,
+        }
+      );
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
 
