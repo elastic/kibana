@@ -235,6 +235,32 @@ describe('compileCorrelationQuery', () => {
         )
       ).toThrow('Unknown operator: invalid');
     });
+
+    it('includes LIMIT when maxGroups is provided', () => {
+      const query = compileCorrelationQuery(makeConfig(), SELF_RULE_ID, 101);
+      expect(query).toContain('| LIMIT 101');
+    });
+
+    it('omits LIMIT when maxGroups is not provided', () => {
+      const query = compileCorrelationQuery(makeConfig(), SELF_RULE_ID);
+      expect(query).not.toContain('LIMIT');
+    });
+
+    it('floors non-integer maxGroups to a safe integer', () => {
+      const query = compileCorrelationQuery(makeConfig(), SELF_RULE_ID, 10.7);
+      expect(query).toContain('| LIMIT 10');
+    });
+
+    it('clamps maxGroups of 0 to minimum of 1', () => {
+      const query = compileCorrelationQuery(makeConfig(), SELF_RULE_ID, 0);
+      expect(query).toContain('| LIMIT 1');
+    });
+
+    it('throws when groupBy is empty', () => {
+      expect(() => compileCorrelationQuery(makeConfig({ groupBy: [] }), SELF_RULE_ID)).toThrow(
+        'Correlation rules require at least one groupBy field'
+      );
+    });
   });
 
   describe('common assertions across all query types', () => {

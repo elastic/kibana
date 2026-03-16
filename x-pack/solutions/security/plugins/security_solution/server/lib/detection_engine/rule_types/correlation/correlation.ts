@@ -37,6 +37,8 @@ import {
 } from '../utils/utils';
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
+const MAX_BUILDING_BLOCKS_PER_GROUP = 500;
+
 export const correlationExecutor = async ({
   sharedParams,
   services,
@@ -68,7 +70,11 @@ export const correlationExecutor = async ({
     const result = createSearchAfterReturnType();
     const selfRuleId = completeRule.alertId;
 
-    const compiledQuery = compileCorrelationQuery(ruleParams.correlation, selfRuleId);
+    const compiledQuery = compileCorrelationQuery(
+      ruleParams.correlation,
+      selfRuleId,
+      tuple.maxSignals + 1
+    );
     ruleExecutionLogger.debug(`Compiled correlation ES|QL query:\n${compiledQuery}`);
 
     try {
@@ -120,7 +126,11 @@ export const correlationExecutor = async ({
         _source: Record<string, unknown>;
       }> = [];
 
-      for (const group of correlationGroups) {
+      let totalAlertsCreated = 0;
+      let groupsProcessed = 0;
+      const alertConstructionStart = performance.now();
+
+      for (const [groupIndex, group] of correlationGroups.entries()) {
         const shellId = uuidv4();
         const maxRisk =
           typeof group.max_risk === 'string'
@@ -145,6 +155,13 @@ export const correlationExecutor = async ({
           : [];
         const highestSeverity = computeHighestSeverity(severityList as string[]);
 
+        const cappedAlertIds = alertIds.slice(0, MAX_BUILDING_BLOCKS_PER_GROUP);
+        if (alertIds.length > MAX_BUILDING_BLOCKS_PER_GROUP) {
+          ruleExecutionLogger.warn(
+            `Correlation group has ${alertIds.length} alert IDs, capping to ${MAX_BUILDING_BLOCKS_PER_GROUP}`
+          );
+        }
+
         const groupByValues: Record<string, unknown> = {};
         for (const field of ruleParams.correlation.groupBy) {
           if (group[field] !== undefined) {
@@ -155,7 +172,7 @@ export const correlationExecutor = async ({
         const boostMultiplier =
           ruleParams.correlation.type === 'temporal' ||
           ruleParams.correlation.type === 'temporal_ordered'
-            ? Math.min(alertIds.length, 5) * 0.1
+            ? Math.min(cappedAlertIds.length, 5) * 0.1
             : 0;
         const compositeRiskScore = Math.min(Math.round(maxRisk * (1 + boostMultiplier)), 100);
 
@@ -169,9 +186,9 @@ export const correlationExecutor = async ({
           'kibana.alert.risk_score': compositeRiskScore,
           'kibana.alert.severity': highestSeverity,
           'kibana.alert.reason': `Correlation rule "${completeRule.ruleConfig.name}" matched ${
-            alertIds.length
+            cappedAlertIds.length
           } alerts grouped by ${ruleParams.correlation.groupBy.join(', ')}`,
-          'kibana.alert.correlated_alerts': alertIds,
+          'kibana.alert.correlated_alerts': cappedAlertIds,
           'kibana.alert.correlated_rule_names': ruleNames,
           'kibana.alert.workflow_status': 'open',
           ...groupByValues,
@@ -183,7 +200,7 @@ export const correlationExecutor = async ({
           _source: shellAlert,
         });
 
-        for (let i = 0; i < alertIds.length; i++) {
+        for (let i = 0; i < cappedAlertIds.length; i++) {
           const bbId = uuidv4();
           const buildingBlock: Record<string, unknown> = {
             [ALERT_UUID]: bbId,
@@ -194,10 +211,10 @@ export const correlationExecutor = async ({
             'kibana.alert.rule.uuid': completeRule.alertId,
             'kibana.alert.rule.name': completeRule.ruleConfig.name,
             'kibana.alert.rule.type': 'correlation',
-            'kibana.alert.original_alert.uuid': alertIds[i],
+            'kibana.alert.original_alert.uuid': cappedAlertIds[i],
             'kibana.alert.risk_score': maxRisk,
             'kibana.alert.severity': highestSeverity,
-            'kibana.alert.reason': `Building block for correlation: contributing alert ${alertIds[i]}`,
+            'kibana.alert.reason': `Building block for correlation: contributing alert ${cappedAlertIds[i]}`,
             'kibana.alert.workflow_status': 'open',
             ...groupByValues,
           };
@@ -207,9 +224,29 @@ export const correlationExecutor = async ({
             _source: buildingBlock,
           });
         }
+
+        totalAlertsCreated += 1 + cappedAlertIds.length;
+        groupsProcessed = groupIndex + 1;
+        if (totalAlertsCreated >= tuple.maxSignals) {
+          ruleExecutionLogger.warn(
+            `Reached maxSignals limit (${tuple.maxSignals}) after processing ${groupIndex + 1} of ${
+              correlationGroups.length
+            } correlation groups`
+          );
+          break;
+        }
       }
 
-      const typedAlerts = wrappedAlerts as unknown as Array<WrappedAlert<DetectionAlertLatest>>;
+      const alertConstructionDuration = performance.now() - alertConstructionStart;
+      ruleExecutionLogger.debug(
+        `Alert construction completed in ${alertConstructionDuration.toFixed(
+          1
+        )}ms. Created ${totalAlertsCreated} alerts from ${groupsProcessed} groups.`
+      );
+
+      const typedAlerts = wrappedAlerts.slice(0, tuple.maxSignals) as unknown as Array<
+        WrappedAlert<DetectionAlertLatest>
+      >;
 
       const bulkCreateResult = await bulkCreate({
         wrappedAlerts: typedAlerts,

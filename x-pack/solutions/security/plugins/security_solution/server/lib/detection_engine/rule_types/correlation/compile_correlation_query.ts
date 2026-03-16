@@ -22,9 +22,13 @@ const validateFieldName = (name: string): string => {
 
 export const compileCorrelationQuery = (
   correlation: CorrelationConfig,
-  selfRuleId: string
+  selfRuleId: string,
+  maxGroups?: number
 ): string => {
   const { rules, type, groupBy, timespan, condition } = correlation;
+  if (groupBy.length === 0) {
+    throw new Error('Correlation rules require at least one groupBy field');
+  }
   const validatedGroupBy = groupBy.map(validateFieldName);
   const groupByFields = validatedGroupBy.join(', ');
   const escapedSelfId = escapeEsqlString(selfRuleId);
@@ -34,36 +38,49 @@ export const compileCorrelationQuery = (
       ? `kibana.alert.rule.uuid == "${escapeEsqlString(rules[0])}"`
       : `kibana.alert.rule.uuid IN (${rules.map((r) => `"${escapeEsqlString(r)}"`).join(', ')})`;
 
+  let query: string;
+
   switch (type) {
     case 'temporal':
-      return compileTemporalQuery({ ruleFilter, selfGuard, groupByFields, timespan, rules });
+      query = compileTemporalQuery({ ruleFilter, selfGuard, groupByFields, timespan, rules });
+      break;
     case 'temporal_ordered':
-      return compileTemporalOrderedQuery({
+      query = compileTemporalOrderedQuery({
         ruleFilter,
         selfGuard,
         groupByFields,
         timespan,
         rules,
       });
+      break;
     case 'event_count':
-      return compileEventCountQuery({
+      query = compileEventCountQuery({
         ruleFilter,
         selfGuard,
         groupByFields,
         timespan,
         condition,
       });
+      break;
     case 'value_count':
-      return compileValueCountQuery({
+      query = compileValueCountQuery({
         ruleFilter,
         selfGuard,
         groupByFields,
         timespan,
         condition,
       });
+      break;
     default:
       throw new Error(`Unsupported correlation type: ${type}`);
   }
+
+  if (maxGroups !== undefined) {
+    const safeLimit = Math.max(1, Math.floor(maxGroups));
+    query += `\n| LIMIT ${safeLimit}`;
+  }
+
+  return query;
 };
 
 interface QueryParts {
