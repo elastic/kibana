@@ -107,6 +107,7 @@ export const EventSchema = schema.maybe(
         task: schema.maybe(
           schema.object({
             id: ecsString(),
+            type: ecsString(),
             scheduled: ecsDate(),
             schedule_delay: ecsStringOrNumber(),
           })
