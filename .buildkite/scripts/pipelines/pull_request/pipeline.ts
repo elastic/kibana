@@ -88,7 +88,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     const solutions = ['observability', 'search', 'security', 'workplaceai'];
     for (const solution of solutions) {
-      if (await doAllChangesMatch(new RegExp(`^(x-pack/solutions/${solution}|\\.buildkite/)`))) {
+      if (await doAllChangesMatch(new RegExp(`^x-pack/solutions/${solution}`))) {
         execFileSync('buildkite-agent', [
           'meta-data',
           'set',

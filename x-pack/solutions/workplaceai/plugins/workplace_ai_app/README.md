@@ -45,5 +45,3 @@ xpack.workplaceAIApp.ears.ui_enabled: true
 ### Running EARS Locally
 
 See the [EARS repository](https://github.com/elastic/elastic-auth-redirect-service) for instructions on how to run EARS locally. Once EARS is running, you can use the "Test the Elastic Auth Redirect Service" section on the Workplace AI home page to test OAuth flows.
-
-no-op validation change
