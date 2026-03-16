@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlyout, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +34,17 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
   const conversationId = useConversationId();
   const { conversationActions } = useConversationContext();
+
+  // Track previous conversation ID to detect changes
+  const prevConversationIdRef = useRef(conversationId);
+
+  // Close canvas when conversation ID changes
+  useEffect(() => {
+    if (prevConversationIdRef.current !== conversationId) {
+      closeCanvas();
+      prevConversationIdRef.current = conversationId;
+    }
+  }, [conversationId, closeCanvas]);
 
   const updateOrigin = useCallback(
     async (origin: unknown) => {
@@ -132,7 +143,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       <EuiFlyoutBody css={flyoutBodyStyles}>
         {uiDefinition.renderCanvasContent(
           { attachment, isSidebar },
-          { registerActionButtons, updateOrigin }
+          { registerActionButtons, updateOrigin, closeCanvas }
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
