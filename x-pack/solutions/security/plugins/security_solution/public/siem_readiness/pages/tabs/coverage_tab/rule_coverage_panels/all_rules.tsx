@@ -86,15 +86,18 @@ export const AllRuleCoveragePanel: React.FC = () => {
 
   const enabledIntegrationsStatusMap = useMemo(() => {
     const map = new Map<string, { status: string; badgeColor: string; tooltip: string }>();
-    relatedIntegrationNames
-      .filter((name) => enabledPackagesSet.has(name))
-      .forEach((name) => {
-        map.set(name, {
-          status: INTEGRATIONS_ENABLED,
-          badgeColor: 'success',
-          tooltip: INTEGRATIONS_ENABLED_TOOLTIP,
-        });
+    const enabledIntegrations = relatedIntegrationNames.filter((name) =>
+      enabledPackagesSet.has(name)
+    );
+
+    for (const name of enabledIntegrations) {
+      map.set(name, {
+        status: INTEGRATIONS_ENABLED,
+        badgeColor: 'success',
+        tooltip: INTEGRATIONS_ENABLED_TOOLTIP,
       });
+    }
+
     return map;
   }, [relatedIntegrationNames, enabledPackagesSet]);
 
@@ -110,16 +113,19 @@ export const AllRuleCoveragePanel: React.FC = () => {
 
   const missingOrDisabledStatusMap = useMemo(() => {
     const map = new Map<string, { status: string; badgeColor: string; tooltip: string }>();
-    relatedIntegrationNames
-      .filter((name) => !enabledPackagesSet.has(name))
-      .forEach((name) => {
-        const isDisabled = disabledPackagesSet.has(name);
-        map.set(name, {
-          status: isDisabled ? INTEGRATIONS_DISABLED : INTEGRATIONS_UNINSTALLED,
-          badgeColor: isDisabled ? 'primary' : 'default',
-          tooltip: isDisabled ? INTEGRATIONS_INSTALLED_TOOLTIP : INTEGRATIONS_UNINSTALLED_TOOLTIP,
-        });
+    const missingOrDisabledIntegrations = relatedIntegrationNames.filter(
+      (name) => !enabledPackagesSet.has(name)
+    );
+
+    for (const name of missingOrDisabledIntegrations) {
+      const isDisabled = disabledPackagesSet.has(name);
+      map.set(name, {
+        status: isDisabled ? INTEGRATIONS_DISABLED : INTEGRATIONS_UNINSTALLED,
+        badgeColor: isDisabled ? 'primary' : 'default',
+        tooltip: isDisabled ? INTEGRATIONS_INSTALLED_TOOLTIP : INTEGRATIONS_UNINSTALLED_TOOLTIP,
       });
+    }
+
     return map;
   }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet]);
 
