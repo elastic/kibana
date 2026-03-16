@@ -128,6 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
         ...browserMonitorJson,
         locations: [LOCAL_LOCATION, pvtLoc],
         maintenance_windows: [mwObject.id],
+        timeout: null,
       };
 
       const createResponse = await monitorTestService.createMonitor({
@@ -163,6 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
           location: { id: testFleetPolicyID },
           spaceId,
           mws: [mwObject],
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });

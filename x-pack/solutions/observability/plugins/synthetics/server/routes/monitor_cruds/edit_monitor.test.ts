@@ -15,6 +15,10 @@ import type {
 } from '../../../common/runtime_types';
 import { getRouteContextMock } from '../../mocks/route_context_mock';
 
+jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
+  getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('fleet-package-policies'),
+}));
+
 jest.mock('../telemetry/monitor_upgrade_sender', () => ({
   sendTelemetryEvents: jest.fn(),
   formatTelemetryUpdateEvent: jest.fn(),

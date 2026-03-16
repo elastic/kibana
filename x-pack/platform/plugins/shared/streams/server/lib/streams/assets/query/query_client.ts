@@ -26,6 +26,7 @@ import {
   ASSET_ID,
   ASSET_TYPE,
   ASSET_UUID,
+  QUERY_DESCRIPTION,
   QUERY_ESQL_QUERY,
   QUERY_EVIDENCE,
   QUERY_FEATURE_FILTER,
@@ -131,6 +132,7 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
 
 type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_TITLE]: string;
+  [QUERY_DESCRIPTION]: string;
   [QUERY_ESQL_QUERY]: string;
   [QUERY_SEVERITY_SCORE]?: number;
 };
@@ -168,6 +170,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     query: {
       id: storageFields[ASSET_ID],
       title: storageFields[QUERY_TITLE],
+      description: storageFields[QUERY_DESCRIPTION],
       /**
        * The storageClient migrateSource converts the `kql` and `feature` filter to esql, making safe their removal here.
        */
@@ -187,6 +190,7 @@ function toStorage(definition: Streams.all.Definition, request: QueryLinkRequest
     ...rest,
     [STREAM_NAME]: definition.name,
     [QUERY_TITLE]: query.title,
+    [QUERY_DESCRIPTION]: query.description,
     [QUERY_ESQL_QUERY]: query.esql.query,
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_EVIDENCE]: query.evidence,
@@ -417,6 +421,7 @@ export class QueryClient {
           filter,
           should: [
             ...wildcardQuery(QUERY_TITLE, query),
+            ...wildcardQuery(QUERY_DESCRIPTION, query),
             ...wildcardQuery(QUERY_KQL_BODY, query),
             ...wildcardQuery(QUERY_FEATURE_NAME, query),
             ...wildcardQuery(QUERY_FEATURE_FILTER, query),
