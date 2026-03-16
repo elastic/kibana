@@ -51,7 +51,7 @@ export const FilterBarContextProvider: React.FC<
   /** isCollapsed initial state should be as follows:
    * - Expanded by default
    * - Pull from localStorage ONLY if the filter bar is initially collapsible
-   *   (If the user has not yet added at least 2 filters, we never want to immediately collapse
+   *   (If the user has not yet added at least 1 filter, we never want to immediately collapse
    *    the filter bar the moment they add enough filters to make it collapsible. It should only
    *    collapse in response to the user manually closing it. If the user then refreshes the page,
    *    localStorage may initialize the filter bar as collasped, which is acceptable)
@@ -66,7 +66,8 @@ export const FilterBarContextProvider: React.FC<
 
   useEffect(() => {
     // If, while the filter bar is collapsed, the user clears all filters, reset isCollapsed to false
-    // so the filter bar will not reinitialize collapsed if they later add another filter
+    // This prevents the filter bar from staying collapsed if the user then adds another filter without refreshing
+    // The filter bar must ALWAYS render expanded if the number of filters goes from 0 to 1
     if (!isCollapsible && isCollapsed) setIsCollapsed(false);
   }, [isCollapsed, isCollapsible]);
 
