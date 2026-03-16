@@ -15,14 +15,12 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { getErrorMessage } from '../../common';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
+import { createAssetManagerClient } from './factories';
 import type { EntityStoreCoreSetup } from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
-import { AssetManagerClient } from '../domain/asset_manager';
 import { getLatestEntitiesIndexName } from '../domain/asset_manager/latest_index';
 import { ENTITY_STORE_STATUS } from '../domain/constants';
-import { CcsLogsExtractionClient, LogsExtractionClient } from '../domain/logs_extraction';
-import { EngineDescriptorClient, EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import type { GetStatusResult } from '../domain/types';
 import {
   ENTITY_STORE_HEALTH_REPORT_EVENT,
@@ -109,9 +107,14 @@ async function runTask({
   }
 
   try {
-    const [coreStart, startPlugins] = await core.getStartServices();
-    const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
-    const esClient = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+    const { assetManagerClient, esClient } = await createAssetManagerClient({
+      core,
+      fakeRequest,
+      logger,
+      namespace,
+      analytics: telemetryReporter,
+      isServerless: false,
+    });
     const index = getLatestEntitiesIndexName(namespace);
     const abortSignal = abortController.signal;
 
@@ -133,36 +136,6 @@ async function runTask({
 
     // Report status
     try {
-      const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
-        soClient,
-        coreStart.elasticsearch.client.asInternalUser,
-        fakeRequest
-      );
-      const engineDescriptorClient = new EngineDescriptorClient(soClient, namespace, logger);
-      const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, logger);
-      const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, namespace);
-      const logsExtractionClient = new LogsExtractionClient({
-        logger,
-        namespace,
-        esClient,
-        dataViewsService,
-        engineDescriptorClient,
-        globalStateClient,
-        ccsLogsExtractionClient,
-      });
-      const assetManagerClient = new AssetManagerClient({
-        logger,
-        esClient,
-        taskManager: startPlugins.taskManager,
-        engineDescriptorClient,
-        globalStateClient,
-        namespace,
-        isServerless: false,
-        logsExtractionClient,
-        security: startPlugins.security,
-        analytics: createReportEvent(core.analytics),
-        savedObjectsClient: soClient,
-      });
       const statusResult = await assetManagerClient.getStatus(true);
       telemetryReporter.reportEvent(
         ENTITY_STORE_HEALTH_REPORT_EVENT,
