@@ -54,7 +54,7 @@ describe('content pack tree helpers', () => {
       const child2 = testContentPackEntry({ name: 'root.child2' });
       const child1Nested = testContentPackEntry({
         name: 'root.child1.nested',
-        queries: [{ id: 'keep', title: 'keep query', esql: { query: 'FROM logs | LIMIT 1' } }],
+        queries: [{ id: 'keep', title: 'keep query', description: '', esql: { query: 'FROM logs | LIMIT 1' } }],
       });
 
       const tree = asTree({
@@ -88,8 +88,8 @@ describe('content pack tree helpers', () => {
       const root = testContentPackEntry({
         name: 'root',
         queries: [
-          { id: 'keep', title: 'keep query', esql: { query: 'FROM logs | LIMIT 1' } },
-          { id: 'drop', title: 'drop query', esql: { query: 'FROM logs | LIMIT 10' } },
+          { id: 'keep', title: 'keep query', description: '', esql: { query: 'FROM logs | LIMIT 1' } },
+          { id: 'drop', title: 'drop query', description: '', esql: { query: 'FROM logs | LIMIT 10' } },
         ],
       });
 
@@ -246,7 +246,7 @@ describe('content pack tree helpers', () => {
           testContentPackEntry({
             name: 'logs',
             queries: [
-              { id: 'one', title: 'title', esql: { query: 'FROM logs | WHERE qty == "one"' } },
+              { id: 'one', title: 'title', description: '', esql: { query: 'FROM logs | WHERE qty == "one"' } },
             ],
           }),
         ],
@@ -259,7 +259,7 @@ describe('content pack tree helpers', () => {
           testContentPackEntry({
             name: 'logs',
             queries: [
-              { id: 'one', title: 'title', esql: { query: 'FROM logs | WHERE qty == "two"' } },
+              { id: 'one', title: 'title', description: '', esql: { query: 'FROM logs | WHERE qty == "two"' } },
             ],
           }),
         ],
