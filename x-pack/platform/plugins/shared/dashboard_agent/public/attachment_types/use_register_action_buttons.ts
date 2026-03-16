@@ -14,6 +14,11 @@ import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useLatest from 'react-use/lib/useLatest';
 
+export type SavedObjectStatus =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'resolved'; exists: boolean };
+
 interface UseRegisterActionButtonsParams {
   dashboardApi: DashboardApi | undefined;
   registerActionButtons: (buttons: ActionButton[]) => void;
@@ -39,8 +44,10 @@ export const useRegisterActionButtons = ({
 
   useEffect(() => {
     if (!dashboardApi) {
+      registerActionButtons([]);
       return;
     }
+
     const buttons: ActionButton[] = [];
 
     if (dashboardApi.locator) {
@@ -51,11 +58,14 @@ export const useRegisterActionButtons = ({
         }),
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          const linkedId = linkedSavedObjectIdRef.current;
-          const soExists = linkedId ? await doesSavedDashboardExist(linkedId) : false;
+          const existingDashboardId =
+            linkedSavedObjectIdRef.current &&
+            (await doesSavedDashboardExist(linkedSavedObjectIdRef.current))
+              ? linkedSavedObjectIdRef.current
+              : undefined;
           await locator.navigate({
             ...dashboardStateRef.current,
-            dashboardId: soExists ? linkedSavedObjectIdRef.current : undefined,
+            dashboardId: existingDashboardId,
             time_range: timeRangeRef.current,
             viewMode: 'edit',
           });
@@ -69,9 +79,18 @@ export const useRegisterActionButtons = ({
       icon: 'save',
       type: ActionButtonType.PRIMARY,
       handler: async () => {
+        const existingDashboardId =
+          linkedSavedObjectIdRef.current &&
+          (await doesSavedDashboardExist(linkedSavedObjectIdRef.current))
+            ? linkedSavedObjectIdRef.current
+            : undefined;
+        if (existingDashboardId) {
+          await dashboardApi.runQuickSave();
+          return;
+        }
         const result = await dashboardApi.runInteractiveSave();
         const nextSavedObjectId = result?.id ?? dashboardApi.savedObjectId$.value;
-        if (nextSavedObjectId && nextSavedObjectId !== linkedSavedObjectIdRef.current) {
+        if (nextSavedObjectId && nextSavedObjectId !== existingDashboardId) {
           await updateOrigin({ savedObjectId: nextSavedObjectId });
         }
       },
