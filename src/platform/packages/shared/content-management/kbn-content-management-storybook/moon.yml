@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/content-management-storybook'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/content-management-storybook'
+  title: '@kbn/content-management-storybook'
   description: Moon project for @kbn/content-management-storybook
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/shared/content-management/kbn-content-management-storybook
+  sourceRoot: src/platform/packages/shared/content-management/kbn-content-management-storybook
 dependsOn:
   - '@kbn/content-list-mock-data'
   - '@kbn/storybook'

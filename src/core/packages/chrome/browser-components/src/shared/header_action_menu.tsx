@@ -25,8 +25,6 @@ const useHeaderActionMenuMounter = () => {
   return mounter;
 };
 
-export const useHasActionMenu = () => useHeaderActionMenuMounter().mount !== undefined;
-
 /**
  * Renders the currently mounted header action menu set via {@link ChromeStart.setHeaderActionMenu}.
  * @deprecated Use {@link HeaderAppMenu} instead. See kibana-team#2651.
