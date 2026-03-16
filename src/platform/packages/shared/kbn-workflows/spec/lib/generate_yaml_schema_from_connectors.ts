@@ -22,6 +22,8 @@ import {
   getTriggerSchema,
   getWhileStepSchema,
   getWorkflowSettingsSchema,
+  LoopBreakStepSchema,
+  LoopContinueStepSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
@@ -129,6 +131,8 @@ function createRecursiveStepSchema(
       DataSetStepSchema,
       WorkflowExecuteStepSchema,
       WorkflowExecuteAsyncStepSchema,
+      LoopBreakStepSchema,
+      LoopContinueStepSchema,
       ...connectorSchemas,
       ...aliasSchemas,
     ]);

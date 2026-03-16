@@ -96,6 +96,10 @@ export function generateBuiltInStepSnippet(
         },
       };
       break;
+    case 'loop.break':
+    case 'loop.continue':
+      parameters = {};
+      break;
     default:
       parameters = {
         with: { '# Add parameters here': '' },

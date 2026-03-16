@@ -196,6 +196,7 @@ export type DashboardApi = CanExpandPanels &
     setSettings: (settings: DashboardSettings) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
+    setState: (state: DashboardState) => void;
 
     publishedChildFilters$: PublishingSubject<Filter[] | undefined>;
     unpublishedChildFilters$: PublishingSubject<Filter[] | undefined>;
