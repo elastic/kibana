@@ -143,7 +143,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       <EuiFlyoutBody css={flyoutBodyStyles}>
         {uiDefinition.renderCanvasContent(
           { attachment, isSidebar },
-          { registerActionButtons, updateOrigin }
+          { registerActionButtons, updateOrigin, closeCanvas }
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
