@@ -253,7 +253,8 @@ spaceTest.describe(
       }
     );
 
-    spaceTest(
+    // Failing: See https://github.com/elastic/kibana/issues/257977
+    spaceTest.skip(
       'Transaction Detail - Waterfall size warning "view in Discover" link opens traces experience',
       async ({ page, pageObjects }) => {
         const transactionDetailParams = {
