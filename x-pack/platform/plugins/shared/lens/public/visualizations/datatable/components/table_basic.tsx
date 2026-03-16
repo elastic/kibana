@@ -75,7 +75,6 @@ import { getColumnAlignment } from '../utils';
 export const DataContext = React.createContext<DataContextType>({});
 
 const DATA_GRID_STYLE_DEFAULT: EuiDataGridStyle = {
-  border: 'horizontal',
   header: 'shade',
   footer: 'shade',
 };
@@ -296,6 +295,105 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       props.data
     );
   }, [props.data, isNumericMap, columnConfig]);
+
+  const maxValueLengthByColumnId: Map<string, number> = useMemo(() => {
+    const map = new Map<string, number>();
+    const columnsWithProgressBar = columnConfig.columns.filter((col) => col.showProgressBar);
+    if (columnsWithProgressBar.length === 0 || !firstLocalTable.rows.length) return map;
+    for (const col of columnsWithProgressBar) {
+      const formatter = formatters[col.columnId];
+      if (!formatter) continue;
+      let maxLen = 0;
+      for (const row of firstLocalTable.rows) {
+        const raw = row[col.columnId];
+        const text = formatter.convert(raw, 'text');
+        const len = String(text).length;
+        if (len > maxLen) maxLen = len;
+      }
+      if (maxLen > 0) map.set(col.columnId, maxLen);
+    }
+    return map;
+  }, [columnConfig.columns, firstLocalTable.rows, formatters]);
+
+  const progressBarGradientByColumnId: Map<string, string> = useMemo(() => {
+    const map = new Map<string, string>();
+    const gradientColumns = columnConfig.columns.filter(
+      (col) =>
+        col.showProgressBar &&
+        (col.progressBarColorMode ?? 'single') === 'gradient' &&
+        (col.palette || col.colorMapping)
+    );
+    if (gradientColumns.length === 0) return map;
+    const categoryRows = (props.untransposedData ?? props.data)?.rows ?? firstLocalTable.rows;
+    for (const col of gradientColumns) {
+      const originalId = getOriginalId(col.columnId);
+      const minMax = minMaxByColumnId.get(originalId);
+      const min = minMax?.min ?? 0;
+      const max = minMax?.max ?? min + 1;
+      const colInfo = getDatatableColumn(firstLocalTable, originalId);
+      const isBucketed = bucketedColumns.some((id) => id === col.columnId);
+      const colorByTerms = shouldColorByTerms(colInfo?.meta?.type, isBucketed);
+      const data: ColorMappingInputData = colorByTerms
+        ? {
+            type: 'categories',
+            categories: col.colorMapping
+              ? getColorCategories(categoryRows, [originalId], [null])
+              : getLegacyColorCategories(categoryRows, [originalId], [null]),
+          }
+        : {
+            type: 'ranges',
+            bins: 0,
+            ...(minMax ?? getFallbackDataBounds()),
+          };
+      const colorFn = getCellColorFn(
+        props.paletteService,
+        palettes,
+        data,
+        colorByTerms,
+        isDarkMode,
+        syncColors,
+        col.palette,
+        col.colorMapping
+      );
+      const parts: string[] = [];
+      if (data.type === 'ranges') {
+        const steps = 5;
+        const range = max - min;
+        for (let i = 0; i <= steps; i++) {
+          const value = range === 0 ? min : min + (range * i) / steps;
+          const color = colorFn(value);
+          if (color) {
+            const pos = range === 0 ? 50 : (i / steps) * 100;
+            parts.push(`${color} ${pos.toFixed(2)}%`);
+          }
+        }
+      } else {
+        const n = data.categories.length;
+        for (let i = 0; i < n; i++) {
+          const color = colorFn(data.categories[i]);
+          if (color) {
+            const pos = n <= 1 ? 50 : (i / (n - 1)) * 100;
+            parts.push(`${color} ${pos.toFixed(2)}%`);
+          }
+        }
+      }
+      if (parts.length > 0) {
+        map.set(col.columnId, `linear-gradient(to right, ${parts.join(', ')})`);
+      }
+    }
+    return map;
+  }, [
+    columnConfig.columns,
+    minMaxByColumnId,
+    props.paletteService,
+    props.untransposedData,
+    props.data,
+    firstLocalTable,
+    bucketedColumns,
+    palettes,
+    isDarkMode,
+    syncColors,
+  ]);
 
   const headerRowHeight = props.args.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT;
   const headerRowLines = props.args.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES;
@@ -570,6 +668,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           rowHasRowClickTriggerActions: props.rowHasRowClickTriggerActions,
           alignments,
           minMaxByColumnId,
+          maxValueLengthByColumnId,
+          progressBarGradientByColumnId,
           handleFilterClick,
         }}
       >

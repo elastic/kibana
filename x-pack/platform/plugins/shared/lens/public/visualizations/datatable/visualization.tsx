@@ -647,6 +647,27 @@ export const getDatatableVisualization = ({
                 ? undefined
                 : column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!),
               sortingHint,
+              showProgressBar: canColor && Boolean(column.showProgressBar) ? true : undefined,
+              progressBarColorMode: canColor && column.showProgressBar
+                ? (column.progressBarColorMode === 'classic' ? 'solid' : (column.progressBarColorMode ?? 'single'))
+                : undefined,
+              progressBarMaxMode: canColor && column.showProgressBar
+                ? (column.progressBarMaxMode ?? 'highest')
+                : undefined,
+              progressBarMaxValue:
+                canColor &&
+                column.showProgressBar &&
+                (column.progressBarMaxMode ?? 'highest') === 'custom' &&
+                column.progressBarMaxValue != null
+                  ? column.progressBarMaxValue
+                  : undefined,
+              progressBarColor:
+                canColor &&
+                column.showProgressBar &&
+                (column.progressBarColorMode ?? 'single') === 'single' &&
+                column.progressBarColor
+                  ? column.progressBarColor
+                  : undefined,
             }
           );
           return buildExpression([datatableColumnFn]).toAst();

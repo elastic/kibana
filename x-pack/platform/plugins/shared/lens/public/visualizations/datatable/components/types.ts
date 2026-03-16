@@ -40,6 +40,10 @@ export interface DataContextType {
   rowHasRowClickTriggerActions?: boolean[];
   alignments?: Map<string, 'left' | 'right' | 'center'>;
   minMaxByColumnId?: Map<string, { min: number; max: number }>;
+  /** For progress bar columns: max character length of formatted values (used to align bars vertically). */
+  maxValueLengthByColumnId?: Map<string, number>;
+  /** For gradient progress bar columns: CSS linear-gradient string keyed by columnId (from palette/min-max). */
+  progressBarGradientByColumnId?: Map<string, string>;
   handleFilterClick?: (
     field: string,
     value: unknown,

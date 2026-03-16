@@ -7,7 +7,15 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSwitch,
+  EuiButtonGroup,
+  EuiSelect,
+  EuiFieldNumber,
+  EuiColorPicker,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import {
   CUSTOM_PALETTE,
@@ -39,6 +47,8 @@ import type { FormatFactory } from '../../../../common/types';
 import { getDatatableColumn } from '../../../../common/expressions/impl/datatable/utils';
 
 const idPrefix = htmlIdGenerator()();
+const barColorIdPrefix = htmlIdGenerator()();
+const maxValueIdPrefix = htmlIdGenerator()();
 
 type ColumnType = DatatableVisualizationState['columns'][number];
 
@@ -98,7 +108,19 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const showDynamicColoringFeature = isBucketable || isNumeric;
   const currentAlignment = getColumnAlignment(column, isNumeric);
   const currentColorMode = column?.colorMode || 'none';
-  const hasDynamicColoring = currentColorMode !== 'none';
+  const showProgressBar = Boolean(column?.showProgressBar);
+  /** Effective "cell decoration" for UI: progressBar when showProgressBar, else colorMode (cell → background). */
+  const cellDecoration: 'none' | 'background' | 'text' | 'progressBar' = showProgressBar
+    ? 'progressBar'
+    : currentColorMode === 'cell'
+      ? 'background'
+      : currentColorMode === 'text'
+        ? 'text'
+        : 'none';
+  const hasDynamicColoring =
+    currentColorMode !== 'none' ||
+    (showProgressBar &&
+      (column?.progressBarColorMode === 'solid' || column?.progressBarColorMode === 'gradient'));
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 
   const hasTransposedColumn = localState.columns.some(({ isTransposed }) => isTransposed);
@@ -156,6 +178,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 defaultMessage: 'Center',
               }),
               'data-test-subj': 'lnsDatatable_alignment_groups_center',
+              isDisabled: Boolean(column?.showProgressBar),
             },
             {
               id: `${idPrefix}right`,
@@ -173,80 +196,196 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
         />
       </EuiFormRow>
       {showDynamicColoringFeature && (
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.table.cellDecoration.label', {
+            defaultMessage: 'Cell decoration',
+          })}
+        >
+          <EuiSelect
+            fullWidth
+            compressed
+            data-test-subj="lnsDatatable_cellDecoration_select"
+            options={[
+              {
+                value: 'none',
+                text: i18n.translate('xpack.lens.table.cellDecoration.none', {
+                  defaultMessage: 'None',
+                }),
+              },
+              {
+                value: 'background',
+                text: i18n.translate('xpack.lens.table.cellDecoration.background', {
+                  defaultMessage: 'Background',
+                }),
+              },
+              {
+                value: 'text',
+                text: i18n.translate('xpack.lens.table.cellDecoration.text', {
+                  defaultMessage: 'Text',
+                }),
+              },
+              {
+                value: 'progressBar',
+                text: i18n.translate('xpack.lens.table.cellDecoration.progressBar', {
+                  defaultMessage: 'Progress bar',
+                }),
+              },
+            ]}
+            value={cellDecoration}
+            onChange={(e) => {
+              const decoration = e.target.value as typeof cellDecoration;
+              const params: Partial<ColumnType> = {};
+
+              if (decoration === 'progressBar') {
+                params.showProgressBar = true;
+                params.colorMode = 'none';
+                const currentBarMode = column?.progressBarColorMode;
+                const resolvedBarMode =
+                  currentBarMode === 'gradient'
+                    ? 'gradient'
+                    : currentBarMode === 'solid' || currentBarMode === 'classic'
+                      ? 'solid'
+                      : 'single';
+                params.progressBarColorMode = resolvedBarMode;
+                if ((resolvedBarMode === 'solid' || resolvedBarMode === 'gradient') && !column?.palette) {
+                  params.palette = {
+                    ...activePalette,
+                    params: { ...activePalette.params, stops: displayStops },
+                  };
+                }
+                if (showColorByTerms && (resolvedBarMode === 'solid' || resolvedBarMode === 'gradient') && !column?.colorMapping) {
+                  params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+                }
+              } else {
+                params.showProgressBar = false;
+                if (decoration === 'none') {
+                  params.colorMode = 'none';
+                  params.palette = undefined;
+                  params.colorMapping = undefined;
+                } else if (decoration === 'background') {
+                  params.colorMode = 'cell';
+                  if (!column?.colorMapping && showColorByTerms) {
+                    params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+                  }
+                  if (!column?.palette) {
+                    params.palette = {
+                      ...activePalette,
+                      params: { ...activePalette.params, stops: displayStops },
+                    };
+                  }
+                } else {
+                  params.colorMode = 'text';
+                  if (!column?.colorMapping && showColorByTerms) {
+                    params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+                  }
+                  if (!column?.palette) {
+                    params.palette = {
+                      ...activePalette,
+                      params: { ...activePalette.params, stops: displayStops },
+                    };
+                  }
+                }
+              }
+              if (decoration === 'progressBar' && currentAlignment === 'center') {
+                params.alignment = 'left';
+              }
+              props.setState({
+                ...localState,
+                columns: updateColumn(localState, accessor, params),
+              });
+            }}
+          />
+        </EuiFormRow>
+      )}
+      {!column.isTransposed && props.groupId === 'metrics' && showProgressBar && (
         <>
           <EuiFormRow
             display="columnCompressed"
             fullWidth
-            label={i18n.translate('xpack.lens.table.dynamicColoring.label', {
-              defaultMessage: 'Color by value',
+            label={i18n.translate('xpack.lens.table.barColor.label', {
+              defaultMessage: 'Bar color',
             })}
           >
             <EuiButtonGroup
               isFullWidth
-              legend={i18n.translate('xpack.lens.table.dynamicColoring.label', {
-                defaultMessage: 'Color by value',
+              legend={i18n.translate('xpack.lens.table.barColor.label', {
+                defaultMessage: 'Bar color',
               })}
-              data-test-subj="lnsDatatable_dynamicColoring_groups"
+              data-test-subj="lnsDatatable_barColor_groups"
               buttonSize="compressed"
               options={[
                 {
-                  id: `${idPrefix}none`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.none', {
-                    defaultMessage: 'None',
+                  id: `${barColorIdPrefix}single`,
+                  label: i18n.translate('xpack.lens.table.barColor.single', {
+                    defaultMessage: 'Single',
                   }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_none',
+                  'data-test-subj': 'lnsDatatable_barColor_groups_single',
                 },
                 {
-                  id: `${idPrefix}cell`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
-                    defaultMessage: 'Cell',
+                  id: `${barColorIdPrefix}solid`,
+                  label: i18n.translate('xpack.lens.table.barColor.solid', {
+                    defaultMessage: 'Solid',
                   }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_cell',
+                  'data-test-subj': 'lnsDatatable_barColor_groups_solid',
                 },
                 {
-                  id: `${idPrefix}text`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.text', {
-                    defaultMessage: 'Text',
+                  id: `${barColorIdPrefix}gradient`,
+                  label: i18n.translate('xpack.lens.table.barColor.gradient', {
+                    defaultMessage: 'Gradient',
                   }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_text',
+                  'data-test-subj': 'lnsDatatable_barColor_groups_gradient',
                 },
               ]}
-              idSelected={`${idPrefix}${currentColorMode}`}
+              idSelected={`${barColorIdPrefix}${column?.progressBarColorMode ?? 'single'}`}
               onChange={(id) => {
-                const newMode = id.replace(idPrefix, '') as ColumnType['colorMode'];
-                const params: Partial<ColumnType> = {
-                  colorMode: newMode,
-                };
-
-                if (newMode !== 'none') {
-                  if (!column?.colorMapping && showColorByTerms) {
-                    params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
-                  }
-
-                  // also set palette for now
+                const mode = id.replace(barColorIdPrefix, '') as ColumnType['progressBarColorMode'];
+                const updates: Partial<ColumnType> = { progressBarColorMode: mode };
+                if (mode === 'solid' || mode === 'gradient') {
                   if (!column?.palette) {
-                    params.palette = {
+                    updates.palette = {
                       ...activePalette,
-                      params: {
-                        ...activePalette.params,
-                        // that's ok, at first open we're going to throw them away and recompute
-                        stops: displayStops,
-                      },
+                      params: { ...activePalette.params, stops: displayStops },
                     };
                   }
+                  if (showColorByTerms && !column?.colorMapping) {
+                    updates.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+                  }
                 }
-
-                // clear up when switching to no coloring
-                if (newMode === 'none') {
-                  params.palette = undefined;
-                  params.colorMapping = undefined;
-                }
-                updateColumnState(accessor, params);
+                props.setState({
+                  ...localState,
+                  columns: updateColumn(localState, accessor, updates),
+                });
               }}
             />
           </EuiFormRow>
-
-          {hasDynamicColoring &&
+          {(column?.progressBarColorMode ?? 'single') === 'single' && (
+            <EuiFormRow
+              fullWidth
+              display="columnCompressed"
+              label={i18n.translate('xpack.lens.table.progressBarColor.label', {
+                defaultMessage: 'Progress bar color',
+              })}
+            >
+              <EuiColorPicker
+                fullWidth
+                compressed
+                format="hex"
+                color={column?.progressBarColor ?? ''}
+                onChange={(color) => {
+                  props.setState({
+                    ...localState,
+                    columns: updateColumn(localState, accessor, {
+                      progressBarColor: color || undefined,
+                    }),
+                  });
+                }}
+                data-test-subj="lnsDatatable_progressBarColor_picker"
+              />
+            </EuiFormRow>
+          )}
+          {(column?.progressBarColorMode === 'solid' || column?.progressBarColorMode === 'gradient') &&
             (showColorByTerms ? (
               <ColorMappingByTerms
                 isDarkMode={isDarkMode}
@@ -278,8 +417,120 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 dataBounds={currentMinMax}
               />
             ))}
+          <EuiFormRow
+            fullWidth
+            display="columnCompressed"
+            label={i18n.translate('xpack.lens.table.progressBarMaxValue.label', {
+              defaultMessage: 'Max value',
+            })}
+          >
+            <EuiButtonGroup
+            isFullWidth
+            legend={i18n.translate('xpack.lens.table.progressBarMaxValue.label', {
+              defaultMessage: 'Max value',
+            })}
+            data-test-subj="lnsDatatable_progressBarMaxValue_groups"
+            buttonSize="compressed"
+            options={[
+              {
+                id: `${maxValueIdPrefix}highest`,
+                label: i18n.translate('xpack.lens.table.progressBarMaxValue.highest', {
+                  defaultMessage: 'Highest',
+                }),
+                'data-test-subj': 'lnsDatatable_progressBarMaxValue_highest',
+              },
+              {
+                id: `${maxValueIdPrefix}custom`,
+                label: i18n.translate('xpack.lens.table.progressBarMaxValue.custom', {
+                  defaultMessage: 'Custom',
+                }),
+                'data-test-subj': 'lnsDatatable_progressBarMaxValue_custom',
+              },
+            ]}
+            idSelected={`${maxValueIdPrefix}${column?.progressBarMaxMode ?? 'highest'}`}
+            onChange={(id) => {
+              const mode = id.replace(maxValueIdPrefix, '') as ColumnType['progressBarMaxMode'];
+              props.setState({
+                ...localState,
+                columns: updateColumn(localState, accessor, {
+                  progressBarMaxMode: mode,
+                  ...(mode === 'highest' ? { progressBarMaxValue: undefined } : {}),
+                }),
+              });
+            }}
+          />
+        </EuiFormRow>
+          {showProgressBar && (column?.progressBarMaxMode ?? 'highest') === 'custom' && (
+            <EuiFormRow
+              fullWidth
+              display="columnCompressed"
+              label={i18n.translate('xpack.lens.table.progressBarMaxValue.customValueLabel', {
+                defaultMessage: 'Custom max value',
+              })}
+            >
+              <EuiFieldNumber
+                fullWidth
+                compressed
+                data-test-subj="lnsDatatable_progressBarMaxValue_customInput"
+                value={
+                  column?.progressBarMaxValue !== undefined && column?.progressBarMaxValue !== null
+                    ? column.progressBarMaxValue
+                    : ''
+                }
+                onChange={(e) => {
+                  const raw = e.currentTarget.value;
+                  const num = raw === '' ? undefined : Number(raw);
+                  props.setState({
+                    ...localState,
+                    columns: updateColumn(localState, accessor, {
+                      progressBarMaxValue:
+                        num !== undefined && !Number.isNaN(num) ? num : undefined,
+                    }),
+                  });
+                }}
+                placeholder={i18n.translate('xpack.lens.table.progressBarMaxValue.placeholder', {
+                  defaultMessage: 'Enter max value',
+                })}
+                min={0}
+                step={1}
+              />
+            </EuiFormRow>
+          )}
         </>
       )}
+      {hasDynamicColoring &&
+        !(showProgressBar && (column?.progressBarColorMode === 'solid' || column?.progressBarColorMode === 'gradient')) &&
+        (showColorByTerms ? (
+          <ColorMappingByTerms
+            isDarkMode={isDarkMode}
+            colorMapping={column.colorMapping}
+            palette={activePalette}
+            palettes={props.palettes}
+            isInlineEditing={isInlineEditing}
+            setPalette={(palette) => {
+              updateColumnState(accessor, { palette, colorMapping: undefined });
+            }}
+            setColorMapping={(colorMapping) => {
+              updateColumnState(accessor, { colorMapping });
+            }}
+            paletteService={props.paletteService}
+            panelRef={props.panelRef}
+            categories={getColorCategories(currentData?.rows, [accessor], [null])}
+            formatter={formatter}
+            allowCustomMatch={allowCustomMatch}
+          />
+        ) : (
+          <ColorMappingByValues
+            palette={activePalette}
+            isInlineEditing={isInlineEditing}
+            setPalette={(newPalette) => {
+              updateColumnState(accessor, { palette: newPalette });
+            }}
+            paletteService={props.paletteService}
+            panelRef={props.panelRef}
+            dataBounds={currentMinMax}
+          />
+        ))}
       {!column.isTransposed && (
         <EuiFormRow
           fullWidth

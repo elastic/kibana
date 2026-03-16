@@ -88,6 +88,16 @@ export interface ColumnState {
   // Categorical color mapping configuration
   colorMapping?: ColorMapping.Config;
   colorMode?: 'none' | 'cell' | 'text';
+  /** When true and colorMode is 'none', show a progress bar next to the value (metric columns). */
+  showProgressBar?: boolean;
+  /** When showProgressBar is true: 'single' = static color (progressBarColor), 'solid' = color mapping, 'gradient' = gradient from color mapping. */
+  progressBarColorMode?: 'single' | 'solid' | 'gradient';
+  /** When showProgressBar is true: 'highest' = max is column max, 'custom' = use progressBarMaxValue. */
+  progressBarMaxMode?: 'highest' | 'custom';
+  /** When progressBarMaxMode is 'custom', this is the max value for the progress bar. */
+  progressBarMaxValue?: number;
+  /** When showProgressBar is true and colorMode is 'none': custom progress bar color (hex). */
+  progressBarColor?: string;
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   summaryLabel?: string;
   collapseFn?: CollapseFunction;
