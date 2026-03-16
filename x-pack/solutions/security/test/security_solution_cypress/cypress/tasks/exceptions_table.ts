@@ -56,7 +56,7 @@ export const clearSearchSelection = () => {
   cy.get(EXCEPTIONS_TABLE_SEARCH_CLEAR).first().click();
 };
 
-export const importExceptionLists = (listsFile: string) => {
+export const importExceptionLists = (listsFile: Cypress.FileReference) => {
   cy.get(IMPORT_SHARED_EXCEPTION_LISTS_BTN).click();
   cy.get(INPUT_FILE).should('exist');
   cy.get(INPUT_FILE).trigger('click');
@@ -301,6 +301,13 @@ export const validateImportExceptionListFailedBecauseExistingListFound = () => {
   });
 };
 
-export const validateImportExceptionListCreateNewOptionDisabled = () => {
-  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX).should('be.disabled');
+export const validateImportExceptionListFailedOnArtifactTypePrecheck = () => {
+  cy.get(TOASTER).should('have.text', 'There was an error uploading the exception list.');
+  cy.get(TOASTER_BODY)
+    .invoke('text')
+    .should((bodyText) => {
+      expect(bodyText).to.match(
+        /On this page only shared exception lists can be imported, but at least one file contains Endpoint artifacts. Endpoint artifacts can be imported on their respective pages/i
+      );
+    });
 };
