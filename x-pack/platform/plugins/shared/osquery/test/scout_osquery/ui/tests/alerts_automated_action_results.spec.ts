@@ -24,10 +24,9 @@ test.describe(
       ruleId = rule.id;
     });
 
-    test.beforeEach(async ({ browserAuth, page, kbnUrl, kbnClient }) => {
+    test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
       await browserAuth.loginWithCustomRole(socManagerRole);
       await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
-      await waitForAlerts(page, kbnClient, ruleId);
     });
 
     test.afterAll(async ({ kbnClient }) => {
@@ -39,8 +38,9 @@ test.describe(
     test(
       'can visit discover from response action results',
       { tag: [...tags.stateful.classic] },
-      async ({ page }) => {
-        test.setTimeout(180_000);
+      async ({ page, kbnClient }) => {
+        test.setTimeout(360_000);
+        await waitForAlerts(page, kbnClient, ruleId);
         const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
 
         await test.step('Expand alert and open response action results', async () => {
@@ -115,8 +115,9 @@ test.describe(
     test(
       'can visit lens from response action results',
       { tag: [...tags.stateful.classic] },
-      async ({ page }) => {
-        test.setTimeout(180_000); // Alert tests can take time
+      async ({ page, kbnClient }) => {
+        test.setTimeout(360_000);
+        await waitForAlerts(page, kbnClient, ruleId);
         const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
 
         await test.step('Expand alert and open response action results', async () => {
@@ -178,8 +179,13 @@ test.describe(
     test(
       'can add to timeline from response action results',
       { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
-      async ({ page }) => {
-        test.setTimeout(180_000); // Alert tests can take time
+      async ({ page, kbnClient, config }) => {
+        test.skip(
+          !!config.serverless,
+          'Alert-dependent: detection engine requires agent data in serverless'
+        );
+        test.setTimeout(360_000);
+        await waitForAlerts(page, kbnClient, ruleId);
         const timelineRegex = new RegExp(`Added ${UUID_REGEX} to Timeline`);
         const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
 

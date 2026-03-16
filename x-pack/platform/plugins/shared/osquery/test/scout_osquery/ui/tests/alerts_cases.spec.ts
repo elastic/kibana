@@ -43,7 +43,6 @@ test.describe(
     test.beforeEach(async ({ browserAuth, page, kbnUrl, kbnClient }) => {
       await browserAuth.loginWithCustomRole(socManagerRole);
       await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
-      await waitForAlerts(page, kbnClient, ruleId);
       const caseData = await loadCase(kbnClient, 'securitySolution');
       caseId = caseData.id;
     });
@@ -70,7 +69,8 @@ test.describe(
       config,
     }) => {
       test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
-      test.setTimeout(180_000);
+      test.setTimeout(360_000);
+      await waitForAlerts(page, kbnClient, ruleId);
 
       const caseName = `Test case ${Date.now()}`;
       const caseDescription = `Test case description ${Date.now()}`;
@@ -150,9 +150,14 @@ test.describe(
       }
     });
 
-    test('sees osquery results from last action and add to a case', async ({ page, config }) => {
+    test('sees osquery results from last action and add to a case', async ({
+      page,
+      kbnClient,
+      config,
+    }) => {
       test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
-      test.setTimeout(180_000);
+      test.setTimeout(360_000);
+      await waitForAlerts(page, kbnClient, ruleId);
 
       await test.step('Expand alert and open response actions', async () => {
         // eslint-disable-next-line playwright/no-nth-methods -- first event in list

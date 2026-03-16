@@ -33,10 +33,10 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
     kbnUrl,
     kbnClient,
   }) => {
-    test.setTimeout(600_000);
+    test.setTimeout(360_000);
     await browserAuth.loginWithCustomRole(t1AnalystRole);
     await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
-    await waitForAlerts(page, kbnClient, ruleId, { timeout: 480_000 });
+    await waitForAlerts(page, kbnClient, ruleId);
 
     // eslint-disable-next-line playwright/no-nth-methods -- first event in list
     await page.testSubj.locator('expand-event').first().click();
@@ -57,10 +57,10 @@ test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
     kbnUrl,
     kbnClient,
   }) => {
-    test.setTimeout(600_000);
+    test.setTimeout(360_000);
     await browserAuth.loginWithCustomRole(t1AnalystRole);
     await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
-    await waitForAlerts(page, kbnClient, ruleId, { timeout: 480_000 });
+    await waitForAlerts(page, kbnClient, ruleId);
 
     // eslint-disable-next-line playwright/no-nth-methods -- first event in list
     await page.testSubj.locator('expand-event').first().click();

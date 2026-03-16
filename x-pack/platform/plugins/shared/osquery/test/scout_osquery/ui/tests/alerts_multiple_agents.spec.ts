@@ -23,10 +23,9 @@ test.describe(
       ruleId = rule.id;
     });
 
-    test.beforeEach(async ({ browserAuth, page, kbnUrl, kbnClient }) => {
+    test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
       await browserAuth.loginWithCustomRole(socManagerRole);
       await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
-      await waitForAlerts(page, kbnClient, ruleId);
     });
 
     test.afterAll(async ({ kbnClient }) => {
@@ -35,8 +34,14 @@ test.describe(
       }
     });
 
-    test('should substitute parameters in investigation guide', async ({ page, config }) => {
+    test('should substitute parameters in investigation guide', async ({
+      page,
+      kbnClient,
+      config,
+    }) => {
       test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
+      test.setTimeout(360_000);
+      await waitForAlerts(page, kbnClient, ruleId);
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       await page.testSubj
@@ -74,6 +79,7 @@ test.describe(
 
     test('should substitute parameters in live query and increase number of ran queries', async ({
       page,
+      kbnClient,
       pageObjects,
       config,
     }) => {
@@ -82,6 +88,8 @@ test.describe(
         true,
         'Response actions notification requires automated actions to complete first'
       );
+      test.setTimeout(360_000);
+      await waitForAlerts(page, kbnClient, ruleId);
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
       const notificationBadge = page.testSubj.locator('response-actions-notification');
@@ -121,11 +129,13 @@ test.describe(
 
     test('should be able to run take action query against all enrolled agents', async ({
       page,
+      kbnClient,
       pageObjects,
       config,
     }) => {
       test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       test.setTimeout(600_000);
+      await waitForAlerts(page, kbnClient, ruleId);
 
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
       await page.testSubj.locator('expand-event').first().click();
@@ -167,11 +177,14 @@ test.describe(
 
     test('should substitute params in osquery ran from timelines alerts', async ({
       page,
+      kbnClient,
       pageObjects,
       config,
     }) => {
       test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
       test.fixme(true, 'Timeline events table population timing is unreliable in CI');
+      test.setTimeout(360_000);
+      await waitForAlerts(page, kbnClient, ruleId);
 
       // Send alert to timeline
       // eslint-disable-next-line playwright/no-nth-methods -- first send-alert button

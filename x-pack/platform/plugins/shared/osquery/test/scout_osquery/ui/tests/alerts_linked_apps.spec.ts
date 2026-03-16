@@ -25,10 +25,9 @@ test.describe(
       ruleName = rule.name;
     });
 
-    test.beforeEach(async ({ browserAuth, page, kbnUrl, kbnClient }) => {
+    test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
       await browserAuth.loginWithCustomRole(socManagerRole);
       await page.goto(kbnUrl.get(`/app/security/rules/id/${ruleId}`));
-      await waitForAlerts(page, kbnClient, ruleId);
     });
 
     test.afterAll(async ({ kbnClient }) => {
@@ -38,6 +37,7 @@ test.describe(
     });
 
     test('should be able to add investigation guides to response actions', async ({ page }) => {
+      await waitForPageReady(page);
       await page.testSubj.locator('editRuleSettingsLink').click();
       await waitForPageReady(page);
       await page.testSubj.locator('edit-rule-actions-tab').click();
@@ -82,11 +82,13 @@ test.describe(
     test('should be able to run live query and add to timeline', async ({
       page,
       kbnUrl,
+      kbnClient,
       pageObjects,
       config,
     }) => {
       test.skip(!!config.serverless, 'Agent-dependent: agents become unhealthy in serverless CI');
-      test.setTimeout(180_000);
+      test.setTimeout(360_000);
+      await waitForAlerts(page, kbnClient, ruleId);
       const TIMELINE_NAME = 'Untitled timeline';
 
       // eslint-disable-next-line playwright/no-nth-methods -- first event in list
