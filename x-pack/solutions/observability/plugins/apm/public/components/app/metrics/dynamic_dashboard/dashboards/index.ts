@@ -13,14 +13,14 @@ interface GetDynamicDashboardProps {
   agentName?: string;
   telemetrySdkName?: string;
   telemetrySdkLanguage?: string;
-  runtimeVersion?: string;
+  agentVersion?: string;
 }
 
 export const getDynamicDashboard = ({
   agentName,
   telemetrySdkName,
   telemetrySdkLanguage,
-  runtimeVersion,
+  agentVersion,
 }: GetDynamicDashboardProps): PanelBuilder | undefined => {
   if (!agentName) {
     return undefined;
@@ -30,7 +30,7 @@ export const getDynamicDashboard = ({
     agentName,
     telemetrySdkName,
     telemetrySdkLanguage,
-    runtimeVersion,
+    agentVersion,
   });
 
   if (!dimensions) {

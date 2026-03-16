@@ -11,7 +11,7 @@ export interface DashboardDimensionProps {
   agentName: string;
   telemetrySdkName?: string;
   telemetrySdkLanguage?: string;
-  runtimeVersion?: string;
+  agentVersion?: string;
 }
 
 export interface DashboardDimensions {
@@ -24,12 +24,12 @@ export interface DashboardDimensions {
 const standardizeLanguageName = (languageName?: string) =>
   languageName ? languageName.toLowerCase().replace('/', '_') : undefined;
 
-export const parseMajorVersion = (runtimeVersion?: string): string | undefined => {
-  if (!runtimeVersion) {
+export const parseMajorVersion = (version?: string): string | undefined => {
+  if (!version) {
     return undefined;
   }
 
-  const major = runtimeVersion.split('.')[0];
+  const major = version.split('.')[0];
   const parsed = Number(major);
 
   if (Number.isNaN(parsed)) {
@@ -43,7 +43,7 @@ export const getDashboardDimensions = ({
   agentName,
   telemetrySdkName,
   telemetrySdkLanguage,
-  runtimeVersion,
+  agentVersion,
 }: DashboardDimensionProps): DashboardDimensions | undefined => {
   const dataFormat = getIngestionPath(!!(telemetrySdkName ?? telemetrySdkLanguage));
   const { sdkName, language } = getSdkNameAndLanguage(agentName);
@@ -53,5 +53,5 @@ export const getDashboardDimensions = ({
     return undefined;
   }
 
-  return { dataFormat, sdkName, language: sdkLanguage, version: parseMajorVersion(runtimeVersion) };
+  return { dataFormat, sdkName, language: sdkLanguage, version: parseMajorVersion(agentVersion) };
 };
