@@ -122,6 +122,7 @@ describe('useCasesColumns ', () => {
             "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
             "minWidth": "9em",
             "name": "Created on",
@@ -240,6 +241,7 @@ describe('useCasesColumns ', () => {
             "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
             "minWidth": "9em",
             "name": "Created on",
@@ -323,6 +325,7 @@ describe('useCasesColumns ', () => {
             "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
             "minWidth": "9em",
             "name": "Created on",
@@ -342,6 +345,7 @@ describe('useCasesColumns ', () => {
           Object {
             "align": "right",
             "render": [Function],
+            "width": "8em",
           },
         ],
         "isLoadingColumns": false,
@@ -377,6 +381,7 @@ describe('useCasesColumns ', () => {
             "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
             "minWidth": "9em",
             "name": "Created on",
@@ -396,6 +401,7 @@ describe('useCasesColumns ', () => {
           Object {
             "align": "right",
             "render": [Function],
+            "width": "8em",
           },
         ],
         "isLoadingColumns": false,
@@ -431,6 +437,7 @@ describe('useCasesColumns ', () => {
             "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
             "minWidth": "9em",
             "name": "Created on",
@@ -450,6 +457,7 @@ describe('useCasesColumns ', () => {
           Object {
             "align": "right",
             "render": [Function],
+            "width": "8em",
           },
         ],
         "isLoadingColumns": false,
@@ -505,6 +513,7 @@ describe('useCasesColumns ', () => {
             "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
             "minWidth": "9em",
             "name": "Created on",
@@ -625,6 +634,7 @@ describe('useCasesColumns ', () => {
             "width": "10em",
           },
           Object {
+            "data-test-subj": "case-table-column-createdAt",
             "field": "createdAt",
             "minWidth": "9em",
             "name": "Created on",
@@ -665,15 +675,18 @@ describe('useCasesColumns ', () => {
           },
           Object {
             "data-test-subj": "text-custom-field-column",
+            "maxWidth": "18em",
+            "minWidth": "6em",
             "name": "Text Label",
             "render": [Function],
-            "width": "250px",
           },
           Object {
+            "align": "center",
             "data-test-subj": "toggle-custom-field-column",
+            "maxWidth": "7em",
+            "minWidth": "2.5em",
             "name": "Toggle Label",
             "render": [Function],
-            "width": "100px",
           },
         ],
         "isLoadingColumns": false,
