@@ -64,8 +64,12 @@ export function createPromptLeakDetectionEvaluator(config?: {
   const patterns = config?.patterns ?? DEFAULT_PROMPT_LEAK_PATTERNS;
   const excludePatterns = config?.excludePatterns ?? [];
 
-  function matchesExclusion(text: string): boolean {
-    return excludePatterns.some((ep) => ep.test(text));
+  function stripExcludedSegments(text: string): string {
+    let result = text;
+    for (const ep of excludePatterns) {
+      result = result.replace(new RegExp(ep.source, ep.flags.includes('g') ? ep.flags : ep.flags + 'g'), '');
+    }
+    return result;
   }
 
   return {
@@ -78,17 +82,19 @@ export function createPromptLeakDetectionEvaluator(config?: {
       const codeBlocks = text.match(codeBlockRegex) || [];
       const plainText = text.replace(codeBlockRegex, '');
 
+      const strippedPlainText = stripExcludedSegments(plainText);
       const detectedPatterns: Array<{ pattern: string; location: 'text' | 'codeblock' }> = [];
 
       for (const pattern of patterns) {
-        if (pattern.test(plainText) && !matchesExclusion(plainText)) {
+        if (pattern.test(strippedPlainText)) {
           detectedPatterns.push({ pattern: pattern.source, location: 'text' });
         }
       }
 
       for (const block of codeBlocks) {
+        const strippedBlock = stripExcludedSegments(block);
         for (const pattern of patterns) {
-          if (pattern.test(block) && !matchesExclusion(block)) {
+          if (pattern.test(strippedBlock)) {
             detectedPatterns.push({ pattern: pattern.source, location: 'codeblock' });
           }
         }
