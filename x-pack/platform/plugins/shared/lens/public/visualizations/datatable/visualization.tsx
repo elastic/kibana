@@ -18,7 +18,6 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   getFallbackDataBounds,
   getOverridePaletteStops,
-  hasPaletteStops,
 } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
