@@ -364,9 +364,6 @@
             "type": "keyword"
           }
         }
-      },
-      "rule_labels": {
-        "type": "keyword"
       }
     }
   },

@@ -72,7 +72,6 @@ export const createNotificationPolicyDataSchema = z.object({
   matcher: z.string().optional(),
   group_by: z.array(z.string()).optional(),
   throttle: z.object({ interval: durationSchema }).optional(),
-  rule_labels: z.array(z.string().max(64)).max(100).optional(),
 });
 
 export type CreateNotificationPolicyData = z.infer<typeof createNotificationPolicyDataSchema>;
@@ -87,7 +86,6 @@ export const updateNotificationPolicyDataSchema = z.object({
   matcher: z.string().optional(),
   group_by: z.array(z.string()).optional(),
   throttle: z.object({ interval: durationSchema }).optional(),
-  rule_labels: z.array(z.string().max(64)).max(100).optional(),
 });
 
 export type UpdateNotificationPolicyData = z.infer<typeof updateNotificationPolicyDataSchema>;
