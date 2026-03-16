@@ -12,12 +12,38 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { bulkOverwriteTransformedDocuments } from './bulk_overwrite_transformed_documents';
+import { DEFAULT_TIMEOUT } from './constants';
 
 jest.mock('./catch_retryable_es_client_errors');
 
 describe('bulkOverwriteTransformedDocuments', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('passes DEFAULT_TIMEOUT to client.bulk by default', async () => {
+    const client = elasticsearchClientMock.createInternalClient(Promise.resolve({ items: [] }));
+
+    await bulkOverwriteTransformedDocuments({
+      client,
+      index: 'new_index',
+      operations: [],
+    })();
+
+    expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ timeout: DEFAULT_TIMEOUT }));
+  });
+
+  it('allows overriding the timeout', async () => {
+    const client = elasticsearchClientMock.createInternalClient(Promise.resolve({ items: [] }));
+
+    await bulkOverwriteTransformedDocuments({
+      client,
+      index: 'new_index',
+      operations: [],
+      timeout: '1s',
+    })();
+
+    expect(client.bulk).toHaveBeenCalledWith(expect.objectContaining({ timeout: '1s' }));
   });
 
   it('resolves with `right:bulk_index_succeeded` if no error is encountered', async () => {
