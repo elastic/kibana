@@ -36,11 +36,19 @@ const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
 
 const getStatusReportTaskId = (namespace: string): string => `${config.type}:${namespace}`;
 
-const getStoreSize = (esClient: ElasticsearchClient, index: string, entityType: EntityType) =>
-  esClient.count({
-    index,
-    query: { term: { 'entity.EngineMetadata.Type': entityType } },
-  });
+const getStoreSize = (
+  esClient: ElasticsearchClient,
+  index: string,
+  entityType: EntityType,
+  signal: AbortSignal
+) =>
+  esClient.count(
+    {
+      index,
+      query: { term: { 'entity.EngineMetadata.Type': entityType } },
+    },
+    { signal }
+  );
 
 const toHealthReportPayload = (statusResult: GetStatusResult) => {
   if (statusResult.status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
@@ -83,6 +91,7 @@ const toHealthReportPayload = (statusResult: GetStatusResult) => {
 async function runTask({
   taskInstance,
   fakeRequest,
+  abortController,
   logger,
   core,
   telemetryReporter,
@@ -90,6 +99,7 @@ async function runTask({
   logger: Logger;
   core: EntityStoreCoreSetup;
   telemetryReporter: TelemetryReporter;
+  abortController: AbortController;
 }): Promise<RunResult> {
   const namespace = taskInstance.state.namespace as string;
 
@@ -103,12 +113,13 @@ async function runTask({
     const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
     const esClient = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
     const index = getLatestEntitiesIndexName(namespace);
+    const abortSignal = abortController.signal;
 
     // Report Entity Store usage per entity type
     await Promise.all(
       ALL_ENTITY_TYPES.map(async (entityType) => {
         try {
-          const { count: storeSize } = await getStoreSize(esClient, index, entityType);
+          const { count: storeSize } = await getStoreSize(esClient, index, entityType, abortSignal);
           telemetryReporter.reportEvent(ENTITY_STORE_USAGE_EVENT, {
             storeSize,
             entityType,
@@ -149,7 +160,7 @@ async function runTask({
         isServerless: false,
         logsExtractionClient,
         security: startPlugins.security,
-        analytics: core.analytics,
+        analytics: createReportEvent(core.analytics),
         savedObjectsClient: soClient,
       });
       const statusResult = await assetManagerClient.getStatus(true);
