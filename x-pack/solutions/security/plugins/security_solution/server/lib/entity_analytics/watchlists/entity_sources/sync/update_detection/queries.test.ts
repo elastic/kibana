@@ -69,5 +69,27 @@ describe('Watchlist sync queries', () => {
       expect(searchBody.aggs?.entities?.aggs).toBeUndefined();
       expect(searchBody.query?.bool?.must).toHaveLength(1);
     });
+
+    it('adds an allowlist terms filter when allowed entity ids are provided', () => {
+      const searchBody = buildEntitiesSearchBody('user', undefined, 100, undefined, ['user:jdoe']);
+
+      expect(searchBody.query?.bool?.must).toHaveLength(2);
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        terms: { euid: ['user:jdoe'] },
+      });
+    });
+
+    it('composes allowlist terms filter with syncMarker filtering', () => {
+      const syncMarker = '2024-01-15T00:00:00Z';
+      const searchBody = buildEntitiesSearchBody('user', undefined, 100, syncMarker, ['user:jdoe']);
+
+      expect(searchBody.query?.bool?.must).toHaveLength(3);
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        terms: { euid: ['user:jdoe'] },
+      });
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
+      });
+    });
   });
 });

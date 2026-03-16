@@ -10,6 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store';
 import type { EntityType } from '@kbn/entity-store';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
+import type { EntityStoreEntityIdsByType } from '../../../entities/service';
 import type { WatchlistBulkEntity } from '../../types';
 import { createWatchlistSyncMarkersService } from '../sync_markers';
 import type { MonitoringEntitySourceDescriptorClient } from '../../../../privilege_monitoring/saved_objects';
@@ -20,6 +21,11 @@ import { getEntityNameFromDoc } from './entity_utils';
 import type { AfterKey, EntityBucket, EntitiesAggregation } from './types';
 
 export type UpdateDetectionService = ReturnType<typeof createUpdateDetectionService>;
+
+type UpdateDetection = (
+  source: MonitoringEntitySource,
+  entityStoreEntityIdsByType: EntityStoreEntityIdsByType
+) => Promise<WatchlistBulkEntity[]>;
 
 const pickLaterTimestamp = (
   current: string | undefined,
@@ -96,6 +102,11 @@ const extractMaxTimestampFromBuckets = (buckets: EntityBucket[]): string | undef
   return max;
 };
 
+const getAllowedEntityIds = (
+  entityStoreEntityIdsByType: EntityStoreEntityIdsByType,
+  entityType: EntityType
+): string[] => entityStoreEntityIdsByType[entityType] ?? [];
+
 export const createUpdateDetectionService = ({
   esClient,
   logger,
@@ -114,8 +125,13 @@ export const createUpdateDetectionService = ({
   const updateDetectionForEntityType = async (
     source: MonitoringEntitySource,
     entityType: EntityType,
+    allowedEntityIds: string[],
     syncMarker?: string
   ): Promise<UpdateDetectionForEntityTypeResult> => {
+    if (allowedEntityIds.length === 0) {
+      return { entities: [] };
+    }
+
     const pageSize = 100;
     let afterKey: AfterKey;
     let fetchMore = true;
@@ -125,7 +141,7 @@ export const createUpdateDetectionService = ({
     while (fetchMore) {
       const response = await esClient.search<never, EntitiesAggregation>({
         index: source.indexPattern,
-        ...buildEntitiesSearchBody(entityType, afterKey, pageSize, syncMarker),
+        ...buildEntitiesSearchBody(entityType, afterKey, pageSize, syncMarker, allowedEntityIds),
       });
 
       const agg = response.aggregations?.entities;
@@ -153,7 +169,10 @@ export const createUpdateDetectionService = ({
     return { entities: allEntities, maxTimestamp };
   };
 
-  const updateDetection = async (source: MonitoringEntitySource) => {
+  const updateDetection: UpdateDetection = async (
+    source: MonitoringEntitySource,
+    entityStoreEntityIdsByType: EntityStoreEntityIdsByType
+  ) => {
     const allEntities: WatchlistBulkEntity[] = [];
     let maxProcessedTimestamp: string | undefined;
 
@@ -168,9 +187,11 @@ export const createUpdateDetectionService = ({
       const syncMarker = await syncMarkersService.getLastProcessedMarker(source);
 
       for (const entityType of ALL_ENTITY_TYPES) {
+        const allowedEntityIds = getAllowedEntityIds(entityStoreEntityIdsByType, entityType);
         const { entities, maxTimestamp } = await updateDetectionForEntityType(
           source,
           entityType,
+          allowedEntityIds,
           syncMarker
         );
         allEntities.push(...entities);
@@ -182,7 +203,12 @@ export const createUpdateDetectionService = ({
       }
     } else {
       for (const entityType of ALL_ENTITY_TYPES) {
-        const { entities } = await updateDetectionForEntityType(source, entityType);
+        const allowedEntityIds = getAllowedEntityIds(entityStoreEntityIdsByType, entityType);
+        const { entities } = await updateDetectionForEntityType(
+          source,
+          entityType,
+          allowedEntityIds
+        );
         allEntities.push(...entities);
       }
     }

@@ -7,6 +7,7 @@
 
 import { createUpdateDetectionService } from './update_detection';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
+import type { EntityStoreEntityIdsByType } from '../../../entities/service';
 
 const mockLogger = {
   debug: jest.fn(),
@@ -32,6 +33,16 @@ const integrationSource: MonitoringEntitySource = {
   enabled: true,
 };
 
+const createEntityStoreEntityIdsByType = (
+  overrides: Partial<EntityStoreEntityIdsByType> = {}
+): EntityStoreEntityIdsByType => ({
+  user: [],
+  host: [],
+  service: [],
+  generic: [],
+  ...overrides,
+});
+
 describe('Watchlist update detection service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,13 +51,17 @@ describe('Watchlist update detection service', () => {
   describe('index source (plain sync)', () => {
     it('uses buildEntitiesSearchBody without syncMarker and applies bulk upsert', async () => {
       const searchCalls: Array<Record<string, unknown>> = [];
+      const targetIndex = '.watchlist-entities-default';
       const esClient = {
         search: jest.fn().mockImplementation((params: Record<string, unknown>) => {
           searchCalls.push(params);
+          if (params.index === targetIndex) {
+            return Promise.resolve({ hits: { hits: [] } });
+          }
           return Promise.resolve({
             aggregations: {
               entities: {
-                buckets: [],
+                buckets: [{ key: { euid: 'user:jdoe' }, doc_count: 1 }],
                 after_key: undefined,
               },
             },
@@ -58,16 +73,41 @@ describe('Watchlist update detection service', () => {
       const service = createUpdateDetectionService({
         esClient: esClient as never,
         logger: mockLogger as never,
-        targetIndex: '.watchlist-entities-default',
+        targetIndex,
       });
 
-      await service.updateDetection(indexSource);
+      await service.updateDetection(
+        indexSource,
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+      );
 
       expect(searchCalls.length).toBeGreaterThan(0);
       const firstSearchParams = searchCalls[0];
       expect(firstSearchParams.aggs?.entities?.aggs).toBeUndefined();
-      expect(firstSearchParams.query?.bool?.must).toHaveLength(1);
+      expect(firstSearchParams.query?.bool?.must).toHaveLength(2);
+      expect(firstSearchParams.query?.bool?.must).toContainEqual({
+        terms: { euid: ['user:jdoe'] },
+      });
       expect(esClient.bulk).toHaveBeenCalled();
+    });
+
+    it('skips source searching when the allowlist is empty for all entity types', async () => {
+      const esClient = {
+        search: jest.fn(),
+        bulk: jest.fn(),
+      };
+
+      const service = createUpdateDetectionService({
+        esClient: esClient as never,
+        logger: mockLogger as never,
+        targetIndex: '.watchlist-entities-default',
+      });
+
+      const result = await service.updateDetection(indexSource, createEntityStoreEntityIdsByType());
+
+      expect(result).toEqual([]);
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(esClient.bulk).not.toHaveBeenCalled();
     });
   });
 
@@ -84,7 +124,10 @@ describe('Watchlist update detection service', () => {
         targetIndex: '.watchlist-entities-default',
       });
 
-      const result = await service.updateDetection(integrationSource);
+      const result = await service.updateDetection(
+        integrationSource,
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+      );
 
       expect(result).toEqual([]);
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -126,11 +169,17 @@ describe('Watchlist update detection service', () => {
         descriptorClient: descriptorClient as never,
       });
 
-      await service.updateDetection(integrationSource);
+      await service.updateDetection(
+        integrationSource,
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+      );
 
       expect(descriptorClient.getLastProcessedMarker).toHaveBeenCalledWith(integrationSource);
       expect(searchCalls.length).toBeGreaterThan(0);
       const firstSearchParams = searchCalls[0];
+      expect(firstSearchParams.query?.bool?.must).toContainEqual({
+        terms: { euid: ['user:jdoe'] },
+      });
       expect(firstSearchParams.query?.bool?.must).toContainEqual({
         range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
       });
@@ -180,7 +229,10 @@ describe('Watchlist update detection service', () => {
         descriptorClient: descriptorClient as never,
       });
 
-      await service.updateDetection(integrationSource);
+      await service.updateDetection(
+        integrationSource,
+        createEntityStoreEntityIdsByType({ user: ['user:jdoe'] })
+      );
 
       expect(descriptorClient.updateLastProcessedMarker).toHaveBeenCalledWith(
         integrationSource,

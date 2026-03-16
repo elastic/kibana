@@ -67,5 +67,3 @@ export const listMonitoringEntitySourceRoute = (
       )
     );
 };
-
-

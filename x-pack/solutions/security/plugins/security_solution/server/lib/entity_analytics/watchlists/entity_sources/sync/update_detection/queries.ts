@@ -6,8 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { euid } from '@kbn/entity-store';
 import type { EntityType } from '@kbn/entity-store';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { AfterKey } from './types';
 
 const EUID_RUNTIME_FIELD = 'euid';
@@ -25,9 +25,13 @@ export const buildEntitiesSearchBody = (
   entityType: EntityType,
   afterKey?: AfterKey,
   pageSize: number = 100,
-  syncMarker?: string
+  syncMarker?: string,
+  allowedEntityIds?: string[]
 ): Omit<estypes.SearchRequest, 'index'> => {
   const must = [euid.getEuidDslDocumentsContainsIdFilter(entityType)];
+  if (allowedEntityIds && allowedEntityIds.length > 0) {
+    must.push({ terms: { [EUID_RUNTIME_FIELD]: allowedEntityIds } });
+  }
   if (syncMarker) {
     must.push({ range: { '@timestamp': { gte: syncMarker, lte: 'now' } } });
   }

@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
 import type { MonitoringEntitySourceDescriptorClient } from '../../../privilege_monitoring/saved_objects';
+import type { EntityStoreEntityIdsByType } from '../../entities/service';
 import { createSourcesSyncService } from './sources_sync';
 import { createUpdateDetectionService } from './update_detection/update_detection';
 
@@ -32,12 +33,18 @@ export const createIndexSyncService = ({
   });
   const sourcesSyncService = createSourcesSyncService({ logger });
 
-  const plainIndexSync = async ({ sourceIds }: { sourceIds: string[] }) => {
+  const plainIndexSync = async ({
+    sourceIds,
+    entityStoreEntityIdsByType,
+  }: {
+    sourceIds: string[];
+    entityStoreEntityIdsByType: EntityStoreEntityIdsByType;
+  }) => {
     await sourcesSyncService.syncBySourceIds({
       descriptorClient,
       sourceIds,
       process: async (source: MonitoringEntitySource) => {
-        await updateDetectionService.updateDetection(source);
+        await updateDetectionService.updateDetection(source, entityStoreEntityIdsByType);
       },
     });
   };
