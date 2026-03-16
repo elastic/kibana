@@ -14,8 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { LoadingIndicator } from './loading_indicator';
 import { createMockChromeComponentsDeps } from '../test_helpers';
 import { ChromeComponentsProvider } from '../context';
-
-const DEBOUNCE_TIME = 300;
+import { LOADING_DEBOUNCE_TIME } from './chrome_hooks';
 
 const setup = (loadingCount = 0) => {
   const loadingCount$ = new BehaviorSubject(loadingCount);
@@ -44,14 +43,14 @@ describe('LoadingIndicator', () => {
   it('shows spinner when loading count > 0 (after debounce)', () => {
     const { deps } = setup(1);
     renderIndicator(deps);
-    act(() => jest.advanceTimersByTime(DEBOUNCE_TIME));
+    act(() => jest.advanceTimersByTime(LOADING_DEBOUNCE_TIME));
     expect(screen.getByTestId('globalLoadingIndicator')).toBeInTheDocument();
   });
 
   it('shows progress bar when showAsBar is true', () => {
     const { deps } = setup(1);
     renderIndicator(deps, { showAsBar: true });
-    act(() => jest.advanceTimersByTime(DEBOUNCE_TIME));
+    act(() => jest.advanceTimersByTime(LOADING_DEBOUNCE_TIME));
     expect(screen.getByTestId('globalLoadingIndicator')).toBeInTheDocument();
   });
 
@@ -59,11 +58,11 @@ describe('LoadingIndicator', () => {
     const { loadingCount$, deps } = setup(1);
     renderIndicator(deps);
 
-    act(() => jest.advanceTimersByTime(DEBOUNCE_TIME));
+    act(() => jest.advanceTimersByTime(LOADING_DEBOUNCE_TIME));
     expect(screen.getByTestId('globalLoadingIndicator')).toBeInTheDocument();
 
     act(() => loadingCount$.next(0));
-    act(() => jest.advanceTimersByTime(DEBOUNCE_TIME));
+    act(() => jest.advanceTimersByTime(LOADING_DEBOUNCE_TIME));
     expect(screen.getByTestId('globalLoadingIndicator-hidden')).toBeInTheDocument();
   });
 });

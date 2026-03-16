@@ -106,7 +106,7 @@ export const ProjectHeader = () => {
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
 
-  const topBarStyles = () => css`
+  const topBarStyles = css`
     box-shadow: none !important;
     background-color: ${euiTheme.colors.backgroundTransparent};
     border-bottom-color: ${euiTheme.colors.backgroundTransparent};
@@ -126,7 +126,6 @@ export const ProjectHeader = () => {
 
               <EuiHeaderSectionItem css={headerCss.leftNavcontrols}>
                 <HeaderNavControls
-                  side="left"
                   position="left"
                   append={<div className="navcontrols__separator" />}
                 />

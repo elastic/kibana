@@ -18,11 +18,13 @@ const AppMenu = lazy(async () => {
 export const HeaderAppMenu = () => {
   const menuConfig = useAppMenu();
 
-  if (menuConfig) {
-    return (
-      <Suspense>
-        <AppMenu config={menuConfig} />
-      </Suspense>
-    );
+  if (!menuConfig) {
+    return null;
   }
+
+  return (
+    <Suspense>
+      <AppMenu config={menuConfig} />
+    </Suspense>
+  );
 };

@@ -19,6 +19,7 @@ import type {
   ChromeNavLink,
 } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
@@ -56,7 +57,7 @@ export function useProjectHome(): string {
   return useObservable(projectHome$, '/app/home');
 }
 
-const LOADING_DEBOUNCE_TIME = 250;
+export const LOADING_DEBOUNCE_TIME = 250;
 
 /**
  * Returns `true` when HTTP requests are in flight, debounced to avoid flickering
@@ -246,12 +247,20 @@ export function useAppMenu() {
 }
 
 /**
+ * Returns the current legacy action menu mount point, or `undefined` if none is set.
+ * @deprecated Legacy action menus use imperative mount points. Prefer `chrome.setAppMenu()`.
+ */
+export function useCurrentActionMenu(): MountPoint | undefined {
+  const { application } = useChromeComponentsDeps();
+  return useObservable(application.currentActionMenu$, undefined);
+}
+
+/**
  * Whether a legacy action menu mount point is currently set.
  * @deprecated Legacy action menus use imperative mount points. Prefer `chrome.setAppMenu()`.
  */
 export function useHasLegacyActionMenu(): boolean {
-  const { application } = useChromeComponentsDeps();
-  return !!useObservable(application.currentActionMenu$, undefined);
+  return !!useCurrentActionMenu();
 }
 
 /** Whether the current app menu (registered via `chrome.setAppMenu()`) has items configured. */

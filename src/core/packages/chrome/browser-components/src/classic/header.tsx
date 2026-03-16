@@ -125,7 +125,7 @@ export function ClassicHeader() {
                 />
               </EuiHeaderSectionItem>
 
-              <HeaderNavControls side="left" position="left" />
+              <HeaderNavControls position="left" />
             </EuiHeaderSection>
 
             <BreadcrumbsWithExtensionsWrapper>

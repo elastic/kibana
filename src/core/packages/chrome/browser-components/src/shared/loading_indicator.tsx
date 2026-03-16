@@ -11,30 +11,18 @@ import { Global, css } from '@emotion/react';
 import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import classNames from 'classnames';
 import { useIsLoading } from './chrome_hooks';
 
 export interface LoadingIndicatorProps {
   showAsBar?: boolean;
   customLogo?: string;
-  maxAmount?: number;
-  valueAmount?: string | number;
 }
 
 export const LoadingIndicator = ({
   showAsBar = false,
   customLogo,
-  maxAmount,
-  valueAmount,
 }: LoadingIndicatorProps) => {
   const isLoading = useIsLoading();
-  const className = classNames(!isLoading && 'kbnLoadingIndicator-hidden');
-  const indicatorHiddenCss = !isLoading
-    ? css({
-        visibility: 'hidden',
-        animationPlayState: 'paused',
-      })
-    : undefined;
 
   const loadingSubj = isLoading ? 'globalLoadingIndicator' : 'globalLoadingIndicator-hidden';
   const testSubj = customLogo ? `${loadingSubj} customLogo` : loadingSubj;
@@ -80,24 +68,25 @@ export const LoadingIndicator = ({
       <Global
         styles={{
           '.euiHeaderSectionItem .euiButtonEmpty__text': {
-            // stop global header buttons from jumping during loading state
             display: 'flex',
           },
         }}
       />
-      {!showAsBar ? (
-        logo
-      ) : (
+      {showAsBar ? (
         <EuiProgress
-          className={className}
-          css={indicatorHiddenCss}
+          className={!isLoading ? 'kbnLoadingIndicator-hidden' : undefined}
+          css={
+            !isLoading
+              ? css({ visibility: 'hidden', animationPlayState: 'paused' })
+              : undefined
+          }
           data-test-subj={testSubj}
-          max={maxAmount}
-          value={valueAmount}
           position="fixed"
           color="accent"
           size="xs"
         />
+      ) : (
+        logo
       )}
     </>
   );

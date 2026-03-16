@@ -16,7 +16,6 @@ import { HeaderExtension } from './header_extension';
 
 interface Props {
   position: NavControlPosition;
-  side?: 'left' | 'right';
   append?: JSX.Element | null;
 }
 
