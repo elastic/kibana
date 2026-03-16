@@ -10,7 +10,7 @@
 import { useGeneratedHtmlId } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 const FILTER_BAR_COLLAPSED_SETTING = 'kibana.unifiedSearch.filterBarCollapsed';
 
@@ -63,6 +63,12 @@ export const FilterBarContextProvider: React.FC<
     setIsCollapsed(!isCollapsed);
     storage.set(FILTER_BAR_COLLAPSED_SETTING, !isCollapsed);
   }, [isCollapsed, storage]);
+
+  useEffect(() => {
+    // If, while the filter bar is collapsed, the user clears all filters, reset isCollapsed to false
+    // so the filter bar will not reinitialize collapsed if they later add another filter
+    if (!isCollapsible && isCollapsed) setIsCollapsed(false);
+  }, [isCollapsed, isCollapsible]);
 
   return (
     <FilterBarContext.Provider
