@@ -42,6 +42,8 @@ import {
   createNewTermsAlertType,
   createQueryAlertType,
   createThresholdAlertType,
+  createVulnerabilityCheckAlertType,
+  createCveWatchAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
@@ -505,6 +507,17 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType()));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType()));
+
+    if (experimentalFeatures.vulnerabilityCheckerEnabled) {
+      plugins.alerting.registerType(
+        securityRuleTypeWrapper(
+          createVulnerabilityCheckAlertType({
+            osqueryCreateActionService: plugins.osquery?.createActionService,
+          })
+        )
+      );
+      plugins.alerting.registerType(securityRuleTypeWrapper(createCveWatchAlertType()));
+    }
 
     const trialCompanionDeps: TrialCompanionRoutesDeps = {
       router,

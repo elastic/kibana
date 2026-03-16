@@ -116,4 +116,6 @@ export enum SecurityPageName {
    */
   spaceRulesHealth = 'space-rules-health',
   ruleHealth = 'rule-health',
+
+  vulnerabilityPosture = 'vulnerability_posture',
 }
