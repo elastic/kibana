@@ -86,7 +86,7 @@ describe('useExistingRule', () => {
   });
 
   it('should not fetch when ruleId is empty', () => {
-    const { result } = renderHook(() => useExistingRule(''), {
+    renderHook(() => useExistingRule(''), {
       wrapper: createWrapper(),
     });
 
