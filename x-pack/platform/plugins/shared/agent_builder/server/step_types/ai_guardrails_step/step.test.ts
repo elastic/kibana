@@ -256,10 +256,7 @@ describe('getAiGuardrailsStepDefinition (ai.guardrails handler)', () => {
 
     const result = await step.handler(context);
 
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      'Guardrail LLM evaluation failed',
-      llmError
-    );
+    expect(mockLogger.warn).toHaveBeenCalledWith('Guardrail LLM evaluation failed', llmError);
     expect(result.output?.pass).toBe(false);
     expect(result.output?.abort).toBe(true);
     expect(result.output?.reason).toBe(
