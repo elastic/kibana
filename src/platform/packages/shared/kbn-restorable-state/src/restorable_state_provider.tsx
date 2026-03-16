@@ -211,30 +211,39 @@ export const createRestorableStateProvider = <TState extends object>() => {
     const [value, _setValue] = useState(() =>
       getInitialValue(initialState$.getValue(), key, initialValue, shouldIgnoredRestoredValue)
     );
-    const hasMountedRef = useRef(false);
+    const valueRef = useRef(value);
 
     const setValue = useStableFunction<Dispatch<SetStateAction<TState[TKey]>>>((newValue) => {
-      _setValue((prevValue) => {
-        return typeof newValue === 'function'
+      const prevValue = valueRef.current;
+      const nextValue =
+        typeof newValue === 'function'
           ? (newValue as (prevValue: TState[TKey]) => TState[TKey])(prevValue)
           : newValue;
-      });
+
+      if (prevValue !== nextValue) {
+        valueRef.current = nextValue;
+        _setValue(nextValue);
+        // TODO: another approach to consider is to call `onInitialStateChange` only on unmount and not on every state change
+        onInitialStateChange?.({ ...initialState$.getValue(), [key]: nextValue });
+      }
     });
 
-    useEffect(() => {
+    useMount(() => {
       const restorableState = initialState$.getValue();
-      const shouldSyncCurrentValue =
-        Object.is(restorableState?.[key], value) === false &&
-        (hasMountedRef.current || shouldStoreDefaultValueRightAway);
-
-      if (shouldSyncCurrentValue) {
+      if (shouldStoreDefaultValueRightAway && value !== restorableState?.[key]) {
         onInitialStateChange?.({ ...restorableState, [key]: value });
       }
+    });
 
-      hasMountedRef.current = true;
-    }, [initialState$, key, onInitialStateChange, shouldStoreDefaultValueRightAway, value]);
-
-    useInitialStateRefresh(key, initialValue, _setValue, shouldIgnoredRestoredValue);
+    useInitialStateRefresh(
+      key,
+      initialValue,
+      (newValue) => {
+        valueRef.current = newValue;
+        _setValue(newValue);
+      },
+      shouldIgnoredRestoredValue
+    );
 
     return [value, setValue] as const;
   };
