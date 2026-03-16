@@ -278,9 +278,18 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
 
   const selection = {
     onSelectionChange: (newSelectedItems: Repository[]) => setSelectedItems(newSelectedItems),
-    selectable: ({ name }: Repository) => Boolean(name !== managedRepository),
-    selectableMessage: (selectable: boolean) => {
+    selectable: ({ name }: Repository) =>
+      Boolean(name !== managedRepository && name !== defaultRepository),
+    selectableMessage: (selectable: boolean, { name }: Repository) => {
       if (!selectable) {
+        if (name === defaultRepository) {
+          return i18n.translate(
+            'xpack.snapshotRestore.repositoryList.table.deleteDefaultRepositoryTooltip',
+            {
+              defaultMessage: 'You cannot delete the default repository.',
+            }
+          );
+        }
         return i18n.translate(
           'xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip',
           {
