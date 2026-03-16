@@ -82,7 +82,7 @@ export const getLiveQueryDetailsRoute = (
           );
 
           const queries = actionDetails?._source?.queries;
-          const expirationDate = actionDetails?.fields?.expiration[0];
+          const expirationDate = actionDetails?.fields?.expiration?.[0];
 
           const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
 
@@ -111,7 +111,8 @@ export const getLiveQueryDetailsRoute = (
                   'user_profile_uid',
                   'pack_id',
                   'pack_name',
-                  'prebuilt_pack'
+                  'prebuilt_pack',
+                  'tags'
                 ),
                 queries: reduce<
                   {
