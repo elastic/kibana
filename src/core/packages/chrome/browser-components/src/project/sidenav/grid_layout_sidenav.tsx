@@ -12,10 +12,12 @@ import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import React, { useCallback } from 'react';
 import { css, Global } from '@emotion/react';
 import { useChromeComponentsDeps } from '../../context';
+import { useProjectNavigation$ } from '../../shared/chrome_hooks';
 import { Navigation } from './navigation';
 
 export const GridLayoutProjectSideNav = () => {
-  const { basePath, application, project, navLinks$, sideNav } = useChromeComponentsDeps();
+  const { basePath, application, navLinks$, sideNav } = useChromeComponentsDeps();
+  const navigation$ = useProjectNavigation$();
 
   const isCollapsed = useObservable(sideNav.collapsed$, sideNav.initialCollapsed);
   const updateLayout = useLayoutUpdate();
@@ -40,7 +42,7 @@ export const GridLayoutProjectSideNav = () => {
         setWidth={setWidth}
         basePath={basePath}
         application={application}
-        navigation$={project.navigation$}
+        navigation$={navigation$}
         navLinks$={navLinks$}
         onToggleCollapsed={sideNav.onToggleCollapsed}
       />

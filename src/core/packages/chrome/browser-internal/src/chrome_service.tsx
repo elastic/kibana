@@ -177,7 +177,6 @@ export class ChromeService {
 
     // 6. Create cached observables for components
     const navLinks$ = navLinks.getNavLinks$();
-    const navigation$ = projectNavigation.getNavigation$();
     const loadingCount$ = http.getLoadingCount$();
     // 7. Build component deps (consumed by ChromeComponentsProvider in the layout service)
     const componentDeps: ChromeComponentsDeps = {
@@ -189,11 +188,6 @@ export class ChromeService {
         center$: navControls.getCenter$(),
         right$: navControls.getRight$(),
         extension$: navControls.getExtension$(),
-      },
-      project: {
-        breadcrumbs$: projectNavigation.getProjectBreadcrumbs$(),
-        homeHref$: projectNavigation.getProjectHome$(),
-        navigation$,
       },
       loadingCount$,
       navLinks$,

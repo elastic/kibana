@@ -8,7 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, debounceTime, map } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type {
   ChromeBreadcrumb,
@@ -40,6 +40,40 @@ export function useProjectBreadcrumbs(): ChromeBreadcrumb[] {
   const chrome = useChromeService();
   const breadcrumbs$ = useMemo(() => chrome.project.getBreadcrumbs$(), [chrome]);
   return useObservable(breadcrumbs$, []);
+}
+
+/**
+ * Returns the project home href derived from the navigation tree.
+ * Used by `Logo` (project header).
+ */
+export function useProjectHome(): string {
+  const chrome = useChromeService();
+  const projectHome$ = useMemo(() => chrome.project.getProjectHome$(), [chrome]);
+  return useObservable(projectHome$, '/app/home');
+}
+
+/**
+ * Returns an observable of the resolved project navigation tree.
+ * Used by `GridLayoutProjectSideNav` to pass to the `Navigation` component.
+ */
+export function useProjectNavigation$() {
+  const chrome = useChromeService();
+  return useMemo(() => chrome.project.getNavigation$(), [chrome]);
+}
+
+const LOADING_DEBOUNCE_TIME = 80;
+
+/**
+ * Returns the current HTTP loading count, debounced to avoid flickering.
+ * Used by `Logo` (project header).
+ */
+export function useLoadingCount(): number {
+  const { loadingCount$ } = useChromeComponentsDeps();
+  const debounced$ = useMemo(
+    () => loadingCount$.pipe(debounceTime(LOADING_DEBOUNCE_TIME)),
+    [loadingCount$]
+  );
+  return useObservable(debounced$, 0);
 }
 
 /**

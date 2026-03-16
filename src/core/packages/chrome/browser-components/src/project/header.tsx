@@ -21,14 +21,17 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { debounceTime } from 'rxjs';
 import { useChromeComponentsDeps } from '../context';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../shared/header_help_menu';
 import { HeaderNavControls } from '../shared/header_nav_controls';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
-import { useProjectBreadcrumbs } from '../shared/chrome_hooks';
+import {
+  useProjectBreadcrumbs,
+  useProjectHome,
+  useLoadingCount,
+} from '../shared/chrome_hooks';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
@@ -79,20 +82,12 @@ const headerStrings = {
       defaultMessage: 'Go to home page',
     }),
   },
-  nav: {
-    closeNavAriaLabel: i18n.translate('core.ui.primaryNav.project.toggleNavAriaLabel', {
-      defaultMessage: 'Toggle primary navigation',
-    }),
-  },
 };
 
-const LOADING_DEBOUNCE_TIME = 80;
-
 const Logo = ({ logoCss }: { logoCss: HeaderCss['logo'] }) => {
-  const { application, basePath, project, loadingCount$, customBranding$ } =
-    useChromeComponentsDeps();
-  const loadingCount = useObservable(loadingCount$.pipe(debounceTime(LOADING_DEBOUNCE_TIME)), 0);
-  const homeHref = useObservable(project.homeHref$, '/app/home');
+  const { application, basePath, customBranding$ } = useChromeComponentsDeps();
+  const loadingCount = useLoadingCount();
+  const homeHref = useProjectHome();
   const customBranding = useObservable(customBranding$, {});
   const { logo } = customBranding;
 
@@ -164,7 +159,6 @@ export const ProjectHeader = () => {
     customBranding$,
     breadcrumbsAppendExtensions$,
     navControls,
-    project,
   } = useChromeComponentsDeps();
 
   const breadcrumbs = useProjectBreadcrumbs();
@@ -205,7 +199,7 @@ export const ProjectHeader = () => {
                 <BreadcrumbsWithExtensionsWrapper
                   breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
                 >
-                  <Breadcrumbs breadcrumbs$={project.breadcrumbs$} />
+                  <Breadcrumbs breadcrumbs={breadcrumbs} />
                 </BreadcrumbsWithExtensionsWrapper>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>

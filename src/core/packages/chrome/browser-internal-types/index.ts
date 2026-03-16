@@ -57,24 +57,11 @@ interface NavControlsObservables {
   extension$: Observable<ChromeNavControl[]>;
 }
 
-interface ProjectChromeObservables {
-  /** Auto-generated breadcrumbs derived from the active nav tree node. */
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  homeHref$: Observable<string>;
-  navigation$: Observable<{
-    solutionId: SolutionId;
-    navigationTree: NavigationTreeDefinitionUI;
-    activeNodes: ChromeProjectNavigationNode[][];
-  }>;
-}
-
 export interface ChromeComponentsDeps {
   application: ChromeApplicationContext;
   basePath: HttpStart['basePath'];
   docLinks: DocLinksStart;
   navControls: NavControlsObservables;
-  /** Project/solution-layout-specific chrome state. */
-  project: ProjectChromeObservables;
   loadingCount$: Observable<number>;
   navLinks$: Observable<ChromeNavLink[]>;
   customBranding$: Observable<CustomBranding>;

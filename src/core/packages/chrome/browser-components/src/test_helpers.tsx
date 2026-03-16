@@ -19,14 +19,10 @@ import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import type {
-  ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeNavControl,
   ChromeNavLink,
-  ChromeProjectNavigationNode,
   ChromeUserBanner,
-  NavigationTreeDefinitionUI,
-  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
@@ -48,15 +44,6 @@ export const createMockChromeComponentsDeps = () => {
     basePath: http.basePath,
     docLinks: docLinksServiceMock.createStartContract(),
     loadingCount$: new BehaviorSubject<number>(0),
-    project: {
-      breadcrumbs$: new BehaviorSubject<ChromeBreadcrumb[]>([]),
-      homeHref$: new BehaviorSubject<string>('/'),
-      navigation$: new BehaviorSubject<{
-        solutionId: SolutionId;
-        navigationTree: NavigationTreeDefinitionUI;
-        activeNodes: ChromeProjectNavigationNode[][];
-      }>(undefined as any),
-    },
     breadcrumbsAppendExtensions$: new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([]),
     customBranding$: new BehaviorSubject<CustomBranding>({}),
     navLinks$: new BehaviorSubject<ChromeNavLink[]>([]),
