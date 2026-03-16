@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { unflattenObject } from './unflatten_object';
+import { flattenObjectWithEscapedDots } from './flatten_object';
+import { unflattenObject, unflattenObjectWithEscapedDots } from './unflatten_object';
 
 describe('unflattenObject', () => {
   it('unflattens deeply nested objects', () => {
@@ -85,6 +86,47 @@ describe('unflattenObject', () => {
           },
         },
       },
+    });
+  });
+
+  describe('escapedDots', () => {
+    it('treats backslash-dot as a literal dot in a single key', () => {
+      expect(unflattenObjectWithEscapedDots({ 'a\\.b': 1 })).toEqual({ 'a.b': 1 });
+    });
+
+    it('can handle multiple backslashes', () => {
+      expect(unflattenObjectWithEscapedDots({ 'a\\\\.b': 1 })).toEqual({ 'a\\.b': 1 });
+    });
+
+    it('can handle multiple dots', () => {
+      expect(unflattenObjectWithEscapedDots({ 'a\\.\\.b': 1 })).toEqual({ 'a..b': 1 });
+    });
+
+    it('can handle objects inside property with escaped dots', () => {
+      expect(unflattenObjectWithEscapedDots({ 'a\\.\\.b.c': 1 })).toEqual({ 'a..b': { c: 1 } });
+    });
+
+    it('round-trips with flattenObject escaping', () => {
+      const nested = { 'key.with.dots': { 'nested.dot.key': 2 } };
+      const flat = flattenObjectWithEscapedDots(nested);
+      expect(flat).toEqual({ 'key\\.with\\.dots.nested\\.dot\\.key': 2 });
+      expect(unflattenObjectWithEscapedDots(flat)).toEqual(nested);
+    });
+
+    it('mixes path segments and literal dots when useEscapedDots is true', () => {
+      expect(
+        unflattenObjectWithEscapedDots({
+          'prefix.key\\.with.dots.suffix': 1,
+        })
+      ).toEqual({
+        prefix: {
+          'key.with': {
+            dots: {
+              suffix: 1,
+            },
+          },
+        },
+      });
     });
   });
 });

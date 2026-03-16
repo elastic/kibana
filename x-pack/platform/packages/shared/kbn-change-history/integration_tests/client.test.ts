@@ -20,7 +20,7 @@ const TEST_MODULE = 'test-module';
 const TEST_DATASET = 'test-dataset';
 
 const defaultLogOpts = {
-  action: 'rule-create',
+  action: 'rule_create',
   username: 'test-user',
   userProfileId: 'test-user-profile-id',
   spaceId: 'default',
@@ -94,6 +94,15 @@ describe('ChangeHistoryClient', () => {
   });
 
   describe('error behavior', () => {
+    it('should throw when creating with invalid module or dataset', async () => {
+      await expect(
+        () => new ChangeHistoryClient({ ...defaultCostructorOpts, module: 'invalid|module' })
+      ).toThrow('Invalid module');
+      await expect(
+        () => new ChangeHistoryClient({ ...defaultCostructorOpts, dataset: 'invalid|dataset' })
+      ).toThrow('Invalid dataset');
+    });
+
     it('should throw when log is called before initialize', async () => {
       const client = new ChangeHistoryClient(defaultCostructorOpts);
       const change: ObjectChange = {
@@ -103,13 +112,13 @@ describe('ChangeHistoryClient', () => {
       };
       await expect(() =>
         client.log(change, { ...defaultLogOpts, spaceId: 'default' })
-      ).rejects.toThrow('Data stream not initialized');
+      ).rejects.toThrow('Change history data stream not initialized');
     });
 
     it('should throw when getHistory is called before initialize', async () => {
       const client = new ChangeHistoryClient(defaultCostructorOpts);
       await expect(() => client.getHistory(KIBANA_SPACE, 'rule', 'id-1')).rejects.toThrow(
-        'Data stream not initialized'
+        'Change history data stream not initialized'
       );
     });
   });
@@ -147,7 +156,7 @@ describe('ChangeHistoryClient', () => {
           created: expect.any(String),
           module: TEST_MODULE,
           dataset: TEST_DATASET,
-          action: 'rule-create',
+          action: 'rule_create',
           type: 'change',
         },
         object: {
@@ -196,9 +205,40 @@ describe('ChangeHistoryClient', () => {
       });
     });
 
-    // TODO: Add test for some documents failing and not others
-    // TODO: Add test for checking kibana spaces (underneath the hood)
+    it('should not throw on partial success when some bulk items fail', async () => {
+      const changes: ObjectChange[] = [
+        {
+          id: 'duplicate-event-id',
+          objectType: 'rule',
+          objectId: 'rule-id',
+          after: { name: 'First Rule' },
+        },
+        {
+          id: 'duplicate-event-id',
+          objectType: 'rule',
+          objectId: 'rule-id',
+          after: { name: 'Duplicate Event Rule' },
+        },
+        {
+          id: 'valid-event-id',
+          objectType: 'rule',
+          objectId: 'rule-id',
+          after: { name: 'Last Rule' },
+        },
+      ];
+      await expect(
+        client.logBulk(changes, { ...defaultLogOpts, spaceId: 'default' })
+      ).resolves.not.toThrow();
+
+      const result = await client.getHistory(KIBANA_SPACE, 'rule', 'rule-id');
+      expect(result.total).toBe(2);
+      const snapshots = result.items.map((i) => i.object.snapshot as ChangeHistoryDocument);
+      expect(snapshots[0]).toEqual({ name: 'Last Rule' });
+      expect(snapshots[1]).toEqual({ name: 'First Rule' });
+    });
   });
+
+  // TODO: Add test for checking kibana space behavior in @kbn-change-history (underneath the hood)
 
   describe('before/after diff', () => {
     let client: ChangeHistoryClient;

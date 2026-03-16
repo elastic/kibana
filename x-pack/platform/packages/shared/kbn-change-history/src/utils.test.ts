@@ -391,6 +391,8 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 1,
         updates: 2,
       });
+      // Using `.sort()` below because we're not depending on array order.
+      // @see https://stackoverflow.com/questions/40135684
       expect(result.fieldChanges.sort()).toEqual(
         ['author', 'config.theme', 'description', 'title'].sort()
       );
@@ -435,6 +437,8 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 1,
       });
+      // Using `.sort()` below because we're not depending on array order.
+      // @see https://stackoverflow.com/questions/40135684
       expect(result.ignored.sort()).toEqual(['description', 'type'].sort());
       expect(result.fieldChanges).toEqual(['title']);
       expect(result.newvalues).toEqual({ title: 'New Title' });
@@ -460,6 +464,8 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 1,
       });
+      // Using `.sort()` below because we're not depending on array order.
+      // @see https://stackoverflow.com/questions/40135684
       expect(result.ignored.sort()).toEqual(
         ['config.layout', 'metadata.author', 'metadata.version'].sort()
       );
@@ -503,6 +509,8 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 2,
       });
+      // Using `.sort()` below because we're not depending on array order.
+      // @see https://stackoverflow.com/questions/40135684
       expect(result.ignored.sort()).toEqual(['description', 'version'].sort());
       expect(result.fieldChanges.sort()).toEqual(['author', 'title'].sort());
     });
@@ -574,7 +582,6 @@ describe('#standardDiffDocCalculation', () => {
     it.each([
       ['my-property', 'hyphen'],
       ['my_property', 'underscore'],
-      ['my.property', 'dot'],
       ['my[0]', 'brackets'],
       ['@mention', 'at sign'],
       ['$variable', 'dollar'],
@@ -593,21 +600,58 @@ describe('#standardDiffDocCalculation', () => {
       expect(result.newvalues).toEqual({ [propName]: 'new' });
     });
 
-    // TODO: What about nested objects clashing due to dot notation?
-    it.skip('should handle property names with a dot in the middle', () => {
-      const a = { 'user.name': 'Alice', user: { name: 'Alice-nested' } };
-      const b = { 'user.name': 'Bob', user: { name: 'Bob-nested' } };
+    it('should handle property names with a dot in the middle', () => {
+      const a = {
+        'user.name': 'jane',
+        user: { name: 'jane-nested' },
+        'user\\.name': 'jane-escaped',
+        'user..name': 'jane-doubledot',
+        'user.data': { name: 'jane-dot-nested' },
+        data: { 'user.name': 'jane-nested-dot' },
+        'user\\.data': { name: 'jane-escaped-nested' },
+      };
+      const b = {
+        'user.name': 'bob',
+        user: { name: 'bob-nested' },
+        'user\\.name': 'bob-escaped',
+        'user..name': 'bob-doubledot',
+        'user.data': { name: 'bob-dot-nested' },
+        data: { 'user.name': 'bob-nested-dot' },
+        'user\\.data': { name: 'bob-escaped-nested' },
+      };
       const result = standardDiffDocCalculation({ a, b });
 
-      expect(result.stats.updates).toBe(2);
-      expect(result.fieldChanges.sort()).toEqual(['user\\.name', 'user.name'].sort());
+      expect(result.stats.updates).toBe(7);
+      // Using `.sort()` below because we're not depending on array order.
+      // @see https://stackoverflow.com/questions/40135684
+      expect(result.fieldChanges.sort()).toEqual(
+        [
+          'user\\.name',
+          'user.name',
+          'user\\\\.name',
+          'user\\.\\.name',
+          'user\\.data.name',
+          'data.user\\.name',
+          'user\\\\.data.name',
+        ].sort()
+      );
       expect(result.oldvalues).toEqual({
-        'user\\.name': 'Alice',
-        'user.name': 'Alice-nested',
+        'user\\.name': 'jane',
+        'user.name': 'jane-nested',
+        'user\\\\.name': 'jane-escaped',
+        'user\\.\\.name': 'jane-doubledot',
+        'user\\.data.name': 'jane-dot-nested',
+        'data.user\\.name': 'jane-nested-dot',
+        'user\\\\.data.name': 'jane-escaped-nested',
       });
       expect(result.newvalues).toEqual({
-        'user\\.name': 'Bob',
-        'user.name': 'Bob-nested',
+        'user\\.name': 'bob',
+        'user.name': 'bob-nested',
+        'user\\\\.name': 'bob-escaped',
+        'user\\.\\.name': 'bob-doubledot',
+        'user\\.data.name': 'bob-dot-nested',
+        'data.user\\.name': 'bob-nested-dot',
+        'user\\\\.data.name': 'bob-escaped-nested',
       });
     });
 
@@ -817,6 +861,8 @@ describe('#maskSensitiveFields', () => {
       const maskFields = { user: true, token: true };
       const result = maskSensitiveFields(snapshot, maskFields);
 
+      // Using `.sort()` below because we're not depending on array order.
+      // @see https://stackoverflow.com/questions/40135684
       expect(result.fields.sort()).toEqual(['token', 'user.apiKey', 'user.email'].sort());
       expect(result.snapshot.user.email).toMatch(maskedValuePattern);
       expect(result.snapshot.user.apiKey).toMatch(maskedValuePattern);
@@ -907,6 +953,15 @@ describe('#maskSensitiveFields', () => {
       maskSensitiveFields(snapshot, maskFields);
 
       expect(snapshot.user).toBe(user);
+    });
+
+    it('should mask a key with a property contains a literal dot', () => {
+      const snapshot = { user: { 'email.work': 'bob@example.com' } };
+      const maskFields = { user: true };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.fields).toEqual(['user.email\\.work']);
+      expect(result.snapshot.user['email.work']).toMatch(maskedValuePattern);
     });
   });
 });

@@ -81,6 +81,14 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     logger: Logger;
     kibanaVersion: string;
   }) {
+    if (module.includes(SEPARATOR_CHAR))
+      throw new Error(
+        `Invalid module "${module}". Should not include separator [${SEPARATOR_CHAR}]`
+      );
+    if (dataset.includes(SEPARATOR_CHAR))
+      throw new Error(
+        `Invalid dataset "${dataset}". Should not include separator [${SEPARATOR_CHAR}]`
+      );
     this.module = module;
     this.dataset = dataset;
     this.kibanaVersion = kibanaVersion;
@@ -98,7 +106,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
 
   /**
    * Initialize the change tracking service.
-   * The privileged elasticsearch client `core.elasticsearch.client.asInternalUser`.
+   * @param elasticsearchClient The privileged elasticsearch client `core.elasticsearch.client.asInternalUser`.
    * @returns A promise that resolves when the change tracking service is initialized.
    * @throws An error if the data stream is not initialized properly.
    */
@@ -243,7 +251,9 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     const { module, dataset, client, kibanaVersion } = this;
 
     if (!client) {
-      const err = new Error(`Data stream not initialized: [${DATA_STREAM_NAME}]`);
+      const err = new Error(
+        `Change history data stream not initialized for: module [${this.module}] and dataset [${this.dataset}]`
+      );
       this.logger.error(err);
       throw err;
     }
@@ -261,12 +271,15 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       const fields = { masked: masked.fields, changed: undefined as string[] | undefined };
       const { event, metadata, tags } = opts.data ?? {};
       const created = new Date().toISOString();
+      // `eventId` should be scoped by module and dataset so two features do not clash on the same `event.id`
+      // If not provided, fallback to `ulid()` to make 'same millisecond' event order deterministic (helps with integration tests)
+      const eventId = id ? `${module}${SEPARATOR_CHAR}${dataset}${SEPARATOR_CHAR}${id}` : ulid();
       const document: ChangeHistoryDocument = {
         '@timestamp': new Date(timestamp || created).toISOString(),
         ecs: { version: ECS_VERSION },
         user: { name: username, id: userProfileId },
         event: {
-          id: id || ulid(), // <-- ULIDs make 'same millisecond' event order deterministic (helps with integration tests)
+          id: eventId,
           created,
           type: event?.type ?? 'change',
           reason: event?.reason,
@@ -342,7 +355,11 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
   ): Promise<GetHistoryResult> {
     const client = this.client;
     if (!client) {
-      throw new Error(`Data stream not initialized: [${DATA_STREAM_NAME}]`);
+      const err = new Error(
+        `Change history data stream not initialized for: module [${this.module}] and dataset [${this.dataset}]`
+      );
+      this.logger.error(err);
+      throw err;
     }
     const filter: QueryDslQueryContainer[] = [
       { term: { 'kibana.space_id': spaceId } },

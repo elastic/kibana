@@ -6,7 +6,10 @@
  */
 
 import crypto from 'node:crypto';
-import { flattenObject as flatten, unflattenObject as unflatten } from '@kbn/object-utils';
+import {
+  flattenObjectWithEscapedDots as flatten,
+  unflattenObjectWithEscapedDots as unflatten,
+} from '@kbn/object-utils';
 import type {
   ChangeTrackingDataMaskingFields,
   ChangeTrackingDiff,
@@ -70,7 +73,7 @@ export function standardDiffDocCalculation(opts: ChangeTrackingDiffOptions): Cha
       // eslint-disable-next-line prettier/prettier
       case 'number': case 'string': case 'boolean': return v;
       // eslint-disable-next-line prettier/prettier
-      case 'object': return v; // -> Arrays, TypedArrays, Date
+      case 'object': return v; // -> Arrays, TypedArrays, Date, null
       // eslint-disable-next-line prettier/prettier
       case 'function': case 'symbol': case 'undefined': return undefined;
       // eslint-disable-next-line prettier/prettier

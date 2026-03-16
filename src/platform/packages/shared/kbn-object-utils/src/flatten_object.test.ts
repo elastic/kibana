@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flattenObject, flattenObjectNestedLast } from './flatten_object';
+import {
+  flattenObject,
+  flattenObjectNestedLast,
+  flattenObjectWithEscapedDots,
+} from './flatten_object';
 
 describe('flattenObject', () => {
   it('should flatten nested object properties', () => {
@@ -79,6 +83,56 @@ describe('flattenObjectNestedLast', () => {
       'alpha.gamma.sigma': 1,
       'alpha.delta.sigma': 2,
       beta: 3,
+    });
+  });
+});
+
+describe('flattenObjectWithEscapedDots', () => {
+  it('escapes dots in a single key', () => {
+    expect(flattenObjectWithEscapedDots({ 'a.b': 1 })).toEqual({ 'a\\.b': 1 });
+  });
+
+  it('handles keys that already contain backslash (escapes dots only)', () => {
+    expect(flattenObjectWithEscapedDots({ 'a\\.b': 1 })).toEqual({ 'a\\\\.b': 1 });
+  });
+
+  it('escapes each dot in a key with multiple dots', () => {
+    expect(flattenObjectWithEscapedDots({ 'a..b': 1 })).toEqual({ 'a\\.\\.b': 1 });
+  });
+
+  it('escapes dots in nested object keys', () => {
+    expect(flattenObjectWithEscapedDots({ 'key.with.dots': { 'nested.dot.key': 2 } })).toEqual({
+      'key\\.with\\.dots.nested\\.dot\\.key': 2,
+    });
+  });
+
+  it('flattens nested objects and only escapes keys that contain dots', () => {
+    const flattened = flattenObjectWithEscapedDots({
+      alpha: {
+        'beta.gamma': 1,
+        delta: { sigma: 2 },
+      },
+      'epsilon.zeta': 3,
+    });
+    expect(flattened).toEqual({
+      'alpha.beta\\.gamma': 1,
+      'alpha.delta.sigma': 2,
+      'epsilon\\.zeta': 3,
+    });
+  });
+
+  it('does not flatten array items', () => {
+    const data = {
+      'key.with.dots': {
+        item1: 'value 1',
+        'item2.with.dots': { itemA: 'value 2' },
+      },
+      key2: ['item7', 'item8'],
+    };
+    expect(flattenObjectWithEscapedDots(data)).toEqual({
+      'key\\.with\\.dots.item1': 'value 1',
+      'key\\.with\\.dots.item2\\.with\\.dots.itemA': 'value 2',
+      key2: ['item7', 'item8'],
     });
   });
 });
