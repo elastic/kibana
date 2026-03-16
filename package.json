@@ -80,6 +80,7 @@
   "resolutions": {
     "**/@babel/parser": "7.24.7",
     "**/@emotion/sheet": "npm:@elastic/emotion-sheet@1.4.1",
+    "**/@hapi/mimos/mime-db": "1.53.0",
     "**/@hello-pangea/dnd": "18.0.1",
     "**/@langchain/core": "0.3.80",
     "**/@langchain/google-common": "0.2.18",
