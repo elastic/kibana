@@ -339,7 +339,7 @@ const formatInferenceErrorMeta = (error: unknown): string => {
     const parts: string[] = [];
     if (error.code) parts.push(`code=${error.code}`);
     if (error.meta?.status) parts.push(`status=${error.meta.status}`);
-    return parts.length > 0 ? `, ${parts.join(', ')}` : '';
+    return parts.length > 0 ? ` ${parts.join(' ')}` : '';
   }
   return '';
 };
