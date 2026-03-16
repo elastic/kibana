@@ -30,10 +30,13 @@ export const buildGetReplacementsQueryFn =
 
 export const buildGetReplacementsRetryFn = () => (failureCount: number, error: unknown) => {
   const kind = (error as ReplacementsApiError)?.kind;
+  // Never retry permanent or auth failures — these won't resolve on retry.
   if (kind === 'not_found' || kind === 'forbidden' || kind === 'unauthorized') {
     return false;
   }
-  return failureCount < 3;
+  // Replacements are a display-only enhancement. One retry is sufficient for transient
+  // network blips; more would cause noisy request storms as each new round mounts.
+  return failureCount < 1;
 };
 
 export const useGetReplacements = ({
@@ -49,4 +52,8 @@ export const useGetReplacements = ({
     enabled: enabled && Boolean(replacementsId),
     staleTime: Infinity,
     retry: buildGetReplacementsRetryFn(),
+    // Prevent a new retry cycle starting every time a new round component mounts
+    // while the query is already in error state. Without this, each streamed-in
+    // round would restart the retry loop, causing O(rounds × retries) requests.
+    retryOnMount: false,
   });

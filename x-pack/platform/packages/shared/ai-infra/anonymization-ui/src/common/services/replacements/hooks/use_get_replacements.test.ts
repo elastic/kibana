@@ -56,11 +56,9 @@ describe('buildGetReplacementsRetryFn', () => {
     expect(retry(0, { kind: 'unauthorized' })).toBe(false);
   });
 
-  it('retries generic errors up to three attempts', () => {
+  it('retries generic errors at most once', () => {
     const retry = buildGetReplacementsRetryFn();
     expect(retry(0, new Error('transient'))).toBe(true);
-    expect(retry(1, new Error('transient'))).toBe(true);
-    expect(retry(2, new Error('transient'))).toBe(true);
-    expect(retry(3, new Error('transient'))).toBe(false);
+    expect(retry(1, new Error('transient'))).toBe(false);
   });
 });
