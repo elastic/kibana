@@ -106,27 +106,10 @@ describe('RuleEditorFlyout', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  test('showFlyout reads job from mlJobService rather than selectedJob prop', () => {
-    const staleSelectedJob = {
-      job_id: 'farequote_no_by',
-      description: 'Stale prop version',
-      analysis_config: {
-        bucket_span: '5m',
-        detectors: [
-          {
-            detector_description: 'mean(responsetime)',
-            function: 'mean',
-            field_name: 'responsetime',
-            detector_index: 0,
-          },
-        ],
-      },
-    };
-
+  test('showFlyout reads job from mlJobService using the anomaly jobId', () => {
     let capturedShowFlyout;
     const props = {
       ...getRequiredProps(),
-      selectedJob: staleSelectedJob,
       setShowFunction: (fn) => {
         capturedShowFlyout = fn;
       },
