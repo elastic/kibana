@@ -23,7 +23,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
-import type { EditIlmPhasesFlyoutProps } from './types';
+import type { EditIlmPhasesFlyoutChangeMeta, EditIlmPhasesFlyoutProps } from './types';
 import {
   createIlmPhasesFlyoutDeserializer,
   createIlmPhasesFlyoutSerializer,
@@ -114,31 +114,83 @@ export const EditIlmPhasesFlyout = ({
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
+  const buildInvalidPhases = useCallback(
+    () => ILM_PHASE_ORDER.filter((p) => tabHasErrors(p)),
+    [tabHasErrors]
+  );
+
+  const lastEmittedMetaRef = useRef<EditIlmPhasesFlyoutChangeMeta>({
+    invalidPhases: [],
+  });
 
   const lastEmittedOutputRef = useRef<IlmPolicyPhases>(initialPhasesRef.current);
   const pendingOnChangeOutputRef = useRef<IlmPolicyPhases | null>(null);
   const pendingOnChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAppliedInitialPhasesRef = useRef<IlmPolicyPhases>(initialPhases);
+
+  useEffect(() => {
+    if (lastAppliedInitialPhasesRef.current === initialPhases) return;
+    lastAppliedInitialPhasesRef.current = initialPhases;
+
+    // Keep `hook_form_lib`'s defaultValue in sync with the latest draft owned by the parent.
+    // This allows fields to rehydrate correctly if flyout contents are remounted (e.g. push↔overlay).
+    lastEmittedOutputRef.current = initialPhases;
+
+    if (pendingOnChangeTimeoutRef.current) {
+      clearTimeout(pendingOnChangeTimeoutRef.current);
+      pendingOnChangeTimeoutRef.current = null;
+    }
+    pendingOnChangeOutputRef.current = null;
+
+    form.updateFieldValues(initialPhases);
+  }, [form, initialPhases]);
+
+  const scheduleOnChangeEmit = useCallback(() => {
+    if (pendingOnChangeTimeoutRef.current) {
+      clearTimeout(pendingOnChangeTimeoutRef.current);
+    }
+
+    pendingOnChangeTimeoutRef.current = setTimeout(() => {
+      pendingOnChangeTimeoutRef.current = null;
+      const toEmit = pendingOnChangeOutputRef.current;
+      pendingOnChangeOutputRef.current = null;
+
+      if (!toEmit) return;
+
+      const metaToEmit: EditIlmPhasesFlyoutChangeMeta = {
+        invalidPhases: buildInvalidPhases(),
+      };
+
+      if (
+        isEqual(toEmit, lastEmittedOutputRef.current) &&
+        isEqual(metaToEmit, lastEmittedMetaRef.current)
+      ) {
+        return;
+      }
+
+      lastEmittedOutputRef.current = toEmit;
+      lastEmittedMetaRef.current = metaToEmit;
+      onChangeRef.current(toEmit, metaToEmit);
+    }, onChangeDebounceMs);
+  }, [buildInvalidPhases, onChangeDebounceMs]);
 
   useEffect(() => {
     const sub = form.subscribe(({ data }) => {
       const next = data.format();
 
-      if (isEqual(next, lastEmittedOutputRef.current)) return;
+      const metaForNext: EditIlmPhasesFlyoutChangeMeta = {
+        invalidPhases: buildInvalidPhases(),
+      };
 
-      pendingOnChangeOutputRef.current = next;
-      if (pendingOnChangeTimeoutRef.current) {
-        clearTimeout(pendingOnChangeTimeoutRef.current);
+      if (
+        isEqual(next, lastEmittedOutputRef.current) &&
+        isEqual(metaForNext, lastEmittedMetaRef.current)
+      ) {
+        return;
       }
 
-      pendingOnChangeTimeoutRef.current = setTimeout(() => {
-        pendingOnChangeTimeoutRef.current = null;
-        const toEmit = pendingOnChangeOutputRef.current;
-        pendingOnChangeOutputRef.current = null;
-        if (!toEmit) return;
-        if (isEqual(toEmit, lastEmittedOutputRef.current)) return;
-        lastEmittedOutputRef.current = toEmit;
-        onChangeRef.current(toEmit);
-      }, onChangeDebounceMs);
+      pendingOnChangeOutputRef.current = next;
+      scheduleOnChangeEmit();
     });
 
     return () => {
@@ -149,7 +201,16 @@ export const EditIlmPhasesFlyout = ({
       pendingOnChangeOutputRef.current = null;
       sub.unsubscribe();
     };
-  }, [form, onChangeDebounceMs]);
+  }, [buildInvalidPhases, form, scheduleOnChangeEmit]);
+
+  useEffect(() => {
+    // Re-emit meta when tab errors change without any form data change.
+    // If we already have a scheduled emit (due to form changes), that emit will compute meta at
+    // emit-time, so we don't need to reschedule.
+    if (pendingOnChangeTimeoutRef.current) return;
+    pendingOnChangeOutputRef.current = lastEmittedOutputRef.current;
+    scheduleOnChangeEmit();
+  }, [buildInvalidPhases, scheduleOnChangeEmit]);
 
   const canSelectFrozen = canCreateRepository || searchableSnapshotRepositories.length > 0;
 

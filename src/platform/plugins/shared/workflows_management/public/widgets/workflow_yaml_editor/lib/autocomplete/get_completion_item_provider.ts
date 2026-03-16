@@ -10,7 +10,7 @@
 import { monaco } from '@kbn/monaco';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
-import { getSuggestions } from './suggestions/get_suggestions';
+import { getSuggestions, isInsideLoopBody } from './suggestions/get_suggestions';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
@@ -29,6 +29,13 @@ const DEPRECATED_TYPE_ALIASES = new Set([
   'kibana.updateCaseDefaultSpace',
   'kibana.addCaseCommentDefaultSpace',
 ]);
+
+/**
+ * Step types that are only valid inside loop bodies (foreach / while).
+ * The monaco-yaml schema provider suggests them everywhere, so the
+ * completion provider must strip them when the cursor is outside a loop.
+ */
+const LOOP_ONLY_STEP_TYPES = new Set(['loop.break', 'loop.continue']);
 
 /**
  * Get the deduplication key for a suggestion.
@@ -88,38 +95,6 @@ export function getCompletionItemProvider(
     // '{' - start of Liquid blocks (e.g., {{ ... }})
     triggerCharacters: ['@', '.', ' ', '|', '{'],
     provideCompletionItems: async (model, position, completionContext) => {
-      // Incremental deduplication accumulator
-      const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
-
-      // First, get suggestions from Monaco YAML providers (includes schema-based completion for workflow keys)
-      // This should run even if workflowDefinition is null to allow autocompletion when YAML is invalid
-      const allYamlProviders = getAllYamlProviders();
-      let isIncomplete = false;
-
-      // Call all stored providers and add their suggestions incrementally
-      for (const yamlProvider of allYamlProviders) {
-        if (yamlProvider.provideCompletionItems) {
-          try {
-            const result = await yamlProvider.provideCompletionItems(
-              model,
-              position,
-              completionContext,
-              {} as monaco.CancellationToken
-            );
-            if (result) {
-              mapSuggestions(deduplicatedMap, result.suggestions || []);
-              if (result.incomplete) {
-                isIncomplete = true;
-              }
-            }
-          } catch (error) {
-            // Continue with other providers if one fails
-          }
-        }
-      }
-
-      // Then, get workflow-specific suggestions (variables, connectors, etc.)
-      // These require workflowDefinition, so only run if available
       const editorState = getState();
       const autocompleteContext = buildAutocompleteContext({
         editorState,
@@ -127,18 +102,66 @@ export function getCompletionItemProvider(
         position,
         completionContext,
       });
-      if (autocompleteContext) {
-        // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
-        const workflowSuggestions = await getSuggestions({
-          ...autocompleteContext,
-          model,
-          position,
+      if (!autocompleteContext) {
+        return {
+          suggestions: [],
+          incomplete: false,
+        };
+      }
+
+      // Incremental deduplication accumulator
+      const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
+
+      let isIncomplete = false;
+
+      {
+        // Get suggestions from all stored YAML providers (excluding workflow provider)
+        const allYamlProviders = getAllYamlProviders();
+
+        // Call all stored providers and add their suggestions incrementally
+        for (const yamlProvider of allYamlProviders) {
+          if (yamlProvider.provideCompletionItems) {
+            try {
+              const result = await yamlProvider.provideCompletionItems(
+                model,
+                position,
+                completionContext,
+                {} as monaco.CancellationToken
+              );
+              if (result) {
+                mapSuggestions(deduplicatedMap, result.suggestions || []);
+                if (result.incomplete) {
+                  isIncomplete = true;
+                }
+              }
+            } catch (error) {
+              // Continue with other providers if one fails
+            }
+          }
+        }
+      }
+
+      // Then, get workflow-specific suggestions (variables, connectors, etc.)
+      // Start with workflow suggestions (they typically have snippets and get priority in deduplication)
+      const workflowSuggestions = await getSuggestions({
+        ...autocompleteContext,
+        model,
+        position,
+      });
+      mapSuggestions(deduplicatedMap, workflowSuggestions);
+
+      let suggestions = Array.from(deduplicatedMap.values());
+
+      if (!isInsideLoopBody(autocompleteContext)) {
+        suggestions = suggestions.filter((s) => {
+          const label = typeof s.label === 'string' ? s.label : s.label.label;
+          const text = typeof s.insertText === 'string' ? s.insertText : '';
+          return !LOOP_ONLY_STEP_TYPES.has(label) && !LOOP_ONLY_STEP_TYPES.has(text);
         });
-        mapSuggestions(deduplicatedMap, workflowSuggestions);
       }
 
       return {
-        suggestions: Array.from(deduplicatedMap.values()),
+        suggestions,
         incomplete: isIncomplete,
       };
     },

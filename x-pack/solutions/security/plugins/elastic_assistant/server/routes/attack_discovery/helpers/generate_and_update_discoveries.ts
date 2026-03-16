@@ -137,7 +137,11 @@ export const generateAndUpdateAttackDiscoveries = async ({
 
     const createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams = {
       alertsContextCount,
-      anonymizedAlerts,
+      anonymizedAlerts: anonymizedAlerts as Array<{
+        id?: string;
+        metadata: Record<string, never>;
+        pageContent: string;
+      }>, // TODO: remove this when the generator returns metadata: z.record(z.string(), z.unknown()) instead of metadata: z.object({}),
       apiConfig,
       attackDiscoveries: dedupedDiscoveries,
       connectorName: connectorName ?? apiConfig.connectorId,
