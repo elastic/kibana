@@ -32,46 +32,32 @@ import { EntityPanelKeyByType } from '../../flyout/entity_details/shared/constan
 
 const HEADER_HEIGHT = 72;
 
-interface Entity {
+interface EntityActionProps {
   entityType: string;
   entityId: string;
+  onClick: (entityId: string, entityType: string) => void;
 }
 
 export type EntityAttachment = Attachment<
   SecurityAgentBuilderAttachments.entity,
-  { entities: Array<Entity> }
+  {
+    entities: Array<{
+      entityType: string;
+      entityId: string;
+    }>;
+  }
 >;
 
-const SingleEntityAction = ({ entityType, entityId }: Entity) => {
-  const { application } = useKibana().services;
-  const id = EntityPanelKeyByType[entityType as EntityType];
-
-  const navigateToEntity = useCallback(() => {
-    if (id) {
-      application.navigateToApp(SECURITY_UI_APP_ID, {
-        deepLinkId: SecurityPageName.entityAnalyticsOverview,
-        path: `?flyout=${encodeURIComponent(
-          encode({
-            right: {
-              id,
-              params: {
-                userName: entityId,
-                contextID: 'entity-attachment',
-                scopeId: 'entity-attachment',
-              },
-            },
-            left: null,
-            preview: [],
-          })
-        )}`,
-      });
-    }
-  }, [application, id, entityId]);
-
+const SingleEntityAction = ({ entityType, entityId, onClick }: EntityActionProps) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiButton color="text" size="s" iconType="inspect" onClick={navigateToEntity}>
+        <EuiButton
+          color="text"
+          size="s"
+          iconType="inspect"
+          onClick={() => onClick(entityId, entityType)}
+        >
           {i18n.translate('xpack.securitySolution.agentBuilder.attachments.entity.open', {
             defaultMessage: 'Explore {type}',
             values: { type: capitalize(entityType) },
@@ -82,36 +68,11 @@ const SingleEntityAction = ({ entityType, entityId }: Entity) => {
   );
 };
 
-const LinkedEntityAction = ({ entityType, entityId }: Entity) => {
-  const { application } = useKibana().services;
-  const id = EntityPanelKeyByType[entityType as EntityType];
-
-  const navigateToEntity = useCallback(() => {
-    if (id) {
-      application.navigateToApp(SECURITY_UI_APP_ID, {
-        deepLinkId: SecurityPageName.entityAnalyticsOverview,
-        path: `?flyout=${encodeURIComponent(
-          encode({
-            right: {
-              id,
-              params: {
-                userName: entityId,
-                contextID: 'entity-attachment',
-                scopeId: 'entity-attachment',
-              },
-            },
-            left: null,
-            preview: [],
-          })
-        )}`,
-      });
-    }
-  }, [application, id, entityId]);
-
+const LinkedEntityAction = ({ entityType, entityId, onClick }: EntityActionProps) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiLink onClick={navigateToEntity}>{entityId}</EuiLink>
+        <EuiLink onClick={() => onClick(entityId, entityType)}>{entityId}</EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -123,10 +84,12 @@ type EntityInlineContentProps = AttachmentRenderProps<EntityAttachment> & {
 
 const EntityInlineContent: React.FC<EntityInlineContentProps> = ({
   attachment,
-  isSidebar,
+  // hopefully available in https://github.com/elastic/kibana/pull/257214
+  /* openSidebarConversation,*/
   numEntities,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { application } = useKibana().services;
 
   const headerStyles = css`
     position: relative;
@@ -142,6 +105,36 @@ const EntityInlineContent: React.FC<EntityInlineContentProps> = ({
     font-weight: ${euiTheme.font.weight.semiBold};
   `;
 
+  const navigateToEntity = useCallback(
+    (entityId: string, entityType: string) => {
+      const id = EntityPanelKeyByType[entityType as EntityType];
+      if (id) {
+        application.navigateToApp(SECURITY_UI_APP_ID, {
+          // TODO: update when Jared's PR merges
+          deepLinkId: SecurityPageName.entityAnalyticsOverview,
+          path: `?flyout=${encodeURIComponent(
+            encode({
+              right: {
+                id,
+                params: {
+                  userName: entityId,
+                  contextID: 'entity-attachment',
+                  scopeId: 'entity-attachment',
+                },
+              },
+              left: null,
+              preview: [],
+            })
+          )}`,
+        });
+
+        // Open the sidebar so the conversation remains accessible
+        // openSidebarConversation?.();
+      }
+    },
+    [application]
+  );
+
   return (
     <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
@@ -149,10 +142,14 @@ const EntityInlineContent: React.FC<EntityInlineContentProps> = ({
           <EuiText css={textStyles} size="s">
             {numEntities === 1
               ? attachment.data.entities[0].entityId
-              : attachment.data.entities.map((entity) => <LinkedEntityAction {...entity} />)}
+              : attachment.data.entities.map((entity) => (
+                  <LinkedEntityAction {...entity} onClick={navigateToEntity} />
+                ))}
           </EuiText>
         </EuiFlexItem>
-        {numEntities === 1 && <SingleEntityAction {...attachment.data.entities[0]} />}
+        {numEntities === 1 && (
+          <SingleEntityAction {...attachment.data.entities[0]} onClick={navigateToEntity} />
+        )}
       </EuiFlexGroup>
     </EuiSplitPanel.Inner>
   );
