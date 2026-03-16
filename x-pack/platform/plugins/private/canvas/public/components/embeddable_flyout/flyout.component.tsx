@@ -21,8 +21,12 @@ import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/pu
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import { contentManagementService, coreServices } from '../../services/kibana_services';
+import { SavedSearchType } from '@kbn/saved-search-plugin/public';
+import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
+import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/public';
 import { getCanvasNotifyService } from '../../services/canvas_notify_service';
+import { contentManagementService, coreServices } from '../../services/kibana_services';
 
 const strings = {
   getNoItemsText: () =>
@@ -35,6 +39,13 @@ const strings = {
     }),
 };
 
+const CANVAS_LIBRARY_TYPES = [
+  SavedSearchType,
+  VISUALIZE_SAVED_OBJECT_TYPE,
+  LENS_CONTENT_TYPE,
+  MAP_SAVED_OBJECT_TYPE,
+];
+
 export interface Props {
   onClose: () => void;
   container: CanAddNewPanel;
@@ -45,9 +56,8 @@ export const AddEmbeddableFlyout: FC<Props> = ({ container, onClose }) => {
 
   const libraryTypes = useAddFromLibraryTypes();
 
-  const canvasOnlyLibraryTypes = useMemo(() => {
-    // Links panels are not supported in Canvas
-    return libraryTypes.filter(({ type }) => type !== 'links');
+  const canvasLibraryTypes = useMemo(() => {
+    return libraryTypes.filter(({ type }) => CANVAS_LIBRARY_TYPES.includes(type));
   }, [libraryTypes]);
 
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
@@ -88,7 +98,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({ container, onClose }) => {
         <SavedObjectFinder
           id="canvasEmbeddableFlyout"
           onChoose={onChoose}
-          savedObjectMetaData={canvasOnlyLibraryTypes}
+          savedObjectMetaData={canvasLibraryTypes}
           showFilter={true}
           noItemsMessage={strings.getNoItemsText()}
           services={{
