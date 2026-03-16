@@ -32,10 +32,22 @@ export class NotificationPoliciesApi {
     );
   }
 
-  public async listNotificationPolicies(params: { page?: number; perPage?: number }) {
+  public async listNotificationPolicies(params: {
+    page?: number;
+    perPage?: number;
+    search?: string;
+    destinationType?: string;
+  }) {
     return this.http.get<FindNotificationPoliciesResponse>(
       INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
-      { query: { page: params.page, perPage: params.perPage } }
+      {
+        query: {
+          page: params.page,
+          perPage: params.perPage,
+          search: params.search || undefined,
+          destinationType: params.destinationType || undefined,
+        },
+      }
     );
   }
 

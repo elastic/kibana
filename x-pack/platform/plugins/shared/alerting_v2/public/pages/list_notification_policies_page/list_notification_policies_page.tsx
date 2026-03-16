@@ -37,12 +37,15 @@ import { useFetchNotificationPolicies } from '../../hooks/use_fetch_notification
 import { useSnoozeNotificationPolicy } from '../../hooks/use_snooze_notification_policy';
 import { useUnsnoozeNotificationPolicy } from '../../hooks/use_unsnooze_notification_policy';
 import { NotificationPolicyActionsCell } from './components/notification_policy_actions_cell';
+import { NotificationPoliciesSearchBar } from './components/notification_policies_search_bar';
 
 const DEFAULT_PER_PAGE = 20;
 
 export const ListNotificationPoliciesPage = () => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
+  const [search, setSearch] = useState('');
+  const [destinationType, setDestinationType] = useState('');
   const [policyToDelete, setPolicyToDelete] = useState<NotificationPolicyResponse | null>(null);
 
   const { navigateToUrl } = useService(CoreStart('application'));
@@ -92,10 +95,22 @@ export const ListNotificationPoliciesPage = () => {
     createNotificationPolicy(data);
   };
 
-  const { data, isLoading, isError, error } = useFetchNotificationPolicies({
+  const { data, isLoading, isError, error, refetch } = useFetchNotificationPolicies({
     page: page + 1,
     perPage,
+    search: search || undefined,
+    destinationType: destinationType || undefined,
   });
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(0);
+  };
+
+  const handleDestinationTypeChange = (value: string) => {
+    setDestinationType(value);
+    setPage(0);
+  };
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -249,6 +264,13 @@ export const ListNotificationPoliciesPage = () => {
             />
           </EuiButton>,
         ]}
+      />
+      <EuiSpacer size="m" />
+      <NotificationPoliciesSearchBar
+        onSearchChange={handleSearchChange}
+        destinationType={destinationType}
+        onDestinationTypeChange={handleDestinationTypeChange}
+        onRefresh={() => refetch()}
       />
       <EuiSpacer size="m" />
       {errorMessage ? (
