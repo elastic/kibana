@@ -16,7 +16,6 @@ import {
   EuiSelectable,
   EuiPopoverTitle,
   EuiBadge,
-  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -55,18 +54,20 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
   const renderOption = (option: EuiSelectableOption) => {
     const statusInfo = statusMap?.get(option.key as string);
     return (
-      <div>
-        <EuiSpacer size="xs" />
-        <div>{option.label}</div>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         {statusInfo && (
-          <EuiToolTip content={statusInfo.tooltip}>
-            <EuiBadge tabIndex={0} color={statusInfo.badgeColor}>
-              {statusInfo.status}
-            </EuiBadge>
-          </EuiToolTip>
+          <EuiFlexItem grow={false} style={{ minWidth: '30%' }}>
+            <EuiToolTip content={statusInfo.tooltip}>
+              <EuiBadge tabIndex={0} color={statusInfo.badgeColor}>
+                {statusInfo.status}
+              </EuiBadge>
+            </EuiToolTip>
+          </EuiFlexItem>
         )}
-        <EuiSpacer size="s" />
-      </div>
+        <EuiFlexItem grow={false}>
+          <span>{option.label}</span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 
@@ -91,14 +92,13 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
       }}
       listProps={{
         showIcons: false,
-        rowHeight: parseInt(euiTheme.size.xxxl, 10),
       }}
       options={options}
       onChange={handleChange}
       renderOption={renderOption}
     >
       {(list, search) => (
-        <div style={{ width: '300px' }}>
+        <div style={{ width: '375px' }}>
           <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
           {list}
         </div>
@@ -166,14 +166,13 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
         }}
         listProps={{
           showIcons: false,
-          rowHeight: parseInt(euiTheme.size.xxxl, 10),
         }}
         options={options}
         onChange={handleChange}
         renderOption={renderOption}
       >
         {(list, search) => (
-          <div style={{ width: '300px' }}>
+          <div style={{ width: '375px' }}>
             <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
             {list}
           </div>
