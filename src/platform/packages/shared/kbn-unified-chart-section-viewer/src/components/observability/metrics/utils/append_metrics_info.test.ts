@@ -48,4 +48,32 @@ describe('buildMetricsInfoQuery', () => {
     expect(buildMetricsInfoQuery('FROM x | STATS count()')).toBe('');
     expect(buildMetricsInfoQuery('FROM x | STATS count()', ['a', 'b'])).toBe('');
   });
+
+  it('inserts METRICS_INFO before LIMIT when query has LIMIT', () => {
+    expect(buildMetricsInfoQuery('FROM metrics-* | LIMIT 100')).toBe(
+      `FROM metrics-*\n | METRICS_INFO | LIMIT 100`
+    );
+    expect(buildMetricsInfoQuery('TS INDEX | LIMIT 10')).toBe(
+      `TS INDEX\n | METRICS_INFO | LIMIT 10`
+    );
+  });
+
+  it('removes SORT from the query', () => {
+    expect(buildMetricsInfoQuery('FROM metrics-* | LIMIT 100 | SORT timestamp DESC')).toBe(
+      `FROM metrics-*\n | METRICS_INFO | LIMIT 100`
+    );
+
+    expect(buildMetricsInfoQuery('FROM metrics-* | SORT timestamp DESC | LIMIT 100 ')).toBe(
+      `FROM metrics-*\n | METRICS_INFO | LIMIT 100`
+    );
+
+    expect(
+      buildMetricsInfoQuery(
+        'FROM metrics-* | SORT timestamp DESC | LIMIT 100 | WHERE timestamp > now-1h',
+        ['environment', 'station.name']
+      )
+    ).toBe(
+      `FROM metrics-* | WHERE timestamp > now - 1h\n| WHERE \`environment\` IS NOT NULL AND \`station.name\` IS NOT NULL | METRICS_INFO | LIMIT 100`
+    );
+  });
 });

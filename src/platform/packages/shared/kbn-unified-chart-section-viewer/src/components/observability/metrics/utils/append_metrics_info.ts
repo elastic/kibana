@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser } from '@elastic/esql';
-import { appendToESQLQuery, hasTransformationalCommand, sanitazeESQLInput } from '@kbn/esql-utils';
+import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
+import {
+  appendToESQLQuery,
+  getLimitFromESQLQuery,
+  hasTransformationalCommand,
+  sanitazeESQLInput,
+} from '@kbn/esql-utils';
 
 const METRICS_INFO_SUFFIX = ' | METRICS_INFO';
 
@@ -16,6 +21,7 @@ const METRICS_INFO_SUFFIX = ' | METRICS_INFO';
 
 /**
  * Appends "| METRICS_INFO" to an ES|QL query if it has no transformational commands.
+ * SORT is removed from the query. LIMIT, if present, is appended after METRICS_INFO.
  * @param esql the ES|QL query.
  * @returns the query with "| METRICS_INFO" added, or an empty string if not allowed.
  */
@@ -29,10 +35,15 @@ export function buildMetricsInfoQuery(esql?: string, dimensions?: string[]): str
     return '';
   }
 
-  const { errors } = Parser.parse(trimmed);
+  const { errors, root } = Parser.parse(trimmed);
   if (errors.length > 0) {
     return '';
   }
+
+  const hasLimit = Walker.matchAll(root, { type: 'command', name: 'limit' }).length > 0;
+  // Remove sort cause sorting for METRCS_INFO the user needs to pass only the fields from METRICS_INFO response
+  const baseCommands = root.commands.filter((cmd) => cmd.name !== 'sort' && cmd.name !== 'limit');
+  const baseQuery = BasicPrettyPrinter.print({ ...root, commands: baseCommands }).trim();
 
   // Avoid double append
   if (/metrics_info\s*$/i.test(trimmed) || trimmed.toUpperCase().endsWith('| METRICS_INFO')) {
@@ -44,9 +55,10 @@ export function buildMetricsInfoQuery(esql?: string, dimensions?: string[]): str
     [];
 
   const esqlQuery = appendToESQLQuery(
-    trimmed,
+    baseQuery,
     filteringDimensions?.length > 0 ? `| WHERE ${filteringDimensions}` : ''
   );
 
-  return `${esqlQuery}${METRICS_INFO_SUFFIX}`;
+  const limitSuffix = hasLimit ? ` | LIMIT ${getLimitFromESQLQuery(trimmed)}` : '';
+  return `${esqlQuery}${METRICS_INFO_SUFFIX}${limitSuffix}`;
 }
