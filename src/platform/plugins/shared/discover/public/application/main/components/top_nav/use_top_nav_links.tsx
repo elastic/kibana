@@ -115,9 +115,7 @@ export const useTopNavLinks = ({
     [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes]
   );
 
-  // Alerting V2: alertingVTwo.uiEnabled capability is enabled (controlled by xpack.alerting_v2.ui.enabled)
-  const canCreateESQLRule =
-    (services.capabilities.alertingVTwo as { uiEnabled?: boolean } | undefined)?.uiEnabled ?? false;
+  const canCreateESQLRule = !!services.capabilities.alertingVTwo;
   const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
 
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
@@ -126,7 +124,6 @@ export const useTopNavLinks = ({
     const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
     items.push(inspectAppMenuItem);
 
-    // Alerting V2: alertingVTwo.uiEnabled capability is enabled (controlled by xpack.alerting_v2.ui.enabled)
     const showLegacyAlerts =
       services.triggersActionsUi &&
       discoverParams.authorizedRuleTypeIds.length &&
