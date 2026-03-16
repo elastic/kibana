@@ -7,6 +7,7 @@
 
 import { parse } from 'query-string';
 import React, { Fragment, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
@@ -18,6 +19,7 @@ import { SectionError } from '../../../shared_imports';
 import { RepositoryForm } from '../../components';
 import type { Section } from '../../constants';
 import { BASE_PATH } from '../../constants';
+import { useToastNotifications } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addRepository, useLoadRepositories } from '../../services/http';
 import { useDefaultRepository } from '../../services/use_default_repository';
@@ -33,6 +35,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
 
   const { data: repositoriesData } = useLoadRepositories();
   const { defaultRepository, setDefaultRepository } = useDefaultRepository();
+  const toastNotifications = useToastNotifications();
   const [pendingRepository, setPendingRepository] = useState<Repository | EmptyRepository | null>(
     null
   );
@@ -59,12 +62,18 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
         setDefaultRepository(name);
       }
 
+      toastNotifications.addSuccess({
+        title: i18n.translate('xpack.snapshotRestore.addRepository.successNotificationTitle', {
+          defaultMessage: "Registered repository ''{name}''",
+          values: { name },
+        }),
+        iconType: 'check',
+      });
+
       const { redirect } = parse(search.replace(/^\?/, ''), { sort: false });
 
       history.push(
-        redirect
-          ? (redirect as string)
-          : encodeURI(`${BASE_PATH}/${encodeURIComponent(section)}/${encodeURIComponent(name)}`)
+        redirect ? (redirect as string) : `${BASE_PATH}/repositories`
       );
     }
   };

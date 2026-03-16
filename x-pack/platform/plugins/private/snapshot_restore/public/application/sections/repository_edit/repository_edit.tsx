@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
@@ -17,7 +18,7 @@ import { PageError, SectionError } from '../../../shared_imports';
 import { RepositoryForm, PageLoading } from '../../components';
 import type { Section } from '../../constants';
 import { BASE_PATH } from '../../constants';
-import { useServices } from '../../app_context';
+import { useServices, useToastNotifications } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { editRepository, useLoadRepositories, useLoadRepository } from '../../services/http';
 import { useDefaultRepository } from '../../services/use_default_repository';
@@ -34,6 +35,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   const { name } = useDecodedParams<MatchParams>();
   const section = 'repositories' as Section;
   const { defaultRepository, setDefaultRepository } = useDefaultRepository();
+  const toastNotifications = useToastNotifications();
   const { data: repositoriesData } = useLoadRepositories();
   const isOnlyRepository = (repositoriesData?.repositories?.length ?? 0) <= 1;
 
@@ -89,9 +91,15 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         setDefaultRepository(name);
       }
 
-      history.push(
-        encodeURI(`${BASE_PATH}/${encodeURIComponent(section)}/${encodeURIComponent(name)}`)
-      );
+      toastNotifications.addSuccess({
+        title: i18n.translate('xpack.snapshotRestore.editRepository.successNotificationTitle', {
+          defaultMessage: "Saved repository ''{name}''",
+          values: { name },
+        }),
+        iconType: 'check',
+      });
+
+      history.push(`${BASE_PATH}/repositories`);
     }
   };
 
