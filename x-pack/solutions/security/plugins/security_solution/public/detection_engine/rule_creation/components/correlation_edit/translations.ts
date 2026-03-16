@@ -203,6 +203,27 @@ export const CORRELATION_REMOTE_CLUSTERS_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const CORRELATION_TARGET_SPACES_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationTargetSpacesLabel',
+  {
+    defaultMessage: 'Target spaces',
+  }
+);
+
+export const CORRELATION_TARGET_SPACES_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationTargetSpacesHelpText',
+  {
+    defaultMessage: 'Optional Kibana spaces to include in cross-space alert correlation',
+  }
+);
+
+export const CORRELATION_TARGET_SPACES_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationTargetSpacesPlaceholder',
+  {
+    defaultMessage: 'Select or type space IDs',
+  }
+);
+
 export const CORRELATION_REMOTE_CLUSTERS_LOADING = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationRemoteClustersLoading',
   {
@@ -256,5 +277,47 @@ export const CONDITION_OPERATOR_LTE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.conditionOperatorLte',
   {
     defaultMessage: '≤',
+  }
+);
+
+export const CORRELATION_RECOMMENDATION_ANALYSIS_DETAILS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.analysisDetails',
+  {
+    defaultMessage: 'Analysis details',
+  }
+);
+
+export const CORRELATION_RECOMMENDATION_ALERT_COUNTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.alertCounts',
+  {
+    defaultMessage: 'Alert counts per rule',
+  }
+);
+
+export const CORRELATION_RECOMMENDATION_CARDINALITY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.cardinality',
+  {
+    defaultMessage: 'Group-by field cardinality',
+  }
+);
+
+export const CORRELATION_RECOMMENDATION_AVG_TIME = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.avgTime',
+  {
+    defaultMessage: 'Average time between alerts',
+  }
+);
+
+export const CORRELATION_RECOMMENDATION_LOADING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.loading',
+  {
+    defaultMessage: 'Loading recommendation...',
+  }
+);
+
+export const CORRELATION_RECOMMENDATION_SERVER_ANALYSIS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.serverAnalysis',
+  {
+    defaultMessage: 'Server-side analysis',
   }
 );

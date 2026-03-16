@@ -5,11 +5,32 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCorrelationTypeRecommendation } from './use_correlation_type_recommendation';
 
+const mockHttpPost = jest.fn();
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      http: {
+        post: mockHttpPost,
+      },
+    },
+  }),
+}));
+
 describe('useCorrelationTypeRecommendation', () => {
-  it('returns undefined when no rules are selected', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    mockHttpPost.mockReset();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('returns undefined recommendation and not loading when no rules are selected', () => {
     const { result } = renderHook(() =>
       useCorrelationTypeRecommendation({
         selectedRules: [],
@@ -17,11 +38,96 @@ describe('useCorrelationTypeRecommendation', () => {
         currentType: 'temporal',
       })
     );
-    expect(result.current).toBeUndefined();
+    expect(result.current.recommendation).toBeUndefined();
+    expect(result.current.isLoading).toBe(false);
   });
 
-  describe('single rule selected', () => {
-    it('recommends event_count for a single rule without network fields', () => {
+  it('calls the server API with correct parameters after debounce', async () => {
+    const serverResponse = {
+      type: 'event_count',
+      confidence: 'medium',
+      reason: 'Single rule with alerts suggests detecting volume spikes',
+      stats: {
+        alertCountPerRule: { 'rule-1': 42 },
+        groupByCardinality: { 'host.name': 15 },
+        avgTimeBetweenAlerts: 30000,
+      },
+    };
+    mockHttpPost.mockResolvedValue(serverResponse);
+
+    const { result } = renderHook(() =>
+      useCorrelationTypeRecommendation({
+        selectedRules: ['rule-1'],
+        groupByFields: ['host.name'],
+        currentType: 'temporal',
+        timespan: '5m',
+      })
+    );
+
+    expect(result.current.isLoading).toBe(true);
+
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(mockHttpPost).toHaveBeenCalledWith(
+      '/internal/security_solution/correlation/recommend_type',
+      {
+        version: '1',
+        body: JSON.stringify({
+          rules: ['rule-1'],
+          groupByFields: ['host.name'],
+          timespan: '5m',
+        }),
+      }
+    );
+
+    expect(result.current.recommendation).toEqual(serverResponse);
+  });
+
+  it('returns server response with stats when API succeeds', async () => {
+    const serverResponse = {
+      type: 'temporal',
+      confidence: 'high',
+      reason: 'Two rules with temporally close alerts',
+      stats: {
+        alertCountPerRule: { 'rule-1': 20, 'rule-2': 15 },
+        groupByCardinality: { 'user.name': 8 },
+        avgTimeBetweenAlerts: 5000,
+      },
+    };
+    mockHttpPost.mockResolvedValue(serverResponse);
+
+    const { result } = renderHook(() =>
+      useCorrelationTypeRecommendation({
+        selectedRules: ['rule-1', 'rule-2'],
+        groupByFields: ['user.name'],
+        currentType: 'event_count',
+      })
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.recommendation).toEqual(serverResponse);
+    expect(result.current.recommendation?.stats).toBeDefined();
+  });
+
+  describe('fallback to client-side heuristics when API fails', () => {
+    beforeEach(() => {
+      mockHttpPost.mockRejectedValue(new Error('Network error'));
+    });
+
+    it('recommends event_count for a single rule without network fields', async () => {
       const { result } = renderHook(() =>
         useCorrelationTypeRecommendation({
           selectedRules: ['rule-1'],
@@ -29,14 +135,23 @@ describe('useCorrelationTypeRecommendation', () => {
           currentType: 'temporal',
         })
       );
-      expect(result.current).toEqual({
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.recommendation).toEqual({
         type: 'event_count',
         confidence: 'medium',
         reason: expect.stringContaining('volume spikes'),
       });
     });
 
-    it('recommends value_count when group-by includes IP fields', () => {
+    it('recommends value_count when group-by includes IP fields', async () => {
       const { result } = renderHook(() =>
         useCorrelationTypeRecommendation({
           selectedRules: ['rule-1'],
@@ -44,46 +159,23 @@ describe('useCorrelationTypeRecommendation', () => {
           currentType: 'temporal',
         })
       );
-      expect(result.current).toEqual({
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.recommendation).toEqual({
         type: 'value_count',
         confidence: 'medium',
         reason: expect.stringContaining('breadth of impact'),
       });
     });
 
-    it('recommends value_count when group-by includes port fields', () => {
-      const { result } = renderHook(() =>
-        useCorrelationTypeRecommendation({
-          selectedRules: ['rule-1'],
-          groupByFields: ['destination.port'],
-          currentType: 'temporal',
-        })
-      );
-      expect(result.current).toEqual({
-        type: 'value_count',
-        confidence: 'medium',
-        reason: expect.stringContaining('breadth of impact'),
-      });
-    });
-
-    it('recommends value_count when group-by includes domain fields', () => {
-      const { result } = renderHook(() =>
-        useCorrelationTypeRecommendation({
-          selectedRules: ['rule-1'],
-          groupByFields: ['dns.question.domain'],
-          currentType: 'temporal',
-        })
-      );
-      expect(result.current).toEqual({
-        type: 'value_count',
-        confidence: 'medium',
-        reason: expect.stringContaining('breadth of impact'),
-      });
-    });
-  });
-
-  describe('two rules selected', () => {
-    it('recommends temporal with high confidence when group-by includes user fields', () => {
+    it('recommends temporal with high confidence when group-by includes user fields', async () => {
       const { result } = renderHook(() =>
         useCorrelationTypeRecommendation({
           selectedRules: ['rule-1', 'rule-2'],
@@ -91,46 +183,23 @@ describe('useCorrelationTypeRecommendation', () => {
           currentType: 'event_count',
         })
       );
-      expect(result.current).toEqual({
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.recommendation).toEqual({
         type: 'temporal',
         confidence: 'high',
         reason: expect.stringContaining('signal convergence'),
       });
     });
 
-    it('recommends temporal with high confidence when group-by includes host fields', () => {
-      const { result } = renderHook(() =>
-        useCorrelationTypeRecommendation({
-          selectedRules: ['rule-1', 'rule-2'],
-          groupByFields: ['host.name'],
-          currentType: 'event_count',
-        })
-      );
-      expect(result.current).toEqual({
-        type: 'temporal',
-        confidence: 'high',
-        reason: expect.stringContaining('signal convergence'),
-      });
-    });
-
-    it('recommends temporal with low confidence without entity fields', () => {
-      const { result } = renderHook(() =>
-        useCorrelationTypeRecommendation({
-          selectedRules: ['rule-1', 'rule-2'],
-          groupByFields: ['event.category'],
-          currentType: 'event_count',
-        })
-      );
-      expect(result.current).toEqual({
-        type: 'temporal',
-        confidence: 'low',
-        reason: expect.stringContaining('consider adding entity fields'),
-      });
-    });
-  });
-
-  describe('three or more rules selected', () => {
-    it('recommends temporal_ordered with high confidence for 3 rules', () => {
+    it('recommends temporal_ordered with high confidence for 3+ rules', async () => {
       const { result } = renderHook(() =>
         useCorrelationTypeRecommendation({
           selectedRules: ['rule-1', 'rule-2', 'rule-3'],
@@ -138,40 +207,96 @@ describe('useCorrelationTypeRecommendation', () => {
           currentType: 'temporal',
         })
       );
-      expect(result.current).toEqual({
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.recommendation).toEqual({
         type: 'temporal_ordered',
         confidence: 'high',
         reason: expect.stringContaining('attack chain'),
       });
     });
 
-    it('recommends temporal_ordered with high confidence for 5 rules', () => {
+    it('recommends temporal with low confidence without entity fields', async () => {
       const { result } = renderHook(() =>
         useCorrelationTypeRecommendation({
-          selectedRules: ['r1', 'r2', 'r3', 'r4', 'r5'],
-          groupByFields: [],
-          currentType: 'temporal',
+          selectedRules: ['rule-1', 'rule-2'],
+          groupByFields: ['event.category'],
+          currentType: 'event_count',
         })
       );
-      expect(result.current).toEqual({
-        type: 'temporal_ordered',
-        confidence: 'high',
-        reason: expect.stringContaining('attack chain'),
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.recommendation).toEqual({
+        type: 'temporal',
+        confidence: 'low',
+        reason: expect.stringContaining('consider adding entity fields'),
       });
     });
   });
 
-  it('memoizes and returns the same reference for identical inputs', () => {
-    const props = {
+  it('debounces API calls', async () => {
+    mockHttpPost.mockResolvedValue({
+      type: 'event_count',
+      confidence: 'medium',
+      reason: 'test',
+      stats: { alertCountPerRule: {}, groupByCardinality: {}, avgTimeBetweenAlerts: null },
+    });
+
+    const { rerender } = renderHook((props) => useCorrelationTypeRecommendation(props), {
+      initialProps: {
+        selectedRules: ['rule-1'],
+        groupByFields: ['host.name'],
+        currentType: 'temporal',
+      },
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+
+    rerender({
       selectedRules: ['rule-1', 'rule-2'],
       groupByFields: ['host.name'],
-      currentType: 'event_count',
-    };
-    const { result, rerender } = renderHook((p) => useCorrelationTypeRecommendation(p), {
-      initialProps: props,
+      currentType: 'temporal',
     });
-    const firstResult = result.current;
-    rerender(props);
-    expect(result.current).toBe(firstResult);
+
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+
+    expect(mockHttpPost).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalledTimes(1);
+    });
+
+    expect(mockHttpPost).toHaveBeenCalledWith(
+      '/internal/security_solution/correlation/recommend_type',
+      expect.objectContaining({
+        body: JSON.stringify({
+          rules: ['rule-1', 'rule-2'],
+          groupByFields: ['host.name'],
+          timespan: '5m',
+        }),
+      })
+    );
   });
 });

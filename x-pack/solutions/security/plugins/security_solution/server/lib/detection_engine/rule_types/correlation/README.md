@@ -121,3 +121,44 @@ FROM .alerts-security.alerts-default, cluster-west:.alerts-security.alerts-defau
 ```
 
 Remote cluster names are validated with `validateClusterName()`, which enforces the `[a-zA-Z0-9_-]+` pattern, preventing ES|QL injection through cluster names.
+
+### Cross-Space Correlation
+
+The correlation engine supports cross-space alert correlation, allowing a rule in one Kibana space to correlate alerts from other spaces. This enables detection of attack patterns that span organizational boundaries (e.g., a SOC space detecting patterns across finance, engineering, and HR spaces).
+
+**Configuration**: Add space IDs to the `targetSpaces` array in the correlation config. Each space ID must match the pattern `[a-z0-9_-]+` (lowercase alphanumeric with hyphens and underscores).
+
+**Example configuration**:
+```json
+{
+  "correlation": {
+    "rules": ["rule-uuid-1", "rule-uuid-2"],
+    "type": "temporal",
+    "groupBy": ["host.name"],
+    "timespan": "5m",
+    "targetSpaces": ["soc", "finance"]
+  }
+}
+```
+
+**How it works**: When `targetSpaces` is set, the alerts index in the ES|QL `FROM` clause dynamically includes indices for each target space alongside the current space's index. Alerts are queried from `.alerts-security.alerts-<spaceId>` for each configured space.
+
+For example, a rule running in the `default` space with `targetSpaces: ["soc"]`:
+
+```esql
+FROM .alerts-security.alerts-default, .alerts-security.alerts-soc METADATA _id, _index
+| WHERE ...
+```
+
+When combined with `remoteClusters`, each remote cluster is prefixed to each space index:
+
+```esql
+FROM .alerts-security.alerts-default, .alerts-security.alerts-soc, west:.alerts-security.alerts-default, west:.alerts-security.alerts-soc METADATA _id, _index
+| WHERE ...
+```
+
+**Security implications**:
+- The user (or API key) executing the rule must have `read` access to the alerts indices in each target space (`.alerts-security.alerts-<spaceId>`).
+- Space IDs are validated with `validateSpaceName()`, which enforces the `[a-z0-9_-]+` pattern, preventing ES|QL injection.
+- Duplicate space indices are automatically deduplicated (e.g., if `targetSpaces` includes the current space).
+- The enrichment phase (fetching contributing alert documents) also queries across all configured space indices.

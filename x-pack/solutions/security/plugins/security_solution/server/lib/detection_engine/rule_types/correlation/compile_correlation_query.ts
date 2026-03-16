@@ -7,7 +7,7 @@
 
 import type { CorrelationConfig } from '../../rule_schema';
 
-const ALERTS_INDEX = '.alerts-security.alerts-default';
+const ALERTS_INDEX_PREFIX = '.alerts-security.alerts-';
 
 const escapeEsqlString = (value: string): string =>
   value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
@@ -28,23 +28,66 @@ const validateClusterName = (name: string): string => {
   return name;
 };
 
-const buildFromClause = (remoteClusters?: string[]): string => {
-  const indices = [ALERTS_INDEX];
+const VALID_SPACE_NAME = /^[a-z0-9_-]+$/;
+const validateSpaceName = (name: string): string => {
+  if (!VALID_SPACE_NAME.test(name)) {
+    throw new Error(`Invalid space ID: "${name}"`);
+  }
+  return name;
+};
+
+const buildFromClause = (
+  spaceId: string,
+  remoteClusters?: string[],
+  targetSpaces?: string[]
+): string => {
+  const baseIndex = `${ALERTS_INDEX_PREFIX}${spaceId}`;
+  const localIndices = [baseIndex];
+
+  if (targetSpaces && targetSpaces.length > 0) {
+    for (const space of targetSpaces) {
+      validateSpaceName(space);
+      const spaceIndex = `${ALERTS_INDEX_PREFIX}${space}`;
+      if (!localIndices.includes(spaceIndex)) {
+        localIndices.push(spaceIndex);
+      }
+    }
+  }
+
+  const allIndices = [...localIndices];
   if (remoteClusters && remoteClusters.length > 0) {
     for (const cluster of remoteClusters) {
       validateClusterName(cluster);
-      indices.push(`${cluster}:${ALERTS_INDEX}`);
+      for (const localIndex of localIndices) {
+        allIndices.push(`${cluster}:${localIndex}`);
+      }
     }
   }
-  return indices.join(', ');
+
+  return allIndices.join(', ');
+};
+
+export const buildEnrichmentIndices = (spaceId: string, targetSpaces?: string[]): string => {
+  const indices = [`${ALERTS_INDEX_PREFIX}${spaceId}`];
+  if (targetSpaces && targetSpaces.length > 0) {
+    for (const space of targetSpaces) {
+      validateSpaceName(space);
+      const spaceIndex = `${ALERTS_INDEX_PREFIX}${space}`;
+      if (!indices.includes(spaceIndex)) {
+        indices.push(spaceIndex);
+      }
+    }
+  }
+  return indices.join(',');
 };
 
 export const compileCorrelationQuery = (
   correlation: CorrelationConfig,
   selfRuleId: string,
+  spaceId: string,
   maxGroups?: number
 ): string => {
-  const { rules, type, groupBy, timespan, condition, remoteClusters } = correlation;
+  const { rules, type, groupBy, timespan, condition, remoteClusters, targetSpaces } = correlation;
   if (groupBy.length === 0) {
     throw new Error('Correlation rules require at least one groupBy field');
   }
@@ -56,7 +99,7 @@ export const compileCorrelationQuery = (
     rules.length === 1
       ? `kibana.alert.rule.uuid == "${escapeEsqlString(rules[0])}"`
       : `kibana.alert.rule.uuid IN (${rules.map((r) => `"${escapeEsqlString(r)}"`).join(', ')})`;
-  const fromClause = buildFromClause(remoteClusters);
+  const fromClause = buildFromClause(spaceId, remoteClusters, targetSpaces);
 
   let query: string;
 

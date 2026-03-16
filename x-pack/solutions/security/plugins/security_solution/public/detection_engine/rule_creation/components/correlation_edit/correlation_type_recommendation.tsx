@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import {
   EuiCallOut,
   EuiButton,
@@ -13,9 +13,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  EuiLoadingSpinner,
+  EuiAccordion,
+  EuiDescriptionList,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CorrelationTypeRecommendation } from './use_correlation_type_recommendation';
+import type { CorrelationTypeRecommendationWithStats } from './use_correlation_type_recommendation';
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.title',
@@ -25,6 +29,36 @@ const TITLE = i18n.translate(
 const APPLY_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.apply',
   { defaultMessage: 'Apply recommendation' }
+);
+
+const LOADING_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.loading',
+  { defaultMessage: 'Loading recommendation...' }
+);
+
+const ANALYSIS_DETAILS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.analysisDetails',
+  { defaultMessage: 'Analysis details' }
+);
+
+const ALERT_COUNTS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.alertCounts',
+  { defaultMessage: 'Alert counts per rule' }
+);
+
+const CARDINALITY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.cardinality',
+  { defaultMessage: 'Group-by field cardinality' }
+);
+
+const AVG_TIME_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.avgTime',
+  { defaultMessage: 'Average time between alerts' }
+);
+
+const SERVER_ANALYSIS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.serverAnalysis',
+  { defaultMessage: 'Server-side analysis' }
 );
 
 const CONFIDENCE_LABELS: Record<string, string> = {
@@ -67,21 +101,84 @@ const TYPE_DISPLAY_NAMES: Record<string, string> = {
   ),
 };
 
+const formatMs = (ms: number): string => {
+  if (ms < 1000) return `${Math.round(ms)}ms`;
+  if (ms < 60_000) return `${(ms / 1000).toFixed(1)}s`;
+  return `${(ms / 60_000).toFixed(1)}m`;
+};
+
+const formatRecord = (record: Record<string, number>): string => {
+  const entries = Object.entries(record);
+  if (entries.length === 0) return 'None';
+  return entries.map(([key, value]) => `${key}: ${value}`).join(', ');
+};
+
 interface CorrelationTypeRecommendationCalloutProps {
-  recommendation: CorrelationTypeRecommendation;
+  recommendation: CorrelationTypeRecommendationWithStats | undefined;
   currentType: string;
   onApply: (type: string) => void;
+  isLoading?: boolean;
 }
 
 export const CorrelationTypeRecommendationCallout = memo<CorrelationTypeRecommendationCalloutProps>(
-  ({ recommendation, currentType, onApply }) => {
-    const handleApply = useCallback(() => {
-      onApply(recommendation.type);
-    }, [onApply, recommendation.type]);
+  ({ recommendation, currentType, onApply, isLoading }) => {
+    const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
-    if (recommendation.type === currentType) {
+    const handleApply = useCallback(() => {
+      if (recommendation) {
+        onApply(recommendation.type);
+      }
+    }, [onApply, recommendation]);
+
+    const handleAccordionToggle = useCallback((isOpen: boolean) => {
+      setIsAccordionOpen(isOpen);
+    }, []);
+
+    if (isLoading) {
+      return (
+        <>
+          <EuiCallOut
+            title={TITLE}
+            color="primary"
+            iconType="sparkles"
+            data-test-subj="correlationTypeRecommendationLoading"
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">{LOADING_LABEL}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      );
+    }
+
+    if (!recommendation || recommendation.type === currentType) {
       return null;
     }
+
+    const { stats } = recommendation;
+    const statsDescriptionList = stats
+      ? [
+          {
+            title: ALERT_COUNTS_LABEL,
+            description: formatRecord(stats.alertCountPerRule),
+          },
+          {
+            title: CARDINALITY_LABEL,
+            description: formatRecord(stats.groupByCardinality),
+          },
+          {
+            title: AVG_TIME_LABEL,
+            description:
+              stats.avgTimeBetweenAlerts !== null ? formatMs(stats.avgTimeBetweenAlerts) : 'N/A',
+          },
+        ]
+      : null;
 
     return (
       <>
@@ -100,9 +197,36 @@ export const CorrelationTypeRecommendationCallout = memo<CorrelationTypeRecommen
                 {CONFIDENCE_LABELS[recommendation.confidence]}
               </EuiBadge>
             </EuiFlexItem>
+            {stats && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{SERVER_ANALYSIS_LABEL}</EuiBadge>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
           <p>{recommendation.reason}</p>
+
+          {statsDescriptionList && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiAccordion
+                id="correlationRecommendationDetails"
+                buttonContent={ANALYSIS_DETAILS_LABEL}
+                forceState={isAccordionOpen ? 'open' : 'closed'}
+                onToggle={handleAccordionToggle}
+                data-test-subj="correlationTypeRecommendationDetails"
+              >
+                <EuiSpacer size="xs" />
+                <EuiDescriptionList
+                  type="column"
+                  compressed
+                  listItems={statsDescriptionList}
+                  data-test-subj="correlationTypeRecommendationStats"
+                />
+              </EuiAccordion>
+            </>
+          )}
+
           <EuiSpacer size="s" />
           <EuiButton
             size="s"

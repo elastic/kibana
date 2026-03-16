@@ -25,6 +25,7 @@ import type { CorrelationState } from './types';
 
 jest.mock('./compile_correlation_query', () => ({
   compileCorrelationQuery: jest.fn().mockReturnValue('FROM .alerts-security.alerts-default'),
+  buildEnrichmentIndices: jest.fn().mockReturnValue('.alerts-security.alerts-default'),
 }));
 
 jest.mock('../esql/esql_request', () => ({

@@ -220,6 +220,16 @@ export const CorrelationConfig = z.object({
         )
     )
     .optional(),
+  targetSpaces: z
+    .array(
+      z
+        .string()
+        .regex(
+          /^[a-z0-9_-]+$/,
+          'Space ID must contain only lowercase alphanumeric characters, hyphens, and underscores'
+        )
+    )
+    .optional(),
 });
 
 export type CorrelationSpecificRuleParams = z.infer<typeof CorrelationSpecificRuleParams>;

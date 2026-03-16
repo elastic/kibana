@@ -549,6 +549,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
                   ...(correlation.remoteClusters && correlation.remoteClusters.length > 0
                     ? { remote_clusters: correlation.remoteClusters }
                     : {}),
+                  ...(correlation.targetSpaces && correlation.targetSpaces.length > 0
+                    ? { target_spaces: correlation.targetSpaces }
+                    : {}),
                   ...(correlation.condition &&
                   (correlation.type === 'event_count' || correlation.type === 'value_count')
                     ? {

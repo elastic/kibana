@@ -59,6 +59,7 @@ import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
+import { recommendCorrelationTypeRoute } from '../lib/detection_engine/rule_types/correlation/routes/recommend_correlation_type_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -156,6 +157,9 @@ export const initRoutes = (
   registerSiemReadinessRoutes({ router, logger });
 
   registerTrialCompanionRoutes(trialCompanionDeps);
+
+  // Correlation type recommendation
+  recommendCorrelationTypeRoute(router);
 
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);

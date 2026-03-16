@@ -33,6 +33,7 @@ import {
   CORRELATION_CONDITION_VALUE_CONFIG,
   CORRELATION_CONDITION_FIELD_CONFIG,
   CORRELATION_REMOTE_CLUSTERS_CONFIG,
+  CORRELATION_TARGET_SPACES_CONFIG,
 } from './field_configs';
 import { CorrelationInfoIcon } from './correlation_info_icon';
 import { useRemoteClusters } from './use_remote_clusters';
@@ -86,7 +87,7 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
   const groupByFields = (nestedData?.groupBy ?? []) as string[];
   const currentTypeFromForm = (nestedData?.type ?? 'temporal') as string;
 
-  const recommendation = useCorrelationTypeRecommendation({
+  const { recommendation, isLoading: isRecommendationLoading } = useCorrelationTypeRecommendation({
     selectedRules,
     groupByFields,
     currentType: currentTypeFromForm,
@@ -109,6 +110,7 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
       correlationRules,
       correlationGroupBy,
       correlationRemoteClusters,
+      correlationTargetSpaces,
       correlationConditionOperator,
       correlationConditionValue,
       correlationConditionField,
@@ -139,11 +141,12 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
           </EuiFormRow>
           <EuiSpacer size="m" />
 
-          {recommendation && (
+          {(recommendation || isRecommendationLoading) && (
             <CorrelationTypeRecommendationCallout
               recommendation={recommendation}
               currentType={typeValue}
               onApply={(type) => correlationType.setValue(type)}
+              isLoading={isRecommendationLoading}
             />
           )}
 
@@ -221,6 +224,32 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
           </EuiFormRow>
           <EuiSpacer size="m" />
 
+          <EuiFormRow
+            label={i18n.CORRELATION_TARGET_SPACES_LABEL}
+            helpText={i18n.CORRELATION_TARGET_SPACES_HELP_TEXT}
+            fullWidth
+          >
+            <EuiComboBox
+              placeholder={i18n.CORRELATION_TARGET_SPACES_PLACEHOLDER}
+              selectedOptions={(correlationTargetSpaces.value as string[]).map((v: string) => ({
+                label: v,
+              }))}
+              onChange={(selected) =>
+                correlationTargetSpaces.setValue(selected.map((s) => s.label))
+              }
+              onCreateOption={(value) => {
+                correlationTargetSpaces.setValue([
+                  ...(correlationTargetSpaces.value as string[]),
+                  value,
+                ]);
+              }}
+              isClearable
+              fullWidth
+              data-test-subj="correlationTargetSpaces"
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+
           {hasCondition && (
             <>
               <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
@@ -292,6 +321,7 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
       remoteClusters,
       remoteClustersLoading,
       recommendation,
+      isRecommendationLoading,
     ]
   );
 
@@ -314,6 +344,10 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
           correlationRemoteClusters: {
             path: `${path}.remoteClusters`,
             config: CORRELATION_REMOTE_CLUSTERS_CONFIG,
+          },
+          correlationTargetSpaces: {
+            path: `${path}.targetSpaces`,
+            config: CORRELATION_TARGET_SPACES_CONFIG,
           },
           correlationConditionOperator: {
             path: `${path}.condition.operator`,

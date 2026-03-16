@@ -82,3 +82,10 @@ export const CORRELATION_REMOTE_CLUSTERS_CONFIG = {
   helpText: i18n.CORRELATION_REMOTE_CLUSTERS_HELP_TEXT,
   defaultValue: [] as unknown,
 };
+
+export const CORRELATION_TARGET_SPACES_CONFIG = {
+  type: FIELD_TYPES.COMBO_BOX,
+  label: i18n.CORRELATION_TARGET_SPACES_LABEL,
+  helpText: i18n.CORRELATION_TARGET_SPACES_HELP_TEXT,
+  defaultValue: [] as unknown,
+};

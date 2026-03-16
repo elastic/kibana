@@ -175,6 +175,7 @@ export interface DefineStepRule {
     groupBy: string[];
     timespan: string;
     remoteClusters?: string[];
+    targetSpaces?: string[];
     condition?: {
       operator: string;
       value: number;
@@ -255,6 +256,7 @@ export interface DefineStepRuleJson {
     group_by: string[];
     timespan: string;
     remote_clusters?: string[];
+    target_spaces?: string[];
     condition?: {
       operator: string;
       value: number;

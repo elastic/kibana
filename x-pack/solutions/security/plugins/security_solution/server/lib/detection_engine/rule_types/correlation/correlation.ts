@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { buildEsqlSearchRequest } from '../esql/build_esql_search_request';
 import { performEsqlRequest } from '../esql/esql_request';
 import { rowToDocument } from '../esql/utils';
-import { compileCorrelationQuery } from './compile_correlation_query';
+import { compileCorrelationQuery, buildEnrichmentIndices } from './compile_correlation_query';
 import {
   fetchContributingAlerts,
   extractEnrichmentFields,
@@ -78,6 +78,7 @@ export const correlationExecutor = async ({
     const compiledQuery = compileCorrelationQuery(
       ruleParams.correlation,
       selfRuleId,
+      sharedParams.spaceId,
       tuple.maxSignals + 1
     );
     ruleExecutionLogger.debug(`Compiled correlation ES|QL query:\n${compiledQuery}`);
@@ -133,10 +134,15 @@ export const correlationExecutor = async ({
         }
       }
 
+      const enrichmentIndex = buildEnrichmentIndices(
+        sharedParams.spaceId,
+        ruleParams.correlation.targetSpaces
+      );
+
       const contributingAlerts = await fetchContributingAlerts(
         services.scopedClusterClient.asCurrentUser,
         allAlertIds,
-        '.alerts-security.alerts-default'
+        enrichmentIndex
       );
 
       ruleExecutionLogger.debug(
