@@ -131,6 +131,7 @@ describe('useCasesColumns ', () => {
             "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-updatedAt",
             "field": "updatedAt",
             "minWidth": "9em",
             "name": "Updated on",
@@ -139,6 +140,7 @@ describe('useCasesColumns ', () => {
             "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-closedAt",
             "field": "closedAt",
             "minWidth": "9.5em",
             "name": "Closed on",
@@ -250,6 +252,7 @@ describe('useCasesColumns ', () => {
             "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-updatedAt",
             "field": "updatedAt",
             "minWidth": "9em",
             "name": "Updated on",
@@ -522,6 +525,7 @@ describe('useCasesColumns ', () => {
             "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-updatedAt",
             "field": "updatedAt",
             "minWidth": "9em",
             "name": "Updated on",
@@ -643,6 +647,7 @@ describe('useCasesColumns ', () => {
             "width": "9em",
           },
           Object {
+            "data-test-subj": "case-table-column-updatedAt",
             "field": "updatedAt",
             "minWidth": "9em",
             "name": "Updated on",

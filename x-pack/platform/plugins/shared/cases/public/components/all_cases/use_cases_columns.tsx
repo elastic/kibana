@@ -242,6 +242,7 @@ export const useCasesColumns = ({
         field: casesColumnsConfig.closedAt.field,
         name: casesColumnsConfig.closedAt.name,
         sortable: true,
+        'data-test-subj': 'case-table-column-closedAt',
       },
       createdAt: {
         ...tableColumnPresetDateRelative({ stripMs: true }),
@@ -255,6 +256,7 @@ export const useCasesColumns = ({
         field: casesColumnsConfig.updatedAt.field,
         name: casesColumnsConfig.updatedAt.name,
         sortable: true,
+        'data-test-subj': 'case-table-column-updatedAt',
       },
       externalIncident: {
         // no field
