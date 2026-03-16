@@ -86,16 +86,24 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       ]);
     }
 
-    const solutions = ['observability', 'search', 'security', 'workplaceai'];
-    for (const solution of solutions) {
-      if (await doAllChangesMatch(new RegExp(`^x-pack/solutions/${solution}`))) {
+    const allSolutions = ['observability', 'search', 'security', 'workplaceai'];
+    const platformPaths = new RegExp(`^(src/|x-pack/platform/|x-pack/solutions/)`);
+    const allChangesUnderPlatformOrSolutions = await doAllChangesMatch(platformPaths);
+
+    if (allChangesUnderPlatformOrSolutions) {
+      const modifiedSolutions = [];
+      for (const solution of allSolutions) {
+        if (await doAnyChangesMatch([new RegExp(`^x-pack/solutions/${solution}/`)])) {
+          modifiedSolutions.push(solution);
+        }
+      }
+      if (modifiedSolutions.length > 0 && modifiedSolutions.length < allSolutions.length) {
         execFileSync('buildkite-agent', [
           'meta-data',
           'set',
           'limit_test_groups_by_solution',
-          solution,
+          modifiedSolutions.join(','),
         ]);
-        break;
       }
     }
 
