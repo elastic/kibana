@@ -10,15 +10,15 @@ import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import {
-  createAppRootMockRenderer,
   type AppContextTestRender,
+  createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
 import { EndpointScriptsGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
 import { SCRIPTS_LIBRARY_PATH } from '../../../../../../common/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { useToasts } from '../../../../../common/lib/kibana';
-import { ScriptsLibrary, SCRIPTS_LIBRARY_PAGE_STORAGE_KEY } from './scripts_library';
+import { SCRIPTS_LIBRARY_PAGE_STORAGE_KEY, ScriptsLibrary } from './scripts_library';
 import { useGetEndpointScriptsList } from '../../../../hooks/script_library';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
 
@@ -180,10 +180,10 @@ describe('ScriptsLibrary', () => {
       const banner = getByTestId('test-new-page-banner');
       expect(banner).toBeInTheDocument();
 
-      expect(getByText('New: Scripts library')).toBeInTheDocument();
+      expect(getByText('New: Script library')).toBeInTheDocument();
       expect(
         getByText(
-          'Create and manage reusable scripts that can be run on endpoints during investigations and response.'
+          'Upload and manage reusable scripts to run on endpoints protected by Elastic Defend.'
         )
       ).toBeInTheDocument();
     });

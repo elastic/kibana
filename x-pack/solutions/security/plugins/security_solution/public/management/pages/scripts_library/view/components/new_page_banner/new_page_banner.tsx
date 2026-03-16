@@ -61,7 +61,7 @@ export const NewPageBanner: React.FC<NewPageBannerProps> = ({
               <h4>
                 <FormattedMessage
                   id="xpack.securitySolution.management.scriptsLibrary.newPageBanner.title"
-                  defaultMessage="New: Scripts library"
+                  defaultMessage="New: Script library"
                 />
               </h4>
             </EuiTitle>
@@ -69,7 +69,7 @@ export const NewPageBanner: React.FC<NewPageBannerProps> = ({
           <EuiFlexItem>
             <FormattedMessage
               id="xpack.securitySolution.management.scriptsLibrary.newPageBanner.description"
-              defaultMessage="Create and manage reusable scripts that can be run on endpoints during investigations and response."
+              defaultMessage="Upload and manage reusable scripts to run on endpoints protected by Elastic Defend."
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
