@@ -169,10 +169,14 @@ export const getArtifactImportFlyoutUiMocks = (
   const getCancelButton = () => renderResult.getByTestId(`${dataTestSubj}-cancelButton`);
   const getImportButton = () => renderResult.getByTestId(`${dataTestSubj}-importButton`);
 
-  const uploadFile = () =>
+  const uploadFile = (listIds: string[]) =>
     userEvent.upload(
       renderResult.getByTestId(`${dataTestSubj}-filePicker`),
-      new File(['random file content'], 'trusted_apps.ndjson')
+      new File(
+        // every id is duplicated to simulate multiple lines. plus one invalid line to make sure parsing errors are ignored
+        [listIds.map((id) => `{"list_id":"${id}"}\n{"list_id":"${id}"}\ninvalid line`).join('\n')],
+        'trusted_apps.ndjson'
+      )
     );
 
   return { queryImportFlyout, getCancelButton, getImportButton, uploadFile };

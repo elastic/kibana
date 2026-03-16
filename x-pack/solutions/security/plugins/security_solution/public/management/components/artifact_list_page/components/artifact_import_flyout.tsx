@@ -21,6 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { parseListIdsFromImportedFile } from '../../../../common/utils/exception_list_items';
 import { useToasts } from '../../../../common/lib/kibana';
 import type { ArtifactListPageLabels } from '../translations';
 import { useImportArtifactList } from '../../../hooks/artifacts/use_import_artifact_list';
@@ -49,8 +50,17 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
 
   const { isLoading, mutate } = useImportArtifactList(apiClient);
 
-  const handleOnSubmit = useCallback(() => {
+  const handleOnSubmit = useCallback(async () => {
     if (file !== null) {
+      const listIds = await parseListIdsFromImportedFile(file);
+
+      if (listIds.size > 1 || !listIds.has(apiClient.listId)) {
+        toasts.addError(new Error(labels.pageImportOnlyCurrentArtifactCanBeImportedError), {
+          title: labels.pageImportErrorToastTitle,
+        });
+        return;
+      }
+
       mutate(
         { file },
         {
@@ -82,7 +92,7 @@ export const ArtifactImportFlyout: React.FC<ArtifactImportFlyoutProps> = ({
         }
       );
     }
-  }, [file, labels, mutate, onSuccess, toasts]);
+  }, [apiClient.listId, file, labels, mutate, onSuccess, toasts]);
 
   const handleOnFileChange: EuiFilePickerProps['onChange'] = useCallback(
     (files: FileList | null) => {

@@ -61,6 +61,12 @@ export const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageLabels = {
       defaultMessage: 'Endpoint exception list import failed',
     }
   ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.endpointExceptions.pageImportOnlyCurrentArtifactCanBeImportedError',
+    {
+      defaultMessage: 'Only endpoint exception list can be imported on this page.',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.endpointExceptions.showingTotal', {
       defaultMessage:

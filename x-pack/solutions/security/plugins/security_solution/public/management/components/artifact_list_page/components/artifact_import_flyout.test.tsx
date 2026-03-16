@@ -31,6 +31,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   let mockedTrustedAppApi: ReturnType<typeof trustedAppsAllHttpMocks>;
   let props: ArtifactImportFlyoutProps;
   let ui: ReturnType<typeof getArtifactImportFlyoutUiMocks>;
+  let currentListId: string;
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
@@ -38,9 +39,12 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     mockedTrustedAppApi = trustedAppsAllHttpMocks(coreStart.http);
 
+    const apiClient = new TrustedAppsApiClient(coreStart.http);
+    currentListId = apiClient.listId;
+
     props = {
       labels: artifactListPageLabels,
-      apiClient: new TrustedAppsApiClient(coreStart.http),
+      apiClient,
       onCancel: jest.fn(),
       onSuccess: jest.fn(),
     };
@@ -80,7 +84,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   it('should enable `Import` button when a file is selected', async () => {
     await render();
 
-    await ui.uploadFile();
+    await ui.uploadFile([currentListId]);
 
     expect(ui.getImportButton()).toBeEnabled();
   });
@@ -88,7 +92,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   it('should call the import API when `Import` button is clicked', async () => {
     await render();
 
-    await ui.uploadFile();
+    await ui.uploadFile([currentListId]);
     await userEvent.click(ui.getImportButton());
 
     expect(mockedTrustedAppApi.responseProvider.trustedAppImportList).toHaveBeenCalledWith(
@@ -107,7 +111,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     await render();
 
-    await ui.uploadFile();
+    await ui.uploadFile([currentListId]);
     await userEvent.click(ui.getImportButton());
 
     expect(ui.getImportButton()).toBeDisabled();
@@ -116,7 +120,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   it('should show a success toast and call `onSuccess` after a successful import', async () => {
     await render();
 
-    await ui.uploadFile();
+    await ui.uploadFile([currentListId]);
     await userEvent.click(ui.getImportButton());
 
     expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -127,6 +131,34 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     expect(props.onSuccess).toHaveBeenCalled();
   });
 
+  it('should show an error toast if another list is being imported', async () => {
+    await render();
+
+    await ui.uploadFile(['some-other-list-id']);
+    await userEvent.click(ui.getImportButton());
+
+    expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining(
+        new Error(artifactListPageLabels.pageImportOnlyCurrentArtifactCanBeImportedError)
+      ),
+      { title: artifactListPageLabels.pageImportErrorToastTitle }
+    );
+  });
+
+  it('should show an error toast if not only the current artifact type is included in the import file', async () => {
+    await render();
+
+    await ui.uploadFile(['some-other-list-id', currentListId]);
+    await userEvent.click(ui.getImportButton());
+
+    expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining(
+        new Error(artifactListPageLabels.pageImportOnlyCurrentArtifactCanBeImportedError)
+      ),
+      { title: artifactListPageLabels.pageImportErrorToastTitle }
+    );
+  });
+
   it('should show an error toast if the import API fails', async () => {
     mockedTrustedAppApi.responseProvider.trustedAppImportList.mockImplementation(() => {
       throw new Error('Fail message from server');
@@ -134,7 +166,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     await render();
 
-    await ui.uploadFile();
+    await ui.uploadFile([currentListId]);
     await userEvent.click(ui.getImportButton());
 
     expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(

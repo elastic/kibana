@@ -97,6 +97,12 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageLabels = {
       defaultMessage: 'Event filter list import failed',
     }
   ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.eventFilters.pageImportOnlyCurrentArtifactCanBeImportedError',
+    {
+      defaultMessage: 'Only event filter list can be imported on this page.',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.eventFilters.showingTotal', {
       defaultMessage: 'Showing {total} {total, plural, one {event filter} other {event filters}}',

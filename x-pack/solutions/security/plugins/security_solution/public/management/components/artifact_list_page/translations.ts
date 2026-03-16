@@ -65,6 +65,12 @@ export const artifactListPageLabels = Object.freeze({
       defaultMessage: 'Artifact list import failed',
     }
   ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.artifactListPage.importOnlyCurrentArtifactCanBeImportedToastMessage',
+    {
+      defaultMessage: 'Only the current artifact type can be imported on this page.',
+    }
+  ),
   importFlyoutDetails: i18n.translate(
     'xpack.securitySolution.artifactListPage.importFlyoutDetails',
     {
@@ -141,7 +147,7 @@ export const artifactListPageLabels = Object.freeze({
   cardActionDeleteLabel: i18n.translate(
     'xpack.securitySolution.artifactListPage.cardActionDeleteLabel',
     {
-      defaultMessage: 'Delete event filter',
+      defaultMessage: 'Delete artifact',
     }
   ),
 
@@ -173,6 +179,7 @@ export type ArtifactListPageRequiredLabels = Pick<
   | 'pageExportErrorToastTitle'
   | 'pageImportSuccessToastTitle'
   | 'pageImportErrorToastTitle'
+  | 'pageImportOnlyCurrentArtifactCanBeImportedError'
   | 'getShowingCountLabel'
   | 'cardActionEditLabel'
   | 'cardActionDeleteLabel'

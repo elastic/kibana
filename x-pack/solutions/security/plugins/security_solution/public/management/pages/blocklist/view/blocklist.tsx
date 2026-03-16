@@ -59,6 +59,12 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageLabels = {
       defaultMessage: 'Blocklist import failed',
     }
   ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.blocklist.pageImportOnlyCurrentArtifactCanBeImportedError',
+    {
+      defaultMessage: 'Only blocklist can be imported on this page.',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.blocklist.showingTotal', {
       defaultMessage:

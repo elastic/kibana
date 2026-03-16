@@ -78,6 +78,12 @@ const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageLabels = {
       defaultMessage: 'Trusted device list import failed',
     }
   ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.pageImportOnlyCurrentArtifactCanBeImportedError',
+    {
+      defaultMessage: 'Only trusted device list can be imported on this page.',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.trustedDevices.list.showingTotal', {
       defaultMessage:

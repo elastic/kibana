@@ -65,6 +65,12 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageLabels = Object.freeze({
       defaultMessage: 'Host isolation exception list import failed',
     }
   ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.pageImportOnlyCurrentArtifactCanBeImportedError',
+    {
+      defaultMessage: 'Only host isolation exception list can be imported on this page.',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.hostIsolationExceptions.showingTotal', {
       defaultMessage:
