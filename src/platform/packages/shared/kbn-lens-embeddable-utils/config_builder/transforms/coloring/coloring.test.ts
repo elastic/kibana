@@ -554,8 +554,8 @@ describe('Color util transforms', () => {
         palette: 'kibana_palette',
         mode: 'categorical',
         mapping: [
-          { color: { type: 'colorCode', value: '#ff0000' }, values: ['value1'] },
-          { color: { type: 'colorCode', value: '#00ff00' }, values: ['value2', 'value3'] },
+          { color: { type: 'color_code', value: '#ff0000' }, values: ['value1'] },
+          { color: { type: 'color_code', value: '#00ff00' }, values: ['value2', 'value3'] },
           { color: { type: 'from_palette', palette: 'no_default', index: 1 }, values: ['value1'] },
         ],
       });
@@ -606,9 +606,9 @@ describe('Color util transforms', () => {
         mapping: [],
         sort: 'asc',
         gradient: [
-          { type: 'colorCode', value: '#ff0000' },
-          { type: 'colorCode', value: '#ffff00' },
-          { type: 'colorCode', value: '#0000ff' },
+          { type: 'color_code', value: '#ff0000' },
+          { type: 'color_code', value: '#ffff00' },
+          { type: 'color_code', value: '#0000ff' },
         ],
       });
     });
@@ -812,10 +812,10 @@ describe('Color util transforms', () => {
         mapping: [
           {
             values: ['value1', 'value2', 'value3'],
-            color: { type: 'colorCode', value: '#ff0000' },
+            color: { type: 'color_code', value: '#ff0000' },
           },
         ],
-        unassignedColor: { type: 'colorCode', value: '#00ff00' },
+        unassignedColor: { type: 'color_code', value: '#00ff00' },
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);
@@ -835,7 +835,7 @@ describe('Color util transforms', () => {
         mapping: [
           {
             values: ['value1', 'value2', 'value3'],
-            color: { type: 'colorCode', value: '#ff0000' },
+            color: { type: 'color_code', value: '#ff0000' },
           },
           {
             values: ['value4', 'value5'],
@@ -867,7 +867,7 @@ describe('Color util transforms', () => {
           },
         ],
         gradient: [
-          { type: 'colorCode', value: '#ff0000' },
+          { type: 'color_code', value: '#ff0000' },
           { type: 'from_palette', index: 2, palette: 'no_default' },
         ],
         sort: 'asc',
