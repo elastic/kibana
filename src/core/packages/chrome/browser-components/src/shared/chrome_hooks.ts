@@ -24,21 +24,22 @@ import { useChromeComponentsDeps } from '../context';
 
 /**
  * Returns the current classic breadcrumbs set via `chrome.setBreadcrumbs()`.
- * Used by `HeaderBreadcrumbs` and `HeaderPageAnnouncer` (classic layout).
+ * Used by `ClassicHeader`.
  */
-export function useBreadcrumbs(): ChromeBreadcrumb[] {
+export function useClassicBreadcrumbs(): ChromeBreadcrumb[] {
   const chrome = useChromeService();
-  return useObservable(chrome.getBreadcrumbs$(), chrome.getBreadcrumbs());
+  const breadcrumbs$ = useMemo(() => chrome.getBreadcrumbs$(), [chrome]);
+  return useObservable(breadcrumbs$, chrome.getBreadcrumbs());
 }
 
 /**
  * Returns the current project-style breadcrumbs derived from the active
- * navigation tree node. Used by `Breadcrumbs` and `HeaderPageAnnouncer`
- * (project layout).
+ * navigation tree node. Used by `ProjectHeader`.
  */
 export function useProjectBreadcrumbs(): ChromeBreadcrumb[] {
   const chrome = useChromeService();
-  return useObservable(chrome.project.getBreadcrumbs$(), []);
+  const breadcrumbs$ = useMemo(() => chrome.project.getBreadcrumbs$(), [chrome]);
+  return useObservable(breadcrumbs$, []);
 }
 
 /**
@@ -47,7 +48,28 @@ export function useProjectBreadcrumbs(): ChromeBreadcrumb[] {
  */
 export function useNavLinks(): ChromeNavLink[] {
   const chrome = useChromeService();
-  return useObservable(chrome.navLinks.getNavLinks$(), []);
+  const navLinks$ = useMemo(() => chrome.navLinks.getNavLinks$(), [chrome]);
+  return useObservable(navLinks$, []);
+}
+
+/**
+ * Returns the recently accessed items list.
+ * Used by `CollapsibleNav` (classic layout).
+ */
+export function useRecentlyAccessed() {
+  const chrome = useChromeService();
+  const recentlyAccessed$ = useMemo(() => chrome.recentlyAccessed.get$(), [chrome]);
+  return useObservable(recentlyAccessed$, []);
+}
+
+/**
+ * Returns the current custom nav link (e.g. cloud deployment link).
+ * Used by `CollapsibleNav` (classic layout).
+ */
+export function useCustomNavLink() {
+  const chrome = useChromeService();
+  const customNavLink$ = useMemo(() => chrome.getCustomNavLink$(), [chrome]);
+  return useObservable(customNavLink$, undefined);
 }
 
 type NavControlPosition = 'left' | 'center' | 'right' | 'extension';

@@ -29,7 +29,7 @@ import { HeaderNavControls } from '../shared/header_nav_controls';
 import { HeaderActionMenu } from '../shared/header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
-import { useHasAppMenuConfig } from '../shared/chrome_hooks';
+import { useClassicBreadcrumbs, useHasAppMenuConfig } from '../shared/chrome_hooks';
 
 export function ClassicHeader() {
   const {
@@ -37,11 +37,11 @@ export function ClassicHeader() {
     basePath,
     loadingCount$,
     navControls,
-    classic,
     breadcrumbsAppendExtensions$,
     customBranding$,
     navLinks$,
   } = useChromeComponentsDeps();
+  const breadcrumbs = useClassicBreadcrumbs();
 
   const homeHref = basePath.prepend('/app/home');
 
@@ -52,7 +52,7 @@ export function ClassicHeader() {
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
-  const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={classic.breadcrumbs$} />;
+  const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs={breadcrumbs} />;
 
   return (
     <>
@@ -66,7 +66,7 @@ export function ClassicHeader() {
               {
                 items: [
                   <HeaderPageAnnouncer
-                    breadcrumbs$={classic.breadcrumbs$}
+                    breadcrumbs={breadcrumbs}
                     customBranding$={customBranding$}
                   />,
                   <HeaderLogo
@@ -111,7 +111,6 @@ export function ClassicHeader() {
                   appId$={application.currentAppId$}
                   id={navId}
                   navLinks$={navLinks$}
-                  recentlyAccessed$={classic.recentlyAccessed$}
                   isNavOpen={isNavOpen}
                   homeHref={homeHref}
                   basePath={basePath}
@@ -120,7 +119,6 @@ export function ClassicHeader() {
                   closeNav={() => {
                     setIsNavOpen(false);
                   }}
-                  customNavLink$={classic.customNavLink$}
                   button={
                     <HeaderMenuButton
                       data-test-subj="toggleNavButton"

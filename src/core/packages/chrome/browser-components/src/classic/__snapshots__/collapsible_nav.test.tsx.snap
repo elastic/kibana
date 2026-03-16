@@ -744,39 +744,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   }
   button={<button />}
   closeNav={[Function]}
-  customNavLink$={
-    BehaviorSubject {
-      "_value": undefined,
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -816,39 +783,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   }
   navigateToApp={[Function]}
   navigateToUrl={[Function]}
-  recentlyAccessed$={
-    BehaviorSubject {
-      "_value": Array [],
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
   storage={
     StubBrowserStorage {
       "keys": Array [],
@@ -992,39 +926,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   }
   button={<button />}
   closeNav={[Function]}
-  customNavLink$={
-    BehaviorSubject {
-      "_value": undefined,
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -1065,39 +966,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   }
   navigateToApp={[Function]}
   navigateToUrl={[Function]}
-  recentlyAccessed$={
-    BehaviorSubject {
-      "_value": Array [],
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
   storage={
     StubBrowserStorage {
       "keys": Array [],

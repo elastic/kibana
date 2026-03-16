@@ -30,7 +30,6 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
 import { ChromeComponentsProvider, type ChromeComponentsDeps } from './context';
 
 /**
@@ -49,11 +48,6 @@ export const createMockChromeComponentsDeps = () => {
     basePath: http.basePath,
     docLinks: docLinksServiceMock.createStartContract(),
     loadingCount$: new BehaviorSubject<number>(0),
-    classic: {
-      breadcrumbs$: new BehaviorSubject<ChromeBreadcrumb[]>([]),
-      recentlyAccessed$: new BehaviorSubject<RecentlyAccessedHistoryItem[]>([]),
-      customNavLink$: new BehaviorSubject<ChromeNavLink | undefined>(undefined),
-    },
     project: {
       breadcrumbs$: new BehaviorSubject<ChromeBreadcrumb[]>([]),
       homeHref$: new BehaviorSubject<string>('/'),

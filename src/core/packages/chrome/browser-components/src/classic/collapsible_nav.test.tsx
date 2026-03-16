@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
@@ -15,7 +16,9 @@ import sinon from 'sinon';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
+import { TestChromeProviders } from '../test_helpers';
 import { CollapsibleNav } from './collapsible_nav';
 
 const { kibana, observability, security, management } = DEFAULT_APP_CATEGORIES;
@@ -53,15 +56,34 @@ function mockProps() {
     isNavOpen: false,
     homeHref: '/',
     url: '/',
-    navLinks$: new BehaviorSubject([]),
-    recentlyAccessed$: new BehaviorSubject([]),
+    navLinks$: new BehaviorSubject<ChromeNavLink[]>([]),
     storage: new StubBrowserStorage(),
     closeNav: () => {},
     navigateToApp: () => Promise.resolve(),
     navigateToUrl: () => Promise.resolve(),
-    customNavLink$: new BehaviorSubject(undefined),
     button: <button />,
   };
+}
+
+function createChromeMock({
+  recentlyAccessed = [],
+  customNavLink,
+}: {
+  recentlyAccessed?: ChromeRecentlyAccessedHistoryItem[];
+  customNavLink?: ChromeNavLink;
+} = {}) {
+  const chrome = chromeServiceMock.createStartContract();
+  chrome.recentlyAccessed.get$.mockReturnValue(new BehaviorSubject(recentlyAccessed));
+  chrome.getCustomNavLink$.mockReturnValue(new BehaviorSubject(customNavLink));
+  return chrome;
+}
+
+function createWrapper(
+  chrome: ReturnType<typeof createChromeMock>
+): FC<PropsWithChildren<unknown>> {
+  return ({ children }) => (
+    <TestChromeProviders chrome={chrome}>{children}</TestChromeProviders>
+  );
 }
 
 function expectShownNavLinksCount(component: ReactWrapper, count: number) {
@@ -82,9 +104,11 @@ function clickGroup(component: ReactWrapper, group: string) {
 }
 
 describe('CollapsibleNav', () => {
-  // this test is mostly an "EUI works as expected" check
   it('renders the default nav', () => {
-    const component = mount(<CollapsibleNav {...mockProps()} />);
+    const chrome = createChromeMock();
+    const component = mount(<CollapsibleNav {...mockProps()} />, {
+      wrappingComponent: createWrapper(chrome),
+    });
     expect(component).toMatchSnapshot();
 
     component.setProps({ isOpen: true });
@@ -92,7 +116,6 @@ describe('CollapsibleNav', () => {
   });
 
   it('renders links grouped by category', () => {
-    // just a test of category functionality, categories are not accurate
     const navLinks = [
       mockLink({ title: 'discover', category: kibana }),
       mockLink({ title: 'siem', category: security }),
@@ -100,7 +123,7 @@ describe('CollapsibleNav', () => {
       mockLink({ title: 'monitoring', category: management }),
       mockLink({ title: 'visualize', category: kibana }),
       mockLink({ title: 'dashboard', category: kibana }),
-      mockLink({ title: 'canvas' }), // links should be able to be rendered top level as well
+      mockLink({ title: 'canvas' }),
       mockLink({ title: 'logs', category: observability }),
     ];
     const recentNavLinks = [
@@ -108,14 +131,14 @@ describe('CollapsibleNav', () => {
       mockRecentNavLink({ label: 'recent 2' }),
     ];
     const customNavLink = mockLink({ title: 'Custom link' });
+    const chrome = createChromeMock({ recentlyAccessed: recentNavLinks, customNavLink });
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
-        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
-        customNavLink$={new BehaviorSubject(customNavLink)}
-      />
+      />,
+      { wrappingComponent: createWrapper(chrome) }
     );
     expect(component.render()).toMatchSnapshot();
   });
@@ -123,13 +146,14 @@ describe('CollapsibleNav', () => {
   it('remembers collapsible section state', () => {
     const navLinks = [mockLink({ category: kibana }), mockLink({ category: observability })];
     const recentNavLinks = [mockRecentNavLink({})];
+    const chrome = createChromeMock({ recentlyAccessed: recentNavLinks });
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
-        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
-      />
+      />,
+      { wrappingComponent: createWrapper(chrome) }
     );
     expectShownNavLinksCount(component, 3);
     clickGroup(component, 'kibana');
@@ -145,13 +169,14 @@ describe('CollapsibleNav', () => {
     const onClose = sinon.spy();
     const navLinks = [mockLink({ category: kibana }), mockLink({ title: 'categoryless' })];
     const recentNavLinks = [mockRecentNavLink({})];
+    const chrome = createChromeMock({ recentlyAccessed: recentNavLinks });
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
-        recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
-      />
+      />,
+      { wrappingComponent: createWrapper(chrome) }
     );
     component.setProps({
       closeNav: () => {

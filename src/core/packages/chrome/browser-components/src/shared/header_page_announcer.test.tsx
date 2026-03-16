@@ -8,11 +8,10 @@
  */
 
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { HeaderPageAnnouncer } from './header_page_announcer';
 
-const createBreadcrumbs$ = (breadcrumbs: any[] = []) => new BehaviorSubject(breadcrumbs);
 const createBranding$ = (branding: any = {}) => new BehaviorSubject(branding);
 
 jest.mock('@elastic/eui', () => {
@@ -28,7 +27,7 @@ describe('HeaderPageAnnouncer', () => {
   it('renders with default brand when no branding is provided', async () => {
     const { findByLabelText } = render(
       <HeaderPageAnnouncer
-        breadcrumbs$={createBreadcrumbs$([{ text: 'Home' }])}
+        breadcrumbs={[{ text: 'Home' }]}
         customBranding$={createBranding$({})}
       />
     );
@@ -39,7 +38,7 @@ describe('HeaderPageAnnouncer', () => {
   it('renders with custom branding', async () => {
     const { findByLabelText } = render(
       <HeaderPageAnnouncer
-        breadcrumbs$={createBreadcrumbs$([{ text: 'Dashboard' }])}
+        breadcrumbs={[{ text: 'Dashboard' }]}
         customBranding$={createBranding$({ pageTitle: 'Kibana' })}
       />
     );
@@ -48,23 +47,18 @@ describe('HeaderPageAnnouncer', () => {
   });
 
   it('updates route title when breadcrumbs change', async () => {
-    const breadcrumbs$ = createBreadcrumbs$([{ text: 'A' }]);
     const { findByLabelText, rerender } = render(
       <HeaderPageAnnouncer
-        breadcrumbs$={breadcrumbs$}
+        breadcrumbs={[{ text: 'A' }]}
         customBranding$={createBranding$({ pageTitle: 'Brand' })}
       />
     );
     let announcer = await findByLabelText('Page change announcements');
     expect(announcer.textContent).toContain('A');
 
-    act(() => {
-      breadcrumbs$.next([{ text: 'B' }]);
-    });
-
     rerender(
       <HeaderPageAnnouncer
-        breadcrumbs$={breadcrumbs$}
+        breadcrumbs={[{ text: 'B' }]}
         customBranding$={createBranding$({ pageTitle: 'Brand' })}
       />
     );
@@ -77,7 +71,7 @@ describe('HeaderPageAnnouncer', () => {
   it('renders skip link', () => {
     const { getByText } = render(
       <HeaderPageAnnouncer
-        breadcrumbs$={createBreadcrumbs$([{ text: 'Test' }])}
+        breadcrumbs={[{ text: 'Test' }]}
         customBranding$={createBranding$({})}
       />
     );
@@ -87,7 +81,7 @@ describe('HeaderPageAnnouncer', () => {
   it('focuses skip link on TAB when shouldHandlingTab is true', () => {
     const { getByTestId } = render(
       <HeaderPageAnnouncer
-        breadcrumbs$={createBreadcrumbs$([{ text: 'Test' }])}
+        breadcrumbs={[{ text: 'Test' }]}
         customBranding$={createBranding$({})}
       />
     );
@@ -102,7 +96,7 @@ describe('HeaderPageAnnouncer', () => {
     const { getByTestId, getByText } = render(
       <>
         <HeaderPageAnnouncer
-          breadcrumbs$={createBreadcrumbs$([{ text: 'Test' }])}
+          breadcrumbs={[{ text: 'Test' }]}
           customBranding$={createBranding$({})}
         />
         <main>
@@ -114,13 +108,11 @@ describe('HeaderPageAnnouncer', () => {
     const skipLink = getByTestId('skipToMainButton');
     const mainButton = getByText('Button in main');
 
-    // Focus an element within main content
     mainButton.focus();
 
     skipLink.focus = jest.fn();
     fireEvent.keyDown(window, { key: 'Tab' });
 
-    // Skip link should NOT be focused when already within main content
     expect(skipLink.focus).not.toHaveBeenCalled();
   });
 
@@ -128,7 +120,7 @@ describe('HeaderPageAnnouncer', () => {
     const { getByTestId, getByText } = render(
       <>
         <HeaderPageAnnouncer
-          breadcrumbs$={createBreadcrumbs$([{ text: 'Test' }])}
+          breadcrumbs={[{ text: 'Test' }]}
           customBranding$={createBranding$({})}
         />
         <div role="main">
@@ -140,13 +132,11 @@ describe('HeaderPageAnnouncer', () => {
     const skipLink = getByTestId('skipToMainButton');
     const mainButton = getByText('Button in main');
 
-    // Focus an element within main content
     mainButton.focus();
 
     skipLink.focus = jest.fn();
     fireEvent.keyDown(window, { key: 'Tab' });
 
-    // Skip link should NOT be focused when already within main content
     expect(skipLink.focus).not.toHaveBeenCalled();
   });
 });

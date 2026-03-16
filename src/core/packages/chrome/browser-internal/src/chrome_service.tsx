@@ -179,8 +179,6 @@ export class ChromeService {
     const navLinks$ = navLinks.getNavLinks$();
     const navigation$ = projectNavigation.getNavigation$();
     const loadingCount$ = http.getLoadingCount$();
-    const recentlyAccessed$ = recentlyAccessed.get$();
-
     // 7. Build component deps (consumed by ChromeComponentsProvider in the layout service)
     const componentDeps: ChromeComponentsDeps = {
       application,
@@ -191,11 +189,6 @@ export class ChromeService {
         center$: navControls.getCenter$(),
         right$: navControls.getRight$(),
         extension$: navControls.getExtension$(),
-      },
-      classic: {
-        breadcrumbs$: state.breadcrumbs.classic.$,
-        recentlyAccessed$,
-        customNavLink$: state.customNavLink.$,
       },
       project: {
         breadcrumbs$: projectNavigation.getProjectBreadcrumbs$(),

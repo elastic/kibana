@@ -8,8 +8,10 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
 import { ClassicHeader } from './header';
 
@@ -22,8 +24,27 @@ describe('Header', () => {
 
   it('renders', () => {
     const deps = createMockChromeComponentsDeps();
+    const chrome = chromeServiceMock.createStartContract();
 
-    deps.classic.breadcrumbs$.next([{ text: 'test' }]);
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
+    chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs$);
+    chrome.getBreadcrumbs.mockReturnValue([{ text: 'test' }]);
+
+    const customNavLink$ = new BehaviorSubject({
+      id: 'cloud-deployment-link',
+      title: 'Manage cloud deployment',
+      baseUrl: '',
+      url: '',
+      href: '',
+      visibleIn: ['globalSearch' as const],
+    });
+    chrome.getCustomNavLink$.mockReturnValue(customNavLink$);
+
+    const recentlyAccessed$ = new BehaviorSubject([
+      { link: '', label: 'dashboard', id: 'dashboard' },
+    ]);
+    chrome.recentlyAccessed.get$.mockReturnValue(recentlyAccessed$);
+
     deps.navLinks$.next([
       {
         id: 'kibana',
@@ -34,18 +55,9 @@ describe('Header', () => {
         visibleIn: ['globalSearch' as const],
       },
     ]);
-    deps.classic.customNavLink$.next({
-      id: 'cloud-deployment-link',
-      title: 'Manage cloud deployment',
-      baseUrl: '',
-      url: '',
-      href: '',
-      visibleIn: ['globalSearch' as const],
-    });
-    deps.classic.recentlyAccessed$.next([{ link: '', label: 'dashboard', id: 'dashboard' }]);
 
     const component = mountWithIntl(
-      <TestChromeProviders deps={deps}>
+      <TestChromeProviders deps={deps} chrome={chrome}>
         <ClassicHeader />
       </TestChromeProviders>
     );

@@ -21,12 +21,11 @@ const DEFAULT_BRAND = 'Elastic'; // This may need to be DRYed out with https://g
 const SEPARATOR = ' - ';
 
 export const HeaderPageAnnouncer: FC<{
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  breadcrumbs: ChromeBreadcrumb[];
   customBranding$: Observable<CustomBranding>;
-}> = ({ breadcrumbs$, customBranding$ }) => {
+}> = ({ breadcrumbs, customBranding$ }) => {
   const [routeTitle, setRouteTitle] = useState('');
   const branding = useObservable(customBranding$)?.pageTitle || DEFAULT_BRAND;
-  const breadcrumbs = useObservable(breadcrumbs$, []);
   const skipLinkRef = useRef<HTMLAnchorElement | null>(null);
   const [shouldHandleTab, setShouldHandleTab] = useState<boolean>(false);
 

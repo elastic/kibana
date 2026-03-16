@@ -15,7 +15,6 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
 import type {
   ChromeSetup,
   ChromeStart,
@@ -58,13 +57,6 @@ interface NavControlsObservables {
   extension$: Observable<ChromeNavControl[]>;
 }
 
-interface ClassicChromeObservables {
-  /** User-set breadcrumbs via {@link ChromeStart.setBreadcrumbs}. */
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  recentlyAccessed$: Observable<RecentlyAccessedHistoryItem[]>;
-  customNavLink$: Observable<ChromeNavLink | undefined>;
-}
-
 interface ProjectChromeObservables {
   /** Auto-generated breadcrumbs derived from the active nav tree node. */
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
@@ -81,8 +73,6 @@ export interface ChromeComponentsDeps {
   basePath: HttpStart['basePath'];
   docLinks: DocLinksStart;
   navControls: NavControlsObservables;
-  /** Classic-layout-specific chrome state. */
-  classic: ClassicChromeObservables;
   /** Project/solution-layout-specific chrome state. */
   project: ProjectChromeObservables;
   loadingCount$: Observable<number>;

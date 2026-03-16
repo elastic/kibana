@@ -18,6 +18,5 @@
     "@kbn/core-custom-branding-common",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-mount-utils-browser",
-    "@kbn/recently-accessed",
   ]
 }

@@ -28,6 +28,7 @@ import { HeaderHelpMenu } from '../shared/header_help_menu';
 import { HeaderNavControls } from '../shared/header_nav_controls';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
+import { useProjectBreadcrumbs } from '../shared/chrome_hooks';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
@@ -166,6 +167,7 @@ export const ProjectHeader = () => {
     project,
   } = useChromeComponentsDeps();
 
+  const breadcrumbs = useProjectBreadcrumbs();
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
@@ -185,7 +187,7 @@ export const ProjectHeader = () => {
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               <EuiHeaderSectionItem>
                 <HeaderPageAnnouncer
-                  breadcrumbs$={project.breadcrumbs$}
+                  breadcrumbs={breadcrumbs}
                   customBranding$={customBranding$}
                 />
                 <Logo logoCss={logoCss} />

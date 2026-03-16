@@ -36,11 +36,6 @@ const mockComponentDeps = {
   basePath: {} as ChromeComponentsDeps['basePath'],
   docLinks: {} as ChromeComponentsDeps['docLinks'],
   navControls: { left$: of([]), center$: of([]), right$: of([]), extension$: of([]) },
-  classic: {
-    breadcrumbs$: of([]),
-    recentlyAccessed$: of([]),
-    customNavLink$: of(undefined),
-  },
   project: { breadcrumbs$: of([]), homeHref$: of('/'), navigation$: of({} as any) },
   loadingCount$: of(0),
   navLinks$: of([]),
