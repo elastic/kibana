@@ -10,9 +10,34 @@ import { Link } from 'react-router-dom-v5-compat';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 import { appPaths } from '../../../../utils/app_paths';
 import { getAgentIdFromPath } from '../get_sidebar_view';
+
+const labels = {
+  back: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.back', {
+    defaultMessage: '← Back',
+  }),
+  title: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.title', {
+    defaultMessage: 'Agent Settings',
+  }),
+  instructions: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.instructions', {
+    defaultMessage: 'Instructions',
+  }),
+  skills: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.skills', {
+    defaultMessage: 'Skills',
+  }),
+  tools: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.tools', {
+    defaultMessage: 'Tools',
+  }),
+  plugins: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.plugins', {
+    defaultMessage: 'Plugins',
+  }),
+  connectors: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.connectors', {
+    defaultMessage: 'Connectors',
+  }),
+};
 
 interface AgentSettingsSidebarViewProps {
   pathname: string;
@@ -39,18 +64,18 @@ export const AgentSettingsSidebarView: React.FC<AgentSettingsSidebarViewProps> =
   const isActive = (path: string) => pathname === path;
 
   const navItems = [
-    { label: 'Instructions', path: appPaths.agent.instructions({ agentId }) },
-    { label: 'Skills', path: appPaths.agent.skills({ agentId }) },
-    { label: 'Tools', path: appPaths.agent.tools({ agentId }) },
-    { label: 'Plugins', path: appPaths.agent.plugins({ agentId }) },
-    { label: 'Connectors', path: appPaths.agent.connectors({ agentId }) },
+    { label: labels.instructions, path: appPaths.agent.instructions({ agentId }) },
+    { label: labels.skills, path: appPaths.agent.skills({ agentId }) },
+    { label: labels.tools, path: appPaths.agent.tools({ agentId }) },
+    { label: labels.plugins, path: appPaths.agent.plugins({ agentId }) },
+    { label: labels.connectors, path: appPaths.agent.connectors({ agentId }) },
   ];
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
         <Link to={appPaths.agent.root({ agentId })} css={linkStyles}>
-          <EuiText size="s">← Back</EuiText>
+          <EuiText size="s">{labels.back}</EuiText>
         </Link>
       </EuiFlexItem>
 
@@ -58,7 +83,7 @@ export const AgentSettingsSidebarView: React.FC<AgentSettingsSidebarViewProps> =
 
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
-          <strong>Agent Settings</strong>
+          <strong>{labels.title}</strong>
         </EuiText>
       </EuiFlexItem>
 

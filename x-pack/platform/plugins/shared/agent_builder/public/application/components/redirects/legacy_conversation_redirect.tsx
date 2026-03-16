@@ -31,12 +31,7 @@ export const LegacyConversationRedirect: React.FC = () => {
     isError,
   } = useQuery({
     queryKey: ['conversation-redirect', conversationId],
-    queryFn: () => {
-      if (!conversationId || isNewConversation) {
-        return Promise.resolve(null);
-      }
-      return conversationsService.get({ conversationId });
-    },
+    queryFn: () => conversationsService.get({ conversationId: conversationId! }),
     enabled: !isNewConversation,
     retry: false,
   });

@@ -17,12 +17,34 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { appPaths } from '../../../../utils/app_paths';
 import { getAgentIdFromPath } from '../get_sidebar_view';
 import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
 import { storageKeys } from '../../../../storage_keys';
+
+const labels = {
+  agentLabel: i18n.translate('xpack.agentBuilder.sidebar.conversation.agentLabel', {
+    defaultMessage: 'Agent',
+  }),
+  selectAgent: i18n.translate('xpack.agentBuilder.sidebar.conversation.selectAgent', {
+    defaultMessage: 'Select agent',
+  }),
+  customize: i18n.translate('xpack.agentBuilder.sidebar.conversation.customize', {
+    defaultMessage: 'Customize',
+  }),
+  conversationsTitle: i18n.translate('xpack.agentBuilder.sidebar.conversation.conversationsTitle', {
+    defaultMessage: 'Conversations',
+  }),
+  newConversation: i18n.translate('xpack.agentBuilder.sidebar.conversation.newConversation', {
+    defaultMessage: '+ New conversation',
+  }),
+  manageComponents: i18n.translate('xpack.agentBuilder.sidebar.conversation.manageComponents', {
+    defaultMessage: 'Manage components',
+  }),
+};
 
 interface ConversationSidebarViewProps {
   pathname: string;
@@ -60,7 +82,7 @@ export const ConversationSidebarView: React.FC<ConversationSidebarViewProps> = (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
-          <strong>Agent</strong>
+          <strong>{labels.agentLabel}</strong>
         </EuiText>
         {isLoading ? (
           <EuiLoadingSpinner size="s" />
@@ -70,14 +92,14 @@ export const ConversationSidebarView: React.FC<ConversationSidebarViewProps> = (
             options={agentOptions}
             value={agentId}
             onChange={handleAgentChange}
-            aria-label="Select agent"
+            aria-label={labels.selectAgent}
           />
         )}
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <Link to={appPaths.agent.skills({ agentId })} css={linkStyles}>
-          <EuiText size="s">Customize</EuiText>
+          <EuiText size="s">{labels.customize}</EuiText>
         </Link>
       </EuiFlexItem>
 
@@ -85,13 +107,13 @@ export const ConversationSidebarView: React.FC<ConversationSidebarViewProps> = (
 
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
-          <strong>Conversations</strong>
+          <strong>{labels.conversationsTitle}</strong>
         </EuiText>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <Link to={appPaths.agent.root({ agentId })} css={linkStyles}>
-          <EuiText size="s">+ New conversation</EuiText>
+          <EuiText size="s">{labels.newConversation}</EuiText>
         </Link>
       </EuiFlexItem>
 
@@ -99,7 +121,7 @@ export const ConversationSidebarView: React.FC<ConversationSidebarViewProps> = (
 
       <EuiFlexItem grow={false}>
         <Link to={appPaths.manage.agents} css={linkStyles}>
-          <EuiText size="s">Manage components</EuiText>
+          <EuiText size="s">{labels.manageComponents}</EuiText>
         </Link>
       </EuiFlexItem>
     </EuiFlexGroup>

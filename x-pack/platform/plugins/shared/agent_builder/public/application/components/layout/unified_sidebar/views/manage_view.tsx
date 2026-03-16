@@ -10,9 +10,34 @@ import { Link } from 'react-router-dom-v5-compat';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 import { appPaths } from '../../../../utils/app_paths';
 import { useLastAgentId } from '../../../../hooks/use_last_agent_id';
+
+const labels = {
+  back: i18n.translate('xpack.agentBuilder.sidebar.manage.back', {
+    defaultMessage: '← Back',
+  }),
+  title: i18n.translate('xpack.agentBuilder.sidebar.manage.title', {
+    defaultMessage: 'Manage Components',
+  }),
+  agents: i18n.translate('xpack.agentBuilder.sidebar.manage.agents', {
+    defaultMessage: 'Agents',
+  }),
+  tools: i18n.translate('xpack.agentBuilder.sidebar.manage.tools', {
+    defaultMessage: 'Tools',
+  }),
+  skills: i18n.translate('xpack.agentBuilder.sidebar.manage.skills', {
+    defaultMessage: 'Skills',
+  }),
+  plugins: i18n.translate('xpack.agentBuilder.sidebar.manage.plugins', {
+    defaultMessage: 'Plugins',
+  }),
+  connectors: i18n.translate('xpack.agentBuilder.sidebar.manage.connectors', {
+    defaultMessage: 'Connectors',
+  }),
+};
 
 interface ManageSidebarViewProps {
   pathname: string;
@@ -39,18 +64,18 @@ export const ManageSidebarView: React.FC<ManageSidebarViewProps> = ({ pathname }
   const isActive = (path: string) => pathname.startsWith(path);
 
   const navItems = [
-    { label: 'Agents', path: appPaths.manage.agents },
-    { label: 'Tools', path: appPaths.manage.tools },
-    { label: 'Skills', path: appPaths.manage.skills },
-    { label: 'Plugins', path: appPaths.manage.plugins },
-    { label: 'Connectors', path: appPaths.manage.connectors },
+    { label: labels.agents, path: appPaths.manage.agents },
+    { label: labels.tools, path: appPaths.manage.tools },
+    { label: labels.skills, path: appPaths.manage.skills },
+    { label: labels.plugins, path: appPaths.manage.plugins },
+    { label: labels.connectors, path: appPaths.manage.connectors },
   ];
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
         <Link to={appPaths.agent.root({ agentId: lastAgentId })} css={linkStyles}>
-          <EuiText size="s">← Back</EuiText>
+          <EuiText size="s">{labels.back}</EuiText>
         </Link>
       </EuiFlexItem>
 
@@ -58,7 +83,7 @@ export const ManageSidebarView: React.FC<ManageSidebarViewProps> = ({ pathname }
 
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued">
-          <strong>Manage Components</strong>
+          <strong>{labels.title}</strong>
         </EuiText>
       </EuiFlexItem>
 
