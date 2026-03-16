@@ -177,9 +177,15 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
     convertCamelCasedKeysToSnakeCase<Required<DashboardState>['pinned_panels'][number]>(panel)
   );
 
+  const hasExplicitPinnedPanels =
+    Object.hasOwn(state, 'pinned_panels') && Array.isArray(state.pinned_panels);
+
   return {
     autoApplyFilters:
       autoApplySelections !== DEFAULT_AUTO_APPLY_SELECTIONS ? autoApplySelections : undefined,
-    pinned_panels: standardizedPinnedPanels.length ? standardizedPinnedPanels : undefined,
+    pinned_panels:
+      standardizedPinnedPanels.length || hasExplicitPinnedPanels
+        ? standardizedPinnedPanels
+        : undefined,
   };
 }
