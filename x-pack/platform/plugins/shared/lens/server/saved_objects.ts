@@ -11,6 +11,7 @@ import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import { getEditPath } from '../common/constants';
 import { getAllMigrations } from './migrations/saved_object_migrations';
 import type { CustomVisualizationMigrations } from './migrations/types';
@@ -35,7 +36,7 @@ export function setupSavedObjects(
   customVisualizationMigrations: CustomVisualizationMigrations
 ) {
   core.savedObjects.registerType({
-    name: 'lens',
+    name: LENS_CONTENT_TYPE,
     indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
     hidden: false,
     namespaceType: 'multiple-isolated',

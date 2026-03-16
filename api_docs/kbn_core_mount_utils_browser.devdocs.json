@@ -298,11 +298,11 @@
           },
           {
             "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx"
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts"
           },
           {
             "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser-components/src/context.tsx"
+            "path": "src/core/packages/chrome/browser-internal-types/index.ts"
           },
           {
             "plugin": "@kbn/core",
