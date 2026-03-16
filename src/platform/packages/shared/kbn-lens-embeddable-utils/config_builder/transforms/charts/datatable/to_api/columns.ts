@@ -21,6 +21,11 @@ import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../colum
 import { isMetricColumnESQL, isMetricColumnNoESQL } from '../helpers';
 import { stripUndefined } from '../../utils';
 
+const colorModeToApplyColorTo = (
+  mode: ColumnState['colorMode']
+): 'value' | 'badge' | 'background' =>
+  mode === 'text' ? 'value' : mode === 'badge' ? 'badge' : 'background';
+
 type APIMetricRowCommonProps = Partial<
   Pick<NonNullable<DatatableState['metrics']>[number], 'visible' | 'alignment' | 'width'>
 >;
@@ -44,8 +49,7 @@ function buildColorProps(
   const { colorMode, palette, colorMapping } = column;
   if (!colorMode || colorMode === 'none') return {};
 
-  const applyColorTo =
-    colorMode === 'text' ? 'value' : colorMode === 'badge' ? 'badge' : 'background';
+  const applyColorTo = colorModeToApplyColorTo(colorMode);
 
   // Prefer colorMapping if present, otherwise use palette
   if (colorMapping) {
@@ -108,8 +112,7 @@ function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
     ...buildRowCommonProps(column),
     ...(colorMode && colorMode !== 'none'
       ? {
-          apply_color_to:
-            colorMode === 'text' ? 'value' : colorMode === 'badge' ? 'badge' : 'background',
+          apply_color_to: colorModeToApplyColorTo(colorMode),
           ...(colorMapping || palette
             ? { color: fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput) }
             : {}),

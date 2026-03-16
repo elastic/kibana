@@ -43,6 +43,33 @@ const idPrefix = htmlIdGenerator()();
 
 type ColumnType = DatatableVisualizationState['columns'][number];
 
+const dynamicColorModeOptions: Array<EuiComboBoxOptionOption<ColumnType['colorMode']>> = [
+  {
+    value: 'none',
+    label: i18n.translate('xpack.lens.table.dynamicColoring.none', {
+      defaultMessage: 'None',
+    }),
+  },
+  {
+    value: 'cell',
+    label: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
+      defaultMessage: 'Cell',
+    }),
+  },
+  {
+    value: 'text',
+    label: i18n.translate('xpack.lens.table.dynamicColoring.text', {
+      defaultMessage: 'Text',
+    }),
+  },
+  {
+    value: 'badge',
+    label: i18n.translate('xpack.lens.table.dynamicColoring.badge', {
+      defaultMessage: 'Badge',
+    }),
+  },
+];
+
 function updateColumn(
   state: DatatableVisualizationState,
   columnId: string,
@@ -101,33 +128,6 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
-
-  const dynamicColorModeOptions: Array<EuiComboBoxOptionOption<ColumnType['colorMode']>> = [
-    {
-      value: 'none',
-      label: i18n.translate('xpack.lens.table.dynamicColoring.none', {
-        defaultMessage: 'None',
-      }),
-    },
-    {
-      value: 'cell',
-      label: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
-        defaultMessage: 'Cell',
-      }),
-    },
-    {
-      value: 'text',
-      label: i18n.translate('xpack.lens.table.dynamicColoring.text', {
-        defaultMessage: 'Text',
-      }),
-    },
-    {
-      value: 'badge',
-      label: i18n.translate('xpack.lens.table.dynamicColoring.badge', {
-        defaultMessage: 'Badge',
-      }),
-    },
-  ];
 
   const selectedDynamicColorModeOption =
     dynamicColorModeOptions.find((option) => option.value === currentColorMode) ??

@@ -475,7 +475,7 @@ describe('Datatable Visualization', () => {
           };
         });
 
-        it.each<ColumnState['colorMode']>(['cell', 'text'])(
+        it.each<ColumnState['colorMode']>(['cell', 'text', 'badge'])(
           'should include palette if colorMode is %s and has stops',
           (colorMode) => {
             params.state.columns[0].colorMode = colorMode;
@@ -485,7 +485,7 @@ describe('Datatable Visualization', () => {
           }
         );
 
-        it.each<ColumnState['colorMode']>(['cell', 'text'])(
+        it.each<ColumnState['colorMode']>(['cell', 'text', 'badge'])(
           'should not include palette if colorMode is %s but stops is empty',
           (colorMode) => {
             (getPaletteDisplayColors as jest.Mock).mockReturnValue([]);
@@ -524,7 +524,7 @@ describe('Datatable Visualization', () => {
           };
         });
 
-        it.each<ColumnState['colorMode']>(['cell', 'text'])(
+        it.each<ColumnState['colorMode']>(['cell', 'text', 'badge'])(
           'should include palette if colorMode is %s and has stops',
           (colorMode) => {
             params.state.columns[0].colorMode = colorMode;
@@ -534,7 +534,7 @@ describe('Datatable Visualization', () => {
           }
         );
 
-        it.each<ColumnState['colorMode']>(['cell', 'text'])(
+        it.each<ColumnState['colorMode']>(['cell', 'text', 'badge'])(
           'should not include palette if colorMode is %s but stops is empty',
           (colorMode) => {
             (getPaletteDisplayColors as jest.Mock).mockReturnValue([]);
@@ -981,7 +981,7 @@ describe('Datatable Visualization', () => {
         name: 'default',
       };
       const colorExpressionTableState = (
-        colorMode?: 'cell' | 'text' | 'none'
+        colorMode?: 'cell' | 'text' | 'badge' | 'none'
       ): DatatableVisualizationState => ({
         ...defaultExpressionTableState,
         columns: [{ columnId: 'b', colorMapping, palette, colorMode }],
@@ -1011,7 +1011,7 @@ describe('Datatable Visualization', () => {
         }
       );
 
-      describe.each<'cell' | 'text' | 'none' | undefined>(['cell', 'text', 'none', undefined])(
+      describe.each<'cell' | 'text' | 'badge' | 'none' | undefined>(['cell', 'text', 'badge', 'none', undefined])(
         'colorMode - %s',
         (colorMode) => {
           it.each<{ dataType: DataType; disallowed?: boolean }>([

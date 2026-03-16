@@ -15,6 +15,7 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DatatableArgs } from '../../../../common/expressions';
 import type { DataContextType } from './types';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('datatable cell renderer', () => {
   const innerCellColorFnMock = jest.fn().mockReturnValue('blue');
@@ -281,6 +282,18 @@ describe('datatable cell renderer', () => {
 
       expect(screen.getByText('formatted 123')).toBeInTheDocument();
       expect(setCellProps).not.toHaveBeenCalled();
+    });
+
+    it('should invoke handleFilterClick when badge with oneClickFilter is clicked', async () => {
+      const handleFilterClick = jest.fn();
+      const columnConfig = getColumnConfiguration();
+      columnConfig.columns[0].colorMode = 'badge';
+      columnConfig.columns[0].oneClickFilter = true;
+
+      renderCellComponent(columnConfig, { handleFilterClick });
+
+      await userEvent.click(screen.getByText('formatted 123'));
+      expect(handleFilterClick).toHaveBeenCalledWith('a', 123, 0, 0);
     });
 
     it('should not color the cell when color function returns null', () => {
