@@ -37,6 +37,8 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
   - '@kbn/esql-language'
+  - '@kbn/datemath'
+  - '@kbn/es-query'
 tags:
   - shared-server
   - package
