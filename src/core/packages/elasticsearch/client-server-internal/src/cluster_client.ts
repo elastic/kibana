@@ -53,6 +53,7 @@ const noop = () => undefined;
  */
 export type OnRequestHandlerFactory = (opts: {
   projectRouting: 'origin-only' | 'all' | ScopeableUrlRequest;
+  logger: Logger;
 }) => OnRequestHandler;
 
 /** @internal **/
@@ -62,6 +63,7 @@ export class ClusterClient implements ICustomClusterClient {
   private readonly security?: InternalSecurityServiceSetup;
   private readonly rootScopedClient: Client;
   private readonly kibanaVersion: string;
+  private readonly logger: Logger;
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
   private readonly onRequestHandlerFactory: OnRequestHandlerFactory;
@@ -96,11 +98,15 @@ export class ClusterClient implements ICustomClusterClient {
     this.authHeaders = authHeaders;
     this.security = security;
     this.kibanaVersion = kibanaVersion;
+    this.logger = logger;
     this.getExecutionContext = getExecutionContext;
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
     this.onRequestHandlerFactory = onRequestHandlerFactory;
 
-    const internalUserOnRequest = onRequestHandlerFactory({ projectRouting: 'origin-only' });
+    const internalUserOnRequest = onRequestHandlerFactory({
+      projectRouting: 'origin-only',
+      logger,
+    });
 
     this.asInternalUser = configureClient(config, {
       logger,
@@ -135,11 +141,12 @@ export class ClusterClient implements ICustomClusterClient {
         scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
-        onRequest: this.onRequestHandlerFactory(
-          projectRouting === 'space'
-            ? { projectRouting: request as ScopeableUrlRequest }
-            : { projectRouting }
-        ),
+        onRequest: this.onRequestHandlerFactory({
+          projectRouting:
+            projectRouting === 'space' ? (request as ScopeableUrlRequest) : projectRouting,
+          logger: this.logger,
+        }),
+        logger: this.logger,
       });
 
       // TODO: callers who pass { Transport: CustomTransport } to child() bypass our

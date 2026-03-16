@@ -111,7 +111,9 @@ enabled:
   - src/platform/test/functional/apps/visualize/group4/config.ts
   - src/platform/test/functional/apps/visualize/group5/config.ts
   - src/platform/test/functional/apps/visualize/group6/config.ts
-  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/config.ts
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/group1/config.ts
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/group2/config.ts
+  - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types/group3/config.ts
   - src/platform/test/functional/config.ccs.ts
   - src/platform/test/functional/firefox/console.config.ts
   - src/platform/test/functional/firefox/dashboard.config.ts
@@ -406,6 +408,7 @@ enabled:
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/platform/test/api_integration/apis/osquery/config.ts
   - x-pack/platform/test/api_integration/apis/search/config.ts
+  - x-pack/platform/test/api_integration/apis/search_inference_endpoints/config.ts
   - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
   - x-pack/platform/test/api_integration/apis/spaces/config.ts

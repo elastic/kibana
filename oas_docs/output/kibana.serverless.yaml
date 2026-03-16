@@ -3409,7 +3409,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new user-defined skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Create a new user-defined skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: post-agent-builder-skills
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3488,7 +3488,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: delete-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3545,7 +3545,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing user-created skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Update an existing user-created skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: put-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -18305,7 +18305,9 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Download a file associated with a response action.
+        Download a file associated with a response action. Files are downloaded in a password-protected `.zip` archive to prevent the file from running. Use password `elastic` to open the `.zip` in a safe environment.
+        > info
+        > Files retrieved from third-party-protected hosts require a different password. Refer to [Third-party response actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions) for your system's password.
       operationId: EndpointFileDownload
       parameters:
         - in: path
@@ -59064,6 +59066,7 @@ paths:
                         required:
                           - type
                           - id
+                      maxItems: 100
                       type: array
                 includeReferencesDeep:
                   default: false
@@ -59092,6 +59095,7 @@ paths:
                     - type: string
                     - items:
                         type: string
+                      maxItems: 100
                       type: array
                   description: The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.
       responses:
@@ -62171,6 +62175,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62195,6 +62201,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62263,6 +62270,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62287,6 +62296,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62362,6 +62372,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62386,6 +62398,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62454,6 +62467,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62478,6 +62493,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62553,6 +62569,8 @@ paths:
                           items:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -62577,6 +62595,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                           type: array
                         rules:
@@ -63493,6 +63512,8 @@ paths:
                           index:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -63517,6 +63538,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                         required:
                           - index
@@ -63624,6 +63646,9 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                description:
+                  default: ''
+                  type: string
                 esql:
                   additionalProperties: false
                   type: object
@@ -83031,6 +83056,11 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entitySourceIds:
+          description: List of entity source IDs associated with the watchlist
+          items:
+            type: string
+          type: array
         id:
           description: The unique ID of the watchlist
           type: string
