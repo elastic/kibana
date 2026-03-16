@@ -21,9 +21,10 @@ type CommonProps = Pick<
   | 'services'
   | 'onSave'
   | 'entityName'
+  | 'flyoutTitle'
+  | 'flyoutTitleId'
   | 'customValidators'
   | 'appendRows'
-  | 'flyoutTitleId'
 >;
 
 export type Props = CommonProps;

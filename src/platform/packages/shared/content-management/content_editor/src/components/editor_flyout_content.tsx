@@ -39,6 +39,7 @@ const getI18nTexts = ({ entityName }: { entityName: string }) => ({
 export interface Props {
   item: Item;
   entityName: string;
+  flyoutTitle: string;
   flyoutTitleId: string;
   isReadonly?: boolean;
   readonlyReason?: string;
@@ -53,12 +54,10 @@ export interface Props {
   appendRows?: React.ReactNode;
 }
 
-const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
-
 export const ContentEditorFlyoutContent: FC<Props> = ({
   item,
   entityName,
-  flyoutTitleId,
+  flyoutTitle,
   isReadonly = true,
   readonlyReason,
   services: { TagSelector, TagList, notifyError },
@@ -120,19 +119,11 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
     setIsSubmitted(true);
   }, [onSave, item.id, form, notifyError, entityName]);
 
-  const title = capitalize(
-    i18n.translate('contentManagement.contentEditor.flyoutTitle', {
-      defaultMessage: '{entityName} details',
-      values: {
-        entityName,
-      },
-    })
-  );
   return (
     <>
       <EuiFlyoutHeader>
         <EuiTitle data-test-subj="flyoutTitle">
-          <h2 id={flyoutTitleId}>{title}</h2>
+          <h2>{flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

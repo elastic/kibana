@@ -17,6 +17,18 @@ import { useServices } from './services';
 import { ContentEditorLoader } from './components';
 import type { ContentEditorFlyoutContentContainerProps } from './components';
 
+const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
+
+const getFlyoutTitle = ({ entityName }: { entityName: string }) =>
+  capitalize(
+    i18n.translate('contentManagement.contentEditor.flyoutTitle', {
+      defaultMessage: '{entityName} details',
+      values: {
+        entityName,
+      },
+    })
+  );
+
 export type OpenContentEditorParams = Pick<
   ContentEditorFlyoutContentContainerProps,
   | 'item'
@@ -45,18 +57,18 @@ export function useOpenContentEditor() {
         flyout.current?.close();
       };
 
+      const flyoutTitle = getFlyoutTitle({ entityName: args.entityName });
+
       flyout.current = openSystemFlyout(
-        <ContentEditorLoader {...args} flyoutTitleId={flyoutTitleId} services={services} />,
+        <ContentEditorLoader
+          {...args}
+          flyoutTitle={flyoutTitle}
+          flyoutTitleId={flyoutTitleId}
+          services={services}
+        />,
         {
           'aria-labelledby': flyoutTitleId,
-          title: args.entityName
-            ? i18n.translate('contentManagement.contentEditor.editFlyoutTitle', {
-                defaultMessage: 'Edit {entityName}',
-                values: { entityName: args.entityName },
-              })
-            : i18n.translate('contentManagement.contentEditor.editItemFlyoutTitle', {
-                defaultMessage: 'Edit item',
-              }),
+          title: flyoutTitle,
           maxWidth: 600,
           size: 'm',
           ownFocus: true,
