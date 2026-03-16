@@ -167,6 +167,7 @@ export const ImportExceptionListFlyout = React.memo(
               if (err.error.message.includes('already exists')) {
                 setAlreadyExistingItem(true);
                 if (
+                  !isEndpointExceptionsMovedFFEnabled &&
                   err.error.message.includes(
                     `Found that list_id: "${ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id}" already exists`
                   )
@@ -187,7 +188,9 @@ export const ImportExceptionListFlyout = React.memo(
       importExceptionListState.loading,
       importExceptionListState?.result,
       importExceptionListState?.result?.errors,
+      isEndpointExceptionsMovedFFEnabled,
     ]);
+
     const handleFileChange = useCallback((inputFiles: FileList | null) => {
       setFiles(inputFiles ?? null);
     }, []);
@@ -235,22 +238,35 @@ export const ImportExceptionListFlyout = React.memo(
                   setAsNewList(false);
                 }}
               />
-              <EuiToolTip
-                position="bottom"
-                content={endpointListImporting ? i18n.IMPORT_EXCEPTION_ENDPOINT_LIST_WARNING : ''}
-              >
+              {isEndpointExceptionsMovedFFEnabled ? (
                 <EuiCheckbox
                   id={'createNewListCheckbox'}
                   label={i18n.IMPORT_EXCEPTION_LIST_AS_NEW_LIST}
                   data-test-subj="importExceptionListCreateNewCheckbox"
                   checked={asNewList}
-                  disabled={endpointListImporting}
                   onChange={(e) => {
                     setAsNewList(!asNewList);
                     setOverwrite(false);
                   }}
                 />
-              </EuiToolTip>
+              ) : (
+                <EuiToolTip
+                  position="bottom"
+                  content={endpointListImporting ? i18n.IMPORT_EXCEPTION_ENDPOINT_LIST_WARNING : ''}
+                >
+                  <EuiCheckbox
+                    id={'createNewListCheckbox'}
+                    label={i18n.IMPORT_EXCEPTION_LIST_AS_NEW_LIST}
+                    data-test-subj="importExceptionListCreateNewCheckbox"
+                    checked={asNewList}
+                    disabled={endpointListImporting}
+                    onChange={(e) => {
+                      setAsNewList(!asNewList);
+                      setOverwrite(false);
+                    }}
+                  />
+                </EuiToolTip>
+              )}
             </>
           )}
         </EuiFlyoutBody>
