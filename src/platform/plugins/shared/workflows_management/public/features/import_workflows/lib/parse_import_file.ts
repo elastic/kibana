@@ -112,6 +112,12 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
     rawWorkflows.push({ id, yaml });
   }
 
+  if (manifestParsed.data.exportedCount !== workflows.length) {
+    parseErrors.push(
+      `Manifest declares ${manifestParsed.data.exportedCount} workflows but ${workflows.length} were parsed`
+    );
+  }
+
   return {
     format: 'zip',
     totalWorkflows: workflows.length,
@@ -123,6 +129,12 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
 }
 
 function parseYamlFile(content: string, filename: string): ClientPreflightResult {
+  if (content.length > MAX_WORKFLOW_YAML_LENGTH) {
+    throw new Error(
+      `File exceeds the maximum YAML length of ${MAX_WORKFLOW_YAML_LENGTH} characters`
+    );
+  }
+
   const ext = filename.lastIndexOf('.') !== -1 ? filename.slice(filename.lastIndexOf('.')) : '.yml';
   const id = filename.slice(0, filename.length - ext.length) || 'workflow';
 

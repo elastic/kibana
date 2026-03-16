@@ -44,9 +44,17 @@ export function parseYamlToJSONWithoutValidation(
   const doc = parseDocument(yamlString);
 
   try {
+    const js: unknown = doc.toJS({ mapAsMap: false, maxAliasCount: 100 });
+    if (js == null || typeof js !== 'object' || Array.isArray(js)) {
+      return {
+        success: false,
+        error: new Error('YAML root must be a mapping'),
+        document: doc,
+      };
+    }
     return {
       success: true,
-      json: doc.toJS({ mapAsMap: false, maxAliasCount: 100 }) as Record<string, unknown>,
+      json: js as Record<string, unknown>,
       document: doc,
     };
   } catch (error) {

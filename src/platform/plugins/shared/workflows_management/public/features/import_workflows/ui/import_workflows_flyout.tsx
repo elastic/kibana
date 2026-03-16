@@ -32,7 +32,6 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowPreview } from '../../../../common/lib/export';
-import type { WorkflowTrigger } from '../../../../common/lib/trigger_types';
 import type {
   ImportWorkflowsResult,
   PreflightImportResult,
@@ -229,6 +228,10 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
 
   const importStatusMap = useMemo(() => {
     if (!importResult || !preflightResult) return new Map<string, 'success' | 'failed'>();
+    // `failed[].index` corresponds to the position in the workflows array sent
+    // to `_bulk_create`, which preserves the same order as
+    // `preflightResult.workflows` (both derived from the same parsed input via
+    // `rawWorkflows`). `generateNewIds` rewrites IDs but preserves ordering.
     const failedIndices = new Set(importResult.failed.map((f) => f.index));
     const map = new Map<string, 'success' | 'failed'>();
     preflightResult.workflows.forEach((w, idx) => {
@@ -289,7 +292,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
           defaultMessage: 'Triggers',
         }),
         render: (triggers: WorkflowPreview['triggers']) => (
-          <WorkflowsTriggersList triggers={triggers as WorkflowTrigger[]} />
+          <WorkflowsTriggersList triggers={triggers} />
         ),
         width: '25%',
       },

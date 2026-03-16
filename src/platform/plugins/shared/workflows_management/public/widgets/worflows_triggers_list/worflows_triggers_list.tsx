@@ -13,11 +13,10 @@ import React, { Suspense } from 'react';
 import { isTriggerType } from '@kbn/workflows';
 import { PopoverItems } from './popover_items';
 import * as i18n from '../../../common/translations';
-import type { WorkflowTrigger } from '../../../common/lib/trigger_types';
 import { triggerSchemas } from '../../trigger_schemas';
 
 interface WorkflowsTriggersListProps {
-  triggers: WorkflowTrigger[];
+  triggers: Array<{ type: string }>;
 }
 
 const TRIGGERS_ICONS: Record<string, string> = {

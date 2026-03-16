@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isRecord } from '../type_guards';
 import { parseYamlToJSONWithoutValidation } from '../yaml/parse_workflow_yaml_to_json_without_validation';
 
 export interface WorkflowPreview {
@@ -19,16 +20,12 @@ export interface WorkflowPreview {
   valid: boolean;
 }
 
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
 function extractTriggers(raw: unknown): Array<{ type: string }> {
   if (!Array.isArray(raw)) {
     return [];
   }
   return raw
-    .filter((t): t is { type: string } => isObject(t) && typeof t.type === 'string')
+    .filter((t): t is { type: string } => isRecord(t) && typeof t.type === 'string')
     .map((t) => ({ type: t.type }));
 }
 
@@ -36,9 +33,9 @@ function countInputs(raw: unknown): number {
   if (Array.isArray(raw)) {
     return raw.length;
   }
-  if (isObject(raw) && 'properties' in raw) {
+  if (isRecord(raw) && 'properties' in raw) {
     const props = raw.properties;
-    if (isObject(props)) {
+    if (isRecord(props)) {
       return Object.keys(props).length;
     }
   }

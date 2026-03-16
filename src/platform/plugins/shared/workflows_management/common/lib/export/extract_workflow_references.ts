@@ -10,10 +10,7 @@
 import type { WorkflowYaml } from '@kbn/workflows';
 
 import { WORKFLOW_EXECUTE_TYPES } from './workflow_import_constants';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
+import { isRecord } from '../type_guards';
 
 const isDynamicValue = (value: string): boolean => value.includes('{{');
 
@@ -22,6 +19,7 @@ function collectFromSteps(steps: unknown, ids: Set<string>): void {
 
   for (const step of steps) {
     if (!isRecord(step)) {
+      // eslint-disable-next-line no-continue
       continue;
     }
 
