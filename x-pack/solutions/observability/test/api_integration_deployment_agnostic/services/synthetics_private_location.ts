@@ -33,19 +33,19 @@ export class PrivateLocationTestService {
     return res.body?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
   }
 
-  async installSyntheticsPackage() {
+  async installSyntheticsPackage({ version }: { version?: string } = {}) {
     await this.supertestWithAuth
       .post('/api/fleet/setup')
       .set('kbn-xsrf', 'true')
       .send()
       .expect(200);
-    const version = await this.fetchSyntheticsPackageVersion();
+    const resolvedVersion = version ?? (await this.fetchSyntheticsPackageVersion());
     await this.retry.try(async () => {
       await this.supertestWithAuth
         .delete(`/api/fleet/epm/packages/synthetics`)
         .set('kbn-xsrf', 'true');
       await this.supertestWithAuth
-        .post(`/api/fleet/epm/packages/synthetics/${version}`)
+        .post(`/api/fleet/epm/packages/synthetics/${resolvedVersion}`)
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
