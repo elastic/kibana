@@ -14,7 +14,10 @@ import type {
   ForEachStep,
   IfStep,
   KibanaStep,
+  LoopBreakStep,
+  LoopContinueStep,
   WaitStep,
+  WhileStep,
   WorkflowYaml,
 } from '../../../spec/schema';
 import type {
@@ -27,6 +30,8 @@ import type {
   ExitForeachNode,
   ExitIfNode,
   KibanaGraphNode,
+  LoopBreakNode,
+  LoopContinueNode,
   WaitGraphNode,
 } from '../../types';
 import { convertToWorkflowGraph } from '../build_execution_graph';
@@ -1178,6 +1183,157 @@ describe('convertToWorkflowGraph', () => {
         'exitTryBlock_testForeachConnectorStep',
         'exitContinue_testForeachConnectorStep',
       ]);
+    });
+  });
+
+  describe('loop.break and loop.continue', () => {
+    it('should create loop-break node inside a foreach loop', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'my_loop',
+            type: 'foreach',
+            foreach: '{{ items }}',
+            steps: [
+              { name: 'step_a', type: 'console' } as ConnectorStep,
+              { name: 'stop_early', type: 'loop.break' } as LoopBreakStep,
+            ],
+          } as ForEachStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const graph = convertToWorkflowGraph(workflowDefinition as any);
+      const breakNode = graph.node('stop_early') as LoopBreakNode;
+
+      expect(breakNode).toBeDefined();
+      expect(breakNode.type).toBe('loop-break');
+      expect(breakNode.loopExitNodeId).toBe('exitForeach_my_loop');
+      expect(breakNode.loopStepId).toBe('my_loop');
+    });
+
+    it('should create loop-continue node inside a foreach loop', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'my_loop',
+            type: 'foreach',
+            foreach: '{{ items }}',
+            steps: [
+              { name: 'skip_item', type: 'loop.continue' } as LoopContinueStep,
+              { name: 'step_a', type: 'console' } as ConnectorStep,
+            ],
+          } as ForEachStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const graph = convertToWorkflowGraph(workflowDefinition as any);
+      const continueNode = graph.node('skip_item') as LoopContinueNode;
+
+      expect(continueNode).toBeDefined();
+      expect(continueNode.type).toBe('loop-continue');
+      expect(continueNode.loopExitNodeId).toBe('exitForeach_my_loop');
+    });
+
+    it('should create loop-break node inside a while loop', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'my_while',
+            type: 'while',
+            condition: 'true',
+            steps: [{ name: 'stop_loop', type: 'loop.break' } as LoopBreakStep],
+          } as WhileStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const graph = convertToWorkflowGraph(workflowDefinition as any);
+      const breakNode = graph.node('stop_loop') as LoopBreakNode;
+
+      expect(breakNode).toBeDefined();
+      expect(breakNode.type).toBe('loop-break');
+      expect(breakNode.loopExitNodeId).toBe('exitWhile_my_while');
+      expect(breakNode.loopStepId).toBe('my_while');
+    });
+
+    it('should support conditional loop.break via the generic inline if mechanism', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'my_loop',
+            type: 'foreach',
+            foreach: '{{ items }}',
+            steps: [
+              {
+                name: 'conditional_break',
+                type: 'loop.break',
+                if: 'foreach.item.status : "done"',
+              } as LoopBreakStep,
+            ],
+          } as ForEachStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const graph = convertToWorkflowGraph(workflowDefinition as any);
+
+      const enterIfNode = graph.node('enterCondition_if_conditional_break') as EnterIfNode;
+      expect(enterIfNode).toBeDefined();
+      expect(enterIfNode.type).toBe('enter-if');
+      expect(enterIfNode.configuration).toEqual(
+        expect.objectContaining({ condition: 'foreach.item.status : "done"' })
+      );
+
+      const breakNode = graph.node('conditional_break') as LoopBreakNode;
+      expect(breakNode).toBeDefined();
+      expect(breakNode.type).toBe('loop-break');
+      expect(breakNode.loopExitNodeId).toBe('exitForeach_my_loop');
+    });
+
+    it('should throw when loop.break is used outside a loop', () => {
+      const workflowDefinition = {
+        steps: [{ name: 'break_outside', type: 'loop.break' } as LoopBreakStep],
+      } as Partial<WorkflowYaml>;
+
+      expect(() => convertToWorkflowGraph(workflowDefinition as any)).toThrow(
+        /loop\.break and loop\.continue are only valid inside a loop body/
+      );
+    });
+
+    it('should throw when loop.continue is used outside a loop', () => {
+      const workflowDefinition = {
+        steps: [{ name: 'continue_outside', type: 'loop.continue' } as LoopContinueStep],
+      } as Partial<WorkflowYaml>;
+
+      expect(() => convertToWorkflowGraph(workflowDefinition as any)).toThrow(
+        /loop\.break and loop\.continue are only valid inside a loop body/
+      );
+    });
+
+    it('should target the innermost loop in nested loops', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'outer_loop',
+            type: 'foreach',
+            foreach: '{{ outer_items }}',
+            steps: [
+              {
+                name: 'inner_loop',
+                type: 'foreach',
+                foreach: '{{ inner_items }}',
+                steps: [{ name: 'break_inner', type: 'loop.break' } as LoopBreakStep],
+              } as ForEachStep,
+            ],
+          } as ForEachStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const graph = convertToWorkflowGraph(workflowDefinition as any);
+      const breakNode = graph.node('break_inner') as LoopBreakNode;
+
+      expect(breakNode).toBeDefined();
+      expect(breakNode.type).toBe('loop-break');
+      expect(breakNode.loopExitNodeId).toBe('exitForeach_inner_loop');
+      expect(breakNode.loopStepId).toBe('inner_loop');
     });
   });
 });
