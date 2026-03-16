@@ -21,7 +21,7 @@ import {
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { EDITOR_MARKER } from '../../definitions/constants';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
-import { columnExists, handleFragment } from '../../definitions/utils/autocomplete/helpers';
+import { columnExists, findFinalWord } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import {
@@ -37,6 +37,17 @@ enum FusePosition {
   KEY_BY = 'key_by',
   GROUP_BY = 'group_by',
   WITH = 'with',
+}
+
+const COMMA_SEPARATOR = /,/;
+const WHITESPACE = /\s+/;
+
+function getTrailingKeyByFragment(innerText: string): string {
+  const segments = innerText.split(COMMA_SEPARATOR);
+  const trailingSegment = segments[segments.length - 1] ?? '';
+  const words = trailingSegment.trim().split(WHITESPACE);
+
+  return words[words.length - 1] ?? '';
 }
 
 function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePosition {
@@ -117,28 +128,13 @@ async function scoreByAutocomplete(
     openSuggestions: true,
   });
 
-  const isFragmentComplete = (fragment: string) => columnExists(fragment, context);
-  const getSuggestionsForIncomplete = (
-    _fragment: string,
-    rangeToReplace?: { start: number; end: number }
-  ) => {
-    return (
-      numericFields?.map((suggestion) => {
-        return {
-          ...suggestion,
-          rangeToReplace,
-        };
-      }) ?? []
-    );
-  };
-  const getSuggestionsForComplete = () => [];
+  const prefix = findFinalWord(innerText);
 
-  return await handleFragment(
-    innerText,
-    isFragmentComplete,
-    getSuggestionsForIncomplete,
-    getSuggestionsForComplete
-  );
+  if (prefix && columnExists(prefix, context)) {
+    return [];
+  }
+
+  return numericFields ?? [];
 }
 
 /**
@@ -155,28 +151,13 @@ async function groupByAutocomplete(
     openSuggestions: true,
   });
 
-  const isFragmentComplete = (fragment: string) => columnExists(fragment, context);
-  const getSuggestionsForIncomplete = (
-    _fragment: string,
-    rangeToReplace?: { start: number; end: number }
-  ) => {
-    return (
-      stringFields?.map((suggestion) => {
-        return {
-          ...suggestion,
-          rangeToReplace,
-        };
-      }) ?? []
-    );
-  };
-  const getSuggestionsForComplete = () => [];
+  const prefix = findFinalWord(innerText);
 
-  return await handleFragment(
-    innerText,
-    isFragmentComplete,
-    getSuggestionsForIncomplete,
-    getSuggestionsForComplete
-  );
+  if (prefix && columnExists(prefix, context)) {
+    return [];
+  }
+
+  return stringFields ?? [];
 }
 
 /**
@@ -199,12 +180,9 @@ async function keyByAutocomplete(
     (await callbacks?.getByType?.(ESQL_STRING_TYPES, alreadyUsedFields, {
       openSuggestions: true,
     })) ?? [];
+  const prefix = getTrailingKeyByFragment(innerText);
 
-  const isFragmentComplete = (fragment: string) => columnExists(fragment, context);
-  const getSuggestionsForComplete = (
-    fragment: string,
-    rangeToReplace: { start: number; end: number }
-  ) => {
+  if (prefix && columnExists(prefix, context)) {
     const finalSuggestions = fuseArgumentsAutocomplete(command).map((s) => ({
       ...s,
       text: ` ${s.text}`,
@@ -216,30 +194,13 @@ async function keyByAutocomplete(
     return finalSuggestions.map<ISuggestionItem>((s) =>
       withAutoSuggest({
         ...s,
-        filterText: fragment,
-        text: fragment + s.text,
-        rangeToReplace,
+        preserveTypedPrefix: true,
+        requiresExistingColumnMatch: true,
       })
     );
-  };
-  const getSuggestionsForIncomplete = (
-    _fragment: string,
-    rangeToReplace?: { start: number; end: number }
-  ) => {
-    return allFields.map((suggestion) =>
-      withAutoSuggest({
-        ...suggestion,
-        rangeToReplace,
-      })
-    );
-  };
+  }
 
-  return handleFragment(
-    innerText,
-    isFragmentComplete,
-    getSuggestionsForIncomplete,
-    getSuggestionsForComplete
-  );
+  return allFields.map((suggestion) => withAutoSuggest({ ...suggestion }));
 }
 
 /**

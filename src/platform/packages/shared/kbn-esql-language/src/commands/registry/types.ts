@@ -100,6 +100,16 @@ export interface ISuggestionItem {
    * until there are no more incomplete suggestions returned.
    */
   incomplete?: boolean;
+  /**
+   * Instructs the centralized replacement-range resolver to prepend the currently typed prefix
+   * to this suggestion's text before insertion.
+   */
+  preserveTypedPrefix?: boolean;
+  /**
+   * Instructs the centralized replacement-range resolver to keep this suggestion only when the
+   * currently typed prefix resolves to an existing column in the current command context.
+   */
+  requiresExistingColumnMatch?: boolean;
 }
 
 export type GetColumnsByTypeFn = (

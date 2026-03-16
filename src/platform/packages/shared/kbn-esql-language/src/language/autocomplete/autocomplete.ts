@@ -37,6 +37,7 @@ import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
+import { attachReplacementRanges } from './utils/prefix_range';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
   const sourceCommands = esqlCommandRegistry
@@ -223,7 +224,11 @@ export async function suggest(
       offset,
       hasMinimumLicenseRequired
     );
-    return commandsSpecificSuggestions;
+
+    return attachReplacementRanges(innerText, commandsSpecificSuggestions, {
+      // TODO: avoid rebuilding the column map here; reuse a memoized result across this suggest() call.
+      columns: await getColumnMap(),
+    });
   }
   return [];
 }
