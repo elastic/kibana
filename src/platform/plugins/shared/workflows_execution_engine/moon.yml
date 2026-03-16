@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/usage-api-plugin'
   - '@kbn/logging-mocks'
+  - '@kbn/crypto'
   - '@kbn/es-errors'
 tags:
   - plugin

@@ -117,8 +117,14 @@ export const visorStyles = (
         }
       }
     `,
+    techPreviewIcon: css`
+      padding-left: ${euiTheme.size.s};
+      flex-shrink: 0;
+      flex-grow: 0;
+      display: flex;
+      align-items: center;
+    `,
     modeSelectWrapper: css`
-      padding-left: ${euiTheme.size.xs};
       flex-shrink: 0;
       flex-grow: 0;
       width: ${modeSelectWidth}px;
