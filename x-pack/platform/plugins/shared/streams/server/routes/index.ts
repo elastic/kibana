@@ -33,6 +33,7 @@ import { internalInsightsRoutes } from './internal/streams/insights/route';
 import { internalTasksRoutes } from './internal/streams/tasks/route';
 import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
 import { internalQueriesRoutes } from './internal/streams/queries/route';
+import { timeSeriesRoutes } from './internal/streams/time_series/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -42,6 +43,7 @@ export const streamsRouteRepository = {
   ...internalLifecycleRoutes,
   ...internalProcessingRoutes,
   ...failureStoreRoutes,
+  ...timeSeriesRoutes,
   ...internalPromptsRoutes,
   ...internalSignificantEventsRoutes,
   ...internalSignificantEventsSettingsRoutes,
