@@ -24,9 +24,7 @@ const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({ services, ch
   <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
       <QueryClientProvider client={queryClient}>
-        <ExperimentalFeaturesProvider>
-          {children}
-        </ExperimentalFeaturesProvider>
+        <ExperimentalFeaturesProvider>{children}</ExperimentalFeaturesProvider>
       </QueryClientProvider>
     </KibanaContextProvider>
   </KibanaRenderContextProvider>
