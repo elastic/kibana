@@ -23,6 +23,9 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
 import type { LayoutService } from '@kbn/core-chrome-layout';
 import { getLayoutDebugFlag } from '@kbn/core-chrome-layout-feature-flags';
@@ -47,6 +50,9 @@ export interface RenderingServiceRenderCoreDeps {
   chrome: InternalChromeStart;
   overlays: OverlayStart;
   featureFlags: FeatureFlagsStart;
+  http: InternalHttpStart;
+  docLinks: DocLinksStart;
+  customBranding: CustomBrandingStart;
 }
 
 export interface RenderingServiceInternalStart extends IRenderingService {
