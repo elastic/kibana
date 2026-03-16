@@ -11,6 +11,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../common/agent_builder/constants';
 
 jest.mock('../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme', () => ({
   useWorkflowsMonacoTheme: jest.fn(),
@@ -40,7 +41,7 @@ const createMockServices = ({
 
 const createAttachment = (overrides: Partial<{ workflowId?: string; name?: string }> = {}) => ({
   id: 'att-1',
-  type: 'workflow.yaml',
+  type: WORKFLOW_YAML_ATTACHMENT_TYPE,
   versions: [],
   current_version: 1,
   data: {

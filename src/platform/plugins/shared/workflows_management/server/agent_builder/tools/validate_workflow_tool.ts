@@ -18,11 +18,10 @@ import {
   formatConnectorStep,
   resolveConnectors,
 } from './get_step_definitions_tool';
+import { workflowTools } from '../../../common/agent_builder/constants';
 import { parseYamlToJSONWithoutValidation } from '../../../common/lib/yaml';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
-
-export const VALIDATE_WORKFLOW_TOOL_ID = 'platform.workflows.validate_workflow';
 
 const extractStepTypes = (yaml: string): string[] => {
   const parsed = parseYamlToJSONWithoutValidation(yaml);
@@ -89,7 +88,7 @@ export function registerValidateWorkflowTool(
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
-    id: VALIDATE_WORKFLOW_TOOL_ID,
+    id: workflowTools.validateWorkflow,
     type: ToolType.builtin,
     description: `Validate a workflow YAML string against all validation rules.
 Use this tool AFTER generating or modifying workflow YAML and BEFORE proposing changes to the user.

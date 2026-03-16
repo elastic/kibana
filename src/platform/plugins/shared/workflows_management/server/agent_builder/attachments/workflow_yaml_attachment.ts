@@ -12,25 +12,12 @@ import type {
   AttachmentResolveContext,
 } from '@kbn/agent-builder-server/attachments';
 import { z } from '@kbn/zod/v4';
+import {
+  WORKFLOW_YAML_ATTACHMENT_TYPE,
+  workflowTools,
+} from '../../../common/agent_builder/constants';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
-import { GET_CONNECTORS_TOOL_ID } from '../tools/get_connectors_tool';
-import { GET_EXAMPLES_TOOL_ID } from '../tools/get_examples_tool';
-import { GET_STEP_DEFINITIONS_TOOL_ID } from '../tools/get_step_definitions_tool';
-import { GET_TRIGGER_DEFINITIONS_TOOL_ID } from '../tools/get_trigger_definitions_tool';
-import { GET_WORKFLOW_TOOL_ID } from '../tools/get_workflow_tool';
-import { LIST_WORKFLOWS_TOOL_ID } from '../tools/list_workflows_tool';
-import { VALIDATE_WORKFLOW_TOOL_ID } from '../tools/validate_workflow_tool';
-import {
-  WORKFLOW_DELETE_STEP_TOOL_ID,
-  WORKFLOW_INSERT_STEP_TOOL_ID,
-  WORKFLOW_MODIFY_PROPERTY_TOOL_ID,
-  WORKFLOW_MODIFY_STEP_PROPERTY_TOOL_ID,
-  WORKFLOW_MODIFY_STEP_TOOL_ID,
-  WORKFLOW_REPLACE_YAML_TOOL_ID,
-} from '../tools/workflow_edit_tools';
-
-export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 
 const clientDiagnosticSchema = z.object({
   severity: z.enum(['error', 'warning']),
@@ -136,30 +123,16 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
           value:
             `Current Workflow YAML:\n\n\`\`\`yaml\n${data.yaml}\n\`\`\`` +
             `${validationSection}\n\n` +
-            `Use the workflow edit tools (workflow_insert_step, workflow_modify_step, workflow_modify_step_property, workflow_modify_property, workflow_delete_step, workflow_replace_yaml) to modify this workflow.\n` +
+            `Use the workflow edit tools (${workflowTools.insertStep}, ${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}, ${workflowTools.modifyProperty}, ${workflowTools.deleteStep}, ${workflowTools.replaceYaml}) to modify this workflow.\n` +
             `When inserting or modifying steps, provide step definitions as structured JSON objects — the tools will generate properly formatted YAML.\n` +
             `Each edit tool emits a diff attachment and updates this YAML attachment for subsequent edits.`,
         };
       },
     };
   },
-  getTools: () => [
-    WORKFLOW_INSERT_STEP_TOOL_ID,
-    WORKFLOW_MODIFY_STEP_TOOL_ID,
-    WORKFLOW_MODIFY_STEP_PROPERTY_TOOL_ID,
-    WORKFLOW_MODIFY_PROPERTY_TOOL_ID,
-    WORKFLOW_DELETE_STEP_TOOL_ID,
-    WORKFLOW_REPLACE_YAML_TOOL_ID,
-    GET_STEP_DEFINITIONS_TOOL_ID,
-    GET_TRIGGER_DEFINITIONS_TOOL_ID,
-    GET_EXAMPLES_TOOL_ID,
-    GET_CONNECTORS_TOOL_ID,
-    VALIDATE_WORKFLOW_TOOL_ID,
-    LIST_WORKFLOWS_TOOL_ID,
-    GET_WORKFLOW_TOOL_ID,
-  ],
+  getTools: () => Object.values(workflowTools),
   getAgentDescription: () =>
-    `workflow.yaml attachments represent the current state of an Elastic Workflow YAML document.\n` +
+    `${WORKFLOW_YAML_ATTACHMENT_TYPE} attachments represent the current state of an Elastic Workflow YAML document.\n` +
     `All workflow authoring tools are already available — do NOT load the workflow-authoring skill via filestore.read.\n` +
     `The workflow YAML and any validation errors are shown in the attachment content — do NOT call attachment_read to re-read them.\n\n` +
     `## Editing Rules\n\n` +
@@ -167,14 +140,14 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     `- Each edit tool returns diffAttachmentId, attachmentId, and attachmentVersion\n` +
     `- Render the diff with <render_attachment id="{diffAttachmentId}"/>\n` +
     `- Render the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/> — the version attribute is required so the UI shows the latest content\n` +
-    `- Edit tools auto-validate the result and return a \`validation\` field — no need to call validate_workflow separately after edits.\n` +
-    `- Prefer surgical edits (workflow_modify_step, workflow_modify_step_property) over workflow_replace_yaml\n` +
-    `- Use get_step_definitions to look up step type schemas when needed\n` +
-    `- Use get_examples to find working workflow patterns\n\n` +
+    `- Edit tools auto-validate the result and return a \`validation\` field — no need to call ${workflowTools.validateWorkflow} separately after edits.\n` +
+    `- Prefer surgical edits (${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}) over ${workflowTools.replaceYaml}\n` +
+    `- Use ${workflowTools.getStepDefinitions} to look up step type schemas when needed\n` +
+    `- Use ${workflowTools.getExamples} to find working workflow patterns\n\n` +
     `## Rendering\n\n` +
-    `- The workflow.yaml attachment is rendered in chat as a YAML code preview with a Save button.\n` +
-    `- You can render it with <render_attachment id="{attachmentId}"/> where {attachmentId} is the workflow.yaml attachment ID.\n` +
-    `- After making edits, render the updated workflow.yaml attachment with the version from the tool result: <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>. The version attribute ensures the UI displays the latest content.\n\n` +
+    `- The ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment is rendered in chat as a YAML code preview with a Save button.\n` +
+    `- You can render it with <render_attachment id="{attachmentId}"/> where {attachmentId} is the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment ID.\n` +
+    `- After making edits, render the updated ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment with the version from the tool result: <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>. The version attribute ensures the UI displays the latest content.\n\n` +
     `## Workflow YAML Structure\n\n` +
     `\`\`\`yaml\nversion: '1'\nname: Workflow Name\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n  - name: step_name\n    type: step_type\n    with:\n      param1: value1\n\`\`\`\n\n` +
     `## Common Step Properties\n\n` +

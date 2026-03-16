@@ -14,9 +14,10 @@ import { isToolUiEvent } from '@kbn/agent-builder-common';
 import type { monaco } from '@kbn/monaco';
 import type { ProposalTracker } from './proposal_tracker';
 import type { ProposalManager, ProposedChange } from './proposed_changes';
-
-const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
-const WORKFLOW_YAML_DIFF_TYPE = 'workflow.yaml.diff';
+import {
+  WORKFLOW_YAML_CHANGED_EVENT,
+  WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
+} from '../../../common/agent_builder/constants';
 
 export interface WorkflowYamlChangedPayload {
   proposalId: string;
@@ -212,7 +213,7 @@ export class AttachmentBridge {
       status: 'pending',
       beforeYaml,
       afterYaml,
-      toolId: WORKFLOW_YAML_DIFF_TYPE,
+      toolId: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
       attachmentVersion: attachmentVersion ?? 0,
     });
 

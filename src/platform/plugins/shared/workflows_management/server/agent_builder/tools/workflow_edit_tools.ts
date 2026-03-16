@@ -19,21 +19,15 @@ import {
   modifyStepProperty,
   modifyWorkflowProperty,
 } from './yaml_edit_utils';
+import {
+  WORKFLOW_YAML_ATTACHMENT_TYPE,
+  WORKFLOW_YAML_CHANGED_EVENT,
+  WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
+  workflowTools,
+} from '../../../common/agent_builder/constants';
 import { parseYamlToJSONWithoutValidation } from '../../../common/lib/yaml';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../attachments/workflow_yaml_attachment';
-import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '../attachments/workflow_yaml_diff_attachment';
-
-export const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
-
-export const WORKFLOW_INSERT_STEP_TOOL_ID = 'platform.workflows.workflow_insert_step';
-export const WORKFLOW_MODIFY_STEP_TOOL_ID = 'platform.workflows.workflow_modify_step';
-export const WORKFLOW_MODIFY_STEP_PROPERTY_TOOL_ID =
-  'platform.workflows.workflow_modify_step_property';
-export const WORKFLOW_MODIFY_PROPERTY_TOOL_ID = 'platform.workflows.workflow_modify_property';
-export const WORKFLOW_DELETE_STEP_TOOL_ID = 'platform.workflows.workflow_delete_step';
-export const WORKFLOW_REPLACE_YAML_TOOL_ID = 'platform.workflows.workflow_replace_yaml';
 
 const workflowEditAvailability = {
   handler: async ({ uiSettings }: { uiSettings: { get: <T>(id: string) => Promise<T> } }) => {
@@ -214,7 +208,7 @@ export function registerWorkflowEditTools(
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
-    id: WORKFLOW_INSERT_STEP_TOOL_ID,
+    id: workflowTools.insertStep,
     type: ToolType.builtin,
     description:
       'Insert a new step at the end of the workflow steps list. Provide the step as a structured object. Returns diffAttachmentId, attachmentId, and attachmentVersion. Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.',
@@ -242,14 +236,14 @@ export function registerWorkflowEditTools(
         description,
         attachment.workflowId,
         attachment.name,
-        WORKFLOW_INSERT_STEP_TOOL_ID,
+        workflowTools.insertStep,
         api
       );
     },
   });
 
   agentBuilder.tools.register({
-    id: WORKFLOW_MODIFY_STEP_TOOL_ID,
+    id: workflowTools.modifyStep,
     type: ToolType.builtin,
     description:
       'Replace an entire step by name with a new step definition. The step is identified by its name. Returns diffAttachmentId, attachmentId, and attachmentVersion. Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.',
@@ -278,14 +272,14 @@ export function registerWorkflowEditTools(
         description,
         attachment.workflowId,
         attachment.name,
-        WORKFLOW_MODIFY_STEP_TOOL_ID,
+        workflowTools.modifyStep,
         api
       );
     },
   });
 
   agentBuilder.tools.register({
-    id: WORKFLOW_MODIFY_STEP_PROPERTY_TOOL_ID,
+    id: workflowTools.modifyStepProperty,
     type: ToolType.builtin,
     description:
       'Modify a single property of a step identified by name. Provide the property key and new value. Returns diffAttachmentId, attachmentId, and attachmentVersion. Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.',
@@ -315,14 +309,14 @@ export function registerWorkflowEditTools(
         description,
         attachment.workflowId,
         attachment.name,
-        WORKFLOW_MODIFY_STEP_PROPERTY_TOOL_ID,
+        workflowTools.modifyStepProperty,
         api
       );
     },
   });
 
   agentBuilder.tools.register({
-    id: WORKFLOW_MODIFY_PROPERTY_TOOL_ID,
+    id: workflowTools.modifyProperty,
     type: ToolType.builtin,
     description:
       'Modify a top-level workflow property (e.g. name, description, trigger). Provide the property key and new value. Returns diffAttachmentId, attachmentId, and attachmentVersion. Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.',
@@ -353,14 +347,14 @@ export function registerWorkflowEditTools(
         description,
         attachment.workflowId,
         attachment.name,
-        WORKFLOW_MODIFY_PROPERTY_TOOL_ID,
+        workflowTools.modifyProperty,
         api
       );
     },
   });
 
   agentBuilder.tools.register({
-    id: WORKFLOW_DELETE_STEP_TOOL_ID,
+    id: workflowTools.deleteStep,
     type: ToolType.builtin,
     description:
       'Delete a step from the workflow by its name. Returns diffAttachmentId, attachmentId, and attachmentVersion. Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.',
@@ -388,17 +382,16 @@ export function registerWorkflowEditTools(
         description,
         attachment.workflowId,
         attachment.name,
-        WORKFLOW_DELETE_STEP_TOOL_ID,
+        workflowTools.deleteStep,
         api
       );
     },
   });
 
   agentBuilder.tools.register({
-    id: WORKFLOW_REPLACE_YAML_TOOL_ID,
+    id: workflowTools.replaceYaml,
     type: ToolType.builtin,
-    description:
-      'Replace the entire workflow YAML content, or create a new workflow from scratch when no workflow.yaml attachment exists yet. For large-scale changes or when multiple properties and steps need to change at once. When an attachment exists, returns diffAttachmentId, attachmentId, and attachmentVersion — render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>. When creating new, returns an attachmentId — render it with <render_attachment id="{attachmentId}"/>.',
+    description: `Replace the entire workflow YAML content, or create a new workflow from scratch when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists yet. For large-scale changes or when multiple properties and steps need to change at once. When an attachment exists, returns diffAttachmentId, attachmentId, and attachmentVersion — render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>. When creating new, returns an attachmentId — render it with <render_attachment id="{attachmentId}"/>.`,
     schema: z.object({
       yaml: z.string().describe('The complete new workflow YAML content'),
       proposalId: z.string().describe('A unique identifier for this proposed change'),
@@ -436,7 +429,7 @@ export function registerWorkflowEditTools(
                 created: true,
                 proposalId,
                 attachmentId: newAttachment.id,
-                toolId: WORKFLOW_REPLACE_YAML_TOOL_ID,
+                toolId: workflowTools.replaceYaml,
                 description: description ?? 'New workflow created',
                 ...(validation ? { validation } : {}),
               },
@@ -468,7 +461,7 @@ export function registerWorkflowEditTools(
               diffAttachmentId,
               attachmentId: attachment.attachmentId,
               attachmentVersion,
-              toolId: WORKFLOW_REPLACE_YAML_TOOL_ID,
+              toolId: workflowTools.replaceYaml,
               description: description ?? 'Full YAML replacement proposed',
               ...(validation ? { validation } : {}),
             },

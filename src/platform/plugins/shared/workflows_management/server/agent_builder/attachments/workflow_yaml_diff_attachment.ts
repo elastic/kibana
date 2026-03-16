@@ -9,9 +9,8 @@
 
 import { diffLines } from 'diff';
 import { z } from '@kbn/zod/v4';
+import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '../../../common/agent_builder/constants';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-
-export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
 
 const workflowYamlDiffStatusSchema = z.enum(['pending', 'accepted', 'declined']);
 
@@ -73,7 +72,7 @@ If the proposal is pending, user can accept or decline it from the workflow YAML
     };
   },
   getAgentDescription: () =>
-    `workflow.yaml.diff attachments represent a proposed change to an Elastic Workflow.\n` +
+    `${WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE} attachments represent a proposed change to an Elastic Workflow.\n` +
     `Workflow edit tools return a diffAttachmentId in their result. ` +
     `You MUST render it in your response using <render_attachment id="{diffAttachmentId}"/> ` +
     `(replacing {diffAttachmentId} with the actual ID from the tool result) ` +

@@ -11,9 +11,10 @@ import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser'
 import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
 import { workflowYamlDiffAttachmentUiDefinition } from './workflow_yaml_diff_attachment_renderer';
-
-const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
-const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
+import {
+  WORKFLOW_YAML_ATTACHMENT_TYPE,
+  WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
+} from '../../../../common/agent_builder/constants';
 
 export const registerWorkflowAttachmentRenderers = (
   attachments: AttachmentServiceStartContract,

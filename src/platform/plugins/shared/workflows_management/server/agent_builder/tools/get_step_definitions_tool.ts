@@ -20,6 +20,7 @@ import {
 } from '@kbn/workflows';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
+import { workflowTools } from '../../../common/agent_builder/constants';
 import {
   addDynamicConnectorsToCache,
   getAllConnectors,
@@ -27,8 +28,6 @@ import {
 } from '../../../common/schema';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
-
-export const GET_STEP_DEFINITIONS_TOOL_ID = 'platform.workflows.get_step_definitions';
 
 interface StepDefinitionForAgent {
   id: string;
@@ -138,7 +137,7 @@ export function registerGetStepDefinitionsTool(
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
-    id: GET_STEP_DEFINITIONS_TOOL_ID,
+    id: workflowTools.getStepDefinitions,
     type: ToolType.builtin,
     description: `Get available workflow step types, their parameters, and usage examples.
 

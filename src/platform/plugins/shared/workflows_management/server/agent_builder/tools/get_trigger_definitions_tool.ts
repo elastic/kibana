@@ -11,9 +11,8 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { builtInTriggerDefinitions } from '@kbn/workflows';
 import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
+import { workflowTools } from '../../../common/agent_builder/constants';
 import type { AgentBuilderPluginSetupContract } from '../../types';
-
-export const GET_TRIGGER_DEFINITIONS_TOOL_ID = 'platform.workflows.get_trigger_definitions';
 
 const LARGE_ENUM_THRESHOLD = 20;
 
@@ -60,7 +59,7 @@ export function registerGetTriggerDefinitionsTool(
   agentBuilder: AgentBuilderPluginSetupContract
 ): void {
   agentBuilder.tools.register({
-    id: GET_TRIGGER_DEFINITIONS_TOOL_ID,
+    id: workflowTools.getTriggerDefinitions,
     type: ToolType.builtin,
     description: `Get available workflow trigger types with schemas and YAML examples.
 
