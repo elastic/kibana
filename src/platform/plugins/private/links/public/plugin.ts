@@ -34,7 +34,6 @@ import type { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices } from './services/kibana_services';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
-import { transformOut } from '../common/embeddable/transforms/transform_out';
 
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -90,9 +89,10 @@ export class LinksPlugin
         return getLinksEmbeddableFactory();
       });
 
-      plugins.embeddable.registerLegacyURLTransform(LINKS_SAVED_OBJECT_TYPE, () =>
-        Promise.resolve(transformOut)
-      );
+      plugins.embeddable.registerLegacyURLTransform(LINKS_SAVED_OBJECT_TYPE, async () => {
+        const { transformOut } = await import('../common/embeddable/transforms/transform_out');
+        return transformOut;
+      });
 
       plugins.visualizations.registerAlias({
         disableCreate: true, // do not allow creation through visualization listing page
