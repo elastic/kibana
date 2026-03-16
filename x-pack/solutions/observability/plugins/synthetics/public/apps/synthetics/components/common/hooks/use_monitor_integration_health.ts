@@ -14,6 +14,10 @@ import {
 } from '../../../state';
 import { ConfigKey, LocationHealthStatusValue } from '../../../../../../common/runtime_types';
 import { fetchMonitorHealthAction, selectMonitorHealth } from '../../../state/monitor_health';
+import {
+  resetMonitorAPI,
+  resetMonitorBulkAPI,
+} from '../../../state/monitor_management/api';
 
 export interface MonitorIntegrationStatus {
   configId: string;
@@ -153,18 +157,38 @@ export const useMonitorIntegrationHealth = (
     [statuses]
   );
 
-  // Reset functionality is a stub until the reset endpoint is implemented (#256394)
-  const resetMonitor = useCallback(async (_configId: string): Promise<void> => {
-    setIsResetting(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setIsResetting(false);
-  }, []);
+  const refetchHealth = useCallback(() => {
+    if (monitorIdsToFetch.length > 0) {
+      prevIdsRef.current = '';
+      dispatch(fetchMonitorHealthAction.get(monitorIdsToFetch));
+    }
+  }, [dispatch, monitorIdsToFetch]);
 
-  const resetMonitors = useCallback(async (_ids: string[]): Promise<void> => {
-    setIsResetting(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setIsResetting(false);
-  }, []);
+  const resetMonitor = useCallback(
+    async (configId: string): Promise<void> => {
+      setIsResetting(true);
+      try {
+        await resetMonitorAPI({ id: configId });
+        refetchHealth();
+      } finally {
+        setIsResetting(false);
+      }
+    },
+    [refetchHealth]
+  );
+
+  const resetMonitors = useCallback(
+    async (ids: string[]): Promise<void> => {
+      setIsResetting(true);
+      try {
+        await resetMonitorBulkAPI({ ids });
+        refetchHealth();
+      } finally {
+        setIsResetting(false);
+      }
+    },
+    [refetchHealth]
+  );
 
   const loading = explicitConfigIds ? healthLoading : !listLoaded || healthLoading;
 
