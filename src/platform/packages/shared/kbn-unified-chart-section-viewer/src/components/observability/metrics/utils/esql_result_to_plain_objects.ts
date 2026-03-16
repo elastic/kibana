@@ -33,7 +33,7 @@ export function esqlResultToPlainObjects<TDocument extends object = Record<strin
       }
 
       const name = column.name;
-      if (!acc[name]) {
+      if (!(name in acc)) {
         acc[name] = value;
       }
 

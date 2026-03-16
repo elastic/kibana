@@ -61,10 +61,10 @@ export interface MetricsESQLResponse {
 export interface ParsedMetricItem {
   metricName: string;
   dataStream: string;
-  units: MetricUnit[];
-  metricTypes: MappingTimeSeriesMetricType[];
-  fieldTypes: ES_FIELD_TYPES[];
-  dimensionFields: Dimension[];
+  readonly units: MetricUnit[];
+  readonly metricTypes: MappingTimeSeriesMetricType[];
+  readonly fieldTypes: ES_FIELD_TYPES[];
+  readonly dimensionFields: Dimension[];
 }
 
 export interface ParsedMetricsResult {

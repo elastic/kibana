@@ -15,7 +15,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime, getEsQueryConfig } from '@kbn/data-plugin/public';
-import { esqlResultToPlainObjects } from './esql_result_to_plan_objects';
+import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 
 export interface ExecuteEsqlParams {
   esqlQuery: string;
