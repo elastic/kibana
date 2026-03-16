@@ -46,7 +46,7 @@ spaceTest.describe(
 
     spaceTest(
       'should narrow time range when brushing a chart in the grid',
-      async ({ pageObjects }) => {
+      async ({ pageObjects, page }) => {
         await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
         const { metricsExperience } = pageObjects;
         await expect(metricsExperience.grid).toBeVisible();
@@ -60,15 +60,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('time range should have narrowed', async () => {
-          await expect
-            .poll(async () => {
-              const timeConfigAfter = await pageObjects.datePicker.getTimeConfig();
-              return (
-                timeConfigAfter.start !== timeConfigBefore.start ||
-                timeConfigAfter.end !== timeConfigBefore.end
-              );
-            })
-            .toBe(true);
+          await expect(
+            page.testSubj.locator('superDatePickerstartDatePopoverButton')
+          ).not.toHaveText(timeConfigBefore.start);
         });
 
         await spaceTest.step('grid should still be visible after zoom', async () => {
