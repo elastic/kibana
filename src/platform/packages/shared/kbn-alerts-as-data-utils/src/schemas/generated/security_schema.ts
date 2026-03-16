@@ -217,6 +217,7 @@ const SecurityAlertOptional = rt.partial({
     })
   ),
   'kibana.alert.time_range': schemaDateRange,
+  'kibana.alert.tracked': schemaBoolean,
   'kibana.alert.updated_at': schemaDate,
   'kibana.alert.updated_by.user.id': schemaString,
   'kibana.alert.updated_by.user.name': schemaString,

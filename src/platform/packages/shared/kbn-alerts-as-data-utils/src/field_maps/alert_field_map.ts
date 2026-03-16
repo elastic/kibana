@@ -63,6 +63,7 @@ import {
   ALERT_SCHEDULED_ACTION_THROTTLING,
   ALERT_MUTED,
   ALERT_SNOOZED,
+  ALERT_TRACKED,
   ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
@@ -377,6 +378,11 @@ export const alertFieldMap = {
     required: false,
   },
   [ALERT_SNOOZED]: {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  [ALERT_TRACKED]: {
     type: 'boolean',
     array: false,
     required: false,

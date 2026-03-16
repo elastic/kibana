@@ -30,6 +30,7 @@ import {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_UUID,
+  ALERT_TRACKED,
 } from '@kbn/rule-data-utils';
 import {
   alertRule,
@@ -86,6 +87,7 @@ describe('buildUpdatedRecoveredAlert', () => {
       [VERSION]: '8.8.1',
       [TAGS]: ['rule-', '-tags'],
       [ALERT_CONSECUTIVE_MATCHES]: 0,
+      [ALERT_TRACKED]: true,
     });
   });
 
@@ -138,6 +140,7 @@ describe('buildUpdatedRecoveredAlert', () => {
       [VERSION]: '8.8.1',
       [TAGS]: ['rule-', '-tags'],
       [ALERT_CONSECUTIVE_MATCHES]: 0,
+      [ALERT_TRACKED]: true,
     });
   });
 
@@ -212,8 +215,33 @@ describe('buildUpdatedRecoveredAlert', () => {
       [ALERT_FLAPPING_HISTORY]: [false, false, true, true],
       [ALERT_PREVIOUS_ACTION_GROUP]: 'recovered',
       [ALERT_STATUS]: 'recovered',
+      [ALERT_TRACKED]: true,
       [ALERT_WORKFLOW_STATUS]: 'open',
       [TAGS]: ['rule-', '-tags'],
     });
+  });
+
+  test('should set kibana.alert.tracked to false when not flapping and no state changes', () => {
+    expect(
+      buildUpdatedRecoveredAlert<{}>({
+        alert: existingFlattenedRecoveredAlert,
+        legacyRawAlert: {
+          meta: {
+            flapping: false,
+            flappingHistory: [false, false, false],
+            maintenanceWindowIds: [],
+          },
+          state: {
+            start: '3023-03-27T12:27:28.159Z',
+          },
+        },
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        [ALERT_TRACKED]: false,
+      })
+    );
   });
 });
