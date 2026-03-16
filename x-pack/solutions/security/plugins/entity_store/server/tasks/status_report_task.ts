@@ -12,6 +12,7 @@ import type {
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { getErrorMessage } from '../../common';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type { EntityStoreCoreSetup } from '../types';
@@ -112,7 +113,7 @@ async function runTask({
           namespace,
         });
       } catch (e) {
-        logger.error(`Error reporting store usage for ${entityType}: ${e.message}`);
+        logger.error(`Error reporting store usage for ${entityType}: ${getErrorMessage(e)}`);
       }
     }
 
@@ -153,10 +154,10 @@ async function runTask({
         toHealthReportPayload(statusResult)
       );
     } catch (e) {
-      logger.error(`Error reporting entity store health: ${e.message}`);
+      logger.error(`Error reporting entity store health: ${getErrorMessage(e)}`);
     }
   } catch (e) {
-    logger.error(`Error running status report task: ${e.message}`);
+    logger.error(`Error running status report task: ${getErrorMessage(e)}`);
   }
 
   return { state: { namespace } };
@@ -199,7 +200,7 @@ export function registerStatusReportTask({
       },
     });
   } catch (e) {
-    logger.error(`Error registering status report task: ${e.message}`);
+    logger.error(`Error registering status report task: ${getErrorMessage(e)}`);
     throw e;
   }
 }
@@ -227,7 +228,7 @@ export async function scheduleStatusReportTask({
       { request }
     );
   } catch (e) {
-    logger.error(`Error scheduling status report task: ${e.message}`);
+    logger.error(`Error scheduling status report task: ${getErrorMessage(e)}`);
     throw e;
   }
 }
