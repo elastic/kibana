@@ -143,10 +143,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths, ...agentBuilderPaths])) ||
-      GITHUB_PR_LABELS.includes('agent-builder:run-smoke-tests') ||
-      GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites') ||
-      ALL_UI_TEST_SUITES
+      ((await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths, ...agentBuilderPaths])) ||
+        GITHUB_PR_LABELS.includes('agent-builder:run-smoke-tests') ||
+        GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites') ||
+        ALL_UI_TEST_SUITES) &&
+      !GITHUB_PR_LABELS.includes('agent-builder:skip-smoke-tests')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/agent_builder_smoke_tests.yml'));
     }

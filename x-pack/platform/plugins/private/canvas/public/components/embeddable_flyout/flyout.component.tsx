@@ -16,9 +16,13 @@ import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
+import { getAddFromLibraryType, useAddFromLibraryTypes } from '@kbn/embeddable-plugin/public';
+import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import type { CanAddNewPanel } from '@kbn/presentation-publishing';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { contentManagementService, coreServices } from '../../services/kibana_services';
+import { getCanvasNotifyService } from '../../services/canvas_notify_service';
 
 const strings = {
   getNoItemsText: () =>
@@ -33,17 +37,10 @@ const strings = {
 
 export interface Props {
   onClose: () => void;
-  onSelect: (id: string, embeddableType: string, isByValueEnabled?: boolean) => void;
-  availableEmbeddables: string[];
-  isByValueEnabled?: boolean;
+  container: CanAddNewPanel;
 }
 
-export const AddEmbeddableFlyout: FC<Props> = ({
-  onSelect,
-  availableEmbeddables,
-  onClose,
-  isByValueEnabled,
-}) => {
+export const AddEmbeddableFlyout: FC<Props> = ({ container, onClose }) => {
   const modalTitleId = useGeneratedHtmlId();
 
   const libraryTypes = useAddFromLibraryTypes();
@@ -53,11 +50,26 @@ export const AddEmbeddableFlyout: FC<Props> = ({
     return libraryTypes.filter(({ type }) => type !== 'links');
   }, [libraryTypes]);
 
-  const onAddPanel = useCallback(
-    (id: string, savedObjectType: string) => {
-      onSelect(id, savedObjectType, isByValueEnabled);
+  const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
+    async (
+      id: SavedObjectCommon['id'],
+      type: SavedObjectCommon['type'],
+      name: string,
+      savedObject: SavedObjectCommon
+    ) => {
+      const libraryType = getAddFromLibraryType(type);
+      if (!libraryType) {
+        getCanvasNotifyService().warning(
+          i18n.translate('xpack.canvas.addPanel.typeNotFound', {
+            defaultMessage: 'Unable to load type: {type}',
+            values: { type },
+          })
+        );
+        return;
+      }
+      libraryType.onAdd(container, savedObject);
     },
-    [isByValueEnabled, onSelect]
+    [container]
   );
 
   return (
@@ -75,7 +87,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
       <EuiFlyoutBody>
         <SavedObjectFinder
           id="canvasEmbeddableFlyout"
-          onChoose={onAddPanel}
+          onChoose={onChoose}
           savedObjectMetaData={canvasOnlyLibraryTypes}
           showFilter={true}
           noItemsMessage={strings.getNoItemsText()}
