@@ -50,6 +50,11 @@ const TAGS_PLACEHOLDER = i18n.translate('xpack.osquery.addTagsFlyout.placeholder
   defaultMessage: 'Add tags...',
 });
 
+const MAX_TAGS_ERROR = i18n.translate('xpack.osquery.addTagsFlyout.maxTagsError', {
+  defaultMessage: 'Maximum of {max} tags allowed',
+  values: { max: MAX_TAGS_PER_ACTION },
+});
+
 interface AddTagsFlyoutProps {
   actionId: string;
   currentTags: string[];
@@ -66,6 +71,8 @@ const AddTagsFlyoutComponent: React.FC<AddTagsFlyoutProps> = ({
   const [localTags, setLocalTags] = useState<string[]>(currentTags);
   const { tags: availableTags } = useHistoryTags();
   const { mutate: updateTags, isLoading: isSaving } = useUpdateActionTags();
+
+  const isAtMaxTags = localTags.length >= MAX_TAGS_PER_ACTION;
 
   const selectedOptions: EuiComboBoxOptionOption[] = useMemo(
     () => localTags.map((tag) => ({ label: tag, key: tag })),
@@ -125,7 +132,12 @@ const AddTagsFlyoutComponent: React.FC<AddTagsFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiFormRow label={FORM_LABEL} fullWidth>
+        <EuiFormRow
+          label={FORM_LABEL}
+          fullWidth
+          isInvalid={isAtMaxTags}
+          error={isAtMaxTags ? MAX_TAGS_ERROR : undefined}
+        >
           <EuiComboBox
             placeholder={TAGS_PLACEHOLDER}
             options={options}

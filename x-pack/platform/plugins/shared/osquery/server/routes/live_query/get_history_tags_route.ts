@@ -13,6 +13,7 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { API_VERSIONS, ACTIONS_INDEX } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 
+// Max unique tags returned by the aggregation; results beyond this are truncated
 const TAGS_AGG_SIZE = 200;
 
 interface TagBucket {

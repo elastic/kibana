@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -17,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const actionIndex = '.logs-osquery_manager.actions-default';
 
   const createActionDoc = async (overrides: Record<string, unknown> = {}) => {
-    const actionId = `action-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const actionId = uuidv4();
 
     await es.index({
       index: actionIndex,
@@ -34,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         user_id: 'elastic',
         queries: [
           {
-            action_id: `query-${Date.now()}`,
+            action_id: uuidv4(),
             id: 'query-1',
             query: 'select 1;',
             agents: ['test-agent-1'],

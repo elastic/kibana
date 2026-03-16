@@ -69,6 +69,7 @@ export const useUnifiedHistory = ({
             ? { sourceFilters: sourceFilters.join(',') }
             : {}),
           ...(userIds && userIds.length > 0 ? { userIds: userIds.join(',') } : {}),
+          // JSON.stringify instead of join(',') because tag values themselves may contain commas
           ...(tags && tags.length > 0 ? { tags: JSON.stringify(tags) } : {}),
           ...(startDate ? { startDate } : {}),
           ...(endDate ? { endDate } : {}),
