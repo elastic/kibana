@@ -44,8 +44,12 @@ export const getDefaultProfileState = ({
         stateUpdate.breakdownField = defaultState.breakdownField;
       }
 
-      if (resetDefaultProfileState.hideChart && defaultState.hideChart !== undefined) {
-        stateUpdate.hideChart = defaultState.hideChart;
+      if (resetDefaultProfileState.hideChart) {
+        stateUpdate.hideChart = defaultState.hideChart ?? false;
+      }
+
+      if (resetDefaultProfileState.hideDataTable) {
+        stateUpdate.hideDataTable = defaultState.hideDataTable ?? false;
       }
 
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
@@ -102,7 +106,8 @@ const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView:
   const getDefaultAppState = getMergedAccessor(
     scopedProfilesManager.getProfiles(),
     'getDefaultAppState',
-    () => ({})
+    // Default profile: chart expanded, table expanded (profiles like metrics override as needed)
+    () => ({ hideChart: false, hideDataTable: false })
   );
 
   return getDefaultAppState({ dataView });

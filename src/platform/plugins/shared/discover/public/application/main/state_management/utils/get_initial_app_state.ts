@@ -63,6 +63,9 @@ export function getInitialAppState({
   if (typeof mergedState.hideChart !== 'boolean') {
     mergedState.hideChart = undefined;
   }
+  if (typeof mergedState.hideDataTable !== 'boolean') {
+    mergedState.hideDataTable = undefined;
+  }
 
   // Don't allow URL state to overwrite the data source if there's an ES|QL query
   if (isOfAggregateQueryType(mergedState.query) && !isEsqlSource(mergedState.dataSource)) {
@@ -178,6 +181,7 @@ function getDefaultAppState({
     interval: 'auto',
     filters: cloneDeep(persistedTab?.serializedSearchSource.filter),
     hideChart: chartHidden,
+    hideDataTable: undefined,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
@@ -195,6 +199,9 @@ function getDefaultAppState({
   }
   if (persistedTab?.hideChart !== undefined) {
     defaultState.hideChart = persistedTab.hideChart;
+  }
+  if (persistedTab?.hideDataTable !== undefined) {
+    defaultState.hideDataTable = persistedTab.hideDataTable;
   }
   if (persistedTab?.rowHeight !== undefined) {
     defaultState.rowHeight = persistedTab.rowHeight;
@@ -226,6 +233,5 @@ function getDefaultAppState({
   if (persistedTab?.density) {
     defaultState.density = persistedTab.density;
   }
-
   return defaultState;
 }

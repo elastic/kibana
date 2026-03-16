@@ -113,6 +113,7 @@ export interface DiscoverSessionTab {
   columns: string[];
   grid: DiscoverGridSettings;
   hideChart: boolean;
+  hideDataTable?: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
   serializedSearchSource: SerializedSearchSourceFields;

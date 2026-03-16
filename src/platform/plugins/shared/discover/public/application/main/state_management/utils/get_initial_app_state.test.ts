@@ -63,6 +63,7 @@ describe('getInitialAppState', () => {
         appState: {
           breakdownField: 'customBreakDownField',
           hideChart: true,
+          hideDataTable: true,
           rowsPerPage: 250,
           hideAggregatedPreview: true,
         },
@@ -91,6 +92,7 @@ describe('getInitialAppState', () => {
         filters: [customFilter],
         grid: {},
         hideChart: true,
+        hideDataTable: true,
         dataSource: createDataViewDataSource({ dataViewId: 'the-data-view-id' }),
         interval: 'auto',
         query: customQuery,
@@ -176,6 +178,7 @@ describe('getInitialAppState', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
+        "hideDataTable": undefined,
         "interval": "auto",
         "query": Object {
           "language": "kuery",
@@ -221,6 +224,7 @@ describe('getInitialAppState', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
+        "hideDataTable": undefined,
         "interval": "auto",
         "query": Object {
           "language": "kuery",

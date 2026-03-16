@@ -116,6 +116,10 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    */
   hideChart?: boolean;
   /**
+   * Used to force the data table to be hidden or visible
+   */
+  hideDataTable?: boolean;
+  /**
    * Number of rows to sample for Discover grid
    */
   sampleSize?: number;
