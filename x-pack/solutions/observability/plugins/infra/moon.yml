@@ -140,6 +140,7 @@ dependsOn:
   - '@kbn/inspector-plugin'
   - '@kbn/css-utils'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/controls-constants'
 tags:
   - plugin
   - prod
