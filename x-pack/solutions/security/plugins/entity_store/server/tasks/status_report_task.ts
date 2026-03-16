@@ -53,7 +53,7 @@ const toHealthReportPayload = (statusResult: GetStatusResult) => {
     engines: engines.map((engine) => ({
       type: engine.type,
       status: engine.status,
-      components: ('components' in engine ? engine.components : []).map((component) => {
+      components: (('components' in engine ? engine.components : []) ?? []).map((component) => {
         const normalizedComponent: {
           id: string;
           resource: string;
