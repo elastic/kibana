@@ -5,23 +5,39 @@
  * 2.0.
  */
 
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { createTestConfig } from '../../common/config';
 
 export const EmailMaximumBodyLength = 10000;
 
-export default createTestConfig('security_and_spaces', {
-  disabledPlugins: [],
-  license: 'trial',
-  ssl: true,
-  enableActionsProxy: true,
-  publicBaseUrl: true,
-  testFiles: [require.resolve('./tests')],
-  useDedicatedTaskRunner: true,
-  experimentalFeatures: [
-    'sentinelOneConnectorOn',
-    'crowdstrikeConnectorOn',
-    'microsoftDefenderEndpointOn',
-  ],
-  emailMaximumBodyLength: EmailMaximumBodyLength,
-  indexRefreshInterval: '1s',
-});
+export default async function (context: FtrConfigProviderContext) {
+  const config = await createTestConfig('security_and_spaces', {
+    disabledPlugins: [],
+    license: 'trial',
+    ssl: true,
+    enableActionsProxy: true,
+    publicBaseUrl: true,
+    testFiles: [require.resolve('./tests')],
+    useDedicatedTaskRunner: true,
+    experimentalFeatures: [
+      'sentinelOneConnectorOn',
+      'crowdstrikeConnectorOn',
+      'microsoftDefenderEndpointOn',
+    ],
+    emailMaximumBodyLength: EmailMaximumBodyLength,
+    indexRefreshInterval: '1s',
+  })(context);
+
+  return {
+    ...config,
+    kbnTestServer: {
+      ...config.kbnTestServer,
+      env: {
+        // NODE_EXTRA_CA_CERTS is needed so the Kibana server trusts the self-signed kibana.crt
+        // when making HTTPS simulators requests through the CONNECT tunnel.
+        NODE_EXTRA_CA_CERTS: CA_CERT_PATH,
+      },
+    },
+  };
+}

@@ -87,6 +87,11 @@ export async function getHttpServer(): Promise<http.Server> {
   return httpServer;
 }
 
+export async function getHttpsHttpServer(): Promise<https.Server> {
+  const { httpsServer } = await initHttp();
+  return httpsServer;
+}
+
 export async function getHttpsWebhookServer(): Promise<https.Server> {
   const { httpsServer } = await initWebhook();
   return httpsServer;
