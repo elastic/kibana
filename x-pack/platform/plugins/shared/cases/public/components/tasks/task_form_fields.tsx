@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiDatePicker,
   EuiFieldText,
@@ -16,6 +16,7 @@ import {
 import moment from 'moment';
 import type { CaseTaskPriority, CaseTaskStatus } from '../../../common/types/domain/task/v1';
 import { TaskAssigneesField } from './task_assignees_field';
+import { useTaskStatuses } from './use_task_statuses';
 import * as i18n from './translations';
 
 export interface TaskFormState {
@@ -41,15 +42,19 @@ const PRIORITY_OPTIONS: Array<{ value: CaseTaskPriority; text: string }> = [
   { value: 'critical', text: i18n.PRIORITY_CRITICAL },
 ];
 
-const STATUS_OPTIONS: Array<{ value: CaseTaskStatus; text: string }> = [
-  { value: 'open', text: i18n.STATUS_OPEN },
-  { value: 'in_progress', text: i18n.STATUS_IN_PROGRESS },
-  { value: 'completed', text: i18n.STATUS_COMPLETED },
-  { value: 'cancelled', text: i18n.STATUS_CANCELLED },
-];
-
 export const TaskFormFields: React.FC<TaskFormFieldsProps> = ({ value, onChange, titleError }) => {
-  const isCompleted = value.status === 'completed';
+  const taskStatuses = useTaskStatuses();
+  const STATUS_OPTIONS = useMemo(() => {
+    const options = taskStatuses
+      .filter((s) => !s.disabled)
+      .map((s) => ({ value: s.key as CaseTaskStatus, text: s.label }));
+    const isKnown = options.some((o) => o.value === value.status);
+    if (!isKnown) {
+      options.unshift({ value: value.status, text: i18n.NO_STATUS });
+    }
+    return options;
+  }, [taskStatuses, value.status]);
+  const isCompleted = value.status === 'done';
 
   return (
     <>

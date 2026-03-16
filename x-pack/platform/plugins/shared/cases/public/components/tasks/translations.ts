@@ -203,3 +203,33 @@ export const NO_TASK_TEMPLATES_AVAILABLE_DESCRIPTION = i18n.translate(
       'Create task templates in case settings to quickly add predefined sets of tasks.',
   }
 );
+
+export const VIEW_LIST = i18n.translate('xpack.cases.tasks.viewList', {
+  defaultMessage: 'List',
+});
+
+export const VIEW_BOARD = i18n.translate('xpack.cases.tasks.viewBoard', {
+  defaultMessage: 'Board',
+});
+
+export const COLUMNS = i18n.translate('xpack.cases.tasks.columns', {
+  defaultMessage: 'Columns',
+});
+
+export const VISIBLE_COLUMNS = i18n.translate('xpack.cases.tasks.visibleColumns', {
+  defaultMessage: 'Visible columns',
+});
+
+export const NO_STATUS = i18n.translate('xpack.cases.tasks.status.noStatus', {
+  defaultMessage: 'No status',
+});
+
+export const UNASSIGNED_COLUMN_LABEL = i18n.translate('xpack.cases.tasks.board.unassigned', {
+  defaultMessage: 'Unassigned',
+});
+
+export const SUBTASKS_LABEL = (count: number) =>
+  i18n.translate('xpack.cases.tasks.subtasksLabel', {
+    values: { count },
+    defaultMessage: '{count} sub-task{count, plural, one {} other {s}}',
+  });

@@ -32,14 +32,7 @@ export const patchTaskRoute = createCasesRoute({
       version: schema.string(),
       title: schema.maybe(schema.string({ minLength: 1, maxLength: 160 })),
       description: schema.maybe(schema.string({ maxLength: 30000 })),
-      status: schema.maybe(
-        schema.oneOf([
-          schema.literal('open'),
-          schema.literal('in_progress'),
-          schema.literal('completed'),
-          schema.literal('cancelled'),
-        ])
-      ),
+      status: schema.maybe(schema.string()),
       priority: schema.maybe(
         schema.oneOf([
           schema.literal('low'),
@@ -65,7 +58,7 @@ export const patchTaskRoute = createCasesRoute({
         version: string;
         title?: string;
         description?: string;
-        status?: 'open' | 'in_progress' | 'completed' | 'cancelled';
+        status?: string;
         priority?: 'low' | 'medium' | 'high' | 'critical';
         assignees?: Array<{ uid: string }>;
         due_date?: string | null;

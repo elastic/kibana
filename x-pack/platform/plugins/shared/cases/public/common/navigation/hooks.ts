@@ -14,6 +14,7 @@ import {
   CASES_CREATE_PATH,
   CASES_CREATE_TEMPLATE_PATH,
   CASES_TEMPLATES_PATH,
+  CASES_TASK_SETTINGS_PATH,
 } from '../../../common/constants';
 import { useNavigation } from '../lib/kibana';
 import type { ICasesDeepLinkId } from './deep_links';
@@ -77,6 +78,7 @@ const navigationMapping = {
   configure: { path: CASES_CONFIGURE_PATH },
   templates: { path: CASES_TEMPLATES_PATH },
   createTemplate: { path: CASES_CREATE_TEMPLATE_PATH },
+  taskSettings: { path: CASES_TASK_SETTINGS_PATH },
 };
 
 export const useAllCasesNavigation = () => {
@@ -118,6 +120,14 @@ export const useCasesCreateTemplateNavigation = () => {
     deepLinkId: APP_ID,
   });
   return { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate };
+};
+
+export const useCasesTaskSettingsNavigation = () => {
+  const [getCasesTaskSettingsUrl, navigateToCasesTaskSettings] = useCasesNavigation({
+    path: navigationMapping.taskSettings.path,
+    deepLinkId: APP_ID,
+  });
+  return { getCasesTaskSettingsUrl, navigateToCasesTaskSettings };
 };
 
 export const useTemplateViewParams = () => useParams<TemplateViewPathParams>();

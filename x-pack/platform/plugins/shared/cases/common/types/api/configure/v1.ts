@@ -27,7 +27,11 @@ import {
   CustomFieldNumberTypeRt,
 } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
-import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
+import {
+  ConfigurationBasicWithoutOwnerRt,
+  ClosureTypeRt,
+  TaskStatusesConfigurationRt,
+} from '../../domain/configure/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseBaseOptionalFieldsRequestRt } from '../case/v1';
 import {
@@ -189,6 +193,7 @@ export const ConfigurationRequestRt = rt.intersection([
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      taskStatuses: TaskStatusesConfigurationRt,
     })
   ),
 ]);
@@ -210,11 +215,12 @@ export const CaseConfigureRequestParamsRt = rt.strict({
 export const ConfigurationPatchRequestRt = rt.intersection([
   rt.exact(
     rt.partial({
-      closure_type: ConfigurationBasicWithoutOwnerRt.type.props.closure_type,
-      connector: ConfigurationBasicWithoutOwnerRt.type.props.connector,
+      closure_type: ConfigurationBasicWithoutOwnerRt.types[0].type.props.closure_type,
+      connector: ConfigurationBasicWithoutOwnerRt.types[0].type.props.connector,
       customFields: CustomFieldsConfigurationRt,
       templates: TemplatesConfigurationRt,
       observableTypes: ObservableTypesConfigurationRt,
+      taskStatuses: TaskStatusesConfigurationRt,
     })
   ),
   rt.strict({ version: rt.string }),

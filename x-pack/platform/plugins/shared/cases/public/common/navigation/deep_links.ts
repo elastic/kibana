@@ -12,6 +12,7 @@ import {
   getCreateCasePath,
   getCasesConfigurePath,
   getCasesTemplatesPath,
+  getCasesTaskSettingsPath,
 } from './paths';
 
 export const CasesDeepLinkId = {
@@ -19,6 +20,7 @@ export const CasesDeepLinkId = {
   casesCreate: 'cases_create',
   casesConfigure: 'cases_configure',
   casesTemplates: 'cases_templates',
+  casesTaskSettings: 'cases_task_settings',
 } as const;
 
 export type ICasesDeepLinkId = (typeof CasesDeepLinkId)[keyof typeof CasesDeepLinkId];
@@ -61,6 +63,15 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
       path: getCasesTemplatesPath(basePath),
     } as T & { id: ICasesDeepLinkId });
   }
+
+  deepLinks.push({
+    title: i18n.translate('xpack.cases.navigation.taskSettings', {
+      defaultMessage: 'Task settings',
+    }),
+    ...(extend[CasesDeepLinkId.casesTaskSettings] ?? {}),
+    id: CasesDeepLinkId.casesTaskSettings,
+    path: getCasesTaskSettingsPath(basePath),
+  } as T & { id: ICasesDeepLinkId });
 
   return {
     title: i18n.translate('xpack.cases.navigation.cases', {

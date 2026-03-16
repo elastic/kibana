@@ -8,12 +8,47 @@
 import * as rt from 'io-ts';
 import { UserRt } from '../user/v1';
 
-export const CaseTaskStatusRt = rt.keyof({
-  open: null,
-  in_progress: null,
-  completed: null,
-  cancelled: null,
-});
+export const CaseTaskStatusRt = rt.string;
+
+export const TaskStatusDefinitionRt = rt.intersection([
+  rt.strict({
+    key: rt.string,
+    label: rt.string,
+    color: rt.string,
+  }),
+  rt.exact(rt.partial({ disabled: rt.boolean })),
+]);
+
+export const TaskStatusesConfigurationRt = rt.array(TaskStatusDefinitionRt);
+
+/** Keys of the four built-in statuses that can be disabled but never deleted. */
+export const BUILTIN_STATUS_KEYS: ReadonlySet<string> = new Set([
+  'open',
+  'in_progress',
+  'done',
+  'cancelled',
+]);
+
+export const DEFAULT_TASK_STATUSES: Array<rt.TypeOf<typeof TaskStatusDefinitionRt>> = [
+  { key: 'open', label: 'Open', color: 'default' },
+  { key: 'in_progress', label: 'In progress', color: 'primary' },
+  { key: 'done', label: 'Done', color: 'success' },
+  { key: 'cancelled', label: 'Cancelled', color: 'default' },
+];
+
+/**
+ * Merge stored task statuses with the 4 built-in defaults.
+ * Built-ins always appear first, preserving any stored overrides (label/color/disabled).
+ * Custom statuses (not in BUILTIN_STATUS_KEYS) are appended after.
+ */
+export function mergeTaskStatusesWithDefaults(
+  stored: TaskStatusDefinition[]
+): TaskStatusDefinition[] {
+  const storedByKey = new Map(stored.map((s) => [s.key, s]));
+  const builtins = DEFAULT_TASK_STATUSES.map((def) => storedByKey.get(def.key) ?? def);
+  const custom = stored.filter((s) => !BUILTIN_STATUS_KEYS.has(s.key));
+  return [...builtins, ...custom];
+}
 
 export const CaseTaskPriorityRt = rt.keyof({
   low: null,
@@ -80,6 +115,8 @@ export const CaseTaskSummaryRt = rt.strict({
 });
 
 export type CaseTaskStatus = rt.TypeOf<typeof CaseTaskStatusRt>;
+export type TaskStatusDefinition = rt.TypeOf<typeof TaskStatusDefinitionRt>;
+export type TaskStatusesConfiguration = rt.TypeOf<typeof TaskStatusesConfigurationRt>;
 export type CaseTaskPriority = rt.TypeOf<typeof CaseTaskPriorityRt>;
 export type CaseTaskAssignee = rt.TypeOf<typeof CaseTaskAssigneeRt>;
 export type CaseTaskCustomField = rt.TypeOf<typeof CaseTaskCustomFieldRt>;

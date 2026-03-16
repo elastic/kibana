@@ -18,6 +18,7 @@ import {
   ConfigurationActivityFieldsRt,
   ConfigurationAttributesRt,
   ConfigurationBasicWithoutOwnerRt,
+  TaskStatusesConfigurationRt,
 } from '../../../common/types/domain';
 import type { ConnectorPersisted } from './connectors';
 import type { User, UserProfile } from './user';
@@ -33,7 +34,15 @@ export interface ConfigurationPersistedAttributes {
   customFields?: PersistedCustomFieldsConfiguration;
   templates?: PersistedTemplatesConfiguration;
   observableTypes?: PersistedObservableTypesConfiguration;
+  taskStatuses?: PersistedTaskStatusesConfiguration;
 }
+
+type PersistedTaskStatusesConfiguration = Array<{
+  key: string;
+  label: string;
+  color: string;
+  disabled?: boolean;
+}>;
 
 type PersistedObservableTypesConfiguration = Array<{
   key: string;
@@ -72,11 +81,12 @@ export type ConfigurationTransformedAttributes = ConfigurationAttributes;
 export type ConfigurationSavedObjectTransformed = SavedObject<ConfigurationTransformedAttributes>;
 
 export const ConfigurationPartialAttributesRt = rt.intersection([
-  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.type.props)),
+  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.types[0].type.props)),
   rt.exact(rt.partial(ConfigurationActivityFieldsRt.type.props)),
   rt.exact(
     rt.partial({
       owner: rt.string,
+      taskStatuses: TaskStatusesConfigurationRt,
     })
   ),
 ]);

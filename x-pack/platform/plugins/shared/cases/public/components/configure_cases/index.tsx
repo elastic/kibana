@@ -60,9 +60,6 @@ import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservableTypes } from '../observable_types';
 import { ObservableTypesForm } from '../observable_types/form';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { TaskTemplates } from '../task_templates/task_templates';
-import { TaskTemplateFlyout } from '../task_templates/task_template_flyout';
-import type { CaseTaskTemplate } from '../../../common/types/domain/task_template/v1';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -135,8 +132,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [templateToEdit, setTemplateToEdit] = useState<TemplateConfiguration | null>(null);
   const [observableTypeToEdit, setObservableTypeToEdit] =
     useState<ObservableTypeConfiguration | null>(null);
-  const [taskTemplateFlyoutOpen, setTaskTemplateFlyoutOpen] = useState(false);
-  const [taskTemplateToEdit, setTaskTemplateToEdit] = useState<CaseTaskTemplate | null>(null);
   const { euiTheme } = useEuiTheme();
 
   const {
@@ -571,21 +566,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
     ]
   );
 
-  const onAddTaskTemplate = useCallback(() => {
-    setTaskTemplateToEdit(null);
-    setTaskTemplateFlyoutOpen(true);
-  }, []);
-
-  const onEditTaskTemplate = useCallback((template: CaseTaskTemplate) => {
-    setTaskTemplateToEdit(template);
-    setTaskTemplateFlyoutOpen(true);
-  }, []);
-
-  const onCloseTaskTemplateFlyout = useCallback(() => {
-    setTaskTemplateFlyoutOpen(false);
-    setTaskTemplateToEdit(null);
-  }, []);
-
   const AddOrEditCustomFieldFlyout =
     flyOutVisibility?.type === 'customField' && flyOutVisibility?.visible ? (
       <CommonFlyout<CustomFieldConfiguration>
@@ -758,30 +738,11 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
           <EuiSpacer size="xl" />
 
-          <div css={sectionWrapperCss}>
-            <EuiFlexItem grow={false}>
-              <TaskTemplates
-                disabled={isLoadingCaseConfiguration}
-                isLoading={isLoadingCaseConfiguration}
-                onAddTemplate={onAddTaskTemplate}
-                onEditTemplate={onEditTaskTemplate}
-              />
-            </EuiFlexItem>
-          </div>
-
-          <EuiSpacer size="xl" />
-
           {ConnectorAddFlyout}
           {ConnectorEditFlyout}
           {AddOrEditCustomFieldFlyout}
           {AddOrEditTemplateFlyout}
           {AddOrEditObservableTypeFlyout}
-          {taskTemplateFlyoutOpen && (
-            <TaskTemplateFlyout
-              templateToEdit={taskTemplateToEdit}
-              onClose={onCloseTaskTemplateFlyout}
-            />
-          )}
         </div>
       </EuiPageBody>
     </EuiPageSection>

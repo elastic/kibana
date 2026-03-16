@@ -718,7 +718,7 @@ export const getSimilarCases = async ({
 export interface CreateTaskRequest {
   title: string;
   description?: string;
-  status?: 'open' | 'in_progress' | 'completed' | 'cancelled';
+  status?: string;
   priority?: 'low' | 'medium' | 'high' | 'critical';
   assignees?: Array<{ uid: string }>;
   due_date?: string | null;
@@ -731,7 +731,7 @@ export interface UpdateTaskRequest {
   version: string;
   title?: string;
   description?: string;
-  status?: 'open' | 'in_progress' | 'completed' | 'cancelled';
+  status?: string;
   priority?: 'low' | 'medium' | 'high' | 'critical';
   assignees?: Array<{ uid: string }>;
   due_date?: string | null;
@@ -747,15 +747,17 @@ export interface FindTasksRequest {
   per_page?: number;
 }
 
+export type CaseTasksResponse = { tasks: CaseTask[]; total: number };
+
 export const getCaseTasks = async (
   caseId: string,
   params?: FindTasksRequest,
   signal?: AbortSignal
-): Promise<{ tasks: CaseTask[]; total: number }> => {
+): Promise<CaseTasksResponse> => {
   const query = params
     ? Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined))
     : {};
-  const response = await KibanaServices.get().http.fetch<{ tasks: CaseTask[]; total: number }>(
+  const response = await KibanaServices.get().http.fetch<CaseTasksResponse>(
     getCaseTasksUrl(caseId),
     {
       method: 'GET',

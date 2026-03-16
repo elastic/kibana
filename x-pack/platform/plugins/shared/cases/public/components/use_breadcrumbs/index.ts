@@ -27,6 +27,9 @@ const getCasesBreadcrumbTitle = (deepLinkId: ICasesDeepLinkId): string => {
     [CasesDeepLinkId.casesTemplates]: i18n.translate('xpack.cases.breadcrumbs.templates', {
       defaultMessage: 'Templates',
     }),
+    [CasesDeepLinkId.casesTaskSettings]: i18n.translate('xpack.cases.breadcrumbs.taskSettings', {
+      defaultMessage: 'Task settings',
+    }),
   };
   return titles[deepLinkId];
 };
@@ -127,6 +130,10 @@ export const useCasesTitleBreadcrumbs = (caseTitle: string) => {
     applyBreadcrumbs(casesBreadcrumbs, [titleBreadcrumb]);
     KibanaServices.get().serverless?.setBreadcrumbs([titleBreadcrumb]);
   }, [caseTitle, appTitle, getAppUrl, applyBreadcrumbs]);
+};
+
+export const useCasesTaskSettingsBreadcrumbs = () => {
+  useCasesBreadcrumbs(CasesDeepLinkId.casesTaskSettings);
 };
 
 export const useCasesTemplatesBreadcrumbs = (templateTitle?: string) => {

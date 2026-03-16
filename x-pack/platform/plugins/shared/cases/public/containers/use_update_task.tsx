@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { UpdateTaskRequest } from './api';
+import type { UpdateTaskRequest, CaseTasksResponse } from './api';
 import { updateTask } from './api';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
@@ -22,10 +22,28 @@ export const useUpdateTask = (caseId: string) => {
       updateTask(caseId, taskId, request),
     {
       mutationKey: casesMutationsKeys.updateTask,
-      onError: (error: ServerError) => {
+      onMutate: async ({ taskId, request }) => {
+        const queryKey = casesQueriesKeys.tasksList(caseId);
+        await queryClient.cancelQueries(queryKey);
+
+        const previousData = queryClient.getQueryData<CaseTasksResponse>(queryKey);
+
+        if (previousData) {
+          const newTasks = previousData.tasks.map((t) =>
+            t.id === taskId ? { ...t, ...request } : t
+          );
+          queryClient.setQueryData<CaseTasksResponse>(queryKey, { ...previousData, tasks: newTasks });
+        }
+
+        return { previousData, queryKey };
+      },
+      onError: (error: ServerError, _vars, context) => {
+        if (context?.previousData) {
+          queryClient.setQueryData(context.queryKey, context.previousData);
+        }
         showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
-      onSuccess: () => {
+      onSettled: () => {
         queryClient.invalidateQueries(casesQueriesKeys.tasksList(caseId));
       },
     }

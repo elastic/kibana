@@ -162,7 +162,9 @@ export type CasesConfigurationUI = Pick<
   | 'version'
   | 'owner'
   | 'observableTypes'
->;
+> & {
+  taskStatuses?: Array<{ key: string; label: string; color: string; disabled?: boolean }>;
+};
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];
 export type CasesConfigurationUITemplate = CasesConfigurationUI['templates'][number];

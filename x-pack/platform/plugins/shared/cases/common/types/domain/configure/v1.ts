@@ -15,6 +15,7 @@ import {
 } from '../custom_field/v1';
 import { CaseBaseOptionalFieldsRt } from '../case/v1';
 import { CaseObservableTypeRt } from '../observable/v1';
+import { TaskStatusDefinitionRt } from '../task/v1';
 
 export const ClosureTypeRt = rt.union([
   rt.literal('close-by-user'),
@@ -107,28 +108,40 @@ export const TemplateConfigurationRt = rt.intersection([
 
 export const TemplatesConfigurationRt = rt.array(TemplateConfigurationRt);
 
-export const ConfigurationBasicWithoutOwnerRt = rt.strict({
-  /**
-   * The external connector
-   */
-  connector: CaseConnectorRt,
-  /**
-   * Whether to close the case after it has been synced with the external system
-   */
-  closure_type: ClosureTypeRt,
-  /**
-   * The custom fields configured for the case
-   */
-  customFields: CustomFieldsConfigurationRt,
-  /**
-   * Templates configured for the case
-   */
-  templates: TemplatesConfigurationRt,
-  /**
-   * Observable types configured for the case
-   */
-  observableTypes: ObservableTypesConfigurationRt,
-});
+export const TaskStatusesConfigurationRt = rt.array(TaskStatusDefinitionRt);
+
+export const ConfigurationBasicWithoutOwnerRt = rt.intersection([
+  rt.strict({
+    /**
+     * The external connector
+     */
+    connector: CaseConnectorRt,
+    /**
+     * Whether to close the case after it has been synced with the external system
+     */
+    closure_type: ClosureTypeRt,
+    /**
+     * The custom fields configured for the case
+     */
+    customFields: CustomFieldsConfigurationRt,
+    /**
+     * Templates configured for the case
+     */
+    templates: TemplatesConfigurationRt,
+    /**
+     * Observable types configured for the case
+     */
+    observableTypes: ObservableTypesConfigurationRt,
+  }),
+  rt.exact(
+    rt.partial({
+      /**
+       * Custom task status definitions for this configuration
+       */
+      taskStatuses: TaskStatusesConfigurationRt,
+    })
+  ),
+]);
 
 export const CasesConfigureBasicRt = rt.intersection([
   ConfigurationBasicWithoutOwnerRt,
@@ -175,3 +188,4 @@ export type Configuration = rt.TypeOf<typeof ConfigurationRt>;
 export type Configurations = rt.TypeOf<typeof ConfigurationsRt>;
 export type ObservableTypesConfiguration = rt.TypeOf<typeof ObservableTypesConfigurationRt>;
 export type ObservableTypeConfiguration = rt.TypeOf<typeof CaseObservableTypeRt>;
+export type TaskStatusesConfiguration = rt.TypeOf<typeof TaskStatusesConfigurationRt>;

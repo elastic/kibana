@@ -27,6 +27,7 @@ import {
   getCasesTemplatesPath,
   getCasesCreateTemplatePath,
   getCasesEditTemplatePath,
+  getCasesTaskSettingsPath,
 } from '../../common/navigation';
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
@@ -50,6 +51,8 @@ const EditTemplateLazy: FC<EditTemplatePageProps> = lazy(
 const AllCasesTemplatesLazy: React.FC = lazy(
   () => import('../templates_v2/pages/all_templates_page')
 );
+
+const TaskSettingsPageLazy: React.FC = lazy(() => import('../task_settings'));
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   actionsNavigation,
@@ -126,6 +129,16 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
             </Suspense>
           </Route>
         )}
+
+        <Route exact path={getCasesTaskSettingsPath(basePath)}>
+          {permissions.settings ? (
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <TaskSettingsPageLazy />
+            </Suspense>
+          ) : (
+            <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
+          )}
+        </Route>
 
         {/* NOTE: current case view implementation retains some local state between renders, eg. when going from one case directly to another one. as a short term fix, we are forcing the component remount. */}
         <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
