@@ -96,7 +96,7 @@ export const useBulkActions = ({
 
   const statusActions = useMemo((): EuiContextMenuPanelItemDescriptor[] => {
     return statusAction.getActions(selectedCases).map((statusActionMenuItem) => {
-      if (statusActionMenuItem['data-test-subj'] === 'cases-bulk-action-status-closed') {
+      if (statusActionMenuItem.key === 'cases-bulk-action-status-closed') {
         return {
           ...statusActionMenuItem,
           panel: undefined,

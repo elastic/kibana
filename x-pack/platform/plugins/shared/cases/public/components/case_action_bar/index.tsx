@@ -56,7 +56,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
 
   const onStatusChanged = useCallback(
     (status: CaseStatuses, closeReason?: string) => {
-      if (status !== 'closed' || closeReason === null) {
+      if (status !== 'closed' || closeReason == null) {
         onUpdateField({
           key: 'status',
           value: status,

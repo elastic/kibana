@@ -32,7 +32,7 @@ const ClosingReasonPanelComponent: React.FC<ClosingReasonPanelProps> = ({ onSubm
     uiSettings.get<string[]>(CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY) ?? [];
 
   const [options, setOptions] = useState<Array<EuiSelectableOption<ClosingReasonOption>>>([
-    ...DEFAULT_CLOSING_REASON_OPTIONS,
+    ...DEFAULT_CLOSING_REASON_OPTIONS.map((defaultReason) => ({ ...defaultReason })),
     ...customClosingReasons.map((reason) => ({ label: reason, key: reason })),
   ]);
 
