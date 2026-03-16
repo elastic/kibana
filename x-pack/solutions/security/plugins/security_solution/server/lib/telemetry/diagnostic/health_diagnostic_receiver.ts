@@ -22,6 +22,7 @@ import * as rx from 'rxjs';
 import type { ElasticsearchClient, LogMeta, Logger } from '@kbn/core/server';
 import type {
   EqlSearchRequest,
+  Indices,
   SearchRequest,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -31,7 +32,11 @@ import {
   type CircuitBreaker,
   type CircuitBreakerResult,
 } from './health_diagnostic_circuit_breakers.types';
-import { type HealthDiagnosticQuery, QueryType } from './health_diagnostic_service.types';
+import {
+  type HealthDiagnosticQuery,
+  QueryType,
+  PermissionError,
+} from './health_diagnostic_service.types';
 import type { TelemetryLogger } from '../telemetry_logger';
 import { newTelemetryLogger, withErrorMessage } from '../helpers';
 
@@ -65,46 +70,85 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     const regex = /^[\s\r\n]*FROM/;
 
     return from(this.indicesFor(diagnosticQuery)).pipe(
-      mergeMap((index) => {
-        const query = regex.test(diagnosticQuery.query)
-          ? diagnosticQuery.query
-          : `FROM ${index} | ${diagnosticQuery.query}`;
+      mergeMap((index) =>
+        from(this.checkPermissions(index)).pipe(
+          mergeMap(() => {
+            const query = regex.test(diagnosticQuery.query)
+              ? diagnosticQuery.query
+              : `FROM ${index} | ${diagnosticQuery.query}`;
 
-        return from(this.client.helpers.esql({ query }, { signal: abortSignal }).toRecords()).pipe(
-          mergeMap((resp) => {
-            return resp.records.map((r) => r as T);
+            return from(
+              this.client.helpers.esql({ query }, { signal: abortSignal }).toRecords()
+            ).pipe(
+              mergeMap((resp) => {
+                return resp.records.map((r) => r as T);
+              })
+            );
           })
-        );
-      })
+        )
+      )
     );
   }
 
   streamEql<T>(diagnosticQuery: HealthDiagnosticQuery, abortSignal: AbortSignal): Observable<T> {
     return from(this.indicesFor(diagnosticQuery)).pipe(
-      mergeMap((index) => {
-        const request: EqlSearchRequest = {
-          index,
-          query: diagnosticQuery.query,
-          size: diagnosticQuery.size,
-        };
+      mergeMap((index) =>
+        from(this.checkPermissions(index)).pipe(
+          mergeMap(() => {
+            const request: EqlSearchRequest = {
+              index,
+              query: diagnosticQuery.query,
+              size: diagnosticQuery.size,
+            };
 
-        return from(this.client.eql.search(request, { signal: abortSignal })).pipe(
-          mergeMap((resp) => {
-            if (resp.hits.events) {
-              return resp.hits.events.map((h) => h._source as T);
-            } else if (resp.hits.sequences) {
-              return resp.hits.sequences.map((seq) => seq.events.map((h) => h._source) as T);
-            } else {
-              this.logger.warn(
-                '>> Neither hits.events nor hits.sequences found in the response for query',
-                { queryName: diagnosticQuery.name } as LogMeta
-              );
-              return [];
-            }
+            return from(this.client.eql.search(request, { signal: abortSignal })).pipe(
+              mergeMap((resp) => {
+                if (resp.hits.events) {
+                  return resp.hits.events.map((h) => h._source as T);
+                } else if (resp.hits.sequences) {
+                  return resp.hits.sequences.map((seq) => seq.events.map((h) => h._source) as T);
+                } else {
+                  this.logger.warn(
+                    '>> Neither hits.events nor hits.sequences found in the response for query',
+                    { queryName: diagnosticQuery.name } as LogMeta
+                  );
+                  return [];
+                }
+              })
+            );
           })
-        );
-      })
+        )
+      )
     );
+  }
+
+  private async checkPermissions(index: Indices) {
+    let exists = false;
+    try {
+      exists = await this.client.indices.exists({ index, allow_no_indices: false });
+    } catch (e) {
+      throw new PermissionError(`Error accessing index: ${e}`);
+    }
+
+    if (!exists) {
+      throw new PermissionError('Index does not exist');
+    }
+
+    try {
+      const res = await this.client.security.hasPrivileges({
+        index: [
+          {
+            names: index,
+            privileges: ['read'],
+          },
+        ],
+      });
+      if (!res.has_all_requested) {
+        throw new PermissionError('Missing read privileges');
+      }
+    } catch (e) {
+      throw new PermissionError(`Error checking privileges: ${e}`);
+    }
   }
 
   streamDSL<T>(
@@ -130,8 +174,13 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     };
 
     return from(this.indicesFor(diagnosticQuery)).pipe(
-      mergeMap((index) => from(this.client.openPointInTime({ index, keep_alive: pitKeepAlive }))),
-
+      mergeMap((index) =>
+        from(this.checkPermissions(index)).pipe(
+          mergeMap(() => {
+            return from(this.client.openPointInTime({ index, keep_alive: pitKeepAlive }));
+          })
+        )
+      ),
       map((res) => res.id),
 
       mergeMap((id) => {
@@ -164,9 +213,11 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
       }),
 
       finalize(() => {
-        this.client.closePointInTime({ id: pitId }).catch((error) => {
-          this.logger.warn('>> closePointInTime error', withErrorMessage(error));
-        });
+        if (pitId !== undefined) {
+          this.client.closePointInTime({ id: pitId }).catch((error) => {
+            this.logger.warn('>> closePointInTime error', withErrorMessage(error));
+          });
+        }
       })
     );
   }
