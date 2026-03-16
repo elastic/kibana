@@ -20,8 +20,10 @@ import { nodeBuilder } from '@kbn/es-query';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
 import { omit } from 'lodash';
-import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
+import {
+  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+  type NotificationPolicySavedObjectAttributes,
+} from '../../saved_objects';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
@@ -44,9 +46,9 @@ const resolveActionAttrs = (
 ): Partial<NotificationPolicySavedObjectAttributes> => {
   switch (action.action) {
     case 'enable':
-      return { enabled: true, snoozedUntil: null };
+      return { enabled: true };
     case 'disable':
-      return { enabled: false, snoozedUntil: null };
+      return { enabled: false };
     case 'snooze':
       return { snoozedUntil: action.snoozed_until };
     case 'unsnooze':
@@ -60,6 +62,9 @@ const toAuthResponse = (
   const { apiKey: _, ...rest } = auth;
   return rest;
 };
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_PER_PAGE = 20;
 
 @injectable()
 export class NotificationPolicyClient {
@@ -209,8 +214,8 @@ export class NotificationPolicyClient {
   public async findNotificationPolicies(
     params: FindNotificationPoliciesParams = {}
   ): Promise<FindNotificationPoliciesResponse> {
-    const page = params.page ?? 1;
-    const perPage = params.perPage ?? 20;
+    const page = params.page ?? DEFAULT_PAGE;
+    const perPage = params.perPage ?? DEFAULT_PER_PAGE;
 
     const filter = this.buildFindFilter(params);
     const sortField = this.mapSortField(params.sortField);

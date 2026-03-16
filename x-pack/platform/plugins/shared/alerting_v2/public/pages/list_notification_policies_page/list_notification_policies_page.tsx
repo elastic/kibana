@@ -142,7 +142,7 @@ export const ListNotificationPoliciesPage = () => {
     pageIndex: page,
     pageSize: perPage,
     totalItemCount: total,
-    pageSizeOptions: [1, 10, 20, 50],
+    pageSizeOptions: [10, 20, 50],
   };
 
   const columns: Array<EuiBasicTableColumn<NotificationPolicyResponse>> = [
@@ -156,7 +156,6 @@ export const ListNotificationPoliciesPage = () => {
       ),
       sortable: true,
     },
-
     {
       field: 'destinations',
       name: (
@@ -176,7 +175,6 @@ export const ListNotificationPoliciesPage = () => {
         </EuiFlexGroup>
       ),
     },
-
     {
       field: 'enabled',
       name: (

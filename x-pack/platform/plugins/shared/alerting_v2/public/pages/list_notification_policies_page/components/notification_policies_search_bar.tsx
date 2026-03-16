@@ -73,7 +73,7 @@ export const NotificationPoliciesSearchBar = ({
       onSearchChange(searchInput);
     },
     SEARCH_DEBOUNCE_MS,
-    [searchInput]
+    [onSearchChange, searchInput]
   );
 
   return (
