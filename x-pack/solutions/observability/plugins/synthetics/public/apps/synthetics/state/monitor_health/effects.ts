@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { takeLatest } from 'redux-saga/effects';
+import { debounce } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import { fetchMonitorsHealth } from './api';
 import { fetchMonitorHealthAction } from './actions';
 
 export function* fetchMonitorHealthEffect() {
-  yield takeLatest(
+  yield debounce(
+    100,
     fetchMonitorHealthAction.get,
     fetchEffectFactory(
       fetchMonitorsHealth,

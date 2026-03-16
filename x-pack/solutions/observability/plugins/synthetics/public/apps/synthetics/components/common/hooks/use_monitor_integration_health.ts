@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchMonitorListAction,
@@ -18,6 +18,8 @@ import {
   resetMonitorAPI,
   resetMonitorBulkAPI,
 } from '../../../state/monitor_management/api';
+import { useSyntheticsRefreshContext } from '../../../contexts';
+
 
 export interface MonitorIntegrationStatus {
   configId: string;
@@ -51,6 +53,7 @@ export const useMonitorIntegrationHealth = (
   const { configIds: explicitConfigIds } = options ?? {};
   const dispatch = useDispatch();
   const [isResetting, setIsResetting] = useState(false);
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const {
     data: { monitors: listMonitors },
@@ -78,17 +81,10 @@ export const useMonitorIntegrationHealth = (
       .map((m) => m[ConfigKey.CONFIG_ID]);
   }, [explicitConfigIds, listLoaded, listMonitors]);
 
-  const prevIdsRef = useRef<string>('');
-
   useEffect(() => {
     if (monitorIdsToFetch.length === 0) return;
-
-    const key = monitorIdsToFetch.slice().sort().join(',');
-    if (key === prevIdsRef.current) return;
-    prevIdsRef.current = key;
-
     dispatch(fetchMonitorHealthAction.get(monitorIdsToFetch));
-  }, [dispatch, monitorIdsToFetch]);
+  }, [dispatch, monitorIdsToFetch, lastRefresh]);
 
   const statuses = useMemo(() => {
     const map = new Map<string, MonitorIntegrationStatus[]>();
@@ -159,7 +155,6 @@ export const useMonitorIntegrationHealth = (
 
   const refetchHealth = useCallback(() => {
     if (monitorIdsToFetch.length > 0) {
-      prevIdsRef.current = '';
       dispatch(fetchMonitorHealthAction.get(monitorIdsToFetch));
     }
   }, [dispatch, monitorIdsToFetch]);
