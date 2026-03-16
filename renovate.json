@@ -2714,7 +2714,7 @@
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
       "minimumReleaseAge": "14 days",
-      "enabled": true,
+      "enabled": true
     },
     {
       "groupName": "react-day-picker",
