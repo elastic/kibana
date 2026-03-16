@@ -12,6 +12,11 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { FakeConnectors } from '../mocks/actions_plugin.mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
+const CONSTANTLY_FAILING_ERROR = {
+  type: 'Error',
+  message: 'Error: Constantly failing connector',
+};
+
 // Failing: See https://github.com/elastic/kibana/issues/252871
 describe.skip('workflow with retry', () => {
   let workflowRunFixture: WorkflowRunFixture;
@@ -94,10 +99,7 @@ steps:
                 'fake_workflow_execution_id'
               );
             expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
-            expect(workflowExecutionDoc?.error).toEqual({
-              type: 'Error',
-              message: 'Error: Constantly failing connector',
-            });
+            expect(workflowExecutionDoc?.error).toEqual(CONSTANTLY_FAILING_ERROR);
             expect(workflowExecutionDoc?.scopeStack).toEqual([]);
           });
 
@@ -123,10 +125,7 @@ steps:
             expect(stepExecutions.length).toBe(3);
             stepExecutions.forEach((se) => {
               expect(se.status).toBe(ExecutionStatus.FAILED);
-              expect(se.error).toEqual({
-                type: 'Error',
-                message: 'Error: Constantly failing connector',
-              });
+              expect(se.error).toEqual(CONSTANTLY_FAILING_ERROR);
             });
           });
 
@@ -243,10 +242,7 @@ steps:
               'fake_workflow_execution_id'
             );
           expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
-          expect(workflowExecutionDoc?.error).toEqual({
-            type: 'Error',
-            message: 'Error: Constantly failing connector',
-          });
+          expect(workflowExecutionDoc?.error).toEqual(CONSTANTLY_FAILING_ERROR);
           expect(workflowExecutionDoc?.scopeStack).toEqual([]);
         });
 
@@ -271,10 +267,7 @@ steps:
           expect(stepExecutions.length).toBe(1);
           stepExecutions.forEach((se) => {
             expect(se.status).toBe(ExecutionStatus.FAILED);
-            expect(se.error).toEqual({
-              type: 'Error',
-              message: 'Error: Constantly failing connector',
-            });
+            expect(se.error).toEqual(CONSTANTLY_FAILING_ERROR);
           });
         });
 
@@ -321,7 +314,7 @@ steps:
             'fake_workflow_execution_id'
           );
         expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
-        expect(workflowExecutionDoc?.error?.type).toBe('Error');
+        expect(workflowExecutionDoc?.error?.type).toBe(CONSTANTLY_FAILING_ERROR.type);
       });
 
       it('should have 3 executions of constantlyFailingStep (1 initial + 2 retries)', async () => {

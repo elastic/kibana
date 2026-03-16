@@ -114,7 +114,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
       return;
     }
 
-    if (!fixedDelayStr) {
+    if (strategy === 'exponential') {
       const delayMs = computeRetryDelayMs(config, retryState.attempt);
       if (
         delayMs > 0 &&
