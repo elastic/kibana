@@ -107,7 +107,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 {
   protected step: TStep;
   protected stepExecutionRuntime: StepExecutionRuntime;
-  protected connectorExecutor: ConnectorExecutor;
+  protected connectorExecutor: ConnectorExecutor | undefined;
   protected workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(
@@ -118,7 +118,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   ) {
     this.step = step;
     this.stepExecutionRuntime = stepExecutionRuntime;
-    this.connectorExecutor = connectorExecutor as any;
+    this.connectorExecutor = connectorExecutor;
     this.workflowExecutionRuntime = workflowExecutionRuntime;
 
     // Graph nodes use `stepId` instead of `name`. When the factory passes a

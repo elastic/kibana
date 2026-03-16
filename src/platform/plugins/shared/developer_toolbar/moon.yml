@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/developer-toolbar'
   - '@kbn/core-chrome-layout-components'
   - '@kbn/config-schema'
+  - '@kbn/core-chrome-browser-internal-types'
 tags:
   - plugin
   - prod
