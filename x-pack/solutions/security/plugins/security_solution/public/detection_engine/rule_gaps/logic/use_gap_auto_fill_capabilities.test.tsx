@@ -34,7 +34,10 @@ describe('useGapAutoFillCapabilities', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseUserPrivileges.mockReturnValue({
-      rulesPrivileges: { rules: { read: true, edit: true } },
+      rulesPrivileges: {
+        rules: { read: true, edit: true },
+        rulesManagementSettings: { edit: true },
+      },
     });
     mockUseLicense.mockReturnValue({
       isEnterprise: () => true,
@@ -70,7 +73,10 @@ describe('useGapAutoFillCapabilities', () => {
       isEnterprise: () => true,
     });
     mockUseUserPrivileges.mockReturnValue({
-      rulesPrivileges: { rules: { read: true, edit: false } },
+      rulesPrivileges: {
+        rules: { read: true, edit: false },
+        rulesManagementSettings: { edit: true },
+      },
     });
 
     const { result } = renderHook(() => useGapAutoFillCapabilities());
