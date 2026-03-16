@@ -598,6 +598,41 @@ export const resetDefsCounter = () => {
 };
 
 /**
+ * Internal marker injected into a Zod v4 JSON schema node (via the `override`
+ * callback) to carry the user-supplied OAS component name through the
+ * conversion pipeline.  The key intentionally starts with `x-` so it is a
+ * valid JSON-Schema extension and is easy to strip afterwards.
+ */
+const COMPONENT_ID_MARKER = 'x-kbn-oas-component-id';
+
+/**
+ * Maps Zod v4 schema instances to their desired OAS `components/schemas` names.
+ * Uses a WeakMap so schema objects can be GC-ed when no longer referenced.
+ */
+const zodV4OasComponentRegistry = new WeakMap<object, string>();
+
+/**
+ * Register a Zod v4 schema so that the OAS converter emits it as a named
+ * component (`$ref: '#/components/schemas/<name>'`) instead of inlining it.
+ *
+ * Call this once per schema, at module load time (e.g. in an `oas_definitions.ts`
+ * file next to the schema definitions):
+ *
+ * ```ts
+ * import { registerZodV4Component } from '@kbn/router-to-openapispec';
+ * import { conditionSchema } from './schemas';
+ *
+ * registerZodV4Component(conditionSchema, 'Condition');
+ * ```
+ *
+ * The name must be unique across all registered schemas in the document.
+ * Names follow the same rules as OpenAPI component names: `[a-zA-Z0-9._-]+`.
+ */
+export const registerZodV4Component = (schema: z4.ZodType, name: string): void => {
+  zodV4OasComponentRegistry.set(schema as object, name);
+};
+
+/**
  * Recursively rewrite every `$ref` value that starts with `#/$defs/`
  * to point to `#/components/schemas/<uniqueKey>` instead.
  */
@@ -625,6 +660,10 @@ function rewriteDefsRefs(obj: unknown, replacements: Record<string, string>): un
  * the entries into `shared` (→ `components/schemas`), and rewrite all
  * `$ref: '#/$defs/...'` pointers so they resolve correctly in the OpenAPI
  * document root.
+ *
+ * When a `$defs` entry carries the `COMPONENT_ID_MARKER` property (injected by
+ * the `override` callback for registered schemas), that stable name is used
+ * instead of the auto-generated `_zod_v4_{batchId}_{key}` name.
  */
 function extractDefsToShared(
   defs: Record<string, unknown>,
@@ -635,9 +674,22 @@ function extractDefsToShared(
   const shared: Record<string, OpenAPIV3.SchemaObject> = {};
 
   for (const [key, value] of Object.entries(defs)) {
-    const uniqueKey = `_zod_v4_${batchId}_${key}`;
+    const def = value as Record<string, unknown>;
+
+    const stableId =
+      typeof def[COMPONENT_ID_MARKER] === 'string' ? (def[COMPONENT_ID_MARKER] as string) : null;
+
+    const uniqueKey = stableId ?? `_zod_v4_${batchId}_${key}`;
+
     replacements[`#/$defs/${key}`] = `#/components/schemas/${uniqueKey}`;
-    shared[uniqueKey] = value as OpenAPIV3.SchemaObject;
+
+    if (stableId) {
+      const { [COMPONENT_ID_MARKER]: _marker, ...rest } = def;
+
+      shared[uniqueKey] = rest as OpenAPIV3.SchemaObject;
+    } else {
+      shared[uniqueKey] = def as OpenAPIV3.SchemaObject;
+    }
   }
 
   // Rewrite $ref paths in the main schema
@@ -650,6 +702,59 @@ function extractDefsToShared(
   }
 
   return { schema: fixedSchema, shared };
+}
+
+/**
+ * Recursively traverse a (post-processed) JSON schema and extract any nodes
+ * that still carry the `COMPONENT_ID_MARKER`.  This covers the case where a
+ * registered schema appears exactly once (so Zod v4 inlined it rather than
+ * placing it in `$defs`): we still want it as a named OAS component.
+ *
+ * Marked nodes are moved into `shared` and replaced with a `$ref`.
+ */
+function hoistMarkedSchemas(
+  node: unknown,
+  shared: Record<string, OpenAPIV3.SchemaObject>
+): unknown {
+  if (typeof node !== 'object' || node === null) {
+    return node;
+  }
+
+  if (Array.isArray(node)) {
+    return node.map((item) => hoistMarkedSchemas(item, shared));
+  }
+
+  const obj = node as Record<string, unknown>;
+
+  // $ref nodes are already references — don't recurse into them
+  if ('$ref' in obj) {
+    return obj;
+  }
+
+  const name = obj[COMPONENT_ID_MARKER];
+
+  if (typeof name === 'string') {
+    const { [COMPONENT_ID_MARKER]: _marker, ...rest } = obj;
+
+    // Recursively handle nested marked schemas within this node first
+    const processed: Record<string, unknown> = {};
+
+    for (const [k, v] of Object.entries(rest)) {
+      processed[k] = hoistMarkedSchemas(v, shared);
+    }
+
+    shared[name] = processed as OpenAPIV3.SchemaObject;
+
+    return { $ref: `#/components/schemas/${name}` };
+  }
+
+  const result: Record<string, unknown> = {};
+
+  for (const [k, v] of Object.entries(obj)) {
+    result[k] = hoistMarkedSchemas(v, shared);
+  }
+
+  return result;
 }
 
 /**
@@ -758,6 +863,16 @@ export const convert = (schema: z.ZodTypeAny) => {
             delete (js as any)[key];
           }
           (js as any).not = {};
+          return;
+        }
+
+        // Inject the stable OAS component name for registered schemas.
+        // This marker is picked up by extractDefsToShared (for $defs entries)
+        // and hoistMarkedSchemas (for inline, single-use schemas).
+        const componentName = zodV4OasComponentRegistry.get(zodSchema as object);
+
+        if (componentName) {
+          (js as any)[COMPONENT_ID_MARKER] = componentName;
         }
       },
     }) as Record<string, any>;
@@ -797,6 +912,15 @@ export const convert = (schema: z.ZodTypeAny) => {
 
     // Convert JSON Schema (OAS 3.1) constructs to OpenAPI 3.0 equivalents
     processedSchema = jsonSchemaToOpenApi30(processedSchema);
+
+    // Extract any registered schemas that were inlined by z4.toJSONSchema()
+    // (single-use, non-recursive schemas don't appear in $defs — we hoist them
+    // here so they still become named components).
+    processedSchema = hoistMarkedSchemas(processedSchema, shared) as Record<string, unknown>;
+
+    for (const [key, value] of Object.entries(shared)) {
+      shared[key] = hoistMarkedSchemas(value, shared) as OpenAPIV3.SchemaObject;
+    }
 
     // Apply the same JSON-description post-processing as v3
     const description = (unwrapped as any).description;

@@ -20,7 +20,6 @@ import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import { useChromeComponentsDeps } from '../context';
 import { CollapsibleNav } from './collapsible_nav';
-import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderLogo } from './header_logo';
 import { HeaderMenuButton } from './header_menu_button';
@@ -30,7 +29,7 @@ import { HeaderNavControls } from '../shared/header_nav_controls';
 import { HeaderActionMenu } from '../shared/header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
-import { useHasAppMenuConfig } from '../shared/use_has_app_menu_config';
+import { useHasAppMenuConfig } from '../shared/chrome_hooks';
 
 export function ClassicHeader() {
   const {
@@ -157,9 +156,6 @@ export function ClassicHeader() {
             >
               {Breadcrumbs}
             </BreadcrumbsWithExtensionsWrapper>
-
-            {/* TODO: Remove once setBadge() is consolidated — https://github.com/elastic/kibana/issues/256050 */}
-            <HeaderBadge badge$={classic.badge$} />
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>

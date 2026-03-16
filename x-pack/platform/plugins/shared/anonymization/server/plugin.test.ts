@@ -12,15 +12,13 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { AnonymizationPlugin } from './plugin';
 import { ProfilesRepository } from './repository';
 import type { AnonymizationProfile, AnonymizationEntityClass } from '@kbn/anonymization-common';
+import type { AnonymizationProfileInitializer } from './types';
 
 jest.mock('./system_index', () => ({
   ensureProfilesIndex: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('./initialization', () => ({
-  ALERTS_DATA_VIEW_TARGET_TYPE: 'data_view',
-  getAlertsDataViewTargetId: (namespace: string) => `security-solution-alert-${namespace}`,
-  ensureAlertsDataViewProfile: jest.fn().mockResolvedValue(undefined),
   GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE: 'index',
   GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID: '__kbn_global_anonymization_profile__',
   LEGACY_ANONYMIZATION_UI_SETTING_KEY: 'ai:anonymizationSettings',
@@ -30,7 +28,6 @@ jest.mock('./initialization', () => ({
 }));
 const initializationMock = jest.requireMock('./initialization') as {
   ensureGlobalProfileForNamespace: jest.Mock;
-  ensureAlertsDataViewProfile: jest.Mock;
 };
 
 const createPlugin = (active = true) => {
@@ -277,5 +274,162 @@ describe('AnonymizationPlugin policy resolution', () => {
     expect(effectivePolicy).toEqual({});
     expect(findByTarget).not.toHaveBeenCalled();
     expect(initializationMock.ensureGlobalProfileForNamespace).not.toHaveBeenCalled();
+  });
+
+  it('dispatches registered profile initializers before policy resolution', async () => {
+    const plugin = createPlugin();
+    const coreStart = coreMock.createStart();
+    const shouldInitialize = jest.fn().mockReturnValue(true);
+    const initialize = jest.fn().mockResolvedValue(undefined);
+    const initializer: AnonymizationProfileInitializer = {
+      id: 'test.initializer',
+      shouldInitialize,
+      initialize,
+    };
+
+    jest.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
+
+    const start = plugin.start(coreStart, {
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+    });
+    start.registerProfileInitializer(initializer);
+
+    await start.getPolicyService().resolveEffectivePolicy('default', {
+      type: 'index',
+      id: 'logs-*',
+    });
+
+    expect(shouldInitialize).toHaveBeenCalledWith({
+      namespace: 'default',
+      target: { type: 'index', id: 'logs-*' },
+    });
+    expect(initialize).toHaveBeenCalled();
+  });
+
+  it('dispatches matching profile initializers in registration order', async () => {
+    const plugin = createPlugin();
+    const coreStart = coreMock.createStart();
+    const callOrder: string[] = [];
+
+    const firstInitializer: AnonymizationProfileInitializer = {
+      id: 'test.initializer.first',
+      shouldInitialize: jest.fn().mockReturnValue(true),
+      initialize: jest.fn().mockImplementation(async () => {
+        callOrder.push('first');
+      }),
+    };
+    const secondInitializer: AnonymizationProfileInitializer = {
+      id: 'test.initializer.second',
+      shouldInitialize: jest.fn().mockReturnValue(true),
+      initialize: jest.fn().mockImplementation(async () => {
+        callOrder.push('second');
+      }),
+    };
+
+    jest.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
+
+    const start = plugin.start(coreStart, {
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+    });
+    start.registerProfileInitializer(firstInitializer);
+    start.registerProfileInitializer(secondInitializer);
+
+    await start.getPolicyService().resolveEffectivePolicy('default', {
+      type: 'index',
+      id: 'logs-*',
+    });
+
+    expect(callOrder).toEqual(['first', 'second']);
+  });
+
+  it('stops dispatching additional initializers when one throws', async () => {
+    const plugin = createPlugin();
+    const coreStart = coreMock.createStart();
+    const firstError = new Error('initializer failure');
+
+    const firstInitializer: AnonymizationProfileInitializer = {
+      id: 'test.initializer.throwing',
+      shouldInitialize: jest.fn().mockReturnValue(true),
+      initialize: jest.fn().mockRejectedValue(firstError),
+    };
+    const secondInitializer: AnonymizationProfileInitializer = {
+      id: 'test.initializer.not_called',
+      shouldInitialize: jest.fn().mockReturnValue(true),
+      initialize: jest.fn().mockResolvedValue(undefined),
+    };
+
+    jest.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
+
+    const start = plugin.start(coreStart, {
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+    });
+    start.registerProfileInitializer(firstInitializer);
+    start.registerProfileInitializer(secondInitializer);
+
+    await expect(
+      start.getPolicyService().resolveEffectivePolicy('default', {
+        type: 'index',
+        id: 'logs-*',
+      })
+    ).rejects.toThrow('initializer failure');
+    expect(secondInitializer.initialize).not.toHaveBeenCalled();
+  });
+
+  it('overwrites existing initializer for duplicate id in start contract', async () => {
+    const plugin = createPlugin();
+    const coreStart = coreMock.createStart();
+    const firstInitialize = jest.fn().mockResolvedValue(undefined);
+    const secondInitialize = jest.fn().mockResolvedValue(undefined);
+
+    const start = plugin.start(coreStart, {
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+    });
+
+    start.registerProfileInitializer({
+      id: 'test.initializer.duplicate',
+      shouldInitialize: jest.fn().mockReturnValue(true),
+      initialize: firstInitialize,
+    });
+    start.registerProfileInitializer({
+      id: 'test.initializer.duplicate',
+      shouldInitialize: jest.fn().mockReturnValue(true),
+      initialize: secondInitialize,
+    });
+
+    jest.spyOn(ProfilesRepository.prototype, 'findByTarget').mockResolvedValue(null);
+
+    await start.getPolicyService().resolveEffectivePolicy('default', {
+      type: 'index',
+      id: 'logs-*',
+    });
+
+    expect(firstInitialize).not.toHaveBeenCalled();
+    expect(secondInitialize).toHaveBeenCalled();
+  });
+
+  it('logs a warning when duplicate initializer id is registered', () => {
+    const plugin = createPlugin();
+    const coreStart = coreMock.createStart();
+    const logger = (plugin as unknown as { logger: { warn: jest.Mock } }).logger;
+    const warnSpy = jest.spyOn(logger, 'warn');
+
+    const start = plugin.start(coreStart, {
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+    });
+
+    start.registerProfileInitializer({
+      id: 'test.initializer.duplicate_warn',
+      shouldInitialize: jest.fn().mockReturnValue(false),
+      initialize: jest.fn().mockResolvedValue(undefined),
+    });
+    start.registerProfileInitializer({
+      id: 'test.initializer.duplicate_warn',
+      shouldInitialize: jest.fn().mockReturnValue(false),
+      initialize: jest.fn().mockResolvedValue(undefined),
+    });
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Overwriting existing anonymization profile initializer: test.initializer.duplicate_warn'
+    );
   });
 });

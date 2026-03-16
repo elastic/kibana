@@ -12,7 +12,8 @@ export * from './timeline';
 export type * from './header_actions';
 export type * from './bulk_actions';
 
-const AlertClosingReasonSchema = z.enum([
+// Hardcoded list of reasons for closing alerts
+export const DefaultClosingReasonSchema = z.enum([
   'false_positive',
   'duplicate',
   'true_positive',
@@ -20,8 +21,11 @@ const AlertClosingReasonSchema = z.enum([
   'automated_closure',
   'other',
 ]);
+
+// It's possible for users to supply custom reasons
+const AlertClosingReasonSchema = z.union([DefaultClosingReasonSchema, z.string()]);
 export type AlertClosingReason = z.infer<typeof AlertClosingReasonSchema>;
-export const AlertClosingReasonValues = AlertClosingReasonSchema.enum;
+export const AlertDefaultClosingReasonValues = DefaultClosingReasonSchema.enum;
 
 export const FILTER_OPEN: Status = 'open';
 export const FILTER_CLOSED: Status = 'closed';
