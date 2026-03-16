@@ -98,7 +98,26 @@ Multiple layers prevent unbounded resource consumption:
 
 - **VALUES() cardinality**: The `VALUES()` aggregation may produce large arrays for high-cardinality groups (e.g., a host generating thousands of alerts). The `MAX_BUILDING_BLOCKS_PER_GROUP` cap mitigates this but the ES|QL response itself can still be large.
 - **No nested field support**: ES|QL does not support `nested` typed fields, so correlation cannot group by nested fields.
-- **No cross-cluster correlation**: Queries run against the local `.alerts-security.alerts-default` index only. Cross-cluster alert correlation would require CCS support in the ES|QL query.
 - **Feature flag gated**: The rule type is not enabled by default. Requires `correlationRulesEnabled` feature flag.
 - **No alert enrichment**: Building blocks reference contributing alerts by UUID but do not copy their full content. Downstream UIs must resolve the `original_alert.uuid` to display contributing alert details.
 - **Timespan is absolute**: The `NOW() - timespan` window is evaluated at query time, not relative to the rule's `from`/`to` tuple. This means the correlation window is independent of the rule schedule interval.
+
+### Cross-Cluster Correlation
+
+The correlation engine supports cross-cluster search (CCS) to correlate alerts across multiple Elasticsearch clusters. This enables detection of distributed attack patterns where signals originate from different clusters in a multi-cluster deployment.
+
+**Configuration**: Add remote cluster names to the `remoteClusters` array in the correlation config. Each name must match the pattern `[a-zA-Z0-9_-]+` (alphanumeric with hyphens and underscores).
+
+**Prerequisites**:
+- Remote clusters must be configured in the local cluster's `_cluster/settings` (see [Elasticsearch CCS docs](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-cross-cluster-search.html)).
+- The API key used by the detection engine must have `read` privileges on `.alerts-security.alerts-default` in each remote cluster, or a cross-cluster API key must be configured.
+- Remote clusters must run compatible Elasticsearch versions.
+
+**How it works**: When `remoteClusters` is set, the compiled ES|QL `FROM` clause includes both the local and remote alert indices using the `cluster:index` syntax. For example, with `remoteClusters: ["cluster-west", "cluster-east"]`:
+
+```esql
+FROM .alerts-security.alerts-default, cluster-west:.alerts-security.alerts-default, cluster-east:.alerts-security.alerts-default METADATA _id, _index
+| WHERE ...
+```
+
+Remote cluster names are validated with `validateClusterName()`, which enforces the `[a-zA-Z0-9_-]+` pattern, preventing ES|QL injection through cluster names.

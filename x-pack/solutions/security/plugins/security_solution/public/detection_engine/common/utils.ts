@@ -77,6 +77,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
     rules: [],
     groupBy: [],
     timespan: '5m',
+    remoteClusters: [],
     condition: {
       operator: 'gte',
       value: 1,

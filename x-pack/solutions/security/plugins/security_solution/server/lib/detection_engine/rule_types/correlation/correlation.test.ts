@@ -50,6 +50,12 @@ jest.mock('../factories', () => ({
   }),
 }));
 
+jest.mock('./enrich_building_blocks', () => ({
+  fetchContributingAlerts: jest.fn().mockResolvedValue(new Map()),
+  extractEnrichmentFields: jest.fn().mockReturnValue({}),
+  computeShellEnrichment: jest.fn().mockReturnValue({}),
+}));
+
 const { performEsqlRequest } = jest.requireMock('../esql/esql_request') as {
   performEsqlRequest: jest.Mock;
 };

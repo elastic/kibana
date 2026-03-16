@@ -6,6 +6,7 @@
  */
 import type { z } from '@kbn/zod/v4';
 import type {
+  CorrelationRuleCreateFields,
   EqlRuleCreateFields,
   QueryRuleCreateFields,
   SavedQueryRuleCreateFields,
@@ -120,6 +121,18 @@ export const getPrebuiltEsqlRuleSpecificFieldsMock = (): EsqlRuleCreateFields =>
   language: 'esql',
 });
 
+export const getPrebuiltCorrelationRuleSpecificFieldsMock = (): CorrelationRuleCreateFields => ({
+  type: 'correlation',
+  query: 'FROM .alerts-security.alerts-default',
+  language: 'esql',
+  correlation: {
+    type: 'temporal_ordered',
+    rules: ['auth-success-remote', 'remote-process-execution'],
+    group_by: ['host.name', 'user.name'],
+    timespan: '5m',
+  },
+});
+
 export const getPrebuiltRuleMockOfType = <T extends TypeSpecificCreateProps>(
   type: T['type']
 ): PrebuiltAssetBaseProps &
@@ -150,6 +163,9 @@ export const getPrebuiltRuleMockOfType = <T extends TypeSpecificCreateProps>(
       break;
     case 'esql':
       typeSpecificFields = getPrebuiltEsqlRuleSpecificFieldsMock();
+      break;
+    case 'correlation':
+      typeSpecificFields = getPrebuiltCorrelationRuleSpecificFieldsMock();
       break;
     default:
       throw new Error(`Unsupported rule type: ${type}`);

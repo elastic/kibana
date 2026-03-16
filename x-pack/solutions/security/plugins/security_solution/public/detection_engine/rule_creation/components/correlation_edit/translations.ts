@@ -147,6 +147,20 @@ export const CORRELATION_CONDITION_VALUE_ERROR = i18n.translate(
   }
 );
 
+export const CORRELATION_REMOTE_CLUSTERS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationRemoteClustersLabel',
+  {
+    defaultMessage: 'Remote clusters',
+  }
+);
+
+export const CORRELATION_REMOTE_CLUSTERS_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationRemoteClustersHelpText',
+  {
+    defaultMessage: 'Optional remote clusters for cross-cluster alert correlation',
+  }
+);
+
 export const CORRELATION_TYPE_TEMPORAL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationTypeTemporal',
   {

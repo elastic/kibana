@@ -18,6 +18,7 @@ import {
   CORRELATION_CONDITION_OPERATOR_CONFIG,
   CORRELATION_CONDITION_VALUE_CONFIG,
   CORRELATION_CONDITION_FIELD_CONFIG,
+  CORRELATION_REMOTE_CLUSTERS_CONFIG,
 } from './field_configs';
 import { CorrelationInfoIcon } from './correlation_info_icon';
 import * as i18n from './translations';
@@ -66,6 +67,7 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
       correlationType,
       correlationRules,
       correlationGroupBy,
+      correlationRemoteClusters,
       correlationConditionOperator,
       correlationConditionValue,
       correlationConditionField,
@@ -125,6 +127,23 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
                 noSuggestions: false,
                 placeholder: 'host.name, user.name',
                 'data-test-subj': 'correlationGroupBy',
+              }}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+
+          <EuiFormRow
+            label={i18n.CORRELATION_REMOTE_CLUSTERS_LABEL}
+            helpText={i18n.CORRELATION_REMOTE_CLUSTERS_HELP_TEXT}
+            fullWidth
+          >
+            <Field
+              field={correlationRemoteClusters}
+              euiFieldProps={{
+                fullWidth: true,
+                noSuggestions: true,
+                placeholder: 'cluster-west, cluster-east',
+                'data-test-subj': 'correlationRemoteClusters',
               }}
             />
           </EuiFormRow>
@@ -213,6 +232,10 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
           correlationGroupBy: {
             path: `${path}.groupBy`,
             config: CORRELATION_GROUP_BY_CONFIG,
+          },
+          correlationRemoteClusters: {
+            path: `${path}.remoteClusters`,
+            config: CORRELATION_REMOTE_CLUSTERS_CONFIG,
           },
           correlationConditionOperator: {
             path: `${path}.condition.operator`,

@@ -15,6 +15,11 @@ import { buildEsqlSearchRequest } from '../esql/build_esql_search_request';
 import { performEsqlRequest } from '../esql/esql_request';
 import { rowToDocument } from '../esql/utils';
 import { compileCorrelationQuery } from './compile_correlation_query';
+import {
+  fetchContributingAlerts,
+  extractEnrichmentFields,
+  computeShellEnrichment,
+} from './enrich_building_blocks';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import {
@@ -120,6 +125,24 @@ export const correlationExecutor = async ({
         };
       }
 
+      const allAlertIds = new Set<string>();
+      for (const group of correlationGroups) {
+        const ids = Array.isArray(group.alert_ids) ? group.alert_ids : [];
+        for (const id of (ids as string[]).slice(0, MAX_BUILDING_BLOCKS_PER_GROUP)) {
+          allAlertIds.add(id);
+        }
+      }
+
+      const contributingAlerts = await fetchContributingAlerts(
+        services.scopedClusterClient.asCurrentUser,
+        allAlertIds,
+        '.alerts-security.alerts-default'
+      );
+
+      ruleExecutionLogger.debug(
+        `Fetched ${contributingAlerts.size} of ${allAlertIds.size} contributing alert documents for enrichment`
+      );
+
       const wrappedAlerts: Array<{
         _id: string;
         _index: string;
@@ -138,7 +161,7 @@ export const correlationExecutor = async ({
             : typeof group.max_risk === 'number'
             ? group.max_risk
             : 0;
-        const alertIds = Array.isArray(group.alert_ids)
+        const alertIds: Array<string | null> = Array.isArray(group.alert_ids)
           ? group.alert_ids
           : group.alert_ids
           ? [group.alert_ids]
@@ -176,6 +199,11 @@ export const correlationExecutor = async ({
             : 0;
         const compositeRiskScore = Math.min(Math.round(maxRisk * (1 + boostMultiplier)), 100);
 
+        const groupContributingDocs = cappedAlertIds
+          .map((id) => contributingAlerts.get(id as string))
+          .filter((doc): doc is Record<string, unknown> => doc != null);
+        const shellEnrichment = computeShellEnrichment(groupContributingDocs);
+
         const shellAlert: Record<string, unknown> = {
           [ALERT_UUID]: shellId,
           [ALERT_GROUP_ID]: shellId,
@@ -191,6 +219,7 @@ export const correlationExecutor = async ({
           'kibana.alert.correlated_alerts': cappedAlertIds,
           'kibana.alert.correlated_rule_names': ruleNames,
           'kibana.alert.workflow_status': 'open',
+          ...shellEnrichment,
           ...groupByValues,
         };
 
@@ -202,6 +231,8 @@ export const correlationExecutor = async ({
 
         for (let i = 0; i < cappedAlertIds.length; i++) {
           const bbId = uuidv4();
+          const contributingDoc = contributingAlerts.get(cappedAlertIds[i] as string);
+          const enrichedFields = contributingDoc ? extractEnrichmentFields(contributingDoc) : {};
           const buildingBlock: Record<string, unknown> = {
             [ALERT_UUID]: bbId,
             [ALERT_BUILDING_BLOCK_TYPE]: 'default',
@@ -216,6 +247,7 @@ export const correlationExecutor = async ({
             'kibana.alert.severity': highestSeverity,
             'kibana.alert.reason': `Building block for correlation: contributing alert ${cappedAlertIds[i]}`,
             'kibana.alert.workflow_status': 'open',
+            ...enrichedFields,
             ...groupByValues,
           };
           wrappedAlerts.push({

@@ -20,12 +20,31 @@ const validateFieldName = (name: string): string => {
   return name;
 };
 
+const VALID_CLUSTER_NAME = /^[a-zA-Z0-9_-]+$/;
+const validateClusterName = (name: string): string => {
+  if (!VALID_CLUSTER_NAME.test(name)) {
+    throw new Error(`Invalid remote cluster name: "${name}"`);
+  }
+  return name;
+};
+
+const buildFromClause = (remoteClusters?: string[]): string => {
+  const indices = [ALERTS_INDEX];
+  if (remoteClusters && remoteClusters.length > 0) {
+    for (const cluster of remoteClusters) {
+      validateClusterName(cluster);
+      indices.push(`${cluster}:${ALERTS_INDEX}`);
+    }
+  }
+  return indices.join(', ');
+};
+
 export const compileCorrelationQuery = (
   correlation: CorrelationConfig,
   selfRuleId: string,
   maxGroups?: number
 ): string => {
-  const { rules, type, groupBy, timespan, condition } = correlation;
+  const { rules, type, groupBy, timespan, condition, remoteClusters } = correlation;
   if (groupBy.length === 0) {
     throw new Error('Correlation rules require at least one groupBy field');
   }
@@ -37,12 +56,20 @@ export const compileCorrelationQuery = (
     rules.length === 1
       ? `kibana.alert.rule.uuid == "${escapeEsqlString(rules[0])}"`
       : `kibana.alert.rule.uuid IN (${rules.map((r) => `"${escapeEsqlString(r)}"`).join(', ')})`;
+  const fromClause = buildFromClause(remoteClusters);
 
   let query: string;
 
   switch (type) {
     case 'temporal':
-      query = compileTemporalQuery({ ruleFilter, selfGuard, groupByFields, timespan, rules });
+      query = compileTemporalQuery({
+        ruleFilter,
+        selfGuard,
+        groupByFields,
+        timespan,
+        rules,
+        fromClause,
+      });
       break;
     case 'temporal_ordered':
       query = compileTemporalOrderedQuery({
@@ -51,6 +78,7 @@ export const compileCorrelationQuery = (
         groupByFields,
         timespan,
         rules,
+        fromClause,
       });
       break;
     case 'event_count':
@@ -60,6 +88,7 @@ export const compileCorrelationQuery = (
         groupByFields,
         timespan,
         condition,
+        fromClause,
       });
       break;
     case 'value_count':
@@ -69,6 +98,7 @@ export const compileCorrelationQuery = (
         groupByFields,
         timespan,
         condition,
+        fromClause,
       });
       break;
     default:
@@ -88,6 +118,7 @@ interface QueryParts {
   selfGuard: string;
   groupByFields: string;
   timespan: string;
+  fromClause: string;
   rules?: string[];
   condition?: { operator: string; value: number; field?: string } | undefined;
 }
@@ -98,9 +129,10 @@ const compileTemporalQuery = ({
   groupByFields,
   timespan,
   rules,
+  fromClause,
 }: QueryParts): string => {
   const minRules = rules?.length ?? 2;
-  return `FROM ${ALERTS_INDEX} METADATA _id, _index
+  return `FROM ${fromClause} METADATA _id, _index
 | WHERE ${ruleFilter}
   AND ${selfGuard}
   AND @timestamp >= NOW() - ${timespan}
@@ -122,9 +154,10 @@ const compileTemporalOrderedQuery = ({
   groupByFields,
   timespan,
   rules,
+  fromClause,
 }: QueryParts): string => {
   const minRules = rules?.length ?? 2;
-  return `FROM ${ALERTS_INDEX} METADATA _id, _index
+  return `FROM ${fromClause} METADATA _id, _index
 | WHERE ${ruleFilter}
   AND ${selfGuard}
   AND @timestamp >= NOW() - ${timespan}
@@ -147,10 +180,11 @@ const compileEventCountQuery = ({
   groupByFields,
   timespan,
   condition,
+  fromClause,
 }: QueryParts): string => {
   const op = condition ? mapOperator(condition.operator) : '>';
   const val = condition?.value ?? 1;
-  return `FROM ${ALERTS_INDEX} METADATA _id, _index
+  return `FROM ${fromClause} METADATA _id, _index
 | WHERE ${ruleFilter}
   AND ${selfGuard}
   AND @timestamp >= NOW() - ${timespan}
@@ -172,11 +206,12 @@ const compileValueCountQuery = ({
   groupByFields,
   timespan,
   condition,
+  fromClause,
 }: QueryParts): string => {
   const field = condition?.field ? validateFieldName(condition.field) : 'kibana.alert.uuid';
   const op = condition ? mapOperator(condition.operator) : '>';
   const val = condition?.value ?? 1;
-  return `FROM ${ALERTS_INDEX} METADATA _id, _index
+  return `FROM ${fromClause} METADATA _id, _index
 | WHERE ${ruleFilter}
   AND ${selfGuard}
   AND @timestamp >= NOW() - ${timespan}

@@ -210,6 +210,16 @@ export const CorrelationConfig = z.object({
     })
     .optional(),
   aliases: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+  remoteClusters: z
+    .array(
+      z
+        .string()
+        .regex(
+          /^[a-zA-Z0-9_-]+$/,
+          'Remote cluster name must be alphanumeric with hyphens/underscores'
+        )
+    )
+    .optional(),
 });
 
 export type CorrelationSpecificRuleParams = z.infer<typeof CorrelationSpecificRuleParams>;

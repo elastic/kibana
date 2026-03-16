@@ -75,3 +75,10 @@ export const CORRELATION_CONDITION_FIELD_CONFIG = {
   helpText: i18n.CORRELATION_CONDITION_FIELD_HELP_TEXT,
   defaultValue: '' as unknown,
 };
+
+export const CORRELATION_REMOTE_CLUSTERS_CONFIG = {
+  type: FIELD_TYPES.COMBO_BOX,
+  label: i18n.CORRELATION_REMOTE_CLUSTERS_LABEL,
+  helpText: i18n.CORRELATION_REMOTE_CLUSTERS_HELP_TEXT,
+  defaultValue: [] as unknown,
+};

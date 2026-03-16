@@ -256,6 +256,50 @@ describe('compileCorrelationQuery', () => {
       expect(query).toContain('| LIMIT 1');
     });
 
+    it('compiles temporal query with remote clusters', () => {
+      const query = compileCorrelationQuery(
+        makeConfig({ remoteClusters: ['cluster-west'] }),
+        SELF_RULE_ID
+      );
+
+      expect(query).toContain(
+        'FROM .alerts-security.alerts-default, cluster-west:.alerts-security.alerts-default METADATA _id, _index'
+      );
+    });
+
+    it('compiles query with multiple remote clusters', () => {
+      const query = compileCorrelationQuery(
+        makeConfig({ remoteClusters: ['cluster-west', 'cluster-east'] }),
+        SELF_RULE_ID
+      );
+
+      expect(query).toContain(
+        'FROM .alerts-security.alerts-default, cluster-west:.alerts-security.alerts-default, cluster-east:.alerts-security.alerts-default METADATA _id, _index'
+      );
+    });
+
+    it('validates remote cluster names', () => {
+      expect(() =>
+        compileCorrelationQuery(
+          makeConfig({ remoteClusters: ['valid-cluster', 'invalid cluster!'] }),
+          SELF_RULE_ID
+        )
+      ).toThrow('Invalid remote cluster name');
+    });
+
+    it('compiles query without remote indices when remoteClusters is empty', () => {
+      const query = compileCorrelationQuery(makeConfig({ remoteClusters: [] }), SELF_RULE_ID);
+
+      expect(query).toContain('FROM .alerts-security.alerts-default METADATA _id, _index');
+      expect(query).not.toContain('cluster');
+    });
+
+    it('compiles query without remote indices when remoteClusters is undefined', () => {
+      const query = compileCorrelationQuery(makeConfig(), SELF_RULE_ID);
+
+      expect(query).toContain('FROM .alerts-security.alerts-default METADATA _id, _index');
+    });
+
     it('throws when groupBy is empty', () => {
       expect(() => compileCorrelationQuery(makeConfig({ groupBy: [] }), SELF_RULE_ID)).toThrow(
         'Correlation rules require at least one groupBy field'
@@ -300,6 +344,16 @@ describe('compileCorrelationQuery', () => {
     it.each(types)('"%s" applies the timespan filter', (type) => {
       const query = compileCorrelationQuery(makeConfig({ type, timespan: '10m' }), SELF_RULE_ID);
       expect(query).toContain('@timestamp >= NOW() - 10m');
+    });
+
+    it.each(types)('"%s" includes remote clusters in FROM clause when configured', (type) => {
+      const query = compileCorrelationQuery(
+        makeConfig({ type, remoteClusters: ['remote1'] }),
+        SELF_RULE_ID
+      );
+      expect(query).toContain(
+        'FROM .alerts-security.alerts-default, remote1:.alerts-security.alerts-default METADATA _id, _index'
+      );
     });
   });
 });
