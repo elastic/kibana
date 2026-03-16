@@ -454,7 +454,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
               defaultMessage:
                 'Check if your log data meets recommended retention periods across key categories.',
             })}
-      </EuiText>
+          </EuiText>
         </EuiFlexItem>
         {nonCompliantStats.hasIssues && (
           <>
