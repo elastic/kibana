@@ -269,8 +269,8 @@ run(
           # Local: check serverless contracts against main
           node scripts/check_contracts.ts --distribution serverless
 
-          # Local: check against a specific branch
-          node scripts/check_contracts.ts --distribution stack --baseBranch 9.3
+          # Local: check against a specific commit
+          node scripts/check_contracts.ts --distribution stack --mergeBase <commit-sha>
       `,
     },
   }

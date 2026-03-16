@@ -94,11 +94,11 @@ node scripts/check_api_contracts.js \
   --distribution stack \
   --specPath oas_docs/output/kibana.yaml
 
-# Check serverless contracts against a specific branch
+# Check serverless contracts against a specific commit
 node scripts/check_api_contracts.js \
   --distribution serverless \
   --specPath oas_docs/output/kibana.serverless.yaml \
-  --baseBranch 9.3
+  --mergeBase <commit-sha>
 ```
 
 **Flags:**
