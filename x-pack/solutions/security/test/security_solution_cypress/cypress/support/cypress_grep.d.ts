@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-/// <reference types="@cypress/grep" />
+// / <reference types="@cypress/grep" />
