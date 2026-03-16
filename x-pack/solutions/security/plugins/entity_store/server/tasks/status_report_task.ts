@@ -141,10 +141,10 @@ async function runTask({
     // Report status
     try {
       const statusResult = await assetManagerClient.getStatus(true);
-      telemetryReporter.reportEvent(
-        ENTITY_STORE_HEALTH_REPORT_EVENT,
-        toHealthReportPayload(statusResult)
-      );
+      telemetryReporter.reportEvent(ENTITY_STORE_HEALTH_REPORT_EVENT, {
+        namespace,
+        ...toHealthReportPayload(statusResult),
+      });
     } catch (e) {
       logger.error(`Error reporting entity store health: ${getErrorMessage(e)}`);
     }

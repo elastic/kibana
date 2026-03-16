@@ -49,6 +49,7 @@ interface EntityStoreHealthEnginePayload {
 }
 
 interface EntityStoreHealthReportPayload {
+  namespace: string;
   engines: EntityStoreHealthEnginePayload[];
 }
 
@@ -177,6 +178,12 @@ export const ENTITY_MAINTAINER_EVENT = {
 export const ENTITY_STORE_HEALTH_REPORT_EVENT = {
   eventType: 'entity_store_health_report',
   schema: {
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the entity store health is reported (e.g. "default")',
+      },
+    },
     engines: {
       type: 'array',
       items: {
