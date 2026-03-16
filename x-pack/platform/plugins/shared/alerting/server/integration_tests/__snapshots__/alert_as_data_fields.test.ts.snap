@@ -661,6 +661,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.attack_discovery.case_id": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.attack_discovery.details_markdown": Object {
       "array": false,
       "required": true,
