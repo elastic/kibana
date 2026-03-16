@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { MAX_GLOBAL_PARAMS_PER_REQUEST, SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { DeleteParamsResponse, SyntheticsParams } from '../../../../common/runtime_types';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
@@ -29,6 +29,7 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         schema.object({
           ids: schema.arrayOf(schema.string(), {
             minSize: 1,
+            maxSize: MAX_GLOBAL_PARAMS_PER_REQUEST,
           }),
         })
       ),

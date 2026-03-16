@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { DeleteMonitorAPI } from './services/delete_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { DeleteParamsResponse } from '../../../common/runtime_types';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { MAX_MONITOR_IDS_PER_REQUEST, SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
   DeleteParamsResponse[],
@@ -26,6 +26,7 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
         schema.object({
           ids: schema.arrayOf(schema.string(), {
             minSize: 1,
+            maxSize: MAX_MONITOR_IDS_PER_REQUEST,
           }),
         })
       ),

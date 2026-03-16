@@ -14,7 +14,7 @@ import { validateRouteSpaceName } from '../../common';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { MAX_TAGS_PER_GLOBAL_PARAM, SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 const RequestParamsSchema = schema.object({
@@ -45,7 +45,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
           })
         ),
         description: schema.maybe(schema.string()),
-        tags: schema.maybe(schema.arrayOf(schema.string())),
+        tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_TAGS_PER_GLOBAL_PARAM })),
       }),
     },
   },
