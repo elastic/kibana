@@ -22,6 +22,8 @@ export interface IngestFlowRegistration {
   getContent: () => Promise<React.ComponentType<IngestFlowProps>>;
 }
 
-export interface IngestHubSetup {
+export type IngestHubSetup = Record<string, never>;
+
+export interface IngestHubStart {
   registerIngestFlow: (flow: IngestFlowRegistration) => void;
 }

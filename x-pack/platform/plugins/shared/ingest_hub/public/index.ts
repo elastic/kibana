@@ -7,8 +7,14 @@
 
 import type { PluginInitializer } from '@kbn/core/public';
 import { IngestHubPlugin } from './plugin';
-import type { IngestHubSetup } from './types';
+import type { IngestHubSetup, IngestHubStart } from './types';
 
-export type { IngestHubSetup, IngestFlowRegistration, IngestFlowProps } from './types';
+export type {
+  IngestHubSetup,
+  IngestHubStart,
+  IngestFlowRegistration,
+  IngestFlowProps,
+} from './types';
 
-export const plugin: PluginInitializer<IngestHubSetup> = () => new IngestHubPlugin();
+export const plugin: PluginInitializer<IngestHubSetup, IngestHubStart> = () =>
+  new IngestHubPlugin();

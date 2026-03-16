@@ -12,7 +12,7 @@ import { DEFAULT_APP_CATEGORIES, type CoreSetup, type Plugin } from '@kbn/core/p
 import { i18n } from '@kbn/i18n';
 import { from, map, switchMap } from 'rxjs';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { IngestHubSetup, IngestFlowRegistration } from './types';
+import type { IngestHubSetup, IngestHubStart, IngestFlowRegistration } from './types';
 
 const INGEST_HUB_ENABLED_FLAG = 'ingestHub.enabled';
 
@@ -20,7 +20,7 @@ const IngestHubApp = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.IngestHubApp }))
 );
 
-export class IngestHubPlugin implements Plugin<IngestHubSetup> {
+export class IngestHubPlugin implements Plugin<IngestHubSetup, IngestHubStart> {
   private readonly ingestFlows: IngestFlowRegistration[] = [];
 
   setup(coreSetup: CoreSetup): IngestHubSetup {
@@ -64,12 +64,14 @@ export class IngestHubPlugin implements Plugin<IngestHubSetup> {
       },
     });
 
+    return {};
+  }
+
+  start(): IngestHubStart {
     return {
       registerIngestFlow: (flow: IngestFlowRegistration) => {
         this.ingestFlows.push(flow);
       },
     };
   }
-
-  start() {}
 }
