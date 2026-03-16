@@ -19,5 +19,7 @@ export {
   isValidWorkflowId,
   MAX_IMPORT_WORKFLOWS,
 } from './workflow_import_constants';
+export { extractReferencedWorkflowIds } from './extract_workflow_references';
+export { rewriteWorkflowReferences } from './rewrite_workflow_references';
 export { extractWorkflowPreview } from './workflow_preview';
 export type { WorkflowPreview } from './workflow_preview';

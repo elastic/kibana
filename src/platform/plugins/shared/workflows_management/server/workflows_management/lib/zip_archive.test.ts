@@ -16,15 +16,15 @@ import {
 } from './zip_archive';
 import type { WorkflowExportEntry } from '../../../common/lib/export';
 
-async function buildZip(files: Array<{ name: string; content: string }>): Promise<Buffer> {
+function buildZip(files: Array<{ name: string; content: string }>): Buffer {
   const zip = new AdmZip();
   for (const file of files) {
     zip.addFile(file.name, Buffer.from(file.content, 'utf-8'));
   }
-  return zip.toBufferPromise();
+  return zip.toBuffer();
 }
 
-async function buildValidZip(workflows: WorkflowExportEntry[]): Promise<Buffer> {
+function buildValidZip(workflows: WorkflowExportEntry[]): Buffer {
   const files = workflows.map((w) => ({
     name: `${w.id}.yml`,
     content: w.yaml,
@@ -38,10 +38,10 @@ async function buildValidZip(workflows: WorkflowExportEntry[]): Promise<Buffer> 
   return buildZip(files);
 }
 
-async function buildAdmZip(fn: (zip: AdmZip) => void): Promise<Buffer> {
+function buildAdmZip(fn: (zip: AdmZip) => void): Buffer {
   const zip = new AdmZip();
   fn(zip);
-  return zip.toBufferPromise();
+  return zip.toBuffer();
 }
 
 describe('generateWorkflowsArchive', () => {
@@ -86,8 +86,8 @@ describe('parseWorkflowsArchive', () => {
     expect(parsed.errors).toHaveLength(0);
   });
 
-  it('should parse a manually-constructed valid ZIP', async () => {
-    const buffer = await buildValidZip([
+  it('should parse a manually-constructed valid ZIP', () => {
+    const buffer = buildValidZip([
       { id: 'alpha', yaml: 'name: Alpha' },
       { id: 'beta', yaml: 'name: Beta' },
     ]);
@@ -97,8 +97,8 @@ describe('parseWorkflowsArchive', () => {
     expect(parsed.manifest.exportedCount).toBe(2);
   });
 
-  it('should respect maxWorkflows option', async () => {
-    const buffer = await buildValidZip([
+  it('should respect maxWorkflows option', () => {
+    const buffer = buildValidZip([
       { id: 'w-1', yaml: 'name: One' },
       { id: 'w-2', yaml: 'name: Two' },
       { id: 'w-3', yaml: 'name: Three' },
@@ -116,28 +116,28 @@ describe('parseWorkflowsArchive', () => {
     );
   });
 
-  it('should throw on empty ZIP', async () => {
-    const emptyZip = await buildAdmZip(() => {});
+  it('should throw on empty ZIP', () => {
+    const emptyZip = buildAdmZip(() => {});
     expect(() => parseWorkflowsArchive(emptyZip)).toThrow(WorkflowArchiveError);
   });
 
-  it('should throw when manifest is missing', async () => {
-    const buffer = await buildAdmZip((zip) => {
+  it('should throw when manifest is missing', () => {
+    const buffer = buildAdmZip((zip) => {
       zip.addFile('w-1.yml', Buffer.from('name: One'));
     });
     expect(() => parseWorkflowsArchive(buffer)).toThrow('manifest.yml');
   });
 
-  it('should throw when manifest is malformed', async () => {
-    const buffer = await buildZip([
+  it('should throw when manifest is malformed', () => {
+    const buffer = buildZip([
       { name: 'w-1.yml', content: 'name: One' },
       { name: 'manifest.yml', content: 'this is not valid manifest content' },
     ]);
     expect(() => parseWorkflowsArchive(buffer)).toThrow(WorkflowArchiveError);
   });
 
-  it('should reject nested entries (files inside subdirectories) with errors', async () => {
-    const buffer = await buildAdmZip((zip) => {
+  it('should reject nested entries (files inside subdirectories) with errors', () => {
+    const buffer = buildAdmZip((zip) => {
       zip.addFile('w-1.yml', Buffer.from('name: One'));
       zip.addFile('subdir/w-2.yml', Buffer.from('name: Two'));
       zip.addFile(
@@ -155,8 +155,8 @@ describe('parseWorkflowsArchive', () => {
     expect(parsed.errors[0]).toContain('Unexpected nested entry');
   });
 
-  it('should reject non-.yml files with errors', async () => {
-    const buffer = await buildZip([
+  it('should reject non-.yml files with errors', () => {
+    const buffer = buildZip([
       { name: 'w-1.yml', content: 'name: One' },
       { name: 'readme.txt', content: 'not a workflow' },
       {
@@ -175,9 +175,9 @@ describe('parseWorkflowsArchive', () => {
     expect(parsed.errors[0]).toContain('not a .yml or .yaml file');
   });
 
-  it('should reject entries with YAML content exceeding MAX_WORKFLOW_YAML_LENGTH', async () => {
+  it('should reject entries with YAML content exceeding MAX_WORKFLOW_YAML_LENGTH', () => {
     const oversized = 'a'.repeat(1_024_001);
-    const buffer = await buildValidZip([{ id: 'big', yaml: oversized }]);
+    const buffer = buildValidZip([{ id: 'big', yaml: oversized }]);
     const parsed = parseWorkflowsArchive(buffer);
 
     expect(parsed.workflows).toHaveLength(0);
@@ -185,10 +185,8 @@ describe('parseWorkflowsArchive', () => {
     expect(parsed.errors[0]).toContain('maximum YAML length');
   });
 
-  it('should reject path traversal entries as nested (adm-zip normalizes ../ to relative)', async () => {
-    // adm-zip normalizes "../../../etc/passwd" to "etc/passwd" internally,
-    // so it gets caught by the flat-structure check (contains "/").
-    const buffer = await buildAdmZip((zip) => {
+  it('should reject path traversal entries as nested (adm-zip normalizes ../ to relative)', () => {
+    const buffer = buildAdmZip((zip) => {
       zip.addFile('../../../etc/passwd', Buffer.from('evil'));
       zip.addFile(
         'manifest.yml',
@@ -201,14 +199,14 @@ describe('parseWorkflowsArchive', () => {
     expect(parsed.errors.some((e) => e.includes('Unexpected nested entry'))).toBe(true);
   });
 
-  it('should extract workflow ID from filename (stripping .yml extension)', async () => {
-    const buffer = await buildValidZip([{ id: 'my-workflow-123', yaml: 'name: Test' }]);
+  it('should extract workflow ID from filename (stripping .yml extension)', () => {
+    const buffer = buildValidZip([{ id: 'my-workflow-123', yaml: 'name: Test' }]);
     const parsed = parseWorkflowsArchive(buffer);
     expect(parsed.workflows[0].id).toBe('my-workflow-123');
   });
 
-  it('should reject entries with invalid workflow IDs (e.g. __proto__)', async () => {
-    const buffer = await buildAdmZip((zip) => {
+  it('should reject entries with invalid workflow IDs (e.g. __proto__)', () => {
+    const buffer = buildAdmZip((zip) => {
       zip.addFile('__proto__.yml', Buffer.from('name: hack'));
       zip.addFile(
         'manifest.yml',
@@ -222,7 +220,7 @@ describe('parseWorkflowsArchive', () => {
     expect(parsed.errors.some((e) => e.includes('invalid workflow ID'))).toBe(true);
   });
 
-  it('should throw when aggregate decompressed size exceeds the limit', async () => {
+  it('should throw when aggregate decompressed size exceeds the limit', () => {
     const zip = new AdmZip();
     const largeContent = 'a'.repeat(1_024_000);
     for (let i = 0; i < 55; i++) {
@@ -234,12 +232,12 @@ describe('parseWorkflowsArchive', () => {
         YAML.stringify({ exportedCount: 55, exportedAt: '2026-01-01T00:00:00Z', version: '1' })
       )
     );
-    const buffer = await zip.toBufferPromise();
+    const buffer = zip.toBuffer();
     expect(() => parseWorkflowsArchive(buffer)).toThrow('total decompressed size limit');
   });
 
-  it('should handle .yaml extension in addition to .yml', async () => {
-    const buffer = await buildAdmZip((zip) => {
+  it('should handle .yaml extension in addition to .yml', () => {
+    const buffer = buildAdmZip((zip) => {
       zip.addFile('w-1.yaml', Buffer.from('name: One'));
       zip.addFile(
         'manifest.yml',

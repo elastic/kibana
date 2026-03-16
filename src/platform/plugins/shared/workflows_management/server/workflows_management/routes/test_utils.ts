@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import AdmZip from 'adm-zip';
+import { Readable } from 'stream';
+import YAML from 'yaml';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { alertDeletionClientMock } from '@kbn/alerting-plugin/server/alert_deletion/alert_deletion_client.mock';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
@@ -144,4 +147,28 @@ export const createMockRequestHandlerContext = (
     },
     licensing: licensingMock.createRequestHandlerContext(),
   }) as unknown as WorkflowsRequestHandlerContext;
+};
+
+export function buildValidZip(workflows: Array<{ id: string; yaml: string }>): Buffer {
+  const zip = new AdmZip();
+  for (const w of workflows) {
+    zip.addFile(`${w.id}.yml`, Buffer.from(w.yaml, 'utf-8'));
+  }
+  const manifest = YAML.stringify({
+    exportedCount: workflows.length,
+    exportedAt: '2026-01-01T00:00:00.000Z',
+    version: '1',
+  });
+  zip.addFile('manifest.yml', Buffer.from(manifest, 'utf-8'));
+  return zip.toBuffer();
+}
+
+export const createFileStream = (
+  content: Buffer | string,
+  filename = 'workflow.yml'
+): Readable => {
+  const buf = typeof content === 'string' ? Buffer.from(content, 'utf-8') : content;
+  const stream = Readable.from([buf]) as Readable & { hapi: { filename: string } };
+  stream.hapi = { filename };
+  return stream;
 };

@@ -9,7 +9,6 @@
 
 import type { EuiBasicTableColumn, EuiFilePickerProps } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
@@ -21,18 +20,26 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiIcon,
+  EuiIconTip,
   EuiPanel,
-  EuiRadioGroup,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowPreview } from '../../../../common/lib/export';
+import type { WorkflowTrigger } from '../../../../server/lib/schedule_utils';
+import type {
+  ImportWorkflowsResult,
+  PreflightImportResult,
+} from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
+import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 
 const ACCEPTED_FILE_TYPES = '.yml,.yaml,.zip';
 const MB_SIZE_BYTES = 1024 * 1024;
@@ -52,6 +59,56 @@ interface ImportWorkflowsFlyoutProps {
   onClose: () => void;
 }
 
+function ImportWorkflowsCallouts({
+  preflightResult,
+  hasConflicts,
+}: {
+  preflightResult: PreflightImportResult | null;
+  hasConflicts: boolean;
+}) {
+  if (preflightResult === null) {
+    return null;
+  }
+  return (
+    <>
+      {hasConflicts ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('workflows.importFlyout.conflictsDetected', {
+              defaultMessage:
+                '{count} {count, plural, one {workflow has an ID conflict} other {workflows have ID conflicts}} with existing workflows.',
+              values: { count: preflightResult.conflicts.length },
+            })}
+            color="warning"
+            iconType="warning"
+            size="s"
+            data-test-subj="import-workflows-conflicts"
+          />
+        </>
+      ) : null}
+
+      {(preflightResult.parseErrors?.length ?? 0) > 0 ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('workflows.importFlyout.preflightParseErrors', {
+              defaultMessage:
+                '{count} {count, plural, one {line was} other {lines were}} skipped due to parse errors',
+              values: { count: preflightResult.parseErrors.length },
+            })}
+            color="warning"
+            iconType="warning"
+            size="s"
+          />
+        </>
+      ) : null}
+    </>
+  );
+}
+
 export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ onClose }) => {
   const { notifications } = useKibana().services;
   const { preflightImportWorkflows, importWorkflows } = useWorkflowActions();
@@ -60,6 +117,8 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
   const [conflictResolution, setConflictResolution] = useState<ConflictResolution>(
     CONFLICT_RESOLUTION_GENERATE_NEW_IDS
   );
+  const [importResult, setImportResult] = useState<ImportWorkflowsResult | null>(null);
+  const isImportComplete = importResult !== null;
 
   const preflightResult = preflightImportWorkflows.data ?? null;
   const isCheckingConflicts = preflightImportWorkflows.isLoading;
@@ -76,6 +135,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
     setSelectedFiles(null);
     setFileSizeError(null);
     setConflictResolution(CONFLICT_RESOLUTION_GENERATE_NEW_IDS);
+    setImportResult(null);
     onClose();
   }, [onClose, preflightReset, importReset]);
 
@@ -84,6 +144,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
       setFileSizeError(null);
       preflightReset();
       setConflictResolution(CONFLICT_RESOLUTION_GENERATE_NEW_IDS);
+      setImportResult(null);
 
       if (!files || files.length === 0) {
         setSelectedFiles(null);
@@ -124,16 +185,15 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
   );
 
   const handleImport = useCallback(() => {
-    if (!selectedFiles || selectedFiles.length === 0) {
+    if (!preflightResult?.rawWorkflows?.length) {
       return;
     }
 
-    const file = selectedFiles[0];
-    const hasConflicts = (preflightResult?.conflicts.length ?? 0) > 0;
+    const hasConflicts = (preflightResult.conflicts.length ?? 0) > 0;
 
     importMutate(
       {
-        file,
+        workflows: preflightResult.rawWorkflows,
         overwrite:
           hasConflicts && conflictResolution === CONFLICT_RESOLUTION_OVERWRITE ? true : undefined,
         generateNewIds:
@@ -143,50 +203,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
       },
       {
         onSuccess: (result) => {
-          const { created, failed, parseErrors } = result;
-
-          if (parseErrors.length > 0) {
-            notifications?.toasts.addWarning(
-              i18n.translate('workflows.importFlyout.parseWarnings', {
-                defaultMessage:
-                  '{count} {count, plural, one {line was} other {lines were}} skipped due to parse errors.',
-                values: { count: parseErrors.length },
-              }),
-              { toastLifeTimeMs: 5000 }
-            );
-          }
-
-          if (failed.length === 0) {
-            notifications?.toasts.addSuccess(
-              i18n.translate('workflows.importFlyout.success', {
-                defaultMessage:
-                  'Successfully imported {count} {count, plural, one {workflow} other {workflows}}.',
-                values: { count: created.length },
-              }),
-              { toastLifeTimeMs: 5000 }
-            );
-          } else if (created.length > 0) {
-            notifications?.toasts.addWarning(
-              i18n.translate('workflows.importFlyout.partialSuccess', {
-                defaultMessage:
-                  'Imported {createdCount} {createdCount, plural, one {workflow} other {workflows}}. ' +
-                  '{failedCount} {failedCount, plural, one {workflow} other {workflows}} failed to import.',
-                values: { createdCount: created.length, failedCount: failed.length },
-              }),
-              { toastLifeTimeMs: 5000 }
-            );
-          } else {
-            notifications?.toasts.addDanger(
-              i18n.translate('workflows.importFlyout.failure', {
-                defaultMessage:
-                  'Failed to import {count} {count, plural, one {workflow} other {workflows}}.',
-                values: { count: failed.length },
-              }),
-              { toastLifeTimeMs: 5000 }
-            );
-          }
-
-          cleanupAndClose();
+          setImportResult(result);
         },
         onError: (error) => {
           const toastError = error instanceof Error ? error : new Error(String(error));
@@ -199,20 +216,26 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
         },
       }
     );
-  }, [
-    selectedFiles,
-    preflightResult,
-    conflictResolution,
-    importMutate,
-    notifications,
-    cleanupAndClose,
-  ]);
+  }, [preflightResult, conflictResolution, importMutate, notifications]);
 
   const hasConflicts = (preflightResult?.conflicts.length ?? 0) > 0;
   const canImport = selectedFiles !== null && !isImporting && !isCheckingConflicts;
   const hasWorkflowPreviews = (preflightResult?.workflows?.length ?? 0) > 0;
 
-  const DESCRIPTION_TRUNCATE_LENGTH = 80;
+  const conflictIds = useMemo(
+    () => new Set(preflightResult?.conflicts.map((c) => c.id) ?? []),
+    [preflightResult?.conflicts]
+  );
+
+  const importStatusMap = useMemo(() => {
+    if (!importResult || !preflightResult) return new Map<string, 'success' | 'failed'>();
+    const failedIndices = new Set(importResult.failed.map((f) => f.index));
+    const map = new Map<string, 'success' | 'failed'>();
+    preflightResult.workflows.forEach((w, idx) => {
+      map.set(w.id, failedIndices.has(idx) ? 'failed' : 'success');
+    });
+    return map;
+  }, [importResult, preflightResult]);
 
   const previewColumns: Array<EuiBasicTableColumn<WorkflowPreview>> = useMemo(
     () => [
@@ -222,61 +245,53 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
           defaultMessage: 'Name',
         }),
         render: (name: string | null, item: WorkflowPreview) => (
-          <EuiText size="s">{name ?? item.id}</EuiText>
-        ),
-        width: '30%',
-      },
-      {
-        field: 'description',
-        name: i18n.translate('workflows.importFlyout.preview.descriptionColumn', {
-          defaultMessage: 'Description',
-        }),
-        render: (description: string | null) => {
-          if (!description) {
-            return (
-              <EuiText size="s" color="subdued">
-                {'\u2014'}
-              </EuiText>
-            );
-          }
-          if (description.length > DESCRIPTION_TRUNCATE_LENGTH) {
-            const truncated = `${description.slice(0, DESCRIPTION_TRUNCATE_LENGTH)}\u2026`;
-            return (
-              <EuiToolTip content={description}>
-                <EuiText size="s" tabIndex={0}>
-                  {truncated}
+          <div
+            css={css`
+              max-width: 100%;
+              overflow: hidden;
+            `}
+          >
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiFlexItem>
+                <EuiText
+                  size="s"
+                  css={css`
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                  `}
+                  title={name ?? item.id}
+                >
+                  {name ?? item.id}
                 </EuiText>
-              </EuiToolTip>
-            );
-          }
-          return <EuiText size="s">{description}</EuiText>;
-        },
-        width: '35%',
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  css={css`
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                  `}
+                  title={item.description ?? undefined}
+                >
+                  {item.description || '\u2014'}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        ),
       },
       {
         field: 'triggers',
         name: i18n.translate('workflows.importFlyout.preview.triggersColumn', {
           defaultMessage: 'Triggers',
         }),
-        render: (triggers: WorkflowPreview['triggers']) => {
-          if (triggers.length === 0) {
-            return (
-              <EuiText size="s" color="subdued">
-                {'\u2014'}
-              </EuiText>
-            );
-          }
-          return (
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {triggers.map((trigger, idx) => (
-                <EuiFlexItem grow={false} key={idx}>
-                  <EuiBadge color="hollow">{trigger.type}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          );
-        },
-        width: '20%',
+        render: (triggers: WorkflowPreview['triggers']) => (
+          <WorkflowsTriggersList triggers={triggers as WorkflowTrigger[]} />
+        ),
+        width: '25%',
       },
       {
         field: 'inputCount',
@@ -284,22 +299,83 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
           defaultMessage: 'Inputs',
         }),
         align: 'right' as const,
-        width: '15%',
+        width: '10%',
+      },
+      {
+        field: 'stepCount',
+        name: i18n.translate('workflows.importFlyout.preview.stepsColumn', {
+          defaultMessage: 'Steps',
+        }),
+        align: 'right' as const,
+        width: '10%',
+      },
+      {
+        field: 'id',
+        name: i18n.translate('workflows.importFlyout.preview.statusColumn', {
+          defaultMessage: 'Status',
+        }),
+        width: '70px',
+        render: (id: string) => {
+          if (isImportComplete) {
+            const status = importStatusMap.get(id);
+            if (status === 'success') {
+              return (
+                <EuiIcon
+                  type="checkInCircleFilled"
+                  color="success"
+                  data-test-subj={`import-preview-success-${id}`}
+                  aria-label={i18n.translate('workflows.importFlyout.preview.successIcon', {
+                    defaultMessage: 'Imported successfully',
+                  })}
+                />
+              );
+            }
+            if (status === 'failed') {
+              return (
+                <EuiIcon
+                  type="crossInACircleFilled"
+                  color="danger"
+                  data-test-subj={`import-preview-failed-${id}`}
+                  aria-label={i18n.translate('workflows.importFlyout.preview.failedIcon', {
+                    defaultMessage: 'Import failed',
+                  })}
+                />
+              );
+            }
+            return null;
+          }
+          return conflictIds.has(id) ? (
+            <EuiIconTip
+              type="warning"
+              color="warning"
+              content={i18n.translate('workflows.importFlyout.preview.conflictTooltip', {
+                defaultMessage:
+                  'A workflow with this ID already exists and will be affected by the chosen conflict resolution strategy.',
+              })}
+              iconProps={{
+                'data-test-subj': `import-preview-conflict-${id}`,
+              }}
+              aria-label={i18n.translate('workflows.importFlyout.preview.conflictIcon', {
+                defaultMessage: 'ID conflict',
+              })}
+            />
+          ) : null;
+        },
       },
     ],
-    []
+    [conflictIds, isImportComplete, importStatusMap]
   );
 
-  const conflictResolutionOptions = [
+  const conflictResolutionSelectOptions = [
     {
-      id: CONFLICT_RESOLUTION_GENERATE_NEW_IDS,
-      label: i18n.translate('workflows.importFlyout.conflictResolution.generateNewIds', {
-        defaultMessage: 'Create as new workflows (generate new IDs)',
+      value: CONFLICT_RESOLUTION_GENERATE_NEW_IDS,
+      text: i18n.translate('workflows.importFlyout.conflictResolution.generateNewIds', {
+        defaultMessage: 'Create as new workflows',
       }),
     },
     {
-      id: CONFLICT_RESOLUTION_OVERWRITE,
-      label: i18n.translate('workflows.importFlyout.conflictResolution.overwrite', {
+      value: CONFLICT_RESOLUTION_OVERWRITE,
+      text: i18n.translate('workflows.importFlyout.conflictResolution.overwrite', {
         defaultMessage: 'Overwrite existing workflows',
       }),
     },
@@ -344,7 +420,8 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
           onChange={handleFileChange}
           display="large"
           fullWidth
-          isLoading={isImporting || isCheckingConflicts}
+          disabled={isImportComplete}
+          isLoading={!isImportComplete && (isImporting || isCheckingConflicts)}
           isInvalid={fileSizeError !== null}
           aria-label={i18n.translate('workflows.importFlyout.filePickerAriaLabel', {
             defaultMessage: 'Select workflow files to import',
@@ -358,6 +435,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
             </EuiText>
           </>
         )}
+        <ImportWorkflowsCallouts preflightResult={preflightResult} hasConflicts={hasConflicts} />
 
         {hasWorkflowPreviews && preflightResult && (
           <>
@@ -389,85 +467,68 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
             </EuiPanel>
           </>
         )}
-
-        {hasConflicts && preflightResult && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              announceOnMount
-              title={i18n.translate('workflows.importFlyout.conflictsDetected', {
-                defaultMessage:
-                  '{count} {count, plural, one {workflow already exists} other {workflows already exist}}',
-                values: { count: preflightResult.conflicts.length },
-              })}
-              color="warning"
-              iconType="warning"
-              data-test-subj="import-workflows-conflicts"
-            >
-              <EuiText size="s">
-                <ul>
-                  {preflightResult.conflicts.map((conflict) => (
-                    <li key={conflict.id}>{conflict.existingName}</li>
-                  ))}
-                </ul>
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiRadioGroup
-                name="importConflictResolution"
-                options={conflictResolutionOptions}
-                idSelected={conflictResolution}
-                onChange={(id) => {
-                  if (isConflictResolution(id)) {
-                    setConflictResolution(id);
-                  }
-                }}
-                data-test-subj="import-workflows-conflict-resolution"
-              />
-            </EuiCallOut>
-          </>
-        )}
-
-        {preflightResult && (preflightResult.parseErrors?.length ?? 0) > 0 && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              announceOnMount
-              title={i18n.translate('workflows.importFlyout.preflightParseErrors', {
-                defaultMessage:
-                  '{count} {count, plural, one {line was} other {lines were}} skipped due to parse errors',
-                values: { count: preflightResult.parseErrors.length },
-              })}
-              color="warning"
-              iconType="warning"
-              size="s"
-            />
-          </>
-        )}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={cleanupAndClose} data-test-subj="import-workflows-cancel">
-              {i18n.translate('workflows.importFlyout.cancel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="import-workflows-confirm"
-              onClick={handleImport}
-              disabled={!canImport}
-              fill
-              isLoading={isImporting}
-            >
-              {i18n.translate('workflows.importFlyout.import', {
-                defaultMessage: 'Import',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {isImportComplete ? (
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={cleanupAndClose} data-test-subj="import-workflows-close">
+                {i18n.translate('workflows.importFlyout.close', {
+                  defaultMessage: 'Close',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={cleanupAndClose} data-test-subj="import-workflows-cancel">
+                {i18n.translate('workflows.importFlyout.cancel', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiSelect
+                    data-test-subj="import-workflows-conflict-resolution"
+                    options={conflictResolutionSelectOptions}
+                    value={conflictResolution}
+                    onChange={(e) => {
+                      if (isConflictResolution(e.target.value)) {
+                        setConflictResolution(e.target.value);
+                      }
+                    }}
+                    compressed
+                    disabled={!canImport}
+                    prepend={i18n.translate('workflows.importFlyout.conflictResolution.label', {
+                      defaultMessage: 'On conflicts',
+                    })}
+                    aria-label={i18n.translate(
+                      'workflows.importFlyout.conflictResolution.ariaLabel',
+                      { defaultMessage: 'Conflict resolution strategy' }
+                    )}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="import-workflows-confirm"
+                    onClick={handleImport}
+                    disabled={!canImport}
+                    fill
+                    isLoading={isImporting}
+                  >
+                    {i18n.translate('workflows.importFlyout.import', {
+                      defaultMessage: 'Import',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

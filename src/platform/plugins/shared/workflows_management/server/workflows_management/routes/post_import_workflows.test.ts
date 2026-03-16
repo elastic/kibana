@@ -8,10 +8,11 @@
  */
 
 import AdmZip from 'adm-zip';
-import { Readable } from 'stream';
 import YAML from 'yaml';
 import { registerPostImportWorkflowsRoute } from './post_import_workflows';
 import {
+  buildValidZip,
+  createFileStream,
   createMockResponse,
   createMockRouterInstance,
   createMockWorkflowsApi,
@@ -21,27 +22,6 @@ import {
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 jest.mock('../lib/with_license_check');
-
-async function buildValidZip(workflows: Array<{ id: string; yaml: string }>): Promise<Buffer> {
-  const zip = new AdmZip();
-  for (const w of workflows) {
-    zip.addFile(`${w.id}.yml`, Buffer.from(w.yaml, 'utf-8'));
-  }
-  const manifest = YAML.stringify({
-    exportedCount: workflows.length,
-    exportedAt: '2026-01-01T00:00:00.000Z',
-    version: '1',
-  });
-  zip.addFile('manifest.yml', Buffer.from(manifest, 'utf-8'));
-  return zip.toBufferPromise();
-}
-
-const createFileStream = (content: Buffer | string, filename = 'workflow.yml'): Readable => {
-  const buf = typeof content === 'string' ? Buffer.from(content, 'utf-8') : content;
-  const stream = Readable.from([buf]) as Readable & { hapi: { filename: string } };
-  stream.hapi = { filename };
-  return stream;
-};
 
 describe('POST /api/workflows/_import', () => {
   let workflowsApi: WorkflowsManagementApi;
@@ -128,7 +108,7 @@ describe('POST /api/workflows/_import', () => {
   describe('ZIP import', () => {
     it('should import workflows from a ZIP archive', async () => {
       const handler = getRouteHandler();
-      const zipBuffer = await buildValidZip([
+      const zipBuffer = buildValidZip([
         { id: 'w-1', yaml: 'name: one' },
         { id: 'w-2', yaml: 'name: two' },
       ]);
@@ -149,14 +129,15 @@ describe('POST /api/workflows/_import', () => {
           { id: 'w-2', yaml: 'name: two' },
         ]),
         'default',
-        expect.anything()
+        expect.anything(),
+        { overwrite: false }
       );
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
-    it('should strip IDs when generateNewIds is true', async () => {
+    it('should generate new IDs when generateNewIds is true', async () => {
       const handler = getRouteHandler();
-      const zipBuffer = await buildValidZip([{ id: 'w-1', yaml: 'name: one' }]);
+      const zipBuffer = buildValidZip([{ id: 'w-1', yaml: 'name: one' }]);
 
       workflowsApi.bulkCreateWorkflows = jest
         .fn()
@@ -165,16 +146,58 @@ describe('POST /api/workflows/_import', () => {
       const mockResponse = createMockResponse();
       await handler({}, createRequest(zipBuffer, { generateNewIds: true }), mockResponse);
 
-      expect(workflowsApi.bulkCreateWorkflows).toHaveBeenCalledWith(
-        [{ yaml: 'name: one' }],
-        'default',
-        expect.anything()
+      const payloads = (workflowsApi.bulkCreateWorkflows as jest.Mock).mock.calls[0][0];
+      expect(payloads).toHaveLength(1);
+      expect(payloads[0].id).toMatch(/^workflow-/);
+      expect(payloads[0].id).not.toBe('w-1');
+      expect(payloads[0].yaml).toBe('name: one');
+    });
+
+    it('should rewrite cross-references when generateNewIds is true', async () => {
+      const handler = getRouteHandler();
+      const parentYaml = [
+        'name: Parent',
+        'steps:',
+        '  - name: call-child',
+        '    type: workflow.execute',
+        '    with:',
+        '      workflow-id: child-1',
+      ].join('\n');
+      const childYaml = 'name: Child\nsteps: []';
+
+      const zipBuffer = buildValidZip([
+        { id: 'parent-1', yaml: parentYaml },
+        { id: 'child-1', yaml: childYaml },
+      ]);
+
+      workflowsApi.bulkCreateWorkflows = jest
+        .fn()
+        .mockResolvedValue({ created: [{ id: 'new-parent' }, { id: 'new-child' }], failed: [] });
+
+      const mockResponse = createMockResponse();
+      await handler({}, createRequest(zipBuffer, { generateNewIds: true }), mockResponse);
+
+      const payloads = (workflowsApi.bulkCreateWorkflows as jest.Mock).mock.calls[0][0];
+      expect(payloads).toHaveLength(2);
+
+      const parentPayload = payloads.find(
+        (p: { id: string; yaml: string }) =>
+          p.id !== payloads.find((c: { id: string; yaml: string }) => c.yaml === childYaml)?.id
       );
+      const childPayload = payloads.find((p: { id: string; yaml: string }) => p.yaml === childYaml);
+
+      expect(childPayload).toBeDefined();
+      expect(childPayload!.id).toMatch(/^workflow-/);
+
+      expect(parentPayload).toBeDefined();
+      expect(parentPayload!.id).toMatch(/^workflow-/);
+      expect(parentPayload!.yaml).toContain(`workflow-id: ${childPayload!.id}`);
+      expect(parentPayload!.yaml).not.toContain('workflow-id: child-1');
     });
 
     it('should detect conflicts when neither overwrite nor generateNewIds is set', async () => {
       const handler = getRouteHandler();
-      const zipBuffer = await buildValidZip([{ id: 'w-1', yaml: 'name: one' }]);
+      const zipBuffer = buildValidZip([{ id: 'w-1', yaml: 'name: one' }]);
 
       workflowsApi.checkWorkflowConflicts = jest
         .fn()
@@ -191,7 +214,7 @@ describe('POST /api/workflows/_import', () => {
 
     it('should skip conflict check when overwrite is true', async () => {
       const handler = getRouteHandler();
-      const zipBuffer = await buildValidZip([{ id: 'w-1', yaml: 'name: one' }]);
+      const zipBuffer = buildValidZip([{ id: 'w-1', yaml: 'name: one' }]);
 
       workflowsApi.bulkCreateWorkflows = jest
         .fn()
@@ -263,7 +286,7 @@ describe('POST /api/workflows/_import', () => {
   describe('security edge cases', () => {
     it('should reject prototype pollution attempt in workflow ID', async () => {
       const handler = getRouteHandler();
-      const zipBuffer = await buildValidZip([{ id: '__proto__', yaml: 'name: hack' }]);
+      const zipBuffer = buildValidZip([{ id: '__proto__', yaml: 'name: hack' }]);
 
       const mockResponse = createMockResponse();
       await handler({}, createRequest(zipBuffer), mockResponse);
@@ -275,7 +298,7 @@ describe('POST /api/workflows/_import', () => {
     it('should reject entries with oversized YAML content', async () => {
       const handler = getRouteHandler();
       const oversizedYaml = 'a'.repeat(1_024_001);
-      const zipBuffer = await buildValidZip([{ id: 'big', yaml: oversizedYaml }]);
+      const zipBuffer = buildValidZip([{ id: 'big', yaml: oversizedYaml }]);
 
       const mockResponse = createMockResponse();
       await handler({}, createRequest(zipBuffer), mockResponse);

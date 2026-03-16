@@ -11,6 +11,7 @@ import type { HttpStart } from '@kbn/core/public';
 import type { DownloadableContent } from '@kbn/share-plugin/public';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
+import { extractReferencedWorkflowIds } from '../../../common/lib/export/extract_workflow_references';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
 const FALLBACK_FILENAME = 'workflow_export';
@@ -83,4 +84,62 @@ export const exportWorkflows = async (
 
   downloadFileAs(filename, blob);
   return exportable.length;
+};
+
+/**
+ * Finds referenced workflow IDs from a set of workflows that are not
+ * already in the export list. Returns the missing IDs.
+ */
+export const findMissingReferencedIds = (workflowsToExport: WorkflowListItemDto[]): string[] => {
+  const exportIds = new Set(workflowsToExport.map((w) => w.id));
+  const referencedIds = new Set<string>();
+
+  for (const workflow of workflowsToExport) {
+    if (workflow.definition) {
+      for (const refId of extractReferencedWorkflowIds(workflow.definition)) {
+        if (!exportIds.has(refId)) {
+          referencedIds.add(refId);
+        }
+      }
+    }
+  }
+
+  return [...referencedIds];
+};
+
+const MAX_RESOLVE_DEPTH = 10;
+
+/**
+ * Recursively resolves all workflow references, adding transitively
+ * referenced workflows to the export list up to a max depth.
+ */
+export const resolveAllReferences = (
+  initialWorkflows: WorkflowListItemDto[],
+  allWorkflowsMap: Map<string, WorkflowListItemDto>
+): WorkflowListItemDto[] => {
+  const result = new Map<string, WorkflowListItemDto>();
+  for (const w of initialWorkflows) {
+    result.set(w.id, w);
+  }
+
+  let frontier = [...initialWorkflows];
+  for (let depth = 0; depth < MAX_RESOLVE_DEPTH && frontier.length > 0; depth++) {
+    const nextFrontier: WorkflowListItemDto[] = [];
+    for (const workflow of frontier) {
+      if (workflow.definition) {
+        for (const refId of extractReferencedWorkflowIds(workflow.definition)) {
+          if (!result.has(refId)) {
+            const referenced = allWorkflowsMap.get(refId);
+            if (referenced) {
+              result.set(refId, referenced);
+              nextFrontier.push(referenced);
+            }
+          }
+        }
+      }
+    }
+    frontier = nextFrontier;
+  }
+
+  return [...result.values()];
 };

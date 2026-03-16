@@ -373,7 +373,8 @@ export class WorkflowsService {
   public async bulkCreateWorkflows(
     workflows: CreateWorkflowCommand[],
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { overwrite?: boolean }
   ): Promise<{
     created: WorkflowDetailDto[];
     failed: Array<{ index: number; error: string }>;
@@ -382,6 +383,7 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
+    const useOverwrite = options?.overwrite ?? false;
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const now = new Date();
@@ -389,9 +391,10 @@ export class WorkflowsService {
 
     const created: WorkflowDetailDto[] = [];
     const failed: Array<{ index: number; error: string }> = [];
-    const bulkOperations: Array<{
-      index: { _id: string; document: WorkflowProperties };
-    }> = [];
+    type BulkOp =
+      | { index: { _id: string; document: WorkflowProperties } }
+      | { create: { _id: string; document: WorkflowProperties } };
+    const bulkOperations: BulkOp[] = [];
     const validWorkflows: Array<{
       idx: number;
       id: string;
@@ -411,9 +414,15 @@ export class WorkflowsService {
           triggerDefinitions
         );
 
-        bulkOperations.push({
-          index: { _id: prepared.id, document: prepared.workflowData },
-        });
+        if (useOverwrite) {
+          bulkOperations.push({
+            index: { _id: prepared.id, document: prepared.workflowData },
+          });
+        } else {
+          bulkOperations.push({
+            create: { _id: prepared.id, document: prepared.workflowData },
+          });
+        }
         validWorkflows.push({
           idx: i,
           id: prepared.id,
@@ -428,7 +437,7 @@ export class WorkflowsService {
       }
     }
 
-    // Phase 2: Bulk index all valid workflows using op_type: create to reject duplicates
+    // Phase 2: Bulk write all valid workflows
     if (bulkOperations.length > 0) {
       const bulkResponse = await this.workflowStorage.getClient().bulk({
         operations: bulkOperations,
@@ -437,7 +446,7 @@ export class WorkflowsService {
 
       // Process bulk response
       bulkResponse.items.forEach((item, itemIndex) => {
-        const operation = item.index;
+        const operation = useOverwrite ? item.index : item.create;
         const validWorkflow = validWorkflows[itemIndex];
 
         if (operation?.error) {

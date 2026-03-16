@@ -21,8 +21,8 @@ jest.mock('../lib/with_license_check');
 
 describe('POST /api/workflows/_bulk_create', () => {
   let workflowsApi: WorkflowsManagementApi;
-  let mockRouter: any;
-  let mockSpaces: any;
+  let mockRouter: ReturnType<typeof createMockRouterInstance>;
+  let mockSpaces: ReturnType<typeof createSpacesMock>;
 
   beforeEach(() => {
     mockRouter = createMockRouterInstance();
@@ -31,20 +31,24 @@ describe('POST /api/workflows/_bulk_create', () => {
     jest.clearAllMocks();
   });
 
+  function getRouteHandler() {
+    registerPostBulkCreateWorkflowsRoute({
+      router: mockRouter,
+      api: workflowsApi,
+      logger: mockLogger,
+      spaces: mockSpaces,
+    });
+    const postCall = (mockRouter.post as jest.Mock).mock.calls.find(
+      (call: unknown[]) => (call[0] as { path: string }).path === '/api/workflows/_bulk_create'
+    );
+    return postCall?.[1];
+  }
+
   describe('handler logic', () => {
-    let routeHandler: any;
+    let routeHandler: ReturnType<typeof getRouteHandler>;
 
     beforeEach(() => {
-      registerPostBulkCreateWorkflowsRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-      const postCall = (mockRouter.post as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows/_bulk_create'
-      );
-      routeHandler = postCall?.[1];
+      routeHandler = getRouteHandler();
     });
 
     it('should bulk create workflows successfully', async () => {
@@ -60,6 +64,7 @@ describe('POST /api/workflows/_bulk_create', () => {
 
       const mockContext = {};
       const mockRequest = {
+        query: { overwrite: false },
         body: {
           workflows: [
             { yaml: 'name: Workflow 1\ntriggers:\n  - type: manual\nsteps: []' },
@@ -76,7 +81,8 @@ describe('POST /api/workflows/_bulk_create', () => {
       expect(workflowsApi.bulkCreateWorkflows).toHaveBeenCalledWith(
         mockRequest.body.workflows,
         'default',
-        mockRequest
+        mockRequest,
+        { overwrite: false }
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockResult });
     });
@@ -91,6 +97,7 @@ describe('POST /api/workflows/_bulk_create', () => {
 
       const mockContext = {};
       const mockRequest = {
+        query: { overwrite: false },
         body: {
           workflows: [
             { yaml: 'name: Workflow 1\ntriggers:\n  - type: manual\nsteps: []' },
@@ -113,6 +120,7 @@ describe('POST /api/workflows/_bulk_create', () => {
 
       const mockContext = {};
       const mockRequest = {
+        query: { overwrite: false },
         body: {
           workflows: [{ yaml: 'name: Test Workflow' }],
         },
@@ -142,6 +150,7 @@ describe('POST /api/workflows/_bulk_create', () => {
 
       const mockContext = {};
       const mockRequest = {
+        query: { overwrite: false },
         body: {
           workflows: [{ yaml: 'name: Workflow 1' }],
         },
@@ -155,7 +164,8 @@ describe('POST /api/workflows/_bulk_create', () => {
       expect(workflowsApi.bulkCreateWorkflows).toHaveBeenCalledWith(
         mockRequest.body.workflows,
         'custom-space',
-        mockRequest
+        mockRequest,
+        { overwrite: false }
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockResult });
     });
@@ -173,6 +183,7 @@ describe('POST /api/workflows/_bulk_create', () => {
 
       const mockContext = {};
       const mockRequest = {
+        query: { overwrite: false },
         body: {
           workflows: [
             { yaml: 'name: Workflow 1', id: 'workflow-custom-1' },
@@ -189,7 +200,38 @@ describe('POST /api/workflows/_bulk_create', () => {
       expect(workflowsApi.bulkCreateWorkflows).toHaveBeenCalledWith(
         mockRequest.body.workflows,
         'default',
-        mockRequest
+        mockRequest,
+        { overwrite: false }
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockResult });
+    });
+
+    it('should pass overwrite=true to the API when query param is set', async () => {
+      const mockResult = {
+        created: [{ id: 'workflow-1', name: 'Workflow 1' }],
+        failed: [],
+      };
+
+      workflowsApi.bulkCreateWorkflows = jest.fn().mockResolvedValue(mockResult);
+
+      const mockContext = {};
+      const mockRequest = {
+        query: { overwrite: true },
+        body: {
+          workflows: [{ yaml: 'name: Workflow 1', id: 'workflow-1' }],
+        },
+        headers: {},
+        url: { pathname: '/api/workflows/_bulk_create' },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(workflowsApi.bulkCreateWorkflows).toHaveBeenCalledWith(
+        mockRequest.body.workflows,
+        'default',
+        mockRequest,
+        { overwrite: true }
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockResult });
     });

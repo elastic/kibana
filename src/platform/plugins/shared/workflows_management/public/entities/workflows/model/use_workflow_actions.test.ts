@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useWorkflowActions } from './use_workflow_actions';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
@@ -91,9 +91,18 @@ describe('useWorkflowActions – import mutations', () => {
       totalWorkflows: 1,
       parseErrors: [],
       workflows: [
-        { id: 'w-1', name: 'W1', description: null, triggers: [], inputCount: 0, stepCount: 1, valid: true },
+        {
+          id: 'w-1',
+          name: 'W1',
+          description: null,
+          triggers: [],
+          inputCount: 0,
+          stepCount: 1,
+          valid: true,
+        },
       ],
       workflowIds: ['w-1'],
+      rawWorkflows: [{ id: 'w-1', yaml: 'name: W1' }],
     };
 
     it('should parse the file client-side and check conflicts via _check-conflicts', async () => {
@@ -122,10 +131,30 @@ describe('useWorkflowActions – import mutations', () => {
         totalWorkflows: 2,
         parseErrors: ['bad line'],
         workflows: [
-          { id: 'w-1', name: 'Existing', description: null, triggers: [], inputCount: 0, stepCount: 0, valid: true },
-          { id: 'w-2', name: 'New', description: 'desc', triggers: [{ type: 'manual' }], inputCount: 1, stepCount: 2, valid: true },
+          {
+            id: 'w-1',
+            name: 'Existing',
+            description: null,
+            triggers: [],
+            inputCount: 0,
+            stepCount: 0,
+            valid: true,
+          },
+          {
+            id: 'w-2',
+            name: 'New',
+            description: 'desc',
+            triggers: [{ type: 'manual' }],
+            inputCount: 1,
+            stepCount: 2,
+            valid: true,
+          },
         ],
         workflowIds: ['w-1', 'w-2'],
+        rawWorkflows: [
+          { id: 'w-1', yaml: 'name: Existing' },
+          { id: 'w-2', yaml: 'name: New' },
+        ],
       };
       mockParseImportFile.mockResolvedValueOnce(parseResult);
       mockHttp.post.mockResolvedValueOnce({
@@ -146,6 +175,7 @@ describe('useWorkflowActions – import mutations', () => {
         conflicts: [{ id: 'w-1', existingName: 'Existing' }],
         parseErrors: ['bad line'],
         workflows: parseResult.workflows,
+        rawWorkflows: parseResult.rawWorkflows,
       });
     });
 
@@ -193,6 +223,7 @@ describe('useWorkflowActions – import mutations', () => {
         parseErrors: ['all entries invalid'],
         workflows: [],
         workflowIds: [],
+        rawWorkflows: [],
       };
       mockParseImportFile.mockResolvedValueOnce(emptyResult);
 
@@ -213,29 +244,27 @@ describe('useWorkflowActions – import mutations', () => {
   // importWorkflows
   // ---------------------------------------------------------------------------
   describe('importWorkflows', () => {
+    const workflows = [{ id: 'w-1', yaml: 'name: Test' }];
     const importSuccess = {
       created: [{ id: 'w-1', name: 'W1' }],
       failed: [],
       parseErrors: [],
     };
 
-    it('should POST FormData to /api/workflows/_import with no query params by default', async () => {
+    it('should POST JSON to /api/workflows/_bulk_create with no query params by default', async () => {
       mockHttp.post.mockResolvedValueOnce(importSuccess);
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
-      const file = createFile('test.yml', 'name: Test');
 
       act(() => {
-        result.current.importWorkflows.mutate({ file });
+        result.current.importWorkflows.mutate({ workflows });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
 
       const [url, options] = mockHttp.post.mock.calls[0];
-      expect(url).toBe('/api/workflows/_import');
-      expect(options.body).toBeInstanceOf(FormData);
-      expect((options.body as FormData).get('file')).toBe(file);
-      expect(options.headers).toEqual({ 'Content-Type': undefined });
+      expect(url).toBe('/api/workflows/_bulk_create');
+      expect(JSON.parse(options.body)).toEqual({ workflows });
       expect(options.query).toEqual({});
     });
 
@@ -245,10 +274,7 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({
-          file: createFile('a.zip', 'zip'),
-          overwrite: true,
-        });
+        result.current.importWorkflows.mutate({ workflows, overwrite: true });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
@@ -257,32 +283,33 @@ describe('useWorkflowActions – import mutations', () => {
       expect(options.query).toEqual({ overwrite: true });
     });
 
-    it('should send generateNewIds=true in query when generateNewIds is true', async () => {
+    it('should generate new IDs client-side when generateNewIds is true', async () => {
       mockHttp.post.mockResolvedValueOnce(importSuccess);
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({
-          file: createFile('a.zip', 'zip'),
-          generateNewIds: true,
-        });
+        result.current.importWorkflows.mutate({ workflows, generateNewIds: true });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
 
       const [, options] = mockHttp.post.mock.calls[0];
-      expect(options.query).toEqual({ generateNewIds: true });
+      const body = JSON.parse(options.body);
+      expect(body.workflows).toHaveLength(1);
+      expect(body.workflows[0].id).toMatch(/^workflow-/);
+      expect(body.workflows[0].id).not.toBe('w-1');
+      expect(options.query).toEqual({});
     });
 
-    it('should send both flags when both overwrite and generateNewIds are true', async () => {
+    it('should generate new IDs and send overwrite when both flags are true', async () => {
       mockHttp.post.mockResolvedValueOnce(importSuccess);
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
         result.current.importWorkflows.mutate({
-          file: createFile('a.zip', 'zip'),
+          workflows,
           overwrite: true,
           generateNewIds: true,
         });
@@ -291,7 +318,9 @@ describe('useWorkflowActions – import mutations', () => {
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
 
       const [, options] = mockHttp.post.mock.calls[0];
-      expect(options.query).toEqual({ overwrite: true, generateNewIds: true });
+      const body = JSON.parse(options.body);
+      expect(body.workflows[0].id).toMatch(/^workflow-/);
+      expect(options.query).toEqual({ overwrite: true });
     });
 
     it('should omit falsy flags from query params', async () => {
@@ -301,7 +330,7 @@ describe('useWorkflowActions – import mutations', () => {
 
       act(() => {
         result.current.importWorkflows.mutate({
-          file: createFile('a.yml', 'y'),
+          workflows,
           overwrite: false,
           generateNewIds: false,
         });
@@ -320,7 +349,7 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ file: createFile('a.yml', 'y') });
+        result.current.importWorkflows.mutate({ workflows });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
@@ -339,7 +368,7 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ file: createFile('a.yml', 'y') });
+        result.current.importWorkflows.mutate({ workflows });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isError).toBe(true));
@@ -350,7 +379,10 @@ describe('useWorkflowActions – import mutations', () => {
 
     it('should expose the import result via data', async () => {
       const response = {
-        created: [{ id: 'w-1', name: 'W1' }, { id: 'w-2', name: 'W2' }],
+        created: [
+          { id: 'w-1', name: 'W1' },
+          { id: 'w-2', name: 'W2' },
+        ],
         failed: [{ index: 2, error: 'invalid yaml' }],
         parseErrors: ['readme.txt is not a .yml file'],
       };
@@ -359,7 +391,7 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ file: createFile('a.zip', 'zip') });
+        result.current.importWorkflows.mutate({ workflows });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
@@ -375,7 +407,7 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ file: createFile('bad.zip', 'bad') });
+        result.current.importWorkflows.mutate({ workflows });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isError).toBe(true));
@@ -388,7 +420,7 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ file: createFile('x.yml', '') });
+        result.current.importWorkflows.mutate({ workflows });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isError).toBe(true));
@@ -412,13 +444,15 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ file: createFile('a.yml', 'first') });
+        result.current.importWorkflows.mutate({ workflows });
       });
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
       expect(result.current.importWorkflows.data).toEqual(firstResponse);
 
       act(() => {
-        result.current.importWorkflows.mutate({ file: createFile('b.yml', 'second') });
+        result.current.importWorkflows.mutate({
+          workflows: [{ id: 'w-2', yaml: 'name: Second' }],
+        });
       });
       await waitFor(() => expect(result.current.importWorkflows.data).toEqual(secondResponse));
 
@@ -431,54 +465,82 @@ describe('useWorkflowActions – import mutations', () => {
   // ---------------------------------------------------------------------------
   describe('preflight → import sequential flow', () => {
     it('should support a full preflight-then-import flow', async () => {
-      const preflightResponse = {
-        format: 'yaml' as const,
+      const clientResult: ClientPreflightResult = {
+        format: 'yaml',
         totalWorkflows: 1,
-        conflicts: [],
         parseErrors: [],
         workflows: [
-          { id: 'w-1', name: 'W', description: null, triggers: [], inputCount: 0, stepCount: 1, valid: true },
+          {
+            id: 'w-1',
+            name: 'W',
+            description: null,
+            triggers: [],
+            inputCount: 0,
+            stepCount: 1,
+            valid: true,
+          },
         ],
+        workflowIds: ['w-1'],
+        rawWorkflows: [{ id: 'w-1', yaml: 'name: W' }],
       };
       const importResponse = { created: [{ id: 'w-1', name: 'W' }], failed: [], parseErrors: [] };
 
-      mockHttp.post.mockResolvedValueOnce(preflightResponse).mockResolvedValueOnce(importResponse);
+      mockParseImportFile.mockResolvedValueOnce(clientResult);
+      mockHttp.post
+        .mockResolvedValueOnce({ conflicts: [] })
+        .mockResolvedValueOnce(importResponse);
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
       const file = createFile('flow.yml', 'name: W');
 
-      // Step 1: preflight
       act(() => {
         result.current.preflightImportWorkflows.mutate({ file });
       });
       await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
       expect(result.current.preflightImportWorkflows.data?.conflicts).toHaveLength(0);
 
-      // Step 2: import (no conflicts, no flags)
       act(() => {
-        result.current.importWorkflows.mutate({ file });
+        result.current.importWorkflows.mutate({ workflows: clientResult.rawWorkflows });
       });
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
       expect(result.current.importWorkflows.data?.created).toHaveLength(1);
 
       expect(mockHttp.post).toHaveBeenCalledTimes(2);
-      expect(mockHttp.post.mock.calls[0][0]).toBe('/api/workflows/_import/preflight');
-      expect(mockHttp.post.mock.calls[1][0]).toBe('/api/workflows/_import');
+      expect(mockHttp.post.mock.calls[0][0]).toBe('/api/workflows/_check-conflicts');
+      expect(mockHttp.post.mock.calls[1][0]).toBe('/api/workflows/_bulk_create');
     });
 
     it('should handle preflight with conflicts then import with overwrite', async () => {
-      const preflightResponse = {
-        format: 'zip' as const,
+      const clientResult: ClientPreflightResult = {
+        format: 'zip',
         totalWorkflows: 1,
-        conflicts: [{ id: 'w-1', existingName: 'Existing Workflow' }],
         parseErrors: [],
         workflows: [
-          { id: 'w-1', name: 'Existing Workflow', description: null, triggers: [], inputCount: 0, stepCount: 1, valid: true },
+          {
+            id: 'w-1',
+            name: 'Existing Workflow',
+            description: null,
+            triggers: [],
+            inputCount: 0,
+            stepCount: 1,
+            valid: true,
+          },
         ],
+        workflowIds: ['w-1'],
+        rawWorkflows: [{ id: 'w-1', yaml: 'name: Existing Workflow' }],
       };
-      const importResponse = { created: [{ id: 'w-1', name: 'Existing Workflow' }], failed: [], parseErrors: [] };
+      const importResponse = {
+        created: [{ id: 'w-1', name: 'Existing Workflow' }],
+        failed: [],
+        parseErrors: [],
+      };
 
-      mockHttp.post.mockResolvedValueOnce(preflightResponse).mockResolvedValueOnce(importResponse);
+      mockParseImportFile.mockResolvedValueOnce(clientResult);
+      mockHttp.post
+        .mockResolvedValueOnce({
+          conflicts: [{ id: 'w-1', existingName: 'Existing Workflow' }],
+        })
+        .mockResolvedValueOnce(importResponse);
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
       const file = createFile('conflict.zip', 'zip');
@@ -490,7 +552,10 @@ describe('useWorkflowActions – import mutations', () => {
       expect(result.current.preflightImportWorkflows.data?.conflicts).toHaveLength(1);
 
       act(() => {
-        result.current.importWorkflows.mutate({ file, overwrite: true });
+        result.current.importWorkflows.mutate({
+          workflows: clientResult.rawWorkflows,
+          overwrite: true,
+        });
       });
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
 
@@ -499,18 +564,28 @@ describe('useWorkflowActions – import mutations', () => {
     });
 
     it('should handle preflight success followed by import failure', async () => {
-      const preflightResponse = {
-        format: 'yaml' as const,
+      const clientResult: ClientPreflightResult = {
+        format: 'yaml',
         totalWorkflows: 1,
-        conflicts: [],
         parseErrors: [],
         workflows: [
-          { id: 'w-1', name: 'W', description: null, triggers: [], inputCount: 0, stepCount: 1, valid: true },
+          {
+            id: 'w-1',
+            name: 'W',
+            description: null,
+            triggers: [],
+            inputCount: 0,
+            stepCount: 1,
+            valid: true,
+          },
         ],
+        workflowIds: ['w-1'],
+        rawWorkflows: [{ id: 'w-1', yaml: 'name: W' }],
       };
 
+      mockParseImportFile.mockResolvedValueOnce(clientResult);
       mockHttp.post
-        .mockResolvedValueOnce(preflightResponse)
+        .mockResolvedValueOnce({ conflicts: [] })
         .mockRejectedValueOnce(new Error('Import failed'));
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
@@ -522,11 +597,10 @@ describe('useWorkflowActions – import mutations', () => {
       await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
 
       act(() => {
-        result.current.importWorkflows.mutate({ file });
+        result.current.importWorkflows.mutate({ workflows: clientResult.rawWorkflows });
       });
       await waitFor(() => expect(result.current.importWorkflows.isError).toBe(true));
 
-      // Preflight remains successful while import has errored
       expect(result.current.preflightImportWorkflows.isSuccess).toBe(true);
       expect(result.current.importWorkflows.isError).toBe(true);
     });

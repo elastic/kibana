@@ -9,11 +9,8 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/plugins/shared/workflows_management'],
-  testMatch: [
-    '<rootDir>/src/platform/plugins/shared/workflows_management/server/**/*.test.{js,ts,tsx}',
-  ],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/workflows_management/server'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/workflows_management/server',
   coverageReporters: ['text', 'html'],

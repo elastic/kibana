@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
 import { BulkCreateWorkflowsCommandSchema } from '@kbn/workflows';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
@@ -26,13 +27,19 @@ export function registerPostBulkCreateWorkflowsRoute({
       options: WORKFLOW_ROUTE_OPTIONS,
       security: WORKFLOW_CREATE_SECURITY,
       validate: {
+        query: schema.object({
+          overwrite: schema.boolean({ defaultValue: false }),
+        }),
         body: BulkCreateWorkflowsCommandSchema,
       },
     },
     withLicenseCheck(async (context, request, response) => {
       try {
         const spaceId = spaces.getSpaceId(request);
-        const result = await api.bulkCreateWorkflows(request.body.workflows, spaceId, request);
+        const { overwrite } = request.query;
+        const result = await api.bulkCreateWorkflows(request.body.workflows, spaceId, request, {
+          overwrite,
+        });
         return response.ok({ body: result });
       } catch (error) {
         return handleRouteError(response, error);

@@ -14,7 +14,7 @@ import { parseImportFile } from './parse_import_file';
 jest.mock('../../../../common/lib/yaml/parse_workflow_yaml_to_json_without_validation', () => ({
   parseYamlToJSONWithoutValidation: (yamlString: string) => {
     try {
-      const json = YAML.parse(yamlString) as Record<string, unknown>;
+      const json = require('yaml').parse(yamlString) as Record<string, unknown>;
       return { success: true, json, document: {} };
     } catch {
       return { success: false, error: new Error('parse failed'), document: {} };
@@ -60,6 +60,7 @@ describe('parseImportFile', () => {
       expect(result.workflows[0].id).toBe('my-workflow');
       expect(result.workflows[0].name).toBe('Test Workflow');
       expect(result.workflowIds).toEqual(['my-workflow']);
+      expect(result.rawWorkflows).toEqual([{ id: 'my-workflow', yaml }]);
       expect(result.parseErrors).toHaveLength(0);
     });
 
@@ -86,6 +87,10 @@ describe('parseImportFile', () => {
       expect(result.totalWorkflows).toBe(2);
       expect(result.workflows).toHaveLength(2);
       expect(result.workflowIds).toEqual(['w-1', 'w-2']);
+      expect(result.rawWorkflows).toEqual([
+        { id: 'w-1', yaml: 'name: One\nsteps: []' },
+        { id: 'w-2', yaml: 'name: Two\nsteps: []' },
+      ]);
       expect(result.parseErrors).toHaveLength(0);
     });
 

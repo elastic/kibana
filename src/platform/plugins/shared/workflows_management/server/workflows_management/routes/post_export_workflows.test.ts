@@ -56,14 +56,10 @@ describe('POST /api/workflows/_export', () => {
   it('should export workflows as a ZIP archive', async () => {
     const handler = getRouteHandler();
 
-    workflowsApi.getWorkflow = jest.fn().mockImplementation((id: string) =>
-      Promise.resolve({
-        id,
-        name: `Workflow ${id}`,
-        yaml: `name: Workflow ${id}\nsteps: []`,
-        definition: null,
-      })
-    );
+    workflowsApi.getWorkflowsByIds = jest.fn().mockResolvedValue([
+      { id: 'w-1', name: 'Workflow w-1', yaml: 'name: Workflow w-1\nsteps: []', definition: null },
+      { id: 'w-2', name: 'Workflow w-2', yaml: 'name: Workflow w-2\nsteps: []', definition: null },
+    ]);
 
     const mockResponse = createMockResponse();
     await handler({}, createRequest(['w-1', 'w-2']), mockResponse);
@@ -84,12 +80,11 @@ describe('POST /api/workflows/_export', () => {
   it('should use workflow.yaml when definition is null', async () => {
     const handler = getRouteHandler();
 
-    workflowsApi.getWorkflow = jest.fn().mockResolvedValue({
-      id: 'w-1',
-      name: 'Test',
-      yaml: 'name: from-yaml-field',
-      definition: null,
-    });
+    workflowsApi.getWorkflowsByIds = jest
+      .fn()
+      .mockResolvedValue([
+        { id: 'w-1', name: 'Test', yaml: 'name: from-yaml-field', definition: null },
+      ]);
 
     const mockResponse = createMockResponse();
     await handler({}, createRequest(['w-1']), mockResponse);
@@ -102,28 +97,20 @@ describe('POST /api/workflows/_export', () => {
 
   it('should return 404 when none of the requested workflows exist', async () => {
     const handler = getRouteHandler();
-    workflowsApi.getWorkflow = jest.fn().mockResolvedValue(null);
+    workflowsApi.getWorkflowsByIds = jest.fn().mockResolvedValue([]);
 
     const mockResponse = createMockResponse();
     await handler({}, createRequest(['w-missing']), mockResponse);
 
     expect(mockResponse.notFound).toHaveBeenCalled();
-    const msg = (mockResponse.notFound as jest.Mock).mock.calls[0][0].body.message;
-    expect(msg).toContain('w-missing');
   });
 
   it('should skip missing workflows and export the rest', async () => {
     const handler = getRouteHandler();
 
-    workflowsApi.getWorkflow = jest.fn().mockImplementation((id: string) => {
-      if (id === 'w-missing') return Promise.resolve(null);
-      return Promise.resolve({
-        id,
-        name: 'Found',
-        yaml: `name: ${id}`,
-        definition: null,
-      });
-    });
+    workflowsApi.getWorkflowsByIds = jest
+      .fn()
+      .mockResolvedValue([{ id: 'w-1', name: 'Found', yaml: 'name: w-1', definition: null }]);
 
     const mockResponse = createMockResponse();
     await handler({}, createRequest(['w-1', 'w-missing']), mockResponse);
@@ -139,7 +126,7 @@ describe('POST /api/workflows/_export', () => {
 
   it('should handle API errors gracefully', async () => {
     const handler = getRouteHandler();
-    workflowsApi.getWorkflow = jest.fn().mockRejectedValue(new Error('ES down'));
+    workflowsApi.getWorkflowsByIds = jest.fn().mockRejectedValue(new Error('ES down'));
 
     const mockResponse = createMockResponse();
     await handler({}, createRequest(['w-1']), mockResponse);

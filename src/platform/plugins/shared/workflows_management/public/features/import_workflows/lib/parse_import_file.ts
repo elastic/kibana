@@ -28,6 +28,8 @@ export interface ClientPreflightResult {
   workflows: WorkflowPreview[];
   /** Workflow IDs extracted from the file, used for server-side conflict checks */
   workflowIds: string[];
+  /** Raw workflow payloads (id + YAML string) ready to send to the bulk create API */
+  rawWorkflows: Array<{ id: string; yaml: string }>;
 }
 
 async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult> {
@@ -48,6 +50,7 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
 
   const workflows: WorkflowPreview[] = [];
   const workflowIds: string[] = [];
+  const rawWorkflows: Array<{ id: string; yaml: string }> = [];
   const parseErrors: string[] = [];
   let totalBytes = 0;
 
@@ -106,6 +109,7 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
     const preview = extractWorkflowPreview(id, yaml);
     workflows.push(preview);
     workflowIds.push(id);
+    rawWorkflows.push({ id, yaml });
   }
 
   return {
@@ -114,6 +118,7 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
     parseErrors,
     workflows,
     workflowIds,
+    rawWorkflows,
   };
 }
 
@@ -129,6 +134,7 @@ function parseYamlFile(content: string, filename: string): ClientPreflightResult
     parseErrors: [],
     workflows: [preview],
     workflowIds: [id],
+    rawWorkflows: [{ id, yaml: content }],
   };
 }
 

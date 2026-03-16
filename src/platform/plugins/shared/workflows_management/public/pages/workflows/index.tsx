@@ -9,6 +9,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -125,9 +126,8 @@ export function WorkflowsPage() {
               {canCreateWorkflow && (
                 <>
                   <EuiFlexItem grow={false}>
-                    <EuiButton
+                    <EuiButtonEmpty
                       iconType="importAction"
-                      color="primary"
                       size="m"
                       onClick={() => setShowImportFlyout(true)}
                       data-test-subj="importWorkflowsButton"
@@ -137,7 +137,7 @@ export function WorkflowsPage() {
                         defaultMessage="Import"
                         ignoreTag
                       />
-                    </EuiButton>
+                    </EuiButtonEmpty>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton

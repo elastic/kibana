@@ -60,6 +60,8 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
     await pageObjects.workflowList.uploadFile(toFilePayload('single.yml', yaml, 'text/yaml'));
     await pageObjects.workflowList.confirmImport();
 
+    await expect(pageObjects.workflowList.getImportCloseButton()).toBeVisible();
+    await pageObjects.workflowList.closeImport();
     await expect(flyout).toBeHidden();
     await expect(pageObjects.workflowList.getWorkflowRow('ImportYAML Single')).toBeVisible();
   });
@@ -91,6 +93,9 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
     );
     await pageObjects.workflowList.confirmImport();
 
+    await expect(pageObjects.workflowList.getImportCloseButton()).toBeVisible();
+    await pageObjects.workflowList.closeImport();
+    await expect(pageObjects.workflowList.getImportFlyout()).toBeHidden();
     await expect(pageObjects.workflowList.getWorkflowRow('ImportZIP First')).toBeVisible();
     await expect(pageObjects.workflowList.getWorkflowRow('ImportZIP Second')).toBeVisible();
   });
@@ -142,6 +147,8 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
     await pageObjects.workflowList.selectConflictResolution('generateNewIds');
     await pageObjects.workflowList.confirmImport();
 
+    await expect(pageObjects.workflowList.getImportCloseButton()).toBeVisible();
+    await pageObjects.workflowList.closeImport();
     await expect(pageObjects.workflowList.getImportFlyout()).toBeHidden();
   });
 
@@ -169,6 +176,8 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
     await pageObjects.workflowList.selectConflictResolution('overwrite');
     await pageObjects.workflowList.confirmImport();
 
+    await expect(pageObjects.workflowList.getImportCloseButton()).toBeVisible();
+    await pageObjects.workflowList.closeImport();
     await expect(pageObjects.workflowList.getImportFlyout()).toBeHidden();
     await expect(pageObjects.workflowList.getWorkflowRow('ImportOverwrite Existing')).toBeVisible();
   });

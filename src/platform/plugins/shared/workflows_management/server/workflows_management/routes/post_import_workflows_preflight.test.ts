@@ -8,10 +8,11 @@
  */
 
 import AdmZip from 'adm-zip';
-import { Readable } from 'stream';
 import YAML from 'yaml';
 import { registerPostImportWorkflowsPreflightRoute } from './post_import_workflows_preflight';
 import {
+  buildValidZip,
+  createFileStream,
   createMockResponse,
   createMockRouterInstance,
   createMockWorkflowsApi,
@@ -21,27 +22,6 @@ import {
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 jest.mock('../lib/with_license_check');
-
-async function buildValidZip(workflows: Array<{ id: string; yaml: string }>): Promise<Buffer> {
-  const zip = new AdmZip();
-  for (const w of workflows) {
-    zip.addFile(`${w.id}.yml`, Buffer.from(w.yaml, 'utf-8'));
-  }
-  const manifest = YAML.stringify({
-    exportedCount: workflows.length,
-    exportedAt: '2026-01-01T00:00:00.000Z',
-    version: '1',
-  });
-  zip.addFile('manifest.yml', Buffer.from(manifest, 'utf-8'));
-  return zip.toBufferPromise();
-}
-
-const createFileStream = (content: Buffer | string, filename = 'workflow.yml'): Readable => {
-  const buf = typeof content === 'string' ? Buffer.from(content, 'utf-8') : content;
-  const stream = Readable.from([buf]) as Readable & { hapi: { filename: string } };
-  stream.hapi = { filename };
-  return stream;
-};
 
 describe('POST /api/workflows/_import/preflight', () => {
   let workflowsApi: WorkflowsManagementApi;
@@ -117,7 +97,7 @@ describe('POST /api/workflows/_import/preflight', () => {
 
   it('should return zip format with workflow previews and no conflicts', async () => {
     const handler = getRouteHandler();
-    const zipBuffer = await buildValidZip([
+    const zipBuffer = buildValidZip([
       {
         id: 'w-1',
         yaml: 'name: one\ntriggers:\n  - type: manual\nsteps:\n  - name: s1\n    type: console',
@@ -148,7 +128,7 @@ describe('POST /api/workflows/_import/preflight', () => {
 
   it('should detect conflicts for existing workflow IDs in ZIP', async () => {
     const handler = getRouteHandler();
-    const zipBuffer = await buildValidZip([
+    const zipBuffer = buildValidZip([
       {
         id: 'w-1',
         yaml: 'name: one\ntriggers:\n  - type: manual\nsteps:\n  - name: s1\n    type: console',

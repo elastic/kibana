@@ -160,12 +160,13 @@ export class WorkflowsManagementApi {
   public async bulkCreateWorkflows(
     workflows: CreateWorkflowCommand[],
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { overwrite?: boolean }
   ): Promise<{
     created: WorkflowDetailDto[];
     failed: Array<{ index: number; error: string }>;
   }> {
-    return this.workflowsService.bulkCreateWorkflows(workflows, spaceId, request);
+    return this.workflowsService.bulkCreateWorkflows(workflows, spaceId, request, options);
   }
 
   public async cloneWorkflow(

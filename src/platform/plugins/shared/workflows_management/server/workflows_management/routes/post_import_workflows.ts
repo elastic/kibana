@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as generateUuid } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_CREATE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
+import { rewriteWorkflowReferences } from '../../../common/lib/export';
 import { MAX_IMPORT_PAYLOAD_BYTES, MAX_IMPORT_WORKFLOWS } from '../lib/import_utils';
 import { parseIncomingFile } from '../lib/parse_incoming_file';
 import { withLicenseCheck } from '../lib/with_license_check';
@@ -102,12 +104,19 @@ export function registerPostImportWorkflowsRoute({
             });
           }
 
-          const workflowPayloads = result.workflows.map((w) => {
-            if (generateNewIds) {
-              return { yaml: w.yaml };
+          let workflowPayloads;
+          if (generateNewIds) {
+            const idMapping = new Map<string, string>();
+            for (const w of result.workflows) {
+              idMapping.set(w.id, `workflow-${generateUuid()}`);
             }
-            return { id: w.id, yaml: w.yaml };
-          });
+            workflowPayloads = result.workflows.map((w) => ({
+              id: idMapping.get(w.id) ?? `workflow-${generateUuid()}`,
+              yaml: rewriteWorkflowReferences(w.yaml, idMapping),
+            }));
+          } else {
+            workflowPayloads = result.workflows.map((w) => ({ id: w.id, yaml: w.yaml }));
+          }
 
           if (!overwrite && !generateNewIds) {
             const idsToCheck = workflowPayloads
@@ -128,7 +137,9 @@ export function registerPostImportWorkflowsRoute({
             }
           }
 
-          const bulkResult = await api.bulkCreateWorkflows(workflowPayloads, spaceId, request);
+          const bulkResult = await api.bulkCreateWorkflows(workflowPayloads, spaceId, request, {
+            overwrite,
+          });
           return response.ok({ body: { ...bulkResult, parseErrors: result.errors } });
         }
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as generateUuid } from 'uuid';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
@@ -17,6 +18,7 @@ import type {
 } from '@kbn/workflows';
 import { useRunWorkflow } from '@kbn/workflows-ui';
 import type { WorkflowPreview } from '../../../../common/lib/export';
+import { rewriteWorkflowReferences } from '../../../../common/lib/export';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
 import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -42,6 +44,7 @@ export interface PreflightImportResult {
   conflicts: Array<{ id: string; existingName: string }>;
   parseErrors: string[];
   workflows: WorkflowPreview[];
+  rawWorkflows: Array<{ id: string; yaml: string }>;
 }
 
 export interface ImportWorkflowsResult {
@@ -51,7 +54,7 @@ export interface ImportWorkflowsResult {
 }
 
 export interface ImportWorkflowsParams {
-  file: File;
+  workflows: Array<{ id: string; yaml: string }>;
   overwrite?: boolean;
   generateNewIds?: boolean;
 }
@@ -361,25 +364,34 @@ export function useWorkflowActions() {
         conflicts,
         parseErrors: clientResult.parseErrors,
         workflows: clientResult.workflows,
+        rawWorkflows: clientResult.rawWorkflows,
       };
     },
   });
 
   const importWorkflows = useMutation<ImportWorkflowsResult, HttpError, ImportWorkflowsParams>({
-    mutationKey: ['POST', 'workflows', '_import'],
-    mutationFn: ({ file, overwrite, generateNewIds }) => {
-      const formData = new FormData();
-      formData.append('file', file);
+    mutationKey: ['POST', 'workflows', '_bulk_create'],
+    mutationFn: ({ workflows, overwrite, generateNewIds }) => {
+      let processedWorkflows = workflows;
+
+      if (generateNewIds) {
+        const idMapping = new Map<string, string>();
+        for (const w of workflows) {
+          idMapping.set(w.id, `workflow-${generateUuid()}`);
+        }
+        processedWorkflows = workflows.map((w) => ({
+          id: idMapping.get(w.id) ?? `workflow-${generateUuid()}`,
+          yaml: rewriteWorkflowReferences(w.yaml, idMapping),
+        }));
+      }
+
       const query: Record<string, boolean> = {};
       if (overwrite) {
         query.overwrite = true;
       }
-      if (generateNewIds) {
-        query.generateNewIds = true;
-      }
-      return http.post<ImportWorkflowsResult>('/api/workflows/_import', {
-        body: formData,
-        headers: { 'Content-Type': undefined },
+
+      return http.post<ImportWorkflowsResult>('/api/workflows/_bulk_create', {
+        body: JSON.stringify({ workflows: processedWorkflows }),
         query,
       });
     },

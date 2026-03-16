@@ -16,11 +16,22 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
-import { exportWorkflows } from '../../../common/lib/export_workflows';
+import { ExportReferencesModal } from './export_references_modal';
+import {
+  exportWorkflows,
+  findMissingReferencedIds,
+  resolveAllReferences,
+} from '../../../common/lib/export_workflows';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
+
+interface ExportModalState {
+  missingWorkflows: WorkflowListItemDto[];
+  pendingExport: WorkflowListItemDto[];
+}
 
 interface UseWorkflowBulkActionsProps {
   selectedWorkflows: WorkflowListItemDto[];
+  allWorkflows: WorkflowListItemDto[];
   onAction: () => void;
   onActionSuccess: () => void;
   deselectWorkflows: () => void;
@@ -35,6 +46,7 @@ const TOAST_LIFE_TIME_MS = 3000;
 
 export const useWorkflowBulkActions = ({
   selectedWorkflows,
+  allWorkflows,
   onAction,
   onActionSuccess,
   deselectWorkflows,
@@ -42,7 +54,13 @@ export const useWorkflowBulkActions = ({
   const { application, http, notifications } = useKibana().services;
   const { deleteWorkflows, updateWorkflow } = useWorkflowActions();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [exportModalState, setExportModalState] = useState<ExportModalState | null>(null);
   const modalTitleId = useGeneratedHtmlId();
+
+  const allWorkflowsMap = useMemo(
+    () => new Map(allWorkflows.map((w) => [w.id, w])),
+    [allWorkflows]
+  );
 
   const canDeleteWorkflow = application?.capabilities.workflowsManagement.deleteWorkflow;
   const canUpdateWorkflow = application?.capabilities.workflowsManagement.updateWorkflow;
@@ -159,47 +177,98 @@ export const useWorkflowBulkActions = ({
     bulkUpdateWorkflows(enabledWorkflows, { enabled: false });
   }, [selectedWorkflows, bulkUpdateWorkflows]);
 
-  const handleExportWorkflows = useCallback(async () => {
+  const performExport = useCallback(
+    async (workflowsToExport: WorkflowListItemDto[]) => {
+      if (!http) return;
+      try {
+        const exportedCount = await exportWorkflows(workflowsToExport, http);
+        const skippedCount = workflowsToExport.length - exportedCount;
+
+        if (skippedCount > 0) {
+          notifications?.toasts.addWarning(
+            i18n.translate('workflows.bulkActions.exportPartial', {
+              defaultMessage:
+                'Exported {exportedCount} {exportedCount, plural, one {workflow} other {workflows}}. ' +
+                '{skippedCount} {skippedCount, plural, one {workflow was} other {workflows were}} skipped due to missing definitions.',
+              values: { exportedCount, skippedCount },
+            }),
+            { toastLifeTimeMs: TOAST_LIFE_TIME_MS }
+          );
+        } else {
+          notifications?.toasts.addSuccess(
+            i18n.translate('workflows.bulkActions.exportSuccess', {
+              defaultMessage:
+                'Successfully exported {exportedCount} {exportedCount, plural, one {workflow} other {workflows}}.',
+              values: { exportedCount },
+            }),
+            { toastLifeTimeMs: TOAST_LIFE_TIME_MS }
+          );
+        }
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        notifications?.toasts.addError(error, {
+          title: i18n.translate('workflows.bulkActions.exportError', {
+            defaultMessage: 'Failed to export workflows',
+          }),
+          toastLifeTimeMs: TOAST_LIFE_TIME_MS,
+        });
+      }
+      deselectWorkflows();
+    },
+    [http, notifications, deselectWorkflows]
+  );
+
+  const handleExportWorkflows = useCallback(() => {
     onAction();
-    if (!http) {
+    const missingIds = findMissingReferencedIds(selectedWorkflows);
+
+    if (missingIds.length === 0) {
+      performExport(selectedWorkflows);
       return;
     }
-    try {
-      const exportedCount = await exportWorkflows(selectedWorkflows, http);
-      const skippedCount = selectedWorkflows.length - exportedCount;
 
-      if (skippedCount > 0) {
-        notifications?.toasts.addWarning(
-          i18n.translate('workflows.bulkActions.exportPartial', {
-            defaultMessage:
-              'Exported {exportedCount} {exportedCount, plural, one {workflow} other {workflows}}. ' +
-              '{skippedCount} {skippedCount, plural, one {workflow was} other {workflows were}} skipped due to missing definitions.',
-            values: { exportedCount, skippedCount },
-          }),
-          { toastLifeTimeMs: TOAST_LIFE_TIME_MS }
-        );
-      } else {
-        notifications?.toasts.addSuccess(
-          i18n.translate('workflows.bulkActions.exportSuccess', {
-            defaultMessage:
-              'Successfully exported {exportedCount} {exportedCount, plural, one {workflow} other {workflows}}.',
-            values: { exportedCount },
-          }),
-          { toastLifeTimeMs: TOAST_LIFE_TIME_MS }
-        );
-      }
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      notifications?.toasts.addError(error, {
-        title: i18n.translate('workflows.bulkActions.exportError', {
-          defaultMessage: 'Failed to export workflows',
-        }),
-        toastLifeTimeMs: TOAST_LIFE_TIME_MS,
-      });
+    const missingWorkflows = missingIds
+      .map((id) => allWorkflowsMap.get(id))
+      .filter((w): w is WorkflowListItemDto => w != null);
+
+    if (missingWorkflows.length === 0) {
+      performExport(selectedWorkflows);
+      return;
     }
 
-    deselectWorkflows();
-  }, [selectedWorkflows, onAction, deselectWorkflows, http, notifications]);
+    setExportModalState({
+      missingWorkflows,
+      pendingExport: selectedWorkflows,
+    });
+  }, [selectedWorkflows, onAction, performExport, allWorkflowsMap]);
+
+  const handleExportIgnore = useCallback(() => {
+    if (exportModalState) {
+      performExport(exportModalState.pendingExport);
+    }
+    setExportModalState(null);
+  }, [exportModalState, performExport]);
+
+  const handleExportAddDirect = useCallback(() => {
+    if (exportModalState) {
+      const merged = [...exportModalState.pendingExport, ...exportModalState.missingWorkflows];
+      performExport(merged);
+    }
+    setExportModalState(null);
+  }, [exportModalState, performExport]);
+
+  const handleExportAddAll = useCallback(() => {
+    if (exportModalState) {
+      const merged = [...exportModalState.pendingExport, ...exportModalState.missingWorkflows];
+      const allResolved = resolveAllReferences(merged, allWorkflowsMap);
+      performExport(allResolved);
+    }
+    setExportModalState(null);
+  }, [exportModalState, performExport, allWorkflowsMap]);
+
+  const handleExportCancel = useCallback(() => {
+    setExportModalState(null);
+  }, []);
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
@@ -324,9 +393,29 @@ export const useWorkflowBulkActions = ({
             </p>
           </EuiConfirmModal>
         )}
+        {exportModalState && (
+          <ExportReferencesModal
+            missingWorkflows={exportModalState.missingWorkflows}
+            onIgnore={handleExportIgnore}
+            onAddDirect={handleExportAddDirect}
+            onAddAll={handleExportAddAll}
+            onCancel={handleExportCancel}
+          />
+        )}
       </>
     );
-  }, [showDeleteModal, selectedWorkflows.length, cancelDelete, confirmDelete, modalTitleId]);
+  }, [
+    showDeleteModal,
+    selectedWorkflows.length,
+    cancelDelete,
+    confirmDelete,
+    modalTitleId,
+    exportModalState,
+    handleExportIgnore,
+    handleExportAddDirect,
+    handleExportAddAll,
+    handleExportCancel,
+  ]);
 
   return {
     panels,

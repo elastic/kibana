@@ -28,8 +28,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { useWorkflows } from '@kbn/workflows-ui';
+import { ExportReferencesModal } from './export_references_modal';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
-import { exportSingleWorkflow } from '../../../common/lib/export_workflows';
+import {
+  exportSingleWorkflow,
+  exportWorkflows,
+  findMissingReferencedIds,
+  resolveAllReferences,
+} from '../../../common/lib/export_workflows';
 import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -49,13 +55,24 @@ interface WorkflowListProps {
   onCreateWorkflow?: () => void;
 }
 
+interface SingleExportModalState {
+  missingWorkflows: WorkflowListItemDto[];
+  pendingExport: WorkflowListItemDto[];
+}
+
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
-  const { application, notifications } = useKibana().services;
+  const { application, http, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
   const [workflowToDelete, setWorkflowToDelete] = useState<WorkflowListItemDto | null>(null);
+  const [singleExportModal, setSingleExportModal] = useState<SingleExportModalState | null>(null);
   const modalTitleId = useGeneratedHtmlId();
   const telemetry = useTelemetry();
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
+
+  const allWorkflowsMap = useMemo(
+    () => new Map((workflows?.results ?? []).map((w) => [w.id, w])),
+    [workflows?.results]
+  );
 
   // Report list viewed telemetry when workflows are loaded
   React.useEffect(() => {
@@ -152,6 +169,54 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     },
     [cloneWorkflow, notifications?.toasts]
   );
+
+  const handleExportWorkflow = useCallback(
+    (item: WorkflowListItemDto) => {
+      if (!item.definition) return;
+
+      const missingIds = findMissingReferencedIds([item]);
+      if (missingIds.length === 0) {
+        exportSingleWorkflow(item);
+        return;
+      }
+
+      const missing = missingIds
+        .map((id) => allWorkflowsMap.get(id))
+        .filter((w): w is WorkflowListItemDto => w != null);
+
+      if (missing.length === 0) {
+        exportSingleWorkflow(item);
+        return;
+      }
+
+      setSingleExportModal({ missingWorkflows: missing, pendingExport: [item] });
+    },
+    [allWorkflowsMap]
+  );
+
+  const handleSingleExportIgnore = useCallback(() => {
+    if (singleExportModal && http) {
+      exportWorkflows(singleExportModal.pendingExport, http);
+    }
+    setSingleExportModal(null);
+  }, [singleExportModal, http]);
+
+  const handleSingleExportAddDirect = useCallback(() => {
+    if (singleExportModal && http) {
+      const merged = [...singleExportModal.pendingExport, ...singleExportModal.missingWorkflows];
+      exportWorkflows(merged, http);
+    }
+    setSingleExportModal(null);
+  }, [singleExportModal, http]);
+
+  const handleSingleExportAddAll = useCallback(() => {
+    if (singleExportModal && http) {
+      const merged = [...singleExportModal.pendingExport, ...singleExportModal.missingWorkflows];
+      const allResolved = resolveAllReferences(merged, allWorkflowsMap);
+      exportWorkflows(allResolved, http);
+    }
+    setSingleExportModal(null);
+  }, [singleExportModal, http, allWorkflowsMap]);
 
   const handleToggleWorkflow = useCallback(
     (item: WorkflowListItemDto) => {
@@ -380,7 +445,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
               defaultMessage: 'Export workflow',
             }),
             onClick: (item: WorkflowListItemDto) => {
-              exportSingleWorkflow(item);
+              handleExportWorkflow(item);
             },
           },
           {
@@ -407,6 +472,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       application,
       canCreateWorkflow,
       handleCloneWorkflow,
+      handleExportWorkflow,
       canDeleteWorkflow,
       handleDeleteWorkflow,
       setExecuteWorkflow,
@@ -467,6 +533,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       <WorkflowsUtilityBar
         totalWorkflows={workflows?.total || 0}
         selectedWorkflows={selectedItems}
+        allWorkflows={workflows?.results ?? []}
         deselectWorkflows={deselectWorkflows}
         onRefresh={onRefresh}
         showStart={showStart}
@@ -511,6 +578,15 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           workflowId={executeWorkflow.id}
           onClose={() => setExecuteWorkflow(null)}
           onSubmit={(data, triggerTab) => handleRunWorkflow(executeWorkflow.id, data, triggerTab)}
+        />
+      )}
+      {singleExportModal && (
+        <ExportReferencesModal
+          missingWorkflows={singleExportModal.missingWorkflows}
+          onIgnore={handleSingleExportIgnore}
+          onAddDirect={handleSingleExportAddDirect}
+          onAddAll={handleSingleExportAddAll}
+          onCancel={() => setSingleExportModal(null)}
         />
       )}
       {workflowToDelete && (
