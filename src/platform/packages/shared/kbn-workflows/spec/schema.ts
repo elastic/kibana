@@ -199,6 +199,8 @@ export const MaxIterationsSchema = z.union([
 ]);
 export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
 
+export const DEFAULT_LOOP_MAX_ITERATIONS = 2000;
+
 export const LoopStepPropsSchema = z.object({
   'max-iterations': MaxIterationsSchema.optional(),
   'iteration-timeout': DurationSchema.optional(),
