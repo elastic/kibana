@@ -260,6 +260,69 @@ describe('getContextSchemaForPath', () => {
     expectZodSchemaEqual((context.shape as any).while, WhileContextSchema);
   });
 
+  it('should return item and index context for data.map step with.fields', () => {
+    const definitionWithDataMap = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      steps: [
+        {
+          name: 'map-step',
+          type: 'data.map',
+          items: '${{ consts.items }}',
+          with: {
+            fields: {
+              title: '${{ item.title }}',
+              pos: '${{ index }}',
+            },
+          },
+        },
+      ],
+      consts: { items: [{ title: 'hello' }] },
+    } as unknown as WorkflowYaml;
+
+    const graph = WorkflowGraph.fromWorkflowDefinition(definitionWithDataMap);
+    const context = getContextSchemaForPath(definitionWithDataMap, graph, [
+      'steps',
+      0,
+      'with',
+      'fields',
+      'title',
+    ]);
+
+    expect((context.shape as any).item).toBeDefined();
+    expect((context.shape as any).index).toBeDefined();
+  });
+
+  it('should add item/index context for data.map step outside with block', () => {
+    const definitionWithDataMap = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      steps: [
+        {
+          name: 'map-step',
+          type: 'data.map',
+          items: '${{ consts.items }}',
+          with: {
+            fields: {
+              title: '${{ item.title }}',
+            },
+          },
+        },
+      ],
+      consts: { items: [{ title: 'hello' }] },
+    } as unknown as WorkflowYaml;
+
+    const graph = WorkflowGraph.fromWorkflowDefinition(definitionWithDataMap);
+    const context = getContextSchemaForPath(definitionWithDataMap, graph, ['steps', 0, 'items']);
+
+    expect((context.shape as any).item).toBeDefined();
+    expect((context.shape as any).index).toBeDefined();
+  });
+
   it('should return the context for first step in false branch of if-split', () => {
     const context = getContextSchemaForPath(definition, workflowGraph, [
       'steps',
