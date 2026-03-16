@@ -87,7 +87,12 @@ describe('content pack tree helpers', () => {
       expect(tree.children[0].children).toHaveLength(1);
       expect(tree.children[0].children[0].name).toEqual('root.child1.nested');
       expect(tree.children[0].children[0].request.queries).toEqual([
-        { id: 'keep', title: 'keep query', esql: { query: 'FROM logs | LIMIT 1' } },
+        {
+          id: 'keep',
+          title: 'keep query',
+          description: '',
+          esql: { query: 'FROM logs | LIMIT 1' },
+        },
       ]);
     });
 
@@ -123,7 +128,12 @@ describe('content pack tree helpers', () => {
       });
 
       expect(tree.request.queries).toEqual([
-        { id: 'keep', title: 'keep query', esql: { query: 'FROM logs | LIMIT 1' } },
+        {
+          id: 'keep',
+          title: 'keep query',
+          description: '',
+          esql: { query: 'FROM logs | LIMIT 1' },
+        },
       ]);
     });
 
