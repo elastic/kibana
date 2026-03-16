@@ -15,7 +15,7 @@ import { search } from './search';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
 
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
-  const searchRoute = router.post({
+  const searchRoute = router.get({
     path: `${MARKDOWN_API_PATH}/search`,
     summary: `Search markdown panels`,
     ...commonRouteConfig,

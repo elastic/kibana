@@ -30,7 +30,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   });
 
   apiTest('should retrieve a paginated list of markdown panels', async ({ apiClient }) => {
-    const response = await apiClient.post(SEARCH_ENDPOINT, {
+    const response = await apiClient.get(SEARCH_ENDPOINT, {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
@@ -45,7 +45,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   });
 
   apiTest('should narrow results by search', async ({ apiClient }) => {
-    const response = await apiClient.post(SEARCH_ENDPOINT, {
+    const response = await apiClient.get(SEARCH_ENDPOINT, {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
@@ -62,7 +62,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   });
 
   apiTest('should allow users to set a per page limit', async ({ apiClient }) => {
-    const response = await apiClient.post(SEARCH_ENDPOINT, {
+    const response = await apiClient.get(SEARCH_ENDPOINT, {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
@@ -81,7 +81,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   apiTest(
     'should allow users to paginate through the list of markdown panels',
     async ({ apiClient }) => {
-      const response = await apiClient.post(SEARCH_ENDPOINT, {
+      const response = await apiClient.get(SEARCH_ENDPOINT, {
         headers: {
           ...COMMON_HEADERS,
           ...viewerCredentials.apiKeyHeader,
