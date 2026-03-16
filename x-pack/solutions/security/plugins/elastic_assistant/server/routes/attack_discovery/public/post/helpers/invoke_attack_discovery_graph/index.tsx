@@ -13,6 +13,7 @@ import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/i
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import type { BaseCallbackHandler } from '@langchain/core/callbacks/base';
 import type { Document } from '@langchain/core/documents';
 
 import type { AttackDiscoveryGraphState } from '../../../../../../lib/langchain/graphs';
@@ -189,7 +190,7 @@ const invokeSingleAttackDiscoveryGraph = async ({
   size: number;
   start?: string;
   tags: string[];
-  traceOptions: { tracers: unknown[] };
+  traceOptions: { tracers: BaseCallbackHandler[] };
 }): Promise<InvokeAttackDiscoveryGraphResult> => {
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
@@ -270,7 +271,7 @@ const invokeBatchedAttackDiscoveryGraph = async ({
   size: number;
   start?: string;
   tags: string[];
-  traceOptions: { tracers: unknown[] };
+  traceOptions: { tracers: BaseCallbackHandler[] };
 }): Promise<InvokeAttackDiscoveryGraphResult> => {
   const { getAnonymizedAlerts } = await import(
     '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/retriever/helpers/get_anonymized_alerts'

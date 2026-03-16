@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
+import type { BaseCallbackHandler } from '@langchain/core/callbacks/base';
 import type { Document } from '@langchain/core/documents';
 
 import { getDefaultAttackDiscoveryGraph } from '..';
@@ -36,7 +37,7 @@ export interface RunBatchedAttackDiscoveryParams {
   replacements?: Replacements;
   start?: string;
   tags?: string[];
-  traceOptions?: { tracers: unknown[] };
+  traceOptions?: { tracers: BaseCallbackHandler[] };
 }
 
 /**
@@ -176,7 +177,7 @@ const runBatchesWithConcurrency = async ({
   replacements?: Replacements;
   start?: string;
   tags?: string[];
-  traceOptions?: { tracers: unknown[] };
+  traceOptions?: { tracers: BaseCallbackHandler[] };
 }): Promise<BatchResult[]> => {
   const results: BatchResult[] = [];
 
@@ -263,7 +264,7 @@ const runSingleBatch = async ({
   replacements?: Replacements;
   start?: string;
   tags?: string[];
-  traceOptions?: { tracers: unknown[] };
+  traceOptions?: { tracers: BaseCallbackHandler[] };
 }): Promise<BatchResult> => {
   const batchStart = Date.now();
 
