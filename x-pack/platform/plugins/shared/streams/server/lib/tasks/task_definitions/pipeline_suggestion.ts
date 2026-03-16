@@ -198,7 +198,7 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
                         path: { name: streamName },
                         body: { processing: pipelineDef, documents },
                       },
-                      scopedClusterClient,
+                      esClient: scopedClusterClient.asCurrentUser,
                       streamsClient,
                       fieldsMetadataClient,
                     }),
@@ -388,7 +388,7 @@ async function processGrokPatterns({
         },
       },
     },
-    scopedClusterClient,
+    esClient: scopedClusterClient.asCurrentUser,
     streamsClient,
     fieldsMetadataClient,
   });
@@ -508,7 +508,7 @@ async function processDissectPattern({
         },
       },
     },
-    scopedClusterClient,
+    esClient: scopedClusterClient.asCurrentUser,
     streamsClient,
     fieldsMetadataClient,
   });
