@@ -56,4 +56,29 @@ export class NotificationPoliciesApi {
   public async deleteNotificationPolicy(id: string) {
     await this.http.delete(`${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}`);
   }
+
+  public async enableNotificationPolicy(id: string) {
+    return this.http.post<NotificationPolicyResponse>(
+      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_enable`
+    );
+  }
+
+  public async disableNotificationPolicy(id: string) {
+    return this.http.post<NotificationPolicyResponse>(
+      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_disable`
+    );
+  }
+
+  public async snoozeNotificationPolicy(id: string, snoozedUntil: string) {
+    return this.http.post<NotificationPolicyResponse>(
+      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_snooze`,
+      { body: JSON.stringify({ snoozed_until: snoozedUntil }) }
+    );
+  }
+
+  public async unsnoozeNotificationPolicy(id: string) {
+    return this.http.post<NotificationPolicyResponse>(
+      `${INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH}/${id}/_unsnooze`
+    );
+  }
 }

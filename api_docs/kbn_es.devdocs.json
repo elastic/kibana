@@ -742,7 +742,7 @@
           "(hostPath: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 728,
+        "lineNumber": 754,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -758,8 +758,99 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 733,
+            "lineNumber": 759,
             "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.getServerlessNodes",
+        "type": "Function",
+        "tags": [],
+        "label": "getServerlessNodes",
+        "description": [],
+        "signature": [
+          "(nameSuffix: string, portOffset: number) => Omit<ServerlessEsNodeArgs, \"image\">[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 326,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.getServerlessNodes.$1",
+            "type": "string",
+            "tags": [],
+            "label": "nameSuffix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+            "lineNumber": 327,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.getServerlessNodes.$2",
+            "type": "number",
+            "tags": [],
+            "label": "portOffset",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+            "lineNumber": 328,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.getSharedServerlessParams",
+        "type": "Function",
+        "tags": [],
+        "label": "getSharedServerlessParams",
+        "description": [],
+        "signature": [
+          "(nameSuffix: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 215,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.getSharedServerlessParams.$1",
+            "type": "string",
+            "tags": [],
+            "label": "nameSuffix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+            "lineNumber": 215,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -789,7 +880,7 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 437,
+        "lineNumber": 456,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -811,7 +902,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 440,
+            "lineNumber": 459,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -953,7 +1044,7 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 422,
+        "lineNumber": 441,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -975,7 +1066,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 425,
+            "lineNumber": 444,
             "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
@@ -1042,6 +1133,23 @@
       },
       {
         "parentPluginId": "@kbn/es",
+        "id": "def-common.LINKED_CLUSTER_PORT_OFFSET",
+        "type": "number",
+        "tags": [],
+        "label": "LINKED_CLUSTER_PORT_OFFSET",
+        "description": [],
+        "signature": [
+          "10"
+        ],
+        "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 1086,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
         "id": "def-common.SERVERLESS_NODES",
         "type": "Array",
         "tags": [],
@@ -1051,7 +1159,7 @@
           "Omit<ServerlessEsNodeArgs, \"image\">[]"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 318,
+        "lineNumber": 392,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

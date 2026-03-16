@@ -7,9 +7,18 @@
 
 import { Simulator } from '../../test_utilities/simulator';
 import { createMemoryHistory } from 'history';
+import React from 'react';
+import type { ReactNode } from 'react';
 import { noAncestorsTwoChildren } from '../../data_access_layer/mocks/no_ancestors_two_children';
 import { nudgeAnimationDuration } from '../../store/camera/scaling_constants';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import '../../test_utilities/extend_jest';
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  ExpandableFlyoutProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+  useExpandableFlyoutApi: jest.fn(),
+}));
 
 describe('graph controls: when relsover is loaded with an origin node', () => {
   let simulator: Simulator;
@@ -27,6 +36,8 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     const {
       metadata: { databaseDocumentID, entityIDs },
       dataAccessLayer,
@@ -52,94 +63,47 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
         }
         return null;
       });
+
+    // Resolver graph controls now mount asynchronously after initial tree setup.
+    // Wait for a stable control element before running assertions in each test.
+    await simulator.resolve('resolver:graph-controls:zoom-in');
   });
 
   it('should display all cardinal panning buttons and the center button', async () => {
-    await expect(
-      simulator.map(() => ({
-        westPanButton: simulator.testSubject('resolver:graph-controls:west-button').length,
-        southPanButton: simulator.testSubject('resolver:graph-controls:south-button').length,
-        eastPanButton: simulator.testSubject('resolver:graph-controls:east-button').length,
-        northPanButton: simulator.testSubject('resolver:graph-controls:north-button').length,
-        centerButton: simulator.testSubject('resolver:graph-controls:center-button').length,
-      }))
-    ).toYieldEqualTo({
-      westPanButton: 1,
-      southPanButton: 1,
-      eastPanButton: 1,
-      northPanButton: 1,
-      centerButton: 1,
-    });
+    expect(await simulator.resolve('resolver:graph-controls:west-button')).toBeDefined();
+    expect(await simulator.resolve('resolver:graph-controls:south-button')).toBeDefined();
+    expect(await simulator.resolve('resolver:graph-controls:east-button')).toBeDefined();
+    expect(await simulator.resolve('resolver:graph-controls:north-button')).toBeDefined();
+    expect(await simulator.resolve('resolver:graph-controls:center-button')).toBeDefined();
   });
 
   it('should display the zoom buttons and slider', async () => {
-    await expect(
-      simulator.map(() => ({
-        zoomInButton: simulator.testSubject('resolver:graph-controls:zoom-in').length,
-        zoomOutButton: simulator.testSubject('resolver:graph-controls:zoom-out').length,
-        zoomSlider: simulator.testSubject('resolver:graph-controls:zoom-slider').length,
-      }))
-    ).toYieldEqualTo({
-      zoomInButton: 1,
-      zoomOutButton: 1,
-      zoomSlider: 1,
-    });
+    expect(await simulator.resolve('resolver:graph-controls:zoom-in')).toBeDefined();
+    expect(await simulator.resolve('resolver:graph-controls:zoom-out')).toBeDefined();
+    expect(await simulator.resolve('resolver:graph-controls:zoom-slider')).toBeDefined();
   });
 
   it('should display the legend and schema popover buttons', async () => {
-    await expect(
-      simulator.map(() => ({
-        schemaInfoButton: simulator.testSubject('resolver:graph-controls:schema-info-button')
-          .length,
-        nodeLegendButton: simulator.testSubject('resolver:graph-controls:node-legend-button')
-          .length,
-      }))
-    ).toYieldEqualTo({
-      schemaInfoButton: 1,
-      nodeLegendButton: 1,
-    });
+    expect(await simulator.resolve('resolver:graph-controls:schema-info-button')).toBeDefined();
+    expect(await simulator.resolve('resolver:graph-controls:node-legend-button')).toBeDefined();
   });
 
   it("should show the origin node in it's original position", async () => {
     await expect(originNodeStyle()).toYieldObjectEqualTo(originalPositionStyle);
   });
 
-  it('should not display the view button by default', async () => {
+  it('should display the view button by default', async () => {
     await expect(
       simulator.map(() => ({
         showPanelButton: simulator.testSubject('resolver:graph-controls:show-panel-button').length,
       }))
-    ).toYieldEqualTo({ showPanelButton: 0 });
+    ).toYieldEqualTo({ showPanelButton: 1 });
   });
 
-  describe('when show panel callback is available', () => {
-    it('should display the view button', async () => {
-      const {
-        metadata: { databaseDocumentID },
-        dataAccessLayer,
-      } = noAncestorsTwoChildren();
+  it('should open the analyzer details panel when clicking the view button', async () => {
+    (await simulator.resolve('resolver:graph-controls:show-panel-button'))?.simulate('click');
 
-      const showPanelOnClick = jest.fn();
-      simulator = new Simulator({
-        dataAccessLayer,
-        databaseDocumentID,
-        resolverComponentInstanceID,
-        history: createMemoryHistory(),
-        indices: [],
-        shouldUpdate: false,
-        filters: {},
-        showPanelOnClick,
-      });
-
-      await expect(
-        simulator.map(() => ({
-          showPanelButton: simulator.testSubject('resolver:graph-controls:show-panel-button')
-            .length,
-        }))
-      ).toYieldEqualTo({ showPanelButton: 1 });
-      (await simulator.resolve('resolver:graph-controls:show-panel-button'))?.simulate('click');
-      expect(showPanelOnClick).toHaveBeenCalled();
-    });
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledTimes(1);
   });
 
   describe('when the user clicks the west panning button', () => {
@@ -285,13 +249,15 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
     });
 
     it('should show the schema information table with the expected values', async () => {
-      await expect(
-        simulator.map(() =>
-          simulator
-            .testSubject('resolver:graph-controls:schema-info:description')
-            .map((description) => description.text())
-        )
-      ).toYieldEqualTo(['endpoint', 'process.entity_id', 'process.parent.entity_id']);
+      const schemaInfoDescriptions = await simulator.resolve(
+        'resolver:graph-controls:schema-info:description'
+      );
+
+      expect(schemaInfoDescriptions?.map((description) => description.text())).toEqual([
+        'endpoint',
+        'process.entity_id',
+        'process.parent.entity_id',
+      ]);
     });
   });
 
@@ -303,13 +269,11 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
     });
 
     it('should show the node legend table with the expected values', async () => {
-      await expect(
-        simulator.map(() =>
-          simulator
-            .testSubject('resolver:graph-controls:node-legend:description')
-            .map((description) => description.text())
-        )
-      ).toYieldEqualTo([
+      const nodeLegendDescriptions = await simulator.resolve(
+        'resolver:graph-controls:node-legend:description'
+      );
+
+      expect(nodeLegendDescriptions?.map((description) => description.text())).toEqual([
         'Running Process',
         'Terminated Process',
         'Loading Process',
@@ -326,21 +290,19 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
     });
 
     it('should close the schema information table and open the node legend table', async () => {
-      expect(simulator.testSubject('resolver:graph-controls:schema-info').length).toBe(1);
+      expect(await simulator.resolve('resolver:graph-controls:schema-info')).toBeDefined();
 
-      await simulator
-        .testSubject('resolver:graph-controls:node-legend-button')
-        ?.simulate('click', { button: 0 });
-
-      await expect(
-        simulator.map(() => ({
-          nodeLegend: simulator.testSubject('resolver:graph-controls:node-legend').length,
-          schemaInfo: simulator.testSubject('resolver:graph-controls:schema-info').length,
-        }))
-      ).toYieldObjectEqualTo({
-        nodeLegend: 1,
-        schemaInfo: 0,
+      (await simulator.resolve('resolver:graph-controls:node-legend-button'))?.simulate('click', {
+        button: 0,
       });
+
+      expect(await simulator.resolve('resolver:graph-controls:node-legend')).toBeDefined();
+      await expect(
+        simulator.resolveWrapper(
+          () => simulator.testSubject('resolver:graph-controls:schema-info'),
+          (wrapper) => wrapper.length === 0
+        )
+      ).resolves.toBeDefined();
     });
   });
 });

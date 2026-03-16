@@ -190,6 +190,53 @@ describe('OpenInDiscover', () => {
     });
   });
 
+  describe('outlinedButton variant', () => {
+    it('should render an outlined button with custom label', () => {
+      const { getByTestId } = render(
+        <OpenInDiscover
+          variant="outlinedButton"
+          dataTestSubj="testOutlinedButton"
+          indexType="traces"
+          rangeFrom="now-15m"
+          rangeTo="now"
+          queryParams={{ serviceName: 'my-service' }}
+          label="Explore traces"
+        />
+      );
+
+      const button = getByTestId('testOutlinedButton');
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveTextContent('Explore traces');
+      expect(button).toHaveAttribute('href', 'http://test-discover-url');
+    });
+
+    it('should render disabled outlined button when indexSettingsStatus is not SUCCESS', () => {
+      mockUseApmIndexSettingsContext.mockReturnValue({
+        indexSettings: [
+          {
+            configurationName: 'transaction',
+            defaultValue: MOCK_TRACES_INDEX,
+          },
+        ],
+        indexSettingsStatus: FETCH_STATUS.LOADING,
+      } as any);
+
+      const { getByTestId } = render(
+        <OpenInDiscover
+          variant="outlinedButton"
+          dataTestSubj="testOutlinedButton"
+          indexType="traces"
+          rangeFrom="now-15m"
+          rangeTo="now"
+          queryParams={{}}
+        />
+      );
+
+      const button = getByTestId('testOutlinedButton');
+      expect(button).toBeDisabled();
+    });
+  });
+
   describe('link variant', () => {
     it('should render a link with correct props', () => {
       const { getByTestId } = render(

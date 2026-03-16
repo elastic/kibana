@@ -44,5 +44,5 @@ export async function update(
     }
   );
 
-  return getDashboardCRUResponseBody(savedObject, 'update');
+  return getDashboardCRUResponseBody(savedObject, 'update', isDashboardAppRequest);
 }

@@ -6,11 +6,9 @@
  */
 
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiCallOut,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
@@ -18,16 +16,27 @@ import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateNotificationPolicyData,
+  NotificationPolicyResponse,
+} from '@kbn/alerting-v2-schemas';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { DeleteNotificationPolicyConfirmModal } from '../../components/notification_policy/delete_confirmation_modal';
 import { NotificationPolicyDestinationBadge } from '../../components/notification_policy/notification_policy_destination_badge';
+import { NotificationPolicySnoozePopover } from '../../components/notification_policy/notification_policy_snooze_popover';
+import { NotificationPolicyStateBadge } from '../../components/notification_policy/notification_policy_state_badge';
 import { paths } from '../../constants';
+import { useCreateNotificationPolicy } from '../../hooks/use_create_notification_policy';
 import { useDeleteNotificationPolicy } from '../../hooks/use_delete_notification_policy';
+import { useDisableNotificationPolicy } from '../../hooks/use_disable_notification_policy';
+import { useEnableNotificationPolicy } from '../../hooks/use_enable_notification_policy';
 import { useFetchNotificationPolicies } from '../../hooks/use_fetch_notification_policies';
+import { useSnoozeNotificationPolicy } from '../../hooks/use_snooze_notification_policy';
+import { useUnsnoozeNotificationPolicy } from '../../hooks/use_unsnooze_notification_policy';
+import { NotificationPolicyActionsCell } from './components/notification_policy_actions_cell';
 
 const DEFAULT_PER_PAGE = 20;
 
@@ -39,7 +48,28 @@ export const ListNotificationPoliciesPage = () => {
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
 
+  const { mutate: createNotificationPolicy } = useCreateNotificationPolicy();
   const { mutate: deleteNotificationPolicy, isLoading: isDeleting } = useDeleteNotificationPolicy();
+  const {
+    mutate: enablePolicy,
+    isLoading: isEnabling,
+    variables: enableVariables,
+  } = useEnableNotificationPolicy();
+  const {
+    mutate: disablePolicy,
+    isLoading: isDisabling,
+    variables: disableVariables,
+  } = useDisableNotificationPolicy();
+  const {
+    mutate: snoozePolicy,
+    isLoading: isSnoozing,
+    variables: snoozeVariables,
+  } = useSnoozeNotificationPolicy();
+  const {
+    mutate: unsnoozePolicy,
+    isLoading: isUnsnoozing,
+    variables: unsnoozeVariables,
+  } = useUnsnoozeNotificationPolicy();
 
   const navigateToCreate = () => {
     navigateToUrl(basePath.prepend(paths.notificationPolicyCreate));
@@ -47,6 +77,19 @@ export const ListNotificationPoliciesPage = () => {
 
   const navigateToEdit = (id: string) => {
     navigateToUrl(basePath.prepend(paths.notificationPolicyEdit(id)));
+  };
+
+  const clonePolicy = (policy: NotificationPolicyResponse) => {
+    const { name, description, destinations, matcher, group_by, throttle } = policy;
+    const data: CreateNotificationPolicyData = {
+      name: `${name} [clone]`,
+      description,
+      destinations,
+      ...(matcher != null && { matcher }),
+      ...(group_by != null && { group_by }),
+      ...(throttle != null && { throttle }),
+    };
+    createNotificationPolicy(data);
   };
 
   const { data, isLoading, isError, error } = useFetchNotificationPolicies({
@@ -81,6 +124,7 @@ export const ListNotificationPoliciesPage = () => {
         />
       ),
     },
+
     {
       field: 'destinations',
       name: (
@@ -100,43 +144,52 @@ export const ListNotificationPoliciesPage = () => {
         </EuiFlexGroup>
       ),
     },
-    {
-      field: 'matcher',
-      name: (
-        <FormattedMessage
-          id="xpack.alertingV2.notificationPoliciesList.column.matcher"
-          defaultMessage="Matcher"
-        />
-      ),
-      render: (matcher: NotificationPolicyResponse['matcher']) =>
-        matcher ? (
-          <EuiCodeBlock paddingSize="s" fontSize="s">
-            {matcher}
-          </EuiCodeBlock>
-        ) : (
-          '-'
-        ),
-    },
-    {
-      field: 'group_by',
-      name: (
-        <FormattedMessage
-          id="xpack.alertingV2.notificationPoliciesList.column.groupBy"
-          defaultMessage="Group by"
-        />
-      ),
-      render: (groupBy: string[]) => (
-        <EuiFlexGroup responsive={false} gutterSize="s" wrap>
-          {groupBy?.map((group) => (
-            <EuiFlexItem key={group} grow={false}>
-              <EuiBadge color="hollow">{group}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-          {groupBy?.length === 0 ? '-' : null}
-        </EuiFlexGroup>
-      ),
-    },
 
+    {
+      field: 'enabled',
+      name: (
+        <FormattedMessage
+          id="xpack.alertingV2.notificationPoliciesList.column.state"
+          defaultMessage="State"
+        />
+      ),
+      render: (_enabled: boolean, policy: NotificationPolicyResponse) => (
+        <NotificationPolicyStateBadge
+          policy={policy}
+          onEnable={(id) => enablePolicy(id)}
+          onDisable={(id) => disablePolicy(id)}
+          isLoading={
+            (isEnabling && enableVariables === policy.id) ||
+            (isDisabling && disableVariables === policy.id)
+          }
+        />
+      ),
+    },
+    {
+      field: 'snoozedUntil',
+      name: (
+        <FormattedMessage
+          id="xpack.alertingV2.notificationPoliciesList.column.notify"
+          defaultMessage="Notify"
+        />
+      ),
+      render: (_snoozedUntil: string | undefined, policy: NotificationPolicyResponse) => {
+        if (!policy.enabled) {
+          return null;
+        }
+        return (
+          <NotificationPolicySnoozePopover
+            policy={policy}
+            onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
+            onCancelSnooze={(id) => unsnoozePolicy(id)}
+            isLoading={
+              (isSnoozing && snoozeVariables?.id === policy.id) ||
+              (isUnsnoozing && unsnoozeVariables === policy.id)
+            }
+          />
+        );
+      },
+    },
     {
       field: 'updatedAt',
       name: (
@@ -145,39 +198,35 @@ export const ListNotificationPoliciesPage = () => {
           defaultMessage="Last update"
         />
       ),
-      render: (updatedAt: string) => new Date(updatedAt).toLocaleString(),
+      render: (updatedAt: string) =>
+        new Date(updatedAt).toLocaleString(undefined, {
+          month: 'short',
+          year: 'numeric',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        }),
     },
     {
       name: i18n.translate('xpack.alertingV2.notificationPoliciesList.column.actions', {
         defaultMessage: 'Actions',
       }),
-      actions: [
-        {
-          name: i18n.translate('xpack.alertingV2.notificationPoliciesList.action.edit', {
-            defaultMessage: 'Edit',
-          }),
-          description: i18n.translate(
-            'xpack.alertingV2.notificationPoliciesList.action.edit.description',
-            { defaultMessage: 'Edit this notification policy' }
-          ),
-          icon: 'pencil',
-          type: 'icon',
-          onClick: (item: NotificationPolicyResponse) => navigateToEdit(item.id),
-        },
-        {
-          name: i18n.translate('xpack.alertingV2.notificationPoliciesList.action.delete', {
-            defaultMessage: 'Delete',
-          }),
-          description: i18n.translate(
-            'xpack.alertingV2.notificationPoliciesList.action.delete.description',
-            { defaultMessage: 'Delete this notification policy' }
-          ),
-          icon: 'trash',
-          type: 'icon',
-          color: 'danger',
-          onClick: (item: NotificationPolicyResponse) => setPolicyToDelete(item),
-        },
-      ],
+      render: (policy: NotificationPolicyResponse) => (
+        <NotificationPolicyActionsCell
+          policy={policy}
+          onEdit={navigateToEdit}
+          onClone={clonePolicy}
+          onDelete={setPolicyToDelete}
+          onEnable={(id) => enablePolicy(id)}
+          onDisable={(id) => disablePolicy(id)}
+          onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
+          onCancelSnooze={(id) => unsnoozePolicy(id)}
+          isStateLoading={
+            (isEnabling && enableVariables === policy.id) ||
+            (isDisabling && disableVariables === policy.id)
+          }
+        />
+      ),
     },
   ];
 

@@ -45,8 +45,6 @@ export function evaluateMatchers(
     if (!rule) continue;
 
     for (const policy of allPolicies) {
-      if (!matchesRuleLabels(policy, rule)) continue;
-
       if (!policy.enabled) continue;
       if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
 
@@ -55,7 +53,7 @@ export function evaluateMatchers(
         continue;
       }
 
-      const isMatch = evaluateKql(policy.matcher, episode);
+      const isMatch = evaluateKql(policy.matcher, { ...episode, rule });
       if (isMatch) {
         matched.push({ episode, policy });
       }

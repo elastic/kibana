@@ -6,8 +6,6 @@
  */
 
 import { PluginStart } from '@kbn/core-di';
-import type { ISavedObjectsClientFactory } from '@kbn/core-di-server';
-import { SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
@@ -20,6 +18,7 @@ import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
+import { NotificationPolicySavedObjectsClientToken } from './tokens';
 
 export type NotificationPolicySavedObjectBulkGetItem =
   | {
@@ -54,13 +53,13 @@ export interface NotificationPolicySavedObjectServiceContract {
     attrs: Partial<NotificationPolicySavedObjectAttributes>;
     version?: string;
   }): Promise<{ id: string; version?: string }>;
-  findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
   bulkUpdate(params: {
     objects: Array<{
       id: string;
       attrs: Partial<NotificationPolicySavedObjectAttributes>;
     }>;
   }): Promise<NotificationPolicySavedObjectBulkUpdateItem[]>;
+  findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
   delete(params: { id: string }): Promise<void>;
   find(params: {
     page: number;
@@ -83,20 +82,14 @@ export interface NotificationPolicySavedObjectServiceContract {
 export class NotificationPolicySavedObjectService
   implements NotificationPolicySavedObjectServiceContract
 {
-  private readonly client: SavedObjectsClientContract;
-
   constructor(
-    @inject(SavedObjectsClientFactory)
-    private readonly savedObjectsClientFactory: ISavedObjectsClientFactory,
+    @inject(NotificationPolicySavedObjectsClientToken)
+    private readonly client: SavedObjectsClientContract,
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
     private readonly spaces: SpacesPluginStart,
     @inject(EncryptedSavedObjectsClientToken)
     private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient
-  ) {
-    this.client = this.savedObjectsClientFactory({
-      includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE],
-    });
-  }
+  ) {}
 
   public async create({
     attrs,

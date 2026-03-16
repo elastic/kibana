@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
+import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { isInferenceProviderError } from '@kbn/inference-common';
-import type { InsightsResult } from '@kbn/streams-schema';
+import type { Insight } from '@kbn/streams-schema';
+import { getImpactLevel } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
@@ -15,6 +18,11 @@ import type { TaskParams } from '../types';
 import { generateInsights } from '../../significant_events/insights/generate_insights';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
+
+export interface InsightsDiscoveryTaskResult {
+  insights: Insight[];
+  tokensUsed: ChatCompletionTokenCount;
+}
 
 export interface InsightsDiscoveryTaskParams {
   connectorId: string;
@@ -44,6 +52,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 streamsClient,
                 inferenceClient,
                 queryClient,
+                insightClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
@@ -62,15 +71,41 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({
-                  input_tokens_used: result.tokensUsed?.prompt ?? 0,
-                  output_tokens_used: result.tokensUsed?.completion ?? 0,
-                  cached_tokens_used: result.tokensUsed?.cached ?? 0,
+                  input_tokens_used: result.tokens_used?.prompt ?? 0,
+                  output_tokens_used: result.tokens_used?.completion ?? 0,
+                  cached_tokens_used: result.tokens_used?.cached ?? 0,
                 });
 
-                await taskClient.complete<InsightsDiscoveryTaskParams, InsightsResult>(
+                const insights = result.insights.map(
+                  (insight) =>
+                    ({
+                      ...insight,
+                      id: uuidv4(),
+                      generated_at: new Date().toISOString(),
+                      impact_level: getImpactLevel(insight.impact),
+                    } satisfies Insight)
+                );
+
+                if (result.insights.length > 0) {
+                  try {
+                    await insightClient.bulk(
+                      insights.map((insight) => ({
+                        index: insight,
+                      }))
+                    );
+                  } catch (persistError) {
+                    taskContext.logger.error(
+                      `Failed to persist ${result.insights.length} insights: ${getErrorMessage(
+                        persistError
+                      )}`
+                    );
+                  }
+                }
+
+                await taskClient.complete<InsightsDiscoveryTaskParams, InsightsDiscoveryTaskResult>(
                   _task,
                   { connectorId, streamNames },
-                  result
+                  { insights, tokensUsed: result.tokens_used }
                 );
               } catch (error) {
                 // Get connector info for error enrichment

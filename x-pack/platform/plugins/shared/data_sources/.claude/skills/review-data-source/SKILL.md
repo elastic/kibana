@@ -28,7 +28,7 @@ validation against the vendor API.
 
 - Look at existing specs for patterns: `src/platform/packages/shared/kbn-connector-specs/src/specs/`
 - If non-MCP: valid structure with required fields, correct auth type
-- **ID alignment**: `metadata.id` (e.g. `.zendesk`), `DataSource.stackConnector(s).type`, `DataSource.iconType`, and
+- **ID alignment**: `metadata.id` (e.g. `.zendesk`), `DataSource.stackConnectors[].type`, `DataSource.iconType`, and
   `ConnectorIconsMap` key all match. IDs must start with a dot.
 - **Schema UI**: Every config field in `schema` has `.meta()` with at least `label` (or uses a `UISchemas.*` helper).
   Otherwise fields render as unlabeled.
@@ -39,6 +39,10 @@ validation against the vendor API.
   client secret where possible.
 - Spec is exported from the repo's connector specs "all specs" file (e.g. `all_specs.ts`). Do not add
   unused/cargo-culted flags; only set flags the platform or this connector actually use.
+- **Input schemas & types**: Action input schemas and their `z.infer<>` types must live in a separate
+  `types.ts` file alongside the spec (not inline in the spec file, and not as `as` casts in handlers).
+  Handlers must be typed with the inferred type (e.g. `handler: async (ctx, input: SearchInput) => {}`),
+  not `input as { field: string }`. See `servicenow_search/types.ts` for the canonical pattern.
 
 ### Workflows
 
@@ -52,7 +56,12 @@ validation against the vendor API.
 - **Optional params**: For optional inputs with a default, name the default in the description. For enum-like or
   constrained options, list allowed values or use a **choice** type in the workflow with **options** so the AI and UI 
   get valid options.
-- Short commented-out field lines inside `data.map` are fine; avoid long commented blocks. 
+- **Output field limiting**: If a tool returns many fields (e.g. full API records with dozens of properties), use a
+  `data.map` step after the connector call to select only the fields relevant to the agent. This keeps context
+  window usage low and responses focused. Commonly excluded: internal IDs, audit timestamps, UI-only flags, raw
+  body blobs. Fields that might be useful in specific scenarios can be left as commented-out lines inside the
+  `fields:` spec for easy re-enablement. See the Zendesk `search.yaml` workflow for the canonical pattern.
+- Short commented-out field lines inside `data.map` are fine; avoid long commented blocks.
 - Workflows that are AI tools have the right tag (e.g. `agent-builder-tool`).
 - Connector reference uses the repo's template variable (e.g. `<%= stackConnectorId %>`); inputs use the correct
   syntax (e.g. `${{ inputs.query }}`).
@@ -61,7 +70,7 @@ validation against the vendor API.
 ### Data Source Definition
 
 - Correct references to the connector spec and workflows
-- **IDs**: `id` (lowercase, hyphenated), `iconType` (dot-prefixed, matches ConnectorIconsMap), `stackConnector(s).type`
+- **IDs**: `id` (lowercase, hyphenated), `iconType` (dot-prefixed, matches ConnectorIconsMap), `stackConnectors[].type`
   matches the connector spec ID
 - Data source is imported and registered in the plugin's sources index (e.g. `server/sources/index.ts`)
 - `workflows.directory` points to the correct workflows folder; all workflows referenced exist as YAML files
@@ -70,10 +79,24 @@ validation against the vendor API.
 ### Documentation and icons
 
 - Generator scaffold docs are filled in (no remaining `TODO:` placeholders)
-- `docs/reference/connectors-kibana/_snippets/elastic-connectors-list.md` description filled in
+- `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md` entry filled in
 - `docs/reference/toc.yml` entry exists in the correct section
 - **Icon**: Data source has an icon (ConnectorIconsMap entry and, if custom, spec icon component or asset). No
   placeholder icons or generated icons. If a brand icon does not exist elsewhere in the repo, prompt the user to provide one.
+
+#### Docs quality checks
+
+If the PR includes documentation changes in `docs/reference/connectors-kibana/`, run the following skills on each
+connector doc file. These require skills from https://github.com/elastic/elastic-docs-skills — if any are
+unavailable, tell the user to install them (`curl -sSL https://raw.githubusercontent.com/elastic/elastic-docs-skills/main/install.sh | bash`).
+
+1. **`docs-check-style`** — Elastic style guide compliance. Flag violations.
+2. **`crosslink-validator`** — Validate cross-links resolve. Flag broken links.
+3. **`frontmatter-audit`** — Check `applies_to`, `description`, `navigation_title` completeness.
+4. **`content-type-checker`** — Verify page follows correct content type guidelines.
+5. **`applies-to-tagging`** — Validate `applies_to` tags match connector availability.
+
+Report documentation issues alongside code issues.
 
 ### Naming and conventions
 
@@ -84,6 +107,33 @@ validation against the vendor API.
   the PR description
 - **TypeScript** (touched files): Use strict equality (`===` / `!==`), follow repo style (early returns, explicit
   types, no `any`)
+
+### Security
+
+- **SSRF**: Any URL field in connector config or workflow action input (e.g. `base_url`, `endpoint`, `webhook_url`)
+  must be validated. URLs should be allowlisted, restricted to HTTPS, or otherwise prevented from being user-controlled
+  in a way that could trigger requests to internal/private hosts. Flag any case where a user-supplied URL flows
+  directly into a network call without validation.
+- **Sensitive data in logs**: Check that query parameters and user-supplied inputs are not logged. Queries come
+  directly from users in chat and may contain sensitive context. Look for `logger.debug`, `console.log`, or any
+  logging that captures `query`, `input`, `prompt`, or similar fields; flag these as high-risk.
+
+### Tool design
+
+- **Discovery / metadata tools**: The tool set should include at least one tool that helps an agent orient itself —
+  e.g. `who_am_i`, `get_current_user`, `list_projects`, `get_table_schema`, `list_spaces`. Without these, an agent
+  must guess IDs or structure before it can call other tools. Flag if the set has no discovery/metadata tooling.
+- **Tool consolidation**: Look for tools that do the same operation on different entity types (e.g. `get_issue_by_id`,
+  `get_ticket_by_id`, `get_task_by_id`). Where practical, these should be consolidated into one tool with a `type`
+  enum parameter. Flag redundant tools and suggest a merged alternative.
+- **Tool completeness**: Consider whether the full set of tools is sufficient for agents to answer realistic user
+  questions against this data source. Would you, given only these tools, be able to find the answer to questions a
+  user is likely to ask? Flag obvious gaps (e.g. search-only tooling with no way to drill into a result, or write
+  operations with no way to read back state).
+- **API efficiency**: Check whether tools are designed to minimize round-trips. Are tools making redundant API calls
+  (e.g. re-fetching data that a prior step already returned)? Are there patterns that will force agents into
+  trial-and-error loops (e.g. a tool that requires an ID with no tool to discover it)? Flag workflows that will
+  reliably require multiple back-and-forth calls to accomplish a single user goal.
 
 List all issues found. If no issues, note that the code looks good.
 

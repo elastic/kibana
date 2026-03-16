@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { run } from '../lib/spawn.mjs';
+import { moonRun } from '../lib/moon.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
@@ -24,6 +24,9 @@ export const command = {
   async run({ args }) {
     const quiet = args.getBooleanValue('quiet') ?? false;
 
-    await run('moon', [':watch-webpack'], { pipe: !quiet });
+    await moonRun(':watch-webpack', {
+      pipe: !quiet,
+      quiet,
+    });
   },
 };

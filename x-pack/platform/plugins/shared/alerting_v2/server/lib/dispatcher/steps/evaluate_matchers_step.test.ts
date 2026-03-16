@@ -279,4 +279,91 @@ describe('evaluateMatchers', () => {
 
     expect(matched).toHaveLength(1);
   });
+
+  describe('rule-aware KQL matching', () => {
+    it('matches rule.name via KQL', () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1', name: 'Test rule' });
+      const policy = createNotificationPolicy({
+        id: 'p1',
+        matcher: 'rule.name: "Test rule"',
+      });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('matches rule.labels via array membership', () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1', labels: ['production', 'critical'] });
+      const policy = createNotificationPolicy({
+        id: 'p1',
+        matcher: 'rule.labels: "production"',
+      });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('matches combined episode and rule conditions', () => {
+      const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
+      const rule = createRule({ id: 'r1', labels: ['production'] });
+      const policy = createNotificationPolicy({
+        id: 'p1',
+        matcher: 'episode_status: active and rule.labels: "production"',
+      });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('does not match rule.labels when rule has no matching labels', () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1', labels: [] });
+      const policy = createNotificationPolicy({
+        id: 'p1',
+        matcher: 'rule.labels: "production"',
+      });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('does not match when combined condition is partially met', () => {
+      const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'inactive' });
+      const rule = createRule({ id: 'r1', labels: ['production'] });
+      const policy = createNotificationPolicy({
+        id: 'p1',
+        matcher: 'episode_status: active and rule.labels: "production"',
+      });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(0);
+    });
+  });
 });

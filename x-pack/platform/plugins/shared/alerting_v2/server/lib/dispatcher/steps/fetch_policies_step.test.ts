@@ -81,7 +81,7 @@ describe('FetchPoliciesStep', () => {
     expect(result.data?.policies?.size).toBe(0);
   });
 
-  it('fetches multiple policies and preserves rule_labels', async () => {
+  it('fetches multiple policies', async () => {
     mockFindAllDecrypted.mockResolvedValue([
       {
         id: 'p1',
@@ -121,7 +121,6 @@ describe('FetchPoliciesStep', () => {
     expect(result.data?.policies?.get('p1')?.apiKey).toBe('key-1');
     expect(result.data?.policies?.get('p1')?.ruleLabels).toEqual(['production']);
     expect(result.data?.policies?.get('p2')?.apiKey).toBe('key-2');
-    expect(result.data?.policies?.get('p2')?.ruleLabels).toEqual([]);
     expect(mockFindAllDecrypted).toHaveBeenCalledTimes(1);
   });
 });

@@ -13,6 +13,7 @@ import {
   fromColorByValueAPIToLensState,
   isColorMappingColor,
   isColorByValueColor,
+  isLegacyColorPalette,
 } from '../../../coloring';
 import { getAccessorName } from '../helpers';
 import {
@@ -30,7 +31,11 @@ function buildColorProps(
   const colorMode = config.apply_color_to === 'value' ? 'text' : 'cell';
 
   if (isColorMappingColor(config.color)) {
-    return { colorMode, colorMapping: fromColorMappingAPIToLensState(config.color) };
+    const color = fromColorMappingAPIToLensState(config.color);
+    if (isLegacyColorPalette(color)) {
+      return { colorMode, palette: color.palette };
+    }
+    return { colorMode, colorMapping: color?.colorMapping };
   }
 
   if (isColorByValueColor(config.color)) {

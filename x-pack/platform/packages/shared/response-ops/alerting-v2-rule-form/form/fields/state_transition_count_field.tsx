@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
-import { EuiFieldNumber } from '@elastic/eui';
+import React, { useEffect } from 'react';
 import { MAX_CONSECUTIVE_BREACHES } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
-import { INVALID_NUMBER_KEYS, parsePositiveIntegerInput } from '../utils';
+import { NumberInput } from './number_input';
+
 const DEFAULT_COUNT = 2;
 
 export type StateTransitionCountVariant = 'pending' | 'recovering';
+
+const validateMax = (val: number) => val <= MAX_CONSECUTIVE_BREACHES;
 
 interface StateTransitionCountFieldProps {
   prependLabel?: string;
@@ -50,12 +52,6 @@ export const StateTransitionCountField = ({
     }
   }, [getValues, setValue, fieldName]);
 
-  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (INVALID_NUMBER_KEYS.includes(e.key)) {
-      e.preventDefault();
-    }
-  }, []);
-
   return (
     <Controller
       name={fieldName}
@@ -76,21 +72,16 @@ export const StateTransitionCountField = ({
         },
       }}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
-        <EuiFieldNumber
+        <NumberInput
+          ref={ref}
           value={value ?? DEFAULT_COUNT}
-          onChange={(e) => {
-            const parsedValue = parsePositiveIntegerInput(e.target.value);
-            if (parsedValue != null && parsedValue <= MAX_CONSECUTIVE_BREACHES) {
-              onChange(parsedValue);
-            }
-          }}
-          onKeyDown={onKeyDown}
+          onChange={onChange}
+          validate={validateMax}
           min={1}
           max={MAX_CONSECUTIVE_BREACHES}
           step={1}
           isInvalid={!!error}
           data-test-subj={testSubj}
-          inputRef={ref}
           fullWidth
           prepend={prependLabel ? [prependLabel] : undefined}
         />

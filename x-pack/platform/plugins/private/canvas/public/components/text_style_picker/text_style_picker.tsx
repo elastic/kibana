@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FontValue } from '@kbn/expressions-plugin/common';
@@ -224,23 +223,4 @@ export const TextStylePicker: FC<Props> = ({
       </EuiFlexGroup>
     </div>
   );
-};
-
-TextStylePicker.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
-  family: PropTypes.string,
-  size: PropTypes.number,
-  align: PropTypes.oneOf(['left', 'center', 'right']),
-  color: PropTypes.string,
-  weight: PropTypes.oneOf(['normal', 'bold']),
-  underline: PropTypes.bool,
-  italic: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
-  colors: PropTypes.array,
-};
-
-TextStylePicker.defaultProps = {
-  align: 'left',
-  size: 14,
-  weight: 'normal',
 };

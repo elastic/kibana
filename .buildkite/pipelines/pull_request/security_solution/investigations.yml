@@ -12,6 +12,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
@@ -23,8 +25,10 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 11
+    parallelism: 14
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1

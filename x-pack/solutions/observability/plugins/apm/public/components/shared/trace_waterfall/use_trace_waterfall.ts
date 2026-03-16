@@ -253,7 +253,7 @@ export function getRootItemOrFallback(
   }
 
   const entryTransactionRootItem = entryTransactionId
-    ? traceItems.find((item) => item.id === entryTransactionId)
+    ? traceItems?.find((item) => item.id === entryTransactionId)
     : undefined;
 
   const rootItem = entryTransactionRootItem

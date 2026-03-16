@@ -652,7 +652,6 @@ describe('NotificationPolicyClient', () => {
         'policy-id-enable',
         {
           enabled: true,
-          snoozedUntil: undefined,
           updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
         },
@@ -724,7 +723,6 @@ describe('NotificationPolicyClient', () => {
         'policy-id-disable',
         {
           enabled: false,
-          snoozedUntil: undefined,
           updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
         },
@@ -787,6 +785,19 @@ describe('NotificationPolicyClient', () => {
 
       expect(res.id).toBe('policy-id-snooze');
     });
+
+    it('throws 400 when snoozedUntil is not a valid ISO datetime', async () => {
+      await expect(
+        client.snoozeNotificationPolicy({
+          id: 'policy-id-snooze',
+          snoozedUntil: 'not-a-date',
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
   });
 
   describe('bulkActionNotificationPolicies', () => {
@@ -814,6 +825,13 @@ describe('NotificationPolicyClient', () => {
             references: [],
             version: 'WzUsMV0=',
           },
+          {
+            id: 'policy-4',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'WzYsMV0=',
+          },
         ],
       });
 
@@ -822,6 +840,7 @@ describe('NotificationPolicyClient', () => {
           { id: 'policy-1', action: 'enable' },
           { id: 'policy-2', action: 'disable' },
           { id: 'policy-3', action: 'snooze', snoozed_until: '2025-06-01T12:00:00.000Z' },
+          { id: 'policy-4', action: 'unsnooze' },
         ],
       });
 
@@ -832,7 +851,7 @@ describe('NotificationPolicyClient', () => {
           id: 'policy-1',
           attributes: {
             enabled: true,
-            snoozedUntil: undefined,
+            snoozedUntil: null,
             updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
@@ -842,7 +861,7 @@ describe('NotificationPolicyClient', () => {
           id: 'policy-2',
           attributes: {
             enabled: false,
-            snoozedUntil: undefined,
+            snoozedUntil: null,
             updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
@@ -856,12 +875,21 @@ describe('NotificationPolicyClient', () => {
             updatedAt: '2025-01-01T00:00:00.000Z',
           },
         },
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-4',
+          attributes: {
+            snoozedUntil: null,
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
       ]);
 
       expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
       expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
 
-      expect(res).toEqual({ processed: 3, total: 3, errors: [] });
+      expect(res).toEqual({ processed: 4, total: 4, errors: [] });
     });
 
     it('collects errors from bulkUpdate response', async () => {

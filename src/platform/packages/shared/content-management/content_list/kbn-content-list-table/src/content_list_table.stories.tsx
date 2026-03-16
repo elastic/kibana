@@ -30,17 +30,24 @@ import {
   useContentListSort,
   useContentListSearch,
   useContentListPagination,
+  useContentListFilters,
   useContentListConfig,
   useContentListSelection,
 } from '@kbn/content-list-provider';
 import type {
   ContentListItem,
   ContentListItemConfig,
+  ContentListServices,
   FindItemsParams,
   FindItemsResult,
 } from '@kbn/content-list-provider';
 import { ContentListToolbar } from '@kbn/content-list-toolbar';
-import { MOCK_DASHBOARDS, createMockFindItems } from '@kbn/content-list-mock-data/storybook';
+import {
+  MOCK_DASHBOARDS,
+  createMockFindItems,
+  extractTagIds,
+  mockTagsService,
+} from '@kbn/content-list-mock-data/storybook';
 import { ContentListTable } from './content_list_table';
 
 // =============================================================================
@@ -75,16 +82,14 @@ const createStoryFindItems = (options?: {
       return { items: [], total: 0 };
     }
 
-    // Use mock findItems for sorting logic.
     const mockFindItems = createMockFindItems({ items: availableItems });
     const result = await mockFindItems({
       searchQuery: params.searchQuery,
-      filters: {},
+      filters: params.filters,
       sort: params.sort ?? { field: 'title', direction: 'asc' },
       page: params.page,
     });
 
-    // Transform to ContentListItem format.
     return {
       items: result.items.map((item) => ({
         id: item.id,
@@ -92,8 +97,10 @@ const createStoryFindItems = (options?: {
         description: item.attributes.description,
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+        tags: extractTagIds(item.references),
       })),
       total: result.total,
+      counts: result.counts,
     };
   };
 };
@@ -189,6 +196,7 @@ const StateDiagnosticPanel = ({
   const { items, totalItems, isLoading, isFetching, error } = useContentListItems();
   const { field: sortField, direction: sortDirection } = useContentListSort();
   const { search } = useContentListSearch();
+  const { filters } = useContentListFilters();
   const pagination = useContentListPagination();
   const { selectedIds, selectedCount } = useContentListSelection();
   const config = useContentListConfig();
@@ -284,6 +292,14 @@ const StateDiagnosticPanel = ({
                   {JSON.stringify({ search, isFetching }, null, 2)}
                 </EuiCodeBlock>
               </EuiFlexItem>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                <EuiTitle size="xxs">
+                  <h3>Filters</h3>
+                </EuiTitle>
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                  {JSON.stringify(filters, null, 2)}
+                </EuiCodeBlock>
+              </EuiFlexItem>
               {pagination.isSupported && (
                 <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
                   <EuiTitle size="xxs">
@@ -372,9 +388,11 @@ interface PlaygroundArgs {
   isLoading: boolean;
   isReadOnly: boolean;
   hasPagination: boolean;
+  hasTags: boolean;
   compressed: boolean;
   tableLayout: 'auto' | 'fixed';
   showDescription: boolean;
+  showTags: boolean;
   showTypeColumn: boolean;
   showActions: boolean;
   showCustomActions: boolean;
@@ -469,7 +487,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
         compressed={args.compressed}
         tableLayout={args.tableLayout}
       >
-        <Column.Name showDescription={args.showDescription} />
+        <Column.Name showDescription={args.showDescription} showTags={args.showTags} />
         <Column.UpdatedAt />
         {args.showTypeColumn && (
           <Column
@@ -479,6 +497,32 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
             render={(item) => <EuiBadge color="hollow">{item.type ?? 'unknown'}</EuiBadge>}
           />
         )}
+        {args.showActions && (
+          <Column.Actions>
+            <Action.Edit />
+            {args.showCustomActions && (
+              <>
+                <Action
+                  id="share"
+                  name="Share"
+                  description="Share with team"
+                  icon="share"
+                  type="icon"
+                  onClick={handleShare}
+                />
+                <Action
+                  id="archive"
+                  name="Archive"
+                  description="Move to archive"
+                  icon="folderClosed"
+                  type="icon"
+                  onClick={handleArchive}
+                />
+              </>
+            )}
+            <Action.Delete />
+          </Column.Actions>
+        )}
       </ContentListTable>
     ),
     [
@@ -486,12 +530,22 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
       args.compressed,
       args.tableLayout,
       args.showDescription,
+      args.showTags,
       args.showTypeColumn,
+      args.showActions,
+      args.showCustomActions,
+      handleShare,
+      handleArchive,
     ]
   );
 
+  const services: ContentListServices | undefined = useMemo(
+    () => (args.hasTags ? { tags: mockTagsService } : undefined),
+    [args.hasTags]
+  );
+
   // Key forces re-mount when configuration changes.
-  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}-${args.hasPagination}-${args.showActions}-${args.showSelection}`;
+  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}-${args.hasPagination}-${args.hasTags}-${args.showActions}-${args.showSelection}`;
 
   return (
     <>
@@ -508,7 +562,9 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
           },
           pagination: args.hasPagination ? { initialPageSize: 10 } : (false as const),
           selection: args.showSelection,
+          tags: args.hasTags,
         }}
+        services={services}
       >
         <EuiPanel paddingSize="xl">
           <ContentListToolbar />
@@ -518,7 +574,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
             compressed={args.compressed}
             tableLayout={args.tableLayout}
           >
-            <Column.Name showDescription={args.showDescription} />
+            <Column.Name showDescription={args.showDescription} showTags={args.showTags} />
             <Column.UpdatedAt />
             {args.showTypeColumn && (
               <Column
@@ -579,12 +635,14 @@ export const Table: PlaygroundStory = {
     isLoading: false,
     isReadOnly: false,
     hasPagination: true,
+    hasTags: true,
     showTypeColumn: false,
     showActions: true,
     showCustomActions: false,
     showSelection: true,
     hasClickableRows: true,
     showDescription: true,
+    showTags: true,
     entityName: 'dashboard',
     entityNamePlural: 'dashboards',
     compressed: false,
@@ -622,6 +680,11 @@ export const Table: PlaygroundStory = {
       description: 'Enable pagination in provider config.',
       table: { category: 'Features' },
     },
+    hasTags: {
+      control: 'boolean',
+      description: 'Enable tag filtering. Provides a mock tags service.',
+      table: { category: 'Features' },
+    },
     compressed: {
       control: 'boolean',
       description: 'Use compact table style.',
@@ -637,6 +700,12 @@ export const Table: PlaygroundStory = {
       control: 'boolean',
       description: 'Show description in Name column.',
       table: { category: 'Columns' },
+    },
+    showTags: {
+      control: 'boolean',
+      description: 'Show tag badges in Name column. Clicking a tag toggles a filter.',
+      table: { category: 'Columns' },
+      if: { arg: 'hasTags' },
     },
     showTypeColumn: {
       control: 'boolean',

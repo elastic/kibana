@@ -95,8 +95,8 @@ export function buildUpdateRuleAttributes(
     state_transition: nullToUndefined(updateData.state_transition, existingAttrs.state_transition),
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
     no_data: nullToUndefined(updateData.no_data, existingAttrs.no_data),
+    enabled: updateData.enabled ?? existingAttrs.enabled,
     // Server-managed fields — preserved as-is except timestamps and user.
-    enabled: existingAttrs.enabled,
     createdBy: existingAttrs.createdBy,
     createdAt: existingAttrs.createdAt,
     ...serverFields,

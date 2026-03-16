@@ -117,7 +117,7 @@ export async function autocomplete(
         {
           afterCompleteSuggestions,
           allowSingleColumnFields: true,
-          preferredExpressionType: 'text',
+          preferredExpressionType: ['text', 'keyword'],
         }
       );
     }

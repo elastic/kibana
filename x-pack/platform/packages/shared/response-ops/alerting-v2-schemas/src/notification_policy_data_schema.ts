@@ -41,10 +41,16 @@ const bulkSnoozeActionSchema = z.object({
   snoozed_until: z.string().datetime(),
 });
 
+const bulkUnsnoozeActionSchema = z.object({
+  id: z.string(),
+  action: z.literal('unsnooze'),
+});
+
 export const notificationPolicyBulkActionSchema = z.discriminatedUnion('action', [
   bulkEnableActionSchema,
   bulkDisableActionSchema,
   bulkSnoozeActionSchema,
+  bulkUnsnoozeActionSchema,
 ]);
 
 export type NotificationPolicyBulkAction = z.infer<typeof notificationPolicyBulkActionSchema>;

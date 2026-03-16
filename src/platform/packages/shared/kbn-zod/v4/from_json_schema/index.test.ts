@@ -96,6 +96,41 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
       expect(() => zodSchema!.parse({ config: { host: 'localhost', port: 8080 } })).not.toThrow();
       expect(() => zodSchema!.parse({ config: {} })).toThrow();
     });
+
+    it('handles nullable object properties', () => {
+      const jsonSchema = {
+        type: 'object',
+        properties: {
+          evidence: {
+            type: 'object',
+            nullable: true,
+            properties: {
+              tool_call_id: { type: 'string', nullable: true },
+              tool_id: { type: 'string', nullable: true },
+              evidence_snippet: { type: 'string', nullable: true },
+            },
+            required: ['tool_call_id', 'tool_id', 'evidence_snippet'],
+          },
+        },
+        required: ['evidence'],
+      };
+
+      const zodSchema = fromJSONSchema(jsonSchema);
+      expect(zodSchema).toBeDefined();
+
+      expect(() =>
+        zodSchema!.parse({
+          evidence: { tool_call_id: '1', tool_id: 'search', evidence_snippet: 'snippet' },
+        })
+      ).not.toThrow();
+      expect(() =>
+        zodSchema!.parse({
+          evidence: { tool_call_id: null, tool_id: null, evidence_snippet: null },
+        })
+      ).not.toThrow();
+      expect(() => zodSchema!.parse({ evidence: null })).not.toThrow();
+      expect(() => zodSchema!.parse({ evidence: {} })).toThrow();
+    });
   });
 
   describe('Discriminated union parsing', () => {

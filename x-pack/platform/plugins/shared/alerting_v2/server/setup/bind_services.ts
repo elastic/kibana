@@ -6,7 +6,7 @@
  */
 
 import { PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreStart, Request } from '@kbn/core-di-server';
+import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
@@ -23,6 +23,7 @@ import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { NotificationPolicySavedObjectService } from '../lib/services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import {
+  NotificationPolicySavedObjectsClientToken,
   NotificationPolicySavedObjectServiceInternalToken,
   NotificationPolicySavedObjectServiceScopedToken,
 } from '../lib/services/notification_policy_saved_object_service/tokens';
@@ -36,6 +37,7 @@ import { AlertingRetryService } from '../lib/services/retry_service';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
 import {
+  RuleSavedObjectsClientToken,
   RulesSavedObjectServiceInternalToken,
   RulesSavedObjectServiceScopedToken,
 } from '../lib/services/rules_saved_object_service/tokens';
@@ -90,6 +92,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
   );
 
+  bind(RuleSavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({ includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE] }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
   bind(RulesSavedObjectService).toSelf().inRequestScope();
   bind(RulesSavedObjectServiceScopedToken).toService(RulesSavedObjectService);
   bind(RulesSavedObjectServiceInternalToken)
@@ -97,7 +107,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const savedObjects = get(CoreStart('savedObjects'));
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
       const internalClient = savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE]);
-      return new RulesSavedObjectService(() => internalClient, spaces);
+      return new RulesSavedObjectService(internalClient, spaces);
     })
     .inSingletonScope();
 
@@ -112,6 +122,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
+  bind(NotificationPolicySavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({
+          includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE],
+        }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
   bind(NotificationPolicySavedObjectService).toSelf().inRequestScope();
   bind(NotificationPolicySavedObjectServiceScopedToken).toService(
     NotificationPolicySavedObjectService
@@ -124,7 +144,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
       ]);
       const esoClient = get(EncryptedSavedObjectsClientToken);
-      return new NotificationPolicySavedObjectService(() => internalClient, spaces, esoClient);
+      return new NotificationPolicySavedObjectService(internalClient, spaces, esoClient);
     })
     .inSingletonScope();
 

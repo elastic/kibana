@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ServiceIdentifier } from 'inversify';
 import type { RulesSavedObjectServiceContract } from './rules_saved_object_service';
+
+/**
+ * Pre-configured SavedObjects client with hidden types for rules
+ */
+export const RuleSavedObjectsClientToken = Symbol.for(
+  'alerting_v2.RuleSavedObjectsClient'
+) as ServiceIdentifier<SavedObjectsClientContract>;
 
 /**
  * RulesSavedObjectService scoped to the current request

@@ -6,12 +6,11 @@
  */
 import {
   getStreamTypeFromDefinition,
-  systemSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { catchError, from as fromRxjs, map } from 'rxjs';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { PromptsConfigService } from '../../../lib/saved_objects/significant_events/prompts_config_service';
@@ -170,9 +169,6 @@ const generateSignificantEventsRoute = createServerRoute({
           'Number of sample documents to use for generation from the current data of stream'
         ),
     }),
-    body: z.object({
-      system: systemSchema.optional(),
-    }),
   }),
   options: {
     access: 'public',
@@ -243,7 +239,6 @@ const generateSignificantEventsRoute = createServerRoute({
       map(({ queries, tokensUsed, toolUsage }) => {
         telemetry.trackSignificantEventsQueriesGenerated({
           count: queries.length,
-          systems_count: 0,
           stream_name: definition.name,
           stream_type: getStreamTypeFromDefinition(definition),
           input_tokens_used: tokensUsed.prompt,

@@ -37,17 +37,20 @@ import type {
   SnoozeNotificationPolicyParams,
   UpdateNotificationPolicyParams,
 } from './types';
+import { validateDateString } from './utils';
 
 const resolveActionAttrs = (
   action: NotificationPolicyBulkAction
 ): Partial<NotificationPolicySavedObjectAttributes> => {
   switch (action.action) {
     case 'enable':
-      return { enabled: true, snoozedUntil: undefined };
+      return { enabled: true, snoozedUntil: null };
     case 'disable':
-      return { enabled: false, snoozedUntil: undefined };
+      return { enabled: false, snoozedUntil: null };
     case 'snooze':
       return { snoozedUntil: action.snoozed_until };
+    case 'unsnooze':
+      return { snoozedUntil: null };
   }
 };
 
@@ -238,7 +241,7 @@ export class NotificationPolicyClient {
   }: {
     id: string;
   }): Promise<NotificationPolicyResponse> {
-    return this.updatePolicyState(id, { enabled: true, snoozedUntil: undefined });
+    return this.updatePolicyState(id, { enabled: true });
   }
 
   public async disableNotificationPolicy({
@@ -246,7 +249,7 @@ export class NotificationPolicyClient {
   }: {
     id: string;
   }): Promise<NotificationPolicyResponse> {
-    return this.updatePolicyState(id, { enabled: false, snoozedUntil: undefined });
+    return this.updatePolicyState(id, { enabled: false });
   }
 
   public async snoozeNotificationPolicy({
@@ -254,6 +257,14 @@ export class NotificationPolicyClient {
     snoozedUntil,
   }: SnoozeNotificationPolicyParams): Promise<NotificationPolicyResponse> {
     return this.updatePolicyState(id, { snoozedUntil });
+  }
+
+  public async unsnoozeNotificationPolicy({
+    id,
+  }: {
+    id: string;
+  }): Promise<NotificationPolicyResponse> {
+    return this.updatePolicyState(id, { snoozedUntil: null });
   }
 
   public async bulkActionNotificationPolicies({
@@ -327,8 +338,12 @@ export class NotificationPolicyClient {
 
   private async updatePolicyState(
     id: string,
-    stateUpdate: { enabled?: boolean; snoozedUntil?: string | undefined }
+    stateUpdate: { enabled?: boolean; snoozedUntil?: string | null }
   ): Promise<NotificationPolicyResponse> {
+    if (stateUpdate.snoozedUntil) {
+      validateDateString(stateUpdate.snoozedUntil);
+    }
+
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 

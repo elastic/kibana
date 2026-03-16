@@ -464,15 +464,16 @@ import {
   ActionButtonType,
   type ActionButton,
   type AttachmentRenderProps,
+  type CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
 
 interface MyCanvasContentProps extends AttachmentRenderProps<MyAttachment> {
-  registerActionButtons?: (buttons: ActionButton[]) => void;
+  callbacks: CanvasRenderCallbacks;
 }
 
 const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
   attachment,
-  registerActionButtons,
+  callbacks: { registerActionButtons, updateOrigin },
 }) => {
   const [api, setApi] = useState<MyApi | undefined>();
 
@@ -487,10 +488,14 @@ const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
         label: 'Save',
         icon: 'save',
         type: ActionButtonType.PRIMARY,
-        handler: () => api.save(),
+        handler: async () => {
+          const savedObjectId = await api.save();
+          // Link the attachment to the saved object
+          await updateOrigin({ saved_object_id: savedObjectId });
+        },
       },
     ]);
-  }, [api, registerActionButtons]);
+  }, [api, registerActionButtons, updateOrigin]);
 
   return (
     <MyEditor onApiReady={setApi} />
@@ -500,11 +505,100 @@ const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
 // In the attachment definition:
 export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
   // ...
-  renderCanvasContent: (props, registerActionButtons) => (
-    <MyCanvasContent {...props} registerActionButtons={registerActionButtons} />
+  renderCanvasContent: (props, callbacks) => (
+    <MyCanvasContent {...props} callbacks={callbacks} />
   ),
 };
 ```
+
+#### Linking by-value attachments to persistent storage with updateOrigin
+
+The `updateOrigin` callback allows you to link a by-value attachment to its persistent storage location (e.g., a saved object) after it has been saved.
+
+This callback is available in two places:
+- **`getActionButtons` params** - for static action buttons defined at registration time
+- **`renderCanvasContent` callbacks** - for dynamic buttons registered at runtime (see [Registering action buttons dynamically](#registering-action-buttons-dynamically) above)
+
+**When to use `updateOrigin`:**
+
+- When your attachment type supports a "Save" workflow where the user can persist a by-value attachment to external storage (e.g., saving a visualization to the library, saving a dashboard)
+- After successfully saving the attachment to persistent storage, call `updateOrigin` to record the reference back to the attachment
+
+**Why this matters:**
+
+- Enables "Open in [App]" functionality by storing the saved object reference
+- Allows the UI to show that an attachment is linked to a persistent resource
+- Maintains the connection between the conversation attachment and its source
+
+**Example: Save button that links to a saved object**
+
+```tsx
+getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
+  const buttons = [];
+
+  // Only show save button if not already linked to a saved object
+  if (!attachment.origin && isCanvas) {
+    buttons.push({
+      label: 'Save to library',
+      icon: 'save',
+      type: ActionButtonType.PRIMARY,
+      handler: async () => {
+        // 1. Save to your persistent storage (e.g., saved objects)
+        const savedObjectId = await myApi.saveToLibrary(attachment.data);
+
+        // 2. Link the attachment to the saved object
+        await updateOrigin({ saved_object_id: savedObjectId });
+      },
+    });
+  }
+
+  // Show "Open in App" if already linked
+  if (attachment.origin?.saved_object_id) {
+    buttons.push({
+      label: 'Open in App',
+      icon: 'popout',
+      type: ActionButtonType.SECONDARY,
+      handler: () => {
+        window.open(`/app/myApp/${attachment.origin.saved_object_id}`, '_blank');
+      },
+    });
+  }
+
+  return buttons;
+},
+```
+
+**Origin shape:**
+
+The `origin` parameter accepts any shape - it will be validated by the attachment type's `validateOrigin` function on the server. For saved object references, the common pattern is:
+
+```ts
+{
+  saved_object_id: string;
+  title?: string;
+  description?: string;
+}
+```
+
+#### Updating origin from outside attachment context
+
+If you need to update an attachment's origin from outside the `getActionButtons` context (e.g., from a different plugin or component that has the conversation and attachment IDs), you can use the `updateAttachmentOrigin` API from the `agentBuilder` plugin's start contract:
+
+```ts
+// In your plugin
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    // Update an attachment's origin directly
+    await agentBuilder.updateAttachmentOrigin(
+      conversationId,
+      attachmentId,
+      { saved_object_id: savedObjectId }
+    );
+  }
+}
+```
+
+This is useful when the save operation happens outside the attachment's UI, such as when a separate "Save to library" workflow completes asynchronously. It is your responsibility to pass the `conversationId` and `attachmentId` to your plugin when navigating away from the chat - how you do this is up to you (e.g., URL parameters, local storage, or other mechanisms).
 
 ## Registering skills
 

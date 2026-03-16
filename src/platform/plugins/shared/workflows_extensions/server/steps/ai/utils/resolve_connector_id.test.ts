@@ -25,6 +25,7 @@ describe('resolveConnectorId', () => {
     connectorId: 'mock-connector-id',
     config: {},
     capabilities: {},
+    isInferenceEndpoint: false,
     ...partial,
   });
 

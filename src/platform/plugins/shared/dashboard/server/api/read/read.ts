@@ -15,7 +15,8 @@ import type { DashboardReadResponseBody } from './types';
 
 export async function read(
   requestCtx: RequestHandlerContext,
-  id: string
+  id: string,
+  isDashboardAppRequest: boolean = false
 ): Promise<DashboardReadResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const {
@@ -30,7 +31,7 @@ export async function read(
     id
   );
 
-  const response = getDashboardCRUResponseBody(savedObject, 'read');
+  const response = getDashboardCRUResponseBody(savedObject, 'read', isDashboardAppRequest);
   return {
     ...response,
     meta: {

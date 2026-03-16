@@ -14,16 +14,15 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { BasicPrettyPrinter, Builder } from '@elastic/esql';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import { buildMetadataOption, getIndexPatternsForStream } from '@kbn/streams-schema';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { StreamsESQLEditor, validatePrefix } from '../../../esql_query_editor';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { SeveritySelector } from '../common/severity_selector';
 import { validateTitle, validateEsqlQuery } from '../common/validate_query';
+import { getValidPrefixes } from '../common/get_valid_prefixes';
 
 interface ManualFlowFormProps {
   definition: Streams.all.Definition;
@@ -35,19 +34,6 @@ interface ManualFlowFormProps {
 
 const DEBOUNCE_DELAY_MS = 500;
 
-const getDefaultQueryFrom = (definition: Streams.all.Definition) =>
-  BasicPrettyPrinter.print(
-    Builder.expression.query([
-      Builder.command({
-        name: 'from',
-        args: [
-          Builder.expression.source.index(getIndexPatternsForStream(definition).join(',')),
-          buildMetadataOption(),
-        ],
-      }),
-    ])
-  );
-
 export function ManualFlowForm({
   definition,
   query,
@@ -55,8 +41,14 @@ export function ManualFlowForm({
   setCanSave,
   isSubmitting,
 }: ManualFlowFormProps) {
-  const queryFrom = useMemo(() => getDefaultQueryFrom(definition), [definition]);
-  const defaultEsql = query.esql.query || queryFrom;
+  // Captured once at mount so that re-renders with new query props don't shift the allowed prefixes.
+  const initialEsqlRef = useRef(query.esql.query);
+  const validPrefixes = useMemo(
+    () => getValidPrefixes(definition, initialEsqlRef.current),
+    [definition]
+  );
+
+  const defaultEsql = query.esql.query || validPrefixes.primary;
 
   const {
     control,
@@ -83,6 +75,13 @@ export function ManualFlowForm({
   }, [isValid, isDirty, setCanSave]);
 
   const debouncedEsqlQuery = useDebouncedValue(esql.query, DEBOUNCE_DELAY_MS);
+
+  const isPreviewQueryValid = useMemo(() => {
+    const syntaxCheck = validateEsqlQuery(debouncedEsqlQuery);
+    if (syntaxCheck.isInvalid) return false;
+    const prefixCheck = validatePrefix(debouncedEsqlQuery, validPrefixes);
+    return prefixCheck.isValid;
+  }, [debouncedEsqlQuery, validPrefixes]);
 
   return (
     <EuiPanel hasShadow={false} color="subdued">
@@ -155,7 +154,7 @@ export function ManualFlowForm({
                 if (syntaxError.isInvalid) {
                   return syntaxError.error;
                 }
-                const prefixError = validatePrefix(value, queryFrom);
+                const prefixError = validatePrefix(value, validPrefixes);
                 if (!prefixError.isValid) {
                   return prefixError.error.message;
                 }
@@ -182,7 +181,7 @@ export function ManualFlowForm({
                     if (newQuery) field.onChange(newQuery.esql);
                   }}
                   onTextLangQueryChange={(newQuery) => field.onChange(newQuery.esql)}
-                  prefix={queryFrom}
+                  prefix={validPrefixes}
                 />
               </EuiFormRow>
             )}
@@ -192,7 +191,7 @@ export function ManualFlowForm({
         <PreviewDataSparkPlot
           definition={definition}
           query={{ ...query, esql: { query: debouncedEsqlQuery } }}
-          isQueryValid={isValid}
+          isQueryValid={isPreviewQueryValid}
         />
       </EuiFlexGroup>
     </EuiPanel>

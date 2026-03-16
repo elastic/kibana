@@ -13,9 +13,12 @@ const SCHEDULE_TITLE_PREFIX = i18n.translate('xpack.alertingV2.ruleForm.schedule
   defaultMessage: 'Every',
 });
 
-const SCHEDULE_UNIT_LABEL = i18n.translate('xpack.alertingV2.ruleForm.schedule.unitLabel', {
-  defaultMessage: 'Unit',
-});
+const SCHEDULE_UNIT_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.ruleForm.schedule.unitAriaLabel',
+  {
+    defaultMessage: 'Unit',
+  }
+);
 
 interface Props {
   value: string;
@@ -28,7 +31,7 @@ export const RuleSchedule = React.forwardRef<HTMLInputElement, Props>((props, re
     {...props}
     ref={ref}
     numberLabel={SCHEDULE_TITLE_PREFIX}
-    unitLabel={SCHEDULE_UNIT_LABEL}
+    unitAriaLabel={SCHEDULE_UNIT_ARIA_LABEL}
     dataTestSubj="ruleSchedule"
     idPrefix="ruleSchedule"
   />

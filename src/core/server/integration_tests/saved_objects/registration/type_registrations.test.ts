@@ -16,7 +16,6 @@ const previouslyRegisteredTypes = [
   'action_task_params',
   'ad_hoc_run_params',
   'alert',
-  'alerting_rule',
   'alerting_rule_template',
   'api_key_pending_invalidation',
   'api_key_to_invalidate',
@@ -26,6 +25,7 @@ const previouslyRegisteredTypes = [
   'apm-service-group',
   'apm-services-telemetry',
   'apm-telemetry',
+  'anonymization-salt',
   'app_search_telemetry',
   'application_usage_daily',
   'application_usage_totals',
@@ -67,6 +67,7 @@ const previouslyRegisteredTypes = [
   'privmon-api-key',
   'entity-discovery-api-key',
   'entity-engine-descriptor-v2',
+  'entity-store-global-state',
   'epm-packages',
   'epm-packages-assets',
   'event_loop_delays_daily',
@@ -101,6 +102,7 @@ const previouslyRegisteredTypes = [
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'infra-custom-dashboards',
+  'inference-settings',
   'ingest-agent-policies',
   'ingest-download-sources',
   'ingest-outputs',
@@ -186,7 +188,6 @@ const previouslyRegisteredTypes = [
   'workplace_search_telemetry',
   'gap_auto_fill_scheduler',
   'trial-companion-nba-milestone',
-  'alerting_notification_policy',
 ].sort();
 
 describe('SO type registrations', () => {

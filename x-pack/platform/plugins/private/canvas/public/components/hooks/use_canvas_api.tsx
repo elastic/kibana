@@ -36,7 +36,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
         trackCanvasUiMetric(METRIC_TYPE.CLICK, type);
       }
       if (embeddableInput) {
-        const expression = embeddableInputToExpression(embeddableInput, type, undefined, true);
+        const expression = embeddableInputToExpression(embeddableInput, type);
         dispatch(addElement(selectedPageId, { expression }));
       }
     },
