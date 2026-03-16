@@ -11,11 +11,11 @@ import { graphlib } from '@dagrejs/dagre';
 import type {
   ConnectorStep,
   ElasticsearchStep,
-  LoopBreakStep,
-  LoopContinueStep,
   ForEachStep,
   IfStep,
   KibanaStep,
+  LoopBreakStep,
+  LoopContinueStep,
   WaitStep,
   WhileStep,
   WorkflowYaml,
@@ -29,9 +29,9 @@ import type {
   ExitConditionBranchNode,
   ExitForeachNode,
   ExitIfNode,
+  KibanaGraphNode,
   LoopBreakNode,
   LoopContinueNode,
-  KibanaGraphNode,
   WaitGraphNode,
 } from '../../types';
 import { convertToWorkflowGraph } from '../build_execution_graph';
@@ -1294,7 +1294,7 @@ describe('convertToWorkflowGraph', () => {
       } as Partial<WorkflowYaml>;
 
       expect(() => convertToWorkflowGraph(workflowDefinition as any)).toThrow(
-        /flow\.break and flow\.continue are only valid inside a loop body/
+        /loop\.break and loop\.continue are only valid inside a loop body/
       );
     });
 
@@ -1304,7 +1304,7 @@ describe('convertToWorkflowGraph', () => {
       } as Partial<WorkflowYaml>;
 
       expect(() => convertToWorkflowGraph(workflowDefinition as any)).toThrow(
-        /flow\.break and flow\.continue are only valid inside a loop body/
+        /loop\.break and loop\.continue are only valid inside a loop body/
       );
     });
 
