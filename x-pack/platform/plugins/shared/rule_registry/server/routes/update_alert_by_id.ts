@@ -13,6 +13,13 @@ import { buildRouteValidation } from './utils/route_validation';
 import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 
+interface UpdateAlertByIdRequestBody {
+  _version?: string;
+  ids: string[];
+  index: string;
+  status: string;
+}
+
 export const updateAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
     {
@@ -48,7 +55,7 @@ export const updateAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) 
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { status, ids, index, _version } = req.body;
+        const { status, ids, index, _version } = req.body as UpdateAlertByIdRequestBody;
 
         const updatedAlert = await alertsClient.update({
           id: ids[0],

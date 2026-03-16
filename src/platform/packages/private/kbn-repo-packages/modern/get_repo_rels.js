@@ -20,6 +20,7 @@ const execAsync = promisify(ChildProcess.execFile);
  * @returns {Iterable<string>}
  */
 function parseLsFilesOutput(repoRoot, output) {
+  /** @type {Set<string>} */
   const files = new Set();
 
   for (const line of output.split('\n').map((l) => l.trim())) {

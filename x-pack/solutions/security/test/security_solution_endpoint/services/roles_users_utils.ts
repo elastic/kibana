@@ -10,12 +10,32 @@ import {
   KNOWN_SERVERLESS_ROLE_DEFINITIONS,
 } from '@kbn/security-solution-plugin/common/test';
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import type { FtrProviderContext } from '../configs/ftr_provider_context';
 
 const KNOWN_ROLE_DEFINITIONS = {
   ...KNOWN_SERVERLESS_ROLE_DEFINITIONS,
   ...KNOWN_ESS_ROLE_DEFINITIONS,
 };
+
+interface SecurityService {
+  role: {
+    create(roleName: string, roleDefinition: unknown): Promise<void>;
+    delete(roleName: string): Promise<void>;
+  };
+  user: {
+    create(
+      username: string,
+      userDefinition: {
+        password: string;
+        roles: string[];
+        full_name: string;
+        email: string;
+      }
+    ): Promise<void>;
+    delete(username: string): Promise<void>;
+  };
+}
+
+type GetSecuritySolutionEndpointService = (name: 'security') => SecurityService;
 
 /**
  * creates a security solution centric role and a user (both having the same name)
@@ -23,7 +43,7 @@ const KNOWN_ROLE_DEFINITIONS = {
  * @param role
  */
 export const createUserAndRole = async (
-  getService: FtrProviderContext['getService'],
+  getService: GetSecuritySolutionEndpointService,
   role: SecurityRoleName
 ): Promise<void> => {
   const securityService = getService('security');
@@ -45,7 +65,7 @@ export const createUserAndRole = async (
  * @param securityService The security service
  */
 export const deleteUserAndRole = async (
-  getService: FtrProviderContext['getService'],
+  getService: GetSecuritySolutionEndpointService,
   roleName: SecurityRoleName
 ): Promise<void> => {
   const securityService = getService('security');

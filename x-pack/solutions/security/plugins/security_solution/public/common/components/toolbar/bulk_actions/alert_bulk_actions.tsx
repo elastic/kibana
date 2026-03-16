@@ -8,7 +8,6 @@
 import numeral from '@elastic/numeral';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
@@ -221,9 +220,16 @@ const mapDispatchToProps = {
   clearSelected: dataTableActions.clearSelected,
 };
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+type AlertBulkActionsStateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type AlertBulkActionsDispatchProps = typeof mapDispatchToProps;
+type PropsFromRedux = AlertBulkActionsStateProps & AlertBulkActionsDispatchProps;
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+const connector = connect<
+  AlertBulkActionsStateProps,
+  AlertBulkActionsDispatchProps,
+  OwnProps,
+  DataTableState
+>(makeMapStateToProps, mapDispatchToProps);
 
 export const StatefulAlertBulkActions = connector(AlertBulkActionsComponent);
 

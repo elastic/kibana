@@ -89,7 +89,10 @@ export function registerChatCompleteRoute({
     },
     async (context, request, response) => {
       try {
-        const chatCompleteResponse = await callChatComplete({ request, stream: false });
+        const chatCompleteResponse = await callChatComplete({
+          request: request as KibanaRequest<unknown, unknown, ChatCompleteRequestBody>,
+          stream: false,
+        });
         return response.ok({
           body: chatCompleteResponse,
         });
@@ -121,7 +124,10 @@ export function registerChatCompleteRoute({
       },
     },
     async (context, request, response) => {
-      const chatCompleteEvents$ = await callChatComplete({ request, stream: true });
+      const chatCompleteEvents$ = await callChatComplete({
+        request: request as KibanaRequest<unknown, unknown, ChatCompleteRequestBody>,
+        stream: true,
+      });
       return response.ok({
         body: observableIntoEventSourceStream(chatCompleteEvents$, {
           logger,

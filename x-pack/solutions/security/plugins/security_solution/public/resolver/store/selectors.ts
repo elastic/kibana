@@ -10,14 +10,7 @@ import type { State } from '../../common/store/types';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import type {
-  AnalyzerById,
-  ResolverState,
-  IsometricTaxiLayout,
-  DataState,
-  VisibleEntites,
-  NodeData,
-} from '../types';
+import type { AnalyzerById, ResolverState, IsometricTaxiLayout, DataState } from '../types';
 import type { EventStats } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
 
@@ -266,38 +259,43 @@ export const originID: (state: ResolverState) => string | undefined = composeSel
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
  * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
  */
-export const ariaFlowtoNodeID = createSelector(
-  visibleNodesAndEdgeLines,
-  composeSelectors(dataStateSelector, dataSelectors.ariaFlowtoCandidate),
-  function (
-    visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites,
-    ariaFlowtoCandidate: (nodeId: string) => string | null
-  ) {
-    return defaultMemoize((time: number) => {
-      // get the visible nodes at `time`
-      const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
-
-      // get a `Set` containing their node IDs
-      const nodesVisibleAtTime: Set<string> = new Set();
-      // NB: in practice, any event that has been graphed is guaranteed to have an entity_id
-      for (const visibleNode of processNodePositions.keys()) {
-        const nodeID = nodeModel.nodeID(visibleNode);
-        if (nodeID !== undefined) {
-          nodesVisibleAtTime.add(nodeID);
-        }
-      }
-
-      // return the ID of `nodeID`'s following sibling, if it is visible
-      return (nodeID: string): string | null => {
-        const flowtoNode: string | null = ariaFlowtoCandidate(nodeID);
-
-        return flowtoNode === null || nodesVisibleAtTime.has(flowtoNode) === false
-          ? null
-          : flowtoNode;
-      };
-    });
-  }
+const ariaFlowtoCandidateSelector = composeSelectors(
+  dataStateSelector,
+  dataSelectors.ariaFlowtoCandidate
 );
+
+const createAriaFlowtoNodeID = (
+  visibleNodesAndEdgeLinesAtTime: ReturnType<typeof visibleNodesAndEdgeLines>,
+  ariaFlowtoCandidate: ReturnType<typeof ariaFlowtoCandidateSelector>
+) =>
+  defaultMemoize((time: number) => {
+    // get the visible nodes at `time`
+    const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
+
+    // get a `Set` containing their node IDs
+    const nodesVisibleAtTime: Set<string> = new Set();
+    // NB: in practice, any event that has been graphed is guaranteed to have an entity_id
+    for (const visibleNode of processNodePositions.keys()) {
+      const nodeID = nodeModel.nodeID(visibleNode);
+      if (nodeID !== undefined) {
+        nodesVisibleAtTime.add(nodeID);
+      }
+    }
+
+    // return the ID of `nodeID`'s following sibling, if it is visible
+    return (nodeID: string): string | null => {
+      const flowtoNode: string | null = ariaFlowtoCandidate(nodeID);
+
+      return flowtoNode === null || nodesVisibleAtTime.has(flowtoNode) === false
+        ? null
+        : flowtoNode;
+    };
+  });
+
+export const ariaFlowtoNodeID = createSelector<
+  [typeof visibleNodesAndEdgeLines, typeof ariaFlowtoCandidateSelector],
+  ReturnType<typeof createAriaFlowtoNodeID>
+>([visibleNodesAndEdgeLines, ariaFlowtoCandidateSelector], createAriaFlowtoNodeID);
 
 export const panelViewAndParameters = composeSelectors(
   uiStateSelector,
@@ -384,32 +382,37 @@ export const graphNodeForID = composeSelectors(dataStateSelector, dataSelectors.
 /**
  * Returns a Set of node IDs representing the visible nodes in the view that we do no have node data for already.
  */
-export const newIDsToRequest: (state: ResolverState) => (time: number) => Set<string> =
-  createSelector(
-    composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData),
-    visibleNodesAndEdgeLines,
-    function (
-      nodeData: Map<string, NodeData> | undefined,
-      visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites
-    ) {
-      return defaultMemoize((time: number) => {
-        const { processNodePositions: nodesInView } = visibleNodesAndEdgeLinesAtTime(time);
+const nodeDataSelector = composeSelectors(
+  dataStateSelector,
+  (dataState: DataState) => dataState.nodeData
+);
 
-        const nodes: Set<string> = new Set();
-        // loop through the nodes in view and see if any of them are new aka we don't have node data for them already
-        for (const node of nodesInView.keys()) {
-          const id = nodeModel.nodeID(node);
-          // if the node has a valid ID field, and we either don't have any node data currently, or
-          // the map doesn't have info for this particular node, then add it to the set so it'll be requested
-          // by the middleware
-          if (id !== undefined && (!nodeData || !nodeData.has(id))) {
-            nodes.add(id);
-          }
-        }
-        return nodes;
-      });
+const createNewIDsToRequest = (
+  nodeData: ReturnType<typeof nodeDataSelector>,
+  visibleNodesAndEdgeLinesAtTime: ReturnType<typeof visibleNodesAndEdgeLines>
+) =>
+  defaultMemoize((time: number) => {
+    const { processNodePositions: nodesInView } = visibleNodesAndEdgeLinesAtTime(time);
+
+    const nodes: Set<string> = new Set();
+    // loop through the nodes in view and see if any of them are new aka we don't have node data for them already
+    for (const node of nodesInView.keys()) {
+      const id = nodeModel.nodeID(node);
+      // if the node has a valid ID field, and we either don't have any node data currently, or
+      // the map doesn't have info for this particular node, then add it to the set so it'll be requested
+      // by the middleware
+      if (id !== undefined && (!nodeData || !nodeData.has(id))) {
+        nodes.add(id);
+      }
     }
-  );
+    return nodes;
+  });
+
+export const newIDsToRequest: (state: ResolverState) => (time: number) => Set<string> =
+  createSelector<
+    [typeof nodeDataSelector, typeof visibleNodesAndEdgeLines],
+    ReturnType<typeof createNewIDsToRequest>
+  >([nodeDataSelector, visibleNodesAndEdgeLines], createNewIDsToRequest);
 
 /**
  * Returns the schema for the current resolver tree. Currently, only used in the graph controls panel.

@@ -22,18 +22,49 @@ import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifact
 import { LOCAL_CACHE_ROOT } from './src/archive/constants';
 import { isCiEnvironment } from './src/archive/utils';
 import { normalizeProjectPath } from './src/normalize_project_path';
+import { resolveTypeCheckCompiler } from './src/resolve_type_check_compiler';
+import { getTsgoPaths, hasLocalTsgoPathOverrides } from './src/tsgo_path_rewrites';
 
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
   return path.startsWith('.') ? path : `./${path}`;
 };
 
+// tsgo does not resolve typeRoots or triple-slash references the same way tsc
+// does, so ambient type packages must be listed explicitly in `types`. This
+// helper replaces the tsc-only `@emotion/react/types/css-prop` entry with
+// `@kbn/ambient-ui-types` (which bundles the css-prop augmentation along with
+// style-import shims) and ensures it is always present.
+const getTsgoTypes = (types: string[] | undefined): string[] | undefined => {
+  if (!Array.isArray(types)) {
+    return types;
+  }
+
+  const rewrittenTypes = types.map((entry) =>
+    entry === '@emotion/react/types/css-prop' ? '@kbn/ambient-ui-types' : entry
+  );
+
+  return [...new Set([...rewrittenTypes, '@kbn/ambient-ui-types'])];
+};
+
+const getTypeCheckPaths = (project: TsProject, isTsgo: boolean): unknown => {
+  if (isTsgo) {
+    return hasLocalTsgoPathOverrides(project) ? getTsgoPaths(project) : undefined;
+  }
+
+  return project.repoRel === 'tsconfig.base.json'
+    ? project.config.compilerOptions?.paths
+    : undefined;
+};
+
 async function createTypeCheckConfigs(
   log: SomeDevLog,
   projects: TsProject[],
-  allProjects: TsProject[]
+  allProjects: TsProject[],
+  compilerName: 'tsc' | 'tsgo'
 ) {
   const writes: Array<[path: string, content: string]> = [];
+  const isTsgo = compilerName === 'tsgo';
 
   // write tsconfig.type_check.json files for each project that is not the root
   const queue = new Set(projects);
@@ -53,7 +84,9 @@ async function createTypeCheckConfigs(
         rootDir: '.',
         noEmit: false,
         emitDeclarationOnly: true,
-        paths: project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined,
+        types: isTsgo ? getTsgoTypes(config.compilerOptions?.types) : config.compilerOptions?.types,
+        baseUrl: isTsgo ? undefined : config.compilerOptions?.baseUrl,
+        paths: getTypeCheckPaths(project, isTsgo),
       },
       kbn_references: undefined,
       references: project.getKbnRefs(allProjects).map((refd) => {
@@ -135,17 +168,18 @@ run(
     }
 
     const projectFilter = normalizeProjectPath(flagsReader.path('project'), log);
+    const compiler = resolveTypeCheckCompiler(flagsReader.string('compiler'));
 
     const projects = TS_PROJECTS.filter(
       (p) => !p.isTypeCheckDisabled() && (!projectFilter || p.path === projectFilter)
     );
 
-    const created = await createTypeCheckConfigs(log, projects, TS_PROJECTS);
+    const created = await createTypeCheckConfigs(log, projects, TS_PROJECTS, compiler.name);
 
     let didTypeCheckFail = false;
     try {
       log.info(
-        `Building TypeScript projects to check types (For visible, though excessive, progress info you can pass --verbose)`
+        `Building TypeScript projects to check types with ${compiler.name} (For visible, though excessive, progress info you can pass --verbose)`
       );
 
       const relative = Path.relative(
@@ -153,9 +187,10 @@ run(
         projects.length === 1 ? projects[0].typeCheckConfigPath : ROOT_REFS_CONFIG_PATH
       );
 
-      await procRunner.run('tsc', {
-        cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
+      await procRunner.run(compiler.name, {
+        cmd: Path.isAbsolute(compiler.cmd) ? Path.relative(REPO_ROOT, compiler.cmd) : compiler.cmd,
         args: [
+          ...compiler.args,
           '-b',
           relative,
           '--pretty',
@@ -214,11 +249,17 @@ run(
 
         # check types in a single project
         node scripts/type_check --project packages/kbn-pm/tsconfig.json
+
+        # preview the native TypeScript compiler
+        node scripts/type_check --compiler tsgo --project packages/kbn-pm/tsconfig.json
     `,
     flags: {
-      string: ['project'],
+      string: ['compiler', 'project'],
       boolean: ['clean-cache', 'cleanup', 'extended-diagnostics', 'with-archive'],
       help: `
+        --compiler [tsc|tsgo]  Type-check compiler to run. Defaults to tsc; tsgo uses the local
+                                  @typescript/native-preview install when available and otherwise
+                                  falls back to npx for a developer preview.
         --project [path]        Path to a tsconfig.json file determines the project to check
         --help                  Show this message
         --clean-cache           Delete any existing TypeScript caches before running type check

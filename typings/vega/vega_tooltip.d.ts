@@ -8,5 +8,6 @@
  */
 
 declare module 'vega-tooltip' {
-  export * from 'vega-tooltip/build';
+  export { Handler, version } from 'vega-tooltip/build/index';
+  export * from 'vega-tooltip/build/index';
 }

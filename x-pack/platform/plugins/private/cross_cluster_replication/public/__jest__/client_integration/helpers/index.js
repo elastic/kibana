@@ -17,6 +17,7 @@ import { getRandomString } from '@kbn/test-jest-helpers';
 export { getRandomString };
 export { setupEnvironment } from './setup_environment';
 
+/** @type {Record<string, { setup: Function }>} */
 export const pageHelpers = {
   autoFollowPatternList: { setup: autoFollowPatternListSetup },
   autoFollowPatternAdd: { setup: autoFollowPatternAddSetup },

@@ -26,7 +26,7 @@ type RequiredParams = Omit<ESSearchRequest, 'index'> & {
 };
 
 export type MSearchParams = Omit<RequiredParams, 'allow_no_indices'>;
-interface TypedMSearchResponse<TDocument, TParams extends RequiredParams> {
+export interface TypedMSearchResponse<TDocument, TParams extends RequiredParams> {
   responses: Array<InferSearchResponseOf<TDocument, TParams>>;
 }
 

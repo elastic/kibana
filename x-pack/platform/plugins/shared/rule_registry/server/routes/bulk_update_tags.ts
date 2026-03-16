@@ -30,6 +30,14 @@ const bodySchema = schema.object({
   query: schema.maybe(schema.string({ maxLength: MAX_QUERY_LENGTH })),
 });
 
+interface BulkUpdateTagsRequestBody {
+  add?: string[];
+  alertIds?: string[];
+  index: string;
+  query?: string;
+  remove?: string[];
+}
+
 export const bulkUpdateTagsRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
     {
@@ -50,7 +58,7 @@ export const bulkUpdateTagsRoute = (router: IRouter<RacRequestHandlerContext>) =
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { query, alertIds, index, add, remove } = req.body;
+        const { query, alertIds, index, add, remove } = req.body as BulkUpdateTagsRequestBody;
 
         if (alertIds && query) {
           return response.badRequest({

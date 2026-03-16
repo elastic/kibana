@@ -5,7 +5,20 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type SuperTest from 'supertest';
+
+interface CreatedMaintenanceWindow {
+  id: string;
+  [key: string]: unknown;
+}
+
+interface MaintenanceWindowServices {
+  supertest: SuperTest.Agent;
+}
+
+type GetMaintenanceWindowService = <TName extends keyof MaintenanceWindowServices>(
+  name: TName
+) => MaintenanceWindowServices[TName];
 
 export const createMaintenanceWindow = async ({
   name,
@@ -17,9 +30,9 @@ export const createMaintenanceWindow = async ({
   name: string;
   startDate?: Date;
   notRecurring?: boolean;
-  getService: FtrProviderContext['getService'];
+  getService: GetMaintenanceWindowService;
   overwrite?: Record<string, any>;
-}) => {
+}): Promise<CreatedMaintenanceWindow> => {
   const supertest = getService('supertest');
   const dtstart = startDate ? startDate : new Date();
   const createParams = {
@@ -39,5 +52,5 @@ export const createMaintenanceWindow = async ({
     .send(createParams)
     .expect(200);
 
-  return body;
+  return body as CreatedMaintenanceWindow;
 };

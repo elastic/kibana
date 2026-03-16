@@ -7,7 +7,6 @@
 
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
-import type { Dispatch } from 'redux';
 import { render, screen } from '@testing-library/react';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
@@ -107,7 +106,6 @@ describe('PinnedTabContent', () => {
     useKibanaMock.mockReturnValue(kibanaMockResult);
 
     props = {
-      dispatch: {} as Dispatch,
       columns: defaultHeaders,
       timelineId: TimelineId.test,
       itemsPerPage: 5,

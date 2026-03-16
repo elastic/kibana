@@ -30,9 +30,17 @@ interface SynthtraceIngestionData {
   infra: Array<SynthtraceEvents<InfraDocument>>;
 }
 
-const INGESTION_CLIENT_MAP: Record<string, SynthtraceClientTypes> = {
-  apm: 'apmEsClient',
-  infra: 'infraEsClient',
+const indexSynthtraceEvents = async <
+  TFields extends Fields,
+  TClient extends SynthtraceClientTypes
+>({
+  client,
+  event,
+}: {
+  client: Awaited<ReturnType<typeof getSynthtraceClient<TClient>>>[TClient];
+  event: SynthtraceEvents<TFields>;
+}) => {
+  return client.index(Readable.from(Array.from(event)));
 };
 
 /**
@@ -61,33 +69,67 @@ export async function ingestSynthtraceDataHook(config: FullConfig, data: Synthtr
     const esClient = getEsClient(scoutConfig, log);
     const kbnUrl = scoutConfig.hosts.kibana;
 
-    for (const key of Object.keys(data)) {
-      const typedKey = key as keyof SynthtraceIngestionData;
-      if (data[typedKey].length > 0) {
-        const clientType = INGESTION_CLIENT_MAP[typedKey];
-        const clients = await getSynthtraceClient(clientType, {
+    for (const typedKey of Object.keys(data) as Array<keyof SynthtraceIngestionData>) {
+      if (typedKey === 'apm') {
+        if (data.apm.length === 0) {
+          log.debug('[setup] no synthtrace data to ingest for apm');
+          continue;
+        }
+
+        const clients = await getSynthtraceClient('apmEsClient', {
           esClient,
           kbnUrl,
           log,
           config: scoutConfig,
         });
 
-        log.debug(`[setup] ingesting ${key} synthtrace data`);
+        log.debug('[setup] ingesting apm synthtrace data');
 
         try {
           await Promise.all(
-            data[typedKey].map((event) => {
-              return clients[clientType].index(Readable.from(Array.from(event)));
+            data.apm.map((event) => {
+              return indexSynthtraceEvents({
+                client: clients.apmEsClient,
+                event,
+              });
             })
           );
         } catch (e) {
-          log.debug(`[setup] error ingesting ${key} synthtrace data`, e);
+          log.debug('[setup] error ingesting apm synthtrace data', e);
         }
 
-        log.debug(`[setup] ${key} synthtrace data ingested successfully`);
-      } else {
-        log.debug(`[setup] no synthtrace data to ingest for ${key}`);
+        log.debug('[setup] apm synthtrace data ingested successfully');
+        continue;
       }
+
+      if (data.infra.length === 0) {
+        log.debug('[setup] no synthtrace data to ingest for infra');
+        continue;
+      }
+
+      const clients = await getSynthtraceClient('infraEsClient', {
+        esClient,
+        kbnUrl,
+        log,
+        config: scoutConfig,
+      });
+
+      log.debug('[setup] ingesting infra synthtrace data');
+
+      try {
+        await Promise.all(
+          data.infra.map((event) => {
+            return indexSynthtraceEvents({
+              client: clients.infraEsClient,
+              event,
+            });
+          })
+        );
+      } catch (e) {
+        log.debug('[setup] error ingesting infra synthtrace data', e);
+      }
+
+      log.debug('[setup] infra synthtrace data ingested successfully');
     }
   });
 }

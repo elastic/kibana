@@ -27,7 +27,7 @@ import {
 import type { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 import { onRaf, shallowEqual } from '../utils';
 
-interface SuggestionsComponentProps {
+export interface SuggestionsComponentProps {
   index: number | null;
   onClick: SuggestionOnClick;
   onMouseEnter: SuggestionOnMouseEnter;

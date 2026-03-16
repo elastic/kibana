@@ -24,7 +24,9 @@ const defaultParams = {
   canAccessFleet: true,
 };
 
-export const getServicesMock = (params: Partial<NoDataPageServices> = defaultParams) => {
+export function getServicesMock(
+  params: Partial<NoDataPageServices> = defaultParams
+): NoDataPageServices {
   const canAccessFleet =
     params.canAccessFleet !== undefined ? params.canAccessFleet : defaultParams.canAccessFleet;
 
@@ -34,20 +36,25 @@ export const getServicesMock = (params: Partial<NoDataPageServices> = defaultPar
   };
 
   return services;
-};
+}
 
 /**
  * Return a Jest mock of the Kibana dependencies for the `NoDataPageKibanaProvider`.
  */
-export const getKibanaDependenciesMock = (
+export function getKibanaDependenciesMock(
   params: Partial<NoDataPageServices> = defaultParams
-): NoDataPageKibanaDependencies => {
+): NoDataPageKibanaDependencies {
   const integrations =
     params.canAccessFleet !== undefined ? params.canAccessFleet : defaultParams.canAccessFleet;
 
   const result: NoDataPageKibanaDependencies = deepmerge(
     {
       coreStart: {
+        http: {
+          basePath: {
+            prepend: jest.fn(),
+          },
+        },
         application: {
           capabilities: {
             navLinks: {
@@ -64,4 +71,4 @@ export const getKibanaDependenciesMock = (
   );
 
   return result;
-};
+}

@@ -99,21 +99,33 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     });
 
     if (stream) {
-      return connectorResult$.pipe(
-        handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
-        processOpenAIStream(),
-        emitTokenCountEstimateIfMissing({ request }),
-        useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
+      const connectorStream$ = connectorResult$.pipe(
+        handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable })
       );
+
+      const eventStream$ = connectorStream$.pipe(
+        processOpenAIStream(),
+        emitTokenCountEstimateIfMissing({ request })
+      );
+
+      return useSimulatedFunctionCalling
+        ? eventStream$.pipe(parseInlineFunctionCalls({ logger }))
+        : eventStream$.pipe(identity);
     } else {
-      return connectorResult$.pipe(
+      const connectorData$ = connectorResult$.pipe(
         handleConnectorDataResponse({
           parseData: (data) => data as OpenAI.ChatCompletion,
-        }),
-        processOpenAIResponse(),
-        emitTokenCountEstimateIfMissing({ request }),
-        useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
+        })
       );
+
+      const eventStream$ = connectorData$.pipe(
+        processOpenAIResponse(),
+        emitTokenCountEstimateIfMissing({ request })
+      );
+
+      return useSimulatedFunctionCalling
+        ? eventStream$.pipe(parseInlineFunctionCalls({ logger }))
+        : eventStream$.pipe(identity);
     }
   },
 };

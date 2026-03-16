@@ -8,9 +8,14 @@
 import { schema } from '@kbn/config-schema';
 
 import type { ExternalRouteDeps } from '.';
-import { API_VERSIONS, type Space } from '../../../../common';
+import { API_VERSIONS, type GetAllSpacesOptions, type Space } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
 import { createLicensedRouteHandler } from '../../lib';
+
+interface GetAllSpacesRequestQuery {
+  purpose?: GetAllSpacesOptions['purpose'];
+  include_authorized_purposes?: GetAllSpacesOptions['includeAuthorizedPurposes'];
+}
 
 export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
   const { router, log, getSpacesService } = deps;
@@ -76,7 +81,8 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
       createLicensedRouteHandler(async (context, request, response) => {
         log.debug(`Inside GET /api/spaces/space`);
 
-        const { purpose, include_authorized_purposes: includeAuthorizedPurposes } = request.query;
+        const { purpose, include_authorized_purposes: includeAuthorizedPurposes } =
+          request.query as GetAllSpacesRequestQuery;
 
         const spacesClient = getSpacesService().createSpacesClient(request);
 

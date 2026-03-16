@@ -7,14 +7,92 @@
 
 import type { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
 import expect from '@kbn/expect';
+import type { Client } from '@elastic/elasticsearch';
 import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 
+interface LoggerService {
+  debug(message: string): void;
+  info(message: string): void;
+  warning(message: string): void;
+  error(message: string): void;
+}
+
+interface RetryService {
+  waitForWithTimeout(
+    description: string,
+    timeout: number,
+    check: () => Promise<boolean>
+  ): Promise<void>;
+}
+
+interface EntityEngine {
+  type: EntityType;
+  status: string;
+}
+
+interface EntityEnginesResponse {
+  engines: EntityEngine[];
+}
+
+interface EntityEngineStatusResponse {
+  status: string;
+}
+
+interface EntityStoreApiService {
+  listEntityEngines(
+    namespace: string
+  ): Promise<{ body: EntityEnginesResponse; expect: (status: number) => Promise<unknown> }>;
+  deleteEntityEngine(
+    params: { params: { entityType: 'user' | 'host' }; query: { data: boolean } },
+    namespace: string
+  ): Promise<unknown>;
+  initEntityEngine(
+    params: { params: { entityType: EntityType }; body: {} },
+    namespace: string
+  ): Promise<{ status: number; body: unknown }>;
+  getEntityEngine(
+    params: { params: { entityType: EntityType } },
+    namespace: string
+  ): Promise<{ body: EntityEngineStatusResponse; expect: (status: number) => Promise<unknown> }>;
+  initEntityStore(
+    params: { body: InitEntityStoreRequestBodyInput },
+    namespace: string
+  ): Promise<{ status: number; body: unknown }>;
+}
+
+interface GetEntityStoreService {
+  (name: 'entityAnalyticsApi'): EntityStoreApiService;
+  (name: 'es'): Client;
+  (name: 'log'): LoggerService;
+  (name: 'retry'): RetryService;
+}
+
+interface EntityStoreUtilsApi {
+  cleanEngines(): Promise<void>;
+  initEntityEngineForEntityTypesAndWait(entityTypes: EntityType[]): Promise<void>;
+  expectTransformStatus(
+    transformId: string,
+    exists: boolean,
+    attempts?: number,
+    delayMs?: number
+  ): Promise<void>;
+  expectEngineAssetsExist(entityType: EntityType): Promise<void>;
+  expectEngineAssetsDoNotExist(entityType: EntityType): Promise<void>;
+  enableEntityStore(
+    body?: InitEntityStoreRequestBodyInput
+  ): Promise<{ status: number; body: unknown }>;
+  waitForEngineStatus(entityType: EntityType, status: string): Promise<void>;
+  initEntityEngineForEntityType(entityType: EntityType): Promise<void>;
+}
+
+const isSupportedEntityType = (entityType: EntityType): entityType is 'user' | 'host' =>
+  entityType === 'user' || entityType === 'host';
+
 export const EntityStoreUtils = (
-  getService: FtrProviderContext['getService'],
+  getService: GetEntityStoreService,
   namespace: string = 'default'
-) => {
+): EntityStoreUtilsApi => {
   const entityAnalyticsApi = getService('entityAnalyticsApi');
   const es = getService('es');
   const log = getService('log');
@@ -35,20 +113,21 @@ export const EntityStoreUtils = (
   log.debug(`EntityStoreUtils namespace: ${namespace}`);
 
   const cleanEngines = async () => {
-    const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
-
-    // @ts-expect-error body is any
-    const engineTypes = body.engines.map((engine) => engine.type);
+    const response = await entityAnalyticsApi.listEntityEngines(namespace);
+    await response.expect(200);
+    const engineTypes = response.body.engines.map((engine) => engine.type);
 
     log.info(`Cleaning engines: ${engineTypes.join(', ')}`);
     try {
       await Promise.all(
-        engineTypes.map((entityType: 'user' | 'host') =>
-          entityAnalyticsApi.deleteEntityEngine(
-            { params: { entityType }, query: { data: true } },
-            namespace
+        engineTypes
+          .filter(isSupportedEntityType)
+          .map((entityType) =>
+            entityAnalyticsApi.deleteEntityEngine(
+              { params: { entityType }, query: { data: true } },
+              namespace
+            )
           )
-        )
       );
     } catch (e) {
       log.warning(`Error deleting engines: ${e.message}`);
@@ -82,12 +161,13 @@ export const EntityStoreUtils = (
       `Engines to start for entity types: ${entityTypes.join(', ')}`,
       60_000,
       async () => {
-        const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
-        if (body.engines.every((engine: any) => engine.status === 'started')) {
+        const response = await entityAnalyticsApi.listEntityEngines(namespace);
+        await response.expect(200);
+        if (response.body.engines.every((engine) => engine.status === 'started')) {
           return true;
         }
-        if (body.engines.some((engine: any) => engine.status === 'error')) {
-          throw new Error(`Engines not started: ${JSON.stringify(body)}`);
+        if (response.body.engines.some((engine) => engine.status === 'error')) {
+          throw new Error(`Engines not started: ${JSON.stringify(response.body)}`);
         }
         return false;
       }
@@ -99,17 +179,19 @@ export const EntityStoreUtils = (
       `Engine for entity type ${entityType} to be in status ${status}`,
       60_000,
       async () => {
-        const { body } = await entityAnalyticsApi
-          .getEntityEngine({ params: { entityType } }, namespace)
-          .expect(200);
-        log.debug(`Engine status for ${entityType}: ${body.status}`);
+        const response = await entityAnalyticsApi.getEntityEngine(
+          { params: { entityType } },
+          namespace
+        );
+        await response.expect(200);
+        log.debug(`Engine status for ${entityType}: ${response.body.status}`);
 
-        if (status !== 'error' && body.status === 'error') {
+        if (status !== 'error' && response.body.status === 'error') {
           // If we are not expecting an error, throw the error to improve logging
-          throw new Error(`Engine not started: ${JSON.stringify(body)}`);
+          throw new Error(`Engine not started: ${JSON.stringify(response.body)}`);
         }
 
-        return body.status === status;
+        return response.body.status === status;
       }
     );
   };

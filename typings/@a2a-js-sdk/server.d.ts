@@ -8,5 +8,18 @@
  */
 
 declare module '@a2a-js/sdk/server' {
-  export * from '@a2a-js/sdk/dist/server';
+  export {
+    A2AError,
+    DefaultExecutionEventBus,
+    DefaultExecutionEventBusManager,
+    DefaultPushNotificationSender,
+    DefaultRequestHandler,
+    ExecutionEventQueue,
+    InMemoryPushNotificationStore,
+    InMemoryTaskStore,
+    JsonRpcTransportHandler,
+    RequestContext,
+    ResultManager,
+  } from '@a2a-js/sdk/dist/server/index';
+  export type { AgentExecutor, ExecutionEventBus } from '@a2a-js/sdk/dist/server/index';
 }

@@ -76,7 +76,7 @@ export function registerStatsRoute({
       },
     },
     async (context, req, res) => {
-      const requestQuery: Stats.v1.StatsHTTPQuery = req.query;
+      const requestQuery = req.query as Stats.v1.StatsHTTPQuery;
       const isExtended = requestQuery.extended === '' || requestQuery.extended;
       const isLegacy = requestQuery.legacy === '' || requestQuery.legacy;
 

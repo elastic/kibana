@@ -8,6 +8,7 @@
 import { Plugin } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { StreamsRepositoryClient } from './api';
+import type { WiredStreamsStatus } from './types';
 
 describe('Streams Plugin', () => {
   let plugin: Plugin;
@@ -189,7 +190,7 @@ describe('Streams Plugin', () => {
       mockRepositoryClient.fetch.mockResolvedValue({
         enabled: true,
         can_manage: true,
-      });
+      } as unknown as WiredStreamsStatus);
 
       await getWiredStatus();
       await getWiredStatus();

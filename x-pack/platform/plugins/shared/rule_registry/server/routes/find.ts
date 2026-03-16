@@ -16,6 +16,19 @@ import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
 
+interface FindAlertsByQueryRequestBody {
+  _source?: boolean | string[];
+  aggs?: Record<string, unknown>;
+  consumers?: string[];
+  index?: string;
+  query?: object;
+  rule_type_ids?: string[];
+  search_after?: Array<number | string>;
+  size?: number;
+  sort?: object[];
+  track_total_hits?: boolean;
+}
+
 export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
     {
@@ -49,6 +62,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
     },
     async (context, request, response) => {
       try {
+        const requestBody = request.body as FindAlertsByQueryRequestBody;
         const {
           aggs,
           rule_type_ids: ruleTypeIds,
@@ -60,7 +74,7 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
           sort,
           track_total_hits,
           _source,
-        } = request.body;
+        } = requestBody;
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
         const alerts = await alertsClient.find({

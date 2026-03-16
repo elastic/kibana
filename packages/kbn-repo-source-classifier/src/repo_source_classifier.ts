@@ -194,8 +194,7 @@ export class RepoSourceClassifier {
           // classification in plugins is more complicated, fall through to remaining logic
           break;
         default:
-          // @ts-expect-error if there isn't an error here we are missing a case for a package type
-          throw new Error(`unexpected package type [${manifest.type}]`);
+          throw new Error(`unexpected package type [${(manifest as KibanaPackageManifest).type}]`);
       }
     }
 

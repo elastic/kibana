@@ -6,12 +6,11 @@
  */
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
-
-import type { ApiParams } from '@kbn/securitysolution-list-api';
 import { createListIndex } from '@kbn/securitysolution-list-api';
 import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 
 import { READ_INDEX_QUERY_KEY } from '../constants';
+import type { SecuritySolutionListHttp } from '../types';
 
 const createListIndexWithOptionalSignal = withOptionalSignal(createListIndex);
 
@@ -19,7 +18,7 @@ export const useCreateListIndex = ({
   http,
   onError,
 }: {
-  http: ApiParams['http'];
+  http: SecuritySolutionListHttp;
   onError?: (err: unknown) => void;
 }) => {
   const queryClient = useQueryClient();

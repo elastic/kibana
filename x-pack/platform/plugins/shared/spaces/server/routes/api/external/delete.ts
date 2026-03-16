@@ -59,7 +59,7 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
       createLicensedRouteHandler(async (context, request, response) => {
         const spacesClient = getSpacesService().createSpacesClient(request);
 
-        const id = request.params.id;
+        const { id } = request.params as { id: string };
 
         try {
           await spacesClient.delete(id);

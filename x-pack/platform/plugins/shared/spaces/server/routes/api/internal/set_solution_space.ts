@@ -26,6 +26,14 @@ const spaceSolutionSchema = schema.oneOf([
   }),
 ]);
 
+type SetSolutionSpaceRequestBody =
+  | {
+      solution: SolutionView;
+    }
+  | {
+      solution_type: 'security' | 'observability' | 'elasticsearch' | 'search';
+    };
+
 /* FUTURE Engineer
  * This route /internal/spaces/space/{id}/solution is and will be used by cloud (control panel)
  * to set the solution of a default space for an instant deployment
@@ -57,15 +65,16 @@ export function initSetSolutionSpaceApi(deps: InternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const spacesClient = (await getSpacesService()).createSpacesClient(request);
-      const id = request.params.id;
+      const { id } = request.params as { id: string };
+      const requestBody = request.body as SetSolutionSpaceRequestBody;
       let solutionToUpdate: SolutionView | undefined;
 
       let result: Space;
       try {
-        if ('solution' in request.body) {
-          solutionToUpdate = request.body.solution;
+        if ('solution' in requestBody) {
+          solutionToUpdate = requestBody.solution;
         } else {
-          solutionToUpdate = parseCloudSolution(request.body.solution_type);
+          solutionToUpdate = parseCloudSolution(requestBody.solution_type);
         }
         const space = await spacesClient?.get(id);
         result = await spacesClient.update(id, { ...space, solution: solutionToUpdate });

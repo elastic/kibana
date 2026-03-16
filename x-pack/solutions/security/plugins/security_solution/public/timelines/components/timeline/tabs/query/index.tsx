@@ -7,7 +7,6 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { type EuiDataGridControlColumn } from '@elastic/eui';
@@ -451,9 +450,12 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const connector = connect(makeMapStateToProps);
+type QueryTabStateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type PropsFromRedux = QueryTabStateProps;
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+const connector = connect<QueryTabStateProps, {}, TimelineTabCommonProps, State>(
+  makeMapStateToProps
+);
 
 const QueryTabContent = connector(
   React.memo(

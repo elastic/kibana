@@ -12,6 +12,10 @@ import type { RacRequestHandlerContext } from '../../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../../common/constants';
 import { getAlertFieldsRequestSchemaV1, getAlertFieldsResponseSchemaV1 } from '.';
 
+interface GetAlertFieldsRequestQuery {
+  rule_type_ids?: string | string[];
+}
+
 export const getAlertFieldsByRuleTypeIds = (router: IRouter<RacRequestHandlerContext>) => {
   router.get(
     {
@@ -47,7 +51,7 @@ export const getAlertFieldsByRuleTypeIds = (router: IRouter<RacRequestHandlerCon
     },
     async (context, request, response) => {
       try {
-        const { rule_type_ids: ruleTypeIds } = request.query;
+        const { rule_type_ids: ruleTypeIds } = request.query as GetAlertFieldsRequestQuery;
         const ruleTypeIdsArray = ruleTypeIds
           ? Array.isArray(ruleTypeIds)
             ? ruleTypeIds

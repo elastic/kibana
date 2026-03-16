@@ -32,7 +32,7 @@ const makeTestLog = () => {
   return log;
 };
 
-const instances: LmdbCache[] = [];
+const instances: Array<InstanceType<typeof LmdbCache>> = [];
 const makeCache = (...options: ConstructorParameters<typeof LmdbCache>) => {
   const instance = new LmdbCache(...options);
   instances.push(instance);

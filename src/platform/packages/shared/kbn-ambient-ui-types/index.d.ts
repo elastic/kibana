@@ -15,6 +15,30 @@ declare module '*.html' {
   export default template;
 }
 
+declare module '*.css' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
+declare module '*.less' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
+declare module '*.sass' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
+declare module '*.scss' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
 declare module '*.png' {
   const content: string;
   // eslint-disable-next-line import/no-default-export
@@ -67,4 +91,11 @@ declare module '*?raw' {
   const content: string;
   // eslint-disable-next-line import/no-default-export
   export default string;
+}
+
+// Virtual module resolved by webpack in Storybook builds (see kbn-storybook).
+declare module 'core_styles' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
 }

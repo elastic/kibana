@@ -24,6 +24,7 @@ export interface Connector {
   name: string;
   actionTypeId: string;
   config?: Record<string, unknown>;
+  isConnectorTypeDeprecated?: boolean;
   isPreconfigured?: boolean;
   isDeprecated?: boolean;
   isSystemAction?: boolean;

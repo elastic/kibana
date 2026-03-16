@@ -7,13 +7,11 @@
 
 import type { PropsWithChildren, ReactElement } from 'react';
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
 import { Provider } from 'react-redux';
 import type { PreloadedState } from '@reduxjs/toolkit';
 import type { RenderOptions } from '@testing-library/react';
 import type {
   LensAppState,
-  LensState,
   LensStoreDeps,
   DatasourceMap,
   VisualizationMap,
@@ -25,6 +23,9 @@ import { getResolvedDateRange } from '../utils';
 import { mockVisualizationMap } from './visualization_mock';
 import { mockDatasourceMap } from './datasource_mock';
 import { makeDefaultServices } from './services_mock';
+
+type MountWithProvidersOptions = NonNullable<Parameters<typeof mountWithProviders>[1]>;
+type MountWrappingComponent = NonNullable<MountWithProvidersOptions['wrappingComponent']>;
 
 export const mockStoreDeps = ({
   lensServices = makeDefaultServices(),
@@ -117,7 +118,7 @@ export function makeLensStore({
       resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
       ...preloadedState,
     },
-  } as unknown as PreloadedState<LensState>);
+  } as unknown as PreloadedState<{ lens: LensAppState }>);
 
   store.dispatch = jest.spyOn(store, 'dispatch') as jest.Mock;
   return { store, deps: storeDeps };
@@ -132,30 +133,34 @@ export interface MountStoreProps {
 export const mountWithReduxStore = (
   component: React.ReactElement,
   store?: MountStoreProps,
-  options?: {
-    wrappingComponent?: React.FC<PropsWithChildren<{}>>;
+  options?: Omit<MountWithProvidersOptions, 'wrappingComponent' | 'wrappingComponentProps'> & {
+    wrappingComponent?: MountWrappingComponent;
     wrappingComponentProps?: Record<string, unknown>;
-    attachTo?: HTMLElement;
   }
 ) => {
   const { store: lensStore, deps } = makeLensStore(store);
 
-  let wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => (
+  const ProviderWrapper: MountWrappingComponent = ({ children }) => (
     <Provider store={lensStore}>{children}</Provider>
   );
+  let wrappingComponent: MountWrappingComponent = ProviderWrapper;
   if (options?.wrappingComponent) {
+    const CustomWrappingComponent = options.wrappingComponent;
+    const wrappingComponentProps = options.wrappingComponentProps ?? {};
+
     wrappingComponent = ({ children }) => {
-      return options?.wrappingComponent?.({
-        ...options?.wrappingComponentProps,
-        children: wrappingComponent({ children }),
-      });
+      return (
+        <CustomWrappingComponent {...wrappingComponentProps}>
+          <ProviderWrapper>{children}</ProviderWrapper>
+        </CustomWrappingComponent>
+      );
     };
   }
 
   const instance = mountWithProviders(component, {
     ...options,
     wrappingComponent,
-  } as unknown as ReactWrapper);
+  });
 
   return { instance, lensStore, deps };
 };

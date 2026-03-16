@@ -5,10 +5,37 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import type { Role, User, UserInfo } from './types';
 import { allUsers } from './users';
 import { allRoles } from './roles';
+
+interface ConfigService {
+  get(key: 'serverless'): boolean;
+}
+
+interface SecurityService {
+  role: {
+    create(roleName: string, privileges: Role['privileges']): Promise<void>;
+    delete(roleName: string): Promise<void>;
+  };
+  user: {
+    create(
+      username: string,
+      userDefinition: {
+        password: string;
+        roles: string[];
+        full_name: string;
+        email: string;
+      }
+    ): Promise<void>;
+    delete(username: string): Promise<void>;
+  };
+}
+
+interface GetUnifiedAlertsAuthService {
+  (name: 'config'): ConfigService;
+  (name: 'security'): SecurityService;
+}
 
 export const getUserInfo = (user: User): UserInfo => ({
   username: user.username,
@@ -20,10 +47,10 @@ export const getUserInfo = (user: User): UserInfo => ({
  * Creates the users and roles for use in the tests
  */
 export const createUsersAndRoles = async (
-  getService: FtrProviderContext['getService'],
+  getService: GetUnifiedAlertsAuthService,
   usersToCreate: User[] = allUsers,
   rolesToCreate: Role[] = allRoles
-) => {
+): Promise<void> => {
   const config = getService('config');
   const isServerless = config.get('serverless');
   if (isServerless) {
@@ -57,10 +84,10 @@ export const createUsersAndRoles = async (
 };
 
 export const deleteUsersAndRoles = async (
-  getService: FtrProviderContext['getService'],
+  getService: GetUnifiedAlertsAuthService,
   usersToDelete: User[] = allUsers,
   rolesToDelete: Role[] = allRoles
-) => {
+): Promise<void> => {
   const config = getService('config');
   const isServerless = config.get('serverless');
   if (isServerless) {

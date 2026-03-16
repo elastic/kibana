@@ -35,7 +35,7 @@ export interface EsDocument {
 export type ScriptErrorCodes = 'PAINLESS_SCRIPT_ERROR' | 'PAINLESS_SYNTAX_ERROR';
 export type FetchDocErrorCodes = 'DOC_NOT_FOUND' | 'ERR_FETCHING_DOC';
 
-interface PreviewError {
+export interface PreviewError {
   code: ScriptErrorCodes;
   error:
     | RuntimeFieldPainlessError

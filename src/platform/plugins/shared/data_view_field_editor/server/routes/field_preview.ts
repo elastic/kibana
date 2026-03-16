@@ -28,6 +28,23 @@ const bodySchema = schema.object({
   document: schema.object({}, { unknowns: 'allow' }),
 });
 
+interface FieldPreviewRequestBody {
+  context:
+    | 'boolean_field'
+    | 'date_field'
+    | 'double_field'
+    | 'geo_point_field'
+    | 'ip_field'
+    | 'keyword_field'
+    | 'long_field'
+    | 'composite_field';
+  document: Record<string, unknown>;
+  index: string;
+  script: {
+    source: string;
+  };
+}
+
 const responseSchema = () => {
   const geoPoint = schema.object({
     type: schema.literal('Point'),
@@ -75,13 +92,14 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
       },
       async (ctx, req, res) => {
         const { client } = (await ctx.core).elasticsearch;
+        const requestBody = req.body as FieldPreviewRequestBody;
 
         const body = {
-          script: req.body.script,
-          context: req.body.context,
+          script: requestBody.script,
+          context: requestBody.context,
           context_setup: {
-            document: req.body.document,
-            index: req.body.index,
+            document: requestBody.document,
+            index: requestBody.index,
           },
         };
 

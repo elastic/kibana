@@ -16,7 +16,7 @@ const persistedLogViewReferenceSchema = schema.object(
 );
 
 // Comparators //
-enum Comparator {
+export enum Comparator {
   GT = 'more than',
   GT_OR_EQ = 'more than or equals',
   LT = 'less than',

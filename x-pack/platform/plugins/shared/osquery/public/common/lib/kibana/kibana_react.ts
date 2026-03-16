@@ -24,6 +24,17 @@ export interface WithKibanaProps {
   kibana: KibanaContext;
 }
 
+interface RouterNavigateTarget {
+  pathname?: string;
+  search?: string;
+  hash?: string;
+}
+
+interface RouterNavigateProps {
+  href: string;
+  onClick: (event: React.MouseEvent<Element>) => void;
+}
+
 const useTypedKibana = () => useKibana<StartServices>();
 
 const isModifiedEvent = (event: React.MouseEvent) =>
@@ -32,9 +43,9 @@ const isModifiedEvent = (event: React.MouseEvent) =>
 const isLeftClickEvent = (event: React.MouseEvent) => event.button === 0;
 
 const useRouterNavigate = (
-  to: Parameters<typeof reactRouterNavigate>[1],
-  onClickCallback?: Parameters<typeof reactRouterNavigate>[2]
-) => {
+  to: string | RouterNavigateTarget,
+  onClickCallback?: Function
+): RouterNavigateProps => {
   const history = useHistory();
 
   return reactRouterNavigate(history, to, onClickCallback);

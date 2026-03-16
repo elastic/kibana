@@ -23,6 +23,13 @@ const createBodySchemaV1 = schema.object({
   }),
 });
 
+interface SetPostCloudSolutionDataRequestBody {
+  onboardingData: {
+    solutionType: 'security' | 'observability' | 'search' | 'elasticsearch';
+    token: string;
+  };
+}
+
 export const setPostCloudSolutionDataRoute = ({ router }: RouteOptions) => {
   router.versioned
     .post({
@@ -45,6 +52,7 @@ export const setPostCloudSolutionDataRoute = ({ router }: RouteOptions) => {
         },
       },
       async (context, request, response) => {
+        const requestBody = request.body as SetPostCloudSolutionDataRequestBody;
         const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.getClient({
           includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
@@ -53,8 +61,8 @@ export const setPostCloudSolutionDataRoute = ({ router }: RouteOptions) => {
         try {
           await persistTokenCloudData(savedObjectsClient, {
             returnError: true,
-            solutionType: request.body.onboardingData.solutionType,
-            onboardingToken: request.body.onboardingData.token,
+            solutionType: requestBody.onboardingData.solutionType,
+            onboardingToken: requestBody.onboardingData.token,
           });
         } catch (error) {
           return response.customError(error);

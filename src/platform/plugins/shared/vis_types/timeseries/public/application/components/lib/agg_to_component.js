@@ -25,6 +25,7 @@ import { MathAgg } from '../aggs/math';
 import { TopHitAgg } from '../aggs/top_hit';
 import { PositiveRateAgg } from '../aggs/positive_rate';
 
+/** @type {Record<string, import('react').ComponentType<any>>} */
 export const aggToComponent = {
   count: StandardAgg,
   avg: StandardAgg,

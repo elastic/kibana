@@ -7,11 +7,8 @@
 
 import type { PhoenixClient } from '@arizeai/phoenix-client';
 import { createClient } from '@arizeai/phoenix-client';
-import type { DatasetInfo } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import type {
-  ExperimentRun,
-  ExperimentEvaluationRun,
-} from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import { createDataset } from '@arizeai/phoenix-client/datasets';
+import { runExperiment as runPhoenixExperiment } from '@arizeai/phoenix-client/experiments';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import { withInferenceContext } from '@kbn/inference-tracing';
@@ -25,6 +22,23 @@ import type {
 } from '@kbn/evals';
 import { upsertDataset } from './upsert_dataset';
 import type { PhoenixConfig } from './get_phoenix_config';
+
+interface PhoenixDatasetInfo {
+  id: string;
+}
+
+interface PhoenixExperimentRun {
+  datasetExampleId: string;
+  output?: string | boolean | number | object | null;
+  traceId: string | null;
+}
+
+interface PhoenixExperimentEvaluationRun {
+  name: string;
+  result: Record<string, unknown> | null;
+  experimentRunId: string;
+  traceId: string | null;
+}
 
 /**
  * Phoenix-backed eval runner. This remains supported as an option during the migration,
@@ -53,8 +67,6 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
   }
 
   private async syncDataSet(dataset: EvaluationDataset): Promise<{ datasetId: string }> {
-    const datasets = await import('@arizeai/phoenix-client/datasets');
-
     const getDatasetsByNameResponse = await this.phoenixClient.GET('/v1/datasets', {
       params: {
         query: {
@@ -64,7 +76,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
     });
 
     if (!getDatasetsByNameResponse.data?.data.length) {
-      const { datasetId } = await datasets.createDataset({
+      const { datasetId } = await createDataset({
         client: this.phoenixClient,
         name: dataset.name,
         description: dataset.description,
@@ -119,7 +131,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
         params: { path: { id: storedDataset.id } },
       });
 
-      const { datasetId } = await datasets.createDataset({
+      const { datasetId } = await createDataset({
         client: this.phoenixClient,
         name: dataset.name,
         description: dataset.description,
@@ -138,7 +150,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
     return { datasetId: storedDataset.id };
   }
 
-  async getDatasetByName(name: string): Promise<DatasetInfo> {
+  async getDatasetByName(name: string): Promise<PhoenixDatasetInfo> {
     const response = await this.phoenixClient.GET('/v1/datasets', {
       params: {
         query: {
@@ -189,9 +201,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
         ? (await this.getDatasetByName(dataset.name)).id
         : (await this.syncDataSet(dataset)).datasetId;
 
-      const experiments = await import('@arizeai/phoenix-client/experiments');
-
-      const ran = await experiments.runExperiment({
+      const ran = await runPhoenixExperiment({
         client: this.phoenixClient,
         dataset: { datasetId },
         experimentName: `Run ID: ${this.options.runId} - Dataset: ${dataset.name}`,
@@ -227,12 +237,15 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
       });
 
       // Translate Phoenix's ExperimentRun structure to Kibana's TaskRun format
-      const phoenixRuns: Record<string, ExperimentRun> = ran.runs ?? {};
+      const phoenixRuns: Record<string, PhoenixExperimentRun> = (ran.runs ?? {}) as Record<
+        string,
+        PhoenixExperimentRun
+      >;
 
       // Group runs by datasetExampleId to compute repetition indices
       const runsByExampleId = new Map<
         string,
-        Array<{ runKey: string; phoenixRun: ExperimentRun }>
+        Array<{ runKey: string; phoenixRun: PhoenixExperimentRun }>
       >();
       for (const [runKey, phoenixRun] of Object.entries(phoenixRuns)) {
         const group = runsByExampleId.get(phoenixRun.datasetExampleId) ?? [];
@@ -265,7 +278,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
 
       // Map evaluation runs with their corresponding exampleId
       const evaluationRuns: RanExperiment['evaluationRuns'] = (ran.evaluationRuns ?? []).map(
-        (evalRun: ExperimentEvaluationRun) => ({
+        (evalRun: PhoenixExperimentEvaluationRun) => ({
           name: evalRun.name,
           result: evalRun.result ?? undefined,
           experimentRunId: evalRun.experimentRunId,

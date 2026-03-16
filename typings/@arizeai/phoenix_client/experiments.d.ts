@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare module 'zod/v4' {
-  export * from 'zod/v4/index.d.cts';
+declare module '@arizeai/phoenix-client/experiments' {
+  export {
+    asEvaluator,
+    evaluateExperiment,
+    runExperiment,
+  } from '@arizeai/phoenix-client/dist/esm/experiments/runExperiment.js';
+  export type { RunExperimentParams } from '@arizeai/phoenix-client/dist/esm/experiments/runExperiment.js';
 }

@@ -35,25 +35,14 @@ export function getPreconfiguredFleetProxiesFromConfig(config?: FleetConfigType)
 
 function hasChanged(existingProxy: FleetProxy, preconfiguredFleetProxy: FleetProxy) {
   return (
-    (!existingProxy.is_preconfigured ||
-      existingProxy.name !== existingProxy.name ||
-      existingProxy.url !== preconfiguredFleetProxy.name ||
-      !isEqual(
-        existingProxy.proxy_headers ?? null,
-        preconfiguredFleetProxy.proxy_headers ?? null
-      ) ||
-      existingProxy.certificate_authorities) ??
-    // @ts-expect-error upgrade typescript v5.9.3
-    null !== preconfiguredFleetProxy.certificate_authorities ??
-    // @ts-expect-error upgrade typescript v5.9.3
-    (null || existingProxy.certificate) ??
-    // @ts-expect-error upgrade typescript v5.9.3
-    null !== preconfiguredFleetProxy.certificate ??
-    // @ts-expect-error upgrade typescript v5.9.3
-    (null || existingProxy.certificate_key) ??
-    // @ts-expect-error upgrade typescript v5.9.3
-    null !== preconfiguredFleetProxy.certificate_key ??
-    null
+    !existingProxy.is_preconfigured ||
+    existingProxy.name !== existingProxy.name ||
+    existingProxy.url !== preconfiguredFleetProxy.name ||
+    !isEqual(existingProxy.proxy_headers ?? null, preconfiguredFleetProxy.proxy_headers ?? null) ||
+    (existingProxy.certificate_authorities ?? null) !==
+      (preconfiguredFleetProxy.certificate_authorities ?? null) ||
+    (existingProxy.certificate ?? null) !== (preconfiguredFleetProxy.certificate ?? null) ||
+    (existingProxy.certificate_key ?? null) !== (preconfiguredFleetProxy.certificate_key ?? null)
   );
 }
 

@@ -24,19 +24,25 @@ interface Aggs extends estypes.AggregationsTermsAggregateBase {
   buckets: AggregationDataPoint[];
 }
 
-interface Group {
+export interface Group {
   id: string;
   name: string;
   size: number;
 }
 
-interface Overlap {
+export interface Overlap {
   [platform: string]: { [policy: string]: number };
+}
+
+export interface ProcessAggregationsResult {
+  platforms: Group[];
+  overlap: Overlap;
+  policies: Group[];
 }
 
 export const processAggregations = (
   aggs: Record<string, estypes.AggregationsAggregate> | undefined
-) => {
+): ProcessAggregationsResult => {
   if (!aggs) {
     return {
       platforms: [],

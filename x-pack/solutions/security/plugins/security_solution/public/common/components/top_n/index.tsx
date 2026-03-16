@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -67,8 +66,6 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const connector = connect(makeMapStateToProps);
-
 //  * `indexToAdd`, which enables the alerts index to be appended to
 //    the `indexPattern` returned by `useWithSource`, may only be populated when
 //    this component is rendered in the context of the active timeline. This
@@ -86,7 +83,8 @@ export interface OwnProps {
   globalFilters?: Filter[];
 }
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+type TopNStateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type PropsFromRedux = TopNStateProps;
 type Props = OwnProps & PropsFromRedux;
 
 const StatefulTopNComponent: React.FC<Props> = ({
@@ -175,6 +173,8 @@ const StatefulTopNComponent: React.FC<Props> = ({
 };
 
 StatefulTopNComponent.displayName = 'StatefulTopNComponent';
+
+const connector = connect<TopNStateProps, {}, OwnProps, State>(makeMapStateToProps);
 
 export const StatefulTopN: React.FunctionComponent<OwnProps> = connector(
   React.memo(StatefulTopNComponent)

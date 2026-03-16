@@ -9,9 +9,6 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { SiemMigrationsDataMigrationClient } from './siem_migrations_data_migration_client';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import type IndexApi from '@elastic/elasticsearch/lib/api/api';
-import type GetApi from '@elastic/elasticsearch/lib/api/api/get';
-import type SearchApi from '@elastic/elasticsearch/lib/api/api/search';
 import type { SiemMigrationsClientDependencies } from '../types';
 
 describe('SiemMigrationsDataMigrationClient', () => {
@@ -63,7 +60,9 @@ describe('SiemMigrationsDataMigrationClient', () => {
 
     test('should throw an error if an error occurs', async () => {
       (
-        esClient.asInternalUser.create as unknown as jest.MockedFn<typeof IndexApi>
+        esClient.asInternalUser.create as unknown as jest.MockedFn<
+          typeof esClient.asInternalUser.create
+        >
       ).mockRejectedValueOnce(new Error('Test error'));
 
       await expect(siemMigrationsDataMigrationClient.create('test')).rejects.toThrow('Test error');
@@ -88,7 +87,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
       };
 
       (
-        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
+        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof esClient.asInternalUser.get>
       ).mockResolvedValueOnce(response);
 
       const result = await siemMigrationsDataMigrationClient.get(id);
@@ -107,7 +106,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
       };
 
       (
-        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
+        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof esClient.asInternalUser.get>
       ).mockRejectedValueOnce({
         message: JSON.stringify(response),
       });
@@ -120,7 +119,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
     test('should throw an error if an error occurs', async () => {
       const id = 'testId';
       (
-        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
+        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof esClient.asInternalUser.get>
       ).mockRejectedValueOnce(new Error('Test error'));
 
       await expect(siemMigrationsDataMigrationClient.get(id)).rejects.toThrow('Test error');
@@ -176,7 +175,9 @@ describe('SiemMigrationsDataMigrationClient', () => {
       } as unknown as ReturnType<typeof esClient.asInternalUser.search>;
 
       (
-        esClient.asInternalUser.search as unknown as jest.MockedFn<typeof SearchApi>
+        esClient.asInternalUser.search as unknown as jest.MockedFn<
+          typeof esClient.asInternalUser.search
+        >
       ).mockResolvedValueOnce(response);
 
       await siemMigrationsDataMigrationClient.getAll();

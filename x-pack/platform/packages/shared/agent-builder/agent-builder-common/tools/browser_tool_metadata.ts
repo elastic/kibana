@@ -7,7 +7,7 @@
 
 //
 // eslint-disable-next-line @kbn/eslint/module_migration
-import type { JSONSchema } from 'zod/v4/core/json-schema';
+import type { JSONSchema as ZodJsonSchema } from 'zod/v4/core';
 
 /**
  * Browser API tool metadata that can be transmitted between browser and server.
@@ -36,5 +36,5 @@ export interface BrowserApiToolMetadata {
    * JSON Schema representation of the tool's parameters.
    * Generated from the tool's Zod schema.
    */
-  schema: JSONSchema;
+  schema: ZodJsonSchema.JSONSchema;
 }

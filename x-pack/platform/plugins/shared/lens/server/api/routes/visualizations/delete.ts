@@ -11,6 +11,7 @@ import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constant
 import type { LensSavedObject } from '../../../content_management';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensDeleteRequestParamsSchema } from './schema';
+import type { LensDeleteRequestParams } from './types';
 
 export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -66,15 +67,16 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
+      const requestParams = req.params as LensDeleteRequestParams;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
       try {
-        const { result } = await client.delete(req.params.id);
+        const { result } = await client.delete(requestParams.id);
 
         if (!result.success) {
-          throw new Error(`Failed to delete Lens visualization with id [${req.params.id}].`);
+          throw new Error(`Failed to delete Lens visualization with id [${requestParams.id}].`);
         }
 
         return res.noContent();
@@ -83,7 +85,7 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
           if (error.output.statusCode === 404) {
             return res.notFound({
               body: {
-                message: `A visualization with id [${req.params.id}] was not found.`,
+                message: `A visualization with id [${requestParams.id}] was not found.`,
               },
             });
           }

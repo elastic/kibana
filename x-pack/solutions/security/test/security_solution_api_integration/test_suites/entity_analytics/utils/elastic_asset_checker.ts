@@ -5,9 +5,27 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import type { Client } from '@elastic/elasticsearch';
 
-export const elasticAssetCheckerFactory = (getService: FtrProviderContext['getService']) => {
+interface RetryService {
+  waitForWithTimeout(
+    description: string,
+    timeout: number,
+    check: () => Promise<boolean>
+  ): Promise<void>;
+}
+
+interface LoggerService {
+  debug(message: string): void;
+}
+
+interface GetElasticAssetCheckerService {
+  (name: 'es'): Client;
+  (name: 'retry'): RetryService;
+  (name: 'log'): LoggerService;
+}
+
+export const elasticAssetCheckerFactory = (getService: GetElasticAssetCheckerService) => {
   const es = getService('es');
   const retry = getService('retry');
   const log = getService('log');

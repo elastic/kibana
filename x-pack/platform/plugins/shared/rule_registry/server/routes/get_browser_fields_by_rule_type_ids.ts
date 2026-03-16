@@ -14,6 +14,10 @@ import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
 
+interface GetBrowserFieldsByRuleTypeIdsRequestQuery {
+  ruleTypeIds: string | string[];
+}
+
 export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerContext>) => {
   router.get(
     {
@@ -40,7 +44,7 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { ruleTypeIds = [] } = request.query;
+        const { ruleTypeIds = [] } = request.query as GetBrowserFieldsByRuleTypeIdsRequestQuery;
 
         const onlyO11yRuleTypeIds = (
           Array.isArray(ruleTypeIds) ? ruleTypeIds : [ruleTypeIds]

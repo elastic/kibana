@@ -12,7 +12,7 @@ import { routing } from '../../../app/services/routing';
 
 /**
  * @param {object} [props]
- * @returns {ReturnType<typeof renderWithRouter>}
+ * @returns {object}
  */
 export const setup = (props = {}) => {
   return renderWithRouter(CrossClusterReplicationHome, {

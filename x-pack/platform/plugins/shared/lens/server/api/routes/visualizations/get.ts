@@ -6,15 +6,13 @@
  */
 
 import { boomify, isBoom } from '@hapi/boom';
-
 import type { TypeOf } from '@kbn/config-schema';
-
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constants';
 import type { LensSavedObject } from '../../../content_management';
 import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
 import { getLensResponseItem } from './utils';
-import type { RegisterAPIRouteFn } from '../../types';
+import type { LensGetRequestParams, RegisterAPIRouteFn } from '../../types';
 
 export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -71,12 +69,13 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
+      const requestParams = req.params as LensGetRequestParams;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
       try {
-        const { result } = await client.get(req.params.id);
+        const { result } = await client.get(requestParams.id);
 
         if (result.item.error) {
           throw result.item.error;
@@ -92,7 +91,7 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
           if (error.output.statusCode === 404) {
             return res.notFound({
               body: {
-                message: `A visualization with id [${req.params.id}] was not found.`,
+                message: `A visualization with id [${requestParams.id}] was not found.`,
               },
             });
           }

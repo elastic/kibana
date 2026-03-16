@@ -9,14 +9,37 @@ import type SuperTest from 'supertest';
 import { findIndex } from 'lodash';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ObjectRemover } from '../../../lib/object_remover';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getTestConnectorData, getTestAlertData } from '../../../lib/get_test_data';
+
+interface CreatedConnector {
+  id: string;
+}
+
+interface ActionsService {
+  api: {
+    createConnector(params: {
+      name: string;
+      config: Record<string, unknown>;
+      secrets: { webhookUrl: string };
+      connectorTypeId: '.slack';
+    }): Promise<CreatedConnector>;
+  };
+}
+
+interface ConnectorHelperServices {
+  actions: ActionsService;
+  supertest: SuperTest.Agent;
+}
+
+type GetConnectorHelperService = <TName extends keyof ConnectorHelperServices>(
+  name: TName
+) => ConnectorHelperServices[TName];
 
 export const createSlackConnectorAndObjectRemover = async ({
   getService,
 }: {
-  getService: FtrProviderContext['getService'];
-}) => {
+  getService: GetConnectorHelperService;
+}): Promise<ObjectRemover> => {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
 
@@ -35,8 +58,8 @@ export const createSlackConnector = async ({
   getService,
 }: {
   name: string;
-  getService: FtrProviderContext['getService'];
-}) => {
+  getService: GetConnectorHelperService;
+}): Promise<CreatedConnector> => {
   const actions = getService('actions');
   const connector = await actions.api.createConnector({
     name,

@@ -62,16 +62,18 @@ const visualizeComparisonChartIcons = [
   },
 ];
 
-export const DataDriftDistributionChart = ({
-  item,
-  colors,
-  secondaryType,
-}: {
+interface DataDriftDistributionChartProps {
   item: Feature | undefined;
   colors: { referenceColor: string; comparisonColor: string };
   secondaryType: string;
   domain?: Feature['domain'];
-}) => {
+}
+
+export const DataDriftDistributionChart = ({
+  item,
+  colors,
+  secondaryType,
+}: DataDriftDistributionChartProps) => {
   const {
     services: { charts },
   } = useDataVisualizerKibana();

@@ -17,6 +17,7 @@ import {
   lensUpdateRequestParamsSchema,
   lensUpdateResponseBodySchema,
 } from './schema';
+import type { LensUpdateRequestBody, LensUpdateRequestParams } from './types';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
 
 export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
@@ -75,7 +76,8 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
-      const requestBodyData = req.body;
+      const requestBodyData = req.body as LensUpdateRequestBody;
+      const requestParams = req.params as LensUpdateRequestParams;
       if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
         throw new Error('visualizationType is required');
       }
@@ -86,11 +88,11 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
       // Note: these types are to enforce loose param typings of client methods
-      const { references, ...data } = getLensRequestConfig(builder, req.body);
+      const { references, ...data } = getLensRequestConfig(builder, requestBodyData);
       const options: LensUpdateIn['options'] = { references };
 
       try {
-        const { result } = await client.update(req.params.id, data, options);
+        const { result } = await client.update(requestParams.id, data, options);
 
         if (result.item.error) {
           throw result.item.error;
@@ -105,7 +107,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
           if (error.output.statusCode === 404) {
             return res.notFound({
               body: {
-                message: `A visualization with id [${req.params.id}] was not found.`,
+                message: `A visualization with id [${requestParams.id}] was not found.`,
               },
             });
           }

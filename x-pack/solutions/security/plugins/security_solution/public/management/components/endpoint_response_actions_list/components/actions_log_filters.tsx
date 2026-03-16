@@ -10,7 +10,6 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import type { useGetEndpointActionList } from '../../../hooks';
 import {
   ActionLogDateRangePicker,
   type DateRangePickerValues,
@@ -18,6 +17,8 @@ import {
 import { ActionsLogFilter } from './actions_log_filter';
 import { ActionsLogUsersFilter } from './actions_log_users_filter';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+
+type RefetchActionList = () => void | Promise<unknown>;
 
 export const ActionsLogFilters = memo(
   ({
@@ -50,7 +51,7 @@ export const ActionsLogFilters = memo(
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
-    onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
+    onClick: RefetchActionList;
     showHostsFilter: boolean;
     'data-test-subj'?: string;
     'data-test-height'?: number;

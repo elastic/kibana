@@ -14,7 +14,10 @@
     "../../../../../typings/**/*",
     "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*",
+    "config/services/detections_response/**/*"
+  ],
   "kbn_references": [
     "@kbn/test-suites-xpack-security-endpoint",
     "@kbn/dev-utils",

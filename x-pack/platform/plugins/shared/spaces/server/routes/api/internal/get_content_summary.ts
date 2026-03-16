@@ -58,7 +58,7 @@ export function initGetSpaceContentSummaryApi(deps: InternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const spaceId = request.params.spaceId;
+        const { spaceId } = request.params as { spaceId: string };
         const spacesClient = getSpacesService().createSpacesClient(request);
 
         await spacesClient.get(spaceId);

@@ -14,6 +14,11 @@ import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
 
+interface GetAlertByIdRequestQuery {
+  id: string;
+  index?: string;
+}
+
 export const getAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.get(
     {
@@ -47,7 +52,7 @@ export const getAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) => 
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { id, index } = request.query;
+        const { id, index } = request.query as GetAlertByIdRequestQuery;
         const alert = await alertsClient.get({ id, index });
         if (alert == null) {
           return response.notFound({

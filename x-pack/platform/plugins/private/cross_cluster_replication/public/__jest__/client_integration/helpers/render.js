@@ -24,7 +24,7 @@ import { MemoryRouter, Routes, Route } from '@kbn/shared-ux-router';
  * });
  */
 /**
- * @returns {import('@testing-library/react').RenderResult & { user: import('@testing-library/user-event').UserEvent }}
+ * @returns {object}
  */
 export const renderWithRouter = (
   Component,

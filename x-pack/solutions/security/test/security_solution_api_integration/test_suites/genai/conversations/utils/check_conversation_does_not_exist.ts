@@ -7,16 +7,18 @@
 
 import expect from 'expect';
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { getConversationsApis } from './apis';
 import { getConversationNotFoundError } from './helpers';
+
+type ConversationsSupertest = Parameters<typeof getConversationsApis>[0]['supertest'];
+type GetConversationsService = (service: 'supertest') => ConversationsSupertest;
 
 export const checkIfConversationDoesNotExist = async ({
   getService,
   id,
   kibanaSpace,
 }: {
-  getService: FtrProviderContext['getService'];
+  getService: GetConversationsService;
   id: string;
   kibanaSpace?: string;
 }) => {

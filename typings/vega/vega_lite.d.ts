@@ -8,5 +8,6 @@
  */
 
 declare module 'vega-lite' {
-  export * from 'vega-lite/build';
+  export { compile, version } from 'vega-lite/build/index';
+  export type { Config, TopLevelSpec } from 'vega-lite/build/index';
 }

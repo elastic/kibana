@@ -6,9 +6,24 @@
  */
 
 import moment from 'moment';
+import type { Client } from '@elastic/elasticsearch';
 import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { apm, httpExitSpan, log, timerange } from '@kbn/synthtrace-client';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
+
+interface SynthtraceService {
+  createApmSynthtraceEsClient(): Promise<ApmSynthtraceEsClient>;
+  createLogsSynthtraceEsClient(): LogsSynthtraceEsClient;
+}
+
+interface GetDistributedTraceService {
+  (name: 'es'): Client;
+  (name: 'synthtrace'): SynthtraceService;
+}
+
+interface CreateDistributedTraceWithErrorsArgs {
+  getService: GetDistributedTraceService;
+  environment?: string;
+}
 
 export interface DistributedTraceData {
   traceId: string;
@@ -31,10 +46,7 @@ const ERROR_SERVICE_NAME = 'payment-service';
 export const createDistributedTraceWithErrors = async ({
   getService,
   environment = 'production',
-}: {
-  getService: DeploymentAgnosticFtrProviderContext['getService'];
-  environment?: string;
-}): Promise<DistributedTraceResult> => {
+}: CreateDistributedTraceWithErrorsArgs): Promise<DistributedTraceResult> => {
   const es = getService('es');
   const synthtrace = getService('synthtrace');
   const apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();

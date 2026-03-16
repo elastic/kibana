@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/module_migration
-import type { JSONSchema } from 'zod/v4/core/json-schema';
+import type { JSONSchema as ZodJsonSchema } from 'zod/v4/core';
 
 /**
  * Wraps a JSON schema in an object if not already an object'.
@@ -17,10 +17,10 @@ export const wrapJsonSchema = ({
   property = 'response',
   description = 'The response to provide',
 }: {
-  schema: JSONSchema;
+  schema: ZodJsonSchema.JSONSchema;
   property?: string;
   description?: string;
-}): { wrapped: boolean; schema: JSONSchema } => {
+}): { wrapped: boolean; schema: ZodJsonSchema.JSONSchema } => {
   if (schema.type === 'object') {
     return {
       wrapped: false,

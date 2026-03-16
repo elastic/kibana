@@ -5,6 +5,8 @@
  * 2.0.
  */
 import expect from 'expect';
+import type { Client } from '@elastic/elasticsearch';
+import type SuperTest from 'supertest';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -22,8 +24,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { TaskStatus } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
-import { routeWithNamespace, waitFor } from '@kbn/detections-response-ftr-services';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 
 type PrivmonUser = ListPrivMonUsersResponse[number] & {
   '@timestamp'?: string;
@@ -44,10 +45,74 @@ const OKTA_USER_IDS = {
 interface TimestampSource {
   '@timestamp'?: string;
 }
-export const PrivMonUtils = (
-  getService: FtrProviderContext['getService'],
-  namespace: string = 'default'
-) => {
+
+interface EntityAnalyticsApiService {
+  listPrivMonUsers(
+    request: { query: Record<string, unknown> },
+    namespace?: string
+  ): Promise<{ body: ListPrivMonUsersResponse }>;
+  listEntitySources(
+    request: { query: Record<string, unknown> },
+    namespace?: string
+  ): Promise<{ body: ListEntitySourcesResponse | MonitoringEntitySource[] }>;
+}
+
+interface LoggerService {
+  debug(message: string): void;
+  error(message: string): void;
+  info(message: string): void;
+  warning(message: string): void;
+}
+
+interface KibanaServerService {
+  savedObjects: {
+    get(request: { type: string; id: string }): Promise<{ attributes: { runAt?: string } }>;
+  };
+}
+
+interface RetryService {
+  waitForWithTimeout(
+    description: string,
+    timeoutMs: number,
+    callback: () => Promise<boolean>
+  ): Promise<boolean>;
+}
+
+interface ConfigService {
+  get(path: 'serverless'): boolean;
+}
+
+interface RoleScopedSupertestService {
+  getSupertestWithRoleScope(
+    role: string,
+    options: { useCookieHeader: boolean }
+  ): Promise<SuperTest.Agent>;
+}
+
+interface PrivMonServices {
+  api: EntityAnalyticsApiService;
+  config: ConfigService;
+  entityAnalyticsApi: EntityAnalyticsApiService;
+  es: Client;
+  kibanaServer: KibanaServerService;
+  log: LoggerService;
+  retry: RetryService;
+  roleScopedSupertest: RoleScopedSupertestService;
+  supertest: SuperTest.Agent;
+  supertestWithoutAuth: SuperTest.Agent;
+}
+
+type GetPrivMonService = <TService extends keyof PrivMonServices>(
+  service: TService
+) => PrivMonServices[TService];
+
+const getEntitySources = (
+  response: ListEntitySourcesResponse | MonitoringEntitySource[]
+): MonitoringEntitySource[] => {
+  return Array.isArray(response) ? response : response.sources;
+};
+
+export const PrivMonUtils = (getService: GetPrivMonService, namespace: string = 'default') => {
   const TASK_ID = 'entity_analytics:monitoring:privileges:engine:default:1.0.0';
   const entityAnalyticsApi = getService('entityAnalyticsApi');
   const log = getService('log');
@@ -186,19 +251,15 @@ export const PrivMonUtils = (
   const waitForSyncTaskRun = async (): Promise<void> => {
     const initialTime = new Date();
 
-    await waitFor(
-      async () => {
-        const task = await kibanaServer.savedObjects.get({
-          type: 'task',
-          id: TASK_ID,
-        });
-        const runAtTime = task.attributes.runAt;
+    await retry.waitForWithTimeout('waitForSyncTaskRun', 120000, async () => {
+      const task = await kibanaServer.savedObjects.get({
+        type: 'task',
+        id: TASK_ID,
+      });
+      const runAtTime = task.attributes.runAt;
 
-        return !!runAtTime && new Date(runAtTime) > initialTime;
-      },
-      'waitForSyncTaskRun',
-      log
-    );
+      return !!runAtTime && new Date(runAtTime) > initialTime;
+    });
   };
 
   const assertIsPrivileged = (user: PrivmonUser | undefined, isPrivileged: boolean) => {
@@ -320,7 +381,7 @@ export const PrivMonUtils = (
 
   async function getLastProcessedMarker(indexPattern: string) {
     const res = await api.listEntitySources({ query: {} });
-    const integration = res.body.sources.find(
+    const integration = getEntitySources(res.body).find(
       (i: any) => i?.type === 'entity_analytics_integration' && i?.indexPattern === indexPattern
     );
     return integration?.integrations?.syncData?.lastUpdateProcessed as string | undefined;
@@ -328,7 +389,7 @@ export const PrivMonUtils = (
 
   const getSyncData = async (indexPattern: string) => {
     const res = await api.listEntitySources({ query: {} });
-    const integration = res.body.find(
+    const integration = getEntitySources(res.body).find(
       (i: any) => i?.type === 'entity_analytics_integration' && i?.indexPattern === indexPattern
     );
     return integration?.integrations?.syncData;
@@ -371,7 +432,7 @@ export const PrivMonUtils = (
       query: {},
     });
 
-    const { sources } = res.body as ListEntitySourcesResponse;
+    const sources = getEntitySources(res.body);
     const source = sources.find((s) => s.integrationName === integrationName);
     if (!source) {
       throw new Error(`No monitoring source found for integration ${integrationName}`);

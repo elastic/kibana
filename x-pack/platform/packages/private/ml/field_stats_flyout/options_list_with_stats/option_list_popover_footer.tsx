@@ -29,8 +29,7 @@ export const OptionsListPopoverFooter: FC<{
       })}
     >
       {isLoading ? (
-        // @ts-expect-error css should be ok
-        <div css={css({ position: 'absolute', width: '100%' })}>
+        <div style={{ position: 'absolute', width: '100%' }}>
           <EuiProgress
             data-test-subj="optionsList-control-popover-loading"
             size="xs"

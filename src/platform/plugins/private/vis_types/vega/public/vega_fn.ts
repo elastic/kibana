@@ -23,11 +23,11 @@ import type { VegaParser } from './data_model/vega_parser';
 type Input = KibanaContext | { type: 'null' };
 type Output = Promise<Render<RenderValue>>;
 
-interface Arguments {
+export interface VegaArguments {
   spec: string;
 }
 
-export type VisParams = Required<Arguments>;
+export type VisParams = Required<VegaArguments>;
 
 export interface RenderValue {
   visData: VegaParser;
@@ -38,7 +38,7 @@ export interface RenderValue {
 export type VegaExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'vega',
   Input,
-  Arguments,
+  VegaArguments,
   Output,
   ExecutionContext<VegaInspectorAdapters>
 >;

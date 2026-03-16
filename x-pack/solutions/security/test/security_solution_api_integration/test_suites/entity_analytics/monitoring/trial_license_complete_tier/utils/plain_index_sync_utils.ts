@@ -5,13 +5,37 @@
  * 2.0.
  */
 import expect from 'expect';
+import type { Client } from '@elastic/elasticsearch';
 import type { CreateEntitySourceRequestBody } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+
+interface LoggerService {
+  info(message: string): void;
+  error(message: string): void;
+}
+
+interface EntityAnalyticsApiService {
+  createEntitySource(params: { body: CreateEntitySourceRequestBody }): Promise<{ status: number }>;
+}
+
+interface GetPlainIndexSyncService {
+  (name: 'log'): LoggerService;
+  (name: 'es'): Client;
+  (name: 'entityAnalyticsApi'): EntityAnalyticsApiService;
+}
+
+interface PlainIndexSyncUtilsApi {
+  createIndex(): Promise<unknown>;
+  addUsersToIndex(users: string[]): Promise<void>;
+  deleteUserFromIndex(userName: string): Promise<void>;
+  createEntitySourceForIndex(): Promise<{ status: number }>;
+  deleteIndex(): Promise<void>;
+}
+
 export const PlainIndexSyncUtils = (
-  getService: FtrProviderContext['getService'],
+  getService: GetPlainIndexSyncService,
   indexName: string,
   namespace: string = 'default'
-) => {
+): PlainIndexSyncUtilsApi => {
   const log = getService('log');
   const es = getService('es');
   const entityAnalyticsApi = getService('entityAnalyticsApi');

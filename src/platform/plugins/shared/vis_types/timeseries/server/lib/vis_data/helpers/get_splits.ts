@@ -41,6 +41,11 @@ interface SplittedData<TMeta extends BaseMeta = BaseMeta> {
   };
 }
 
+type SplitBucket<TMeta extends BaseMeta> = SplittedData<TMeta> & {
+  column_filter?: Partial<SplittedData<TMeta>>;
+  key: string | number;
+};
+
 export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta = BaseMeta>(
   resp: TRawResponse,
   panel: Panel,
@@ -56,7 +61,10 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
   // a partially implemented Mock of Series and Panel in the process_bucket.test.ts
   const color = getValidColor(series.color, { shouldBeCompatibleWithColorJs: true }).hex();
   const metric = getLastMetric(series);
-  const buckets = get(resp, `aggregations.${series.id}.buckets`);
+  const buckets = get(resp, `aggregations.${series.id}.buckets`) as
+    | Array<SplitBucket<TMeta>>
+    | Record<string, SplittedData<TMeta>>
+    | undefined;
 
   const fieldsForSeries = meta?.dataViewId ? await extractFields({ id: meta.dataViewId }) : [];
   const splitByLabel = calculateLabel(metric, series.metrics, fieldsForSeries);
@@ -64,6 +72,8 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
   if (buckets) {
     if (Array.isArray(buckets)) {
       return buckets.map((bucket) => {
+        const bucketKey = String(bucket.key);
+
         if (bucket.column_filter) {
           bucket = {
             ...bucket,
@@ -71,12 +81,12 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
           };
         }
 
-        bucket.id = `${series.id}${SERIES_SEPARATOR}${bucket.key}`;
+        bucket.id = `${series.id}${SERIES_SEPARATOR}${bucketKey}`;
         bucket.splitByLabel = splitByLabel;
-        bucket.label = formatKey(bucket.key, series);
+        bucket.label = formatKey(bucketKey, series);
         bucket.color = color;
-        bucket.meta = meta;
-        bucket.termsSplitKey = bucket.key;
+        bucket.meta = meta!;
+        bucket.termsSplitKey = bucketKey;
         return bucket;
       });
     }

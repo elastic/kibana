@@ -7,13 +7,61 @@
 
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
-import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
+
+interface CasesService {
+  api: {
+    createCase(params: { owner: string }): Promise<Record<string, unknown>>;
+  };
+  casesTable: {
+    waitForCasesToBeListed(): Promise<void>;
+    goToFirstListedCase(): Promise<void>;
+  };
+}
+
+interface SvlCasesService {
+  api: {
+    deleteAllCaseItems(): Promise<void>;
+  };
+}
+
+interface HeaderPageObject {
+  waitUntilLoadingHasFinished(): Promise<void>;
+}
+
+interface CommonPageObject {
+  navigateToApp(appId: string): Promise<void>;
+}
+
+interface SidenavPageObject {
+  clickLink(params: { deepLinkId: AppDeepLinkId | 'observability-overview:cases' }): Promise<void>;
+}
+
+interface SvlCommonNavigationPageObject {
+  sidenav: SidenavPageObject;
+}
+
+interface CasePageObjects {
+  common: CommonPageObject;
+  header: HeaderPageObject;
+  svlCommonNavigation: SvlCommonNavigationPageObject;
+}
+
+interface CaseServices {
+  cases: CasesService;
+  svlCases: SvlCasesService;
+}
+
+type GetCasePageObject = <TName extends keyof CasePageObjects>(
+  name: TName
+) => CasePageObjects[TName];
+
+type GetCaseService = <TName extends keyof CaseServices>(name: TName) => CaseServices[TName];
 
 export const createOneCaseBeforeDeleteAllAfter = (
-  getPageObject: FtrProviderContext['getPageObject'],
-  getService: FtrProviderContext['getService'],
+  getPageObject: GetCasePageObject,
+  getService: GetCaseService,
   owner: string
-) => {
+): void => {
   const svlCases = getService('svlCases');
 
   before(async () => {
@@ -26,10 +74,10 @@ export const createOneCaseBeforeDeleteAllAfter = (
 };
 
 export const createOneCaseBeforeEachDeleteAllAfterEach = (
-  getPageObject: FtrProviderContext['getPageObject'],
-  getService: FtrProviderContext['getService'],
+  getPageObject: GetCasePageObject,
+  getService: GetCaseService,
   owner: string
-) => {
+): void => {
   const svlCases = getService('svlCases');
 
   beforeEach(async () => {
@@ -42,10 +90,10 @@ export const createOneCaseBeforeEachDeleteAllAfterEach = (
 };
 
 export const createAndNavigateToCase = async (
-  getPageObject: FtrProviderContext['getPageObject'],
-  getService: FtrProviderContext['getService'],
+  getPageObject: GetCasePageObject,
+  getService: GetCaseService,
   owner: string
-) => {
+): Promise<Record<string, unknown>> => {
   const cases = getService('cases');
 
   const header = getPageObject('header');
@@ -61,10 +109,10 @@ export const createAndNavigateToCase = async (
 };
 
 export const navigateToCasesApp = async (
-  getPageObject: FtrProviderContext['getPageObject'],
-  getService: FtrProviderContext['getService'],
+  getPageObject: GetCasePageObject,
+  getService: GetCaseService,
   owner: string
-) => {
+): Promise<void> => {
   const common = getPageObject('common');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
 

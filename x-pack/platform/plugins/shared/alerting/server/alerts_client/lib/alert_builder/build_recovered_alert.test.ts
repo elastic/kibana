@@ -97,7 +97,7 @@ for (const flattened of [true, false]) {
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
-              ...alertRule,
+              ...omit(alertRule, SPACE_IDS),
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -175,7 +175,7 @@ for (const flattened of [true, false]) {
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
-              ...alertRule,
+              ...omit(alertRule, SPACE_IDS),
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -240,18 +240,16 @@ for (const flattened of [true, false]) {
         [ALERT_START]: '2023-03-28T12:27:28.159Z',
         [ALERT_END]: '2023-03-30T12:27:28.159Z',
         [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: '2023-03-30T12:27:28.159Z' },
-        // @ts-expect-error
         [SPACE_IDS]: ['*'],
         [VERSION]: '8.9.0',
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
-              ...alertRule,
+              ...omit(alertRule, SPACE_IDS),
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
               [ALERT_MUTED]: false,
-              [SPACE_IDS]: ['*'],
             }
           : {
               event: {
@@ -355,7 +353,7 @@ for (const flattened of [true, false]) {
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
-              ...alertRule,
+              ...omit(alertRule, SPACE_IDS),
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -426,7 +424,7 @@ for (const flattened of [true, false]) {
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
-              ...alertRule,
+              ...omit(alertRule, SPACE_IDS),
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -542,7 +540,7 @@ for (const flattened of [true, false]) {
         [TAGS]: ['-tags', 'reported-recovery-tag', 'active-alert-tag', 'rule-'],
         ...(flattened
           ? {
-              ...alertRule,
+              ...omit(alertRule, SPACE_IDS),
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -656,7 +654,7 @@ for (const flattened of [true, false]) {
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
-              ...alertRule,
+              ...omit(alertRule, SPACE_IDS),
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',
@@ -768,7 +766,7 @@ for (const flattened of [true, false]) {
         [TAGS]: ['rule-', '-tags'],
         ...(flattened
           ? {
-              ...alertRule,
+              ...omit(alertRule, SPACE_IDS),
               [EVENT_KIND]: 'signal',
               [ALERT_INSTANCE_ID]: 'alert-A',
               [ALERT_UUID]: 'abcdefg',

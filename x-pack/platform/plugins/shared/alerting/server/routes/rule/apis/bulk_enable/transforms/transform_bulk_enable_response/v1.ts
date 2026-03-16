@@ -11,13 +11,13 @@ import type { BulkEnableRulesResult } from '../../../../../../application/rule/m
 import { transformRuleToRuleResponseV1 } from '../../../../transforms';
 import type { Rule, RuleParams } from '../../../../../../application/rule/types';
 
-export const transformBulkEnableResponse = <Params extends RuleParams = never>(
+export function transformBulkEnableResponse<Params extends RuleParams = never>(
   response: BulkEnableRulesResult<Params>
-): BulkEnableRulesResponseV1<RuleParamsV1>['body'] => {
+): BulkEnableRulesResponseV1<RuleParamsV1>['body'] {
   return {
     rules: response.rules.map((rule) => transformRuleToRuleResponseV1<Params>(rule as Rule)),
     errors: response.errors,
     total: response.total,
     task_ids_failed_to_be_enabled: response.taskIdsFailedToBeEnabled,
   };
-};
+}

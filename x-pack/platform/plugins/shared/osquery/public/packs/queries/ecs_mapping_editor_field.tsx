@@ -275,11 +275,11 @@ export const ECSComboboxField = React.memo(ECSComboboxFieldComponent, deepEqual)
 const OSQUERY_COLUMN_VALUE_TYPE_OPTIONS = [
   {
     value: 'field',
-    inputDisplay: <OsqueryIcon size="m" />,
+    inputDisplay: <OsqueryIcon size="m" aria-label="Osquery value" />,
     dropdownDisplay: (
       <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
-          <OsqueryIcon size="m" />
+          <OsqueryIcon size="m" aria-label="Osquery value" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s" className="eui-textNoWrap">
@@ -294,11 +294,11 @@ const OSQUERY_COLUMN_VALUE_TYPE_OPTIONS = [
   },
   {
     value: 'value',
-    inputDisplay: <EuiIcon type="user" size="m" />,
+    inputDisplay: <EuiIcon type="user" size="m" aria-label="Static value" />,
     dropdownDisplay: (
       <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="user" size="m" />
+          <EuiIcon type="user" size="m" aria-label="Static value" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s" className="eui-textNoWrap">
@@ -313,10 +313,10 @@ const OSQUERY_COLUMN_VALUE_TYPE_OPTIONS = [
   },
 ];
 
-const EMPTY_ARRAY: EuiComboBoxOptionOption[] = [];
+const EMPTY_ARRAY: OsquerySchemaOption[] = [];
 
 interface OsqueryColumnFieldProps {
-  euiFieldProps: EuiComboBoxProps<OsquerySchemaOption>;
+  euiFieldProps: EuiComboBoxProps<OsquerySchemaValue>;
   index: number;
   control: ECSMappingFormReturn['control'];
   watch: ECSMappingFormReturn['watch'];
@@ -391,7 +391,11 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
 
   const renderOsqueryOption = useCallback(
-    (option: any, searchValue: any, contentClassName: any) => (
+    (
+      option: OsquerySchemaOption,
+      searchValue: string,
+      contentClassName: string
+    ): React.ReactNode => (
       <EuiFlexGroup
         className={`${contentClassName} euiSuggestItem euiSuggestItem--truncate`}
         alignItems="center"
@@ -399,7 +403,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       >
         <EuiFlexItem grow={false}>
           <span css={fieldSpanCss} className="euiSuggestItem__label euiSuggestItem__label--expand">
-            <b>{option.value.suggestion_label}</b>
+            <b>{option.value?.suggestion_label ?? option.label}</b>
           </span>
         </EuiFlexItem>
         <EuiFlexItem css={descriptionWrapperCss} grow={false}>
@@ -407,24 +411,12 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             css={fieldSpanCss}
             className="euiSuggestItem__description euiSuggestItem__description"
           >
-            {option.value.description}
+            {option.value?.description}
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
     []
-  );
-
-  const handleKeyChange = useCallback(
-    (newSelectedOptions: any) => {
-      setSelected(newSelectedOptions);
-      resultField.onChange(
-        isArray(newSelectedOptions)
-          ? map(newSelectedOptions, 'label')
-          : newSelectedOptions[0]?.label ?? ''
-      );
-    },
-    [resultField]
   );
 
   const isSingleSelection = useMemo(() => {
@@ -441,6 +433,16 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
     return !!ecsData?.key?.length;
   }, [ecsMappingArray, index, isLastItem, resultTypeField.value]);
+
+  const handleKeyChange = useCallback(
+    (newSelectedOptions: OsquerySchemaOption[]) => {
+      setSelected(newSelectedOptions);
+      resultField.onChange(
+        isSingleSelection ? newSelectedOptions[0]?.label ?? '' : map(newSelectedOptions, 'label')
+      );
+    },
+    [isSingleSelection, resultField]
+  );
 
   const onTypeChange = useCallback(
     (newType: any) => {
@@ -509,13 +511,12 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
   }, [index, isSingleSelection, resultField, resultField.value]);
 
   useEffect(() => {
-    // @ts-expect-error hard to type to satisfy TS, but it represents proper types
-    setSelected((_: OsquerySchemaOption[]): OsquerySchemaOption[] | Array<{ label: string }> => {
+    setSelected((_: OsquerySchemaOption[]): OsquerySchemaOption[] => {
       if (!resultField.value?.length) return [];
 
       // Static array values
       if (isArray(resultField.value)) {
-        return resultField.value.map((value) => ({ label: value })) as OsquerySchemaOption[];
+        return resultField.value.map((value) => ({ label: value }));
       }
 
       const selectedOption = find(euiFieldProps?.options, ['label', resultField.value]) as
@@ -547,11 +548,8 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
           {Prepend}
         </EuiFlexItem>
         <EuiFlexItem css={overflowCss}>
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-          {/* @ts-ignore*/}
           <EuiComboBox
             css={resultComboBoxCss}
-            error={resultFieldState.error?.message}
             // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
             inputRef={(ref: HTMLInputElement) => {
               inputRef.current = ref;
@@ -653,7 +651,6 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                 isLastItem={isLastItem}
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 euiFieldProps={{
-                  // @ts-expect-error update types
                   options: osquerySchemaOptions,
                   isDisabled,
                 }}
@@ -686,15 +683,15 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
   );
 };
 
-interface OsquerySchemaOption {
-  label: string;
-  value: {
-    name: string;
-    description?: string;
-    table?: string;
-    suggestion_label?: string;
-  };
+interface OsquerySchemaValue {
+  name: string;
+  description?: string;
+  table?: string;
+  tableOrder?: number;
+  suggestion_label?: string;
 }
+
+type OsquerySchemaOption = EuiComboBoxOptionOption<OsquerySchemaValue>;
 
 interface OsqueryColumn {
   name: string;

@@ -9,12 +9,16 @@
 
 import Path from 'path';
 
-import { getPackages, getPluginPackagesFilter, type Package } from '@kbn/repo-packages';
+import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
+import type { PluginPackageManifest, Package as RepoPackageCtor } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { PluginOrPackage } from './types';
 import { ApiScope } from './types';
 
-function toApiScope(pkg: Package): ApiScope {
+type RepoPackage = InstanceType<typeof RepoPackageCtor>;
+type RepoPluginPackage = RepoPackage & { manifest: PluginPackageManifest };
+
+function toApiScope(pkg: RepoPackage): ApiScope {
   switch (pkg.manifest.type) {
     case 'shared-browser':
     case 'shared-scss':
@@ -35,7 +39,7 @@ function toApiScope(pkg: Package): ApiScope {
   }
 }
 
-function toPluginOrPackage(pkg: Package): PluginOrPackage {
+function toPluginOrPackage(pkg: RepoPackage): PluginOrPackage {
   const result = {
     id: pkg.isPlugin() ? pkg.manifest.plugin.id : pkg.manifest.id,
     directory: Path.resolve(REPO_ROOT, pkg.normalizedRepoRelativeDir),
@@ -69,6 +73,13 @@ function toPluginOrPackage(pkg: Package): PluginOrPackage {
   return result;
 }
 
+const publicPluginFilter = getPluginPackagesFilter({
+  examples: false,
+  testPlugins: false,
+});
+const isPublicPluginPackage = (pkg: RepoPackage): pkg is RepoPluginPackage =>
+  publicPluginFilter(pkg);
+
 /**
  * Options for filtering plugins and packages.
  */
@@ -88,12 +99,7 @@ export interface FindPluginsOptions {
 export function findPlugins(options?: FindPluginsOptions): PluginOrPackage[] {
   const { pluginFilter, packageFilter } = options ?? {};
   const packages = getPackages(REPO_ROOT);
-  const plugins = packages.filter(
-    getPluginPackagesFilter({
-      examples: false,
-      testPlugins: false,
-    })
-  );
+  const plugins = packages.filter(isPublicPluginPackage);
   const core = packages.find((p) => p.manifest.id === '@kbn/core');
 
   if (!core) {
@@ -126,12 +132,7 @@ export function findPlugins(options?: FindPluginsOptions): PluginOrPackage[] {
 
 export function findTeamPlugins(team: string): PluginOrPackage[] {
   const packages = getPackages(REPO_ROOT);
-  const plugins = packages.filter(
-    getPluginPackagesFilter({
-      examples: false,
-      testPlugins: false,
-    })
-  );
+  const plugins = packages.filter(isPublicPluginPackage);
 
   return [...plugins.filter((p) => p.manifest.owner.includes(team)).map(toPluginOrPackage)];
 }

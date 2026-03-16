@@ -13,7 +13,7 @@ import { FOLLOWER_INDEX_EDIT_NAME } from './constants';
 
 /**
  * @param {object} [props]
- * @returns {ReturnType<typeof renderWithRouter>}
+ * @returns {object}
  */
 export const setup = (props = {}) => {
   return renderWithRouter(FollowerIndexEdit, {

@@ -38,6 +38,16 @@ const resourceTypeSchema = schema.oneOf(
   { defaultValue: ResourceTypes.productDoc }
 );
 
+interface InstallationRequestPayload {
+  inferenceId: string;
+  resourceType: ResourceType;
+}
+
+interface UpdateAllRequestPayload {
+  forceUpdate?: boolean;
+  inferenceIds?: string[];
+}
+
 export const registerInstallationRoutes = ({
   router,
   getServices,
@@ -65,8 +75,7 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const { installClient, documentationManager } = getServices();
-      const inferenceId = req.query?.inferenceId;
-      const resourceType = req.query?.resourceType as ResourceType;
+      const { inferenceId, resourceType } = req.query as InstallationRequestPayload;
 
       // Handle Security Labs status separately
       if (resourceType === ResourceTypes.securityLabs) {
@@ -143,9 +152,7 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const { documentationManager } = getServices();
-
-      const inferenceId = req.body?.inferenceId;
-      const resourceType = req.body?.resourceType as ResourceType;
+      const { inferenceId, resourceType } = req.body as InstallationRequestPayload;
 
       // Handle Security Labs installation
       if (resourceType === ResourceTypes.securityLabs) {
@@ -240,7 +247,7 @@ export const registerInstallationRoutes = ({
       },
     },
     async (ctx, req, res) => {
-      const { forceUpdate } = req.body ?? {};
+      const { forceUpdate, inferenceIds = [] } = (req.body ?? {}) as UpdateAllRequestPayload;
 
       const { documentationManager } = getServices();
 
@@ -248,7 +255,7 @@ export const registerInstallationRoutes = ({
         request: req,
         forceUpdate,
         // If inferenceIds is provided, use it, otherwise use all previously installed inference IDs
-        inferenceIds: req.body.inferenceIds ?? [],
+        inferenceIds,
       });
 
       // check status after installation in case of failure
@@ -280,14 +287,14 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const { documentationManager } = getServices();
-      const resourceType = req.body?.resourceType as ResourceType;
+      const { inferenceId, resourceType } = req.body as InstallationRequestPayload;
 
       // Handle Security Labs uninstallation
       if (resourceType === ResourceTypes.securityLabs) {
         await documentationManager.uninstallSecurityLabs({
           request: req,
           wait: true,
-          inferenceId: req.body?.inferenceId,
+          inferenceId,
         });
 
         return res.ok<UninstallResponse>({
@@ -300,7 +307,7 @@ export const registerInstallationRoutes = ({
         await documentationManager.uninstallOpenAPISpec({
           request: req,
           wait: true,
-          inferenceId: req.body?.inferenceId,
+          inferenceId,
         });
 
         return res.ok<UninstallResponse>({
@@ -313,8 +320,8 @@ export const registerInstallationRoutes = ({
       await documentationManager.uninstall({
         request: req,
         wait: true,
-        inferenceId: req.body?.inferenceId,
-        resourceType: req.body?.resourceType,
+        inferenceId,
+        resourceType,
       });
 
       return res.ok<UninstallResponse>({

@@ -22,20 +22,22 @@ import type { DataDriftField, Feature } from '../types';
 import { getFieldFormatType, useFieldFormatter } from './default_value_formatter';
 import { NoChartsData } from './no_charts_data';
 
-export const SingleDistributionChart = ({
-  data,
-  color,
-  fieldType,
-  secondaryType,
-  name,
-}: {
+interface SingleDistributionChartProps {
   data: Histogram[];
   name: string;
   secondaryType: string;
   color?: SeriesColorAccessor;
   fieldType?: DataDriftField['type'];
   domain?: Feature['domain'];
-}) => {
+}
+
+export const SingleDistributionChart = ({
+  data,
+  color,
+  fieldType,
+  secondaryType,
+  name,
+}: SingleDistributionChartProps) => {
   const chartBaseTheme = useElasticChartsTheme();
   const xAxisFormatter = useFieldFormatter(getFieldFormatType(secondaryType));
   const yAxisFormatter = useFieldFormatter(FIELD_FORMAT_IDS.NUMBER);

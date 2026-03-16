@@ -13,7 +13,7 @@ import { AUTO_FOLLOW_PATTERN_EDIT_NAME } from './constants';
 
 /**
  * @param {object} [props]
- * @returns {ReturnType<typeof renderWithRouter>}
+ * @returns {object}
  */
 export const setup = (props = {}) => {
   return renderWithRouter(AutoFollowPatternEdit, {

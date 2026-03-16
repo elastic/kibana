@@ -18,7 +18,7 @@ const getSpaceUrlPrefix = (spaceId?: string): string => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
 };
 
-interface SendOptions {
+export interface SendOptions {
   supertestWithoutAuth: SupertestWithoutAuthProviderType;
   auth: { username: string; password: string };
   referer?: string;

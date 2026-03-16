@@ -8,8 +8,8 @@
  */
 
 import type { KibanaGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
-import type { Package } from './package';
 import type { PLUGIN_CATEGORY } from './plugin_category_info';
+import type { Package as PackageCtor } from './package';
 
 type ExportTarget = string | ConditionalExports | Array<string | ConditionalExports>;
 
@@ -152,6 +152,8 @@ export type KibanaPackageManifest =
   | PluginPackageManifest
   | SharedBrowserPackageManifest
   | BasePackageManifest;
+
+export type Package = InstanceType<typeof PackageCtor>;
 
 export type PluginPackage = Package & {
   manifest: PluginPackageManifest;

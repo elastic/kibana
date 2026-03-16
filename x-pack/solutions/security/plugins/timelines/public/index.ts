@@ -20,6 +20,7 @@ import { TimelinesPlugin } from './plugin';
 
 export type { TimelinesUIStart } from './types';
 export type { OnColumnFocused } from '../common/utils/accessibility';
+export type { DragActions } from './hooks/use_add_to_timeline';
 
 export {
   ARIA_COLINDEX_ATTRIBUTE,

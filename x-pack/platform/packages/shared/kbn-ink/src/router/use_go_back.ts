@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useInput } from 'ink';
+import { useInput, type Key } from 'ink';
 import { useInkRouter } from './use_ink_router';
 
 /**
@@ -14,7 +14,7 @@ import { useInkRouter } from './use_ink_router';
 export function useGoBack() {
   const { back } = useInkRouter();
 
-  useInput((input, key) => {
+  useInput((input: string, key: Key) => {
     if (input === 'q') {
       back();
     }

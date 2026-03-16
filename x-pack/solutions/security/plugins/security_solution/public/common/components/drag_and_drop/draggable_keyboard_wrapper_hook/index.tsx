@@ -7,7 +7,7 @@
 
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import type { FluidDragActions } from '@hello-pangea/dnd';
+import type { DragActions } from '@kbn/timelines-plugin/public';
 import { useKibana } from '../../../lib/kibana';
 import { draggableKeyDownHandler } from './helpers';
 
@@ -37,7 +37,7 @@ export const useDraggableKeyboardWrapper = ({
     draggableId,
     fieldName,
   });
-  const [dragActions, setDragActions] = useState<FluidDragActions | null>(null);
+  const [dragActions, setDragActions] = useState<DragActions | null>(null);
 
   const cancelDragActions = useCallback(() => {
     setDragActions((prevDragAction) => {

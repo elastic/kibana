@@ -12,6 +12,11 @@ import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constant
 import type { LensCreateIn, LensSavedObject } from '../../../content_management';
 import type { LensCreateResponseBody, RegisterAPIRouteFn } from '../../../types';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
+import type {
+  LensCreateRequestBody,
+  LensCreateRequestParams,
+  LensCreateRequestQuery,
+} from './types';
 import {
   lensCreateRequestBodySchema,
   lensCreateRequestParamsSchema,
@@ -73,13 +78,20 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
+      const requestBody = req.body as LensCreateRequestBody;
+      const requestParams = req.params as LensCreateRequestParams;
+      const requestQuery = req.query as LensCreateRequestQuery;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
       try {
-        const { references, ...data } = getLensRequestConfig(builder, req.body);
-        const options: LensCreateIn['options'] = { ...req.query, references, id: req.params.id };
+        const { references, ...data } = getLensRequestConfig(builder, requestBody);
+        const options: LensCreateIn['options'] = {
+          ...requestQuery,
+          references,
+          id: requestParams.id,
+        };
         const { result } = await client.create(data, options);
 
         if (result.item.error) {

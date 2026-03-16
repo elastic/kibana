@@ -7,7 +7,6 @@
 
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
@@ -308,8 +307,13 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   updateReduxTime: dispatchUpdateReduxTime(dispatch),
 });
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+type SearchOrFilterStateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+type SearchOrFilterDispatchProps = ReturnType<typeof mapDispatchToProps>;
+type PropsFromRedux = SearchOrFilterStateProps & SearchOrFilterDispatchProps;
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+const connector = connect<SearchOrFilterStateProps, SearchOrFilterDispatchProps, OwnProps, State>(
+  makeMapStateToProps,
+  mapDispatchToProps
+);
 
 export const StatefulSearchOrFilter = connector(StatefulSearchOrFilterComponent);

@@ -112,11 +112,12 @@ export const registerReplacementsRoutes = (
       },
       async (context, request, response) => {
         try {
+          const { id } = request.params as { id: string };
           const { namespace, repo } = await resolveReplacementsContext(context, {
             ...options,
             logger,
           });
-          const replacements = await repo.get(namespace, request.params.id);
+          const replacements = await repo.get(namespace, id);
 
           if (!replacements) {
             return response.notFound({ body: { message: 'Replacements set not found' } });

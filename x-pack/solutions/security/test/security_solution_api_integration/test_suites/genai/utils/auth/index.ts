@@ -5,11 +5,44 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import type { Role, User, UserInfo } from './types';
+import type { Role, Space, User, UserInfo } from './types';
 import { allUsers } from './users';
 import { allRoles } from './roles';
 import { spaces } from './spaces';
+
+interface ConfigService {
+  get(key: 'serverless'): boolean;
+}
+
+interface SecurityService {
+  role: {
+    create(roleName: string, privileges: Role['privileges']): Promise<void>;
+    delete(roleName: string): Promise<void>;
+  };
+  user: {
+    create(
+      username: string,
+      userDefinition: {
+        password: string;
+        roles: string[];
+        full_name: string;
+        email: string;
+      }
+    ): Promise<void>;
+    delete(username: string): Promise<void>;
+  };
+}
+
+interface SpacesService {
+  create(space: Space): Promise<void>;
+  delete(spaceId: string): Promise<void>;
+}
+
+interface GetGenAiAuthService {
+  (name: 'config'): ConfigService;
+  (name: 'security'): SecurityService;
+  (name: 'spaces'): SpacesService;
+}
 
 export const getUserInfo = (user: User): UserInfo => ({
   username: user.username,
@@ -17,7 +50,7 @@ export const getUserInfo = (user: User): UserInfo => ({
   email: `${user.username}@elastic.co`,
 });
 
-export const createSpaces = async (getService: FtrProviderContext['getService']) => {
+export const createSpaces = async (getService: GetGenAiAuthService): Promise<void> => {
   const spacesService = getService('spaces');
   for (const space of spaces) {
     await spacesService.create(space);
@@ -29,10 +62,10 @@ export const createSpaces = async (getService: FtrProviderContext['getService'])
  * scenarios but can be passed specific ones as well.
  */
 export const createUsersAndRoles = async (
-  getService: FtrProviderContext['getService'],
+  getService: GetGenAiAuthService,
   usersToCreate: User[] = allUsers,
   rolesToCreate: Role[] = allRoles
-) => {
+): Promise<void> => {
   const config = getService('config');
   const isServerless = config.get('serverless');
   if (isServerless) {
@@ -65,7 +98,7 @@ export const createUsersAndRoles = async (
   }
 };
 
-export const deleteSpaces = async (getService: FtrProviderContext['getService']) => {
+export const deleteSpaces = async (getService: GetGenAiAuthService): Promise<void> => {
   const spacesService = getService('spaces');
   for (const space of spaces) {
     try {
@@ -77,10 +110,10 @@ export const deleteSpaces = async (getService: FtrProviderContext['getService'])
 };
 
 export const deleteUsersAndRoles = async (
-  getService: FtrProviderContext['getService'],
+  getService: GetGenAiAuthService,
   usersToDelete: User[] = allUsers,
   rolesToDelete: Role[] = allRoles
-) => {
+): Promise<void> => {
   const config = getService('config');
   const isServerless = config.get('serverless');
   if (isServerless) {
@@ -106,12 +139,12 @@ export const deleteUsersAndRoles = async (
   }
 };
 
-export const createSpacesAndUsers = async (getService: FtrProviderContext['getService']) => {
+export const createSpacesAndUsers = async (getService: GetGenAiAuthService): Promise<void> => {
   await createSpaces(getService);
   await createUsersAndRoles(getService);
 };
 
-export const deleteSpacesAndUsers = async (getService: FtrProviderContext['getService']) => {
+export const deleteSpacesAndUsers = async (getService: GetGenAiAuthService): Promise<void> => {
   await deleteSpaces(getService);
   await deleteUsersAndRoles(getService);
 };

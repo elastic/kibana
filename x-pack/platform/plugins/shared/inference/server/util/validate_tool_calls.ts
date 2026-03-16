@@ -69,7 +69,9 @@ export function validateToolCalls({
     } catch (error) {
       const errorMessage =
         error instanceof z.ZodError
-          ? error?.issues?.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')
+          ? error.issues
+              .map((issue: z.ZodIssue) => `${issue.path.join('.')}: ${issue.message}`)
+              .join(', ')
           : error instanceof Error
           ? error.message
           : 'Unknown validation error';

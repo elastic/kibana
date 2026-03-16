@@ -16,8 +16,9 @@ const { getRepoRelsSync } = require('./get_repo_rels');
 
 const PACKAGE_MAP_PATH = Path.resolve(__dirname, '../package-map.json');
 
-/** @typedef {Map<string, import('./package').Package>} PkgDirMap */
-/** @typedef {Map<string, import('./package').Package>} PkgsById */
+/** @typedef {InstanceType<typeof Package>} RepoPackage */
+/** @typedef {Map<string, RepoPackage>} PkgDirMap */
+/** @typedef {Map<string, RepoPackage>} PkgsById */
 
 /**
  * @type {Map<any, any>}
@@ -110,10 +111,10 @@ function updatePackageMap(repoRoot, manifestPaths) {
  * Resolves to an array of Package instances which parse the manifest files,
  * package.json files, and provide useful metadata about each package.
  * @param {string} repoRoot
- * @returns {Package[]}
+ * @returns {RepoPackage[]}
  */
 function getPackages(repoRoot) {
-  /** @type {Array<import('./package').Package> | undefined} */
+  /** @type {RepoPackage[] | undefined} */
   const cached = CACHE.get(repoRoot);
   if (cached) {
     return cached;
@@ -211,13 +212,11 @@ function findPackageForPath(repoRoot, path) {
   return findClosest(Path.relative(repoRoot, Path.dirname(path)), getPkgDirMap(repoRoot));
 }
 
-module.exports = {
-  getPackages,
-  getPkgDirMap,
-  getPkgsById,
-  updatePackageMap,
-  removePackagesFromPackageMap,
-  findPackageForPath,
-  readPackageMap,
-  readHashOfPackageMap,
-};
+exports.getPackages = getPackages;
+exports.getPkgDirMap = getPkgDirMap;
+exports.getPkgsById = getPkgsById;
+exports.updatePackageMap = updatePackageMap;
+exports.removePackagesFromPackageMap = removePackagesFromPackageMap;
+exports.findPackageForPath = findPackageForPath;
+exports.readPackageMap = readPackageMap;
+exports.readHashOfPackageMap = readHashOfPackageMap;
