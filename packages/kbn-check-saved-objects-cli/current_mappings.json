@@ -2353,6 +2353,10 @@
       }
     }
   },
+  "inference-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "infra-custom-dashboards": {
     "dynamic": false,
     "properties": {

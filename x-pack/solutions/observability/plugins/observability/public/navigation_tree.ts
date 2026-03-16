@@ -566,6 +566,7 @@ function createNavTree({
             }),
             children: [
               { link: 'management:genAiSettings' },
+              { link: 'management:evals' },
               { link: 'management:aiAssistantManagementSelection' },
             ],
           },

@@ -1,0 +1,1621 @@
+{
+  "id": "@kbn/anonymization-ui",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.AnonymizationProfilesSection",
+        "type": "Function",
+        "tags": [],
+        "label": "AnonymizationProfilesSection",
+        "description": [],
+        "signature": [
+          "({ fetch, spaceId, canShow, canManage, onCreateSuccess, onUpdateSuccess, onDeleteSuccess, listTrustedNerModels, fetchPreviewDocument, onCreateConflict, onOpenConflictError, }: ",
+          {
+            "pluginId": "@kbn/anonymization-ui",
+            "scope": "public",
+            "docId": "kibKbnAnonymizationUiPluginApi",
+            "section": "def-public.AnonymizationProfilesSectionProps",
+            "text": "AnonymizationProfilesSectionProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+        "lineNumber": 57,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.AnonymizationProfilesSection.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  fetch,\n  spaceId,\n  canShow,\n  canManage,\n  onCreateSuccess,\n  onUpdateSuccess,\n  onDeleteSuccess,\n  listTrustedNerModels,\n  fetchPreviewDocument,\n  onCreateConflict,\n  onOpenConflictError,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/anonymization-ui",
+                "scope": "public",
+                "docId": "kibKbnAnonymizationUiPluginApi",
+                "section": "def-public.AnonymizationProfilesSectionProps",
+                "text": "AnonymizationProfilesSectionProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+            "lineNumber": 57,
+            "columnNumber": 46,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.createAnonymizationProfilesClient",
+        "type": "Function",
+        "tags": [],
+        "label": "createAnonymizationProfilesClient",
+        "description": [],
+        "signature": [
+          "(http: AnonymizationProfilesHttpService) => ",
+          "AnonymizationProfilesClient"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/services/profiles/client.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.createAnonymizationProfilesClient.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "AnonymizationProfilesHttpService"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/services/profiles/client.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.createAnonymizationReplacementsClient",
+        "type": "Function",
+        "tags": [],
+        "label": "createAnonymizationReplacementsClient",
+        "description": [],
+        "signature": [
+          "(http: AnonymizationReplacementsHttpService) => ",
+          "AnonymizationReplacementsClient"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/services/replacements/client.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.createAnonymizationReplacementsClient.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "AnonymizationReplacementsHttpService"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/services/replacements/client.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.ProfileFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "ProfileFlyout",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/anonymization-ui",
+            "scope": "public",
+            "docId": "kibKbnAnonymizationUiPluginApi",
+            "section": "def-public.ProfileFormProps",
+            "text": "ProfileFormProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_flyout/profile_flyout.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFlyout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/anonymization-ui",
+                "scope": "public",
+                "docId": "kibKbnAnonymizationUiPluginApi",
+                "section": "def-public.ProfileFormProps",
+                "text": "ProfileFormProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_flyout/profile_flyout.tsx",
+            "lineNumber": 25,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.ProfileForm",
+        "type": "Function",
+        "tags": [],
+        "label": "ProfileForm",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/anonymization-ui",
+            "scope": "public",
+            "docId": "kibKbnAnonymizationUiPluginApi",
+            "section": "def-public.ProfileFormProps",
+            "text": "ProfileFormProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileForm.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/anonymization-ui",
+                "scope": "public",
+                "docId": "kibKbnAnonymizationUiPluginApi",
+                "section": "def-public.ProfileFormProps",
+                "text": "ProfileFormProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form.tsx",
+            "lineNumber": 15,
+            "columnNumber": 29,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.ProfileFormContent",
+        "type": "Function",
+        "tags": [],
+        "label": "ProfileFormContent",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_content.tsx",
+        "lineNumber": 200,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.ProfileFormFooter",
+        "type": "Function",
+        "tags": [],
+        "label": "ProfileFormFooter",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_footer.tsx",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.ProfileFormProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ProfileFormProvider",
+        "description": [],
+        "signature": [
+          "({ children, ...props }: ProfileFormProviderProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_provider.tsx",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, ...props }",
+            "description": [],
+            "signature": [
+              "ProfileFormProviderProps"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_provider.tsx",
+            "lineNumber": 17,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.useDeleteProfileFlow",
+        "type": "Function",
+        "tags": [],
+        "label": "useDeleteProfileFlow",
+        "description": [],
+        "signature": [
+          "({ client, context, }: UseDeleteProfileFlowParams) => ",
+          "DeleteProfileFlowController"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/hooks/use_delete_profile_flow.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.useDeleteProfileFlow.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  client,\n  context,\n}",
+            "description": [],
+            "signature": [
+              "UseDeleteProfileFlowParams"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/hooks/use_delete_profile_flow.ts",
+            "lineNumber": 29,
+            "columnNumber": 38,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.useProfileEditor",
+        "type": "Function",
+        "tags": [],
+        "label": "useProfileEditor",
+        "description": [],
+        "signature": [
+          "({ client, context, profileId, }: UseProfileEditorParams) => ProfileEditorController"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/hooks/use_profile_editor.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.useProfileEditor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  client,\n  context,\n  profileId,\n}",
+            "description": [],
+            "signature": [
+              "UseProfileEditorParams"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/hooks/use_profile_editor.ts",
+            "lineNumber": 30,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.useProfileForm",
+        "type": "Function",
+        "tags": [],
+        "label": "useProfileForm",
+        "description": [],
+        "signature": [
+          "({ client, context, initialProfile, }: UseProfileFormParams) => ",
+          "ProfileFormController"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/hooks/use_profile_form.ts",
+        "lineNumber": 74,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.useProfileForm.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  client,\n  context,\n  initialProfile,\n}",
+            "description": [],
+            "signature": [
+              "UseProfileFormParams"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/hooks/use_profile_form.ts",
+            "lineNumber": 74,
+            "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.useProfilesListView",
+        "type": "Function",
+        "tags": [],
+        "label": "useProfilesListView",
+        "description": [],
+        "signature": [
+          "({ client, context, initialPerPage, enabled, }: UseProfilesListViewParams) => ",
+          "ProfilesListViewController"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/hooks/use_profiles_list_view.ts",
+        "lineNumber": 58,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.useProfilesListView.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  client,\n  context,\n  initialPerPage = DEFAULT_PER_PAGE,\n  enabled = true,\n}",
+            "description": [],
+            "signature": [
+              "UseProfilesListViewParams"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/hooks/use_profiles_list_view.ts",
+            "lineNumber": 58,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.useResolveAnonymizedValues",
+        "type": "Function",
+        "tags": [],
+        "label": "useResolveAnonymizedValues",
+        "description": [],
+        "signature": [
+          "({ client, replacementsId, inlineDeanonymizations, enabled, }: UseResolveAnonymizedValuesParams) => ",
+          "ResolveAnonymizedValuesResult"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/hooks/use_resolve_anonymized_values.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.useResolveAnonymizedValues.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  client,\n  replacementsId,\n  inlineDeanonymizations,\n  enabled = true,\n}",
+            "description": [],
+            "signature": [
+              "UseResolveAnonymizedValuesParams"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/hooks/use_resolve_anonymized_values.ts",
+            "lineNumber": 42,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.AnonymizationProfilesSectionProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymizationProfilesSectionProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.AnonymizationProfilesSectionProps.fetch",
+            "type": "Function",
+            "tags": [],
+            "label": "fetch",
+            "description": [],
+            "signature": [
+              "HttpHandler"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.AnonymizationProfilesSectionProps.fetch.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 354,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.AnonymizationProfilesSectionProps.fetch.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptions",
+                  " & { asResponse: true; }"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 355,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.AnonymizationProfilesSectionProps.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.AnonymizationProfilesSectionProps.canShow",
+            "type": "boolean",
+            "tags": [],
+            "label": "canShow",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.AnonymizationProfilesSectionProps.canManage",
+            "type": "boolean",
+            "tags": [],
+            "label": "canManage",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.AnonymizationProfilesSectionProps.listTrustedNerModels",
+            "type": "Function",
+            "tags": [],
+            "label": "listTrustedNerModels",
+            "description": [],
+            "signature": [
+              "(() => Promise<",
+              "TrustedNerModelOption",
+              "[]>) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.AnonymizationProfilesSectionProps.fetchPreviewDocument",
+            "type": "Function",
+            "tags": [],
+            "label": "fetchPreviewDocument",
+            "description": [],
+            "signature": [
+              "FetchPreviewDocument",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.AnonymizationProfilesSectionProps.onCreateSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onCreateSuccess",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.AnonymizationProfilesSectionProps.onUpdateSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpdateSuccess",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.AnonymizationProfilesSectionProps.onDeleteSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "onDeleteSuccess",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.AnonymizationProfilesSectionProps.onCreateConflict",
+            "type": "Function",
+            "tags": [],
+            "label": "onCreateConflict",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.AnonymizationProfilesSectionProps.onOpenConflictError",
+            "type": "Function",
+            "tags": [],
+            "label": "onOpenConflictError",
+            "description": [],
+            "signature": [
+              "((error: unknown) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.AnonymizationProfilesSectionProps.onOpenConflictError.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/anonymization_profiles_section/anonymization_profiles_section.tsx",
+                "lineNumber": 42,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.InlineDeanonymizationEntity",
+        "type": "Interface",
+        "tags": [],
+        "label": "InlineDeanonymizationEntity",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/types/replacements.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.InlineDeanonymizationEntity.mask",
+            "type": "string",
+            "tags": [],
+            "label": "mask",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/types/replacements.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.InlineDeanonymizationEntity.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/types/replacements.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.InlineDeanonymizationEntry",
+        "type": "Interface",
+        "tags": [],
+        "label": "InlineDeanonymizationEntry",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/types/replacements.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.InlineDeanonymizationEntry.entity",
+            "type": "Object",
+            "tags": [],
+            "label": "entity",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/anonymization-ui",
+                "scope": "public",
+                "docId": "kibKbnAnonymizationUiPluginApi",
+                "section": "def-public.InlineDeanonymizationEntity",
+                "text": "InlineDeanonymizationEntity"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/types/replacements.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.ProfileFormProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProfileFormProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.isEdit",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEdit",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.isManageMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "isManageMode",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.targetType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "targetType",
+            "description": [],
+            "signature": [
+              "\"index\" | \"data_view\" | \"index_pattern\""
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.targetId",
+            "type": "string",
+            "tags": [],
+            "label": "targetId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.fieldRules",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldRules",
+            "description": [],
+            "signature": [
+              "{ field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.regexRules",
+            "type": "Array",
+            "tags": [],
+            "label": "regexRules",
+            "description": [],
+            "signature": [
+              "{ id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.nerRules",
+            "type": "Array",
+            "tags": [],
+            "label": "nerRules",
+            "description": [],
+            "signature": [
+              "{ id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.nameError",
+            "type": "string",
+            "tags": [],
+            "label": "nameError",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.targetIdError",
+            "type": "string",
+            "tags": [],
+            "label": "targetIdError",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.fieldRulesError",
+            "type": "string",
+            "tags": [],
+            "label": "fieldRulesError",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.regexRulesError",
+            "type": "string",
+            "tags": [],
+            "label": "regexRulesError",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.nerRulesError",
+            "type": "string",
+            "tags": [],
+            "label": "nerRulesError",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.submitError",
+            "type": "Object",
+            "tags": [],
+            "label": "submitError",
+            "description": [],
+            "signature": [
+              "ProfilesApiError",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.hasConflict",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasConflict",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.conflictProfileId",
+            "type": "string",
+            "tags": [],
+            "label": "conflictProfileId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.isSubmitting",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSubmitting",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.onOpenConflictProfile",
+            "type": "Function",
+            "tags": [],
+            "label": "onOpenConflictProfile",
+            "description": [],
+            "signature": [
+              "((profileId: string) => void) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.ProfileFormProps.onOpenConflictProfile.$1",
+                "type": "string",
+                "tags": [],
+                "label": "profileId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+                "lineNumber": 37,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.onNameChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onNameChange",
+            "description": [],
+            "signature": [
+              "(name: string) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.ProfileFormProps.onNameChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+                "lineNumber": 38,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.onDescriptionChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onDescriptionChange",
+            "description": [],
+            "signature": [
+              "(description: string) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.ProfileFormProps.onDescriptionChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+                "lineNumber": 39,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.onTargetTypeChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onTargetTypeChange",
+            "description": [],
+            "signature": [
+              "(targetType: \"index\" | \"data_view\" | \"index_pattern\") => void"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.ProfileFormProps.onTargetTypeChange.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "targetType",
+                "description": [],
+                "signature": [
+                  "\"index\" | \"data_view\" | \"index_pattern\""
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+                "lineNumber": 40,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.onTargetIdChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onTargetIdChange",
+            "description": [],
+            "signature": [
+              "(targetId: string) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.ProfileFormProps.onTargetIdChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "targetId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+                "lineNumber": 41,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.onFieldRulesChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onFieldRulesChange",
+            "description": [],
+            "signature": [
+              "(rules: { field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.ProfileFormProps.onFieldRulesChange.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "rules",
+                "description": [],
+                "signature": [
+                  "{ field: string; allowed: boolean; anonymized: boolean; entityClass?: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\" | undefined; }[]"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+                "lineNumber": 42,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.onRegexRulesChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onRegexRulesChange",
+            "description": [],
+            "signature": [
+              "(rules: { id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.ProfileFormProps.onRegexRulesChange.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "rules",
+                "description": [],
+                "signature": [
+                  "{ id: string; type: \"regex\"; enabled: boolean; pattern: string; entityClass: \"PER\" | \"ORG\" | \"LOC\" | \"MISC\" | \"HOST_NAME\" | \"USER_NAME\" | \"IP\" | \"URL\" | \"EMAIL\" | \"CLOUD_ACCOUNT\" | \"ENTITY_NAME\" | \"RESOURCE_NAME\" | \"RESOURCE_ID\"; }[]"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+                "lineNumber": 43,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.onNerRulesChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onNerRulesChange",
+            "description": [],
+            "signature": [
+              "(rules: { id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.ProfileFormProps.onNerRulesChange.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "rules",
+                "description": [],
+                "signature": [
+                  "{ id: string; type: \"ner\"; enabled: boolean; allowedEntityClasses: (\"PER\" | \"ORG\" | \"LOC\" | \"MISC\")[]; modelId?: string | undefined; }[]"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+                "lineNumber": 44,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.listTrustedNerModels",
+            "type": "Function",
+            "tags": [],
+            "label": "listTrustedNerModels",
+            "description": [],
+            "signature": [
+              "(() => Promise<",
+              "TrustedNerModelOption",
+              "[]>) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.fetchPreviewDocument",
+            "type": "Function",
+            "tags": [],
+            "label": "fetchPreviewDocument",
+            "description": [],
+            "signature": [
+              "FetchPreviewDocument",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.unavailableTargetIds",
+            "type": "Array",
+            "tags": [],
+            "label": "unavailableTargetIds",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.replacementsId",
+            "type": "string",
+            "tags": [],
+            "label": "replacementsId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.inlineDeanonymizations",
+            "type": "Array",
+            "tags": [],
+            "label": "inlineDeanonymizations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/anonymization-ui",
+                "scope": "public",
+                "docId": "kibKbnAnonymizationUiPluginApi",
+                "section": "def-public.InlineDeanonymizationEntry",
+                "text": "InlineDeanonymizationEntry"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.fetch",
+            "type": "Function",
+            "tags": [],
+            "label": "fetch",
+            "description": [],
+            "signature": [
+              "HttpHandler"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.ProfileFormProps.fetch.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 354,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/anonymization-ui",
+                "id": "def-public.ProfileFormProps.fetch.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptions",
+                  " & { asResponse: true; }"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 355,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.onCancel",
+            "type": "Function",
+            "tags": [],
+            "label": "onCancel",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/anonymization-ui",
+            "id": "def-public.ProfileFormProps.onSubmit",
+            "type": "Function",
+            "tags": [],
+            "label": "onSubmit",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/profile_form/profile_form_props.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/anonymization-ui",
+        "id": "def-public.TokenToOriginalMap",
+        "type": "Type",
+        "tags": [],
+        "label": "TokenToOriginalMap",
+        "description": [],
+        "signature": [
+          "{ [x: string]: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/anonymization-ui/src/common/types/replacements.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

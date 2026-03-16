@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/logstash-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/logstash'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/logstash-plugin'
+  title: '@kbn/logstash-plugin'
   description: Moon project for @kbn/logstash-plugin
   channel: ''
   owner: '@elastic/logstash'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/logstash
+  sourceRoot: x-pack/platform/plugins/private/logstash
 dependsOn:
   - '@kbn/core'
   - '@kbn/home-plugin'
@@ -45,14 +44,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
