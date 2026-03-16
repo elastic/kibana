@@ -1011,60 +1011,63 @@ describe('Datatable Visualization', () => {
         }
       );
 
-      describe.each<'cell' | 'text' | 'badge' | 'none' | undefined>(['cell', 'text', 'badge', 'none', undefined])(
-        'colorMode - %s',
-        (colorMode) => {
-          it.each<{ dataType: DataType; disallowed?: boolean }>([
-            // allowed types
-            { dataType: 'document' },
-            { dataType: 'ip' },
-            { dataType: 'histogram' },
-            { dataType: 'geo_point' },
-            { dataType: 'geo_shape' },
-            { dataType: 'counter' },
-            { dataType: 'gauge' },
-            { dataType: 'murmur3' },
-            { dataType: 'string' },
-            { dataType: 'number' },
-            { dataType: 'boolean' },
-            // disallowed types
-            { dataType: 'date', disallowed: true },
-          ])(
-            'should apply correct palette, colorMapping & colorMode for $dataType',
-            ({ dataType, disallowed = false }) => {
-              datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
-                dataType,
-                isBucketed: false,
-                label: 'label',
-                hasTimeShift: false,
-                hasReducedTimeRange: false,
-              });
+      describe.each<'cell' | 'text' | 'badge' | 'none' | undefined>([
+        'cell',
+        'text',
+        'badge',
+        'none',
+        undefined,
+      ])('colorMode - %s', (colorMode) => {
+        it.each<{ dataType: DataType; disallowed?: boolean }>([
+          // allowed types
+          { dataType: 'document' },
+          { dataType: 'ip' },
+          { dataType: 'histogram' },
+          { dataType: 'geo_point' },
+          { dataType: 'geo_shape' },
+          { dataType: 'counter' },
+          { dataType: 'gauge' },
+          { dataType: 'murmur3' },
+          { dataType: 'string' },
+          { dataType: 'number' },
+          { dataType: 'boolean' },
+          // disallowed types
+          { dataType: 'date', disallowed: true },
+        ])(
+          'should apply correct palette, colorMapping & colorMode for $dataType',
+          ({ dataType, disallowed = false }) => {
+            datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+              dataType,
+              isBucketed: false,
+              label: 'label',
+              hasTimeShift: false,
+              hasReducedTimeRange: false,
+            });
 
-              const expression = datatableVisualization.toExpression(
-                colorExpressionTableState(colorMode),
-                frame.datasourceLayers,
-                {},
-                { '1': { type: 'expression', chain: [] } }
-              ) as Ast;
+            const expression = datatableVisualization.toExpression(
+              colorExpressionTableState(colorMode),
+              frame.datasourceLayers,
+              {},
+              { '1': { type: 'expression', chain: [] } }
+            ) as Ast;
 
-              const columnArgs =
-                buildExpression(expression).findFunction<DatatableColumnFn>(
-                  'lens_datatable_column'
-                )[0].arguments;
+            const columnArgs =
+              buildExpression(expression).findFunction<DatatableColumnFn>(
+                'lens_datatable_column'
+              )[0].arguments;
 
-              if (disallowed) {
-                expect(columnArgs.colorMode).toEqual(['none']);
-                expect(columnArgs.palette).toBeUndefined();
-                expect(columnArgs.colorMapping).toBeUndefined();
-              } else {
-                expect(columnArgs.colorMode).toEqual([colorMode ?? 'none']);
-                expect(columnArgs.palette).toEqual([expect.any(Object)]);
-                expect(columnArgs.colorMapping).toEqual([expect.any(String)]);
-              }
+            if (disallowed) {
+              expect(columnArgs.colorMode).toEqual(['none']);
+              expect(columnArgs.palette).toBeUndefined();
+              expect(columnArgs.colorMapping).toBeUndefined();
+            } else {
+              expect(columnArgs.colorMode).toEqual([colorMode ?? 'none']);
+              expect(columnArgs.palette).toEqual([expect.any(Object)]);
+              expect(columnArgs.colorMapping).toEqual([expect.any(String)]);
             }
-          );
-        }
-      );
+          }
+        );
+      });
     });
   });
 
