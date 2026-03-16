@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
@@ -27,7 +27,7 @@ import type { ResolvedInferenceEndpoints } from './types';
  */
 export const getForFeature = async (
   registry: InferenceFeatureRegistry,
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   featureId: string
 ): Promise<ResolvedInferenceEndpoints> => {
@@ -53,7 +53,7 @@ interface ResolvedEndpointIds {
 
 const resolveEndpointIds = async (
   registry: InferenceFeatureRegistry,
-  soClient: SavedObjectsClientContract,
+  soClient: ISavedObjectsRepository,
   featureId: string
 ): Promise<ResolvedEndpointIds> => {
   if (!registry.get(featureId)) {
@@ -158,7 +158,7 @@ const fetchEndpoints = async (
 };
 
 const readSettingsFeatures = async (
-  soClient: SavedObjectsClientContract
+  soClient: ISavedObjectsRepository
 ): Promise<InferenceSettingsAttributes['features']> => {
   try {
     const so = await soClient.get<InferenceSettingsAttributes>(

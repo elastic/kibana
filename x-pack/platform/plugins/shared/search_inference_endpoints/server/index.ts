@@ -23,6 +23,5 @@ export type {
   InferenceFeatureRegistryStartContract,
   InferenceInferenceEndpointInfo,
   InferenceEndpointsContract,
-  ScopedInferenceEndpointsClient,
   ResolvedInferenceEndpoints,
 } from './types';

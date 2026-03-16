@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
@@ -45,12 +44,8 @@ export interface ResolvedInferenceEndpoints {
   warnings: string[];
 }
 
-export interface ScopedInferenceEndpointsClient {
-  getForFeature: (featureId: string) => Promise<ResolvedInferenceEndpoints>;
-}
-
 export interface InferenceEndpointsContract {
-  asScoped: (request: KibanaRequest) => ScopedInferenceEndpointsClient;
+  getForFeature: (featureId: string) => Promise<ResolvedInferenceEndpoints>;
 }
 
 export interface SearchInferenceEndpointsPluginStart {

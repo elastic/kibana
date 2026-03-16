@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  SavedObject,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -38,7 +34,7 @@ const createEndpointInfo = (id: string): InferenceInferenceEndpointInfo =>
 
 const createSoClient = (
   features: InferenceSettingsAttributes['features'] | 'not_found' = []
-): SavedObjectsClientContract =>
+): ISavedObjectsRepository =>
   ({
     get: jest.fn().mockImplementation(() => {
       if (features === 'not_found') {
@@ -50,7 +46,7 @@ const createSoClient = (
         attributes: { features },
       } as SavedObject<InferenceSettingsAttributes>;
     }),
-  } as unknown as SavedObjectsClientContract);
+  } as unknown as ISavedObjectsRepository);
 
 const createEsClient = (
   endpointMap: Record<string, InferenceInferenceEndpointInfo | 'not_found'> = {}
@@ -199,7 +195,7 @@ describe('getForFeature', () => {
     registry.register(createValidFeature({ featureId: 'f1' }));
     const soClient = {
       get: jest.fn().mockRejectedValue(new Error('Connection refused')),
-    } as unknown as SavedObjectsClientContract;
+    } as unknown as ISavedObjectsRepository;
     await expect(getForFeature(registry, soClient, createEsClient(), 'f1')).rejects.toThrow(
       'Connection refused'
     );

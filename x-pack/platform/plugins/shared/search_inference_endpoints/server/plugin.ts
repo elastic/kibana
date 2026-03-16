@@ -8,7 +8,6 @@
 import type {
   CoreSetup,
   CoreStart,
-  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -136,15 +135,10 @@ export class SearchInferenceEndpointsPlugin
         register: featureRegistry.register.bind(featureRegistry),
       },
       endpoints: {
-        asScoped: (request: KibanaRequest) => {
-          const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
-          const soClient = core.savedObjects.getScopedClient(request, {
-            includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
-          });
-          return {
-            getForFeature: (featureId: string) =>
-              getForFeature(featureRegistry, soClient, esClient, featureId),
-          };
+        getForFeature: (featureId: string) => {
+          const esClient = core.elasticsearch.client.asInternalUser;
+          const soClient = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
+          return getForFeature(featureRegistry, soClient, esClient, featureId);
         },
       },
     };
