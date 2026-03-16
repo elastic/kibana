@@ -39,10 +39,11 @@ import { visit } from '../../../../tasks/navigation';
 import { assertDetailsNotExist, getDetails } from '../../../../tasks/rule_details';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
+// Flaky on serverless: https://github.com/elastic/kibana/issues/241848
 describe(
   'Machine Learning Detection Rules - Editing',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless', '@skipInServerless', '@skipInServerlessMKI'],
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
