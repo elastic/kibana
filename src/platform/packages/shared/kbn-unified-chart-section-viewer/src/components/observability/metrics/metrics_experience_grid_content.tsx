@@ -14,7 +14,6 @@ import {
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   euiScrollBarStyles,
   useEuiTheme,
   type EuiFlexGridProps,
@@ -29,6 +28,7 @@ import { usePagination } from './hooks';
 import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { useMetricsExperienceFieldsContext } from './context/metrics_experience_fields_provider';
+import { MetricsCountLabel } from './metrics_count_label';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
@@ -102,23 +102,7 @@ export const MetricsExperienceGridContent = ({
           direction="row"
         >
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              justifyContent="spaceBetween"
-              alignItems="center"
-              responsive={false}
-              gutterSize="s"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate('metricsExperience.grid.metricsCount.label', {
-                      defaultMessage: '{count} {count, plural, one {metric} other {metrics}}',
-                      values: { count: filteredFieldsCount },
-                    })}
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <MetricsCountLabel count={filteredFieldsCount} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBetaBadge
