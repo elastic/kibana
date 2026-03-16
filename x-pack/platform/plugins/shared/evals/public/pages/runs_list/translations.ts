@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PAGE_TITLE = i18n.translate('xpack.evals.runsList.pageTitle', {
-  defaultMessage: 'Evaluations',
-});
-
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.evals.runsList.searchPlaceholder', {
   defaultMessage: 'Filter by branch...',
 });

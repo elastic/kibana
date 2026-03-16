@@ -12,7 +12,6 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import type {
-  ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeGlobalHelpExtensionMenuLink,
@@ -49,7 +48,6 @@ export const createMockChromeComponentsDeps = () => {
     loadingCount$: new BehaviorSubject<number>(0),
     classic: {
       breadcrumbs$: new BehaviorSubject<ChromeBreadcrumb[]>([]),
-      badge$: new BehaviorSubject<ChromeBadge | undefined>(undefined),
       recentlyAccessed$: new BehaviorSubject<RecentlyAccessedHistoryItem[]>([]),
       customNavLink$: new BehaviorSubject<ChromeNavLink | undefined>(undefined),
     },

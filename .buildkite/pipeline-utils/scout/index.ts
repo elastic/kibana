@@ -8,3 +8,6 @@
  */
 
 export * from './pick_scout_test_group_run_order';
+export * from './paths';
+export * from './test_tracks';
+export * from './test_distribution_strategies';

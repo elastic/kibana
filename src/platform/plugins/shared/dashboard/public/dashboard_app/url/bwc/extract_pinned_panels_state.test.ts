@@ -62,6 +62,22 @@ describe('extractDashboardState', () => {
         },
       ]);
     });
+
+    test('should keep explicit empty pinned panels', () => {
+      const dashboardState = extractDashboardState({
+        pinned_panels: [],
+      });
+
+      expect(dashboardState.pinned_panels).toEqual([]);
+    });
+
+    test('should not set pinned panels when not provided', () => {
+      const dashboardState = extractDashboardState({
+        pinned_panels: undefined,
+      });
+
+      expect(dashboardState.pinned_panels).toBeUndefined();
+    });
   });
 
   describe('>= 8.19 to <9.4 state', () => {

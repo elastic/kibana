@@ -48,16 +48,16 @@ export interface ChromeState {
     collapsed: State<boolean>;
   };
 
-  /** Breadcrumbs state */
+  /** Breadcrumbs state (includes legacy badge from setBadge()) */
   breadcrumbs: {
     classic: ArrayState<ChromeBreadcrumb>;
     appendExtensions: ArrayState<ChromeBreadcrumbsAppendExtension>;
     badges: ArrayState<ChromeBreadcrumbsBadge>;
+    legacyBadge: State<ChromeBadge | undefined>;
     appendExtensionsWithBadges$: Observable<ChromeBreadcrumbsAppendExtension[]>;
   };
 
   /** UI elements */
-  badge: State<ChromeBadge | undefined>;
   headerBanner: State<ChromeUserBanner | undefined>;
   globalFooter: State<ReactNode>;
   customNavLink: State<ChromeNavLink | undefined>;
@@ -90,16 +90,16 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   // Side Nav
   const sideNavCollapsed = createPersistedState(IS_SIDENAV_COLLAPSED_KEY, false);
 
-  // Breadcrumbs
+  // Breadcrumbs (legacyBadge powers setBadge() -> breadcrumbs badge pipeline)
   const {
     breadcrumbs,
     breadcrumbsAppendExtensions,
     breadcrumbsBadges,
+    legacyBadge,
     breadcrumbsAppendExtensionsWithBadges$,
   } = createBreadcrumbsState();
 
   // UI Elements (per-app reset handled in setupAppChangeHandler)
-  const badge = createState<ChromeBadge | undefined>(undefined);
   const appMenu = createState<AppMenuConfig | undefined>(undefined);
 
   // UI Elements (not reset on app change)
@@ -121,9 +121,9 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       classic: breadcrumbs,
       appendExtensions: breadcrumbsAppendExtensions,
       badges: breadcrumbsBadges,
+      legacyBadge,
       appendExtensionsWithBadges$: breadcrumbsAppendExtensionsWithBadges$,
     },
-    badge,
     headerBanner,
     globalFooter,
     customNavLink,

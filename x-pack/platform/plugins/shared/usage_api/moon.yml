@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/usage-api-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/usage-api-plugin'
+  title: '@kbn/usage-api-plugin'
   description: Moon project for @kbn/usage-api-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/usage_api
+  sourceRoot: x-pack/platform/plugins/shared/usage_api
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
@@ -35,14 +34,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
