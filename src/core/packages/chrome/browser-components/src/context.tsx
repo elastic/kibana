@@ -9,29 +9,19 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
-import type { Observable } from 'rxjs';
-import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
-
-/**
- * Minimal application contract needed by Chrome components.
- * Replaces `InternalApplicationStart` to break the dependency on the private
- * `@kbn/core-application-browser-internal` package.
- */
-export interface ChromeApplicationContext
-  extends Pick<ApplicationStart, 'navigateToApp' | 'navigateToUrl' | 'currentAppId$'> {
-  currentActionMenu$: Observable<MountPoint<HTMLElement> | undefined>;
-}
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 
 export interface ChromeComponentsDeps {
-  application: ChromeApplicationContext;
-  basePath: HttpStart['basePath'];
+  application: Pick<
+    InternalApplicationStart,
+    'navigateToApp' | 'navigateToUrl' | 'currentAppId$' | 'currentActionMenu$'
+  >;
+  http: Pick<HttpStart, 'basePath' | 'getLoadingCount$'>;
   docLinks: DocLinksStart;
-  loadingCount$: Observable<number>;
-  customBranding$: Observable<CustomBranding>;
+  customBranding: Pick<CustomBrandingStart, 'customBranding$'>;
 }
 
 const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null);
@@ -41,8 +31,8 @@ const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null)
  * `ProjectHeader`, `GridLayoutProjectSideNav`, `HeaderTopBanner`, `ChromelessHeader`,
  * `AppMenuBar`, `Sidebar`).
  *
- * The layout layer assembles these five external-service fields and wraps the layout
- * tree once. Chrome-owned state is accessed separately via `useChromeService()` hooks.
+ * The layout layer passes whole service contracts (narrowed via `Pick`) and wraps the
+ * layout tree once. Chrome-owned state is accessed separately via `useChromeService()` hooks.
  */
 export const ChromeComponentsProvider: FC<PropsWithChildren<{ value: ChromeComponentsDeps }>> = ({
   value,

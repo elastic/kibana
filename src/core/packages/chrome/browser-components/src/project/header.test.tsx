@@ -33,7 +33,7 @@ describe('Header', () => {
     );
 
     act(() => {
-      deps.customBranding$.next({ logo: 'foo.jpg' });
+      deps.customBranding.customBranding$.next({ logo: 'foo.jpg' });
     });
 
     expect(queryByTestId(/customLogo/)).not.toBeNull();

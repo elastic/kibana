@@ -28,7 +28,7 @@ import React, { useMemo } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { AppCategory } from '@kbn/core-application-common';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
-import type { ChromeApplicationContext } from '../context';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import {
   useRecentlyAccessed,
   useCustomNavLink,
@@ -109,8 +109,8 @@ interface Props {
   homeHref: string;
   storage?: Storage;
   closeNav: () => void;
-  navigateToApp: ChromeApplicationContext['navigateToApp'];
-  navigateToUrl: ChromeApplicationContext['navigateToUrl'];
+  navigateToApp: ApplicationStart['navigateToApp'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   button: EuiCollapsibleNavProps['button'];
 }
 

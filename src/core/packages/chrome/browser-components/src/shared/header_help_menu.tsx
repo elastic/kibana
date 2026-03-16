@@ -30,9 +30,8 @@ import { useIsServerless, useKibanaVersion } from '@kbn/react-env';
 import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 
 import { css } from '@emotion/react';
-import { useChromeComponentsDeps } from '../context';
 import { isModifiedOrPrevented } from './nav_link';
-import { useHelpMenu } from './chrome_hooks';
+import { useHelpMenu, useNavigateToUrl, useDocLinks } from './chrome_hooks';
 
 const buildDefaultContentLinks = ({
   kibanaDocLink,
@@ -80,8 +79,8 @@ const createCustomLink = (
 };
 
 export const HeaderHelpMenu = () => {
-  const { application, docLinks } = useChromeComponentsDeps();
-  const { navigateToUrl } = application;
+  const navigateToUrl = useNavigateToUrl();
+  const docLinks = useDocLinks();
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const isServerless = useIsServerless();

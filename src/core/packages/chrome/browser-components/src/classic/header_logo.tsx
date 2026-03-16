@@ -11,12 +11,10 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { HTMLAttributes } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import type { HttpStart } from '@kbn/core-http-browser';
 import { useEuiTheme } from '@elastic/eui';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import { LoadingIndicator } from '../shared/loading_indicator';
+import { useCustomBranding } from '../shared/chrome_hooks';
 
 const ElasticMark = ({ ...props }: HTMLAttributes<SVGElement>) => (
   <svg
@@ -45,14 +43,12 @@ function onClick(
 
 interface Props {
   href: string;
-  navigateToApp: (appId: string) => void;
-  loadingCount$?: ReturnType<HttpStart['getLoadingCount$']>;
-  customBranding$: Observable<CustomBranding>;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
-export function HeaderLogo({ href, navigateToApp, loadingCount$, customBranding$ }: Props) {
+export function HeaderLogo({ href, navigateToApp }: Props) {
   const { euiTheme } = useEuiTheme();
-  const customBranding = useObservable(customBranding$, {});
+  const customBranding = useCustomBranding();
   const { customizedLogo, logo } = customBranding;
 
   const styles = {
@@ -78,7 +74,7 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, customBranding$
         defaultMessage: 'Elastic home',
       })}
     >
-      <LoadingIndicator loadingCount$={loadingCount$!} customLogo={logo} />
+      <LoadingIndicator customLogo={logo} />
       {customizedLogo ? (
         <img
           src={customizedLogo}

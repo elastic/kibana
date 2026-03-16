@@ -26,6 +26,7 @@ import {
   Sidebar,
   useHasAppMenu,
 } from '@kbn/core-chrome-browser-components';
+import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import {
   useChromeStyle,
   useIsChromeVisible,
@@ -85,17 +86,11 @@ export class GridLayout implements LayoutService {
     const appBannerComponent = overlays.banners.getComponent();
     const debug = this.params.debug ?? false;
 
-    const componentDeps = {
-      application: {
-        navigateToApp: application.navigateToApp,
-        navigateToUrl: application.navigateToUrl,
-        currentAppId$: application.currentAppId$,
-        currentActionMenu$: application.currentActionMenu$,
-      },
-      basePath: http.basePath,
+    const componentDeps: ChromeComponentsDeps = {
+      application,
+      http,
       docLinks,
-      loadingCount$: http.getLoadingCount$(),
-      customBranding$: customBranding.customBranding$,
+      customBranding,
     };
 
     const GridLayoutContent = React.memo(({ debug: showDebug }: { debug: boolean }) => {

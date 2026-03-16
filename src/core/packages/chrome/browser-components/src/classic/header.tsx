@@ -18,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
-import { useChromeComponentsDeps } from '../context';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderLogo } from './header_logo';
@@ -29,15 +28,18 @@ import { HeaderNavControls } from '../shared/header_nav_controls';
 import { HeaderActionMenu } from '../shared/header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
-import { useClassicBreadcrumbs, useHasAppMenuConfig } from '../shared/chrome_hooks';
+import {
+  useClassicBreadcrumbs,
+  useHasAppMenuConfig,
+  useNavigateToApp,
+  useNavigateToUrl,
+  useBasePath,
+} from '../shared/chrome_hooks';
 
 export function ClassicHeader() {
-  const {
-    application,
-    basePath,
-    loadingCount$,
-    customBranding$,
-  } = useChromeComponentsDeps();
+  const navigateToApp = useNavigateToApp();
+  const navigateToUrl = useNavigateToUrl();
+  const basePath = useBasePath();
   const breadcrumbs = useClassicBreadcrumbs();
 
   const homeHref = basePath.prepend('/app/home');
@@ -62,15 +64,10 @@ export function ClassicHeader() {
             sections={[
               {
                 items: [
-                  <HeaderPageAnnouncer
-                    breadcrumbs={breadcrumbs}
-                    customBranding$={customBranding$}
-                  />,
+                  <HeaderPageAnnouncer breadcrumbs={breadcrumbs} />,
                   <HeaderLogo
                     href={homeHref}
-                    navigateToApp={application.navigateToApp}
-                    loadingCount$={loadingCount$}
-                    customBranding$={customBranding$}
+                    navigateToApp={navigateToApp}
                   />,
                 ],
               },
@@ -107,8 +104,8 @@ export function ClassicHeader() {
                   isNavOpen={isNavOpen}
                   homeHref={homeHref}
                   basePath={basePath}
-                  navigateToApp={application.navigateToApp}
-                  navigateToUrl={application.navigateToUrl}
+                  navigateToApp={navigateToApp}
+                  navigateToUrl={navigateToUrl}
                   closeNav={() => {
                     setIsNavOpen(false);
                   }}

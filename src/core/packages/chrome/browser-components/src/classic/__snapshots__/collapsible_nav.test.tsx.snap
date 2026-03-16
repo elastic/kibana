@@ -698,39 +698,6 @@ Array [
 
 exports[`CollapsibleNav renders the default nav 1`] = `
 <CollapsibleNav
-  appId$={
-    BehaviorSubject {
-      "_value": "test",
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
   basePath={
     BasePath {
       "assetsHrefBase": "/test",
@@ -847,39 +814,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
 
 exports[`CollapsibleNav renders the default nav 2`] = `
 <CollapsibleNav
-  appId$={
-    BehaviorSubject {
-      "_value": "test",
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
   basePath={
     BasePath {
       "assetsHrefBase": "/test",

@@ -10,27 +10,24 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiHeader,
-  EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
-  EuiImage,
-  EuiLoadingSpinner,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { useChromeComponentsDeps } from '../context';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../shared/header_help_menu';
 import { HeaderNavControls } from '../shared/header_nav_controls';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
+import { LoadingIndicator } from '../shared/loading_indicator';
 import {
   useProjectBreadcrumbs,
   useProjectHome,
-  useLoadingCount,
+  useNavigateToUrl,
+  useBasePath,
+  useCustomBranding,
 } from '../shared/chrome_hooks';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
@@ -41,10 +38,6 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
       justify-content: center;
       min-width: ${size.xxl};
       cursor: pointer;
-    `,
-    logo: css`
-      min-width: 0; /* overrides min-width: 40px */
-      padding: 0;
     `,
   },
   leftHeaderSection: css`
@@ -76,19 +69,11 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
 
-const headerStrings = {
-  logo: {
-    ariaLabel: i18n.translate('core.ui.primaryNav.goToHome.ariaLabel', {
-      defaultMessage: 'Go to home page',
-    }),
-  },
-};
-
 const Logo = ({ logoCss }: { logoCss: HeaderCss['logo'] }) => {
-  const { application, basePath, customBranding$ } = useChromeComponentsDeps();
-  const loadingCount = useLoadingCount();
+  const navigateToUrl = useNavigateToUrl();
+  const basePath = useBasePath();
   const homeHref = useProjectHome();
-  const customBranding = useObservable(customBranding$, {});
+  const customBranding = useCustomBranding();
   const { logo } = customBranding;
 
   let fullHref: string | undefined;
@@ -99,66 +84,23 @@ const Logo = ({ logoCss }: { logoCss: HeaderCss['logo'] }) => {
   const navigateHome = useCallback(
     (event: React.MouseEvent) => {
       if (fullHref) {
-        application.navigateToUrl(fullHref);
+        navigateToUrl(fullHref);
       }
       event.preventDefault();
     },
-    [fullHref, application]
+    [fullHref, navigateToUrl]
   );
-
-  const renderLogo = () => {
-    if (logo) {
-      return (
-        <a href={fullHref} onClick={navigateHome} data-test-subj="globalLoadingIndicator-hidden">
-          <EuiImage
-            src={logo}
-            css={logoCss}
-            data-test-subj="globalLoadingIndicator-hidden customLogo"
-            size={24}
-            alt="logo"
-            aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.customLogoAriaLabel', {
-              defaultMessage: 'User logo',
-            })}
-          />
-        </a>
-      );
-    }
-
-    return (
-      <EuiHeaderLogo
-        iconType="logoElastic"
-        onClick={navigateHome}
-        href={fullHref}
-        css={logoCss}
-        data-test-subj="globalLoadingIndicator-hidden"
-        aria-label={headerStrings.logo.ariaLabel}
-      />
-    );
-  };
 
   return (
     <span css={logoCss.container} data-test-subj="nav-header-logo">
-      {loadingCount === 0 ? (
-        renderLogo()
-      ) : (
-        <a onClick={navigateHome} href={fullHref}>
-          <EuiLoadingSpinner
-            size="l"
-            aria-hidden={false}
-            onClick={navigateHome}
-            data-test-subj="globalLoadingIndicator"
-          />
-        </a>
-      )}
+      <a onClick={navigateHome} href={fullHref}>
+        <LoadingIndicator customLogo={logo} />
+      </a>
     </span>
   );
 };
 
 export const ProjectHeader = () => {
-  const {
-    customBranding$,
-  } = useChromeComponentsDeps();
-
   const breadcrumbs = useProjectBreadcrumbs();
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
@@ -178,10 +120,7 @@ export const ProjectHeader = () => {
           <EuiHeader position={'static'} className="header__firstBar" css={topBarStyles}>
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               <EuiHeaderSectionItem>
-                <HeaderPageAnnouncer
-                  breadcrumbs={breadcrumbs}
-                  customBranding$={customBranding$}
-                />
+                <HeaderPageAnnouncer breadcrumbs={breadcrumbs} />
                 <Logo logoCss={logoCss} />
               </EuiHeaderSectionItem>
 

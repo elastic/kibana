@@ -18,6 +18,10 @@ import type {
   ChromeNavControl,
   ChromeNavLink,
 } from '@kbn/core-chrome-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useChromeComponentsDeps } from '../context';
@@ -52,19 +56,45 @@ export function useProjectHome(): string {
   return useObservable(projectHome$, '/app/home');
 }
 
-const LOADING_DEBOUNCE_TIME = 80;
+const LOADING_DEBOUNCE_TIME = 250;
 
 /**
- * Returns the current HTTP loading count, debounced to avoid flickering.
- * Used by `Logo` (project header).
+ * Returns `true` when HTTP requests are in flight, debounced to avoid flickering
+ * on very short requests.
  */
-export function useLoadingCount(): number {
-  const { loadingCount$ } = useChromeComponentsDeps();
-  const debounced$ = useMemo(
-    () => loadingCount$.pipe(debounceTime(LOADING_DEBOUNCE_TIME)),
-    [loadingCount$]
+export function useIsLoading(): boolean {
+  const { http } = useChromeComponentsDeps();
+  const isLoading$ = useMemo(
+    () => http.getLoadingCount$().pipe(debounceTime(LOADING_DEBOUNCE_TIME), map((c) => c > 0)),
+    [http]
   );
-  return useObservable(debounced$, 0);
+  return useObservable(isLoading$, false);
+}
+
+/** Returns `http.basePath` (`IBasePath`). */
+export function useBasePath(): IBasePath {
+  return useChromeComponentsDeps().http.basePath;
+}
+
+/** Returns `application.navigateToUrl`. */
+export function useNavigateToUrl(): ApplicationStart['navigateToUrl'] {
+  return useChromeComponentsDeps().application.navigateToUrl;
+}
+
+/** Returns `application.navigateToApp`. */
+export function useNavigateToApp(): ApplicationStart['navigateToApp'] {
+  return useChromeComponentsDeps().application.navigateToApp;
+}
+
+/** Returns the `docLinks` service. */
+export function useDocLinks(): DocLinksStart {
+  return useChromeComponentsDeps().docLinks;
+}
+
+/** Returns the resolved custom branding state. */
+export function useCustomBranding(): CustomBranding {
+  const { customBranding } = useChromeComponentsDeps();
+  return useObservable(customBranding.customBranding$, {});
 }
 
 /**

@@ -8,11 +8,9 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
+import { render, fireEvent, act } from '@testing-library/react';
+import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
 import { HeaderPageAnnouncer } from './header_page_announcer';
-
-const createBranding$ = (branding: any = {}) => new BehaviorSubject(branding);
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -26,41 +24,47 @@ jest.mock('@elastic/eui', () => {
 describe('HeaderPageAnnouncer', () => {
   it('renders with default brand when no branding is provided', async () => {
     const { findByLabelText } = render(
-      <HeaderPageAnnouncer
-        breadcrumbs={[{ text: 'Home' }]}
-        customBranding$={createBranding$({})}
-      />
+      <TestChromeProviders>
+        <HeaderPageAnnouncer breadcrumbs={[{ text: 'Home' }]} />
+      </TestChromeProviders>
     );
     const announcer = await findByLabelText('Page change announcements');
     expect(announcer.textContent).toBe('Home - Elastic');
   });
 
   it('renders with custom branding', async () => {
+    const deps = createMockChromeComponentsDeps();
+    act(() => {
+      deps.customBranding.customBranding$.next({ pageTitle: 'Kibana' });
+    });
+
     const { findByLabelText } = render(
-      <HeaderPageAnnouncer
-        breadcrumbs={[{ text: 'Dashboard' }]}
-        customBranding$={createBranding$({ pageTitle: 'Kibana' })}
-      />
+      <TestChromeProviders deps={deps}>
+        <HeaderPageAnnouncer breadcrumbs={[{ text: 'Dashboard' }]} />
+      </TestChromeProviders>
     );
     const announcer = await findByLabelText('Page change announcements');
     expect(announcer.textContent).toBe('Dashboard - Kibana');
   });
 
   it('updates route title when breadcrumbs change', async () => {
+    const deps = createMockChromeComponentsDeps();
+    act(() => {
+      deps.customBranding.customBranding$.next({ pageTitle: 'Brand' });
+    });
+
     const { findByLabelText, rerender } = render(
-      <HeaderPageAnnouncer
-        breadcrumbs={[{ text: 'A' }]}
-        customBranding$={createBranding$({ pageTitle: 'Brand' })}
-      />
+      <TestChromeProviders deps={deps}>
+        <HeaderPageAnnouncer breadcrumbs={[{ text: 'A' }]} />
+      </TestChromeProviders>
     );
     let announcer = await findByLabelText('Page change announcements');
     expect(announcer.textContent).toContain('A');
 
     rerender(
-      <HeaderPageAnnouncer
-        breadcrumbs={[{ text: 'B' }]}
-        customBranding$={createBranding$({ pageTitle: 'Brand' })}
-      />
+      <TestChromeProviders deps={deps}>
+        <HeaderPageAnnouncer breadcrumbs={[{ text: 'B' }]} />
+      </TestChromeProviders>
     );
 
     announcer = await findByLabelText('Page change announcements');
@@ -70,20 +74,18 @@ describe('HeaderPageAnnouncer', () => {
 
   it('renders skip link', () => {
     const { getByText } = render(
-      <HeaderPageAnnouncer
-        breadcrumbs={[{ text: 'Test' }]}
-        customBranding$={createBranding$({})}
-      />
+      <TestChromeProviders>
+        <HeaderPageAnnouncer breadcrumbs={[{ text: 'Test' }]} />
+      </TestChromeProviders>
     );
     expect(getByText('Skip to main content')).toBeInTheDocument();
   });
 
   it('focuses skip link on TAB when shouldHandlingTab is true', () => {
     const { getByTestId } = render(
-      <HeaderPageAnnouncer
-        breadcrumbs={[{ text: 'Test' }]}
-        customBranding$={createBranding$({})}
-      />
+      <TestChromeProviders>
+        <HeaderPageAnnouncer breadcrumbs={[{ text: 'Test' }]} />
+      </TestChromeProviders>
     );
     const skipLink = getByTestId('skipToMainButton');
     skipLink.focus = jest.fn();
@@ -95,10 +97,9 @@ describe('HeaderPageAnnouncer', () => {
   it('does not focus skip link when Tab is pressed and focus is already within main content', () => {
     const { getByTestId, getByText } = render(
       <>
-        <HeaderPageAnnouncer
-          breadcrumbs={[{ text: 'Test' }]}
-          customBranding$={createBranding$({})}
-        />
+        <TestChromeProviders>
+          <HeaderPageAnnouncer breadcrumbs={[{ text: 'Test' }]} />
+        </TestChromeProviders>
         <main>
           <button>Button in main</button>
         </main>
@@ -119,10 +120,9 @@ describe('HeaderPageAnnouncer', () => {
   it('does not focus skip link when Tab is pressed and focus is within role="main"', () => {
     const { getByTestId, getByText } = render(
       <>
-        <HeaderPageAnnouncer
-          breadcrumbs={[{ text: 'Test' }]}
-          customBranding$={createBranding$({})}
-        />
+        <TestChromeProviders>
+          <HeaderPageAnnouncer breadcrumbs={[{ text: 'Test' }]} />
+        </TestChromeProviders>
         <div role="main">
           <button>Button in main</button>
         </div>

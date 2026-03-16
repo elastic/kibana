@@ -22,22 +22,22 @@ import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { ChromeComponentsProvider, type ChromeComponentsDeps } from './context';
 
 /**
- * Creates a full {@link ChromeComponentsDeps} mock backed by {@link BehaviorSubject} instances so
- * individual tests can push new values reactively via `act(() => deps.xxx$.next(...))`.
+ * Creates a full {@link ChromeComponentsDeps} mock backed by service mocks so
+ * individual tests can push new values reactively via `act(() => deps.customBranding.customBranding$.next(...))`.
  *
  * The return type is inferred (not narrowed to `ChromeComponentsDeps`) so callers retain access to
- * `.next()` on each subject. A `satisfies` check still validates structural compatibility.
+ * mock-specific methods like `.next()`. A `satisfies` check still validates structural compatibility.
  *
  * Internal to this package — not re-exported from `index.ts`.
  */
 export const createMockChromeComponentsDeps = () => {
-  const http = httpServiceMock.createSetupContract({ basePath: '/test' });
   return {
     application: applicationServiceMock.createInternalStartContract(),
-    basePath: http.basePath,
+    http: httpServiceMock.createSetupContract({ basePath: '/test' }),
     docLinks: docLinksServiceMock.createStartContract(),
-    loadingCount$: new BehaviorSubject<number>(0),
-    customBranding$: new BehaviorSubject<CustomBranding>({}),
+    customBranding: {
+      customBranding$: new BehaviorSubject<CustomBranding>({}),
+    },
   } satisfies ChromeComponentsDeps;
 };
 

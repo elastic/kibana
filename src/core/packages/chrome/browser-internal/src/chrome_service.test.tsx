@@ -244,10 +244,9 @@ describe('start', () => {
   describe('render smoke tests', () => {
     const buildComponentDeps = (startDeps: ReturnType<typeof defaultStartDeps>) => ({
       application: startDeps.application,
-      basePath: startDeps.http.basePath,
+      http: startDeps.http,
       docLinks: startDeps.docLinks,
-      loadingCount$: startDeps.http.getLoadingCount$(),
-      customBranding$: startDeps.customBranding.customBranding$,
+      customBranding: startDeps.customBranding,
     });
 
     it('ClassicHeader renders within ChromeComponentsProvider', async () => {

@@ -10,14 +10,11 @@
 import { Global, css } from '@emotion/react';
 import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import classNames from 'classnames';
-import type { HttpStart } from '@kbn/core-http-browser';
-
-const DEBOUNCE_DELAY_MS = 250;
+import { useIsLoading } from './chrome_hooks';
 
 export interface LoadingIndicatorProps {
-  loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
   customLogo?: string;
   maxAmount?: number;
@@ -25,38 +22,22 @@ export interface LoadingIndicatorProps {
 }
 
 export const LoadingIndicator = ({
-  loadingCount$,
   showAsBar = false,
   customLogo,
   maxAmount,
   valueAmount,
 }: LoadingIndicatorProps) => {
-  const [visible, setVisible] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => {
-    const subscription = loadingCount$.subscribe((count) => {
-      clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => {
-        setVisible(count > 0);
-      }, DEBOUNCE_DELAY_MS);
-    });
-
-    return () => {
-      clearTimeout(timerRef.current);
-      subscription.unsubscribe();
-    };
-  }, [loadingCount$]);
-
-  const className = classNames(!visible && 'kbnLoadingIndicator-hidden');
-  const indicatorHiddenCss = !visible
+  const isLoading = useIsLoading();
+  const className = classNames(!isLoading && 'kbnLoadingIndicator-hidden');
+  const indicatorHiddenCss = !isLoading
     ? css({
         visibility: 'hidden',
         animationPlayState: 'paused',
       })
     : undefined;
 
-  const testSubj = visible ? 'globalLoadingIndicator' : 'globalLoadingIndicator-hidden';
+  const loadingSubj = isLoading ? 'globalLoadingIndicator' : 'globalLoadingIndicator-hidden';
+  const testSubj = customLogo ? `${loadingSubj} customLogo` : loadingSubj;
 
   const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
     defaultMessage: 'Loading content',
@@ -83,7 +64,7 @@ export const LoadingIndicator = ({
     />
   );
 
-  const logo = visible ? (
+  const logo = isLoading ? (
     <EuiLoadingSpinner
       size="l"
       data-test-subj={testSubj}
