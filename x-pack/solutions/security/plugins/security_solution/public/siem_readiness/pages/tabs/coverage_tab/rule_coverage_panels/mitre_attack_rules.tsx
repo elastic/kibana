@@ -370,8 +370,12 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
                   .map((pkg) => ({
                     label: integrationDisplayNames.data?.get(pkg) || pkg,
                     key: pkg,
+                    isDisabled: disabledPackagesSet.has(pkg),
                   }))
-                  .sort((a, b) => a.label.localeCompare(b.label))}
+                  .sort((a, b) => {
+                    if (a.isDisabled !== b.isDisabled) return a.isDisabled ? -1 : 1;
+                    return a.label.localeCompare(b.label);
+                  })}
                 statusMap={
                   new Map(
                     tactic.missingPackages.map((pkg) => {

@@ -54,9 +54,9 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
   const renderOption = (option: EuiSelectableOption) => {
     const statusInfo = statusMap?.get(option.key as string);
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         {statusInfo && (
-          <EuiFlexItem grow={false} style={{ minWidth: '30%' }}>
+          <EuiFlexItem grow={false}>
             <EuiToolTip content={statusInfo.tooltip}>
               <EuiBadge tabIndex={0} color={statusInfo.badgeColor}>
                 {statusInfo.status}

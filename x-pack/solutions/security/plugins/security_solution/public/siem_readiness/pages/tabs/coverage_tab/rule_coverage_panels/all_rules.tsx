@@ -107,9 +107,13 @@ export const AllRuleCoveragePanel: React.FC = () => {
       .map((name) => ({
         label: getIntegrationDisplayName(name),
         key: name,
+        isDisabled: disabledPackagesSet.has(name),
       }))
-      .sort((a, b) => a.label.localeCompare(b.label));
-  }, [relatedIntegrationNames, enabledPackagesSet, getIntegrationDisplayName]);
+      .sort((a, b) => {
+        if (a.isDisabled !== b.isDisabled) return a.isDisabled ? -1 : 1;
+        return a.label.localeCompare(b.label);
+      });
+  }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet, getIntegrationDisplayName]);
 
   const missingOrDisabledStatusMap = useMemo(() => {
     const map = new Map<string, { status: string; badgeColor: string; tooltip: string }>();
