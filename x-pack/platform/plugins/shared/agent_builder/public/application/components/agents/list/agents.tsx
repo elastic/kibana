@@ -27,6 +27,10 @@ const manageSkillsLabel = i18n.translate('xpack.agentBuilder.agents.manageSkills
   defaultMessage: 'Manage skills',
 });
 
+const managePluginsLabel = i18n.translate('xpack.agentBuilder.agents.managePluginsLabel', {
+  defaultMessage: 'Manage plugins',
+});
+
 export const AgentBuilderAgents = () => {
   const { euiTheme } = useEuiTheme();
   const { manageAgents } = useUiPrivileges();
@@ -62,6 +66,12 @@ export const AgentBuilderAgents = () => {
             href={createAgentBuilderUrl(appPaths.skills.list)}
           >
             <EuiText size="s">{manageSkillsLabel}</EuiText>
+          </EuiButtonEmpty>,
+          <EuiButtonEmpty
+            aria-label={managePluginsLabel}
+            href={createAgentBuilderUrl(appPaths.plugins.list)}
+          >
+            <EuiText size="s">{managePluginsLabel}</EuiText>
           </EuiButtonEmpty>,
         ]
       : []),

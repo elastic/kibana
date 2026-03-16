@@ -86,12 +86,9 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   >({});
   const router = useStreamsAppRouter();
   const aiFeatures = useAIFeatures();
-  const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi({
-    connectorId: aiFeatures?.genAiConnectors.selectedConnector,
-  });
-  const { scheduleInsightsDiscoveryTask, getInsightsDiscoveryTaskStatus } = useInsightsDiscoveryApi(
-    aiFeatures?.genAiConnectors.selectedConnector
-  );
+  const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi();
+  const { scheduleInsightsDiscoveryTask, getInsightsDiscoveryTaskStatus } =
+    useInsightsDiscoveryApi();
   const [{ value: insightsTask }, getInsightsTaskStatus] = useAsyncFn(
     getInsightsDiscoveryTaskStatus
   );
@@ -147,7 +144,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                   onClick={() => {
                     toasts.remove(toast);
                     router.push('/_discovery/{tab}', {
-                      path: { tab: 'insights' },
+                      path: { tab: 'significant_events' },
                       query: {},
                     });
                   }}
