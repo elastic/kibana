@@ -6,12 +6,12 @@
  */
 
 import { validateQuery } from '@kbn/esql-language';
+import { z as z4 } from '@kbn/zod/v4';
 import type { EsqlAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 
 /**
  * Creates the definition for the `text` attachment type.
@@ -25,7 +25,10 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
     validate: async (input) => {
       const parseResult = esqlAttachmentDataSchema.safeParse(input);
       if (!parseResult.success) {
-        const schema = zodToJsonSchema(esqlAttachmentDataSchema);
+        const { $schema, ...schema } = z4.toJSONSchema(esqlAttachmentDataSchema as z4.ZodType, {
+          unrepresentable: 'any',
+          io: 'input',
+        }) as Record<string, unknown>;
         return {
           valid: false,
           error: `message: ${parseResult.error.message}, schema: ${JSON.stringify(schema)}`,

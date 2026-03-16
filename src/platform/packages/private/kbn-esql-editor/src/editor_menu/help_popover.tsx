@@ -22,8 +22,13 @@ import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE, QuerySource } from '@kbn/esql-types';
+import { getESQLAdHocDataview, getEditorExtensions } from '@kbn/esql-utils';
+import {
+  type RecommendedQuery,
+  type ESQLRegistrySolutionId,
+  QuerySource,
+  ESQL_CLASSIC_SOLUTION_ID,
+} from '@kbn/esql-types';
 import { getRecommendedQueriesTemplates } from '@kbn/esql-language/src/commands/registry/options/recommended_queries';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
@@ -45,7 +50,8 @@ export const HelpPopover: React.FC<{
   const currentQueryRef = useRef<string>('');
   currentQueryRef.current = actions?.currentQuery ?? '';
 
-  const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
+  const activeSolutionNavId = useObservable(chrome.getActiveSolutionNavId$());
+  const activeSolutionId = activeSolutionNavId ?? ESQL_CLASSIC_SOLUTION_ID;
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
 
@@ -137,12 +143,15 @@ export const HelpPopover: React.FC<{
     let cancelled = false;
     const getESQLExtensions = async () => {
       if (!activeSolutionId || !queryForRecommendedQueries) {
-        return; // Don't fetch if we don't have the active solution or query
+        return;
       }
 
       try {
-        const extensions: { recommendedQueries: RecommendedQuery[] } = await http.get(
-          `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${queryForRecommendedQueries}`
+        const query = currentQueryRef.current || queryForRecommendedQueries;
+        const extensions = await getEditorExtensions(
+          http,
+          query,
+          activeSolutionId as ESQLRegistrySolutionId
         );
 
         if (cancelled) return;

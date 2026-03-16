@@ -78,8 +78,7 @@ export const StepPanel = ({
             onClick={() => onRemoveStep(stepIndex)}
           >
             {i18n.translate('xpack.streams.editDslStepsFlyout.removeStep', {
-              defaultMessage: 'Remove step {stepNumber}',
-              values: { stepNumber },
+              defaultMessage: 'Remove this step',
             })}
           </EuiButton>
         </div>

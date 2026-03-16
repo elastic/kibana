@@ -6,8 +6,8 @@
  */
 
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { isSchema } from '../../../shared/type_guards';
 
 export interface FailureStoreStatsResponse {
@@ -108,7 +108,11 @@ export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.ob
 });
 
 export const wiredIngestStreamEffectiveFailureStoreSchema: z.Schema<WiredIngestStreamEffectiveFailureStore> =
-  effectiveFailureStoreSchema.and(z.object({ from: NonEmptyString }));
+  effectiveFailureStoreSchema.and(
+    z.object({
+      from: NonEmptyString,
+    })
+  );
 
 export const isEnabledLifecycleFailureStore = (
   input: EffectiveFailureStore | FailureStore

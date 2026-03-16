@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -32,7 +32,7 @@ const logRateAnalysisSchema = z.object({
     .object(timeRangeSchemaRequired)
     .describe('Time range representing the time period with unusual behavior.'),
   searchQuery: z
-    .record(z.any())
+    .record(z.string(), z.any())
     .describe(
       'Optional Elasticsearch query DSL filter that limits which documents are analyzed. Defaults to a match_all query.'
     )

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import { ElementControls } from './element_controls';
@@ -36,7 +35,7 @@ export interface Props {
   onDelete: (element: CustomElement) => void;
 }
 
-export const ElementGrid = ({ elements, filterText, onClick, onEdit, onDelete }: Props) => {
+export const ElementGrid = ({ elements, filterText = '', onClick, onEdit, onDelete }: Props) => {
   filterText = filterText.toLowerCase();
 
   return (
@@ -68,16 +67,4 @@ export const ElementGrid = ({ elements, filterText, onClick, onEdit, onDelete }:
       })}
     </EuiFlexGrid>
   );
-};
-
-ElementGrid.propTypes = {
-  elements: PropTypes.array.isRequired,
-  filterText: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
-};
-
-ElementGrid.defaultProps = {
-  filterText: '',
 };
