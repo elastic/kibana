@@ -10,8 +10,8 @@ import userEvent from '@testing-library/user-event';
 import { act, fireEvent } from '@testing-library/react';
 import { EndpointScriptEditForm, type EndpointScriptEditFormProps } from './script_edit_form';
 import {
-  createAppRootMockRenderer,
   type AppContextTestRender,
+  createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { EndpointScriptsGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
 
@@ -29,6 +29,7 @@ describe('EndpointScriptEditForm', () => {
 
     onChangeMock = jest.fn();
     defaultProps = {
+      isUploading: false,
       onChange: onChangeMock,
       'data-test-subj': 'test',
     };
@@ -46,7 +47,7 @@ describe('EndpointScriptEditForm', () => {
 
     expect(getByTestId('test')).toBeInTheDocument();
     const rows = renderResult.getAllByTestId(/test-.*-row/);
-    expect(rows.length).toBe(9);
+    expect(rows.length).toBe(10);
 
     // file and checkbox don't have labels
     expect(getByTestId('test-file-picker-row')).toBeInTheDocument();
@@ -57,17 +58,18 @@ describe('EndpointScriptEditForm', () => {
       .filter((label) => !!label);
 
     expect(visibleRowLabels).toEqual([
+      'File type',
+      'Path to executable file (only for archive files)',
       'Name',
       'Operating systems',
       'Types',
-      'Path to executable file (only for archive files)',
       'Description',
       'Instructions',
       'Examples',
     ]);
   });
 
-  it('does not call onChange on initial render', () => {
+  it('does NOT call onChange on initial render', () => {
     render();
 
     expect(onChangeMock).not.toHaveBeenCalled();
@@ -131,6 +133,51 @@ describe('EndpointScriptEditForm', () => {
       expect(onChangeMock).not.toHaveBeenCalled();
     });
 
+    it('should show required validation error when `File type` is not selected', async () => {
+      const { getByTestId } = renderResult;
+
+      const fileTypeSelect = getByTestId('test-file-type-select');
+      await userEvent.click(fileTypeSelect);
+      // Pressing Escape key to close the file type dropdown
+      await userEvent.keyboard('{Escape}');
+      await userEvent.tab();
+
+      expect(fileTypeSelect).toHaveAttribute('aria-invalid', 'true');
+      const fileTypeRow = getByTestId('test-file-type-row');
+      const euiFormErrorText = fileTypeRow.querySelector('.euiFormErrorText');
+      expect(euiFormErrorText?.textContent).toEqual('File type selection is required.');
+      // form has not changed yet, so onChange should not be called
+      expect(onChangeMock).not.toHaveBeenCalled();
+    });
+
+    it('should show required validation error when `Path to executable` is blurred (with empty value) for archive file type', async () => {
+      const { getByTestId } = renderResult;
+
+      const fileTypeSelect = getByTestId('test-file-type-select') as HTMLSelectElement;
+      fireEvent.change(fileTypeSelect, { target: { value: 'archive' } });
+
+      const pathToExecutableInput = getByTestId('test-path-to-executable-input');
+      await userEvent.type(pathToExecutableInput, ' ');
+      await userEvent.tab();
+
+      expect(pathToExecutableInput).toHaveAttribute('aria-invalid', 'true');
+      const pathToExecutableRow = getByTestId('test-path-to-executable-row');
+      const euiFormErrorText = pathToExecutableRow.querySelector('.euiFormErrorText');
+      expect(euiFormErrorText?.textContent).toEqual(
+        'Path to executable is required for archive files.'
+      );
+      expect(onChangeMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            fileType: 'archive',
+            pathToExecutable: '',
+          }),
+          hasFormChanged: true,
+          isValid: false,
+        })
+      );
+    });
+
     it('shows required validation error when `Name` input is blurred (with empty value)', async () => {
       const { getByTestId } = renderResult;
 
@@ -174,36 +221,58 @@ describe('EndpointScriptEditForm', () => {
       expect(onChangeMock).not.toHaveBeenCalled();
     });
 
-    it('should trigger form `isValid: true` when required fields are filled', async () => {
-      const { getByTestId, container } = renderResult;
+    it.each(['script', 'archive'])(
+      'should trigger form `isValid: true` when required fields are filled for a `%s` type file',
+      async (testFileType) => {
+        const { getByTestId, container } = renderResult;
 
-      const filePicker = getByTestId('test-file-picker');
-      const nameInput = getByTestId('test-name-input');
+        const filePicker = getByTestId('test-file-picker');
+        const nameInput = getByTestId('test-name-input');
 
-      const testFile = new File(['--test--file--'], 'file.sh', { type: 'application/txt' });
-      await userEvent.upload(filePicker, [testFile]);
-      await userEvent.click(nameInput);
-      await userEvent.paste('Test Script');
+        const testFile = new File(
+          ['--test--file--'],
+          `file.${testFileType === 'archive' ? 'zip' : 'sh'}`,
+          { type: 'application/txt' }
+        );
+        await userEvent.upload(filePicker, [testFile]);
+        await userEvent.click(nameInput);
+        await userEvent.paste('Test Script');
 
-      // Select first option from platforms combobox dropdown
-      const comboboxInput = container.querySelector(
-        '[data-test-subj="comboBoxSearchInput"]'
-      ) as HTMLInputElement;
-      await userEvent.click(comboboxInput);
-      await userEvent.keyboard('{ArrowDown}{Enter}');
+        // select file type from dropdown to trigger validation for that field and set form as valid since all required fields are now filled
+        const fileTypeSelect = getByTestId('test-file-type-select') as HTMLSelectElement;
+        fireEvent.change(fileTypeSelect, { target: { value: testFileType } });
 
-      expect(onChangeMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          script: expect.objectContaining({
-            fileName: 'file.sh',
-            name: 'Test Script',
-            platform: ['linux'],
-          }),
-          isValid: true,
-          hasFormChanged: true,
-        })
-      );
-    });
+        // Wait for state updates to complete after fileType change
+        if (testFileType === 'archive') {
+          const pathToExecutableInput = await renderResult.findByTestId(
+            'test-path-to-executable-input'
+          );
+          await userEvent.click(pathToExecutableInput);
+          await userEvent.paste('/test/executable');
+        }
+
+        // Select first option from platforms combobox dropdown
+        const comboboxInput = container.querySelector(
+          '[data-test-subj="comboBoxSearchInput"]'
+        ) as HTMLInputElement;
+        await userEvent.click(comboboxInput);
+        await userEvent.keyboard('{ArrowDown}{Enter}');
+
+        expect(onChangeMock).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            script: expect.objectContaining({
+              fileName: `file.${testFileType === 'archive' ? 'zip' : 'sh'}`,
+              fileType: testFileType,
+              pathToExecutable: testFileType === 'archive' ? '/test/executable' : '',
+              name: 'Test Script',
+              platform: ['linux'],
+            }),
+            isValid: true,
+            hasFormChanged: true,
+          })
+        );
+      }
+    );
 
     it.each([
       ['description', "Provide a brief description of the script's functionality."],
@@ -247,15 +316,18 @@ describe('EndpointScriptEditForm', () => {
   });
 
   describe('Editing', () => {
+    let scriptItem: EndpointScriptEditFormProps['scriptItem'];
     beforeEach(() => {
-      const scriptItem = scriptsGenerator.generate({
+      scriptItem = scriptsGenerator.generate({
         name: 'Test Script',
         id: 'test-script-id',
         fileName: 'test_script.sh',
+        fileType: 'archive',
         description: 'Test description',
         instructions: 'Test instructions',
         example: 'Test example',
       });
+
       render({ ...defaultProps, scriptItem });
     });
 
@@ -311,6 +383,62 @@ describe('EndpointScriptEditForm', () => {
           hasFormChanged: true,
         })
       );
+    });
+
+    it('should clear `pathToExecutable` value and set it as `disabled` when `fileType` is changed from `archive` to `script`', async () => {
+      const { getByTestId } = renderResult;
+
+      const fileTypeSelect = getByTestId('test-file-type-select') as HTMLSelectElement;
+      fireEvent.change(fileTypeSelect, { target: { value: 'script' } });
+
+      const pathToExecutableInput = getByTestId(
+        'test-path-to-executable-input'
+      ) as HTMLInputElement;
+      expect(pathToExecutableInput).toHaveValue('');
+      expect(pathToExecutableInput).toHaveAttribute('disabled');
+    });
+
+    it('should enable `pathToExecutable` and show validation error when `fileType` is changed from `script` to `archive` (without path value)', async () => {
+      const { getByTestId } = renderResult;
+
+      const fileTypeSelect = getByTestId('test-file-type-select') as HTMLSelectElement;
+      // Change to script first
+      fireEvent.change(fileTypeSelect, { target: { value: 'script' } });
+
+      // Verify it's disabled and cleared
+      const pathToExecutableInput = getByTestId(
+        'test-path-to-executable-input'
+      ) as HTMLInputElement;
+      expect(pathToExecutableInput).toHaveAttribute('disabled');
+
+      // Change back to archive
+      fireEvent.change(fileTypeSelect, { target: { value: 'archive' } });
+
+      // Verify it's enabled and shows validation error
+      expect(pathToExecutableInput).not.toHaveAttribute('disabled');
+      expect(pathToExecutableInput).toHaveAttribute('aria-invalid', 'true');
+
+      const pathToExecutableRow = getByTestId('test-path-to-executable-row');
+      const euiFormErrorText = pathToExecutableRow.querySelector('.euiFormErrorText');
+      expect(euiFormErrorText?.textContent).toEqual(
+        'Path to executable is required for archive files.'
+      );
+    });
+
+    it('should NOT show validation error for `pathToExecutable` when `fileType` is `script`', async () => {
+      const { getByTestId } = renderResult;
+
+      const fileTypeSelect = getByTestId('test-file-type-select') as HTMLSelectElement;
+      fireEvent.change(fileTypeSelect, { target: { value: 'script' } });
+
+      const pathToExecutableInput = getByTestId(
+        'test-path-to-executable-input'
+      ) as HTMLInputElement;
+      const pathToExecutableRow = getByTestId('test-path-to-executable-row');
+
+      expect(pathToExecutableInput).toHaveValue('');
+      const euiFormErrorText = pathToExecutableRow.querySelector('.euiFormErrorText');
+      expect(euiFormErrorText).not.toBeInTheDocument();
     });
 
     it.each([
