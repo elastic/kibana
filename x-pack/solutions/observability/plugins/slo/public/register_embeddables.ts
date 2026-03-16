@@ -9,6 +9,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { firstValueFrom } from 'rxjs';
 import { ALL_VALUE } from '@kbn/slo-schema/src/constants';
+import type { AlertsEmbeddableState } from '../server/lib/embeddables/alerts_schema';
 import { SLO_ALERTS_EMBEDDABLE_ID } from '../common/embeddables/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
@@ -101,7 +102,7 @@ export const registerEmbeddables = async ({
           panelReferences?: Reference[],
           containerReferences?: Reference[],
           id?: string
-        ) => transformOut(storedState, panelReferences);
+        ) => transformOut(storedState as AlertsEmbeddableState, panelReferences);
       }
     );
 
