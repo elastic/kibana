@@ -121,8 +121,11 @@ function collectWorkflowOutputSteps(
  * so workflow.output `with:` validation can run.
  * Supports both JSON Schema format (object with properties) and legacy array format
  * ([{ name, type, required?, ... }]) so that either declaration style is validated.
+ * Exported for use by autocomplete (get_workflow_outputs_suggestions) when workflowDefinition.outputs is undefined.
  */
-function getOutputsFromYamlDocument(yamlDocument: Document): NormalizableFieldSchema | undefined {
+export function getOutputsFromYamlDocument(
+  yamlDocument: Document
+): NormalizableFieldSchema | undefined {
   const outputsNode = yamlDocument.get('outputs', true);
   if (outputsNode == null) return undefined;
   const plain =

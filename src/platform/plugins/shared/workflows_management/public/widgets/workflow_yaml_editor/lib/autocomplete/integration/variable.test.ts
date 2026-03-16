@@ -614,6 +614,26 @@ steps:
   });
 
   describe('workflow.output with: block autocomplete', () => {
+    it('should not suggest output fields when cursor is on the same line as with: (aligned with other steps)', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+outputs:
+  - name: result
+    type: string
+triggers:
+  - type: manual
+steps:
+  - name: emit
+    type: workflow.output
+    with:  |<-
+`.trim();
+      const suggestions = await getSuggestions(yamlContent);
+      const labels = suggestions.map((s) => s.label);
+      // No output key suggestions on the "with:" line (same as console/custom property behavior)
+      expect(labels).not.toContain('result');
+    });
+
     it('should suggest declared output fields inside workflow.output with: block', async () => {
       const yamlContent = `
 version: "1"

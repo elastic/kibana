@@ -8,8 +8,19 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import {
+  type NormalizableFieldSchema,
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
+import { getOutputsFromYamlDocument } from '../../../../../../features/validate_workflow_yaml/lib/validate_workflow_outputs_in_yaml';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
+
+function getRawOutputs(context: AutocompleteContext): NormalizableFieldSchema | undefined {
+  return (
+    context.workflowDefinition?.outputs ??
+    (context.yamlDocument ? getOutputsFromYamlDocument(context.yamlDocument) : undefined)
+  );
+}
 
 /**
  * Returns true when the cursor is inside a workflow.output step (including nested in if/foreach).
@@ -52,13 +63,15 @@ function createOutputSuggestion(
 export async function getWorkflowOutputsSuggestions(
   autocompleteContext: AutocompleteContext
 ): Promise<monaco.languages.CompletionItem[]> {
-  const { focusedStepInfo, range, workflowDefinition } = autocompleteContext;
+  const { focusedStepInfo, range } = autocompleteContext;
 
   if (focusedStepInfo?.stepType !== 'workflow.output') {
     return [];
   }
 
-  const rawOutputs = workflowDefinition?.outputs;
+  // Use workflowDefinition.outputs when available; otherwise read from current YAML document
+  // so autocomplete works even when computed workflow definition doesn't have outputs yet
+  const rawOutputs = getRawOutputs(autocompleteContext);
   const normalizedOutputs = normalizeFieldsToJsonSchema(rawOutputs);
 
   if (!normalizedOutputs?.properties || Object.keys(normalizedOutputs.properties).length === 0) {
@@ -77,6 +90,10 @@ export async function getWorkflowOutputsSuggestions(
         }
       }
     }
+  }
+
+  if (autocompleteContext.line.trimStart().startsWith('with:')) {
+    return [];
   }
 
   const suggestions: monaco.languages.CompletionItem[] = [];
