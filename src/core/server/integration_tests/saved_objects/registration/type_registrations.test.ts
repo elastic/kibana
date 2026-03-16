@@ -190,6 +190,7 @@ const previouslyRegisteredTypes = [
   'gap_auto_fill_scheduler',
   'trial-companion-nba-milestone',
   'alerting_notification_policy',
+  'alerting_api_key_pending_invalidation',
 ].sort();
 
 describe('SO type registrations', () => {
