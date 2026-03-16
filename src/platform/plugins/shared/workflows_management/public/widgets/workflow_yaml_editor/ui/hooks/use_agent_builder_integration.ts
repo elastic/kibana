@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import type { monaco } from '@kbn/monaco';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../../common/agent_builder/constants';
 import {
   AttachmentBridge,
   baseProposalId,
@@ -37,21 +38,7 @@ interface UseAgentBuilderIntegrationReturn {
   proposalManager: ProposalManager | null;
 }
 
-const serializeClientDiagnostics = (
-  errors: YamlValidationResult[] | null | undefined
-): Array<{ severity: string; message: string; source: string }> | undefined => {
-  if (!errors || errors.length === 0) return undefined;
-  const relevant = errors.filter(
-    (e): e is YamlValidationResult & { severity: 'error' | 'warning'; message: string } =>
-      (e.severity === 'error' || e.severity === 'warning') && e.message != null
-  );
-  if (relevant.length === 0) return undefined;
-  return relevant.map((e) => ({
-    severity: e.severity,
-    message: e.message,
-    source: e.owner,
-  }));
-};
+const ATTACHMENT_SYNC_DEBOUNCE_TIME = 500;
 
 export const useAgentBuilderIntegration = ({
   editorRef,
@@ -70,7 +57,9 @@ export const useAgentBuilderIntegration = ({
 
   useEffect(() => {
     const editor = editorRef.current;
-    if (!isEditorMounted || !editor || !agentBuilder) return;
+    if (!isEditorMounted || !editor || !agentBuilder) {
+      return;
+    }
 
     const tracker = new ProposalTracker();
     trackerRef.current = tracker;
@@ -98,49 +87,47 @@ export const useAgentBuilderIntegration = ({
     bridge.start(agentBuilder.events.chat$, manager, editorRef, tracker);
     attachmentBridgeRef.current = bridge;
 
-    const attachmentId = workflowId ?? 'new-workflow';
+    const buildAttachment = (yaml: string) =>
+      buildWorkflowAttachment({
+        yaml,
+        workflowId,
+        workflowName,
+        diagnostics: serializeClientDiagnostics(validationErrorsRef.current),
+      });
 
     const unsubAllResolved = tracker.onAllResolved(() => {
       const yaml = editorRef.current?.getModel()?.getValue();
       if (yaml) {
-        agentBuilder.addAttachment({
-          id: attachmentId,
-          type: 'workflow.yaml',
-          data: {
-            yaml,
-            workflowId,
-            name: workflowName,
-            clientDiagnostics: serializeClientDiagnostics(validationErrorsRef.current),
-          },
-        });
+        agentBuilder.addAttachment(buildAttachment(yaml));
       }
     });
+
+    const syncAttachment = (yaml: string) => {
+      const attachment = buildAttachment(yaml);
+      agentBuilder.setChatConfig({ attachments: [attachment] });
+      agentBuilder.addAttachment(attachment);
+    };
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let modelListener: monaco.IDisposable | null = null;
     const model = editor.getModel();
     if (model) {
+      syncAttachment(model.getValue());
+
       modelListener = model.onDidChangeContent(() => {
         if (debounceTimer) clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
-          const currentYaml = model.getValue();
-          agentBuilder.addAttachment({
-            id: attachmentId,
-            type: 'workflow.yaml',
-            data: {
-              yaml: currentYaml,
-              workflowId,
-              name: workflowName,
-              clientDiagnostics: serializeClientDiagnostics(validationErrorsRef.current),
-            },
-          });
-        }, 500);
+          syncAttachment(model.getValue());
+        }, ATTACHMENT_SYNC_DEBOUNCE_TIME);
       });
     }
 
     return () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
       modelListener?.dispose();
+      agentBuilder.clearChatConfig();
       bridge.stop();
       attachmentBridgeRef.current = null;
       manager.dispose();
@@ -153,26 +140,23 @@ export const useAgentBuilderIntegration = ({
 
   const openAgentChat = useCallback(
     (options?: OpenAgentChatOptions) => {
-      if (!agentBuilder) return;
+      if (!agentBuilder) {
+        return;
+      }
 
-      const editor = editorRef.current;
-      const currentYaml = editor?.getModel()?.getValue() ?? '';
+      const currentYaml = editorRef.current?.getModel()?.getValue() ?? '';
 
-      const attachmentId = workflowId ?? 'new-workflow';
       agentBuilder.openChat({
+        sessionTag: 'workflow-editor',
         initialMessage: options?.initialMessage,
         autoSendInitialMessage: options?.autoSendInitialMessage,
         attachments: [
-          {
-            id: attachmentId,
-            type: 'workflow.yaml',
-            data: {
-              workflowId,
-              name: workflowName,
-              yaml: currentYaml,
-              clientDiagnostics: serializeClientDiagnostics(validationErrors),
-            },
-          },
+          buildWorkflowAttachment({
+            yaml: currentYaml,
+            workflowId,
+            workflowName,
+            diagnostics: serializeClientDiagnostics(validationErrors),
+          }),
         ],
       });
     },
@@ -185,3 +169,40 @@ export const useAgentBuilderIntegration = ({
     proposalManager: proposalManagerRef.current,
   };
 };
+
+const serializeClientDiagnostics = (
+  errors: YamlValidationResult[] | null | undefined
+): Array<{ severity: string; message: string; source: string }> | undefined => {
+  if (!errors || errors.length === 0) return undefined;
+  const relevant = errors.filter(
+    (e): e is YamlValidationResult & { severity: 'error' | 'warning'; message: string } =>
+      (e.severity === 'error' || e.severity === 'warning') && e.message != null
+  );
+  if (relevant.length === 0) return undefined;
+  return relevant.map((e) => ({
+    severity: e.severity,
+    message: e.message,
+    source: e.owner,
+  }));
+};
+
+const buildWorkflowAttachment = ({
+  yaml,
+  workflowId,
+  workflowName,
+  diagnostics,
+}: {
+  yaml: string;
+  workflowId?: string;
+  workflowName?: string;
+  diagnostics: ReturnType<typeof serializeClientDiagnostics>;
+}) => ({
+  id: workflowId ?? 'new-workflow',
+  type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+  data: {
+    yaml,
+    workflowId,
+    name: workflowName,
+    clientDiagnostics: diagnostics,
+  },
+});

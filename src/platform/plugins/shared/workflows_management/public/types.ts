@@ -60,6 +60,8 @@ export interface AgentBuilderPluginStartContract {
   attachments: AttachmentServiceStartContract;
   events: EventsServiceStartContract;
   addAttachment: (attachment: AttachmentInput) => void;
+  setChatConfig: (config: { attachments?: AttachmentInput[] }) => void;
+  clearChatConfig: () => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
