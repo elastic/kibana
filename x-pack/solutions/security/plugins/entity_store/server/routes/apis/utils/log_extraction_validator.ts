@@ -139,6 +139,3 @@ export function validateLogExtractionParams(
   validateDelayVsLookbackPeriod(data, ctx);
 }
 
-export const LogExtractionSchemaField = LogExtractionBodyParams.superRefine(
-  validateLogExtractionParams
-);

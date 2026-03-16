@@ -9,13 +9,13 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { ENTITY_STORE_ROUTES } from '../../../common';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
+import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS, LogExtractionUpdateParams } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { LogExtractionSchemaField } from './utils/log_extraction_validator';
+import { validateLogExtractionParams } from './utils/log_extraction_validator';
 
 const bodySchema = z.object({
-  logExtraction: LogExtractionSchemaField,
+  logExtraction: LogExtractionUpdateParams.superRefine(validateLogExtractionParams),
 });
 
 export function registerUpdate(router: EntityStorePluginRouter) {

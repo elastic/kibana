@@ -43,7 +43,7 @@ import { ENGINE_STATUS } from '../constants';
 import { parseDurationToMs } from '../../infra/time';
 import type { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
 import { EntityStoreNotRunningError } from '../errors';
-import type { LogExtractionBodyParams } from '../../routes/constants';
+import type { LogExtractionUpdateParams } from '../../routes/constants';
 
 interface LogsExtractionOptions {
   specificWindow?: {
@@ -165,7 +165,7 @@ export class LogsExtractionClient {
     }
   }
 
-  public async updateConfig(params: LogExtractionBodyParams): Promise<LogExtractionConfig> {
+  public async updateConfig(params: LogExtractionUpdateParams): Promise<LogExtractionConfig> {
     const globalState = await this.globalStateClient.findOrThrow();
     const mergedConfig = LogExtractionConfigSchema.parse({
       ...globalState.logsExtraction,
