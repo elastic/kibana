@@ -263,6 +263,48 @@ describe('BarDetails', () => {
         expect(getByText('5 outgoing')).toBeInTheDocument();
       });
     });
+
+    describe('when onClick is provided in context', () => {
+      it('calls onClick with item id and flyoutDetailTab when badge is clicked', async () => {
+        const user = userEvent.setup();
+        const onClickMock = jest.fn();
+
+        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+          onClick: onClickMock,
+        });
+
+        const mockItemWithSpanLinks = {
+          ...mockItem,
+          id: 'test-span-id',
+          spanLinksCount: { incoming: 2, outgoing: 3 },
+        } as unknown as TraceWaterfallItem;
+
+        const { getByTestId } = render(<BarDetails item={mockItemWithSpanLinks} left={10} />);
+        const badge = getByTestId('spanLinksBadge_test-span-id');
+
+        await user.click(badge);
+
+        expect(onClickMock).toHaveBeenCalledTimes(1);
+        expect(onClickMock).toHaveBeenCalledWith('test-span-id', { flyoutDetailTab: 'span_links' });
+      });
+
+      it('does not pass onClick to SpanLinksBadge when context onClick is undefined', () => {
+        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+          onClick: undefined,
+        });
+
+        const mockItemWithSpanLinks = {
+          ...mockItem,
+          id: 'test-span-id',
+          spanLinksCount: { incoming: 2, outgoing: 3 },
+        } as unknown as TraceWaterfallItem;
+
+        const { getByTestId } = render(<BarDetails item={mockItemWithSpanLinks} left={10} />);
+        const badge = getByTestId('spanLinksBadge_test-span-id');
+
+        expect(badge).not.toHaveAttribute('aria-label');
+      });
+    });
   });
 
   describe('in case of sync badge', () => {

@@ -33,7 +33,7 @@ describe('Options list control', () => {
           displaySettings,
         }}
       >
-        <OptionsListControl />
+        <OptionsListControl isPinned={true} />
       </OptionsListControlContext.Provider>
     );
   };

@@ -6,10 +6,10 @@
  */
 
 import { AttachmentType } from '../../domain/attachment/v1';
-import { CombinedAttachmentRequestRt, CombinedBulkCreateAttachmentsRequestRt } from './v2';
+import { AttachmentRequestRtV2, BulkCreateAttachmentsRequestRtV2 } from './v2';
 
 describe('Unified Attachments', () => {
-  describe('CombinedAttachmentRequestRt', () => {
+  describe('AttachmentRequestRtV2', () => {
     it('accepts v1 user comment attachment request', () => {
       const v1Request = {
         comment: 'This is a comment',
@@ -17,7 +17,7 @@ describe('Unified Attachments', () => {
         owner: 'cases',
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v1Request);
+      const query = AttachmentRequestRtV2.decode(v1Request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -29,6 +29,7 @@ describe('Unified Attachments', () => {
       const v2Request = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'cases',
         data: {
           attributes: {
             title: 'My Visualization',
@@ -44,7 +45,7 @@ describe('Unified Attachments', () => {
         },
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v2Request);
+      const query = AttachmentRequestRtV2.decode(v2Request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -55,10 +56,11 @@ describe('Unified Attachments', () => {
     it('accepts v2 unified attachment request with only attachmentId', () => {
       const v2Request = {
         type: 'lens',
+        owner: 'cases',
         attachmentId: 'attachment-123',
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v2Request);
+      const query = AttachmentRequestRtV2.decode(v2Request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -69,6 +71,7 @@ describe('Unified Attachments', () => {
     it('accepts v2 unified attachment request with only data', () => {
       const v2Request = {
         type: 'user',
+        owner: 'cases',
         data: {
           content: {
             title: 'My comment',
@@ -76,7 +79,7 @@ describe('Unified Attachments', () => {
         },
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v2Request);
+      const query = AttachmentRequestRtV2.decode(v2Request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -87,9 +90,10 @@ describe('Unified Attachments', () => {
     it('rejects v2 unified attachment request with neither attachmentId nor data', () => {
       const v2Request = {
         type: 'lens',
+        owner: 'cases',
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v2Request);
+      const query = AttachmentRequestRtV2.decode(v2Request);
 
       expect(query._tag).toBe('Left');
     });
@@ -102,7 +106,7 @@ describe('Unified Attachments', () => {
         foo: 'bar',
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v1Request);
+      const query = AttachmentRequestRtV2.decode(v1Request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -118,6 +122,7 @@ describe('Unified Attachments', () => {
       const v2Request = {
         type: 'lens',
         attachmentId: 'attachment-123',
+        owner: 'cases',
         data: {
           attributes: {
             title: 'My Visualization',
@@ -129,13 +134,14 @@ describe('Unified Attachments', () => {
         foo: 'bar',
       };
 
-      const query = CombinedAttachmentRequestRt.decode(v2Request);
+      const query = AttachmentRequestRtV2.decode(v2Request);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           type: 'lens',
           attachmentId: 'attachment-123',
+          owner: 'cases',
           data: {
             attributes: {
               title: 'My Visualization',
@@ -159,7 +165,7 @@ describe('Unified Attachments', () => {
         },
       };
 
-      const query = CombinedAttachmentRequestRt.decode(requestWithExtraFields);
+      const query = AttachmentRequestRtV2.decode(requestWithExtraFields);
 
       expect(query._tag).toBe('Right');
       if (query._tag === 'Right') {
@@ -175,9 +181,9 @@ describe('Unified Attachments', () => {
     });
   });
 
-  describe('CombinedBulkCreateAttachmentsRequestRt', () => {
+  describe('BulkCreateAttachmentsRequestRtV2', () => {
     it('accepts empty array', () => {
-      const query = CombinedBulkCreateAttachmentsRequestRt.decode([]);
+      const query = BulkCreateAttachmentsRequestRtV2.decode([]);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -199,7 +205,7 @@ describe('Unified Attachments', () => {
         },
       ];
 
-      const query = CombinedBulkCreateAttachmentsRequestRt.decode(v1Requests);
+      const query = BulkCreateAttachmentsRequestRtV2.decode(v1Requests);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -212,6 +218,7 @@ describe('Unified Attachments', () => {
         {
           type: 'lens',
           attachmentId: 'attachment-1',
+          owner: 'cases',
           data: {
             attributes: {
               title: 'First Visualization',
@@ -221,6 +228,7 @@ describe('Unified Attachments', () => {
         {
           type: 'lens',
           attachmentId: 'attachment-2',
+          owner: 'cases',
           data: {
             attributes: {
               title: 'Second Visualization',
@@ -229,7 +237,7 @@ describe('Unified Attachments', () => {
         },
       ];
 
-      const query = CombinedBulkCreateAttachmentsRequestRt.decode(v2Requests);
+      const query = BulkCreateAttachmentsRequestRtV2.decode(v2Requests);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -247,6 +255,7 @@ describe('Unified Attachments', () => {
         {
           type: 'lens',
           attachmentId: 'attachment-123',
+          owner: 'cases',
           data: {
             attributes: {
               title: 'My Visualization',
@@ -258,7 +267,7 @@ describe('Unified Attachments', () => {
         },
       ];
 
-      const query = CombinedBulkCreateAttachmentsRequestRt.decode(mixedRequests);
+      const query = BulkCreateAttachmentsRequestRtV2.decode(mixedRequests);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -280,11 +289,12 @@ describe('Unified Attachments', () => {
           data: {
             content: 'My comment',
           },
+          owner: 'cases',
           foo: 'bar',
         },
       ];
 
-      const query = CombinedBulkCreateAttachmentsRequestRt.decode(requestsWithExtraFields);
+      const query = BulkCreateAttachmentsRequestRtV2.decode(requestsWithExtraFields);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -300,6 +310,7 @@ describe('Unified Attachments', () => {
             data: {
               content: 'My comment',
             },
+            owner: 'cases',
           },
         ],
       });

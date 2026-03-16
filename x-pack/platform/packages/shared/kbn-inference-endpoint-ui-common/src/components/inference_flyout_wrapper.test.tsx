@@ -37,7 +37,8 @@ jest.mock('../hooks/use_inference_endpoint_mutation', () => ({
   })),
 }));
 
-describe('InferenceFlyout', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253507
+describe.skip('InferenceFlyout', () => {
   const Wrapper = ({ children }: { children: React.ReactElement }) => {
     const queryClient = new QueryClient({
       defaultOptions: {

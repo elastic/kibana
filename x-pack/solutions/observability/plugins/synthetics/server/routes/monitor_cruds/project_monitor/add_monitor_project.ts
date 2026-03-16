@@ -19,8 +19,11 @@ import type { ProjectMonitor } from '../../../../common/runtime_types';
 
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
+import { getBrowserTimeoutWarningsForProjectMonitors } from '../monitor_warnings';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 100; // 50MiB
+const MAX_BROWSER_MONITORS = 250;
+const MAX_LIGHTWEIGHT_MONITORS = 1500;
 
 export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
@@ -44,7 +47,9 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       projectName: schema.string(),
     }),
     body: schema.object({
-      monitors: schema.arrayOf(schema.any()),
+      monitors: schema.arrayOf(schema.any(), {
+        maxSize: MAX_BROWSER_MONITORS + MAX_LIGHTWEIGHT_MONITORS,
+      }),
     }),
   },
   options: {
@@ -60,14 +65,14 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     const lightWeightMonitors = monitors.filter((monitor) => monitor.type !== 'browser');
     const browserMonitors = monitors.filter((monitor) => monitor.type === 'browser');
 
-    if (browserMonitors.length > 250) {
+    if (browserMonitors.length > MAX_BROWSER_MONITORS) {
       return response.badRequest({
         body: {
           message: REQUEST_TOO_LARGE,
         },
       });
     }
-    if (lightWeightMonitors.length > 1500) {
+    if (lightWeightMonitors.length > MAX_LIGHTWEIGHT_MONITORS) {
       return response.badRequest({
         body: {
           message: REQUEST_TOO_LARGE_LIGHTWEIGHT,
@@ -94,10 +99,16 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
 
       await pushMonitorFormatter.configureAllProjectMonitors();
 
+      const warnings = getBrowserTimeoutWarningsForSucceededProjectMonitors(
+        monitors,
+        pushMonitorFormatter.failedMonitors.filter((m) => !!m.id).map((m) => m.id as string)
+      );
+
       return {
         createdMonitors: pushMonitorFormatter.createdMonitors,
         updatedMonitors: pushMonitorFormatter.updatedMonitors,
         failedMonitors: pushMonitorFormatter.failedMonitors,
+        ...(warnings.length > 0 ? { warnings } : {}),
       };
     } catch (error) {
       if (error.output?.statusCode === 404) {
@@ -218,6 +229,15 @@ export const checkPublicLocationsPermissions = async (
   }
 };
 
+const getBrowserTimeoutWarningsForSucceededProjectMonitors = (
+  monitors: ProjectMonitor[],
+  failedMonitorsIds: string[]
+) => {
+  const failedIdsSet = new Set(failedMonitorsIds);
+  const succeededMonitors = monitors.filter((m) => !failedIdsSet.has(m.id));
+  return getBrowserTimeoutWarningsForProjectMonitors(succeededMonitors);
+};
+
 export const ELASTIC_MANAGED_LOCATIONS_DISABLED = i18n.translate(
   'xpack.synthetics.noAccess.publicLocations',
   {
@@ -228,13 +248,19 @@ export const ELASTIC_MANAGED_LOCATIONS_DISABLED = i18n.translate(
 
 export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.request', {
   defaultMessage:
-    'Request payload is too large. Please send a max of 250 browser monitors per request.',
+    'Request payload is too large. Please send a max of {maxBrowserMonitors} browser monitors per request.',
+  values: {
+    maxBrowserMonitors: MAX_BROWSER_MONITORS,
+  },
 });
 
 export const REQUEST_TOO_LARGE_LIGHTWEIGHT = i18n.translate(
   'xpack.synthetics.server.project.delete.request.lightweight',
   {
     defaultMessage:
-      'Request payload is too large. Please send a max of 1500 lightweight monitors per request.',
+      'Request payload is too large. Please send a max of {maxLightweightMonitors} lightweight monitors per request.',
+    values: {
+      maxLightweightMonitors: MAX_LIGHTWEIGHT_MONITORS,
+    },
   }
 );

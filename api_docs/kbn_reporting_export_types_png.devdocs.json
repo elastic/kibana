@@ -186,7 +186,7 @@
                 "signature": [
                   "[core: ",
                   "CoreSetup",
-                  "<{}, unknown>, config: Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "<{}, unknown>, config: Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -204,7 +204,7 @@
                   },
                   ", context: ",
                   "PluginInitializerContext",
-                  "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",

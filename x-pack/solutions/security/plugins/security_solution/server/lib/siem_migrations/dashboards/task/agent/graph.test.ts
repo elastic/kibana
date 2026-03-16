@@ -63,6 +63,8 @@ const setupAgent = (responses: NodeResponse[]) => {
       getConnectorList: jest.fn(),
       getDefaultConnector: jest.fn(),
       getConnectorById: jest.fn(),
+      getInferenceEndpoints: jest.fn(),
+      getInferenceEndpointById: jest.fn(),
       ...model,
     },
     request: httpServerMock.createKibanaRequest(),

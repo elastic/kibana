@@ -320,6 +320,10 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       z-index: ${theme.euiTheme.levels.toast} !important;
     }
 
+    .suggest-widget.message {
+      display: none !important;
+    }
+
     .suggest-details-container {
       background-color: ${theme.euiTheme.colors.backgroundBasePlain};
       line-height: 1.5rem;
@@ -385,5 +389,26 @@ export const filterDuplicatedWarnings = (
 ): MonacoMessage[] => {
   return uniqBy(warnings, (warning) => {
     return warning.message;
+  });
+};
+
+/**
+ * Computes toggled comment lines for a set of lines, following standard IDE behavior:
+ * comment all lines if any line is uncommented, uncomment all only if every line
+ * is already commented.
+ */
+export const getToggleCommentLines = (lines: string[]): string[] => {
+  const allCommented = lines.every((line) => line.startsWith('//'));
+  const shouldComment = !allCommented;
+
+  return lines.map((line) => {
+    const isCommented = line.startsWith('//');
+    if (shouldComment && !isCommented) {
+      return `//${line}`;
+    }
+    if (!shouldComment && isCommented) {
+      return line.replace('//', '');
+    }
+    return line;
   });
 };

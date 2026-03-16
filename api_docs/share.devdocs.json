@@ -2465,7 +2465,7 @@
         "label": "scheduleUnusedUrlsCleanupTask",
         "description": [],
         "signature": [
-          "({ taskManager, checkInterval, isEnabled, }: { taskManager: ",
+          "({ taskManager, checkInterval, isEnabled, logger, }: { taskManager: ",
           {
             "pluginId": "taskManager",
             "scope": "server",
@@ -2473,7 +2473,15 @@
             "section": "def-server.TaskManagerStartContract",
             "text": "TaskManagerStartContract"
           },
-          "; checkInterval: moment.Duration; isEnabled: boolean; }) => Promise<void>"
+          "; checkInterval: moment.Duration; isEnabled: boolean; logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          "; }) => Promise<void>"
         ],
         "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
         "lineNumber": 166,
@@ -2486,10 +2494,10 @@
             "id": "def-server.scheduleUnusedUrlsCleanupTask.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  taskManager,\n  checkInterval,\n  isEnabled,\n}",
+            "label": "{\n  taskManager,\n  checkInterval,\n  isEnabled,\n  logger,\n}",
             "description": [],
             "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
-            "lineNumber": 170,
+            "lineNumber": 171,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -2519,7 +2527,7 @@
                   " | undefined) => void; }"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
-                "lineNumber": 171,
+                "lineNumber": 172,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2535,7 +2543,7 @@
                   "moment.Duration"
                 ],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
-                "lineNumber": 172,
+                "lineNumber": 173,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2548,7 +2556,29 @@
                 "label": "isEnabled",
                 "description": [],
                 "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
-                "lineNumber": 173,
+                "lineNumber": 174,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "share",
+                "id": "def-server.scheduleUnusedUrlsCleanupTask.$1.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/share/server/unused_urls_task/task.ts",
+                "lineNumber": 175,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

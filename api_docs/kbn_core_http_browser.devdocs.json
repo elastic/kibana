@@ -267,12 +267,12 @@
             "id": "def-public.HttpFetchQuery.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[key: string]: string | number | boolean | string[] | number[] | boolean[] | null | undefined",
+            "label": "[key: string]: string | number | boolean | string[] | boolean[] | number[] | null | undefined",
             "description": [
               "\nTypeScript note: Technically we should use this interface instead, but @types/node uses the below stricter\ndefinition, so to avoid TypeScript errors, we'll restrict our version.\n\n[key: string]:\n  | string\n  | number\n  | boolean\n  | Array<string | number | boolean>\n  | undefined\n  | null;"
             ],
             "signature": [
-              "[key: string]:  string | number | boolean | string[] | number[] | boolean[] | null | undefined"
+              "[key: string]:  string | number | boolean | string[] | boolean[] | number[] | null | undefined"
             ],
             "path": "src/core/packages/http/browser/src/types.ts",
             "lineNumber": 269,
@@ -301,7 +301,7 @@
           {
             "parentPluginId": "@kbn/core-http-browser",
             "id": "def-public.HttpHandler.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -312,12 +312,50 @@
             "lineNumber": 353,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpHandler.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 354,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpHandler.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptions",
+                  " & { asResponse: true; }"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 355,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
             "id": "def-public.HttpHandler.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -328,12 +366,33 @@
             "lineNumber": 358,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpHandler.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptionsWithPath",
+                  " & { asResponse: true; }"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 358,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
             "id": "def-public.HttpHandler.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -344,12 +403,50 @@
             "lineNumber": 362,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpHandler.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 362,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpHandler.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptions",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 362,
+                "columnNumber": 43,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
             "id": "def-public.HttpHandler.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -360,7 +457,27 @@
             "lineNumber": 364,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpHandler.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptionsWithPath"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 364,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1408,7 +1525,40 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.fetch.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 354,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.fetch.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptions",
+                  " & { asResponse: true; }"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 355,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
@@ -1426,7 +1576,40 @@
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.delete.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 354,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.delete.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptions",
+                  " & { asResponse: true; }"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 355,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
@@ -1444,7 +1627,40 @@
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 354,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.get.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptions",
+                  " & { asResponse: true; }"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 355,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
@@ -1462,7 +1678,40 @@
             "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.head.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 354,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.head.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptions",
+                  " & { asResponse: true; }"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 355,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
@@ -1480,7 +1729,40 @@
             "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.options.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 354,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.options.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptions",
+                  " & { asResponse: true; }"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 355,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
@@ -1498,7 +1780,40 @@
             "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.patch.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 354,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.patch.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptions",
+                  " & { asResponse: true; }"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 355,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
@@ -1516,7 +1831,40 @@
             "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.post.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 354,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.post.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptions",
+                  " & { asResponse: true; }"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 355,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
@@ -1534,7 +1882,40 @@
             "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.put.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 354,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpSetup.put.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpFetchOptions",
+                  " & { asResponse: true; }"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "lineNumber": 355,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-http-browser",

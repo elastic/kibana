@@ -574,7 +574,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; field?: string | undefined; disabled?: boolean | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>> | undefined"
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>> | undefined"
         ],
         "path": "src/platform/packages/shared/as-code/filters-transforms/src/to_stored_filter.ts",
         "lineNumber": 63,
@@ -681,7 +681,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; field?: string | undefined; disabled?: boolean | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>>[] | undefined"
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }>>[] | undefined"
         ],
         "path": "src/platform/packages/shared/as-code/filters-transforms/src/to_stored_filter.ts",
         "lineNumber": 319,
@@ -769,7 +769,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; field?: string | undefined; disabled?: boolean | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }"
+          "; }> | undefined; meta: Readonly<{ params?: any; key?: string | undefined; value?: any; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; relation?: string | undefined; } & {}>; }"
         ],
         "path": "src/platform/packages/shared/as-code/filters-transforms/src/types.ts",
         "lineNumber": 14,

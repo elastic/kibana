@@ -13,7 +13,13 @@
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/config-schema",
-    "@kbn/presentation-publishing-schemas"
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/content-management-plugin",
+    "@kbn/content-management-utils",
+    "@kbn/core-http-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-server",
   ],
   "exclude": ["target/**/*"]
 }

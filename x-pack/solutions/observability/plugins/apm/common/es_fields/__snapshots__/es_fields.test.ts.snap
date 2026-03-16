@@ -15,6 +15,10 @@ exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
 
+exports[`Error ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
+
 exports[`Error ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
 
 exports[`Error CHILD_ID 1`] = `undefined`;
@@ -455,6 +459,10 @@ exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
 
+exports[`Span ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
+
 exports[`Span ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
 
 exports[`Span CHILD_ID 1`] = `undefined`;
@@ -877,6 +885,10 @@ exports[`Transaction AGENT_NAME 1`] = `"java"`;
 exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
 
 exports[`Transaction ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
 

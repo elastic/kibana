@@ -14,10 +14,16 @@ export type {
   DataSetGraphNodeSchema,
   WaitGraphNode,
   WaitGraphNodeSchema,
+  WaitForInputGraphNode,
+  WaitForInputGraphNodeSchema,
   ElasticsearchGraphNode,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNode,
   KibanaGraphNodeSchema,
+  WorkflowExecuteGraphNode,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteAsyncGraphNodeSchema,
 } from './nodes/base';
 export type {
   EnterConditionBranchNode,
@@ -35,7 +41,19 @@ export type {
   ExitForeachNodeSchema,
   EnterForeachNodeConfiguration,
   EnterForeachNodeConfigurationSchema,
+  EnterWhileNode,
+  EnterWhileNodeSchema,
+  ExitWhileNode,
+  ExitWhileNodeSchema,
+  EnterWhileNodeConfiguration,
+  EnterWhileNodeConfigurationSchema,
 } from './nodes/loop_nodes';
+export type {
+  LoopBreakNode,
+  LoopBreakNodeSchema,
+  LoopContinueNode,
+  LoopContinueNodeSchema,
+} from './nodes/flow_control_nodes';
 export type {
   EnterRetryNode,
   EnterRetryNodeSchema,
@@ -70,12 +88,15 @@ export {
   isElasticsearch,
   isKibana,
   isWait,
+  isWaitForInput,
   isEnterForeach,
+  isEnterWhile,
   isEnterIf,
   isEnterRetry,
   isEnterTryBlock,
   isEnterNormalPath,
   isExitForeach,
+  isExitWhile,
   isExitIf,
   isExitRetry,
   isExitTryBlock,
@@ -86,4 +107,9 @@ export {
   isExitStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
+  isLoopBreak,
+  isLoopContinue,
+  isLoopEnterNode,
+  shouldSuggestInnerSteps,
 } from './guards';
+export type { LoopEnterNode } from './guards';
