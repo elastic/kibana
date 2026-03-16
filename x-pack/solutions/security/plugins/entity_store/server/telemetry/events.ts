@@ -7,6 +7,7 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { EventTypeOpts } from '@kbn/core/server';
+import type { EntityMaintainerTelemetryEventType } from '../tasks/entity_maintainers/types';
 
 // ------------------------------------
 //  Event types
@@ -50,6 +51,14 @@ interface EntityStoreHealthEnginePayload {
 interface EntityStoreHealthReportPayload {
   engines: EntityStoreHealthEnginePayload[];
 }
+
+interface EntityMaintainerEvent {
+  id: string;
+  namespace?: string;
+  type: EntityMaintainerTelemetryEventType;
+  errorMessage?: string;
+}
+
 // ------------------------------------
 // Event definitions
 // ------------------------------------
@@ -132,6 +141,39 @@ export const ENTITY_STORE_USAGE_EVENT = {
   },
 } as const satisfies EventTypeOpts<StoreUsageEventPayload>;
 
+export const ENTITY_MAINTAINER_EVENT = {
+  eventType: 'entity_store_entity_maintainer',
+  schema: {
+    id: {
+      type: 'keyword',
+      _meta: {
+        description: 'Entity maintainer identifier',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the maintainer runs (e.g. "default")',
+        optional: true,
+      },
+    },
+    type: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Entity maintainer telemetry event type (register, abort, setup, run, error, stop, start, delete)',
+      },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        description: 'Optional error message for error events',
+        optional: true,
+      },
+    },
+  },
+} as const satisfies EventTypeOpts<EntityMaintainerEvent>;
+
 export const ENTITY_STORE_HEALTH_REPORT_EVENT = {
   eventType: 'entity_store_health_report',
   schema: {
@@ -200,6 +242,7 @@ const events = [
   ENTITY_STORE_DELETION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
   ENTITY_STORE_HEALTH_REPORT_EVENT,
+  ENTITY_MAINTAINER_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) =>
@@ -215,6 +258,7 @@ interface TelemetryEventMap {
   [ENTITY_STORE_INITIALIZATION_FAILURE_EVENT.eventType]: InitializationFailureEvent;
   [ENTITY_STORE_USAGE_EVENT.eventType]: StoreUsageEventPayload;
   [ENTITY_STORE_HEALTH_REPORT_EVENT.eventType]: EntityStoreHealthReportPayload;
+  [ENTITY_MAINTAINER_EVENT.eventType]: EntityMaintainerEvent;
 }
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;
