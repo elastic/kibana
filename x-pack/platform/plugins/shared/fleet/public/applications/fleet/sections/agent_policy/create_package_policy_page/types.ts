@@ -51,6 +51,7 @@ export type CreatePackagePolicyParams = React.FunctionComponent<{
   pkgLabel?: string;
   defaultPolicyData?: Partial<NewPackagePolicy>;
   noBreadcrumb?: boolean;
+  isCompleteSetup?: boolean;
   addIntegrationFlyoutProps?: {
     selectIntegrationStep: EuiStepProps;
     onSubmitCompleted: () => void;

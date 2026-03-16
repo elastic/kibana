@@ -20,11 +20,13 @@ export const CloudConnectorInputFields = ({
   onChange,
   packageInfo,
   hasInvalidRequiredVars = false,
+  isEditPage = true,
 }: {
   fields: Array<CloudConnectorField>;
   onChange: (key: string, value: string) => void;
   packageInfo: PackageInfo;
   hasInvalidRequiredVars?: boolean;
+  isEditPage?: boolean;
 }) => {
   // Helper styles for password fields
   const passwordFieldStyles = css`
@@ -67,7 +69,7 @@ export const CloudConnectorInputFields = ({
                     onChange={(value) => onChange(field.id, value)}
                     errors={invalid ? [invalidError] : []}
                     forceShowErrors={invalid}
-                    isEditPage={true}
+                    isEditPage={isEditPage}
                   />
                 </Suspense>
               </div>

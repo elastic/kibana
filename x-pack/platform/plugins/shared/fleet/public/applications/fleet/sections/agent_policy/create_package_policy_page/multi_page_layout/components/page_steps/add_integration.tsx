@@ -272,6 +272,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
                 validationResults={validationResults}
                 submitAttempted={formState === 'INVALID'}
                 noAdvancedToggle={true}
+                integration={integrationInfo?.name}
               />
             </ExpandableAdvancedSettings>
           )}

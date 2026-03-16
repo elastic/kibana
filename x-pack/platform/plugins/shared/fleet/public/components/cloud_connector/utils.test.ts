@@ -557,6 +557,34 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
 
       expect(result).toContain('complex-kibana-id');
     });
+
+    it('should append CompletionBaseUrl when provided', () => {
+      const completionBaseUrl =
+        'https://kibana.example.com/app/fleet/integrations/cloud_security_posture/complete-integration-setup/cspm';
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+        completionBaseUrl,
+      });
+
+      expect(result).toBe(
+        'https://example.com/templates/single-account/kibana-component-id/cloudformation.yaml&param_CompletionBaseUrl=https%3A%2F%2Fkibana.example.com%2Fapp%2Ffleet%2Fintegrations%2Fcloud_security_posture%2Fcomplete-integration-setup%2Fcspm'
+      );
+    });
+
+    it('should keep existing URL when CompletionBaseUrl is not provided', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: mockIacTemplateUrl,
+      });
+
+      expect(result).toBe(
+        'https://example.com/templates/single-account/kibana-component-id/cloudformation.yaml'
+      );
+    });
   });
 
   describe('Failure cases', () => {

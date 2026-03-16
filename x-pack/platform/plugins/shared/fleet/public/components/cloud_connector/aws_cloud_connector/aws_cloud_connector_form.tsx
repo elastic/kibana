@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiButton, EuiLink, EuiCallOut } from '@elastic/eui';
 
 import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
 import {
@@ -25,6 +25,7 @@ import { ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
+import { useCloudConnectorPrefill } from '../hooks/use_cloud_connector_prefill';
 
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
@@ -38,12 +39,15 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   setCredentials,
   accountType = ORGANIZATION_ACCOUNT,
   iacTemplateUrl,
+  completionBaseUrl,
 }) => {
+  const prefill = useCloudConnectorPrefill();
   const cloudConnectorRemoteRoleTemplate = cloud
     ? getCloudConnectorRemoteRoleTemplate({
         cloud,
         accountType,
         iacTemplateUrl,
+        completionBaseUrl,
       })
     : undefined;
 
@@ -72,28 +76,54 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
         data-test-subj={CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ}
       />
       <EuiSpacer size="m" />
-      <EuiAccordion
-        id="cloudFormationAccordianInstructions"
-        data-test-subj={''}
-        buttonContent={<EuiLink>{'Steps to assume role'}</EuiLink>}
-        paddingSize="l"
-      >
-        <CloudFormationCloudCredentialsGuide accountType={accountType} />
-      </EuiAccordion>
-      <EuiSpacer size="l" />
-      <EuiButton
-        data-test-subj="launchCloudFormationAgentlessButton"
-        target="_blank"
-        iconSide="left"
-        iconType="launch"
-        href={cloudConnectorRemoteRoleTemplate}
-      >
-        <FormattedMessage
-          id="xpack.fleet.cloudConnector.aws.launchCloudFormationButton"
-          defaultMessage="Launch CloudFormation"
-        />
-      </EuiButton>
-      <EuiSpacer size="m" />
+      {prefill.isPrefilled && (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.fleet.cloudConnector.aws.prefilledCalloutTitle"
+                defaultMessage="CloudFormation stack deployed successfully"
+              />
+            }
+            color="success"
+            iconType="check"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.cloudConnector.aws.prefilledCalloutDescription"
+                defaultMessage='Your IAM role was configured from CloudFormation. Review the details below and click "Save and Continue" to finish setup.'
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {!prefill.isPrefilled && (
+        <>
+          <EuiAccordion
+            id="cloudFormationAccordianInstructions"
+            data-test-subj={''}
+            buttonContent={<EuiLink>{'Steps to assume role'}</EuiLink>}
+            paddingSize="l"
+          >
+            <CloudFormationCloudCredentialsGuide accountType={accountType} />
+          </EuiAccordion>
+          <EuiSpacer size="l" />
+          <EuiButton
+            data-test-subj="launchCloudFormationAgentlessButton"
+            target="_blank"
+            iconSide="left"
+            iconType="launch"
+            href={cloudConnectorRemoteRoleTemplate}
+          >
+            <FormattedMessage
+              id="xpack.fleet.cloudConnector.aws.launchCloudFormationButton"
+              defaultMessage="Launch CloudFormation"
+            />
+          </EuiButton>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       {fields && (
         <CloudConnectorInputFields
@@ -109,6 +139,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
             }
           }}
           hasInvalidRequiredVars={hasInvalidRequiredVars}
+          isEditPage={!prefill.isPrefilled}
         />
       )}
     </>
