@@ -54,6 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await common.unsetTime();
+      await kibanaServer.uiSettings.unset('defaultIndex');
     });
 
     beforeEach(async () => {

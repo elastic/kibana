@@ -122,7 +122,7 @@ describe('AutomaticImportSavedObjectService', () => {
         expect(result.id).toBe('test-integration-1');
         expect(result.attributes.created_by).toBe('test-user');
         expect(result.attributes.metadata?.created_at).toBeDefined();
-        expect(result.attributes.metadata?.version).toBe('0.0.0');
+        expect(result.attributes.metadata?.version).toBe('0.1.0');
 
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-integration-1');
       });
@@ -220,7 +220,7 @@ describe('AutomaticImportSavedObjectService', () => {
           integrationParams,
           authenticatedUser
         );
-        expect(created.attributes.metadata?.version).toBe('0.0.0');
+        expect(created.attributes.metadata?.version).toBe('0.1.0');
 
         // First update
         const firstUpdate = await savedObjectService.updateIntegration({ ...updateData }, '0.0.1');
