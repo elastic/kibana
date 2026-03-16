@@ -428,7 +428,7 @@ export class LensPlugin {
             }
           );
         },
-        savedObjectType: LENS_EMBEDDABLE_TYPE,
+        savedObjectType: LENS_CONTENT_TYPE,
         savedObjectName: i18n.translate('xpack.lens.mapSavedObjectLabel', {
           defaultMessage: 'Lens',
         }),

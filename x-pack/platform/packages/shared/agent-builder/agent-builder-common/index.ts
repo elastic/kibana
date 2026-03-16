@@ -101,7 +101,13 @@ export {
   agentBuilderDefaultAgentId,
   AgentType,
   AgentVisibility,
+  VISIBILITY_ICON,
+  VISIBILITY_BADGE_COLOR,
   AgentExecutionErrorCode,
+  isAgentOwner,
+  canChangeAgentVisibility,
+  hasAgentReadAccess,
+  hasAgentWriteAccess,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
@@ -177,6 +183,7 @@ export {
 } from './chat';
 export {
   type PublicSkillDefinition,
+  type PublicSkillSummary,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
   type SkillReferencedContent,
