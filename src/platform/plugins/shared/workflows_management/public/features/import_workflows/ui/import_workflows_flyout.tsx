@@ -228,14 +228,12 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
 
   const importStatusMap = useMemo(() => {
     if (!importResult || !preflightResult) return new Map<string, 'success' | 'failed'>();
-    // `failed[].index` corresponds to the position in the workflows array sent
-    // to `_bulk_create`, which preserves the same order as
-    // `preflightResult.workflows` (both derived from the same parsed input via
-    // `rawWorkflows`). `generateNewIds` rewrites IDs but preserves ordering.
     const failedIndices = new Set(importResult.failed.map((f) => f.index));
+    const failedIds = new Set(importResult.failed.map((f) => f.id));
     const map = new Map<string, 'success' | 'failed'>();
     preflightResult.workflows.forEach((w, idx) => {
-      map.set(w.id, failedIndices.has(idx) ? 'failed' : 'success');
+      const isFailed = failedIndices.has(idx) || failedIds.has(w.id);
+      map.set(w.id, isFailed ? 'failed' : 'success');
     });
     return map;
   }, [importResult, preflightResult]);

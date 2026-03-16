@@ -242,9 +242,9 @@ export type EsWorkflowCreate = Omit<
   'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml' | 'deleted_at'
 >;
 
-const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
+export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
 const MAX_BULK_CREATE_WORKFLOWS = 500;
-const WORKFLOW_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$/;
+export const WORKFLOW_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$/;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),

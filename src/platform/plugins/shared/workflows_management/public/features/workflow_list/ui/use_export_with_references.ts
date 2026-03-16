@@ -81,23 +81,30 @@ export const useExportWithReferences = ({
     [http, notifications, onComplete]
   );
 
+  const exportWithoutReferences = useCallback(
+    (workflowsToExport: WorkflowListItemDto[]) => {
+      if (workflowsToExport.length === 1) {
+        exportSingleWorkflow(workflowsToExport[0]);
+        notifications?.toasts.addSuccess(
+          i18n.translate('workflows.export.singleSuccess', {
+            defaultMessage: 'Workflow exported successfully.',
+          }),
+          { toastLifeTimeMs: TOAST_LIFE_TIME_MS }
+        );
+        onComplete?.();
+      } else {
+        performExport(workflowsToExport);
+      }
+    },
+    [performExport, notifications, onComplete]
+  );
+
   const startExport = useCallback(
     (workflowsToExport: WorkflowListItemDto[]) => {
       const missingIds = findMissingReferencedIds(workflowsToExport);
 
       if (missingIds.length === 0) {
-        if (workflowsToExport.length === 1) {
-          exportSingleWorkflow(workflowsToExport[0]);
-          notifications?.toasts.addSuccess(
-            i18n.translate('workflows.export.singleSuccess', {
-              defaultMessage: 'Workflow exported successfully.',
-            }),
-            { toastLifeTimeMs: TOAST_LIFE_TIME_MS }
-          );
-          onComplete?.();
-        } else {
-          performExport(workflowsToExport);
-        }
+        exportWithoutReferences(workflowsToExport);
         return;
       }
 
@@ -106,24 +113,13 @@ export const useExportWithReferences = ({
         .filter((w): w is WorkflowListItemDto => w != null);
 
       if (missingWorkflows.length === 0) {
-        if (workflowsToExport.length === 1) {
-          exportSingleWorkflow(workflowsToExport[0]);
-          notifications?.toasts.addSuccess(
-            i18n.translate('workflows.export.singleSuccess', {
-              defaultMessage: 'Workflow exported successfully.',
-            }),
-            { toastLifeTimeMs: TOAST_LIFE_TIME_MS }
-          );
-          onComplete?.();
-        } else {
-          performExport(workflowsToExport);
-        }
+        exportWithoutReferences(workflowsToExport);
         return;
       }
 
       setExportModalState({ missingWorkflows, pendingExport: workflowsToExport });
     },
-    [allWorkflowsMap, performExport, notifications, onComplete]
+    [allWorkflowsMap, exportWithoutReferences]
   );
 
   const handleIgnore = useCallback(() => {

@@ -164,7 +164,7 @@ export class WorkflowsManagementApi {
     options?: { overwrite?: boolean }
   ): Promise<{
     created: WorkflowDetailDto[];
-    failed: Array<{ index: number; error: string }>;
+    failed: Array<{ index: number; id: string; error: string }>;
   }> {
     return this.workflowsService.bulkCreateWorkflows(workflows, spaceId, request, options);
   }

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
 export const WORKFLOW_EXPORT_VERSION = '1';
-// ~1 MB on disk, ~2 MB in V8 heap
-export const MAX_WORKFLOW_YAML_LENGTH = 1_024_000;
+export { MAX_WORKFLOW_YAML_LENGTH };
 
 export const WorkflowExportEntrySchema = z.object({
   id: z.string(),

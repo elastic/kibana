@@ -8,10 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { BulkCreateWorkflowsCommandSchema } from '@kbn/workflows';
+import { BulkCreateWorkflowsCommandSchema, WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
-import { WORKFLOW_CREATE_SECURITY } from './route_security';
+import { WORKFLOW_BULK_CREATE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
 import { withLicenseCheck } from '../lib/with_license_check';
 
@@ -25,7 +25,7 @@ export function registerPostBulkCreateWorkflowsRoute({
     {
       path: '/api/workflows/_bulk_create',
       options: WORKFLOW_ROUTE_OPTIONS,
-      security: WORKFLOW_CREATE_SECURITY,
+      security: WORKFLOW_BULK_CREATE_SECURITY,
       validate: {
         query: schema.object({
           overwrite: schema.boolean({ defaultValue: false }),
@@ -37,6 +37,15 @@ export function registerPostBulkCreateWorkflowsRoute({
       try {
         const spaceId = spaces.getSpaceId(request);
         const { overwrite } = request.query;
+
+        if (overwrite && !request.authzResult?.[WorkflowsManagementApiActions.update]) {
+          return response.forbidden({
+            body: {
+              message: 'Overwriting workflows requires the update privilege',
+            },
+          });
+        }
+
         const result = await api.bulkCreateWorkflows(request.body.workflows, spaceId, request, {
           overwrite,
         });

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { registerPostBulkCreateWorkflowsRoute } from './post_bulk_create_workflows';
 import {
   createMockResponse,
@@ -206,7 +207,7 @@ describe('POST /api/workflows/_bulk_create', () => {
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockResult });
     });
 
-    it('should pass overwrite=true to the API when query param is set', async () => {
+    it('should pass overwrite=true to the API when query param is set and user has update privilege', async () => {
       const mockResult = {
         created: [{ id: 'workflow-1', name: 'Workflow 1' }],
         failed: [],
@@ -222,6 +223,7 @@ describe('POST /api/workflows/_bulk_create', () => {
         },
         headers: {},
         url: { pathname: '/api/workflows/_bulk_create' },
+        authzResult: { [WorkflowsManagementApiActions.update]: true },
       };
       const mockResponse = createMockResponse();
 
@@ -234,6 +236,27 @@ describe('POST /api/workflows/_bulk_create', () => {
         { overwrite: true }
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockResult });
+    });
+
+    it('should return forbidden when overwrite=true but user lacks update privilege', async () => {
+      const mockContext = {};
+      const mockRequest = {
+        query: { overwrite: true },
+        body: {
+          workflows: [{ yaml: 'name: Workflow 1', id: 'workflow-1' }],
+        },
+        headers: {},
+        url: { pathname: '/api/workflows/_bulk_create' },
+        authzResult: { [WorkflowsManagementApiActions.update]: false },
+      };
+      const mockResponse = createMockResponse();
+
+      await routeHandler(mockContext, mockRequest, mockResponse);
+
+      expect(workflowsApi.bulkCreateWorkflows).not.toHaveBeenCalled();
+      expect(mockResponse.forbidden).toHaveBeenCalledWith({
+        body: { message: 'Overwriting workflows requires the update privilege' },
+      });
     });
   });
 });

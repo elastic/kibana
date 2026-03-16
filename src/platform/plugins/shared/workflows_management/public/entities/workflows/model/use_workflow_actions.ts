@@ -49,7 +49,7 @@ export interface PreflightImportResult {
 
 export interface ImportWorkflowsResult {
   created: WorkflowDetailDto[];
-  failed: Array<{ index: number; error: string }>;
+  failed: Array<{ index: number; id: string; error: string }>;
   parseErrors: string[];
 }
 
@@ -379,10 +379,16 @@ export function useWorkflowActions() {
         for (const w of workflows) {
           idMapping.set(w.id, `workflow-${generateUuid()}`);
         }
-        processedWorkflows = workflows.map((w) => ({
-          id: idMapping.get(w.id) ?? `workflow-${generateUuid()}`,
-          yaml: rewriteWorkflowReferences(w.yaml, idMapping),
-        }));
+        processedWorkflows = workflows.map((w) => {
+          const newId = idMapping.get(w.id);
+          if (!newId) {
+            throw new Error(`Missing ID mapping for workflow ${w.id}`);
+          }
+          return {
+            id: newId,
+            yaml: rewriteWorkflowReferences(w.yaml, idMapping),
+          };
+        });
       }
 
       const query: Record<string, boolean> = {};

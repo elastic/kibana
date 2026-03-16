@@ -272,10 +272,6 @@ export class WorkflowsService {
 
     const id = workflow.id || this.generateWorkflowId();
 
-    if (workflow.id) {
-      this.validateWorkflowId(workflow.id);
-    }
-
     const workflowData: WorkflowProperties = {
       name: workflowToCreate.name,
       description: workflowToCreate.description,
@@ -335,6 +331,10 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
+    if (workflow.id) {
+      this.validateWorkflowId(workflow.id);
+    }
+
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const now = new Date();
@@ -377,7 +377,7 @@ export class WorkflowsService {
     options?: { overwrite?: boolean }
   ): Promise<{
     created: WorkflowDetailDto[];
-    failed: Array<{ index: number; error: string }>;
+    failed: Array<{ index: number; id: string; error: string }>;
   }> {
     if (!this.workflowStorage) {
       throw new Error('WorkflowsService not initialized');
@@ -390,7 +390,7 @@ export class WorkflowsService {
     const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
     const created: WorkflowDetailDto[] = [];
-    const failed: Array<{ index: number; error: string }> = [];
+    const failed: Array<{ index: number; id: string; error: string }> = [];
     type BulkOp =
       | { index: { _id: string; document: WorkflowProperties } }
       | { create: { _id: string; document: WorkflowProperties } };
@@ -432,6 +432,7 @@ export class WorkflowsService {
       } catch (error) {
         failed.push({
           index: i,
+          id: workflows[i].id ?? `unknown-${i}`,
           error: error instanceof Error ? error.message : String(error),
         });
       }
@@ -441,7 +442,7 @@ export class WorkflowsService {
     if (bulkOperations.length > 0) {
       const bulkResponse = await this.workflowStorage.getClient().bulk({
         operations: bulkOperations,
-        refresh: true,
+        refresh: 'wait_for',
       });
 
       // Process bulk response
@@ -452,6 +453,7 @@ export class WorkflowsService {
         if (operation?.error) {
           failed.push({
             index: validWorkflow.idx,
+            id: validWorkflow.id,
             error:
               typeof operation.error === 'object' && 'reason' in operation.error
                 ? operation.error.reason ?? JSON.stringify(operation.error)
