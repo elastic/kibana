@@ -19,6 +19,12 @@ import type { UserActionBuilder } from './abstract_builder';
 import { SeverityUserActionBuilder } from './builders/severity';
 import { AssigneesUserActionBuilder } from './builders/assignees';
 import { NoopUserActionBuilder } from './builders/noop';
+import {
+  ApplyTaskTemplateUserActionBuilder,
+  CreateTaskUserActionBuilder,
+  DeleteTaskUserActionBuilder,
+  UpdateTaskUserActionBuilder,
+} from './builders/tasks';
 import { CategoryUserActionBuilder } from './builders/category';
 import { CustomFieldsUserActionBuilder } from './builders/custom_fields';
 import { ObservablesUserActionBuilder } from './builders/observables';
@@ -45,10 +51,10 @@ const builderMap = {
   extended_fields: ExtendedFieldsUserActionBuilder,
   template: TemplateUserActionBuilder,
   workflow: WorkflowUserActionBuilder,
-  create_task: NoopUserActionBuilder,
-  update_task: NoopUserActionBuilder,
-  delete_task: NoopUserActionBuilder,
-  apply_task_template: NoopUserActionBuilder,
+  create_task: CreateTaskUserActionBuilder,
+  update_task: UpdateTaskUserActionBuilder,
+  delete_task: DeleteTaskUserActionBuilder,
+  apply_task_template: ApplyTaskTemplateUserActionBuilder,
 };
 
 export class BuilderFactory {
