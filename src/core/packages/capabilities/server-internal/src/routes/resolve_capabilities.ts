@@ -41,7 +41,7 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
                 }
               },
             }),
-            { maxSize: 100 }
+            { maxSize: 500 }
           ),
         }),
       },
