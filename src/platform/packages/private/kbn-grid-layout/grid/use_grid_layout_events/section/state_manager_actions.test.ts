@@ -71,7 +71,7 @@ describe('row state manager actions', () => {
           },
           translate: {
             top: -140,
-            left: 0,
+            left: 80,
           },
         })
       );

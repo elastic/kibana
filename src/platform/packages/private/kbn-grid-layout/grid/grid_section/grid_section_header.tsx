@@ -254,7 +254,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       />
                     </EuiFlexItem>
                   )}
-                  <EuiFlexItem grow={true}>
+                  <EuiFlexItem grow={false} css={[styles.floatToRight]}>
                     <EuiButtonIcon
                       iconType="move"
                       color="text"
@@ -291,6 +291,9 @@ const styles = {
       display: 'block',
     },
   }),
+  floatToRight: css({
+    marginLeft: 'auto',
+  }),
   headerStyles: ({ euiTheme }: UseEuiTheme, sectionId: string) =>
     css({
       gridColumnStart: 1,
@@ -307,9 +310,6 @@ const styles = {
       '.kbnGridSection--dragHandle': {
         cursor: 'move',
         touchAction: 'none',
-        width: '100%',
-        justifyContent: 'flex-end',
-        paddingRight: euiTheme.size.xs,
         '&:active, &:hover, &:focus': {
           transform: 'none !important', // prevent "bump up" that EUI adds on hover
           backgroundColor: 'transparent',
