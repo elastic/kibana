@@ -211,7 +211,7 @@ describe('Legend Settings', () => {
       onLayoutChange: jest.fn(),
     });
 
-    expect(screen.getByRole('spinbutton', { name: 'Pixel limit' })).toBeInTheDocument();
+    expect(screen.getByRole('spinbutton', { name: 'Width limit' })).toBeInTheDocument();
     expect(screen.queryByRole('spinbutton', { name: 'Line limit' })).toBeNull();
   });
 
