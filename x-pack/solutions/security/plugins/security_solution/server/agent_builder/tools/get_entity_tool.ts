@@ -22,11 +22,15 @@ import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/co
 import { getRiskScoreTimeSeriesIndex } from '../../../common/entity_analytics/risk_engine/indices';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import {
+  ENTITY_STORE_ENTITY_TYPE_FIELD,
+  ENTITY_STORE_ENTITY_ID_FIELD,
+  getRowValue,
+  addOrUpdateEntityAttachment,
+} from '../utils/entity_attachment_utils';
 import { securityTool } from './constants';
 
 const ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD = 'entity.risk.calculated_score_norm';
-const ENTITY_STORE_ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
-const ENTITY_STORE_ENTITY_ID_FIELD = 'entity.id';
 
 const schema = z.object({
   entityType: IdentifierType.describe(
@@ -81,14 +85,6 @@ export const normalizeEntityId = (
   return entityId.startsWith(prefix) ? entityId : `${prefix}${entityId}`;
 };
 
-const getRowValue = (
-  columns: Array<{ name: string }>,
-  row: unknown[],
-  columnName: string
-): unknown => {
-  const idx = columns.findIndex((col) => col.name === columnName);
-  return idx >= 0 ? row[idx] : undefined;
-};
 interface GetAlertIdsFromRiskScoreIndexParams {
   entityId: string;
   entityType: string;
@@ -354,7 +350,7 @@ export const getEntityTool = (
         }
       },
     },
-    handler: async (params, { spaceId, esClient }) => {
+    handler: async (params, { attachments, spaceId, esClient }) => {
       logger.debug(
         `${SECURITY_GET_ENTITY_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
@@ -390,6 +386,30 @@ export const getEntityTool = (
             enrichEntityResult({ row, columns, query, date, interval, spaceId, esClient: client })
           )
         );
+
+        // console.log(`Adding attachment in GET tool`);
+
+        // await addOrUpdateEntityAttachment(
+        //   attachments,
+        //   enrichedResults.map((res) => {
+        //     const firstValue = res.data.values[0];
+        //     const entityTypeValue = getRowValue(
+        //       res.data.columns,
+        //       firstValue,
+        //       ENTITY_STORE_ENTITY_TYPE_FIELD
+        //     );
+        //     const entityIdValue = getRowValue(
+        //       res.data.columns,
+        //       firstValue,
+        //       ENTITY_STORE_ENTITY_ID_FIELD
+        //     );
+        //     return {
+        //       entityType: String(entityTypeValue ?? ''),
+        //       entityId: String(entityIdValue ?? ''),
+        //     };
+        //   }),
+        //   `Entity: ${normalizedEntityId}`
+        // );
 
         return { results: enrichedResults };
       } catch (error) {
