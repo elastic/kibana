@@ -37,6 +37,8 @@ import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
+import { resetSyntheticsMonitorRoute } from './monitor_cruds/reset_monitor';
+import { resetSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/reset_monitor_bulk';
 import {
   disableSyntheticsRoute,
   getSyntheticsEnablementRoute,
@@ -108,6 +110,8 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   syntheticsInspectStatusRuleRoute,
   syntheticsInspectTLSRuleRoute,
   getSyntheticsTriggerTaskRun,
+  resetSyntheticsMonitorRoute,
+  resetSyntheticsMonitorBulkRoute,
   cleanupPrivateLocationRoute,
   syncParamsSyntheticsParamsRoute,
   syncParamsSettingsParamsRoute,
