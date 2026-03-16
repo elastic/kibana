@@ -100,23 +100,27 @@ async function runTask({
 
   try {
     const [coreStart, startPlugins] = await core.getStartServices();
-    const esClient = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
     const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
+    const esClient = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
     const index = getLatestEntitiesIndexName(namespace);
 
-    for (const entityType of ALL_ENTITY_TYPES) {
-      try {
-        const { count: storeSize } = await getStoreSize(esClient, index, entityType);
-        telemetryReporter.reportEvent(ENTITY_STORE_USAGE_EVENT, {
-          storeSize,
-          entityType,
-          namespace,
-        });
-      } catch (e) {
-        logger.error(`Error reporting store usage for ${entityType}: ${getErrorMessage(e)}`);
-      }
-    }
+    // Report Entity Store usage per entity type
+    await Promise.all(
+      ALL_ENTITY_TYPES.map(async (entityType) => {
+        try {
+          const { count: storeSize } = await getStoreSize(esClient, index, entityType);
+          telemetryReporter.reportEvent(ENTITY_STORE_USAGE_EVENT, {
+            storeSize,
+            entityType,
+            namespace,
+          });
+        } catch (e) {
+          logger.error(`Error reporting store usage for ${entityType}: ${getErrorMessage(e)}`);
+        }
+      })
+    );
 
+    // Report status
     try {
       const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
         soClient,
