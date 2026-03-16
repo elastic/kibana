@@ -14,7 +14,9 @@ import {
   EuiPanel,
   EuiPopover,
   useEuiTheme,
+  type EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -72,7 +74,7 @@ export const NotificationPolicyActionsCell = ({
       ]
     : [];
 
-  const panels = [
+  const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
       items: [
@@ -122,7 +124,9 @@ export const NotificationPolicyActionsCell = ({
             defaultMessage: 'Delete',
           }),
           icon: 'trash',
-          style: { color: euiTheme.colors.textDanger },
+          css: css`
+            color: ${euiTheme.colors.textDanger};
+          `,
           onClick: () => {
             closePopover();
             onDelete(policy);

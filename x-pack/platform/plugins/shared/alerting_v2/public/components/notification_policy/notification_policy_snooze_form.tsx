@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,

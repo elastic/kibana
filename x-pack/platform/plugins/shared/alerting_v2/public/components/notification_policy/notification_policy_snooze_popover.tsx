@@ -46,7 +46,7 @@ export const NotificationPolicySnoozePopover = ({
       <EuiButton
         iconType="bellSlash"
         color="accent"
-        size="xs"
+        size="s"
         onClick={togglePopover}
         isLoading={isLoading}
       >
