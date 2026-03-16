@@ -23,6 +23,7 @@ import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
+  doAllChangesMatch,
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
@@ -83,6 +84,19 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         `cancel_on_gate_failure:${stepKey}`,
         'true',
       ]);
+    }
+
+    const solutions = ['observability', 'search', 'security', 'workplaceai'];
+    for (const solution of solutions) {
+      if (await doAllChangesMatch(new RegExp(`^x-pack/solutions/${solution}`))) {
+        execFileSync('buildkite-agent', [
+          'meta-data',
+          'set',
+          'limit_test_groups_by_solution',
+          solution,
+        ]);
+        break;
+      }
     }
 
     if (prHasFIPSLabel()) {
