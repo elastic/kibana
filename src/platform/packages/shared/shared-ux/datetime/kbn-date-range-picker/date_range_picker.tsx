@@ -12,7 +12,7 @@ import React, { useMemo, type ComponentType } from 'react';
 import type { SerializedStyles } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 
-import type { TimeRangeBounds, TimeRangeBoundsOption } from './types';
+import type { TimeRangeBounds, TimeRangeBoundsOption, CalendarOptions } from './types';
 import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 import { DateRangePickerProvider } from './date_range_picker_context';
 import { DateRangePickerLayout } from './date_range_picker_layout';
@@ -125,6 +125,8 @@ export interface DateRangePickerProps {
   onPresetSave?: (option: TimeRangeBoundsOption) => void;
   /** Called when the user wants to delete a saved preset. */
   onPresetDelete?: (option: TimeRangeBoundsOption) => void;
+  /** Calendar-specific options (e.g. first day of week). */
+  calendarOptions?: CalendarOptions;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {

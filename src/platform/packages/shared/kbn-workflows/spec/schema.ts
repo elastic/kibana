@@ -199,6 +199,8 @@ export const MaxIterationsSchema = z.union([
 ]);
 export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
 
+export const DEFAULT_LOOP_MAX_ITERATIONS = 2000;
+
 export const LoopStepPropsSchema = z.object({
   'max-iterations': MaxIterationsSchema.optional(),
   'iteration-timeout': DurationSchema.optional(),
@@ -572,6 +574,24 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+export const LoopBreakStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('loop.break')
+    .describe('Exit the enclosing loop immediately. Valid only inside a foreach or while body'),
+  ...StepWithIfConditionSchema.shape,
+});
+export type LoopBreakStep = z.infer<typeof LoopBreakStepSchema>;
+
+export const LoopContinueStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('loop.continue')
+    .describe(
+      'Skip remaining steps in the current iteration and advance to the next one. Valid only inside a foreach or while body'
+    ),
+  ...StepWithIfConditionSchema.shape,
+});
+export type LoopContinueStep = z.infer<typeof LoopContinueStepSchema>;
+
 export const ConsoleStepInputSchema = z.object({
   message: z.unknown().optional(),
 });
@@ -678,14 +698,21 @@ const StepSchema = z.lazy(() =>
     MergeStepSchema,
     WorkflowExecuteStepSchema,
     WorkflowExecuteAsyncStepSchema,
+    LoopBreakStepSchema,
+    LoopContinueStepSchema,
     BaseConnectorStepSchema,
   ])
 );
 export type Step = z.infer<typeof StepSchema>;
 
-export const BuiltInStepTypes = [
+export const LoopStepTypes = [
   ForEachStepSchema.shape.type.value,
   WhileStepSchema.shape.type.value,
+] as const;
+export type LoopStepType = (typeof LoopStepTypes)[number];
+
+export const BuiltInStepTypes = [
+  ...LoopStepTypes,
   IfStepSchema.shape.type.value,
   ParallelStepSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
@@ -693,6 +720,8 @@ export const BuiltInStepTypes = [
   WaitStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
+  LoopBreakStepSchema.shape.type.value,
+  LoopContinueStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -933,6 +962,13 @@ export const ForEachContextSchema = z.object({
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
+export const BaseSerializedErrorSchema = z.object({
+  type: z.string(),
+  message: z.string(),
+  details: z.record(z.string(), z.unknown()).optional(),
+});
+export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
+
 export const WhileContextSchema = z.object({
   iteration: z.number().int(),
 });
@@ -943,6 +979,7 @@ export const StepContextSchema = WorkflowContextSchema.extend({
   foreach: ForEachContextSchema.optional(),
   while: WhileContextSchema.optional(),
   variables: z.record(z.string(), z.unknown()).optional(),
+  error: BaseSerializedErrorSchema.optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
 
@@ -952,10 +989,3 @@ export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
   steps: z.object({}),
 });
 export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
-
-export const BaseSerializedErrorSchema = z.object({
-  type: z.string(),
-  message: z.string(),
-  details: z.record(z.string(), z.unknown()).optional(),
-});
-export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
