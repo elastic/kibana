@@ -11486,6 +11486,12 @@ paths:
             items:
               type: string
             type: array
+        - description: Filter results to Attack discoveries associated with the specified case ID
+          in: query
+          name: case_id
+          required: false
+          schema:
+            type: string
         - description: Filter results to Attack discoveries created by any of the provided human readable connector names. Note that values must match the human readable `connector_name` property of an Attack discovery, e.g. "GPT-5 Chat", which are distinct from `connector_id` values used to generate Attack discoveries.
           in: query
           name: connector_names
@@ -73083,6 +73089,9 @@ components:
         apiConfig:
           $ref: '#/components/schemas/Security_Attack_discovery_API_ApiConfig'
           description: LLM API configuration.
+        caseId:
+          description: Optional case ID to scope the attack discovery to. When provided, the server will derive alert IDs from the alerts attached to this case and use them as the alert filter. The generated discoveries will be associated with this case for later retrieval.
+          type: string
         connectorName:
           type: string
         end:
