@@ -137,7 +137,6 @@ describe('useNotificationPolicyForm', () => {
         groupBy: ['host.name', 'service.name'],
         frequency: { type: 'throttle', interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
-        ruleLabels: ['team-observability'],
       });
     });
 

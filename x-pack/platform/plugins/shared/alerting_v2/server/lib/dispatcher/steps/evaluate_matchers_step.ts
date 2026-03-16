@@ -62,8 +62,3 @@ export function evaluateMatchers(
 
   return matched;
 }
-
-function matchesRuleLabels(policy: NotificationPolicy, rule: Rule): boolean {
-  if (policy.ruleLabels.length === 0) return true;
-  return policy.ruleLabels.some((label) => rule.labels.includes(label));
-}

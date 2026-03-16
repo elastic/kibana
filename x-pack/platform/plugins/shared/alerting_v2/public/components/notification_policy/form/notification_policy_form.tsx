@@ -158,65 +158,6 @@ export const NotificationPolicyForm = () => {
           <EuiTitle size="xs">
             <h3>
               <FormattedMessage
-                id="xpack.alertingV2.notificationPolicy.form.ruleLabels.title"
-                defaultMessage="Rule scope"
-              />
-            </h3>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.alertingV2.notificationPolicy.form.ruleLabels.description"
-              defaultMessage="Limit this policy to rules with specific labels. Leave empty to apply to all rules."
-            />
-          </EuiText>
-        </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner>
-          <Controller
-            name="ruleLabels"
-            control={control}
-            render={({ field }) => (
-              <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.ruleLabels', {
-                  defaultMessage: 'Rule labels',
-                })}
-                helpText={i18n.translate(
-                  'xpack.alertingV2.notificationPolicy.form.ruleLabels.help',
-                  {
-                    defaultMessage:
-                      'Only rules with at least one matching label will use this policy',
-                  }
-                )}
-                fullWidth
-              >
-                <EuiComboBox
-                  fullWidth
-                  data-test-subj="ruleLabelsInput"
-                  placeholder={i18n.translate(
-                    'xpack.alertingV2.notificationPolicy.form.ruleLabels.placeholder',
-                    { defaultMessage: 'Add rule label (e.g. production, critical)' }
-                  )}
-                  selectedOptions={field.value.map((label: string) => ({ label }))}
-                  onCreateOption={(value) => {
-                    field.onChange([...field.value, value]);
-                  }}
-                  onChange={(options) => {
-                    field.onChange(options.map((o) => o.label));
-                  }}
-                  noSuggestions
-                />
-              </EuiFormRow>
-            )}
-          />
-        </EuiSplitPanel.Inner>
-      </EuiSplitPanel.Outer>
-
-      <EuiSpacer size="m" />
-
-      <EuiSplitPanel.Outer borderRadius="m" hasShadow={true} hasBorder={true}>
-        <EuiSplitPanel.Inner color="subdued">
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
                 id="xpack.alertingV2.notificationPolicy.form.grouping.title"
                 defaultMessage="Grouping configuration"
               />

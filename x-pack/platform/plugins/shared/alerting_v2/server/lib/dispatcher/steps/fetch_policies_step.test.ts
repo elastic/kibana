@@ -48,7 +48,6 @@ describe('FetchPoliciesStep', () => {
     const policy = result.data?.policies?.get('p1');
     expect(policy?.name).toBe('Policy 1');
     expect(policy?.apiKey).toBe('decrypted-key');
-    expect(policy?.ruleLabels).toEqual([]);
 
     expect(mockFindAllDecrypted).toHaveBeenCalledTimes(1);
   });
@@ -119,7 +118,6 @@ describe('FetchPoliciesStep', () => {
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(2);
     expect(result.data?.policies?.get('p1')?.apiKey).toBe('key-1');
-    expect(result.data?.policies?.get('p1')?.ruleLabels).toEqual(['production']);
     expect(result.data?.policies?.get('p2')?.apiKey).toBe('key-2');
     expect(mockFindAllDecrypted).toHaveBeenCalledTimes(1);
   });

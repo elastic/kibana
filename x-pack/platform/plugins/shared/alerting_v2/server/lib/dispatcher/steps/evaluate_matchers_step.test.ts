@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EvaluateMatchersStep, evaluateMatchers } from './evaluate_matchers_step';
 import {
   createAlertEpisode,
   createDispatcherPipelineState,
   createNotificationPolicy,
   createRule,
 } from '../fixtures/test_utils';
+import { EvaluateMatchersStep, evaluateMatchers } from './evaluate_matchers_step';
 
 describe('EvaluateMatchersStep', () => {
   const step = new EvaluateMatchersStep();
@@ -145,97 +145,6 @@ describe('evaluateMatchers', () => {
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
     expect(matched).toHaveLength(0);
-  });
-
-  describe('rule label scoping', () => {
-    it('matches when policy has no ruleLabels (global)', () => {
-      const episode = createAlertEpisode({ rule_id: 'r1' });
-      const rule = createRule({ id: 'r1', labels: ['production'] });
-      const policy = createNotificationPolicy({ id: 'p1', ruleLabels: [] });
-
-      const matched = evaluateMatchers(
-        [episode],
-        new Map([['r1', rule]]),
-        new Map([['p1', policy]])
-      );
-
-      expect(matched).toHaveLength(1);
-    });
-
-    it('matches when policy ruleLabels overlap with rule labels', () => {
-      const episode = createAlertEpisode({ rule_id: 'r1' });
-      const rule = createRule({ id: 'r1', labels: ['production', 'critical'] });
-      const policy = createNotificationPolicy({ id: 'p1', ruleLabels: ['critical'] });
-
-      const matched = evaluateMatchers(
-        [episode],
-        new Map([['r1', rule]]),
-        new Map([['p1', policy]])
-      );
-
-      expect(matched).toHaveLength(1);
-    });
-
-    it('does not match when policy ruleLabels do not overlap with rule labels', () => {
-      const episode = createAlertEpisode({ rule_id: 'r1' });
-      const rule = createRule({ id: 'r1', labels: ['staging'] });
-      const policy = createNotificationPolicy({ id: 'p1', ruleLabels: ['production'] });
-
-      const matched = evaluateMatchers(
-        [episode],
-        new Map([['r1', rule]]),
-        new Map([['p1', policy]])
-      );
-
-      expect(matched).toHaveLength(0);
-    });
-
-    it('does not match when rule has no labels and policy has ruleLabels', () => {
-      const episode = createAlertEpisode({ rule_id: 'r1' });
-      const rule = createRule({ id: 'r1', labels: [] });
-      const policy = createNotificationPolicy({ id: 'p1', ruleLabels: ['production'] });
-
-      const matched = evaluateMatchers(
-        [episode],
-        new Map([['r1', rule]]),
-        new Map([['p1', policy]])
-      );
-
-      expect(matched).toHaveLength(0);
-    });
-
-    it('applies both rule label scoping and KQL matcher', () => {
-      const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
-      const rule = createRule({ id: 'r1', labels: ['production'] });
-      const matchingPolicy = createNotificationPolicy({
-        id: 'p1',
-        ruleLabels: ['production'],
-        matcher: 'episode_status: active',
-      });
-      const nonMatchingLabelPolicy = createNotificationPolicy({
-        id: 'p2',
-        ruleLabels: ['staging'],
-        matcher: 'episode_status: active',
-      });
-      const nonMatchingKqlPolicy = createNotificationPolicy({
-        id: 'p3',
-        ruleLabels: ['production'],
-        matcher: 'episode_status: inactive',
-      });
-
-      const matched = evaluateMatchers(
-        [episode],
-        new Map([['r1', rule]]),
-        new Map([
-          ['p1', matchingPolicy],
-          ['p2', nonMatchingLabelPolicy],
-          ['p3', nonMatchingKqlPolicy],
-        ])
-      );
-
-      expect(matched).toHaveLength(1);
-      expect(matched[0].policy.id).toBe('p1');
-    });
   });
 
   it('skips disabled policies', () => {

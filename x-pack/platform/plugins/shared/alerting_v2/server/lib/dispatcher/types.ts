@@ -71,8 +71,7 @@ export interface NotificationPolicy {
   snoozedUntil?: string | null;
   /** Target destinations to dispatch matched episodes to */
   destinations: NotificationPolicyDestination[];
-  /** Rule labels to scope this policy to specific rules. Empty = applies to all rules. */
-  ruleLabels: string[];
+
   /** Decrypted base64-encoded API key (id:key) for authenticated workflow dispatch */
   apiKey?: string;
 }
