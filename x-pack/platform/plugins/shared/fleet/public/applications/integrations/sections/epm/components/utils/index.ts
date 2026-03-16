@@ -6,11 +6,13 @@
  */
 
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../types';
+import { isUpcomingDeprecation } from '../../screens/detail/overview/deprecation_callout';
 
 export { promoteFeaturedIntegrations } from './promote_featured_integrations';
 
 // Everywhere we display the title of an integration, we need to add the "(deprecated)" suffix if the integration is deprecated.
 // if the title already contains " (deprecated)", don't add it again, e.g. "Log Management (deprecated)"
+// Upcoming deprecations (currentVersion < deprecated.since) are excluded — they get their own callout, not a title suffix.
 export const wrapTitleWithDeprecated = ({
   title,
   deprecated,
@@ -27,9 +29,11 @@ export const wrapTitleWithDeprecated = ({
   const titleToWrap = title || integrationInfo?.title || packageInfo?.title || defaultTitle;
   const isDeprecated: boolean =
     deprecated ||
-    !!packageInfo?.deprecated ||
+    (!!packageInfo?.deprecated &&
+      !isUpcomingDeprecation(packageInfo.version, packageInfo.deprecated)) ||
     !!packageInfo?.conditions?.deprecated ||
-    !!integrationInfo?.deprecated ||
+    (!!integrationInfo?.deprecated &&
+      !isUpcomingDeprecation(packageInfo?.version ?? '', integrationInfo.deprecated)) ||
     false;
   return isDeprecated &&
     !titleToWrap.match(/ \(deprecated\)$/) &&
