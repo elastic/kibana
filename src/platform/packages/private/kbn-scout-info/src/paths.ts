@@ -58,3 +58,6 @@ export const SCOUT_CONFIG_PATH_REGEX = new RegExp(
 
 export const SCOUT_CONFIG_MANIFEST_PATH_GLOB =
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB + `/.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/*.json`;
+
+// Scout CI
+export const SCOUT_CI_CONFIG_PATH = path.resolve(REPO_ROOT, '.buildkite', 'scout_ci_config.yml');
