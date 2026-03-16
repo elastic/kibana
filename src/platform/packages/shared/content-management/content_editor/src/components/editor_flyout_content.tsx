@@ -123,7 +123,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
     <>
       <EuiFlyoutHeader>
         <EuiTitle data-test-subj="flyoutTitle">
-          <h2>{flyoutTitle}</h2>
+          <h2 id={flyoutTitleId}>{flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
