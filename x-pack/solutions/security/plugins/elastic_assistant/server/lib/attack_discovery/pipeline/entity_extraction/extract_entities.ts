@@ -1,0 +1,126 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/core/server';
+import type { ExtractedEntity, ObservableTypeKey, EntityExtractionConfig } from '../types';
+import { getEcsFieldMappings } from './ecs_field_mappings';
+
+const IPV4_REGEX = /^(\d{1,3}\.){3}\d{1,3}$/;
+
+const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
+  const parts = path.split('.');
+  let current: unknown = obj;
+  for (const part of parts) {
+    if (current == null || typeof current !== 'object') {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+};
+
+const resolveIpType = (value: string): ObservableTypeKey =>
+  IPV4_REGEX.test(value) ? 'ipv4' : 'ipv6';
+
+const isExcluded = (
+  typeKey: ObservableTypeKey,
+  value: string,
+  exclusionFilters: Record<string, string[]>
+): boolean => {
+  const filters = exclusionFilters[typeKey];
+  if (!filters) return false;
+  const normalizedValue = value.toLowerCase().trim();
+  return filters.some((f) => normalizedValue === f.toLowerCase());
+};
+
+const flattenValue = (value: unknown): string[] => {
+  if (value == null) return [];
+  if (Array.isArray(value)) {
+    return value.flatMap(flattenValue);
+  }
+  const str = String(value).trim();
+  return str ? [str] : [];
+};
+
+export interface ExtractionResult {
+  readonly entities: ExtractedEntity[];
+  readonly stats: {
+    readonly totalFields: number;
+    readonly fieldsWithValues: number;
+    readonly entitiesExtracted: number;
+    readonly entitiesAfterDedup: number;
+  };
+}
+
+/**
+ * Extracts observable entities from alert documents using ECS field mappings.
+ * Supports configurable exclusion filters and IP version detection.
+ */
+export const extractEntitiesFromAlerts = ({
+  alerts,
+  config,
+  logger,
+}: {
+  alerts: Array<{ _id: string; _source: Record<string, unknown> }>;
+  config: EntityExtractionConfig;
+  logger: Logger;
+}): ExtractionResult => {
+  const mappings = getEcsFieldMappings();
+  const allEntities: ExtractedEntity[] = [];
+  let totalFields = 0;
+  let fieldsWithValues = 0;
+
+  for (const alert of alerts) {
+    for (const mapping of mappings) {
+      totalFields++;
+      const rawValue = getNestedValue(alert._source, mapping.ecsField);
+      const values = flattenValue(rawValue);
+
+      if (values.length > 0) {
+        fieldsWithValues++;
+
+        for (const value of values) {
+          const typeKey = mapping.detectIpVersion ? resolveIpType(value) : mapping.observableType;
+
+          if (!isExcluded(typeKey, value, config.exclusionFilters)) {
+            allEntities.push({
+              typeKey,
+              value,
+              sourceField: mapping.ecsField,
+              alertId: alert._id,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  const seen = new Set<string>();
+  const dedupedEntities: ExtractedEntity[] = [];
+  for (const entity of allEntities) {
+    const key = `${entity.typeKey}::${entity.value.toLowerCase()}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      dedupedEntities.push(entity);
+    }
+  }
+
+  logger.debug(
+    () =>
+      `extractEntitiesFromAlerts: extracted ${allEntities.length} entities from ${alerts.length} alerts, ${dedupedEntities.length} unique after dedup`
+  );
+
+  return {
+    entities: dedupedEntities,
+    stats: {
+      totalFields,
+      fieldsWithValues,
+      entitiesExtracted: allEntities.length,
+      entitiesAfterDedup: dedupedEntities.length,
+    },
+  };
+};
