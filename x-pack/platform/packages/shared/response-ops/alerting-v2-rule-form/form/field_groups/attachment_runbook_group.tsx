@@ -18,16 +18,22 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
+import { useController, useFormContext } from 'react-hook-form';
 import { RunbookField } from '../fields/runbook_field';
 import type { FormValues } from '../types';
 
 const RUNBOOK_ARTIFACT_TYPE = 'runbook';
 
-export const AttacmentRunbookGroup: React.FC = () => {
-  const { watch, setValue, getValues } = useFormContext<FormValues>();
-  const artifacts = watch('artifacts') ?? [];
-  const runbookArtifact = artifacts.find((artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE);
+export const AttachmentRunbookGroup: React.FC = () => {
+  const { setValue, control } = useFormContext<FormValues>();
+  const {
+    field: { value: artifactsValue },
+  } = useController<FormValues, 'artifacts'>({
+    control,
+    name: 'artifacts',
+  });
+  const artifacts = artifactsValue;
+  const runbookArtifact = artifacts?.find((artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE);
   const runbookValue = runbookArtifact?.value;
   const hasRunbook = Boolean(runbookValue?.trim());
   const runbookTitle = runbookValue
@@ -60,46 +66,41 @@ export const AttacmentRunbookGroup: React.FC = () => {
   }, []);
 
   const onConfirmDeleteRunbook = useCallback(() => {
-    const currentArtifacts = getValues('artifacts') ?? [];
-    const nextArtifacts = currentArtifacts.filter(
+    const nextArtifacts = (artifacts ?? []).filter(
       (artifact) => artifact.type !== RUNBOOK_ARTIFACT_TYPE
     );
-    setValue('artifacts', nextArtifacts.length ? nextArtifacts : undefined, {
-      shouldDirty: true,
-      shouldTouch: true,
-    });
+    setValue('artifacts', nextArtifacts);
     closeDeleteConfirm();
-  }, [closeDeleteConfirm, getValues, setValue]);
+  }, [artifacts, closeDeleteConfirm, setValue]);
 
   const toggleAttachmentsOpen = useCallback(() => {
     setIsAttachmentsOpen((prev) => !prev);
   }, []);
 
   return (
-    <EuiSplitPanel.Outer hasBorder={true} hasShadow={false} grow={false}>
-      <EuiSplitPanel.Inner color="subdued" paddingSize="m">
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType={isAttachmentsOpen ? 'arrowDown' : 'arrowRight'}
-              onClick={toggleAttachmentsOpen}
-              aria-label={i18n.translate('xpack.alertingV2.ruleForm.toggleAttachmentsButtonLabel', {
-                defaultMessage: 'Toggle attachments',
+    <>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={isAttachmentsOpen ? 'arrowDown' : 'arrowRight'}
+            onClick={toggleAttachmentsOpen}
+            aria-label={i18n.translate('xpack.alertingV2.ruleForm.toggleAttachmentsButtonLabel', {
+              defaultMessage: 'Toggle attachments',
+            })}
+            color="text"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <h3>
+              {i18n.translate('xpack.alertingV2.ruleForm.attachmentsGroupTitle', {
+                defaultMessage: 'Attachments',
               })}
-              color="text"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h3>
-                {i18n.translate('xpack.alertingV2.ruleForm.attachmentsGroupTitle', {
-                  defaultMessage: 'Attachments',
-                })}
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiSplitPanel.Inner>
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       {isAttachmentsOpen && (
         <EuiSplitPanel.Inner paddingSize="m">
           {!hasRunbook ? (
@@ -193,6 +194,6 @@ export const AttacmentRunbookGroup: React.FC = () => {
           </p>
         </EuiConfirmModal>
       )}
-    </EuiSplitPanel.Outer>
+    </>
   );
 };

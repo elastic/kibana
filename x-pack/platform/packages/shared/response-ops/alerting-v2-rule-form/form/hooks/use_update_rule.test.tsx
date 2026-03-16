@@ -252,6 +252,32 @@ describe('useUpdateRule', () => {
     });
   });
 
+  it('includes runbook artifact in update payload when defined', async () => {
+    const { http, result } = setupUseUpdateRule();
+
+    http.patch.mockResolvedValue({ id: ruleId, metadata: { name: 'Rule With Runbook' } });
+
+    const formData: FormValues = {
+      ...validFormData,
+      artifacts: [
+        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'runbook-id', type: 'runbook', value: 'Runbook content' },
+      ],
+    };
+
+    await act(async () => {
+      result.current.updateRule(formData);
+    });
+
+    await waitFor(() => {
+      const body = getLastPatchedBody(http);
+      expect(body.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'runbook-id', type: 'runbook', value: 'Runbook content' },
+      ]);
+    });
+  });
+
   it('shows success toast and calls onSuccess callback on successful update', async () => {
     const { http, notifications, onSuccess, result } = setupUseUpdateRule();
 

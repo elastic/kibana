@@ -43,7 +43,7 @@ jest.mock('./fields/kind_field', () => ({
 }));
 
 jest.mock('./field_groups/attachment_runbook_group', () => ({
-  AttacmentRunbookGroup: () => (
+  AttachmentRunbookGroup: () => (
     <div data-test-subj="mockAttachmentRunbookGroup">Attachment Runbook Group</div>
   ),
 }));
@@ -100,7 +100,7 @@ describe('GuiRuleForm', () => {
       expect(screen.getByTestId('mockKindField')).toBeInTheDocument();
     });
 
-    it('renders AttacmentRunbookGroup', () => {
+    it('renders AttachmentRunbookGroup', () => {
       render(<GuiRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
 
       expect(screen.getByTestId('mockAttachmentRunbookGroup')).toBeInTheDocument();

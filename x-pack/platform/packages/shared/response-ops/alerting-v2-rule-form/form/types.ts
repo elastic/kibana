@@ -17,7 +17,6 @@ export interface RuleMetadata {
   description?: string;
   owner?: string;
   labels?: string[];
-  runbook?: string;
 }
 
 export interface RuleSchedule {

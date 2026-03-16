@@ -301,37 +301,12 @@ describe('rule_request_mappers', () => {
       expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
     });
 
-    it('maps metadata.runbook into a runbook artifact', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        metadata: {
-          ...baseFormValues.metadata,
-          runbook: 'Runbook markdown content',
-        },
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.artifacts).toHaveLength(1);
-      expect(result.artifacts?.[0]).toEqual(
-        expect.objectContaining({
-          type: 'runbook',
-          value: 'Runbook markdown content',
-        })
-      );
-      expect(result.artifacts?.[0].id).toEqual(expect.any(String));
-    });
-
     it('replaces existing runbook artifact value while preserving artifact id', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        metadata: {
-          ...baseFormValues.metadata,
-          runbook: 'Updated runbook',
-        },
         artifacts: [
           { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'existing-runbook-id', type: 'runbook', value: 'Old runbook' },
+          { id: 'existing-runbook-id', type: 'runbook', value: '  Existing runbook  ' },
         ],
       };
 
@@ -339,8 +314,83 @@ describe('rule_request_mappers', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'artifact-1', type: 'host', value: 'host-a' },
-        { id: 'existing-runbook-id', type: 'runbook', value: 'Updated runbook' },
+        { id: 'existing-runbook-id', type: 'runbook', value: 'Existing runbook' },
       ]);
+    });
+
+    it('removes empty runbook artifact and keeps other artifacts', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'runbook-id', type: 'runbook', value: '   ' },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+    });
+
+    it('omits artifacts when only runbook artifact is empty', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [{ id: 'runbook-id', type: 'runbook', value: '   ' }],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toBeUndefined();
+    });
+
+    it('omits artifacts when artifacts are empty', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toBeUndefined();
+    });
+
+    it('omits artifacts when artifacts are undefined', () => {
+      const result = mapFormValuesToRuleRequest(baseFormValues);
+
+      expect(result.artifacts).toBeUndefined();
+    });
+
+    it('keeps non-empty runbook artifact value unchanged', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'runbook-id', type: 'runbook', value: 'Valid runbook' },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'runbook-id', type: 'runbook', value: 'Valid runbook' },
+      ]);
+    });
+
+    it('creates runbook artifact id when runbook artifact id is empty', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [{ id: '', type: 'runbook', value: 'Runbook with missing id' }],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toHaveLength(1);
+      expect(result.artifacts?.[0]).toEqual({
+        id: expect.stringMatching(/^runbook-\d+-[a-z0-9]+$/),
+        type: 'runbook',
+        value: 'Runbook with missing id',
+      });
     });
   });
 
@@ -429,6 +479,17 @@ describe('rule_request_mappers', () => {
       expect(result.time_field).toBe('@timestamp');
       expect(result.schedule).toEqual({ every: '5m', lookback: '1m' });
       expect(result.evaluation).toEqual({ query: { base: 'FROM logs-* | LIMIT 10' } });
+    });
+
+    it('coerces empty artifacts array to null for explicit removal', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [],
+      };
+
+      const result = mapFormValuesToUpdateRequest(formValues);
+
+      expect(result.artifacts).toBeNull();
     });
   });
 
@@ -637,7 +698,6 @@ describe('rule_request_mappers', () => {
         { id: 'artifact-1', type: 'host', value: 'host-a' },
         { id: 'runbook-id', type: 'runbook', value: 'Runbook from API' },
       ]);
-      expect(result.metadata?.runbook).toBeUndefined();
     });
 
     it('roundtrips: create request from mapped response matches original API payload', () => {

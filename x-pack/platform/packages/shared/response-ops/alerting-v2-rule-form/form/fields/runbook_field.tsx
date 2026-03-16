@@ -20,7 +20,7 @@ import {
   EuiModalFooter,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
+import { useController, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 
 const RUNBOOK_ROW_ID = 'ruleV2FormRunbookField';
@@ -34,8 +34,14 @@ export interface RunbookFieldProps {
 }
 
 export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) => {
-  const { watch, setValue } = useFormContext<FormValues>();
-  const artifacts = watch('artifacts') ?? [];
+  const { control, setValue } = useFormContext<FormValues>();
+  const {
+    field: { value: artifactsValue },
+  } = useController<FormValues, 'artifacts'>({
+    control,
+    name: 'artifacts',
+  });
+  const artifacts = artifactsValue ?? [];
   const runbookArtifact = artifacts.find((artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE);
   const runbookValue = runbookArtifact?.value ?? '';
   const [draftRunbook, setDraftRunbook] = useState(runbookValue);
@@ -62,10 +68,7 @@ export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) =
         ]
       : nonRunbookArtifacts;
 
-    setValue('artifacts', nextArtifacts.length ? nextArtifacts : undefined, {
-      shouldDirty: true,
-      shouldTouch: true,
-    });
+    setValue('artifacts', nextArtifacts);
     onClose();
   };
 

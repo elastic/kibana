@@ -16,7 +16,7 @@ import { AlertConditionsFieldGroup } from './field_groups/alert_conditions_field
 import { ErrorCallOut } from '../flyout/error_callout';
 import { RULE_FORM_ID } from './constants';
 import { KindField } from './fields/kind_field';
-import { AttacmentRunbookGroup } from './field_groups/attachment_runbook_group';
+import { AttachmentRunbookGroup } from './field_groups/attachment_runbook_group';
 
 export interface GuiRuleFormProps {
   onSubmit: (values: FormValues) => void;
@@ -52,7 +52,7 @@ export const GuiRuleForm = ({ onSubmit, includeQueryEditor = true }: GuiRuleForm
       <EuiSpacer size="m" />
       <AlertConditionsFieldGroup />
       <EuiSpacer size="m" />
-      <AttacmentRunbookGroup />
+      <AttachmentRunbookGroup />
     </EuiForm>
   );
 };

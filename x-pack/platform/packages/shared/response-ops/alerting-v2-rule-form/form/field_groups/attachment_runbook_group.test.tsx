@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createFormWrapper } from '../../test_utils';
-import { AttacmentRunbookGroup } from './attachment_runbook_group';
+import { AttachmentRunbookGroup } from './attachment_runbook_group';
 
 const getRunbookModal = () => {
   const heading = screen.getByRole('heading', { name: 'Add Runbook' });
@@ -45,9 +45,9 @@ const addRunbookText = async (text: string) => {
   await user.click(within(modal).getByRole('button', { name: 'Add Runbook' }));
 };
 
-describe('AttacmentRunbookGroup', () => {
+describe('AttachmentRunbookGroup', () => {
   it('renders attachments title and keeps section closed initially', () => {
-    render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
+    render(<AttachmentRunbookGroup />, { wrapper: createFormWrapper() });
 
     expect(screen.getByText('Attachments')).toBeInTheDocument();
     expect(screen.queryByTestId('addRunbookButton')).not.toBeInTheDocument();
@@ -57,7 +57,7 @@ describe('AttacmentRunbookGroup', () => {
 
   it('opens and closes runbook modal from add button', async () => {
     const user = userEvent.setup();
-    render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
+    render(<AttachmentRunbookGroup />, { wrapper: createFormWrapper() });
 
     await openAttachmentsSection();
     await user.click(screen.getByTestId('addRunbookButton'));
@@ -68,7 +68,7 @@ describe('AttacmentRunbookGroup', () => {
   });
 
   it('saves runbook, hides add button, and shows panel with first line title', async () => {
-    render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
+    render(<AttachmentRunbookGroup />, { wrapper: createFormWrapper() });
 
     await addRunbookText('First line title\nSecond line');
 
@@ -81,7 +81,7 @@ describe('AttacmentRunbookGroup', () => {
 
   it('reopens modal from edit and keeps existing runbook value', async () => {
     const user = userEvent.setup();
-    render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
+    render(<AttachmentRunbookGroup />, { wrapper: createFormWrapper() });
 
     await addRunbookText('Existing runbook title');
     await user.click(screen.getByLabelText('Edit Runbook'));
@@ -92,7 +92,7 @@ describe('AttacmentRunbookGroup', () => {
 
   it('shows delete confirmation and keeps runbook when delete is canceled', async () => {
     const user = userEvent.setup();
-    render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
+    render(<AttachmentRunbookGroup />, { wrapper: createFormWrapper() });
 
     await addRunbookText('Runbook to keep');
     await user.click(screen.getByLabelText('Delete Runbook'));
@@ -106,7 +106,7 @@ describe('AttacmentRunbookGroup', () => {
 
   it('deletes runbook after confirmation and shows add runbook button again', async () => {
     const user = userEvent.setup();
-    render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
+    render(<AttachmentRunbookGroup />, { wrapper: createFormWrapper() });
 
     await addRunbookText('Runbook to delete');
     await user.click(screen.getByLabelText('Delete Runbook'));

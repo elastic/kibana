@@ -17,11 +17,6 @@ const RUNBOOK_ARTIFACT_TYPE = 'runbook';
 const createRunbookArtifactId = () =>
   `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
-// TEMP COMPAT:
-// Keep artifacts visible in this package until all consumers resolve updated schema types.
-type CreateRuleDataCompat = CreateRuleData & { artifacts?: RuleArtifactPayload };
-type UpdateRuleDataCompat = UpdateRuleData & { artifacts?: RuleArtifactPayload | null };
-type RuleResponseCompat = RuleResponse & { artifacts?: RuleArtifactPayload };
 
 // ---------------------------------------------------------------------------
 // FormValues → API request
@@ -142,30 +137,34 @@ export interface RuleRequestCommon {
   artifacts?: RuleArtifactPayload;
 }
 
-const mapArtifacts = (
-  metadata: FormValues['metadata'],
-  artifacts: FormValues['artifacts']
-): RuleRequestCommon['artifacts'] => {
-  const runbookValue = metadata.runbook?.trim(); // legacy fallback
+const mapArtifacts = (artifacts: FormValues['artifacts']): RuleRequestCommon['artifacts'] => {
   const currentArtifacts = artifacts ?? [];
-  const existingRunbookArtifact = currentArtifacts.find(
+  const runbookArtifact = currentArtifacts.find(
     (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
   );
+  const runbookValue = runbookArtifact?.value.trim();
 
-  if (!runbookValue) {
-    return currentArtifacts.length ? currentArtifacts : undefined;
+  if (runbookArtifact && !runbookValue) {
+    const artifactsWithoutRunbook = currentArtifacts.filter(
+      (artifact) => artifact.type !== RUNBOOK_ARTIFACT_TYPE
+    );
+    return artifactsWithoutRunbook.length ? artifactsWithoutRunbook : undefined;
   }
 
-  if (existingRunbookArtifact) {
+  if (runbookArtifact && runbookValue) {
+    const runbookId = runbookArtifact.id.trim() ? runbookArtifact.id : createRunbookArtifactId();
+    if (runbookArtifact.value === runbookValue && runbookArtifact.id === runbookId) {
+      return currentArtifacts.length ? currentArtifacts : undefined;
+    }
+
     return currentArtifacts.map((artifact) =>
-      artifact.type === RUNBOOK_ARTIFACT_TYPE ? { ...artifact, value: runbookValue } : artifact
+      artifact.type === RUNBOOK_ARTIFACT_TYPE
+        ? { ...artifact, id: runbookId, value: runbookValue }
+        : artifact
     );
   }
 
-  return [
-    ...currentArtifacts,
-    { id: createRunbookArtifactId(), type: RUNBOOK_ARTIFACT_TYPE, value: runbookValue },
-  ];
+  return currentArtifacts.length ? currentArtifacts : undefined;
 };
 
 /**
@@ -184,7 +183,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     artifacts,
     kind,
   } = formValues;
-  const mappedArtifacts = mapArtifacts(metadata, artifacts);
+  const mappedArtifacts = mapArtifacts(artifacts);
 
   return {
     metadata: mapMetadata(metadata),
@@ -202,7 +201,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
  * Maps `FormValues` to the create API request payload.
  * Adds `kind` on top of the common request shape since it is required for creation.
  */
-export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRuleDataCompat => ({
+export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRuleData => ({
   kind: formValues.kind,
   ...mapFormValuesToRuleRequest(formValues),
 });
@@ -212,7 +211,7 @@ export const mapFormValuesToCreateRequest = (formValues: FormValues): CreateRule
  * Coerces absent optional fields to `null` so the API interprets them as
  * explicit removals (as opposed to `undefined` which omits the key entirely).
  */
-export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleDataCompat => {
+export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRuleData => {
   const { grouping, recovery_policy, state_transition, artifacts, ...rest } =
     mapFormValuesToRuleRequest(formValues);
 
@@ -280,7 +279,5 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
         },
       }
     : {}),
-  ...((rule as RuleResponseCompat).artifacts
-    ? { artifacts: (rule as RuleResponseCompat).artifacts }
-    : {}),
+  ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
 });

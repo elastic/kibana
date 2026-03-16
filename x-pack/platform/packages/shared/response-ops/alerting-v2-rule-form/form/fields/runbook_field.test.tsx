@@ -99,6 +99,27 @@ describe('RunbookField', () => {
     expect(screen.getByTestId('runbookValueSpy')).toHaveTextContent(/First line\s+Second line/);
   });
 
+  it('clears runbook artifact when saved with empty value', async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+
+    render(
+      <>
+        <RunbookField isOpen={true} onClose={onClose} />
+        <RunbookValueSpy />
+      </>,
+      {
+        wrapper: createFormWrapper(createDefaultValues('Existing runbook')),
+      }
+    );
+
+    await user.clear(screen.getByLabelText('Runbook'));
+    await user.click(screen.getByRole('button', { name: 'Add Runbook' }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('runbookValueSpy')).toHaveTextContent('');
+  });
+
   it('refreshes draft from form value when reopened', async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
