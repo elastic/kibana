@@ -504,6 +504,165 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('POST /api/fleet/cloud_connectors - GCP', () => {
+      const createdConnectorIds: string[] = [];
+
+      after(async () => {
+        for (const id of createdConnectorIds) {
+          try {
+            await supertest
+              .delete(`/api/fleet/cloud_connectors/${id}?force=true`)
+              .set('kbn-xsrf', 'xxxx');
+          } catch (error) {
+            // Connector might already be deleted or not exist
+          }
+        }
+      });
+
+      it('should create a GCP cloud connector successfully', async () => {
+        const response = await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-gcp-connector',
+            cloudProvider: 'gcp',
+            vars: {
+              service_account: {
+                value: 'test-sa@my-project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: 'gcp-connector-id-12345',
+                type: 'text',
+              },
+            },
+          })
+          .expect(200);
+        const body = response.body;
+
+        expect(body.item).to.have.property('id');
+        expect(body.item.name).to.equal('test-gcp-connector');
+        expect(body.item.cloudProvider).to.equal('gcp');
+        expect(body.item.vars).to.have.property('service_account');
+        expect(body.item.vars).to.have.property('audience');
+        expect(body.item.vars).to.have.property('gcp_credentials_cloud_connector_id');
+        expect(body.item).to.have.property('created_at');
+        expect(body.item).to.have.property('updated_at');
+
+        createdConnectorIds.push(body.item.id);
+      });
+
+      it('should return 400 when service_account is missing for GCP', async () => {
+        await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-gcp-connector-missing-sa',
+            cloudProvider: 'gcp',
+            vars: {
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: 'gcp-connector-id-12345',
+                type: 'text',
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('should return 400 when audience is missing for GCP', async () => {
+        await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-gcp-connector-missing-audience',
+            cloudProvider: 'gcp',
+            vars: {
+              service_account: {
+                value: 'test-sa@my-project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: 'gcp-connector-id-12345',
+                type: 'text',
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('should return 400 when gcp_credentials_cloud_connector_id is missing for GCP', async () => {
+        await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-gcp-connector-missing-cc-id',
+            cloudProvider: 'gcp',
+            vars: {
+              service_account: {
+                value: 'test-sa@my-project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+                type: 'text',
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('should accept valid GCP cloud connector with all required fields', async () => {
+        const { body } = await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-gcp-connector-valid',
+            cloudProvider: 'gcp',
+            vars: {
+              service_account: {
+                value: 'valid-sa@project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/999999/locations/global/workloadIdentityPools/pool/providers/provider',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: 'gcp-connector-valid-id',
+                type: 'text',
+              },
+            },
+          })
+          .expect(200);
+
+        expect(body.item).to.have.property('id');
+        expect(body.item.name).to.equal('test-gcp-connector-valid');
+        expect(body.item.vars.service_account.value).to.equal(
+          'valid-sa@project.iam.gserviceaccount.com'
+        );
+        expect(body.item.vars.audience.value).to.equal(
+          '//iam.googleapis.com/projects/999999/locations/global/workloadIdentityPools/pool/providers/provider'
+        );
+        expect(body.item.vars.gcp_credentials_cloud_connector_id.value).to.equal(
+          'gcp-connector-valid-id'
+        );
+
+        createdConnectorIds.push(body.item.id);
+      });
+    });
+
     describe('GET /api/fleet/cloud_connectors - AWS and Azure', () => {
       let createdAwsConnectorId: string;
       let createdAzureConnectorId: string;
@@ -616,6 +775,56 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body.items).to.be.an('array');
+      });
+    });
+
+    describe('GET /api/fleet/cloud_connectors - GCP', () => {
+      let createdGcpConnectorId: string;
+      const testRunId = Date.now();
+
+      before(async () => {
+        const gcpResponse = await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `test-get-gcp-connector-${testRunId}`,
+            cloudProvider: 'gcp',
+            vars: {
+              service_account: {
+                value: 'get-test-sa@project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: 'test-get-gcp-id',
+                type: 'text',
+              },
+            },
+          })
+          .expect(200);
+        createdGcpConnectorId = gcpResponse.body.item.id;
+      });
+
+      it('should get list of cloud connectors including GCP', async () => {
+        const { body } = await supertest.get(`/api/fleet/cloud_connectors`).expect(200);
+
+        expect(body.items).to.be.an('array');
+        expect(body.items.length).to.be.greaterThan(0);
+
+        const connector = body.items.find((c: any) => c.id === createdGcpConnectorId);
+        expect(connector).to.be.an('object');
+        expect(connector.name).to.equal(`test-get-gcp-connector-${testRunId}`);
+        expect(connector.cloudProvider).to.equal('gcp');
+        expect(connector.vars).to.have.property('service_account');
+        expect(connector.vars).to.have.property('audience');
+        expect(connector.vars).to.have.property('gcp_credentials_cloud_connector_id');
+        expect(connector).to.have.property('packagePolicyCount');
+        expect(connector).to.have.property('created_at');
+        expect(connector).to.have.property('updated_at');
       });
     });
 
@@ -821,6 +1030,97 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('DELETE /api/fleet/cloud_connectors/{id} with force option - GCP', () => {
+      let createdGcpConnectorId: string;
+
+      beforeEach(async () => {
+        const gcpResponse = await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `test-force-delete-gcp-connector-${Date.now()}-${Math.random()
+              .toString(36)
+              .substr(2, 9)}`,
+            cloudProvider: 'gcp',
+            vars: {
+              service_account: {
+                value: 'delete-test-sa@project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: 'test-delete-gcp-id',
+                type: 'text',
+              },
+            },
+          })
+          .expect(200);
+        createdGcpConnectorId = gcpResponse.body.item.id;
+      });
+
+      it('should delete GCP cloud connector successfully with force=false when packagePolicyCount is 0', async () => {
+        const { body: getBody } = await supertest
+          .get(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .expect(200);
+
+        expect(getBody.item.packagePolicyCount).to.equal(0);
+
+        const { body } = await supertest
+          .delete(`/api/fleet/cloud_connectors/${createdGcpConnectorId}?force=false`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(body).to.have.property('id', createdGcpConnectorId);
+
+        // Verify connector is deleted
+        await supertest.get(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`).expect(400);
+      });
+
+      it('should delete GCP cloud connector successfully with force=true', async () => {
+        const { body: getBody } = await supertest
+          .get(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .expect(200);
+
+        expect(getBody.item.packagePolicyCount).to.equal(0);
+
+        const { body } = await supertest
+          .delete(`/api/fleet/cloud_connectors/${createdGcpConnectorId}?force=true`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(body).to.have.property('id', createdGcpConnectorId);
+
+        // Verify connector is deleted
+        await supertest.get(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`).expect(400);
+      });
+
+      it('should delete GCP cloud connector successfully without force parameter when packagePolicyCount is 0', async () => {
+        const { body } = await supertest
+          .delete(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(body).to.have.property('id', createdGcpConnectorId);
+
+        // Verify connector is deleted
+        await supertest.get(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`).expect(400);
+      });
+
+      afterEach(async () => {
+        try {
+          await supertest
+            .delete(`/api/fleet/cloud_connectors/${createdGcpConnectorId}?force=true`)
+            .set('kbn-xsrf', 'xxxx');
+        } catch (error) {
+          // Connector might already be deleted
+        }
+      });
+    });
+
     describe('GET /api/fleet/cloud_connectors/{id} - AWS and Azure', () => {
       let createdAwsConnectorId: string;
       let createdAwsConnectorName: string;
@@ -964,6 +1264,76 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
 
         expect(body).to.have.property('message');
+      });
+    });
+
+    describe('GET /api/fleet/cloud_connectors/{id} - GCP', () => {
+      let createdGcpConnectorId: string;
+      let createdGcpConnectorName: string;
+
+      beforeEach(async () => {
+        createdGcpConnectorName = `test-gcp-get-by-id-${Date.now()}-${Math.random()
+          .toString(36)
+          .substr(2, 9)}`;
+        const gcpResponse = await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: createdGcpConnectorName,
+            cloudProvider: 'gcp',
+            vars: {
+              service_account: {
+                value: 'get-by-id-sa@project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: 'gcp-get-by-id-12345',
+                type: 'text',
+              },
+            },
+          })
+          .expect(200);
+        createdGcpConnectorId = gcpResponse.body.item.id;
+      });
+
+      afterEach(async () => {
+        try {
+          await supertest
+            .delete(`/api/fleet/cloud_connectors/${createdGcpConnectorId}?force=true`)
+            .set('kbn-xsrf', 'xxxx');
+        } catch (error) {
+          // Connector might already be deleted
+        }
+      });
+
+      it('should get GCP cloud connector by id successfully', async () => {
+        const { body } = await supertest
+          .get(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .expect(200);
+
+        expect(body.item).to.have.property('id', createdGcpConnectorId);
+        expect(body.item).to.have.property('name', createdGcpConnectorName);
+        expect(body.item).to.have.property('cloudProvider', 'gcp');
+        expect(body.item).to.have.property('packagePolicyCount', 0);
+        expect(body.item).to.have.property('created_at');
+        expect(body.item).to.have.property('updated_at');
+        expect(body.item.vars).to.have.property('service_account');
+        expect(body.item.vars.service_account.value).to.equal(
+          'get-by-id-sa@project.iam.gserviceaccount.com'
+        );
+        expect(body.item.vars).to.have.property('audience');
+        expect(body.item.vars.audience.value).to.equal(
+          '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+        );
+        expect(body.item.vars).to.have.property('gcp_credentials_cloud_connector_id');
+        expect(body.item.vars.gcp_credentials_cloud_connector_id.value).to.equal(
+          'gcp-get-by-id-12345'
+        );
       });
     });
 
@@ -1512,6 +1882,283 @@ export default function (providerContext: FtrProviderContext) {
         // Verify packagePolicyCount is preserved (still 0 since no package policies reference this connector)
         expect(updatedConnector.item.packagePolicyCount).to.equal(0);
         expect(updatedConnector.item.name).to.equal('updated-azure-name-preserve-count');
+      });
+    });
+
+    describe('PUT /api/fleet/cloud_connectors/{id} - GCP', () => {
+      let createdGcpConnectorId: string;
+
+      beforeEach(async () => {
+        const gcpResponse = await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `test-update-gcp-connector-${Date.now()}-${Math.random()
+              .toString(36)
+              .substr(2, 9)}`,
+            cloudProvider: 'gcp',
+            vars: {
+              service_account: {
+                value: 'original-sa@project.iam.gserviceaccount.com',
+                type: 'text',
+              },
+              audience: {
+                value:
+                  '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/original-pool/providers/original-provider',
+                type: 'text',
+              },
+              gcp_credentials_cloud_connector_id: {
+                value: 'original-gcp-id-12345',
+                type: 'text',
+              },
+            },
+          })
+          .expect(200);
+        createdGcpConnectorId = gcpResponse.body.item.id;
+      });
+
+      afterEach(async () => {
+        try {
+          await supertest
+            .delete(`/api/fleet/cloud_connectors/${createdGcpConnectorId}?force=true`)
+            .set('kbn-xsrf', 'xxxx');
+        } catch (error) {
+          // Connector might already be deleted
+        }
+      });
+
+      it('should update GCP cloud connector name successfully', async () => {
+        const updateData = {
+          name: 'updated-gcp-connector-name',
+        };
+
+        const { body } = await supertest
+          .put(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updateData)
+          .expect(200);
+
+        expect(body.item).to.have.property('id', createdGcpConnectorId);
+        expect(body.item).to.have.property('name', 'updated-gcp-connector-name');
+        expect(body.item).to.have.property('cloudProvider', 'gcp');
+        expect(body.item).to.have.property('packagePolicyCount', 0);
+        expect(body.item).to.have.property('updated_at');
+        // Verify vars remain unchanged
+        expect(body.item.vars.service_account.value).to.equal(
+          'original-sa@project.iam.gserviceaccount.com'
+        );
+        expect(body.item.vars.audience.value).to.equal(
+          '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/original-pool/providers/original-provider'
+        );
+        expect(body.item.vars.gcp_credentials_cloud_connector_id.value).to.equal(
+          'original-gcp-id-12345'
+        );
+      });
+
+      it('should update GCP cloud connector vars successfully', async () => {
+        const updateData = {
+          vars: {
+            service_account: {
+              value: 'updated-sa@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/987654321/locations/global/workloadIdentityPools/updated-pool/providers/updated-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'updated-gcp-id-67890',
+              type: 'text',
+            },
+          },
+        };
+
+        const { body } = await supertest
+          .put(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updateData)
+          .expect(200);
+
+        expect(body.item).to.have.property('id', createdGcpConnectorId);
+        expect(body.item).to.have.property('cloudProvider', 'gcp');
+        expect(body.item).to.have.property('packagePolicyCount', 0);
+        expect(body.item).to.have.property('updated_at');
+        // Verify vars are updated
+        expect(body.item.vars.service_account.value).to.equal(
+          'updated-sa@project.iam.gserviceaccount.com'
+        );
+        expect(body.item.vars.audience.value).to.equal(
+          '//iam.googleapis.com/projects/987654321/locations/global/workloadIdentityPools/updated-pool/providers/updated-provider'
+        );
+        expect(body.item.vars.gcp_credentials_cloud_connector_id.value).to.equal(
+          'updated-gcp-id-67890'
+        );
+      });
+
+      it('should update both name and vars successfully for GCP', async () => {
+        const updateData = {
+          name: 'fully-updated-gcp-connector',
+          vars: {
+            service_account: {
+              value: 'fully-updated-sa@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/111111/locations/global/workloadIdentityPools/full-pool/providers/full-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'fully-updated-gcp-id',
+              type: 'text',
+            },
+          },
+        };
+
+        const { body } = await supertest
+          .put(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updateData)
+          .expect(200);
+
+        expect(body.item).to.have.property('id', createdGcpConnectorId);
+        expect(body.item).to.have.property('name', 'fully-updated-gcp-connector');
+        expect(body.item).to.have.property('cloudProvider', 'gcp');
+        expect(body.item).to.have.property('packagePolicyCount', 0);
+        expect(body.item).to.have.property('updated_at');
+        expect(body.item.vars.service_account.value).to.equal(
+          'fully-updated-sa@project.iam.gserviceaccount.com'
+        );
+        expect(body.item.vars.audience.value).to.equal(
+          '//iam.googleapis.com/projects/111111/locations/global/workloadIdentityPools/full-pool/providers/full-provider'
+        );
+        expect(body.item.vars.gcp_credentials_cloud_connector_id.value).to.equal(
+          'fully-updated-gcp-id'
+        );
+      });
+
+      it('should handle empty update request for GCP', async () => {
+        const updateData = {};
+
+        const { body } = await supertest
+          .put(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updateData)
+          .expect(200);
+
+        expect(body.item).to.have.property('id', createdGcpConnectorId);
+        expect(body.item).to.have.property('cloudProvider', 'gcp');
+        expect(body.item).to.have.property('packagePolicyCount', 0);
+        expect(body.item).to.have.property('updated_at');
+        // Verify vars remain unchanged
+        expect(body.item.vars.service_account.value).to.equal(
+          'original-sa@project.iam.gserviceaccount.com'
+        );
+        expect(body.item.vars.audience.value).to.equal(
+          '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/original-pool/providers/original-provider'
+        );
+        expect(body.item.vars.gcp_credentials_cloud_connector_id.value).to.equal(
+          'original-gcp-id-12345'
+        );
+      });
+
+      it('should validate that service_account is required when updating GCP vars', async () => {
+        const updateData = {
+          vars: {
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+            // Missing service_account
+          },
+        };
+
+        const { body } = await supertest
+          .put(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updateData)
+          .expect(400);
+
+        expect(body).to.have.property('message');
+        expect(body.message).to.match(/service_account must be a valid string/);
+      });
+
+      it('should validate that audience is required when updating GCP vars', async () => {
+        const updateData = {
+          vars: {
+            service_account: {
+              value: 'valid-sa@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            gcp_credentials_cloud_connector_id: {
+              value: 'gcp-connector-id',
+              type: 'text',
+            },
+            // Missing audience
+          },
+        };
+
+        const { body } = await supertest
+          .put(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updateData)
+          .expect(400);
+
+        expect(body).to.have.property('message');
+        expect(body.message).to.match(/audience must be a valid string/);
+      });
+
+      it('should validate that gcp_credentials_cloud_connector_id is required when updating GCP vars', async () => {
+        const updateData = {
+          vars: {
+            service_account: {
+              value: 'valid-sa@project.iam.gserviceaccount.com',
+              type: 'text',
+            },
+            audience: {
+              value:
+                '//iam.googleapis.com/projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider',
+              type: 'text',
+            },
+            // Missing gcp_credentials_cloud_connector_id
+          },
+        };
+
+        const { body } = await supertest
+          .put(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updateData)
+          .expect(400);
+
+        expect(body).to.have.property('message');
+        expect(body.message).to.match(/gcp_credentials_cloud_connector_id must be a valid string/);
+      });
+
+      it('should preserve packagePolicyCount when updating GCP connector', async () => {
+        const { body: originalConnector } = await supertest
+          .get(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .expect(200);
+
+        expect(originalConnector.item.packagePolicyCount).to.equal(0);
+
+        const updateData = {
+          name: 'updated-gcp-name-preserve-count',
+        };
+
+        const { body: updatedConnector } = await supertest
+          .put(`/api/fleet/cloud_connectors/${createdGcpConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(updateData)
+          .expect(200);
+
+        expect(updatedConnector.item.packagePolicyCount).to.equal(0);
+        expect(updatedConnector.item.name).to.equal('updated-gcp-name-preserve-count');
       });
     });
 
