@@ -22,3 +22,24 @@ export const loadEcsFlatData = async (): Promise<Record<string, EcsFlatEntry>> =
   cachedEcsFlat = mod.EcsFlat as unknown as Record<string, EcsFlatEntry>;
   return cachedEcsFlat;
 };
+
+/**
+ * Computes a compact summary of ECS root field groups for prompt injection.
+ * Returns a markdown-formatted string listing each root with its sub-field count.
+ */
+export const getEcsRootFieldsSummary = (ecsFlatData: Record<string, EcsFlatEntry>): string => {
+  const rootCounts = new Map<string, number>();
+
+  for (const key of Object.keys(ecsFlatData)) {
+    const dotIndex = key.indexOf('.');
+    if (dotIndex === -1) continue;
+    const root = key.substring(0, dotIndex);
+    rootCounts.set(root, (rootCounts.get(root) ?? 0) + 1);
+  }
+
+  const lines = Array.from(rootCounts.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([root, count]) => `- **${root}** (${count} fields)`);
+
+  return lines.join('\n');
+};

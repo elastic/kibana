@@ -19,9 +19,10 @@ import {
   fetchSamplesTool,
   fetchCurrentPipelineTool,
   getEcsInfoTool,
-  listEcsRootFieldsTool,
   ingestPipelineValidatorTool,
+  testPipelineTool,
   loadEcsFlatData,
+  getEcsRootFieldsSummary,
 } from '../../agents/tools';
 import type { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
 import { INGEST_PIPELINE_GENERATOR_PROMPT } from '../../agents/prompts';
@@ -67,21 +68,33 @@ export class AgentService {
     );
 
     const fetchSamplesToolInstance = fetchSamplesTool(samples);
-    const validatorTool = ingestPipelineValidatorTool(esClient, samples);
+    const testPipelineToolInstance = testPipelineTool(esClient, samples);
     const ecsFlatData = await loadEcsFlatData();
+    const validatorTool = ingestPipelineValidatorTool({
+      esClient,
+      samples,
+      packageName: integrationId,
+      dataStreamName: dataStreamId,
+      ecsFlatData,
+    });
     const ecsInfoTool = getEcsInfoTool(ecsFlatData);
-    const listRootFieldsTool = listEcsRootFieldsTool(ecsFlatData);
+    const ecsRootFieldsSummary = getEcsRootFieldsSummary(ecsFlatData);
 
     const logAndEcsAnalyzerSubAgent = createLogAndEcsAnalyzerAgent({
-      prompt: `You have access to fetch_log_samples, list_ecs_root_fields, and get_ecs_info tools.
+      prompt: `You have access to fetch_log_samples and get_ecs_info tools.
+
+<ecs_root_fields>
+The following ECS root field groups are available. Use get_ecs_info with root_fields to drill into any of these:
+${ecsRootFieldsSummary}
+</ecs_root_fields>
+
 <workflow>
 1. Call fetch_log_samples to retrieve 5-10 sample logs
 2. Analyze the samples to identify format, fields, and characteristics
-3. Call list_ecs_root_fields to discover available ECS field groups
-4. Use get_ecs_info with relevant root_fields (batch multiple in one call) and field_paths to look up ECS field definitions
-5. Provide structured analysis output including ECS mappings and conditional event classification as specified in your system prompt
+3. Use get_ecs_info with relevant root_fields (batch multiple in one call) and field_paths to look up ECS field definitions
+4. Provide structured analysis output including ECS mappings and conditional event classification as specified in your system prompt
 </workflow>`,
-      tools: [fetchSamplesToolInstance, ecsInfoTool, listRootFieldsTool],
+      tools: [fetchSamplesToolInstance, ecsInfoTool],
     });
 
     const pipelineGeneratorSubAgent = createIngestPipelineGeneratorAgent({
@@ -89,13 +102,17 @@ export class AgentService {
       description:
         'Generates an Elasticsearch ingest pipeline based on log analysis and ECS mappings. Validates and iterates autonomously. The current pipeline and validation results are injected into context automatically on follow-up calls.',
       prompt: INGEST_PIPELINE_GENERATOR_PROMPT,
-      tools: [validatorTool, fetchSamplesToolInstance],
+      tools: [validatorTool, testPipelineToolInstance, fetchSamplesToolInstance],
     });
 
     const reviewSubAgent = createReviewAgent({
-      prompt:
-        'The current pipeline, validation results, sample logs, and processed outputs are injected into your context automatically. Use get_ecs_info to verify ECS field compliance. Use fetch_current_pipeline only if the pipeline was not injected.',
-      tools: [fetchCurrentPipelineTool(), ecsInfoTool, listRootFieldsTool],
+      prompt: `The current pipeline, validation results, sample logs, and processed outputs are injected into your context automatically. Use get_ecs_info to verify ECS field compliance. Use fetch_current_pipeline only if the pipeline was not injected.
+
+<ecs_root_fields>
+The following ECS root field groups are available. Use get_ecs_info with root_fields to drill into any of these:
+${ecsRootFieldsSummary}
+</ecs_root_fields>`,
+      tools: [fetchCurrentPipelineTool(), ecsInfoTool],
     });
 
     const automaticImportAgent = createAutomaticImportAgent({

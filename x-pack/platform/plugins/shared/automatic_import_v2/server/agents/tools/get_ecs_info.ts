@@ -61,7 +61,7 @@ const resolveRootField = (
   if (directFields.length === 0 && nestedFieldSets.size === 0) {
     return {
       root_field: rootField,
-      error: `No ECS fields found under "${rootField}". Check spelling or try list_ecs_root_fields to see available roots.`,
+      error: `No ECS fields found under "${rootField}". Check spelling against the ECS root fields list provided in your context.`,
     };
   }
 

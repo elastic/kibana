@@ -6,10 +6,10 @@
  */
 
 export { ingestPipelineValidatorTool } from './ingest_pipeline_validator';
+export { testPipelineTool } from './test_pipeline';
 
 export { fetchSamplesTool } from './fetch_samples';
 export { fetchUniqueKeysTool } from './fetch_unique_keys';
 export { fetchCurrentPipelineTool } from './fetch_current_pipeline';
 export { getEcsInfoTool } from './get_ecs_info';
-export { listEcsRootFieldsTool } from './list_ecs_root_fields';
-export { loadEcsFlatData } from './ecs_data';
+export { loadEcsFlatData, getEcsRootFieldsSummary } from './ecs_data';

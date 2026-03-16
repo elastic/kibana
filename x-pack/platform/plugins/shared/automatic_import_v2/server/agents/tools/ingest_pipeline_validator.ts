@@ -13,6 +13,7 @@ import { z } from '@kbn/zod/v4';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import type { estypes } from '@elastic/elasticsearch';
+import type { EcsFlatEntry } from './get_ecs_info';
 
 const ECS_EVENT_TYPES_PER_CATEGORY: Record<string, string[]> = {
   api: [
@@ -49,6 +50,16 @@ const ECS_EVENT_TYPES_PER_CATEGORY: Record<string, string[]> = {
   web: ['access', 'error', 'info'],
 };
 
+const VALID_EVENT_KINDS = new Set([
+  'alert',
+  'enrichment',
+  'event',
+  'metric',
+  'state',
+  'pipeline_error',
+  'signal',
+]);
+
 const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
   const parts = path.split('.');
   let current: unknown = obj;
@@ -65,6 +76,29 @@ const asArray = (value: unknown): string[] => {
   if (typeof value === 'string') return [value];
   return [];
 };
+
+const IGNORED_FIELDS: string[] = [];
+
+const flattenKeys = (obj: Record<string, unknown>, prefix = ''): string[] => {
+  const keys: string[] = [];
+  for (const [key, value] of Object.entries(obj)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (value != null && typeof value === 'object' && !Array.isArray(value)) {
+      keys.push(...flattenKeys(value as Record<string, unknown>, path));
+    } else {
+      keys.push(path);
+    }
+  }
+  return keys;
+};
+
+interface ValidatorToolOptions {
+  esClient: ElasticsearchClient;
+  samples: string[];
+  packageName: string;
+  dataStreamName: string;
+  ecsFlatData: Record<string, EcsFlatEntry>;
+}
 
 interface DocTemplate {
   _index: string;
@@ -92,14 +126,22 @@ interface FailedSample {
  * Creates a standalone langgraph tool that validates an ingest pipeline against samples.
  * This function can be used independently or through the IngestPipelineValidatorTool class.
  *
- * @param esClient - Elasticsearch client for simulating the pipeline
- * @param samples - Array of log samples to validate the pipeline against
+ * @param options - Validator tool configuration
  * @returns DynamicStructuredTool instance for use in langgraph agents
  */
-export function ingestPipelineValidatorTool(
-  esClient: ElasticsearchClient,
-  samples: string[]
-): DynamicStructuredTool {
+export function ingestPipelineValidatorTool(options: ValidatorToolOptions): DynamicStructuredTool {
+  const { esClient, samples, packageName, dataStreamName, ecsFlatData } = options;
+
+  const ecsFieldSet = new Set(Object.keys(ecsFlatData));
+  const ecsRootSet = new Set<string>();
+  for (const key of ecsFieldSet) {
+    const dotIndex = key.indexOf('.');
+    if (dotIndex !== -1) {
+      ecsRootSet.add(key.substring(0, dotIndex));
+    }
+  }
+  const ignoredFieldSet = new Set(IGNORED_FIELDS);
+  const customFieldPrefix = `${packageName}.${dataStreamName}.`;
   const validatorSchema = z.object({
     // We intentionally keep this schema permissive to avoid LangChain output
     // parsing failures. The model can return the pipeline as:
@@ -339,6 +381,15 @@ export function ingestPipelineValidatorTool(
               }
             }
           }
+
+          const eventKind = getNestedValue(source, 'event.kind');
+          if (typeof eventKind === 'string' && !VALID_EVENT_KINDS.has(eventKind)) {
+            ecsWarnings.push(
+              `Invalid event.kind: "${eventKind}". Valid values: ${[...VALID_EVENT_KINDS].join(
+                ', '
+              )}`
+            );
+          }
         }
 
         const hasTimestamp = successfulDocuments.some(
@@ -349,6 +400,42 @@ export function ingestPipelineValidatorTool(
         }
 
         const uniqueEcsWarnings = [...new Set(ecsWarnings)];
+
+        const fieldNamingErrors: string[] = [];
+
+        for (const doc of successfulDocuments.slice(0, 20)) {
+          const source = doc as Record<string, unknown>;
+          const fieldPaths = flattenKeys(source);
+
+          for (const fieldPath of fieldPaths) {
+            if (ignoredFieldSet.has(fieldPath)) {
+              continue;
+            }
+            if (ecsFieldSet.has(fieldPath)) {
+              continue;
+            }
+
+            const dotIndex = fieldPath.indexOf('.');
+            const root = dotIndex !== -1 ? fieldPath.substring(0, dotIndex) : fieldPath;
+
+            if (ecsRootSet.has(root)) {
+              fieldNamingErrors.push(
+                `Field '${fieldPath}' is under ECS root '${root}' but is not a valid ECS field. ` +
+                  `Custom fields under ECS paths are not allowed. ` +
+                  `Either use a valid ECS field or rename to '${customFieldPrefix}${fieldPath.substring(
+                    dotIndex + 1
+                  )}'.`
+              );
+            } else if (!fieldPath.startsWith(customFieldPrefix)) {
+              fieldNamingErrors.push(
+                `Field '${fieldPath}' is not an ECS field and is not properly namespaced. ` +
+                  `Non-ECS fields must use the format '${customFieldPrefix}<field_name>'.`
+              );
+            }
+          }
+        }
+
+        const uniqueFieldNamingErrors = [...new Set(fieldNamingErrors)];
 
         const detailedResponse = JSON.stringify({
           message: summaryMessage,
@@ -362,6 +449,9 @@ export function ingestPipelineValidatorTool(
             sample: f.sample.substring(0, 500),
           })),
           ...(uniqueEcsWarnings.length > 0 ? { ecs_warnings: uniqueEcsWarnings } : {}),
+          ...(uniqueFieldNamingErrors.length > 0
+            ? { field_naming_errors: uniqueFieldNamingErrors }
+            : {}),
         });
 
         return new Command({
