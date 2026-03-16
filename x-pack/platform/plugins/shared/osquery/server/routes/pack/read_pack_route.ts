@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, map } from 'lodash';
+import { filter, map, mapValues } from 'lodash';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
@@ -76,7 +76,10 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           updated_at: attributes.updated_at,
           updated_by: attributes.updated_by,
           saved_object_id: id,
-          queries: convertSOQueriesToPack(attributes.queries),
+          queries: mapValues(
+            convertSOQueriesToPack(attributes.queries),
+            ({ schedule_id: _s, start_date: _d, ...restQuery }) => restQuery
+          ),
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,
           read_only: attributes.version !== undefined && osqueryPackAssetReference,
