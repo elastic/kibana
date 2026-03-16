@@ -68,6 +68,19 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await expect(page.locator(`td:has-text("${NEW_LOCATION_LABEL}")`)).toBeVisible();
     });
 
+    await test.step('Verify that spaces options are available only after selecting an agent policy', async () => {
+      await page.click('button:has-text("Create location")');
+      await expect(
+        page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
+      ).toBeHidden();
+      await page.click('[aria-label="Select agent policy"]');
+      await page.click('button[role="option"]:has-text("Test fleet policyAgents: 0")');
+      await expect(
+        page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
+      ).toBeVisible();
+      await page.click('button:has-text("Cancel")');
+    });
+
     await test.step('verify Fleet integration', async () => {
       await pageObjects.syntheticsApp.navigateToFleetIntegrationPolicies();
       await page.click(`text="test-monitor-${NEW_LOCATION_LABEL}"`);
