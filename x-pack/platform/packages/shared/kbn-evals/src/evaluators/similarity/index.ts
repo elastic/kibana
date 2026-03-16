@@ -76,14 +76,14 @@ export function createSimilarityEvaluator(config?: { threshold?: number }): Eval
         typeof expected === 'string'
           ? expected
           : expected == null
-            ? ''
-            : JSON.stringify(sortKeys(expected));
+          ? ''
+          : JSON.stringify(sortKeys(expected));
       const outputText =
         typeof output === 'string'
           ? output
           : output == null
-            ? ''
-            : JSON.stringify(sortKeys(output));
+          ? ''
+          : JSON.stringify(sortKeys(output));
 
       if (expectedText.trim().length === 0 && outputText.trim().length === 0) {
         return {
