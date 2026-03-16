@@ -158,7 +158,9 @@ export async function suggest(
         innerText,
         resourceRetriever
       );
-      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.('from *')) ?? {
+      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(
+        fromCommand + ' '
+      )) ?? {
         recommendedQueries: [],
       };
       const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(

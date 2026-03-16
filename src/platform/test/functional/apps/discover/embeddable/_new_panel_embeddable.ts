@@ -68,9 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Dashboards')),
         discover
           .getSavedSearchTitle()
-          .then((lastBreadcrumb) =>
-            expect(lastBreadcrumb).to.be('Editing New by-value Discover session')
-          ),
+          .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be('Editing New Discover session')),
         testSubjects
           .exists('unifiedTabs_tabsBar', { timeout: 1000 })
           .then((unifiedTabs) => expect(unifiedTabs).not.to.be(true)),
