@@ -16,13 +16,13 @@ import {
 } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ExperimentalFeatures } from '../../../common';
-import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
-import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
-import { getRiskScoreTimeSeriesIndex } from '../../../common/entity_analytics/risk_engine/indices';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import { securityTool } from './constants';
+import type { ExperimentalFeatures } from '../../../../common';
+import { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
+import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../../common/constants';
+import { getRiskScoreTimeSeriesIndex } from '../../../../common/entity_analytics/risk_engine/indices';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import { securityTool } from '../constants';
 
 const ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD = 'entity.risk.calculated_score_norm';
 const ENTITY_STORE_ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
