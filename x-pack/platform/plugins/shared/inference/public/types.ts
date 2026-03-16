@@ -9,13 +9,13 @@ import type { ChatCompleteAPI, OutputAPI, InferenceConnector } from '@kbn/infere
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
-export interface ConfigSchema {}
+export interface ConfigSchema { }
 
-export interface InferenceSetupDependencies {}
+export interface InferenceSetupDependencies { }
 
-export interface InferenceStartDependencies {}
+export interface InferenceStartDependencies { }
 
-export interface InferencePublicSetup {}
+export interface InferencePublicSetup { }
 
 export interface InferencePublicStart {
   chatComplete: ChatCompleteAPI;

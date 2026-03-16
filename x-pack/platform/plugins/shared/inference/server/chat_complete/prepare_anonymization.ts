@@ -107,26 +107,26 @@ export const prepareAnonymization = async ({
 
   let existingReplacements = carriedReplacementsId
     ? await withShardRecoveryRetry({
-        logger,
-        operation: 'get_replacements',
-        action: async () => {
-          try {
-            return await repo?.get(namespace, carriedReplacementsId);
-          } catch (error) {
-            if (error instanceof ReplacementsNamespaceMismatchError) {
-              // The carried replacementsId belongs to a different namespace (e.g. after a space
-              // migration). Fall back to generating a fresh document rather than hard-erroring —
-              // callers that persisted an old ID before migration should not receive a 409.
-              logger.warn(
-                `[inference.anonymization.namespace_mismatch] replacements_id=${carriedReplacementsId} requested_namespace=${namespace} actual_namespace=${error.meta.actualNamespace} — falling back to new replacements document`
-              );
-              replacementsId = uuidv4();
-              return null;
-            }
-            throw error;
+      logger,
+      operation: 'get_replacements',
+      action: async () => {
+        try {
+          return await repo?.get(namespace, carriedReplacementsId);
+        } catch (error) {
+          if (error instanceof ReplacementsNamespaceMismatchError) {
+            // The carried replacementsId belongs to a different namespace (e.g. after a space
+            // migration). Fall back to generating a fresh document rather than hard-erroring —
+            // callers that persisted an old ID before migration should not receive a 409.
+            logger.warn(
+              `[inference.anonymization.namespace_mismatch] replacements_id=${carriedReplacementsId} requested_namespace=${namespace} actual_namespace=${error.meta.actualNamespace} — falling back to new replacements document`
+            );
+            replacementsId = uuidv4();
+            return null;
           }
-        },
-      })
+          throw error;
+        }
+      },
+    })
     : null;
 
   const anonymization = await anonymizeMessages({
@@ -201,8 +201,7 @@ export const prepareAnonymization = async ({
       // isRetryableShardRecoveryError is already handled inside withShardRecoveryRetry;
       // if retries are exhausted the error propagates normally here.
       logger.warn(
-        `Replacements update failed for ${replacementsId}, creating new document: ${
-          updateErr instanceof Error ? updateErr.message : String(updateErr)
+        `Replacements update failed for ${replacementsId}, creating new document: ${updateErr instanceof Error ? updateErr.message : String(updateErr)
         }`
       );
       replacementsId = uuidv4();

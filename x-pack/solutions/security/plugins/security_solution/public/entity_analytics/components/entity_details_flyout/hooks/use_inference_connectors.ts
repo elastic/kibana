@@ -20,7 +20,7 @@ const QUERY_KEY = ['entity-analytics', 'load-inference-connectors'];
 export function useLoadInferenceConnectors(): UseQueryResult<UseInferenceConnectorsResult> {
   const { inference } = useKibana().services;
   return useQuery(QUERY_KEY, async () => {
-    const connectors = await inference.getConnectors();
+    const { connectors } = await inference.getConnectors();
     return {
       connectors,
       hasConnectors: connectors.length > 0,

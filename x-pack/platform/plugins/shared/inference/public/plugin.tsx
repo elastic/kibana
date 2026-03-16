@@ -23,13 +23,12 @@ import { createChatCompleteRestApi } from '../common/rest/chat_complete';
 
 export class InferencePlugin
   implements
-    Plugin<
-      InferencePublicSetup,
-      InferencePublicStart,
-      InferenceSetupDependencies,
-      InferenceStartDependencies
-    >
-{
+  Plugin<
+    InferencePublicSetup,
+    InferencePublicStart,
+    InferenceSetupDependencies,
+    InferenceStartDependencies
+  > {
   logger: Logger;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {

@@ -18,12 +18,12 @@ describe('AgentBuilderAccessChecker', () => {
     isActive?: boolean;
     hasAtLeast?: boolean;
   }): LicensingPluginStart =>
-    ({
-      license$: new BehaviorSubject({
-        isActive,
-        hasAtLeast: jest.fn().mockReturnValue(hasAtLeast),
-      }),
-    } as unknown as LicensingPluginStart);
+  ({
+    license$: new BehaviorSubject({
+      isActive,
+      hasAtLeast: jest.fn().mockReturnValue(hasAtLeast),
+    }),
+  } as unknown as LicensingPluginStart);
 
   const createInference = ({
     connectors = [],
@@ -32,10 +32,10 @@ describe('AgentBuilderAccessChecker', () => {
     connectors?: Array<{ id: string }>;
     anonymizationEnabled?: boolean;
   }): InferencePublicStart =>
-    ({
-      getConnectors: jest.fn().mockResolvedValue(connectors),
-      isAnonymizationEnabled: jest.fn().mockResolvedValue(anonymizationEnabled),
-    } as unknown as InferencePublicStart);
+  ({
+    getConnectors: jest.fn().mockResolvedValue(connectors),
+    isAnonymizationEnabled: jest.fn().mockResolvedValue(anonymizationEnabled),
+  } as unknown as InferencePublicStart);
 
   it('derives connector and anonymization flags from connectors payload', async () => {
     const licensing = createLicensing({ isActive: true, hasAtLeast: true });
