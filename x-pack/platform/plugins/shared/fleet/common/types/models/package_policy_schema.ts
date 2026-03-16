@@ -269,6 +269,13 @@ export const NewPackagePolicySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });
 
+/**
+ * Snapshot of the package policy SO schema as of model version 10.22.0.
+ * If NewPackagePolicySchema gains new fields, create PackagePolicySchemaV{next}
+ * that extends this one rather than modifying this schema.
+ */
+export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends({});
+
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
   enabled: schema.maybe(schema.boolean()),

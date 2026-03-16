@@ -41,7 +41,7 @@ import {
   SettingsSchemaV6,
   SettingsSchemaV7,
   SettingsSchemaV8,
-  NewPackagePolicySchema,
+  PackagePolicySchemaV22,
 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -1077,8 +1077,8 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: NewPackagePolicySchema.extends({}, { unknowns: 'ignore' }),
-            create: NewPackagePolicySchema.extends(
+            forwardCompatibility: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV22.extends(
               {
                 enabled: schema.maybe(schema.boolean()),
                 inputs: schema.maybe(schema.arrayOf(schema.any())),
@@ -1237,8 +1237,8 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: NewPackagePolicySchema.extends({}, { unknowns: 'ignore' }),
-            create: NewPackagePolicySchema.extends(
+            forwardCompatibility: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV22.extends(
               {
                 enabled: schema.maybe(schema.boolean()),
                 inputs: schema.maybe(schema.arrayOf(schema.any())),
