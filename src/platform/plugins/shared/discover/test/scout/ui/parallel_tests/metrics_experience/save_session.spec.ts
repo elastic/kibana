@@ -10,14 +10,21 @@
 /**
  * Save session tests.
  *
- * Validates that a configured metrics view can be saved, cleared, and then
- * reloaded from saved searches with full state restoration.
+ * Validates that a configured metrics view (query, breakdown selection,
+ * card count) can be saved, cleared, and then reloaded from saved searches
+ * with full metrics-specific state restoration.
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics_experience';
+import {
+  spaceTest,
+  testData,
+  DEFAULT_TIME_RANGE,
+  DEFAULT_CONFIG,
+} from '../../fixtures/metrics_experience';
 
 const SAVED_SEARCH_NAME = 'Metrics Tier 3 Save Test';
+const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
 
 spaceTest.describe(
   'Metrics in Discover - Save Session',
@@ -46,6 +53,17 @@ spaceTest.describe(
       await expect(metricsExperience.grid).toBeVisible();
       await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
 
+      await spaceTest.step('select a breakdown dimension', async () => {
+        await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+        ).toBeVisible();
+        await discover.waitUntilSearchingHasFinished();
+      });
+
+      const cardCountBefore = await metricsExperience.getVisibleCardCount();
+      const queryBefore = await discover.getEsqlQueryValue();
+
       await spaceTest.step('save the current metrics session', async () => {
         await discover.saveSearch(SAVED_SEARCH_NAME);
       });
@@ -63,6 +81,22 @@ spaceTest.describe(
       await spaceTest.step('metrics grid should be restored', async () => {
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+      });
+
+      await spaceTest.step('breakdown selection should be preserved', async () => {
+        await expect(
+          metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+        ).toBeVisible();
+      });
+
+      await spaceTest.step('card count should match the original session', async () => {
+        const cardCountAfter = await metricsExperience.getVisibleCardCount();
+        expect(cardCountAfter).toStrictEqual(cardCountBefore);
+      });
+
+      await spaceTest.step('ES|QL query should be preserved', async () => {
+        const queryAfter = await discover.getEsqlQueryValue();
+        expect(queryAfter).toStrictEqual(queryBefore);
       });
     });
   }
