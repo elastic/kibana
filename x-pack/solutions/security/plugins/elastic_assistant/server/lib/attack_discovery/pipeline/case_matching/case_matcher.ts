@@ -7,7 +7,7 @@
 
 import type { Logger, KibanaRequest } from '@kbn/core/server';
 import type { CasesServerStart } from '@kbn/cases-plugin/server';
-import { CaseStatuses } from '@kbn/cases-components/src/status/types';
+import { CaseStatuses } from '@kbn/cases-components';
 import type {
   ExtractedEntity,
   CaseMatchScore,
@@ -138,6 +138,12 @@ const fetchOpenCasesWithObservables = async ({
     sortOrder: 'desc',
     perPage: 100,
   });
+
+  if (result.total > result.cases.length) {
+    logger.warn(
+      `Case matching is limited to the ${result.cases.length} most recently updated open cases out of ${result.total} total. Older cases may not be matched.`
+    );
+  }
 
   const casesWithObs: CaseWithObservables[] = [];
 

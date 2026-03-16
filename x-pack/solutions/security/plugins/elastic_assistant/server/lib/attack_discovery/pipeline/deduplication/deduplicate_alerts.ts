@@ -122,6 +122,8 @@ const mergeByHashGroups = (hashGroups: Map<string, string[]>, uf: UnionFind): vo
   }
 };
 
+const MAX_PAIRWISE_GROUP = 500;
+
 const mergeBySimilarity = (
   ruleHostGroups: Map<string, string[]>,
   featureMap: Map<string, AlertFeatureEntry>,
@@ -131,6 +133,12 @@ const mergeBySimilarity = (
   for (const members of ruleHostGroups.values()) {
     if (members.length < 2) {
       // nothing to do
+    } else if (members.length > MAX_PAIRWISE_GROUP) {
+      // Too many members for pairwise comparison — cluster all together
+      // (same rule + host with this many alerts is likely noise)
+      for (let i = 1; i < members.length; i++) {
+        uf.union(members[0], members[i]);
+      }
     } else {
       for (let i = 0; i < members.length; i++) {
         for (let j = i + 1; j < members.length; j++) {

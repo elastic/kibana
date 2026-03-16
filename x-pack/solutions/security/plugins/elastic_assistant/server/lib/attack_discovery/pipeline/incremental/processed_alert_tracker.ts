@@ -10,7 +10,14 @@ import type { ProcessedAlertTracker } from '../types';
 
 const TRACKER_INDEX_PREFIX = '.security-ad-processed-alerts';
 
-const getTrackerIndexName = (spaceId: string): string => `${TRACKER_INDEX_PREFIX}-${spaceId}`;
+const SAFE_SPACE_ID = /^[a-z0-9_-]{1,100}$/i;
+
+const getTrackerIndexName = (spaceId: string): string => {
+  if (!SAFE_SPACE_ID.test(spaceId)) {
+    throw new Error(`Invalid spaceId for tracker index name: ${spaceId}`);
+  }
+  return `${TRACKER_INDEX_PREFIX}-${spaceId}`;
+};
 
 const TRACKER_MAPPINGS = {
   properties: {
@@ -46,9 +53,14 @@ export const ensureTrackerIndex = async ({
       logger.info(`Created processed alert tracker index: ${indexName}`);
     }
   } catch (error) {
-    if ((error as { meta?: { statusCode?: number } }).meta?.statusCode !== 400) {
+    const meta = (error as { meta?: { statusCode?: number; body?: { error?: { type?: string } } } })
+      .meta;
+    const isAlreadyExists =
+      meta?.statusCode === 400 && meta?.body?.error?.type === 'resource_already_exists_exception';
+    if (!isAlreadyExists) {
       throw error;
     }
+    logger.debug(`Tracker index ${indexName} already exists (concurrent creation)`);
   }
 };
 
@@ -70,17 +82,30 @@ export const getProcessedAlertIds = async ({
       query: { term: { case_id: caseId } },
       size: 1,
       sort: [{ last_processed_at: { order: 'desc' as const } }],
+      seq_no_primary_term: true,
     });
 
     const hit = result.hits.hits[0];
     if (!hit?._source) return null;
 
     const source = hit._source as Record<string, unknown>;
+    const caseIdValue = source.case_id;
+    const processedIds = source.processed_alert_ids;
+    const lastProcessed = source.last_processed_at;
+    const genUuids = source.generation_uuids;
+
+    if (typeof caseIdValue !== 'string' || typeof lastProcessed !== 'string') {
+      logger.warn(`Invalid tracker document structure for case ${caseId}, treating as empty`);
+      return null;
+    }
+
     return {
-      caseId: source.case_id as string,
-      processedAlertIds: (source.processed_alert_ids ?? []) as string[],
-      lastProcessedAt: source.last_processed_at as string,
-      generationUuids: (source.generation_uuids ?? []) as string[],
+      caseId: caseIdValue,
+      processedAlertIds: Array.isArray(processedIds) ? (processedIds as string[]) : [],
+      lastProcessedAt: lastProcessed,
+      generationUuids: Array.isArray(genUuids) ? (genUuids as string[]) : [],
+      seqNo: hit._seq_no,
+      primaryTerm: hit._primary_term,
     };
   } catch (error) {
     logger.warn(`Failed to get processed alert IDs for case ${caseId}: ${error}`);
@@ -104,27 +129,56 @@ export const updateProcessedAlertIds = async ({
   logger: Logger;
 }): Promise<void> => {
   const indexName = getTrackerIndexName(spaceId);
-  const existing = await getProcessedAlertIds({ esClient, spaceId, caseId, logger });
+  const maxRetries = 3;
 
-  const allAlertIds = [...new Set([...(existing?.processedAlertIds ?? []), ...newAlertIds])];
-  const allGenerationUuids = [...new Set([...(existing?.generationUuids ?? []), generationUuid])];
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const existing = await getProcessedAlertIds({ esClient, spaceId, caseId, logger });
 
-  await esClient.index({
-    index: indexName,
-    id: `tracker-${caseId}`,
-    document: {
-      case_id: caseId,
-      processed_alert_ids: allAlertIds,
-      last_processed_at: new Date().toISOString(),
-      generation_uuids: allGenerationUuids,
-    },
-    refresh: 'wait_for',
-  });
+    const MAX_TRACKED_ALERTS = 10000;
+    const mergedAlertIds = [...new Set([...(existing?.processedAlertIds ?? []), ...newAlertIds])];
+    const allAlertIds =
+      mergedAlertIds.length > MAX_TRACKED_ALERTS
+        ? mergedAlertIds.slice(-MAX_TRACKED_ALERTS)
+        : mergedAlertIds;
+    const allGenerationUuids = [...new Set([...(existing?.generationUuids ?? []), generationUuid])];
 
-  logger.debug(
-    () =>
-      `Updated processed alert tracker for case ${caseId}: ${allAlertIds.length} total alert IDs (${newAlertIds.length} new)`
-  );
+    const baseParams = {
+      index: indexName,
+      id: `tracker-${caseId}`,
+      document: {
+        case_id: caseId,
+        processed_alert_ids: allAlertIds,
+        last_processed_at: new Date().toISOString(),
+        generation_uuids: allGenerationUuids,
+      },
+      refresh: 'wait_for' as const,
+    };
+
+    const indexParams =
+      existing?.seqNo != null && existing.primaryTerm != null
+        ? { ...baseParams, if_seq_no: existing.seqNo, if_primary_term: existing.primaryTerm }
+        : baseParams;
+
+    try {
+      await esClient.index(indexParams);
+      logger.debug(
+        () =>
+          `Updated processed alert tracker for case ${caseId}: ${allAlertIds.length} total alert IDs (${newAlertIds.length} new)`
+      );
+      return;
+    } catch (error) {
+      const statusCode = (error as { meta?: { statusCode?: number } }).meta?.statusCode;
+      if (statusCode === 409 && attempt < maxRetries - 1) {
+        logger.warn(
+          `Version conflict updating tracker for case ${caseId}, retrying (attempt ${
+            attempt + 1
+          }/${maxRetries})`
+        );
+      } else {
+        throw error;
+      }
+    }
+  }
 };
 
 export const computeDeltaAlertIds = ({

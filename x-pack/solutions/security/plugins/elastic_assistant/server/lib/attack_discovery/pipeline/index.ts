@@ -13,5 +13,12 @@ export { extractEntitiesFromAlerts } from './entity_extraction';
 export { matchAlertsToCases } from './case_matching';
 export { triggerCaseAttackDiscovery } from './case_integration';
 export { getIncrementalDelta, markAlertsProcessed } from './incremental';
-export type { PipelineConfig, PipelineExecutionResult } from './types';
+export type {
+  PipelineConfig,
+  PipelineExecutionResult,
+  ProcessedAlertTracker,
+  ExtractedEntity,
+  CaseMatchScore,
+  ObservableTypeKey,
+} from './types';
 export { DEFAULT_PIPELINE_CONFIG } from './types';

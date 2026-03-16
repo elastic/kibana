@@ -101,6 +101,8 @@ export interface ProcessedAlertTracker {
   readonly processedAlertIds: string[];
   readonly lastProcessedAt: string;
   readonly generationUuids: string[];
+  readonly seqNo?: number;
+  readonly primaryTerm?: number;
 }
 
 export const DEFAULT_PIPELINE_CONFIG: PipelineConfig = {

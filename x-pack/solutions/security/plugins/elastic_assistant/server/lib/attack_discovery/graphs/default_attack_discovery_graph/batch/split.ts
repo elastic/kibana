@@ -51,7 +51,12 @@ const getContextWindowForModel = (model?: string): number | undefined => {
     return exactMatch;
   }
 
-  for (const [knownModel, contextWindow] of Object.entries(KNOWN_CONTEXT_WINDOWS)) {
+  // Sort by key length descending so more-specific models match first (e.g. 'gpt-4-turbo' before 'gpt-4')
+  const sortedEntries = Object.entries(KNOWN_CONTEXT_WINDOWS).sort(
+    ([a], [b]) => b.length - a.length
+  );
+
+  for (const [knownModel, contextWindow] of sortedEntries) {
     if (normalizedModel.includes(knownModel)) {
       return contextWindow;
     }

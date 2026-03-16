@@ -17,9 +17,9 @@ import { DEFAULT_PIPELINE_CONFIG } from '../../../lib/attack_discovery/pipeline/
 
 const PipelineRunRequestBody = z.object({
   dry_run: z.boolean().optional().default(false),
-  max_alerts: z.number().optional().default(500),
-  lookback_minutes: z.number().optional().default(15),
-  similarity_threshold: z.number().optional().default(0.85),
+  max_alerts: z.number().min(1).max(10000).optional().default(500),
+  lookback_minutes: z.number().min(1).max(10080).optional().default(15),
+  similarity_threshold: z.number().min(0).max(1).optional().default(0.85),
 });
 
 const CaseTriggerAdParams = z.object({ caseId: z.string().min(1) });
@@ -127,8 +127,9 @@ export const registerPipelineRoutes = (
         return response.ok({ body: result });
       } catch (err) {
         const error = transformError(err);
+        logger.error(`Pipeline run failed: ${error.message}`);
         return response.customError({
-          body: { message: error.message },
+          body: { message: 'Pipeline execution failed' },
           statusCode: error.statusCode,
         });
       }
@@ -214,8 +215,9 @@ export const registerPipelineRoutes = (
         });
       } catch (err) {
         const error = transformError(err);
+        logger.error(`Case AD trigger failed: ${error.message}`);
         return response.customError({
-          body: { message: error.message },
+          body: { message: 'Incremental AD trigger failed' },
           statusCode: error.statusCode,
         });
       }

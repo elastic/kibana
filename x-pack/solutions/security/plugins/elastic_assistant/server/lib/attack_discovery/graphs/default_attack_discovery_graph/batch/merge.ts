@@ -176,7 +176,10 @@ const runMergePass = async ({
     2
   );
 
-  const query = MERGE_PROMPT_TEMPLATE.replace('{discoveries}', discoveriesJson);
+  const query = MERGE_PROMPT_TEMPLATE.replace('{discoveries}', discoveriesJson).replace(
+    '{format_instructions}',
+    formatInstructions
+  );
 
   logger?.debug(() => `mergeDiscoveries: invoking LLM merge pass (${llmType})`);
 
@@ -186,6 +189,13 @@ const runMergePass = async ({
   })) as unknown as string;
 
   const jsonResponse = extractJson(rawResponse);
+  if (!jsonResponse || (jsonResponse[0] !== '{' && jsonResponse[0] !== '[')) {
+    throw new Error(
+      `LLM merge response was not valid JSON. Raw response starts with: "${String(
+        rawResponse
+      ).slice(0, 100)}"`
+    );
+  }
   const parsed = JSON.parse(jsonResponse);
   const result = generationSchema.parse(parsed);
 

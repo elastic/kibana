@@ -96,9 +96,17 @@ const runCaseMatchingAndAttachment = async (
     }
   }
 
+  const MAX_ATTACHMENTS_PER_CASE = 100;
+
   for (const [caseId, alertIds] of alertsByCaseId) {
     try {
-      for (const alertId of alertIds) {
+      const capped = alertIds.slice(0, MAX_ATTACHMENTS_PER_CASE);
+      if (capped.length < alertIds.length) {
+        ctx.logger.warn(
+          `Capping alert attachments for case ${caseId}: ${capped.length}/${alertIds.length}`
+        );
+      }
+      for (const alertId of capped) {
         await casesClient.attachments.add({
           caseId,
           comment: {
@@ -133,6 +141,10 @@ const runCaseMatchingAndAttachment = async (
     for (const id of createResult.caseIds) {
       affectedCaseIds.add(id);
     }
+    for (const [caseId, ids] of createResult.alertIdsByCaseId) {
+      const existing = alertsByCaseId.get(caseId) ?? [];
+      alertsByCaseId.set(caseId, [...existing, ...ids]);
+    }
   }
 
   await addObservablesToCases({
@@ -156,10 +168,16 @@ const createCaseForUnmatched = async ({
   unmatched: Array<{ alertId: string }>;
   logger: Logger;
   errors: string[];
-}): Promise<{ casesCreated: number; alertsAttached: number; caseIds: string[] }> => {
+}): Promise<{
+  casesCreated: number;
+  alertsAttached: number;
+  caseIds: string[];
+  alertIdsByCaseId: Map<string, string[]>;
+}> => {
   let casesCreated = 0;
   let alertsAttached = 0;
   const caseIds: string[] = [];
+  const alertIdsByCaseId = new Map<string, string[]>();
 
   try {
     const newCase = await casesClient.cases.create({
@@ -173,6 +191,7 @@ const createCaseForUnmatched = async ({
 
     casesCreated++;
     caseIds.push(newCase.id);
+    const attachedAlertIds: string[] = [];
 
     for (const unmatchedResult of unmatched) {
       try {
@@ -187,10 +206,13 @@ const createCaseForUnmatched = async ({
           },
         });
         alertsAttached++;
+        attachedAlertIds.push(unmatchedResult.alertId);
       } catch (error) {
         errors.push(`Failed to attach alert ${unmatchedResult.alertId} to new case: ${error}`);
       }
     }
+
+    alertIdsByCaseId.set(newCase.id, attachedAlertIds);
   } catch (error) {
     errors.push(
       `Failed to create new case for unmatched alerts: ${
@@ -199,7 +221,7 @@ const createCaseForUnmatched = async ({
     );
   }
 
-  return { casesCreated, alertsAttached, caseIds };
+  return { casesCreated, alertsAttached, caseIds, alertIdsByCaseId };
 };
 
 const addObservablesToCases = async ({
@@ -307,7 +329,24 @@ export const runInvestigationPipeline = async ({
   const executionId = uuidv4();
   const startedAt = new Date().toISOString();
   const errors: string[] = [];
-  const config: PipelineConfig = { ...DEFAULT_PIPELINE_CONFIG, ...configOverrides };
+  const config: PipelineConfig = {
+    ...DEFAULT_PIPELINE_CONFIG,
+    ...configOverrides,
+    deduplication: { ...DEFAULT_PIPELINE_CONFIG.deduplication, ...configOverrides?.deduplication },
+    entityExtraction: {
+      ...DEFAULT_PIPELINE_CONFIG.entityExtraction,
+      ...configOverrides?.entityExtraction,
+    },
+    caseMatching: {
+      ...DEFAULT_PIPELINE_CONFIG.caseMatching,
+      ...configOverrides?.caseMatching,
+      weights: {
+        ...DEFAULT_PIPELINE_CONFIG.caseMatching.weights,
+        ...configOverrides?.caseMatching?.weights,
+      },
+    },
+    incrementalAd: { ...DEFAULT_PIPELINE_CONFIG.incrementalAd, ...configOverrides?.incrementalAd },
+  };
 
   logger.info(`Pipeline ${executionId}: starting${dryRun ? ' (dry run)' : ''}`);
 
@@ -402,6 +441,7 @@ export const runInvestigationPipeline = async ({
     await tagAlertsAsProcessed({
       esClient,
       alertIds: alertsResult.alerts.map((a) => a._id),
+      logger,
     });
   } catch (error) {
     errors.push(`Failed to tag alerts as processed: ${error}`);
@@ -468,9 +508,11 @@ const fetchUnprocessedAlerts = async ({
 const tagAlertsAsProcessed = async ({
   esClient,
   alertIds,
+  logger,
 }: {
   esClient: ElasticsearchClient;
   alertIds: string[];
+  logger: Logger;
 }): Promise<void> => {
   if (alertIds.length === 0) return;
 
@@ -478,12 +520,18 @@ const tagAlertsAsProcessed = async ({
     { update: { _id: id, _index: '.alerts-security.alerts-default' } },
     {
       doc: {
-        'kibana.alert.pipeline': { processed: true, processed_at: new Date().toISOString() },
+        kibana: {
+          alert: { pipeline: { processed: true, processed_at: new Date().toISOString() } },
+        },
       },
     },
   ]);
 
-  await esClient.bulk({ operations, refresh: 'wait_for' });
+  const result = await esClient.bulk({ operations, refresh: 'wait_for' });
+  if (result.errors) {
+    const failedCount = result.items.filter((item) => item.update?.error).length;
+    logger.warn(`Failed to tag ${failedCount}/${alertIds.length} alerts as processed`);
+  }
 };
 
 const buildResult = ({

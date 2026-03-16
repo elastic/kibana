@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
@@ -13,12 +14,21 @@ import { deduplicateAlerts } from '../deduplication';
 import { extractEntitiesFromAlerts } from '../entity_extraction';
 import { DEFAULT_PIPELINE_CONFIG } from '../types';
 
+const SAFE_ALERTS_INDEX = /^\.alerts-security\.alerts-[a-z0-9*-]+$/;
+
+const SafeAlertIndexPattern = z
+  .string()
+  .default('.alerts-security.alerts-default')
+  .refine((val) => SAFE_ALERTS_INDEX.test(val), {
+    message: 'index_pattern must target .alerts-security.alerts-* indices',
+  });
+
 export const FetchUnprocessedAlertsStepId = 'security.fetchUnprocessedAlerts';
 
 const FetchAlertsInputSchema = z.object({
-  index_pattern: z.string().default('.alerts-security.alerts-default'),
-  max_alerts: z.number().default(500),
-  lookback_minutes: z.number().default(15),
+  index_pattern: SafeAlertIndexPattern,
+  max_alerts: z.number().min(1).max(10000).default(500),
+  lookback_minutes: z.number().min(1).max(10080).default(15),
 });
 
 const FetchAlertsOutputSchema = z.object({
@@ -89,7 +99,7 @@ export const DeduplicateAlertsStepId = 'security.deduplicateAlerts';
 
 const DedupInputSchema = z.object({
   alert_ids: z.array(z.string()),
-  index_pattern: z.string().default('.alerts-security.alerts-default'),
+  index_pattern: SafeAlertIndexPattern,
   similarity_threshold: z.number().default(0.85),
 });
 
@@ -144,7 +154,7 @@ export const deduplicateAlertsStep = createServerStepDefinition({
     const result = await deduplicateAlerts({
       alerts,
       esClient,
-      logger: context.logger as never,
+      logger: context.logger as Logger,
       similarityThreshold: threshold,
     });
 
@@ -163,7 +173,7 @@ export const ExtractEntitiesStepId = 'security.extractEntities';
 
 const ExtractInputSchema = z.object({
   alert_ids: z.array(z.string()),
-  index_pattern: z.string().default('.alerts-security.alerts-default'),
+  index_pattern: SafeAlertIndexPattern,
 });
 
 const ExtractOutputSchema = z.object({
@@ -218,7 +228,7 @@ export const extractEntitiesStep = createServerStepDefinition({
     const result = extractEntitiesFromAlerts({
       alerts,
       config: DEFAULT_PIPELINE_CONFIG.entityExtraction,
-      logger: context.logger as never,
+      logger: context.logger as Logger,
     });
 
     return {
@@ -238,7 +248,7 @@ export const TagProcessedAlertsStepId = 'security.tagProcessedAlerts';
 
 const TagInputSchema = z.object({
   alert_ids: z.array(z.string()),
-  index_pattern: z.string().default('.alerts-security.alerts-default'),
+  index_pattern: SafeAlertIndexPattern,
 });
 
 const TagOutputSchema = z.object({
@@ -268,13 +278,22 @@ export const tagProcessedAlertsStep = createServerStepDefinition({
       { update: { _id: id, _index: indexPattern } },
       {
         doc: {
-          'kibana.alert.pipeline': { processed: true, processed_at: new Date().toISOString() },
+          kibana: {
+            alert: { pipeline: { processed: true, processed_at: new Date().toISOString() } },
+          },
         },
       },
     ]);
 
-    await esClient.bulk({ operations: body, refresh: 'wait_for' });
+    const result = await esClient.bulk({ operations: body, refresh: 'wait_for' });
+    const failedCount = result.errors
+      ? result.items.filter((item) => item.update?.error).length
+      : 0;
 
-    return { output: { tagged_count: alertIds.length } };
+    if (failedCount > 0) {
+      context.logger.warn(`Failed to tag ${failedCount}/${alertIds.length} alerts as processed`);
+    }
+
+    return { output: { tagged_count: alertIds.length - failedCount } };
   },
 });

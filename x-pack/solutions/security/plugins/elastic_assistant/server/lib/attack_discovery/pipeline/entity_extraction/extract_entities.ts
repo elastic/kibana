@@ -99,10 +99,12 @@ export const extractEntitiesFromAlerts = ({
     }
   }
 
+  // Deduplicate per-alert: same entity value within one alert is redundant,
+  // but the same entity across different alerts must be preserved for case matching
   const seen = new Set<string>();
   const dedupedEntities: ExtractedEntity[] = [];
   for (const entity of allEntities) {
-    const key = `${entity.typeKey}::${entity.value.toLowerCase()}`;
+    const key = `${entity.alertId}::${entity.typeKey}::${entity.value.toLowerCase()}`;
     if (!seen.has(key)) {
       seen.add(key);
       dedupedEntities.push(entity);
