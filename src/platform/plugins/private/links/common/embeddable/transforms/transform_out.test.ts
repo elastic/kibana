@@ -45,8 +45,6 @@ describe('transformOut', () => {
       links: [
         {
           type: 'externalLink',
-          id: 'e2ab286f-0945-4e17-b256-f497b6c3102e',
-          order: 0,
           destination: 'https://github.com/',
           options: {
             openInNewTab: false,
