@@ -35,7 +35,7 @@ export const ProjectPickerSettings = ({ onResetToDefaults }: ProjectPickerSettin
             closePopover();
           },
         },
-        // TODO: Enable this when cloud CPS management link is ready
+        // TODO: Enable this when cloud CPS management link is ready: https://github.com/elastic/kibana/issues/257859
         // {
         //   isSeparator: true as const,
         // },
