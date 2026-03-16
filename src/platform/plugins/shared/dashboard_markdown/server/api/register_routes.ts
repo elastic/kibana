@@ -17,9 +17,9 @@ import { registerSearchRoute } from './search';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const { versioned: versionedRouter } = http.createRouter();
+  registerSearchRoute(versionedRouter);
   registerCreateRoute(versionedRouter);
   registerReadRoute(versionedRouter);
   registerUpdateRoute(versionedRouter);
   registerDeleteRoute(versionedRouter);
-  registerSearchRoute(versionedRouter);
 }

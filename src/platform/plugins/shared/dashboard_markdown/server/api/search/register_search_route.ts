@@ -44,7 +44,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
           return res.forbidden();
         }
 
-        return res.badRequest();
+        return res.badRequest({ body: e.message });
       }
 
       return res.ok({ body: result });

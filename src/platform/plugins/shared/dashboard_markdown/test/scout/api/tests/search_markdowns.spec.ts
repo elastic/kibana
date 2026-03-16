@@ -51,7 +51,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
         ...viewerCredentials.apiKeyHeader,
       },
       body: {
-        search: 'Search Markdown 00',
+        search: '0*',
       },
       responseType: 'json',
     });
@@ -96,7 +96,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
       expect(response).toHaveStatusCode(200);
       expect(response.body.total).toBe(TOTAL_MARKDOWNS);
       expect(response.body.markdowns).toHaveLength(10);
-      expect(response.body.markdowns[0].id).toBe(`test-search-markdown-10`);
+      expect(response.body.markdowns[0].id).toBe(`test-markdown-10`);
     }
   );
 });
