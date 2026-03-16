@@ -151,6 +151,8 @@ export const getVisibleAttachmentsForInput = ({
       if (!attachment.id) {
         return true;
       }
+      // Hide attachments already in the conversation: input attachments with matching IDs
+      // are treated as updates to existing content, not new pills to display.
       return !persistedAttachmentIds.has(attachment.id);
     })
     .map((attachment, index) => ({
