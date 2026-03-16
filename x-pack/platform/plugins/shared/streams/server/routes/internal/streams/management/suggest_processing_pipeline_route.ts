@@ -315,13 +315,13 @@ export const suggestProcessingPipelineRoute = createServerRoute({
             },
           ];
         }
+        const errorMessage = getErrorMessage(error) || 'Failed to generate pipeline suggestion';
         logger.error(
           `[${params.path.name}][suggest_pipeline] Failed to generate pipeline suggestion` +
-            ` (connectorId=${params.body.connector_id}${formatInferenceErrorMeta(error)}): ${
-              error.message
-            }`
+            ` (connectorId=${params.body.connector_id}${formatInferenceErrorMeta(
+              error
+            )}): ${errorMessage}`
         );
-        const errorMessage = error.message || 'Failed to generate pipeline suggestion';
         if (isSSEError(error) && error.status) {
           throw createSSERequestError(errorMessage, error.status);
         }
@@ -330,6 +330,9 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     );
   },
 });
+
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
 
 const formatInferenceErrorMeta = (error: unknown): string => {
   if (isInferenceError(error)) {
@@ -430,9 +433,9 @@ async function processGrokPatterns({
     } else {
       logger.error(
         `[${streamName}][suggest_pipeline][grok] LLM review failed` +
-          ` (connectorId=${connectorId}${formatInferenceErrorMeta(result.reason)}): ${
-            result.reason.message
-          }`
+          ` (connectorId=${connectorId}${formatInferenceErrorMeta(
+            result.reason
+          )}): ${getErrorMessage(result.reason)}`
       );
     }
     return acc;
@@ -581,9 +584,7 @@ async function processDissectPattern({
   } catch (error) {
     logger.error(
       `[${streamName}][suggest_pipeline][dissect] LLM review failed` +
-        ` (connectorId=${connectorId}${formatInferenceErrorMeta(error)}): ${
-          error instanceof Error ? error.message : String(error)
-        }`
+        ` (connectorId=${connectorId}${formatInferenceErrorMeta(error)}): ${getErrorMessage(error)}`
     );
     throw error;
   }
