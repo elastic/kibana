@@ -19,8 +19,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
 import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
+import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useAllResults } from './use_all_results';
@@ -247,12 +247,17 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   // --- Unified DataTable: handlers ---
   const handleSort = useCallback((newSort: string[][]) => {
-    setSortingColumns(
-      newSort.slice(0, 1).map(([id, direction]) => ({
+    setSortingColumns((prevCols) => {
+      const prevIds = new Set(prevCols.map((col) => col.id));
+      const added = newSort.filter(([id]) => !prevIds.has(id));
+      const existing = newSort.filter(([id]) => prevIds.has(id));
+      const reordered = [...added, ...existing];
+
+      return reordered.slice(0, 1).map(([id, direction]) => ({
         id,
         direction: direction as 'asc' | 'desc',
-      }))
-    );
+      }));
+    });
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, []);
 
