@@ -138,4 +138,3 @@ export function validateLogExtractionParams(
   validateAdditionalIndexPatterns(data, ctx);
   validateDelayVsLookbackPeriod(data, ctx);
 }
-
