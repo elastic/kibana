@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObject,
+} from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceFeatureConfig } from './types';
 import type { InferenceSettingsAttributes } from '../common/types';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
-import { InferenceEndpoints } from './inference_endpoints';
+import { getForFeature } from './inference_endpoints';
 
 const createValidFeature = (
   overrides: Partial<InferenceFeatureConfig> = {}
@@ -31,9 +36,9 @@ const createEndpointInfo = (id: string): InferenceInferenceEndpointInfo =>
     service: 'elasticsearch',
   } as InferenceInferenceEndpointInfo);
 
-const createSoRepo = (
+const createSoClient = (
   features: InferenceSettingsAttributes['features'] | 'not_found' = []
-): ISavedObjectsRepository =>
+): SavedObjectsClientContract =>
   ({
     get: jest.fn().mockImplementation(() => {
       if (features === 'not_found') {
@@ -45,7 +50,7 @@ const createSoRepo = (
         attributes: { features },
       } as SavedObject<InferenceSettingsAttributes>;
     }),
-  } as unknown as ISavedObjectsRepository);
+  } as unknown as SavedObjectsClientContract);
 
 const createEsClient = (
   endpointMap: Record<string, InferenceInferenceEndpointInfo | 'not_found'> = {}
@@ -64,52 +69,54 @@ const createEsClient = (
     },
   } as unknown as ElasticsearchClient);
 
-describe('InferenceEndpoints', () => {
+describe('getForFeature', () => {
   let registry: InferenceFeatureRegistry;
 
   beforeEach(() => {
-    registry = new InferenceFeatureRegistry();
+    registry = new InferenceFeatureRegistry(loggingSystemMock.createLogger());
   });
 
-  const makeEndpoints = (
-    soRepo: ISavedObjectsRepository,
-    esClient: ElasticsearchClient
-  ): InferenceEndpoints => new InferenceEndpoints(registry, soRepo, esClient);
-
   it('throws when featureId is not registered', async () => {
-    const ep = makeEndpoints(createSoRepo(), createEsClient());
-    await expect(ep.getForFeature('unknown')).rejects.toThrow('not registered');
+    await expect(
+      getForFeature(registry, createSoClient(), createEsClient(), 'unknown')
+    ).rejects.toThrow('not registered');
   });
 
   it('returns empty result when no endpoints resolved', async () => {
     registry.register(createValidFeature({ featureId: 'f1' }));
-    const ep = makeEndpoints(createSoRepo(), createEsClient());
-    await expect(ep.getForFeature('f1')).resolves.toEqual({ endpoints: [], warnings: [] });
+    await expect(
+      getForFeature(registry, createSoClient(), createEsClient(), 'f1')
+    ).resolves.toEqual({ endpoints: [], warnings: [] });
   });
 
   it('returns hydrated endpoints from SO override', async () => {
     registry.register(createValidFeature({ featureId: 'f1' }));
     const info = createEndpointInfo('ep1');
-    const ep = makeEndpoints(
-      createSoRepo([{ feature_id: 'f1', endpoints: [{ id: 'ep1' }] }]),
-      createEsClient({ ep1: info })
-    );
-    await expect(ep.getForFeature('f1')).resolves.toEqual({ endpoints: [info], warnings: [] });
+    await expect(
+      getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'f1', endpoints: [{ id: 'ep1' }] }]),
+        createEsClient({ ep1: info }),
+        'f1'
+      )
+    ).resolves.toEqual({ endpoints: [info], warnings: [] });
   });
 
   it('returns hydrated endpoints from recommendedEndpoints', async () => {
     registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
     const info = createEndpointInfo('rec1');
-    const ep = makeEndpoints(createSoRepo(), createEsClient({ rec1: info }));
-    await expect(ep.getForFeature('f1')).resolves.toEqual({ endpoints: [info], warnings: [] });
+    await expect(
+      getForFeature(registry, createSoClient(), createEsClient({ rec1: info }), 'f1')
+    ).resolves.toEqual({ endpoints: [info], warnings: [] });
   });
 
   it('walks the fallback chain to parent recommendedEndpoints', async () => {
     registry.register(createValidFeature({ featureId: 'parent', recommendedEndpoints: ['prec1'] }));
     registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
     const info = createEndpointInfo('prec1');
-    const ep = makeEndpoints(createSoRepo(), createEsClient({ prec1: info }));
-    await expect(ep.getForFeature('child')).resolves.toEqual({ endpoints: [info], warnings: [] });
+    await expect(
+      getForFeature(registry, createSoClient(), createEsClient({ prec1: info }), 'child')
+    ).resolves.toEqual({ endpoints: [info], warnings: [] });
   });
 
   it('walks the full chain: child -> parent -> grandparent', async () => {
@@ -119,35 +126,43 @@ describe('InferenceEndpoints', () => {
     registry.register(createValidFeature({ featureId: 'parent', parentFeatureId: 'grandparent' }));
     registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
     const info = createEndpointInfo('gp_ep');
-    const ep = makeEndpoints(createSoRepo(), createEsClient({ gp_ep: info }));
-    await expect(ep.getForFeature('child')).resolves.toEqual({ endpoints: [info], warnings: [] });
+    await expect(
+      getForFeature(registry, createSoClient(), createEsClient({ gp_ep: info }), 'child')
+    ).resolves.toEqual({ endpoints: [info], warnings: [] });
   });
 
   it('prefers SO override over recommendedEndpoints', async () => {
     registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
     const soInfo = createEndpointInfo('so_ep');
-    const ep = makeEndpoints(
-      createSoRepo([{ feature_id: 'f1', endpoints: [{ id: 'so_ep' }] }]),
-      createEsClient({ so_ep: soInfo, rec1: createEndpointInfo('rec1') })
-    );
-    await expect(ep.getForFeature('f1')).resolves.toEqual({ endpoints: [soInfo], warnings: [] });
+    await expect(
+      getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'f1', endpoints: [{ id: 'so_ep' }] }]),
+        createEsClient({ so_ep: soInfo, rec1: createEndpointInfo('rec1') }),
+        'f1'
+      )
+    ).resolves.toEqual({ endpoints: [soInfo], warnings: [] });
   });
 
   it('skips SO entry with empty endpoints and falls through to recommended', async () => {
     registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
     const info = createEndpointInfo('rec1');
-    const ep = makeEndpoints(
-      createSoRepo([{ feature_id: 'f1', endpoints: [] }]),
-      createEsClient({ rec1: info })
-    );
-    await expect(ep.getForFeature('f1')).resolves.toEqual({ endpoints: [info], warnings: [] });
+    await expect(
+      getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'f1', endpoints: [] }]),
+        createEsClient({ rec1: info }),
+        'f1'
+      )
+    ).resolves.toEqual({ endpoints: [info], warnings: [] });
   });
 
   it('handles SO 404 and falls through to recommended', async () => {
     registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
     const info = createEndpointInfo('rec1');
-    const ep = makeEndpoints(createSoRepo('not_found'), createEsClient({ rec1: info }));
-    await expect(ep.getForFeature('f1')).resolves.toEqual({ endpoints: [info], warnings: [] });
+    await expect(
+      getForFeature(registry, createSoClient('not_found'), createEsClient({ rec1: info }), 'f1')
+    ).resolves.toEqual({ endpoints: [info], warnings: [] });
   });
 
   it('returns warning for ES endpoints that no longer exist (404)', async () => {
@@ -155,8 +170,12 @@ describe('InferenceEndpoints', () => {
       createValidFeature({ featureId: 'f1', recommendedEndpoints: ['ep1', 'ep2'] })
     );
     const info = createEndpointInfo('ep2');
-    const ep = makeEndpoints(createSoRepo(), createEsClient({ ep1: 'not_found', ep2: info }));
-    const result = await ep.getForFeature('f1');
+    const result = await getForFeature(
+      registry,
+      createSoClient(),
+      createEsClient({ ep1: 'not_found', ep2: info }),
+      'f1'
+    );
     expect(result.endpoints).toEqual([info]);
     expect(result.warnings).toHaveLength(1);
     expect(result.warnings[0]).toContain('ep1');
@@ -171,17 +190,19 @@ describe('InferenceEndpoints', () => {
           .mockRejectedValue(Object.assign(new Error('ES unavailable'), { statusCode: 503 })),
       },
     } as unknown as ElasticsearchClient;
-    const ep = makeEndpoints(createSoRepo(), esClient);
-    await expect(ep.getForFeature('f1')).rejects.toThrow('ES unavailable');
+    await expect(getForFeature(registry, createSoClient(), esClient, 'f1')).rejects.toThrow(
+      'ES unavailable'
+    );
   });
 
   it('propagates non-404 SO errors', async () => {
     registry.register(createValidFeature({ featureId: 'f1' }));
-    const soRepo = {
+    const soClient = {
       get: jest.fn().mockRejectedValue(new Error('Connection refused')),
-    } as unknown as ISavedObjectsRepository;
-    const ep = makeEndpoints(soRepo, createEsClient());
-    await expect(ep.getForFeature('f1')).rejects.toThrow('Connection refused');
+    } as unknown as SavedObjectsClientContract;
+    await expect(getForFeature(registry, soClient, createEsClient(), 'f1')).rejects.toThrow(
+      'Connection refused'
+    );
   });
 
   it('detects cycles and returns empty result', async () => {
@@ -189,7 +210,8 @@ describe('InferenceEndpoints', () => {
     registry.register(createValidFeature({ featureId: 'b', parentFeatureId: 'a' }));
     // Inject cycle
     (registry as any).features.get('a').parentFeatureId = 'b';
-    const ep = makeEndpoints(createSoRepo(), createEsClient());
-    await expect(ep.getForFeature('a')).resolves.toEqual({ endpoints: [], warnings: [] });
+    await expect(getForFeature(registry, createSoClient(), createEsClient(), 'a')).resolves.toEqual(
+      { endpoints: [], warnings: [] }
+    );
   });
 });

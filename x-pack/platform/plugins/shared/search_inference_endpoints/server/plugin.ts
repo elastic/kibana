@@ -8,6 +8,7 @@
 import type {
   CoreSetup,
   CoreStart,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -19,7 +20,7 @@ import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
-import { InferenceEndpoints } from './inference_endpoints';
+import { getForFeature } from './inference_endpoints';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   SearchInferenceEndpointsPluginSetup,
@@ -126,18 +127,25 @@ export class SearchInferenceEndpointsPlugin
       this.dynamicConnectorsPoller.start();
     }
 
-    const internalRepo = core.savedObjects.createInternalRepository([INFERENCE_SETTINGS_SO_TYPE]);
-    const esClient = core.elasticsearch.client.asInternalUser;
-    const endpoints = new InferenceEndpoints(this.featureRegistry, internalRepo, esClient);
+    const featureRegistry = this.featureRegistry;
 
     return {
       features: {
-        get: this.featureRegistry.get.bind(this.featureRegistry),
-        getAll: this.featureRegistry.getAll.bind(this.featureRegistry),
-        register: this.featureRegistry.register.bind(this.featureRegistry),
+        get: featureRegistry.get.bind(featureRegistry),
+        getAll: featureRegistry.getAll.bind(featureRegistry),
+        register: featureRegistry.register.bind(featureRegistry),
       },
       endpoints: {
-        getForFeature: endpoints.getForFeature.bind(endpoints),
+        asScoped: (request: KibanaRequest) => {
+          const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+          const soClient = core.savedObjects.getScopedClient(request, {
+            includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
+          });
+          return {
+            getForFeature: (featureId: string) =>
+              getForFeature(featureRegistry, soClient, esClient, featureId),
+          };
+        },
       },
     };
   }

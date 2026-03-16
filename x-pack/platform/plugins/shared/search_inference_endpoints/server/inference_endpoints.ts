@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
@@ -14,117 +14,136 @@ import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
 import type { ResolvedInferenceEndpoints } from './types';
 
-export class InferenceEndpoints {
-  constructor(
-    private readonly registry: InferenceFeatureRegistry,
-    private readonly soRepo: ISavedObjectsRepository,
-    private readonly esClient: ElasticsearchClient
-  ) {}
+/**
+ * Returns the resolved inference endpoints for a feature.
+ * Walks the fallback chain (admin SO override → recommendedEndpoints → parent feature)
+ * and fetches full endpoint objects from Elasticsearch.
+ *
+ * @param registry - The feature registry to look up feature configs.
+ * @param soClient - A scoped saved objects client.
+ * @param esClient - A scoped Elasticsearch client.
+ * @param featureId - The feature to resolve endpoints for.
+ * @throws If `featureId` is not registered.
+ */
+export const getForFeature = async (
+  registry: InferenceFeatureRegistry,
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  featureId: string
+): Promise<ResolvedInferenceEndpoints> => {
+  const endpointIds = await resolveEndpointIds(registry, soClient, featureId);
+  if (endpointIds.length === 0) {
+    return { endpoints: [], warnings: [] };
+  }
+  return fetchEndpoints(esClient, endpointIds);
+};
 
-  /**
-   * Returns the resolved inference endpoints for a feature.
-   * Walks the fallback chain (admin SO override → recommendedEndpoints → parent feature)
-   * and fetches full endpoint objects from Elasticsearch.
-   *
-   * @param featureId - The feature to resolve endpoints for.
-   * @throws If `featureId` is not registered.
-   */
-  async getForFeature(featureId: string): Promise<ResolvedInferenceEndpoints> {
-    const endpointIds = await this.resolveEndpointIds(featureId);
-    if (endpointIds.length === 0) {
-      return { endpoints: [], warnings: [] };
-    }
-    return this.fetchEndpoints(endpointIds);
+const resolveEndpointIds = async (
+  registry: InferenceFeatureRegistry,
+  soClient: SavedObjectsClientContract,
+  featureId: string
+): Promise<string[]> => {
+  if (!registry.get(featureId)) {
+    throw new Error(
+      i18n.translate('xpack.searchInferenceEndpoints.endpoints.featureNotFound', {
+        defaultMessage: 'Feature with id "{featureId}" is not registered.',
+        values: { featureId },
+      })
+    );
   }
 
-  private async resolveEndpointIds(featureId: string): Promise<string[]> {
-    if (!this.registry.get(featureId)) {
-      throw new Error(
-        i18n.translate('xpack.searchInferenceEndpoints.endpoints.featureNotFound', {
-          defaultMessage: 'Feature with id "{featureId}" is not registered.',
-          values: { featureId },
+  const soFeatures = await readSettingsFeatures(soClient);
+  const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
+
+  // Walk the fallback chain for the feature:
+  // 1. Check for an admin-configured SO override for the current feature
+  // 2. Fall back to the feature's recommendedEndpoints
+  // 3. If neither exists, follow the parentFeatureId link and repeat
+  // The visited set prevents infinite loops from circular parent references.
+  const visited = new Set<string>();
+  let currentId = featureId;
+
+  while (!visited.has(currentId)) {
+    visited.add(currentId);
+    const current = registry.get(currentId);
+    if (!current) {
+      break;
+    }
+
+    const soEntry = soFeaturesMap.get(currentId);
+    if (soEntry && soEntry.endpoints.length > 0) {
+      return soEntry.endpoints.map((e) => e.id);
+    }
+
+    if (current.recommendedEndpoints.length > 0) {
+      return current.recommendedEndpoints;
+    }
+
+    if (current.parentFeatureId) {
+      currentId = current.parentFeatureId;
+    } else {
+      break;
+    }
+  }
+
+  return [];
+};
+
+/**
+ * Fetches full inference endpoint objects from Elasticsearch by their IDs.
+ * Returns the successfully fetched endpoints and warnings for any that were not found (404).
+ * Non-404 errors are propagated.
+ */
+const fetchEndpoints = async (
+  esClient: ElasticsearchClient,
+  ids: string[]
+): Promise<ResolvedInferenceEndpoints> => {
+  const endpoints: InferenceInferenceEndpointInfo[] = [];
+  const warnings: string[] = [];
+
+  const results = await Promise.all(
+    ids.map(async (id) => {
+      try {
+        const response = await esClient.inference.get({ inference_id: id });
+        return { id, endpoint: response.endpoints[0] ?? null };
+      } catch (e) {
+        if (e?.statusCode === 404) {
+          return { id, endpoint: null };
+        }
+        throw e;
+      }
+    })
+  );
+
+  for (const { id, endpoint } of results) {
+    if (endpoint) {
+      endpoints.push(endpoint);
+    } else {
+      warnings.push(
+        i18n.translate('xpack.searchInferenceEndpoints.endpoints.endpointNotFound', {
+          defaultMessage: 'Inference endpoint "{endpointId}" was not found in Elasticsearch.',
+          values: { endpointId: id },
         })
       );
     }
-
-    const soFeatures = await this.readSettingsFeatures();
-    const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
-
-    const visited = new Set<string>();
-    let currentId = featureId;
-
-    while (!visited.has(currentId)) {
-      visited.add(currentId);
-      const current = this.registry.get(currentId);
-      if (!current) {
-        break;
-      }
-
-      const soEntry = soFeaturesMap.get(currentId);
-      if (soEntry && soEntry.endpoints.length > 0) {
-        return soEntry.endpoints.map((e) => e.id);
-      }
-
-      if (current.recommendedEndpoints.length > 0) {
-        return current.recommendedEndpoints;
-      }
-
-      if (current.parentFeatureId) {
-        currentId = current.parentFeatureId;
-      } else {
-        break;
-      }
-    }
-
-    return [];
   }
 
-  private async fetchEndpoints(ids: string[]): Promise<ResolvedInferenceEndpoints> {
-    const endpoints: InferenceInferenceEndpointInfo[] = [];
-    const warnings: string[] = [];
+  return { endpoints, warnings };
+};
 
-    const results = await Promise.all(
-      ids.map(async (id) => {
-        try {
-          const response = await this.esClient.inference.get({ inference_id: id });
-          return { id, endpoint: response.endpoints[0] ?? null };
-        } catch (e) {
-          if (e?.statusCode === 404) {
-            return { id, endpoint: null };
-          }
-          throw e;
-        }
-      })
+const readSettingsFeatures = async (
+  soClient: SavedObjectsClientContract
+): Promise<InferenceSettingsAttributes['features']> => {
+  try {
+    const so = await soClient.get<InferenceSettingsAttributes>(
+      INFERENCE_SETTINGS_SO_TYPE,
+      INFERENCE_SETTINGS_ID
     );
-
-    for (const { id, endpoint } of results) {
-      if (endpoint) {
-        endpoints.push(endpoint);
-      } else {
-        warnings.push(
-          i18n.translate('xpack.searchInferenceEndpoints.endpoints.endpointNotFound', {
-            defaultMessage: 'Inference endpoint "{endpointId}" was not found in Elasticsearch.',
-            values: { endpointId: id },
-          })
-        );
-      }
+    return so.attributes.features ?? [];
+  } catch (e) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      return [];
     }
-
-    return { endpoints, warnings };
+    throw e;
   }
-
-  private async readSettingsFeatures(): Promise<InferenceSettingsAttributes['features']> {
-    try {
-      const so = await this.soRepo.get<InferenceSettingsAttributes>(
-        INFERENCE_SETTINGS_SO_TYPE,
-        INFERENCE_SETTINGS_ID
-      );
-      return so.attributes.features ?? [];
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        return [];
-      }
-      throw e;
-    }
-  }
-}
+};
