@@ -7,6 +7,7 @@
 
 import type { ConfigType } from '../../../config';
 import { postTaskRoute } from './post_task_route';
+import { getCaseTasksRoute } from './get_case_tasks_route';
 import { getTaskRoute } from './get_task_route';
 import { findTasksRoute } from './find_tasks_route';
 import { patchTaskRoute } from './patch_task_route';
@@ -25,6 +26,7 @@ export const getTaskRoutes = (config: ConfigType) => {
 
   return [
     postTaskRoute,
+    getCaseTasksRoute,
     getTaskRoute,
     findTasksRoute,
     patchTaskRoute,

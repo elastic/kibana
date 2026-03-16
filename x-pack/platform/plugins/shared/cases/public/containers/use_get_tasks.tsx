@@ -17,6 +17,8 @@ export const useGetTasks = (caseId: string, params?: FindTasksRequest) => {
     {
       enabled: Boolean(caseId),
       keepPreviousData: true,
+      retry: false,
+      staleTime: 30_000,
     }
   );
 };
