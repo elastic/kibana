@@ -76,13 +76,7 @@ export async function getESQLAdHocDataview({
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  const indexPattern = getIndexPatternFromESQLQuery(query);
-  const prefix = options?.idPrefix ?? 'esql';
-  const dataViewId = await sha256(`${prefix}-${indexPattern}`);
-
   if (options?.createNewInstanceEvenIfCachedOneAvailable) {
-    // overwise it might return a cached data view with a different time field
-    dataViewsService.clearInstanceCache(dataViewId);
     timeFieldCache.delete(query);
   }
 
@@ -101,6 +95,16 @@ export async function getESQLAdHocDataview({
       timeFieldCache.set(query, timeField);
     }
   }
+
+  const indexPattern = getIndexPatternFromESQLQuery(query);
+  const prefix = options?.idPrefix ?? 'esql';
+  const dataViewId = await sha256(`${prefix}-${indexPattern}-${timeField}`);
+
+  if (options?.createNewInstanceEvenIfCachedOneAvailable) {
+    // overwise it might return a cached data view with a different time field
+    dataViewsService.clearInstanceCache(dataViewId);
+  }
+
   const skipFetchFields = options?.skipFetchFields ?? false;
 
   const dataView = await dataViewsService.create(
