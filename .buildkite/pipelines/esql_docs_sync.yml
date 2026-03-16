@@ -1,0 +1,10 @@
+steps:
+  - command: .buildkite/scripts/steps/esql_docs_sync.sh
+    label: ES|QL Docs Sync
+    timeout_in_minutes: 30
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true

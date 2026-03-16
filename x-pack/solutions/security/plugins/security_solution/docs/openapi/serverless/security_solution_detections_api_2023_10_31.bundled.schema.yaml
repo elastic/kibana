@@ -4516,7 +4516,7 @@ components:
       type: object
       properties:
         reason:
-          $ref: '#/components/schemas/ReasonEnum'
+          $ref: '#/components/schemas/Reason'
         signal_ids:
           description: >-
             List of alert ids. Use field `_id` on alert document or
@@ -4547,7 +4547,7 @@ components:
           additionalProperties: true
           type: object
         reason:
-          $ref: '#/components/schemas/ReasonEnum'
+          $ref: '#/components/schemas/Reason'
         status:
           enum:
             - closed
@@ -4598,6 +4598,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/DefaultParams'
             - $ref: '#/components/schemas/ProcessesParams'
+            - $ref: '#/components/schemas/RunscriptParams'
       required:
         - action_type_id
         - params
@@ -7589,8 +7590,16 @@ components:
             - risk_score
             - severity
         - $ref: '#/components/schemas/QueryRuleCreateFields'
+    Reason:
+      description: >-
+        The reason for closing the alerts. Can be one of following predefined
+        reasons: [false_positive, duplicate, true_positive, benign_positive,
+        automated_closure, other] or a custom reason provided by the user
+        through the advanced settings.
+      oneOf:
+        - $ref: '#/components/schemas/ReasonEnum'
+        - type: string
     ReasonEnum:
-      description: The reason for closing the alerts
       enum:
         - false_positive
         - duplicate
@@ -8356,6 +8365,44 @@ components:
         field.
       minimum: 1
       type: integer
+    RunScriptOsConfigValues:
+      minProperties: 1
+      type: object
+      properties:
+        scriptId:
+          type: string
+        scriptInput:
+          type: string
+        timeout:
+          description: Specify the timeout in seconds for the script execution
+          example: 60
+          type: integer
+    RunscriptParams:
+      description: |
+        > warn
+        > This functionality is currently not available
+      type: object
+      properties:
+        command:
+          enum:
+            - runscript
+          type: string
+        comment:
+          description: >-
+            Add a note that explains or describes the action. You can find your
+            comment in the response actions history log
+          type: string
+        config:
+          type: object
+          properties:
+            linux:
+              $ref: '#/components/schemas/RunScriptOsConfigValues'
+            macos:
+              $ref: '#/components/schemas/RunScriptOsConfigValues'
+            windows:
+              $ref: '#/components/schemas/RunScriptOsConfigValues'
+      required:
+        - command
     SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion

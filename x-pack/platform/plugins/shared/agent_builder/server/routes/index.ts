@@ -17,6 +17,7 @@ import { registerAttachmentRoutes } from './attachments';
 import { registerMCPRoutes } from './mcp';
 import { registerA2ARoutes } from './a2a';
 import { registerSkillsRoutes } from './skills';
+import { registerPluginsRoutes } from './plugins';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
@@ -30,4 +31,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerMCPRoutes(dependencies);
   registerA2ARoutes(dependencies);
   registerSkillsRoutes(dependencies);
+  registerPluginsRoutes(dependencies);
 };

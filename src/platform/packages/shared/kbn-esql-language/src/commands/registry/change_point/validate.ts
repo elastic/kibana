@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { errors } from '../../definitions/utils';
 import type {
   ESQLAst,
   ESQLAstAllCommands,
   ESQLAstChangePointCommand,
   ESQLMessage,
-} from '../../../types';
-import { isColumn, isOptionNode } from '../../../ast/is';
+} from '@elastic/esql/types';
+import { isColumn, isOptionNode } from '@elastic/esql';
+import { errors } from '../../definitions/utils';
 import type { SupportedDataType } from '../../definitions/types';
 import { isNumericType } from '../../definitions/types';
 import type { ICommandContext, ICommandCallbacks } from '../types';

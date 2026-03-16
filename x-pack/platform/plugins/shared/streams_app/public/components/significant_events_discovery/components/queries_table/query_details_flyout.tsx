@@ -28,6 +28,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiText,
+  EuiTextArea,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -36,6 +37,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
+import { StreamsESQLEditor } from '../../../esql_query_editor';
 import type { SignificantEventItem } from '../../../../hooks/use_fetch_significant_events';
 import { InfoPanel } from '../../../info_panel';
 import { SparkPlot } from '../../../spark_plot';
@@ -83,6 +85,7 @@ export function QueryDetailsFlyout({
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [title, setTitle] = useState(item.query.title);
+  const [description, setDescription] = useState(item.query.description ?? '');
   const [query, setQuery] = useState(getQueryInputValue(item));
   const [severityScore, setSeverityScore] = useState(item.query.severity_score);
 
@@ -91,6 +94,7 @@ export function QueryDetailsFlyout({
     setIsDeleteModalVisible(false);
     setIsEditMode(false);
     setTitle(item.query.title);
+    setDescription(item.query.description ?? '');
     setQuery(getQueryInputValue(item));
     setSeverityScore(item.query.severity_score);
   }, [item]);
@@ -108,6 +112,7 @@ export function QueryDetailsFlyout({
   const handleCancelEdit = () => {
     setIsEditMode(false);
     setTitle(item.query.title);
+    setDescription(item.query.description ?? '');
     setQuery(getQueryInputValue(item));
     setSeverityScore(item.query.severity_score);
   };
@@ -116,10 +121,8 @@ export function QueryDetailsFlyout({
       {
         ...item.query,
         title: title.trim(),
-        kql: {
-          ...item.query.kql,
-          query: query.trim(),
-        },
+        description: description.trim(),
+        esql: { query: query.trim() },
         severity_score: severityScore,
       },
       item.stream_name
@@ -131,9 +134,15 @@ export function QueryDetailsFlyout({
     {
       title: QUERY_LABEL,
       description: (
-        <EuiCodeBlock language="kql" paddingSize="none" transparentBackground>
+        <EuiCodeBlock language="esql" paddingSize="none" transparentBackground>
           {getDisplayQueryValue(item)}
         </EuiCodeBlock>
+      ),
+    },
+    {
+      title: DESCRIPTION_LABEL,
+      description: (
+        <EuiText size="s">{item.query.description || DEFAULT_QUERY_PLACEHOLDER}</EuiText>
       ),
     },
     {
@@ -305,14 +314,26 @@ export function QueryDetailsFlyout({
                     disabled={isSaving}
                   />
                 </EuiFormRow>
-                <EuiFormRow label={QUERY_LABEL}>
-                  <EuiFieldText
-                    data-test-subj="queriesTableQueryDetailsFlyoutQueryInput"
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
+                <EuiFormRow label={DESCRIPTION_LABEL}>
+                  <EuiTextArea
+                    data-test-subj="queriesTableQueryDetailsFlyoutDescriptionInput"
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
                     disabled={isSaving}
+                    rows={2}
+                    resize="vertical"
+                    placeholder={DESCRIPTION_PLACEHOLDER}
                   />
                 </EuiFormRow>
+                <StreamsESQLEditor
+                  query={{ esql: query }}
+                  onTextLangQueryChange={(newQuery) => setQuery(newQuery.esql)}
+                  onTextLangQuerySubmit={async (newQuery) => {
+                    if (newQuery?.esql) setQuery(newQuery.esql);
+                  }}
+                  dataTestSubj="queriesTableQueryDetailsFlyoutQueryInput"
+                  isDisabled={isSaving}
+                />
                 <EuiFormRow label={SEVERITY_LABEL}>
                   <SeveritySelector
                     severityScore={severityScore}
@@ -373,13 +394,7 @@ export function QueryDetailsFlyout({
 }
 
 function getQueryInputValue(item: SignificantEventItem) {
-  if (!item.query.kql?.query) {
-    return '';
-  }
-
-  return typeof item.query.kql.query === 'string'
-    ? item.query.kql.query
-    : JSON.stringify(item.query.kql.query);
+  return item.query.esql?.query ?? '';
 }
 
 function getDisplayQueryValue(item: SignificantEventItem) {
@@ -405,6 +420,16 @@ const QUERY_NAME_LABEL = i18n.translate(
 const QUERY_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryLabel',
   { defaultMessage: 'Query' }
+);
+
+const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.descriptionLabel',
+  { defaultMessage: 'Description' }
+);
+
+const DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.descriptionPlaceholder',
+  { defaultMessage: 'Describe what this query detects and why it matters' }
 );
 
 const SEVERITY_LABEL = i18n.translate(
