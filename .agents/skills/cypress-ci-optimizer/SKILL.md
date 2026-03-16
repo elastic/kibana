@@ -1,5 +1,6 @@
 ---
 name: cypress-ci-optimizer
+disable-model-invocation: true
 description: Analyze and optimize Kibana Security Solution Cypress CI performance. Use when investigating slow Cypress builds, load balancing imbalances, spec splitting, weight tuning, or reducing CI wall-clock time for parallel Cypress test suites.
 ---
 

@@ -1,5 +1,6 @@
 ---
 name: cypress-ci-audit
+disable-model-invocation: true
 description: >
   Automated audit and optimization of Kibana Security Solution Cypress CI suites.
   Pulls Buildkite timing data, detects weight miscalibrations, identifies imbalanced agents,
