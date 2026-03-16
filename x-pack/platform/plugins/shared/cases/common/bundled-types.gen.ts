@@ -294,9 +294,9 @@ export const Settings = z.object({
    */
   syncAlerts: z.boolean(),
   /**
-      * When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.
-
-      */
+   * When `true`, observables (for example, IPs, hashes, URLs) are
+   * automatically extracted from case comments. Defaults to `false` if omitted.
+   */
   extractObservables: z.boolean().optional(),
 });
 
