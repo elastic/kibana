@@ -441,7 +441,7 @@ export const ReviewApproveModal: React.FC<{
         >
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalApprove"
-            defaultMessage="Approve & deploy"
+            defaultMessage="Approve"
           />
         </EuiButton>
       </EuiModalFooter>

@@ -142,8 +142,10 @@ export const ManageIntegrationActions: React.FC<{
           onClick={openReviewModal}
           style={{
             backgroundColor: euiTheme.colors.backgroundLightPrimary,
+            borderRadius: euiTheme.border.radius.small,
             paddingLeft: euiTheme.size.s,
             paddingRight: euiTheme.size.s,
+            gap: '4px',
             fontFamily: euiTheme.font.family,
             fontWeight: euiTheme.font.weight.medium,
             fontSize: '12px',
