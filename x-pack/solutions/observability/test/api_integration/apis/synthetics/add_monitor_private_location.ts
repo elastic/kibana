@@ -85,8 +85,8 @@ export default function ({ getService }: FtrProviderContext) {
         .send(monitor)
         .expect(400);
 
-      expect(apiResponse.body.message).eql('Browser Monitor timeout is invalid');
-      expect(apiResponse.body.attributes.details).to.contain('Invalid timeout 29 seconds');
+      expect(apiResponse.body.message).eql('Browser monitor timeout for private locations is invalid');
+      expect(apiResponse.body.attributes.details).to.contain('Timeout of 29 seconds is too low');
     });
 
     it('allows browser timeout at 30s in private locations', async () => {
