@@ -84,27 +84,15 @@ export const optimizePrompt = async (options: {
   inferenceClient: BoundInferenceClient;
   config: OptimizationConfig;
 }): Promise<OptimizationResult> => {
-  const {
-    basePrompt,
-    dataset,
-    task,
-    evaluators,
-    executorClient,
-    inferenceClient,
-    config,
-  } = options;
+  const { basePrompt, dataset, task, evaluators, executorClient, inferenceClient, config } =
+    options;
 
   let bestPrompt = basePrompt;
   let bestScore = await scorePrompt(executorClient, dataset, task, evaluators);
   const iterations: IterationResult[] = [];
 
   for (let i = 0; i < config.maxIterations; i++) {
-    const candidatePrompt = await mutatePrompt(
-      inferenceClient,
-      bestPrompt,
-      bestScore,
-      i
-    );
+    const candidatePrompt = await mutatePrompt(inferenceClient, bestPrompt, bestScore, i);
 
     const candidateScore = await scorePrompt(executorClient, dataset, task, evaluators);
 
@@ -122,8 +110,7 @@ export const optimizePrompt = async (options: {
   }
 
   const baselineScore = iterations.length > 0 ? iterations[0].score : bestScore;
-  const improvement =
-    baselineScore > 0 ? ((bestScore - baselineScore) / baselineScore) * 100 : 0;
+  const improvement = baselineScore > 0 ? ((bestScore - baselineScore) / baselineScore) * 100 : 0;
 
   return {
     bestPrompt,

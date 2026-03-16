@@ -119,11 +119,7 @@ export { simulateConversations, type SimulatorConfig } from './src/conversation_
 export { optimizePrompt, type OptimizationResult } from './src/prompt_optimization/optimizer';
 
 // Quality gates
-export {
-  type GateConfig,
-  serializeGateConfig,
-  parseGateConfig,
-} from './src/quality_gates/types';
+export { type GateConfig, serializeGateConfig, parseGateConfig } from './src/quality_gates/types';
 export {
   calibrateThresholds,
   type CalibrateOptions,

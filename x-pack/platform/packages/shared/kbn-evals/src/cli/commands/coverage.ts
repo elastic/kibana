@@ -90,7 +90,9 @@ export const coverageCmd: Command<void> = {
       for (const entry of report.gateReadiness) {
         const status = entry.meetsThreshold ? 'PASS' : 'FAIL';
         log.info(
-          `  ${entry.evaluator}: ${status} (actual=${entry.actual.toFixed(3)}, required=${entry.required.toFixed(3)})`
+          `  ${entry.evaluator}: ${status} (actual=${entry.actual.toFixed(
+            3
+          )}, required=${entry.required.toFixed(3)})`
         );
       }
     }

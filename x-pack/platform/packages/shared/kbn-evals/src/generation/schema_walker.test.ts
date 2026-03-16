@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  generateTestsFromToolSchema,
-  type JSONSchema,
-  type Difficulty,
-} from './schema_walker';
+import { generateTestsFromToolSchema, type JSONSchema, type Difficulty } from './schema_walker';
 
 describe('generateTestsFromToolSchema', () => {
   const difficulties: Difficulty[] = ['simple', 'moderate', 'complex'];
@@ -254,9 +250,15 @@ describe('generateTestsFromToolSchema', () => {
     const schema: JSONSchema = { type: 'object', properties: {} };
 
     it('generates the requested number of examples', () => {
-      expect(generateTestsFromToolSchema(schema, { count: 0, difficulty: 'simple' })).toHaveLength(0);
-      expect(generateTestsFromToolSchema(schema, { count: 1, difficulty: 'simple' })).toHaveLength(1);
-      expect(generateTestsFromToolSchema(schema, { count: 50, difficulty: 'simple' })).toHaveLength(50);
+      expect(generateTestsFromToolSchema(schema, { count: 0, difficulty: 'simple' })).toHaveLength(
+        0
+      );
+      expect(generateTestsFromToolSchema(schema, { count: 1, difficulty: 'simple' })).toHaveLength(
+        1
+      );
+      expect(generateTestsFromToolSchema(schema, { count: 50, difficulty: 'simple' })).toHaveLength(
+        50
+      );
     });
   });
 

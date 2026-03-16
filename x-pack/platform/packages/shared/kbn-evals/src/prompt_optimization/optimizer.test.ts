@@ -9,9 +9,7 @@ import { optimizePrompt } from './optimizer';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EvalsExecutorClient, EvaluationDataset, Evaluator, RanExperiment } from '../types';
 
-const createMockInferenceClient = (
-  improvedPrompts: string[]
-): BoundInferenceClient => {
+const createMockInferenceClient = (improvedPrompts: string[]): BoundInferenceClient => {
   let callIdx = 0;
   const outputFn = jest.fn().mockImplementation(async () => {
     const prompt = improvedPrompts[callIdx] ?? improvedPrompts[improvedPrompts.length - 1];

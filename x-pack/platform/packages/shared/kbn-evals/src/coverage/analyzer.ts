@@ -61,14 +61,7 @@ interface AnalyzerOptions {
  * consumers should pass pre-enriched suite metadata.
  */
 export const analyzeCoverage = (options: AnalyzerOptions): CoverageReport => {
-  const {
-    repoRoot,
-    log,
-    toolIds = [],
-    evaluatorNames = [],
-    gateConfig,
-    actualScores,
-  } = options;
+  const { repoRoot, log, toolIds = [], evaluatorNames = [], gateConfig, actualScores } = options;
 
   const suites = options.suites ?? resolveEvalSuites(repoRoot, log);
   const suiteIds = suites.map((s) => s.id);
@@ -78,8 +71,7 @@ export const analyzeCoverage = (options: AnalyzerOptions): CoverageReport => {
       (suiteId) =>
         suiteId.includes(toolId) ||
         suites.some(
-          (s) =>
-            s.id === suiteId && (s.tags.includes(toolId) || s.description?.includes(toolId))
+          (s) => s.id === suiteId && (s.tags.includes(toolId) || s.description?.includes(toolId))
         )
     );
     return {
@@ -90,11 +82,10 @@ export const analyzeCoverage = (options: AnalyzerOptions): CoverageReport => {
   });
 
   const evaluatorCoverage: EvaluatorCoverageEntry[] = evaluatorNames.map((name) => {
-    const usedIn = suiteIds.filter(
-      (suiteId) =>
-        suites.some(
-          (s) => s.id === suiteId && (s.tags.includes(name) || s.description?.includes(name))
-        )
+    const usedIn = suiteIds.filter((suiteId) =>
+      suites.some(
+        (s) => s.id === suiteId && (s.tags.includes(name) || s.description?.includes(name))
+      )
     );
     return { evaluatorName: name, usedIn };
   });

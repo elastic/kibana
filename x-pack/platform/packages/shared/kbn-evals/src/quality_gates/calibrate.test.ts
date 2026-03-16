@@ -16,7 +16,7 @@ const createMockLog = (): SomeDevLog =>
     warning: jest.fn(),
     info: jest.fn(),
     debug: jest.fn(),
-  }) as unknown as SomeDevLog;
+  } as unknown as SomeDevLog);
 
 const createMockRepository = (
   stats: {

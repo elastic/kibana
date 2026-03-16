@@ -76,7 +76,10 @@ export const calibrateThresholds = async (
       changes.push({
         evaluator: evaluatorName,
         recommended,
-        reason: `Bootstrap: mean=${roundTo(mean, 3)}, stdDev=${roundTo(stdDev, 3)}, floor=${recommendedMin}`,
+        reason: `Bootstrap: mean=${roundTo(mean, 3)}, stdDev=${roundTo(
+          stdDev,
+          3
+        )}, floor=${recommendedMin}`,
       });
     } else {
       const existing = existingConfig?.evaluators?.[evaluatorName];
@@ -91,9 +94,10 @@ export const calibrateThresholds = async (
           evaluator: evaluatorName,
           previous: currentAvg,
           recommended,
-          reason: currentAvg === undefined
-            ? `New evaluator threshold: mean=${roundTo(mean, 3)}`
-            : `Tightened: actual mean (${roundTo(mean, 3)}) exceeds current (${currentAvg})`,
+          reason:
+            currentAvg === undefined
+              ? `New evaluator threshold: mean=${roundTo(mean, 3)}`
+              : `Tightened: actual mean (${roundTo(mean, 3)}) exceeds current (${currentAvg})`,
         });
       } else {
         evaluatorThresholds[evaluatorName] = { ...existing };
@@ -106,8 +110,8 @@ export const calibrateThresholds = async (
     mode === 'bootstrap'
       ? { avg: globalAvg }
       : existingConfig?.score && globalAvg > existingConfig.score.avg
-        ? { avg: globalAvg }
-        : existingConfig?.score ?? { avg: globalAvg };
+      ? { avg: globalAvg }
+      : existingConfig?.score ?? { avg: globalAvg };
 
   const config: GateConfig = {
     score: scoreThreshold,

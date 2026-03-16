@@ -103,8 +103,12 @@ describe('analyzeCoverage', () => {
         suites,
       });
 
-      expect(report.evaluatorCoverage.find((e) => e.evaluatorName === 'criteria')?.usedIn).toHaveLength(2);
-      expect(report.evaluatorCoverage.find((e) => e.evaluatorName === 'latency')?.usedIn).toHaveLength(0);
+      expect(
+        report.evaluatorCoverage.find((e) => e.evaluatorName === 'criteria')?.usedIn
+      ).toHaveLength(2);
+      expect(
+        report.evaluatorCoverage.find((e) => e.evaluatorName === 'latency')?.usedIn
+      ).toHaveLength(0);
       expect(report.gaps).toContain('Evaluator "latency" is not used in any suite');
     });
 
@@ -173,9 +177,7 @@ describe('analyzeCoverage', () => {
 
   describe('overall metrics', () => {
     it('computes correct overall percentages', () => {
-      const suites = [
-        createMockSuite({ id: 'tool-a-suite', tags: ['tool-a'] }),
-      ];
+      const suites = [createMockSuite({ id: 'tool-a-suite', tags: ['tool-a'] })];
 
       const report = analyzeCoverage({
         repoRoot: '/repo',

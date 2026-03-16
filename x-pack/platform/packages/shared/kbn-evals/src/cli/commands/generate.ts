@@ -54,9 +54,7 @@ export const generateCmd: Command<void> = {
       throw createFlagError(`Failed to parse schema file as JSON: ${resolvedSchemaPath}`);
     }
 
-    log.info(
-      `Generating ${count} examples with difficulty="${difficulty}" from ${schemaPath}`
-    );
+    log.info(`Generating ${count} examples with difficulty="${difficulty}" from ${schemaPath}`);
 
     const examples = generateTestsFromToolSchema(toolSchema, {
       count,
