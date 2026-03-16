@@ -54,6 +54,7 @@ export interface DataLifecycleSummaryDownsamplingActions {
 
 export interface DataLifecycleSummaryUiState {
   editedPhaseName?: string;
+  editedDownsampleStepIndex?: number;
   isEditLifecycleFlyoutOpen?: boolean;
   invalidPhases?: PhaseName[];
   invalidStepIndices?: number[];
@@ -82,6 +83,7 @@ export const DataLifecycleSummary = ({
   const { canManageLifecycle } = capabilities;
   const {
     editedPhaseName,
+    editedDownsampleStepIndex,
     isEditLifecycleFlyoutOpen = false,
     invalidPhases,
     invalidStepIndices,
@@ -164,6 +166,7 @@ export const DataLifecycleSummary = ({
                   onRemoveStep={downsamplingActions?.onRemoveDownsampleStep}
                   onEditStep={downsamplingActions?.onEditDownsampleStep}
                   editedPhaseName={editedPhaseName}
+                  editedDownsampleStepIndex={editedDownsampleStepIndex}
                   canManageLifecycle={canManageLifecycle}
                   isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
                 />

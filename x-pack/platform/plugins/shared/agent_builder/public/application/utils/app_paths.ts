@@ -36,4 +36,8 @@ export const appPaths = {
     new: '/skills/new',
     details: ({ skillId }: { skillId: string }) => `/skills/${skillId}`,
   },
+  plugins: {
+    list: '/plugins',
+    details: ({ pluginId }: { pluginId: string }) => `/plugins/${pluginId}`,
+  },
 };
