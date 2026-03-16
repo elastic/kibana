@@ -15,6 +15,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS_DELAYED,
+  ALERT_TRACKED,
 } from '@kbn/rule-data-utils';
 import { alertRule } from '../test_fixtures';
 import { buildDelayedAlert } from './build_delayed_alert';
@@ -43,6 +44,7 @@ describe('buildDelayedAlert', () => {
       [ALERT_INSTANCE_ID]: alertInstanceId,
       [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
       [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+      [ALERT_TRACKED]: true,
     });
   });
 });

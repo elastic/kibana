@@ -31,6 +31,7 @@ import {
   ALERT_SEVERITY_IMPROVING,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS_RECOVERED,
+  ALERT_TRACKED,
   ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
@@ -128,6 +129,7 @@ export const buildRecoveredAlert = <
     ...(alertMuted !== undefined ? { [ALERT_MUTED]: alertMuted } : {}),
     // Set status to 'recovered'
     [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+    [ALERT_TRACKED]: true,
     // Set latest duration as recovered alerts should have updated duration
     ...(alertState.duration ? { [ALERT_DURATION]: nanosToMicros(alertState.duration) } : {}),
     // Set end time

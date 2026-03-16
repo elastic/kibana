@@ -13,6 +13,7 @@ import {
   ALERT_UUID,
   TIMESTAMP,
   ALERT_STATUS_DELAYED,
+  ALERT_TRACKED,
   ALERT_RULE_UUID,
   ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
@@ -64,5 +65,6 @@ export const buildDelayedAlert = <
     [ALERT_INSTANCE_ID]: alertInstanceId,
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+    [ALERT_TRACKED]: true,
   } as Alert & AlertData;
 };

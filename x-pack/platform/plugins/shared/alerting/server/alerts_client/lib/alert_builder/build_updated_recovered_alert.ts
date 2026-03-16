@@ -15,6 +15,7 @@ import {
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
+  ALERT_TRACKED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import type { RawAlertInstance } from '@kbn/alerting-state-types';
@@ -57,9 +58,9 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     // Set latest flapping history
     [ALERT_FLAPPING_HISTORY]: legacyRawAlert.meta?.flappingHistory,
     // For an "ongoing recovered" alert, we do not want to update the execution UUID to the current one so it does
-    // not get returned for summary alerts. In the future, we may want to restore this and add another field to the
-    // alert doc indicating that this is an ongoing recovered alert that can be used for querying.
+    // not get returned for summary alerts.
     [ALERT_RULE_EXECUTION_UUID]: get(alert, ALERT_RULE_EXECUTION_UUID),
+    [ALERT_TRACKED]: shouldKeepTracking(legacyRawAlert),
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
   };
 
@@ -86,4 +87,11 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
   return deepmerge.all([expandedAlert, refreshableAlertFields, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;
+};
+
+const shouldKeepTracking = (legacyRawAlert: RawAlertInstance): boolean => {
+  const flapping = legacyRawAlert.meta?.flapping;
+  const flappingHistory: boolean[] = legacyRawAlert.meta?.flappingHistory || [];
+  const numStateChanges = flappingHistory.filter((f) => f).length;
+  return flapping === true || numStateChanges > 0;
 };
