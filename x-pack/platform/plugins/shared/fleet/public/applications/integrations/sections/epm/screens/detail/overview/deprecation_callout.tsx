@@ -26,7 +26,6 @@ export const isUpcomingDeprecation = (version: string, deprecated?: DeprecationI
 /**
  * Resolves the effective deprecation info for a package/integration from all sources,
  * in priority order: conditions.deprecated → package.deprecated → integrationInfo.deprecated.
- * Used by parent components to decide which callout to show.
  */
 export const getPackageDeprecationInfo = (
   packageInfo: PackageInfo,

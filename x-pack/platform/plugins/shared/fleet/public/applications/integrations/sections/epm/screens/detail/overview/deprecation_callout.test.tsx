@@ -34,7 +34,7 @@ jest.mock('../../../../../../../hooks', () => {
   };
 });
 
-describe('CurrentDeprecationCallout', () => {
+describe('DeprecationCallout', () => {
   const mockGetHref = jest.fn((page: string, params?: any) => {
     if (params?.pkgkey) {
       return `/app/integrations/detail/${params.pkgkey}/overview`;
