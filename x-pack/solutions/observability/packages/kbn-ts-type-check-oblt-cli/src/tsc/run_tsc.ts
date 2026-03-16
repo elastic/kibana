@@ -14,7 +14,7 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import type { TsProject } from '@kbn/ts-projects';
 
-import { getChangedFiles, getAffectedProjectRefs } from '../root_refs_config';
+import { getChangedFiles, getAffectedProjectRefs } from './root_refs_config';
 import { TscProgressTracker } from './tsc_progress_tracker';
 
 interface TscRunOptions {
@@ -100,7 +100,7 @@ export async function runTscFastPass({
   const multi = affectedRefs.size > 1;
 
   log.info(
-    `[First pass] Checking ${affectedRefs.size} changed ${
+    `[TypeCheck] [First pass] Checking ${affectedRefs.size} changed ${
       multi ? 'projects' : 'project'
     } first (${projectNames.join(', ')}) with ${
       multi ? 'their' : 'its'
