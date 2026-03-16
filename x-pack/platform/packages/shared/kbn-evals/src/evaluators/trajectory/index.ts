@@ -48,6 +48,12 @@ export function createTrajectoryEvaluator(config: {
 }): Evaluator {
   const { extractToolCalls, goldenPathExtractor, orderWeight = 0.5, coverageWeight = 0.5 } = config;
 
+  if (Math.abs(orderWeight + coverageWeight - 1) > 1e-6) {
+    throw new Error(
+      `orderWeight (${orderWeight}) + coverageWeight (${coverageWeight}) must sum to 1`
+    );
+  }
+
   return {
     name: 'trajectory',
     kind: 'CODE',
@@ -72,17 +78,18 @@ export function createTrajectoryEvaluator(config: {
       const goldenSet = new Set(golden);
       const matchedTools = actual.filter((tool) => goldenSet.has(tool));
       const uniqueMatched = new Set(matchedTools);
-      const coverageScore = uniqueMatched.size / Math.max(golden.length, 1);
+      const coverageScore = uniqueMatched.size / Math.max(goldenSet.size, 1);
 
       const score = orderWeight * orderScore + coverageWeight * coverageScore;
 
-      const missingTools = golden.filter((tool) => !new Set(actual).has(tool));
+      const actualTools = new Set(actual);
+      const missingTools = golden.filter((tool) => !actualTools.has(tool));
       const extraTools = actual.filter((tool) => !goldenSet.has(tool));
 
       const explanationParts = [
         `LCS length: ${lcs.length}/${golden.length}`,
         `Order score: ${orderScore.toFixed(2)}`,
-        `Coverage: ${uniqueMatched.size}/${golden.length} tools matched`,
+        `Coverage: ${uniqueMatched.size}/${goldenSet.size} tools matched`,
         `Coverage score: ${coverageScore.toFixed(2)}`,
       ];
       if (missingTools.length > 0) {

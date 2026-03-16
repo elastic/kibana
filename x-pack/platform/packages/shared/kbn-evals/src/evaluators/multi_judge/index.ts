@@ -28,17 +28,22 @@ function computeMajority(scores: number[]): number {
 export function createMultiJudgeEvaluator(config: {
   judges: Evaluator[];
   strategy?: AggregationStrategy;
+  logger?: { warn: (msg: string) => void };
 }): Evaluator {
-  const { judges, strategy = 'mean' } = config;
+  const { judges, strategy = 'mean', logger } = config;
+
+  const hasLlmJudge = judges.some((judge) => judge.kind === 'LLM');
 
   return {
     name: 'multi-judge',
-    kind: 'LLM',
+    kind: hasLlmJudge ? 'LLM' : 'CODE',
     evaluate: async (params) => {
       const results = await Promise.allSettled(judges.map((judge) => judge.evaluate(params)));
 
       const judgeResults: Array<{ name: string; result: EvaluationResult }> = [];
       const scores: number[] = [];
+
+      const failedJudges: Array<{ name: string; error: string }> = [];
 
       results.forEach((result, i) => {
         if (result.status === 'fulfilled') {
@@ -46,6 +51,11 @@ export function createMultiJudgeEvaluator(config: {
           if (result.value.score != null) {
             scores.push(result.value.score);
           }
+        } else {
+          const errorMessage =
+            result.reason instanceof Error ? result.reason.message : String(result.reason);
+          failedJudges.push({ name: judges[i].name, error: errorMessage });
+          logger?.warn(`Judge "${judges[i].name}" failed: ${errorMessage}`);
         }
       });
 
@@ -54,7 +64,7 @@ export function createMultiJudgeEvaluator(config: {
           score: null,
           label: 'no-scores',
           explanation: 'No judges returned valid scores.',
-          metadata: { judgeResults },
+          metadata: { judgeResults, failedJudges },
         };
       }
 
@@ -69,6 +79,10 @@ export function createMultiJudgeEvaluator(config: {
         case 'majority':
           aggregatedScore = computeMajority(scores);
           break;
+        default: {
+          const _exhaustive: never = strategy;
+          throw new Error(`Unknown aggregation strategy: ${_exhaustive}`);
+        }
       }
 
       const explanation = judgeResults
@@ -87,6 +101,7 @@ export function createMultiJudgeEvaluator(config: {
           successfulJudges: scores.length,
           individualScores: scores,
           judgeResults,
+          failedJudges,
         },
       };
     },
