@@ -795,8 +795,8 @@ describe('Cases API', () => {
 
     it('should return correct response should not covert to camel case registered attachments', async () => {
       const resp = await updateCases({ cases: data, signal: abortCtrl.signal });
-      expect(resp.cases).toHaveLength(cases.length);
-      expect(resp.cases[0]).toEqual(
+      expect(resp).toHaveLength(cases.length);
+      expect(resp[0]).toEqual(
         expect.objectContaining({
           id: cases[0].id,
           patchCaseStats: {
@@ -808,7 +808,7 @@ describe('Cases API', () => {
 
     it('returns an empty array if the cases are empty', async () => {
       const resp = await updateCases({ cases: [], signal: abortCtrl.signal });
-      expect(resp).toEqual({ cases: [] });
+      expect(resp).toEqual([]);
     });
 
     it('returns cases with per-case alert status update summary', async () => {
@@ -825,8 +825,8 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
 
-      expect(resp.cases).toHaveLength(cases.length);
-      expect(resp.cases[0]).toEqual(
+      expect(resp).toHaveLength(cases.length);
+      expect(resp[0]).toEqual(
         expect.objectContaining({
           id: cases[0].id,
           patchCaseStats: {

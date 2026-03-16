@@ -377,11 +377,9 @@ export const updateCases = async ({
 }: {
   cases: CaseUpdateRequest[];
   signal?: AbortSignal;
-}): Promise<{
-  cases: Array<CaseUI & { patchCaseStats: PatchCaseStats }>;
-}> => {
+}): Promise<Array<CaseUI & { patchCaseStats: PatchCaseStats }>> => {
   if (cases.length === 0) {
-    return { cases: [] };
+    return [];
   }
 
   const response = await KibanaServices.get().http.fetch<CasesPatchResponse>(CASES_URL, {
@@ -391,11 +389,9 @@ export const updateCases = async ({
   });
 
   const decodedResponse = decodeCasesWithBulkUpdateStatsResponse(response);
-  return {
-    cases: convertArrayToCamelCase(decodedResponse) as Array<
-      CaseUI & { patchCaseStats: PatchCaseStats }
-    >,
-  };
+  return convertArrayToCamelCase(decodedResponse) as Array<
+    CaseUI & { patchCaseStats: PatchCaseStats }
+  >;
 };
 
 export const replaceCustomField = async ({

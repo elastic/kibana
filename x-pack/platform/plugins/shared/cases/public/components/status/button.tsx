@@ -37,10 +37,6 @@ const StatusActionButtonComponent: React.FC<Props> = ({
   });
   const onCloseCase = useCallback(
     (closeReason?: string) => {
-      if (closeReason == null) {
-        onStatusChanged(CaseStatuses.closed);
-        return;
-      }
       onStatusChanged(CaseStatuses.closed, closeReason);
     },
     [onStatusChanged]

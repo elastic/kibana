@@ -99,9 +99,8 @@ export const useBulkActions = ({
       if (statusActionMenuItem.key === 'cases-bulk-action-status-closed') {
         return {
           ...statusActionMenuItem,
-          panel: undefined,
           onClick: openCloseCaseModal,
-        };
+        } as EuiContextMenuPanelItemDescriptor;
       }
 
       return statusActionMenuItem;

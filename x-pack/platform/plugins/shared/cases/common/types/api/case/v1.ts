@@ -137,7 +137,7 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
     template: rt.union([CaseTemplate, rt.null]),
     [CASE_EXTENDED_FIELDS]: rt.union([rt.undefined, rt.record(rt.string, rt.string)]),
     /**
-     * The case close reason
+     * The close reason to sync to attached alerts
      */
     closeReason: CaseCloseReasonRt,
   })

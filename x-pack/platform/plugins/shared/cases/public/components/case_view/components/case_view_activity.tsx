@@ -135,7 +135,7 @@ export const CaseViewActivity = ({
 
   const changeStatus = useCallback(
     (status: CaseStatuses, closeReason?: string) => {
-      if (status !== CaseStatuses.closed || closeReason == null) {
+      if (status !== CaseStatuses.closed) {
         onUpdateField({
           key: 'status',
           value: status,

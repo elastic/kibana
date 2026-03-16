@@ -10,7 +10,7 @@ import type { ToastInputFields } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import type { CaseUpdateRequest } from '../../../../common/ui';
+import type { PatchCaseStats } from '../../../../common/types/api';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import type { CasesUI } from '../../../../common';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
@@ -26,37 +26,6 @@ import { useShouldDisableStatus } from './use_should_disable_status';
 import { useKibana } from '../../../common/lib/kibana';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { generateCaseViewPath } from '../../../common/navigation';
-
-const getStatusToast = ({
-  status,
-  cases,
-  alertStatusSyncCount,
-  totalAlertsCount,
-}: {
-  status: CaseStatuses;
-  cases: CasesUI;
-  alertStatusSyncCount: number;
-  totalAlertsCount?: number;
-}): { title: string; text?: string } => {
-  const totalCases = cases.length;
-  const caseTitle = totalCases === 1 ? cases[0].title : '';
-
-  if (status === CaseStatuses.open) {
-    return { title: i18n.REOPENED_CASES({ totalCases, caseTitle }) };
-  } else if (status === CaseStatuses['in-progress']) {
-    return { title: i18n.MARK_IN_PROGRESS_CASES({ totalCases, caseTitle }) };
-  } else if (status === CaseStatuses.closed) {
-    return {
-      title: i18n.CLOSED_CASES({ totalCases, caseTitle }),
-      text:
-        totalAlertsCount == null
-          ? undefined
-          : i18n.CLOSED_CASES_SUMMARY(alertStatusSyncCount, totalAlertsCount),
-    };
-  }
-
-  return { title: '' };
-};
 
 const StatusToastContent = ({
   summary,
@@ -84,6 +53,87 @@ const StatusToastContent = ({
 );
 StatusToastContent.displayName = 'StatusToastContent';
 
+interface GetUpdateSuccessToastParams {
+  status: CaseStatuses;
+  cases: CasesUI;
+  patchCaseStats?: PatchCaseStats[];
+  // Dependencies for rendering re-direct button within toast
+  appId?: string;
+  application: ReturnType<typeof useKibana>['services']['application'];
+  i18nStart: ReturnType<typeof useKibana>['services']['i18n'];
+  theme: ReturnType<typeof useKibana>['services']['theme'];
+  userProfile: ReturnType<typeof useKibana>['services']['userProfile'];
+}
+
+const getUpdateSuccessToast = ({
+  status,
+  cases,
+  patchCaseStats,
+  appId,
+  application,
+  i18nStart,
+  theme,
+  userProfile,
+}: GetUpdateSuccessToastParams): { title: string; text?: ToastInputFields['text'] } => {
+  const totalCases = cases.length;
+  const caseTitle = totalCases === 1 ? cases[0].title : '';
+
+  if (status === CaseStatuses.open) {
+    return { title: i18n.REOPENED_CASES({ totalCases, caseTitle }) };
+  }
+
+  if (status === CaseStatuses['in-progress']) {
+    return { title: i18n.MARK_IN_PROGRESS_CASES({ totalCases, caseTitle }) };
+  }
+
+  // Special handling for closed cases as it can possibly be closed with a close reason to sync to attached alerts
+  const alertStatusSyncCount =
+    patchCaseStats?.reduce((total, stats) => {
+      return total + (stats?.numberOfAlertsWithStatusSynced ?? 0);
+    }, 0) ?? 0;
+  const totalAlertsCount = cases.reduce((total, currentCase) => total + currentCase.totalAlerts, 0);
+  const summary =
+    totalAlertsCount === 0
+      ? undefined
+      : i18n.CLOSED_CASES_SUMMARY(alertStatusSyncCount, totalAlertsCount);
+  const toast: { title: string; text?: ToastInputFields['text'] } = {
+    title: i18n.CLOSED_CASES({ totalCases, caseTitle }),
+    text: summary,
+  };
+
+  const theCase = cases[0];
+  if (cases.length !== 1 || !theCase.settings.syncAlerts || summary == null) {
+    return toast;
+  }
+
+  const appIdToNavigateTo = isValidOwner(theCase.owner) ? OWNER_INFO[theCase.owner].appId : appId;
+  const alertsUrl =
+    appIdToNavigateTo != null
+      ? application.getUrlForApp(appIdToNavigateTo, {
+          deepLinkId: 'cases',
+          path: generateCaseViewPath({
+            detailName: theCase.id,
+            tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+          }),
+        })
+      : null;
+
+  if (alertsUrl == null) {
+    return toast;
+  }
+
+  return {
+    ...toast,
+    text: toMountPoint(
+      <StatusToastContent
+        summary={summary}
+        onSeeAlertsClick={() => application.navigateToUrl(alertsUrl, { forceRedirect: true })}
+      />,
+      { i18n: i18nStart, theme, userProfile }
+    ),
+  };
+};
+
 interface UseStatusActionProps extends UseActionProps {
   selectedStatus?: CaseStatuses;
 }
@@ -106,75 +156,22 @@ export const useStatusAction = ({
         id: theCase.id,
         version: theCase.version,
         closeReason,
-      })) as CaseUpdateRequest[];
+      }));
 
       updateCases(
         {
           cases: casesToUpdate,
-          getUpdateSuccessToast: ({ patchCaseStats }) => {
-            const alertStatusSyncCount =
-              patchCaseStats?.reduce((total, stats) => {
-                return total + (stats?.numberOfAlertsWithStatusSynced ?? 0);
-              }, 0) ?? 0;
-            const totalAlertsCount = selectedCases.reduce(
-              (total, currentCase) => total + currentCase.totalAlerts,
-              0
-            );
-
-            const toast = getStatusToast({
+          getUpdateSuccessToast: ({ patchCaseStats }: { patchCaseStats?: PatchCaseStats[] }) => {
+            return getUpdateSuccessToast({
               status,
               cases: selectedCases,
-              alertStatusSyncCount,
-              totalAlertsCount: totalAlertsCount !== 0 ? totalAlertsCount : undefined,
+              patchCaseStats,
+              appId,
+              application,
+              i18nStart,
+              theme,
+              userProfile,
             });
-
-            const theCase = selectedCases[0];
-
-            const isSingleCaseWithSyncAlerts =
-              selectedCases.length === 1 && theCase.settings.syncAlerts && toast.text != null;
-
-            if (!isSingleCaseWithSyncAlerts) {
-              return toast;
-            }
-
-            const summary = toast.text;
-            if (summary == null) {
-              return toast;
-            }
-
-            const appIdToNavigateTo =
-              theCase != null && isValidOwner(theCase.owner)
-                ? OWNER_INFO[theCase.owner].appId
-                : appId;
-
-            const alertsUrl =
-              appIdToNavigateTo != null
-                ? application.getUrlForApp(appIdToNavigateTo, {
-                    deepLinkId: 'cases',
-                    path: generateCaseViewPath({
-                      detailName: theCase.id,
-                      tabId: CASE_VIEW_PAGE_TABS.ALERTS,
-                    }),
-                  })
-                : null;
-
-            if (alertsUrl == null) {
-              return toast;
-            }
-
-            // Show toast with 're-direct to case alerts' button when closing a single case
-            return {
-              ...toast,
-              text: toMountPoint(
-                <StatusToastContent
-                  summary={summary}
-                  onSeeAlertsClick={() =>
-                    application.navigateToUrl(alertsUrl, { forceRedirect: true })
-                  }
-                />,
-                { i18n: i18nStart, theme, userProfile }
-              ) as ToastInputFields['text'],
-            };
           },
         },
         { onSuccess: onActionSuccess }

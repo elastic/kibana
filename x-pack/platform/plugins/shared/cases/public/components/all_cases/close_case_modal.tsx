@@ -138,6 +138,7 @@ export const useCloseCaseModal = ({
   const [closeReasonOptions, setCloseReasonOptions] = useState<
     Array<EuiSelectableOption<ClosingReasonOption>>
   >(() => createCloseReasonOptions());
+  // Pre-select 'Close without reason'
   const [selectedClosingReason, setSelectedClosingReason] = useState<
     EuiSelectableOption<ClosingReasonOption> | undefined
   >(() => createCloseReasonOptions().find((option) => option.key == null));

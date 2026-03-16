@@ -8,12 +8,7 @@
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { CaseStatuses, UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
-import type {
-  EventDetails,
-  UserActionParameters,
-  UserActionEvent,
-  SavedObjectParameters,
-} from '../types';
+import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class StatusUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'status'>): UserActionEvent {
@@ -23,21 +18,18 @@ export class StatusUserActionBuilder extends UserActionBuilder {
       args.payload.syncAlerts === true &&
       args.payload.closeReason != null;
 
-    const parameters: SavedObjectParameters = {
-      attributes: {
-        ...this.getCommonUserActionAttributes({
-          user: args.user,
-          owner: args.owner,
-        }),
-        action,
-        payload: {
-          status: args.payload.status,
-          ...(shouldLogCloseReasonSyncMessage ? { closeReason: args.payload.closeReason } : {}),
-          ...(args.payload.syncedAlerts != null ? { syncedAlerts: args.payload.syncedAlerts } : {}),
-        },
-        type: UserActionTypes.status,
-      },
-      references: this.createCaseReferences(args.caseId),
+    const parameters = this.buildCommonUserAction({
+      ...args,
+      action,
+      valueKey: 'status',
+      value: args.payload.status,
+      type: UserActionTypes.status,
+    });
+
+    parameters.attributes.payload = {
+      ...parameters.attributes.payload,
+      ...(shouldLogCloseReasonSyncMessage ? { closeReason: args.payload.closeReason } : {}),
+      ...(args.payload.syncedAlerts != null ? { syncedAlerts: args.payload.syncedAlerts } : {}),
     };
     const getMessage = (id?: string) =>
       shouldLogCloseReasonSyncMessage
