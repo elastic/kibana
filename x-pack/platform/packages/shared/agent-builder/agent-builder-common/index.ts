@@ -97,6 +97,7 @@ export {
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
 export { type UserIdAndName } from './base/users';
 export { EsResourceType } from './base/resources';
+export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
   AgentType,

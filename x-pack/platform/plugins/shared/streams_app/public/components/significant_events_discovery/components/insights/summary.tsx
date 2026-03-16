@@ -129,7 +129,7 @@ export function Summary({ count }: { count: number }) {
                     data-test-subj="significant_events_regenerate_insights_button"
                   >
                     {i18n.translate('xpack.streams.insights.regenerateButtonLabel', {
-                      defaultMessage: 'Re-generate insights',
+                      defaultMessage: 'Re-discover Significant Events',
                     })}
                   </EuiButton>
                 </EuiFlexItem>
@@ -185,7 +185,7 @@ export function Summary({ count }: { count: number }) {
                   'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundDescription',
                   {
                     defaultMessage:
-                      'Start extracting insights from your logs, and understand what they mean with the power of AI and Elastic Observability.',
+                      'Discover Significant Events from your logs, and understand what they mean with the power of AI and Elastic Observability.',
                   }
                 )}
               </EuiText>
@@ -200,10 +200,10 @@ export function Summary({ count }: { count: number }) {
                     children:
                       task?.status === TaskStatus.InProgress
                         ? i18n.translate('xpack.streams.insights.generatingButtonLabel', {
-                            defaultMessage: 'Generating insights',
+                            defaultMessage: 'Discovering Significant Events',
                           })
                         : i18n.translate('xpack.streams.insights.generateButtonLabel', {
-                            defaultMessage: 'Generate insights',
+                            defaultMessage: 'Discover Significant Events',
                           }),
                     onClick: onGenerateInsightsClick,
                     isDisabled: isGenerateButtonPending,
