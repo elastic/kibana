@@ -139,7 +139,8 @@ export function FeaturesTable() {
           {i18n.translate(
             'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.knowledgeIndicatorsCount',
             {
-              defaultMessage: '{count} Knowledge Indicators',
+              defaultMessage:
+                '{count} {count, plural, one {Knowledge Indicator} other {Knowledge Indicators}}',
               values: { count: data?.features.length ?? 0 },
             }
           )}
