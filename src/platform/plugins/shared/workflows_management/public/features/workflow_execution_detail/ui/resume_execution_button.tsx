@@ -32,6 +32,8 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { clearResumeParam } = useWorkflowUrlState();
   const [isModalOpen, setIsModalOpen] = useState(autoOpen);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Honour autoOpen changes (e.g. when navigated to with ?resume=true)
   useEffect(() => {
@@ -39,12 +41,19 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   }, [autoOpen]);
 
   const openModal = useCallback(() => setIsModalOpen(true), []);
-  const closeModal = useCallback(() => setIsModalOpen(false), []);
+  const closeModal = useCallback(() => {
+    clearResumeParam();
+    setIsModalOpen(false);
+  }, [clearResumeParam]);
 
   const handleSubmit = useCallback(
     async ({ stepInputs }: { stepInputs: Record<string, unknown> }) => {
+      if (!http) {
+        throw new Error('HTTP service is unavailable');
+      }
+      setIsSubmitting(true);
       try {
-        await http?.post(`/api/workflowExecutions/${executionId}/resume`, {
+        await http.post(`/api/workflowExecutions/${executionId}/resume`, {
           body: JSON.stringify({ input: stepInputs }),
         });
         notifications?.toasts.addSuccess({
@@ -53,7 +62,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
             { defaultMessage: 'Workflow resumed' }
           ),
         });
-        clearResumeParam();
+        setIsSubmitted(true);
         closeModal();
       } catch (error) {
         notifications?.toasts.addError?.(error, {
@@ -62,9 +71,11 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
             { defaultMessage: 'Error resuming workflow' }
           ),
         });
+      } finally {
+        setIsSubmitting(false);
       }
     },
-    [executionId, http, notifications, clearResumeParam, closeModal]
+    [executionId, http, notifications, closeModal]
   );
 
   return (
@@ -88,7 +99,8 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
               color="warning"
               size="s"
               onClick={openModal}
-              disabled={!canExecuteWorkflow}
+              disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
+              isLoading={isSubmitting}
               data-test-subj="provideActionButton"
             >
               <FormattedMessage

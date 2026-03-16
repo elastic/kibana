@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ResumeExecutionButton } from './resume_execution_button';
@@ -148,7 +148,9 @@ describe('ResumeExecutionButton', () => {
       renderComponent();
       fireEvent.click(screen.getByTestId('provideActionButton'));
       await waitFor(() => expect(capturedOnSubmit).toBeDefined());
-      capturedOnSubmit!({ stepInputs: { approved: true } });
+      act(() => {
+        capturedOnSubmit!({ stepInputs: { approved: true } });
+      });
       await waitFor(() => {
         expect(mockHttpPost).toHaveBeenCalledWith('/api/workflowExecutions/exec-123/resume', {
           body: JSON.stringify({ input: { approved: true } }),
@@ -160,7 +162,9 @@ describe('ResumeExecutionButton', () => {
       renderComponent();
       fireEvent.click(screen.getByTestId('provideActionButton'));
       await waitFor(() => expect(capturedOnSubmit).toBeDefined());
-      capturedOnSubmit!({ stepInputs: {} });
+      act(() => {
+        capturedOnSubmit!({ stepInputs: {} });
+      });
       await waitFor(() => {
         expect(mockAddSuccess).toHaveBeenCalledTimes(1);
         expect(screen.queryByTestId('test-step-modal')).not.toBeInTheDocument();
@@ -173,13 +177,55 @@ describe('ResumeExecutionButton', () => {
       renderComponent();
       fireEvent.click(screen.getByTestId('provideActionButton'));
       await waitFor(() => expect(capturedOnSubmit).toBeDefined());
-      capturedOnSubmit!({ stepInputs: {} });
+      act(() => {
+        capturedOnSubmit!({ stepInputs: {} });
+      });
       await waitFor(() => {
         expect(mockAddError).toHaveBeenCalledWith(
           apiError,
           expect.objectContaining({ title: expect.any(String) })
         );
         expect(screen.getByTestId('test-step-modal')).toBeInTheDocument();
+      });
+    });
+
+    it('disables the button and shows loading while the request is in-flight', async () => {
+      let resolvePost!: () => void;
+      mockHttpPost.mockImplementationOnce(
+        () => new Promise<void>((resolve) => (resolvePost = resolve))
+      );
+
+      renderComponent();
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      act(() => {
+        capturedOnSubmit!({ stepInputs: {} });
+      });
+
+      // Button should be disabled + loading while the POST is in flight
+      await waitFor(() => {
+        expect(screen.getByTestId('provideActionButton')).toBeDisabled();
+      });
+
+      // Resolve the POST — button stays disabled (isSubmitted) but stops loading
+      resolvePost();
+      await waitFor(() => {
+        expect(screen.getByTestId('provideActionButton')).toBeDisabled();
+      });
+    });
+
+    it('does not disable the button when submit fails', async () => {
+      mockHttpPost.mockRejectedValueOnce(new Error('fail'));
+      renderComponent();
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      act(() => {
+        capturedOnSubmit!({ stepInputs: {} });
+      });
+      await waitFor(() => {
+        expect(mockAddError).toHaveBeenCalledTimes(1);
+        // Button must remain enabled so the user can retry
+        expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
       });
     });
   });

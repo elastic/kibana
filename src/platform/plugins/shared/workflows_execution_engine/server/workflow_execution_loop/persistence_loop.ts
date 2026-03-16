@@ -46,6 +46,11 @@ export async function persistenceLoop(
 ) {
   // Create the abort promise once outside the loop to avoid accumulating
   // event listeners on each iteration.
+  //
+  // The no-op .catch() is intentional: the promise can reject while persistenceLoop is
+  // inside `await flushState` (outside the try-catch that handles TimeoutAbortedError).
+  // Without it, Node.js would detect an unhandled rejection and crash the process.
+  // Promise.race still receives the rejection normally via the original promise reference.
   const persistenceAbortPromise: Promise<void> = persistenceAbortSignal
     ? new Promise<void>((_, reject) => {
         if (persistenceAbortSignal.aborted) {
@@ -57,6 +62,8 @@ export async function persistenceLoop(
         });
       })
     : new Promise<void>(() => {});
+
+  persistenceAbortPromise.catch(() => {});
 
   while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
     if (persistenceAbortSignal?.aborted) {

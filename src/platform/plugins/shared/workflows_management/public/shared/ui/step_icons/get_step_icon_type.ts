@@ -47,6 +47,9 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
     case 'wait':
       iconType = 'clock';
       break;
+    case 'waitForInput':
+      iconType = 'user';
+      break;
     case 'enter-if':
     case 'exit-if':
     case 'enter-condition-branch':

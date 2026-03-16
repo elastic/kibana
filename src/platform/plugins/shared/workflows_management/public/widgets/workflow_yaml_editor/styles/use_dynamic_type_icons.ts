@@ -69,6 +69,10 @@ export const predefinedStepTypes = [
     displayName: 'Wait',
   },
   {
+    actionTypeId: 'waitForInput',
+    displayName: 'Wait For Input',
+  },
+  {
     actionTypeId: 'data.set',
     displayName: 'Set Variables',
   },
