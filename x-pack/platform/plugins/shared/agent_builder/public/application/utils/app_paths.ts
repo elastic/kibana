@@ -41,19 +41,4 @@ export const appPaths = {
     pluginDetails: ({ pluginId }: { pluginId: string }) => `/manage/plugins/${pluginId}`,
     connectors: '/manage/connectors',
   },
-
-  // Legacy paths (for backward compatibility, will redirect)
-  legacy: {
-    conversationNew: `/conversations/${newConversationId}`,
-    conversationById: ({ conversationId }: { conversationId: string }) =>
-      `/conversations/${conversationId}`,
-  },
-};
-
-// Route patterns for matching (used by unified sidebar)
-export const routePatterns = {
-  agentRoot: '/agents/:agentId',
-  agentConversations: '/agents/:agentId/conversations/*',
-  agentSettings: '/agents/:agentId/(skills|tools|plugins|connectors|instructions)',
-  manage: '/manage/*',
 };

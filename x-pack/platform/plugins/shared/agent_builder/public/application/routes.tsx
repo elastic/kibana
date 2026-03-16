@@ -9,7 +9,8 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useMemo } from 'react';
 
 import { AppLayout } from './components/layout/app_layout';
-import { RootRedirect, LegacyConversationRedirect } from './components/redirects';
+import { RootRedirect } from './components/redirects/root_redirect';
+import { LegacyConversationRedirect } from './components/redirects/legacy_conversation_redirect';
 import { allRoutes } from './route_config';
 import { useExperimentalFeatures } from './hooks/use_experimental_features';
 
