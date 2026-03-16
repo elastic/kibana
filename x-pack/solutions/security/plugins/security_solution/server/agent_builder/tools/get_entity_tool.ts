@@ -27,7 +27,7 @@ import {
   ENTITY_STORE_ENTITY_ID_FIELD,
   getRowValue,
   addOrUpdateEntityAttachment,
-} from '../utils/entity_attachment_utils';
+} from '../utils/entity_utils';
 import { securityTool } from './constants';
 
 const ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD = 'entity.risk.calculated_score_norm';
@@ -387,31 +387,54 @@ export const getEntityTool = (
           )
         );
 
-        // console.log(`Adding attachment in GET tool`);
+        let resultAttachmentId: string | undefined;
+        let resultAttachmentVersion: number | undefined;
 
-        // await addOrUpdateEntityAttachment(
-        //   attachments,
-        //   enrichedResults.map((res) => {
-        //     const firstValue = res.data.values[0];
-        //     const entityTypeValue = getRowValue(
-        //       res.data.columns,
-        //       firstValue,
-        //       ENTITY_STORE_ENTITY_TYPE_FIELD
-        //     );
-        //     const entityIdValue = getRowValue(
-        //       res.data.columns,
-        //       firstValue,
-        //       ENTITY_STORE_ENTITY_ID_FIELD
-        //     );
-        //     return {
-        //       entityType: String(entityTypeValue ?? ''),
-        //       entityId: String(entityIdValue ?? ''),
-        //     };
-        //   }),
-        //   `Entity: ${normalizedEntityId}`
-        // );
+        try {
+          const attachment = await addOrUpdateEntityAttachment({
+            attachments,
+            entities: enrichedResults.map((res) => {
+              const firstValue = res.data.values[0];
+              const entityTypeValue = getRowValue(
+                res.data.columns,
+                firstValue,
+                ENTITY_STORE_ENTITY_TYPE_FIELD
+              );
+              const entityIdValue = getRowValue(
+                res.data.columns,
+                firstValue,
+                ENTITY_STORE_ENTITY_ID_FIELD
+              );
+              return {
+                entityType: String(entityTypeValue ?? '') as IdentifierType,
+                entityId: String(entityIdValue ?? ''),
+              };
+            }),
+            description: `Entity: ${normalizedEntityId}`,
+          });
 
-        return { results: enrichedResults };
+          resultAttachmentId = attachment?.id;
+          resultAttachmentVersion = attachment?.current_version ?? 1;
+        } catch (error) {
+          logger.warn(
+            `Could not add entity attachment: ${error instanceof Error ? error.message : error}`
+          );
+        }
+
+        return {
+          results: [
+            ...enrichedResults,
+            ...(resultAttachmentId
+              ? [
+                  {
+                    tool_result_id: getToolResultId(),
+                    type: 'attachment',
+                    data: { attachmentId: resultAttachmentId, version: resultAttachmentVersion },
+                  },
+                ]
+              : []),
+          ],
+        };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return {

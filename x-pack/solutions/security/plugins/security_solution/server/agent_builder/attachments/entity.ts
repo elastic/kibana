@@ -4,27 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ExperimentalFeatures } from '../../../common';
-import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import {
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   SECURITY_GET_ENTITY_TOOL_ID,
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
 } from '../tools';
-import { securityAttachmentDataSchema } from './security_attachment_data_schema';
+import { entityAttachmentDataSchema } from '../utils/entity_utils';
 
-const entityAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  entities: z.array(
-    z.object({
-      entityType: IdentifierType,
-      entityId: z.string().min(1),
-    })
-  ),
-});
 /**
  * Type guard to check if data is a formatted risk entity string
  */

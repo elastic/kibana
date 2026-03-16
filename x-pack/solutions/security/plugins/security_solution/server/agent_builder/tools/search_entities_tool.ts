@@ -28,7 +28,7 @@ import {
   ENTITY_STORE_ENTITY_ID_FIELD,
   getRowValue,
   addOrUpdateEntityAttachment,
-} from '../utils/entity_attachment_utils';
+} from '../utils/entity_utils';
 import { securityTool } from './constants';
 
 const ENTITY_STORE_KEEP_FIELDS = [
@@ -452,30 +452,53 @@ export const searchEntitiesTool = (
 
         const entities = values.flatMap((row) => {
           const entityId = String(getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD) ?? '');
-          if (!entityId) return [];
+          const entityType = String(
+            getRowValue(columns, row, ENTITY_STORE_ENTITY_TYPE_FIELD) ?? ''
+          );
 
-          const entityTypeRaw = getRowValue(columns, row, ENTITY_STORE_ENTITY_TYPE_FIELD);
-          // Fall back to parsing the type prefix from the entity ID (e.g. "host:server1" → "host")
-          const entityType =
-            entityTypeRaw != null ? String(entityTypeRaw) : entityId.split(':')[0] ?? '';
+          if (!entityId || !entityType) return [];
 
-          return [{ entityType, entityId }];
+          return [{ entityType: entityType as IdentifierType, entityId }];
         });
 
-        console.log(`Entities found: ${JSON.stringify(entities)}`);
+        let resultAttachmentId: string | undefined;
+        let resultAttachmentVersion: number | undefined;
 
-        await addOrUpdateEntityAttachment(
-          attachments,
-          entities,
-          'Entities matching search criteria'
-        );
+        try {
+          const attachment = await addOrUpdateEntityAttachment({
+            attachments,
+            entities,
+            description: 'Entities matching search criteria',
+          });
+          resultAttachmentId = attachment?.id;
+          resultAttachmentVersion = attachment?.current_version ?? 1;
+        } catch (error) {
+          logger.error(
+            `Failed to add or update entity attachment: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }`
+          );
+        }
+
+        const entityResults = values.map((_, rowIdx) => ({
+          tool_result_id: getToolResultId(),
+          type: ToolResultType.esqlResults as const,
+          data: { query, columns, values: [values[rowIdx]] },
+        }));
 
         return {
-          results: values.map((_, rowIdx) => ({
-            tool_result_id: getToolResultId(),
-            type: ToolResultType.esqlResults as const,
-            data: { query, columns, values: [values[rowIdx]] },
-          })),
+          results: [
+            ...entityResults,
+            ...(resultAttachmentId
+              ? [
+                  {
+                    tool_result_id: getToolResultId(),
+                    type: 'attachment',
+                    data: { attachmentId: resultAttachmentId, version: resultAttachmentVersion },
+                  },
+                ]
+              : []),
+          ],
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
