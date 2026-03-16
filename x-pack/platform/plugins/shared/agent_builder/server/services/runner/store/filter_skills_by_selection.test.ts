@@ -19,6 +19,7 @@ const createMockSkill = (
   readonly: true,
   basePath: 'skills/platform',
   getRegistryTools: () => [],
+  referencedContentCount: 0,
   ...overrides,
 });
 

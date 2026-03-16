@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useSelector } from 'react-redux';
 import { OverviewTab } from '../../flyout_v2/document/tabs/overview_tab';
@@ -14,6 +14,7 @@ import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import type { ResolverCellActionRenderer } from '../../resolver/types';
 
 const DataViewManagerBootstrap = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -80,6 +81,13 @@ export const AlertFlyoutOverviewTab = ({
     };
   }, [servicesPromise, storePromise]);
 
+  // For now we are not rendering any cell actions in the overview tab, but we need to provide a renderer to prevent errors in the resolver component.
+  // We will eventually implement the Discover cell actions.
+  const renderCellActions = useCallback<ResolverCellActionRenderer>(
+    ({ children, field, scopeId, value }) => <>{children}</>,
+    []
+  );
+
   if (!services || !store) {
     return null;
   }
@@ -90,7 +98,7 @@ export const AlertFlyoutOverviewTab = ({
     children: (
       <>
         <DataViewManagerBootstrap />
-        <OverviewTab hit={hit} />
+        <OverviewTab hit={hit} renderCellActions={renderCellActions} />
       </>
     ),
   });

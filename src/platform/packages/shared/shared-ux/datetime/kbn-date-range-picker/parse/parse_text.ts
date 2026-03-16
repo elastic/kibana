@@ -55,6 +55,7 @@ const SUPPORTED_DATE_FORMATS = [
   'MMM D YYYY', // e.g. "Feb 3 2016"
   'MMM D, YYYY', // e.g. "feb 3, 2016"
   'YYYY-MM-DD',
+  'YYYY-MM-DDTHH:mm:ss.SSS',
   'YYYY-MM-DDTHH:mm:ss.SSSZ',
   'YYYY-MM-DDTHH:mm:ssZ',
   'YYYY-MM-DDTHH:mm',
