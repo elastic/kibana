@@ -160,25 +160,6 @@ export class AgentBuilderPlugin
 
     const { navigationService } = this.setupServices;
 
-    const internalServices: AgentBuilderInternalService = {
-      agentService,
-      attachmentsService,
-      chatService,
-      conversationsService,
-      docLinksService,
-      navigationService,
-      toolsService,
-      skillsService,
-      pluginsService,
-      startDependencies,
-      accessChecker,
-      eventsService,
-    };
-
-    this.internalServices = internalServices;
-
-    setSidebarServices(core, internalServices);
-
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
     const sidebar = core.chrome.sidebar.getApp('agentBuilder');
 
@@ -218,6 +199,28 @@ export class AgentBuilderPlugin
       this.activeSidebarRef = sidebarRef;
       return { chatRef: sidebarRef };
     };
+
+    const internalServices: AgentBuilderInternalService = {
+      agentService,
+      attachmentsService,
+      chatService,
+      conversationsService,
+      docLinksService,
+      navigationService,
+      toolsService,
+      skillsService,
+      pluginsService,
+      startDependencies,
+      accessChecker,
+      eventsService,
+      openSidebarConversation: (options?: OpenConversationSidebarOptions) => {
+        return openSidebarInternal(options);
+      },
+    };
+
+    this.internalServices = internalServices;
+
+    setSidebarServices(core, internalServices);
 
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
