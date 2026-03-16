@@ -40,6 +40,9 @@ export function createBreakdownSelector(page: ScoutPage): BreakdownSelector {
         await selectable.waitFor({ state: 'visible' });
       }
       await selectableWrapper.searchAndSelectFirst(dimensionName);
+      if (await selectable.isVisible()) {
+        await button.click();
+      }
     },
   };
 }

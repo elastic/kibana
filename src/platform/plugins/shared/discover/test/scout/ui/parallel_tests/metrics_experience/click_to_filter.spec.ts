@@ -52,9 +52,6 @@ spaceTest.describe(
 
       await spaceTest.step('select a breakdown dimension', async () => {
         await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
-        if (await metricsExperience.breakdownSelector.selectable.isVisible()) {
-          await metricsExperience.breakdownSelector.toggleButton.click();
-        }
         await expect(
           metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
         ).toBeVisible();
