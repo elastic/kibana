@@ -51,3 +51,34 @@ steps:
     connector-id: <%= sharepoint-server-stack-connector-id %>
     with:
       path: "${{ inputs.path }}"
+  - name: set-list-result
+    type: if
+    condition: "${{ inputs.list_action == 'getWeb' }}"
+    steps:
+      - name: set-get-web-output
+        type: data.set
+        with:
+          result: "${{ steps.get-web.output }}"
+    else:
+      - name: set-other-result
+        type: if
+        condition: "${{ inputs.list_action == 'getLists' }}"
+        steps:
+          - name: set-get-lists-output
+            type: data.set
+            with:
+              result: "${{ steps.get-lists.output }}"
+        else:
+          - name: set-items-or-folder-result
+            type: if
+            condition: "${{ inputs.list_action == 'getListItems' }}"
+            steps:
+              - name: set-get-list-items-output
+                type: data.set
+                with:
+                  result: "${{ steps.get-list-items.output }}"
+            else:
+              - name: set-get-folder-contents-output
+                type: data.set
+                with:
+                  result: "${{ steps.get-folder-contents.output }}"
