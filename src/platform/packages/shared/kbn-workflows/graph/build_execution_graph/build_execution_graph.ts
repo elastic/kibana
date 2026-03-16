@@ -784,14 +784,11 @@ function insertGraphBetweenNodes(
   });
 }
 
-const DEFAULT_MAX_LOOP_ITERATIONS = 2000;
-
 function normalizeMaxIterations(raw?: MaxIterations): {
   maxIterations?: number;
   onLimit?: 'continue' | 'fail';
 } {
-  if (raw == null)
-    return { maxIterations: DEFAULT_MAX_LOOP_ITERATIONS, onLimit: 'continue' };
+  if (raw == null) return {};
   if (typeof raw === 'number') return { maxIterations: raw, onLimit: 'continue' };
   return { maxIterations: raw.limit, onLimit: raw['on-limit'] };
 }

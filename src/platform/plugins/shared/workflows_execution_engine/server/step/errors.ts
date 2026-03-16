@@ -13,7 +13,6 @@ import { ExecutionError } from '@kbn/workflows/server';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 export const DEFAULT_MAX_STEP_SIZE = '10mb';
-export const DEFAULT_MAX_LOOP_ITERATIONS = 2000;
 export const DEFAULT_MAX_CUMULATIVE_OUTPUT_SIZE = '150mb';
 export const DEFAULT_MAX_WORKFLOW_OUTPUT_SIZE = '5mb';
 export const DEFAULT_MAX_STEPS_PER_WORKFLOW = 150;

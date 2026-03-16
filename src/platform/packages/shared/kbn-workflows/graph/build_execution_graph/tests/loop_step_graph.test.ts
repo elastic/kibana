@@ -358,7 +358,7 @@ describe('convertToWorkflowGraph', () => {
       expect(exitNode.onLimit).toBe('fail');
     });
 
-    it('should default maxIterations to 2000 when not configured', () => {
+    it('should not set maxIterations on exit node when not configured', () => {
       const workflowDefinition = {
         steps: [
           {
@@ -379,8 +379,8 @@ describe('convertToWorkflowGraph', () => {
 
       const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
       const exitNode = executionGraph.node('exitForeach_foreachStep') as ExitForeachNode;
-      expect(exitNode.maxIterations).toBe(2000);
-      expect(exitNode.onLimit).toBe('continue');
+      expect(exitNode.maxIterations).toBeUndefined();
+      expect(exitNode.onLimit).toBeUndefined();
     });
 
     it('should support max-iterations combined with iteration-timeout and iteration-on-failure', () => {
