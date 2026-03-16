@@ -104,6 +104,10 @@
     "@kbn/agent-builder-plugin",
     "@kbn/cloud-plugin",
     "@kbn/controls-constants",
+    "@kbn/cases-plugin",
+    "@kbn/cases-components",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
   ],
   "exclude": [
     "target/**/*",
