@@ -13,12 +13,14 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCheckbox,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSkeletonText,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
@@ -89,6 +91,70 @@ const NEXT_STATUS: Record<CaseTask['status'], CaseTask['status']> = {
 };
 
 // ---------------------------------------------------------------------------
+// Title cell with checkbox
+// ---------------------------------------------------------------------------
+
+interface TaskTitleCellProps {
+  row: TaskRow;
+  expandedIds: Set<string>;
+  onToggleExpand: (id: string) => void;
+  onToggleComplete: (task: TaskRow) => void;
+}
+
+const TaskTitleCell: React.FC<TaskTitleCellProps> = ({
+  row,
+  expandedIds,
+  onToggleExpand,
+  onToggleComplete,
+}) => {
+  const checkboxId = useGeneratedHtmlId({ prefix: 'task-check' });
+  const isCompleted = row.status === 'completed';
+
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+      style={{ paddingLeft: row._depth * 20 }}
+    >
+      {row._hasChildren ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={expandedIds.has(row.id) ? 'arrowDown' : 'arrowRight'}
+            aria-label={expandedIds.has(row.id) ? i18n.COLLAPSE_SUBTASKS : i18n.EXPAND_SUBTASKS}
+            size="xs"
+            onClick={() => onToggleExpand(row.id)}
+            data-test-subj={`cases-tasks-expand-${row.id}`}
+          />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false} style={{ width: 24 }} />
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiCheckbox
+          id={checkboxId}
+          checked={isCompleted}
+          onChange={() => onToggleComplete(row)}
+          aria-label={isCompleted ? i18n.MARK_INCOMPLETE : i18n.MARK_COMPLETE}
+          data-test-subj={`cases-tasks-check-${row.id}`}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText
+          size="s"
+          style={isCompleted ? { textDecoration: 'line-through', color: '#6a717d' } : undefined}
+        >
+          {row._depth > 0 && (
+            <span style={{ color: '#6a717d', marginRight: 4 }}>↳</span>
+          )}
+          {row.title}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -99,10 +165,11 @@ interface TasksTableProps {
   onAddTask?: () => void;
   onEditTask?: (task: CaseTask) => void;
   onAddSubTask?: (parentTask: CaseTask) => void;
+  onApplyTemplate?: () => void;
 }
 
 export const TasksTable = React.memo<TasksTableProps>(
-  ({ caseId, tasks, isLoading, onAddTask, onEditTask, onAddSubTask }) => {
+  ({ caseId, tasks, isLoading, onAddTask, onEditTask, onAddSubTask, onApplyTemplate }) => {
     const { mutate: deleteTask } = useDeleteTask(caseId);
     const { mutate: updateTask } = useUpdateTask(caseId);
 
@@ -147,34 +214,20 @@ export const TasksTable = React.memo<TasksTableProps>(
         field: 'title',
         'data-test-subj': 'cases-tasks-col-title',
         render: (title: string, row: TaskRow) => (
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="xs"
-            responsive={false}
-            style={{ paddingLeft: row._depth * 20 }}
-          >
-            {row._hasChildren ? (
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType={expandedIds.has(row.id) ? 'arrowDown' : 'arrowRight'}
-                  aria-label={expandedIds.has(row.id) ? i18n.COLLAPSE_SUBTASKS : i18n.EXPAND_SUBTASKS}
-                  size="xs"
-                  onClick={() => toggleExpand(row.id)}
-                  data-test-subj={`cases-tasks-expand-${row.id}`}
-                />
-              </EuiFlexItem>
-            ) : (
-              <EuiFlexItem grow={false} style={{ width: 24 }} />
-            )}
-            <EuiFlexItem>
-              <EuiText size="s">
-                {row._depth > 0 && (
-                  <span style={{ color: '#6a717d', marginRight: 4 }}>↳</span>
-                )}
-                {title}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <TaskTitleCell
+            row={row}
+            expandedIds={expandedIds}
+            onToggleExpand={toggleExpand}
+            onToggleComplete={(task) => {
+              updateTask({
+                taskId: task.id,
+                request: {
+                  version: task.version,
+                  status: task.status === 'completed' ? 'open' : 'completed',
+                },
+              });
+            }}
+          />
         ),
       },
       {
@@ -307,11 +360,22 @@ export const TasksTable = React.memo<TasksTableProps>(
           titleSize="xs"
           data-test-subj="cases-tasks-table-empty"
           actions={
-            onAddTask ? (
-              <EuiButton size="s" onClick={onAddTask} iconType="plus" data-test-subj="cases-tasks-add-task-empty">
-                {i18n.ADD_TASK}
-              </EuiButton>
-            ) : null
+            <EuiFlexGroup gutterSize="s" justifyContent="center" wrap>
+              {onAddTask && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton size="s" onClick={onAddTask} iconType="plus" data-test-subj="cases-tasks-add-task-empty">
+                    {i18n.ADD_TASK}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+              {onApplyTemplate && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty size="s" iconType="documents" onClick={onApplyTemplate} data-test-subj="cases-tasks-apply-template-empty">
+                    {i18n.APPLY_TEMPLATE}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           }
         />
       );
@@ -320,7 +384,14 @@ export const TasksTable = React.memo<TasksTableProps>(
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            {onApplyTemplate && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty size="s" iconType="documents" onClick={onApplyTemplate} data-test-subj="cases-tasks-apply-template">
+                  {i18n.APPLY_TEMPLATE}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               {onAddTask && (
                 <EuiButton size="s" onClick={onAddTask} iconType="plus" data-test-subj="cases-tasks-add-task">

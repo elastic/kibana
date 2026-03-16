@@ -161,3 +161,45 @@ export const COLLAPSE_SUBTASKS = i18n.translate('xpack.cases.tasks.collapseSubta
 export const CLICK_TO_ADVANCE_STATUS = i18n.translate('xpack.cases.tasks.clickToAdvanceStatus', {
   defaultMessage: 'Click to advance status',
 });
+
+export const MARK_COMPLETE = i18n.translate('xpack.cases.tasks.markComplete', {
+  defaultMessage: 'Mark as complete',
+});
+
+export const MARK_INCOMPLETE = i18n.translate('xpack.cases.tasks.markIncomplete', {
+  defaultMessage: 'Mark as incomplete',
+});
+
+export const APPLY_TEMPLATE = i18n.translate('xpack.cases.tasks.applyTemplate', {
+  defaultMessage: 'Apply template',
+});
+
+export const APPLY_TEMPLATE_DESCRIPTION = i18n.translate(
+  'xpack.cases.tasks.applyTemplateDescription',
+  {
+    defaultMessage: 'Select a task template to add its tasks to this case.',
+  }
+);
+
+export const APPLY_TEMPLATE_CONFIRM = i18n.translate('xpack.cases.tasks.applyTemplateConfirm', {
+  defaultMessage: 'Apply',
+});
+
+export const APPLY_TEMPLATE_ERROR = i18n.translate('xpack.cases.tasks.applyTemplateError', {
+  defaultMessage: 'Failed to apply template. Please try again.',
+});
+
+export const NO_TASK_TEMPLATES_AVAILABLE = i18n.translate(
+  'xpack.cases.tasks.noTaskTemplatesAvailable',
+  {
+    defaultMessage: 'No task templates',
+  }
+);
+
+export const NO_TASK_TEMPLATES_AVAILABLE_DESCRIPTION = i18n.translate(
+  'xpack.cases.tasks.noTaskTemplatesAvailableDescription',
+  {
+    defaultMessage:
+      'Create task templates in case settings to quickly add predefined sets of tasks.',
+  }
+);

@@ -15,6 +15,7 @@ import { CaseViewTabs } from '../case_view/case_view_tabs';
 import { TasksTable } from './tasks_table';
 import { AddTaskFlyout } from './add_task_flyout';
 import { EditTaskFlyout } from './edit_task_flyout';
+import { ApplyTemplateModal } from './apply_template_modal';
 
 interface CaseViewTasksProps {
   caseData: CaseUI;
@@ -32,6 +33,7 @@ export const CaseViewTasks = React.memo<CaseViewTasksProps>(({ caseData, searchT
 
   const [addState, setAddState] = useState<AddTaskState>({ open: false, parentTask: null });
   const [editingTask, setEditingTask] = useState<CaseTask | null>(null);
+  const [applyTemplateOpen, setApplyTemplateOpen] = useState(false);
 
   return (
     <>
@@ -51,6 +53,7 @@ export const CaseViewTasks = React.memo<CaseViewTasksProps>(({ caseData, searchT
                 onAddTask={() => setAddState({ open: true, parentTask: null })}
                 onEditTask={(task) => setEditingTask(task)}
                 onAddSubTask={(parentTask) => setAddState({ open: true, parentTask })}
+                onApplyTemplate={() => setApplyTemplateOpen(true)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -71,6 +74,13 @@ export const CaseViewTasks = React.memo<CaseViewTasksProps>(({ caseData, searchT
           caseId={caseId}
           task={editingTask}
           onClose={() => setEditingTask(null)}
+        />
+      )}
+
+      {applyTemplateOpen && (
+        <ApplyTemplateModal
+          caseId={caseId}
+          onClose={() => setApplyTemplateOpen(false)}
         />
       )}
     </>
