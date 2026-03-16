@@ -121,12 +121,10 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
     title: schema.string({
       meta: { description: 'The title of the section.' },
     }),
-    collapsed: schema.maybe(
-      schema.boolean({
-        meta: { description: 'The collapsed state of the section.' },
-        defaultValue: false,
-      })
-    ),
+    collapsed: schema.boolean({
+      meta: { description: 'The collapsed state of the section.' },
+      defaultValue: false,
+    }),
     grid: sectionGridSchema,
     panels: schema.arrayOf(getPanelSchema(isDashboardAppRequest), {
       meta: { description: 'The panels that belong to the section.' },
@@ -141,52 +139,43 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
   });
 }
 
-export const optionsSchema = schema.object({
-  auto_apply_filters: schema.maybe(
-    schema.boolean({
+export const optionsSchema = schema.object(
+  {
+    auto_apply_filters: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.auto_apply_filters,
       meta: { description: 'Auto apply control filters.' },
-    })
-  ),
-  hide_panel_titles: schema.maybe(
-    schema.boolean({
+    }),
+    hide_panel_titles: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.hide_panel_titles,
       meta: { description: 'Hide the panel titles in the dashboard.' },
-    })
-  ),
-  hide_panel_borders: schema.maybe(
-    schema.boolean({
+    }),
+    hide_panel_borders: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.hide_panel_borders,
       meta: { description: 'Hide the panel borders in the dashboard.' },
-    })
-  ),
-  use_margins: schema.maybe(
-    schema.boolean({
+    }),
+    use_margins: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.use_margins,
       meta: { description: 'Show margins between panels in the dashboard layout.' },
-    })
-  ),
-  sync_colors: schema.maybe(
-    schema.boolean({
+    }),
+    sync_colors: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.sync_colors,
       meta: { description: 'Synchronize colors between related panels in the dashboard.' },
-    })
-  ),
-  sync_tooltips: schema.maybe(
-    schema.boolean({
+    }),
+    sync_tooltips: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.sync_tooltips,
       meta: { description: 'Synchronize tooltips between related panels in the dashboard.' },
-    })
-  ),
-  sync_cursor: schema.maybe(
-    schema.boolean({
+    }),
+    sync_cursor: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.sync_cursor,
       meta: {
         description: 'Synchronize cursor position between related panels in the dashboard.',
       },
-    })
-  ),
-});
+    }),
+  },
+  {
+    defaultValue: DEFAULT_DASHBOARD_OPTIONS,
+  }
+);
 
 export const accessControlSchema = schema.maybe(
   schema.object({
@@ -199,21 +188,19 @@ export const accessControlSchema = schema.maybe(
 
 export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
   return schema.object({
-    pinned_panels: schema.maybe(pinnedPanelsSchema),
+    pinned_panels: pinnedPanelsSchema,
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
-    options: schema.maybe(optionsSchema),
-    panels: schema.maybe(
-      schema.arrayOf(
-        schema.oneOf([
-          getPanelSchema(isDashboardAppRequest),
-          getSectionSchema(isDashboardAppRequest),
-        ]),
-        {
-          defaultValue: [],
-          maxSize: MAX_PANELS,
-        }
-      )
+    options: optionsSchema,
+    panels: schema.arrayOf(
+      schema.oneOf([
+        getPanelSchema(isDashboardAppRequest),
+        getSectionSchema(isDashboardAppRequest),
+      ]),
+      {
+        defaultValue: [],
+        maxSize: MAX_PANELS,
+      }
     ),
     project_routing: schema.maybe(schema.string()),
     query: schema.maybe(querySchema),
