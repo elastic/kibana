@@ -42,17 +42,24 @@ export const recommendCorrelationTypeRoute = (router: SecuritySolutionPluginRout
         },
       },
       async (context, request, response) => {
-        const spaceId = (await context.securitySolution).getSpaceId();
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+        try {
+          const spaceId = (await context.securitySolution).getSpaceId();
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-        const result = await recommendCorrelationType(esClient, {
-          rules: request.body.rules,
-          groupByFields: request.body.groupByFields,
-          timespan: request.body.timespan,
-          spaceId,
-        });
+          const result = await recommendCorrelationType(esClient, {
+            rules: request.body.rules,
+            groupByFields: request.body.groupByFields,
+            timespan: request.body.timespan,
+            spaceId,
+          });
 
-        return response.ok({ body: result });
+          return response.ok({ body: result });
+        } catch (err) {
+          return response.customError({
+            statusCode: 500,
+            body: { message: err.message },
+          });
+        }
       }
     );
 };

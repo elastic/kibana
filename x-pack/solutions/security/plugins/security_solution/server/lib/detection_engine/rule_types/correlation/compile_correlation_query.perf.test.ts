@@ -39,7 +39,7 @@ describe('compileCorrelationQuery performance', () => {
     });
 
     const start = performance.now();
-    const query = compileCorrelationQuery(config, SELF_RULE_ID);
+    const query = compileCorrelationQuery(config, SELF_RULE_ID, 'default');
     const duration = performance.now() - start;
 
     expect(duration).toBeLessThan(10);
@@ -65,7 +65,7 @@ describe('compileCorrelationQuery performance', () => {
       });
 
       const start = performance.now();
-      const query = compileCorrelationQuery(config, SELF_RULE_ID);
+      const query = compileCorrelationQuery(config, SELF_RULE_ID, 'default');
       const duration = performance.now() - start;
 
       expect(duration).toBeLessThan(10);
@@ -81,7 +81,7 @@ describe('compileCorrelationQuery performance', () => {
     });
 
     const start = performance.now();
-    const query = compileCorrelationQuery(config, SELF_RULE_ID);
+    const query = compileCorrelationQuery(config, SELF_RULE_ID, 'default');
     const duration = performance.now() - start;
 
     expect(duration).toBeLessThan(50);
@@ -99,7 +99,7 @@ describe('compileCorrelationQuery performance', () => {
     });
 
     const results = Array.from({ length: 100 }, () =>
-      compileCorrelationQuery(config, SELF_RULE_ID)
+      compileCorrelationQuery(config, SELF_RULE_ID, 'default')
     );
 
     const unique = new Set(results);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface CorrelationTypeRecommendation {
@@ -41,7 +41,7 @@ const ENTITY_FIELD_PATTERNS = ['user', 'host'];
 const hasFieldMatch = (fields: string[], patterns: string[]): boolean =>
   fields.some((field) => patterns.some((pattern) => field.includes(pattern)));
 
-const getClientSideFallback = (
+export const getClientSideFallback = (
   selectedRules: string[],
   groupByFields: string[]
 ): CorrelationTypeRecommendation | undefined => {
@@ -108,6 +108,9 @@ export const useCorrelationTypeRecommendation = ({
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cancelledRef = useRef(false);
 
+  const rulesKey = useMemo(() => selectedRules.join(','), [selectedRules]);
+  const fieldsKey = useMemo(() => groupByFields.join(','), [groupByFields]);
+
   const fetchRecommendation = useCallback(async () => {
     if (selectedRules.length === 0) {
       setRecommendation(undefined);
@@ -130,7 +133,7 @@ export const useCorrelationTypeRecommendation = ({
       if (!cancelledRef.current) {
         setRecommendation(result);
       }
-    } catch {
+    } catch (_e) {
       if (!cancelledRef.current) {
         const fallback = getClientSideFallback(selectedRules, groupByFields);
         setRecommendation(fallback);
@@ -140,7 +143,8 @@ export const useCorrelationTypeRecommendation = ({
         setIsLoading(false);
       }
     }
-  }, [http, selectedRules, groupByFields, timespan]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [http, rulesKey, fieldsKey, timespan]);
 
   useEffect(() => {
     cancelledRef.current = false;
@@ -167,7 +171,8 @@ export const useCorrelationTypeRecommendation = ({
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [fetchRecommendation, selectedRules]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchRecommendation, rulesKey]);
 
   return { recommendation, isLoading };
 };

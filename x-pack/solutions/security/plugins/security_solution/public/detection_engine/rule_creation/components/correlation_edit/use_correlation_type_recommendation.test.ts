@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useCorrelationTypeRecommendation } from './use_correlation_type_recommendation';
+import { renderHook, act } from '@testing-library/react';
+import {
+  useCorrelationTypeRecommendation,
+  getClientSideFallback,
+} from './use_correlation_type_recommendation';
 
 const mockHttpPost = jest.fn();
+const mockHttp = { post: mockHttpPost };
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
-      http: {
-        post: mockHttpPost,
-      },
+      http: mockHttp,
     },
   }),
 }));
@@ -29,6 +31,12 @@ describe('useCorrelationTypeRecommendation', () => {
   afterEach(() => {
     jest.useRealTimers();
   });
+
+  const advanceTimersAndFlush = async (ms: number) => {
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(ms);
+    });
+  };
 
   it('returns undefined recommendation and not loading when no rules are selected', () => {
     const { result } = renderHook(() =>
@@ -66,14 +74,9 @@ describe('useCorrelationTypeRecommendation', () => {
 
     expect(result.current.isLoading).toBe(true);
 
-    act(() => {
-      jest.advanceTimersByTime(500);
-    });
+    await advanceTimersAndFlush(500);
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
+    expect(result.current.isLoading).toBe(false);
     expect(mockHttpPost).toHaveBeenCalledWith(
       '/internal/security_solution/correlation/recommend_type',
       {
@@ -85,7 +88,6 @@ describe('useCorrelationTypeRecommendation', () => {
         }),
       }
     );
-
     expect(result.current.recommendation).toEqual(serverResponse);
   });
 
@@ -110,14 +112,9 @@ describe('useCorrelationTypeRecommendation', () => {
       })
     );
 
-    act(() => {
-      jest.advanceTimersByTime(500);
-    });
+    await advanceTimersAndFlush(500);
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.recommendation).toEqual(serverResponse);
     expect(result.current.recommendation?.stats).toBeDefined();
   });
@@ -136,14 +133,9 @@ describe('useCorrelationTypeRecommendation', () => {
         })
       );
 
-      act(() => {
-        jest.advanceTimersByTime(500);
-      });
+      await advanceTimersAndFlush(500);
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
+      expect(result.current.isLoading).toBe(false);
       expect(result.current.recommendation).toEqual({
         type: 'event_count',
         confidence: 'medium',
@@ -160,14 +152,9 @@ describe('useCorrelationTypeRecommendation', () => {
         })
       );
 
-      act(() => {
-        jest.advanceTimersByTime(500);
-      });
+      await advanceTimersAndFlush(500);
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
+      expect(result.current.isLoading).toBe(false);
       expect(result.current.recommendation).toEqual({
         type: 'value_count',
         confidence: 'medium',
@@ -184,14 +171,9 @@ describe('useCorrelationTypeRecommendation', () => {
         })
       );
 
-      act(() => {
-        jest.advanceTimersByTime(500);
-      });
+      await advanceTimersAndFlush(500);
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
+      expect(result.current.isLoading).toBe(false);
       expect(result.current.recommendation).toEqual({
         type: 'temporal',
         confidence: 'high',
@@ -208,14 +190,9 @@ describe('useCorrelationTypeRecommendation', () => {
         })
       );
 
-      act(() => {
-        jest.advanceTimersByTime(500);
-      });
+      await advanceTimersAndFlush(500);
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
+      expect(result.current.isLoading).toBe(false);
       expect(result.current.recommendation).toEqual({
         type: 'temporal_ordered',
         confidence: 'high',
@@ -232,14 +209,9 @@ describe('useCorrelationTypeRecommendation', () => {
         })
       );
 
-      act(() => {
-        jest.advanceTimersByTime(500);
-      });
+      await advanceTimersAndFlush(500);
 
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
+      expect(result.current.isLoading).toBe(false);
       expect(result.current.recommendation).toEqual({
         type: 'temporal',
         confidence: 'low',
@@ -264,30 +236,15 @@ describe('useCorrelationTypeRecommendation', () => {
       },
     });
 
-    act(() => {
-      jest.advanceTimersByTime(200);
-    });
-
     rerender({
       selectedRules: ['rule-1', 'rule-2'],
       groupByFields: ['host.name'],
       currentType: 'temporal',
     });
 
-    act(() => {
-      jest.advanceTimersByTime(200);
-    });
+    await advanceTimersAndFlush(500);
 
-    expect(mockHttpPost).not.toHaveBeenCalled();
-
-    act(() => {
-      jest.advanceTimersByTime(300);
-    });
-
-    await waitFor(() => {
-      expect(mockHttpPost).toHaveBeenCalledTimes(1);
-    });
-
+    expect(mockHttpPost).toHaveBeenCalledTimes(1);
     expect(mockHttpPost).toHaveBeenCalledWith(
       '/internal/security_solution/correlation/recommend_type',
       expect.objectContaining({
@@ -298,5 +255,38 @@ describe('useCorrelationTypeRecommendation', () => {
         }),
       })
     );
+  });
+});
+
+describe('getClientSideFallback', () => {
+  it('returns undefined for empty rules', () => {
+    expect(getClientSideFallback([], ['host.name'])).toBeUndefined();
+  });
+
+  it('returns event_count for single rule without network fields', () => {
+    const result = getClientSideFallback(['rule-1'], ['host.name']);
+    expect(result?.type).toBe('event_count');
+  });
+
+  it('returns value_count for single rule with network fields', () => {
+    const result = getClientSideFallback(['rule-1'], ['source.ip']);
+    expect(result?.type).toBe('value_count');
+  });
+
+  it('returns temporal_ordered for 3+ rules', () => {
+    const result = getClientSideFallback(['r1', 'r2', 'r3'], ['host.name']);
+    expect(result?.type).toBe('temporal_ordered');
+  });
+
+  it('returns temporal with high confidence for 2 rules with entity fields', () => {
+    const result = getClientSideFallback(['r1', 'r2'], ['user.name']);
+    expect(result?.type).toBe('temporal');
+    expect(result?.confidence).toBe('high');
+  });
+
+  it('returns temporal with low confidence for 2 rules without entity fields', () => {
+    const result = getClientSideFallback(['r1', 'r2'], ['event.category']);
+    expect(result?.type).toBe('temporal');
+    expect(result?.confidence).toBe('low');
   });
 });

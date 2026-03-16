@@ -42,11 +42,31 @@ export const typeSpecificCamelToSnake = (
       };
     }
     case 'correlation': {
+      const { correlation } = params;
       return {
         type: params.type,
         language: params.language,
         query: params.query,
-        correlation: convertObjectKeysToSnakeCase(params.correlation),
+        correlation: {
+          rules: correlation.rules,
+          type: correlation.type,
+          group_by: correlation.groupBy,
+          timespan: correlation.timespan,
+          ...(correlation.condition
+            ? {
+                condition: {
+                  operator: correlation.condition.operator,
+                  value: correlation.condition.value,
+                  ...(correlation.condition.field !== undefined
+                    ? { field: correlation.condition.field }
+                    : {}),
+                },
+              }
+            : {}),
+          ...(correlation.aliases ? { aliases: correlation.aliases } : {}),
+          ...(correlation.remoteClusters ? { remote_clusters: correlation.remoteClusters } : {}),
+          ...(correlation.targetSpaces ? { target_spaces: correlation.targetSpaces } : {}),
+        },
         alert_suppression: params.alertSuppression
           ? convertObjectKeysToSnakeCase(params.alertSuppression)
           : undefined,

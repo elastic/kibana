@@ -190,11 +190,21 @@ export const CorrelationHitRate = React.memo<CorrelationHitRateProps>(({ signalI
   );
 
   const navigateToAlerts = useCallback(() => {
-    openAlertsPageWithFilter({
-      title: OPEN_IN_ALERTS_TITLE_STATUS,
-      selected_options: ['open'],
-      field_name: ALERT_WORKFLOW_STATUS,
-    });
+    openAlertsPageWithFilter([
+      {
+        title: OPEN_IN_ALERTS_TITLE_STATUS,
+        selected_options: ['open'],
+        field_name: ALERT_WORKFLOW_STATUS,
+      },
+      {
+        title: i18n.translate(
+          'xpack.securitySolution.detectionResponse.correlationAlertsOpenInAlertsRuleType',
+          { defaultMessage: 'Rule type' }
+        ),
+        selected_options: ['siem.correlationRule'],
+        field_name: 'kibana.alert.rule.type',
+      },
+    ]);
   }, [openAlertsPageWithFilter]);
 
   const columns = useGetTableColumns({ getAppUrl, navigateTo, openRuleInAlertsPage });

@@ -67,7 +67,7 @@ const buildFromClause = (
   return allIndices.join(', ');
 };
 
-export const buildEnrichmentIndices = (spaceId: string, targetSpaces?: string[]): string => {
+export const buildEnrichmentIndices = (spaceId: string, targetSpaces?: string[]): string[] => {
   const indices = [`${ALERTS_INDEX_PREFIX}${spaceId}`];
   if (targetSpaces && targetSpaces.length > 0) {
     for (const space of targetSpaces) {
@@ -78,7 +78,7 @@ export const buildEnrichmentIndices = (spaceId: string, targetSpaces?: string[])
       }
     }
   }
-  return indices.join(',');
+  return indices;
 };
 
 export const compileCorrelationQuery = (

@@ -50,7 +50,7 @@ const MGET_BATCH_SIZE = 5000;
 export const fetchContributingAlerts = async (
   esClient: ElasticsearchClient,
   alertIds: Set<string>,
-  alertsIndex: string
+  alertsIndices: string[]
 ): Promise<Map<string, Record<string, unknown>>> => {
   const results = new Map<string, Record<string, unknown>>();
   if (alertIds.size === 0) return results;
@@ -59,9 +59,11 @@ export const fetchContributingAlerts = async (
   for (let offset = 0; offset < idArray.length; offset += MGET_BATCH_SIZE) {
     const batch = idArray.slice(offset, offset + MGET_BATCH_SIZE);
     const response = await esClient.mget({
-      index: alertsIndex,
-      ids: batch,
-      _source: ENRICHMENT_FIELDS as unknown as string[],
+      docs: batch.map((id) => ({
+        _id: id,
+        _index: alertsIndices[0],
+        _source: ENRICHMENT_FIELDS as unknown as string[],
+      })),
     });
 
     for (const doc of response.docs) {

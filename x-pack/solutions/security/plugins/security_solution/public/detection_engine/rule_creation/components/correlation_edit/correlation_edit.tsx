@@ -14,6 +14,7 @@ import {
   EuiCodeBlock,
   EuiComboBox,
   EuiBadge,
+  EuiFormHelpText,
 } from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
 import {
@@ -69,7 +70,11 @@ interface CorrelationEditProps {
 }
 
 export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
-  const { clusters: remoteClusters, isLoading: remoteClustersLoading } = useRemoteClusters();
+  const {
+    clusters: remoteClusters,
+    isLoading: remoteClustersLoading,
+    error: remoteClustersError,
+  } = useRemoteClusters();
 
   const [formData] = useFormData({
     watch: [`${path}.rules`, `${path}.groupBy`, `${path}.type`],
@@ -222,6 +227,9 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
               data-test-subj="correlationRemoteClusters"
             />
           </EuiFormRow>
+          {remoteClustersError && (
+            <EuiFormHelpText color="danger">{remoteClustersError}</EuiFormHelpText>
+          )}
           <EuiSpacer size="m" />
 
           <EuiFormRow
@@ -320,6 +328,7 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
       showConditionField,
       remoteClusters,
       remoteClustersLoading,
+      remoteClustersError,
       recommendation,
       isRecommendationLoading,
     ]

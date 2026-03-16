@@ -465,7 +465,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // The second run should produce the same number of alerts (not compounding).
         // If self-correlation guard is missing, the count would grow.
-        expect(secondRunCount).toBeLessThanOrEqual(firstRunCount * 2);
+        expect(secondRunCount).toBeLessThanOrEqual(firstRunCount);
       });
     });
   });

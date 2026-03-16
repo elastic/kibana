@@ -429,19 +429,22 @@ describe('compileCorrelationQuery', () => {
 
   describe('buildEnrichmentIndices', () => {
     it('returns the current space index when no target spaces', () => {
-      expect(buildEnrichmentIndices('default')).toBe('.alerts-security.alerts-default');
+      expect(buildEnrichmentIndices('default')).toEqual(['.alerts-security.alerts-default']);
     });
 
-    it('returns comma-separated indices with target spaces', () => {
-      expect(buildEnrichmentIndices('default', ['soc', 'finance'])).toBe(
-        '.alerts-security.alerts-default,.alerts-security.alerts-soc,.alerts-security.alerts-finance'
-      );
+    it('returns array of indices with target spaces', () => {
+      expect(buildEnrichmentIndices('default', ['soc', 'finance'])).toEqual([
+        '.alerts-security.alerts-default',
+        '.alerts-security.alerts-soc',
+        '.alerts-security.alerts-finance',
+      ]);
     });
 
     it('deduplicates when target spaces includes the current space', () => {
-      expect(buildEnrichmentIndices('default', ['default', 'soc'])).toBe(
-        '.alerts-security.alerts-default,.alerts-security.alerts-soc'
-      );
+      expect(buildEnrichmentIndices('default', ['default', 'soc'])).toEqual([
+        '.alerts-security.alerts-default',
+        '.alerts-security.alerts-soc',
+      ]);
     });
 
     it('validates space IDs', () => {

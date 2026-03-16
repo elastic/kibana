@@ -169,6 +169,11 @@ export const recommendCorrelationType = async (
   config: RecommendConfig
 ): Promise<CorrelationTypeRecommendationResult> => {
   const { rules, groupByFields, timespan, spaceId } = config;
+
+  if (!/^[a-z0-9_-]+$/.test(spaceId)) {
+    throw new Error(`Invalid space ID: "${spaceId}"`);
+  }
+
   const alertsIndex = `.alerts-security.alerts-${spaceId}`;
   const timespanMs = parseTimespanToMs(timespan);
 
@@ -200,15 +205,6 @@ export const recommendCorrelationType = async (
   }
 
   if (rulesWithAlerts <= 1) {
-    if (hasHighCardinality) {
-      return {
-        type: 'value_count',
-        confidence: 'medium',
-        reason:
-          'Single rule with high-cardinality group-by fields suggests detecting breadth of distinct values',
-        stats,
-      };
-    }
     return {
       type: 'event_count',
       confidence: rulesWithAlerts === 0 ? 'low' : 'medium',

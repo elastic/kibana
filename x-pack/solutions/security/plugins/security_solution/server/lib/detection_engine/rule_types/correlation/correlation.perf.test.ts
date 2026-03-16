@@ -21,7 +21,14 @@ import type { EsqlTable } from '../esql/esql_request';
 import type { CorrelationState } from './types';
 
 jest.mock('./compile_correlation_query', () => ({
-  compileCorrelationQuery: jest.fn().mockReturnValue('FROM .alerts-security.alerts-default'),
+  compileCorrelationQuery: jest.fn().mockReturnValue('FROM .alerts-security.alerts-default ...'),
+  buildEnrichmentIndices: jest.fn().mockReturnValue(['.alerts-security.alerts-default']),
+}));
+
+jest.mock('./enrich_building_blocks', () => ({
+  fetchContributingAlerts: jest.fn().mockResolvedValue(new Map()),
+  extractEnrichmentFields: jest.fn().mockReturnValue({}),
+  computeShellEnrichment: jest.fn().mockReturnValue({}),
 }));
 
 jest.mock('../esql/esql_request', () => ({

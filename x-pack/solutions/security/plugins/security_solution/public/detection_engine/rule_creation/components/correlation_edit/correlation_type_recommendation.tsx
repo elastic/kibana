@@ -20,6 +20,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CorrelationTypeRecommendationWithStats } from './use_correlation_type_recommendation';
+import {
+  CORRELATION_RECOMMENDATION_ANALYSIS_DETAILS,
+  CORRELATION_RECOMMENDATION_ALERT_COUNTS,
+  CORRELATION_RECOMMENDATION_CARDINALITY,
+  CORRELATION_RECOMMENDATION_AVG_TIME,
+  CORRELATION_RECOMMENDATION_LOADING,
+  CORRELATION_RECOMMENDATION_SERVER_ANALYSIS,
+} from './translations';
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.title',
@@ -29,36 +37,6 @@ const TITLE = i18n.translate(
 const APPLY_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.apply',
   { defaultMessage: 'Apply recommendation' }
-);
-
-const LOADING_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.loading',
-  { defaultMessage: 'Loading recommendation...' }
-);
-
-const ANALYSIS_DETAILS_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.analysisDetails',
-  { defaultMessage: 'Analysis details' }
-);
-
-const ALERT_COUNTS_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.alertCounts',
-  { defaultMessage: 'Alert counts per rule' }
-);
-
-const CARDINALITY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.cardinality',
-  { defaultMessage: 'Group-by field cardinality' }
-);
-
-const AVG_TIME_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.avgTime',
-  { defaultMessage: 'Average time between alerts' }
-);
-
-const SERVER_ANALYSIS_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.correlationTypeRecommendation.serverAnalysis',
-  { defaultMessage: 'Server-side analysis' }
 );
 
 const CONFIDENCE_LABELS: Record<string, string> = {
@@ -148,7 +126,7 @@ export const CorrelationTypeRecommendationCallout = memo<CorrelationTypeRecommen
                 <EuiLoadingSpinner size="m" />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiText size="s">{LOADING_LABEL}</EuiText>
+                <EuiText size="s">{CORRELATION_RECOMMENDATION_LOADING}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiCallOut>
@@ -165,15 +143,15 @@ export const CorrelationTypeRecommendationCallout = memo<CorrelationTypeRecommen
     const statsDescriptionList = stats
       ? [
           {
-            title: ALERT_COUNTS_LABEL,
+            title: CORRELATION_RECOMMENDATION_ALERT_COUNTS,
             description: formatRecord(stats.alertCountPerRule),
           },
           {
-            title: CARDINALITY_LABEL,
+            title: CORRELATION_RECOMMENDATION_CARDINALITY,
             description: formatRecord(stats.groupByCardinality),
           },
           {
-            title: AVG_TIME_LABEL,
+            title: CORRELATION_RECOMMENDATION_AVG_TIME,
             description:
               stats.avgTimeBetweenAlerts !== null ? formatMs(stats.avgTimeBetweenAlerts) : 'N/A',
           },
@@ -199,7 +177,7 @@ export const CorrelationTypeRecommendationCallout = memo<CorrelationTypeRecommen
             </EuiFlexItem>
             {stats && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{SERVER_ANALYSIS_LABEL}</EuiBadge>
+                <EuiBadge color="hollow">{CORRELATION_RECOMMENDATION_SERVER_ANALYSIS}</EuiBadge>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -211,7 +189,7 @@ export const CorrelationTypeRecommendationCallout = memo<CorrelationTypeRecommen
               <EuiSpacer size="s" />
               <EuiAccordion
                 id="correlationRecommendationDetails"
-                buttonContent={ANALYSIS_DETAILS_LABEL}
+                buttonContent={CORRELATION_RECOMMENDATION_ANALYSIS_DETAILS}
                 forceState={isAccordionOpen ? 'open' : 'closed'}
                 onToggle={handleAccordionToggle}
                 data-test-subj="correlationTypeRecommendationDetails"

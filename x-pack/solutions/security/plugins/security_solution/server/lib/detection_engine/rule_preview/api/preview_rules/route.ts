@@ -391,6 +391,9 @@ export const previewRulesRoute = (
               await runExecutors(newTermsAlertType, previewRuleParams);
               break;
             case 'correlation':
+              if (!config.experimentalFeatures.correlationRulesEnabled) {
+                throw Error('Correlation rule type is not supported');
+              }
               const correlationAlertType = createCorrelationAlertType();
               await runExecutors(correlationAlertType, previewRuleParams);
               break;

@@ -5,8 +5,47 @@
  * 2.0.
  */
 
-import { PrebuiltRuleAsset } from '../../../prebuilt_rules/model/rule_assets/prebuilt_rule_asset';
+import { z } from '@kbn/zod';
 import { PREBUILT_CORRELATION_RULES } from './rules';
+
+const CorrelationConfigSchema = z.object({
+  rules: z.array(z.string()),
+  type: z.enum(['temporal', 'temporal_ordered', 'event_count', 'value_count']),
+  groupBy: z.array(z.string()),
+  timespan: z.string().regex(/^\d+[smhd]$/),
+  condition: z
+    .object({
+      operator: z.enum(['eq', 'neq', 'gt', 'gte', 'lt', 'lte']),
+      value: z.number().int().min(1),
+      field: z.string().optional(),
+    })
+    .optional(),
+});
+
+const PrebuiltCorrelationRuleSchema = z.object({
+  rule_id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  severity: z.enum(['low', 'medium', 'high', 'critical']),
+  risk_score: z.number().min(1).max(100),
+  type: z.literal('correlation'),
+  language: z.literal('esql'),
+  query: z.string(),
+  tags: z.array(z.string()),
+  threat: z.array(
+    z.object({
+      framework: z.literal('MITRE ATT&CK'),
+      tactic: z.object({ id: z.string(), name: z.string(), reference: z.string() }),
+      technique: z
+        .array(z.object({ id: z.string(), name: z.string(), reference: z.string() }))
+        .optional(),
+    })
+  ),
+  correlation: CorrelationConfigSchema,
+  version: z.number(),
+  license: z.string().optional(),
+  author: z.array(z.string()).optional(),
+});
 
 const MITRE_TACTIC_ID_PATTERN = /^TA\d{4}$/;
 const MITRE_TECHNIQUE_ID_PATTERN = /^T\d{4}(\.\d{3})?$/;
@@ -32,8 +71,8 @@ describe('Prebuilt correlation rules', () => {
   describe.each(PREBUILT_CORRELATION_RULES.map((rule) => [rule.rule_id, rule]))(
     'rule %s',
     (_ruleId, rule) => {
-      it('should parse successfully against the PrebuiltRuleAsset schema', () => {
-        const result = PrebuiltRuleAsset.safeParse(rule);
+      it('should parse successfully against the PrebuiltCorrelationRuleSchema', () => {
+        const result = PrebuiltCorrelationRuleSchema.safeParse(rule);
         if (!result.success) {
           throw new Error(
             `Rule ${rule.rule_id} failed schema validation: ${JSON.stringify(
@@ -61,10 +100,10 @@ describe('Prebuilt correlation rules', () => {
         expect(correlation.rules.length).toBeGreaterThan(0);
       });
 
-      it('should have a non-empty correlation.group_by array', () => {
-        const { correlation } = rule as { correlation: { group_by: string[] } };
-        expect(Array.isArray(correlation.group_by)).toBe(true);
-        expect(correlation.group_by.length).toBeGreaterThan(0);
+      it('should have a non-empty correlation.groupBy array', () => {
+        const { correlation } = rule as { correlation: { groupBy: string[] } };
+        expect(Array.isArray(correlation.groupBy)).toBe(true);
+        expect(correlation.groupBy.length).toBeGreaterThan(0);
       });
 
       it('should have a timespan matching the expected format', () => {

@@ -532,13 +532,13 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
       }
     : isCorrelationRule(ruleFields.ruleType)
     ? (() => {
-        const { queryBar, correlation, ...rest } = ruleFields as typeof ruleFields & {
+        const { queryBar, correlation } = ruleFields as typeof ruleFields & {
           correlation?: DefineStepRule['correlation'];
         };
         return {
-          ...rest,
           language: 'esql',
           query: queryBar?.query?.query as string,
+          required_fields: requiredFields,
           ...(correlation
             ? {
                 correlation: {

@@ -31,7 +31,7 @@ export const PREBUILT_CORRELATION_RULES: PrebuiltRuleAsset[] = [
     correlation: {
       type: 'temporal_ordered',
       rules: ['auth-success-remote', 'remote-process-execution'],
-      group_by: ['host.name', 'user.name'],
+      groupBy: ['host.name', 'user.name'],
       timespan: '5m',
     },
     threat: [
@@ -81,7 +81,7 @@ export const PREBUILT_CORRELATION_RULES: PrebuiltRuleAsset[] = [
     correlation: {
       type: 'temporal_ordered',
       rules: ['suspicious-process-creation', 'privilege-escalation-attempt'],
-      group_by: ['host.name', 'user.name'],
+      groupBy: ['host.name', 'user.name'],
       timespan: '10m',
     },
     threat: [
@@ -131,7 +131,7 @@ export const PREBUILT_CORRELATION_RULES: PrebuiltRuleAsset[] = [
     correlation: {
       type: 'event_count',
       rules: ['auth-failure-brute-force'],
-      group_by: ['source.ip'],
+      groupBy: ['source.ip'],
       timespan: '15m',
       condition: { operator: 'gte', value: 10 },
     },
@@ -189,7 +189,7 @@ export const PREBUILT_CORRELATION_RULES: PrebuiltRuleAsset[] = [
     correlation: {
       type: 'value_count',
       rules: ['large-file-transfer', 'dns-tunneling-activity', 'cloud-storage-upload'],
-      group_by: ['host.name'],
+      groupBy: ['host.name'],
       timespan: '30m',
       condition: { operator: 'gte', value: 2, field: 'destination.ip' },
     },
@@ -241,7 +241,7 @@ export const PREBUILT_CORRELATION_RULES: PrebuiltRuleAsset[] = [
     correlation: {
       type: 'temporal',
       rules: ['defense-evasion-tamper', 'suspicious-script-execution'],
-      group_by: ['host.name'],
+      groupBy: ['host.name'],
       timespan: '3m',
     },
     threat: [
@@ -311,7 +311,7 @@ export const PREBUILT_CORRELATION_RULES: PrebuiltRuleAsset[] = [
         'persistence-registry-run-key',
         'persistence-scheduled-task',
       ],
-      group_by: ['host.name', 'user.name'],
+      groupBy: ['host.name', 'user.name'],
       timespan: '1h',
     },
     threat: [

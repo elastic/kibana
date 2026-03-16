@@ -175,15 +175,17 @@ export const cleanupAll = async (
         query: '',
       },
     });
-  } catch {
-    // best-effort
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('Rule cleanup failed:', (e as Error).message);
   }
 
   // Delete test documents index
   try {
     await esClient.indices.delete({ index: testIndex, ignore_unavailable: true });
-  } catch {
-    // best-effort
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('Index cleanup failed:', (e as Error).message);
   }
 
   // Delete generated alerts
@@ -194,7 +196,8 @@ export const cleanupAll = async (
       refresh: true,
       conflicts: 'proceed',
     });
-  } catch {
-    // best-effort
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('Alert cleanup failed:', (e as Error).message);
   }
 };

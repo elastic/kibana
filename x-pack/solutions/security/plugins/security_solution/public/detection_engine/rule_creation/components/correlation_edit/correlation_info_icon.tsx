@@ -14,7 +14,7 @@ import * as i18n from './translations';
 
 export const CorrelationInfoIcon = memo(function CorrelationInfoIcon(): JSX.Element {
   const { docLinks } = useKibana().services;
-  const [isPopoverOpen, { off: closePopover, on: togglePopover }] = useBoolean(false);
+  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
   const button = (
     <EuiButtonIcon

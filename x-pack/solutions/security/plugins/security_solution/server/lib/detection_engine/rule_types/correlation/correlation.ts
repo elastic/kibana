@@ -134,7 +134,7 @@ export const correlationExecutor = async ({
         }
       }
 
-      const enrichmentIndex = buildEnrichmentIndices(
+      const enrichmentIndices = buildEnrichmentIndices(
         sharedParams.spaceId,
         ruleParams.correlation.targetSpaces
       );
@@ -142,7 +142,7 @@ export const correlationExecutor = async ({
       const contributingAlerts = await fetchContributingAlerts(
         services.scopedClusterClient.asCurrentUser,
         allAlertIds,
-        enrichmentIndex
+        enrichmentIndices
       );
 
       ruleExecutionLogger.debug(
@@ -161,17 +161,20 @@ export const correlationExecutor = async ({
 
       for (const [groupIndex, group] of correlationGroups.entries()) {
         const shellId = uuidv4();
-        const maxRisk =
+        const rawMaxRisk =
           typeof group.max_risk === 'string'
             ? Number(group.max_risk)
             : typeof group.max_risk === 'number'
             ? group.max_risk
             : 0;
-        const alertIds: Array<string | null> = Array.isArray(group.alert_ids)
-          ? group.alert_ids
-          : group.alert_ids
-          ? [group.alert_ids]
-          : [];
+        const maxRisk = Number.isFinite(rawMaxRisk) ? rawMaxRisk : 0;
+        const alertIds = (
+          Array.isArray(group.alert_ids)
+            ? group.alert_ids
+            : group.alert_ids
+            ? [group.alert_ids]
+            : []
+        ).filter((id): id is string => typeof id === 'string' && id.length > 0);
         const ruleNames = Array.isArray(group.rule_names)
           ? group.rule_names
           : group.rule_names

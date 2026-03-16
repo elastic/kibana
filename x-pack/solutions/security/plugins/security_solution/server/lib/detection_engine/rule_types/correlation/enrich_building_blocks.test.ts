@@ -25,11 +25,9 @@ describe('enrich_building_blocks', () => {
   describe('fetchContributingAlerts', () => {
     it('should return empty map when alertIds is empty', async () => {
       const esClient = createMockEsClient();
-      const result = await fetchContributingAlerts(
-        esClient,
-        new Set<string>(),
-        '.alerts-security.alerts-default'
-      );
+      const result = await fetchContributingAlerts(esClient, new Set<string>(), [
+        '.alerts-security.alerts-default',
+      ]);
 
       expect(result.size).toBe(0);
       expect(esClient.mget).not.toHaveBeenCalled();
@@ -58,11 +56,9 @@ describe('enrich_building_blocks', () => {
         ],
       });
 
-      const result = await fetchContributingAlerts(
-        esClient,
-        new Set(['alert-1', 'alert-2']),
-        '.alerts-security.alerts-default'
-      );
+      const result = await fetchContributingAlerts(esClient, new Set(['alert-1', 'alert-2']), [
+        '.alerts-security.alerts-default',
+      ]);
 
       expect(result.size).toBe(2);
       expect(result.get('alert-1')).toEqual({
@@ -77,8 +73,16 @@ describe('enrich_building_blocks', () => {
 
       expect(esClient.mget).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: '.alerts-security.alerts-default',
-          ids: ['alert-1', 'alert-2'],
+          docs: expect.arrayContaining([
+            expect.objectContaining({
+              _id: 'alert-1',
+              _index: '.alerts-security.alerts-default',
+            }),
+            expect.objectContaining({
+              _id: 'alert-2',
+              _index: '.alerts-security.alerts-default',
+            }),
+          ]),
         })
       );
     });
@@ -106,7 +110,7 @@ describe('enrich_building_blocks', () => {
       const result = await fetchContributingAlerts(
         esClient,
         new Set(['alert-1', 'alert-2', 'alert-3']),
-        '.alerts-security.alerts-default'
+        ['.alerts-security.alerts-default']
       );
 
       expect(result.size).toBe(2);
@@ -136,15 +140,13 @@ describe('enrich_building_blocks', () => {
 
       const esClient = { mget: mgetMock } as unknown as ElasticsearchClient;
 
-      const result = await fetchContributingAlerts(
-        esClient,
-        new Set(ids),
-        '.alerts-security.alerts-default'
-      );
+      const result = await fetchContributingAlerts(esClient, new Set(ids), [
+        '.alerts-security.alerts-default',
+      ]);
 
       expect(mgetMock).toHaveBeenCalledTimes(2);
-      expect(mgetMock.mock.calls[0][0].ids).toHaveLength(5000);
-      expect(mgetMock.mock.calls[1][0].ids).toHaveLength(3);
+      expect(mgetMock.mock.calls[0][0].docs).toHaveLength(5000);
+      expect(mgetMock.mock.calls[1][0].docs).toHaveLength(3);
       expect(result.size).toBe(totalIds);
     });
   });
