@@ -205,13 +205,13 @@ describe('getForFeature', () => {
     );
   });
 
-  it('detects cycles and returns empty result', async () => {
+  it('detects cycles and returns empty result with warning', async () => {
     registry.register(createValidFeature({ featureId: 'a' }));
     registry.register(createValidFeature({ featureId: 'b', parentFeatureId: 'a' }));
-    // Inject cycle
     (registry as any).features.get('a').parentFeatureId = 'b';
-    await expect(getForFeature(registry, createSoClient(), createEsClient(), 'a')).resolves.toEqual(
-      { endpoints: [], warnings: [] }
-    );
+    const result = await getForFeature(registry, createSoClient(), createEsClient(), 'a');
+    expect(result.endpoints).toEqual([]);
+    expect(result.warnings).toHaveLength(1);
+    expect(result.warnings[0]).toContain('Cyclic dependency');
   });
 });

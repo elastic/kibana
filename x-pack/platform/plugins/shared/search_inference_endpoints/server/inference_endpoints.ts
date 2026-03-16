@@ -31,18 +31,31 @@ export const getForFeature = async (
   esClient: ElasticsearchClient,
   featureId: string
 ): Promise<ResolvedInferenceEndpoints> => {
-  const endpointIds = await resolveEndpointIds(registry, soClient, featureId);
-  if (endpointIds.length === 0) {
-    return { endpoints: [], warnings: [] };
+  const { ids, warnings: resolveWarnings } = await resolveEndpointIds(
+    registry,
+    soClient,
+    featureId
+  );
+  if (ids.length === 0) {
+    return { endpoints: [], warnings: resolveWarnings };
   }
-  return fetchEndpoints(esClient, endpointIds);
+  const result = await fetchEndpoints(esClient, ids);
+  return {
+    endpoints: result.endpoints,
+    warnings: [...resolveWarnings, ...result.warnings],
+  };
 };
+
+interface ResolvedEndpointIds {
+  ids: string[];
+  warnings: string[];
+}
 
 const resolveEndpointIds = async (
   registry: InferenceFeatureRegistry,
   soClient: SavedObjectsClientContract,
   featureId: string
-): Promise<string[]> => {
+): Promise<ResolvedEndpointIds> => {
   if (!registry.get(featureId)) {
     throw new Error(
       i18n.translate('xpack.searchInferenceEndpoints.endpoints.featureNotFound', {
@@ -63,7 +76,20 @@ const resolveEndpointIds = async (
   const visited = new Set<string>();
   let currentId = featureId;
 
-  while (!visited.has(currentId)) {
+  while (true) {
+    if (visited.has(currentId)) {
+      return {
+        ids: [],
+        warnings: [
+          i18n.translate('xpack.searchInferenceEndpoints.endpoints.cyclicDependency', {
+            defaultMessage:
+              'Cyclic dependency detected in feature fallback chain: "{featureId}" references back to "{currentId}".',
+            values: { featureId, currentId },
+          }),
+        ],
+      };
+    }
+
     visited.add(currentId);
     const current = registry.get(currentId);
     if (!current) {
@@ -72,11 +98,11 @@ const resolveEndpointIds = async (
 
     const soEntry = soFeaturesMap.get(currentId);
     if (soEntry && soEntry.endpoints.length > 0) {
-      return soEntry.endpoints.map((e) => e.id);
+      return { ids: soEntry.endpoints.map((e) => e.id), warnings: [] };
     }
 
     if (current.recommendedEndpoints.length > 0) {
-      return current.recommendedEndpoints;
+      return { ids: current.recommendedEndpoints, warnings: [] };
     }
 
     if (current.parentFeatureId) {
@@ -86,7 +112,7 @@ const resolveEndpointIds = async (
     }
   }
 
-  return [];
+  return { ids: [], warnings: [] };
 };
 
 /**
