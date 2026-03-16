@@ -6,16 +6,42 @@
  */
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchInferenceEndpointsPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchInferenceEndpointsPluginStart {}
+export type { InferenceTaskType };
+
+export interface InferenceFeatureConfig {
+  featureId: string;
+  parentFeatureId?: string;
+  featureName: string;
+  featureDescription: string;
+  taskType: InferenceTaskType;
+  maxNumberOfEndpoints?: number;
+  recommendedEndpoints: string[];
+}
+
+export type RegisterResult = { ok: true } | { ok: false; error: string };
+
+export interface InferenceFeatureRegistryContract {
+  register: (feature: InferenceFeatureConfig) => RegisterResult;
+}
+
+export interface InferenceFeatureRegistryStartContract extends InferenceFeatureRegistryContract {
+  getAll: () => InferenceFeatureConfig[];
+  get: (featureId: string) => InferenceFeatureConfig | undefined;
+}
+
+export interface SearchInferenceEndpointsPluginSetup {
+  features: InferenceFeatureRegistryContract;
+}
+
+export interface SearchInferenceEndpointsPluginStart {
+  features: InferenceFeatureRegistryStartContract;
+}
 
 export interface SearchInferenceEndpointsPluginStartDependencies {
   actions: ActionsPluginStartContract;
-  features: FeaturesPluginStart;
 }
 
 export interface SearchInferenceEndpointsPluginSetupDependencies {
