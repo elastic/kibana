@@ -112,6 +112,24 @@ describe('TraceWaterfall', () => {
     jest.clearAllMocks();
   });
 
+  it('renders the focused trace waterfall without docId', () => {
+    render(<TraceWaterfall {...defaultProps} docId={undefined} />);
+
+    expect(screen.getByTestId('focusedTraceWaterfall')).toBeInTheDocument();
+  });
+
+  it('renders the focused trace waterfall without serviceName', () => {
+    render(<TraceWaterfall {...defaultProps} serviceName={undefined} />);
+
+    expect(screen.getByTestId('focusedTraceWaterfall')).toBeInTheDocument();
+  });
+
+  it('renders the focused trace waterfall without docId and serviceName', () => {
+    render(<TraceWaterfall {...defaultProps} docId={undefined} serviceName={undefined} />);
+
+    expect(screen.getByTestId('focusedTraceWaterfall')).toBeInTheDocument();
+  });
+
   describe('stale-state prevention', () => {
     it('renders the full-screen waterfall when initialState has a matching restoredTraceId', async () => {
       const initialState: Partial<TraceWaterfallRestorableState> = {
