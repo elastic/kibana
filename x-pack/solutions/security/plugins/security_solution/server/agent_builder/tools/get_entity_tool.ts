@@ -190,6 +190,16 @@ const findEntityById = async ({
       query: likeQuery,
       esClient,
     });
+
+    if (likeValues.length === 0) {
+      const nameQuery = `FROM ${entityIndex} | WHERE entity.name RLIKE ".*${rlikePattern}.*" OR user.full_name RLIKE ".*${rlikePattern}.*" | LIMIT 5`;
+      const { columns: nameColumns, values: nameValues } = await executeEsql({
+        query: nameQuery,
+        esClient,
+      });
+      return { query: nameQuery, columns: nameColumns, values: nameValues };
+    }
+
     return { query: likeQuery, columns: likeColumns, values: likeValues };
   }
 

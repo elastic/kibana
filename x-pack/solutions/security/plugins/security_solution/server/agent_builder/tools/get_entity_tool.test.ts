@@ -481,15 +481,17 @@ describe('getEntityTool', () => {
       (executeEsql as jest.Mock)
         // 1. Exact match — nothing found
         .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
-        // 2. LIKE fallback — also nothing found
-        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] });
+        // 2. entity.id RLIKE fallback — also nothing found
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 3. entity.name RLIKE fallback — also nothing found
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.name', type: 'keyword' }], values: [] });
 
       const result = (await tool.handler(
         { entityType: 'host', entityId: 'server1' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      expect(executeEsql).toHaveBeenCalledTimes(2);
+      expect(executeEsql).toHaveBeenCalledTimes(3);
       expect(result.results).toHaveLength(1);
       const errorResult = result.results[0] as ErrorResult;
       expect(errorResult.type).toBe(ToolResultType.error);
@@ -528,7 +530,9 @@ describe('getEntityTool', () => {
       (executeEsql as jest.Mock)
         // 1. Exact match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 2. RLIKE fallback — empty (just checking query shape)
+        // 2. entity.id RLIKE fallback — empty (just checking query shape)
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 3. entity.name RLIKE fallback — empty
         .mockResolvedValueOnce({ columns: [], values: [] });
 
       await tool.handler(
@@ -541,11 +545,115 @@ describe('getEntityTool', () => {
       expect(rlikeQuery).not.toContain('RLIKE ".*host:server1.*"');
     });
 
-    it('escapes regex metacharacters in the RLIKE pattern', async () => {
+    it('returns entity.name RLIKE fallback results when entity.id searches find nothing', async () => {
+      (executeEsql as jest.Mock)
+        // 1. Exact match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 2. entity.id RLIKE fallback — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 3. entity.name RLIKE fallback — returns a match
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+          ],
+          values: [['host:server1', 'server1']],
+        });
+
+      const result = (await tool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      expect(executeEsql).toHaveBeenCalledTimes(3);
+      const nameQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
+      expect(nameQuery).toContain('entity.name RLIKE ".*server1.*"');
+      expect(nameQuery).toContain('user.full_name RLIKE ".*server1.*"');
+      expect(nameQuery).toContain('LIMIT 5');
+      expect(result.results).toHaveLength(1);
+      const esqlResult = result.results[0] as EsqlResults;
+      expect(esqlResult.type).toBe(ToolResultType.esqlResults);
+      expect(esqlResult.data.values).toHaveLength(1);
+    });
+
+    it('returns user.full_name RLIKE match when user is found by full name', async () => {
+      (executeEsql as jest.Mock)
+        // 1. Exact match — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 2. entity.id RLIKE fallback — empty
+        .mockResolvedValueOnce({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [] })
+        // 3. entity.name / user.full_name RLIKE fallback — returns a user entity matched by full name
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+            { name: 'user.full_name', type: 'keyword' },
+          ],
+          values: [['user:jdoe', 'jdoe', 'John Doe']],
+        });
+
+      const result = (await tool.handler(
+        { entityType: 'user', entityId: 'John Doe' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      expect(executeEsql).toHaveBeenCalledTimes(3);
+      const nameQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
+      expect(nameQuery).toContain('user.full_name RLIKE ".*John Doe.*"');
+      expect(result.results).toHaveLength(1);
+      const esqlResult = result.results[0] as EsqlResults;
+      expect(esqlResult.type).toBe(ToolResultType.esqlResults);
+      expect(esqlResult.data.values).toHaveLength(1);
+      expect(esqlResult.data.values[0]).toContain('John Doe');
+    });
+
+    it('uses raw entityId (not normalized) as the entity.name RLIKE pattern', async () => {
       (executeEsql as jest.Mock)
         // 1. Exact match — empty
         .mockResolvedValueOnce({ columns: [], values: [] })
-        // 2. RLIKE fallback — empty
+        // 2. entity.id RLIKE fallback — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 3. entity.name RLIKE fallback — empty (just checking query shape)
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      await tool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const nameQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
+      expect(nameQuery).toContain('entity.name RLIKE ".*server1.*"');
+      expect(nameQuery).toContain('user.full_name RLIKE ".*server1.*"');
+      expect(nameQuery).not.toContain('entity.name RLIKE ".*host:server1.*"');
+      expect(nameQuery).not.toContain('user.full_name RLIKE ".*host:server1.*"');
+    });
+
+    it('escapes regex metacharacters in the entity.name RLIKE pattern', async () => {
+      (executeEsql as jest.Mock)
+        // 1. Exact match — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 2. entity.id RLIKE fallback — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 3. entity.name RLIKE fallback — empty
+        .mockResolvedValueOnce({ columns: [], values: [] });
+
+      await tool.handler(
+        { entityId: 'server.1*test' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      );
+
+      const nameQuery = (executeEsql as jest.Mock).mock.calls[2][0].query;
+      expect(nameQuery).toContain('entity.name RLIKE ".*server\\\\.1\\\\*test.*"');
+      expect(nameQuery).toContain('user.full_name RLIKE ".*server\\\\.1\\\\*test.*"');
+    });
+
+    it('escapes regex metacharacters in the entity.id RLIKE pattern', async () => {
+      (executeEsql as jest.Mock)
+        // 1. Exact match — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 2. entity.id RLIKE fallback — empty
+        .mockResolvedValueOnce({ columns: [], values: [] })
+        // 3. entity.name RLIKE fallback — empty
         .mockResolvedValueOnce({ columns: [], values: [] });
 
       await tool.handler(
