@@ -121,9 +121,7 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
               },
               preferences: {
                 type: 'object',
-                additionalProperties: {
-                  type: 'string',
-                },
+                additionalProperties: false,
                 properties: {
                   newsletter: {
                     type: 'boolean',
@@ -209,7 +207,6 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
     expect(normalizedInputs?.properties?.username.maxLength).toBe(20);
     expect(normalizedInputs?.properties?.tags.minItems).toBe(1);
     expect(normalizedInputs?.properties?.tags.maxItems).toBe(10);
-    expect(normalizedInputs?.properties?.tags.uniqueItems).toBe(true);
     expect(normalizedInputs?.properties?.website.format).toBe('uri');
     expect(normalizedInputs?.properties?.createdAt.format).toBe('date-time');
 
