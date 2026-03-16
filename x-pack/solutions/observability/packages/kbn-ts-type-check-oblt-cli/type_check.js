@@ -6,4 +6,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('./run_type_check_cli');
+require('./src/run_type_check_cli');

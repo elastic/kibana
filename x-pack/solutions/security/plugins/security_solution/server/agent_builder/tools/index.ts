@@ -16,3 +16,5 @@ export {
   createDetectionRuleTool,
   SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
 } from './create_detection_rule_tool';
+export { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
+export { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
