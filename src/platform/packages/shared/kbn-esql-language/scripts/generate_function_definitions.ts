@@ -142,7 +142,7 @@ const enrichGrouping = (
   return groupingFunctionDefinitions.map((op) => {
     const newOp = {
       ...op,
-      locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
+      locationsAvailable: [...op.locationsAvailable, Location.STATS_BY, Location.LIMIT_BY],
     };
     if (newOp.name === 'bucket') {
       const updatedSignatures = newOp.signatures.map((signature) => {
@@ -197,6 +197,7 @@ const enrichOperators = (
         Location.SORT,
         Location.STATS_WHERE,
         Location.STATS_BY,
+        Location.LIMIT_BY,
         Location.COMPLETION,
         Location.RERANK,
         Location.JOIN,
@@ -214,6 +215,7 @@ const enrichOperators = (
         Location.STATS,
         Location.STATS_WHERE,
         Location.STATS_BY,
+        Location.LIMIT_BY,
         Location.COMPLETION,
         Location.RERANK,
         Location.JOIN,
