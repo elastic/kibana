@@ -49,6 +49,11 @@ export function createConversationCoherenceEvaluator(config: {
               `LLM returned invalid ${field}: ${JSON.stringify(val)} — expected a finite number`
             );
           }
+          if (val < 0 || val > 1) {
+            throw new Error(
+              `LLM returned out-of-range ${field}: ${val} — expected a value between 0 and 1`
+            );
+          }
         }
 
         return result;

@@ -49,7 +49,9 @@ function createMockInferenceClient(
   const promptFn = error
     ? jest.fn().mockRejectedValue(error)
     : jest.fn().mockResolvedValue({
-        toolCalls: scores ? [{ function: { name: 'score_coherence', arguments: scores } }] : [],
+        toolCalls: scores
+          ? [{ function: { name: 'score_coherence', arguments: scores } }]
+          : [],
       });
 
   return { prompt: promptFn, bindTo: jest.fn() } as unknown as BoundInferenceClient;
