@@ -11,6 +11,33 @@ import type { FS, LiquidOptions } from 'liquidjs';
 import { Liquid } from 'liquidjs';
 
 /**
+ * A LiquidJS emitter that enforces an output byte-size limit.
+ * Throws when the accumulated render output exceeds `maxBytes`,
+ * stopping the render mid-execution before the full string materializes in memory.
+ *
+ * This closes the gap where LiquidJS's built-in `memoryLimit` does not count
+ * emitter buffer growth (string concatenation in for loops).
+ */
+export class SizeLimitedEmitter {
+  public buffer = '';
+  private totalBytes = 0;
+
+  constructor(
+    private maxBytes: number,
+    private errorFactory: (maxBytes: number) => Error
+  ) {}
+
+  write(html: unknown): void {
+    const str = html != null ? String(html) : '';
+    this.totalBytes += Buffer.byteLength(str, 'utf-8');
+    if (this.maxBytes > 0 && this.totalBytes > this.maxBytes) {
+      throw this.errorFactory(this.maxBytes);
+    }
+    this.buffer += str;
+  }
+}
+
+/**
  * LiquidJS tags supported in workflow templates.
  * Tags not in this set are removed from the engine.
  */

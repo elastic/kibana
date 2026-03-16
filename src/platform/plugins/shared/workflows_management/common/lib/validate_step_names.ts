@@ -21,9 +21,10 @@ export interface StepNameValidationResult {
 }
 
 /**
- * Collects all step names from a workflow definition recursively
+ * Collects all step names from a workflow definition recursively.
+ * Walks foreach, if/else, parallel branches, and on-failure fallbacks.
  */
-function collectAllStepNames(steps: WorkflowYaml['steps']): string[] {
+export function collectAllStepNames(steps: WorkflowYaml['steps']): string[] {
   const stepNames: string[] = [];
 
   if (!steps || !Array.isArray(steps)) {

@@ -11,6 +11,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from './errors';
 import { validateLiquidTemplate } from './validate_liquid_template';
+import { validateStepCount } from './validate_step_count';
 import { validateStepNameUniqueness } from './validate_step_names';
 import type { TriggerDefinitionForValidateTriggers } from './validate_triggers';
 import { validateTriggers } from './validate_triggers';
@@ -82,6 +83,19 @@ export function validateWorkflowYaml(
       }
     } catch {
       // Structure too malformed for step name validation
+    }
+
+    try {
+      const stepCountValidation = validateStepCount(parsedWorkflow);
+      for (const stepCountError of stepCountValidation.errors) {
+        diagnostics.push({
+          severity: 'error',
+          message: stepCountError.message,
+          source: 'step-count',
+        });
+      }
+    } catch {
+      // Structure too malformed for step count validation
     }
 
     if (options?.triggerDefinitions) {

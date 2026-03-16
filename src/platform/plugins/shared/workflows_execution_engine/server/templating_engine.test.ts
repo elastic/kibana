@@ -8,6 +8,7 @@
  */
 
 import { WorkflowTemplatingEngine } from './templating_engine';
+import { TemplateSizeLimitExceeded } from './step/errors';
 
 describe('WorkflowTemplatingEngine', () => {
   let templatingEngine: WorkflowTemplatingEngine;
@@ -670,6 +671,59 @@ describe('WorkflowTemplatingEngine', () => {
         expect(() => {
           templatingEngine.render('{% for i in (1..20000000) %}{{ i }}{% endfor %}', {});
         }).toThrow('memory alloc limit exceeded');
+      });
+    });
+
+    describe('size-limited rendering', () => {
+      it('should allow small output within limit', () => {
+        const result = templatingEngine.render('Hello {{ name }}!', { name: 'World' }, 1024);
+        expect(result).toBe('Hello World!');
+      });
+
+      it('should throw TemplateSizeLimitExceeded when output exceeds limit', () => {
+        const template = '{% for i in (1..1000) %}AAAAAAAAAA{% endfor %}';
+        expect(() => {
+          templatingEngine.render(template, {}, 100);
+        }).toThrow(TemplateSizeLimitExceeded);
+      });
+
+      it('should throw TemplateSizeLimitExceeded for large string concatenation in loops', () => {
+        const template = '{% for i in (1..500) %}XXXXXXXXXXXXXXXXX{% endfor %}';
+        expect(() => {
+          templatingEngine.render(template, {}, 1024);
+        }).toThrow(TemplateSizeLimitExceeded);
+      });
+
+      it('should not apply limit when maxOutputBytes is 0', () => {
+        const template = '{% for i in (1..100) %}X{% endfor %}';
+        const result = templatingEngine.render(template, {}, 0);
+        expect(result).toHaveLength(100);
+      });
+
+      it('should not apply limit when maxOutputBytes is undefined', () => {
+        const template = '{% for i in (1..100) %}X{% endfor %}';
+        const result = templatingEngine.render(template, {});
+        expect(result).toHaveLength(100);
+      });
+
+      it('should apply limit recursively in objects', () => {
+        const obj = { payload: '{% for i in (1..1000) %}AAAAAAAAAA{% endfor %}' };
+        expect(() => {
+          templatingEngine.render(obj, {}, 100);
+        }).toThrow(TemplateSizeLimitExceeded);
+      });
+
+      it('should have correct error type and details', () => {
+        const template = '{% for i in (1..1000) %}AAAAAAAAAA{% endfor %}';
+        try {
+          templatingEngine.render(template, {}, 500);
+          fail('Expected TemplateSizeLimitExceeded');
+        } catch (error) {
+          expect(error).toBeInstanceOf(TemplateSizeLimitExceeded);
+          const e = error as TemplateSizeLimitExceeded;
+          expect(e.type).toBe('TemplateSizeLimitExceeded');
+          expect(e.details?.limitBytes).toBe(500);
+        }
       });
     });
 

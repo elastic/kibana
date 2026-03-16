@@ -16,8 +16,7 @@ import apm from 'elastic-apm-node';
 import type { SerializedError } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
-  DEFAULT_MAX_STEP_SIZE,
-  parseByteSize,
+  resolveMaxStepSizeBytes,
   ResponseSizeLimitError,
   safeOutputSize,
 } from './errors';
@@ -229,42 +228,12 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   // Subclasses implement this to execute the step logic
   protected abstract _run(input?: any): Promise<RunStepResult>;
 
-  /**
-   * Resolves the maximum step size in bytes.
-   * Resolution order: step-level > workflow settings > plugin config > DEFAULT_MAX_STEP_SIZE.
-   * Returns 0 if the configured value is explicitly "0" (disables the limit).
-   * Returns the default on invalid/unparseable values to avoid crashing the step.
-   */
   protected getMaxResponseBytes(): number {
-    try {
-      // 1. Step-level override (from YAML — auto-populated in constructor)
-      const stepLimit = this.step['max-step-size'];
-      if (stepLimit) {
-        return parseByteSize(stepLimit);
-      }
-
-      // 2. Workflow-level override (from YAML settings, via runtime — not user-facing context)
-      const workflowSettings =
-        this.stepExecutionRuntime.workflowExecution?.workflowDefinition?.settings;
-      const workflowLimit = workflowSettings?.['max-step-size'];
-      if (workflowLimit) {
-        return parseByteSize(workflowLimit);
-      }
-
-      // 3. Plugin config default (from kibana.yml)
-      const pluginConfig = this.stepExecutionRuntime.contextManager.getDependencies().config;
-      if (pluginConfig?.maxResponseSize) {
-        const configValue = pluginConfig.maxResponseSize;
-        return typeof configValue === 'number'
-          ? configValue
-          : (configValue as any).getValueInBytes();
-      }
-
-      // 4. Hardcoded fallback
-      return parseByteSize(DEFAULT_MAX_STEP_SIZE);
-    } catch {
-      return parseByteSize(DEFAULT_MAX_STEP_SIZE);
-    }
+    return resolveMaxStepSizeBytes(
+      this.stepExecutionRuntime.node,
+      this.stepExecutionRuntime.workflowExecution,
+      this.stepExecutionRuntime.contextManager.getDependencies().config
+    );
   }
 
   // Helper for handling on-failure, retries, etc.
