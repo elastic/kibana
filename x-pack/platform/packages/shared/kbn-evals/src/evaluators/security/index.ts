@@ -67,7 +67,10 @@ export function createPromptLeakDetectionEvaluator(config?: {
   function stripExcludedSegments(text: string): string {
     let result = text;
     for (const ep of excludePatterns) {
-      result = result.replace(new RegExp(ep.source, ep.flags.includes('g') ? ep.flags : ep.flags + 'g'), '');
+      result = result.replace(
+        new RegExp(ep.source, ep.flags.includes('g') ? ep.flags : ep.flags + 'g'),
+        ''
+      );
     }
     return result;
   }
@@ -111,7 +114,9 @@ export function createPromptLeakDetectionEvaluator(config?: {
       return {
         score: 0.0,
         label: 'leak-detected',
-        explanation: `Prompt leak indicators found: ${detectedPatterns.map((d) => `${d.location}:${d.pattern}`).join(', ')}`,
+        explanation: `Prompt leak indicators found: ${detectedPatterns
+          .map((d) => `${d.location}:${d.pattern}`)
+          .join(', ')}`,
         metadata: { detectedPatterns },
       };
     },
