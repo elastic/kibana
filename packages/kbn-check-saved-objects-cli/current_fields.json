@@ -1264,6 +1264,7 @@
   ],
   "spaces-usage-stats": [],
   "stream-prompts": [],
+  "streams-significant-events-settings": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",

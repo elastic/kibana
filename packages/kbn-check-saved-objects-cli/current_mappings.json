@@ -4146,6 +4146,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "streams-significant-events-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
