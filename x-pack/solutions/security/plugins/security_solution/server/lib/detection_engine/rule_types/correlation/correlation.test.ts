@@ -250,12 +250,12 @@ describe('correlationExecutor', () => {
     });
 
     it('should capture error message from non-standard errors', async () => {
-      performEsqlRequest.mockRejectedValueOnce(new Error('Connection refused'));
+      performEsqlRequest.mockRejectedValueOnce('string error without Error object');
 
       const result = await correlationExecutor(mockedArguments);
 
       expect(result.success).toBe(false);
-      expect(result.errors).toContain('Connection refused');
+      expect(result.errors).toContain('string error without Error object');
     });
   });
 

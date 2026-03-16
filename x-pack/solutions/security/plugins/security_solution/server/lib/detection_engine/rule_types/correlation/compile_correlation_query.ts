@@ -9,17 +9,30 @@ import type { CorrelationConfig } from '../../rule_schema';
 
 const ALERTS_INDEX = '.alerts-security.alerts-default';
 
+const escapeEsqlString = (value: string): string =>
+  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+const VALID_FIELD_NAME = /^[a-zA-Z_][a-zA-Z0-9_.]*$/;
+const validateFieldName = (name: string): string => {
+  if (!VALID_FIELD_NAME.test(name)) {
+    throw new Error(`Invalid field name: "${name}"`);
+  }
+  return name;
+};
+
 export const compileCorrelationQuery = (
   correlation: CorrelationConfig,
   selfRuleId: string
 ): string => {
   const { rules, type, groupBy, timespan, condition } = correlation;
-  const groupByFields = groupBy.join(', ');
-  const selfGuard = `kibana.alert.rule.uuid != "${selfRuleId}"`;
+  const validatedGroupBy = groupBy.map(validateFieldName);
+  const groupByFields = validatedGroupBy.join(', ');
+  const escapedSelfId = escapeEsqlString(selfRuleId);
+  const selfGuard = `kibana.alert.rule.uuid != "${escapedSelfId}"`;
   const ruleFilter =
     rules.length === 1
-      ? `kibana.alert.rule.uuid == "${rules[0]}"`
-      : `kibana.alert.rule.uuid IN (${rules.map((r) => `"${r}"`).join(', ')})`;
+      ? `kibana.alert.rule.uuid == "${escapeEsqlString(rules[0])}"`
+      : `kibana.alert.rule.uuid IN (${rules.map((r) => `"${escapeEsqlString(r)}"`).join(', ')})`;
 
   switch (type) {
     case 'temporal':
@@ -76,12 +89,12 @@ const compileTemporalQuery = ({
   AND @timestamp >= NOW() - ${timespan}
 | STATS
     rule_count = COUNT_DISTINCT(kibana.alert.rule.uuid),
-    alert_ids = MV_APPEND(kibana.alert.uuid),
-    rule_names = MV_APPEND(kibana.alert.rule.name),
+    alert_ids = VALUES(kibana.alert.uuid),
+    rule_names = VALUES(kibana.alert.rule.name),
     min_time = MIN(@timestamp),
     max_time = MAX(@timestamp),
     max_risk = MAX(kibana.alert.risk_score),
-    severity_list = MV_APPEND(kibana.alert.severity)
+    severity_list = VALUES(kibana.alert.severity)
   BY ${groupByFields}
 | WHERE rule_count >= ${minRules}`;
 };
@@ -101,12 +114,12 @@ const compileTemporalOrderedQuery = ({
 | SORT @timestamp ASC
 | STATS
     rule_count = COUNT_DISTINCT(kibana.alert.rule.uuid),
-    alert_ids = MV_APPEND(kibana.alert.uuid),
-    rule_names = MV_APPEND(kibana.alert.rule.name),
+    alert_ids = VALUES(kibana.alert.uuid),
+    rule_names = VALUES(kibana.alert.rule.name),
     first_seen = MIN(@timestamp),
     last_seen = MAX(@timestamp),
     max_risk = MAX(kibana.alert.risk_score),
-    severity_list = MV_APPEND(kibana.alert.severity)
+    severity_list = VALUES(kibana.alert.severity)
   BY ${groupByFields}
 | WHERE rule_count >= ${minRules}`;
 };
@@ -126,12 +139,12 @@ const compileEventCountQuery = ({
   AND @timestamp >= NOW() - ${timespan}
 | STATS
     event_count = COUNT(*),
-    alert_ids = MV_APPEND(kibana.alert.uuid),
-    rule_names = MV_APPEND(kibana.alert.rule.name),
+    alert_ids = VALUES(kibana.alert.uuid),
+    rule_names = VALUES(kibana.alert.rule.name),
     min_time = MIN(@timestamp),
     max_time = MAX(@timestamp),
     max_risk = MAX(kibana.alert.risk_score),
-    severity_list = MV_APPEND(kibana.alert.severity)
+    severity_list = VALUES(kibana.alert.severity)
   BY ${groupByFields}
 | WHERE event_count ${op} ${val}`;
 };
@@ -143,7 +156,7 @@ const compileValueCountQuery = ({
   timespan,
   condition,
 }: QueryParts): string => {
-  const field = condition?.field ?? 'kibana.alert.uuid';
+  const field = condition?.field ? validateFieldName(condition.field) : 'kibana.alert.uuid';
   const op = condition ? mapOperator(condition.operator) : '>';
   const val = condition?.value ?? 1;
   return `FROM ${ALERTS_INDEX} METADATA _id, _index
@@ -152,12 +165,12 @@ const compileValueCountQuery = ({
   AND @timestamp >= NOW() - ${timespan}
 | STATS
     distinct_values = COUNT_DISTINCT(${field}),
-    alert_ids = MV_APPEND(kibana.alert.uuid),
-    rule_names = MV_APPEND(kibana.alert.rule.name),
+    alert_ids = VALUES(kibana.alert.uuid),
+    rule_names = VALUES(kibana.alert.rule.name),
     min_time = MIN(@timestamp),
     max_time = MAX(@timestamp),
     max_risk = MAX(kibana.alert.risk_score),
-    severity_list = MV_APPEND(kibana.alert.severity)
+    severity_list = VALUES(kibana.alert.severity)
   BY ${groupByFields}
 | WHERE distinct_values ${op} ${val}`;
 };
@@ -177,6 +190,6 @@ const mapOperator = (op: string): string => {
     case 'lte':
       return '<=';
     default:
-      return '>';
+      throw new Error(`Unknown operator: ${op}`);
   }
 };

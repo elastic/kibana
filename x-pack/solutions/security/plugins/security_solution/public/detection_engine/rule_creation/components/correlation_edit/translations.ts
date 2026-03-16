@@ -146,3 +146,73 @@ export const CORRELATION_CONDITION_VALUE_ERROR = i18n.translate(
     defaultMessage: 'Value must be greater than or equal to one.',
   }
 );
+
+export const CORRELATION_TYPE_TEMPORAL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationTypeTemporal',
+  {
+    defaultMessage: 'Temporal',
+  }
+);
+
+export const CORRELATION_TYPE_TEMPORAL_ORDERED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationTypeTemporalOrdered',
+  {
+    defaultMessage: 'Temporal Ordered',
+  }
+);
+
+export const CORRELATION_TYPE_EVENT_COUNT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationTypeEventCount',
+  {
+    defaultMessage: 'Event Count',
+  }
+);
+
+export const CORRELATION_TYPE_VALUE_COUNT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationTypeValueCount',
+  {
+    defaultMessage: 'Value Count',
+  }
+);
+
+export const CONDITION_OPERATOR_EQ = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.conditionOperatorEq',
+  {
+    defaultMessage: '=',
+  }
+);
+
+export const CONDITION_OPERATOR_NEQ = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.conditionOperatorNeq',
+  {
+    defaultMessage: '≠',
+  }
+);
+
+export const CONDITION_OPERATOR_GT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.conditionOperatorGt',
+  {
+    defaultMessage: '>',
+  }
+);
+
+export const CONDITION_OPERATOR_GTE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.conditionOperatorGte',
+  {
+    defaultMessage: '≥',
+  }
+);
+
+export const CONDITION_OPERATOR_LT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.conditionOperatorLt',
+  {
+    defaultMessage: '<',
+  }
+);
+
+export const CONDITION_OPERATOR_LTE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.conditionOperatorLte',
+  {
+    defaultMessage: '≤',
+  }
+);

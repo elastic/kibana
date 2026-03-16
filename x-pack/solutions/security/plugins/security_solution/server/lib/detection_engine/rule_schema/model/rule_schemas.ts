@@ -199,11 +199,13 @@ export const CorrelationConfig = z.object({
   rules: z.array(z.string()).min(1),
   type: z.enum(['temporal', 'temporal_ordered', 'event_count', 'value_count']),
   groupBy: z.array(z.string()).min(1),
-  timespan: z.string(),
+  timespan: z
+    .string()
+    .regex(/^\d+[smhd]$/, 'Timespan must match format: <number><unit> (e.g. 5m, 1h, 30s, 7d)'),
   condition: z
     .object({
       operator: z.enum(['eq', 'neq', 'gt', 'gte', 'lt', 'lte']),
-      value: z.number(),
+      value: z.number().int().min(1),
       field: z.string().optional(),
     })
     .optional(),

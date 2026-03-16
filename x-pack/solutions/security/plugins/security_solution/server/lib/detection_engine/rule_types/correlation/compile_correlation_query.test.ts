@@ -21,10 +21,10 @@ const makeConfig = (overrides: Partial<CorrelationConfig> = {}): CorrelationConf
 const assertCommonShape = (query: string) => {
   expect(query).toContain('FROM .alerts-security.alerts-default METADATA _id, _index');
   expect(query).toContain(`kibana.alert.rule.uuid != "${SELF_RULE_ID}"`);
-  expect(query).toContain('MV_APPEND(kibana.alert.uuid)');
-  expect(query).toContain('MV_APPEND(kibana.alert.rule.name)');
+  expect(query).toContain('VALUES(kibana.alert.uuid)');
+  expect(query).toContain('VALUES(kibana.alert.rule.name)');
   expect(query).toContain('MAX(kibana.alert.risk_score)');
-  expect(query).toContain('MV_APPEND(kibana.alert.severity)');
+  expect(query).toContain('VALUES(kibana.alert.severity)');
 };
 
 describe('compileCorrelationQuery', () => {
@@ -193,6 +193,28 @@ describe('compileCorrelationQuery', () => {
       expect(query).toContain('"another:rule"');
     });
 
+    it('escapes quotes and backslashes in rule IDs', () => {
+      const query = compileCorrelationQuery(
+        makeConfig({ rules: ['rule"with"quotes', 'rule\\with\\backslashes'] }),
+        SELF_RULE_ID
+      );
+
+      expect(query).toContain('"rule\\"with\\"quotes"');
+      expect(query).toContain('"rule\\\\with\\\\backslashes"');
+    });
+
+    it('escapes the selfRuleId in the self-guard', () => {
+      const query = compileCorrelationQuery(makeConfig(), 'self"injected');
+
+      expect(query).toContain('kibana.alert.rule.uuid != "self\\"injected"');
+    });
+
+    it('validates groupBy field names', () => {
+      expect(() =>
+        compileCorrelationQuery(makeConfig({ groupBy: ['host.name; DROP TABLE'] }), SELF_RULE_ID)
+      ).toThrow('Invalid field name');
+    });
+
     it('throws for an unsupported correlation type', () => {
       expect(() =>
         compileCorrelationQuery(
@@ -200,6 +222,18 @@ describe('compileCorrelationQuery', () => {
           SELF_RULE_ID
         )
       ).toThrow('Unsupported correlation type: unsupported');
+    });
+
+    it('throws for an unknown operator', () => {
+      expect(() =>
+        compileCorrelationQuery(
+          makeConfig({
+            type: 'event_count',
+            condition: { operator: 'invalid' as 'gt', value: 1 },
+          }),
+          SELF_RULE_ID
+        )
+      ).toThrow('Unknown operator: invalid');
     });
   });
 
@@ -221,10 +255,10 @@ describe('compileCorrelationQuery', () => {
       expect(query).toContain(`kibana.alert.rule.uuid != "${SELF_RULE_ID}"`);
     });
 
-    it.each(types)('"%s" uses MV_APPEND for alert_ids and rule_names', (type) => {
+    it.each(types)('"%s" uses VALUES for alert_ids and rule_names', (type) => {
       const query = compileCorrelationQuery(makeConfig({ type }), SELF_RULE_ID);
-      expect(query).toContain('alert_ids = MV_APPEND(kibana.alert.uuid)');
-      expect(query).toContain('rule_names = MV_APPEND(kibana.alert.rule.name)');
+      expect(query).toContain('alert_ids = VALUES(kibana.alert.uuid)');
+      expect(query).toContain('rule_names = VALUES(kibana.alert.rule.name)');
     });
 
     it.each(types)('"%s" includes MAX(kibana.alert.risk_score)', (type) => {
@@ -232,9 +266,9 @@ describe('compileCorrelationQuery', () => {
       expect(query).toContain('max_risk = MAX(kibana.alert.risk_score)');
     });
 
-    it.each(types)('"%s" includes MV_APPEND(kibana.alert.severity)', (type) => {
+    it.each(types)('"%s" includes VALUES(kibana.alert.severity)', (type) => {
       const query = compileCorrelationQuery(makeConfig({ type }), SELF_RULE_ID);
-      expect(query).toContain('severity_list = MV_APPEND(kibana.alert.severity)');
+      expect(query).toContain('severity_list = VALUES(kibana.alert.severity)');
     });
 
     it.each(types)('"%s" applies the timespan filter', (type) => {

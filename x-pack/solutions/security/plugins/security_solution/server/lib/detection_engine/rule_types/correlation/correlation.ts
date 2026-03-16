@@ -66,7 +66,7 @@ export const correlationExecutor = async ({
 
   return withSecuritySpan('correlationExecutor', async () => {
     const result = createSearchAfterReturnType();
-    const selfRuleId = completeRule.ruleParams.ruleId;
+    const selfRuleId = completeRule.alertId;
 
     const compiledQuery = compileCorrelationQuery(ruleParams.correlation, selfRuleId);
     ruleExecutionLogger.debug(`Compiled correlation ES|QL query:\n${compiledQuery}`);
@@ -81,7 +81,7 @@ export const correlationExecutor = async ({
         primaryTimestamp,
         secondaryTimestamp,
         exceptionFilter,
-        excludedDocuments: {},
+        excludedDocuments: state.excludedDocuments ?? {},
         ruleExecutionTimeout,
       });
 
@@ -122,10 +122,27 @@ export const correlationExecutor = async ({
 
       for (const group of correlationGroups) {
         const shellId = uuidv4();
-        const alertIds = Array.isArray(group.alert_ids) ? group.alert_ids : [group.alert_ids];
-        const ruleNames = Array.isArray(group.rule_names) ? group.rule_names : [group.rule_names];
-        const maxRisk = typeof group.max_risk === 'number' ? group.max_risk : 0;
-        const severityList = Array.isArray(group.severity_list) ? group.severity_list : [];
+        const maxRisk =
+          typeof group.max_risk === 'string'
+            ? Number(group.max_risk)
+            : typeof group.max_risk === 'number'
+            ? group.max_risk
+            : 0;
+        const alertIds = Array.isArray(group.alert_ids)
+          ? group.alert_ids
+          : group.alert_ids
+          ? [group.alert_ids]
+          : [];
+        const ruleNames = Array.isArray(group.rule_names)
+          ? group.rule_names
+          : group.rule_names
+          ? [group.rule_names]
+          : [];
+        const severityList = Array.isArray(group.severity_list)
+          ? group.severity_list
+          : group.severity_list
+          ? [group.severity_list]
+          : [];
         const highestSeverity = computeHighestSeverity(severityList as string[]);
 
         const groupByValues: Record<string, unknown> = {};
@@ -157,7 +174,7 @@ export const correlationExecutor = async ({
           'kibana.alert.correlated_alerts': alertIds,
           'kibana.alert.correlated_rule_names': ruleNames,
           'kibana.alert.workflow_status': 'open',
-          ...flattenGroupByValues(groupByValues),
+          ...groupByValues,
         };
 
         wrappedAlerts.push({
@@ -182,7 +199,7 @@ export const correlationExecutor = async ({
             'kibana.alert.severity': highestSeverity,
             'kibana.alert.reason': `Building block for correlation: contributing alert ${alertIds[i]}`,
             'kibana.alert.workflow_status': 'open',
-            ...flattenGroupByValues(groupByValues),
+            ...groupByValues,
           };
           wrappedAlerts.push({
             _id: bbId,
@@ -213,7 +230,7 @@ export const correlationExecutor = async ({
         responseActions: completeRule.ruleParams.responseActions,
       });
     } catch (error) {
-      result.errors.push(error.message);
+      result.errors.push(error instanceof Error ? error.message : String(error));
       result.success = false;
     }
 
@@ -231,12 +248,4 @@ const computeHighestSeverity = (severities: string[]): string => {
     if (severities.includes(s)) return s;
   }
   return 'low';
-};
-
-const flattenGroupByValues = (values: Record<string, unknown>): Record<string, unknown> => {
-  const result: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(values)) {
-    result[key] = value;
-  }
-  return result;
 };

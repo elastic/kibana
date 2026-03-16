@@ -248,6 +248,17 @@ export interface DefineStepRuleJson {
   alert_suppression?: AlertSuppression | ThresholdAlertSuppression;
   related_integrations?: RelatedIntegration[];
   required_fields?: RequiredFieldInput[];
+  correlation?: {
+    rules: string[];
+    type: string;
+    group_by: string[];
+    timespan: string;
+    condition?: {
+      operator: string;
+      value: number;
+      field?: string;
+    };
+  };
 }
 
 export interface AboutStepRuleJson {

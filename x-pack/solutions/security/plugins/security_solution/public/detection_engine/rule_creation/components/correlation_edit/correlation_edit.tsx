@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiCodeBlock,
-  EuiCallOut,
-} from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiCodeBlock } from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
 import { UseMultiFields, UseField, SelectField, Field } from '../../../../shared_imports';
 import { ScheduleItemField } from '../schedule_item_field';
@@ -29,26 +22,26 @@ import {
 import * as i18n from './translations';
 
 const CORRELATION_TYPE_OPTIONS = [
-  { value: 'temporal', text: 'Temporal' },
-  { value: 'temporal_ordered', text: 'Temporal Ordered' },
-  { value: 'event_count', text: 'Event Count' },
-  { value: 'value_count', text: 'Value Count' },
+  { value: 'temporal', text: i18n.CORRELATION_TYPE_TEMPORAL },
+  { value: 'temporal_ordered', text: i18n.CORRELATION_TYPE_TEMPORAL_ORDERED },
+  { value: 'event_count', text: i18n.CORRELATION_TYPE_EVENT_COUNT },
+  { value: 'value_count', text: i18n.CORRELATION_TYPE_VALUE_COUNT },
 ];
 
 const CONDITION_OPERATOR_OPTIONS = [
-  { value: 'eq', text: '=' },
-  { value: 'neq', text: '≠' },
-  { value: 'gt', text: '>' },
-  { value: 'gte', text: '≥' },
-  { value: 'lt', text: '<' },
-  { value: 'lte', text: '≤' },
+  { value: 'eq', text: i18n.CONDITION_OPERATOR_EQ },
+  { value: 'neq', text: i18n.CONDITION_OPERATOR_NEQ },
+  { value: 'gt', text: i18n.CONDITION_OPERATOR_GT },
+  { value: 'gte', text: i18n.CONDITION_OPERATOR_GTE },
+  { value: 'lt', text: i18n.CONDITION_OPERATOR_LT },
+  { value: 'lte', text: i18n.CONDITION_OPERATOR_LTE },
 ];
 
 const TIMESPAN_COMPONENT_PROPS = {
   idAria: 'correlationTimespan',
   dataTestSubj: 'correlationTimespan',
   units: ['m', 'h', 'd'],
-  minValue: 0,
+  minValue: 1,
 };
 
 interface CorrelationEditProps {
@@ -190,23 +183,15 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
             helpText={i18n.CORRELATION_ESQL_PREVIEW_HELP_TEXT}
             fullWidth
           >
-            <EuiCodeBlock language="esql" fontSize="s" paddingSize="m" isCopyable>
+            <EuiCodeBlock fontSize="s" paddingSize="m" isCopyable>
               {i18n.CORRELATION_ESQL_PREVIEW_PLACEHOLDER}
             </EuiCodeBlock>
           </EuiFormRow>
-          <EuiSpacer size="s" />
-          <EuiCallOut size="s" color="primary" title={i18n.CORRELATION_ESQL_PREVIEW_PLACEHOLDER} />
         </>
       );
     },
     [showConditionSection, showConditionField]
   );
-
-  const conditionOperatorConfig = useMemo(() => CORRELATION_CONDITION_OPERATOR_CONFIG, []);
-
-  const conditionValueConfig = useMemo(() => CORRELATION_CONDITION_VALUE_CONFIG, []);
-
-  const conditionFieldConfig = useMemo(() => CORRELATION_CONDITION_FIELD_CONFIG, []);
 
   return (
     <>
@@ -226,15 +211,15 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
           },
           correlationConditionOperator: {
             path: `${path}.condition.operator`,
-            config: conditionOperatorConfig,
+            config: CORRELATION_CONDITION_OPERATOR_CONFIG,
           },
           correlationConditionValue: {
             path: `${path}.condition.value`,
-            config: conditionValueConfig,
+            config: CORRELATION_CONDITION_VALUE_CONFIG,
           },
           correlationConditionField: {
             path: `${path}.condition.field`,
-            config: conditionFieldConfig,
+            config: CORRELATION_CONDITION_FIELD_CONFIG,
           },
         }}
       >

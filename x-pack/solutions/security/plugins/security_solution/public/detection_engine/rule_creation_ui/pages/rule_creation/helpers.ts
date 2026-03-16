@@ -34,6 +34,7 @@ import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin
 
 import { TimeDuration } from '@kbn/securitysolution-utils/time_duration';
 import { assertUnreachable } from '../../../../../common/utility_types';
+import { isCorrelationRule } from '../../../../../common/detection_engine/utils';
 import {
   transformAlertToRuleAction,
   transformAlertToRuleResponseAction,
@@ -529,6 +530,39 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         history_window_start: convertDurationToDateMath(ruleFields.historyWindowSize),
         ...alertSuppressionFields,
       }
+    : isCorrelationRule(ruleFields.ruleType)
+    ? (() => {
+        const { queryBar, correlation, ...rest } = ruleFields as typeof ruleFields & {
+          correlation?: DefineStepRule['correlation'];
+        };
+        return {
+          ...rest,
+          language: 'esql',
+          query: queryBar?.query?.query as string,
+          ...(correlation
+            ? {
+                correlation: {
+                  rules: correlation.rules,
+                  type: correlation.type,
+                  group_by: correlation.groupBy,
+                  timespan: correlation.timespan,
+                  ...(correlation.condition &&
+                  (correlation.type === 'event_count' || correlation.type === 'value_count')
+                    ? {
+                        condition: {
+                          operator: correlation.condition.operator,
+                          value: correlation.condition.value,
+                          ...(correlation.condition.field
+                            ? { field: correlation.condition.field }
+                            : {}),
+                        },
+                      }
+                    : {}),
+                },
+              }
+            : {}),
+        };
+      })()
     : isEsqlFields(ruleFields) && !('index' in ruleFields)
     ? {
         language: ruleFields.queryBar?.query?.language,
