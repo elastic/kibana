@@ -219,7 +219,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           let result = createResultObject(state);
 
-          let frozenIndicesQueriedCount = 0;
           const wrapperWarnings = [];
           const wrapperErrors = [];
 
