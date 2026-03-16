@@ -47,11 +47,16 @@ export const SharepointServer: ConnectorSpec = {
   },
 
   schema: z.object({
-    siteUrl: z.string().url().describe('SharePoint Server site URL').meta({
-      label: 'Site URL',
-      widget: 'text',
-      placeholder: 'https://sharepoint.company.com/sites/mysite',
-    }),
+    siteUrl: z
+      .string()
+      .url()
+      .transform((val) => val.replace(/\/+$/, ''))
+      .describe('SharePoint Server site URL')
+      .meta({
+        label: 'Site URL',
+        widget: 'text',
+        placeholder: 'https://sharepoint.company.com/sites/mysite',
+      }),
   }),
 
   actions: {
