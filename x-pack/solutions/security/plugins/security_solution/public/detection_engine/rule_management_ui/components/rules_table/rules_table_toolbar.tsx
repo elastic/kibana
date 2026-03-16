@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
@@ -20,6 +20,7 @@ export enum AllRulesTabs {
 }
 
 export const RulesTableToolbar = React.memo(() => {
+  const { euiTheme } = useEuiTheme();
   const { data: ruleManagementFilters } = useRuleManagementFilters();
   const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
 
@@ -75,7 +76,9 @@ export const RulesTableToolbar = React.memo(() => {
   return (
     <EuiFlexGroup
       justifyContent={'spaceBetween'}
-      style={{ boxShadow: '0px -1px 0px inset rgb(227, 232, 242)' }}
+      style={{
+        boxShadow: `0 -1px 0 0 ${euiTheme.border.color} inset`,
+      }}
     >
       <EuiFlexItem grow={false}>
         <TabNavigation navTabs={ruleTabs} />

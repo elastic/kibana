@@ -16,32 +16,30 @@ import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_cont
 /**
  * Search bar only for the Add Prebuilt Rules table. Renders at the top of the layout.
  */
-export const AddPrebuiltRulesTableSearchBar = React.memo(
-  function AddPrebuiltRulesTableSearchBar() {
-    const {
-      state: { filterOptions },
-      actions: { setFilterOptions },
-    } = useAddPrebuiltRulesTableContext();
+export const AddPrebuiltRulesTableSearchBar = React.memo(function AddPrebuiltRulesTableSearchBar() {
+  const {
+    state: { filterOptions },
+    actions: { setFilterOptions },
+  } = useAddPrebuiltRulesTableContext();
 
-    const handleOnSearch = useCallback(
-      (nameFilter: string) => {
-        setFilterOptions((filters) => ({
-          ...filters,
-          name: nameFilter.trim(),
-        }));
-      },
-      [setFilterOptions]
-    );
+  const handleOnSearch = useCallback(
+    (nameFilter: string) => {
+      setFilterOptions((filters) => ({
+        ...filters,
+        name: nameFilter.trim(),
+      }));
+    },
+    [setFilterOptions]
+  );
 
-    return (
-      <RuleSearchField
-        initialValue={filterOptions.name}
-        onSearch={handleOnSearch}
-        placeholder={i18n.SEARCH_PLACEHOLDER}
-      />
-    );
-  }
-);
+  return (
+    <RuleSearchField
+      initialValue={filterOptions.name}
+      onSearch={handleOnSearch}
+      placeholder={i18n.SEARCH_PLACEHOLDER}
+    />
+  );
+});
 
 AddPrebuiltRulesTableSearchBar.displayName = 'AddPrebuiltRulesTableSearchBar';
 
@@ -77,7 +75,7 @@ export const AddPrebuiltRulesTableFiltersSidebarContent = React.memo(
               onSelectedTagsChanged={handleSelectedTags}
               selectedTags={selectedTags}
               tags={tags}
-              data-test-subj="allRulesTagPopover"
+              data-test-subj="addPrebuiltRulesTagPopover"
             />
           </EuiFilterGroup>
         </EuiFlexItem>

@@ -12,11 +12,11 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiResizableContainer,
-  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import {
+  RULES_TABLE_FILTERS_MAIN_PANEL_MIN_HEIGHT_PX,
   RULES_TABLE_FILTERS_MAIN_PANEL_MIN_WIDTH_PERCENT,
   RULES_TABLE_FILTERS_SIDEBAR_DEFAULT_WIDTH_PERCENT,
   RULES_TABLE_FILTERS_SIDEBAR_MIN_WIDTH_PERCENT,
@@ -85,7 +85,7 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiTitle size="m">
-                            <span>{i18n.FILTER_SIDEBAR_TITLE}</span>
+                            <h2>{i18n.FILTER_SIDEBAR_TITLE}</h2>
                           </EuiTitle>
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -112,8 +112,8 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
             </EuiResizablePanel>
             <EuiResizableButton
               indicator="border"
-              style={{ height: 'stretch' }}
               alignIndicator="start"
+              style={{ height: 'stretch' }}
             />
             <EuiResizablePanel
               id={RULES_TABLE_FILTERS_MAIN_PANEL_ID}
@@ -121,7 +121,7 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
               initialSize={mainPanelSizePercent}
               minSize={`${RULES_TABLE_FILTERS_MAIN_PANEL_MIN_WIDTH_PERCENT}%`}
               paddingSize="m"
-              style={{ paddingBottom: 0, minHeight: 400 }}
+              style={{ paddingBottom: 0, minHeight: RULES_TABLE_FILTERS_MAIN_PANEL_MIN_HEIGHT_PX }}
               data-test-subj="rulesTableFiltersMainContent"
             >
               <EuiFlexGroup direction="column" gutterSize="s">
