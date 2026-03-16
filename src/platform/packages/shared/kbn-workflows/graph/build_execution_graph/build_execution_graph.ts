@@ -16,6 +16,8 @@ import type {
   ForEachStep,
   IfStep,
   KibanaStep,
+  LoopBreakStep,
+  LoopContinueStep,
   LoopStepProps,
   MaxIterations,
   StepWithForeach,
@@ -54,12 +56,16 @@ import type {
   ExitTryBlockNode,
   ExitWhileNode,
   GraphNodeUnion,
+  LoopBreakNode,
+  LoopContinueNode,
+  LoopEnterNode,
   WaitForInputGraphNode,
   WorkflowGraphType,
 } from '../types';
+import { isLoopEnterNode } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
-const flowControlStepTypes = new Set(['if', 'foreach', 'while']);
+const flowControlStepTypes = new Set(['if', 'foreach', 'while', 'loop.break', 'loop.continue']);
 const disallowedWorkflowLevelOnFailureSteps = new Set(['wait']);
 
 /** Context used during the graph construction to keep track of settings and avoid cycles */
@@ -115,6 +121,14 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
 
   if (currentStep.type === 'if') {
     return createIfGraph(getStepId(currentStep, context), currentStep as IfStep, context);
+  }
+
+  if (currentStep.type === 'loop.break') {
+    return visitLoopBreakStep(currentStep as LoopBreakStep, context);
+  }
+
+  if (currentStep.type === 'loop.continue') {
+    return visitLoopContinueStep(currentStep as LoopContinueStep, context);
   }
 
   if ((currentStep as TimeoutProp).timeout) {
@@ -884,6 +898,62 @@ function createWhileGraph(
 
   insertGraphBetweenNodes(graph, innerGraph, enterWhileNodeId, exitNodeId);
   context.stack.pop();
+  return graph;
+}
+
+function findEnclosingLoop(context: GraphBuildContext): LoopEnterNode {
+  for (let i = context.stack.length - 1; i >= 0; i--) {
+    const node = context.stack[i];
+    if (isLoopEnterNode(node)) {
+      return node;
+    }
+  }
+  throw new Error(
+    'loop.break and loop.continue are only valid inside a loop body (foreach or while). ' +
+      'Move the step inside a loop, or remove it.'
+  );
+}
+
+function visitLoopBreakStep(
+  currentStep: LoopBreakStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const enclosingLoop = findEnclosingLoop(context);
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+
+  const { exitNodeId: loopExitNodeId } = enclosingLoop;
+
+  const loopBreakNode: LoopBreakNode = {
+    id: stepId,
+    type: 'loop-break',
+    stepId,
+    stepType: currentStep.type,
+    loopExitNodeId,
+    loopStepId: enclosingLoop.stepId,
+  };
+  graph.setNode(loopBreakNode.id, loopBreakNode);
+  return graph;
+}
+
+function visitLoopContinueStep(
+  currentStep: LoopContinueStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const enclosingLoop = findEnclosingLoop(context);
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+
+  const { exitNodeId: loopExitNodeId } = enclosingLoop;
+
+  const loopContinueNode: LoopContinueNode = {
+    id: stepId,
+    type: 'loop-continue',
+    stepId,
+    stepType: currentStep.type,
+    loopExitNodeId,
+  };
+  graph.setNode(loopContinueNode.id, loopContinueNode);
   return graph;
 }
 
