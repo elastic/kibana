@@ -22,7 +22,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   let objectRemover: ObjectRemover;
 
-  describe('Slack', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/251934
+  describe.skip('Slack', () => {
     before(async () => {
       objectRemover = await createSlackConnectorAndObjectRemover({ getService });
     });

@@ -150,7 +150,7 @@ function TraceWaterfallComponent() {
               border-bottom: ${euiTheme.border.thin};
             `}
           >
-            {showLegend && serviceName && (
+            {showLegend && (
               <EuiFlexItem
                 grow={false}
                 css={css`

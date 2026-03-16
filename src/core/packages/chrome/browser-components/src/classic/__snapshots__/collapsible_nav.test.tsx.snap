@@ -150,7 +150,7 @@ Array [
             aria-hidden="true"
             class="euiButtonIcon__icon"
             color="inherit"
-            data-euiicon-type="arrowRight"
+            data-euiicon-type="chevronSingleRight"
           />
         </button>
       </div>
@@ -274,7 +274,7 @@ Array [
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowRight"
+              data-euiicon-type="chevronSingleRight"
             />
           </button>
         </div>
@@ -405,7 +405,7 @@ Array [
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowRight"
+              data-euiicon-type="chevronSingleRight"
             />
           </button>
         </div>
@@ -519,7 +519,7 @@ Array [
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowRight"
+              data-euiicon-type="chevronSingleRight"
             />
           </button>
         </div>
@@ -616,7 +616,7 @@ Array [
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowRight"
+              data-euiicon-type="chevronSingleRight"
             />
           </button>
         </div>

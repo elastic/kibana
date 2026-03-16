@@ -82,7 +82,7 @@ export const getLiveQueryDetailsRoute = (
           );
 
           const queries = actionDetails?._source?.queries;
-          const expirationDate = actionDetails?.fields?.expiration[0];
+          const expirationDate = actionDetails?.fields?.expiration?.[0];
 
           const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
 

@@ -279,6 +279,7 @@ export function createNavigationTree({
             title: AI_TITLE,
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+              { link: 'management:evals', breadcrumbStatus: 'hidden' },
               ...(showAiAssistant
                 ? [
                     {
