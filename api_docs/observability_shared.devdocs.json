@@ -586,7 +586,7 @@
           "() => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/external_resource_links/index.tsx",
-        "lineNumber": 23,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

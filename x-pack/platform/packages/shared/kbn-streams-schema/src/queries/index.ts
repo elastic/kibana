@@ -22,6 +22,7 @@ export const esqlQuerySchema: z.Schema<EsqlQuery> = z.object({
 interface StreamQueryBase {
   id: string;
   title: string;
+  description: string;
 }
 
 export interface StreamQuery extends StreamQueryBase {
@@ -34,6 +35,7 @@ export interface StreamQuery extends StreamQueryBase {
 const streamQueryBaseSchema = z.object({
   id: NonEmptyString,
   title: NonEmptyString,
+  description: z.string(),
 }) satisfies z.Schema<StreamQueryBase>;
 
 export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.extend({
@@ -54,6 +56,7 @@ export const upsertStreamQueryRequestSchema = z.object({
   esql: esqlQuerySchema,
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
+  description: z.string().default(''),
 });
 
 export interface QueriesGetResponse {

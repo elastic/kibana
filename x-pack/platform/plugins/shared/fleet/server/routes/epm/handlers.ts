@@ -28,6 +28,7 @@ import type {
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
   UpdatePackageResponse,
+  ReviewUpgradeResponse,
   GetVerificationKeyIdResponse,
   GetBulkAssetsResponse,
   GetInstalledPackagesResponse,
@@ -59,6 +60,7 @@ import type {
   RollbackPackageRequestSchema,
   GetKnowledgeBaseRequestSchema,
   DeletePackageResponseSchema,
+  ReviewUpgradeRequestSchema,
 } from '../../types';
 import { KibanaSavedObjectType } from '../../types';
 import {
@@ -95,7 +97,7 @@ import {
   rollbackAvailableCheck,
   rollbackInstallation,
 } from '../../services/epm/packages/rollback';
-import { updatePackage } from '../../services/epm/packages/update';
+import { updatePackage, reviewUpgrade } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
   ReauthorizeTransformRequestSchema,
@@ -310,6 +312,21 @@ export const updatePackageHandler: FleetRequestHandler<
   const body: UpdatePackageResponse = {
     item: res,
   };
+
+  return response.ok({ body });
+};
+
+export const reviewUpgradeHandler: FleetRequestHandler<
+  TypeOf<typeof ReviewUpgradeRequestSchema.params>,
+  unknown,
+  TypeOf<typeof ReviewUpgradeRequestSchema.body>
+> = async (context, request, response) => {
+  const savedObjectsClient = (await context.fleet).internalSoClient;
+  const { pkgName } = request.params;
+  const { action, target_version: targetVersion } = request.body;
+
+  await reviewUpgrade({ savedObjectsClient, pkgName, action, targetVersion });
+  const body: ReviewUpgradeResponse = { success: true };
 
   return response.ok({ body });
 };
@@ -705,6 +722,8 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       previous_version: attributes.previous_version,
       rolled_back: attributes.rolled_back,
       is_rollback_ttl_expired: isIntegrationRollbackTTLExpired(attributes.install_started_at),
+      pending_upgrade_review: attributes.pending_upgrade_review,
+      keep_policies_up_to_date: attributes.keep_policies_up_to_date,
     };
 
     return {
