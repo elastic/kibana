@@ -11,9 +11,10 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import * as i18n from '../translations';
-import { DEFAULT_CLOSING_REASON_OPTIONS } from './default_closing_reasons';
-
-const CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY = 'securitySolution:alertCloseReasons';
+import {
+  DEFAULT_CLOSING_REASON_OPTIONS,
+  CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY,
+} from './default_closing_reasons';
 
 interface ClosingReasonOption {
   key?: string;
@@ -28,8 +29,10 @@ const ClosingReasonPanelComponent: React.FC<ClosingReasonPanelProps> = ({ onSubm
     services: { uiSettings },
   } = useKibana<{ uiSettings: IUiSettingsClient }>();
 
-  const customClosingReasons =
-    uiSettings.get<string[]>(CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY) ?? [];
+  const customClosingReasons = useMemo(
+    () => uiSettings.get<string[]>(CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY) ?? [],
+    [uiSettings]
+  );
 
   const [options, setOptions] = useState<Array<EuiSelectableOption<ClosingReasonOption>>>([
     ...DEFAULT_CLOSING_REASON_OPTIONS.map((defaultReason) => ({ ...defaultReason })),

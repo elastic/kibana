@@ -20,21 +20,18 @@ import {
   EuiSelectable,
   EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { DEFAULT_CLOSING_REASON_OPTIONS } from '@kbn/response-ops-alerts-close-reason';
+import {
+  CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY,
+  DEFAULT_CLOSING_REASON_OPTIONS,
+} from '@kbn/response-ops-alerts-close-reason';
 
 import * as i18n from './translations';
-
-const CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY = 'securitySolution:alertCloseReasons';
 
 interface ClosingReasonOption {
   key?: string;
 }
-
-const getDefaultClosingReasonOptions = (): Array<EuiSelectableOption<ClosingReasonOption>> =>
-  DEFAULT_CLOSING_REASON_OPTIONS;
 
 interface CloseCaseModalProps {
   closeReasonOptions: Array<EuiSelectableOption<ClosingReasonOption>>;
@@ -83,9 +80,9 @@ const CloseCaseModalComponent = React.memo<CloseCaseModalProps>(
         </EuiSelectable>
       </EuiModalBody>
       <EuiModalFooter
-        css={css`
-          justify-content: space-between;
-        `}
+        css={{
+          'justify-content': 'space-between',
+        }}
       >
         <EuiButtonEmpty onClick={onClose}>{i18n.CLOSE_CASE_MODAL_CLOSE_BUTTON}</EuiButtonEmpty>
         <EuiButton onClick={onSubmit} fill>
@@ -121,7 +118,7 @@ export const useCloseCaseModal = ({
       uiSettings.get<string[]>(CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY) ?? [];
 
     return [
-      ...getDefaultClosingReasonOptions(),
+      ...DEFAULT_CLOSING_REASON_OPTIONS,
       ...customClosingReasons.map((reason) => ({ label: reason, key: reason })),
     ];
   }, [uiSettings]);
@@ -138,18 +135,17 @@ export const useCloseCaseModal = ({
   const [closeReasonOptions, setCloseReasonOptions] = useState<
     Array<EuiSelectableOption<ClosingReasonOption>>
   >(() => createCloseReasonOptions());
-  // Pre-select 'Close without reason'
-  const [selectedClosingReason, setSelectedClosingReason] = useState<
-    EuiSelectableOption<ClosingReasonOption> | undefined
-  >(() => createCloseReasonOptions().find((option) => option.key == null));
+  const selectedClosingReason = useMemo(
+    () => closeReasonOptions.find((option) => option.checked === 'on'),
+    [closeReasonOptions]
+  );
   const onCloseReasonOptionsChange = useCallback(
     (
       options: Array<EuiSelectableOption<ClosingReasonOption>>,
       _event?: unknown,
-      changedOption?: EuiSelectableOption<ClosingReasonOption>
+      _changedOption?: EuiSelectableOption<ClosingReasonOption>
     ) => {
       setCloseReasonOptions(options);
-      setSelectedClosingReason(changedOption?.checked === 'on' ? changedOption : undefined);
     },
     []
   );
@@ -171,7 +167,6 @@ export const useCloseCaseModal = ({
     }
     const nextCloseReasonOptions = createCloseReasonOptions();
     setCloseReasonOptions(nextCloseReasonOptions);
-    setSelectedClosingReason(nextCloseReasonOptions.find((option) => option.key == null));
     setIsCloseCaseModalVisible(true);
   }, [canSyncCloseReasonToAlerts, createCloseReasonOptions, onCloseCase]);
 

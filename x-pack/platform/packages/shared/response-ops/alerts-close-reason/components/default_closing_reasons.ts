@@ -7,6 +7,8 @@
 
 import * as i18n from '../translations';
 
+export const CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY = 'securitySolution:alertCloseReasons';
+
 interface DefaultClosingReasonOption {
   key?: string;
   label: string;
