@@ -10,12 +10,20 @@
 /**
  * Share session tests.
  *
- * Validates that a configured metrics view (query, time range) can be shared
- * via URL and that another user opening that URL sees the same metrics grid.
+ * Validates that a configured metrics view (query, breakdown selection,
+ * card count) can be shared via URL and that opening that URL fully
+ * restores the metrics-specific state.
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics_experience';
+import {
+  spaceTest,
+  testData,
+  DEFAULT_TIME_RANGE,
+  DEFAULT_CONFIG,
+} from '../../fixtures/metrics_experience';
+
+const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
 
 spaceTest.describe(
   'Metrics in Discover - Share Session',
@@ -46,6 +54,17 @@ spaceTest.describe(
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
 
+        await spaceTest.step('select a breakdown dimension', async () => {
+          await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
+          await expect(
+            metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+          ).toBeVisible();
+          await discover.waitUntilSearchingHasFinished();
+        });
+
+        const cardCountBefore = await metricsExperience.getVisibleCardCount();
+        const queryBefore = await discover.getEsqlQueryValue();
+
         let sharedUrl: string;
 
         await spaceTest.step('open share modal and copy the URL', async () => {
@@ -60,9 +79,25 @@ spaceTest.describe(
           await discover.waitUntilSearchingHasFinished();
         });
 
-        await spaceTest.step('metrics grid should be visible at shared URL', async () => {
+        await spaceTest.step('metrics grid should be restored with same state', async () => {
           await expect(metricsExperience.grid).toBeVisible();
           await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+        });
+
+        await spaceTest.step('breakdown selection should be preserved', async () => {
+          await expect(
+            metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+          ).toBeVisible();
+        });
+
+        await spaceTest.step('card count should match the original session', async () => {
+          const cardCountAfter = await metricsExperience.getVisibleCardCount();
+          expect(cardCountAfter).toStrictEqual(cardCountBefore);
+        });
+
+        await spaceTest.step('ES|QL query should be preserved', async () => {
+          const queryAfter = await discover.getEsqlQueryValue();
+          expect(queryAfter).toStrictEqual(queryBefore);
         });
       }
     );
