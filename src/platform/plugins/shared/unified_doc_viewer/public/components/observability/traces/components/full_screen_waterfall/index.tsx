@@ -192,21 +192,19 @@ export const FullScreenWaterfall = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody scrollContainerRef={scrollContainerRef}>
-        <div>
-          {isWaterfallReady && scrollElement ? (
-            <FullTraceWaterfall
-              traceId={traceId}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              serviceName={serviceName}
-              scrollElement={scrollElement}
-              onNodeClick={onNodeClick}
-              onErrorClick={onErrorClick}
-            />
-          ) : (
-            <EuiSkeletonText lines={4} />
-          )}
-        </div>
+        {isWaterfallReady && scrollElement ? (
+          <FullTraceWaterfall
+            traceId={traceId}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            serviceName={serviceName}
+            scrollElement={scrollElement}
+            onNodeClick={onNodeClick}
+            onErrorClick={onErrorClick}
+          />
+        ) : (
+          <EuiSkeletonText lines={4} />
+        )}
       </EuiFlyoutBody>
 
       {docId && activeFlyoutType ? (
