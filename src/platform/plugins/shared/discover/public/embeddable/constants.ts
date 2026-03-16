@@ -18,6 +18,8 @@ export const LEGACY_LOG_STREAM_EMBEDDABLE = 'log_stream';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
+export const ACTION_ADD_DISCOVER_SESSION_PANEL = 'ACTION_ADD_DISCOVER_SESSION_PANEL';
+
 export const DEFAULT_HEADER_ROW_HEIGHT_LINES = 3;
 
 /** This constant refers to the dashboard panel specific state */

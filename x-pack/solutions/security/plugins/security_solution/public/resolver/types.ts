@@ -9,6 +9,7 @@ import type React from 'react';
 import type { AnyAction, Dispatch, Middleware, Store } from 'redux';
 import type { BBox } from 'rbush';
 import type { Provider } from 'react-redux';
+import type { CellActionFieldValue } from '@kbn/cell-actions';
 import type {
   NewResolverTree,
   ResolverEntityIndex,
@@ -815,6 +816,17 @@ export interface TimeFilters {
   to?: string;
 }
 
+export interface ResolverCellActionRendererProps {
+  children: React.ReactNode;
+  field: string;
+  scopeId: string;
+  value: CellActionFieldValue;
+}
+
+export type ResolverCellActionRenderer = (
+  props: ResolverCellActionRendererProps
+) => React.ReactNode | null;
+
 /**
  * The externally provided React props.
  */
@@ -846,6 +858,11 @@ export interface ResolverProps {
    * A flag to update data from an external source
    */
   shouldUpdate: boolean;
+
+  /**
+   * Renderer used by Resolver panels for field cell actions.
+   */
+  renderCellActions: ResolverCellActionRenderer;
 }
 
 /**

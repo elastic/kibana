@@ -93,6 +93,19 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-public.uiPrivileges.manageSkills",
+            "type": "string",
+            "tags": [],
+            "label": "manageSkills",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/agent_builder/common/features.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -410,6 +423,94 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-public.AgentBuilderPluginStart.updateAttachmentOrigin",
+          "type": "Function",
+          "tags": [],
+          "label": "updateAttachmentOrigin",
+          "description": [
+            "\nUpdates the origin of an attachment in a conversation.\nUse this after saving a by-value attachment to link it to its persistent store.\n"
+          ],
+          "signature": [
+            "(conversationId: string, attachmentId: string, origin: unknown) => Promise<",
+            {
+              "pluginId": "@kbn/agent-builder-common",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderCommonPluginApi",
+              "section": "def-common.UpdateOriginResponse",
+              "text": "UpdateOriginResponse"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
+          "lineNumber": 129,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "agentBuilder",
+              "id": "def-public.AgentBuilderPluginStart.updateAttachmentOrigin.$1",
+              "type": "string",
+              "tags": [],
+              "label": "conversationId",
+              "description": [
+                "- The conversation containing the attachment"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
+              "lineNumber": 149,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "agentBuilder",
+              "id": "def-public.AgentBuilderPluginStart.updateAttachmentOrigin.$2",
+              "type": "string",
+              "tags": [],
+              "label": "attachmentId",
+              "description": [
+                "- The ID of the attachment to update"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
+              "lineNumber": 150,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "agentBuilder",
+              "id": "def-public.AgentBuilderPluginStart.updateAttachmentOrigin.$3",
+              "type": "Unknown",
+              "tags": [],
+              "label": "origin",
+              "description": [
+                "- The origin reference object (shape depends on attachment type)"
+              ],
+              "signature": [
+                "unknown"
+              ],
+              "path": "x-pack/platform/plugins/shared/agent_builder/public/types.ts",
+              "lineNumber": 151,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "Promise resolving to the update result"
+          ]
         }
       ],
       "lifecycle": "start",
@@ -669,7 +770,7 @@
         "\nSetup contract of the agentBuilder plugin."
       ],
       "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-      "lineNumber": 156,
+      "lineNumber": 160,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -687,7 +788,7 @@
             "AgentsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 160,
+          "lineNumber": 164,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -711,7 +812,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 164,
+          "lineNumber": 168,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -729,7 +830,7 @@
             "AttachmentsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 168,
+          "lineNumber": 172,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -753,7 +854,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 172,
+          "lineNumber": 176,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -771,7 +872,7 @@
             "SkillsSetup"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 176,
+          "lineNumber": 180,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -790,7 +891,7 @@
         "\nStart contract of the agentBuilder plugin."
       ],
       "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-      "lineNumber": 194,
+      "lineNumber": 198,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -808,7 +909,7 @@
             "AgentsStart"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 198,
+          "lineNumber": 202,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -832,7 +933,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 202,
+          "lineNumber": 206,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -850,7 +951,7 @@
             "SkillsStart"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 206,
+          "lineNumber": 210,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -868,7 +969,7 @@
             "ExecutionStart"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 210,
+          "lineNumber": 214,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -886,7 +987,7 @@
             "RuntimeStart"
           ],
           "path": "x-pack/platform/plugins/shared/agent_builder/server/types.ts",
-          "lineNumber": 214,
+          "lineNumber": 218,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
