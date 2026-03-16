@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,14 +21,27 @@ import { i18n } from '@kbn/i18n';
 import type { Feature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
 import React, { useState, useCallback } from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { useBoolean } from '@kbn/react-hooks';
 import { useFetchFeatures } from '../../../../hooks/use_fetch_features';
+import { useDiscoveryFeaturesApi } from '../../../../hooks/use_discovery_features_api';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { LoadingPanel } from '../../../loading_panel';
 import { FeatureDetailsFlyout } from '../../../stream_detail_systems/stream_features/feature_details_flyout';
+import { DeleteFeatureModal } from '../../../stream_detail_systems/stream_features/delete_feature_modal';
 import { getConfidenceColor } from '../../../stream_detail_systems/stream_features/use_stream_features_table';
 
 export function FeaturesTable() {
-  const { data, isLoading: loading } = useFetchFeatures();
+  const { data, isLoading: loading, refetch } = useFetchFeatures();
+  const { deleteFeaturesInBulk } = useDiscoveryFeaturesApi();
+  const {
+    core: { notifications },
+  } = useKibana();
+
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
+  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
+  const [isBulkDeleteModalVisible, { on: showBulkDeleteModal, off: hideBulkDeleteModal }] =
+    useBoolean(false);
 
   const handleSelectFeature = useCallback((feature: Feature | null) => {
     setSelectedFeature(feature);
@@ -37,9 +51,52 @@ export function FeaturesTable() {
     setSelectedFeature(null);
   }, []);
 
+  const clearSelection = useCallback(() => {
+    setSelectedFeatures([]);
+  }, []);
+
+  const [{ loading: isBulkDeleting }, handleBulkDelete] = useAsyncFn(async () => {
+    if (selectedFeatures.length === 0) return;
+
+    try {
+      await deleteFeaturesInBulk(selectedFeatures);
+      notifications.toasts.addSuccess({
+        title: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeleteSuccess.title',
+          {
+            defaultMessage: '{count, plural, one {Feature deleted} other {Features deleted}}',
+            values: { count: selectedFeatures.length },
+          }
+        ),
+        text: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeleteSuccess.text',
+          {
+            defaultMessage:
+              '{count, plural, one {The feature has} other {# features have}} been successfully deleted.',
+            values: { count: selectedFeatures.length },
+          }
+        ),
+      });
+      setSelectedFeatures([]);
+      hideBulkDeleteModal();
+      refetch();
+    } catch (error) {
+      notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+        title: i18n.translate(
+          'xpack.streams.significantEventsDiscovery.featuresTable.bulkDeleteError.title',
+          {
+            defaultMessage: 'Failed to delete features',
+          }
+        ),
+      });
+    }
+  }, [selectedFeatures, deleteFeaturesInBulk, refetch, notifications.toasts, hideBulkDeleteModal]);
+
   if (loading && !data) {
     return <LoadingPanel size="l" />;
   }
+
+  const isSelectionActionsDisabled = selectedFeatures.length === 0 || loading;
 
   const columns: Array<EuiBasicTableColumn<Feature>> = [
     {
@@ -122,12 +179,55 @@ export function FeaturesTable() {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          {i18n.translate('xpack.streams.significantEventsDiscovery.featuresTable.featuresCount', {
-            defaultMessage: '{count} Features',
-            values: { count: data?.features.length ?? 0 },
-          })}
-        </EuiText>
+        <EuiFlexGroup alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.featuresTable.featuresCount',
+                {
+                  defaultMessage: '{count} Features',
+                  values: { count: data?.features.length ?? 0 },
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="cross"
+              size="xs"
+              aria-label={i18n.translate(
+                'xpack.streams.significantEventsDiscovery.featuresTable.clearSelection',
+                { defaultMessage: 'Clear selection' }
+              )}
+              isDisabled={isSelectionActionsDisabled}
+              onClick={clearSelection}
+            >
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.featuresTable.clearSelection',
+                { defaultMessage: 'Clear selection' }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              isLoading={isBulkDeleting}
+              size="xs"
+              iconType="trash"
+              color="danger"
+              aria-label={i18n.translate(
+                'xpack.streams.significantEventsDiscovery.featuresTable.deleteSelected',
+                { defaultMessage: 'Delete selected' }
+              )}
+              isDisabled={isSelectionActionsDisabled}
+              onClick={showBulkDeleteModal}
+            >
+              {i18n.translate(
+                'xpack.streams.significantEventsDiscovery.featuresTable.deleteSelected',
+                { defaultMessage: 'Delete selected' }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiInMemoryTable
@@ -136,9 +236,14 @@ export function FeaturesTable() {
             { defaultMessage: 'Features table' }
           )}
           columns={columns}
-          itemId="id"
+          itemId="uuid"
           items={data?.features ?? []}
           loading={loading}
+          selection={{
+            initialSelected: selectedFeatures,
+            onSelectionChange: setSelectedFeatures,
+            selected: selectedFeatures,
+          }}
           search={{
             box: {
               incremental: true,
@@ -164,6 +269,14 @@ export function FeaturesTable() {
       </EuiFlexItem>
       {selectedFeature && (
         <FeatureDetailsFlyout feature={selectedFeature} onClose={handleCloseFlyout} />
+      )}
+      {isBulkDeleteModalVisible && selectedFeatures.length > 0 && (
+        <DeleteFeatureModal
+          features={selectedFeatures}
+          isLoading={isBulkDeleting}
+          onCancel={hideBulkDeleteModal}
+          onConfirm={handleBulkDelete}
+        />
       )}
     </EuiFlexGroup>
   );
