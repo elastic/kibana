@@ -741,4 +741,16 @@ describe('mergeCompiledTemplates', () => {
     expect(base).toEqual({ arr: [1, 2], obj: { a: 1 } });
     expect(override).toEqual({ arr: [3], obj: { b: 2 } });
   });
+
+  it('null in base is replaced by override object', () => {
+    expect(mergeCompiledTemplates({ key: null }, { key: { nested: true } })).toEqual({
+      key: { nested: true },
+    });
+  });
+
+  it('override null replaces base value', () => {
+    expect(mergeCompiledTemplates({ key: { nested: true } }, { key: null })).toEqual({
+      key: null,
+    });
+  });
 });

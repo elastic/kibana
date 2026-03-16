@@ -182,7 +182,8 @@ describe('Fleet template_paths compilation (integration)', () => {
     if (esServer) {
       await esServer.stop();
     }
-    await new Promise((res) => setTimeout(res, 5000));
+    // Allow async operations (e.g. saved object cleanup) to settle before Jest tears down
+    await new Promise((res) => setTimeout(res, 10000));
   });
 
   it('merges input and stream templates using vars from the policy', async () => {
