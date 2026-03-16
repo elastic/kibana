@@ -132,6 +132,13 @@ Fence the replacement code with the esql tag. Do not explain it.
 If the instruction asks to modify or extend an existing pipe command (e.g. "also add ...", "change ...", "add a column"),
 output the complete modified version of that pipe. Otherwise output only new pipe(s).
 
+Before the code block, output exactly one of these lines:
+  REPLACES_NEXT: true
+  REPLACES_NEXT: false
+Output "true" when your generated code is a modified version of the pipe immediately after the marked comment
+(i.e. it should replace that pipe, not be added alongside it).
+Output "false" when your generated code is new and should be inserted without removing any existing pipe.
+
 <CurrentQuery>
 ${currentQuery}
 </CurrentQuery>
@@ -149,6 +156,14 @@ ${fieldsContext}
   }
 
   return prompt;
+};
+
+const extractSurgicalResponse = (content: string): { esql: string; replacesNext: boolean } => {
+  const codeMatch = content.match(/```esql\s*([\s\S]*?)```/);
+  const esql = codeMatch ? codeMatch[1].trim() : content.trim();
+  const flagMatch = content.match(/REPLACES_NEXT:\s*(true|false)/i);
+  const replacesNext = flagMatch ? flagMatch[1].toLowerCase() === 'true' : false;
+  return { esql, replacesNext };
 };
 
 const extractEsqlQuery = (content: string): string => {
@@ -222,8 +237,15 @@ export const registerNLtoESQLRoute = (
           })
         );
 
+        const rawContent = result.content ?? '';
+        if (currentQuery) {
+          const { esql, replacesNext } = extractSurgicalResponse(rawContent);
+          return response.ok({
+            body: { content: esql, replacesNext },
+          });
+        }
         return response.ok({
-          body: { content: extractEsqlQuery(result.content ?? '') },
+          body: { content: extractEsqlQuery(rawContent) },
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);

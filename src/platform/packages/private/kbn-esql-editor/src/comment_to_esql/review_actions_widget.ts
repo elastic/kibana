@@ -14,34 +14,41 @@ import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 
 const WIDGET_ID = 'ESQL_COMMENT_REVIEW_ACTIONS_WIDGET';
+const ZONE_HEIGHT_PX = 30;
 
 interface ReviewActionsCallbacks {
   onAccept: () => void;
-  onAcceptAndRemoveComment: () => void;
   onReject: () => void;
 }
 
 /**
- * A widget that displays the review actions for the generated code
- * when a comment is added to the editor.
- * The widget displays three buttons:
- * - Accept: Keep generated code and the comment (for iteration)
- * - Accept & Remove Comment: Keep generated code, delete the comment (final state)
- * - Reject: Remove the generated code
- * The widget is positioned below the generated code.
- * The widget is disposed when the review is resolved or the editor is disposed.
+ * Renders Keep / Undo buttons using a hybrid approach:
+ * - A ViewZone inserts vertical space so no editor content is hidden
+ * - A ContentWidget renders the interactive buttons on top of that space
  */
 export class ReviewActionsWidget implements monaco.editor.IContentWidget {
   private domNode: HTMLElement | undefined;
-  private lineNumber: number;
+  private zoneId: string | undefined;
+  private readonly afterLineNumber: number;
 
   constructor(
     private readonly euiTheme: EuiThemeComputed,
     private readonly editor: monaco.editor.ICodeEditor,
-    lineNumber: number,
-    private readonly callbacks: ReviewActionsCallbacks
+    afterLineNumber: number,
+    private readonly callbacks: ReviewActionsCallbacks,
+    private readonly isReplaceMode: boolean = false
   ) {
-    this.lineNumber = lineNumber;
+    this.afterLineNumber = afterLineNumber;
+
+    const zoneDom = document.createElement('div');
+    editor.changeViewZones((accessor) => {
+      this.zoneId = accessor.addZone({
+        afterLineNumber,
+        heightInPx: ZONE_HEIGHT_PX,
+        domNode: zoneDom,
+      });
+    });
+
     editor.addContentWidget(this);
   }
 
@@ -59,7 +66,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
   public getPosition(): monaco.editor.IContentWidgetPosition | null {
     return {
       position: {
-        lineNumber: this.lineNumber,
+        lineNumber: this.afterLineNumber,
         column: 1,
       },
       preference: [monaco.editor.ContentWidgetPositionPreference.BELOW],
@@ -68,6 +75,15 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
 
   public dispose(): void {
     this.editor.removeContentWidget(this);
+
+    if (this.zoneId) {
+      const id = this.zoneId;
+      this.editor.changeViewZones((accessor) => {
+        accessor.removeZone(id);
+      });
+      this.zoneId = undefined;
+    }
+
     this.domNode = undefined;
   }
 
@@ -83,54 +99,45 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
     container.className = css`
       display: flex;
       flex-direction: row;
-      padding: ${this.euiTheme.size.xs} 0;
+      align-items: center;
+      height: ${ZONE_HEIGHT_PX}px;
       white-space: nowrap;
       width: max-content;
 
       & > button + button {
-        margin-left: ${this.euiTheme.size.xs};
+        margin-left: ${this.euiTheme.size.s};
       }
     `;
 
-    container.appendChild(
-      this.createButton(
-        i18n.translate('esqlEditor.commentReview.accept', {
-          defaultMessage: 'Accept ({shortcut})',
+    const acceptLabel = this.isReplaceMode
+      ? i18n.translate('esqlEditor.commentReview.replace', {
+          defaultMessage: 'Replace ({shortcut})',
           values: { shortcut: isMac ? '⌘⇧↵' : 'Ctrl+Shift+Enter' },
-        }),
-        'success',
-        this.callbacks.onAccept
-      )
-    );
-
-    container.appendChild(
-      this.createButton(
-        i18n.translate('esqlEditor.commentReview.acceptAndRemoveComment', {
-          defaultMessage: 'Accept & Clean ({shortcut})',
-          values: { shortcut: isMac ? '⌘⇧⌥↵' : 'Ctrl+Shift+Alt+Enter' },
-        }),
-        'successDark',
-        this.callbacks.onAcceptAndRemoveComment
-      )
-    );
+        })
+      : i18n.translate('esqlEditor.commentReview.accept', {
+          defaultMessage: 'Keep ({shortcut})',
+          values: { shortcut: isMac ? '⌘⇧↵' : 'Ctrl+Shift+Enter' },
+        });
 
     container.appendChild(
       this.createButton(
         i18n.translate('esqlEditor.commentReview.reject', {
-          defaultMessage: 'Reject ({shortcut})',
+          defaultMessage: 'Undo ({shortcut})',
           values: { shortcut: isMac ? '⌘⇧⌫' : 'Ctrl+Shift+Backspace' },
         }),
-        'danger',
+        'neutral',
         this.callbacks.onReject
       )
     );
+
+    container.appendChild(this.createButton(acceptLabel, 'success', this.callbacks.onAccept));
 
     return container;
   }
 
   private createButton(
     label: string,
-    variant: 'success' | 'successDark' | 'danger',
+    variant: 'success' | 'neutral',
     onClick: () => void
   ): HTMLButtonElement {
     const colors: Record<
@@ -138,21 +145,15 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
       { bg: string; text: string; hoverBg: string; hoverText: string }
     > = {
       success: {
-        bg: this.euiTheme.colors.backgroundLightSuccess,
-        text: this.euiTheme.colors.textSuccess,
-        hoverBg: this.euiTheme.colors.backgroundFilledSuccess,
-        hoverText: this.euiTheme.colors.textInverse,
-      },
-      successDark: {
-        bg: `color-mix(in srgb, ${this.euiTheme.colors.backgroundFilledSuccess} 60%, ${this.euiTheme.colors.backgroundLightSuccess})`,
+        bg: this.euiTheme.colors.backgroundFilledSuccess,
         text: this.euiTheme.colors.textInverse,
-        hoverBg: this.euiTheme.colors.backgroundFilledSuccess,
+        hoverBg: this.euiTheme.colors.textSuccess,
         hoverText: this.euiTheme.colors.textInverse,
       },
-      danger: {
-        bg: this.euiTheme.colors.backgroundLightDanger,
-        text: this.euiTheme.colors.textDanger,
-        hoverBg: this.euiTheme.colors.backgroundFilledDanger,
+      neutral: {
+        bg: this.euiTheme.colors.backgroundFilledText,
+        text: this.euiTheme.colors.textInverse,
+        hoverBg: this.euiTheme.colors.backgroundFilledText,
         hoverText: this.euiTheme.colors.textInverse,
       },
     };

@@ -7,8 +7,8 @@ Generates ES|QL code from natural-language comments in the editor using an LLM.
 1. The user writes a `//` comment on its own line describing what they want
 2. Presses **⌘+J** (Mac) / **Ctrl+J** (Windows/Linux)
 3. The comment is sent to the `/internal/esql/nl_to_esql` route
-4. Generated code appears below the comment with an inline diff review (comment in red, generated code in green)
-5. The user accepts or rejects the change via buttons or keyboard shortcuts
+4. Generated code appears below the comment highlighted in green
+5. The user keeps or undoes the change via buttons or keyboard shortcuts
 
 ## Surgical vs non-surgical mode
 
@@ -51,19 +51,33 @@ FROM kibana_sample_data_flights
 
 And outputs only: `| WHERE FlightDelay == true`
 
-## Insert-only behavior
+## LLM-signaled replacement
 
-Generated code is always **inserted** on a new line below the comment. The system never automatically replaces existing lines — this avoids unintended deletion of valid code (e.g., replacing an existing `| WHERE` clause when the user intended to add a second filter). If the LLM generates a modified version of an existing pipe (e.g., an extended `| STATS`), the user can manually remove the original line after accepting.
+The LLM decides whether its output should **replace** the pipe immediately after the comment or be **inserted** alongside it. It signals this via a `REPLACES_NEXT: true/false` flag in its response.
+
+- `REPLACES_NEXT: true` — the generated code is a modified version of the next pipe (e.g., `// Group by host` modifying an existing `| STATS count = COUNT(*)`). On accept, the original pipe is removed.
+- `REPLACES_NEXT: false` — the generated code is new and should be inserted without touching existing pipes (e.g., `// filter for delayed flights` adding a new `| WHERE`).
+
+This avoids both problems: no silent deletion of unrelated pipes (like WHERE), and no duplicate pipes left behind when the intent is clearly a modification.
 
 ## Review flow
 
-When generated code is shown:
+A ViewZone + ContentWidget hybrid renders action buttons between editor lines without overlapping content.
 
-- **Comment line**: red background with strikethrough
+### Insert mode (`REPLACES_NEXT: false`)
+
 - **Generated code**: green background
+- **Comment**: no decoration (stays as-is for iteration)
+- Buttons: **Undo** (dark) / **Keep** (green)
 
-Three actions are available:
+### Replace mode (`REPLACES_NEXT: true`)
 
-- **Accept** (⌘⇧↵ / Ctrl+Shift+Enter): keeps both the generated code **and** the comment. The comment stays in place so the user can evaluate the result, tweak the instruction, and press ⌘+J again to regenerate — ideal for iterating.
-- **Accept & Remove Comment**: keeps the generated code and deletes the comment. This is the "I'm done" action for a clean final state with no leftover prompts.
-- **Reject** (⌘⇧⌫ / Ctrl+Shift+Backspace): removes the generated code and restores the original state.
+- **Generated code**: green background
+- **Replaced line**: amber/warning background with strikethrough
+- **Comment**: no decoration
+- Buttons: **Undo** (dark) / **Replace** (green)
+
+### Actions
+
+- **Keep / Replace** (⌘⇧↵ / Ctrl+Shift+Enter): keeps the generated code. In replace mode, also removes the original pipe. The comment stays in place so the user can iterate — tweak the instruction and press ⌘+J again.
+- **Undo** (⌘⇧⌫ / Ctrl+Shift+Backspace): removes the generated code and restores the original state.

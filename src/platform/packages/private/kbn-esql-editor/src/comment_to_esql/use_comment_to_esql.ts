@@ -24,16 +24,19 @@ import {
   markCommentInQuery,
   isModelStillValid,
 } from './utils';
-const COMMENT_REMOVED_CLASS = 'esqlCommentRemoved';
 const CODE_ADDED_CLASS = 'esqlCodeAdded';
+const LINE_REPLACED_CLASS = 'esqlLineReplaced';
+
+interface GenerateResult {
+  content: string;
+  replacesNext: boolean;
+}
 
 interface CommentReviewState {
-  // The line number of the comment which generated the code
   commentLineNumber: number;
-  // The line number of the first line of the generated code that was inserted
   generatedLineStart: number;
-  // The line number of the last line of the generated code that was inserted
   generatedLineEnd: number;
+  replacedLineNumber: number | null;
 }
 
 interface UseCommentToEsqlParams {
@@ -59,15 +62,15 @@ export const useCommentToEsql = ({
   // Diff styles for the comment and the generated code
   const commentToEsqlStyle = useMemo(
     () => css`
-      .${COMMENT_REMOVED_CLASS} {
-        background-color: ${euiTheme.colors.backgroundLightDanger};
-        text-decoration: line-through;
-      }
       .${CODE_ADDED_CLASS} {
         background-color: ${euiTheme.colors.backgroundLightSuccess};
       }
+      .${LINE_REPLACED_CLASS} {
+        background-color: ${euiTheme.colors.backgroundLightWarning};
+        text-decoration: line-through;
+      }
     `,
-    [euiTheme.colors.backgroundLightDanger, euiTheme.colors.backgroundLightSuccess]
+    [euiTheme.colors.backgroundLightSuccess, euiTheme.colors.backgroundLightWarning]
   );
 
   const cleanup = useCallback(() => {
@@ -86,30 +89,32 @@ export const useCommentToEsql = ({
   }, []);
 
   const acceptChange = useCallback(() => {
-    cleanup();
-  }, [cleanup]);
-
-  const acceptAndRemoveComment = useCallback(() => {
     const editor = editorRef.current;
     const model = editorModel.current;
     const state = reviewStateRef.current;
-    if (!editor || !model || !state) return;
+    if (!editor || !model || !state) {
+      cleanup();
+      return;
+    }
 
+    const { replacedLineNumber } = state;
     cleanup();
 
-    const commentLineContent = model.getLineContent(state.commentLineNumber);
-    const isLastLine = state.commentLineNumber === model.getLineCount();
-    editor.executeEdits('nl-to-esql-accept', [
-      {
-        range: new monaco.Range(
-          state.commentLineNumber,
-          1,
-          isLastLine ? state.commentLineNumber : state.commentLineNumber + 1,
-          isLastLine ? commentLineContent.length + 1 : 1
-        ),
-        text: null,
-      },
-    ]);
+    if (replacedLineNumber) {
+      const lineContent = model.getLineContent(replacedLineNumber);
+      const isLastLine = replacedLineNumber === model.getLineCount();
+      editor.executeEdits('nl-to-esql-accept', [
+        {
+          range: new monaco.Range(
+            replacedLineNumber,
+            1,
+            isLastLine ? replacedLineNumber : replacedLineNumber + 1,
+            isLastLine ? lineContent.length + 1 : 1
+          ),
+          text: null,
+        },
+      ]);
+    }
   }, [editorRef, editorModel, cleanup]);
 
   const rejectChange = useCallback(() => {
@@ -135,15 +140,7 @@ export const useCommentToEsql = ({
 
       reviewStateRef.current = state;
 
-      const decorations: monaco.editor.IModelDeltaDecoration[] = [
-        {
-          range: new monaco.Range(state.commentLineNumber, 1, state.commentLineNumber, 1),
-          options: {
-            isWholeLine: true,
-            className: COMMENT_REMOVED_CLASS,
-          },
-        },
-      ];
+      const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
       for (let line = state.generatedLineStart; line <= state.generatedLineEnd; line++) {
         decorations.push({
@@ -155,13 +152,26 @@ export const useCommentToEsql = ({
         });
       }
 
+      if (state.replacedLineNumber) {
+        decorations.push({
+          range: new monaco.Range(state.replacedLineNumber, 1, state.replacedLineNumber, 1),
+          options: {
+            isWholeLine: true,
+            className: LINE_REPLACED_CLASS,
+          },
+        });
+      }
+
       decorationsRef.current = editor.createDecorationsCollection(decorations);
 
-      widgetRef.current = new ReviewActionsWidget(euiTheme, editor, state.generatedLineEnd, {
-        onAccept: acceptChange,
-        onAcceptAndRemoveComment: acceptAndRemoveComment,
-        onReject: rejectChange,
-      });
+      const widgetAfterLine = state.replacedLineNumber ?? state.generatedLineEnd;
+      widgetRef.current = new ReviewActionsWidget(
+        euiTheme,
+        editor,
+        widgetAfterLine,
+        { onAccept: acceptChange, onReject: rejectChange },
+        Boolean(state.replacedLineNumber)
+      );
 
       if (!contextKeyRef.current) {
         contextKeyRef.current = editor.createContextKey('esqlCommentReviewActive', false);
@@ -185,19 +195,9 @@ export const useCommentToEsql = ({
           precondition: 'esqlCommentReviewActive',
           run: () => acceptChange(),
         }),
-        editor.addAction({
-          id: 'esql.commentReview.acceptAndClean',
-          label: 'Accept and remove comment',
-          keybindings: [
-            // eslint-disable-next-line no-bitwise
-            monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.Enter,
-          ],
-          precondition: 'esqlCommentReviewActive',
-          run: () => acceptAndRemoveComment(),
-        }),
       ];
     },
-    [editorRef, euiTheme, acceptChange, acceptAndRemoveComment, rejectChange]
+    [editorRef, euiTheme, acceptChange, rejectChange]
   );
 
   const generateESQL = useCallback(
@@ -206,16 +206,20 @@ export const useCommentToEsql = ({
       sources: string[] | undefined,
       isSurgical: boolean,
       currentQuery: string
-    ): Promise<string | null> => {
+    ): Promise<GenerateResult | null> => {
       try {
-        const result = await http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
-          body: JSON.stringify({
-            nlInstruction,
-            sources,
-            ...(isSurgical ? { currentQuery } : {}),
-          }),
-        });
-        return result.content || null;
+        const result = await http.post<{ content: string; replacesNext?: boolean }>(
+          NL_TO_ESQL_ROUTE,
+          {
+            body: JSON.stringify({
+              nlInstruction,
+              sources,
+              ...(isSurgical ? { currentQuery } : {}),
+            }),
+          }
+        );
+        if (!result.content) return null;
+        return { content: result.content, replacesNext: result.replacesNext ?? false };
       } catch (error) {
         const message =
           (error as { body?: { message?: string } })?.body?.message ??
@@ -262,15 +266,14 @@ export const useCommentToEsql = ({
       ? markCommentInQuery(fullText, targetComment.lineNumber)
       : fullText;
 
-    const generatedESQL = await generateESQL(nlInstruction, sources, isSurgical, queryForRoute);
-    if (!generatedESQL) return;
+    const result = await generateESQL(nlInstruction, sources, isSurgical, queryForRoute);
+    if (!result) return;
 
-    // Check if the model is still valid to avoid race conditions
     if (!isModelStillValid(editorModel.current, targetComment.lineNumber)) return;
 
     if (!isSurgical) {
       const fullRange = model.getFullModelRange();
-      editor.executeEdits('nl-to-esql', [{ range: fullRange, text: generatedESQL }]);
+      editor.executeEdits('nl-to-esql', [{ range: fullRange, text: result.content }]);
       return;
     }
 
@@ -278,13 +281,19 @@ export const useCommentToEsql = ({
       editor,
       model,
       targetComment.lineNumber,
-      generatedESQL
+      result.content
     );
+
+    const replacedLineNumber =
+      result.replacesNext && generatedLineEnd + 1 <= model.getLineCount()
+        ? generatedLineEnd + 1
+        : null;
 
     showReview({
       commentLineNumber: targetComment.lineNumber,
       generatedLineStart,
       generatedLineEnd,
+      replacedLineNumber,
     });
   }, [editorRef, editorModel, cleanup, generateESQL, showReview]);
 
