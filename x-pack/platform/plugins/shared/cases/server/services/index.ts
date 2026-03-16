@@ -17,6 +17,7 @@ export { UserProfileService } from './user_profiles';
 export { TemplatesService } from './templates';
 export { FieldDefinitionsService } from './field_definitions';
 export { CaseTaskService } from './tasks';
+export { CaseTaskTemplateService } from './task_templates';
 
 export interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
