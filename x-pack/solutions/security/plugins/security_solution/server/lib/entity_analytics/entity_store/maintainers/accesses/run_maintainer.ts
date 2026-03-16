@@ -15,6 +15,17 @@ import { INTEGRATION_CONFIGS, type AccessesIntegrationConfig } from './integrati
 import { postprocessEsqlResults } from './postprocess_records';
 import { upsertEntityRelationships } from './upsert_entities';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isIndexNotFound(err: any): boolean {
+  const type = err?.meta?.body?.error?.type ?? err?.body?.error?.type ?? '';
+  return type === 'index_not_found_exception';
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function errMsg(err: any): string {
+  return err?.message ?? JSON.stringify(err);
+}
+
 /**
  * Computes `accesses_frequently` and `accesses_infrequently` relationships for
  * user entities by analysing authentication events across configured integrations.
@@ -29,8 +40,6 @@ import { upsertEntityRelationships } from './upsert_entities';
  *    step 1 via a DSL filter, counts how many times each user accessed each
  *    host. Hosts accessed more than 4 times are labelled `accesses_frequently`;
  *    the rest are labelled `accesses_infrequently`.
- *    If the index lacks `*.entity.id` fields the query is automatically retried
- *    without those fields (verification_exception fallback).
  *
  * 3. **Upsert relationships** — After all integrations and pages have been
  *    processed, the accumulated records are written to the entity store's
@@ -60,7 +69,6 @@ export async function runMaintainer({
 
     let afterKey: CompositeAfterKey | undefined;
     let iterations = 0;
-    let skipEntityFields = false;
 
     do {
       iterations++;
@@ -76,19 +84,21 @@ export async function runMaintainer({
         )})`
       );
 
-      const aggResult = await esClient
-        .search({
+      let aggResult;
+      try {
+        aggResult = await esClient.search({
           index: integration.getIndexPattern(namespace),
           ...integration.buildCompositeAggQuery(afterKey),
-        })
-        .catch((err) => {
-          logger.error(
-            `[${integration.id}] Composite aggregation failed: ${
-              err?.message ?? JSON.stringify(err)
-            }`
-          );
-          throw err;
         });
+      } catch (err) {
+        if (isIndexNotFound(err)) {
+          const idx = integration.getIndexPattern(namespace);
+          logger.info(`[${integration.id}] Index "${idx}" not found, skipping`);
+          break;
+        }
+        logger.error(`[${integration.id}] Composite aggregation failed: ${errMsg(err)}`);
+        throw err;
+      }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const aggs = aggResult.aggregations as any;
@@ -107,38 +117,11 @@ export async function runMaintainer({
         },
       };
 
-      let esqlQuery = integration.buildEsqlQuery(namespace, skipEntityFields);
-      logger.info(
-        `[${integration.id}] Running ES|QL query (skipEntityFields=${skipEntityFields}):\n${esqlQuery}`
-      );
+      const esqlQuery = integration.buildEsqlQuery(namespace);
+      logger.info(`[${integration.id}] Running ES|QL query:\n${esqlQuery}`);
       logger.info(`[${integration.id}] Bucket user filter: ${JSON.stringify(bucketFilter)}`);
 
-      let esqlResult;
-      try {
-        esqlResult = await esClient.esql.query({ query: esqlQuery, filter: esqlFilter });
-      } catch (err) {
-        const isVerificationException =
-          err?.meta?.body?.error?.type === 'verification_exception' ||
-          err?.message?.includes('verification_exception');
-
-        if (isVerificationException && !skipEntityFields) {
-          logger.warn(
-            `[${integration.id}] ES|QL query failed with verification_exception ` +
-              '(likely missing *.entity.id fields). Retrying without entity fields.'
-          );
-          skipEntityFields = true;
-          esqlQuery = integration.buildEsqlQuery(namespace, skipEntityFields);
-          logger.info(
-            `[${integration.id}] Retry ES|QL query (skipEntityFields=${skipEntityFields}):\n${esqlQuery}`
-          );
-          esqlResult = await esClient.esql.query({ query: esqlQuery, filter: esqlFilter });
-        } else {
-          logger.error(
-            `[${integration.id}] ES|QL query failed: ${err?.message ?? JSON.stringify(err)}`
-          );
-          throw err;
-        }
-      }
+      const esqlResult = await esClient.esql.query({ query: esqlQuery, filter: esqlFilter });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const columns = (esqlResult as any).columns as Array<{ name: string; type: string }>;

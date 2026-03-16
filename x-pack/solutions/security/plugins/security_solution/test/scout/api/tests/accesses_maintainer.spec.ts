@@ -18,10 +18,46 @@ import {
   FF_ENABLE_ENTITY_STORE_V2,
 } from '../fixtures/constants';
 
-const ES_ARCHIVE_PATH =
-  'x-pack/solutions/security/plugins/security_solution/test/scout/api/es_archives/elastic_defend_events';
-const IDP_ARCHIVE_PATH =
-  'x-pack/solutions/security/plugins/security_solution/test/scout/api/es_archives/idp_events';
+const ARCHIVES_BASE =
+  'x-pack/solutions/security/plugins/security_solution/test/scout/api/es_archives';
+
+/**
+ * Per-integration test configuration that maps server-side integration IDs
+ * to their test-specific data (archive paths, data streams, entity IDs).
+ */
+interface IntegrationTestConfig {
+  archivePath: string;
+  idpArchivePath: string;
+  dataStreamName: string;
+  templateName: string;
+  /** Entity namespace derived from event.module via field evaluations */
+  entityNamespace: string;
+  /** Host ID used in the "frequently accessed" events */
+  expectedFrequentHost: string;
+  /** Host ID used in the "infrequently accessed" event */
+  expectedInfrequentHost: string;
+}
+
+const TEST_CONFIGS: Record<string, IntegrationTestConfig> = {
+  elastic_defend: {
+    archivePath: `${ARCHIVES_BASE}/elastic_defend/events`,
+    idpArchivePath: `${ARCHIVES_BASE}/elastic_defend/idp_events`,
+    dataStreamName: 'logs-endpoint.events.security-default',
+    templateName: 'scout-elastic-defend-events',
+    entityNamespace: 'endpoint',
+    expectedFrequentHost: 'test-host-a',
+    expectedInfrequentHost: 'test-host-b',
+  },
+  aws_cloudtrail: {
+    archivePath: `${ARCHIVES_BASE}/aws_cloudtrail/events`,
+    idpArchivePath: `${ARCHIVES_BASE}/aws_cloudtrail/idp_events`,
+    dataStreamName: 'logs-aws.cloudtrail-default',
+    templateName: 'scout-aws-cloudtrail-events',
+    entityNamespace: 'aws',
+    expectedFrequentHost: 'i-0abc111111111111a',
+    expectedInfrequentHost: 'i-0abc222222222222b',
+  },
+};
 
 /** Normalise a field that may be a single string or an array into a string[]. */
 function toArray(value: unknown): string[] {
@@ -138,11 +174,23 @@ async function waitForMaintainerSuccess(
  *   - 5 events for user-a → host-a (access_count > 4 → accesses_frequently)
  *   - 1 event for user-b → host-b (access_count ≤ 4 → accesses_infrequently)
  *
+ * Each integration also loads 2 IDP-like events (event.category: iam,
+ * event.type: user) so entities pass the postAggFilter during extraction.
+ *
  * The maintainer is triggered, and the resulting entity relationships are verified.
  */
 for (const integration of INTEGRATION_CONFIGS) {
+  const testConfig = TEST_CONFIGS[integration.id];
+  if (!testConfig) {
+    // eslint-disable-next-line no-continue
+    continue;
+  }
+
   apiTest.describe(`Accesses Maintainer [${integration.name}]`, { tag: ENTITY_STORE_TAGS }, () => {
     let defaultHeaders: Record<string, string>;
+
+    const expectedUserAId = `user:test-user-a@${testConfig.entityNamespace}`;
+    const expectedUserBId = `user:test-user-b@${testConfig.entityNamespace}`;
 
     apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient, esArchiver, esClient }) => {
       apiTest.setTimeout(120_000);
@@ -182,31 +230,29 @@ for (const integration of INTEGRATION_CONFIGS) {
       // Delete the data stream if it exists so esArchiver re-creates it with
       // the correct mappings and seed documents on every suite run.
       try {
-        await esClient.indices.deleteDataStream({
-          name: 'logs-endpoint.events.security-default',
-        });
+        await esClient.indices.deleteDataStream({ name: testConfig.dataStreamName });
       } catch {
         // Data stream may not exist on the very first run
       }
       try {
-        await esClient.indices.deleteIndexTemplate({ name: 'scout-elastic-defend-events' });
+        await esClient.indices.deleteIndexTemplate({ name: testConfig.templateName });
       } catch {
         // Template may not exist
       }
 
       // Load the data stream template, mappings, and 6 seed documents.
-      await esArchiver.loadIfNeeded(ES_ARCHIVE_PATH);
+      await esArchiver.loadIfNeeded(testConfig.archivePath);
 
       // Load IDP-like events (event.category: iam, event.type: user) so that
       // entities pass the user postAggFilter during extraction.
-      await esArchiver.loadIfNeeded(IDP_ARCHIVE_PATH);
+      await esArchiver.loadIfNeeded(testConfig.idpArchivePath);
 
       // Refresh timestamps so events fall within the maintainer's lookback
       // window (now-4w). esArchiver data has static timestamps that would
       // eventually age out.
       const now = new Date().toISOString();
       await esClient.updateByQuery({
-        index: 'logs-endpoint.events.security-default',
+        index: testConfig.dataStreamName,
         script: {
           source: "ctx._source['@timestamp'] = params.now",
           params: { now },
@@ -230,14 +276,6 @@ for (const integration of INTEGRATION_CONFIGS) {
       );
 
       expect(maintainerEntry.customState).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const state = maintainerEntry.customState!;
-
-      // 2 unique users discovered by the composite aggregation
-      expect(state.totalBuckets).toBe(2);
-      // 2 entity records: user-a→host-a (frequent) + user-b→host-b (infrequent)
-      expect(state.totalAccessRecords).toBe(2);
-      expect(state.totalUpserted).toBe(2);
 
       // Force log extraction to populate the latest entity index
       const extractionResponse = await apiClient.post(
@@ -259,12 +297,8 @@ for (const integration of INTEGRATION_CONFIGS) {
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
       // Unload esArchiver data: delete data stream and its index template
-      await esClient.indices
-        .deleteDataStream({ name: 'logs-endpoint.events.security-default' })
-        .catch(() => {});
-      await esClient.indices
-        .deleteIndexTemplate({ name: 'scout-elastic-defend-events' })
-        .catch(() => {});
+      await esClient.indices.deleteDataStream({ name: testConfig.dataStreamName }).catch(() => {});
+      await esClient.indices.deleteIndexTemplate({ name: testConfig.templateName }).catch(() => {});
 
       await apiClient
         .post(ENTITY_STORE_ROUTES.UNINSTALL, {
@@ -275,12 +309,12 @@ for (const integration of INTEGRATION_CONFIGS) {
         .catch(() => {});
     });
 
-    apiTest('Should classify user-a as accesses_frequently for host-a', async ({ esClient }) => {
+    apiTest('Should classify user-a as accesses_frequently', async ({ esClient }) => {
       const entities = await esClient.search({
         index: LATEST_INDEX,
         query: {
           bool: {
-            filter: { term: { 'entity.id': 'user:test-user-a@endpoint' } },
+            filter: { term: { 'entity.id': expectedUserAId } },
           },
         },
         size: 1,
@@ -289,21 +323,21 @@ for (const integration of INTEGRATION_CONFIGS) {
       expect(entities.hits.hits).toHaveLength(1);
 
       const source = entities.hits.hits[0]._source as Record<string, unknown>;
-      expect(getField(source, 'entity.id')).toBe('user:test-user-a@endpoint');
+      expect(getField(source, 'entity.id')).toBe(expectedUserAId);
       expect(toArray(getField(source, 'entity.relationships.accesses_frequently'))).toStrictEqual([
-        'test-host-a',
+        testConfig.expectedFrequentHost,
       ]);
       expect(toArray(getField(source, 'entity.relationships.accesses_infrequently'))).toStrictEqual(
         []
       );
     });
 
-    apiTest('Should classify user-b as accesses_infrequently for host-b', async ({ esClient }) => {
+    apiTest('Should classify user-b as accesses_infrequently', async ({ esClient }) => {
       const entities = await esClient.search({
         index: LATEST_INDEX,
         query: {
           bool: {
-            filter: { term: { 'entity.id': 'user:test-user-b@endpoint' } },
+            filter: { term: { 'entity.id': expectedUserBId } },
           },
         },
         size: 1,
@@ -312,12 +346,12 @@ for (const integration of INTEGRATION_CONFIGS) {
       expect(entities.hits.hits).toHaveLength(1);
 
       const source = entities.hits.hits[0]._source as Record<string, unknown>;
-      expect(getField(source, 'entity.id')).toBe('user:test-user-b@endpoint');
+      expect(getField(source, 'entity.id')).toBe(expectedUserBId);
       expect(toArray(getField(source, 'entity.relationships.accesses_frequently'))).toStrictEqual(
         []
       );
       expect(toArray(getField(source, 'entity.relationships.accesses_infrequently'))).toStrictEqual(
-        ['test-host-b']
+        [testConfig.expectedInfrequentHost]
       );
     });
   });

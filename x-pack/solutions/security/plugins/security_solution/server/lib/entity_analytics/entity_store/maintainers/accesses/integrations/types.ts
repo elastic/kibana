@@ -32,11 +32,6 @@ export interface AccessesIntegrationConfig {
   /** Builds a bool/should filter to scope ES|QL to the users found in a composite page */
   buildBucketUserFilter: (buckets: CompositeBucket[]) => QueryDslQueryContainer;
 
-  /**
-   * Builds the ES|QL query that computes access frequency.
-   * @param namespace - Kibana space namespace
-   * @param skipEntityFields - When true, strips references to *.entity.id columns
-   *   that may not exist on raw log indices.
-   */
-  buildEsqlQuery: (namespace: string, skipEntityFields?: boolean) => string;
+  /** Builds the ES|QL query that computes access frequency. */
+  buildEsqlQuery: (namespace: string) => string;
 }

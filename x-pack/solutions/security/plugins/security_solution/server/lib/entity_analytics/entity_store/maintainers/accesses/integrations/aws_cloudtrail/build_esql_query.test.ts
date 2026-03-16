@@ -7,16 +7,16 @@
 
 import { buildEsqlQuery } from './build_esql_query';
 
-describe('buildEsqlQuery', () => {
+describe('AWS CloudTrail buildEsqlQuery', () => {
   describe('namespace handling', () => {
     it('uses the namespace to form the index pattern', () => {
       const query = buildEsqlQuery('default');
-      expect(query).toContain('FROM logs-endpoint.events.security-default');
+      expect(query).toContain('FROM logs-aws.cloudtrail-default');
     });
 
     it('uses a custom namespace', () => {
       const query = buildEsqlQuery('production');
-      expect(query).toContain('FROM logs-endpoint.events.security-production');
+      expect(query).toContain('FROM logs-aws.cloudtrail-production');
     });
   });
 
@@ -40,16 +40,16 @@ describe('buildEsqlQuery', () => {
   });
 
   describe('query structure', () => {
-    it('filters for log_on events', () => {
+    it('filters for AWS module and StartSession action', () => {
       const query = buildEsqlQuery('default');
-      expect(query).toContain('event.action == "log_on"');
+      expect(query).toContain('event.module == "aws"');
+      expect(query).toContain('event.action == "StartSession"');
     });
 
-    it('filters for correct logon types', () => {
+    it('does not filter on event.provider or logon_type', () => {
       const query = buildEsqlQuery('default');
-      expect(query).toContain('"RemoteInteractive"');
-      expect(query).toContain('"Interactive"');
-      expect(query).toContain('"Network"');
+      expect(query).not.toContain('event.provider');
+      expect(query).not.toContain('logon_type');
     });
 
     it('filters for successful outcomes', () => {

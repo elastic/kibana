@@ -27,8 +27,8 @@ export function buildEsqlQuery(namespace: string): string {
     getEuidFragments();
 
   return `FROM ${getIndexPattern(namespace)}
-| WHERE event.action == "log_on"
-    AND process.Ext.session_info.logon_type IN ("RemoteInteractive", "Interactive", "Network")
+| WHERE event.module == "aws"
+    AND event.action == "StartSession"
     AND event.outcome == "success"
     AND (${userIdFilter})
     AND (${hostIdFilter})

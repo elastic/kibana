@@ -181,66 +181,8 @@ describe('runMaintainer', () => {
     });
   });
 
-  describe('verification_exception retry', () => {
-    it('retries ES|QL without entity fields on verification_exception', async () => {
-      const buckets = [createBucket('user-1')];
-      esClient.search.mockResolvedValueOnce(createAggResponse(buckets));
-
-      const verificationError = new Error(
-        'verification_exception: Unknown column [user.entity.id]'
-      );
-      esClient.esql.query
-        .mockRejectedValueOnce(verificationError)
-        .mockResolvedValueOnce(createEsqlResponse() as never);
-
-      await runMaintainer({
-        esClient,
-        logger,
-        namespace: 'default',
-        crudClient,
-        integrations: [mockIntegration],
-      });
-
-      expect(esClient.esql.query).toHaveBeenCalledTimes(2);
-      expect(mockIntegration.buildEsqlQuery).toHaveBeenCalledWith('default', false);
-      expect(mockIntegration.buildEsqlQuery).toHaveBeenCalledWith('default', true);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('verification_exception'));
-    });
-
-    it('keeps skipEntityFields=true for subsequent pages after retry', async () => {
-      const page1Buckets = Array.from({ length: COMPOSITE_PAGE_SIZE }, (_, i) =>
-        createBucket(`user-${i}`)
-      );
-      const page1AfterKey: CompositeAfterKey = {
-        'user.id': `user-${COMPOSITE_PAGE_SIZE - 1}`,
-      };
-      const page2Buckets = [createBucket('user-last')];
-
-      esClient.search
-        .mockResolvedValueOnce(createAggResponse(page1Buckets, page1AfterKey))
-        .mockResolvedValueOnce(createAggResponse(page2Buckets));
-
-      const verificationError = new Error('verification_exception: Unknown column');
-      esClient.esql.query
-        .mockRejectedValueOnce(verificationError)
-        .mockResolvedValueOnce(createEsqlResponse() as never)
-        .mockResolvedValueOnce(createEsqlResponse() as never);
-
-      await runMaintainer({
-        esClient,
-        logger,
-        namespace: 'default',
-        crudClient,
-        integrations: [mockIntegration],
-      });
-
-      const buildEsqlCalls = (mockIntegration.buildEsqlQuery as jest.Mock).mock.calls;
-      expect(buildEsqlCalls[0]).toEqual(['default', false]);
-      expect(buildEsqlCalls[1]).toEqual(['default', true]);
-      expect(buildEsqlCalls[2]).toEqual(['default', true]);
-    });
-
-    it('throws non-verification_exception errors', async () => {
+  describe('ES|QL query failure', () => {
+    it('throws when ES|QL query fails', async () => {
       const buckets = [createBucket('user-1')];
       esClient.search.mockResolvedValueOnce(createAggResponse(buckets));
 
@@ -256,28 +198,6 @@ describe('runMaintainer', () => {
           integrations: [mockIntegration],
         })
       ).rejects.toThrow('search_phase_execution_exception');
-    });
-
-    it('does not retry twice on repeated verification_exception', async () => {
-      const buckets = [createBucket('user-1')];
-      esClient.search.mockResolvedValueOnce(createAggResponse(buckets));
-
-      const verificationError = new Error('verification_exception: Unknown column');
-      esClient.esql.query
-        .mockRejectedValueOnce(verificationError)
-        .mockRejectedValueOnce(verificationError);
-
-      await expect(
-        runMaintainer({
-          esClient,
-          logger,
-          namespace: 'default',
-          crudClient,
-          integrations: [mockIntegration],
-        })
-      ).rejects.toThrow('verification_exception');
-
-      expect(esClient.esql.query).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -448,8 +368,51 @@ describe('runMaintainer', () => {
   });
 
   describe('composite aggregation failure', () => {
-    it('throws when composite aggregation fails', async () => {
-      esClient.search.mockRejectedValueOnce(new Error('index_not_found_exception'));
+    it('skips integration when index does not exist', async () => {
+      const indexNotFoundError = Object.assign(new Error('index_not_found_exception'), {
+        meta: { body: { error: { type: 'index_not_found_exception' } } },
+      });
+      esClient.search.mockRejectedValueOnce(indexNotFoundError);
+
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        integrations: [mockIntegration],
+      });
+
+      expect(result.totalBuckets).toBe(0);
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('not found, skipping'));
+    });
+
+    it('continues to next integration after skipping one with missing index', async () => {
+      const missingInt = createMockIntegration({ id: 'missing', name: 'Missing' });
+      const existingInt = createMockIntegration({ id: 'existing', name: 'Existing' });
+
+      const indexNotFoundError = Object.assign(new Error('index_not_found_exception'), {
+        meta: { body: { error: { type: 'index_not_found_exception' } } },
+      });
+      esClient.search
+        .mockRejectedValueOnce(indexNotFoundError)
+        .mockResolvedValueOnce(createAggResponse([createBucket('user-1')]));
+      esClient.esql.query.mockResolvedValueOnce(createEsqlResponse() as never);
+
+      const result = await runMaintainer({
+        esClient,
+        logger,
+        namespace: 'default',
+        crudClient,
+        integrations: [missingInt, existingInt],
+      });
+
+      expect(result.totalBuckets).toBe(1);
+      expect(missingInt.buildEsqlQuery).not.toHaveBeenCalled();
+      expect(existingInt.buildEsqlQuery).toHaveBeenCalled();
+    });
+
+    it('throws on non-index_not_found errors', async () => {
+      esClient.search.mockRejectedValueOnce(new Error('search_phase_execution_exception'));
 
       await expect(
         runMaintainer({
@@ -459,7 +422,7 @@ describe('runMaintainer', () => {
           crudClient,
           integrations: [mockIntegration],
         })
-      ).rejects.toThrow('index_not_found_exception');
+      ).rejects.toThrow('search_phase_execution_exception');
     });
   });
 

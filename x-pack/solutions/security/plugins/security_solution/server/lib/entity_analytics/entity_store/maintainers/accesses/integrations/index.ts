@@ -7,12 +7,17 @@
 
 export type { AccessesIntegrationConfig } from './types';
 export { elasticDefendIntegration } from './elastic_defend';
+export { awsCloudTrailIntegration } from './aws_cloudtrail';
 
 import { elasticDefendIntegration } from './elastic_defend';
+import { awsCloudTrailIntegration } from './aws_cloudtrail';
 import type { AccessesIntegrationConfig } from './types';
 
 /**
  * Registry of all integration configs the accesses maintainer should process.
  * Add new integrations here (e.g. Active Directory, Okta, Entra ID).
  */
-export const INTEGRATION_CONFIGS: AccessesIntegrationConfig[] = [elasticDefendIntegration];
+export const INTEGRATION_CONFIGS: AccessesIntegrationConfig[] = [
+  elasticDefendIntegration,
+  awsCloudTrailIntegration,
+];
