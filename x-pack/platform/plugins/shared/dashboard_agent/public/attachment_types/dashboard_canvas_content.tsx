@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { DashboardAttachmentOrigin } from '@kbn/dashboard-agent-common';
@@ -16,6 +16,7 @@ import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import { DEFAULT_TIME_RANGE, getStateFromAttachment } from './attachment_to_dashboard_state';
+import type { SavedObjectStatus } from './use_register_action_buttons';
 import { useRegisterActionButtons } from './use_register_action_buttons';
 
 const dashboardCanvasContentStyles = {
@@ -58,46 +59,50 @@ export const DashboardCanvasContent = ({
   updateOrigin,
   dashboardLocator,
   searchBarComponent: SearchBar,
-  doesSavedDashboardExist,
+  checkSavedDashboardExist,
 }: AttachmentRenderProps<DashboardAttachment> & {
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: DashboardAttachmentOrigin) => Promise<unknown>;
   dashboardLocator?: DashboardRendererProps['locator'];
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
-  doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }) => {
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
   const linkedSavedObjectId = attachment.origin?.savedObjectId;
+  const [savedObjectStatus, setSavedObjectStatus] = useState<SavedObjectStatus>({
+    status: 'idle',
+  });
 
-  // useEffect(
-  //   function checkLinkedSavedDashboardExists() {
-  //     let canceled = false;
+  useEffect(
+    function checkSavedObjectExists() {
+      if (!linkedSavedObjectId) {
+        setSavedObjectStatus({ status: 'resolved', exists: false });
+        return;
+      }
 
-  //     if (!linkedSavedObjectId) {
-  //       setLinkedSavedDashboardExists(false);
-  //       return;
-  //     }
+      let canceled = false;
+      setSavedObjectStatus({ status: 'loading' });
 
-  //     setLinkedSavedDashboardExists(false);
-  //     doesSavedDashboardExist(linkedSavedObjectId)
-  //       .then((exists) => {
-  //         if (!canceled) {
-  //           setLinkedSavedDashboardExists(exists);
-  //         }
-  //       })
-  //       .catch(() => {
-  //         if (!canceled) {
-  //           setLinkedSavedDashboardExists(false);
-  //         }
-  //       });
+      checkSavedDashboardExist(linkedSavedObjectId)
+        .then((exists) => {
+          if (!canceled) {
+            setSavedObjectStatus({ status: 'resolved', exists });
+          }
+        })
+        .catch(() => {
+          if (!canceled) {
+            setSavedObjectStatus({ status: 'resolved', exists: false });
+          }
+        });
 
-  //     return () => {
-  //       canceled = true;
-  //     };
-  //   },
-  //   [linkedSavedObjectId, doesSavedDashboardExist]
-  // );
+      return () => {
+        canceled = true;
+      };
+    },
+    [linkedSavedObjectId, checkSavedDashboardExist]
+  );
+
   const dashboardState = useMemo(() => getStateFromAttachment(attachment), [attachment]);
 
   const [timeRange, setTimeRange] = useState<{ from: string; to: string }>(
@@ -119,7 +124,7 @@ export const DashboardCanvasContent = ({
     timeRange,
     dashboardState,
     linkedSavedObjectId,
-    doesSavedDashboardExist,
+    checkSavedDashboardExist,
   });
 
   return (
@@ -148,44 +153,16 @@ export const DashboardCanvasContent = ({
           data-test-subj="dashboardCanvasSearchBar"
         />
       </div>
-      {/* TODO: Hide the callout for now until we agree on the design */}
-      {/*
-      {linkedSavedObjectId && linkedSavedDashboardExists && (
-        <EuiCallOut
-          css={styles.callout}
-          size="s"
-          iconType="info"
-          announceOnMount={false}
-          title={
-            <FormattedMessage
-              id="xpack.dashboardAgent.attachments.dashboard.savedVersionCalloutDescription"
-              defaultMessage="There's a {savedVersion} of this dashboard that may have more up to date content."
-              values={{
-                savedVersion: (
-                  <EuiLink
-                    href={dashboardLocator?.getRedirectUrl({ dashboardId: linkedSavedObjectId })}
-                    css={{
-                      textDecoration: 'underline',
-                    }}
-                  >
-                    {i18n.translate(
-                      'xpack.dashboardAgent.attachments.dashboard.savedVersionLinkText',
-                      {
-                        defaultMessage: 'saved version',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          }
-        />
-      )} */}
       <div css={styles.renderer}>
         <DashboardRenderer
           getCreationOptions={getCreationOptions}
           showPlainSpinner
           locator={dashboardLocator}
+          savedObjectId={
+            savedObjectStatus.status === 'resolved' && savedObjectStatus.exists
+              ? linkedSavedObjectId
+              : undefined
+          }
           onApiAvailable={(api) => {
             api.setViewMode('view');
             const initialTimeRange = api.timeRange$.value;

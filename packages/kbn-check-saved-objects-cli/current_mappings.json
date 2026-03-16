@@ -1593,6 +1593,17 @@
         "index": false,
         "type": "flattened"
       },
+      "dependencies": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
       "es_index_patterns": {
         "dynamic": false,
         "properties": {}
@@ -4283,6 +4294,10 @@
     "properties": {}
   },
   "stream-prompts": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "streams-significant-events-settings": {
     "dynamic": false,
     "properties": {}
   },

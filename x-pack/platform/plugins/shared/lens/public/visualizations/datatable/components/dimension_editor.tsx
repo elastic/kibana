@@ -8,17 +8,14 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
-import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import type { PaletteRegistry, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import {
-  CUSTOM_PALETTE,
   DEFAULT_COLOR_MAPPING_CONFIG,
-  applyPaletteParams,
   canCreateCustomMatch,
   getFallbackDataBounds,
 } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { getOriginalId } from '@kbn/transpose-utils';
 import type { KbnPalettes } from '@kbn/palettes';
 import type {
   VisualizationDimensionEditorProps,
@@ -26,15 +23,11 @@ import type {
 } from '@kbn/lens-common';
 import { DatatableInspectorTables } from '../../../../common/expressions';
 
-import {
-  defaultPaletteParams,
-  findMinMaxByColumnId,
-  getAccessorType,
-} from '../../../shared_components';
+import { getAccessorType } from '../../../shared_components';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
-import { getColumnAlignment } from '../utils';
+import { getColumnAlignment, getDataBoundsForAccessor, getColorByValuePalette } from '../utils';
 import type { FormatFactory } from '../../../../common/types';
 import { getDatatableColumn } from '../../../../common/expressions/impl/datatable/utils';
 
@@ -93,7 +86,11 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const allowCustomMatch = canCreateCustomMatch(columnMeta);
   const datasource = frame.datasourceLayers?.[localState.layerId];
 
-  const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
+  const { isNumeric, isCategory: isBucketable } = getAccessorType(
+    datasource,
+    accessor,
+    columnMeta?.type
+  );
   const showColorByTerms = isBucketable;
   const showDynamicColoringFeature = isBucketable || isNumeric;
   const currentAlignment = getColumnAlignment(column, isNumeric);
@@ -101,30 +98,28 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const hasDynamicColoring = currentColorMode !== 'none';
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 
-  const hasTransposedColumn = localState.columns.some(({ isTransposed }) => isTransposed);
-  const columnsToCheck = hasTransposedColumn
-    ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
-      []
-    : [accessor];
-  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
-  const currentMinMax = minMaxByColumnId.get(accessor) ?? getFallbackDataBounds();
+  const currentMinMax =
+    getDataBoundsForAccessor(accessor, currentData, localState.columns) ?? getFallbackDataBounds();
 
-  const activePalette: PaletteOutput<CustomPaletteParams> = {
-    type: 'palette',
-    name: showColorByTerms ? 'default' : defaultPaletteParams.name,
-    ...column?.palette,
-    params: { ...column?.palette?.params },
-  };
-  // need to tell the helper that the colorStops are required to display
-  const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
+  let activePalette: PaletteOutput<CustomPaletteParams>;
 
-  if (activePalette.name !== CUSTOM_PALETTE && activePalette.params?.stops) {
-    activePalette.params.stops = applyPaletteParams(
-      props.paletteService,
-      activePalette,
-      currentMinMax
-    );
+  if (showColorByTerms) {
+    // Terms coloring uses the existing palette or the 'default' categorical palette
+    activePalette = {
+      type: 'palette',
+      name: column?.palette?.name ?? 'default',
+    };
+  } else {
+    // Value coloring uses the existing palette or the 'positive' color by value palette
+    activePalette = getColorByValuePalette(props.paletteService, currentMinMax, column?.palette);
   }
+
+  // Check if a legacy palette is used for terms coloring instead of a color mapping
+  const isLegacyTermsMode =
+    showColorByTerms &&
+    !column.colorMapping &&
+    Boolean(column.palette) &&
+    !column.palette?.params?.stops?.length;
 
   return (
     <div className="lnsIndexPatternDimensionEditor--padded">
@@ -219,20 +214,14 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 };
 
                 if (newMode !== 'none') {
-                  if (!column?.colorMapping && showColorByTerms) {
-                    params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
-                  }
-
-                  // also set palette for now
-                  if (!column?.palette) {
-                    params.palette = {
-                      ...activePalette,
-                      params: {
-                        ...activePalette.params,
-                        // that's ok, at first open we're going to throw them away and recompute
-                        stops: displayStops,
-                      },
-                    };
+                  if (showColorByTerms) {
+                    if (!column?.colorMapping) {
+                      params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+                    }
+                  } else {
+                    if (!column?.palette) {
+                      params.palette = activePalette;
+                    }
                   }
                 }
 
@@ -250,15 +239,22 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             (showColorByTerms ? (
               <ColorMappingByTerms
                 isDarkMode={isDarkMode}
-                colorMapping={column.colorMapping}
-                palette={activePalette}
+                colorMapping={
+                  isLegacyTermsMode
+                    ? undefined
+                    : column.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG
+                }
+                palette={isLegacyTermsMode ? activePalette : undefined}
                 palettes={props.palettes}
                 isInlineEditing={isInlineEditing}
                 setPalette={(palette) => {
                   updateColumnState(accessor, { palette, colorMapping: undefined });
                 }}
                 setColorMapping={(colorMapping) => {
-                  updateColumnState(accessor, { colorMapping });
+                  updateColumnState(accessor, {
+                    colorMapping,
+                    ...(colorMapping != null ? { palette: undefined } : {}),
+                  });
                 }}
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}

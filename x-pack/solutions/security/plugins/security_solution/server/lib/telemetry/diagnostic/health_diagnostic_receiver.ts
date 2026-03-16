@@ -69,10 +69,10 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
   streamEsql<T>(diagnosticQuery: HealthDiagnosticQuery, abortSignal: AbortSignal): Observable<T> {
     const regex = /^[\s\r\n]*FROM/;
 
-    return from(this.indicesFor(diagnosticQuery)).pipe(
-      mergeMap((index) =>
-        from(this.checkPermissions(index)).pipe(
-          mergeMap(() => {
+    return from(this.checkPermissions(diagnosticQuery.index)).pipe(
+      mergeMap(() =>
+        from(this.indicesFor(diagnosticQuery)).pipe(
+          mergeMap((index) => {
             const query = regex.test(diagnosticQuery.query)
               ? diagnosticQuery.query
               : `FROM ${index} | ${diagnosticQuery.query}`;
@@ -91,10 +91,10 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
   }
 
   streamEql<T>(diagnosticQuery: HealthDiagnosticQuery, abortSignal: AbortSignal): Observable<T> {
-    return from(this.indicesFor(diagnosticQuery)).pipe(
-      mergeMap((index) =>
-        from(this.checkPermissions(index)).pipe(
-          mergeMap(() => {
+    return from(this.checkPermissions(diagnosticQuery.index)).pipe(
+      mergeMap(() =>
+        from(this.indicesFor(diagnosticQuery)).pipe(
+          mergeMap((index) => {
             const request: EqlSearchRequest = {
               index,
               query: diagnosticQuery.query,
@@ -173,52 +173,52 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
       return this.client.search<T>(paginatedRequest, { signal: abortSignal });
     };
 
-    return from(this.indicesFor(diagnosticQuery)).pipe(
-      mergeMap((index) =>
-        from(this.checkPermissions(index)).pipe(
-          mergeMap(() => {
-            return from(this.client.openPointInTime({ index, keep_alive: pitKeepAlive }));
+    return from(this.checkPermissions(diagnosticQuery.index)).pipe(
+      mergeMap(() =>
+        from(this.indicesFor(diagnosticQuery)).pipe(
+          mergeMap((index) =>
+            from(this.client.openPointInTime({ index, keep_alive: pitKeepAlive }))
+          ),
+          map((res) => res.id),
+
+          mergeMap((id) => {
+            pitId = id;
+            return from(fetchPage());
+          }),
+          expand((searchResponse) => {
+            const returnedPitId = (searchResponse as { pit_id?: string }).pit_id;
+            if (returnedPitId) {
+              pitId = returnedPitId;
+            }
+
+            const hits = searchResponse.hits.hits;
+            const aggrs = searchResponse.aggregations;
+
+            if (aggrs || hits.length === 0) {
+              return EMPTY;
+            }
+
+            searchAfter = hits[hits.length - 1].sort;
+            return from(fetchPage());
+          }),
+
+          mergeMap((searchResponse) => {
+            if (searchResponse.aggregations) {
+              return [searchResponse.aggregations as T];
+            } else {
+              return searchResponse.hits.hits.map((h) => h._source as T);
+            }
+          }),
+
+          finalize(() => {
+            if (pitId !== undefined) {
+              this.client.closePointInTime({ id: pitId }).catch((error) => {
+                this.logger.warn('>> closePointInTime error', withErrorMessage(error));
+              });
+            }
           })
         )
-      ),
-      map((res) => res.id),
-
-      mergeMap((id) => {
-        pitId = id;
-        return from(fetchPage());
-      }),
-      expand((searchResponse) => {
-        const returnedPitId = (searchResponse as { pit_id?: string }).pit_id;
-        if (returnedPitId) {
-          pitId = returnedPitId;
-        }
-
-        const hits = searchResponse.hits.hits;
-        const aggrs = searchResponse.aggregations;
-
-        if (aggrs || hits.length === 0) {
-          return EMPTY;
-        }
-
-        searchAfter = hits[hits.length - 1].sort;
-        return from(fetchPage());
-      }),
-
-      mergeMap((searchResponse) => {
-        if (searchResponse.aggregations) {
-          return [searchResponse.aggregations as T];
-        } else {
-          return searchResponse.hits.hits.map((h) => h._source as T);
-        }
-      }),
-
-      finalize(() => {
-        if (pitId !== undefined) {
-          this.client.closePointInTime({ id: pitId }).catch((error) => {
-            this.logger.warn('>> closePointInTime error', withErrorMessage(error));
-          });
-        }
-      })
+      )
     );
   }
 
