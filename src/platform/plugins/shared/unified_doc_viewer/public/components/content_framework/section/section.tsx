@@ -70,25 +70,19 @@ export function ContentFrameworkSection({
         initialIsOpen={forceState === 'open'}
         onToggle={handleToggle}
         forceState={accordionState}
+        css={css`
+          .euiAccordion__triggerWrapper {
+            flex-wrap: wrap;
+          }
+          .euiAccordion__button {
+            inline-size: auto;
+          }
+        `}
         buttonContent={
           <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
-            <EuiFlexItem
-              grow
-              css={css`
-                min-width: 0;
-                overflow: hidden;
-              `}
-            >
+            <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
-                <h3
-                  css={css`
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                  `}
-                >
-                  {title}
-                </h3>
+                <h3>{title}</h3>
               </EuiTitle>
             </EuiFlexItem>
             {description ? (
