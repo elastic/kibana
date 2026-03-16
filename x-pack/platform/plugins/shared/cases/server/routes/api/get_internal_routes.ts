@@ -29,6 +29,8 @@ import { findUserActionsRoute } from './internal/find_user_actions';
 import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
 import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
+import { getTaskRoutes } from './tasks';
+import { getTaskTemplateRoutes } from './task_templates';
 
 export const getInternalRoutes = (userProfileService: UserProfileService, config: ConfigType) =>
   [
@@ -53,4 +55,6 @@ export const getInternalRoutes = (userProfileService: UserProfileService, config
     findUserActionsRoute,
     findCasesContainingAllDocumentsRoute,
     ...getTemplateRoutes(config),
+    ...getTaskRoutes(config),
+    ...getTaskTemplateRoutes(config),
   ] as CaseRoute[];
