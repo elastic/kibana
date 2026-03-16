@@ -37,7 +37,7 @@ import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 
 const AVG_TARGET_BUCKETS = 100000;
-const M4_TARGET_BUCKETS = 100;
+const M4_TARGET_BUCKETS = 400;
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
