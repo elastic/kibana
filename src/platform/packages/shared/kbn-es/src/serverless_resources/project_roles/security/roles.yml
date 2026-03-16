@@ -2,8 +2,8 @@
 # modeled after the t1_analyst minus osquery run saved queries privilege, plus endpoint exceptions read
 viewer:
   metadata:
-    _public: true
-    _reserved: true
+    public: true
+    reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -75,8 +75,8 @@ viewer:
 # modeled after t3_analyst
 editor:
   metadata:
-    _public: true
-    _reserved: true
+    public: true
+    reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -171,8 +171,8 @@ editor:
 
 t1_analyst:
   metadata:
-    _public: true
-    _reserved: true
+    public: true
+    reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -237,8 +237,8 @@ t1_analyst:
 
 t2_analyst:
   metadata:
-    _public: true
-    _reserved: true
+    public: true
+    reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -306,8 +306,8 @@ t2_analyst:
 
 t3_analyst:
   metadata:
-    _public: true
-    _reserved: true
+    public: true
+    reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -394,8 +394,8 @@ t3_analyst:
 
 threat_intelligence_analyst:
   metadata:
-    _public: true
-    _reserved: true
+    public: true
+    reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -471,8 +471,8 @@ threat_intelligence_analyst:
 
 rule_author:
   metadata:
-    _public: true
-    _reserved: true
+    public: true
+    reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -558,8 +558,8 @@ rule_author:
 
 soc_manager:
   metadata:
-    _public: true
-    _reserved: true
+    public: true
+    reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -653,8 +653,8 @@ soc_manager:
 
 detections_admin:
   metadata:
-    _public: true
-    _reserved: true
+    public: true
+    reserved: true
   cluster: ['manage_index_templates', 'manage_transform', 'read_project_routing']
   indices:
     - names:
@@ -727,8 +727,8 @@ detections_admin:
 
 platform_engineer:
   metadata:
-    _public: true
-    _reserved: true
+    public: true
+    reserved: true
   cluster:
     - manage
   indices:
@@ -808,8 +808,8 @@ platform_engineer:
 
 endpoint_operations_analyst:
   metadata:
-    _public: true
-    _reserved: true
+    public: true
+    reserved: true
   cluster:
     - 'read_project_routing'
   indices:
@@ -901,8 +901,8 @@ endpoint_operations_analyst:
 
 endpoint_policy_manager:
   metadata:
-    _public: true
-    _reserved: true
+    public: true
+    reserved: true
   cluster:
     - 'read_project_routing'
   indices:
