@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -112,6 +112,20 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const supportsPresets = inputs.typeInput.value
     ? outputTypeSupportPresets(inputs.typeInput.value as ValueOf<OutputType>)
     : false;
+
+  const yamlConfigValue = inputs.additionalYamlConfigInput.value;
+  const presetValue = inputs.presetInput.value;
+  const setPresetValue = inputs.presetInput.setValue;
+  useEffect(() => {
+    if (
+      yaml &&
+      supportsPresets &&
+      outputYmlIncludesReservedPerformanceKey(yamlConfigValue, yaml.parse) &&
+      presetValue !== 'custom'
+    ) {
+      setPresetValue('custom');
+    }
+  }, [yaml, supportsPresets, yamlConfigValue, presetValue, setPresetValue]);
 
   // Remote ES output not yet supported in serverless
   const isStateful = !cloud?.isServerlessEnabled;

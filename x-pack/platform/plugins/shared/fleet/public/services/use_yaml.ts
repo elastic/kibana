@@ -9,15 +9,33 @@ import { useState, useEffect } from 'react';
 
 import { loadYaml } from '@kbn/yaml-loader';
 
+type YamlModule = Awaited<ReturnType<typeof loadYaml>>;
+
+let cachedYaml: YamlModule | null = null;
+let loadPromise: Promise<YamlModule> | null = null;
+
 /**
  * React hook that loads the yaml package asynchronously.
  * Returns the yaml module (parse, stringify, Document, etc.) once loaded, or null while loading.
+ * The module is cached globally so subsequent hook calls resolve synchronously.
  */
-export const useYaml = (): Awaited<ReturnType<typeof loadYaml>> | null => {
-  const [yaml, setYaml] = useState<Awaited<ReturnType<typeof loadYaml>> | null>(null);
+export const useYaml = (): YamlModule | null => {
+  const [yaml, setYaml] = useState<YamlModule | null>(cachedYaml);
 
   useEffect(() => {
-    loadYaml().then(setYaml);
+    if (cachedYaml) {
+      setYaml(cachedYaml);
+      return;
+    }
+
+    if (!loadPromise) {
+      loadPromise = loadYaml();
+    }
+
+    loadPromise.then((mod) => {
+      cachedYaml = mod;
+      setYaml(mod);
+    });
   }, []);
 
   return yaml;
