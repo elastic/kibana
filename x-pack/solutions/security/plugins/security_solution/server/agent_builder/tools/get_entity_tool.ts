@@ -25,12 +25,11 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 import {
   ENTITY_STORE_ENTITY_TYPE_FIELD,
   ENTITY_STORE_ENTITY_ID_FIELD,
+  ENTITY_STORE_RISK_SCORE_FIELD,
   getRowValue,
   addOrUpdateEntityAttachment,
 } from '../utils/entity_utils';
 import { securityTool } from './constants';
-
-const ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD = 'entity.risk.calculated_score_norm';
 
 const schema = z.object({
   entityType: IdentifierType.describe(
@@ -249,7 +248,7 @@ const enrichEntityResult = async ({
   let resultRow = [...row];
 
   // Check if entity has a risk score; if so, fetch inputs from the risk score index
-  const riskScoreNorm = getRowValue(columns, row, ENTITY_STORE_RISK_SCORE_NORMALIZED_FIELD);
+  const riskScoreNorm = getRowValue(columns, row, ENTITY_STORE_RISK_SCORE_FIELD);
   if (riskScoreNorm != null) {
     const esType = getRowValue(columns, row, ENTITY_STORE_ENTITY_TYPE_FIELD);
     const esId = getRowValue(columns, row, ENTITY_STORE_ENTITY_ID_FIELD);
@@ -405,9 +404,16 @@ export const getEntityTool = (
                 firstValue,
                 ENTITY_STORE_ENTITY_ID_FIELD
               );
+              const riskScoreRaw = getRowValue(
+                res.data.columns,
+                firstValue,
+                ENTITY_STORE_RISK_SCORE_FIELD
+              );
+              const riskScore = typeof riskScoreRaw === 'number' ? riskScoreRaw : undefined;
               return {
                 entityType: String(entityTypeValue ?? '') as IdentifierType,
                 entityId: String(entityIdValue ?? ''),
+                ...(riskScore !== undefined && { riskScore }),
               };
             }),
             description: `Entity: ${normalizedEntityId}`,

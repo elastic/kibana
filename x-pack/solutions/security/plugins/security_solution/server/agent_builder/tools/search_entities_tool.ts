@@ -26,6 +26,7 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 import {
   ENTITY_STORE_ENTITY_TYPE_FIELD,
   ENTITY_STORE_ENTITY_ID_FIELD,
+  ENTITY_STORE_RISK_SCORE_FIELD,
   getRowValue,
   addOrUpdateEntityAttachment,
 } from '../utils/entity_utils';
@@ -458,7 +459,15 @@ export const searchEntitiesTool = (
 
           if (!entityId || !entityType) return [];
 
-          return [{ entityType: entityType as IdentifierType, entityId }];
+          const riskScoreRaw = getRowValue(columns, row, ENTITY_STORE_RISK_SCORE_FIELD);
+          const riskScore = typeof riskScoreRaw === 'number' ? riskScoreRaw : undefined;
+          return [
+            {
+              entityType: entityType as IdentifierType,
+              entityId,
+              ...(riskScore !== undefined && { riskScore }),
+            },
+          ];
         });
 
         let resultAttachmentId: string | undefined;

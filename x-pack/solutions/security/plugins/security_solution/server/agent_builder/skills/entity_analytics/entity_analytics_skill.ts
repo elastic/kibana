@@ -311,6 +311,6 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
         : [getRiskScoreInlineTool(ctx), getAssetCriticalityInlineTool(ctx)],
     getRegistryTools: () =>
       ctx.isEntityStoreV2Enabled
-        ? ['attachments.read', SECURITY_GET_ENTITY_TOOL_ID, SECURITY_SEARCH_ENTITIES_TOOL_ID]
+        ? [SECURITY_GET_ENTITY_TOOL_ID, SECURITY_SEARCH_ENTITIES_TOOL_ID]
         : [],
   });

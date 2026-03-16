@@ -8,19 +8,30 @@
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
+import type { ExperimentalFeatures } from '../../../common';
+import {
+  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+  SECURITY_GET_ENTITY_TOOL_ID,
+  SECURITY_SEARCH_ENTITIES_TOOL_ID,
+} from '../tools';
 import { createEntityAttachmentType } from './entity';
 
 describe('createEntityAttachmentType', () => {
-  const attachmentType = createEntityAttachmentType();
+  const experimentalFeatures = { entityAnalyticsEntityStoreV2: true } as ExperimentalFeatures;
+  const attachmentType = createEntityAttachmentType(experimentalFeatures);
   const formatContext = agentBuilderMocks.attachments.createFormatContextMock();
 
   describe('validate', () => {
     it('returns valid when entity data is valid with host identifierType', async () => {
       const input = {
-        identifierType: 'host',
-        identifier: 'hostname-1',
         attachmentLabel: 'Risk Entity',
+        entities: [
+          {
+            entityType: 'host',
+            entityId: 'hostname-1',
+            riskScore: 85.0,
+          },
+        ],
       };
 
       const result = await attachmentType.validate(input);
@@ -33,9 +44,14 @@ describe('createEntityAttachmentType', () => {
 
     it('returns valid when entity data is valid with user identifierType', async () => {
       const input = {
-        identifierType: 'user',
-        identifier: 'username-1',
         attachmentLabel: 'Risk Entity',
+        entities: [
+          {
+            entityType: 'user',
+            entityId: 'username-1',
+            riskScore: 39.0,
+          },
+        ],
       };
 
       const result = await attachmentType.validate(input);
@@ -48,9 +64,13 @@ describe('createEntityAttachmentType', () => {
 
     it('returns valid when entity data is valid with service identifierType', async () => {
       const input = {
-        identifierType: 'service',
-        identifier: 'service-1',
         attachmentLabel: 'Risk Entity',
+        entities: [
+          {
+            entityType: 'service',
+            entityId: 'service-1',
+          },
+        ],
       };
 
       const result = await attachmentType.validate(input);
@@ -63,9 +83,13 @@ describe('createEntityAttachmentType', () => {
 
     it('returns valid when entity data is valid with generic identifierType', async () => {
       const input = {
-        identifierType: 'generic',
-        identifier: 'generic-1',
         attachmentLabel: 'Risk Entity',
+        entities: [
+          {
+            entityType: 'generic',
+            entityId: 'generic-1',
+          },
+        ],
       };
 
       const result = await attachmentType.validate(input);
@@ -152,12 +176,24 @@ describe('createEntityAttachmentType', () => {
   });
 
   describe('getTools', () => {
-    it('returns entity risk score tool', () => {
-      const tools = attachmentType.getTools?.();
+    it('returns entity risk score tool if entityAnalyticsEntityStoreV2 flag is false', () => {
+      const attachmentType_ = createEntityAttachmentType({
+        entityAnalyticsEntityStoreV2: false,
+      } as ExperimentalFeatures);
+      const tools = attachmentType_.getTools?.();
 
       expect(tools).toBeDefined();
       if (tools) {
         expect(tools).toEqual([SECURITY_ENTITY_RISK_SCORE_TOOL_ID]);
+      }
+    });
+
+    it('returns entity store get tool if entityAnalyticsEntityStoreV2 flag is true', () => {
+      const tools = attachmentType.getTools?.();
+
+      expect(tools).toBeDefined();
+      if (tools) {
+        expect(tools).toEqual([SECURITY_GET_ENTITY_TOOL_ID, SECURITY_SEARCH_ENTITIES_TOOL_ID]);
       }
     });
   });

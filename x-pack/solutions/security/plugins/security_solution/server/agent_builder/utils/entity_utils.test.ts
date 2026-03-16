@@ -12,7 +12,7 @@ import { addOrUpdateEntityAttachment, ENTITY_ATTACHMENT_CONVERSATION_ID } from '
 import type { AttachmentType } from '@kbn/agent-builder-common/attachments';
 
 const makeExistingAttachmentReturn = (
-  entities: Array<{ entityType: string; entityId: string }>
+  entities: Array<{ entityType: string; entityId: string; riskScore?: number }>
 ) => ({
   id: ENTITY_ATTACHMENT_CONVERSATION_ID,
   version: 1,
@@ -33,10 +33,10 @@ describe('addOrUpdateEntityAttachment', () => {
   });
 
   describe('when no existing attachment', () => {
-    it('calls attachments.add with all entities', async () => {
+    it('calls attachments.add with all entities including riskScore', async () => {
       attachments.get.mockReturnValue(undefined);
       const entities = [
-        { entityType: 'host', entityId: 'host:server1' },
+        { entityType: 'host', entityId: 'host:server1', riskScore: 85.0 },
         { entityType: 'user', entityId: 'user:alice' },
       ] as EntityAttachmentData['entities'];
 
@@ -145,6 +145,48 @@ describe('addOrUpdateEntityAttachment', () => {
 
       expect(attachments.update).not.toHaveBeenCalled();
       expect(attachments.add).not.toHaveBeenCalled();
+    });
+
+    it('deduplicates by EUID regardless of riskScore value', async () => {
+      const existingEntities = [{ entityType: 'host', entityId: 'host:server1', riskScore: 50.0 }];
+      attachments.get.mockReturnValue(makeExistingAttachmentReturn(existingEntities));
+
+      // Same EUID but a different (updated) riskScore — should not be re-added
+      const incomingEntities = [
+        { entityType: 'host', entityId: 'host:server1', riskScore: 75.0 },
+      ] as EntityAttachmentData['entities'];
+
+      await addOrUpdateEntityAttachment({
+        attachments,
+        entities: incomingEntities,
+        description: 'test description',
+      });
+
+      expect(attachments.update).not.toHaveBeenCalled();
+      expect(attachments.add).not.toHaveBeenCalled();
+    });
+
+    it('stores riskScore alongside entityId and entityType when adding new entities', async () => {
+      const existingEntities = [{ entityType: 'host', entityId: 'host:server1', riskScore: 50.0 }];
+      attachments.get.mockReturnValue(makeExistingAttachmentReturn(existingEntities));
+
+      const newEntities = [
+        { entityType: 'user', entityId: 'user:alice', riskScore: 92.3 },
+      ] as EntityAttachmentData['entities'];
+
+      await addOrUpdateEntityAttachment({
+        attachments,
+        entities: newEntities,
+        description: 'test description',
+      });
+
+      expect(attachments.update).toHaveBeenCalledWith(ENTITY_ATTACHMENT_CONVERSATION_ID, {
+        data: {
+          attachmentLabel: 'Entity',
+          entities: [...existingEntities, ...newEntities],
+        },
+        description: 'test description',
+      });
     });
   });
 });

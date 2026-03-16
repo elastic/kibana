@@ -23,11 +23,14 @@ export const getRowValue = (
   return idx >= 0 ? row[idx] : undefined;
 };
 
+export const ENTITY_STORE_RISK_SCORE_FIELD = 'entity.risk.calculated_score_norm';
+
 export const entityAttachmentDataSchema = securityAttachmentDataSchema.extend({
   entities: z.array(
     z.object({
       entityType: IdentifierType,
       entityId: z.string().min(1),
+      riskScore: z.number().optional(),
     })
   ),
 });
