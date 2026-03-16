@@ -107,3 +107,17 @@ export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Find documents with values appearing for the first time.',
   }
 );
+
+export const CORRELATION_TYPE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.correlationTypeTitle',
+  {
+    defaultMessage: 'Correlation',
+  }
+);
+
+export const CORRELATION_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.correlationTypeDescription',
+  {
+    defaultMessage: 'Correlate alerts from multiple rules to detect multi-step attack patterns.',
+  }
+);

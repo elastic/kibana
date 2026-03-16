@@ -18,7 +18,9 @@ import {
   isThreatMatchRule,
   isNewTermsRule,
   isEsqlRule,
+  isCorrelationRule,
 } from '../../../../../common/detection_engine/utils';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
@@ -47,8 +49,10 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
     const setThreatMatch = useCallback(() => setType('threat_match'), [setType]);
     const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
     const setEsql = useCallback(() => setType('esql'), [setType]);
+    const setCorrelation = useCallback(() => setType('correlation'), [setType]);
 
     const { isEsqlRuleTypeEnabled } = useEsqlAvailability();
+    const isCorrelationRuleTypeEnabled = useIsExperimentalFeatureEnabled('correlationRulesEnabled');
 
     const eqlSelectableConfig = useMemo(
       () => ({
@@ -105,6 +109,14 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
         isSelected: isEsqlRule(ruleType),
       }),
       [ruleType, setEsql]
+    );
+
+    const correlationSelectableConfig = useMemo(
+      () => ({
+        onClick: setCorrelation,
+        isSelected: isCorrelationRule(ruleType),
+      }),
+      [ruleType, setCorrelation]
     );
 
     return (
@@ -203,6 +215,21 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 description={i18n.ESQL_TYPE_DESCRIPTION}
                 icon={<EuiIcon type="logoElasticsearch" size="l" />}
                 selectable={esqlSelectableConfig}
+                layout="horizontal"
+              />
+            </EuiFlexItem>
+          )}
+          {((!isUpdateView && isCorrelationRuleTypeEnabled) ||
+            correlationSelectableConfig.isSelected) && (
+            <EuiFlexItem>
+              <EuiCard
+                data-test-subj="correlationRuleType"
+                title={i18n.CORRELATION_TYPE_TITLE}
+                titleSize="xs"
+                description={i18n.CORRELATION_TYPE_DESCRIPTION}
+                icon={<EuiIcon size="l" type="cluster" />}
+                isDisabled={isUpdateView && !correlationSelectableConfig.isSelected}
+                selectable={correlationSelectableConfig}
                 layout="horizontal"
               />
             </EuiFlexItem>

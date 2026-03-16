@@ -24,6 +24,7 @@ export const QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.queryRule` as const;
 export const SAVED_QUERY_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.savedQueryRule` as const;
 export const THRESHOLD_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.thresholdRule` as const;
 export const NEW_TERMS_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.newTermsRule` as const;
+export const CORRELATION_RULE_TYPE_ID = `${RULE_TYPE_PREFIX}.correlationRule` as const;
 
 export const SECURITY_SOLUTION_RULE_TYPE_IDS = [
   EQL_RULE_TYPE_ID,
@@ -34,4 +35,5 @@ export const SECURITY_SOLUTION_RULE_TYPE_IDS = [
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
+  CORRELATION_RULE_TYPE_ID,
 ];

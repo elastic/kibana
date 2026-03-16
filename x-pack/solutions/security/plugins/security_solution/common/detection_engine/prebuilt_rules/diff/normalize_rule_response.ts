@@ -123,6 +123,15 @@ const normalizeTypeSpecificFields = (rule: RuleResponse): TypeSpecificResponse =
         alert_suppression: rule.alert_suppression,
       };
     }
+    case 'correlation': {
+      return {
+        type: rule.type,
+        language: rule.language,
+        query: normalizeQueryField(rule.query),
+        correlation: rule.correlation,
+        alert_suppression: rule.alert_suppression,
+      };
+    }
     case 'threat_match': {
       return {
         type: rule.type,

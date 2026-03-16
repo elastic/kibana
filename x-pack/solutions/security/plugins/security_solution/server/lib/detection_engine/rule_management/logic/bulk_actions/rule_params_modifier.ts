@@ -157,6 +157,10 @@ const applyBulkActionEditToRuleParams = (
         ruleParams.type !== 'esql',
         "Index patterns can't be added. ES|QL rule doesn't have index patterns property"
       );
+      invariant(
+        ruleParams.type !== 'correlation',
+        "Index patterns can't be added. Correlation rule doesn't have index patterns property"
+      );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {
         isActionSkipped = true;
@@ -178,6 +182,10 @@ const applyBulkActionEditToRuleParams = (
       invariant(
         ruleParams.type !== 'esql',
         "Index patterns can't be deleted. ES|QL rule doesn't have index patterns property"
+      );
+      invariant(
+        ruleParams.type !== 'correlation',
+        "Index patterns can't be deleted. Correlation rule doesn't have index patterns property"
       );
 
       if (
@@ -205,6 +213,10 @@ const applyBulkActionEditToRuleParams = (
       invariant(
         ruleParams.type !== 'esql',
         "Index patterns can't be overwritten. ES|QL rule doesn't have index patterns property"
+      );
+      invariant(
+        ruleParams.type !== 'correlation',
+        "Index patterns can't be overwritten. Correlation rule doesn't have index patterns property"
       );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {

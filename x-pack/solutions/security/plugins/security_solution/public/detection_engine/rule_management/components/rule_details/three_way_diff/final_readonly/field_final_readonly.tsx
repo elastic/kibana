@@ -100,6 +100,8 @@ export function FieldFinalReadOnly(): JSX.Element {
           finalDiffableRule={finalDiffableRule}
         />
       );
+    case 'correlation':
+      return null as unknown as JSX.Element;
     default:
       return assertUnreachable(finalDiffableRule);
   }

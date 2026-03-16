@@ -103,6 +103,11 @@ export const convertRuleToDiffable = (ruleResponse: RuleResponse): DiffableRule 
         ...commonFields,
         ...extractDiffableEsqlFieldsFromRuleObject(rule),
       };
+    case 'correlation':
+      return {
+        ...commonFields,
+        ...extractDiffableEsqlFieldsFromRuleObject(rule as unknown as EsqlRule),
+      };
     default:
       return assertUnreachable(rule, 'Unhandled rule type');
   }

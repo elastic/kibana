@@ -486,6 +486,14 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
         },
       ];
     }
+    case 'correlation': {
+      return [
+        {
+          title: label,
+          description: i18n.CORRELATION_TYPE_DESCRIPTION,
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }

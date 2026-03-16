@@ -406,6 +406,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
     case 'threshold':
       return thresholdRuleParams;
     case 'esql':
+    case 'correlation':
       return esqlRuleParams;
     case 'new_terms':
     case 'threat_match':

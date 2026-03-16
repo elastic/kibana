@@ -6,6 +6,7 @@
  */
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import type {
+  CORRELATION_RULE_TYPE_ID,
   EQL_RULE_TYPE_ID,
   ESQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
@@ -193,6 +194,34 @@ export const EsqlSpecificRuleParams = z.object({
 export type EsqlRuleParams = BaseRuleParams & EsqlSpecificRuleParams;
 export const EsqlRuleParams = z.intersection(BaseRuleParams, EsqlSpecificRuleParams);
 
+export type CorrelationConfig = z.infer<typeof CorrelationConfig>;
+export const CorrelationConfig = z.object({
+  rules: z.array(z.string()).min(1),
+  type: z.enum(['temporal', 'temporal_ordered', 'event_count', 'value_count']),
+  groupBy: z.array(z.string()).min(1),
+  timespan: z.string(),
+  condition: z
+    .object({
+      operator: z.enum(['eq', 'neq', 'gt', 'gte', 'lt', 'lte']),
+      value: z.number(),
+      field: z.string().optional(),
+    })
+    .optional(),
+  aliases: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+});
+
+export type CorrelationSpecificRuleParams = z.infer<typeof CorrelationSpecificRuleParams>;
+export const CorrelationSpecificRuleParams = z.object({
+  type: z.literal('correlation'),
+  language: z.literal('esql'),
+  query: RuleQuery,
+  correlation: CorrelationConfig,
+  alertSuppression: AlertSuppressionCamel.optional(),
+});
+
+export type CorrelationRuleParams = BaseRuleParams & CorrelationSpecificRuleParams;
+export const CorrelationRuleParams = z.intersection(BaseRuleParams, CorrelationSpecificRuleParams);
+
 export type ThreatSpecificRuleParams = z.infer<typeof ThreatSpecificRuleParams>;
 export const ThreatSpecificRuleParams = z.object({
   type: z.literal('threat_match'),
@@ -302,6 +331,7 @@ export type TypeSpecificRuleParams = z.infer<typeof TypeSpecificRuleParams>;
 export const TypeSpecificRuleParams = z.union([
   EqlSpecificRuleParams,
   EsqlSpecificRuleParams,
+  CorrelationSpecificRuleParams,
   ThreatSpecificRuleParams,
   QuerySpecificRuleParams,
   SavedQuerySpecificRuleParams,
@@ -314,6 +344,7 @@ export type RuleParams = z.infer<typeof RuleParams>;
 export const RuleParams = z.union([
   EqlRuleParams,
   EsqlRuleParams,
+  CorrelationRuleParams,
   ThreatRuleParams,
   QueryRuleParams,
   SavedQueryRuleParams,
@@ -332,6 +363,7 @@ export type AllRuleTypes =
   | typeof SIGNALS_ID
   | typeof EQL_RULE_TYPE_ID
   | typeof ESQL_RULE_TYPE_ID
+  | typeof CORRELATION_RULE_TYPE_ID
   | typeof INDICATOR_RULE_TYPE_ID
   | typeof ML_RULE_TYPE_ID
   | typeof QUERY_RULE_TYPE_ID

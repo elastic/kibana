@@ -57,6 +57,7 @@ import {
   isSuppressionRuleInGA,
   isThreatMatchRule,
   isThresholdRule as getIsThresholdRule,
+  isCorrelationRule,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
@@ -552,7 +553,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             component={SelectRuleType}
             componentProps={selectRuleTypeProps}
           />
-          <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType) && !isEsqlRule(ruleType)} fullWidth>
+          <RuleTypeEuiFormRow
+            $isVisible={
+              !isMlRule(ruleType) && !isEsqlRule(ruleType) && !isCorrelationRule(ruleType)
+            }
+            fullWidth
+          >
             <>
               <EuiSpacer size="s" />
               {DataSource}
@@ -577,7 +583,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   disabled={isLoading}
                   onValidityChange={setIsQueryBarValid}
                 />
-              ) : isEsqlRule(ruleType) ? (
+              ) : isEsqlRule(ruleType) || isCorrelationRule(ruleType) ? (
                 <EsqlQueryEdit
                   path="queryBar"
                   fieldsToValidateOnChange={ALERT_SUPPRESSION_FIELDS_FIELD_NAME}

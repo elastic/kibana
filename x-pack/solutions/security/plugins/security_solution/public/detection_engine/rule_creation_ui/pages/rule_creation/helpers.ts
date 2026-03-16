@@ -344,6 +344,20 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         'index',
         'dataViewId',
       ]);
+    case 'correlation':
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threshold',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'newTermsFields',
+        'historyWindowSize',
+        'eqlOptions',
+        'index',
+        'dataViewId',
+      ]);
   }
   assertUnreachable(type);
 };

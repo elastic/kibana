@@ -41,6 +41,17 @@ export const typeSpecificCamelToSnake = (
           : undefined,
       };
     }
+    case 'correlation': {
+      return {
+        type: params.type,
+        language: params.language,
+        query: params.query,
+        correlation: convertObjectKeysToSnakeCase(params.correlation),
+        alert_suppression: params.alertSuppression
+          ? convertObjectKeysToSnakeCase(params.alertSuppression)
+          : undefined,
+      };
+    }
     case 'threat_match': {
       return {
         type: params.type,

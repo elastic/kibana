@@ -117,6 +117,11 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
+   * Enables correlation rules for cross-alert correlation
+   */
+  correlationRulesEnabled: false,
+
+  /**
    * Enables the storing of gaps in the event log
    */
   storeGapsInEventLogEnabled: true,

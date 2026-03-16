@@ -8,6 +8,7 @@
 import type {
   DiffableAllFields,
   DiffableCommonFields,
+  DiffableCorrelationFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
   DiffableEsqlFields,
@@ -30,6 +31,7 @@ export type ThreatMatchThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableThreatMat
 export type ThresholdThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableThresholdFields>;
 export type MachineLearningThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableMachineLearningFields>;
 export type NewTermsThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableNewTermsFields>;
+export type CorrelationThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableCorrelationFields>;
 
 /**
  * It's an object which keys are the same as keys of DiffableRule, but values are
@@ -52,6 +54,7 @@ export type ThreeWayRuleFieldsDiff = CommonThreeWayFieldsDiff &
     | ThresholdThreeWayFieldsDiff
     | MachineLearningThreeWayFieldsDiff
     | NewTermsThreeWayFieldsDiff
+    | CorrelationThreeWayFieldsDiff
   );
 
 interface ThreeWayBaseRuleDiff {
@@ -94,7 +97,7 @@ export type RuleFieldsDiffWithKqlQuery =
 
 export type RuleFieldsDiffWithEqlQuery = EqlThreeWayFieldsDiff;
 
-export type RuleFieldsDiffWithEsqlQuery = EsqlThreeWayFieldsDiff;
+export type RuleFieldsDiffWithEsqlQuery = EsqlThreeWayFieldsDiff | CorrelationThreeWayFieldsDiff;
 
 export type RuleFieldsDiffWithThreatQuery = ThreatMatchThreeWayFieldsDiff;
 

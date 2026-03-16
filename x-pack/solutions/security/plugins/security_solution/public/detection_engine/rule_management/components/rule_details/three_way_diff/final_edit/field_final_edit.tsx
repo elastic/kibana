@@ -58,6 +58,8 @@ export function FieldFinalEdit(): JSX.Element {
       );
     case 'new_terms':
       return <NewTermsRuleFieldEdit fieldName={fieldName as UpgradeableNewTermsFields} />;
+    case 'correlation':
+      return null as unknown as JSX.Element;
     default:
       return assertUnreachable(ruleType);
   }

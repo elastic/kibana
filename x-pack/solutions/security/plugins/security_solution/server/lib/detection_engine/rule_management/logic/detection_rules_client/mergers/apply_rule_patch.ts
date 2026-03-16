@@ -9,6 +9,8 @@ import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
+  CorrelationRule,
+  CorrelationRuleResponseFields,
   EqlRule,
   EqlRuleResponseFields,
   EsqlRule,
@@ -29,6 +31,7 @@ import type {
   TypeSpecificResponse,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import {
+  CorrelationRulePatchFields,
   EqlRulePatchFields,
   EsqlRulePatchFields,
   MachineLearningRulePatchFields,
@@ -155,6 +158,19 @@ const patchEsqlParams = (
     type: existingRule.type,
     language: rulePatch.language ?? existingRule.language,
     query: rulePatch.query ?? existingRule.query,
+    alert_suppression: rulePatch.alert_suppression ?? existingRule.alert_suppression,
+  };
+};
+
+const patchCorrelationParams = (
+  rulePatch: CorrelationRulePatchFields,
+  existingRule: CorrelationRule
+): CorrelationRuleResponseFields => {
+  return {
+    type: existingRule.type,
+    language: rulePatch.language ?? existingRule.language,
+    query: rulePatch.query ?? existingRule.query,
+    correlation: rulePatch.correlation ?? existingRule.correlation,
     alert_suppression: rulePatch.alert_suppression ?? existingRule.alert_suppression,
   };
 };
@@ -288,6 +304,13 @@ export const patchTypeSpecificParams = (
         throw new BadRequestError(stringifyZodError(result.error));
       }
       return patchEsqlParams(result.data, existingRule);
+    }
+    case 'correlation': {
+      const result = CorrelationRulePatchFields.safeParse(params);
+      if (!result.success) {
+        throw new BadRequestError(stringifyZodError(result.error));
+      }
+      return patchCorrelationParams(result.data, existingRule);
     }
     case 'threat_match': {
       const result = ThreatMatchRulePatchFields.safeParse(params);

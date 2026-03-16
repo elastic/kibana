@@ -137,6 +137,17 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
           : undefined,
       };
     }
+    case 'correlation': {
+      return {
+        type: params.type,
+        language: params.language,
+        query: params.query,
+        correlation: convertObjectKeysToCamelCase(params.correlation),
+        alertSuppression: params.alert_suppression
+          ? convertObjectKeysToCamelCase(params.alert_suppression)
+          : undefined,
+      };
+    }
     case 'threat_match': {
       return {
         type: params.type,

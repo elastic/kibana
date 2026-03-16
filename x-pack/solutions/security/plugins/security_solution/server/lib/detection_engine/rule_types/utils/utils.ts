@@ -52,6 +52,7 @@ import type {
 } from '../types';
 import type { ShardError } from '../../../types';
 import type {
+  CorrelationRuleParams,
   EqlRuleParams,
   EsqlRuleParams,
   MachineLearningRuleParams,
@@ -715,6 +716,8 @@ export const isThreatParams = (params: RuleParams): params is ThreatRuleParams =
   params.type === 'threat_match';
 export const isMachineLearningParams = (params: RuleParams): params is MachineLearningRuleParams =>
   params.type === 'machine_learning';
+export const isCorrelationParams = (params: RuleParams): params is CorrelationRuleParams =>
+  params.type === 'correlation';
 
 /**
  * Prevent javascript from returning Number.MAX_SAFE_INTEGER when Elasticsearch expects

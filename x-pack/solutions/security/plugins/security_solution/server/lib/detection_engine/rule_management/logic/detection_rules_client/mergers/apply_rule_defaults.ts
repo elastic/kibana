@@ -95,6 +95,15 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         alert_suppression: props.alert_suppression,
       };
     }
+    case 'correlation': {
+      return {
+        type: props.type,
+        language: props.language,
+        query: props.query,
+        correlation: props.correlation,
+        alert_suppression: props.alert_suppression,
+      };
+    }
     case 'threat_match': {
       return {
         type: props.type,

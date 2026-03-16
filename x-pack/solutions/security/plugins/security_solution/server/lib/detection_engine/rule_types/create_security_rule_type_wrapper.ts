@@ -23,6 +23,7 @@ import {
   getRuleRangeTuples,
   isMachineLearningParams,
   isEsqlParams,
+  isCorrelationParams,
   getDisabledActionsWarningText,
 } from './utils/utils';
 import { runExecutionValidation } from './validation';
@@ -175,7 +176,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
           const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
             params;
-          const { savedObjectsClient, ruleMonitoringService, ruleResultService } = services;
+          const {
+            savedObjectsClient,
+            scopedClusterClient,
+            ruleMonitoringService,
+            ruleResultService,
+          } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({
@@ -213,6 +219,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           let result = createResultObject(state);
 
+          let frozenIndicesQueriedCount = 0;
           const wrapperWarnings = [];
           const wrapperErrors = [];
 
@@ -249,7 +256,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
            */
           if (isEsqlParams(params)) {
             inputIndex = getIndexListFromEsqlQuery(params.query);
-          } else if (!isMachineLearningParams(params)) {
+          } else if (!isMachineLearningParams(params) && !isCorrelationParams(params)) {
             try {
               const { index, runtimeMappings: dataViewRuntimeMappings } = await getInputIndex({
                 index: params.index,

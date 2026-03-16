@@ -58,6 +58,7 @@ import type {
 import {
   createEqlAlertType,
   createEsqlAlertType,
+  createCorrelationAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
   createQueryAlertType,
@@ -388,6 +389,10 @@ export const previewRulesRoute = (
             case 'new_terms':
               const newTermsAlertType = createNewTermsAlertType();
               await runExecutors(newTermsAlertType, previewRuleParams);
+              break;
+            case 'correlation':
+              const correlationAlertType = createCorrelationAlertType();
+              await runExecutors(correlationAlertType, previewRuleParams);
               break;
             default:
               assertUnreachable(previewRuleParams);

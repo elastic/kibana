@@ -81,6 +81,8 @@ export const FUNCTIONAL_FIELD_MAP: Record<AllKeys<RuleResponse>, boolean> = {
   // New terms rule type fields
   new_terms_fields: true,
   history_window_start: true,
+  // Correlation rule type fields
+  correlation: false,
   // Response fields - We don't use these fields for diffing purposes, setting the values to false
   id: false,
   rule_id: false,

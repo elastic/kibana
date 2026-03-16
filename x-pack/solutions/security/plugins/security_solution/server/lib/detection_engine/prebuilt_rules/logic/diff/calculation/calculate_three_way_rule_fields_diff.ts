@@ -12,6 +12,7 @@ import type {
   AllThreeWayFieldsDiff,
   DiffableAllFields,
   DiffableCommonFields,
+  DiffableCorrelationFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
   DiffableEsqlFields,
@@ -22,6 +23,7 @@ import type {
   DiffableThreatMatchFields,
   DiffableThresholdFields,
   CommonThreeWayFieldsDiff,
+  CorrelationThreeWayFieldsDiff,
   CustomQueryThreeWayFieldsDiff,
   EqlThreeWayFieldsDiff,
   EsqlThreeWayFieldsDiff,
@@ -191,6 +193,19 @@ export const calculateThreeWayRuleFieldsDiff = (
       return {
         ...commonFieldsDiff,
         ...calculateEsqlFieldsDiff(
+          { base_version, current_version, target_version },
+          isRuleCustomized
+        ),
+      };
+    }
+    case 'correlation': {
+      if (hasBaseVersion) {
+        invariant(base_version.type === 'correlation', BASE_TYPE_ERROR);
+      }
+      invariant(target_version.type === 'correlation', TARGET_TYPE_ERROR);
+      return {
+        ...commonFieldsDiff,
+        ...calculateCorrelationFieldsDiff(
           { base_version, current_version, target_version },
           isRuleCustomized
         ),
@@ -372,6 +387,20 @@ const newTermsFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableNewT
   alert_suppression: simpleDiffAlgorithm,
 };
 
+const calculateCorrelationFieldsDiff = (
+  ruleVersions: ThreeVersionsOf<DiffableCorrelationFields>,
+  isRuleCustomized: boolean
+): CorrelationThreeWayFieldsDiff => {
+  return calculateFieldsDiffFor(ruleVersions, correlationFieldsDiffAlgorithms, isRuleCustomized);
+};
+
+const correlationFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableCorrelationFields> =
+  {
+    type: ruleTypeDiffAlgorithm,
+    esql_query: esqlQueryDiffAlgorithm,
+    alert_suppression: simpleDiffAlgorithm,
+  };
+
 const calculateAllFieldsDiff = (
   ruleVersions: ThreeVersionsOf<DiffableAllFields>,
   isRuleCustomized: boolean
@@ -385,6 +414,7 @@ const allFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableAllFields
   ...savedQueryFieldsDiffAlgorithms,
   ...eqlFieldsDiffAlgorithms,
   ...esqlFieldsDiffAlgorithms,
+  ...correlationFieldsDiffAlgorithms,
   ...threatMatchFieldsDiffAlgorithms,
   ...thresholdFieldsDiffAlgorithms,
   ...machineLearningFieldsDiffAlgorithms,

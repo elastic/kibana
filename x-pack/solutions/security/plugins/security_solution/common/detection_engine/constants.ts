@@ -49,6 +49,7 @@ export const SUPPRESSIBLE_ALERT_RULES: Type[] = [
   'new_terms',
   'threat_match',
   'eql',
+  'correlation',
   'machine_learning',
 ];
 
@@ -61,6 +62,7 @@ export const SUPPRESSIBLE_ALERT_RULES_GA: Type[] = [
   'threat_match',
   'machine_learning',
   'eql',
+  'correlation',
 ];
 
 export const RISK_SCORE_LOW = 21;

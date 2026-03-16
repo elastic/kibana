@@ -8,6 +8,7 @@
  */
 
 import {
+  CORRELATION_RULE_TYPE_ID,
   EQL_RULE_TYPE_ID,
   ESQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
@@ -30,6 +31,7 @@ export const ruleTypeMappings = {
   threat_match: INDICATOR_RULE_TYPE_ID,
   threshold: THRESHOLD_RULE_TYPE_ID,
   new_terms: NEW_TERMS_RULE_TYPE_ID,
+  correlation: CORRELATION_RULE_TYPE_ID,
 };
 type RuleTypeMappings = typeof ruleTypeMappings;
 

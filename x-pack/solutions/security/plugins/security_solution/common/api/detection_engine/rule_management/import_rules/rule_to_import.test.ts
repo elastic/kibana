@@ -28,6 +28,7 @@ const ruleTypeValues = [
   'machine_learning',
   'new_terms',
   'esql',
+  'correlation',
 ] as const;
 type PartialRuleToImportInputForTest = Partial<RuleToImportInput> &
   Partial<{

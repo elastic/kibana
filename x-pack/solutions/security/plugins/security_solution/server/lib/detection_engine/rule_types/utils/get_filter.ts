@@ -173,6 +173,9 @@ export const getFilter = async ({
     case 'esql': {
       throw new BadRequestError('Unsupported Rule of type "esql" supplied to getFilter');
     }
+    case 'correlation': {
+      throw new BadRequestError('Unsupported Rule of type "correlation" supplied to getFilter');
+    }
     default: {
       return assertUnreachable(type);
     }

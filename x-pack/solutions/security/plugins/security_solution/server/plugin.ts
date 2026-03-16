@@ -37,6 +37,7 @@ import { getScheduleNotificationResponseActionsService } from './lib/detection_e
 import {
   createEqlAlertType,
   createEsqlAlertType,
+  createCorrelationAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
   createNewTermsAlertType,
@@ -484,6 +485,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType()));
     if (!experimentalFeatures.esqlRulesDisabled) {
       plugins.alerting.registerType(securityRuleTypeWrapper(createEsqlAlertType()));
+    }
+    if (experimentalFeatures.correlationRulesEnabled) {
+      plugins.alerting.registerType(securityRuleTypeWrapper(createCorrelationAlertType()));
     }
     plugins.alerting.registerType(
       securityRuleTypeWrapper(

@@ -1079,4 +1079,5 @@ const RULE_TYPE_TEST_ID_MAP = {
   threat_match: 'threatMatchRuleType',
   new_terms: 'newTermsRuleType',
   esql: 'esqlRuleType',
+  correlation: 'correlationRuleType',
 };
