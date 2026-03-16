@@ -95,6 +95,7 @@ describe('NotificationPolicyClient', () => {
         expect.objectContaining({
           name: 'my-policy',
           description: 'my-policy description',
+          enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
             apiKey: 'encoded-es-api-key',
@@ -115,6 +116,7 @@ describe('NotificationPolicyClient', () => {
           version: 'WzEsMV0=',
           name: 'my-policy',
           description: 'my-policy description',
+          enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
             owner: 'test-user',
@@ -154,6 +156,7 @@ describe('NotificationPolicyClient', () => {
         expect.objectContaining({
           name: 'my-policy',
           description: 'my-policy description',
+          enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
             apiKey: 'encoded-es-api-key',
@@ -218,6 +221,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'test-policy',
         description: 'test-policy description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
         auth: {
           apiKey: 'encrypted-api-key',
@@ -269,6 +273,7 @@ describe('NotificationPolicyClient', () => {
       const firstAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-two',
         description: 'policy-two description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-two' }],
         auth: {
           apiKey: 'secret-key-2',
@@ -283,6 +288,7 @@ describe('NotificationPolicyClient', () => {
       const secondAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-one',
         description: 'policy-one description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-one' }],
         auth: {
           apiKey: 'secret-key-1',
@@ -334,6 +340,7 @@ describe('NotificationPolicyClient', () => {
       const firstAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-found-one',
         description: 'policy-found-one description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-found-one' }],
         auth: {
           apiKey: 'key-1',
@@ -348,6 +355,7 @@ describe('NotificationPolicyClient', () => {
       const thirdAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-found-three',
         description: 'policy-found-three description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-found-three' }],
         auth: {
           apiKey: 'key-3',
@@ -404,6 +412,7 @@ describe('NotificationPolicyClient', () => {
       const validAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-valid',
         description: 'policy-valid description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-valid' }],
         auth: {
           apiKey: 'valid-key',
@@ -454,6 +463,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
           apiKey: 'old-api-key',
@@ -564,6 +574,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
           apiKey: 'old-api-key',
@@ -601,11 +612,305 @@ describe('NotificationPolicyClient', () => {
     });
   });
 
+  describe('enableNotificationPolicy', () => {
+    const updatedAttributes: NotificationPolicySavedObjectAttributes = {
+      name: 'snoozed-policy',
+      description: 'snoozed-policy description',
+      enabled: true,
+      destinations: [{ type: 'workflow', id: 'test-workflow' }],
+      auth: {
+        apiKey: 'some-key',
+        owner: 'test-user',
+        createdByUser: false,
+      },
+      createdBy: 'elastic_profile_uid',
+      createdAt: '2024-12-01T00:00:00.000Z',
+      updatedBy: 'elastic_profile_uid',
+      updatedAt: '2025-01-01T00:00:00.000Z',
+    };
+
+    it('does a partial update then fetches the full policy', async () => {
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-enable',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-enable',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: updatedAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      const res = await client.enableNotificationPolicy({ id: 'policy-id-enable' });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-enable',
+        {
+          enabled: true,
+          snoozedUntil: undefined,
+          updatedBy: 'elastic_profile_uid',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+        undefined
+      );
+
+      expect(res.id).toBe('policy-id-enable');
+      expect(res.auth).not.toHaveProperty('apiKey');
+    });
+
+    it('throws 404 when policy is not found on follow-up get', async () => {
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-enable-404',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+      });
+      mockSavedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-enable-404'
+        )
+      );
+
+      await expect(
+        client.enableNotificationPolicy({ id: 'policy-id-enable-404' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+  });
+
+  describe('disableNotificationPolicy', () => {
+    it('does a partial update with enabled=false', async () => {
+      const updatedAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'active-policy',
+        description: 'active-policy description',
+        enabled: false,
+        destinations: [{ type: 'workflow', id: 'test-workflow' }],
+        auth: {
+          apiKey: 'some-key',
+          owner: 'test-user',
+          createdByUser: false,
+        },
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-disable',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-disable',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: updatedAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      const res = await client.disableNotificationPolicy({ id: 'policy-id-disable' });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-disable',
+        {
+          enabled: false,
+          snoozedUntil: undefined,
+          updatedBy: 'elastic_profile_uid',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+        undefined
+      );
+
+      expect(res.id).toBe('policy-id-disable');
+      expect(res.auth).not.toHaveProperty('apiKey');
+    });
+  });
+
+  describe('snoozeNotificationPolicy', () => {
+    it('does a partial update with snoozedUntil', async () => {
+      const updatedAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'active-policy',
+        description: 'active-policy description',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'test-workflow' }],
+        snoozedUntil: '2025-06-01T12:00:00.000Z',
+        auth: {
+          apiKey: 'some-key',
+          owner: 'test-user',
+          createdByUser: false,
+        },
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-snooze',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-snooze',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: updatedAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      const res = await client.snoozeNotificationPolicy({
+        id: 'policy-id-snooze',
+        snoozedUntil: '2025-06-01T12:00:00.000Z',
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-snooze',
+        {
+          snoozedUntil: '2025-06-01T12:00:00.000Z',
+          updatedBy: 'elastic_profile_uid',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        },
+        undefined
+      );
+
+      expect(res.id).toBe('policy-id-snooze');
+    });
+
+    it('throws 400 when snoozedUntil is not a valid ISO datetime', async () => {
+      await expect(
+        client.snoozeNotificationPolicy({
+          id: 'policy-id-snooze',
+          snoozedUntil: 'not-a-date',
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bulkActionNotificationPolicies', () => {
+    it('issues a single bulkUpdate with partial attrs for mixed actions', async () => {
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'WzMsMV0=',
+          },
+          {
+            id: 'policy-2',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'WzQsMV0=',
+          },
+          {
+            id: 'policy-3',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'WzUsMV0=',
+          },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [
+          { id: 'policy-1', action: 'enable' },
+          { id: 'policy-2', action: 'disable' },
+          { id: 'policy-3', action: 'snooze', snoozed_until: '2025-06-01T12:00:00.000Z' },
+        ],
+      });
+
+      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-1',
+          attributes: {
+            enabled: true,
+            snoozedUntil: undefined,
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-2',
+          attributes: {
+            enabled: false,
+            snoozedUntil: undefined,
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-3',
+          attributes: {
+            snoozedUntil: '2025-06-01T12:00:00.000Z',
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+      ]);
+
+      expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+
+      expect(res).toEqual({ processed: 3, total: 3, errors: [] });
+    });
+
+    it('collects errors from bulkUpdate response', async () => {
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'missing-policy',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {} as NotificationPolicySavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object [notification_policy/missing-policy] not found',
+            },
+          },
+        ],
+      });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [{ id: 'missing-policy', action: 'enable' }],
+      });
+
+      expect(res.processed).toBe(0);
+      expect(res.total).toBe(1);
+      expect(res.errors).toHaveLength(1);
+      expect(res.errors[0].id).toBe('missing-policy');
+    });
+  });
+
   describe('deleteNotificationPolicy', () => {
     it('deletes a notification policy successfully', async () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-to-delete',
         description: 'policy-to-delete description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-to-delete' }],
         auth: {
           apiKey: 'some-key',

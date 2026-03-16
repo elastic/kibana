@@ -47,6 +47,9 @@ export function evaluateMatchers(
     for (const policy of allPolicies) {
       if (!matchesRuleLabels(policy, rule)) continue;
 
+      if (!policy.enabled) continue;
+      if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
+
       if (!policy.matcher) {
         matched.push({ episode, policy });
         continue;
