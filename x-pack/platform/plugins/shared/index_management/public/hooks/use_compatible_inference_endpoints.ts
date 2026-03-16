@@ -23,6 +23,13 @@ interface CompatibleEndpointsData {
   endpointDefinitions: EndpointDefinition[] | undefined;
 }
 
+const defaultEndpointsPriorityList = [
+  defaultInferenceEndpoints.JINAv5,
+  defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
+  defaultInferenceEndpoints.ELSER,
+  defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
+];
+
 /**
  * Transforms the inference endpoints into a format that can be used to build the selectable options for the inference endpoint dropdown.
  *
@@ -36,7 +43,14 @@ export const useCompatibleInferenceEndpoints = (
     if (endpointsLoading) {
       return;
     }
-    let defaultInferenceId: string | undefined;
+    const availableDefaultEndpoints = defaultEndpointsPriorityList.filter((defaultEndpoint) =>
+      endpoints?.some((endpoint) => endpoint.inference_id === defaultEndpoint)
+    );
+    // If no compatible endpoints are found, default to the ELSER endpoint which is always available
+    const defaultInferenceId =
+      availableDefaultEndpoints.length > 0
+        ? availableDefaultEndpoints[0]
+        : defaultInferenceEndpoints.ELSER;
     const endpointDefinitions: EndpointDefinition[] = [];
     endpoints?.forEach((endpoint) => {
       // Skip incompatible endpoints
@@ -47,17 +61,6 @@ export const useCompatibleInferenceEndpoints = (
       const modelId = endpoint.service_settings.model_id ?? endpoint.service_settings.model;
       const service = provider?.name ?? endpoint.service;
       const description = modelId ? `${service} - ${modelId}` : service;
-
-      const isElserInEis =
-        endpoint.inference_id === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID;
-
-      if (isElserInEis) {
-        // Prioritize elser in eis endpoint as default.
-        defaultInferenceId = endpoint.inference_id;
-      } else if (!defaultInferenceId) {
-        // Otherwise use the first compatible endpoint as default.
-        defaultInferenceId = endpoint.inference_id;
-      }
 
       endpointDefinitions.push({
         inference_id: endpoint.inference_id,
