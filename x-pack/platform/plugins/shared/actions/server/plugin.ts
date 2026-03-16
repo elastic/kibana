@@ -477,10 +477,6 @@ export class ActionsPlugin
     };
   }
 
-  public getConnectorLifecycleListeners(): ConnectorLifecycleListener[] {
-    return this.connectorLifecycleListeners;
-  }
-
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
     const {
       logger,
