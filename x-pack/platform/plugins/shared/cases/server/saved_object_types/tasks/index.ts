@@ -41,6 +41,7 @@ export const caseTaskSavedObjectType: SavedObjectsType = {
       due_date: { type: 'date' },
       started_at: { type: 'date' },
       completed_at: { type: 'date' },
+      completion_notes: { type: 'text' },
 
       // Ordering
       sort_order: { type: 'integer' },

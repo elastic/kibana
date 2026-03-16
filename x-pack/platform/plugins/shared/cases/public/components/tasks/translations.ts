@@ -116,3 +116,48 @@ export const TASK_DUE_DATE_PLACEHOLDER = i18n.translate(
 export const TASK_TITLE_REQUIRED = i18n.translate('xpack.cases.tasks.fields.titleRequired', {
   defaultMessage: 'A title is required.',
 });
+
+export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.tasks.fields.assignYourself', {
+  defaultMessage: 'Assign yourself',
+});
+
+export const COMPLETION_NOTES = i18n.translate('xpack.cases.tasks.fields.completionNotes', {
+  defaultMessage: 'Completion notes',
+});
+
+export const COMPLETION_NOTES_PLACEHOLDER = i18n.translate(
+  'xpack.cases.tasks.fields.completionNotesPlaceholder',
+  {
+    defaultMessage: 'Describe what was done to complete this task (optional)',
+  }
+);
+
+export const EDIT_TASK = i18n.translate('xpack.cases.tasks.editTask', {
+  defaultMessage: 'Edit task',
+});
+
+export const SAVE_CHANGES = i18n.translate('xpack.cases.tasks.saveChanges', {
+  defaultMessage: 'Save changes',
+});
+
+export const ADD_SUBTASK = i18n.translate('xpack.cases.tasks.addSubtask', {
+  defaultMessage: 'Add sub-task',
+});
+
+export const SUBTASK_OF = (parentTitle: string) =>
+  i18n.translate('xpack.cases.tasks.subtaskOf', {
+    values: { parentTitle },
+    defaultMessage: 'Sub-task of "{parentTitle}"',
+  });
+
+export const EXPAND_SUBTASKS = i18n.translate('xpack.cases.tasks.expandSubtasks', {
+  defaultMessage: 'Expand sub-tasks',
+});
+
+export const COLLAPSE_SUBTASKS = i18n.translate('xpack.cases.tasks.collapseSubtasks', {
+  defaultMessage: 'Collapse sub-tasks',
+});
+
+export const CLICK_TO_ADVANCE_STATUS = i18n.translate('xpack.cases.tasks.clickToAdvanceStatus', {
+  defaultMessage: 'Click to advance status',
+});

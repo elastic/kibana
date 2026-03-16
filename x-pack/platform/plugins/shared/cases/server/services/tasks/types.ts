@@ -25,6 +25,7 @@ export interface CreateTaskArgs extends IndexRefresh {
   assignees?: CaseTaskAssignee[];
   due_date?: string | null;
   parent_task_id?: string | null;
+  completion_notes?: string | null;
   custom_fields?: CaseTaskCustomField[];
   template_id?: string | null;
   owner: string;
@@ -46,6 +47,7 @@ export interface UpdateTaskArgs extends IndexRefresh {
   assignees?: CaseTaskAssignee[];
   due_date?: string | null;
   parent_task_id?: string | null;
+  completion_notes?: string | null;
   sort_order?: number;
   custom_fields?: CaseTaskCustomField[];
   user: User;

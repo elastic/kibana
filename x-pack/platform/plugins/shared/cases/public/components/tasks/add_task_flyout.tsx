@@ -9,8 +9,7 @@ import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiDatePicker,
-  EuiFieldText,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -18,64 +17,72 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
-  EuiFormRow,
-  EuiSelect,
-  EuiTextArea,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import moment from 'moment';
 import type { CreateTaskRequest } from '../../containers/api';
 import { useCreateTask } from '../../containers/use_create_task';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { TaskFormFields } from './task_form_fields';
+import type { TaskFormState } from './task_form_fields';
 import * as i18n from './translations';
 
 interface AddTaskFlyoutProps {
   caseId: string;
+  parentTaskId?: string | null;
+  parentTaskTitle?: string;
   onClose: () => void;
 }
 
-const PRIORITY_OPTIONS = [
-  { value: 'low', text: i18n.PRIORITY_LOW },
-  { value: 'medium', text: i18n.PRIORITY_MEDIUM },
-  { value: 'high', text: i18n.PRIORITY_HIGH },
-  { value: 'critical', text: i18n.PRIORITY_CRITICAL },
-];
+const DEFAULT_FORM: TaskFormState = {
+  title: '',
+  description: '',
+  status: 'open',
+  priority: 'medium',
+  dueDate: null,
+  assignees: [],
+  completionNotes: '',
+};
 
-const STATUS_OPTIONS = [
-  { value: 'open', text: i18n.STATUS_OPEN },
-  { value: 'in_progress', text: i18n.STATUS_IN_PROGRESS },
-  { value: 'completed', text: i18n.STATUS_COMPLETED },
-  { value: 'cancelled', text: i18n.STATUS_CANCELLED },
-];
-
-const AddTaskFlyoutComponent: React.FC<AddTaskFlyoutProps> = ({ caseId, onClose }) => {
+export const AddTaskFlyout: React.FC<AddTaskFlyoutProps> = ({
+  caseId,
+  parentTaskId,
+  parentTaskTitle,
+  onClose,
+}) => {
   const { mutate: createTask, isLoading } = useCreateTask(caseId);
   const { owner } = useCasesContext();
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState<CreateTaskRequest['priority']>('medium');
-  const [status, setStatus] = useState<CreateTaskRequest['status']>('open');
-  const [dueDate, setDueDate] = useState<moment.Moment | null>(null);
+  const [form, setForm] = useState<TaskFormState>(DEFAULT_FORM);
   const [titleError, setTitleError] = useState<string | null>(null);
 
+  const handleChange = useCallback((updates: Partial<TaskFormState>) => {
+    setForm((prev) => ({ ...prev, ...updates }));
+    if (updates.title !== undefined && updates.title.trim()) setTitleError(null);
+  }, []);
+
   const handleSubmit = useCallback(() => {
-    if (!title.trim()) {
+    if (!form.title.trim()) {
       setTitleError(i18n.TASK_TITLE_REQUIRED);
       return;
     }
 
     const request: CreateTaskRequest = {
-      title: title.trim(),
-      ...(description.trim() && { description: description.trim() }),
-      priority,
-      status,
-      ...(dueDate && { due_date: dueDate.toISOString() }),
+      title: form.title.trim(),
+      ...(form.description.trim() && { description: form.description.trim() }),
+      status: form.status,
+      priority: form.priority,
+      assignees: form.assignees.length > 0 ? form.assignees : undefined,
+      ...(form.dueDate && { due_date: form.dueDate.toISOString() }),
+      ...(form.completionNotes.trim() && { completion_notes: form.completionNotes.trim() }),
+      ...(parentTaskId != null && { parent_task_id: parentTaskId }),
       owner: owner[0],
     };
 
     createTask(request, { onSuccess: onClose });
-  }, [title, description, priority, status, dueDate, createTask, onClose]);
+  }, [form, parentTaskId, owner, createTask, onClose]);
+
+  const flyoutTitle = parentTaskId ? i18n.ADD_SUBTASK : i18n.ADD_TASK;
 
   return (
     <EuiFlyout
@@ -88,84 +95,32 @@ const AddTaskFlyoutComponent: React.FC<AddTaskFlyoutProps> = ({ caseId, onClose 
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="cases-add-task-flyout-title" data-test-subj="cases-add-task-flyout-title">
-            {i18n.ADD_TASK}
+            {flyoutTitle}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {parentTaskTitle && (
+          <>
+            <EuiCallOut
+              size="s"
+              title={i18n.SUBTASK_OF(parentTaskTitle)}
+              iconType="branch"
+              data-test-subj="cases-add-subtask-parent-notice"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiForm component="form" data-test-subj="cases-add-task-form">
-          <EuiFormRow
-            label={i18n.TASK_TITLE}
-            isInvalid={titleError != null}
-            error={titleError ?? undefined}
-            fullWidth
-          >
-            <EuiFieldText
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                if (e.target.value.trim()) setTitleError(null);
-              }}
-              placeholder={i18n.TASK_TITLE_PLACEHOLDER}
-              fullWidth
-              data-test-subj="cases-add-task-title"
-              autoFocus
-            />
-          </EuiFormRow>
-
-          <EuiFormRow label={i18n.TASK_DESCRIPTION} fullWidth>
-            <EuiTextArea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={i18n.TASK_DESCRIPTION_PLACEHOLDER}
-              fullWidth
-              rows={4}
-              data-test-subj="cases-add-task-description"
-            />
-          </EuiFormRow>
-
-          <EuiFormRow label={i18n.TASK_STATUS} fullWidth>
-            <EuiSelect
-              options={STATUS_OPTIONS}
-              value={status}
-              onChange={(e) => setStatus(e.target.value as CreateTaskRequest['status'])}
-              fullWidth
-              data-test-subj="cases-add-task-status"
-            />
-          </EuiFormRow>
-
-          <EuiFormRow label={i18n.TASK_PRIORITY} fullWidth>
-            <EuiSelect
-              options={PRIORITY_OPTIONS}
-              value={priority}
-              onChange={(e) => setPriority(e.target.value as CreateTaskRequest['priority'])}
-              fullWidth
-              data-test-subj="cases-add-task-priority"
-            />
-          </EuiFormRow>
-
-          <EuiFormRow label={i18n.TASK_DUE_DATE} fullWidth>
-            <EuiDatePicker
-              selected={dueDate}
-              onChange={setDueDate}
-              dateFormat="MM/DD/YYYY"
-              placeholderText={i18n.TASK_DUE_DATE_PLACEHOLDER}
-              fullWidth
-              data-test-subj="cases-add-task-due-date"
-            />
-          </EuiFormRow>
+          <TaskFormFields value={form} onChange={handleChange} titleError={titleError} />
         </EuiForm>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onClose}
-              flush="left"
-              data-test-subj="cases-add-task-flyout-cancel"
-            >
+            <EuiButtonEmpty onClick={onClose} flush="left" data-test-subj="cases-add-task-flyout-cancel">
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -176,7 +131,7 @@ const AddTaskFlyoutComponent: React.FC<AddTaskFlyoutProps> = ({ caseId, onClose 
               isLoading={isLoading}
               data-test-subj="cases-add-task-flyout-submit"
             >
-              {i18n.ADD_TASK}
+              {flyoutTitle}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -184,7 +139,3 @@ const AddTaskFlyoutComponent: React.FC<AddTaskFlyoutProps> = ({ caseId, onClose 
     </EuiFlyout>
   );
 };
-
-AddTaskFlyoutComponent.displayName = 'AddTaskFlyout';
-
-export const AddTaskFlyout = React.memo(AddTaskFlyoutComponent);

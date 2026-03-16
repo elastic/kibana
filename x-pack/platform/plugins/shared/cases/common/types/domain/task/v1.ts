@@ -55,7 +55,9 @@ export const CaseTaskAttributesRt = rt.intersection([
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRt, rt.null]),
   }),
-  rt.exact(rt.partial({})),
+  rt.exact(rt.partial({
+    completion_notes: rt.union([rt.string, rt.null]),
+  })),
 ]);
 
 export const CaseTaskRt = rt.intersection([

@@ -51,6 +51,7 @@ export const postTaskRoute = createCasesRoute({
       ),
       due_date: schema.maybe(schema.nullable(schema.string())),
       parent_task_id: schema.maybe(schema.nullable(schema.string())),
+      completion_notes: schema.maybe(schema.nullable(schema.string({ maxLength: 30000 }))),
       owner: schema.string(),
     }),
   },
@@ -68,6 +69,7 @@ export const postTaskRoute = createCasesRoute({
         assignees?: Array<{ uid: string }>;
         due_date?: string | null;
         parent_task_id?: string | null;
+        completion_notes?: string | null;
         owner: string;
       };
 

@@ -52,6 +52,7 @@ export const patchTaskRoute = createCasesRoute({
         schema.arrayOf(schema.object({ uid: schema.string() }), { maxSize: 10 })
       ),
       due_date: schema.maybe(schema.nullable(schema.string())),
+      completion_notes: schema.maybe(schema.nullable(schema.string({ maxLength: 30000 }))),
     }),
   },
   handler: async ({ context, request, response }) => {
@@ -68,6 +69,7 @@ export const patchTaskRoute = createCasesRoute({
         priority?: 'low' | 'medium' | 'high' | 'critical';
         assignees?: Array<{ uid: string }>;
         due_date?: string | null;
+        completion_notes?: string | null;
       };
 
       const task = await casesClient.tasks.update({

@@ -27,6 +27,7 @@ export interface CreateTaskParams {
   assignees?: CaseTaskAssignee[];
   due_date?: string | null;
   parent_task_id?: string | null;
+  completion_notes?: string | null;
   owner: string;
 }
 
@@ -39,6 +40,7 @@ export interface UpdateTaskParams {
   priority?: CaseTaskPriority;
   assignees?: CaseTaskAssignee[];
   due_date?: string | null;
+  completion_notes?: string | null;
 }
 
 export type FindTasksParams = FindTasksArgs;

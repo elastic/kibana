@@ -7,17 +7,26 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { CaseTask } from '../../../common/types/domain/task/v1';
 import { useGetTasks } from '../../containers/use_get_tasks';
 import { TasksTable } from './tasks_table';
 import { AddTaskFlyout } from './add_task_flyout';
+import { EditTaskFlyout } from './edit_task_flyout';
 
 interface CaseViewTasksProps {
   caseId: string;
 }
 
+interface AddTaskState {
+  open: boolean;
+  parentTask: CaseTask | null;
+}
+
 export const CaseViewTasks = React.memo<CaseViewTasksProps>(({ caseId }) => {
   const { data, isLoading } = useGetTasks(caseId);
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  const [addState, setAddState] = useState<AddTaskState>({ open: false, parentTask: null });
+  const [editingTask, setEditingTask] = useState<CaseTask | null>(null);
 
   return (
     <>
@@ -27,13 +36,28 @@ export const CaseViewTasks = React.memo<CaseViewTasksProps>(({ caseId }) => {
             caseId={caseId}
             tasks={data?.tasks ?? []}
             isLoading={isLoading}
-            onAddTask={() => setIsFlyoutOpen(true)}
+            onAddTask={() => setAddState({ open: true, parentTask: null })}
+            onEditTask={(task) => setEditingTask(task)}
+            onAddSubTask={(parentTask) => setAddState({ open: true, parentTask })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isFlyoutOpen && (
-        <AddTaskFlyout caseId={caseId} onClose={() => setIsFlyoutOpen(false)} />
+      {addState.open && (
+        <AddTaskFlyout
+          caseId={caseId}
+          parentTaskId={addState.parentTask?.id ?? null}
+          parentTaskTitle={addState.parentTask?.title}
+          onClose={() => setAddState({ open: false, parentTask: null })}
+        />
+      )}
+
+      {editingTask && (
+        <EditTaskFlyout
+          caseId={caseId}
+          task={editingTask}
+          onClose={() => setEditingTask(null)}
+        />
       )}
     </>
   );

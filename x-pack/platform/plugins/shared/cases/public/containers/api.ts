@@ -718,6 +718,7 @@ export interface CreateTaskRequest {
   assignees?: Array<{ uid: string }>;
   due_date?: string | null;
   parent_task_id?: string | null;
+  completion_notes?: string | null;
   owner: string;
 }
 
@@ -729,6 +730,7 @@ export interface UpdateTaskRequest {
   priority?: 'low' | 'medium' | 'high' | 'critical';
   assignees?: Array<{ uid: string }>;
   due_date?: string | null;
+  completion_notes?: string | null;
 }
 
 export interface FindTasksRequest {
