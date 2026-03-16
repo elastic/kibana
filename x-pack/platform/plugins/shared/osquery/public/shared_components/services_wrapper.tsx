@@ -14,11 +14,9 @@ import { queryClient } from '../query_client';
 import { KibanaRenderContextProvider } from '../shared_imports';
 import type { StartPlugins } from '../types';
 import { ExperimentalFeaturesProvider } from '../common/experimental_features_context';
-import type { ExperimentalFeatures } from '../../common/experimental_features';
-import { allowedExperimentalValues } from '../../common/experimental_features';
 
 export interface ServicesWrapperProps {
-  services: CoreStart & StartPlugins & { experimentalFeatures?: ExperimentalFeatures };
+  services: CoreStart & StartPlugins;
   children: React.ReactNode;
 }
 
@@ -26,9 +24,7 @@ const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({ services, ch
   <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
       <QueryClientProvider client={queryClient}>
-        <ExperimentalFeaturesProvider
-          value={services.experimentalFeatures ?? allowedExperimentalValues}
-        >
+        <ExperimentalFeaturesProvider>
           {children}
         </ExperimentalFeaturesProvider>
       </QueryClientProvider>
