@@ -12,7 +12,7 @@
  * Prevents "Shard Legend not populated" when shards are present but nodes are
  * missing or empty (see https://github.com/elastic/sdh-kibana/issues/6121).
  *
- * @param {{ shards?: Array<{ node?: string }>, nodes?: Record<string, unknown> | unknown[] }} response - Index or node detail API response
+ * @param {{ shards?: unknown[], nodes?: Record<string, unknown> | unknown[] }} response - Index or node detail API response
  * @returns {Record<string, { name: string, type: string, node_ids: string[] }>} Normalized nodes object keyed by node id
  */
 export function ensureShardLegendNodes(response) {
