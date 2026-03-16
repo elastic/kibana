@@ -14,10 +14,7 @@ import type { AttachmentBoundedTool } from './tools';
 /**
  * Server-side definition of an attachment type.
  */
-export interface AttachmentTypeDefinition<
-  TType extends string = string,
-  TContent = unknown
-> {
+export interface AttachmentTypeDefinition<TType extends string = string, TContent = unknown> {
   /**
    * Unique identifier for the attachment type to register.
    */
