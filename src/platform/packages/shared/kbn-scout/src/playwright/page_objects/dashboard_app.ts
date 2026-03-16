@@ -31,6 +31,7 @@ export class DashboardApp {
   private readonly viewOnlyModeButton;
   private readonly dashboardViewport;
   private readonly embeddablePanel;
+  private readonly dashboardPanel;
 
   // Add panel flow
   private readonly addPanelButton;
@@ -41,6 +42,8 @@ export class DashboardApp {
   // Save flows
   private readonly savedObjectTitleInput;
   private readonly confirmSaveButton;
+  private readonly quickSaveSecondaryButton;
+  private readonly interactiveSaveMenuItem;
 
   // Library flyout
   private readonly savedObjectsFinderTable;
@@ -49,6 +52,13 @@ export class DashboardApp {
   private readonly addEmbeddableSuccess;
 
   // Markdown panel
+
+  // ES|QL / Visualize editor actions
+  private readonly applyFlyoutButton;
+  private readonly visualizeSaveAndReturnButton;
+
+  // Drilldown wizard
+  private readonly drilldownWizardSubmit;
 
   // Customize panel flyout
   private readonly customizePanelFlyout;
@@ -67,6 +77,7 @@ export class DashboardApp {
     this.viewOnlyModeButton = this.page.testSubj.locator('dashboardViewOnlyMode');
     this.dashboardViewport = this.page.testSubj.locator('dshDashboardViewport');
     this.embeddablePanel = this.page.testSubj.locator('embeddablePanel');
+    this.dashboardPanel = this.page.testSubj.locator('dashboardPanel');
 
     // Add panel flow
     this.addPanelButton = this.page.testSubj.locator('dashboardEditorMenuButton');
@@ -79,6 +90,10 @@ export class DashboardApp {
     // Save flows
     this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
+    this.quickSaveSecondaryButton = this.page.testSubj.locator(
+      'dashboardQuickSaveMenuItem-secondary-button'
+    );
+    this.interactiveSaveMenuItem = this.page.testSubj.locator('dashboardInteractiveSaveMenuItem');
 
     // Library flyout
     this.savedObjectsFinderTable = this.page.testSubj.locator('savedObjectsFinderTable');
@@ -87,6 +102,13 @@ export class DashboardApp {
     );
     this.savedObjectFinderSearchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
     this.addEmbeddableSuccess = this.page.testSubj.locator('addEmbeddableToDashboardSuccess');
+
+    // ES|QL / Visualize editor actions
+    this.applyFlyoutButton = this.page.testSubj.locator('applyFlyoutButton');
+    this.visualizeSaveAndReturnButton = this.page.testSubj.locator('visualizesaveAndReturnButton');
+
+    // Drilldown wizard
+    this.drilldownWizardSubmit = this.page.testSubj.locator('drilldownWizardSubmit');
 
     // Customize panel flyout
     this.customizePanelFlyout = this.page.testSubj.locator('customizePanel');
@@ -106,8 +128,10 @@ export class DashboardApp {
     await this.waitForRenderComplete();
   }
 
+  /** Clicks "Create new dashboard" on the listing page and waits for the editor toolbar to load. */
   async openNewDashboard() {
     await this.page.testSubj.click('newItemButton');
+    await expect(this.addPanelButton).toBeVisible();
   }
 
   private getSettingsFlyout() {
@@ -170,6 +194,12 @@ export class DashboardApp {
     await expect(this.editModeButton).toBeHidden();
   }
 
+  async ensureViewMode() {
+    if (!(await this.getIsInViewMode())) {
+      await this.clickCancelOutOfEditMode();
+    }
+  }
+
   /**
    * Opens the "Add panel" flyout for selecting panel types to add to the dashboard.
    */
@@ -191,6 +221,29 @@ export class DashboardApp {
     await this.savedObjectTitleInput.fill(name);
     await this.confirmSaveButton.click();
     await expect(this.confirmSaveButton).toBeHidden();
+  }
+
+  async saveChangesToExistingDashboard() {
+    await this.page.testSubj.click('dashboardQuickSaveMenuItem');
+    await expect(this.page.testSubj.locator('dashboardQuickSaveMenuItem')).toBeDisabled();
+  }
+
+  async addPanelFromLibrary(...names: string[]) {
+    await this.page.testSubj.click('dashboardAddFromLibraryButton');
+    for (let i = 0; i < names.length; i++) {
+      if (i > 0) {
+        await this.page.testSubj.clearInput('savedObjectFinderSearchInput');
+      }
+      await this.page.testSubj.typeWithDelay('savedObjectFinderSearchInput', names[i]);
+      await this.page.testSubj.click(`savedObjectTitle${names[i].replace(/ /g, '-')}`);
+      await this.page.testSubj.waitForSelector(
+        `embeddablePanelHeading-${names[i].replace(/[- ]/g, '')}`,
+        {
+          state: 'visible',
+        }
+      );
+    }
+    await this.closeLibraryFlyout();
   }
 
   async clickQuickSave() {
@@ -278,13 +331,6 @@ export class DashboardApp {
 
     // Close "Added successfully" toast
     await this.toasts.closeAll();
-  }
-
-  /**
-   * Adds a panel from the library without forcing a type filter.
-   */
-  async addPanelFromLibrary(panelName: string, embeddableType?: string) {
-    return this.addEmbeddable(panelName, embeddableType);
   }
 
   /**
@@ -407,7 +453,7 @@ export class DashboardApp {
    * Gets the count of panels on the dashboard
    */
   async getPanelCount(): Promise<number> {
-    return this.embeddablePanel.count();
+    return this.dashboardPanel.count();
   }
 
   /**
@@ -853,5 +899,143 @@ export class DashboardApp {
     // Wait for the edit button to appear and click it
     const editVisualizationConfigurationSelector = `[data-test-subj="hover-actions-${id}"] [data-test-subj="embeddablePanelAction-editPanel"]`;
     await this.page.locator(editVisualizationConfigurationSelector).click();
+  }
+
+  /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */
+  async addNewPanel(panelType: 'ES|QL' | 'Lens' | 'Custom visualization' | 'Maps' | 'Links') {
+    await this.addPanelButton.click();
+    await this.page.testSubj.click(`create-action-${panelType}`);
+    await expect(this.panelSelectionFlyout).toBeHidden();
+  }
+
+  /** Clicks "Apply and close" in the ES|QL editor flyout to commit the query to the panel. */
+  async applyAndCloseESQLPanel() {
+    await this.applyFlyoutButton.click();
+  }
+
+  /** Clicks the "Save and return" button in the legacy Visualize editor. */
+  async clickVisualizeSaveAndReturn() {
+    await this.visualizeSaveAndReturnButton.click();
+  }
+
+  /** Navigates to a dashboard by clicking its title link on the listing page. */
+  async clickDashboardTitleLink(dashboardTitle: string) {
+    await this.page.testSubj.click(
+      `dashboardListingTitleLink-${dashboardTitle.split(' ').join('-')}`
+    );
+    await this.waitForRenderComplete();
+  }
+
+  /**
+   * Opens the "Save as..." dialog via the quick-save dropdown,
+   * fills in the new title, and confirms.
+   */
+  async saveDashboardAsCopy(dashboardTitle: string) {
+    await this.quickSaveSecondaryButton.click();
+    await this.interactiveSaveMenuItem.click();
+    await expect(this.savedObjectTitleInput).toBeVisible();
+    await this.savedObjectTitleInput.fill(dashboardTitle);
+    await this.confirmSaveButton.click();
+    await expect(this.confirmSaveButton).toBeHidden();
+  }
+
+  /** Selects a drilldown trigger and submits the drilldown wizard. */
+  async selectDrilldownTriggerAndSubmit(
+    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu'
+  ) {
+    await this.page.testSubj.click(`triggerPicker-${trigger}`);
+    await expect(this.drilldownWizardSubmit).toBeEnabled();
+    await this.drilldownWizardSubmit.click();
+  }
+
+  // ============================================================
+  // Panel Count
+  // ============================================================
+
+  async expectPanelCount(expectedCount: number) {
+    await expect.poll(() => this.dashboardPanel.count()).toBe(expectedCount);
+  }
+
+  // ============================================================
+  // Dashboard Listing
+  // ============================================================
+
+  getDashboardListingLink(title: string) {
+    return this.page.testSubj.locator(`dashboardListingTitleLink-${title.split(' ').join('-')}`);
+  }
+
+  // ============================================================
+  // Fullscreen
+  // ============================================================
+
+  async enterFullscreen() {
+    await this.page.testSubj.click('dashboardFullScreenMode');
+    await expect(this.page.testSubj.locator('exitFullScreenModeButton')).toBeVisible();
+  }
+
+  async exitFullscreen() {
+    await this.page.keyboard.press('Escape');
+    await expect(this.page.testSubj.locator('exitFullScreenModeButton')).toBeHidden();
+  }
+
+  // ============================================================
+  // Maximize Panel
+  // ============================================================
+
+  async maximizePanel(title?: string) {
+    if (title) {
+      await this.clickPanelAction('embeddablePanelAction-togglePanel', title);
+    } else {
+      const panelWrapper = this.page.locator('.embPanel__hoverActionsAnchor >> nth=0');
+      await panelWrapper.scrollIntoViewIfNeeded();
+      await panelWrapper.hover();
+      const toggleAction = panelWrapper.locator(
+        '[data-test-subj="embeddablePanelAction-togglePanel"]'
+      );
+      if (await toggleAction.isVisible()) {
+        await toggleAction.click();
+      } else {
+        await panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
+        await this.page.testSubj.click('embeddablePanelAction-togglePanel');
+      }
+    }
+    await expect(this.page.locator('.dshLayout-isMaximizedPanel')).toBeVisible();
+  }
+
+  // ============================================================
+  // URL Drilldown
+  // ============================================================
+
+  async createUrlDrilldown(
+    name: string,
+    url: string,
+    trigger: 'on_click_value' | 'on_select_range' | 'on_open_panel_menu' = 'on_click_value'
+  ) {
+    await this.page.testSubj.click('drilldownFactoryItem-url_drilldown');
+    await this.page.testSubj.locator('drilldownNameInput').fill(name);
+
+    const selectAll = process.platform === 'darwin' ? 'Meta+a' : 'Control+a';
+    const monacoEditor = this.page.locator(
+      '[data-test-subj="url-template-editor-container"] .monaco-editor'
+    );
+    await monacoEditor.click();
+    await this.page.keyboard.press(selectAll);
+    await this.page.keyboard.type(url);
+
+    await this.selectDrilldownTriggerAndSubmit(trigger);
+  }
+
+  // ============================================================
+  // Dashboard Settings Helpers
+  // ============================================================
+
+  async setDashboardTitle(title: string) {
+    const titleInput = this.page.testSubj.locator('dashboardTitleInput');
+    await titleInput.fill(title);
+  }
+
+  async setDashboardDescription(description: string) {
+    const descriptionInput = this.page.testSubj.locator('dashboardDescriptionInput');
+    await descriptionInput.fill(description);
   }
 }
