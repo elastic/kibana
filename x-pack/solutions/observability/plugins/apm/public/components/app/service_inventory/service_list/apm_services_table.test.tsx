@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import { ApmServicesTable, getServiceColumns } from './apm_services_table';
@@ -20,7 +21,6 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { fromQuery } from '../../../shared/links/url_helpers';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
 
 jest.mock('../../../../hooks/use_breakpoints', () => ({
@@ -203,25 +203,23 @@ function renderApmServicesTable({
 }) {
   const defaultSortFn = (items: ServiceListItem[]) => items;
 
-  return render(
-    <IntlProvider locale="en">
-      <MockApmPluginContextWrapper history={history}>
-        <ApmServicesTable
-          status={status}
-          items={services}
-          comparisonDataLoading={false}
-          displayHealthStatus={displayHealthStatus}
-          displayAlerts={displayAlerts}
-          displaySlos={displaySlos}
-          initialSortField={ServiceInventoryFieldName.ServiceName}
-          initialPageSize={25}
-          initialSortDirection="asc"
-          sortFn={defaultSortFn}
-          serviceOverflowCount={0}
-          maxCountExceeded={false}
-        />
-      </MockApmPluginContextWrapper>
-    </IntlProvider>
+  return renderWithKibanaRenderContext(
+    <MockApmPluginContextWrapper history={history}>
+      <ApmServicesTable
+        status={status}
+        items={services}
+        comparisonDataLoading={false}
+        displayHealthStatus={displayHealthStatus}
+        displayAlerts={displayAlerts}
+        displaySlos={displaySlos}
+        initialSortField={ServiceInventoryFieldName.ServiceName}
+        initialPageSize={25}
+        initialSortDirection="asc"
+        sortFn={defaultSortFn}
+        serviceOverflowCount={0}
+        maxCountExceeded={false}
+      />
+    </MockApmPluginContextWrapper>
   );
 }
 
@@ -276,25 +274,23 @@ describe('ApmServicesTable', () => {
     it('shows max count exceeded warning when maxCountExceeded is true', async () => {
       const defaultSortFn = (items: ServiceListItem[]) => items;
 
-      render(
-        <IntlProvider locale="en">
-          <MockApmPluginContextWrapper history={history}>
-            <ApmServicesTable
-              status={FETCH_STATUS.SUCCESS}
-              items={mockServices}
-              comparisonDataLoading={false}
-              displayHealthStatus={false}
-              displayAlerts={false}
-              displaySlos={false}
-              initialSortField={ServiceInventoryFieldName.ServiceName}
-              initialPageSize={25}
-              initialSortDirection="asc"
-              sortFn={defaultSortFn}
-              serviceOverflowCount={0}
-              maxCountExceeded={true}
-            />
-          </MockApmPluginContextWrapper>
-        </IntlProvider>
+      renderWithKibanaRenderContext(
+        <MockApmPluginContextWrapper history={history}>
+          <ApmServicesTable
+            status={FETCH_STATUS.SUCCESS}
+            items={mockServices}
+            comparisonDataLoading={false}
+            displayHealthStatus={false}
+            displayAlerts={false}
+            displaySlos={false}
+            initialSortField={ServiceInventoryFieldName.ServiceName}
+            initialPageSize={25}
+            initialSortDirection="asc"
+            sortFn={defaultSortFn}
+            serviceOverflowCount={0}
+            maxCountExceeded={true}
+          />
+        </MockApmPluginContextWrapper>
       );
 
       expect(await screen.findByRole('table')).toBeInTheDocument();
