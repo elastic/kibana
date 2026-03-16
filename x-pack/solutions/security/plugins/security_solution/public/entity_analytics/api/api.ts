@@ -37,6 +37,7 @@ import type {
   UploadAssetCriticalityRecordsResponse,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
 } from '../../../common/api/entity_analytics';
+import type { ListWatchlistsResponse } from '../../../common/api/entity_analytics/watchlists/management/list.gen';
 import {
   API_VERSIONS,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
@@ -65,6 +66,7 @@ import {
   RISK_SCORE_ENTITY_CALCULATION_URL,
   RISK_SCORE_PREVIEW_URL,
 } from '../../../common/constants';
+import { WATCHLISTS_URL } from '../../../common/entity_analytics/watchlists/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
@@ -421,6 +423,14 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
+    // TODO: switch to WATCHLISTS privileges API when backend route lands; https://github.com/elastic/security-team/issues/16102
+    // Keeping this separate from privmon to allow safe removal of privmon later.
+    const fetchWatchlistPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
+      http.fetch<PrivMonPrivilegesResponse>(PRIVMON_PRIVILEGE_CHECK_API, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+      });
+
     /**
      * Fetches risk engine settings
      */
@@ -467,6 +477,16 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
+    /**
+     * List all watchlists
+     */
+    const fetchWatchlists = async ({ signal }: { signal?: AbortSignal } = {}) =>
+      http.fetch<ListWatchlistsResponse>(`${WATCHLISTS_URL}/list`, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        signal,
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -490,6 +510,7 @@ export const useEntityAnalyticsRoutes = () => {
       updatePrivMonMonitoredIndices,
       fetchPrivilegeMonitoringEngineStatus,
       fetchPrivilegeMonitoringPrivileges,
+      fetchWatchlistPrivileges,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,
@@ -497,6 +518,7 @@ export const useEntityAnalyticsRoutes = () => {
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
+      fetchWatchlists,
     };
   }, [http]);
 };

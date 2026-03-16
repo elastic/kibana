@@ -25,7 +25,7 @@ jest.mock('@kbn/presentation-publishing', () => ({
 }));
 
 jest.mock('./utils/get_esql_single_column_values', () => {
-  const getESQLSingleColumnValues = () => mockGetESQLSingleColumnValues();
+  const getESQLSingleColumnValues = async () => mockGetESQLSingleColumnValues();
   getESQLSingleColumnValues.isSuccess = () => mockIsSuccess();
   return {
     getESQLSingleColumnValues,

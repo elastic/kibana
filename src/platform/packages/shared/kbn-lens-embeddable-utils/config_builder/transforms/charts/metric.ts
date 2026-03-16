@@ -55,6 +55,7 @@ import {
   fromColorByValueLensStateToAPI,
   fromStaticColorAPIToLensState,
   fromStaticColorLensStateToAPI,
+  isColorByValueColor,
 } from '../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../columns/utils';
 
@@ -128,7 +129,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     ...(primaryMetric.color?.type === 'static'
       ? fromStaticColorAPIToLensState(primaryMetric.color)
       : {}),
-    ...(primaryMetric.color?.type === 'dynamic'
+    ...(isColorByValueColor(primaryMetric.color)
       ? { palette: fromColorByValueAPIToLensState(primaryMetric.color) }
       : {}),
     ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
@@ -615,7 +616,7 @@ export function fromAPItoLensState(config: MetricState): MetricAttributesWithout
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

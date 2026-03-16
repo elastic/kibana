@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { stripUnmappedKeys, throwOnUnmappedKeys } from './scope_tooling';
+import { stripUnmappedKeys } from './scope_tooling';
 
 const mockGetTransforms = jest.fn();
 
@@ -175,6 +175,7 @@ describe('stripUnmappedKeys', () => {
           uid: 'panel1',
         },
         {
+          collapsed: false,
           grid: { y: 0 },
           panels: [
             {
@@ -218,6 +219,7 @@ describe('stripUnmappedKeys', () => {
               "uid": "panel1",
             },
             Object {
+              "collapsed": false,
               "grid": Object {
                 "y": 0,
               },
@@ -246,82 +248,5 @@ describe('stripUnmappedKeys', () => {
         ],
       }
     `);
-  });
-});
-
-describe('throwOnUnmappedKeys', () => {
-  it('should not throw when there are no unmapped keys', () => {
-    mockGetTransforms.mockImplementation(() => {
-      return {
-        schema: schema.object({
-          foo: schema.string(),
-        }),
-      };
-    });
-    const dashboardState = {
-      title: 'my dashboard',
-      panels: [
-        {
-          config: {
-            foo: 'some value',
-          },
-          grid: {
-            h: 15,
-            w: 24,
-            x: 0,
-            y: 0,
-          },
-          type: 'typeWithSchema',
-        },
-      ],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).not.toThrow();
-  });
-
-  it('should throw when dashboard contains a panel without a schema', () => {
-    const dashboardState = {
-      title: 'my dashboard',
-      panels: [
-        {
-          config: {
-            foo: 'some value',
-          },
-          grid: {
-            h: 15,
-            w: 24,
-            x: 0,
-            y: 0,
-          },
-          type: 'typeWithoutSchema',
-        },
-      ],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
-  });
-
-  it('should throw when dashboard contains a panel with enhancements', () => {
-    mockGetTransforms.mockImplementation(() => {
-      return {
-        schema: schema.object({}),
-      };
-    });
-    const dashboardState = {
-      title: 'my dashboard',
-      panels: [
-        {
-          config: {
-            enhancements: {},
-          },
-          grid: {
-            h: 15,
-            w: 24,
-            x: 0,
-            y: 0,
-          },
-          type: 'typeWithSchema',
-        },
-      ],
-    };
-    expect(() => throwOnUnmappedKeys(dashboardState)).toThrow();
   });
 });

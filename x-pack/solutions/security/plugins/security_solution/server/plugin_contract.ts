@@ -45,6 +45,7 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/serve
 import type { PluginSetup as KqlServerPluginSetup } from '@kbn/kql/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { AnonymizationPluginStart } from '@kbn/anonymization-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
@@ -93,6 +94,7 @@ export interface SecuritySolutionPluginStartDependencies {
   share: SharePluginStart;
   actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
+  anonymization: AnonymizationPluginStart;
   llmTasks?: LlmTasksPluginStart;
 }
 

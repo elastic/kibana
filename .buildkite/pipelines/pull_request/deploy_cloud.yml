@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
-    cancel_on_build_failing: true
     label: 'Build and Deploy to Cloud'
     agents:
       machineType: n2-standard-2

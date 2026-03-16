@@ -6,6 +6,7 @@
       "jest",
       "node",
       "react",
+      "@testing-library/jest-dom",
       "@kbn/ambient-ui-types",
       "@testing-library/jest-dom",
     ]

@@ -11,6 +11,7 @@ import {
   DeprecationInfoSchema,
   ExperimentalDataStreamFeaturesSchema,
 } from '../models/package_policy';
+import { OtelCollectorConfigSchema } from '../models';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
@@ -338,6 +339,7 @@ export const GetInputsResponseSchema = schema.oneOf([
       }),
       { maxSize: 10000 }
     ),
+    ...OtelCollectorConfigSchema,
   }),
 ]);
 
@@ -604,6 +606,26 @@ export const UpdatePackageRequestSchema = {
     keepPoliciesUpToDate: schema.boolean(),
   }),
 };
+
+export const ReviewUpgradeRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string({
+      meta: { description: 'Package name to review upgrade for' },
+    }),
+  }),
+  body: schema.object({
+    action: schema.oneOf([
+      schema.literal('accept'),
+      schema.literal('decline'),
+      schema.literal('pending'),
+    ]),
+    target_version: schema.string(),
+  }),
+};
+
+export const ReviewUpgradeResponseSchema = schema.object({
+  success: schema.boolean(),
+});
 
 export const GetStatsRequestSchema = {
   params: schema.object({

@@ -32,7 +32,7 @@ import { disconnectTab } from './tabs';
 import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
 import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
-import { fromSavedObjectTabToSavedSearch } from '../tab_mapping_utils';
+import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
@@ -126,14 +126,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     const { persistedDiscoverSession } = getState();
     const persistedTab = persistedDiscoverSession?.tabs.find((tab) => tab.id === tabId);
-    const persistedTabSavedSearch =
-      persistedDiscoverSession && persistedTab
-        ? await fromSavedObjectTabToSavedSearch({
-            tab: persistedTab,
-            discoverSession: persistedDiscoverSession,
-            services,
-          })
-        : undefined;
+    const persistedTabSearchSource = persistedTab
+      ? await fromSavedObjectTabToSearchSource({ tab: persistedTab, services })
+      : undefined;
 
     const initialQuery = urlAppState?.query ?? persistedTab?.serializedSearchSource.query;
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
@@ -143,7 +138,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       ? initialDataViewIdOrSpec
       : undefined;
 
-    const persistedTabDataView = persistedTabSavedSearch?.searchSource.getField('index');
+    const persistedTabDataView = persistedTabSearchSource?.getField('index');
     const dataViewId = isDataViewSource(urlAppState?.dataSource)
       ? urlAppState?.dataSource.dataViewId
       : persistedTabDataView?.id;
@@ -208,8 +203,8 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     }
 
     const initialGlobalState: TabStateGlobalState = {
-      ...(persistedTabSavedSearch?.timeRestore && dataView.isTimeBased()
-        ? pick(persistedTabSavedSearch, 'timeRange', 'refreshInterval')
+      ...(persistedTab?.timeRestore && dataView.isTimeBased()
+        ? pick(persistedTab, 'timeRange', 'refreshInterval')
         : undefined),
       ...tabInitialGlobalState,
     };

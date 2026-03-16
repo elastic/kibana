@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/check_saved_objects.sh
-    cancel_on_build_failing: true
     label: 'Check changes in Saved Objects'
     agents:
       machineType: n2-standard-2

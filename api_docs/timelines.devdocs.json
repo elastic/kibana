@@ -1325,6 +1325,60 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-common.getTimelineFieldsDataFromHit",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimelineFieldsDataFromHit",
+        "description": [
+          "\nTransforms a SearchHit into an array of TimelineEventsDetailsItem, which is the format used to display the event details in the timeline.\nIt merges the fields and _source of the hit, and adds any nested fields from the _source based on the enrichmentPath."
+        ],
+        "signature": [
+          "(hit: ",
+          "SearchHit",
+          "<",
+          "EventHit",
+          ">) => ",
+          {
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TimelineEventsDetailsItem",
+            "text": "TimelineEventsDetailsItem"
+          },
+          "[]"
+        ],
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/get_timeline_fields_data_from_hit.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.getTimelineFieldsDataFromHit.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "hit",
+            "description": [],
+            "signature": [
+              "SearchHit",
+              "<",
+              "EventHit",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/get_timeline_fields_data_from_hit.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-common.isGeoField",
         "type": "Function",
         "tags": [],
@@ -3920,26 +3974,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/build_browser_fields.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/build_browser_fields.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/build_browser_fields.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/hooks/use_browser_fields.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/hooks/use_browser_fields.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
           },
           {
@@ -3957,6 +3991,18 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/build_browser_fields.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/build_browser_fields.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/build_browser_fields.ts"
           },
           {
             "plugin": "securitySolution",
@@ -4105,6 +4151,14 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/app/home/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/hooks/use_browser_fields.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/hooks/use_browser_fields.ts"
           },
           {
             "plugin": "securitySolution",
@@ -4595,10 +4649,10 @@
           "ZodNumber",
           "; }, ",
           "ZodTypeAny",
-          ", \"passthrough\"> | undefined; filterQuery?: any; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; excludeEcsData?: boolean | undefined; }"
+          ", \"passthrough\"> | undefined; filterQuery?: any; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; dateRangeField?: string | undefined; excludeEcsData?: boolean | undefined; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_all.ts",
-        "lineNumber": 41,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
