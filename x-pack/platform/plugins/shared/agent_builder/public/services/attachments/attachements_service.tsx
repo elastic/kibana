@@ -8,7 +8,6 @@
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type {
   UnknownAttachment,
-  AttachmentInput,
   UpdateOriginResponse,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
@@ -96,49 +95,4 @@ export class AttachmentsService {
       `${publicApiPath}/conversations/${conversationId}/attachments/stale`
     );
   }
-
-  /**
-   * Converts stale API results into deduplicated attachment inputs for staging.
-   */
-  toAttachmentInputsFromStaleResponse(
-    staleResponse: CheckStaleAttachmentsResponse,
-    typeByAttachmentId: Map<string, string>,
-    hiddenByAttachmentId: Map<string, boolean>
-  ): AttachmentInput[] {
-    return toAttachmentInputsFromStaleResponse(
-      staleResponse,
-      typeByAttachmentId,
-      hiddenByAttachmentId
-    );
-  }
 }
-
-export const toAttachmentInputsFromStaleResponse = (
-  staleResponse: CheckStaleAttachmentsResponse,
-  typeByAttachmentId: Map<string, string>,
-  hiddenByAttachmentId: Map<string, boolean>
-): AttachmentInput[] => {
-  return staleResponse.attachments.flatMap((result) => {
-    if (!result.is_stale || !isRecord(result.resolved_data)) {
-      return [];
-    }
-
-    const type = typeByAttachmentId.get(result.attachment_id);
-    if (!type) {
-      return [];
-    }
-
-    return [
-      {
-        id: result.attachment_id,
-        type,
-        data: result.resolved_data,
-        hidden: hiddenByAttachmentId.get(result.attachment_id) ?? false,
-      },
-    ];
-  });
-};
-
-const isRecord = (value: unknown): value is Record<string, unknown> => {
-  return typeof value === 'object' && value !== null;
-};

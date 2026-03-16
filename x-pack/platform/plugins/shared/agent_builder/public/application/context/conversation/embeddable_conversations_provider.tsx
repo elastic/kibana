@@ -15,6 +15,7 @@ import type {
   EmbeddableConversationProps,
 } from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
+import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
@@ -181,35 +182,10 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     if (attachments.length === 0) {
       return;
     }
-
-    setCurrentProps((prevProps) => {
-      const existingAttachments = [...(prevProps.attachments ?? [])];
-      const byId = new Map<string, AttachmentInput>(
-        existingAttachments
-          .filter((attachment): attachment is AttachmentInput & { id: string } =>
-            Boolean(attachment.id)
-          )
-          .map((attachment) => [attachment.id, attachment])
-      );
-
-      for (const attachment of attachments) {
-        if (attachment.id && byId.has(attachment.id)) {
-          byId.set(attachment.id, attachment);
-          continue;
-        }
-
-        existingAttachments.push(attachment);
-      }
-
-      const deduplicated = existingAttachments.map((attachment) => {
-        if (!attachment.id) {
-          return attachment;
-        }
-        return byId.get(attachment.id) ?? attachment;
-      });
-
-      return { ...prevProps, attachments: deduplicated };
-    });
+    setCurrentProps((prevProps) => ({
+      ...prevProps,
+      attachments: upsertAttachmentsIntoList(prevProps.attachments, attachments),
+    }));
   }, []);
 
   const removeAttachment = useCallback((attachmentIndex: number) => {

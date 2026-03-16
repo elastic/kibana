@@ -19,6 +19,7 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useAgentBuilderAgents } from '../../hooks/agents/use_agents';
 import { searchParamNames } from '../../search_param_names';
 import { useConversationActions } from './use_conversation_actions';
+import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 
 interface RoutedConversationsProviderProps {
   children: React.ReactNode;
@@ -99,35 +100,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     if (nextAttachments.length === 0) {
       return;
     }
-
-    setAttachments((prevAttachments) => {
-      const existingAttachments = [...(prevAttachments ?? [])];
-      const byId = new Map<string, AttachmentInput>(
-        existingAttachments
-          .filter((attachment): attachment is AttachmentInput & { id: string } =>
-            Boolean(attachment.id)
-          )
-          .map((attachment) => [attachment.id, attachment])
-      );
-
-      for (const nextAttachment of nextAttachments) {
-        if (nextAttachment.id && byId.has(nextAttachment.id)) {
-          byId.set(nextAttachment.id, nextAttachment);
-          continue;
-        }
-
-        existingAttachments.push(nextAttachment);
-      }
-
-      const deduplicated = existingAttachments.map((attachment) => {
-        if (!attachment.id) {
-          return attachment;
-        }
-        return byId.get(attachment.id) ?? attachment;
-      });
-
-      return deduplicated;
-    });
+    setAttachments((prev) => upsertAttachmentsIntoList(prev, nextAttachments));
   }, []);
 
   const resetAttachments = useCallback(() => {

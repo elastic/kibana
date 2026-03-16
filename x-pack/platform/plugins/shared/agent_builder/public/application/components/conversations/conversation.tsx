@@ -6,19 +6,15 @@
  */
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
   useEuiOverflowScroll,
   useEuiScrollBar,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { isString } from 'lodash';
 import { useConversationError, useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInput } from './conversation_input/conversation_input';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
@@ -45,10 +41,9 @@ import { CanvasFlyout } from './conversation_rounds/round_response/attachments/c
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { useConversation } from '../../hooks/use_conversation';
-import type { CheckStaleAttachmentsResponse } from '../../../../common/http_api/attachments';
-import { AttachmentPillsRow } from './conversation_input/attachment_pills_row';
-
-const STALE_CHECK_DEBOUNCE_MS = 300;
+import { useStaleAttachmentsCheck } from '../../hooks/use_stale_attachments_check';
+import { getStaleAttachmentInputs } from '../../context/conversation/get_stale_attachment_inputs';
+import { StaleAttachmentsPanel } from './stale_attachments_panel';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -61,14 +56,8 @@ export const Conversation: React.FC<{}> = () => {
   const shouldStickToBottom = useShouldStickToBottom();
   const onAppLeave = useAppLeave();
   const { attachmentsService } = useAgentBuilderServices();
-  const { attachments: stagedAttachments, upsertAttachments } = useConversationContext();
-  const [staleResponse, setStaleResponse] = useState<CheckStaleAttachmentsResponse | undefined>(
-    undefined
-  );
-  const staleCheckTimerRef = useRef<number | undefined>(undefined);
-  const isStaleCheckInFlightRef = useRef(false);
-  const hasPendingStaleCheckRef = useRef(false);
-  const checkedSignatureByAttachmentIdRef = useRef<Map<string, string>>(new Map());
+  const { attachments: stagedAttachments = [], upsertAttachments } = useConversationContext();
+  const { staleResponse, scheduleStaleCheck } = useStaleAttachmentsCheck(conversationId);
 
   useSendPredefinedInitialMessage();
 
@@ -87,184 +76,28 @@ export const Conversation: React.FC<{}> = () => {
 
   const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
 
-  const latestAttachmentSignatures = useMemo(() => {
-    return (conversation?.attachments ?? [])
-      .map((attachment) => {
-        const latestVersion = attachment.versions.find(
-          (v) => v.version === attachment.current_version
-        );
-        return {
-          attachmentId: attachment.id,
-          signature: `${attachment.current_version}:${latestVersion?.content_hash ?? 'none'}`,
-        };
-      })
-      .sort((a, b) => a.attachmentId.localeCompare(b.attachmentId));
-  }, [conversation?.attachments]);
-
-  const staleCheckKey = useMemo(() => {
-    return latestAttachmentSignatures
-      .map(({ attachmentId, signature }) => `${attachmentId}:${signature}`)
-      .join('|');
-  }, [latestAttachmentSignatures]);
-
-  const runStaleCheck = useCallback(
-    async ({ force = false }: { force?: boolean } = {}) => {
-      if (!conversationId) {
-        setStaleResponse(undefined);
-        return;
-      }
-
-      if (latestAttachmentSignatures.length === 0) {
-        setStaleResponse(undefined);
-        return;
-      }
-
-      const hasChangedSignatures = latestAttachmentSignatures.some(
-        ({ attachmentId, signature }) => {
-          return checkedSignatureByAttachmentIdRef.current.get(attachmentId) !== signature;
-        }
-      );
-
-      if (!force && !hasChangedSignatures) {
-        return;
-      }
-
-      if (isStaleCheckInFlightRef.current) {
-        hasPendingStaleCheckRef.current = true;
-        return;
-      }
-
-      isStaleCheckInFlightRef.current = true;
-      try {
-        const response = await attachmentsService.checkStale(conversationId);
-        setStaleResponse(response);
-        checkedSignatureByAttachmentIdRef.current = new Map(
-          latestAttachmentSignatures.map(({ attachmentId, signature }) => [attachmentId, signature])
-        );
-      } finally {
-        isStaleCheckInFlightRef.current = false;
-        if (hasPendingStaleCheckRef.current) {
-          hasPendingStaleCheckRef.current = false;
-          runStaleCheck({ force: true });
-        }
-      }
-    },
-    [attachmentsService, conversationId, latestAttachmentSignatures]
-  );
-
-  const scheduleStaleCheck = useCallback(
-    ({ force = false }: { force?: boolean } = {}) => {
-      if (staleCheckTimerRef.current) {
-        window.clearTimeout(staleCheckTimerRef.current);
-      }
-
-      staleCheckTimerRef.current = window.setTimeout(() => {
-        runStaleCheck({ force });
-      }, STALE_CHECK_DEBOUNCE_MS);
-    },
-    [runStaleCheck]
-  );
-
-  useEffect(() => {
-    scheduleStaleCheck({ force: true });
-  }, [conversationId, scheduleStaleCheck]);
-
-  useEffect(() => {
-    scheduleStaleCheck();
-  }, [staleCheckKey, scheduleStaleCheck]);
-
-  useEffect(() => {
-    const onWindowFocus = () => {
-      scheduleStaleCheck({ force: true });
-    };
-
-    window.addEventListener('focus', onWindowFocus);
-    return () => {
-      window.removeEventListener('focus', onWindowFocus);
-    };
-  }, [scheduleStaleCheck]);
-
-  useEffect(() => {
-    return () => {
-      if (staleCheckTimerRef.current) {
-        window.clearTimeout(staleCheckTimerRef.current);
-      }
-    };
-  }, []);
-
   const stagedAttachmentIds = useMemo(() => {
-    return new Set((stagedAttachments ?? []).map((attachment) => attachment.id).filter(Boolean));
+    const ids = stagedAttachments.map((attachment) => attachment.id).filter(isString);
+    return new Set(ids);
   }, [stagedAttachments]);
 
-  const staleAttachmentPills = useMemo(() => {
-    const attachmentsById = new Map(
-      (conversation?.attachments ?? []).map((attachment) => [attachment.id, attachment])
-    );
+  const staleAttachmentInputs = useMemo(
+    () =>
+      getStaleAttachmentInputs(
+        staleResponse ?? { attachments: [] },
+        conversation?.attachments ?? [],
+        stagedAttachmentIds
+      ),
+    [conversation?.attachments, stagedAttachmentIds, staleResponse]
+  );
 
-    return (staleResponse?.attachments ?? [])
-      .filter(
-        (staleAttachment) =>
-          staleAttachment.is_stale && !stagedAttachmentIds.has(staleAttachment.attachment_id)
-      )
-      .map((staleAttachment) => {
-        const conversationAttachment = attachmentsById.get(staleAttachment.attachment_id);
-        const latestVersion = conversationAttachment?.versions.find(
-          (version) => version.version === conversationAttachment.current_version
-        );
-
-        if (!conversationAttachment || !latestVersion) {
-          return undefined;
-        }
-
-        return {
-          id: conversationAttachment.id,
-          type: conversationAttachment.type,
-          data: latestVersion.data,
-          hidden: conversationAttachment.hidden ?? false,
-        };
-      });
-  }, [conversation?.attachments, stagedAttachmentIds, staleResponse?.attachments]);
-
-  const filteredStaleAttachmentPills = useMemo(() => {
-    return staleAttachmentPills.filter(
-      (attachment): attachment is { id: string; type: string; data: unknown; hidden: boolean } =>
-        attachment !== undefined
-    );
-  }, [staleAttachmentPills]);
-
-  const hasStaleAttachments = filteredStaleAttachmentPills.length > 0;
+  const hasStaleAttachments = staleAttachmentInputs.length > 0;
 
   const handleStageStaleAttachments = useCallback(() => {
-    if (!upsertAttachments || !conversation?.attachments || !staleResponse) {
-      return;
+    if (upsertAttachments && staleAttachmentInputs.length > 0) {
+      upsertAttachments(staleAttachmentInputs);
     }
-
-    const typeByAttachmentId = new Map(
-      conversation.attachments.map((attachment) => [attachment.id, attachment.type])
-    );
-    const hiddenByAttachmentId = new Map(
-      conversation.attachments.map((attachment) => [attachment.id, attachment.hidden ?? false])
-    );
-    const nextAttachments = attachmentsService.toAttachmentInputsFromStaleResponse(
-      staleResponse,
-      typeByAttachmentId,
-      hiddenByAttachmentId
-    );
-
-    upsertAttachments(nextAttachments);
-  }, [attachmentsService, conversation?.attachments, staleResponse, upsertAttachments]);
-
-  const stalePanelTitle = i18n.translate('xpack.agentBuilder.conversation.staleAttachments.title', {
-    defaultMessage: 'Some attachments are out of sync',
-  });
-
-  const stalePanelDescription = i18n.translate(
-    'xpack.agentBuilder.conversation.staleAttachments.description',
-    {
-      defaultMessage:
-        'These snapshots are older than their source data. Add updated attachments to the input to use them in your next message.',
-    }
-  );
+  }, [staleAttachmentInputs, upsertAttachments]);
 
   // Stick to bottom only when user returns to an existing conversation (conversationId is defined and changes)
   useEffect(() => {
@@ -348,35 +181,12 @@ export const Conversation: React.FC<{}> = () => {
           grow={false}
         >
           {hasStaleAttachments && (
-            <>
-              <EuiPanel hasBorder={true} hasShadow={false} paddingSize="m">
-                <EuiText size="s">
-                  <h4>{stalePanelTitle}</h4>
-                  <p>{stalePanelDescription}</p>
-                </EuiText>
-                <EuiSpacer size="s" />
-                <AttachmentPillsRow attachments={filteredStaleAttachmentPills} />
-                <EuiSpacer size="s" />
-                <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton size="s" onClick={handleStageStaleAttachments}>
-                      {i18n.translate(
-                        'xpack.agentBuilder.conversation.staleAttachments.stageButton',
-                        {
-                          defaultMessage: 'Add updated attachments to input',
-                        }
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-              <EuiSpacer size="m" />
-            </>
+            <StaleAttachmentsPanel
+              attachmentInputs={staleAttachmentInputs}
+              onAddToInput={handleStageStaleAttachments}
+            />
           )}
-          <ConversationInput
-            onSubmit={scrollToMostRecentRoundTop}
-            onFocus={() => scheduleStaleCheck({ force: true })}
-          />
+          <ConversationInput onSubmit={scrollToMostRecentRoundTop} onFocus={scheduleStaleCheck} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <CanvasFlyout attachmentsService={attachmentsService} />
