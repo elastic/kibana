@@ -66,6 +66,34 @@ describe('AttachmentService getter', () => {
         });
       });
 
+      it('Filters successful result over error', async () => {
+        const attachmentGetterWithFlagOn = createAttachmentGetter(true);
+        const unifiedError = {
+          ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT),
+          id: '1',
+        };
+        const legacy = {
+          ...createUserAttachment(),
+          id: '1',
+        };
+        const unifiedNotFound = {
+          ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT),
+          id: '2',
+        };
+        const legacyNotFound = {
+          ...createErrorSO(CASE_COMMENT_SAVED_OBJECT),
+          id: '2',
+        };
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          // @ts-expect-error: SO client types are not correct
+          saved_objects: [unifiedError, legacy, unifiedNotFound, legacyNotFound],
+        });
+
+        const res = await attachmentGetterWithFlagOn.bulkGet(['1', '2'], mode);
+
+        expect(res.saved_objects).toEqual([legacy]);
+      });
+
       it('strips excess fields', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [{ ...createUserAttachment({ foo: 'bar' }) }],

@@ -11,12 +11,8 @@ import type {
   UnifiedAttachmentPayload,
   UserCommentAttachmentPayload,
 } from '../../types/domain';
-import {
-  LEGACY_EXTERNAL_REFERENCE_ATTACHMENT_TYPE,
-  LEGACY_PERSISTABLE_STATE_ATTACHMENT_TYPE,
-  LEGACY_COMMENT_ATTACHMENT_TYPE,
-  LEGACY_ATTACHMENT_TYPES,
-} from '../../constants/attachments';
+import { LEGACY_ATTACHMENT_TYPES } from '../../constants/attachments';
+import { AttachmentType } from '../../types/domain';
 
 /**
  * A type narrowing function for external reference attachments.
@@ -24,7 +20,7 @@ import {
 export const isCommentRequestTypeExternalReference = (
   context: AttachmentRequestV2
 ): context is ExternalReferenceAttachmentPayload => {
-  return context.type === LEGACY_EXTERNAL_REFERENCE_ATTACHMENT_TYPE;
+  return context.type === AttachmentType.externalReference;
 };
 
 /**
@@ -33,15 +29,17 @@ export const isCommentRequestTypeExternalReference = (
 export const isCommentRequestTypePersistableState = (
   context: Partial<AttachmentRequest> | UnifiedAttachmentPayload
 ): context is PersistableStateAttachmentPayload => {
-  return context.type === LEGACY_PERSISTABLE_STATE_ATTACHMENT_TYPE;
+  return context.type === AttachmentType.persistableState;
 };
 
 export const isLegacyAttachmentRequest = (
   context: AttachmentRequestV2
 ): context is AttachmentRequest => {
-  return Boolean((context.type as string) && LEGACY_ATTACHMENT_TYPES.has(context.type));
+  return Boolean(
+    (context.type as string) && LEGACY_ATTACHMENT_TYPES.has(context.type as AttachmentType)
+  );
 };
 
 export const isLegacyCommentAttachment = (
   attachment: AttachmentRequestV2
-): attachment is UserCommentAttachmentPayload => attachment.type === LEGACY_COMMENT_ATTACHMENT_TYPE;
+): attachment is UserCommentAttachmentPayload => attachment.type === AttachmentType.user;

@@ -116,25 +116,22 @@ export const commentAttachmentTransformer: AttachmentTypeTransformer<
     return attrs as UnifiedAttachmentAttributes;
   },
 
-  toLegacySchema(attributes: unknown, owner?: string): AttachmentPersistedAttributes {
+  toLegacySchema(attributes: unknown): AttachmentPersistedAttributes {
     const attrs = attributes as AttachmentPersistedAttributes | UnifiedAttachmentAttributes;
     const attrsAsCombined = attrs as AttachmentAttributesV2;
 
     if (isOldSchema(attrsAsCombined)) {
       const oldAttrs = attrs as AttachmentPersistedAttributes;
-      const resolvedOwner = oldAttrs.owner ?? owner ?? '';
-      return { ...oldAttrs, owner: resolvedOwner };
+      return oldAttrs;
     }
 
     if (isNewSchema(attrsAsCombined)) {
       const newAttrs = attrs as UnifiedAttachmentAttributes;
-      const resolvedOwner =
-        (newAttrs.metadata as { owner?: string } | null | undefined)?.owner ?? owner ?? '';
       const parsed = decodeCommentAttachmentData(newAttrs.data);
       return {
         type: AttachmentType.user,
         comment: parsed.content,
-        owner: resolvedOwner,
+        owner: newAttrs.owner,
         created_at: newAttrs.created_at,
         created_by: newAttrs.created_by,
         pushed_at: newAttrs.pushed_at ?? null,
@@ -168,7 +165,7 @@ export const commentAttachmentTransformer: AttachmentTypeTransformer<
   toUnifiedPayload(attachment: unknown): UnifiedValueAttachmentPayload {
     return toUnifiedPayloadCommentAttachment(attachment as AttachmentRequest);
   },
-  toLegacyPayload(attachment: unknown, owner?: string): AttachmentRequest {
+  toLegacyPayload(attachment: unknown): AttachmentRequest {
     return toLegacyPayloadCommentAttachment(attachment as UnifiedValueAttachmentPayload);
   },
 };

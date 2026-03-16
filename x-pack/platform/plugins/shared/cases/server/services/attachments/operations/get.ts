@@ -69,29 +69,21 @@ export class AttachmentGetter {
       const isCaseAttachmentsEnabled = this.context.config.attachments?.enabled;
       const response =
         await this.context.unsecuredSavedObjectsClient.bulkGet<AttachmentAttributesV2>(
-          isCaseAttachmentsEnabled
-            ? attachmentIds.flatMap((id) => [
-                { id, type: CASE_ATTACHMENT_SAVED_OBJECT },
-                { id, type: CASE_COMMENT_SAVED_OBJECT },
-              ])
-            : attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT }))
+          attachmentIds.flatMap((id) =>
+            isCaseAttachmentsEnabled
+              ? [
+                  { id, type: CASE_ATTACHMENT_SAVED_OBJECT },
+                  { id, type: CASE_COMMENT_SAVED_OBJECT },
+                ]
+              : [{ id, type: CASE_COMMENT_SAVED_OBJECT }]
+          )
         );
-
-      const merged: Array<
-        SavedObject<AttachmentPersistedAttributes> | SavedObject<UnifiedAttachmentAttributes>
-      > = [];
 
       // Because we always serach in 2 SO types, one will hit and the other will not
       // filtering out the error response here
-      for (const so of response.saved_objects) {
-        if (!isSOError(so)) {
-          if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
-            merged.push(so as SavedObject<UnifiedAttachmentAttributes>);
-          } else if (so.type === CASE_COMMENT_SAVED_OBJECT) {
-            merged.push(so as SavedObject<AttachmentPersistedAttributes>);
-          }
-        }
-      }
+      const merged: Array<
+        SavedObject<AttachmentPersistedAttributes> | SavedObject<UnifiedAttachmentAttributes>
+      > = response.saved_objects.filter((so) => !isSOError(so));
 
       if (mode === 'legacy') {
         return this.transformAndDecodeBulkGetResponseLegacy(merged);
