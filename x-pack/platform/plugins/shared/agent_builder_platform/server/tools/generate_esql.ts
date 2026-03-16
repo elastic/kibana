@@ -43,8 +43,14 @@ const nlToEsqlToolSchema = z.object({
     .object({
       from: z
         .string()
-        .describe('Start of the time range, e.g. "now-24h" or "2026-01-01T00:00:00Z"'),
-      to: z.string().describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
+        .describe(
+          'Start of the time range in Elasticsearch-compatible date format - Date Math or ISO 8601,, e.g. "now-24h" or "2026-01-01T00:00:00Z"'
+        ),
+      to: z
+        .string()
+        .describe(
+          'End of the time range in Elasticsearch-compatible date format - Date Math or ISO 8601,, e.g. "now" or "2026-01-31T23:59:59Z"'
+        ),
     })
     .optional()
     .describe(
