@@ -13,15 +13,15 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorToken, ConnectorTokenClientContract, UserConnectorToken } from '../types';
 import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
 
-// Per-connector locks to prevent concurrent token refreshes for the same connector
+// Per-connector (or per-connector-per-user) locks to prevent concurrent token refreshes
 const tokenRefreshLocks = new Map<string, ReturnType<typeof pLimit>>();
 
-function getOrCreateLock(connectorId: string): ReturnType<typeof pLimit> {
-  if (!tokenRefreshLocks.has(connectorId)) {
+function getOrCreateLock(lockKey: string): ReturnType<typeof pLimit> {
+  if (!tokenRefreshLocks.has(lockKey)) {
     // Using p-limit with concurrency of 1 creates a mutex (only 1 operation at a time)
-    tokenRefreshLocks.set(connectorId, pLimit(1));
+    tokenRefreshLocks.set(lockKey, pLimit(1));
   }
-  return tokenRefreshLocks.get(connectorId)!;
+  return tokenRefreshLocks.get(lockKey)!;
 }
 
 export interface GetOAuthAuthorizationCodeConfig {
@@ -119,8 +119,10 @@ export const getOAuthAuthorizationCodeAccessToken = async ({
   // Default to true (OAuth 2.0 recommended practice)
   const shouldUseBasicAuth = useBasicAuth ?? true;
 
-  // Acquire lock for this connector to prevent concurrent token refreshes
-  const lock = getOrCreateLock(connectorId);
+  // Acquire lock scoped to the connector (shared mode) or to the connector + user (per-user mode),
+  // so concurrent requests for different users don't block each other unnecessarily.
+  const lockKey = isPerUser ? `${connectorId}:${profileUid}` : connectorId;
+  const lock = getOrCreateLock(lockKey);
 
   return await lock(async () => {
     // Re-fetch token inside lock - another request may have already refreshed it
