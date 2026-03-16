@@ -2797,7 +2797,7 @@
               ">; getConfig: () => Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 481,
+            "lineNumber": 482,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2813,7 +2813,7 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 481,
+                "lineNumber": 482,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
