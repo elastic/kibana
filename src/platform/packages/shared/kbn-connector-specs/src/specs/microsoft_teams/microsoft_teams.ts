@@ -62,7 +62,6 @@ export const MicrosoftTeams: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.bearer.token.label',
                 { defaultMessage: 'Microsoft API token' }
               ),
-              placeholder: 'abcde...',
               helpText: i18n.translate(
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.bearer.token.helpText',
                 {
@@ -78,7 +77,6 @@ export const MicrosoftTeams: ConnectorSpec = {
         type: 'oauth_client_credentials',
         defaults: {
           scope: 'https://graph.microsoft.com/.default',
-          tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
         },
         overrides: {
           meta: {
@@ -88,6 +86,7 @@ export const MicrosoftTeams: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauth.tokenUrl.label',
                 { defaultMessage: 'Token URL' }
               ),
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
               helpText: i18n.translate(
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauth.tokenUrl.helpText',
                 {
