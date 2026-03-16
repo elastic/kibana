@@ -378,8 +378,12 @@ export class DiscoverApp {
       return;
     }
 
+    // Recommended queries are fetched asynchronously when the popover opens
+    // (ad-hoc data view resolution followed by the extensions endpoint with
+    // two resolveIndex calls). In serverless CI this chain regularly exceeds
+    // the default 10 s action timeout.
     const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
-    await recommendedQueriesButton.waitFor({ state: 'visible' });
+    await expect(recommendedQueriesButton).toBeVisible({ timeout: 30_000 });
     await recommendedQueriesButton.click();
     await panelTitleButton.waitFor({ state: 'visible' });
   }
@@ -392,7 +396,10 @@ export class DiscoverApp {
       name: queryLabel,
     });
 
-    await queryOption.waitFor({ state: 'visible' });
+    // Solution-specific queries (e.g. "Search all metrics") are populated by
+    // the extensions endpoint which can lag behind the static template queries
+    // that render first. Allow extra time for the button to appear.
+    await expect(queryOption).toBeVisible({ timeout: 30_000 });
     await queryOption.click();
     await this.waitUntilSearchingHasFinished();
   }
