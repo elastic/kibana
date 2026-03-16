@@ -448,7 +448,11 @@ export const runInvestigationPipeline = async ({
     } catch (error) {
       errors.push(`Case matching failed: ${error instanceof Error ? error.message : error}`);
     }
-  } else if (config.caseMatching.enabled && entities.length === 0 && leadersForProcessing.length > 0) {
+  } else if (
+    config.caseMatching.enabled &&
+    entities.length === 0 &&
+    leadersForProcessing.length > 0
+  ) {
     logger.warn(
       `Pipeline ${executionId}: ${leadersForProcessing.length} leader alerts produced 0 entities — these alerts will be tagged as processed but not matched to any case`
     );
