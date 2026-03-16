@@ -8,21 +8,24 @@
 import type { Client } from '@elastic/elasticsearch';
 import { createGcsRepository, replaySnapshot } from '@kbn/es-snapshot-loader';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { GcsConfig } from '../scenarios/types';
 
-export const OTEL_DEMO_SNAPSHOT_NAME = 'payment-service-failures';
 export async function replayObservabilityDataStreams(
   esClient: Client,
   log: ToolingLog,
-  snapshotName: string
+  snapshotName: string,
+  gcsConfig: GcsConfig
 ) {
-  log.debug(`Replaying data from snapshot: ${snapshotName}`);
+  log.debug(
+    `Replaying data from snapshot: ${snapshotName} (${gcsConfig.bucket}/${gcsConfig.basePath})`
+  );
 
   await replaySnapshot({
     esClient,
     log,
     repository: createGcsRepository({
-      bucket: 'obs-ai-datasets',
-      basePath: 'otel-demo/payment-service-failures',
+      bucket: gcsConfig.bucket,
+      basePath: gcsConfig.basePath,
     }),
     snapshotName,
     patterns: ['logs-*', 'metrics-*', 'traces-*'],
