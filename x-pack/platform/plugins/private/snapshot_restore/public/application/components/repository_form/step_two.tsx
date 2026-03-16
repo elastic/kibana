@@ -189,7 +189,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
             </EuiButtonEmpty>
           ) : (
             <EuiButtonEmpty
-              color="primary"
+              flush="left"
               iconType="arrowLeft"
               onClick={onBack}
               data-test-subj="backButton"
@@ -203,10 +203,9 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            color={isManagedRepository ? 'warning' : 'success'}
-            iconType="check"
+            color={isManagedRepository ? 'warning' : 'primary'}
             onClick={onSave}
-            fill={isManagedRepository ? false : true}
+            fill={!isManagedRepository}
             data-test-subj="submitButton"
             isLoading={isSaving}
           >
