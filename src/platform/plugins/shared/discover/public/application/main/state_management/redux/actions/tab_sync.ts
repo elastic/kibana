@@ -54,7 +54,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     }
 
     dispatch(stopSyncing({ tabId }));
-    const { appState$, appStateContainer, globalStateContainer } = createUrlSyncObservables({
+    const { appState$, createAppStateContainer, globalStateContainer } = createUrlSyncObservables({
       tabId,
       dispatch,
       getState,
@@ -126,7 +126,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       const { data } = services;
       const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       const currentDataView = currentDataView$.getValue();
-      const appState = appStateContainer.get();
+      const appState = getAppState();
       const setDataViewFromSavedSearch =
         !appState.dataSource ||
         (isDataSourceType(appState.dataSource, DataSourceType.DataView) &&
@@ -149,7 +149,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       // syncs `_a` portion of url with query services
       const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
         data.query,
-        appStateContainer,
+        createAppStateContainer(false),
         {
           filters: FilterStateStore.APP_STATE,
           query: true,
@@ -158,7 +158,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 
       const { start: startSyncingAppStateWithUrl, stop: stopSyncingAppStateWithUrl } = syncState({
         storageKey: APP_STATE_URL_KEY,
-        stateContainer: appStateContainer,
+        stateContainer: createAppStateContainer(true),
         stateStorage: urlStateStorage,
       });
 
@@ -211,8 +211,8 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     // initialize syncing with _g and _a part of the URL
     const unsubscribeUrlState = initializeAndSyncUrlState();
 
-    // subscribing to state changes of appStateContainer, triggering data fetching
-    const appStateSubscription = appStateContainer.state$.subscribe(
+    // subscribing to app state changes, triggering data fetching
+    const appStateSubscription = appState$.subscribe(
       buildStateSubscribe({
         dataState: dataStateContainer,
         dispatch,

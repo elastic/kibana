@@ -42,17 +42,19 @@ export const createUrlSyncObservables = ({
     getState,
   });
 
-  const appStateContainer: INullableBaseStateContainer<DiscoverAppState> = {
+  const createAppStateContainer = (
+    isSystemTriggered: boolean
+  ): INullableBaseStateContainer<DiscoverAppState> => ({
     get: () => getAppState(),
     set: (appState) => {
       if (!appState) {
         return;
       }
 
-      dispatch(internalStateActions.setAppState({ tabId, appState, isSystemTriggered: true }));
+      dispatch(internalStateActions.setAppState({ tabId, appState, isSystemTriggered }));
     },
     state$: appState$,
-  };
+  });
 
   const getGlobalState = (): GlobalQueryStateFromUrl => {
     const tabState = selectTab(getState(), tabId);
@@ -92,7 +94,7 @@ export const createUrlSyncObservables = ({
 
   return {
     appState$,
-    appStateContainer,
+    createAppStateContainer,
     globalStateContainer,
   };
 };

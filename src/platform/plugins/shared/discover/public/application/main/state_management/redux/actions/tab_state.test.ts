@@ -217,11 +217,13 @@ describe('tab_state actions', () => {
       expect(
         selectTab(internalState.getState(), tabId).resetDefaultProfileState
           .previousStateSnapshotsByProfileId
-      ).toEqual({
-        [profileId]: {
-          columns: ['field1'],
-        },
-      });
+      ).toEqual(
+        expect.objectContaining({
+          [profileId]: expect.objectContaining({
+            columns: ['field1'],
+          }),
+        })
+      );
     });
   });
 

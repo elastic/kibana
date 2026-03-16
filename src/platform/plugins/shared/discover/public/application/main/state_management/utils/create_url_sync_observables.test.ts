@@ -56,14 +56,39 @@ describe('createUrlSyncObservables', () => {
 
     expect(result).toBeDefined();
     expect(result.appState$).toBeDefined();
-    expect(result.appStateContainer).toBeDefined();
+    expect(result.createAppStateContainer).toBeDefined();
     expect(result.globalStateContainer).toBeDefined();
   });
 
   it('should allow appStateContainer to get and set app state', async () => {
-    const { result, internalState, runtimeStateManager, tabId } = await setup();
+    const { result, internalState, tabId } = await setup();
+    const appStateContainer = result.createAppStateContainer(false);
 
-    const currentAppState = result.appStateContainer.get();
+    const currentAppState = appStateContainer.get();
+    expect(currentAppState).toBeDefined();
+    expect(currentAppState.query).toBeDefined();
+
+    let state = internalState.getState();
+    let tab = selectTab(state, tabId);
+    expect(tab.appState.hideChart).toBe(false);
+
+    const newAppState: DiscoverAppState = {
+      ...currentAppState,
+      hideChart: true,
+    };
+
+    appStateContainer.set(newAppState);
+
+    state = internalState.getState();
+    tab = selectTab(state, tabId);
+    expect(tab.appState.hideChart).toBe(true);
+  });
+
+  it('should not sync previous state snapshots when urlAppStateContainer sets app state', async () => {
+    const { result, internalState, runtimeStateManager, tabId } = await setup();
+    const urlAppStateContainer = result.createAppStateContainer(true);
+
+    const currentAppState = urlAppStateContainer.get();
     expect(currentAppState).toBeDefined();
     expect(currentAppState.query).toBeDefined();
 
@@ -84,7 +109,7 @@ describe('createUrlSyncObservables', () => {
       hideChart: true,
     };
 
-    result.appStateContainer.set(newAppState);
+    urlAppStateContainer.set(newAppState);
 
     state = internalState.getState();
     tab = selectTab(state, tabId);
@@ -131,11 +156,23 @@ describe('createUrlSyncObservables', () => {
 
   it('should not set app state when nothing is passed', async () => {
     const { result } = await setup();
+    const appStateContainer = result.createAppStateContainer(false);
 
-    const originalAppState = result.appStateContainer.get();
-    result.appStateContainer.set(null);
+    const originalAppState = appStateContainer.get();
+    appStateContainer.set(null);
 
-    const currentAppState = result.appStateContainer.get();
+    const currentAppState = appStateContainer.get();
+    expect(currentAppState).toEqual(originalAppState);
+  });
+
+  it('should not set app state when nothing is passed to urlAppStateContainer', async () => {
+    const { result } = await setup();
+    const urlAppStateContainer = result.createAppStateContainer(true);
+
+    const originalAppState = urlAppStateContainer.get();
+    urlAppStateContainer.set(null);
+
+    const currentAppState = urlAppStateContainer.get();
     expect(currentAppState).toEqual(originalAppState);
   });
 
