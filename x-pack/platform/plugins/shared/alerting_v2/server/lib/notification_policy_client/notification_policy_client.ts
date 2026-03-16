@@ -228,7 +228,8 @@ export class NotificationPolicyClient {
       items: res.saved_objects.map((so) => ({
         id: so.id,
         version: so.version,
-        ...so.attributes,
+        ...omit(so.attributes, ['auth']),
+        auth: toAuthResponse(so.attributes.auth),
       })),
       total: res.total,
       page,

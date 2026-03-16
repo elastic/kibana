@@ -102,6 +102,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(item.destinations).to.be.an('array');
         expect(item.createdAt).to.be.a('string');
         expect(item.updatedAt).to.be.a('string');
+        expect(item.auth).to.be.an('object');
+        expect(item.auth.owner).to.be.a('string');
+        expect(item.auth.createdByUser).to.be.a('boolean');
+        expect(item.auth).to.not.have.property('apiKey');
       }
     });
 
