@@ -38,3 +38,4 @@ react-element-to-jsx-string
 lightningcss
 tar-fs
 browserslist
+react-day-picker

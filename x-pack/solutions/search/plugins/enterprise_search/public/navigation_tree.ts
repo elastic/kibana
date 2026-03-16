@@ -291,6 +291,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:genAiSettings' },
+                    { link: 'management:evals' },
                     { link: 'management:aiAssistantManagementSelection' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.ai', {
