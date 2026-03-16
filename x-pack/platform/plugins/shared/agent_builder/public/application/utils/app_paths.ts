@@ -20,7 +20,6 @@ export const appPaths = {
         `/agents/${agentId}/conversations/${conversationId}`,
     },
     skills: ({ agentId }: { agentId: string }) => `/agents/${agentId}/skills`,
-    tools: ({ agentId }: { agentId: string }) => `/agents/${agentId}/tools`,
     plugins: ({ agentId }: { agentId: string }) => `/agents/${agentId}/plugins`,
     connectors: ({ agentId }: { agentId: string }) => `/agents/${agentId}/connectors`,
     instructions: ({ agentId }: { agentId: string }) => `/agents/${agentId}/instructions`,

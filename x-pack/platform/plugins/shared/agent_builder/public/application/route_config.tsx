@@ -62,12 +62,6 @@ export const agentRoutes: RouteDefinition[] = [
     element: <RouteDisplay />,
   },
   {
-    path: '/agents/:agentId/tools',
-    sidebarView: 'agentSettings',
-    navLabel: navLabels.tools,
-    element: <RouteDisplay />,
-  },
-  {
     path: '/agents/:agentId/plugins',
     sidebarView: 'agentSettings',
     navLabel: navLabels.plugins,
