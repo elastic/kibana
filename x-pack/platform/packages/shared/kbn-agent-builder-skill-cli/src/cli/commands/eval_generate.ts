@@ -10,8 +10,15 @@ import Fs from 'fs';
 import type { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { DOMAIN_PLUGIN_PATHS, ELASTIC_LICENSE_HEADER } from '../../constants';
-import type { SkillDomain } from '../../constants';
-import { validateSkillName, validateDomain, toSnakeCase, resolveRepoRoot, ensureDir } from '../../utils';
+import {
+  validateSkillName,
+  validateDomain,
+  toSnakeCase,
+  resolveRepoRoot,
+  ensureDir,
+  findSkillFile,
+  extractSkillMetadata,
+} from '../../utils';
 
 interface EvalTask {
   id: string;
@@ -19,27 +26,6 @@ interface EvalTask {
   expectedBehavior: string;
   category: string;
   difficulty: 'easy' | 'medium' | 'hard';
-}
-
-function extractSkillMetadata(filePath: string): {
-  name: string;
-  description: string;
-  content: string;
-  tools: string[];
-} {
-  const source = Fs.readFileSync(filePath, 'utf-8');
-
-  const nameMatch = source.match(/name:\s*['"]([^'"]+)['"]/);
-  const descMatch = source.match(/description:\s*\n?\s*['"`]([^'"`]+)['"`]/s);
-  const contentMatch = source.match(/content:\s*`([^`]*)`/s);
-  const toolMatches = source.match(/['"]([a-z]+\.[a-z._]+)['"]/g);
-
-  return {
-    name: nameMatch?.[1] ?? 'unknown',
-    description: descMatch?.[1] ?? '',
-    content: contentMatch?.[1] ?? '',
-    tools: toolMatches?.map((t) => t.replace(/['"]/g, '')).filter((t) => t.includes('.')) ?? [],
-  };
 }
 
 function generateTasksFromMetadata(meta: {
@@ -61,8 +47,11 @@ function generateTasksFromMetadata(meta: {
 
   tasks.push({
     id: `${meta.name}-activation-${++taskIndex}`,
-    input: `Help me with ${meta.description.toLowerCase().slice(0, 100)}`,
-    expectedBehavior: 'Agent should activate the skill and begin the workflow described in its content',
+    input: meta.description
+      ? `Help me with ${meta.description.toLowerCase().slice(0, 100)}`
+      : `Help me get started with ${meta.name.replace(/-/g, ' ')}`,
+    expectedBehavior:
+      'Agent should activate the skill and begin the workflow described in its content',
     category: 'activation',
     difficulty: 'easy',
   });
@@ -110,13 +99,17 @@ function generateTasksFromMetadata(meta: {
   return tasks;
 }
 
+function escapeForSingleQuoteString(str: string): string {
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+}
+
 function renderEvalDatasetFile(skillName: string, tasks: EvalTask[]): string {
   const datasetEntries = tasks
     .map(
       (task) => `  {
     id: '${task.id}',
-    input: '${task.input.replace(/'/g, "\\'")}',
-    expectedBehavior: '${task.expectedBehavior.replace(/'/g, "\\'")}',
+    input: '${escapeForSingleQuoteString(task.input)}',
+    expectedBehavior: '${escapeForSingleQuoteString(task.expectedBehavior)}',
     category: '${task.category}',
     difficulty: '${task.difficulty}',
   }`
@@ -149,26 +142,21 @@ export const evalGenerateCmd: Command<void> = {
   name: 'eval:generate',
   description: `
   Generate an evaluation dataset for an Agent Builder skill.
-  Creates 50-100 agent tasks with pass/fail rubrics based on the skill definition.
+  Creates eval tasks with pass/fail rubrics based on the skill definition.
 
   Examples:
     node scripts/agent_builder_skill eval:generate --name alert-triage --domain security
-    node scripts/agent_builder_skill eval:generate --name alert-triage --domain security --count 75
   `,
   flags: {
-    string: ['name', 'domain', 'count'],
-    default: { count: '50' },
+    string: ['name', 'domain'],
     help: `
       --name      Skill name [required]
       --domain    Skill domain [required]
-      --count     Target number of eval tasks to generate (default: 50)
     `,
   },
   run: async ({ log, flagsReader }) => {
     const name = flagsReader.string('name');
     const domain = flagsReader.string('domain');
-    const countStr = flagsReader.string('count');
-    const count = countStr ? parseInt(countStr, 10) : undefined;
 
     if (!name) {
       throw createFlagError('--name is required');
@@ -181,36 +169,22 @@ export const evalGenerateCmd: Command<void> = {
     validateDomain(domain);
 
     const repoRoot = resolveRepoRoot();
-    const pluginPath = DOMAIN_PLUGIN_PATHS[domain as SkillDomain];
-    const snakeName = toSnakeCase(name);
-    const skillFile = Path.join(repoRoot, pluginPath, 'skills', `${snakeName}_skill.ts`);
+    const pluginPath = DOMAIN_PLUGIN_PATHS[domain];
+    const skillFile = findSkillFile(repoRoot, pluginPath, name);
 
-    if (!Fs.existsSync(skillFile)) {
+    if (!skillFile) {
       throw new Error(
-        `Skill file not found: ${skillFile}\nRun "generate" first to scaffold the skill.`
+        `Skill file not found for "${name}" in ${pluginPath}\nRun "generate" first to scaffold the skill.`
       );
     }
 
     log.info(`Generating eval dataset for skill "${name}"...`);
 
     const meta = extractSkillMetadata(skillFile);
-    let tasks = generateTasksFromMetadata(meta);
+    const tasks = generateTasksFromMetadata(meta);
 
-    const targetCount = count ?? 50;
-    while (tasks.length < targetCount) {
-      const idx = tasks.length + 1;
-      tasks.push({
-        id: `${name}-generated-${idx}`,
-        input: `Scenario ${idx}: Help me with a ${name.replace(/-/g, ' ')} task`,
-        expectedBehavior: 'TODO: Define the expected agent behavior for this scenario',
-        category: 'generated',
-        difficulty: idx % 3 === 0 ? 'hard' : idx % 2 === 0 ? 'medium' : 'easy',
-      });
-    }
-
-    tasks = tasks.slice(0, targetCount);
-
-    const evalDir = Path.join(repoRoot, pluginPath, 'skills', '__evals__');
+    const snakeName = toSnakeCase(name);
+    const evalDir = Path.join(Path.dirname(skillFile), '__evals__');
     ensureDir(evalDir);
 
     const evalFile = Path.join(evalDir, `${snakeName}_eval_dataset.ts`);
@@ -240,7 +214,9 @@ export const evalGenerateCmd: Command<void> = {
     log.info('');
     log.info('Next steps:');
     log.info(`  1. Review and edit ${Path.relative(repoRoot, evalFile)}`);
-    log.info(`  2. Replace TODO placeholders with domain-specific expected behaviors`);
-    log.info(`  3. Run evals: node scripts/agent_builder_skill eval:run --name ${name} --domain ${domain}`);
+    log.info(`  2. Add domain-specific scenarios and refine expected behaviors`);
+    log.info(
+      `  3. Run evals: node scripts/agent_builder_skill eval:run --name ${name} --domain ${domain}`
+    );
   },
 };

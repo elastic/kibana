@@ -11,15 +11,39 @@ import { spawnSync } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { DOMAIN_PLUGIN_PATHS } from '../../constants';
-import type { SkillDomain } from '../../constants';
-import { validateSkillName, validateDomain, toSnakeCase, resolveRepoRoot } from '../../utils';
+import {
+  validateSkillName,
+  validateDomain,
+  toSnakeCase,
+  resolveRepoRoot,
+  findSkillFile,
+} from '../../utils';
 
-function findEvalSuiteConfig(repoRoot: string, pluginPath: string, skillName: string): string | null {
+function findEvalSuiteConfig(
+  repoRoot: string,
+  pluginPath: string,
+  skillName: string
+): string | null {
   const snakeName = toSnakeCase(skillName);
-  const candidates = [
-    Path.join(repoRoot, pluginPath, 'skills', '__evals__', `${snakeName}_eval_dataset.ts`),
-    Path.join(repoRoot, pluginPath, 'skills', '__evals__', `${snakeName}.eval.ts`),
-  ];
+  const skillFile = findSkillFile(repoRoot, pluginPath, skillName);
+  const skillDir = skillFile ? Path.dirname(skillFile) : null;
+
+  const candidates: string[] = [];
+  const skillsDir = Path.join(repoRoot, pluginPath, 'skills');
+
+  if (skillDir) {
+    candidates.push(
+      Path.join(skillDir, '__evals__', `${snakeName}_eval_dataset.ts`),
+      Path.join(skillDir, '__evals__', `${snakeName}.eval.ts`)
+    );
+  }
+
+  if (!skillDir || skillDir !== skillsDir) {
+    candidates.push(
+      Path.join(skillsDir, '__evals__', `${snakeName}_eval_dataset.ts`),
+      Path.join(skillsDir, '__evals__', `${snakeName}.eval.ts`)
+    );
+  }
 
   for (const candidate of candidates) {
     if (Fs.existsSync(candidate)) {
@@ -44,18 +68,16 @@ export const evalRunCmd: Command<void> = {
   Examples:
     node scripts/agent_builder_skill eval:run --name alert-triage --domain security
     node scripts/agent_builder_skill eval:run --name alert-triage --domain security --connector-id bedrock-claude
-    node scripts/agent_builder_skill eval:run --domain security --metric first-try
+    node scripts/agent_builder_skill eval:run --name alert-triage --domain security --metric first-try
   `,
   flags: {
     string: ['name', 'domain', 'connector-id', 'metric'],
-    boolean: ['baseline'],
-    default: { baseline: false, metric: 'overall' },
+    default: { metric: 'overall' },
     help: `
       --name            Skill name [required]
       --domain          Skill domain [required]
       --connector-id    LLM connector ID for evaluation (uses EVALUATION_CONNECTOR_ID env if unset)
       --metric          Metric to report: first-try, e2e, overall (default: overall)
-      --baseline        Compare with/without skill (A/B evaluation)
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -63,7 +85,6 @@ export const evalRunCmd: Command<void> = {
     const domain = flagsReader.string('domain');
     const connectorId = flagsReader.string('connector-id') || process.env.EVALUATION_CONNECTOR_ID;
     const metric = flagsReader.string('metric') || 'overall';
-    const baseline = flagsReader.boolean('baseline');
 
     if (!name) {
       throw createFlagError('--name is required');
@@ -76,7 +97,7 @@ export const evalRunCmd: Command<void> = {
     validateDomain(domain);
 
     const repoRoot = resolveRepoRoot();
-    const pluginPath = DOMAIN_PLUGIN_PATHS[domain as SkillDomain];
+    const pluginPath = DOMAIN_PLUGIN_PATHS[domain];
     const evalConfig = findEvalSuiteConfig(repoRoot, pluginPath, name);
 
     if (!evalConfig) {
@@ -92,15 +113,11 @@ export const evalRunCmd: Command<void> = {
     if (connectorId) {
       log.info(`  Connector: ${connectorId}`);
     }
-    if (baseline) {
-      log.info(`  Mode: A/B comparison (with/without skill)`);
-    }
 
     const phaseGates: Record<string, Record<string, number>> = {
       security: { 'first-try': 0.8, e2e: 0.6, overall: 0.85 },
       observability: { 'first-try': 0.8, e2e: 0.6, overall: 0.85 },
       platform: { 'first-try': 0.8, e2e: 0.6, overall: 0.85 },
-      search: { 'first-try': 0.8, e2e: 0.6, overall: 0.85 },
     };
 
     const threshold = phaseGates[domain]?.[metric] ?? 0.85;
@@ -124,13 +141,17 @@ export const evalRunCmd: Command<void> = {
 
       const hasTodos = datasetContent.includes("'TODO:");
       if (hasTodos) {
-        log.warning('  Dataset contains TODO placeholders — edit them before running real evaluations');
+        log.warning(
+          '  Dataset contains TODO placeholders — edit them before running real evaluations'
+        );
       }
 
       log.info('');
       log.info('Dry-run complete. To run real evaluations:');
       log.info('  1. Set up connectors: node scripts/evals init');
-      log.info(`  2. Run: EVALUATION_CONNECTOR_ID=<id> node scripts/agent_builder_skill eval:run --name ${name} --domain ${domain}`);
+      log.info(
+        `  2. Run: EVALUATION_CONNECTOR_ID=<id> node scripts/agent_builder_skill eval:run --name ${name} --domain ${domain}`
+      );
       return;
     }
 
@@ -143,7 +164,6 @@ export const evalRunCmd: Command<void> = {
     const result = spawnSync(
       'node',
       [
-        '--no-experimental-require-module',
         'scripts/evals',
         'run',
         '--suite',
@@ -158,7 +178,10 @@ export const evalRunCmd: Command<void> = {
     );
 
     if (result.status !== 0) {
-      log.error(`Evaluation run failed with exit code ${result.status}`);
+      const exitInfo = result.signal
+        ? `killed by signal ${result.signal}`
+        : `exit code ${result.status}`;
+      log.error(`Evaluation run failed with ${exitInfo}`);
       process.exitCode = 1;
     }
   },

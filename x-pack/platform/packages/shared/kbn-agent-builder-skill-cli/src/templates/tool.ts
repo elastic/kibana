@@ -34,7 +34,7 @@ export function ${fnName}(): BuiltinToolDefinition<typeof ${schemaVar}> {
     type: ToolType.builtin,
     name: '${opts.name}',
     description:
-      '${opts.description}',
+      '${opts.description.replace(/'/g, "\\'")}',
     schema: ${schemaVar},
     tags: [],
     handler: async (params, _context) => {

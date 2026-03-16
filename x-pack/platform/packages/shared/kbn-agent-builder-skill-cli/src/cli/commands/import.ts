@@ -10,8 +10,7 @@ import Fs from 'fs';
 import type { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { DOMAIN_PLUGIN_PATHS } from '../../constants';
-import type { SkillDomain } from '../../constants';
-import { validateSkillName, validateDomain, toSnakeCase, resolveRepoRoot } from '../../utils';
+import { validateSkillName, validateDomain, resolveRepoRoot, findSkillFile } from '../../utils';
 
 function parseSkillMd(content: string): { name: string; description: string; body: string } {
   const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
@@ -77,14 +76,9 @@ function updateSkillFileContent(
   if (updates.content) {
     const toolsSectionIndex = updates.content.indexOf('\n## Tools\n');
     const cleanContent =
-      toolsSectionIndex >= 0
-        ? updates.content.slice(0, toolsSectionIndex).trim()
-        : updates.content;
+      toolsSectionIndex >= 0 ? updates.content.slice(0, toolsSectionIndex).trim() : updates.content;
 
-    result = result.replace(
-      /content:\s*`[^`]*`/s,
-      `content: \`${cleanContent}\``
-    );
+    result = result.replace(/content:\s*`[^`]*`/s, `content: \`${cleanContent}\``);
   }
 
   if (updates.description) {
@@ -146,13 +140,12 @@ export const importCmd: Command<void> = {
     validateDomain(domain);
 
     const repoRoot = resolveRepoRoot();
-    const pluginPath = DOMAIN_PLUGIN_PATHS[domain as SkillDomain];
-    const snakeName = toSnakeCase(name);
-    const skillFile = Path.join(repoRoot, pluginPath, 'skills', `${snakeName}_skill.ts`);
+    const pluginPath = DOMAIN_PLUGIN_PATHS[domain];
+    const skillFile = findSkillFile(repoRoot, pluginPath, name);
 
-    if (!Fs.existsSync(skillFile)) {
+    if (!skillFile) {
       throw new Error(
-        `Skill file not found: ${skillFile}\n` +
+        `Skill file not found for "${name}" in ${pluginPath}\n` +
           `Run "generate" first to create a skill, then import content into it.`
       );
     }

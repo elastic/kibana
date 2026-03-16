@@ -27,7 +27,7 @@ export const ${varName} = defineSkillType({
   name: '${opts.name}',
   basePath: '${resolvedBasePath}',
   description:
-    '${opts.description}',
+    '${opts.description.replace(/'/g, "\\'")}',
   content: \`# ${toTitleCase(opts.name)}
 
 ## Overview

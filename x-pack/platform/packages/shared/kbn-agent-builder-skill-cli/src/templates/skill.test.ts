@@ -16,8 +16,8 @@ describe('renderSkillFile', () => {
       description: 'Triage and analyze security alerts',
     });
 
-    expect(result).toContain("import { defineSkillType }");
-    expect(result).toContain("export const alertTriageSkill = defineSkillType");
+    expect(result).toContain('import { defineSkillType }');
+    expect(result).toContain('export const alertTriageSkill = defineSkillType');
     expect(result).toContain("id: 'alert-triage'");
     expect(result).toContain("name: 'alert-triage'");
     expect(result).toContain("basePath: 'skills/security/alerts'");

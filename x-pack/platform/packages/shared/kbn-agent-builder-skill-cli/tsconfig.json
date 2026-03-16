@@ -18,6 +18,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/tooling-log",
+    "@kbn/repo-info",
     "@kbn/agent-builder-server",
     "@kbn/zod"
   ]

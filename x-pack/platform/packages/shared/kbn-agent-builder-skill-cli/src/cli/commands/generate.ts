@@ -9,8 +9,13 @@ import Path from 'path';
 import type { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { DOMAIN_PLUGIN_PATHS, DOMAIN_BASE_PATHS } from '../../constants';
-import type { SkillDomain } from '../../constants';
-import { validateSkillName, validateDomain, toSnakeCase, resolveRepoRoot, writeFileIfNotExists } from '../../utils';
+import {
+  validateSkillName,
+  validateDomain,
+  toSnakeCase,
+  resolveRepoRoot,
+  writeFile,
+} from '../../utils';
 import { renderSkillFile } from '../../templates/skill';
 import { renderToolFile } from '../../templates/tool';
 import { renderSkillTestFile, renderToolTestFile } from '../../templates/test';
@@ -27,17 +32,18 @@ export const generateCmd: Command<void> = {
   `,
   flags: {
     string: ['name', 'domain', 'base-path', 'description'],
-    boolean: ['with-tool'],
+    boolean: ['with-tool', 'force'],
     default: {
       'with-tool': false,
-      description: 'TODO: Add a description for this skill',
+      force: false,
     },
     help: `
       --name           Skill name (lowercase, hyphens, max 64 chars) [required]
-      --domain         Skill domain: security, observability, platform, search [required]
+      --domain         Skill domain: security, observability, platform [required]
       --base-path      Override the default base path (e.g. skills/security/alerts)
       --description    Skill description (max 1024 chars)
       --with-tool      Also generate a companion tool file and test
+      --force          Overwrite existing files
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -55,10 +61,12 @@ export const generateCmd: Command<void> = {
     validateDomain(domain);
 
     const repoRoot = resolveRepoRoot();
-    const pluginPath = DOMAIN_PLUGIN_PATHS[domain as SkillDomain];
-    const basePath = flagsReader.string('base-path') || DOMAIN_BASE_PATHS[domain as SkillDomain];
-    const description = flagsReader.string('description') || 'TODO: Add a description for this skill';
+    const pluginPath = DOMAIN_PLUGIN_PATHS[domain];
+    const basePath = flagsReader.string('base-path') || DOMAIN_BASE_PATHS[domain];
+    const description =
+      flagsReader.string('description') || 'TODO: Add a description for this skill';
     const withTool = flagsReader.boolean('with-tool');
+    const force = flagsReader.boolean('force');
 
     const skillsDir = Path.join(repoRoot, pluginPath, 'skills');
     const snakeName = toSnakeCase(name);
@@ -70,12 +78,8 @@ export const generateCmd: Command<void> = {
     const skillFile = Path.join(skillsDir, `${snakeName}_skill.ts`);
     const skillTestFile = Path.join(skillsDir, `${snakeName}_skill.test.ts`);
 
-    writeFileIfNotExists(
-      skillFile,
-      renderSkillFile({ name, domain: domain as SkillDomain, basePath, description }),
-      log
-    );
-    writeFileIfNotExists(skillTestFile, renderSkillTestFile({ name }), log);
+    writeFile(skillFile, renderSkillFile({ name, domain, basePath, description }), log, force);
+    writeFile(skillTestFile, renderSkillTestFile({ name }), log, force);
 
     if (withTool) {
       const toolsDir = Path.join(repoRoot, pluginPath, 'tools');
@@ -83,17 +87,15 @@ export const generateCmd: Command<void> = {
       const toolFile = Path.join(toolsDir, `${snakeName}_tool.ts`);
       const toolTestFile = Path.join(toolsDir, `${snakeName}_tool.test.ts`);
 
-      writeFileIfNotExists(
-        toolFile,
-        renderToolFile({ name, domain: domain as SkillDomain, toolId, description }),
-        log
-      );
-      writeFileIfNotExists(toolTestFile, renderToolTestFile({ name, toolId }), log);
+      writeFile(toolFile, renderToolFile({ name, domain, toolId, description }), log, force);
+      writeFile(toolTestFile, renderToolTestFile({ name, toolId }), log, force);
     }
 
     log.info('');
     log.info('Next steps:');
-    log.info(`  1. Edit ${skillFile} to add skill content and instructions`);
+    log.info(
+      `  1. Edit ${Path.relative(repoRoot, skillFile)} to add skill content and instructions`
+    );
     if (withTool) {
       log.info(`  2. Implement the tool handler in the generated tool file`);
       log.info(`  3. Register the skill in the plugin's register_skills.ts`);

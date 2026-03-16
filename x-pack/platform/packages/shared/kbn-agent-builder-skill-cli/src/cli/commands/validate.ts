@@ -9,7 +9,6 @@ import Path from 'path';
 import Fs from 'fs';
 import type { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import type { ToolingLog } from '@kbn/tooling-log';
 import {
   DOMAIN_PLUGIN_PATHS,
   SKILL_NAME_REGEX,
@@ -21,9 +20,9 @@ import type { SkillDomain } from '../../constants';
 import {
   validateSkillName,
   validateDomain,
-  toSnakeCase,
   resolveRepoRoot,
   discoverSkillFiles,
+  findSkillFile,
 } from '../../utils';
 
 interface ValidationResult {
@@ -31,7 +30,7 @@ interface ValidationResult {
   checks: Array<{ name: string; passed: boolean; message: string }>;
 }
 
-function validateSkillFile(filePath: string, log: ToolingLog): ValidationResult {
+function validateSkillFile(filePath: string): ValidationResult {
   const checks: Array<{ name: string; passed: boolean; message: string }> = [];
   const content = Fs.readFileSync(filePath, 'utf-8');
 
@@ -113,8 +112,8 @@ function validateSkillFile(filePath: string, log: ToolingLog): ValidationResult 
 
   const inlineToolMatches = content.match(/getInlineTools/g);
   if (inlineToolMatches) {
-    const toolCountMatch = content.match(/id:\s*['"][^'"]+['"]/g);
-    const estimatedToolCount = toolCountMatch ? toolCountMatch.length - 1 : 0;
+    const toolIdMatches = content.match(/id:\s*['"][a-z]+\.[a-z._]+['"]/g);
+    const estimatedToolCount = toolIdMatches?.length ?? 0;
     if (estimatedToolCount > MAX_INLINE_TOOLS) {
       checks.push({
         name: 'inline-tool-limit',
@@ -167,7 +166,7 @@ export const validateCmd: Command<void> = {
     default: { all: false },
     help: `
       --name      Skill name to validate (optional if --domain or --all)
-      --domain    Domain to validate all skills in (security, observability, platform, search)
+      --domain    Domain to validate all skills in (security, observability, platform)
       --all       Validate all skills across all domains
     `,
   },
@@ -181,6 +180,10 @@ export const validateCmd: Command<void> = {
       throw createFlagError('Provide --name and --domain, --domain, or --all');
     }
 
+    if (name && !domain) {
+      throw createFlagError('--domain is required when using --name');
+    }
+
     let filesToValidate: string[] = [];
 
     if (all) {
@@ -189,14 +192,13 @@ export const validateCmd: Command<void> = {
       }
     } else if (domain) {
       validateDomain(domain);
-      const pluginPath = DOMAIN_PLUGIN_PATHS[domain as SkillDomain];
+      const pluginPath = DOMAIN_PLUGIN_PATHS[domain];
 
       if (name) {
         validateSkillName(name);
-        const snakeName = toSnakeCase(name);
-        const skillFile = Path.join(repoRoot, pluginPath, 'skills', `${snakeName}_skill.ts`);
-        if (!Fs.existsSync(skillFile)) {
-          throw new Error(`Skill file not found: ${skillFile}`);
+        const skillFile = findSkillFile(repoRoot, pluginPath, name);
+        if (!skillFile) {
+          throw new Error(`Skill file not found for "${name}" in ${pluginPath}`);
         }
         filesToValidate = [skillFile];
       } else {
@@ -217,7 +219,7 @@ export const validateCmd: Command<void> = {
 
     for (const file of filesToValidate) {
       const relativePath = Path.relative(repoRoot, file);
-      const result = validateSkillFile(file, log);
+      const result = validateSkillFile(file);
 
       if (result.passed) {
         log.success(`✓ ${relativePath}`);
@@ -236,7 +238,9 @@ export const validateCmd: Command<void> = {
     }
 
     log.info('---');
-    log.info(`Results: ${totalPassed} passed, ${totalFailed} failed out of ${filesToValidate.length} skills`);
+    log.info(
+      `Results: ${totalPassed} passed, ${totalFailed} failed out of ${filesToValidate.length} skills`
+    );
 
     if (totalFailed > 0) {
       process.exitCode = 1;

@@ -6,7 +6,7 @@
  */
 
 import { ELASTIC_LICENSE_HEADER } from '../constants';
-import { toCamelCase, toSnakeCase } from '../utils';
+import { toCamelCase, toPascalCase, toSnakeCase } from '../utils';
 
 export function renderSkillTestFile(opts: { name: string }): string {
   const varName = `${toCamelCase(opts.name)}Skill`;
@@ -43,12 +43,9 @@ describe('${varName}', () => {
 `;
 }
 
-export function renderToolTestFile(opts: {
-  name: string;
-  toolId: string;
-}): string {
-  const fnName = `get${opts.name.split(/[-_]/).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join('')}Tool`;
-  const fileName = `${opts.name.replace(/-/g, '_')}_tool`;
+export function renderToolTestFile(opts: { name: string; toolId: string }): string {
+  const fnName = `get${toPascalCase(opts.name)}Tool`;
+  const fileName = `${toSnakeCase(opts.name)}_tool`;
 
   return `${ELASTIC_LICENSE_HEADER}
 

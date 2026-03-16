@@ -19,12 +19,8 @@ describe('validateSkillName', () => {
   });
 
   it('rejects names with invalid characters', () => {
-    expect(() => validateSkillName('Alert Triage')).toThrow(
-      'must contain only lowercase letters'
-    );
-    expect(() => validateSkillName('alert.triage')).toThrow(
-      'must contain only lowercase letters'
-    );
+    expect(() => validateSkillName('Alert Triage')).toThrow('must contain only lowercase letters');
+    expect(() => validateSkillName('alert.triage')).toThrow('must contain only lowercase letters');
   });
 
   it('rejects names exceeding max length', () => {
@@ -38,7 +34,6 @@ describe('validateDomain', () => {
     expect(() => validateDomain('security')).not.toThrow();
     expect(() => validateDomain('observability')).not.toThrow();
     expect(() => validateDomain('platform')).not.toThrow();
-    expect(() => validateDomain('search')).not.toThrow();
   });
 
   it('rejects invalid domains', () => {
@@ -72,5 +67,9 @@ describe('toPascalCase', () => {
   it('converts hyphenated names', () => {
     expect(toPascalCase('alert-triage')).toBe('AlertTriage');
     expect(toPascalCase('my-long-name')).toBe('MyLongName');
+  });
+
+  it('converts underscored names', () => {
+    expect(toPascalCase('alert_triage')).toBe('AlertTriage');
   });
 });
