@@ -12,6 +12,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 
 /**
  * A single SML chunk to be indexed.
@@ -65,14 +66,6 @@ export interface SmlListItem {
 }
 
 /**
- * A converted conversation attachment from SML.
- */
-export interface SmlConversationAttachment {
-  type: string;
-  data: Record<string, unknown>;
-}
-
-/**
  * Server-side type definition for SML (Semantic Metadata Layer).
  *
  * Registered via `agentBuilder.sml.registerType()` during plugin setup.
@@ -102,7 +95,7 @@ export interface SmlTypeDefinition {
   toAttachment: (
     item: SmlDocument,
     context: SmlToAttachmentContext
-  ) => Promise<SmlConversationAttachment | undefined>;
+  ) => Promise<AttachmentInput | undefined>;
 
   /**
    * Optional: custom crawl interval for the crawler.

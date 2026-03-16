@@ -50,7 +50,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
   id: VISUALIZATION_SML_TYPE,
   fetchFrequency: () => '1h',
 
-  list: async function* (context) {
+  async *list(context) {
     const finder = context.savedObjectsClient.createPointInTimeFinder({
       type: 'lens',
       perPage: 1000,
