@@ -26,7 +26,7 @@ exports[`<ToolbarButton /> standard is rendered - default 1`] = `
     class="emotion-euiButtonDisplayContent"
   >
     <span
-      class="eui-textTruncate"
+      class="eui-textTruncate css-13ifi6d-m"
     >
       Create chart
     </span>
@@ -48,7 +48,7 @@ exports[`<ToolbarButton /> standard is rendered - primary 1`] = `
     class="emotion-euiButtonDisplayContent"
   >
     <span
-      class="eui-textTruncate"
+      class="eui-textTruncate css-13ifi6d-m"
     >
       Create chart
     </span>
@@ -74,7 +74,7 @@ exports[`<ToolbarButton /> standard is rendered - text wth icon 1`] = `
       data-euiicon-type="plusInCircle"
     />
     <span
-      class="eui-textTruncate"
+      class="eui-textTruncate css-13ifi6d-m"
     >
       Create chart
     </span>

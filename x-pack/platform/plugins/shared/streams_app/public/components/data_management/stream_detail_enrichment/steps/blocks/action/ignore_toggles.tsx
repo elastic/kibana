@@ -45,11 +45,7 @@ export const IgnoreMissingToggle = () => {
       name={'ignore_missing'}
       label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreMissingLabel',
-        { defaultMessage: 'Ignore missing' }
-      )}
-      helpText={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreMissingHelpText',
-        { defaultMessage: 'Ignore documents with a missing field.' }
+        { defaultMessage: 'Ignore documents with a missing field' }
       )}
     />
   );

@@ -11,15 +11,14 @@ import { schema } from '@kbn/config-schema';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { baseMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
-export function getUpdateRequestBodySchema() {
-  return getDashboardStateSchema();
+export function getUpdateRequestBodySchema(isDashboardAppRequest: boolean) {
+  return getDashboardStateSchema(isDashboardAppRequest);
 }
 
-export function getUpdateResponseBodySchema() {
+export function getUpdateResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string(),
-    data: getDashboardStateSchema(),
+    data: getDashboardStateSchema(isDashboardAppRequest),
     meta: schema.allOf([baseMetaSchema, updatedMetaSchema]),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
   });
 }

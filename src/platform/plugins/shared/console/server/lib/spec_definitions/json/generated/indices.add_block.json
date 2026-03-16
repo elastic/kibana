@@ -40,6 +40,7 @@
       "{index}/_block/{block}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-add-block",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-add-block",
     "availability": {
       "stack": true,
       "serverless": true

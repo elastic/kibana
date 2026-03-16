@@ -89,6 +89,32 @@ describe('validateStreamlang', () => {
       expect(result.errors[0].field).toBe('field1');
       expect(result.errors[1].field).toBe('field2');
     });
+
+    it('should allow non-namespaced fields when skipNamespaceValidation is true (logs.ecs streams)', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'set',
+            to: 'test_field',
+            value: 'test',
+          },
+          {
+            action: 'set',
+            to: 'host.name',
+            value: 'my-host',
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+        streamType: 'wired',
+        skipNamespaceValidation: true,
+      });
+
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
   });
 
   describe('reserved field validation', () => {
@@ -1442,11 +1468,19 @@ describe('validateStreamlang', () => {
         });
 
         expect(result.isValid).toBe(false);
-        expect(result.errors).toHaveLength(1);
-        expect(result.errors[0].type).toBe('mixed_type');
-        expect(result.errors[0].field).toBe('attributes.amount');
-        expect(result.errors[0].conflictingTypes).toEqual(
-          expect.arrayContaining(['string', 'number'])
+        expect(result.errors).toHaveLength(2);
+        expect(result.errors).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              type: 'invalid_processor_placement',
+              field: 'to',
+            }),
+            expect.objectContaining({
+              type: 'mixed_type',
+              field: 'attributes.amount',
+              conflictingTypes: expect.arrayContaining(['string', 'number']),
+            }),
+          ])
         );
       });
 
@@ -1993,6 +2027,158 @@ describe('validateStreamlang', () => {
 
       expect(result.isValid).toBe(false);
       expect(result.errors.some((e) => e.type === 'invalid_processor_placement')).toBe(true);
+    });
+
+    it('should reject split inside a where block without a distinct target field', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'status',
+              eq: 'active',
+              steps: [
+                {
+                  action: 'split',
+                  from: 'attributes.tags',
+                  separator: ',',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+
+      expect(result.isValid).toBe(false);
+      const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
+      expect(placementErrors).toHaveLength(1);
+      expect(placementErrors[0].field).toBe('to');
+      expect(placementErrors[0].message).toContain('split');
+    });
+
+    it('should allow split inside a where block with a distinct target field', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'status',
+              eq: 'active',
+              steps: [
+                {
+                  action: 'split',
+                  from: 'attributes.tags',
+                  separator: ',',
+                  to: 'attributes.tags_array',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+
+      const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
+      expect(placementErrors).toHaveLength(0);
+    });
+
+    it('should reject split inside a where block when target field equals source field', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'status',
+              eq: 'active',
+              steps: [
+                {
+                  action: 'split',
+                  from: 'attributes.tags',
+                  separator: ',',
+                  to: 'attributes.tags',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+
+      expect(result.isValid).toBe(false);
+      const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
+      expect(placementErrors).toHaveLength(1);
+    });
+
+    it('should allow split at root level without a target field', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'split',
+            from: 'attributes.tags',
+            separator: ',',
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+
+      const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
+      expect(placementErrors).toHaveLength(0);
+    });
+
+    it('should reject convert inside a where block without a distinct target field', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'status',
+              eq: 'active',
+              steps: [
+                {
+                  action: 'convert',
+                  from: 'attributes.value',
+                  type: 'integer',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+
+      expect(result.isValid).toBe(false);
+      const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
+      expect(placementErrors).toHaveLength(1);
+      expect(placementErrors[0].field).toBe('to');
+      expect(placementErrors[0].message).toContain('convert');
+    });
+
+    it('should allow convert inside a where block with a distinct target field', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'status',
+              eq: 'active',
+              steps: [
+                {
+                  action: 'convert',
+                  from: 'attributes.value',
+                  type: 'integer',
+                  to: 'attributes.value_int',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+
+      const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
+      expect(placementErrors).toHaveLength(0);
     });
   });
 });

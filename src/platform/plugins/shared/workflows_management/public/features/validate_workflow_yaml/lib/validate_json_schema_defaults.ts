@@ -117,7 +117,10 @@ export function validateJsonSchemaDefaults(
     normalizedInputs.properties !== null &&
     !Array.isArray(normalizedInputs.properties)
   ) {
-    buildPropertyMap(normalizedInputs.properties, ['inputs', 'properties']);
+    buildPropertyMap(normalizedInputs.properties as Record<string, JSONSchema7>, [
+      'inputs',
+      'properties',
+    ]);
   }
 
   // Also build a map for definitions (for $ref schemas)

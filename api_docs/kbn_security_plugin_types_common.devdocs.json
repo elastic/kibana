@@ -593,7 +593,7 @@
           ", \"type\">"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/api_keys/api_key.ts",
-        "lineNumber": 115,
+        "lineNumber": 120,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -610,7 +610,7 @@
               "SecurityApiKeyType"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/api_keys/api_key.ts",
-            "lineNumber": 119,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2387,7 +2387,7 @@
           ") & { expired: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/api_keys/api_key.ts",
-        "lineNumber": 122,
+        "lineNumber": 127,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

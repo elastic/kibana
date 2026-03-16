@@ -25,14 +25,16 @@ test.describe(
         // Ignore if already disabled
       }
 
-      // Clean up logs index/data stream
-      try {
-        await esClient.indices.deleteDataStream({ name: 'logs' });
-      } catch {
+      // Clean up logs.otel and logs.ecs data streams
+      for (const stream of ['logs.otel', 'logs.ecs']) {
         try {
-          await esClient.indices.delete({ index: 'logs' });
+          await esClient.indices.deleteDataStream({ name: stream });
         } catch {
-          // Nothing exists
+          try {
+            await esClient.indices.delete({ index: stream });
+          } catch {
+            // Nothing exists
+          }
         }
       }
     });
@@ -89,9 +91,9 @@ test.describe(
       await browserAuth.loginAs('editor');
       await pageObjects.streams.goto();
 
-      // Verify logs stream is visible (wired streams enabled)
+      // Verify logs.otel and logs.ecs streams are visible (wired streams enabled)
       await pageObjects.streams.expectStreamsTableVisible();
-      await pageObjects.streams.verifyStreamsAreInTable(['logs']);
+      await pageObjects.streams.verifyStreamsAreInTable(['logs.otel', 'logs.ecs']);
 
       // Open settings
       await page.getByRole('button', { name: 'Settings' }).click();
@@ -117,9 +119,9 @@ test.describe(
       await browserAuth.loginAsViewer();
       await pageObjects.streams.goto();
 
-      // Verify logs stream is visible (wired streams enabled)
+      // Verify logs.otel and logs.ecs streams are visible (wired streams enabled)
       await pageObjects.streams.expectStreamsTableVisible();
-      await pageObjects.streams.verifyStreamsAreInTable(['logs']);
+      await pageObjects.streams.verifyStreamsAreInTable(['logs.otel', 'logs.ecs']);
 
       // Open settings
       await page.getByRole('button', { name: 'Settings' }).click();

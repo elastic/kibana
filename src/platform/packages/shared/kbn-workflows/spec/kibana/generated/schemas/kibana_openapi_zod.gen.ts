@@ -639,6 +639,15 @@ export const cases_alert_identifiers = z.union([
 ]);
 
 /**
+ * Unsuccessful cases API response
+ */
+export const cases_response_4xx = z.object({
+    error: z.optional(z.string()),
+    message: z.optional(z.string()),
+    statusCode: z.optional(z.int())
+});
+
+/**
  * Create case request
  *
  * The create case API request body varies depending on the type of connector.
@@ -915,15 +924,6 @@ export const cases_add_case_comment_request = z.union([
 ]);
 
 /**
- * Unsuccessful cases API response
- */
-export const cases_4xx_response = z.object({
-    error: z.optional(z.string()),
-    message: z.optional(z.string()),
-    statusCode: z.optional(z.int())
-});
-
-/**
  * Cross-site request forgery protection
  */
 export const cases_kbn_xsrf = z.string().register(z.globalRegistry, {
@@ -1046,4 +1046,45 @@ export const set_alert_tags_request = z.object({
  */
 export const set_alert_tags_response = z.record(z.string(), z.unknown()).register(z.globalRegistry, {
     description: 'Elasticsearch update by query response'
+});
+
+export const get_streams_request = z.object({
+    body: z.optional(z.union([
+        z.record(z.string(), z.never()),
+        z.enum(['null']),
+        z.unknown()
+    ])),
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+export const get_streams_name_request = z.object({
+    body: z.optional(z.union([
+        z.record(z.string(), z.never()),
+        z.enum(['null']),
+        z.unknown()
+    ])),
+    path: z.object({
+        name: z.string()
+    }),
+    query: z.optional(z.never())
+});
+
+export const get_streams_name_significant_events_request = z.object({
+    body: z.optional(z.union([
+        z.record(z.string(), z.never()),
+        z.enum(['null']),
+        z.unknown()
+    ])),
+    path: z.object({
+        name: z.string()
+    }),
+    query: z.object({
+        from: z.string(),
+        to: z.string(),
+        bucketSize: z.string(),
+        query: z.optional(z.string().register(z.globalRegistry, {
+            description: 'Query string to filter significant events on metadata fields'
+        }))
+    })
 });

@@ -39,10 +39,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
-import {
-  APPLY_FILTER_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER, ON_SELECT_RANGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { getInspector, getUiActions, getUsageCollection } from '../services';
@@ -254,7 +251,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
       projectRoutingOverrides$,
       rendered$: hasRendered$,
-      supportedTriggers: () => [ACTION_CONVERT_TO_LENS, APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER],
+      supportedTriggers: () => [ACTION_CONVERT_TO_LENS, ON_APPLY_FILTER, ON_SELECT_RANGE],
       serializeState: () => {
         // In the visualize editor, linkedToLibrary should always be false to force the full state to be serialized,
         // instead of just passing a reference to the linked saved object. Other contexts like dashboards should

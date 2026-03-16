@@ -26,6 +26,7 @@
       "{index}/_mget"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-mget",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-mget",
     "availability": {
       "stack": true,
       "serverless": true

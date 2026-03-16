@@ -40,7 +40,7 @@ const getDeps = async (): Promise<CommonFetchParams> => {
     inspectorAdapters: { requests: new RequestAdapter() },
     searchSessionId: '123',
     services,
-    savedSearch: savedSearchMock,
+    searchSource: savedSearchMock.searchSource,
     internalState: toolkit.internalState,
     scopedProfilesManager: scopedProfilesManager$.getValue(),
     scopedEbtManager: scopedEbtManager$.getValue(),

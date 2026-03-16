@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { ENTITY_STORE_ROUTES } from '../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
@@ -21,7 +22,7 @@ const bodySchema = z.object({
 export function registerStop(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: '/internal/security/entity-store/stop',
+      path: ENTITY_STORE_ROUTES.STOP,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -39,7 +40,7 @@ export function registerStop(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager } = entityStoreCtx;
+        const { logger, assetManagerClient: assetManager } = entityStoreCtx;
         const { entityTypes } = req.body;
 
         logger.debug('Stop API invoked');

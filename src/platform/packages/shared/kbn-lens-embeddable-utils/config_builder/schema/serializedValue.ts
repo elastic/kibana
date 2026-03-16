@@ -26,7 +26,7 @@ const rangeKeySchema = schema.object(
       { maxSize: 100 }
     ),
   },
-  { meta: { id: 'rangeKey' } }
+  { meta: { id: 'rangeKey', title: 'Range Key' } }
 );
 
 const multiFieldKeySchema = schema.object(
@@ -34,7 +34,7 @@ const multiFieldKeySchema = schema.object(
     type: schema.literal('multiFieldKey'),
     keys: schema.arrayOf(schema.string(), { maxSize: 100 }),
   },
-  { meta: { id: 'multiFieldKey' } }
+  { meta: { id: 'multiFieldKey', title: 'Multi Field Key' } }
 );
 
 export const serializedValueSchema = schema.oneOf([

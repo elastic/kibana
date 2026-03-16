@@ -3,11 +3,11 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
+      "@kbn/ambient-ui-types",
       "jest",
       "node",
       "react",
-      "@testing-library/jest-dom",
-      "../../../../../typings/emotion.d.ts"
+      "@testing-library/jest-dom"
     ]
   },
   "include": ["**/*.ts", "**/*.tsx"],

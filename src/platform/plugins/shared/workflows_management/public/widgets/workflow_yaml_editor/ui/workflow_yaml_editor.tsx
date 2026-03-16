@@ -28,6 +28,7 @@ import {
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
+  useWorkflowIdDecorations,
 } from './decorations';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { StepActions } from './step_actions';
@@ -44,15 +45,18 @@ import {
   setYamlString,
 } from '../../../entities/workflows/store';
 import {
+  selectEditorWorkflowLookup,
   selectEditorYaml,
   selectExecution,
   selectHasChanges,
+  selectHighlightedStepId,
   selectIsExecutionsTab,
   selectIsSavingYaml,
   selectStepExecutions,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
+  HIGHLIGHTED_STEP_TRIGGER,
   setHasYamlSchemaValidationErrors,
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
@@ -66,16 +70,16 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { triggerSchemas } from '../../../trigger_schemas';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
-import {
-  buildExecutionContext,
-  type ExecutionContext,
-} from '../lib/execution_context/build_execution_context';
+import type { ExecutionContext } from '../lib/execution_context/build_execution_context';
+import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
 import { useLazyStepExecutionFetcher } from '../lib/execution_context/use_lazy_step_execution_fetcher';
 import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
+  HttpMonacoConnectorStepHandler,
   KibanaMonacoConnectorHandler,
+  WorkflowExecuteMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import { CustomMonacoStepHandler } from '../lib/monaco_connectors/custom_monaco_step_handler';
 import {
@@ -214,6 +218,9 @@ export const WorkflowYAMLEditor = ({
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
+
+  const highlightedStepId = useSelector(selectHighlightedStepId);
+  const workflowLookup = useSelector(selectEditorWorkflowLookup);
 
   // Data
   const connectorsData = useAvailableConnectors();
@@ -363,11 +370,17 @@ export const WorkflowYAMLEditor = ({
         });
         registerMonacoConnectorHandler(kibanaHandler);
 
+        const workflowExecuteHandler = new WorkflowExecuteMonacoConnectorHandler();
+        registerMonacoConnectorHandler(workflowExecuteHandler);
+
         const customHandler = new CustomMonacoStepHandler();
         registerMonacoConnectorHandler(customHandler);
 
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
+
+        const httpHandler = new HttpMonacoConnectorStepHandler();
+        registerMonacoConnectorHandler(httpHandler);
 
         // Create unified providers with template expression support
         const providerConfig = {
@@ -440,6 +453,12 @@ export const WorkflowYAMLEditor = ({
     readOnly: isExecutionYaml,
   });
 
+  useWorkflowIdDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
+  });
+
   const updateContainerPosition = (
     stepInfo: StepInfo,
     _editor: monaco.editor.IStandaloneCodeEditor
@@ -478,6 +497,23 @@ export const WorkflowYAMLEditor = ({
     return () => disposable.dispose();
   }, [isEditorMounted, dispatch]);
 
+  // Scroll editor to highlighted step when selected from execution flyout.
+  // workflowLookup is a dependency because the line numbers may shift, but in
+  // practice this only fires in execution mode where the editor is read-only,
+  // so re-scrolling on lookup changes is harmless.
+  useEffect(() => {
+    if (!isEditorMounted || !highlightedStepId || !workflowLookup) {
+      return;
+    }
+    const lineStart =
+      highlightedStepId === HIGHLIGHTED_STEP_TRIGGER
+        ? workflowLookup.triggersLineStart
+        : workflowLookup.steps[highlightedStepId]?.lineStart;
+    if (lineStart != null) {
+      editorRef.current?.revealLineInCenter(lineStart);
+    }
+  }, [isEditorMounted, highlightedStepId, workflowLookup]);
+
   // Actions
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
   const openActionsPopover = useCallback(() => {
@@ -496,7 +532,14 @@ export const WorkflowYAMLEditor = ({
         return;
       }
       if (isTriggerType(action.id) || triggerSchemas.isRegisteredTriggerId(action.id)) {
-        insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
+        const triggerDefinition = triggerSchemas.getTriggerDefinition(action.id);
+        insertTriggerSnippet(
+          model,
+          yamlDocumentCurrent,
+          action.id,
+          editor,
+          triggerDefinition?.snippets?.condition
+        );
       } else {
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
       }

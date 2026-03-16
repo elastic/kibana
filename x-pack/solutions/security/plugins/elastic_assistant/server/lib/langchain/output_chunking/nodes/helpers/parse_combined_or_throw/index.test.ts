@@ -128,6 +128,6 @@ describe('parseCombinedOrThrow', () => {
         ...defaultArgs,
         combinedResponse: invalidJson,
       })
-    ).toThrowError('Expected array, received string');
+    ).toThrowError('Invalid input: expected array, received string');
   });
 });

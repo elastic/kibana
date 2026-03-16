@@ -15,7 +15,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
-import { DocViewerTable, SHOW_ONLY_SELECTED_FIELDS } from './table';
+import { DocViewerTable, SHOW_ONLY_SELECTED_FIELDS, HIDE_NULL_VALUES } from './table';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { userEvent } from '@testing-library/user-event';
@@ -218,6 +218,158 @@ describe('DocViewerTable', () => {
           screen.queryByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')
         ).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('switch - hide null values', () => {
+    const dataViewWithNullableFields = createStubDataView({
+      spec: {
+        id: 'test-nullable',
+        title: 'test-nullable',
+        timeFieldName: '@timestamp',
+        fields: {
+          '@timestamp': {
+            name: '@timestamp',
+            type: 'date',
+            esTypes: ['date'],
+            aggregatable: true,
+            searchable: true,
+            count: 30,
+            readFromDocValues: true,
+            scripted: false,
+            isMapped: true,
+          },
+          message: {
+            name: 'message',
+            type: 'string',
+            esTypes: ['text'],
+            aggregatable: false,
+            searchable: true,
+            count: 10,
+            readFromDocValues: false,
+            scripted: false,
+            isMapped: true,
+          },
+          'optional.field': {
+            name: 'optional.field',
+            type: 'string',
+            esTypes: ['keyword'],
+            aggregatable: true,
+            searchable: true,
+            count: 0,
+            readFromDocValues: true,
+            scripted: false,
+            isMapped: true,
+          },
+          'another.nullable': {
+            name: 'another.nullable',
+            type: 'number',
+            esTypes: ['long'],
+            aggregatable: true,
+            searchable: true,
+            count: 0,
+            readFromDocValues: true,
+            scripted: false,
+            isMapped: true,
+          },
+        },
+      },
+    });
+
+    const hitWithNullValues = buildDataTableRecord(
+      {
+        _index: 'test-nullable',
+        _id: '1',
+        _score: 1,
+        _source: {
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          message: 'test message',
+          'optional.field': null,
+          'another.nullable': null,
+        },
+      },
+      dataViewWithNullableFields
+    );
+
+    const setupNullableComponent = (
+      props: Partial<React.ComponentProps<typeof DocViewerTable>> = {}
+    ) => {
+      const user = userEvent.setup();
+
+      render(
+        <IntlProvider locale="en">
+          <DocViewerTable
+            dataView={dataViewWithNullableFields}
+            hit={hitWithNullValues}
+            columns={[]}
+            {...props}
+          />
+        </IntlProvider>
+      );
+
+      return { user };
+    };
+
+    beforeEach(() => {
+      storage.clear();
+    });
+
+    it('should render the switch', () => {
+      setupNullableComponent();
+
+      expect(screen.getByTestId('unifiedDocViewerHideNullValuesSwitch')).toBeInTheDocument();
+    });
+
+    it('should show all fields including those with null values by default', () => {
+      setupNullableComponent();
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('message')).toBeInTheDocument();
+      expect(screen.getByText('optional.field')).toBeInTheDocument();
+      expect(screen.getByText('another.nullable')).toBeInTheDocument();
+    });
+
+    it('should hide fields with null values when toggled on', async () => {
+      const { user } = setupNullableComponent();
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('message')).toBeInTheDocument();
+      expect(screen.getByText('optional.field')).toBeInTheDocument();
+      expect(screen.getByText('another.nullable')).toBeInTheDocument();
+
+      const hideNullValuesSwitch = screen.getByTestId('unifiedDocViewerHideNullValuesSwitch');
+      await user.click(hideNullValuesSwitch);
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('message')).toBeInTheDocument();
+      expect(screen.queryByText('optional.field')).toBeNull();
+      expect(screen.queryByText('another.nullable')).toBeNull();
+    });
+
+    it('should persist state to localStorage', async () => {
+      const { user } = setupNullableComponent();
+
+      expect(storage.get(HIDE_NULL_VALUES)).toBeFalsy();
+
+      const hideNullValuesSwitch = screen.getByTestId('unifiedDocViewerHideNullValuesSwitch');
+      await user.click(hideNullValuesSwitch);
+
+      expect(storage.get(HIDE_NULL_VALUES)).toBe(true);
+
+      await user.click(hideNullValuesSwitch);
+
+      expect(storage.get(HIDE_NULL_VALUES)).toBe(false);
+    });
+
+    it('should hide fields with null values if it was previously switched on', () => {
+      storage.set(HIDE_NULL_VALUES, true);
+
+      setupNullableComponent();
+
+      expect(screen.getByText('@timestamp')).toBeInTheDocument();
+      expect(screen.getByText('message')).toBeInTheDocument();
+      expect(screen.queryByText('optional.field')).toBeNull();
+      expect(screen.queryByText('another.nullable')).toBeNull();
     });
   });
 });

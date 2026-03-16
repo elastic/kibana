@@ -20,10 +20,7 @@ import {
   initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
-import {
-  APPLY_FILTER_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER, ON_CLICK_VALUE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { MapApi } from './types';
 import { SavedMap } from '../routes/map_page';
@@ -184,7 +181,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
       ...projectRoutingManager.api,
       serializeState,
       supportedTriggers: () => {
-        return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
+        return [ON_APPLY_FILTER, ON_CLICK_VALUE];
       },
     });
 

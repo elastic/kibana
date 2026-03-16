@@ -15,6 +15,7 @@ import type {
   VisualizationState,
   SupportedDatasourceId,
   TypedLensSerializedState,
+  LensDocument,
 } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -32,7 +33,7 @@ import type { ConvertibleLayer } from './esql_conversion_types';
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
-import { useLensSelector } from '../../../state_management';
+import { useLensSelector, selectPersistedDoc } from '../../../state_management';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 
 interface EsqlConversionSettings {
@@ -77,6 +78,7 @@ export const useEsqlConversionCheck = (
 ): EsqlConversionSettings => {
   // Get datasourceStates from Redux
   const { datasourceStates } = useLensSelector((state) => state.lens);
+  const persistedDoc = useLensSelector(selectPersistedDoc);
 
   return useMemo(() => {
     const datasourceState = datasourceStates[datasourceId]?.state as FormBasedPrivateState;
@@ -86,6 +88,13 @@ export const useEsqlConversionCheck = (
     }
 
     const { state } = visualization;
+
+    // Guard: charts saved to the library
+    if (isSavedToLibrary(persistedDoc)) {
+      return getEsqlConversionDisabledSettings(
+        esqlConversionFailureReasonMessages.saved_to_library_not_supported
+      );
+    }
 
     // Guard: trendline check
     if (hasTrendLineLayer(state)) {
@@ -207,6 +216,7 @@ export const useEsqlConversionCheck = (
     showConvertToEsqlButton,
     startDependencies.data.nowProvider,
     visualization,
+    persistedDoc,
   ]);
 };
 
@@ -233,4 +243,8 @@ function isValidDatasourceState(
       'layers' in datasourceState &&
       (datasourceState as { layers?: unknown }).layers !== undefined
   );
+}
+
+function isSavedToLibrary(persistedDoc: LensDocument | undefined) {
+  return Boolean(persistedDoc && persistedDoc.savedObjectId);
 }

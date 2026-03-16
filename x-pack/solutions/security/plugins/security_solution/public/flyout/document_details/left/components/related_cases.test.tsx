@@ -17,7 +17,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
+} from '../../../../flyout_v2/shared/components/test_ids';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { TestProviders } from '../../../../common/mock';
 import { APP_UI_ID } from '../../../../../common';

@@ -34,7 +34,7 @@ export function useTransactionActions({
   const { share } = useApmPluginContext();
 
   return useMemo(() => {
-    const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+    const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
 
     return [
       {

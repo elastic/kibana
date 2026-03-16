@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
-import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../common';
+import type { NewPackagePolicy, PackageInfo } from '../../../common';
 import type { CloudConnectorVar, CloudConnectorSecretVar } from '../../../common/types';
-import type { CloudConnectorSecretReference, CloudProvider } from '../../types';
+import type { AccountType, CloudConnectorSecretReference, CloudProvider } from '../../types';
 
 import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 
@@ -48,14 +47,7 @@ export type CloudConnectorCredentials =
   | AwsCloudConnectorCredentials
   | AzureCloudConnectorCredentials;
 
-export interface CloudConnectorConfig {
-  provider: CloudProviders;
-  fields: CloudConnectorField[];
-  description?: ReactNode;
-}
-
 export interface NewCloudConnectorFormProps {
-  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   updatePolicy: UpdatePolicy;
@@ -63,9 +55,12 @@ export interface NewCloudConnectorFormProps {
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
   cloudProvider?: CloudProvider;
-  templateName?: string;
   credentials?: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
+  /** Account type to determine organization vs single account behavior */
+  accountType?: AccountType;
+  /** IaC template URL from var_group selection for generating cloud connector setup instructions. */
+  iacTemplateUrl?: string;
 }
 
 // Define the interface for connector options
@@ -87,7 +82,6 @@ export interface AzureCloudConnectorOption {
 }
 
 export interface CloudConnectorFormProps {
-  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   updatePolicy: UpdatePolicy;
@@ -95,10 +89,12 @@ export interface CloudConnectorFormProps {
   hasInvalidRequiredVars: boolean;
   cloud?: CloudSetup;
   cloudProvider?: CloudProvider;
-  isOrganization?: boolean;
-  templateName?: string;
   credentials?: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
+  /** Account type for cloud connector template URL generation */
+  accountType?: AccountType;
+  /** IaC template URL from var_group selection for generating cloud connector setup instructions. */
+  iacTemplateUrl?: string;
 }
 
 export type CloudSetupForCloudConnector = Pick<
@@ -111,16 +107,11 @@ export type CloudSetupForCloudConnector = Pick<
   | 'isServerlessEnabled'
 >;
 
-export interface CloudFormationCloudCredentialsGuideProps {
-  cloudProvider?: CloudProvider;
-}
-
 export interface GetCloudConnectorRemoteRoleTemplateParams {
-  input: NewPackagePolicyInput;
   cloud: CloudSetupForCloudConnector;
-  packageInfo: PackageInfo;
-  templateName: string;
-  provider: CloudProviders;
+  accountType: AccountType;
+  /** IaC template URL to use for generating the cloud connector remote role template. */
+  iacTemplateUrl?: string;
 }
 
 export interface CloudConnectorField {

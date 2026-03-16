@@ -51,13 +51,13 @@ Unless stated otherwise, these helpers include **both** `@local-*` and `@cloud-*
 
 ### Stateful (by domain) [scout-deployment-tags-stateful]
 
-| Helper                        | Domain               |
-| ----------------------------- | -------------------- |
-| `tags.stateful.all`           | All stateful targets |
-| `tags.stateful.classic`       | Classic              |
-| `tags.stateful.search`        | Search               |
-| `tags.stateful.observability` | Observability        |
-| `tags.stateful.security`      | Security             |
+| Helper                        | Domain                                   |
+| ----------------------------- | ---------------------------------------- |
+| `tags.stateful.all`           | All stateful targets                     |
+| `tags.stateful.classic`       | Classic                                  |
+| `tags.stateful.search`        | {icon}`logo_elasticsearch` Search        |
+| `tags.stateful.observability` | {icon}`logo_observability` Observability |
+| `tags.stateful.security`      | {icon}`logo_security` Security           |
 
 ### Serverless (by solution) [scout-deployment-tags-serverless]
 
@@ -69,30 +69,30 @@ Unless stated otherwise, these helpers include **both** `@local-*` and `@cloud-*
 
 #### Search [scout-deployment-tags-serverless-search]
 
-| Helper                   | Project type |
-| ------------------------ | ------------ |
-| `tags.serverless.search` | Search       |
+| Helper                   | Project type                      |
+| ------------------------ | --------------------------------- |
+| `tags.serverless.search` | {icon}`logo_elasticsearch` Search |
 
 #### Observability [scout-deployment-tags-serverless-observability]
 
-| Helper                                          | Project type                    |
-| ----------------------------------------------- | ------------------------------- |
-| `tags.serverless.observability.complete`        | Observability (complete)        |
-| `tags.serverless.observability.logs_essentials` | Observability (logs_essentials) |
+| Helper                                          | Project type                                               |
+| ----------------------------------------------- | ---------------------------------------------------------- |
+| `tags.serverless.observability.complete`        | {icon}`logo_observability` Observability (complete)        |
+| `tags.serverless.observability.logs_essentials` | {icon}`logo_observability` Observability (logs_essentials) |
 
 #### Security [scout-deployment-tags-serverless-security]
 
-| Helper                                | Project type          |
-| ------------------------------------- | --------------------- |
-| `tags.serverless.security.complete`   | Security (complete)   |
-| `tags.serverless.security.essentials` | Security (essentials) |
-| `tags.serverless.security.ease`       | Security (ease)       |
+| Helper                                | Project type                                |
+| ------------------------------------- | ------------------------------------------- |
+| `tags.serverless.security.complete`   | {icon}`logo_security` Security (complete)   |
+| `tags.serverless.security.essentials` | {icon}`logo_security` Security (essentials) |
+| `tags.serverless.security.ease`       | {icon}`logo_security` Security (ease)       |
 
 #### Workplace AI [scout-deployment-tags-serverless-workplaceai]
 
-| Helper                        | Project type |
-| ----------------------------- | ------------ |
-| `tags.serverless.workplaceai` | Workplace AI |
+| Helper                        | Project type                               |
+| ----------------------------- | ------------------------------------------ |
+| `tags.serverless.workplaceai` | {icon}`logo_workplace_search` Workplace AI |
 
 For the authoritative list (and the exact tag strings), see `src/platform/packages/shared/kbn-scout/src/playwright/tags.ts` or just rely on editor autocomplete.
 

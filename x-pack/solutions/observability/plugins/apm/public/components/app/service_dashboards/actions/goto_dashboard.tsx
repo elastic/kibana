@@ -17,9 +17,14 @@ export function GotoDashboard({ currentDashboard }: { currentDashboard: SavedApm
     services: { share },
   } = useKibana<ApmPluginStartDeps>();
 
-  const url = share?.url.locators.get(DASHBOARD_APP_LOCATOR)?.getRedirectUrl({
+  const url = share?.url?.locators?.get(DASHBOARD_APP_LOCATOR)?.getRedirectUrl({
     dashboardId: currentDashboard?.dashboardSavedObjectId,
   });
+
+  if (!url) {
+    return null;
+  }
+
   return (
     <EuiButtonEmpty
       data-test-subj="apmGotoDashboardGoToDashboardButton"

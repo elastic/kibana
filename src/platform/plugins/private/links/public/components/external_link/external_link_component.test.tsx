@@ -14,8 +14,8 @@ import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { ExternalLinkComponent } from './external_link_component';
 import { coreServices } from '../../services/kibana_services';
-import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { ResolvedLink } from '../../types';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from './constants';
 
 describe('external link component', () => {
   const defaultLinkInfo: ResolvedLink = {
@@ -39,27 +39,27 @@ describe('external link component', () => {
 
     const link = await screen.findByTestId('externalLink--foo');
     expect(link).toBeInTheDocument();
-    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeInTheDocument();
     await userEvent.click(link);
     expect(window.open).toHaveBeenCalledWith('https://example.com', '_blank');
   });
 
-  test('renders external icon even when `openInNewTab` setting is `false`', async () => {
+  test('renders external icon even when `open_in_new_tab` setting is `false`', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
-      options: { ...DEFAULT_URL_DRILLDOWN_OPTIONS, openInNewTab: false },
+      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
     const link = await screen.findByTestId('externalLink--foo');
-    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeInTheDocument();
   });
 
   test('modified click does not trigger event.preventDefault', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
-      options: { ...DEFAULT_URL_DRILLDOWN_OPTIONS, openInNewTab: false },
+      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 
@@ -71,10 +71,10 @@ describe('external link component', () => {
     expect(preventDefault).toHaveBeenCalledTimes(0);
   });
 
-  test('uses navigateToUrl when openInNewTab is false', async () => {
+  test('uses navigateToUrl when open_in_new_tab is false', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
-      options: { ...DEFAULT_URL_DRILLDOWN_OPTIONS, openInNewTab: false },
+      options: { ...DEFAULT_EXTERNAL_LINK_OPTIONS, open_in_new_tab: false },
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
 

@@ -14,19 +14,21 @@ import {
   AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
 } from '../../../../common/services/cloud_connectors/test_subjects';
-import { extractRawCredentialVars } from '../../../../common';
+import {
+  extractRawCredentialVars,
+  getCredentialKeyFromVarName,
+  writeCredentials,
+} from '../../../../common/services/cloud_connectors';
 import type { CloudConnectorFormProps, CloudSetupForCloudConnector } from '../types';
 
 import {
-  type AzureCloudConnectorFieldNames,
   getCloudConnectorRemoteRoleTemplate,
   isAzureCredentials,
   updateInputVarsWithCredentials,
-  updatePolicyWithAzureCloudConnectorCredentials,
   getDeploymentIdFromUrl,
   getKibanaComponentId,
 } from '../utils';
-import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_PROVIDER } from '../constants';
+import { ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -52,26 +54,23 @@ const getElasticStackId = (cloud?: CloudSetupForCloudConnector): string | undefi
 };
 
 export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
-  input,
   newPolicy,
   packageInfo,
   updatePolicy,
   cloud,
   hasInvalidRequiredVars = false,
-  templateName = 'azure-cloud-connector-template',
   credentials,
   setCredentials,
+  accountType = ORGANIZATION_ACCOUNT,
+  iacTemplateUrl,
 }) => {
-  const armTemplateUrl =
-    cloud && templateName
-      ? getCloudConnectorRemoteRoleTemplate({
-          input,
-          cloud,
-          packageInfo,
-          templateName,
-          provider: AZURE_PROVIDER,
-        })
-      : undefined;
+  const armTemplateUrl = cloud
+    ? getCloudConnectorRemoteRoleTemplate({
+        cloud,
+        accountType,
+        iacTemplateUrl,
+      })
+    : undefined;
 
   const elasticStackId = getElasticStackId(cloud);
 
@@ -133,38 +132,24 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           fields={fields}
           packageInfo={packageInfo}
           onChange={(key, value) => {
-            // Update local credentials state if available
-            if (credentials && isAzureCredentials(credentials) && setCredentials) {
-              const updatedCredentials = { ...credentials };
-              if (
-                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID ||
-                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID
-              ) {
-                updatedCredentials.tenantId = value;
-              } else if (
-                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID ||
-                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID
-              ) {
-                updatedCredentials.clientId = value;
-              } else if (
-                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID
-              ) {
-                updatedCredentials.azure_credentials_cloud_connector_id = value;
-              }
-              setCredentials(updatedCredentials);
-            } else {
-              // Fallback to old method
-              const updatedPolicyWithCredentials = updatePolicyWithAzureCloudConnectorCredentials(
-                newPolicy,
-                input,
-                {
-                  [key]: value,
-                } as Record<AzureCloudConnectorFieldNames, string | undefined>
-              );
+            // Use schema-based lookup to map var names to credential properties
+            const credentialKey = getCredentialKeyFromVarName('azure', key);
 
-              updatePolicy({
-                updatedPolicy: updatedPolicyWithCredentials,
-              });
+            // If we have credentials and setCredentials, update via credentials state
+            if (credentials && isAzureCredentials(credentials) && setCredentials && credentialKey) {
+              setCredentials({ ...credentials, [credentialKey]: value });
+              return;
+            }
+
+            // Fallback: update policy directly when credentials or setCredentials is unavailable
+            if (credentialKey) {
+              const updatedPolicy = writeCredentials(
+                newPolicy,
+                { [credentialKey]: value },
+                'azure',
+                packageInfo
+              );
+              updatePolicy({ updatedPolicy });
             }
           }}
           hasInvalidRequiredVars={hasInvalidRequiredVars}

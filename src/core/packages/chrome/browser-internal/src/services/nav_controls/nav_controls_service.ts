@@ -27,6 +27,15 @@ export class NavControlsService {
     const navControlsExtension$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const helpMenuLinks$ = new BehaviorSubject<ChromeHelpMenuLink[]>([]);
 
+    const toSorted = (controls: ReadonlySet<ChromeNavControl>) =>
+      sortBy([...controls.values()], 'order');
+
+    const left$ = navControlsLeft$.pipe(map(toSorted), takeUntil(this.stop$));
+    const right$ = navControlsRight$.pipe(map(toSorted), takeUntil(this.stop$));
+    const center$ = navControlsCenter$.pipe(map(toSorted), takeUntil(this.stop$));
+    const extension$ = navControlsExtension$.pipe(map(toSorted), takeUntil(this.stop$));
+    const helpLinks$ = helpMenuLinks$.pipe(takeUntil(this.stop$));
+
     return {
       // In the future, registration should be moved to the setup phase. This
       // is not possible until the legacy nav controls are no longer supported.
@@ -50,27 +59,11 @@ export class NavControlsService {
         helpMenuLinks$.next(links);
       },
 
-      getLeft$: () =>
-        navControlsLeft$.pipe(
-          map((controls) => sortBy([...controls.values()], 'order')),
-          takeUntil(this.stop$)
-        ),
-      getRight$: () =>
-        navControlsRight$.pipe(
-          map((controls) => sortBy([...controls.values()], 'order')),
-          takeUntil(this.stop$)
-        ),
-      getCenter$: () =>
-        navControlsCenter$.pipe(
-          map((controls) => sortBy([...controls.values()], 'order')),
-          takeUntil(this.stop$)
-        ),
-      getExtension$: () =>
-        navControlsExtension$.pipe(
-          map((controls) => sortBy([...controls.values()], 'order')),
-          takeUntil(this.stop$)
-        ),
-      getHelpMenuLinks$: () => helpMenuLinks$.pipe(takeUntil(this.stop$)),
+      getLeft$: () => left$,
+      getRight$: () => right$,
+      getCenter$: () => center$,
+      getExtension$: () => extension$,
+      getHelpMenuLinks$: () => helpLinks$,
     };
   }
 

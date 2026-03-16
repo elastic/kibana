@@ -51,15 +51,17 @@ export const getGapAutoFillSchedulerSO = async ({
     throw err;
   }
 
+  const ruleTypeIdConsumersPairs = schedulerSO.attributes.ruleTypes.map((ruleType) => ({
+    ruleTypeId: ruleType.type,
+    consumers: [ruleType.consumer],
+  }));
+
   try {
-    for (const ruleType of schedulerSO.attributes.ruleTypes) {
-      await context.authorization.ensureAuthorized({
-        ruleTypeId: ruleType.type,
-        consumer: ruleType.consumer,
-        operation,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    }
+    await context.authorization.bulkEnsureAuthorized({
+      ruleTypeIdConsumersPairs,
+      operation,
+      entity: AlertingAuthorizationEntity.Rule,
+    });
   } catch (error) {
     context.auditLogger?.log(
       gapAutoFillSchedulerAuditEvent({

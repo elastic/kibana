@@ -18,7 +18,9 @@ Scout doesn’t currently have a global teardown hook. Most environments are eph
 
 ## Enable it [enable-global-setup-hook]
 
-### 1. Turn it on in your config [global-setup-config]
+:::::::::::{stepper}
+
+::::::::::{step} Turn it on in your config
 
 Set `runGlobalSetup: true` in your Playwright config:
 
@@ -32,7 +34,9 @@ export default createPlaywrightConfig({
 });
 ```
 
-### 2. Create `global.setup.ts` [global-setup-file]
+::::::::::
+
+::::::::::{step} Create `global.setup.ts`
 
 Add `global.setup.ts` inside the `testDir` folder. Scout will discover and run it automatically.
 
@@ -43,7 +47,9 @@ test/scout/ui/
     └── some_suite.spec.ts
 ```
 
-### 3. Write setup code [global-setup-code]
+::::::::::
+
+::::::::::{step} Write setup code
 
 Example: load an ES archive once:
 
@@ -60,6 +66,10 @@ globalSetupHook('Load test data', async ({ esArchiver, log }) => {
 The global setup hook only has access to **worker-scoped** fixtures. It cannot use test-scoped fixtures like `page`, `browserAuth`, or `pageObjects`.
 ::::::
 
-## Run tests [global-setup-run-tests]
+::::::::::
+
+::::::::::{step} Run tests
 
 Run tests as usual via [Run Scout tests](./run-tests.md). The global setup hook will execute first—check console logs to verify it ran successfully.
+
+::::::::::::

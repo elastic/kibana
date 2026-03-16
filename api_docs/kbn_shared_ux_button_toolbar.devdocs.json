@@ -611,7 +611,7 @@
         "label": "Props",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; size?: \"m\" | \"s\" | undefined; \"aria-label\"?: string | undefined; 'data-test-subj'?: string | undefined; onBlur?: React.FocusEventHandler<HTMLButtonElement> | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; isLoading?: boolean | undefined; isDisabled?: boolean | undefined; fullWidth?: boolean | undefined; as?: \"standard\" | undefined; fontWeight?: ToolbarButtonFontWeights | undefined; iconSide?: ",
+          "{ id?: string | undefined; \"aria-label\"?: string | undefined; 'data-test-subj'?: string | undefined; onBlur?: React.FocusEventHandler<HTMLButtonElement> | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; size?: \"m\" | \"s\" | undefined; isLoading?: boolean | undefined; isDisabled?: boolean | undefined; fullWidth?: boolean | undefined; as?: \"standard\" | undefined; fontWeight?: ToolbarButtonFontWeights | undefined; iconSide?: ",
           "ButtonContentIconSide",
           "; hasArrow?: boolean | undefined; groupPosition?: ButtonPositions | undefined; }"
         ],

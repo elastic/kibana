@@ -7,6 +7,7 @@
 
 import React, { createContext, useCallback, useContext, useState } from 'react';
 import { isEqual } from 'lodash';
+import { getStepIndexFromArrayItemPath } from './utils';
 
 export type StepFieldKey = 'after' | 'fixed_interval';
 export type OnStepFieldErrorsChange = (
@@ -66,5 +67,37 @@ export const useDslStepsFlyoutTabErrors = () => {
     });
   }, []);
 
-  return { onStepFieldErrorsChange, tabHasErrors, pruneToStepPaths };
+  const reindexErrorsAfterRemoval = useCallback((removedIndex: number) => {
+    setErrorsByStepPath((prev) => {
+      if (!Number.isFinite(removedIndex) || removedIndex < 0) return prev;
+
+      const next: typeof prev = {};
+
+      for (const [stepPath, stepErrors] of Object.entries(prev)) {
+        const index = getStepIndexFromArrayItemPath(stepPath);
+        if (index < 0) {
+          next[stepPath] = stepErrors;
+          continue;
+        }
+
+        if (index < removedIndex) {
+          next[stepPath] = stepErrors;
+          continue;
+        }
+
+        if (index === removedIndex) {
+          // Removed step - drop its errors.
+          continue;
+        }
+
+        // Steps after the removed index shift down by 1.
+        const nextPath = `_meta.downsampleSteps[${index - 1}]`;
+        next[nextPath] = stepErrors;
+      }
+
+      return isEqual(prev, next) ? prev : next;
+    });
+  }, []);
+
+  return { onStepFieldErrorsChange, tabHasErrors, pruneToStepPaths, reindexErrorsAfterRemoval };
 };

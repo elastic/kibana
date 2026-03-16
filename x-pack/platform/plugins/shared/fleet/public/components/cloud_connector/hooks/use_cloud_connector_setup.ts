@@ -163,7 +163,10 @@ export const useCloudConnectorSetup = (
 
   // State for existing connection form
   const [existingConnectionCredentials, setExistingConnectionCredentials] =
-    useState<CloudConnectorCredentials>({});
+    useState<CloudConnectorCredentials>(() => {
+      // In edit mode, if the policy has a cloud_connector_id, initialize with it
+      return newPolicy.cloud_connector_id ? { cloudConnectorId: newPolicy.cloud_connector_id } : {};
+    });
 
   // Extract account type from inputs
   const accountTypeFromInputs = useMemo(() => {

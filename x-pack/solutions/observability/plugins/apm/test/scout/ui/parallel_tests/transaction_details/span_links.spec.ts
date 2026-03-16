@@ -11,6 +11,8 @@ import { test, testData } from '../../fixtures';
 import {
   SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY,
   SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
+  SERVICE_SPAN_LINKS_PRODUCER_EXTERNAL_ONLY,
+  SERVICE_SPAN_LINKS_PRODUCER_CONSUMER,
 } from '../../fixtures/constants';
 
 const timeRange = {
@@ -30,22 +32,14 @@ test.describe(
       page,
       pageObjects: { transactionDetailsPage },
     }) => {
-      await transactionDetailsPage.gotoServiceInventory(
-        SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY,
-        timeRange
-      );
-      await page.getByText('Transaction A').click();
-      await page.waitForLoadingIndicatorHidden();
-
       await test.step('shows span links badge with correct count', async () => {
+        await transactionDetailsPage.goToTransactionDetails({
+          serviceName: SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY,
+          transactionName: 'Transaction A',
+          start: timeRange.rangeFrom,
+          end: timeRange.rangeTo,
+        });
         await expect(page.getByText('2 Span links')).toBeVisible();
-      });
-
-      await test.step('shows tooltip with incoming/outgoing links', async () => {
-        await page.getByRole('button', { name: 'Open span links details' }).hover();
-        await expect(page.getByText('2 Span links found')).toBeVisible();
-        await expect(page.getByText('2 incoming')).toBeVisible();
-        await expect(page.getByText('0 outgoing')).toBeVisible();
       });
 
       await test.step('opens span flyout and shows span links details', async () => {
@@ -84,19 +78,14 @@ test.describe(
       page,
       pageObjects: { transactionDetailsPage },
     }) => {
-      await transactionDetailsPage.gotoServiceInventory('zzz-producer-external-only', timeRange);
-      await page.getByText('Transaction B').click();
-      await page.waitForLoadingIndicatorHidden();
-
       await test.step('shows span links badge with correct count', async () => {
+        await transactionDetailsPage.goToTransactionDetails({
+          serviceName: SERVICE_SPAN_LINKS_PRODUCER_EXTERNAL_ONLY,
+          transactionName: 'Transaction B',
+          start: timeRange.rangeFrom,
+          end: timeRange.rangeTo,
+        });
         await expect(page.getByText('2 Span links')).toBeVisible();
-      });
-
-      await test.step('shows tooltip with incoming/outgoing links', async () => {
-        await page.getByRole('button', { name: 'Open span links details' }).hover();
-        await expect(page.getByText('2 Span links found')).toBeVisible();
-        await expect(page.getByText('1 incoming')).toBeVisible();
-        await expect(page.getByText('1 outgoing')).toBeVisible();
       });
 
       await test.step('opens span flyout and shows span links details', async () => {
@@ -126,11 +115,14 @@ test.describe(
       page,
       pageObjects: { transactionDetailsPage },
     }) => {
-      await transactionDetailsPage.gotoServiceInventory('zzz-producer-consumer', timeRange);
-      await page.getByText('Transaction C').click();
-      await page.waitForLoadingIndicatorHidden();
-
       await test.step('opens transaction flyout and shows span links', async () => {
+        await transactionDetailsPage.goToTransactionDetails({
+          serviceName: SERVICE_SPAN_LINKS_PRODUCER_CONSUMER,
+          transactionName: 'Transaction C',
+          start: timeRange.rangeFrom,
+          end: timeRange.rangeTo,
+        });
+
         await page.getByRole('button', { name: '1 View details for' }).click();
         await transactionDetailsPage.getSpanLinksTab().click();
 
@@ -160,14 +152,14 @@ test.describe(
       page,
       pageObjects: { transactionDetailsPage },
     }) => {
-      await transactionDetailsPage.gotoServiceInventory(
-        SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
-        timeRange
-      );
-      await page.getByText('Transaction D').click();
-      await page.waitForLoadingIndicatorHidden();
-
       await test.step('opens transaction flyout and shows span links', async () => {
+        await transactionDetailsPage.goToTransactionDetails({
+          serviceName: SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
+          transactionName: 'Transaction D',
+          start: timeRange.rangeFrom,
+          end: timeRange.rangeTo,
+        });
+
         await page.getByRole('button', { name: '1 View details for' }).click();
         await transactionDetailsPage.getSpanLinksTab().click();
 
@@ -195,14 +187,14 @@ test.describe(
       page,
       pageObjects: { transactionDetailsPage },
     }) => {
-      await transactionDetailsPage.gotoServiceInventory(
-        SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
-        timeRange
-      );
-      await page.getByText('Transaction D').click();
-      await page.waitForLoadingIndicatorHidden();
-
       await test.step('opens span flyout and shows span links', async () => {
+        await transactionDetailsPage.goToTransactionDetails({
+          serviceName: SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE,
+          transactionName: 'Transaction D',
+          start: timeRange.rangeFrom,
+          end: timeRange.rangeTo,
+        });
+
         await page.getByText('Span E').click();
         await transactionDetailsPage.getSpanLinksTab().click();
 

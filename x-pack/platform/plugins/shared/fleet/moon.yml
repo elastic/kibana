@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/fleet-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/fleet'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/fleet-plugin'
+  title: '@kbn/fleet-plugin'
   description: Moon project for @kbn/fleet-plugin
   channel: ''
   owner: '@elastic/fleet'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/fleet
+  sourceRoot: x-pack/platform/plugins/shared/fleet
 dependsOn:
   - '@kbn/core'
   - '@kbn/licensing-plugin'
@@ -97,6 +96,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/automatic-import-plugin'
+  - '@kbn/automatic-import-v2-plugin'
   - '@kbn/core-security-server-mocks'
   - '@kbn/server-http-tools'
   - '@kbn/zod'
@@ -119,6 +119,10 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/reporting-common'
   - '@kbn/reporting-plugin'
+  - '@kbn/user-profile-components'
+  - '@kbn/css-utils'
+  - '@kbn/rison'
+  - '@kbn/rule-data-utils'
 tags:
   - plugin
   - prod

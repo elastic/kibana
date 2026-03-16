@@ -464,9 +464,30 @@ describe('AuthenticationService', () => {
         expect(reauthenticate).not.toHaveBeenCalled();
       });
 
+      it('does not handle 401 errors if not related to expired token.', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { reason: 'current license is non-compliant' } },
+          })
+        ) as UnauthorizedError;
+
+        await unauthorizedErrorHandler(
+          { error: failureReason, request: httpServerMock.createKibanaRequest() },
+          mockUnauthorizedErrorToolkit
+        );
+
+        expect(mockUnauthorizedErrorToolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(mockUnauthorizedErrorToolkit.retry).not.toHaveBeenCalled();
+        expect(reauthenticate).not.toHaveBeenCalled();
+      });
+
       it('does not handle error unless provider successfully returns new headers.', async () => {
         const failureReason = new errors.ResponseError(
-          securityMock.createApiResponse({ statusCode: 401, body: {} })
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { reason: 'token expired' } },
+          })
         ) as UnauthorizedError;
 
         const nonHandleableResults = [
@@ -502,7 +523,45 @@ describe('AuthenticationService', () => {
 
       it('handles error if authentication succeeds and authentication headers are available.', async () => {
         const failureReason = new errors.ResponseError(
-          securityMock.createApiResponse({ statusCode: 401, body: {} })
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { reason: 'token expired' } },
+          })
+        ) as UnauthorizedError;
+
+        reauthenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(mockAuthenticatedUser(), {
+            authHeaders: { header: 'value' },
+          })
+        );
+
+        const mockRequest = httpServerMock.createKibanaRequest();
+        await unauthorizedErrorHandler(
+          { error: failureReason, request: mockRequest },
+          mockUnauthorizedErrorToolkit
+        );
+
+        expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledTimes(1);
+        expect(mockUnauthorizedErrorToolkit.retry).toHaveBeenCalledWith({
+          authHeaders: { header: 'value' },
+        });
+        expect(mockUnauthorizedErrorToolkit.notHandled).not.toHaveBeenCalled();
+
+        expect(reauthenticate).toHaveBeenCalledTimes(1);
+        expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
+      });
+
+      it('handles error if authentication succeeds and authentication headers are available (UIAM).', async () => {
+        const failureReason = new errors.ResponseError(
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: {
+              error: {
+                reason: 'failed to authenticate cloud access token for project',
+                caused_by: { authentication_error_code: '0x7E0116' },
+              },
+            },
+          })
         ) as UnauthorizedError;
 
         reauthenticate.mockResolvedValue(
@@ -529,7 +588,10 @@ describe('AuthenticationService', () => {
 
       it('filters out and recovers `Authorization` header when provider cannot handle error.', async () => {
         const failureReason = new errors.ResponseError(
-          securityMock.createApiResponse({ statusCode: 401, body: {} })
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { reason: 'token expired' } },
+          })
         ) as UnauthorizedError;
 
         const mockRequest = httpServerMock.createKibanaRequest({
@@ -556,7 +618,10 @@ describe('AuthenticationService', () => {
 
       it('filters out and recovers `Authorization` header when provider can handle error.', async () => {
         const failureReason = new errors.ResponseError(
-          securityMock.createApiResponse({ statusCode: 401, body: {} })
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { reason: 'token expired' } },
+          })
         ) as UnauthorizedError;
 
         const mockRequest = httpServerMock.createKibanaRequest({
@@ -587,7 +652,10 @@ describe('AuthenticationService', () => {
 
       it('filters out and recovers `Authorization` header when provider fails with unexpected error.', async () => {
         const failureReason = new errors.ResponseError(
-          securityMock.createApiResponse({ statusCode: 401, body: {} })
+          securityMock.createApiResponse({
+            statusCode: 401,
+            body: { error: { reason: 'token expired' } },
+          })
         ) as UnauthorizedError;
 
         const mockRequest = httpServerMock.createKibanaRequest({

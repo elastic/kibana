@@ -15,7 +15,6 @@ import type {
 } from '@kbn/core/server';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { Runner } from '@kbn/agent-builder-server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceSetup, AgentsServiceStart, ToolRefsParams } from './types';
 import type { AgentsUsingToolsResult } from './persisted/types';
@@ -23,7 +22,6 @@ import type { ToolsServiceStart } from '../tools';
 import {
   createBuiltinAgentRegistry,
   createBuiltinProviderFn,
-  registerBuiltinAgents,
   type BuiltinAgentRegistry,
 } from './builtin';
 import { createPersistedProviderFn } from './persisted';
@@ -40,7 +38,6 @@ export interface AgentsServiceStartDeps {
   elasticsearch: ElasticsearchServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
-  getRunner: () => Runner;
   toolsService: ToolsServiceStart;
 }
 
@@ -55,8 +52,6 @@ export class AgentsService {
 
   setup(setupDeps: AgentsServiceSetupDeps): AgentsServiceSetup {
     this.setupDeps = setupDeps;
-
-    registerBuiltinAgents({ registry: this.builtinRegistry });
 
     return {
       register: (agent) => {
@@ -75,8 +70,7 @@ export class AgentsService {
     }
 
     const { logger } = this.setupDeps;
-    const { getRunner, security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } =
-      startDeps;
+    const { security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } = startDeps;
 
     const builtinProviderFn = createBuiltinProviderFn({ registry: this.builtinRegistry });
     const persistedProviderFn = createPersistedProviderFn({
@@ -128,9 +122,6 @@ export class AgentsService {
 
     return {
       getRegistry,
-      execute: async (args) => {
-        return getRunner().runAgent(args);
-      },
       removeToolRefsFromAgents,
       getAgentsUsingTools,
     };
