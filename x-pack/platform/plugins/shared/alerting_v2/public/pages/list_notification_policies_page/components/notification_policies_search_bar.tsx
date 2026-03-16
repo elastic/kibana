@@ -52,7 +52,7 @@ export const NotificationPoliciesSearchBar = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="s" responsive={false}>
+    <EuiFlexGroup gutterSize="s" direction="row" responsive={false}>
       <EuiFlexItem grow>
         <EuiFieldSearch
           compressed

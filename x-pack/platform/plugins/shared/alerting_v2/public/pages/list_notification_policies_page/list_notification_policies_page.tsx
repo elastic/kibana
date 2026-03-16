@@ -265,43 +265,47 @@ export const ListNotificationPoliciesPage = () => {
           </EuiButton>,
         ]}
       />
-      <EuiSpacer size="m" />
-      <NotificationPoliciesSearchBar
-        onSearchChange={handleSearchChange}
-        destinationType={destinationType}
-        onDestinationTypeChange={handleDestinationTypeChange}
-        onRefresh={() => refetch()}
-      />
-      <EuiSpacer size="m" />
-      {errorMessage ? (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title={
-              <FormattedMessage
-                id="xpack.alertingV2.notificationPoliciesList.loadErrorTitle"
-                defaultMessage="Failed to load notification policies"
-              />
-            }
-            color="danger"
-            iconType="error"
-          >
-            {errorMessage}
-          </EuiCallOut>
-          <EuiSpacer />
-        </>
-      ) : null}
-      <EuiBasicTable
-        items={items}
-        columns={columns}
-        responsiveBreakpoint={false}
-        loading={isLoading}
-        pagination={pagination}
-        onChange={onTableChange}
-        tableCaption={i18n.translate('xpack.alertingV2.notificationPoliciesList.tableCaption', {
-          defaultMessage: 'Notification Policies',
-        })}
-      />
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiSpacer size="m" />
+        <EuiFlexItem grow={false}>
+          <NotificationPoliciesSearchBar
+            onSearchChange={handleSearchChange}
+            destinationType={destinationType}
+            onDestinationTypeChange={handleDestinationTypeChange}
+            onRefresh={() => refetch()}
+          />
+        </EuiFlexItem>
+        {errorMessage ? (
+          <>
+            <EuiCallOut
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.alertingV2.notificationPoliciesList.loadErrorTitle"
+                  defaultMessage="Failed to load notification policies"
+                />
+              }
+              color="danger"
+              iconType="error"
+            >
+              {errorMessage}
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        ) : null}
+        <EuiBasicTable
+          items={items}
+          columns={columns}
+          responsiveBreakpoint={false}
+          loading={isLoading}
+          pagination={pagination}
+          onChange={onTableChange}
+          tableCaption={i18n.translate('xpack.alertingV2.notificationPoliciesList.tableCaption', {
+            defaultMessage: 'Notification Policies',
+          })}
+        />
+      </EuiFlexGroup>
+
       {policyToDelete && (
         <DeleteNotificationPolicyConfirmModal
           policyName={policyToDelete.name}
