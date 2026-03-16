@@ -413,6 +413,21 @@ const UnifiedHistoryTableComponent = () => {
   const columns = useMemo(
     () => [
       {
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
+        width: '120px',
+        actions: [
+          {
+            available: isPlayButtonAvailable,
+            render: renderPlayButton,
+          },
+          {
+            render: renderDetailsAction,
+          },
+        ],
+      },
+      {
         field: 'queryText',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.queryColumnTitle', {
           defaultMessage: 'Query',
@@ -422,20 +437,20 @@ const UnifiedHistoryTableComponent = () => {
         render: renderQueryColumn,
       },
       {
-        field: 'totalRows',
-        name: i18n.translate('xpack.osquery.liveQueryActions.table.resultsColumnTitle', {
-          defaultMessage: 'Results',
-        }),
-        width: '120px',
-        render: renderResultsColumn,
-      },
-      {
         field: 'tags',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.tagsColumnTitle', {
           defaultMessage: 'Tags',
         }),
         width: '100px',
         render: renderTagsColumn,
+      },
+      {
+        field: 'totalRows',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.resultsColumnTitle', {
+          defaultMessage: 'Results',
+        }),
+        width: '120px',
+        render: renderResultsColumn,
       },
       {
         field: 'source',
@@ -468,21 +483,6 @@ const UnifiedHistoryTableComponent = () => {
         }),
         width: '200px',
         render: renderRunByColumn,
-      },
-      {
-        name: i18n.translate('xpack.osquery.liveQueryActions.table.actionsColumnTitle', {
-          defaultMessage: 'Actions',
-        }),
-        width: '120px',
-        actions: [
-          {
-            available: isPlayButtonAvailable,
-            render: renderPlayButton,
-          },
-          {
-            render: renderDetailsAction,
-          },
-        ],
       },
     ],
     [
