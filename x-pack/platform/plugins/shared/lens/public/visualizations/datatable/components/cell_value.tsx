@@ -26,6 +26,32 @@ const getBadgeLabel = (value: unknown) =>
     values: { value: String(value) },
   });
 
+type ColumnConfigWithIndex = DatatableColumnConfig['columns'][number] & { colIndex: number };
+
+const buildColumnConfigLookup = (
+  columns: DatatableColumnConfig['columns']
+): Map<string, ColumnConfigWithIndex> => {
+  const lookup = new Map<string, ColumnConfigWithIndex>();
+  columns.forEach((column, colIndex) => {
+    // Keep the first matching column to preserve previous findIndex() behavior.
+    if (!lookup.has(column.columnId)) {
+      lookup.set(column.columnId, { ...column, colIndex });
+    }
+  });
+  return lookup;
+};
+
+const getCellClassName = (
+  alignment: 'left' | 'right' | 'center' | undefined,
+  fitRowToContent?: boolean,
+  isColored = false
+) =>
+  classNames({
+    'lnsTableCell--multiline': fitRowToContent,
+    'lnsTableCell--colored': isColored,
+    [`lnsTableCell--${alignment}`]: true,
+  });
+
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
   columnConfig: DatatableColumnConfig,
@@ -38,23 +64,21 @@ export const createGridCell = (
   ) => CellColorFn,
   fitRowToContent?: boolean
 ) => {
+  const columnConfigLookup = buildColumnConfigLookup(columnConfig.columns);
+
   return ({ rowIndex, columnId, setCellProps, isExpanded }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, handleFilterClick } = useContext(DataContext);
     const formatter = formatters[columnId];
     const rawValue: RawValue = table?.rows[rowIndex]?.[columnId];
-    const fallbackText = rawValue == null ? '' : String(rawValue);
-    const colIndex = columnConfig.columns.findIndex(({ columnId: id }) => id === columnId);
+    const currentColumnConfig = columnConfigLookup.get(columnId);
+    const colIndex = currentColumnConfig?.colIndex ?? -1;
     const { euiTheme } = useEuiTheme();
-    const {
-      oneClickFilter,
-      colorMode = 'none',
-      palette,
-      colorMapping,
-    } = columnConfig.columns[colIndex] ?? {};
-    const filterOnClick = oneClickFilter && handleFilterClick;
-    const textContent = formatter?.convert(rawValue, 'text') ?? fallbackText;
-    const htmlContent = formatter?.convert(rawValue, 'html') ?? textContent;
-    const content = colorMode === 'badge' ? textContent : filterOnClick ? textContent : htmlContent;
+    const { oneClickFilter, colorMode = 'none', palette, colorMapping } = currentColumnConfig ?? {};
+    const filterOnClick = Boolean(oneClickFilter && handleFilterClick);
+    const shouldUseTextContent = colorMode === 'badge' || filterOnClick;
+    const fallbackText = rawValue == null ? '' : String(rawValue);
+    const content =
+      formatter?.convert(rawValue, shouldUseTextContent ? 'text' : 'html') ?? fallbackText;
     const currentAlignment = alignments?.get(columnId);
 
     const badgeColor = useMemo(() => {
@@ -107,10 +131,7 @@ export const createGridCell = (
       return (
         <div
           data-test-subj="lnsTableCellContent"
-          className={classNames({
-            'lnsTableCell--multiline': fitRowToContent,
-            [`lnsTableCell--${currentAlignment}`]: true,
-          })}
+          className={getCellClassName(currentAlignment, fitRowToContent)}
         >
           <EuiBadge
             data-test-subj="lnsTableCellContentBadge"
@@ -140,10 +161,7 @@ export const createGridCell = (
       return (
         <div
           data-test-subj="lnsTableCellContent"
-          className={classNames({
-            'lnsTableCell--multiline': fitRowToContent,
-            [`lnsTableCell--${currentAlignment}`]: true,
-          })}
+          className={getCellClassName(currentAlignment, fitRowToContent)}
         >
           <EuiLink
             style={{ color: adjustedLinkColor }}
@@ -163,13 +181,9 @@ export const createGridCell = (
          * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
          * which is produced in a safe way.
          */
-        dangerouslySetInnerHTML={{ __html: content ?? '' }} // eslint-disable-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
         data-test-subj="lnsTableCellContent"
-        className={classNames({
-          'lnsTableCell--multiline': fitRowToContent,
-          'lnsTableCell--colored': colorMode !== 'none',
-          [`lnsTableCell--${currentAlignment}`]: true,
-        })}
+        className={getCellClassName(currentAlignment, fitRowToContent, colorMode !== 'none')}
       />
     );
   };
