@@ -135,8 +135,11 @@ export const registerAlertVectorizationRoutes = (
 
           const alerts = alertsResponse.docs
             .filter(
-              (doc): doc is GetGetResult<Record<string, unknown>> & { _source: Record<string, unknown> } =>
-                'found' in doc && !!doc.found && '_source' in doc && doc._source != null
+              (
+                doc
+              ): doc is GetGetResult<Record<string, unknown>> & {
+                _source: Record<string, unknown>;
+              } => 'found' in doc && !!doc.found && '_source' in doc && doc._source != null
             )
             .map((doc) => ({
               id: doc._id,
