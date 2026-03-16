@@ -6,10 +6,9 @@
  */
 
 import type { JSX } from 'react';
-import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
 
 interface PanelConfig {
-  id: EuiContextMenuPanelId;
+  id: string | number;
   title?: JSX.Element | string;
   'data-test-subj'?: string;
 }
