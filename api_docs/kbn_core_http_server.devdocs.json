@@ -16787,6 +16787,14 @@
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/unified_history/get_unified_history_route.ts"
               },
               {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/scheduled_results/get_scheduled_action_results_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/scheduled_results/get_scheduled_query_results_route.ts"
+              },
+              {
                 "plugin": "searchInferenceEndpoints",
                 "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
               },
