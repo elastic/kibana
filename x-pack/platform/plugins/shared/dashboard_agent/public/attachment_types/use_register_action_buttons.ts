@@ -26,7 +26,7 @@ interface UseRegisterActionButtonsParams {
   timeRange: { from: string; to: string };
   dashboardState: Pick<DashboardState, 'title' | 'description' | 'panels' | 'time_range'>;
   linkedSavedObjectId: string | undefined;
-  doesSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }
 
 export const useRegisterActionButtons = ({
@@ -36,7 +36,7 @@ export const useRegisterActionButtons = ({
   timeRange,
   dashboardState,
   linkedSavedObjectId,
-  doesSavedDashboardExist,
+  checkSavedDashboardExist,
 }: UseRegisterActionButtonsParams) => {
   const timeRangeRef = useLatest(timeRange);
   const linkedSavedObjectIdRef = useLatest(linkedSavedObjectId);
@@ -60,7 +60,7 @@ export const useRegisterActionButtons = ({
         handler: async () => {
           const existingDashboardId =
             linkedSavedObjectIdRef.current &&
-            (await doesSavedDashboardExist(linkedSavedObjectIdRef.current))
+            (await checkSavedDashboardExist(linkedSavedObjectIdRef.current))
               ? linkedSavedObjectIdRef.current
               : undefined;
           await locator.navigate({
@@ -81,7 +81,7 @@ export const useRegisterActionButtons = ({
       handler: async () => {
         const existingDashboardId =
           linkedSavedObjectIdRef.current &&
-          (await doesSavedDashboardExist(linkedSavedObjectIdRef.current))
+          (await checkSavedDashboardExist(linkedSavedObjectIdRef.current))
             ? linkedSavedObjectIdRef.current
             : undefined;
         if (existingDashboardId) {
@@ -100,7 +100,7 @@ export const useRegisterActionButtons = ({
     dashboardApi,
     registerActionButtons,
     updateOrigin,
-    doesSavedDashboardExist,
+    checkSavedDashboardExist,
     timeRangeRef,
     linkedSavedObjectIdRef,
     dashboardStateRef,

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import {
-  HEATMAP_NAME,
   type FormBasedLayer,
   type HeatmapVisualizationState,
   type TextBasedLayer,
@@ -88,7 +87,7 @@ function reverseBuildVisualizationState(
 
   const sharedProps = {
     ...generateApiLayer(layer),
-    type: HEATMAP_NAME,
+    type: 'heat_map' as const,
     legend: getLegendProps(visualization.legend),
     axes: getGridConfigProps(visualization.gridConfig),
     cells: {
