@@ -7,9 +7,14 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { Feature } from '@kbn/streams-schema';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
 import { FEATURE_EXTRACTION_POLL_INTERVAL_MS, FEATURE_EXTRACTION_TIMEOUT_MS } from './constants';
+import {
+  getSigeventsSnapshotFeaturesIndex,
+  SIGEVENTS_FEATURES_INDEX_PATTERN,
+} from '../../../src/data_generators/sigevents_features_index';
 
 export async function enableSignificantEvents(
   config: ConnectionConfig,
@@ -95,17 +100,82 @@ export async function logSigEventsExtractedFeatures(
   config: ConnectionConfig,
   log: ToolingLog
 ): Promise<void> {
-  const { data } = await kibanaRequest(config, 'GET', '/internal/streams/logs/features');
-  const features = (data as Record<string, unknown>)?.features;
-  if (Array.isArray(features)) {
-    log.info(`Extracted ${features.length} features:`);
-    for (const f of features) {
-      const feat = f as Record<string, unknown>;
-      log.info(`  - ${feat.title || feat.description} (${feat.type})`);
-    }
-  } else {
-    log.warning('Could not retrieve features after extraction');
+  const features = await fetchSigEventsExtractedFeatures(config, log, 'logs');
+  log.info(`Extracted ${features.length} features:`);
+  for (const f of features) {
+    log.info(`  - ${f.title || f.description} (${f.type})`);
   }
+}
+
+async function fetchSigEventsExtractedFeatures(
+  config: ConnectionConfig,
+  log: ToolingLog,
+  streamName: string
+): Promise<Feature[]> {
+  const { data } = await kibanaRequest(config, 'GET', `/internal/streams/${streamName}/features`);
+  const features = (data as Record<string, unknown>)?.features;
+  if (!Array.isArray(features)) {
+    throw new Error(`Expected "features" array from Kibana, got: ${JSON.stringify(data)}`);
+  }
+  return features.filter(Boolean) as Feature[];
+}
+
+export async function persistSigEventsExtractedFeaturesForSnapshot(
+  config: ConnectionConfig,
+  esClient: Client,
+  log: ToolingLog,
+  snapshotName: string,
+  streamName: string = 'logs'
+): Promise<{ index: string; count: number }> {
+  const features = await fetchSigEventsExtractedFeatures(config, log, streamName);
+  const index = getSigeventsSnapshotFeaturesIndex(snapshotName);
+
+  await esClient.indices.delete({ index, ignore_unavailable: true });
+  await esClient.indices.create({
+    index,
+    mappings: {
+      dynamic: false,
+      properties: {
+        uuid: { type: 'keyword' },
+        id: { type: 'keyword' },
+        stream_name: { type: 'keyword' },
+        type: { type: 'keyword' },
+        subtype: { type: 'keyword' },
+        title: { type: 'keyword' },
+        description: { type: 'text' },
+        properties: { type: 'object', enabled: false },
+        confidence: { type: 'float' },
+        evidence: { type: 'keyword' },
+        tags: { type: 'keyword' },
+        meta: { type: 'object', enabled: false },
+        status: { type: 'keyword' },
+        last_seen: { type: 'date' },
+        expires_at: { type: 'date' },
+      },
+    },
+  });
+
+  if (features.length > 0) {
+    const operations = features.flatMap((feature) => [
+      { index: { _index: index, _id: feature.uuid } },
+      feature,
+    ]);
+
+    await esClient.bulk({ refresh: true, operations });
+  } else {
+    try {
+      await esClient.indices.refresh({ index });
+    } catch (error) {
+      throw new Error(
+        `Failed to refresh features index "${index}" before snapshotting: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  log.info(`Persisted ${features.length} features to "${index}" for snapshotting`);
+  return { index, count: features.length };
 }
 
 export async function cleanupSigEventsExtractedFeaturesData(
@@ -114,7 +184,7 @@ export async function cleanupSigEventsExtractedFeaturesData(
 ): Promise<void> {
   log.info('Cleaning up ES data...');
 
-  for (const target of ['logs*', '.kibana_streams_features']) {
+  for (const target of ['logs*', '.kibana_streams_features', SIGEVENTS_FEATURES_INDEX_PATTERN]) {
     try {
       await esClient.indices.deleteDataStream({ name: target });
     } catch {

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/management-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/management-plugin'
+  title: '@kbn/management-plugin'
   description: Moon project for @kbn/management-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/management
+  sourceRoot: src/platform/plugins/shared/management
 dependsOn:
   - '@kbn/core'
   - '@kbn/home-plugin'
@@ -37,7 +36,6 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/core-chrome-browser'
   - '@kbn/autoops-promotion-callout'
-  - '@kbn/licensing-plugin'
 tags:
   - plugin
   - prod
@@ -52,14 +50,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

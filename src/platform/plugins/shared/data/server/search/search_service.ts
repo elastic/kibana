@@ -14,6 +14,7 @@ import moment from 'moment';
 import type {
   CoreSetup,
   CoreStart,
+  IClusterClient,
   KibanaRequest,
   Logger,
   PluginInitializerContext,
@@ -33,6 +34,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
 import type {
   DataRequestHandlerContext,
   IScopedSearchClient,
@@ -289,8 +291,13 @@ export class SearchService {
       getSearchStrategy: this.getSearchStrategy,
       asScoped: this.asScoped,
       searchSource: {
-        asScoped: async (request: KibanaRequest) => {
-          const esClient = elasticsearch.client.asScoped(request);
+        asScoped: async (request: KibanaRequest, opts?: AsScopedOptions) => {
+          const esClient = this.createScopedEsClient({
+            client: elasticsearch.client,
+            request,
+            opts,
+          });
+
           const savedObjectsClient = savedObjects.getScopedClient(request);
           const scopedIndexPatterns = await indexPatterns.dataViewsServiceFactory(
             savedObjectsClient,
@@ -308,7 +315,7 @@ export class SearchService {
           const searchSourceDependencies: SearchSourceDependencies = {
             aggs: aggsStart,
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
-            search: this.asScoped(request).search,
+            search: this.asScoped(request, opts).search,
             onResponse: (req, res) => res,
             dataViews: scopedIndexPatterns,
             scriptedFieldsEnabled: true,
@@ -533,13 +540,13 @@ export class SearchService {
   private asScopedProvider = (core: CoreStart, rollupsEnabled: boolean = false) => {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const getSessionAsScoped = this.sessionService.asScopedProvider(core);
-    return (request: KibanaRequest): IScopedSearchClient => {
+    return (request: KibanaRequest, opts?: AsScopedOptions): IScopedSearchClient => {
       const savedObjectsClient = savedObjects.getScopedClient(request);
       const searchSessionsClient = getSessionAsScoped(request);
       const deps = {
         searchSessionsClient,
         savedObjectsClient,
-        esClient: elasticsearch.client.asScoped(request),
+        esClient: this.createScopedEsClient({ client: elasticsearch.client, request, opts }),
         uiSettingsClient: new CachedUiSettingsClient(
           uiSettings.asScopedToClient(savedObjectsClient)
         ),
@@ -568,5 +575,23 @@ export class SearchService {
         getSessionStatus: searchSessionsClient.status,
       };
     };
+  };
+
+  private createScopedEsClient = ({
+    client,
+    request,
+    opts,
+  }: {
+    client: IClusterClient;
+    request: KibanaRequest;
+    opts?: AsScopedOptions;
+  }) => {
+    return opts?.projectRouting === 'space'
+      ? client.asScoped(request, { projectRouting: 'space' })
+      : opts?.projectRouting === 'all'
+      ? client.asScoped(request, { projectRouting: 'all' })
+      : opts?.projectRouting === 'origin-only'
+      ? client.asScoped(request, { projectRouting: 'origin-only' })
+      : client.asScoped(request);
   };
 }

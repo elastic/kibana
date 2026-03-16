@@ -5,47 +5,43 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
-import type { ChatEvent } from '@kbn/agent-builder-common';
-import { isToolUiEvent, isRoundCompleteEvent, getLatestVersion } from '@kbn/agent-builder-common';
-import type {
-  DashboardAttachmentData,
-  PanelAddedEventData,
-  PanelsRemovedEventData,
-} from '@kbn/dashboard-agent-common';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  DASHBOARD_PANEL_ADDED_EVENT,
-  DASHBOARD_PANELS_REMOVED_EVENT,
-} from '@kbn/dashboard-agent-common';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { DashboardAttachmentStore } from '../services/attachment_store';
-import { createFlyoutConsumer } from '../flyout';
+import type {
+  DashboardApi,
+  DashboardRendererProps,
+  DashboardStart,
+} from '@kbn/dashboard-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import { DashboardCanvasContent } from './dashboard_canvas_content';
+import { getStateFromAttachment } from './attachment_to_dashboard_state';
 
-/**
- * Registers the dashboard attachment UI definition, including the icon and label.
- * Returns a cleanup function that should be called when the plugin stops.
- */
 export const registerDashboardAttachmentUiDefinition = ({
-  attachments,
-  chat$,
-  share,
-  core,
+  agentBuilder: { attachments },
+  dashboardLocator,
+  unifiedSearch,
+  dashboardPlugin,
 }: {
-  attachments: AttachmentServiceStartContract;
-  chat$: Observable<ChatEvent>;
-  share?: SharePluginStart;
-  core: CoreStart;
+  agentBuilder: AgentBuilderPluginStart;
+  dashboardLocator?: DashboardRendererProps['locator'];
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  dashboardPlugin: DashboardStart;
 }): (() => void) => {
-  const attachmentStore = new DashboardAttachmentStore();
+  let dashboardApi: DashboardApi | undefined;
+  const dashboardAppApiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
+    dashboardApi = api;
+  });
 
-  // Create flyout consumer - it subscribes to attachmentStore.state$
-  const unsubscribeFlyout = createFlyoutConsumer({ attachmentStore, core, chat$, share });
-
+  const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
+  const checkSavedDashboardExist = async (dashboardId: string) => {
+    const findDashboardsService = await findDashboardsServicePromise;
+    const result = await findDashboardsService.findById(dashboardId);
+    return result.status === 'success';
+  };
   attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, {
     getLabel: (attachment) => {
       return (
@@ -56,56 +52,43 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
-    onClick: ({ attachment }) => {
-      const data = attachment.data;
-      if (!data) return;
+    renderCanvasContent: (props, callbacks) => (
+      <DashboardCanvasContent
+        {...props}
+        registerActionButtons={callbacks.registerActionButtons}
+        updateOrigin={callbacks.updateOrigin}
+        dashboardLocator={dashboardLocator}
+        searchBarComponent={unifiedSearch.ui.SearchBar}
+        checkSavedDashboardExist={checkSavedDashboardExist}
+      />
+    ),
+    getActionButtons: ({ attachment, openCanvas, isCanvas }) => {
+      if (isCanvas) {
+        return [];
+      }
+      return [
+        {
+          label: i18n.translate('xpack.dashboardAgent.attachments.dashboard.previewActionLabel', {
+            defaultMessage: 'Preview',
+          }),
+          icon: 'eye',
+          type: ActionButtonType.SECONDARY,
+          handler: () => {
+            if (!dashboardApi) {
+              openCanvas?.();
+              return;
+            }
 
-      attachmentStore.setAttachment(attachment.id, data);
+            dashboardApi.setViewMode('edit');
+            dashboardApi.setState(getStateFromAttachment(attachment));
+          },
+        },
+      ];
     },
   });
 
-  // Subscribe to chat events for progressive panel updates
-  const eventsSubscription = chat$.subscribe((event) => {
-    // Handle progressive panel additions
-    if (
-      isToolUiEvent<typeof DASHBOARD_PANEL_ADDED_EVENT, PanelAddedEventData>(
-        event,
-        DASHBOARD_PANEL_ADDED_EVENT
-      )
-    ) {
-      const { dashboardAttachmentId, panel } = event.data.data;
-      attachmentStore.addPanel(dashboardAttachmentId, panel);
-    }
-
-    // Handle progressive panel removals
-    if (
-      isToolUiEvent<typeof DASHBOARD_PANELS_REMOVED_EVENT, PanelsRemovedEventData>(
-        event,
-        DASHBOARD_PANELS_REMOVED_EVENT
-      )
-    ) {
-      const { dashboardAttachmentId, panelIds } = event.data.data;
-      attachmentStore.removePanels(dashboardAttachmentId, panelIds);
-    }
-
-    // Handle final attachment update (round complete)
-    if (isRoundCompleteEvent(event) && event.data.attachments) {
-      for (const attachment of event.data.attachments) {
-        if (attachment.type === DASHBOARD_ATTACHMENT_TYPE) {
-          const latestVersion = getLatestVersion(attachment);
-          if (latestVersion?.data) {
-            attachmentStore.updateAttachment(
-              attachment.id,
-              latestVersion.data as DashboardAttachmentData
-            );
-          }
-        }
-      }
-    }
-  });
-
   return () => {
-    eventsSubscription.unsubscribe();
-    unsubscribeFlyout();
+    dashboardAppApiSubscription.unsubscribe();
+    dashboardApi = undefined;
   };
 };

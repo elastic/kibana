@@ -16,6 +16,7 @@ import {
   HIGHLIGHTED_STROKE_WIDTH,
   MOCK_PRIMARY_COLOR,
   MOCK_DEFAULT_COLOR,
+  MOCK_EUI_THEME_FOR_USE_THEME,
 } from './constants';
 import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_TYPE, SPAN_SUBTYPE } from '@kbn/apm-types';
 
@@ -23,17 +24,7 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    useEuiTheme: () => ({
-      euiTheme: {
-        colors: {
-          primary: MOCK_PRIMARY_COLOR,
-          mediumShade: MOCK_DEFAULT_COLOR,
-        },
-        levels: {
-          content: 1000,
-        },
-      },
-    }),
+    useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
   };
 });
 

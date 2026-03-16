@@ -184,13 +184,13 @@
   "@elastic/kibana-cases": {
     "x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.json": "'bundled-types.json' should be snake_case",
     "x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.schema.yaml": "'bundled-types.schema.yaml' should be snake_case",
-    "x-pack/platform/plugins/shared/cases/docs/openapi/bundled-types.gen.ts": "'bundled-types.gen.ts' should be snake_case",
     "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/defaultSearchOperator.yaml": "'defaultSearchOperator.yaml' should be snake_case",
     "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/includeComments.yaml": "'includeComments.yaml' should be snake_case",
     "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/searchFields.yaml": "'searchFields.yaml' should be snake_case",
     "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/searchFieldsType.yaml": "'searchFieldsType.yaml' should be snake_case",
     "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/searchFieldsTypeArray.yaml": "'searchFieldsTypeArray.yaml' should be snake_case",
-    "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/sortField.yaml": "'sortField.yaml' should be snake_case"
+    "x-pack/platform/plugins/shared/cases/docs/openapi/components/parameters/sortField.yaml": "'sortField.yaml' should be snake_case",
+    "x-pack/platform/plugins/shared/cases/common/bundled-types.gen.ts": "'bundled-types.gen.ts' should be snake_case"
   },
   "@elastic/kibana-core": {
     "src/core/packages/custom-branding": "'custom-branding' should be snake_case",

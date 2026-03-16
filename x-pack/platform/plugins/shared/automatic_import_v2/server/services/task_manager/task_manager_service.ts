@@ -19,6 +19,8 @@ import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
 import { AgentService } from '../agents/agent_service';
 import { AutomaticImportSamplesIndexService } from '../samples_index/index_service';
+import { generateFieldMappings } from '../build_integration/fields';
+import { validateFieldMappings } from '../build_integration/validate_fields';
 import type { LangSmithOptions } from '../../routes/types';
 import type { AutomaticImportV2PluginStartDependencies } from '../../types';
 import type { AutomaticImportSavedObjectService } from '../saved_objects/saved_objects_service';
@@ -229,12 +231,29 @@ export class TaskManagerService {
         `Pipeline generation results objects: ${JSON.stringify(result.pipeline_generation_results)}`
       );
 
-      // Update the data stream saved object with pipeline and task status
+      const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
+      const fieldMapping = await generateFieldMappings(
+        (pipelineGenerationResultsObjects ?? []) as Array<Record<string, unknown>>,
+        fieldsMetadataClient
+      );
+      this.logger.debug(`Generated field mappings: ${JSON.stringify(fieldMapping)}`);
+
+      const validationResult = await validateFieldMappings(esClient, fieldMapping, this.logger);
+      if (!validationResult.valid) {
+        this.logger.warn(
+          `Field mapping validation warnings for ${dataStreamId}: ${validationResult.errors.join(
+            ', '
+          )}`
+        );
+      }
+
+      // Update the data stream saved object with pipeline, field mappings, and task status
       await automaticImportSavedObjectService.updateDataStreamSavedObjectAttributes({
         integrationId,
         dataStreamId,
         ingestPipeline: pipelineObject,
         pipelineDocs: pipelineGenerationResultsObjects,
+        fieldMapping,
         status: TASK_STATUSES.completed,
       });
 

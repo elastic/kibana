@@ -7,5 +7,5 @@
 
 export const ALERTS_SUMMARY_PROMPT = '[data-test-subj="alert-summary-landing-page-prompt"]';
 export const GET_STARTED_PAGE = '[data-test-subj="onboarding-hub-page"]';
-export const AI_SOC_NAVIGATION = '[data-test-subj*="securitySolutionSideNav"]';
+export const AI_SOC_NAVIGATION = '[data-test-subj*="securitySideNav"]';
 export const APP_NOT_FOUND_PAGE = '[data-test-subj="appNotFoundPageContent"]';

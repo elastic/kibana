@@ -212,10 +212,14 @@ function buildFormBasedLayer(layer: GaugeStateNoESQL): FormBasedPersistedState['
 function getValueColumns(layer: GaugeStateESQL) {
   return [
     getValueColumn(getAccessorName('metric'), layer.metric.column, 'number'),
-    ...(layer.metric.max ? [getValueColumn(getAccessorName('max'), layer.metric.max.column)] : []),
-    ...(layer.metric.min ? [getValueColumn(getAccessorName('min'), layer.metric.min.column)] : []),
+    ...(layer.metric.max
+      ? [getValueColumn(getAccessorName('max'), layer.metric.max.column, 'number')]
+      : []),
+    ...(layer.metric.min
+      ? [getValueColumn(getAccessorName('min'), layer.metric.min.column, 'number')]
+      : []),
     ...(layer.metric.goal
-      ? [getValueColumn(getAccessorName('goal'), layer.metric.goal.column)]
+      ? [getValueColumn(getAccessorName('goal'), layer.metric.goal.column, 'number')]
       : []),
   ];
 }
@@ -252,7 +256,7 @@ export function fromAPItoLensState(config: GaugeState): GaugeAttributesWithoutFi
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

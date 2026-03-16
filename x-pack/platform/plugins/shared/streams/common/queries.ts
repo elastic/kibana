@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { StreamQuery, StreamQueryInput } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 
-// Legacy stored query links may not include rule_backed and should be treated as already backed.
-export const LEGACY_RULE_BACKED_FALLBACK = true;
+export const QUERY_STATUSES = ['active', 'draft'] as const;
+export type QueryStatus = (typeof QUERY_STATUSES)[number];
 
 export interface QueryLink {
   'asset.uuid': string;
@@ -17,14 +17,12 @@ export interface QueryLink {
   query: StreamQuery;
   stream_name: string;
   /** Whether a Kibana rule exists for this query. */
-  rule_backed?: boolean;
+  rule_backed: boolean;
   /** The deterministic ID of the Kibana rule associated with this query. */
   rule_id: string;
 }
 
-export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name' | 'query'> & {
-  query: StreamQueryInput;
-};
+export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name'>;
 
 export type QueryUnlinkRequest = Pick<QueryLink, 'asset.type' | 'asset.id'>;
 
