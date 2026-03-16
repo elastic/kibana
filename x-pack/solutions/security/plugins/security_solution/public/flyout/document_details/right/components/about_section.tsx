@@ -14,15 +14,14 @@ import {
   getFieldValue,
 } from '@kbn/discover-utils';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../rule_details/right';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
-import { ABOUT_SECTION_TEST_ID } from './test_ids';
 import { MitreAttack } from './mitre_attack';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -30,10 +29,13 @@ import { isEcsAllowedValue } from '../utils/event_utils';
 import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
 import { EventRenderer } from './event_renderer';
-import { AlertStatus } from './alert_status';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { AlertDescription } from '../../../../flyout_v2/document/components/alert_description';
-import { ABOUT_SECTION_TITLE } from '../../../../flyout_v2/document/components/about_section';
+import {
+  ABOUT_SECTION_TEST_ID,
+  ABOUT_SECTION_TITLE,
+} from '../../../../flyout_v2/document/components/about_section';
+import { AlertStatus } from '../../../../flyout_v2/document/components/alert_status';
 import {
   ALERT_REASON_BANNER,
   AlertReason,
@@ -114,7 +116,7 @@ export const AboutSection = memo(() => {
         />
         <AlertReason hit={hit} onShowFullReason={openAlertReasonPreview} />
         <MitreAttack />
-        <AlertStatus />
+        <AlertStatus hit={hit} />
       </>
     ) : (
       <>

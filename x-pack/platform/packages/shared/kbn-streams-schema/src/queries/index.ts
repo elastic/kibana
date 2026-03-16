@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { primitive } from '../shared/record_types';
 import type { SignificantEventsResponse } from '../api/significant_events';
 
@@ -43,7 +43,10 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.ex
 });
 
 export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
-  z.record(z.union([primitive, z.array(z.union([primitive, querySchema])), querySchema]))
+  z.record(
+    z.string(),
+    z.union([primitive, z.array(z.union([primitive, querySchema])), querySchema])
+  )
 );
 
 export const upsertStreamQueryRequestSchema = z.object({

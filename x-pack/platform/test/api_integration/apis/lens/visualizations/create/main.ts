@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { LENS_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
+import { LENS_INTERNAL_VIS_API_PATH, LENS_API_VERSION } from '@kbn/lens-plugin/common/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { LensCreateResponseBody } from '@kbn/lens-plugin/server';
@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('main', () => {
     it('should create a lens visualization', async () => {
       const response = await supertest
-        .post(LENS_VIS_API_PATH)
+        .post(LENS_INTERNAL_VIS_API_PATH)
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, LENS_API_VERSION)
         .send(getExampleLensBody(undefined, 'new lens vis'));

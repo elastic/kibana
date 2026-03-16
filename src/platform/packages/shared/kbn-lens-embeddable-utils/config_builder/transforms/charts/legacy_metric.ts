@@ -175,7 +175,7 @@ export function fromAPItoLensState(
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

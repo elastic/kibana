@@ -23,14 +23,55 @@ jest.mock('../../shared/components/flyout_body', () => ({
   ),
 }));
 
-jest.mock('../hooks/use_attack_details', () => ({
-  useAttackDetails: jest.fn().mockReturnValue({
+jest.mock('../hooks/use_attack_details', () => {
+  return {
+    useAttackDetails: jest.fn().mockReturnValue({
+      loading: false,
+      attack: {
+        id: 'test-alert-1',
+        alertIds: ['alert-1'],
+        detectionEngineRuleId: 'rule-1',
+        ruleStatus: 'enabled',
+        ruleVersion: 1,
+        timestamp: '2024-01-01T00:00:00Z',
+        entities: {
+          users: [],
+          hosts: [],
+        },
+        summaryMarkdown: '# Test Alert Summary',
+        mitreTactics: [],
+        mitreTechniques: [],
+      },
+      browserFields: {},
+      dataFormattedForFieldBrowser: [],
+      searchHit: { _index: 'test', _id: 'test-id' },
+      getFieldsData: jest.fn(),
+      refetch: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../hooks/use_header_data', () => ({
+  useHeaderData: jest.fn().mockReturnValue({ timestamp: '2024-01-01T00:00:00Z' }),
+}));
+
+jest.mock('../hooks/use_attack_entities_lists', () => ({
+  useAttackEntitiesLists: jest.fn().mockReturnValue({
+    userNames: [],
+    hostNames: [],
     loading: false,
-    browserFields: {},
-    dataFormattedForFieldBrowser: [],
-    searchHit: { _index: 'test', _id: 'test-id' },
-    getFieldsData: jest.fn(),
+    error: false,
   }),
+}));
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn().mockReturnValue({
+    openLeftPanel: jest.fn(),
+  }),
+}));
+
+jest.mock('../../../common/hooks/use_space_id', () => ({
+  useSpaceId: () => 'default',
 }));
 
 describe('AttackDetailsLeftPanel', () => {
@@ -45,6 +86,6 @@ describe('AttackDetailsLeftPanel', () => {
 
     expect(screen.getByTestId('flyout-header')).toBeInTheDocument();
     expect(screen.getByTestId('flyout-body')).toBeInTheDocument();
-    expect(screen.getByText('Attack details')).toBeInTheDocument();
+    expect(screen.getByText('Insights')).toBeInTheDocument();
   });
 });

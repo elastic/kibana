@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useAlertPrevalenceFromProcessTree } from './use_alert_prevalence_from_process_tree';
+import { useAlertPrevalenceFromProcessTree } from '../../../../flyout_v2/document/hooks/use_alert_prevalence_from_process_tree';
 
 export interface UseFetchRelatedAlertsByAncestryParams {
   /**

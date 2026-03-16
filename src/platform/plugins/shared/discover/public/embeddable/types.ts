@@ -12,6 +12,7 @@ import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   EmbeddableApiContext,
+  CanOverrideHoverActions,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
@@ -26,13 +27,16 @@ import type {
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import type { SavedSearch, SerializableSavedSearch } from '@kbn/saved-search-plugin/common/types';
+import type {
+  DiscoverSessionTab,
+  SavedSearch,
+  SerializableSavedSearch,
+} from '@kbn/saved-search-plugin/common/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import type { BehaviorSubject } from 'rxjs';
 import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
-  EditableSavedSearchAttributes,
   NonPersistedDisplayOptions,
   SearchEmbeddableState,
 } from '../../common/embeddable/types';
@@ -71,11 +75,12 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
   SerializedTitles &
   SerializedTimeRange &
   SerializedDrilldowns & {
-    rawSavedObjectAttributes?: EditableSavedSearchAttributes;
     savedObjectTitle?: string;
     savedObjectId?: string;
     savedObjectDescription?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
+    selectedTabId?: string;
+    tabs?: DiscoverSessionTab[];
   };
 
 export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
@@ -92,6 +97,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
   HasTimeRange &
   HasInspectorAdapters &
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
+  Partial<CanOverrideHoverActions> &
   HasDrilldowns &
   HasSupportedTriggers;
 

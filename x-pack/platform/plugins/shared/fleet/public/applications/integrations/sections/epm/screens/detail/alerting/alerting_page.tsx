@@ -128,11 +128,8 @@ export const AlertingPage = ({ packageInfo, refetchPackageInfo }: AlertingPagePr
     setIsReinstalling(false);
   }, [notifications.toasts, name, version, forceRefreshAssets]);
 
-  // Redirect to overview if not installed or not an integration package
-  if (
-    packageInstallStatus.status !== InstallStatus.installed ||
-    packageInfo.type !== 'integration'
-  ) {
+  // Redirect to overview if not installed
+  if (packageInstallStatus.status !== InstallStatus.installed) {
     return <Redirect to={getPath('integration_details_overview', { pkgkey })} />;
   }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodObject } from '@kbn/zod';
+import type { ZodObject } from '@kbn/zod/v4';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
 import { createBadRequestError, HookLifecycle, ToolResultType } from '@kbn/agent-builder-common';

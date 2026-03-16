@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -70,10 +71,15 @@ async function mountComponent({
     toolkit.getCurrentTab().id
   ).stateContainer$.getValue()!;
 
-  stateContainer.dataState.data$.documents$.next({
+  const testDocuments = {
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
-  });
+  };
+
+  stateContainer.dataState.data$.documents$.next(testDocuments);
+
+  // Prevent any further updates to documents$ from clearing test data
+  stateContainer.dataState.data$.documents$.next = jest.fn();
 
   const props = {
     viewModeToggle: <div data-test-subj="viewModeToggle">test</div>,
@@ -134,6 +140,34 @@ describe('Discover documents layout', () => {
     });
     expect(screen.getByText('Loading documents')).toBeVisible();
     expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
+  });
+
+  test('ES|QL: should not show sample size control', async () => {
+    await mountComponent({
+      fetchStatus: FetchStatus.COMPLETE,
+      hits: esHitsMock,
+      isEsqlMode: true,
+    });
+
+    await userEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('unifiedDataTableSampleSizeInput')).not.toBeInTheDocument();
+    });
+  });
+
+  test('should show sample size control when not in ES|QL mode', async () => {
+    await mountComponent({
+      fetchStatus: FetchStatus.COMPLETE,
+      hits: esHitsMock,
+      isEsqlMode: false,
+    });
+
+    await userEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('unifiedDataTableSampleSizeInput').length).toBeGreaterThan(0);
+    });
   });
 
   test('should set rounded width to state on resize column', async () => {

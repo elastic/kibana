@@ -7,7 +7,7 @@
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import { isEqual } from 'lodash';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import {
   type RulePatchProps,
   RuleResponse,

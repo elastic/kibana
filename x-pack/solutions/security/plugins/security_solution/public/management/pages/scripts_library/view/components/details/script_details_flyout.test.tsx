@@ -7,8 +7,8 @@
 
 import React from 'react';
 import {
-  createAppRootMockRenderer,
   type AppContextTestRender,
+  createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import {
   EndpointScriptDetailsFlyout,
@@ -130,7 +130,8 @@ describe('EndpointScriptDetailsFlyout', () => {
           description: '',
           instructions: '',
           example: '',
-          pathToExecutable: '',
+          pathToExecutable: undefined,
+          fileType: 'script',
         },
       });
       const { getByTestId } = renderResult;

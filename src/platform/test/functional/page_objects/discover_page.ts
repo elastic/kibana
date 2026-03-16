@@ -33,6 +33,8 @@ export class DiscoverPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly timeToVisualize = this.ctx.getPageObject('timeToVisualize');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly dashboardPanelActions = this.ctx.getService('dashboardPanelActions');
+  private readonly dashboard = this.ctx.getPageObject('dashboard');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -67,6 +69,28 @@ export class DiscoverPageObject extends FtrService {
     });
 
     return await getHistogramChartDataTimeRange();
+  }
+
+  public async saveAsSearch(searchName: string) {
+    await this.clickSaveAsSearchButton();
+    // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
+    await this.retry.waitFor(
+      `saved search title is set to ${searchName} and save button is clickable`,
+      async () => {
+        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
+        await this.testSubjects.setValue('savedObjectTitle', searchName);
+        return (await saveButton.getAttribute('disabled')) !== 'true';
+      }
+    );
+
+    await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.header.waitUntilLoadingHasFinished();
+
+    await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
+      const last = await this.getCurrentQueryName();
+
+      return last === searchName;
+    });
   }
 
   public async saveSearch(
@@ -216,6 +240,16 @@ export class DiscoverPageObject extends FtrService {
   public async clickSaveSearchButton() {
     await this.testSubjects.moveMouseTo('discoverSaveButton');
     await this.testSubjects.click('discoverSaveButton');
+  }
+
+  public async clickSaveAsSearchButton() {
+    await this.testSubjects.moveMouseTo('discoverSaveButton-secondary-button');
+    await this.testSubjects.click('discoverSaveButton-secondary-button');
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.testSubjects.find('discoverSaveButtonPopover'));
+    });
+    await this.testSubjects.moveMouseTo('interactiveSaveMenuItem');
+    await this.testSubjects.click('interactiveSaveMenuItem');
   }
 
   public async clickCancelButton() {
@@ -1077,4 +1111,45 @@ export class DiscoverPageObject extends FtrService {
   public setQueryMode(mode: string) {
     return this.browser.setLocalStorageItem(DISCOVER_QUERY_MODE_KEY, JSON.stringify(mode));
   }
+
+  /** Discover Embeddable helper methods   */
+
+  public async editEmbeddableInDiscover() {
+    await this.dashboardPanelActions.clickEdit();
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.click('discoverEmbeddableInlineEditEditInDiscoverLink');
+    await this.waitForDiscoverAppOnScreen();
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async enterInlineEditing() {
+    const isAlreadyActive = await this.testSubjects.exists(
+      'discoverEmbeddableInlineEditSelectTabAction'
+    );
+    if (!isAlreadyActive) {
+      await this.dashboardPanelActions.clickPanelAction('embeddablePanelAction-editPanel');
+      await this.header.waitUntilLoadingHasFinished();
+    }
+  }
+
+  public async selectTabFromPopover(tabLabel: string) {
+    await this.testSubjects.click('discoverEmbeddableInlineEditSelectTabAction');
+    const popover = await this.testSubjects.find('discoverEmbeddableInlineEditSelectTabPopover');
+    await this.find.clickByButtonText(tabLabel, popover);
+    await this.header.waitUntilLoadingHasFinished();
+    await this.dashboard.waitForRenderComplete();
+  }
+
+  public async selectEmbeddableTab(tabLabel: string) {
+    await this.retry.try(async () => {
+      await this.enterInlineEditing();
+      await this.selectTabFromPopover(tabLabel);
+
+      await this.testSubjects.click('discoverEmbeddableInlineEditApplyButton');
+      await this.header.waitUntilLoadingHasFinished();
+      await this.dashboard.waitForRenderComplete();
+    });
+  }
+
+  /** Discover Embeddable helper methods end   */
 }

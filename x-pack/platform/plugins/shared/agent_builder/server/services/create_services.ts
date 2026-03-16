@@ -6,6 +6,7 @@
  */
 
 import type { Runner } from '@kbn/agent-builder-server';
+import type { AgentBuilderConfig } from '../config';
 import type {
   InternalSetupServices,
   InternalStartServices,
@@ -21,6 +22,8 @@ import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
+import { createMeteringService, type MeteringService } from './metering';
+import { type PluginsService, createPluginsService } from './plugins';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -28,28 +31,44 @@ interface ServiceInstances {
   attachments: AttachmentService;
   hooks: HooksService;
   skills: SkillService;
+  plugins: PluginsService;
+  metering: MeteringService;
 }
 
 export class ServiceManager {
   private services?: ServiceInstances;
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
+  private readonly config: AgentBuilderConfig;
 
-  setupServices({ logger, workflowsManagement }: ServiceSetupDeps): InternalSetupServices {
+  constructor(config: AgentBuilderConfig) {
+    this.config = config;
+  }
+
+  setupServices({
+    logger,
+    workflowsManagement,
+    cloud,
+    usageApi,
+  }: ServiceSetupDeps): InternalSetupServices {
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
       attachments: createAttachmentService(),
       hooks: new HooksService(),
       skills: createSkillService(),
+      plugins: createPluginsService(),
+      metering: createMeteringService({ cloud, usageApi, logger: logger.get('metering') }),
     };
 
     this.internalSetup = {
-      tools: this.services.tools.setup({ logger, workflowsManagement }),
-      agents: this.services.agents.setup({ logger }),
+      tools: this.services.tools.setup({ logger: logger.get('tools'), workflowsManagement }),
+      agents: this.services.agents.setup({ logger: logger.get('agents') }),
       attachments: this.services.attachments.setup(),
-      hooks: this.services.hooks.setup({ logger }),
+      hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
       skills: this.services.skills.setup(),
+      plugins: this.services.plugins.setup(),
+      metering: this.services.metering,
     };
 
     return this.internalSetup;
@@ -154,6 +173,7 @@ export class ServiceManager {
       spaces,
       trackingService,
       analyticsService,
+      meteringService: this.services.metering,
     });
 
     const execution = createAgentExecutionService({
@@ -170,6 +190,14 @@ export class ServiceManager {
       savedObjects,
       trackingService,
       analyticsService,
+      meteringService: this.services.metering,
+    });
+
+    const plugins = this.services.plugins.start({
+      logger: logger.get('plugins'),
+      elasticsearch,
+      spaces,
+      config: this.config,
     });
 
     this.internalStart = {
@@ -187,6 +215,7 @@ export class ServiceManager {
       featureFlags,
       uiSettings,
       savedObjects,
+      plugins,
     };
 
     return this.internalStart;

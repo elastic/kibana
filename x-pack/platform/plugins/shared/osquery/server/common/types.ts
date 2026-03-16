@@ -24,6 +24,8 @@ export interface PackSavedObject {
     timeout?: number;
     snapshot?: boolean;
     removed?: boolean;
+    schedule_id?: string;
+    start_date?: string;
     ecs_mapping?: Record<string, unknown>;
   }>;
   version?: number;

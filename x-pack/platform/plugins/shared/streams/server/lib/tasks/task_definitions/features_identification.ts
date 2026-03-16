@@ -102,6 +102,14 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   size: 20,
                 });
 
+                if (sampleDocuments.length === 0) {
+                  taskContext.logger.debug(
+                    () =>
+                      `No sample documents found for stream ${streamName}, skipping features identification`
+                  );
+                  return getDeleteTaskRunResult();
+                }
+
                 const identifyFeaturesStart = Date.now();
                 const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
                   identifyFeatures({

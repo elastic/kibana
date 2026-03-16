@@ -18,6 +18,8 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
@@ -28,6 +30,8 @@ import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
 import type { AuditLogService } from '../audit';
 import type { AgentExecutionService, TaskHandler } from './execution';
+import type { MeteringService } from './metering';
+import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -35,6 +39,8 @@ export interface InternalSetupServices {
   attachments: AttachmentServiceSetup;
   hooks: HooksServiceSetup;
   skills: SkillServiceSetup;
+  plugins: PluginsServiceSetup;
+  metering: MeteringService;
 }
 
 export interface InternalStartServices {
@@ -52,12 +58,15 @@ export interface InternalStartServices {
   savedObjects: SavedObjectsServiceStart;
   execution: AgentExecutionService;
   taskHandler: TaskHandler;
+  plugins: PluginsServiceStart;
 }
 
 export interface ServiceSetupDeps {
   logger: Logger;
   workflowsManagement?: WorkflowsServerPluginSetup;
   trackingService?: TrackingService;
+  cloud?: CloudSetup;
+  usageApi?: UsageApiSetup;
 }
 
 export interface ServicesStartDeps {

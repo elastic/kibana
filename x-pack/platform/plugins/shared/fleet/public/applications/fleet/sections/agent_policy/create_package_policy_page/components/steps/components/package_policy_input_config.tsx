@@ -18,11 +18,22 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 
-import type { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../../../types';
+import type {
+  NewPackagePolicyInput,
+  NewPackagePolicyInputStream,
+  RegistryVarsEntry,
+} from '../../../../../../types';
 import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
+
+export interface StreamAdvancedVarsConfig {
+  vars: RegistryVarsEntry[];
+  packagePolicyInputStream: NewPackagePolicyInputStream;
+  updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
+  validationResults: PackagePolicyConfigValidationResults;
+}
 
 export const PackagePolicyInputConfig: React.FunctionComponent<{
   hasInputStreams: boolean;
@@ -33,6 +44,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   forceShowErrors?: boolean;
   isEditPage?: boolean;
   showDescriptionColumn?: boolean;
+  streamAdvancedVars?: StreamAdvancedVarsConfig;
 }> = memo(
   ({
     hasInputStreams,
@@ -43,6 +55,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     forceShowErrors,
     isEditPage = false,
     showDescriptionColumn = true,
+    streamAdvancedVars,
   }) => {
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -64,15 +77,27 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
       return [_requiredVars, _advancedVars];
     }, [packageInputVars, isEditPage]);
 
+    const allAdvancedVars = useMemo(() => {
+      if (!streamAdvancedVars?.vars.length) {
+        return advancedVars;
+      }
+      return [...advancedVars, ...streamAdvancedVars.vars];
+    }, [advancedVars, streamAdvancedVars]);
+
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputValidationResults);
     const hasRequiredVarGroupErrors = inputValidationResults.required_vars;
-    const advancedVarsWithErrorsCount: number = useMemo(
-      () =>
-        advancedVars.filter(({ name: varName }) => inputValidationResults.vars?.[varName]?.length)
-          .length,
-      [advancedVars, inputValidationResults.vars]
-    );
+    const advancedVarsWithErrorsCount: number = useMemo(() => {
+      let count = advancedVars.filter(
+        ({ name: varName }) => inputValidationResults.vars?.[varName]?.length
+      ).length;
+      if (streamAdvancedVars) {
+        count += streamAdvancedVars.vars.filter(
+          ({ name: varName }) => streamAdvancedVars.validationResults.vars?.[varName]?.length
+        ).length;
+      }
+      return count;
+    }, [advancedVars, inputValidationResults.vars, streamAdvancedVars]);
 
     const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
     const flexWidth = isBiggerScreen ? 7 : 5;
@@ -175,7 +200,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                 </EuiFlexItem>
               );
             })}
-            {advancedVars.length ? (
+            {allAdvancedVars.length ? (
               <Fragment>
                 <EuiFlexItem>
                   {/* Wrapper div to prevent button from going full width */}
@@ -227,6 +252,35 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                               });
                             }}
                             errors={inputValidationResults.vars?.[varName]}
+                            forceShowErrors={forceShowErrors}
+                            isEditPage={isEditPage}
+                          />
+                        </EuiFlexItem>
+                      );
+                    })
+                  : null}
+                {isShowingAdvanced && streamAdvancedVars
+                  ? streamAdvancedVars.vars.map((varDef) => {
+                      const { name: varName, type: varType } = varDef;
+                      const value =
+                        streamAdvancedVars.packagePolicyInputStream.vars?.[varName]?.value;
+                      return (
+                        <EuiFlexItem key={`stream-${varName}`}>
+                          <PackagePolicyInputVarField
+                            varDef={varDef}
+                            value={value}
+                            onChange={(newValue: any) => {
+                              streamAdvancedVars.updatePackagePolicyInputStream({
+                                vars: {
+                                  ...streamAdvancedVars.packagePolicyInputStream.vars,
+                                  [varName]: {
+                                    type: varType,
+                                    value: newValue,
+                                  },
+                                },
+                              });
+                            }}
+                            errors={streamAdvancedVars.validationResults.vars?.[varName]}
                             forceShowErrors={forceShowErrors}
                             isEditPage={isEditPage}
                           />

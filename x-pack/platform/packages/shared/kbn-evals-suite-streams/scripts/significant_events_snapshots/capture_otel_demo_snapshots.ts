@@ -23,7 +23,13 @@ import {
   triggerSigEventsFeatureExtraction,
   waitForSigEventsFeatureExtraction,
 } from './lib/significant_events_workflow';
-import { deployOtelDemo, patchScenario, teardownOtelDemo, waitForPodsReady } from './lib/otel_demo';
+import {
+  ensureMinikube,
+  deployOtelDemo,
+  patchScenario,
+  teardownOtelDemo,
+  waitForPodsReady,
+} from './lib/otel_demo';
 
 run(
   async ({ log, flags, addCleanupTask }) => {
@@ -79,6 +85,10 @@ run(
     }
 
     log.info('');
+    log.info('Checking minikube...');
+    await ensureMinikube(log);
+
+    log.info('');
     log.info('Registering GCS snapshot repository...');
     await registerGcsRepository(esClient, log, runId);
 
@@ -101,9 +111,7 @@ run(
     log.info('');
     log.info('Each snapshot contains:');
     log.info('  logs*                        - OTel Demo log data');
-    log.info(
-      '  sigevents-streams-features-* - LLM-extracted features (copied out of system indices)'
-    );
+    log.info('  sigevents-streams-features-* - Extracted features (inferred + computed)');
     log.info('');
     log.info(`To use in evals, update SIGEVENTS_SNAPSHOT_RUN in replay.ts to "${runId}"`);
   },
@@ -200,13 +208,14 @@ async function processScenario(
       log.info('[4/7] Skipped (healthy baseline)');
     }
 
-    // Step 5 — Run feature extraction (extracted features will be stored as part of the snapshot)
+    // Step 5 — Run feature extraction (the task generates both inferred and computed features)
+    // Extracted features will be stored as part of the snapshot
     log.info('[5/7] Running feature extraction...');
     await enableSignificantEvents(config, log);
     await triggerSigEventsFeatureExtraction(config, log, connectorId);
     await waitForSigEventsFeatureExtraction(config, log);
     await logSigEventsExtractedFeatures(config, log);
-    await persistSigEventsExtractedFeaturesForSnapshot(config, esClient, log, scenario.id, 'logs');
+    await persistSigEventsExtractedFeaturesForSnapshot(config, esClient, log, scenario.id);
 
     // Step 6 — Create a snapshot of the logs and extracted features
     log.info('[6/7] Creating GCS snapshot...');

@@ -23,7 +23,7 @@ import type { FeatureClient } from '../lib/streams/feature/feature_client';
 import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
 import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
-import type { SystemClient } from '../lib/streams/system/system_client';
+import type { InsightClient } from '../lib/significant_events/insights/client/insight_client';
 
 export type GetScopedClients = ({
   request,
@@ -37,7 +37,7 @@ export interface RouteHandlerScopedClients {
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   featureClient: FeatureClient;
-  systemClient: SystemClient;
+  insightClient: InsightClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   queryClient: QueryClient;

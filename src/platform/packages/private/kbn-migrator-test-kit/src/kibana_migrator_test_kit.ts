@@ -297,7 +297,10 @@ const getElasticsearchClient = async (
       { dnsCacheTtlInSeconds: esClientConfig.dnsCacheTtl?.asSeconds() ?? 0 }
     ),
     kibanaVersion,
-    onRequest: getRequestHandlerFactory(false)({ projectRouting: 'origin-only' }),
+    onRequest: getRequestHandlerFactory(false)({
+      projectRouting: 'origin-only',
+      logger: loggerFactory.get('elasticsearch'),
+    }),
   });
 };
 

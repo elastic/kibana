@@ -10,6 +10,7 @@
 import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import { metrics, ValueType } from '@opentelemetry/api';
 import { parseClientOptions } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 import { createTransport, type OnRequestHandler } from './create_transport';
@@ -42,7 +43,7 @@ export const configureClient = (
   }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped, kibanaVersion);
-  const KibanaTransport = createTransport({ scoped, getExecutionContext, onRequest });
+  const KibanaTransport = createTransport({ scoped, getExecutionContext, onRequest, logger });
   const client = new Client({
     ...clientOptions,
     agent: agentFactoryProvider.getAgentFactory(clientOptions.agent),
@@ -55,5 +56,76 @@ export const configureClient = (
   const { apisToRedactInLogs = [] } = config;
   instrumentEsQueryAndDeprecationLogger({ logger, client, type, apisToRedactInLogs });
 
+  instrumentCpsMetrics({ client, logger });
+
   return client;
 };
+
+/**
+ * Instruments CPS metrics with HTTP response status.
+ *
+ * Emits a single unified metric after response returns so we can include http_status dimension.
+ * The metric includes bypass_reason when applicable, and projectId/region are automatically
+ * added to resource.attributes by the OpenTelemetry SDK.
+ */
+function instrumentCpsMetrics({ client, logger }: { client: Client; logger: Logger }) {
+  const meter = metrics.getMeter('kibana.elasticsearch.cps');
+  const cpsRequestCounter = meter.createCounter('kibana.elasticsearch.cps.request.count', {
+    description:
+      'Unified count of Elasticsearch CPS requests with routing type, status, and bypass reason',
+    unit: '{request}',
+    valueType: ValueType.INT,
+  });
+
+  client.diagnostic.on('response', (error, event) => {
+    if (!event) return;
+
+    const routingContext = (event.meta.request.options?.context as any)?.cpsRoutingContext;
+    if (!routingContext) return; // Not a CPS-instrumented request
+
+    const { routingType, cpsEnabled, apiName, bypassReason, requestId, routePath, requestPath } =
+      routingContext;
+    const httpStatus = error ? getErrorStatus(error) : event.statusCode ?? 200;
+
+    const metricAttributes: Record<string, string | number | boolean> = {
+      'kibana.cps.enabled': cpsEnabled,
+      'kibana.cps.routing.type': routingType,
+      'db.operation.name': apiName,
+      'http.response.status_code': httpStatus,
+    };
+
+    if (routingType === 'none' && bypassReason) {
+      metricAttributes['kibana.cps.routing.bypass_reason'] = bypassReason;
+    }
+
+    cpsRequestCounter.add(1, metricAttributes);
+
+    logger.debug('CPS request completed', {
+      event: {
+        kind: routingType === 'none' && bypassReason ? 'alert' : 'metric',
+        category: ['web', 'api'],
+      },
+      cps: {
+        routing_type: routingType,
+        api_name: apiName,
+        is_cps_enabled: cpsEnabled,
+        bypass_reason: bypassReason ?? null,
+        request_id: requestId,
+        route_path: routePath,
+        request_path: requestPath,
+      },
+      http: {
+        request: {
+          method: event.meta.request.params?.method ?? 'unknown',
+        },
+        response: {
+          status_code: httpStatus,
+        },
+      },
+    } as any);
+  });
+}
+
+function getErrorStatus(error: any): number {
+  return error?.statusCode ?? error?.meta?.statusCode ?? 500;
+}

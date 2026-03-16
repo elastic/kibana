@@ -75,7 +75,23 @@ async function startServers() {
   });
 
   const esServer = await startES();
-  const kibanaRoot = createRootWithCorePlugins({}, { oss: false });
+  const kibanaRoot = createRootWithCorePlugins(
+    {
+      plugins: {
+        // Must enable all plugins to ensure the snapshot includes SO types from every plugin,
+        // matching the configuration used in the 'Check changes in Saved Objects' CI step.
+        forceEnableAllPlugins: true,
+      },
+      node: {
+        roles: ['ui'],
+      },
+    },
+    {
+      oss: false,
+      // Running in 'dev' mode prevents plugins (e.g. cloud-experiments) from failing due to missing config.
+      dev: true,
+    }
+  );
   await kibanaRoot.preboot();
   await kibanaRoot.setup();
   const coreStart = await kibanaRoot.start();

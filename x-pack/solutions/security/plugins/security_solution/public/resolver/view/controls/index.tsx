@@ -35,7 +35,7 @@ export const GraphControls = React.memo(
   ({
     id,
     className,
-    showPanelOnClick,
+    onShowPanel,
   }: {
     /**
      * Id that identify the scope of analyzer
@@ -46,9 +46,9 @@ export const GraphControls = React.memo(
      */
     className?: string;
     /**
-     * Callback for showing the panel when it is displayed separately
+     * Callback for showing the analyzer details panel
      */
-    showPanelOnClick?: () => void;
+    onShowPanel: () => void;
   }) => {
     const dispatch = useDispatch();
     const scalingFactor = useSelector((state: State) =>
@@ -146,7 +146,7 @@ export const GraphControls = React.memo(
             isOpen={activePopover === 'datePicker'}
             setActivePopover={setActivePopover}
           />
-          {showPanelOnClick && <ShowPanelButton showPanelOnClick={showPanelOnClick} />}
+          <ShowPanelButton onClick={onShowPanel} />
         </StyledGraphControlsColumn>
         <StyledGraphControlsColumn>
           <EuiPanel className="panning-controls" paddingSize="none" hasBorder>

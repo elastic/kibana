@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -136,6 +136,8 @@ export interface CategoryAccordionTableProps<
   defaultSortField?: string;
   /** Default sort direction. Default: "asc" */
   defaultSortDirection?: 'asc' | 'desc';
+  /** Optional localStorage key to persist accordion open/closed state */
+  storageKey?: string;
 }
 
 export const CategoryAccordionTable = <T extends Record<string, unknown>>({
@@ -159,22 +161,44 @@ export const CategoryAccordionTable = <T extends Record<string, unknown>>({
   pageSizeOptions = [5, 10, 20],
   defaultSortField,
   defaultSortDirection = 'asc',
+  storageKey,
 }: CategoryAccordionTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
 
-  // Track which accordions are open
-  const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({});
+  // Initialize state from localStorage if storageKey is provided
+  const getInitialState = useCallback(() => {
+    if (!storageKey) return {};
+    try {
+      const stored = localStorage.getItem(storageKey);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  }, [storageKey]);
+
+  const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>(getInitialState);
+
+  // Sync to localStorage when state changes (only if storageKey is provided)
+  useEffect(() => {
+    if (storageKey) {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(openAccordions));
+      } catch (error) {
+        // Silently fail if localStorage is not available
+      }
+    }
+  }, [openAccordions, storageKey]);
 
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValue, setFilterValue] = useState(defaultFilterValue);
 
-  const toggleAccordion = (catName: string) => {
+  const toggleAccordion = useCallback((catName: string) => {
     setOpenAccordions((prev) => ({
       ...prev,
       [catName]: !prev[catName],
     }));
-  };
+  }, []);
 
   // Helper to get nested field value from object
   const getFieldValue = useCallback((obj: T, fieldPath: string): string => {
@@ -211,10 +235,28 @@ export const CategoryAccordionTable = <T extends Record<string, unknown>>({
       .filter((category) => category.items.length > 0);
   }, [categories, searchQuery, filterValue, searchField, filterField, getFieldValue]);
 
-  // Calculate total counts for display
-  const totalItemsCount = filteredCategories.reduce((sum, cat) => sum + cat.items.length, 0);
+  // Calculate total counts for display - count unique items by searchField to avoid duplicates
+  const totalItemsCount = useMemo(() => {
+    const uniqueItems = new Set<string>();
+    filteredCategories.forEach((cat) => {
+      cat.items.forEach((item) => {
+        uniqueItems.add(getFieldValue(item, searchField));
+      });
+    });
+    return uniqueItems.size;
+  }, [filteredCategories, searchField, getFieldValue]);
+
   const totalCategoriesCount = filteredCategories.length;
-  const originalTotalItems = categories.reduce((sum, cat) => sum + cat.items.length, 0);
+
+  const originalTotalItems = useMemo(() => {
+    const uniqueItems = new Set<string>();
+    categories.forEach((cat) => {
+      cat.items.forEach((item) => {
+        uniqueItems.add(getFieldValue(item, searchField));
+      });
+    });
+    return uniqueItems.size;
+  }, [categories, searchField, getFieldValue]);
 
   return (
     <>

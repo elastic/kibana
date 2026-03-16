@@ -65,6 +65,7 @@ import type {
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import { WorkflowConflictError, WorkflowValidationError } from '../../common/lib/errors';
+
 import type { ValidateWorkflowResponse } from '../../common/lib/validate_workflow_yaml';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml';
@@ -75,6 +76,14 @@ import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_st
 import { createStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
+
+/** Derives a list of trigger type ids from a workflow definition (e.g. ['manual', 'scheduled', 'cases.updated']). */
+function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefined): string[] {
+  const triggers = definition?.triggers ?? [];
+  return triggers
+    .map((t) => (t && typeof t.type === 'string' ? t.type : null))
+    .filter(<T>(v: T): v is NonNullable<T> => v != null);
+}
 
 const DEFAULT_PAGE_SIZE = 100;
 
@@ -99,6 +108,7 @@ export class WorkflowsService {
   private getActionsClientWithRequest: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<ActionsClient>>;
+  private readonly initPromise: Promise<void>;
 
   constructor(
     logger: Logger,
@@ -111,7 +121,7 @@ export class WorkflowsService {
     this.getActionsClientWithRequest = (request: KibanaRequest) =>
       getPluginsStart().then((plugins) => plugins.actions.getActionsClientWithRequest(request));
 
-    void this.initialize(getCoreStart, getPluginsStart);
+    this.initPromise = this.initialize(getCoreStart, getPluginsStart);
   }
 
   public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
@@ -120,6 +130,10 @@ export class WorkflowsService {
 
   public setSecurityService(security: SecurityServiceStart) {
     this.security = security;
+  }
+
+  private async ensureInitialized(): Promise<void> {
+    await this.initPromise;
   }
 
   private async initialize(
@@ -143,9 +157,7 @@ export class WorkflowsService {
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     try {
       const response = await this.workflowStorage.getClient().search({
@@ -175,7 +187,7 @@ export class WorkflowsService {
   /**
    * Parses and validates a workflow YAML, returning the prepared document and metadata.
    * Shared by createWorkflow and bulkCreateWorkflows.
-   * When triggerDefinitions is provided, custom trigger with.condition values are validated
+   * When triggerDefinitions is provided, custom trigger on.condition values are validated
    * (valid KQL and only event schema properties).
    */
   private prepareWorkflowDocument(
@@ -215,6 +227,7 @@ export class WorkflowsService {
       description: workflowToCreate.description,
       enabled: workflowToCreate.enabled,
       tags: workflowToCreate.tags || [],
+      triggerTypes: getTriggerTypesFromDefinition(workflowToCreate.definition),
       yaml: workflow.yaml,
       definition: workflowToCreate.definition ?? null,
       createdBy: authenticatedUser,
@@ -264,9 +277,7 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
@@ -311,9 +322,7 @@ export class WorkflowsService {
     created: WorkflowDetailDto[];
     failed: Array<{ index: number; error: string }>;
   }> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
@@ -452,7 +461,7 @@ export class WorkflowsService {
 
     if (!validation.valid || !validation.parsedWorkflow) {
       return {
-        updatedDataPatch: { definition: undefined, enabled: false, valid: false },
+        updatedDataPatch: { definition: undefined, enabled: false, valid: false, triggerTypes: [] },
         validationErrors: validation.diagnostics
           .filter((d) => d.severity === 'error')
           .map((d) => d.message),
@@ -468,6 +477,7 @@ export class WorkflowsService {
         enabled: workflowDef.enabled,
         description: workflowDef.description,
         tags: workflowDef.tags,
+        triggerTypes: getTriggerTypesFromDefinition(workflowDef.definition),
         valid: true,
         yaml: workflowYaml,
       },
@@ -569,9 +579,7 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     try {
       const { source: existingSource } = await this.getExistingWorkflowDocument(id, spaceId);
@@ -597,6 +605,9 @@ export class WorkflowsService {
       }
 
       const finalData: WorkflowProperties = { ...existingSource, ...updatedData };
+      if (finalData.triggerTypes === undefined) {
+        finalData.triggerTypes = getTriggerTypesFromDefinition(finalData.definition) ?? [];
+      }
 
       await this.workflowStorage.getClient().index({
         id,
@@ -625,9 +636,7 @@ export class WorkflowsService {
   }
 
   public async deleteWorkflows(ids: string[], spaceId: string): Promise<DeleteWorkflowsResponse> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const now = new Date();
     const failures: Array<{ id: string; error: string }> = [];
@@ -715,10 +724,56 @@ export class WorkflowsService {
     };
   }
 
-  public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
+  /**
+   * Returns all enabled, non-deleted workflows in the space that are subscribed to the given trigger type.
+   * Used by the event-driven handler to resolve which workflows to run when an event is emitted.
+   */
+  public async getWorkflowsSubscribedToTrigger(
+    triggerId: string,
+    spaceId: string
+  ): Promise<WorkflowDetailDto[]> {
     if (!this.workflowStorage) {
       throw new Error('WorkflowsService not initialized');
     }
+
+    const searchResponse = await this.workflowStorage.getClient().search({
+      size: 1000,
+      track_total_hits: true,
+      _source: [
+        'name',
+        'description',
+        'enabled',
+        'yaml',
+        'definition',
+        'createdBy',
+        'lastUpdatedBy',
+        'valid',
+        'created_at',
+        'updated_at',
+      ],
+      query: {
+        bool: {
+          must: [
+            { term: { spaceId } },
+            { term: { enabled: true } },
+            { term: { triggerTypes: triggerId } },
+          ],
+          must_not: [{ exists: { field: 'deleted_at' } }],
+        },
+      },
+      sort: [{ updated_at: { order: 'desc' } }],
+    });
+
+    return searchResponse.hits.hits.map((hit) => {
+      if (!hit._source) {
+        throw new Error('Missing _source in search result');
+      }
+      return this.transformStorageDocumentToWorkflowDto(hit._id, hit._source as WorkflowProperties);
+    });
+  }
+
+  public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
+    await this.ensureInitialized();
 
     const { size = 100, page = 1, enabled, createdBy, tags, query } = params;
     const from = (page - 1) * size;
@@ -868,9 +923,7 @@ export class WorkflowsService {
   }
 
   public async getWorkflowStats(spaceId: string): Promise<WorkflowStatsDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const statsResponse = await this.workflowStorage.getClient().search({
       size: 0,
@@ -969,9 +1022,7 @@ export class WorkflowsService {
   }
 
   public async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const aggs: Record<string, any> = {};

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { NonEmptyOrWhitespaceString, NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { createIsNarrowSchema, NonEmptyString } from '@kbn/zod-helpers/v4';
 import type { Condition } from '../conditions';
 import { conditionSchema, isAlwaysCondition } from '../conditions';
 import {
@@ -21,8 +20,6 @@ import type { ElasticsearchProcessorType } from './manual_ingest_pipeline_proces
 import { elasticsearchProcessorTypes } from './manual_ingest_pipeline_processors';
 import type { ConvertType } from '../formats/convert_types';
 import { convertTypes } from '../formats/convert_types';
-
-export { NonEmptyString };
 
 /**
  * Base processor
@@ -87,11 +84,20 @@ export const manualIngestPipelineProcessorSchema = processorBaseWithWhereSchema
       .literal('manual_ingest_pipeline')
       .describe('Manual ingest pipeline - executes raw Elasticsearch ingest processors'),
     processors: z
-      .array(z.record(z.enum(elasticsearchProcessorTypes), z.unknown()))
+      .array(
+        // In Zod v4, z.record(z.enum([...]), ...) fills in undefined for all missing
+        // enum keys (matching TS Record<Enum, V> semantics). We strip those phantom
+        // entries so downstream code can rely on Object.keys() reflecting the input.
+        z
+          .record(z.enum(elasticsearchProcessorTypes), z.unknown())
+          .transform((record) =>
+            Object.fromEntries(Object.entries(record).filter(([, v]) => v !== undefined))
+          )
+      )
       .describe('List of raw Elasticsearch ingest processors to run'),
     tag: z.optional(z.string()).describe('Optional ingest processor tag for Elasticsearch'),
     on_failure: z
-      .optional(z.array(z.record(z.unknown())))
+      .optional(z.array(z.record(z.string(), z.unknown())))
       .describe('Fallback processors to run when a processor fails'),
   })
   .describe(
@@ -117,7 +123,7 @@ export const grokProcessorSchema = processorBaseWithWhereSchema
       .array(NonEmptyString)
       .nonempty()
       .describe('Grok patterns applied in order to extract fields'),
-    pattern_definitions: z.optional(z.record(z.string())),
+    pattern_definitions: z.optional(z.record(z.string(), z.string())),
     ignore_missing: z
       .optional(z.boolean())
       .describe('Skip processing when source field is missing'),
@@ -385,7 +391,7 @@ export interface ReplaceProcessor extends ProcessorBaseWithWhere {
 export const replaceProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('replace'),
   from: StreamlangSourceField,
-  pattern: NonEmptyOrWhitespaceString, // Allows space " " as valid pattern
+  pattern: z.string().nonempty(), // Allows space " " as valid pattern
   replacement: z.string(), // Required, should be '' for empty replacement
   to: z.optional(StreamlangTargetField),
   ignore_missing: z.optional(z.boolean()),
@@ -420,7 +426,7 @@ export const redactProcessorSchema = processorBaseWithWhereSchema
         'Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")'
       ),
     pattern_definitions: z
-      .optional(z.record(z.string()))
+      .optional(z.record(z.string(), z.string()))
       .describe('Custom pattern definitions to use in the patterns'),
     prefix: z
       .optional(z.string())
@@ -768,10 +774,8 @@ export type ProcessorType = StreamlangProcessorDefinition['action'];
  * Get all processor types as a string array (derived from the Zod schema)
  */
 export const processorTypes: ProcessorType[] = (
-  streamlangProcessorSchema._def.options as Array<
-    z.ZodObject<any, any, any, any, any> | z.ZodEffects<any, any, any> | z.ZodUnion<any>
-  >
-).map((schema) => {
+  streamlangProcessorSchema._def.options as ReadonlyArray<any>
+).map((schema: any) => {
   // Handle ZodEffects (from .refine()) by unwrapping to get the base schema
   let baseSchema = '_def' in schema && 'schema' in schema._def ? schema._def.schema : schema;
 

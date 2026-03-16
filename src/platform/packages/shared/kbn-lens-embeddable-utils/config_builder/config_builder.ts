@@ -167,7 +167,6 @@ export class LensConfigBuilder {
   }
 
   isSupported(chartType?: string | null): boolean {
-    if (!this.enableAPITransforms) return false;
     if (!chartType) return false;
     const type = compatibilityMap[chartType] ?? chartType;
     return type in this.apiConvertersByChart;

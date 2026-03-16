@@ -308,6 +308,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       isEmbeddedEditor: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
       getByValueInput: jest.fn(),
+      clearEditorState: jest.fn(),
     },
     trackUiMetric: jest.fn(),
   } as unknown as DiscoverServices;

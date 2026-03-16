@@ -115,7 +115,13 @@ export const useListDetailsView = (exceptionListId: string) => {
   const initializeListRules = useCallback(
     async (result: Awaited<ReturnType<typeof getListById>>) => {
       if (result) {
-        const listRules = canReadRules ? await getListRules(result.list_id) : [];
+        const listRules = canReadRules
+          ? await getListRules({
+              id: result.id,
+              listId: result.list_id,
+              namespaceType: result.namespace_type,
+            })
+          : [];
         setLinkedRules(listRules);
       }
     },

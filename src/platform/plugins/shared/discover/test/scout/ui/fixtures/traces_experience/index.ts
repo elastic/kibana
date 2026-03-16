@@ -46,5 +46,4 @@ export const spaceTest = spaceBaseTest.extend<
 
 export { TRACES, RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE } from './constants';
 export { setupTracesExperience, teardownTracesExperience } from './setup';
-export { simpleTrace } from './synthtrace/simple_trace';
 export { richTrace, traceCorrelatedLogs } from './synthtrace/complete_traces_experience';

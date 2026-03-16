@@ -1850,7 +1850,7 @@
             "label": "valueLabels",
             "description": [],
             "signature": [
-              "\"hide\" | \"show\""
+              "\"show\" | \"hide\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "lineNumber": 243,
@@ -3754,7 +3754,7 @@
         "label": "ValueLabelMode",
         "description": [],
         "signature": [
-          "\"hide\" | \"show\""
+          "\"show\" | \"hide\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "lineNumber": 75,

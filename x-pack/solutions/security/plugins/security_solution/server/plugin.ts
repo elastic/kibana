@@ -158,6 +158,7 @@ import {
 } from './lib/trial_companion/services/trial_companion_milestone_service';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
+import { securityAlertsProfileInitializer } from './lib/anonymization';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -241,13 +242,15 @@ export class Plugin implements ISecuritySolutionPlugin {
   }
 
   private registerAgentBuilderAttachmentsAndTools(
-    agentBuilder: SecuritySolutionPluginSetupDependencies['agentBuilder'],
+    plugins: SecuritySolutionPluginSetupDependencies,
     core: SecuritySolutionPluginCoreSetupDependencies,
     logger: Logger
   ): void {
-    if (!agentBuilder) {
+    if (!plugins.agentBuilder) {
       return;
     }
+
+    const agentBuilder = plugins.agentBuilder;
 
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
@@ -267,6 +270,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       getStartServices: core.getStartServices,
       kibanaVersion: this.pluginContext.env.packageInfo.version,
       logger,
+      ml: plugins.ml,
       options: { endpointAppContextService },
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
@@ -687,7 +691,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
+    this.registerAgentBuilderAttachmentsAndTools(plugins, core, this.logger);
 
     return {
       setProductFeaturesConfigurator:
@@ -730,6 +734,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.licensing$ = plugins.licensing.license$;
 
     this.telemetryConfigProvider.start(plugins.telemetry.isOptedIn$);
+    plugins.anonymization.registerProfileInitializer(securityAlertsProfileInitializer);
 
     // Assistant Tool and Feature Registration
     const filteredTools = config.experimentalFeatures.riskScoreAssistantToolDisabled

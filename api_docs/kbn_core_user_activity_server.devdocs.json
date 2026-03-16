@@ -20,7 +20,7 @@
         "label": "TrackUserActionParams",
         "description": [],
         "path": "src/core/packages/user-activity/server/src/types.ts",
-        "lineNumber": 62,
+        "lineNumber": 74,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +38,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/user-activity/server/src/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -56,7 +56,7 @@
               "UserActivityEvent"
             ],
             "path": "src/core/packages/user-activity/server/src/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -74,7 +74,26 @@
               "UserActivityObject"
             ],
             "path": "src/core/packages/user-activity/server/src/types.ts",
-            "lineNumber": 68,
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.TrackUserActionParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [
+              "Additional bucket of non-standard metadata."
+            ],
+            "signature": [
+              "UserActivityMetadata",
+              " | undefined"
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -178,14 +197,14 @@
           {
             "parentPluginId": "@kbn/core-user-activity-server",
             "id": "def-server.UserActivityEvent.action",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "action",
             "description": [
               "Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search'"
             ],
             "signature": [
-              "\"user_logged_in\""
+              "\"log_in_user\" | \"log_out_user\""
             ],
             "path": "src/core/packages/user-activity/server/src/types.ts",
             "lineNumber": 56,
@@ -203,10 +222,64 @@
               "Event type {@link UserActivityEventType}."
             ],
             "signature": [
-              "\"info\" | \"error\" | \"start\" | \"end\" | \"group\" | \"user\" | \"indicator\" | \"allowed\" | \"deletion\" | \"admin\" | \"protocol\" | \"creation\" | \"access\" | \"connection\" | \"change\" | \"denied\" | \"installation\""
+              "\"info\" | \"error\" | \"start\" | \"end\" | \"group\" | \"user\" | \"allowed\" | \"indicator\" | \"deletion\" | \"admin\" | \"protocol\" | \"creation\" | \"access\" | \"connection\" | \"change\" | \"denied\" | \"installation\""
             ],
             "path": "src/core/packages/user-activity/server/src/types.ts",
             "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityEvent.start",
+            "type": "string",
+            "tags": [],
+            "label": "start",
+            "description": [
+              "ISO8601 timestamp of the event start time."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityEvent.end",
+            "type": "string",
+            "tags": [],
+            "label": "end",
+            "description": [
+              "ISO8601 timestamp of the event end time."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server",
+            "id": "def-server.UserActivityEvent.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [
+              "Duration (in ns) between the event start and end timestamps."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/core/packages/user-activity/server/src/types.ts",
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -305,7 +378,7 @@
           "\nAllows plugins to record user actions.\nContextual information (user, session, space, IP) is automatically injected.\n"
         ],
         "path": "src/core/packages/user-activity/server/src/types.ts",
-        "lineNumber": 72,
+        "lineNumber": 86,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -325,7 +398,7 @@
               ") => void"
             ],
             "path": "src/core/packages/user-activity/server/src/types.ts",
-            "lineNumber": 86,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -343,7 +416,7 @@
                   "TrackUserActionParams"
                 ],
                 "path": "src/core/packages/user-activity/server/src/types.ts",
-                "lineNumber": 90,
+                "lineNumber": 104,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -365,7 +438,7 @@
           "\nAllows plugins to record user actions.\nContextual information (user, session, space, IP) is automatically injected."
         ],
         "path": "src/core/packages/user-activity/server/src/types.ts",
-        "lineNumber": 93,
+        "lineNumber": 107,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -385,7 +458,7 @@
               ") => void"
             ],
             "path": "src/core/packages/user-activity/server/src/types.ts",
-            "lineNumber": 99,
+            "lineNumber": 113,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -403,7 +476,7 @@
                   "TrackUserActionParams"
                 ],
                 "path": "src/core/packages/user-activity/server/src/types.ts",
-                "lineNumber": 103,
+                "lineNumber": 117,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -428,10 +501,10 @@
           "Closed union derived from the keys of {@link userActivityActions}. @public"
         ],
         "signature": [
-          "\"user_logged_in\""
+          "\"log_in_user\" | \"log_out_user\""
         ],
         "path": "src/core/packages/user-activity/server/src/user_activity_actions.ts",
-        "lineNumber": 39,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -449,7 +522,7 @@
           "\nEvent type following ECS (Elastic Common Schema) allowed values."
         ],
         "signature": [
-          "\"info\" | \"error\" | \"start\" | \"end\" | \"group\" | \"user\" | \"indicator\" | \"allowed\" | \"deletion\" | \"admin\" | \"protocol\" | \"creation\" | \"access\" | \"connection\" | \"change\" | \"denied\" | \"installation\""
+          "\"info\" | \"error\" | \"start\" | \"end\" | \"group\" | \"user\" | \"allowed\" | \"indicator\" | \"deletion\" | \"admin\" | \"protocol\" | \"creation\" | \"access\" | \"connection\" | \"change\" | \"denied\" | \"installation\""
         ],
         "path": "src/core/packages/user-activity/server/src/types.ts",
         "lineNumber": 27,
@@ -472,7 +545,7 @@
           "\nCentral registry of all known user-activity actions.\nTo add a new action, add an entry with a `description`, `ownerTeam`, `groupName` and `versionAddedAt`."
         ],
         "signature": [
-          "{ readonly user_logged_in: { readonly description: \"User logged in to Kibana.\"; readonly ownerTeam: \"@elastic/kibana-core\"; readonly groupName: \"Authentication\"; readonly versionAddedAt: \"9.4\"; }; }"
+          "{ readonly log_in_user: { readonly description: \"User logged in to Kibana.\"; readonly ownerTeam: \"@elastic/kibana-core\"; readonly groupName: \"Authentication\"; readonly versionAddedAt: \"9.4\"; }; readonly log_out_user: { readonly description: \"User logged out of Kibana.\"; readonly ownerTeam: \"@elastic/kibana-core\"; readonly groupName: \"Authentication\"; readonly versionAddedAt: \"9.4\"; }; }"
         ],
         "path": "src/core/packages/user-activity/server/src/user_activity_actions.ts",
         "lineNumber": 30,

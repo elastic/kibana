@@ -72,7 +72,7 @@ export function ColorMappingByTerms({
   allowCustomMatch,
 }: ColorMappingByTermsProps) {
   const { euiTheme } = useEuiTheme();
-  const [useLegacyPalettes, setUseLegacyPalettes] = useState(!colorMapping);
+  const [useLegacyPalettes, setUseLegacyPalettes] = useState(Boolean(!colorMapping && palette));
 
   return (
     <EuiFormRow

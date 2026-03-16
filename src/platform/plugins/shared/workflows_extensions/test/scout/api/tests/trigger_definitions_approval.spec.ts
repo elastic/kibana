@@ -14,7 +14,7 @@ import { APPROVED_TRIGGER_DEFINITIONS } from '../fixtures/approved_trigger_defin
 import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
-  'Workflows Extensions - Custom Trigger Definitions Approval',
+  'Workflows Extensions - Event-Driven Trigger Definitions Approval',
   { tag: ['@ess', '@svlSearch', '@svlSecurity', '@svlOblt', '@svlWorkplaceAI'] },
   () => {
     let adminApiCredentials: RoleApiCredentials;
@@ -24,7 +24,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'should validate that all registered custom trigger definitions are approved by workflows-eng team',
+      'should validate that all registered event-driven trigger definitions are approved by workflows-eng team',
       async ({ apiClient }) => {
         const response = await apiClient.get('internal/workflows_extensions/trigger_definitions', {
           headers: {

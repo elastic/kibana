@@ -10,10 +10,7 @@ import Boom from '@hapi/boom';
 import { AttachmentPatchRequestRtV2 } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import {
-  isCommentRequestTypeExternalReference,
-  isLegacyAttachmentRequest,
-} from '../../../common/utils/attachments';
+import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
 import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
@@ -22,7 +19,6 @@ import { decodeCommentRequestV2 } from '../utils';
 import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
-import { getCaseOwner } from './utils';
 
 /**
  * Update an attachment.
@@ -78,12 +74,7 @@ export async function update(
       throw Boom.badRequest(`You cannot change the type of the comment.`);
     }
 
-    const caseOwner = await getCaseOwner(caseID, clientArgs);
-    const owner = isLegacyAttachmentRequest(queryRestAttributes)
-      ? queryRestAttributes.owner
-      : caseOwner;
-
-    if (myComment.attributes.owner !== owner) {
+    if (myComment.attributes.owner !== queryRestAttributes.owner) {
       throw Boom.badRequest(`You cannot change the owner of the comment.`);
     }
 

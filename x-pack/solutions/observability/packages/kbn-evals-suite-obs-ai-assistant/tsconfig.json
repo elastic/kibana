@@ -32,6 +32,5 @@
     "@kbn/some-dev-log",
     "@kbn/synthtrace",
     "@kbn/agent-builder-common",
-    "@kbn/es-snapshot-loader"
   ]
 }

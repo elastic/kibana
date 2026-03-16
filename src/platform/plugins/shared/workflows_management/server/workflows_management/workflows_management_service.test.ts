@@ -32,6 +32,7 @@ describe('WorkflowsService', () => {
       description: 'A test workflow',
       enabled: true,
       tags: ['test'],
+      triggerTypes: [] as string[],
       yaml: 'name: Test Workflow\nenabled: true',
       definition: { name: 'Test Workflow', enabled: true },
       createdBy: 'test-user',
@@ -182,6 +183,56 @@ describe('WorkflowsService', () => {
         statusCode: 500,
         message: 'Server error',
       });
+    });
+  });
+
+  describe('getWorkflowsSubscribedToTrigger', () => {
+    it('should return enabled workflows in space that have the trigger type', async () => {
+      const workflowWithTrigger = {
+        _id: 'workflow-with-trigger',
+        _source: {
+          ...mockWorkflowDocument._source,
+          triggerTypes: ['manual', 'cases.updated'],
+          name: 'Case workflow',
+        },
+      };
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [workflowWithTrigger], total: { value: 1 } },
+      } as any);
+
+      const result = await service.getWorkflowsSubscribedToTrigger('cases.updated', 'default');
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        id: 'workflow-with-trigger',
+        name: 'Case workflow',
+        enabled: true,
+      });
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                { term: { spaceId: 'default' } },
+                { term: { enabled: true } },
+                { term: { triggerTypes: 'cases.updated' } },
+              ],
+              must_not: [{ exists: { field: 'deleted_at' } }],
+            },
+          },
+          size: 1000,
+        })
+      );
+    });
+
+    it('should return empty array when no workflows are subscribed', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      const result = await service.getWorkflowsSubscribedToTrigger('unknown.trigger', 'default');
+
+      expect(result).toEqual([]);
     });
   });
 

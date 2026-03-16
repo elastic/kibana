@@ -88,8 +88,6 @@ export interface ESQLEditorProps {
   enableResourceBrowser?: boolean;
   /** Stats about the last request made */
   queryStats?: ESQLQueryStats;
-  /** If true, automatically opens the quick search visor when the editor initially loads with a query that has only source commands */
-  openVisorOnSourceCommands?: boolean;
 }
 
 interface ESQLVariableService {

@@ -43,6 +43,7 @@ export async function registerObservabilityAgent({
         instructions:
           dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
 
+        ${getTimeRangeInstructions()}
         ${getInvestigationInstructions()}
         ${getReasoningInstructions()}
         ${getTraceMetricFormatInstructions()}
@@ -56,6 +57,16 @@ export async function registerObservabilityAgent({
   });
 
   logger.debug('Successfully registered observability agent in agent-builder');
+}
+
+function getTimeRangeInstructions() {
+  return dedent(`
+    <time_range>
+    ### Time Range
+    The screen context attachment contains the user's currently selected time range (e.g. "Time range: now-15m to now").
+    When a time range is available from screen context or the user's explicit request, always pass it as the \`start\` and \`end\` parameters to tool calls — do not rely on tool defaults when explicit time context is available.
+    </time_range>
+  `);
 }
 
 function getInvestigationInstructions() {

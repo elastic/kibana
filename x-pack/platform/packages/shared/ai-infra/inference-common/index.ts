@@ -59,6 +59,8 @@ export {
   isToolNotFoundError,
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
+  type ChatCompleteAnonymizationMetadata,
+  type ChatCompleteAnonymizationTarget,
   type AnonymizationRule,
   type RegexAnonymizationRule,
   type NamedEntityRecognitionRule,
@@ -69,6 +71,9 @@ export {
   type DeanonymizationOutput,
   type DeanonymizedMessage,
   type AnonymizationSettings,
+  type AnonymizationEntityClass,
+  type AnonymizationResponseMetadata,
+  type DeanonymizedMessageData,
   type CustomToolChoice,
   type ToolCallArgumentsOfToolDefinition,
   type ToolCallOfToolDefinitions,
@@ -78,6 +83,7 @@ export {
   type ToolsOfChoice,
   type ToolCallArguments,
   type ToolCallbackResult,
+  type InferenceCallbacks,
   type InferenceEventEmitter,
 } from './src/chat_complete';
 

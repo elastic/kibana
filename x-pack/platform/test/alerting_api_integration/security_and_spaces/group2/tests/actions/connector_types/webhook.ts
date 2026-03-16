@@ -26,6 +26,7 @@ const defaultValues: Record<string, any> = {
   headers: null,
   method: 'post',
   hasAuth: true,
+  authType: 'webhook-authentication-basic',
 };
 
 function parsePort(url: Record<string, string>): Record<string, string | null | number> {

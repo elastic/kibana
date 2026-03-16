@@ -55,7 +55,10 @@ export {
 export { mapToEvaluationScoreDocuments, exportEvaluations } from './src/utils/report_model_score';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
-export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';
+export {
+  createSpanLatencyEvaluator,
+  createSkillInvocationEvaluator,
+} from './src/evaluators/trace_based';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 
 export {

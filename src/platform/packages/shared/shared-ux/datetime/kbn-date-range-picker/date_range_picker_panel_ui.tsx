@@ -66,15 +66,25 @@ export const PanelHeader = ({
   );
 };
 
+interface SubPanelHeadingProps extends PanelCommonProps {
+  /** Called before navigating back. Use to restore state or run cleanup. */
+  onGoBack?: () => void;
+}
+
 /** Heading used inside `PanelHeader` for sub-panels (panels navigated to from the main panel). */
-export const SubPanelHeading = ({ className, children }: PanelCommonProps) => {
+export const SubPanelHeading = ({ className, onGoBack, children }: SubPanelHeadingProps) => {
   const { goBack, canGoBack } = useDateRangePickerPanelNavigation();
   const euiThemeContext = useEuiTheme();
   const styles = subPanelHeadingStyles(euiThemeContext);
 
+  const handleGoBack = () => {
+    onGoBack?.();
+    goBack();
+  };
+
   if (canGoBack) {
     return (
-      <button css={[styles.root, styles.button]} className={className} onClick={goBack}>
+      <button css={[styles.root, styles.button]} className={className} onClick={handleGoBack}>
         <EuiIcon type="sortLeft" aria-hidden="true" />
         <>{children}</>
       </button>
@@ -92,11 +102,17 @@ export const SubPanelHeading = ({ className, children }: PanelCommonProps) => {
  * Scrollable body section of a panel. Sits between `PanelHeader` and `PanelFooter`.
  * Will fill the vertical space (flew-grow: 1), and can scroll.
  */
-export const PanelBody = ({ className, children }: PanelCommonProps) => {
+export const PanelBody = ({
+  spacingSide = 'inline',
+  className,
+  children,
+}: PanelSpacingProps & PanelCommonProps) => {
   const euiThemeContext = useEuiTheme();
+  const styles = panelBodyStyles(euiThemeContext);
+  const spacing = panelSpacingStyles(euiThemeContext);
 
   return (
-    <div css={panelBodyStyles(euiThemeContext).root} className={className}>
+    <div css={[styles.root, spacing[spacingSide]]} className={className}>
       {children}
     </div>
   );

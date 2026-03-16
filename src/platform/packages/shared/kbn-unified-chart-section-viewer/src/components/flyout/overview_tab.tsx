@@ -26,6 +26,7 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 import type { MetricField, Dimension } from '../../types';
 import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
+import { MetricTypeBadge } from './metric_type_badge';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
 
 interface OverviewTabProps {
@@ -117,9 +118,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
               i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
                 defaultMessage: 'Metric type',
               }),
-              <div>
-                <EuiBadge>{metric.instrument}</EuiBadge>
-              </div>,
+              <MetricTypeBadge instrument={metric.instrument} />,
               'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
             ),
           ]
@@ -139,6 +138,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
     () =>
       paginatedDimensions.map((dimension: Dimension) => {
         return {
+          'data-test-subj': `metricsExperienceFlyoutOverviewTabDimensionItem-${dimension.name}`,
           label: <FieldNameWithIcon name={dimension.name} type={dimension.type} />,
         };
       }),

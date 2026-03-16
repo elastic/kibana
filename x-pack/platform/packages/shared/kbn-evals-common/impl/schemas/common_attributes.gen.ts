@@ -38,6 +38,7 @@ export type ExampleInfo = z.infer<typeof ExampleInfo>;
 export const ExampleInfo = z.object({
   id: z.string(),
   index: z.number().int(),
+  input: z.object({}).catchall(z.unknown()).nullable().optional(),
   dataset: z.object({
     id: z.string(),
     name: z.string(),
@@ -48,6 +49,7 @@ export type TaskInfo = z.infer<typeof TaskInfo>;
 export const TaskInfo = z.object({
   trace_id: z.string().nullable().optional(),
   repetition_index: z.number().int(),
+  output: z.object({}).catchall(z.unknown()).nullable().optional(),
   model: Model,
 });
 

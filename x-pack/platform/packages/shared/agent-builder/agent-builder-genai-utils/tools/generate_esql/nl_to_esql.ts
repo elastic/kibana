@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
+import { buildServerESQLCallbacks } from '@kbn/esql/server';
 import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
@@ -65,8 +66,8 @@ export interface GenerateEsqlOptions {
    */
   executeQuery?: boolean;
   /**
-   * Maximum number of retries to attempt if the query fails to execute.
-   * Note: this is only relevant if `executeQuery` is `true`
+   * Maximum number of retries if the query fails (execute or AST validation).
+   * When `executeQuery` is true: retries after execution errors; when false: retries after AST validation errors.
    * Defaults to `3`
    * */
   maxRetries?: number;
@@ -91,11 +92,13 @@ export const generateEsql = async ({
   logger,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
   const docBase = await EsqlDocumentBase.load();
+  const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
 
   const graph = createNlToEsqlGraph({
     model,
     esClient,
     docBase,
+    esqlCallbacks,
   });
 
   return withActiveInferenceSpan(

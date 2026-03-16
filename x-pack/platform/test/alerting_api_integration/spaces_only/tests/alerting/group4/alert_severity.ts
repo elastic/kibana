@@ -25,14 +25,11 @@ export default function createAlertSeverityTests({ getService }: FtrProviderCont
 
   const alertsAsDataIndex = '.alerts-test.severity.alerts-default';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/232564
-  describe.skip('improving alert severity', () => {
+  describe('improving alert severity', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(async () => {
-      await objectRemover.removeAll();
-    });
     after(async () => {
+      await objectRemover.removeAll();
       await es.deleteByQuery({
         index: alertsAsDataIndex,
         query: { match_all: {} },

@@ -12,6 +12,7 @@ import type { EndpointAppContextService } from '../../endpoint/endpoint_app_cont
 import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
+import { getSecurityMlJobsSkill } from './security_ml_jobs';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -19,6 +20,7 @@ interface RegisterSkillsOpts {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
   logger: Logger;
+  ml: EntityAnalyticsRoutesDeps['ml'];
   options: {
     endpointAppContextService: EndpointAppContextService;
   };
@@ -33,6 +35,7 @@ export const registerSkills = async ({
   getStartServices,
   kibanaVersion,
   logger,
+  ml,
   options,
 }: RegisterSkillsOpts): Promise<void> => {
   if (experimentalFeatures.automaticTroubleshootingSkill) {
@@ -44,4 +47,5 @@ export const registerSkills = async ({
   await agentBuilder.skills.register(
     getEntityAnalyticsSkill({ getStartServices, kibanaVersion, logger })
   );
+  await agentBuilder.skills.register(getSecurityMlJobsSkill({ getStartServices, logger, ml }));
 };

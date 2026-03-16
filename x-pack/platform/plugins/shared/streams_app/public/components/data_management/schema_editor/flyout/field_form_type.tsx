@@ -18,6 +18,7 @@ import type { MappedSchemaField, SchemaField } from '../types';
 /**
  * Returns a filtered and alphabetically sorted (by display label) list of field type options.
  * Excludes readonly types and conditionally excludes geo_point based on stream type and feature flag.
+ * Also excludes 'unmapped' type for classic streams since they don't support description-only overrides.
  */
 export const getFieldTypeOptions = ({
   streamType,
@@ -32,6 +33,11 @@ export const getFieldTypeOptions = ({
       if (optionKey === 'geo_point') {
         if (streamType !== 'classic') return false;
         if (enableGeoPointSuggestions === false) return false;
+      }
+      // Classic streams do not support description-only overrides (unmapped type).
+      // Users must specify a real type to add a description.
+      if (optionKey === 'unmapped' && streamType === 'classic') {
+        return false;
       }
       return true;
     })

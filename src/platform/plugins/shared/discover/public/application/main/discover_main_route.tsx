@@ -202,6 +202,8 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     id: currentDiscoverSessionId || 'new',
   });
 
+  const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
+
   useEffect(() => {
     if (customizationContext.displayMode === 'standalone') {
       const pageTitleSuffix = persistedDiscoverSession?.title
@@ -218,6 +220,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     persistedDiscoverSession?.title,
     customizationContext.displayMode,
     services,
+    isEmbeddedEditor,
   ]);
 
   const areTabsInitializing = useInternalStateSelector((state) => state.tabs.areInitializing);
