@@ -8,7 +8,15 @@
 import { differenceWith, isEmpty } from 'lodash';
 import React, { useCallback, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiHighlight, EuiLink, EuiTextColor } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiHighlight,
+  EuiLink,
+  EuiTextColor,
+} from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { getUserDisplayName, UserAvatar } from '@kbn/user-profile-components';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
@@ -16,17 +24,25 @@ import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useIsUserTyping } from '../../common/use_is_user_typing';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { getAllPermissionsExceptFrom } from '../../utils/permissions';
+import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
 import * as i18n from './translations';
 
-type UserProfileOption = EuiComboBoxOptionOption<string> & UserProfileWithAvatar;
+type UserProfileComboBoxOption = EuiComboBoxOptionOption<string> & UserProfileWithAvatar;
 
-const toOption = (profile: UserProfileWithAvatar): UserProfileOption =>
+const userProfileToComboBoxOption = (userProfile: UserProfileWithAvatar): UserProfileComboBoxOption =>
   ({
-    label: getUserDisplayName(profile.user),
-    value: profile.uid,
-    key: profile.uid,
-    ...profile,
-  } as UserProfileOption);
+    label: getUserDisplayName(userProfile.user),
+    value: userProfile.uid,
+    key: userProfile.uid,
+    user: userProfile.user,
+    data: userProfile.data,
+  } as UserProfileComboBoxOption);
+
+const comboBoxOptionToAssignee = (option: EuiComboBoxOptionOption<string>) => ({
+  uid: option.value ?? '',
+});
 
 interface TaskAssigneesFieldProps {
   value: Array<{ uid: string }>;
@@ -35,48 +51,46 @@ interface TaskAssigneesFieldProps {
 
 export const TaskAssigneesField: React.FC<TaskAssigneesFieldProps> = ({ value, onChange }) => {
   const { owner: owners } = useCasesContext();
+  const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
   const [searchTerm, setSearchTerm] = useState('');
   const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
+  const hasOwners = owners.length > 0;
 
-  const { data: currentUserProfile, isLoading: isLoadingCurrentUser } = useGetCurrentUserProfile();
+  const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
+    useGetCurrentUserProfile();
 
-  const { data: suggestedProfiles = [], isLoading: isLoadingSuggested, isFetching: isFetchingSuggested } =
-    useSuggestUserProfiles({ name: searchTerm, owners, onDebounce });
+  const {
+    data: userProfiles = [],
+    isLoading: isLoadingSuggest,
+    isFetching: isFetchingSuggest,
+  } = useSuggestUserProfiles({
+    name: searchTerm,
+    owners: hasOwners ? owners : availableOwners,
+    onDebounce,
+  });
 
-  // Bulk-get profiles for already-selected assignees that aren't in the suggestion results
-  const missingUids = differenceWith(
+  const assigneesWithoutProfiles = differenceWith(
     value,
-    suggestedProfiles,
-    (assignee, profile) => assignee.uid === profile.uid
-  ).map((a) => a.uid);
-
-  const { data: bulkProfiles = new Map(), isLoading: isLoadingBulk } =
-    useBulkGetUserProfiles({ uids: missingUids });
-
-  const bulkProfilesArray = Array.from(bulkProfiles.values());
-
-  const allProfiles = [...suggestedProfiles, ...bulkProfilesArray];
-  const options: UserProfileOption[] = allProfiles.map(toOption);
-
-  const selectedOptions: UserProfileOption[] = value
-    .map(({ uid }) => options.find((o) => o.key === uid))
-    .filter((o): o is UserProfileOption => o != null);
-
-  const isLoading =
-    isLoadingCurrentUser ||
-    isLoadingSuggested ||
-    isFetchingSuggested ||
-    isLoadingBulk ||
-    isUserTyping;
-
-  const handleChange = useCallback(
-    (selected: Array<EuiComboBoxOptionOption<string>>) => {
-      onChange(selected.map((o) => ({ uid: o.value ?? '' })));
-    },
-    [onChange]
+    userProfiles,
+    (assignee, userProfile) => assignee.uid === userProfile.uid
   );
 
-  const handleSearchChange = useCallback(
+  const { data: bulkUserProfiles = new Map(), isFetching: isLoadingBulkGetUserProfiles } =
+    useBulkGetUserProfiles({ uids: assigneesWithoutProfiles.map((assignee) => assignee.uid) });
+
+  const bulkUserProfilesAsArray = Array.from(bulkUserProfiles).map(([_, profile]) => profile);
+
+  const options =
+    bringCurrentUserToFrontAndSort(currentUserProfile, [
+      ...userProfiles,
+      ...bulkUserProfilesAsArray,
+    ])?.map((userProfile) => userProfileToComboBoxOption(userProfile)) ?? [];
+
+  const selectedOptions: UserProfileComboBoxOption[] = value
+    .map(({ uid }) => options.find((o) => o.key === uid))
+    .filter((o): o is UserProfileComboBoxOption => o != null);
+
+  const onSearchComboChange = useCallback(
     (term: string) => {
       if (!isEmpty(term)) {
         setSearchTerm(term);
@@ -86,7 +100,14 @@ export const TaskAssigneesField: React.FC<TaskAssigneesFieldProps> = ({ value, o
     [onContentChange]
   );
 
-  const handleSelfAssign = useCallback(() => {
+  const onComboChange = useCallback(
+    (selected: Array<EuiComboBoxOptionOption<string>>) => {
+      onChange(selected.map((option) => comboBoxOptionToAssignee(option)));
+    },
+    [onChange]
+  );
+
+  const onSelfAssign = useCallback(() => {
     if (!currentUserProfile) return;
     const alreadySelected = value.some((a) => a.uid === currentUserProfile.uid);
     if (!alreadySelected) onChange([...value, { uid: currentUserProfile.uid }]);
@@ -94,14 +115,19 @@ export const TaskAssigneesField: React.FC<TaskAssigneesFieldProps> = ({ value, o
 
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption<string>, searchValue: string, contentClassName: string) => {
-      const { user, data } = option as UserProfileOption;
+      const { user, data } = option as UserProfileComboBoxOption;
       const displayName = getUserDisplayName(user);
       return (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <UserAvatar user={user} avatar={data?.avatar} size="s" />
+            <UserAvatar user={user} avatar={data.avatar} size="s" />
           </EuiFlexItem>
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none" responsive={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            gutterSize="none"
+            responsive={false}
+          >
             <EuiFlexItem>
               <EuiHighlight search={searchValue} className={contentClassName}>
                 {displayName}
@@ -123,15 +149,30 @@ export const TaskAssigneesField: React.FC<TaskAssigneesFieldProps> = ({ value, o
     []
   );
 
-  const isSelfSelected = Boolean(currentUserProfile && value.some((a) => a.uid === currentUserProfile.uid));
+  const isLoading =
+    isLoadingCurrentUserProfile ||
+    isLoadingBulkGetUserProfiles ||
+    isLoadingSuggest ||
+    isFetchingSuggest ||
+    isUserTyping;
+
+  const isDisabled = isLoadingCurrentUserProfile || isLoadingBulkGetUserProfiles;
+
+  const isCurrentUserSelected = Boolean(
+    value.find((assignee) => assignee.uid === currentUserProfile?.uid)
+  );
 
   return (
     <EuiFormRow
-      label={i18n.TASK_ASSIGNEES}
       fullWidth
+      label={i18n.TASK_ASSIGNEES}
       helpText={
         currentUserProfile ? (
-          <EuiLink onClick={handleSelfAssign} disabled={isSelfSelected} data-test-subj="cases-task-assign-yourself">
+          <EuiLink
+            data-test-subj="cases-task-assign-yourself"
+            onClick={onSelfAssign}
+            disabled={isCurrentUserSelected}
+          >
             {i18n.ASSIGN_YOURSELF}
           </EuiLink>
         ) : undefined
@@ -141,10 +182,11 @@ export const TaskAssigneesField: React.FC<TaskAssigneesFieldProps> = ({ value, o
         fullWidth
         async
         isLoading={isLoading}
+        isDisabled={isDisabled}
         options={options}
         selectedOptions={selectedOptions}
-        onChange={handleChange}
-        onSearchChange={handleSearchChange}
+        onChange={onComboChange}
+        onSearchChange={onSearchComboChange}
         renderOption={renderOption}
         rowHeight={35}
         data-test-subj="cases-task-assignees-combobox"
