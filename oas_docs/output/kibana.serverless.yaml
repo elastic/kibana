@@ -3409,7 +3409,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new user-defined skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Create a new user-defined skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: post-agent-builder-skills
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3488,7 +3488,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: delete-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3545,7 +3545,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing user-created skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Update an existing user-created skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: put-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -18305,7 +18305,9 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Download a file associated with a response action.
+        Download a file associated with a response action. Files are downloaded in a password-protected `.zip` archive to prevent the file from running. Use password `elastic` to open the `.zip` in a safe environment.
+        > info
+        > Files retrieved from third-party-protected hosts require a different password. Refer to [Third-party response actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions) for your system's password.
       operationId: EndpointFileDownload
       parameters:
         - in: path
@@ -39727,6 +39729,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: Skip dependency validation when installing a package with dependencies
+          in: query
+          name: skipDependencyCheck
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -59064,6 +59073,7 @@ paths:
                         required:
                           - type
                           - id
+                      maxItems: 100
                       type: array
                 includeReferencesDeep:
                   default: false
@@ -59092,6 +59102,7 @@ paths:
                     - type: string
                     - items:
                         type: string
+                      maxItems: 100
                       type: array
                   description: The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.
       responses:
@@ -62171,6 +62182,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62195,6 +62208,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62263,6 +62277,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62287,6 +62303,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62362,6 +62379,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62386,6 +62405,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62454,6 +62474,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62478,6 +62500,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62553,6 +62576,8 @@ paths:
                           items:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -62577,6 +62602,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                           type: array
                         rules:
@@ -63493,6 +63519,8 @@ paths:
                           index:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -63517,6 +63545,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                         required:
                           - index
@@ -63624,6 +63653,9 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                description:
+                  default: ''
+                  type: string
                 esql:
                   additionalProperties: false
                   type: object
@@ -83031,6 +83063,11 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entitySourceIds:
+          description: List of entity source IDs associated with the watchlist
+          items:
+            type: string
+          type: array
         id:
           description: The unique ID of the watchlist
           type: string
@@ -85251,6 +85288,7 @@ components:
           - attributes:
               created_at: '2023-10-31T00:00:00Z'
               created_by: elastic
+              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               description: My pack description
               enabled: true
               name: My Pack
@@ -85263,6 +85301,7 @@ components:
                   query: select * from uptime;
               updated_at: '2023-10-31T00:00:00Z'
               updated_by: elastic
+              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             namespaces:
               - default
@@ -85307,6 +85346,7 @@ components:
           - attributes:
               created_at: '2022-07-26T09:28:08.597Z'
               created_by: elastic
+              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               description: Saved query description
               ecs_mapping:
                 host.uptime:
@@ -85318,6 +85358,7 @@ components:
               query: select * from uptime;
               updated_at: '2022-07-26T09:28:08.597Z'
               updated_by: elastic
+              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               version: 2.8.0
             id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             namespaces:

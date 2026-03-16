@@ -20,6 +20,7 @@ const createMockInternalSkillDefinition = (
   readonly: true,
   basePath: 'skills/platform',
   getRegistryTools: () => [],
+  referencedContentCount: 0,
   ...overrides,
 });
 
@@ -51,6 +52,7 @@ const createMockPersistedProvider = (
       readonly: false,
       basePath: '/skills',
       getRegistryTools: () => params.tool_ids ?? [],
+      referencedContentCount: params.referenced_content?.length ?? 0,
     })),
     update: jest.fn(async (id, update) => ({
       id,
@@ -60,6 +62,7 @@ const createMockPersistedProvider = (
       readonly: false,
       basePath: '/skills',
       getRegistryTools: () => update.tool_ids ?? [],
+      referencedContentCount: 0,
     })),
     delete: jest.fn(async (_skillId: string) => undefined),
   };
@@ -178,6 +181,24 @@ describe('createSkillRegistry', () => {
 
       const persisted = result.find((s) => s.id === 'custom-skill-1');
       expect(persisted?.readonly).toBe(false);
+    });
+  });
+
+  describe('list with summaryOnly', () => {
+    it('forwards options to both providers', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
+      const persistedProvider = createMockPersistedProvider([persistedSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.list({ summaryOnly: true });
+      expect(result).toHaveLength(2);
+
+      expect(builtinProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
+      expect(persistedProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
     });
   });
 

@@ -22,6 +22,9 @@ import type {
   ExitNormalPathNode,
   ExitRetryNode,
   ExitWhileNode,
+  LoopBreakNode,
+  LoopContinueNode,
+  WaitForInputGraphNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowGraph,
@@ -37,6 +40,7 @@ import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { CustomStepImpl } from './custom_step_impl';
 import { DataSetStepImpl } from './data_set_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
+import { LoopBreakNodeImpl, LoopContinueNodeImpl } from './flow_control_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import {
   EnterConditionBranchNodeImpl,
@@ -62,6 +66,7 @@ import {
   ExitStepTimeoutZoneNodeImpl,
   ExitWorkflowTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
+import { WaitForInputStepImpl } from './wait_for_input_step/wait_for_input_step';
 import { WaitStepImpl } from './wait_step/wait_step';
 import { EnterWhileNodeImpl, ExitWhileNodeImpl } from './while_step';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step/workflow_execute_step_impl';
@@ -190,6 +195,22 @@ export class NodesFactory {
           this.workflowRuntime,
           stepLogger
         );
+      case 'loop-break':
+        return new LoopBreakNodeImpl(
+          node as LoopBreakNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger,
+          this.stepExecutionRuntimeFactory
+        );
+      case 'loop-continue':
+        return new LoopContinueNodeImpl(
+          node as LoopContinueNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger,
+          this.stepExecutionRuntimeFactory
+        );
       case 'enter-retry':
         return new EnterRetryNodeImpl(
           node as EnterRetryNode,
@@ -275,6 +296,13 @@ export class NodesFactory {
         return new WaitStepImpl(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           node as any,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger
+        );
+      case 'waitForInput':
+        return new WaitForInputStepImpl(
+          node as WaitForInputGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger

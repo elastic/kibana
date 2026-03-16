@@ -10,11 +10,12 @@ import type {
   UnknownAttachment,
   ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentPreviewState } from '@kbn/agent-builder-browser/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { AttachmentHeader } from './attachment_header';
-import { useCanvasContext } from './canvas_context';
+import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
 interface InlineAttachmentWithActionsProps {
   attachment: UnknownAttachment;
@@ -22,6 +23,12 @@ interface InlineAttachmentWithActionsProps {
   isSidebar: boolean;
   conversationId: string;
   screenContext?: ScreenContextAttachmentData;
+  /** Version number of the attachment being rendered, used for canvas preview comparison */
+  version?: number;
+  /**
+   * Shared preview state for header actions/badges.
+   */
+  previewBadgeState?: AttachmentPreviewState;
 }
 
 /**
@@ -33,13 +40,19 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   isSidebar,
   conversationId,
   screenContext,
+  version,
+  previewBadgeState,
 }) => {
-  const { openCanvas: openCanvasContext, canvasState } = useCanvasContext();
+  const {
+    openCanvas: openCanvasContext,
+    previewedAttachmentKey,
+    setPreviewedAttachmentKey,
+  } = useCanvasContext();
   const { conversationActions } = useConversationContext();
 
   const openCanvas = useCallback(() => {
-    openCanvasContext(attachment, isSidebar);
-  }, [openCanvasContext, attachment, isSidebar]);
+    openCanvasContext(attachment, isSidebar, version);
+  }, [openCanvasContext, attachment, isSidebar, version]);
 
   const updateOrigin = useCallback(
     async (origin: unknown) => {
@@ -51,6 +64,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   );
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
+  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, version);
 
   const inlineActionButtons = useMemo(
     () =>
@@ -60,13 +74,27 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
         updateOrigin,
         openCanvas,
         isCanvas: false,
+        setPreviewBadgeState: (nextPreviewState) => {
+          setPreviewedAttachmentKey(
+            nextPreviewState === 'previewing' ? attachmentPreviewKey : null
+          );
+        },
       }),
-    [uiDefinition, attachment, isSidebar, updateOrigin, openCanvas]
+    [
+      uiDefinition,
+      attachment,
+      isSidebar,
+      updateOrigin,
+      openCanvas,
+      setPreviewedAttachmentKey,
+      attachmentPreviewKey,
+    ]
   );
 
-  const isViewingAttachmentInCanvas = useMemo(() => {
-    return canvasState?.attachment.id === attachment.id;
-  }, [canvasState, attachment]);
+  const isPreviewingAttachment = previewedAttachmentKey === attachmentPreviewKey;
+
+  const resolvedPreviewBadgeState: AttachmentPreviewState =
+    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
 
   if (!uiDefinition) {
     return null;
@@ -79,10 +107,14 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       <AttachmentHeader
         title={title}
         actionButtons={inlineActionButtons}
-        showCurrentlyPreviewingBadge={isViewingAttachmentInCanvas}
+        previewBadgeState={resolvedPreviewBadgeState}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.({ attachment, isSidebar, screenContext })}
+        {uiDefinition?.renderInlineContent?.({
+          attachment,
+          isSidebar,
+          screenContext,
+        })}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

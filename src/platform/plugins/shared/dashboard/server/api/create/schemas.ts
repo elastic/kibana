@@ -33,6 +33,5 @@ export function getCreateResponseBodySchema(isDashboardAppRequest: boolean) {
     id: schema.string(),
     data: getDashboardStateSchema(isDashboardAppRequest),
     meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
   });
 }
