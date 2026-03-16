@@ -373,6 +373,8 @@ export function getDataStateContainer({
             resetFetchChart$
           );
 
+          let shouldApplyDefaultProfileState = true;
+
           if (didProfileChange) {
             const nextProfileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
             const nextProfileSnapshot =
@@ -383,8 +385,12 @@ export function getDataStateContainer({
               nextProfileSnapshot ?? {},
               resetDefaultProfileState.fields
             );
+            const hasNextProfileStateUpdate =
+              nextProfileStateUpdate && Object.keys(nextProfileStateUpdate).length > 0;
 
-            if (nextProfileStateUpdate && Object.keys(nextProfileStateUpdate).length > 0) {
+            shouldApplyDefaultProfileState = !hasNextProfileStateUpdate;
+
+            if (hasNextProfileStateUpdate) {
               await withSkipNextFetch(() =>
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
@@ -400,9 +406,14 @@ export function getDataStateContainer({
           }
 
           const dataView = currentDataView$.getValue();
-          const defaultProfileState = dataView
-            ? getDefaultProfileState({ scopedProfilesManager, resetDefaultProfileState, dataView })
-            : undefined;
+          const defaultProfileState =
+            shouldApplyDefaultProfileState && dataView
+              ? getDefaultProfileState({
+                  scopedProfilesManager,
+                  resetDefaultProfileState,
+                  dataView,
+                })
+              : undefined;
           const preFetchStateUpdate = defaultProfileState?.getPreFetchState();
 
           if (preFetchStateUpdate) {

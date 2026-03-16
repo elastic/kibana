@@ -244,7 +244,7 @@ describe('test getDataStateContainer', () => {
       fetchDocumentsDeferred.resolve({ records: [] });
     });
 
-    it('should apply previous state for the incoming profile when the data source profile changes', async () => {
+    it('should restore previous state without applying default profile state for a previously resolved profile', async () => {
       const toolkit = getDiscoverInternalStateMock();
 
       await toolkit.initializeTabs();
@@ -282,13 +282,15 @@ describe('test getDataStateContainer', () => {
           appState: {
             columns: ['custom_column'],
             rowHeight: 5,
+            breakdownField: 'custom_breakdown',
+            hideChart: false,
           },
         })
       );
       toolkit.internalState.dispatch(
         internalStateActions.setResetDefaultProfileState({
           tabId: toolkit.getCurrentTab().id,
-          resetDefaultProfileState: ['columns', 'rowHeight'],
+          resetDefaultProfileState: ['columns', 'rowHeight', 'breakdownField', 'hideChart'],
         })
       );
       getContextsSpy.mockReturnValue({
@@ -305,6 +307,8 @@ describe('test getDataStateContainer', () => {
             ...toolkit.getCurrentTab().appState,
             columns: ['restored_column'],
             rowHeight: 2,
+            breakdownField: 'restored_breakdown',
+            hideChart: false,
           },
         })
       );
@@ -332,9 +336,18 @@ describe('test getDataStateContainer', () => {
       await waitFor(() => {
         expect(toolkit.getCurrentTab().appState.columns).toEqual(['restored_column']);
         expect(toolkit.getCurrentTab().appState.rowHeight).toBe(2);
+        expect(toolkit.getCurrentTab().appState.breakdownField).toBe('restored_breakdown');
+        expect(toolkit.getCurrentTab().appState.hideChart).toBe(false);
       });
 
       fetchDocumentsDeferred.resolve({ records: [] });
+
+      await waitFor(() => {
+        expect(toolkit.getCurrentTab().appState.columns).toEqual(['restored_column']);
+        expect(toolkit.getCurrentTab().appState.rowHeight).toBe(2);
+        expect(toolkit.getCurrentTab().appState.breakdownField).toBe('restored_breakdown');
+        expect(toolkit.getCurrentTab().appState.hideChart).toBe(false);
+      });
     });
 
     it('should update app state from default profile state', async () => {
