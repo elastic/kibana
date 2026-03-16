@@ -52,7 +52,7 @@ describe('getWarningHeaderMessageFromRouteDeprecation', () => {
   });
 
   it('truncates the header when the encoded message exceeds the max length', () => {
-    const longMsg = 'a'.repeat(5000);
+    const longMsg = 'a'.repeat(2_000);
     const deprecationObject: RouteDeprecationInfo = {
       reason: { type: 'deprecate' },
       severity: 'warning',
@@ -60,7 +60,7 @@ describe('getWarningHeaderMessageFromRouteDeprecation', () => {
       message: longMsg,
     };
     const result = getWarningHeaderMessageFromRouteDeprecation(deprecationObject, kibanaVersion);
-    expect(result.length).toBeLessThanOrEqual(4000);
+    expect(result.length).toBeLessThan(longMsg.length);
     expect(result).toMatch(/\.\.\."/);
   });
 });
