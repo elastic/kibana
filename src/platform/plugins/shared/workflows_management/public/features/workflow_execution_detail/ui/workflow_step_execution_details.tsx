@@ -136,15 +136,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
-          {showResumeUI && (
-            <EuiFlexItem grow={false}>
-              <ResumeExecutionButton
-                executionId={workflowExecutionId}
-                resumeMessage={resumeMessage}
-                autoOpen={shouldAutoResume}
-              />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>
             <EuiTabs expand>
               {tabs.map((tab) => (
@@ -160,6 +151,15 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
               ))}
             </EuiTabs>
           </EuiFlexItem>
+          {showResumeUI && (
+            <EuiFlexItem grow={false}>
+              <ResumeExecutionButton
+                executionId={workflowExecutionId}
+                resumeMessage={resumeMessage}
+                autoOpen={shouldAutoResume}
+              />
+            </EuiFlexItem>
+          )}
           {isFinished ? (
             <EuiFlexItem css={{ overflowY: 'auto' }}>
               {isLoadingStepData ? (

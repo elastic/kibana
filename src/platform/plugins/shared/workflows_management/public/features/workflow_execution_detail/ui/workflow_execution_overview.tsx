@@ -78,15 +78,6 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
-          {showResumeUI && executionId && (
-            <EuiFlexItem grow={false}>
-              <ResumeExecutionButton
-                executionId={executionId}
-                resumeMessage={resumeMessage}
-                autoOpen={shouldAutoResume}
-              />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
@@ -198,6 +189,15 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
             </div>
           </EuiFlexItem>
 
+          {showResumeUI && executionId && (
+            <EuiFlexItem grow={false}>
+              <ResumeExecutionButton
+                executionId={executionId}
+                resumeMessage={resumeMessage}
+                autoOpen={shouldAutoResume}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem css={{ overflow: 'hidden', minHeight: 0 }}>
             <StepExecutionDataView stepExecution={stepExecution} mode="input" />
           </EuiFlexItem>
