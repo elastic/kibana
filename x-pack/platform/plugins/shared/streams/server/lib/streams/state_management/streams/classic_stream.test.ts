@@ -36,20 +36,18 @@ describe('ClassicStream', () => {
       isServerless: false,
       isWiredStreamViewsEnabled: true,
       isDev: false,
-      scopedClusterClient: {
-        asCurrentUser: {
-          indices: {
-            getDataStreamSettings: jest.fn().mockResolvedValue({
-              data_streams: [
-                {
-                  name: 'logs-test-default',
-                  effective_settings: {
-                    index: {},
-                  },
+      esClient: {
+        indices: {
+          getDataStreamSettings: jest.fn().mockResolvedValue({
+            data_streams: [
+              {
+                name: 'logs-test-default',
+                effective_settings: {
+                  index: {},
                 },
-              ],
-            }),
-          },
+              },
+            ],
+          }),
         },
       },
     } as unknown as StateDependencies);

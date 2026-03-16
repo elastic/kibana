@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/otel-demo'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-onboarding-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/otel-demo'
+  title: '@kbn/otel-demo'
   description: Moon project for @kbn/otel-demo
   channel: ''
   owner: '@elastic/obs-onboarding-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-otel-demo
+  sourceRoot: src/platform/packages/shared/kbn-otel-demo
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
@@ -35,14 +34,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

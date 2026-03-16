@@ -13,6 +13,19 @@ import type { DATE_TYPE_ABSOLUTE, DATE_TYPE_RELATIVE, DATE_TYPE_NOW } from './co
 
 export type DateType = typeof DATE_TYPE_ABSOLUTE | typeof DATE_TYPE_RELATIVE | typeof DATE_TYPE_NOW;
 
+/** Single-character date-math time unit (e.g. `'d'` for days, `'M'` for months). */
+export type TimeUnit = 'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'M' | 'y';
+
+/** Structured offset extracted from a relative date-math string like `now-7d/d`. */
+export interface DateOffset {
+  /** Signed offset. Negative = past, positive = future. */
+  count: number;
+  /** Time unit for the offset. */
+  unit: TimeUnit;
+  /** Optional rounding unit (the `/d` in `now-1d/d`). */
+  roundTo?: TimeUnit;
+}
+
 /** Elastic dataMath string or ISO 8601 yyyy-MM-ddTHH:mm:ss.SSSZ e.g. 2025-12-23T08:15:13Z */
 export type DateString = string;
 
@@ -31,6 +44,15 @@ export interface TimeRangeBounds {
 /** Used for presets and recent options */
 export interface TimeRangeBoundsOption extends TimeRangeBounds {
   label?: string;
+}
+
+/** Calendar-specific configuration options. */
+export interface CalendarOptions {
+  /**
+   * First day of the week: 0 for Sunday, 1 for Monday.
+   * @default 0
+   */
+  firstDayOfWeek?: 0 | 1;
 }
 
 export interface TimeRangeTransformOptions {

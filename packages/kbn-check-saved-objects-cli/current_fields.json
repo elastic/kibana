@@ -427,6 +427,9 @@
   "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
+    "dependencies",
+    "dependencies.name",
+    "dependencies.version",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
@@ -451,6 +454,7 @@
     "latest_install_failed_attempts",
     "name",
     "package_assets",
+    "pending_upgrade_review",
     "previous_version",
     "verification_key_id",
     "verification_status",
@@ -708,6 +712,7 @@
     "title",
     "type"
   ],
+  "inference-settings": [],
   "infra-custom-dashboards": [
     "assetType",
     "dashboardFilterAssetIdEnabled",
@@ -1259,6 +1264,7 @@
   ],
   "spaces-usage-stats": [],
   "stream-prompts": [],
+  "streams-significant-events-settings": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
@@ -1326,6 +1332,7 @@
   ],
   "task": [
     "attempts",
+    "cost",
     "enabled",
     "ownerId",
     "partition",

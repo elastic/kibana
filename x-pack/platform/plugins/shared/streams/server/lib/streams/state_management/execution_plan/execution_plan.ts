@@ -110,10 +110,7 @@ export class ExecutionPlan {
     try {
       this.actionsByType = Object.assign(this.actionsByType, groupBy(elasticsearchActions, 'type'));
 
-      await translateClassicStreamPipelineActions(
-        this.actionsByType,
-        this.dependencies.scopedClusterClient
-      );
+      await translateClassicStreamPipelineActions(this.actionsByType, this.dependencies.esClient);
     } catch (error) {
       throw new FailedToPlanElasticsearchActionsError(
         `Failed to plan Elasticsearch action execution: ${getErrorMessage(error)}`
@@ -144,7 +141,7 @@ export class ExecutionPlan {
     }
 
     // Use security API to check if user has all required permissions
-    const securityClient = this.dependencies.scopedClusterClient.asCurrentUser.security;
+    const securityClient = this.dependencies.esClient.security;
 
     const hasPrivilegesRequest: SecurityHasPrivilegesRequest = {
       cluster: requiredPermissions.cluster.length > 0 ? requiredPermissions.cluster : undefined,
@@ -301,7 +298,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         upsertComponent({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           component: action.request,
         })
@@ -313,7 +310,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         upsertTemplate({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           template: action.request,
         })
@@ -325,7 +322,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         rolloverDataStream({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           name: action.request.name,
         })
@@ -337,7 +334,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         updateDefaultIngestPipeline({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           name: action.request.name,
           pipeline: action.request.pipeline,
         })
@@ -349,7 +346,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         updateDataStreamsLifecycle({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           names: [action.request.name],
           lifecycle: action.request.lifecycle,
@@ -363,7 +360,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         updateDataStreamsMappings({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           name: action.request.name,
           mappings: action.request.mappings,
@@ -376,7 +373,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         upsertDataStream({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           name: action.request.name,
         })
@@ -390,7 +387,7 @@ export class ExecutionPlan {
       (action) => getSegments(action.stream).length - 1,
       (action) =>
         upsertIngestPipeline({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           pipeline: action.request,
         })
@@ -401,7 +398,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         deleteDataStream({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           name: action.request.name,
         })
@@ -413,7 +410,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         deleteTemplate({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           name: action.request.name,
         })
@@ -425,7 +422,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         updateDataStreamsFailureStore({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           failureStore: action.request.failure_store,
           stream: action.request.definition,
@@ -439,7 +436,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         deleteIngestPipeline({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           id: action.request.name,
         })
@@ -451,7 +448,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         deleteComponent({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           logger: this.dependencies.logger,
           name: action.request.name,
         })
@@ -477,7 +474,7 @@ export class ExecutionPlan {
     return Promise.all(
       actions.map((action) =>
         putDataStreamsSettings({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          esClient: this.dependencies.esClient,
           names: [action.request.name],
           settings: action.request.settings,
         })
@@ -496,7 +493,7 @@ export class ExecutionPlan {
         retryTransientEsErrors(
           () =>
             upsertEsqlView({
-              esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+              esClient: this.dependencies.esClient,
               logger: this.dependencies.logger,
               name: action.request.name,
               query: action.request.query,
@@ -516,7 +513,7 @@ export class ExecutionPlan {
         retryTransientEsErrors(
           () =>
             deleteEsqlView({
-              esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+              esClient: this.dependencies.esClient,
               logger: this.dependencies.logger,
               name: action.request.name,
             }),
