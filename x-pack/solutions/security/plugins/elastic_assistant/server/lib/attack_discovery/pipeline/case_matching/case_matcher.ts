@@ -83,6 +83,10 @@ const CASES_TO_PIPELINE_TYPE_KEY: Record<string, ObservableTypeKey> = {
   'observable-type-email': 'email',
   'observable-type-domain': 'domain',
   'observable-type-agent-id': 'agent_id',
+  'observable-type-user': 'user',
+  'observable-type-process': 'process',
+  'observable-type-registry': 'registry',
+  'observable-type-service': 'service',
 };
 
 const normalizeCasesTypeKey = (casesKey: string): string =>

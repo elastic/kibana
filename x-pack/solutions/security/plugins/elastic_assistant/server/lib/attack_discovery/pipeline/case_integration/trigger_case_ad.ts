@@ -117,15 +117,19 @@ export const triggerCaseAttackDiscovery = async ({
       savedObjectsClient,
     });
 
-    if (adResult) {
-      await markAlertsProcessed({
-        caseId,
-        deltaAlertIds: delta.deltaAlertIds,
-        esClient,
-        generationUuid: delta.generationUuid,
-        logger,
-        spaceId,
-      });
+    await markAlertsProcessed({
+      caseId,
+      deltaAlertIds: delta.deltaAlertIds,
+      esClient,
+      generationUuid: delta.generationUuid,
+      logger,
+      spaceId,
+    });
+
+    if (!adResult) {
+      logger.info(
+        `triggerCaseAttackDiscovery: AD returned no discoveries for case ${caseId}, marking ${delta.deltaAlertIds.length} alerts as processed to avoid re-analysis`
+      );
     }
 
     return {
@@ -141,7 +145,8 @@ export const triggerCaseAttackDiscovery = async ({
 
     return {
       caseId,
-      triggered: true,
+      triggered: false,
+      skipReason: `AD generation failed: ${errorMessage}`,
       deltaAlertCount: delta.deltaAlertIds.length,
       generationUuid: delta.generationUuid,
       discoveriesGenerated: 0,

@@ -234,6 +234,10 @@ const PIPELINE_TO_CASES_TYPE_KEY: Record<string, string> = {
   email: 'observable-type-email',
   domain: 'observable-type-domain',
   agent_id: 'observable-type-agent-id',
+  user: 'observable-type-user',
+  process: 'observable-type-process',
+  registry: 'observable-type-registry',
+  service: 'observable-type-service',
 };
 
 const toCasesTypeKey = (pipelineKey: string): string =>
@@ -258,11 +262,21 @@ const addObservablesToCases = async ({
       const caseEntities = entities.filter((e) => caseAlertIds.includes(e.alertId));
 
       if (caseEntities.length > 0) {
-        const observables = caseEntities.slice(0, 50).map((e) => ({
-          typeKey: toCasesTypeKey(e.typeKey),
-          value: e.value,
-          description: `Auto-extracted from alert via pipeline (field: ${e.sourceField})`,
-        }));
+        const seen = new Set<string>();
+        const observables = caseEntities
+          .reduce<Array<{ typeKey: string; value: string; description: string }>>((acc, e) => {
+            const dedupeKey = `${toCasesTypeKey(e.typeKey)}::${e.value.toLowerCase()}`;
+            if (!seen.has(dedupeKey)) {
+              seen.add(dedupeKey);
+              acc.push({
+                typeKey: toCasesTypeKey(e.typeKey),
+                value: e.value,
+                description: `Auto-extracted from alert via pipeline (field: ${e.sourceField})`,
+              });
+            }
+            return acc;
+          }, [])
+          .slice(0, 50);
 
         await casesClient.cases.bulkAddObservables({ caseId, observables });
       }
@@ -434,6 +448,10 @@ export const runInvestigationPipeline = async ({
     } catch (error) {
       errors.push(`Case matching failed: ${error instanceof Error ? error.message : error}`);
     }
+  } else if (config.caseMatching.enabled && entities.length === 0 && leadersForProcessing.length > 0) {
+    logger.warn(
+      `Pipeline ${executionId}: ${leadersForProcessing.length} leader alerts produced 0 entities — these alerts will be tagged as processed but not matched to any case`
+    );
   }
 
   if (config.incrementalAd.enabled && affectedCaseIds.size > 0) {

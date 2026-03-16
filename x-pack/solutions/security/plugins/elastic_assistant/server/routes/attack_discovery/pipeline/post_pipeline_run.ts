@@ -68,7 +68,14 @@ export const registerPipelineRoutes = (
               filter: [
                 { terms: { 'kibana.alert.workflow_status': ['open', 'acknowledged'] } },
                 { range: { '@timestamp': { gte: lookbackTime.toISOString() } } },
-                { bool: { must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }] } },
+                {
+                  bool: {
+                    must_not: [
+                      { exists: { field: 'kibana.alert.building_block_type' } },
+                      { exists: { field: 'kibana.alert.pipeline.processed' } },
+                    ],
+                  },
+                },
               ],
             },
           },

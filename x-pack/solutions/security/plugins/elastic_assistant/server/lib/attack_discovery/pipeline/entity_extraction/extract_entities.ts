@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ExtractedEntity, ObservableTypeKey, EntityExtractionConfig } from '../types';
 import { getEcsFieldMappings } from './ecs_field_mappings';
 
-const IPV4_REGEX = /^(\d{1,3}\.){3}\d{1,3}$/;
+const IPV4_REGEX = /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
 
 const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
   const parts = path.split('.');
