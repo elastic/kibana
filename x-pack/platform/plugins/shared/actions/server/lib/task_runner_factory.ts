@@ -74,7 +74,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create({ taskInstance }: RunContext) {
+  public create({ taskInstance, abortController }: RunContext) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -133,6 +133,7 @@ export class TaskRunnerFactory {
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
             actionExecutionId,
             ...getSource(references, source),
+            signal: abortController.signal,
           });
         } catch (e) {
           const errorSource =

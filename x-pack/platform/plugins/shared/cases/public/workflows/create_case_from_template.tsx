@@ -6,14 +6,11 @@
  */
 
 import React from 'react';
-import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import type { SelectionOption } from '@kbn/workflows/types/latest';
 import { getCaseConfigure } from '../containers/configure/api';
-import {
-  createCaseFromTemplateStepCommonDefinition,
-  CreateCaseFromTemplateStepTypeId,
-} from '../../common/workflows/steps/create_case_from_template';
-import * as i18n from './translations';
+import { createCaseFromTemplateStepCommonDefinition } from '../../common/workflows/steps/create_case_from_template';
+import * as i18n from '../../common/workflows/translations';
 
 const WORKFLOW_CASE_OWNER = 'securitySolution';
 
@@ -32,32 +29,6 @@ export const createCreateCaseFromTemplateStepDefinition = () =>
         default: icon,
       }))
     ),
-    label: i18n.CREATE_CASE_FROM_TEMPLATE_STEP_LABEL,
-    description: i18n.CREATE_CASE_FROM_TEMPLATE_STEP_DESCRIPTION,
-    documentation: {
-      details: i18n.CREATE_CASE_FROM_TEMPLATE_STEP_DOCUMENTATION_DETAILS,
-      examples: [
-        `## Create case from template
-\`\`\`yaml
-- name: create_case_from_template
-  type: ${CreateCaseFromTemplateStepTypeId}
-  with:
-    case_template_id: "triage_template"
-\`\`\``,
-        `## Create case from template with overwrites
-\`\`\`yaml
-- name: create_case_from_template_with_overwrites
-  type: ${CreateCaseFromTemplateStepTypeId}
-  with:
-    case_template_id: "triage_template"
-    overwrites:
-      title: "Template based case title"
-      severity: "high"
-      status: "in-progress"
-\`\`\``,
-      ],
-    },
-    actionsMenuGroup: ActionsMenuGroup.kibana,
     editorHandlers: {
       input: {
         case_template_id: {

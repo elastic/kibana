@@ -12,7 +12,7 @@ import { extractTabs, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableByValueState,
@@ -37,6 +37,7 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
   ) {
     const transformsFlow = flow(
       transformTitlesOut<StoredSearchEmbeddableState>,
+      transformTimeRangeOut<StoredSearchEmbeddableState>,
       (state: StoredSearchEmbeddableState) => transformDrilldownsOut(state, references)
     );
     const state = transformsFlow(storedState);
