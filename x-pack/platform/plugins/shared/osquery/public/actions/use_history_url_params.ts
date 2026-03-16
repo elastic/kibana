@@ -96,18 +96,23 @@ export const useHistoryUrlParams = () => {
     [history, pathname]
   );
 
+  const currentFilters = useCallback(
+    () => parseHistoryUrlParams(history.location.search),
+    [history]
+  );
+
   const setFilter = useCallback(
     <K extends keyof HistoryUrlFilters>(key: K, value: HistoryUrlFilters[K]) => {
-      replaceUrl({ ...filters, [key]: value });
+      replaceUrl({ ...currentFilters(), [key]: value });
     },
-    [filters, replaceUrl]
+    [currentFilters, replaceUrl]
   );
 
   const setFilters = useCallback(
     (partial: Partial<HistoryUrlFilters>) => {
-      replaceUrl({ ...filters, ...partial });
+      replaceUrl({ ...currentFilters(), ...partial });
     },
-    [filters, replaceUrl]
+    [currentFilters, replaceUrl]
   );
 
   return { filters, setFilter, setFilters };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useGoBack } from './use_go_back';
 
 const mockPush = jest.fn();
