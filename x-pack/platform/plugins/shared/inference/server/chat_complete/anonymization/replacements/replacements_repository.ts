@@ -8,8 +8,11 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import type { ReplacementsSet } from '@kbn/anonymization-common';
+import { isConflictError, isNotFoundError } from '../../utils';
 import { ANONYMIZATION_REPLACEMENTS_INDEX } from './replacements_index';
+import { ReplacementsNamespaceMismatchError } from './replacements_errors';
 
 /** ES document shape for replacements. */
 interface EsReplacementsDocument {
@@ -54,14 +57,17 @@ const ENCRYPTION_VERSION = 'v1';
  */
 export class ReplacementsRepository {
   private readonly encryptionKey: string | undefined;
+  private readonly logger: Logger | undefined;
 
   constructor(
     private readonly esClient: ElasticsearchClient,
     options?: {
       encryptionKey?: string;
+      logger?: Logger;
     }
   ) {
     this.encryptionKey = options?.encryptionKey;
+    this.logger = options?.logger;
   }
 
   private deriveKey(secret: string): Buffer {
@@ -130,10 +136,18 @@ export class ReplacementsRepository {
     return withStatus;
   }
 
-  private isVersionConflict(err: unknown): boolean {
-    const statusCode = (err as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode;
-    const metaStatusCode = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
-    return statusCode === 409 || metaStatusCode === 409;
+  private assertNamespaceMatch(
+    namespace: string,
+    replacementsId: string,
+    doc?: EsReplacementsDocument
+  ): asserts doc is EsReplacementsDocument {
+    if (!doc) {
+      throw this.setStatusCode(new Error('Replacements document missing'), 404);
+    }
+
+    if (doc.namespace !== namespace) {
+      throw new ReplacementsNamespaceMismatchError(replacementsId, namespace, doc.namespace);
+    }
   }
 
   private dedupeAndValidate(
@@ -169,10 +183,27 @@ export class ReplacementsRepository {
   /**
    * Creates a new replacements set.
    */
+  private warnIfTruncated(
+    deduped: Array<{ anonymized: string; original: string }>,
+    context: string
+  ): Array<{ anonymized: string; original: string }> {
+    if (deduped.length > MAX_REPLACEMENTS) {
+      this.logger?.warn(
+        `[anonymization.replacements.truncation] context=${context} total=${
+          deduped.length
+        } limit=${MAX_REPLACEMENTS} dropped=${deduped.length - MAX_REPLACEMENTS}`
+      );
+    }
+    return deduped.slice(0, MAX_REPLACEMENTS);
+  }
+
   async create(params: CreateReplacementsParams): Promise<ReplacementsSet> {
     const now = new Date().toISOString();
     const id = params.id ?? uuidv4();
-    const replacements = this.dedupeAndValidate(params.replacements).slice(0, MAX_REPLACEMENTS);
+    const replacements = this.warnIfTruncated(
+      this.dedupeAndValidate(params.replacements),
+      `create id=${id}`
+    );
 
     const doc: EsReplacementsDocument = {
       id,
@@ -208,13 +239,11 @@ export class ReplacementsRepository {
       });
 
       const doc = result._source;
-      if (!doc || doc.namespace !== namespace) {
-        return null;
-      }
+      this.assertNamespaceMatch(namespace, replacementsId, doc);
 
       return this.toReplacementsSet(doc);
     } catch (err) {
-      if (err?.meta?.statusCode === 404) {
+      if (isNotFoundError(err)) {
         return null;
       }
       throw err;
@@ -242,23 +271,21 @@ export class ReplacementsRepository {
           id: replacementsId,
         });
       } catch (err) {
-        if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode === 404) {
+        if (isNotFoundError(err)) {
           return null;
         }
         throw err;
       }
 
       const doc = docResult._source;
-      if (!doc || doc.namespace !== namespace) {
-        return null;
-      }
+      this.assertNamespaceMatch(namespace, replacementsId, doc);
 
       const existing = this.toReplacementsSet(doc);
       const now = new Date().toISOString();
-      const mergedReplacements = this.dedupeAndValidate([
-        ...existing.replacements,
-        ...params.replacements,
-      ]).slice(0, MAX_REPLACEMENTS);
+      const mergedReplacements = this.warnIfTruncated(
+        this.dedupeAndValidate([...existing.replacements, ...params.replacements]),
+        `update id=${replacementsId}`
+      );
 
       try {
         await this.esClient.update({
@@ -278,7 +305,7 @@ export class ReplacementsRepository {
 
         return this.get(namespace, replacementsId);
       } catch (err) {
-        if (this.isVersionConflict(err) && attempt < MAX_UPDATE_RETRIES - 1) {
+        if (isConflictError(err) && attempt < MAX_UPDATE_RETRIES - 1) {
           continue;
         }
         throw err;

@@ -41,4 +41,5 @@ export type PromptRequestBody = ChatCompleteRequestBodyBase & {
 
 export interface GetConnectorsResponseBody {
   connectors: InferenceConnector[];
+  anonymizationEnabled: boolean;
 }

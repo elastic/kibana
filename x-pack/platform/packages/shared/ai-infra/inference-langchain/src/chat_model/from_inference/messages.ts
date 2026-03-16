@@ -9,10 +9,15 @@ import type { ChatCompleteResponse } from '@kbn/inference-common';
 import { AIMessage } from '@langchain/core/messages';
 
 export const responseToLangchainMessage = (response: ChatCompleteResponse): AIMessage => {
-  const additionalKwargs = response.refusal ? { refusal: response.refusal } : undefined;
+  const additionalKwargs = {
+    ...(response.refusal ? { refusal: response.refusal } : {}),
+    ...(response.metadata?.anonymization
+      ? { anonymization: { replacementsId: response.metadata.anonymization.replacementsId } }
+      : {}),
+  };
   return new AIMessage({
     content: response.content,
-    ...(additionalKwargs ? { additional_kwargs: additionalKwargs } : {}),
+    ...(Object.keys(additionalKwargs).length > 0 ? { additional_kwargs: additionalKwargs } : {}),
     tool_calls: response.toolCalls.map((toolCall) => {
       return {
         id: toolCall.toolCallId,

@@ -19,16 +19,22 @@ import {
 } from '@kbn/anonymization-plugin/common';
 import { ReplacementsRepository } from './replacements_repository';
 import { ensureReplacementsIndex } from './replacements_index';
+import { ReplacementsNamespaceMismatchError } from './replacements_errors';
 import type { InferenceServerStart, InferenceStartDependencies } from '../../../types';
 
 const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
+
+// replaceTokensWithOriginals is O(n × m) for text length n and replacement count m.
+// With MAX_REPLACEMENTS=10000 entries an unbounded payload could cause excessive CPU usage,
+// so we cap the input at 1 MB of text — well above any realistic LLM response size.
+const DEANONYMIZE_TEXT_MAX_LENGTH = 1_000_000;
 
 const assertReplacementsEncryptionKeyConfigured = (encryptionKey?: string): void => {
   if (!encryptionKey) {
     const error = new Error(
       'Replacements encryption key is not available — verify the anonymization plugin is active and properly initialized'
     ) as Error & { statusCode?: number };
-    error.statusCode = 400;
+    error.statusCode = 503;
     throw error;
   }
 };
@@ -48,14 +54,13 @@ const resolveEncryptionKey = async ({
   const anonymizationEnabled = anonymizationPlugin?.isEnabled() ?? false;
 
   if (!anonymizationEnabled) {
+    // Plugin is intentionally disabled — caller will receive a 503 explaining this.
     return undefined;
   }
 
-  try {
-    return await anonymizationPlugin?.getPolicyService().getReplacementsEncryptionKey(namespace);
-  } catch {
-    return undefined;
-  }
+  // Let errors propagate: a transient failure (ES down, plugin not yet started) should
+  // surface as a 5xx, not silently degrade to a misleading 400 "not configured" response.
+  return anonymizationPlugin?.getPolicyService().getReplacementsEncryptionKey(namespace);
 };
 
 const resolveReplacementsContext = async (
@@ -79,7 +84,7 @@ const resolveReplacementsContext = async (
     replacementsIndexEnsuredAt = Date.now();
   }
 
-  const repo = new ReplacementsRepository(esClient, { encryptionKey });
+  const repo = new ReplacementsRepository(esClient, { encryptionKey, logger: options.logger });
   return { namespace, repo };
 };
 
@@ -130,6 +135,9 @@ export const registerReplacementsRoutes = (
             },
           });
         } catch (err) {
+          if (err instanceof ReplacementsNamespaceMismatchError) {
+            return response.notFound({ body: { message: 'Replacements set not found' } });
+          }
           logger.error(`Failed to resolve replacements: ${toErrorMessage(err)}`);
           return response.customError({
             body: { message: toErrorMessage(err) },
@@ -156,7 +164,7 @@ export const registerReplacementsRoutes = (
         validate: {
           request: {
             body: schema.object({
-              text: schema.string(),
+              text: schema.string({ maxLength: DEANONYMIZE_TEXT_MAX_LENGTH }),
               replacementsId: schema.string(),
             }),
           },
@@ -182,6 +190,9 @@ export const registerReplacementsRoutes = (
 
           return response.ok({ body: { text: deanonymizedText } });
         } catch (err) {
+          if (err instanceof ReplacementsNamespaceMismatchError) {
+            return response.notFound({ body: { message: 'Replacements set not found' } });
+          }
           logger.error(`Failed to deanonymize text: ${toErrorMessage(err)}`);
           return response.customError({
             body: { message: toErrorMessage(err) },

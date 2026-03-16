@@ -78,6 +78,11 @@ export type InferenceClientCreateOptions =
  */
 export interface InferenceServerStart {
   /**
+   * Returns whether anonymization platform integration is active.
+   */
+  isAnonymizationEnabled: () => boolean;
+
+  /**
    * Creates an {@link InferenceClient}, scoped to a request.
    *
    * @example
@@ -153,6 +158,28 @@ export interface InferenceServerStart {
    * @throws Error if the connector with the specified ID does not exist
    */
   getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+
+  /**
+   * Deanonymizes a text string by replacing anonymization tokens with their original values
+   * using the replacements document identified by the given namespace and replacementsId.
+   * Returns the original text unchanged if anonymization is disabled or the replacements
+   * document is not found.
+   *
+   * @param namespace - The space namespace the replacements document belongs to
+   * @param replacementsId - The ID of the replacements document
+   * @param text - The text containing anonymization tokens to replace
+   *
+   * SECURITY: `namespace` MUST be derived from the request-scoped SO client
+   * (`getScopedClient(request).getCurrentNamespace() ?? 'default'`), never from
+   * user-controlled input. This function uses elevated (internal) ES privileges;
+   * all tenant isolation relies on the namespace matching the document's stored namespace.
+   * A `ReplacementsNamespaceMismatchError` is thrown when the namespace does not match,
+   * to prevent cross-space reads. Unlike transient errors (which are logged and return the
+   * original text), this error propagates to the caller. Callers must not swallow it in a
+   * way that returns wrong-namespace decrypted content; falling back to a safe default
+   * (e.g. an existing title, or the original tokenized text) is acceptable.
+   */
+  deanonymizeText: (namespace: string, replacementsId: string, text: string) => Promise<string>;
 
   /**
    * Lists available Elasticsearch inference endpoints, optionally filtered by task type.

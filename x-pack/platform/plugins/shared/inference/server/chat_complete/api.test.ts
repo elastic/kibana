@@ -14,7 +14,8 @@ import {
 } from './api.test.mocks';
 
 import { of, Subject, isObservable, toArray, firstValueFrom, filter } from 'rxjs';
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
@@ -170,6 +171,22 @@ describe('createChatCompleteApi', () => {
   });
 
   describe('response mode', () => {
+    const recoveringShardError = {
+      statusCode: 503,
+      meta: {
+        statusCode: 503,
+        body: {
+          error: {
+            type: 'illegal_index_shard_state_exception',
+            reason:
+              'CurrentState[RECOVERING] operations only allowed when shard state is one of [POST_RECOVERY, STARTED]',
+          },
+        },
+      },
+      message:
+        'no_shard_available_action_exception: CurrentState[RECOVERING] operations only allowed when shard state is one of [POST_RECOVERY, STARTED]',
+    };
+
     it('reuses carried replacementsId when found', async () => {
       inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
 
@@ -193,7 +210,54 @@ describe('createChatCompleteApi', () => {
       expect(response.metadata?.anonymization?.replacementsId).toBe('existing-replacements-id');
     });
 
-    it('falls back to a new replacementsId when carried one is missing', async () => {
+    it('retries transient shard-recovery failures when fetching carried replacements', async () => {
+      mockEsClient.get.mockRejectedValueOnce(recoveringShardError);
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      const response = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        metadata: {
+          anonymization: {
+            replacementsId: 'existing-replacements-id',
+          },
+        },
+        maxRetries: 0,
+      });
+
+      expect(mockEsClient.get.mock.calls.length).toBeGreaterThanOrEqual(2);
+      expect(mockEsClient.get.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ id: 'existing-replacements-id' })
+      );
+      expect(response.metadata?.anonymization?.replacementsId).toBe('existing-replacements-id');
+    });
+
+    it('does not retry non-retryable replacements errors', async () => {
+      mockEsClient.get.mockRejectedValueOnce({
+        statusCode: 400,
+        meta: { statusCode: 400 },
+        message: 'bad request',
+      });
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      await expect(
+        chatComplete({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          metadata: {
+            anonymization: {
+              replacementsId: 'existing-replacements-id',
+            },
+          },
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({ message: 'bad request' });
+
+      expect(mockEsClient.get).toHaveBeenCalledTimes(1);
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(0);
+    });
+
+    it('reuses carried replacementsId by creating document when carried one is missing', async () => {
       mockEsClient.get.mockRejectedValueOnce({ meta: { statusCode: 404 } });
       inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
 
@@ -211,8 +275,122 @@ describe('createChatCompleteApi', () => {
       expect(mockEsClient.get).toHaveBeenCalledTimes(1);
       expect(mockEsClient.update).toHaveBeenCalledTimes(0);
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
-      expect(response.metadata?.anonymization?.replacementsId).not.toBe('stale-replacements-id');
-      expect(response.metadata?.anonymization?.replacementsId).toEqual(expect.any(String));
+      expect(mockEsClient.index.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ id: 'stale-replacements-id' })
+      );
+      expect(response.metadata?.anonymization?.replacementsId).toBe('stale-replacements-id');
+    });
+
+    it('falls back to a new replacements document when carried replacementsId belongs to another namespace', async () => {
+      // Simulate a document that was created in a different space (e.g. after a space migration).
+      // The old behaviour threw a 409; the new behaviour silently allocates a fresh UUID so that
+      // clients that persisted a pre-migration ID are not hard-errored.
+      mockEsClient.get.mockResolvedValueOnce({
+        _source: {
+          id: 'cross-space-replacements-id',
+          namespace: 'other-space',
+          replacements: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          created_by: 'inference',
+        },
+      });
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      const response = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        metadata: {
+          anonymization: {
+            replacementsId: 'cross-space-replacements-id',
+          },
+        },
+        maxRetries: 0,
+      });
+
+      // A fresh replacementsId must have been allocated (different from the cross-space one).
+      expect(response.metadata?.anonymization?.replacementsId).toBeDefined();
+      expect(response.metadata?.anonymization?.replacementsId).not.toBe(
+        'cross-space-replacements-id'
+      );
+      // The agent call must have gone through.
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('handles create conflict by falling back to update', async () => {
+      mockEsClient.get
+        .mockRejectedValueOnce({ meta: { statusCode: 404 } })
+        .mockResolvedValueOnce({
+          _seq_no: 1,
+          _primary_term: 1,
+          _source: {
+            id: 'stale-replacements-id',
+            namespace: 'default',
+            replacements: [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            created_by: 'inference',
+          },
+        })
+        .mockResolvedValueOnce({
+          _source: {
+            id: 'stale-replacements-id',
+            namespace: 'default',
+            replacements: [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            created_by: 'inference',
+          },
+        });
+      mockEsClient.index.mockRejectedValueOnce({
+        statusCode: 409,
+        meta: { statusCode: 409 },
+      });
+      mockEsClient.update.mockResolvedValueOnce({});
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      const response = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        metadata: {
+          anonymization: {
+            replacementsId: 'stale-replacements-id',
+          },
+        },
+        maxRetries: 0,
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.update).toHaveBeenCalledTimes(1);
+      expect(response.metadata?.anonymization?.replacementsId).toBe('stale-replacements-id');
+    });
+
+    it('fails when create conflict fallback update cannot persist replacements', async () => {
+      mockEsClient.get
+        .mockRejectedValueOnce({ meta: { statusCode: 404 } })
+        .mockRejectedValueOnce({ meta: { statusCode: 404 } });
+      mockEsClient.index.mockRejectedValueOnce({
+        statusCode: 409,
+        meta: { statusCode: 409 },
+      });
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      await expect(
+        chatComplete({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          metadata: {
+            anonymization: {
+              replacementsId: 'stale-replacements-id',
+            },
+          },
+          maxRetries: 0,
+        })
+      ).rejects.toThrow(
+        'Unable to persist replacements after create conflict for replacementsId "stale-replacements-id"'
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
 
     it('does not persist replacements when there is no anonymization and no carried id', async () => {
@@ -252,6 +430,35 @@ describe('createChatCompleteApi', () => {
         metadata: undefined,
         toolCalls: [],
       });
+    });
+
+    it('keeps masked output for Agent Builder requests while preserving replacements metadata', async () => {
+      mockEsClient.get.mockResolvedValueOnce({
+        _source: {
+          id: 'existing-replacements-id',
+          namespace: 'default',
+          replacements: [{ anonymized: 'EMAIL_token', original: 'alice@example.com' }],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          created_by: 'inference',
+        },
+      });
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('EMAIL_token')));
+
+      const response = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'alice@example.com' }],
+        metadata: {
+          anonymization: {
+            replacementsId: 'existing-replacements-id',
+            keepTokenized: true,
+          },
+        },
+        maxRetries: 0,
+      });
+
+      expect(response.content).toBe('EMAIL_token');
+      expect(response.metadata?.anonymization?.replacementsId).toBe('existing-replacements-id');
     });
 
     it('implicitly retries errors when configured to', async () => {

@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { GetConnectorsResponseBody } from '../../common/http_apis';
 import { getConnectorList } from '../util/get_connector_list';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
 
@@ -34,7 +35,15 @@ export function registerConnectorsRoute({
       const actions = pluginsStart.actions;
       const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
       const connectors = await getConnectorList({ actions, request, esClient, logger });
-      return response.ok({ body: { connectors } });
+
+      // `anonymizationEnabled` is informational UI state for Agent Builder access checks.
+      // It must not be treated as a security boundary. Deanonymization is enforced
+      // server-side by replacements API privileges (`read_anonymization`).
+      const body: GetConnectorsResponseBody = {
+        connectors,
+        anonymizationEnabled: pluginsStart.anonymization?.isEnabled() ?? false,
+      };
+      return response.ok({ body });
     }
   );
 }
