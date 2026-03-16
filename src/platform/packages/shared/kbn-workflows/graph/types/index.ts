@@ -41,7 +41,19 @@ export type {
   ExitForeachNodeSchema,
   EnterForeachNodeConfiguration,
   EnterForeachNodeConfigurationSchema,
+  EnterWhileNode,
+  EnterWhileNodeSchema,
+  ExitWhileNode,
+  ExitWhileNodeSchema,
+  EnterWhileNodeConfiguration,
+  EnterWhileNodeConfigurationSchema,
 } from './nodes/loop_nodes';
+export type {
+  LoopBreakNode,
+  LoopBreakNodeSchema,
+  LoopContinueNode,
+  LoopContinueNodeSchema,
+} from './nodes/flow_control_nodes';
 export type {
   EnterRetryNode,
   EnterRetryNodeSchema,
@@ -78,11 +90,13 @@ export {
   isWait,
   isWaitForInput,
   isEnterForeach,
+  isEnterWhile,
   isEnterIf,
   isEnterRetry,
   isEnterTryBlock,
   isEnterNormalPath,
   isExitForeach,
+  isExitWhile,
   isExitIf,
   isExitRetry,
   isExitTryBlock,
@@ -93,4 +107,9 @@ export {
   isExitStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
+  isLoopBreak,
+  isLoopContinue,
+  isLoopEnterNode,
+  shouldSuggestInnerSteps,
 } from './guards';
+export type { LoopEnterNode } from './guards';

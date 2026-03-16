@@ -36,15 +36,18 @@ export const TAG_FILTER_ID = 'tag';
 export interface ActiveFilters {
   /** Search text extracted from the search bar, without filter syntax. */
   search?: string;
-  [filterId: string]: IncludeExcludeFilter | string | undefined;
+  /** When `true`, restrict results to starred items only. */
+  starredOnly?: boolean;
+  [filterId: string]: IncludeExcludeFilter | string | boolean | undefined;
 }
 
 /**
  * Returns the filter value as `IncludeExcludeFilter` if it is an object; otherwise `undefined`.
- * Use when accessing `include`/`exclude` on a filter dimension, since the index signature allows `string`.
+ * Use when accessing `include`/`exclude` on a filter dimension, since the index signature
+ * allows `string`, `boolean`, and `IncludeExcludeFilter`.
  */
 export const getIncludeExcludeFilter = (
-  value: IncludeExcludeFilter | string | undefined
+  value: IncludeExcludeFilter | string | boolean | undefined
 ): IncludeExcludeFilter | undefined => (value && typeof value === 'object' ? value : undefined);
 
 /**

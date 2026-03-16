@@ -23,7 +23,7 @@ import type { WorkflowsManagementApi } from '../workflows_management_api';
 
 jest.mock('../lib/with_license_check');
 
-describe('POST /api/workflowExecutions/{executionId}/resume', () => {
+describe('POST /api/workflowExecutions/{workflowExecutionId}/resume', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -46,7 +46,7 @@ describe('POST /api/workflowExecutions/{executionId}/resume', () => {
         spaces: mockSpaces,
       });
       const postCall = (mockRouter.post as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflowExecutions/{executionId}/resume'
+        (call) => call[0].path === '/api/workflowExecutions/{workflowExecutionId}/resume'
       );
       routeHandler = postCall?.[1];
     });
@@ -55,7 +55,7 @@ describe('POST /api/workflowExecutions/{executionId}/resume', () => {
       workflowsApi.resumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);
 
       const mockRequest = {
-        params: { executionId: 'execution-123' },
+        params: { workflowExecutionId: 'execution-123' },
         body: { input: { approved: true } },
         headers: {},
       };
@@ -84,7 +84,7 @@ describe('POST /api/workflowExecutions/{executionId}/resume', () => {
         .mockRejectedValue(new WorkflowExecutionNotFoundError('execution-404'));
 
       const mockRequest = {
-        params: { executionId: 'execution-404' },
+        params: { workflowExecutionId: 'execution-404' },
         body: { input: {} },
         headers: {},
       };
@@ -103,7 +103,7 @@ describe('POST /api/workflowExecutions/{executionId}/resume', () => {
         );
 
       const mockRequest = {
-        params: { executionId: 'execution-123' },
+        params: { workflowExecutionId: 'execution-123' },
         body: { input: {} },
         headers: {},
       };
@@ -123,7 +123,7 @@ describe('POST /api/workflowExecutions/{executionId}/resume', () => {
       mockSpaces.getSpaceId = jest.fn().mockReturnValue('custom-space');
 
       const mockRequest = {
-        params: { executionId: 'execution-456' },
+        params: { workflowExecutionId: 'execution-456' },
         body: { input: { decision: 'approve' } },
         headers: {},
       };
@@ -144,7 +144,7 @@ describe('POST /api/workflowExecutions/{executionId}/resume', () => {
       workflowsApi.resumeWorkflowExecution = jest.fn().mockRejectedValue(unexpectedError);
 
       const mockRequest = {
-        params: { executionId: 'execution-123' },
+        params: { workflowExecutionId: 'execution-123' },
         body: { input: {} },
         headers: {},
       };

@@ -8,8 +8,6 @@
  */
 
 export class WorkflowExecutionInvalidStatusError extends Error {
-  public readonly statusCode = 409;
-
   constructor(executionId: string, currentStatus: string, expectedStatus: string) {
     super(
       `Workflow execution "${executionId}" is in status "${currentStatus}" but expected "${expectedStatus}".`

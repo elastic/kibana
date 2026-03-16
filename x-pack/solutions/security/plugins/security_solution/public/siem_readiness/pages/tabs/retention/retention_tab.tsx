@@ -36,6 +36,8 @@ import { RetentionWarningPrompt } from './retention_warning_prompt';
 import { buildRetentionCaseDescription, getRetentionCaseTitle } from './retention_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
 import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
+import { isRetentionNonCompliant } from '../../../hooks/visibility_status_utils';
+import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const RETENTION_CASE_TAGS = ['siem-readiness', 'retention', 'data-lifecycle'];
 
@@ -111,7 +113,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
       for (const item of category.items) {
         if (!seen.has(item.indexName)) {
           seen.add(item.indexName);
-          if (item.status === 'non-compliant') {
+          if (isRetentionNonCompliant(item.status)) {
             nonCompliantCount++;
           }
         }
@@ -137,8 +139,8 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
   // Render function for accordion extra action (right side badges/stats)
   const renderExtraAction = (category: CategoryData<RetentionInfoWithStatus>) => {
-    const nonCompliantCount = category.items.filter(
-      (item) => item.status === 'non-compliant'
+    const nonCompliantCount = category.items.filter((item) =>
+      isRetentionNonCompliant(item.status)
     ).length;
 
     const hasIssues = nonCompliantCount > 0;
@@ -489,6 +491,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         defaultSortField="retentionDays"
         defaultSortDirection="asc"
         itemName="data streams / indices"
+        storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
       />
     </>
   );

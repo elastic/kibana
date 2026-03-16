@@ -554,9 +554,61 @@ describe('Color util transforms', () => {
         palette: 'kibana_palette',
         mode: 'categorical',
         mapping: [
-          { color: { type: 'colorCode', value: '#ff0000' }, values: ['value1'] },
-          { color: { type: 'colorCode', value: '#00ff00' }, values: ['value2', 'value3'] },
+          { color: { type: 'color_code', value: '#ff0000' }, values: ['value1'] },
+          { color: { type: 'color_code', value: '#00ff00' }, values: ['value2', 'value3'] },
           { color: { type: 'from_palette', palette: 'no_default', index: 1 }, values: ['value1'] },
+        ],
+      });
+    });
+
+    it('should convert gradient color mapping from palette', () => {
+      const originalColorMapping: ColorMapping.Config = {
+        paletteId: 'kibana_palette',
+        specialAssignments: [],
+        assignments: [],
+        colorMode: {
+          type: 'gradient',
+          steps: [{ type: 'categorical', colorIndex: 1, paletteId: 'no_default', touched: true }],
+          sort: 'desc',
+        },
+      };
+
+      const result = fromColorMappingLensStateToAPI(originalColorMapping);
+      expect(result).toEqual({
+        palette: 'kibana_palette',
+        mode: 'gradient',
+        mapping: [],
+        sort: 'desc',
+        gradient: [{ index: 1, palette: 'no_default', type: 'from_palette' }],
+      });
+    });
+
+    it('should convert gradient color mapping from color code', () => {
+      const originalColorMapping: ColorMapping.Config = {
+        paletteId: 'kibana_palette',
+        specialAssignments: [],
+        assignments: [],
+        colorMode: {
+          type: 'gradient',
+          steps: [
+            { type: 'colorCode', colorCode: '#ff0000', touched: false },
+            { type: 'colorCode', colorCode: '#ffff00', touched: false },
+            { type: 'colorCode', colorCode: '#0000ff', touched: true },
+          ],
+          sort: 'asc',
+        },
+      };
+
+      const result = fromColorMappingLensStateToAPI(originalColorMapping);
+      expect(result).toEqual({
+        palette: 'kibana_palette',
+        mode: 'gradient',
+        mapping: [],
+        sort: 'asc',
+        gradient: [
+          { type: 'color_code', value: '#ff0000' },
+          { type: 'color_code', value: '#ffff00' },
+          { type: 'color_code', value: '#0000ff' },
         ],
       });
     });
@@ -597,6 +649,36 @@ describe('Color util transforms', () => {
           specialAssignments: [
             { color: { type: 'loop' }, rules: [{ type: 'other' }], touched: false },
           ],
+        },
+      });
+    });
+
+    it('should convert gradient color mapping', () => {
+      const result = fromColorMappingAPIToLensState({
+        palette: 'kibana_palette',
+        mode: 'gradient',
+        mapping: [],
+        sort: 'desc',
+        gradient: [{ index: 1, palette: 'no_default', type: 'from_palette' }],
+      });
+      expect(result).toEqual({
+        colorMapping: {
+          paletteId: 'kibana_palette',
+          specialAssignments: [
+            {
+              color: { type: 'loop' },
+              rules: [{ type: 'other' }],
+              touched: false,
+            },
+          ],
+          assignments: [],
+          colorMode: {
+            type: 'gradient',
+            steps: [
+              { type: 'categorical', colorIndex: 1, paletteId: 'no_default', touched: false },
+            ],
+            sort: 'desc',
+          },
         },
       });
     });
@@ -730,10 +812,10 @@ describe('Color util transforms', () => {
         mapping: [
           {
             values: ['value1', 'value2', 'value3'],
-            color: { type: 'colorCode', value: '#ff0000' },
+            color: { type: 'color_code', value: '#ff0000' },
           },
         ],
-        unassignedColor: { type: 'colorCode', value: '#00ff00' },
+        unassignedColor: { type: 'color_code', value: '#00ff00' },
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);
@@ -753,7 +835,7 @@ describe('Color util transforms', () => {
         mapping: [
           {
             values: ['value1', 'value2', 'value3'],
-            color: { type: 'colorCode', value: '#ff0000' },
+            color: { type: 'color_code', value: '#ff0000' },
           },
           {
             values: ['value4', 'value5'],
@@ -785,10 +867,11 @@ describe('Color util transforms', () => {
           },
         ],
         gradient: [
-          { type: 'colorCode', value: '#ff0000' },
+          { type: 'color_code', value: '#ff0000' },
           { type: 'from_palette', index: 2, palette: 'no_default' },
         ],
-        unassignedColor: { type: 'colorCode', value: '#00ff00' },
+        sort: 'asc',
+        unassignedColor: { type: 'from_palette', palette: 'kibana_palette', index: 2 },
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);
