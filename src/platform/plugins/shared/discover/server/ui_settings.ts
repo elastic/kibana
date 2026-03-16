@@ -53,8 +53,8 @@ export const getUiSettings: (
     }),
     category: ['discover'],
     schema: enableValidations
-      ? schema.arrayOf(schema.string(), { maxSize: MAX_SAVED_SEARCH_COLUMNS })
-      : schema.arrayOf(schema.string(), { maxSize: MAX_SAVED_SEARCH_COLUMNS_SERVERLESS }),
+      ? schema.arrayOf(schema.string(), { maxSize: MAX_SAVED_SEARCH_COLUMNS_SERVERLESS })
+      : schema.arrayOf(schema.string(), { maxSize: MAX_SAVED_SEARCH_COLUMNS }),
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
     name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {
