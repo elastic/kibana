@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { ChatCompleteAnonymizationMetadata } from '@kbn/inference-common';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
 import { wrapJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
-import type { Logger } from '@kbn/logging';
 import { convertError, isRecoverableError } from '../utils/errors';
 import { errorAction } from './actions';
 import type { PromptFactory } from './prompts';
@@ -18,6 +18,7 @@ import { getRandomAnsweringMessage } from './i18n';
 import { tags } from './constants';
 import type { StateType } from './state';
 import { processStructuredAnswerResponse } from './action_utils';
+import { extractReplacementsId } from './replacements_id';
 
 const structuredOutputZodSchema = z.object({
   response: z.string().describe("The response to the user's query"),
@@ -45,12 +46,13 @@ export const createAnswerAgentStructured = ({
   promptFactory,
   events,
   outputSchema,
+  anonymizationMetadata,
 }: {
   chatModel: InferenceChatModel;
   events: AgentEventEmitter;
   promptFactory: PromptFactory;
   outputSchema?: Record<string, unknown>;
-  logger: Logger;
+  anonymizationMetadata?: ChatCompleteAnonymizationMetadata;
 }) => {
   return async (state: StateType) => {
     if (state.answerActions.length === 0 && state.errorCount === 0) {
@@ -64,9 +66,14 @@ export const createAnswerAgentStructured = ({
           "Use this structured format to respond to the user's request with the required data.",
       });
 
-      const structuredModel = chatModel
+      const modelForRequest = anonymizationMetadata
+        ? chatModel.withAnonymization(anonymizationMetadata)
+        : chatModel;
+
+      const structuredModel = modelForRequest
         .withStructuredOutput(schemaToUse, {
           name: 'structured_answer',
+          includeRaw: true,
         })
         .withConfig({
           tags: [tags.agent, tags.answerAgent],
@@ -77,13 +84,21 @@ export const createAnswerAgentStructured = ({
         answerActions: state.answerActions,
       });
 
-      let response = await structuredModel.invoke(prompt);
+      const output = await structuredModel.invoke(prompt);
+      let response = output.parsed;
+      const replacementsId = extractReplacementsId(output.raw.additional_kwargs);
       // unwrap response if schema was wrapped
-      if (wrapped && response[wrappedSchemaProp]) {
+      if (
+        wrapped &&
+        response &&
+        typeof response === 'object' &&
+        wrappedSchemaProp in response &&
+        response[wrappedSchemaProp as keyof typeof response]
+      ) {
         response = response[wrappedSchemaProp];
       }
 
-      const action = processStructuredAnswerResponse(response);
+      const action = processStructuredAnswerResponse(response, replacementsId);
 
       return {
         answerActions: [action],

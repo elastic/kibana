@@ -26,6 +26,8 @@ interface ConversationContextValue {
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
   conversationActions: ConversationActions;
+  showAnonymized: boolean;
+  setShowAnonymized: (value: boolean) => void;
 }
 
 const ConversationContext = createContext<ConversationContextValue | undefined>(undefined);

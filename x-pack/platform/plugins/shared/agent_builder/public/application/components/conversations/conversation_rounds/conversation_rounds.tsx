@@ -34,6 +34,7 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
     attachmentsService,
     invalidateConversation: conversationActions.invalidateConversation,
   });
+  const { showAnonymized } = useConversationContext();
 
   return (
     <EuiFlexGroup
@@ -54,9 +55,11 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
             isCurrentRound={isCurrentRound}
             rawRound={round}
             conversationId={conversation?.id}
+            conversationReplacementsId={conversation?.replacementsId}
             conversationAttachments={conversation?.attachments}
             allRounds={conversationRounds}
             roundIndex={index}
+            showAnonymized={showAnonymized}
           />
         );
       })}

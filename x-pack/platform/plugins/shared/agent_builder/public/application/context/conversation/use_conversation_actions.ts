@@ -59,8 +59,20 @@ export interface ConversationActions {
     results: ToolResult[];
     toolCallId: string;
   }) => void;
-  setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
-  addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
+  setAssistantMessage: ({
+    assistantMessage,
+    replacementsId,
+  }: {
+    assistantMessage: string;
+    replacementsId?: string;
+  }) => void;
+  addAssistantMessageChunk: ({
+    messageChunk,
+    replacementsId,
+  }: {
+    messageChunk: string;
+    replacementsId?: string;
+  }) => void;
   setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => void;
   setPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => void;
   clearPendingPrompt: () => void;
@@ -218,14 +230,32 @@ const createConversationActions = ({
         }
       });
     },
-    setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => {
+    setAssistantMessage: ({
+      assistantMessage,
+      replacementsId,
+    }: {
+      assistantMessage: string;
+      replacementsId?: string;
+    }) => {
       setCurrentRound((round) => {
         round.response.message = assistantMessage;
+        if (replacementsId) {
+          round.response.replacements_id = replacementsId;
+        }
       });
     },
-    addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => {
+    addAssistantMessageChunk: ({
+      messageChunk,
+      replacementsId,
+    }: {
+      messageChunk: string;
+      replacementsId?: string;
+    }) => {
       setCurrentRound((round) => {
         round.response.message += messageChunk;
+        if (replacementsId) {
+          round.response.replacements_id = replacementsId;
+        }
       });
     },
     setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => {

@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import { defer, shareReplay } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
+import type { Logger } from '@kbn/logging';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { Conversation, ConversationRound, ConverseInput } from '@kbn/agent-builder-common';
@@ -21,10 +22,18 @@ export const generateTitle = ({
   nextInput,
   conversation,
   chatModel,
+  anonymizationEnabled,
+  deanonymizeTitle,
+  abortSignal,
+  logger,
 }: {
   nextInput: ConverseInput;
   conversation: Conversation;
   chatModel: InferenceChatModel;
+  anonymizationEnabled: boolean;
+  deanonymizeTitle?: (title: string) => Promise<string>;
+  abortSignal?: AbortSignal;
+  logger: Logger;
 }): Observable<string> => {
   return defer(async () => {
     try {
@@ -32,8 +41,16 @@ export const generateTitle = ({
         previousRounds: conversation.rounds,
         nextInput,
         chatModel,
+        replacementsId: anonymizationEnabled ? conversation.replacementsId : undefined,
+        deanonymizeTitle,
+        abortSignal,
       });
     } catch (e) {
+      logger.warn(
+        `[agent_builder.generateTitle] Failed to generate title, falling back to default: ${
+          e instanceof Error ? e.message : String(e)
+        }`
+      );
       return conversation.title;
     }
   }).pipe(shareReplay());
@@ -43,16 +60,26 @@ const generateConversationTitle = async ({
   previousRounds,
   nextInput,
   chatModel,
+  replacementsId,
+  deanonymizeTitle,
+  abortSignal,
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   chatModel: InferenceChatModel;
+  replacementsId?: string;
+  deanonymizeTitle?: (title: string) => Promise<string>;
+  abortSignal?: AbortSignal;
 }) => {
   return withActiveInferenceSpan(
     'GenerateTitle',
     { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
     async (span) => {
-      const structuredModel = chatModel.withStructuredOutput(
+      const modelForRequest = replacementsId
+        ? chatModel.withAnonymization({ replacementsId })
+        : chatModel;
+
+      const structuredModel = modelForRequest.withStructuredOutput(
         z
           .object({
             title: z.string().describe('The title for the conversation'),
@@ -79,11 +106,13 @@ Now, generate a title for the following conversation.`,
         createUserMessage(nextInput.message ?? '[no message]'),
       ];
 
-      const { title } = await structuredModel.invoke(prompt);
+      const { title } = await structuredModel.invoke(prompt, { signal: abortSignal });
 
-      span?.setAttribute('output.value', title);
+      const resolvedTitle = deanonymizeTitle ? await deanonymizeTitle(title) : title;
 
-      return title;
+      span?.setAttribute('output.value', resolvedTitle);
+
+      return resolvedTitle;
     }
   );
 };

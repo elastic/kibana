@@ -115,5 +115,7 @@
     "@kbn/shared-ux-ai-components",
     "@kbn/fs",
     "@kbn/react-hooks",
+    "@kbn/anonymization-ui",
+    "@kbn/anonymization-common",
   ]
 }

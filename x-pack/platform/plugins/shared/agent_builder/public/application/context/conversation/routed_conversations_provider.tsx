@@ -113,6 +113,8 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     );
   }, []);
 
+  const [showAnonymized, setShowAnonymized] = useState(false);
+
   // Handle agent ID syncing from URL params (moved from useSyncAgentId)
   useEffect(() => {
     if (agentIdSyncedRef.current || conversationId) {
@@ -142,6 +144,8 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
+      showAnonymized,
+      setShowAnonymized,
     }),
     [
       conversationId,
@@ -152,6 +156,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
+      showAnonymized,
     ]
   );
 

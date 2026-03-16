@@ -7,7 +7,37 @@
 
 import { useQuery } from '@kbn/react-query';
 import { replacementsQueryKeys } from '../cache_keys';
+import type { ReplacementsApiError } from '../errors';
+import type { AnonymizationReplacementsClient } from '../client';
 import type { UseGetReplacementsParams } from './types';
+
+export const buildGetReplacementsQueryFn =
+  (client: AnonymizationReplacementsClient, replacementsId: string | undefined) => async () => {
+    if (!replacementsId) {
+      return null;
+    }
+    try {
+      return await client.getReplacements(replacementsId);
+    } catch (error) {
+      // Missing replacement sets are expected for some conversations and should
+      // not fail rendering or trigger noisy retries.
+      if ((error as ReplacementsApiError)?.kind === 'not_found') {
+        return null;
+      }
+      throw error;
+    }
+  };
+
+export const buildGetReplacementsRetryFn = () => (failureCount: number, error: unknown) => {
+  const kind = (error as ReplacementsApiError)?.kind;
+  // Never retry permanent or auth failures — these won't resolve on retry.
+  if (kind === 'not_found' || kind === 'forbidden' || kind === 'unauthorized') {
+    return false;
+  }
+  // Replacements are a display-only enhancement. One retry is sufficient for transient
+  // network blips; more would cause noisy request storms as each new round mounts.
+  return failureCount < 1;
+};
 
 export const useGetReplacements = ({
   client,
@@ -18,11 +48,12 @@ export const useGetReplacements = ({
     queryKey: replacementsId
       ? replacementsQueryKeys.detail(replacementsId)
       : [...replacementsQueryKeys.root(), 'detail', 'none'],
-    queryFn: async () => {
-      if (!replacementsId) {
-        return undefined;
-      }
-      return client.getReplacements(replacementsId);
-    },
+    queryFn: buildGetReplacementsQueryFn(client, replacementsId),
     enabled: enabled && Boolean(replacementsId),
+    staleTime: Infinity,
+    retry: buildGetReplacementsRetryFn(),
+    // Prevent a new retry cycle starting every time a new round component mounts
+    // while the query is already in error state. Without this, each streamed-in
+    // round would restart the retry loop, causing O(rounds × retries) requests.
+    retryOnMount: false,
   });

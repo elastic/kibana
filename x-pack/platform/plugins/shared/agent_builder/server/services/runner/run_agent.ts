@@ -52,6 +52,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     skillServiceStart,
     pluginsServiceStart,
     toolManager,
+    inference,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -67,6 +68,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     filestore: experimentalFeaturesEnabled,
     skills: experimentalFeaturesEnabled,
   };
+  const anonymizationEnabled = inference?.isAnonymizationEnabled() ?? false;
 
   return {
     request,
@@ -107,6 +109,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     hooks: manager.deps.hooks,
     experimentalFeatures,
+    anonymizationEnabled,
   };
 };
 
