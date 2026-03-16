@@ -99,6 +99,6 @@ export const gapStatusTooltipFilled = (duration: string) =>
 export const FILTER_SIDEBAR_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagementUi.rulesTable.filtersSidebar.title',
   {
-    defaultMessage: 'Filter',
+    defaultMessage: 'Filters',
   }
 );

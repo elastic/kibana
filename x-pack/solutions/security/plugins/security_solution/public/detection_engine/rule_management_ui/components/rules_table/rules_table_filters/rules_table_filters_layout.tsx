@@ -84,8 +84,8 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
                           <EuiIcon type="transitionLeftOut" size="xl" aria-hidden={true} />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiTitle size="m">
-                            <h2>{i18n.FILTER_SIDEBAR_TITLE}</h2>
+                          <EuiTitle size="s">
+                            <h4>{i18n.FILTER_SIDEBAR_TITLE}</h4>
                           </EuiTitle>
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -97,7 +97,7 @@ export const RulesTableFiltersLayout = React.memo<RulesTableFiltersLayoutProps>(
                           onClick={onClearFilters}
                           data-test-subj="rulesTableFiltersSidebarClearButton"
                         >
-                          <EuiText size="xs" color="subdued">
+                          <EuiText size="s" color="subdued">
                             {CLEAR_RULES_TABLE_FILTERS}
                           </EuiText>
                         </EuiButtonEmpty>
