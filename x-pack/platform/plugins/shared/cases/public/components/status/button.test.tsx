@@ -88,7 +88,7 @@ describe('StatusActionButton', () => {
         .find('button')
         .filterWhere((node) => node.text() === i18n.CLOSE_CASE_MODAL_CONFIRM)
         .simulate('click');
-      expect(onStatusChanged).toHaveBeenCalledWith('closed');
+      expect(onStatusChanged).toHaveBeenLastCalledWith('closed', undefined);
     });
 
     it('rotates correctly to open when status is closed', () => {

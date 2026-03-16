@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import {
   ALERT_CLOSING_REASON_PANEL_ID,
   useBulkClosingReasonItems,
-} from 'x-pack/platform/packages/shared/response-ops/alerts-close-reason';
+} from '@kbn/response-ops-alerts-close-reason';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 
@@ -19,7 +19,7 @@ import { useApplyAttackWorkflowStatus } from '../apply_actions/use_apply_attack_
 
 jest.mock('../use_attacks_privileges');
 jest.mock('../apply_actions/use_apply_attack_workflow_status');
-jest.mock('x-pack/platform/packages/shared/response-ops/alerts-close-reason');
+jest.mock('@kbn/response-ops-alerts-close-reason');
 
 const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
   typeof useAttacksPrivileges
@@ -50,7 +50,7 @@ describe('useBulkAttackWorkflowStatusItems', () => {
         key: 'closed-attack-status',
         disableOnQuery: true,
       },
-      panels: [],
+      panels: [{ id: ALERT_CLOSING_REASON_PANEL_ID, title: 'Close selected alerts' }],
       getPanels: jest.fn().mockReturnValue([]),
     });
 

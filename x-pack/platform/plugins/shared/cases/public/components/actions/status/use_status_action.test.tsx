@@ -5,28 +5,44 @@
  * 2.0.
  */
 
-import { act, fireEvent, waitFor, within, renderHook } from '@testing-library/react';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useStatusAction } from './use_status_action';
-
-import * as api from '../../../containers/api';
 import { basicCase } from '../../../containers/mock';
+import type { PatchCaseStats } from '../../../../common/types/api';
 import { CaseStatuses } from '../../../../common/types/domain';
 import { useUserPermissions } from '../../user_actions/use_user_permissions';
 import { useShouldDisableStatus } from './use_should_disable_status';
 import { TestProviders } from '../../../common/mock';
-import { coreMock } from '@kbn/core/public/mocks';
-import React from 'react';
+import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 
 jest.mock('../../user_actions/use_user_permissions');
 jest.mock('./use_should_disable_status');
-jest.mock('../../../containers/api');
+jest.mock('../../../containers/use_bulk_update_case');
 
 describe('useStatusAction', () => {
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();
+  const mutate = jest.fn();
+
+  const getUpdateSuccessToastFromLastCall = (patchCaseStats?: PatchCaseStats[]) => {
+    const updateCall = mutate.mock.calls.at(-1)?.[0] as
+      | {
+          getUpdateSuccessToast?: (args: { patchCaseStats?: PatchCaseStats[] }) => {
+            title: string;
+            text?: unknown;
+          };
+        }
+      | undefined;
+
+    return updateCall?.getUpdateSuccessToast?.({ patchCaseStats });
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useUpdateCases as jest.Mock).mockReturnValue({
+      mutate,
+      isLoading: false,
+    });
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
 
     (useUserPermissions as jest.Mock).mockReturnValue({
@@ -78,8 +94,6 @@ describe('useStatusAction', () => {
   });
 
   it('update the status cases', async () => {
-    const updateSpy = jest.spyOn(api, 'updateCases');
-
     const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
       {
@@ -99,13 +113,11 @@ describe('useStatusAction', () => {
         expect(onAction).toHaveBeenCalled();
       });
 
-      await waitFor(() => {
-        expect(onActionSuccess).toHaveBeenCalled();
-      });
-      expect(updateSpy).toHaveBeenCalledWith(
+      expect(mutate).toHaveBeenCalledWith(
         expect.objectContaining({
           cases: [{ status, id: basicCase.id, version: basicCase.version }],
-        })
+        }),
+        expect.objectContaining({ onSuccess: onActionSuccess })
       );
     }
 
@@ -114,100 +126,53 @@ describe('useStatusAction', () => {
     });
 
     await waitFor(() => {
-      expect(updateSpy).toHaveBeenCalledWith(
+      expect(mutate).toHaveBeenCalledWith(
         expect.objectContaining({
           cases: [{ status: CaseStatuses.closed, id: basicCase.id, version: basicCase.version }],
-        })
+        }),
+        expect.objectContaining({ onSuccess: onActionSuccess })
       );
     });
   });
 
   it('shows closed alert count details when closing with a reason', async () => {
-    const coreStart = coreMock.createStart();
-    coreStart.application.getUrlForApp = jest.fn().mockReturnValue('/app/security/cases/test');
-    jest.spyOn(api, 'updateCases').mockResolvedValue({
-      cases: [
-        {
-          ...basicCase,
-          patchCaseStats: {
-            numberOfAlertsWithStatusSynced: 3,
-          },
-        },
-      ],
-    });
-
     const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
+        wrapper: TestProviders,
       }
     );
 
     act(() => {
       result.current.handleUpdateCaseStatus(
-        [{ ...basicCase, totalAlerts: 4 }],
+        [
+          {
+            ...basicCase,
+            totalAlerts: 4,
+          },
+        ],
         CaseStatuses.closed,
         'false_positive'
       );
     });
 
-    await waitFor(() => expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalled());
-
-    const toast = (coreStart.notifications.toasts.addSuccess as jest.Mock).mock.calls[0][0];
+    await waitFor(() => {
+      expect(mutate).toHaveBeenCalled();
+    });
+    const toast = getUpdateSuccessToastFromLastCall([{ numberOfAlertsWithStatusSynced: 3 }]);
     expect(toast).toEqual(
       expect.objectContaining({
         title: 'Closed "Another horrible breach!!"',
-        className: 'eui-textBreakWord',
+        text: 'Closed 3/4 attached alerts.',
       })
     );
-
-    const domNode = document.createElement('div');
-
-    let unmount: (() => void) | undefined;
-    if (typeof toast.text === 'function') {
-      unmount = toast.text(domNode);
-    } else if (
-      toast.text != null &&
-      'mount' in toast.text &&
-      typeof toast.text.mount === 'function'
-    ) {
-      unmount = toast.text.mount(domNode);
-    }
-
-    expect(within(domNode).getByTestId('cases-status-close-sync-summary')).toHaveTextContent(
-      'Closed 3/4 attached alerts.'
-    );
-
-    fireEvent.click(within(domNode).getByTestId('cases-status-close-sync-see-alerts'));
-    expect(coreStart.application.navigateToUrl).toHaveBeenCalled();
-
-    unmount?.();
   });
 
   it('shows only summary text for bulk close with reason', async () => {
-    const coreStart = coreMock.createStart();
-    jest.spyOn(api, 'updateCases').mockResolvedValue({
-      cases: [
-        {
-          ...basicCase,
-          patchCaseStats: {
-            numberOfAlertsWithStatusSynced: 1,
-          },
-        },
-        {
-          ...basicCase,
-          id: 'another-id',
-          patchCaseStats: {
-            numberOfAlertsWithStatusSynced: 1,
-          },
-        },
-      ],
-    });
-
     const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
+        wrapper: TestProviders,
       }
     );
 
@@ -222,13 +187,19 @@ describe('useStatusAction', () => {
       );
     });
 
-    await waitFor(() =>
-      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Closed 2 cases',
-        text: 'Closed 2/4 attached alerts.',
-        className: 'eui-textBreakWord',
-      })
-    );
+    await waitFor(() => {
+      expect(mutate).toHaveBeenCalled();
+    });
+
+    expect(
+      getUpdateSuccessToastFromLastCall([
+        { numberOfAlertsWithStatusSynced: 1 },
+        { numberOfAlertsWithStatusSynced: 1 },
+      ])
+    ).toEqual({
+      title: 'Closed 2 cases',
+      text: 'Closed 2/4 attached alerts.',
+    });
   });
 
   const singleCaseTests = [
@@ -239,12 +210,10 @@ describe('useStatusAction', () => {
   it.each(singleCaseTests)(
     'shows the success toaster correctly when updating the status of the case: %s',
     async (_, index, expectedMessage) => {
-      const coreStart = coreMock.createStart();
-
       const { result } = renderHook(
         () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
         {
-          wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
+          wrapper: TestProviders,
         }
       );
 
@@ -256,22 +225,19 @@ describe('useStatusAction', () => {
       });
 
       await waitFor(() => {
-        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-          title: expectedMessage,
-          text: undefined,
-          className: 'eui-textBreakWord',
-        });
+        expect(mutate).toHaveBeenCalled();
+      });
+      expect(getUpdateSuccessToastFromLastCall()).toEqual({
+        title: expectedMessage,
       });
     }
   );
 
   it('shows the success toaster correctly when updating a single case to closed', async () => {
-    const coreStart = coreMock.createStart();
-
     const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
+        wrapper: TestProviders,
       }
     );
 
@@ -280,11 +246,10 @@ describe('useStatusAction', () => {
     });
 
     await waitFor(() => {
-      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Closed "Another horrible breach!!"',
-        text: undefined,
-        className: 'eui-textBreakWord',
-      });
+      expect(mutate).toHaveBeenCalled();
+    });
+    expect(getUpdateSuccessToastFromLastCall()).toEqual({
+      title: 'Closed "Another horrible breach!!"',
     });
   });
 
@@ -296,12 +261,10 @@ describe('useStatusAction', () => {
   it.each(multipleCasesTests)(
     'shows the success toaster correctly when updating the status of the case: %s',
     async (_, index, expectedMessage) => {
-      const coreStart = coreMock.createStart();
-
       const { result } = renderHook(
         () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
         {
-          wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
+          wrapper: TestProviders,
         }
       );
 
@@ -313,22 +276,19 @@ describe('useStatusAction', () => {
       });
 
       await waitFor(() => {
-        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-          title: expectedMessage,
-          text: undefined,
-          className: 'eui-textBreakWord',
-        });
+        expect(mutate).toHaveBeenCalled();
+      });
+      expect(getUpdateSuccessToastFromLastCall()).toEqual({
+        title: expectedMessage,
       });
     }
   );
 
   it('shows the success toaster correctly when updating multiple cases to closed', async () => {
-    const coreStart = coreMock.createStart();
-
     const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
+        wrapper: TestProviders,
       }
     );
 
@@ -337,11 +297,10 @@ describe('useStatusAction', () => {
     });
 
     await waitFor(() => {
-      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Closed 2 cases',
-        text: undefined,
-        className: 'eui-textBreakWord',
-      });
+      expect(mutate).toHaveBeenCalled();
+    });
+    expect(getUpdateSuccessToastFromLastCall()).toEqual({
+      title: 'Closed 2 cases',
     });
   });
 
