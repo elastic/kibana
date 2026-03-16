@@ -10,17 +10,26 @@ applies_to:
 # AI Assistant settings in {{kib}} [ai-assistant-settings-kb]
 
 `xpack.productDocBase.artifactRepositoryUrl`
-:   Url of the repository to use to download and install the Elastic product documentation artifacts for the AI assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co` Supports:
+:   URL of the repository to use to download and install the Elastic product documentation artifacts for the AI assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co`. Supports:
     
     * HTTP(S) URLs
-    * {applies_to}`stack: ga 9.1+` Local file paths (`file://`).
+    * {applies_to}`stack: ga 9.1` Local file paths (`file://`).
+
+`xpack.productDocBase.artifactRepositoryProxyUrl`
+:   {applies_to}`stack: ga 9.4` URL of an HTTP proxy to use when downloading product documentation artifacts from the artifact repository. When set, {{kib}} routes requests to the `xpack.productDocBase.artifactRepositoryUrl` through this proxy. Supports HTTP and HTTPS URLs. Not set by default.
+
+Installing product documentation requires network access to the artifact repository. {applies_to}`stack: ga 9.4` If your environment routes outbound HTTP traffic through a proxy, you can configure {{kib}} to use it by adding the proxy URL to your `kibana.yml` configuration file:
+
+```yaml
+xpack.productDocBase.artifactRepositoryProxyUrl: "https://my-proxy-host:port"
+```
+
+After restarting {{kib}}, you can install the AI Assistant knowledge base content (Elastic documentation and Security Labs) from the **GenAI Settings** page. For fully air-gapped environments where no external network access is available, you can deploy a local artifact repository instead.
 
 ## Configuring product documentation for air-gapped environments [configuring-product-doc-for-airgap]
 
-Installing product documentation requires network access to its artifact repository. 
-
-* {applies_to}`stack: ga 9.0+` In air-gapped environments, or environments where remote network traffic is blocked or filtered, you can use a local artifact repository by specifying the path with the `file://` URI scheme.
-* {applies_to}`stack: ga 9.0+` In air-gapped environments, or environments where remote network traffic is blocked or filtered, the artifact repository must be manually deployed somewhere accessible by the Kibana deployment.
+* {applies_to}`stack: ga 9.0` In air-gapped environments, or environments where remote network traffic is blocked or filtered, you can use a local artifact repository by specifying the path with the `file://` URI scheme.
+* {applies_to}`stack: ga 9.0` In air-gapped environments, or environments where remote network traffic is blocked or filtered, the artifact repository must be manually deployed somewhere accessible by the Kibana deployment.
 
 Deploying a custom product documentation repository can be done in 2 ways: using a S3 bucket, or using a CDN.
 
