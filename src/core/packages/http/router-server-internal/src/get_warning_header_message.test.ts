@@ -11,31 +11,56 @@ import type { RouteDeprecationInfo } from '@kbn/core-http-server';
 import { getWarningHeaderMessageFromRouteDeprecation } from './get_warning_header_message';
 
 describe('getWarningHeaderMessageFromRouteDeprecation', () => {
+  const kibanaVersion = '12.31.45';
+
   it('creates the warning with a default message if the deprecation object does not have one', () => {
-    const kibanaVersion = '12.31.45';
-    const expectedMessage = `299 Kibana-${kibanaVersion} "This endpoint deprecated"`;
     const deprecationObject: RouteDeprecationInfo = {
       reason: { type: 'deprecate' },
       severity: 'warning',
       documentationUrl: 'fakeurl.com',
     };
-    expect(getWarningHeaderMessageFromRouteDeprecation(deprecationObject, expectedMessage)).toMatch(
-      expectedMessage
+    expect(getWarningHeaderMessageFromRouteDeprecation(deprecationObject, kibanaVersion)).toEqual(
+      `299 Kibana-${kibanaVersion} "This%20endpoint%20is%20deprecated"`
     );
   });
 
   it('creates the warning with the deprecation object message', () => {
-    const kibanaVersion = '12.31.45';
     const msg = 'Custom deprecation message for this object';
-    const expectedMessage = `299 Kibana-${kibanaVersion} "${msg}"`;
     const deprecationObject: RouteDeprecationInfo = {
       reason: { type: 'deprecate' },
       severity: 'warning',
       documentationUrl: 'fakeurl.com',
       message: msg,
     };
-    expect(getWarningHeaderMessageFromRouteDeprecation(deprecationObject, expectedMessage)).toMatch(
-      expectedMessage
+    expect(getWarningHeaderMessageFromRouteDeprecation(deprecationObject, kibanaVersion)).toEqual(
+      `299 Kibana-${kibanaVersion} "${encodeURIComponent(msg)}"`
     );
+  });
+
+  it('encodes non-ASCII characters in the message', () => {
+    const deprecationObject: RouteDeprecationInfo = {
+      reason: { type: 'deprecate' },
+      severity: 'warning',
+      documentationUrl: 'fakeurl.com',
+      message: 'このAPIは非推奨です',
+    };
+    const result = getWarningHeaderMessageFromRouteDeprecation(deprecationObject, kibanaVersion);
+    expect(result).toEqual(
+      `299 Kibana-${kibanaVersion} "${encodeURIComponent('このAPIは非推奨です')}"`
+    );
+    expect(result).not.toMatch(/[^\x20-\x7E]/);
+  });
+
+  it('truncates the header when the encoded message exceeds the max length', () => {
+    const longMsg = 'a'.repeat(5000);
+    const deprecationObject: RouteDeprecationInfo = {
+      reason: { type: 'deprecate' },
+      severity: 'warning',
+      documentationUrl: 'fakeurl.com',
+      message: longMsg,
+    };
+    const result = getWarningHeaderMessageFromRouteDeprecation(deprecationObject, kibanaVersion);
+    expect(result.length).toBeLessThanOrEqual(4000);
+    expect(result).toMatch(/\.\.\."/);
   });
 });
