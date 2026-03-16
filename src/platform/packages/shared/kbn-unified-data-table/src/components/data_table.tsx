@@ -1358,6 +1358,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           <div
             ref={setDataGridWrapper}
             key={isCompareActive ? 'comparisonTable' : 'docTable'}
+            id="discoverDocTable"
             data-test-subj="discoverDocTable"
             data-render-complete={isRenderComplete}
             data-shared-item=""

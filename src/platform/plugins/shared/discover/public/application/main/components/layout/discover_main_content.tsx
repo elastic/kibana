@@ -139,7 +139,7 @@ export const DiscoverMainContent = ({
 
   const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
 
-  const showChart = useAppStateSelector((state) => !state.hideChart);
+  const showDataTable = useAppStateSelector((state) => !state.hideDataTable || state.hideChart);
 
   return (
     <Droppable
@@ -154,10 +154,13 @@ export const DiscoverMainContent = ({
           direction="column"
           gutterSize="none"
           responsive={false}
+          justifyContent={
+            viewMode === VIEW_MODE.DOCUMENT_LEVEL && !showDataTable ? 'flexEnd' : undefined
+          }
           data-test-subj="dscMainContent"
         >
-          {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
-          {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+          {isChartAvailable && showDataTable && <EuiHorizontalRule margin="none" />}
+          {viewMode === VIEW_MODE.DOCUMENT_LEVEL && showDataTable ? (
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
               dataView={dataView}
@@ -165,7 +168,7 @@ export const DiscoverMainContent = ({
               onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
             />
           ) : null}
-          {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
+          {viewMode === VIEW_MODE.AGGREGATED_LEVEL && showDataTable ? (
             <>
               <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
               <FieldStatisticsTab
@@ -177,7 +180,7 @@ export const DiscoverMainContent = ({
               />
             </>
           ) : null}
-          {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
+          {viewMode === VIEW_MODE.PATTERN_LEVEL && showDataTable ? (
             <PatternAnalysisTab
               dataView={dataView}
               switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true)}

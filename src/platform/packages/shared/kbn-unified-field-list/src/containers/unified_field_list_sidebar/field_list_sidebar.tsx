@@ -15,7 +15,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHideFor,
   EuiPageSidebar,
   euiBreakpoint,
   type UseEuiTheme,
@@ -33,7 +32,7 @@ import type { ButtonAddFieldVariant, AdditionalFieldGroups } from '../../types';
 import type { GroupedFieldsParams } from '../../hooks/use_grouped_fields';
 import { useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
-import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
+import { type SidebarToggleButtonProps } from './sidebar_toggle_button';
 import {
   getSelectedFields,
   shouldShowField,
@@ -168,7 +167,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onSelectedFieldFilter,
   onEditField,
   onDeleteField,
-  onToggleSidebar,
   additionalFilters,
   additionalFieldGroups,
 }) => {
@@ -333,24 +331,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     ],
   };
 
-  const sidebarToggleButton =
-    typeof isSidebarCollapsed === 'boolean' && onToggleSidebar ? (
-      <SidebarToggleButton
-        buttonSize={compressed ? 's' : 'm'}
-        isSidebarCollapsed={isSidebarCollapsed}
-        panelId={pageSidebarProps.id}
-        onChange={onToggleSidebar}
-      />
-    ) : null;
-
-  if (isSidebarCollapsed && sidebarToggleButton) {
-    return (
-      <EuiHideFor sizes={['xs', 's']}>
-        <div {...pageSidebarProps}>{sidebarToggleButton}</div>
-      </EuiHideFor>
-    );
-  }
-
   const hasButtonAddFieldToolbarStyle = buttonAddFieldVariant === 'toolbar';
   const buttonAddFieldCommonProps: Partial<Omit<EuiButtonProps, 'type'>> = {
     size: 's',
@@ -387,9 +367,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
             isProcessing={isProcessing}
             prepend={
               <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-                {sidebarToggleButton && (
-                  <EuiFlexItem grow={false}>{sidebarToggleButton}</EuiFlexItem>
-                )}
                 <EuiFlexItem>
                   <FieldListFilters
                     {...fieldListFiltersProps}

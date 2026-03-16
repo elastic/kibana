@@ -77,7 +77,12 @@ export const UnifiedHistogramLayout = ({
   const { euiTheme } = useEuiTheme();
   const minTopPanelHeight = euiTheme.base * 12;
   const defaultTopPanelHeight = originalDefaultTopPanelHeight ?? minTopPanelHeight;
-  const minMainPanelHeight = euiTheme.base * 10;
+
+  // In expand-chart mode (topPanelHeight === 'max-content'), use a tight min height for the
+  // top panel so the chart gets the remaining space and the hits bar stays compact.
+  const isExpandChartMode = topPanelHeight === 'max-content' && (chart || hits);
+  // Min flex panel height is kept tight (~euiTheme.base * 3, e.g. ~24px when base=8) to avoid extra whitespace
+  const minMainPanelHeight = isExpandChartMode ? euiTheme.base * 3 : euiTheme.base * 10;
 
   const chartCss =
     isMobile && chart && !chart.hidden
@@ -92,11 +97,13 @@ export const UnifiedHistogramLayout = ({
           }
         `;
 
+  // When topPanelHeight is 'max-content', we must use Resizable mode so the layout
+  // respects it (PanelsStatic ignores fixedPanelSize and would not expand the chart).
   const panelsMode =
     chart || hits
-      ? showFixedPanels
-        ? ResizableLayoutMode.Static
-        : ResizableLayoutMode.Resizable
+      ? isExpandChartMode || !showFixedPanels
+        ? ResizableLayoutMode.Resizable
+        : ResizableLayoutMode.Static
       : ResizableLayoutMode.Single;
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
