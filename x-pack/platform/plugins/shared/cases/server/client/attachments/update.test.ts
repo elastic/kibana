@@ -19,11 +19,6 @@ import {
   createUserActionServiceMock,
 } from '../../services/mocks';
 import { commentAttachmentType } from '../../attachment_framework/attachments';
-import { getCaseOwner } from './utils';
-
-jest.mock('./utils', () => ({
-  getCaseOwner: jest.fn(),
-}));
 
 describe('update', () => {
   const caseID = 'test-case';
@@ -39,7 +34,6 @@ describe('update', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(getCaseOwner).mockResolvedValue(SECURITY_SOLUTION_OWNER);
   });
 
   describe('comments', () => {
@@ -167,13 +161,13 @@ describe('update', () => {
       version: 'WzAsMV0=',
       type: 'comment' as const,
       data: { content: 'updated content' },
+      owner: SECURITY_SOLUTION_OWNER,
     };
 
     await expect(
       update({ updateRequest: unifiedUpdateRequest, caseID }, clientArgs)
     ).resolves.toBeDefined();
 
-    expect(getCaseOwner).toHaveBeenCalledWith(caseID, clientArgs);
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
       expect.objectContaining({
         entities: expect.arrayContaining([

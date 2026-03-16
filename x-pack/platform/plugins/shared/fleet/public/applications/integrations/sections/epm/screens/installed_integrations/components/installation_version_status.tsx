@@ -32,7 +32,12 @@ const InstalledVersionStatus: React.FunctionComponent<{
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon size="m" type="checkInCircleFilled" color="success" />
+        <EuiIcon
+          size="m"
+          type="checkInCircleFilled"
+          color="success"
+          aria-label={item.installationInfo?.version ?? item.version}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{item.installationInfo?.version ?? item.version}</EuiFlexItem>
     </EuiFlexGroup>
@@ -173,7 +178,12 @@ const InstallUpgradeFailedVersionStatus: React.FunctionComponent<{
     >
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon size="m" type="error" color="danger" />
+          <EuiIcon
+            size="m"
+            type="error"
+            color="danger"
+            aria-label={isUpgradeFailed ? 'Upgrade failed' : 'Install failed'}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {isUpgradeFailed ? (
@@ -236,7 +246,11 @@ export const InstallationVersionStatus: React.FunctionComponent<{
 }> = React.memo(({ item }) => {
   const status = item.ui.installation_status;
 
-  if (status === 'installed') {
+  if (
+    status === 'installed' ||
+    status === 'pending_upgrade_review' ||
+    status === 'declined_review'
+  ) {
     return <InstalledVersionStatus item={item} />;
   } else if (status === 'upgrade_available') {
     return <UpgradeAvailableVersionStatus item={item} />;

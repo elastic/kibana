@@ -68,7 +68,7 @@ export async function createRequestHandlerContext({
     esClient,
     namespace,
   });
-  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, crudClient);
+  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, namespace);
   const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
@@ -106,6 +106,7 @@ export async function createRequestHandlerContext({
       logger,
       taskManager: taskManagerStart,
       namespace,
+      analytics,
     }),
     crudClient,
     resolutionClient: new ResolutionClient({
