@@ -62437,6 +62437,7 @@ paths:
                         required:
                           - type
                           - id
+                      maxItems: 100
                       type: array
                 includeReferencesDeep:
                   default: false
@@ -62465,6 +62466,7 @@ paths:
                     - type: string
                     - items:
                         type: string
+                      maxItems: 100
                       type: array
                   description: The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.
       responses:
@@ -66631,6 +66633,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66655,6 +66659,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -66723,6 +66728,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66747,6 +66754,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -66822,6 +66830,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66846,6 +66856,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -66914,6 +66925,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66938,6 +66951,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -67013,6 +67027,8 @@ paths:
                           items:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -67037,6 +67053,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                           type: array
                         rules:
@@ -67953,6 +67970,8 @@ paths:
                           index:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -67977,6 +67996,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                         required:
                           - index
@@ -68084,6 +68104,9 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                description:
+                  default: ''
+                  type: string
                 esql:
                   additionalProperties: false
                   type: object
@@ -68972,7 +68995,72 @@ paths:
         required: true
       responses:
         '200':
-          description: A successful response.
+          content:
+            application/json:
+              examples:
+                postSyntheticMonitorsResponseWithWarning:
+                  description: A response when a browser monitor specifies a timeout but has no private locations.
+                  summary: Response with warning
+                  value: |-
+                    {
+                      "type": "browser",
+                      "name": "Example journey",
+                      "enabled": true,
+                      "warnings": [
+                        {
+                          "id": "monitor-id",
+                          "message": "For browser monitors, timeout is only supported on private locations. Browser monitor \"Example journey\" specifies a timeout and is running on public locations: \"public-1, public-2\". The timeout will have no effect on these locations.",
+                          "publicLocationIds": ["public-1", "public-2"]
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    description: |
+                      An optional array of warnings about the monitor configuration.
+                    items:
+                      $ref: '#/components/schemas/Synthetics_monitorWarning'
+                    type: array
+          description: |
+            A successful response. The response may include a `warnings` array when the monitor configuration has non-critical issues. For example, if a browser monitor specifies a timeout but has no private locations configured, a warning is returned indicating the timeout will have no effect.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidBrowserTimeout:
+                  description: A 400 error when a browser monitor timeout is below 30 seconds.
+                  summary: Invalid browser timeout
+                  value: |-
+                    {
+                      "statusCode": 400,
+                      "error": "Bad Request",
+                      "message": "Browser Monitor timeout is invalid",
+                      "attributes": {
+                        "details": "Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds."
+                      }
+                    }
+              schema:
+                type: object
+                properties:
+                  attributes:
+                    type: object
+                    properties:
+                      details:
+                        example: Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds.
+                        type: string
+                  error:
+                    example: Bad Request
+                    type: string
+                  message:
+                    example: Browser Monitor timeout is invalid
+                    type: string
+                  statusCode:
+                    example: 400
+                    type: integer
+          description: |
+            Bad request. For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
       summary: Create a monitor
       tags:
         - synthetics
@@ -69247,7 +69335,39 @@ paths:
         required: true
       responses:
         '200':
-          description: OK
+          content:
+            application/json:
+              examples:
+                putSyntheticMonitorResponseWithWarning:
+                  description: A response when a browser monitor specifies a timeout but has no private locations.
+                  summary: Response with warning
+                  value: |-
+                    {
+                      "type": "browser",
+                      "name": "Example journey",
+                      "enabled": true,
+                      "warnings": [
+                        {
+                          "id": "monitor-id",
+                          "message": "For browser monitors, timeout is only supported on private locations. Browser monitor \"Example journey\" specifies a timeout and is running on public locations: \"public-1, public-2\". The timeout will have no effect on these locations.",
+                          "publicLocationIds": ["public-1", "public-2"]
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    description: |
+                      An optional array of warnings about the monitor configuration.
+                    items:
+                      $ref: '#/components/schemas/Synthetics_monitorWarning'
+                    type: array
+          description: |
+            A successful response. The response may include a `warnings` array when the monitor configuration has non-critical issues.
+        '400':
+          description: |
+            Bad request. For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
       summary: Update a monitor
       tags:
         - synthetics
@@ -93804,6 +93924,11 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entitySourceIds:
+          description: List of entity source IDs associated with the watchlist
+          items:
+            type: string
+          type: array
         id:
           description: The unique ID of the watchlist
           type: string
@@ -98712,6 +98837,8 @@ components:
           default: 16
           description: |
             The monitor timeout in seconds. The monitor will fail if it doesn't complete within this time.
+
+            For browser monitors, the minimum timeout is 30 seconds. Browser monitor timeouts are only applied when the monitor runs on private locations. If a browser monitor specifies a timeout but has no private locations configured, the timeout will have no effect and a warning will be returned in the response.
           type: number
       required:
         - name
@@ -98893,6 +99020,21 @@ components:
             - host
             - type
       title: ICMP monitor fields
+    Synthetics_monitorWarning:
+      title: Monitor warning
+      type: object
+      properties:
+        message:
+          description: A human-readable warning message.
+          type: string
+        monitorId:
+          description: The monitor ID associated with the warning.
+          type: string
+        publicLocationIds:
+          description: The public location IDs associated with the warning.
+          items:
+            type: string
+          type: array
     Synthetics_parameterRequest:
       title: Parameter request
       type: object

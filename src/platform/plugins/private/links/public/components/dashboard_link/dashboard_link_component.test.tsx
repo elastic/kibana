@@ -101,7 +101,7 @@ describe('Dashboard link component', () => {
     expect(link).toHaveTextContent('Dashboard 1');
 
     // does not render external link icon
-    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeNull();
 
     // calls `navigate` on click
@@ -139,7 +139,7 @@ describe('Dashboard link component', () => {
     const link = screen.getByTestId('dashboardLink--Dashboard 1');
     expect(link).toBeInTheDocument();
     // external link icon is rendered
-    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeInTheDocument();
 
     // calls `window.open`

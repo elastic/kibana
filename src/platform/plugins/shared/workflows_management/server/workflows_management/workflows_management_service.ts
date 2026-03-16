@@ -73,7 +73,7 @@ import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
-import { createStorage } from '../storage/workflow_storage';
+import { createStorage, workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
@@ -108,6 +108,7 @@ export class WorkflowsService {
   private getActionsClientWithRequest: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<ActionsClient>>;
+  private readonly initPromise: Promise<void>;
 
   constructor(
     logger: Logger,
@@ -120,7 +121,7 @@ export class WorkflowsService {
     this.getActionsClientWithRequest = (request: KibanaRequest) =>
       getPluginsStart().then((plugins) => plugins.actions.getActionsClientWithRequest(request));
 
-    void this.initialize(getCoreStart, getPluginsStart);
+    this.initPromise = this.initialize(getCoreStart, getPluginsStart);
   }
 
   public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
@@ -129,6 +130,10 @@ export class WorkflowsService {
 
   public setSecurityService(security: SecurityServiceStart) {
     this.security = security;
+  }
+
+  private async ensureInitialized(): Promise<void> {
+    await this.initPromise;
   }
 
   private async initialize(
@@ -152,9 +157,7 @@ export class WorkflowsService {
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     try {
       const response = await this.workflowStorage.getClient().search({
@@ -274,9 +277,7 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
@@ -321,9 +322,7 @@ export class WorkflowsService {
     created: WorkflowDetailDto[];
     failed: Array<{ index: number; error: string }>;
   }> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
     const authenticatedUser = getAuthenticatedUser(request, this.security);
@@ -580,9 +579,7 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     try {
       const { source: existingSource } = await this.getExistingWorkflowDocument(id, spaceId);
@@ -639,9 +636,7 @@ export class WorkflowsService {
   }
 
   public async deleteWorkflows(ids: string[], spaceId: string): Promise<DeleteWorkflowsResponse> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const now = new Date();
     const failures: Array<{ id: string; error: string }> = [];
@@ -741,46 +736,101 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const searchResponse = await this.workflowStorage.getClient().search({
-      size: 1000,
-      track_total_hits: true,
-      _source: [
-        'name',
-        'description',
-        'enabled',
-        'yaml',
-        'definition',
-        'createdBy',
-        'lastUpdatedBy',
-        'valid',
-        'created_at',
-        'updated_at',
-      ],
-      query: {
-        bool: {
-          must: [
-            { term: { spaceId } },
-            { term: { enabled: true } },
-            { term: { triggerTypes: triggerId } },
-          ],
-          must_not: [{ exists: { field: 'deleted_at' } }],
-        },
+    const pageSize = 1000;
+    const MAX_PAGES = 100;
+    const keepAlive = '1m';
+    const indexPattern = `${workflowIndexName}-*`;
+    const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
+    const query = {
+      bool: {
+        must: [
+          { term: { spaceId } },
+          { term: { enabled: true } },
+          { term: { triggerTypes: triggerId } },
+        ],
+        must_not: [{ exists: { field: 'deleted_at' } }],
       },
-      sort: [{ updated_at: { order: 'desc' } }],
-    });
+    };
+    const _source = [
+      'name',
+      'description',
+      'enabled',
+      'yaml',
+      'definition',
+      'createdBy',
+      'lastUpdatedBy',
+      'valid',
+      'created_at',
+      'updated_at',
+    ];
 
-    return searchResponse.hits.hits.map((hit) => {
-      if (!hit._source) {
-        throw new Error('Missing _source in search result');
-      }
-      return this.transformStorageDocumentToWorkflowDto(hit._id, hit._source as WorkflowProperties);
+    const pitResponse = await this.esClient.openPointInTime({
+      index: indexPattern,
+      keep_alive: keepAlive,
+      ignore_unavailable: true,
     });
+    const pitId = pitResponse.id;
+
+    try {
+      const allHits: Array<{ _id: string; _source: WorkflowProperties }> = [];
+      let searchAfter: estypes.SearchHit['sort'] | undefined;
+      let hasMore = true;
+      let pageCount = 0;
+
+      while (hasMore && pageCount < MAX_PAGES) {
+        pageCount++;
+        const searchResponse = await this.esClient.search<WorkflowProperties>({
+          pit: { id: pitId, keep_alive: keepAlive },
+          size: pageSize,
+          _source,
+          query,
+          sort,
+          ...(searchAfter ? { search_after: searchAfter } : {}),
+        });
+
+        const hits = searchResponse.hits.hits;
+        for (const hit of hits) {
+          if (hit._source && hit._id) {
+            allHits.push({ _id: hit._id, _source: hit._source as WorkflowProperties });
+          }
+        }
+
+        hasMore = hits.length >= pageSize;
+        if (hasMore) {
+          const lastHit = hits[hits.length - 1];
+          if (!lastHit.sort) {
+            throw new Error(
+              `Missing sort value on last hit (required for search_after). Last hit: ${JSON.stringify(
+                lastHit
+              )}`
+            );
+          }
+          searchAfter = lastHit.sort;
+        }
+      }
+
+      if (hasMore && pageCount >= MAX_PAGES) {
+        this.logger.warn(
+          `getWorkflowsSubscribedToTrigger truncated at ${MAX_PAGES} pages (${
+            pageCount * pageSize
+          } workflows) for trigger ${triggerId} in space ${spaceId}`
+        );
+      }
+
+      return allHits.map(({ _id, _source: source }) =>
+        this.transformStorageDocumentToWorkflowDto(_id, source)
+      );
+    } finally {
+      try {
+        await this.esClient.closePointInTime({ id: pitId });
+      } catch (closeErr) {
+        this.logger.warn(`Failed to close PIT ${pitId}: ${closeErr}`);
+      }
+    }
   }
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const { size = 100, page = 1, enabled, createdBy, tags, query } = params;
     const from = (page - 1) * size;
@@ -930,9 +980,7 @@ export class WorkflowsService {
   }
 
   public async getWorkflowStats(spaceId: string): Promise<WorkflowStatsDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     const statsResponse = await this.workflowStorage.getClient().search({
       size: 0,
@@ -1031,9 +1079,7 @@ export class WorkflowsService {
   }
 
   public async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
-    if (!this.workflowStorage) {
-      throw new Error('WorkflowsService not initialized');
-    }
+    await this.ensureInitialized();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const aggs: Record<string, any> = {};

@@ -19,6 +19,7 @@ import { zoomDataSource } from './zoom';
 import { zendeskDataSource } from './zendesk';
 import { pagerdutyDataSource } from './pagerduty';
 import { servicenowDataSource } from './servicenow';
+import { amazonS3DataSource } from './amazon_s3';
 import { tavilyDataSource } from './tavily';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
@@ -36,5 +37,6 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(zendeskDataSource);
   dataCatalog.register(servicenowDataSource);
   dataCatalog.register(pagerdutyDataSource);
+  dataCatalog.register(amazonS3DataSource);
   dataCatalog.register(tavilyDataSource);
 }

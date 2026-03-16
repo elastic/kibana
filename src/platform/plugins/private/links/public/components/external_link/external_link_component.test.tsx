@@ -38,7 +38,7 @@ describe('external link component', () => {
 
     const link = await screen.findByTestId('externalLink--https://example.com');
     expect(link).toBeInTheDocument();
-    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeInTheDocument();
     await userEvent.click(link);
     expect(window.open).toHaveBeenCalledWith('https://example.com', '_blank');
@@ -51,7 +51,7 @@ describe('external link component', () => {
     };
     render(<ExternalLinkComponent link={linkInfo} layout={LINKS_VERTICAL_LAYOUT} />);
     const link = await screen.findByTestId('externalLink--https://example.com');
-    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeInTheDocument();
   });
 
