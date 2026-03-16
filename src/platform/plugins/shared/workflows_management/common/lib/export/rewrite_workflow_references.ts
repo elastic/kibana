@@ -10,7 +10,7 @@
 import type { Pair, Scalar } from 'yaml';
 import { isMap, isPair, isScalar, parseDocument, visit } from 'yaml';
 
-const WORKFLOW_EXECUTE_TYPES = new Set(['workflow.execute', 'workflow.executeAsync']);
+import { WORKFLOW_EXECUTE_TYPES } from './workflow_import_constants';
 
 /**
  * Rewrites `workflow-id` references inside `workflow.execute` and

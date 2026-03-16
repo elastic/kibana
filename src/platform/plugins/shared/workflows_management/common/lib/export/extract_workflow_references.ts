@@ -9,9 +9,11 @@
 
 import type { WorkflowYaml } from '@kbn/workflows';
 
-type StepLike = Record<string, unknown>;
+import { WORKFLOW_EXECUTE_TYPES } from './workflow_import_constants';
 
-const WORKFLOW_EXECUTE_TYPES = new Set(['workflow.execute', 'workflow.executeAsync']);
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
 
 const isDynamicValue = (value: string): boolean => value.includes('{{');
 
@@ -19,33 +21,32 @@ function collectFromSteps(steps: unknown, ids: Set<string>): void {
   if (!Array.isArray(steps)) return;
 
   for (const step of steps) {
-    if (typeof step !== 'object' || step === null) {
-      // skip non-object entries
-    } else {
-      const s = step as StepLike;
-      const stepType = s.type;
+    if (!isRecord(step)) {
+      continue;
+    }
 
-      if (typeof stepType === 'string' && WORKFLOW_EXECUTE_TYPES.has(stepType)) {
-        const withBlock = s.with;
-        if (typeof withBlock === 'object' && withBlock !== null) {
-          const workflowId = (withBlock as Record<string, unknown>)['workflow-id'];
-          if (
-            typeof workflowId === 'string' &&
-            workflowId.length > 0 &&
-            !isDynamicValue(workflowId)
-          ) {
-            ids.add(workflowId);
-          }
+    const { type: stepType } = step;
+
+    if (typeof stepType === 'string' && WORKFLOW_EXECUTE_TYPES.has(stepType)) {
+      const { with: withBlock } = step;
+      if (isRecord(withBlock)) {
+        const workflowId = withBlock['workflow-id'];
+        if (
+          typeof workflowId === 'string' &&
+          workflowId.length > 0 &&
+          !isDynamicValue(workflowId)
+        ) {
+          ids.add(workflowId);
         }
       }
+    }
 
-      if ('steps' in s) collectFromSteps(s.steps, ids);
-      if ('else' in s) collectFromSteps(s.else, ids);
-      if ('branches' in s && Array.isArray(s.branches)) {
-        for (const branch of s.branches) {
-          if (typeof branch === 'object' && branch !== null && 'steps' in branch) {
-            collectFromSteps((branch as StepLike).steps, ids);
-          }
+    if ('steps' in step) collectFromSteps(step.steps, ids);
+    if ('else' in step) collectFromSteps(step.else, ids);
+    if ('branches' in step && Array.isArray(step.branches)) {
+      for (const branch of step.branches) {
+        if (isRecord(branch) && 'steps' in branch) {
+          collectFromSteps(branch.steps, ids);
         }
       }
     }

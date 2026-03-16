@@ -61,7 +61,7 @@ export const ExportReferencesModal: React.FC<ExportReferencesModalProps> = ({
           <p>
             {i18n.translate('workflows.exportReferences.description', {
               defaultMessage:
-                'The selected {count, plural, one {workflow references} other {workflows reference}} {count} other {count, plural, one {workflow} other {workflows}} not included in the export:',
+                'The selected workflows reference {count} other {count, plural, one {workflow} other {workflows}} not included in the export:',
               values: { count: missingWorkflows.length },
             })}
           </p>

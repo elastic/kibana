@@ -9,6 +9,8 @@
 
 export const MAX_IMPORT_WORKFLOWS = 500;
 
+export const WORKFLOW_EXECUTE_TYPES = new Set(['workflow.execute', 'workflow.executeAsync']);
+
 const WORKFLOW_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$/;
 const UNSAFE_IDS = new Set(['__proto__', 'constructor', 'prototype']);
 

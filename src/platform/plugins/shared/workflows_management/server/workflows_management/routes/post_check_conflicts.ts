@@ -22,7 +22,7 @@ export function registerPostCheckConflictsRoute({ router, api, spaces }: RouteDe
       security: WORKFLOW_READ_SECURITY,
       validate: {
         body: schema.object({
-          ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 500 }),
+          ids: schema.arrayOf(schema.string({ maxLength: 255 }), { minSize: 1, maxSize: 500 }),
         }),
       },
     },

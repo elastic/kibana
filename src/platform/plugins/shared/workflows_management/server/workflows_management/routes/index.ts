@@ -28,7 +28,6 @@ import { registerPostCloneWorkflowRoute } from './post_clone_workflow';
 import { registerPostCreateWorkflowRoute } from './post_create_workflow';
 import { registerPostCheckConflictsRoute } from './post_check_conflicts';
 import { registerPostExportWorkflowsRoute } from './post_export_workflows';
-import { registerPostImportWorkflowsRoute } from './post_import_workflows';
 import { registerPostResumeWorkflowExecutionRoute } from './post_resume_workflow_execution';
 import { registerPostRunWorkflowRoute } from './post_run_workflow';
 import { registerPostSearchWorkflowsRoute } from './post_search_workflows';
@@ -58,7 +57,6 @@ export function defineRoutes(
   registerPostBulkCreateWorkflowsRoute(deps);
   registerPostCheckConflictsRoute(deps);
   registerPostExportWorkflowsRoute(deps);
-  registerPostImportWorkflowsRoute(deps);
   registerPutUpdateWorkflowRoute(deps);
   registerDeleteWorkflowByIdRoute(deps);
   registerDeleteWorkflowsBulkRoute(deps);
