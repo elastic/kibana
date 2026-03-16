@@ -79,7 +79,6 @@ export function createChromeApi({
 
   const chromeStart: InternalChromeStart = {
     componentDeps,
-    getConfig: () => componentDeps.config,
     withProvider: (children: ReactNode) => {
       return (
         <ChromeServiceProvider value={{ chrome: chromeStart }}>

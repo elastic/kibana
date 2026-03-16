@@ -10,8 +10,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
-import { ChromeComponentsProvider } from '../context';
-import { createMockChromeComponentsDeps } from '../test_helpers';
+import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
 import { ClassicHeader } from './header';
 
 describe('Header', () => {
@@ -46,9 +45,9 @@ describe('Header', () => {
     deps.classic.recentlyAccessed$.next([{ link: '', label: 'dashboard', id: 'dashboard' }]);
 
     const component = mountWithIntl(
-      <ChromeComponentsProvider value={deps}>
+      <TestChromeProviders deps={deps}>
         <ClassicHeader />
-      </ChromeComponentsProvider>
+      </TestChromeProviders>
     );
     expect(component.find('EuiHeader').exists()).toBeTruthy();
     expect(component.find('nav[aria-label="Primary"]').exists()).toBeFalsy();

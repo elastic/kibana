@@ -1,6 +1,6 @@
 # @kbn/core-chrome-browser-internal-types
 
-Internal type definitions for the Chrome service (`InternalChromeStart`, `InternalChromeSetup`, `ChromeComponentsConfig`).
+Internal type definitions for the Chrome service (`InternalChromeStart`, `InternalChromeSetup`, `ChromeComponentsDeps`).
 
 Extracted into a standalone package so that lightweight consumers (e.g.
 `@kbn/core-chrome-browser-context`, `@kbn/core-chrome-browser-components`)

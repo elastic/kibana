@@ -51,7 +51,7 @@ exports[`Header renders 1`] = `
             aria-label="Elastic home"
             class="css-4ghmd2-logoCss"
             data-test-subj="logo"
-            href="/"
+            href="/test/app/home"
           >
             <span
               data-euiicon-type="logoElastic"

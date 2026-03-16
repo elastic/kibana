@@ -27,7 +27,6 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
 };
 
 const mockComponentDeps = {
-  config: { isServerless: false, kibanaVersion: '1.0.0', homeHref: '/', kibanaDocLink: '/' },
   application: {
     currentActionMenu$: new BehaviorSubject<any>(undefined),
     currentAppId$: new BehaviorSubject<string | undefined>(undefined),
@@ -47,12 +46,6 @@ const mockComponentDeps = {
   navLinks$: of([]),
   customBranding$: of({} as any),
   breadcrumbsAppendExtensions$: of([]),
-  helpMenu: {
-    menuLinks$: of([]),
-    extension$: of(undefined),
-    supportUrl$: of(''),
-    globalExtensionMenuLinks$: of([]),
-  },
   appMenu$: of(undefined),
   headerBanner$: of(undefined),
   sideNav: {
@@ -66,12 +59,6 @@ const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
     componentDeps:
       mockComponentDeps as unknown as DeeplyMockedKeys<InternalChromeStart>['componentDeps'],
-    getConfig: jest.fn().mockReturnValue({
-      isServerless: false,
-      kibanaVersion: '1.0.0',
-      homeHref: '/',
-      kibanaDocLink: '/',
-    }),
     withProvider: jest.fn((children) => children),
     sidebar: lazyObject(sidebarServiceMock.createStartContract()),
     navLinks: lazyObject({

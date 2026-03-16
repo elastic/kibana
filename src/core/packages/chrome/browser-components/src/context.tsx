@@ -11,11 +11,10 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
 import type {
   ChromeApplicationContext,
-  ChromeComponentsConfig,
   ChromeComponentsDeps,
 } from '@kbn/core-chrome-browser-internal-types';
 
-export type { ChromeApplicationContext, ChromeComponentsConfig, ChromeComponentsDeps };
+export type { ChromeApplicationContext, ChromeComponentsDeps };
 
 const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null);
 

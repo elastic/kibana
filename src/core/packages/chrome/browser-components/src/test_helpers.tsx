@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import type {
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
-  ChromeGlobalHelpExtensionMenuLink,
-  ChromeHelpExtension,
-  ChromeHelpMenuLink,
   ChromeNavControl,
   ChromeNavLink,
   ChromeProjectNavigationNode,
@@ -27,7 +31,7 @@ import type {
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
-import type { ChromeComponentsDeps } from './context';
+import { ChromeComponentsProvider, type ChromeComponentsDeps } from './context';
 
 /**
  * Creates a full {@link ChromeComponentsDeps} mock backed by {@link BehaviorSubject} instances so
@@ -41,7 +45,6 @@ import type { ChromeComponentsDeps } from './context';
 export const createMockChromeComponentsDeps = () => {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
   return {
-    config: { isServerless: false, kibanaVersion: '1.0.0', homeHref: '/', kibanaDocLink: '/docs' },
     application: applicationServiceMock.createInternalStartContract(),
     basePath: http.basePath,
     docLinks: docLinksServiceMock.createStartContract(),
@@ -62,12 +65,6 @@ export const createMockChromeComponentsDeps = () => {
     },
     breadcrumbsAppendExtensions$: new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([]),
     customBranding$: new BehaviorSubject<CustomBranding>({}),
-    helpMenu: {
-      menuLinks$: new BehaviorSubject<ChromeHelpMenuLink[]>([]),
-      extension$: new BehaviorSubject<ChromeHelpExtension | undefined>(undefined),
-      supportUrl$: new BehaviorSubject<string>(''),
-      globalExtensionMenuLinks$: new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>([]),
-    },
     navLinks$: new BehaviorSubject<ChromeNavLink[]>([]),
     navControls: {
       left$: new BehaviorSubject<ChromeNavControl[]>([]),
@@ -84,3 +81,37 @@ export const createMockChromeComponentsDeps = () => {
     },
   } satisfies ChromeComponentsDeps;
 };
+
+const defaultCoreEnv = coreContextMock.create().env;
+
+export const serverlessCoreEnv = {
+  ...defaultCoreEnv,
+  packageInfo: { ...defaultCoreEnv.packageInfo, buildFlavor: 'serverless' as const },
+};
+
+/**
+ * Wraps children with real context providers (`CoreEnvContextProvider`,
+ * `ChromeServiceProvider`, `ChromeComponentsProvider`) so that hooks like
+ * `useIsServerless()`, `useKibanaVersion()`, `useHelpMenu()`, and
+ * `useChromeStyle()` work without module-level `jest.mock` calls.
+ *
+ * Pass overrides to control test-specific behavior:
+ * - `coreEnv` — swap `buildFlavor` to `'serverless'`, change `version`, etc.
+ * - `chrome` — pre-configure observable return values on the mock chrome service
+ * - `deps` — override individual `ChromeComponentsDeps` fields
+ */
+export const TestChromeProviders: FC<
+  PropsWithChildren<{
+    deps?: ChromeComponentsDeps;
+    chrome?: InternalChromeStart;
+    coreEnv?: typeof defaultCoreEnv;
+  }>
+> = ({ children, deps, chrome, coreEnv }) => (
+  <CoreEnvContextProvider value={coreEnv ?? defaultCoreEnv}>
+    <ChromeServiceProvider value={{ chrome: chrome ?? chromeServiceMock.createStartContract() }}>
+      <ChromeComponentsProvider value={deps ?? createMockChromeComponentsDeps()}>
+        {children}
+      </ChromeComponentsProvider>
+    </ChromeServiceProvider>
+  </CoreEnvContextProvider>
+);

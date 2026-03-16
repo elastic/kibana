@@ -8,11 +8,7 @@
  */
 
 export { ChromeComponentsProvider, useChromeComponentsDeps } from './src/context';
-export type {
-  ChromeApplicationContext,
-  ChromeComponentsConfig,
-  ChromeComponentsDeps,
-} from './src/context';
+export type { ChromeApplicationContext, ChromeComponentsDeps } from './src/context';
 
 export { ClassicHeader } from './src/classic';
 export { ProjectHeader } from './src/project';

@@ -22,9 +22,6 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
-  ChromeGlobalHelpExtensionMenuLink,
-  ChromeHelpExtension,
-  ChromeHelpMenuLink,
   ChromeNavControl,
   ChromeNavLink,
   ChromeProjectNavigationNode,
@@ -42,16 +39,6 @@ import type {
 // Moved here to break the circular dependency:
 //   browser-internal-types -> browser-components -> browser-context -> browser-internal-types
 // ---------------------------------------------------------------------------
-
-/** @internal */
-export interface ChromeComponentsConfig {
-  isServerless: boolean;
-  kibanaVersion: string;
-  /** @deprecated Will be removed — compute from `basePath.prepend('/app/home')` instead. */
-  homeHref: string;
-  /** @deprecated Will be removed — read `docLinks.links.kibana.guide` instead. */
-  kibanaDocLink: string;
-}
 
 /**
  * Minimal application contract needed by Chrome components.
@@ -90,7 +77,6 @@ interface ProjectChromeObservables {
 }
 
 export interface ChromeComponentsDeps {
-  config: ChromeComponentsConfig;
   application: ChromeApplicationContext;
   basePath: HttpStart['basePath'];
   docLinks: DocLinksStart;
@@ -100,12 +86,6 @@ export interface ChromeComponentsDeps {
   /** Project/solution-layout-specific chrome state. */
   project: ProjectChromeObservables;
   loadingCount$: Observable<number>;
-  helpMenu: {
-    menuLinks$: Observable<ChromeHelpMenuLink[]>;
-    extension$: Observable<ChromeHelpExtension | undefined>;
-    supportUrl$: Observable<string>;
-    globalExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
-  };
   navLinks$: Observable<ChromeNavLink[]>;
   customBranding$: Observable<CustomBranding>;
   breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
@@ -132,16 +112,6 @@ export interface InternalChromeStart extends ChromeStart {
    * Will be removed once all fields are migrated to useChromeService() reads.
    */
   componentDeps: ChromeComponentsDeps;
-
-  /**
-   * Returns static chrome configuration assembled during `ChromeService.start()`.
-   */
-  getConfig(): {
-    isServerless: boolean;
-    kibanaVersion: string;
-    homeHref: string;
-    kibanaDocLink: string;
-  };
 
   /**
    * Get an observable of the current badge.

@@ -33,18 +33,17 @@ import { useHasAppMenuConfig } from '../shared/chrome_hooks';
 
 export function ClassicHeader() {
   const {
-    config,
     application,
     basePath,
-    docLinks,
     loadingCount$,
     navControls,
     classic,
     breadcrumbsAppendExtensions$,
     customBranding$,
-    helpMenu,
     navLinks$,
   } = useChromeComponentsDeps();
+
+  const homeHref = basePath.prepend('/app/home');
 
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
@@ -71,7 +70,7 @@ export function ClassicHeader() {
                     customBranding$={customBranding$}
                   />,
                   <HeaderLogo
-                    href={config.homeHref}
+                    href={homeHref}
                     navigateToApp={application.navigateToApp}
                     loadingCount$={loadingCount$}
                     customBranding$={customBranding$}
@@ -98,17 +97,7 @@ export function ClassicHeader() {
                   <EuiHideFor sizes={['xs', 's']}>
                     <HeaderNavControls navControls$={navControls.extension$} />
                   </EuiHideFor>,
-                  <HeaderHelpMenu
-                    isServerless={config.isServerless}
-                    globalHelpExtensionMenuLinks$={helpMenu.globalExtensionMenuLinks$}
-                    helpExtension$={helpMenu.extension$}
-                    helpSupportUrl$={helpMenu.supportUrl$}
-                    defaultContentLinks$={helpMenu.menuLinks$}
-                    kibanaDocLink={config.kibanaDocLink}
-                    docLinks={docLinks}
-                    kibanaVersion={config.kibanaVersion}
-                    navigateToUrl={application.navigateToUrl}
-                  />,
+                  <HeaderHelpMenu />,
                   <HeaderNavControls navControls$={navControls.right$} />,
                 ],
               },
@@ -124,7 +113,7 @@ export function ClassicHeader() {
                   navLinks$={navLinks$}
                   recentlyAccessed$={classic.recentlyAccessed$}
                   isNavOpen={isNavOpen}
-                  homeHref={config.homeHref}
+                  homeHref={homeHref}
                   basePath={basePath}
                   navigateToApp={application.navigateToApp}
                   navigateToUrl={application.navigateToUrl}

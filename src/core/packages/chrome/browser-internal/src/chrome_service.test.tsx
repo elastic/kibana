@@ -35,6 +35,9 @@ import {
   ChromelessHeader,
   ClassicHeader,
 } from '@kbn/core-chrome-browser-components';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
+
 import { ChromeService } from './chrome_service';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
@@ -242,7 +245,7 @@ describe('start', () => {
     it('exposes componentDeps for use by the layout service', async () => {
       const { chrome } = await start();
       expect(chrome.componentDeps).toBeDefined();
-      expect(chrome.componentDeps.config).toBeDefined();
+      expect(chrome.componentDeps.application).toBeDefined();
     });
 
     it('ClassicHeader renders within ChromeComponentsProvider', async () => {
@@ -250,9 +253,13 @@ describe('start', () => {
 
       render(
         <KibanaRenderContextProvider {...startDeps}>
-          <ChromeComponentsProvider value={chrome.componentDeps}>
-            <ClassicHeader />
-          </ChromeComponentsProvider>
+          <CoreEnvContextProvider value={coreContextMock.create().env}>
+            <ChromeServiceProvider value={{ chrome }}>
+              <ChromeComponentsProvider value={chrome.componentDeps}>
+                <ClassicHeader />
+              </ChromeComponentsProvider>
+            </ChromeServiceProvider>
+          </CoreEnvContextProvider>
         </KibanaRenderContextProvider>
       );
     });

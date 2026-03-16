@@ -160,12 +160,8 @@ const Logo = ({ logoCss }: { logoCss: HeaderCss['logo'] }) => {
 
 export const ProjectHeader = () => {
   const {
-    config,
-    application,
-    docLinks,
     customBranding$,
     breadcrumbsAppendExtensions$,
-    helpMenu,
     navControls,
     project,
   } = useChromeComponentsDeps();
@@ -218,17 +214,7 @@ export const ProjectHeader = () => {
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem>
-                <HeaderHelpMenu
-                  isServerless={config.isServerless}
-                  globalHelpExtensionMenuLinks$={helpMenu.globalExtensionMenuLinks$}
-                  helpExtension$={helpMenu.extension$}
-                  helpSupportUrl$={helpMenu.supportUrl$}
-                  defaultContentLinks$={helpMenu.menuLinks$}
-                  kibanaDocLink={docLinks.links.elasticStackGetStarted}
-                  docLinks={docLinks}
-                  kibanaVersion={config.kibanaVersion}
-                  navigateToUrl={application.navigateToUrl}
-                />
+                <HeaderHelpMenu />
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem

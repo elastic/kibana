@@ -180,18 +180,9 @@ export class ChromeService {
     const navigation$ = projectNavigation.getNavigation$();
     const loadingCount$ = http.getLoadingCount$();
     const recentlyAccessed$ = recentlyAccessed.get$();
-    const helpMenuLinks$ = navControls.getHelpMenuLinks$();
-    const homeHref = http.basePath.prepend('/app/home');
-    const kibanaVersion = this.params.kibanaVersion;
 
     // 7. Build component deps (consumed by ChromeComponentsProvider in the layout service)
     const componentDeps: ChromeComponentsDeps = {
-      config: {
-        isServerless: this.isServerless,
-        kibanaVersion,
-        homeHref,
-        kibanaDocLink: docLinks.links.kibana.guide,
-      },
       application,
       basePath: http.basePath,
       docLinks,
@@ -212,12 +203,6 @@ export class ChromeService {
         navigation$,
       },
       loadingCount$,
-      helpMenu: {
-        menuLinks$: helpMenuLinks$,
-        extension$: state.help.extension.$,
-        supportUrl$: state.help.supportUrl.$,
-        globalExtensionMenuLinks$: state.help.globalMenuLinks.$,
-      },
       navLinks$,
       customBranding$: customBranding.customBranding$,
       breadcrumbsAppendExtensions$: state.breadcrumbs.appendExtensionsWithBadges$,
