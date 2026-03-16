@@ -209,6 +209,7 @@ export class AgentBuilderPlugin
       navigationService,
       toolsService,
       skillsService,
+      pluginsService,
       startDependencies,
       accessChecker,
       eventsService,
