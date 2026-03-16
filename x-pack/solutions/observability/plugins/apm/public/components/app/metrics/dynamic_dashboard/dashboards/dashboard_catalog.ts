@@ -6,7 +6,7 @@
  */
 
 import type { PanelBuilder } from '../types';
-import { getOtelOtherJavaPanels } from './panels/jvm_panels';
+import { getOtelOtherJavaPanels } from './panels/java/otel_other_java_panels';
 
 type VersionPanels = Partial<Record<string, PanelBuilder>> & { default: PanelBuilder };
 type LanguagePanels = Partial<Record<string, VersionPanels>>;

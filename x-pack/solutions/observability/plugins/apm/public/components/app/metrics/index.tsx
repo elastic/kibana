@@ -6,7 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
+import { isElasticAgentName, isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { isAWSLambdaAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ServerlessMetrics } from './serverless_metrics';
@@ -57,6 +59,19 @@ export function Metrics() {
         serverlessType={serverlessType}
         dataView={dataView}
         apmIndices={apmIndices}
+      />
+    );
+  }
+
+  if (!isElasticAgentName(agentName ?? '')) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        title={i18n.translate('xpack.apm.metrics.emptyState.title', {
+          defaultMessage: 'Runtime metrics are not available for this Agent / SDK type.',
+        })}
+        iconType="info"
+        data-test-subj="apmMetricsNoDashboardFound"
       />
     );
   }
