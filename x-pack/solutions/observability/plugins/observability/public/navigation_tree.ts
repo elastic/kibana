@@ -405,6 +405,21 @@ function createNavTree({
     ],
     footer: [
       {
+        link: 'ingestHub' as const,
+        title: i18n.translate('xpack.observability.obltNav.ingestHub', {
+          defaultMessage: 'Ingest Hub',
+        }),
+        icon: 'launch',
+        children: [
+          {
+            link: 'ingestHub' as const,
+            title: i18n.translate('xpack.observability.obltNav.ingestHub.getStarted', {
+              defaultMessage: 'Get started',
+            }),
+          },
+        ],
+      },
+      {
         title: i18n.translate('xpack.observability.obltNav.addData', {
           defaultMessage: 'Add data',
         }),
