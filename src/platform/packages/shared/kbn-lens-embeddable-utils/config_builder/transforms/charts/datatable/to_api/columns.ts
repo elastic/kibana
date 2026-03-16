@@ -18,13 +18,8 @@ import { isFormBasedLayer, operationFromColumn } from '../../../utils';
 import { getValueApiColumn } from '../../../columns/esql_column';
 import { fromColorByValueLensStateToAPI, fromColorMappingLensStateToAPI } from '../../../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../columns/utils';
-import { isMetricColumnESQL, isMetricColumnNoESQL } from '../helpers';
+import { isMetricColumnESQL, isMetricColumnNoESQL, colorModeToApplyColorTo } from '../helpers';
 import { stripUndefined } from '../../utils';
-
-const colorModeToApplyColorTo = (
-  mode: ColumnState['colorMode']
-): 'value' | 'badge' | 'background' =>
-  mode === 'text' ? 'value' : mode === 'badge' ? 'badge' : 'background';
 
 type APIMetricRowCommonProps = Partial<
   Pick<NonNullable<DatatableState['metrics']>[number], 'visible' | 'alignment' | 'width'>

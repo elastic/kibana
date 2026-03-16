@@ -14,6 +14,28 @@ import type {
 } from '@kbn/lens-common';
 import { ACCESSOR } from './constants';
 
+const COLOR_MODE_TO_API = {
+  text: 'value',
+  badge: 'badge',
+  cell: 'background',
+} as const;
+
+const API_TO_COLOR_MODE = {
+  value: 'text',
+  badge: 'badge',
+  background: 'cell',
+} as const;
+
+type ApiColorTarget = (typeof COLOR_MODE_TO_API)[keyof typeof COLOR_MODE_TO_API];
+
+export const colorModeToApplyColorTo = (mode: ColumnState['colorMode']): ApiColorTarget =>
+  COLOR_MODE_TO_API[mode as keyof typeof COLOR_MODE_TO_API] ?? 'background';
+
+export const applyColorToToColorMode = (
+  target: string
+): NonNullable<ColumnState['colorMode']> =>
+  API_TO_COLOR_MODE[target as keyof typeof API_TO_COLOR_MODE] ?? 'cell';
+
 /**
  * Checks if the column is a metric column in a formBased layer
  * - In metric columns the isMetric property is not set in all cases and neither is for rows

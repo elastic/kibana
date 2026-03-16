@@ -15,7 +15,7 @@ import {
   isColorByValueColor,
   isLegacyColorPalette,
 } from '../../../coloring';
-import { getAccessorName } from '../helpers';
+import { getAccessorName, applyColorToToColorMode } from '../helpers';
 import {
   METRIC_ACCESSOR_PREFIX,
   ROW_ACCESSOR_PREFIX,
@@ -28,12 +28,7 @@ function buildColorProps(
     | NonNullable<DatatableState['rows']>[number]
 ): Partial<Pick<ColumnState, 'palette' | 'colorMapping' | 'colorMode'>> {
   if (!config.apply_color_to) return {};
-  let colorMode: ColumnState['colorMode'] = 'cell';
-  if (config.apply_color_to === 'value') {
-    colorMode = 'text';
-  } else if (config.apply_color_to === 'badge') {
-    colorMode = 'badge';
-  }
+  const colorMode = applyColorToToColorMode(config.apply_color_to);
 
   if (isColorMappingColor(config.color)) {
     const color = fromColorMappingAPIToLensState(config.color);
