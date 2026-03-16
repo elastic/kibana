@@ -30,6 +30,7 @@ import {
 interface Query {
   esql: string;
   title: string;
+  description: string;
   category: SignificantEventType;
   severity_score: number;
   evidence?: string[];
