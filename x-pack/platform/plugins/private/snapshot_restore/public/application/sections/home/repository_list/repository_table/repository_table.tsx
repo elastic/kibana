@@ -28,7 +28,7 @@ import type { Repository, RepositoryType } from '../../../../../../common/types'
 import type { UseRequestResponse } from '../../../../../shared_imports';
 import { RepositoryDeleteProvider } from '../../../../components';
 import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
-import { useServices } from '../../../../app_context';
+import { useServices, useToastNotifications } from '../../../../app_context';
 import { textService } from '../../../../services/text';
 import { linkToEditRepository, linkToAddRepository } from '../../../../services/navigation';
 
@@ -52,12 +52,27 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
   onRepositoryDeleted,
 }) => {
   const { i18n, uiMetricService, history } = useServices();
+  const toastNotifications = useToastNotifications();
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
   const [openActionsRowName, setOpenActionsRowName] = useState<string | undefined>(undefined);
   const [pendingDefaultName, setPendingDefaultName] = useState<string | undefined>(undefined);
   const confirmModalTitleId = useGeneratedHtmlId();
 
   const closeActionsMenu = () => setOpenActionsRowName(undefined);
+
+  const setDefaultWithToast = (name: string) => {
+    onSetDefaultRepository(name);
+    toastNotifications.addSuccess({
+      title: i18n.translate(
+        'xpack.snapshotRestore.repositoryList.table.setDefaultSuccessNotificationTitle',
+        {
+          defaultMessage: "Set default repository to ''{name}''",
+          values: { name },
+        }
+      ),
+      iconType: 'check',
+    });
+  };
 
   const columns = [
     {
@@ -194,7 +209,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                               if (defaultRepository) {
                                 setPendingDefaultName(name);
                               } else {
-                                onSetDefaultRepository(name);
+                                setDefaultWithToast(name);
                               }
                             }
                           : undefined
@@ -410,7 +425,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
         }
         onCancel={() => setPendingDefaultName(undefined)}
         onConfirm={() => {
-          onSetDefaultRepository(pendingDefaultName);
+          setDefaultWithToast(pendingDefaultName);
           setPendingDefaultName(undefined);
         }}
         cancelButtonText={

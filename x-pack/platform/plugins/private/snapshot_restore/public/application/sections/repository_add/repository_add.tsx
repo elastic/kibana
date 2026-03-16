@@ -178,6 +178,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
           saveError={renderSaveError()}
           clearSaveError={clearSaveError}
           onSave={onSave}
+          onCancel={() => history.push(`${BASE_PATH}/repositories`)}
           isDefaultRepository={isDefaultRepository}
           isFirstRepository={isFirstRepository}
           onToggleDefault={setIsDefaultRepository}

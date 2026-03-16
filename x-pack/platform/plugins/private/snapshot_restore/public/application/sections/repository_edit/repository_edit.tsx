@@ -268,6 +268,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
           saveError={renderSaveError()}
           clearSaveError={clearSaveError}
           onSave={onSave}
+          onCancel={() => history.push(`${BASE_PATH}/repositories`)}
           isDefaultRepository={isDefaultRepository}
           isFirstRepository={isOnlyRepository}
           onToggleDefault={setIsDefaultRepository}

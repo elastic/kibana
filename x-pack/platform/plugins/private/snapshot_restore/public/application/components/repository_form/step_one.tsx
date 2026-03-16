@@ -15,6 +15,7 @@ import {
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiLink,
@@ -39,6 +40,7 @@ import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';
 interface Props {
   repository: Repository | EmptyRepository;
   onNext: () => void;
+  onCancel: () => void;
   updateRepository: (updatedFields: any) => void;
   validation: RepositoryValidation;
 }
@@ -46,6 +48,7 @@ interface Props {
 export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
   repository,
   onNext,
+  onCancel,
   updateRepository,
   validation,
 }) => {
@@ -327,19 +330,31 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
   );
 
   const renderActions = () => (
-    <EuiButton
-      color="primary"
-      onClick={onNext}
-      fill
-      iconType="arrowRight"
-      iconSide="right"
-      data-test-subj="nextButton"
-    >
-      <FormattedMessage
-        id="xpack.snapshotRestore.repositoryForm.nextButtonLabel"
-        defaultMessage="Next"
-      />
-    </EuiButton>
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty flush="left" onClick={onCancel} data-test-subj="cancelButton">
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          color="primary"
+          onClick={onNext}
+          fill
+          iconType="arrowRight"
+          iconSide="right"
+          data-test-subj="nextButton"
+        >
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.nextButtonLabel"
+            defaultMessage="Next"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const renderFormValidationError = () => {

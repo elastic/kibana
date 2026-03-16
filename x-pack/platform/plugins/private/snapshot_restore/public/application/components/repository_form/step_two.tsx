@@ -38,6 +38,7 @@ interface Props {
   validation: RepositoryValidation;
   saveError?: React.ReactNode;
   onBack: () => void;
+  onCancel?: () => void;
   isDefaultRepository?: boolean;
   isFirstRepository?: boolean;
   onToggleDefault?: (value: boolean) => void;
@@ -53,6 +54,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   validation,
   saveError,
   onBack,
+  onCancel,
   isDefaultRepository,
   isFirstRepository,
   onToggleDefault,
@@ -176,9 +178,16 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
     );
 
     return (
-      <EuiFlexGroup gutterSize="m" alignItems="center">
-        {isEditing ? null : (
-          <EuiFlexItem grow={false}>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          {isEditing ? (
+            <EuiButtonEmpty flush="left" onClick={onCancel} data-test-subj="cancelButton">
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          ) : (
             <EuiButtonEmpty
               color="primary"
               iconType="arrowLeft"
@@ -190,8 +199,8 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
                 defaultMessage="Back"
               />
             </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
+          )}
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             color={isManagedRepository ? 'warning' : 'success'}
