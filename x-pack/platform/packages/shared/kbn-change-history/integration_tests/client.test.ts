@@ -5,30 +5,38 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { Client } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { ChangeHistoryClient } from '..';
+import { DATA_STREAM_NAME } from '../src/client';
 import type { ChangeHistoryDocument, ObjectChange } from '..';
+import { sha256 } from '../src/utils';
 
 const KIBANA_SPACE = 'default';
 const TEST_MODULE = 'test-module';
 const TEST_DATASET = 'test-dataset';
-const DATA_STREAM_NAME = `.kibana-change-history-${TEST_MODULE}-${TEST_DATASET}`;
 
 const defaultLogOpts = {
   action: 'rule-create',
   username: 'test-user',
+  userProfileId: 'test-user-profile-id',
   spaceId: 'default',
   refresh: true as const,
 };
 
 describe('ChangeHistoryClient', () => {
   let esServer: EsTestCluster;
-  let logger: Logger;
+  const logger = loggingSystemMock.createLogger();
+
+  const defaultCostructorOpts = {
+    module: TEST_MODULE,
+    dataset: TEST_DATASET,
+    logger,
+    kibanaVersion: '1.0.0',
+  };
 
   const cleanup = async () => {
     const client = esServer.getClient();
@@ -48,10 +56,6 @@ describe('ChangeHistoryClient', () => {
     await esServer.stop();
   });
 
-  beforeEach(async () => {
-    logger = loggingSystemMock.createLogger();
-  });
-
   afterEach(async () => {
     await cleanup();
   });
@@ -59,20 +63,21 @@ describe('ChangeHistoryClient', () => {
   describe('initialize', () => {
     const getEsDataStreams = async (name: string) => {
       try {
-        return (await esServer.getClient().indices.getDataStream({ name }))?.data_streams ?? [];
+        const res = await esServer.getClient().indices.getDataStream({ name });
+        return res?.data_streams?.map((s) => s.name) ?? [];
       } catch (error) {
-        return [];
+        if (
+          error.meta?.statusCode === 404 &&
+          error.body?.error?.type === 'index_not_found_exception'
+        ) {
+          return [];
+        }
+        throw error;
       }
     };
 
     it('should set isInitialized to true after initialize and getHistory does not throw', async () => {
-      const client = new ChangeHistoryClient({
-        module: TEST_MODULE,
-        dataset: TEST_DATASET,
-        logger,
-        kibanaVersion: '1.0.0',
-      });
-      expect(client.dataStreamName).toBe(DATA_STREAM_NAME);
+      const client = new ChangeHistoryClient(defaultCostructorOpts);
       expect(client.isInitialized()).toBe(false);
 
       expect(await getEsDataStreams(DATA_STREAM_NAME)).toHaveLength(0);
@@ -80,9 +85,7 @@ describe('ChangeHistoryClient', () => {
       await client.initialize(esServer.getClient());
       expect(client.isInitialized()).toBe(true);
 
-      const ds = await getEsDataStreams(DATA_STREAM_NAME);
-      expect(ds).toHaveLength(1);
-      expect(ds[0].name).toBe(DATA_STREAM_NAME);
+      expect(await getEsDataStreams(DATA_STREAM_NAME)).toEqual([DATA_STREAM_NAME]);
 
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'any-id');
       expect(result.total).toBe(0);
@@ -92,12 +95,7 @@ describe('ChangeHistoryClient', () => {
 
   describe('error behavior', () => {
     it('should throw when log is called before initialize', async () => {
-      const client = new ChangeHistoryClient({
-        module: TEST_MODULE,
-        dataset: TEST_DATASET,
-        logger,
-        kibanaVersion: '1.0.0',
-      });
+      const client = new ChangeHistoryClient(defaultCostructorOpts);
       const change: ObjectChange = {
         objectType: 'rule',
         objectId: 'id-1',
@@ -109,12 +107,7 @@ describe('ChangeHistoryClient', () => {
     });
 
     it('should throw when getHistory is called before initialize', async () => {
-      const client = new ChangeHistoryClient({
-        module: TEST_MODULE,
-        dataset: TEST_DATASET,
-        logger,
-        kibanaVersion: '1.0.0',
-      });
+      const client = new ChangeHistoryClient(defaultCostructorOpts);
       await expect(() => client.getHistory(KIBANA_SPACE, 'rule', 'id-1')).rejects.toThrow(
         'Data stream not initialized'
       );
@@ -127,12 +120,7 @@ describe('ChangeHistoryClient', () => {
 
     beforeEach(async () => {
       esClient = esServer.getClient();
-      client = new ChangeHistoryClient({
-        module: TEST_MODULE,
-        dataset: TEST_DATASET,
-        logger,
-        kibanaVersion: '1.0.0',
-      });
+      client = new ChangeHistoryClient(defaultCostructorOpts);
       await client.initialize(esClient);
     });
 
@@ -140,23 +128,38 @@ describe('ChangeHistoryClient', () => {
       const change: ObjectChange = {
         objectType: 'rule',
         objectId: 'id-1',
+        sequence: 1,
         after: { name: 'Rule 1', enabled: true },
       };
+      const hash = sha256(JSON.stringify(change.after));
       await client.log(change, { ...defaultLogOpts, spaceId: 'default' });
 
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'id-1');
       expect(result.total).toBe(1);
       expect(result.items.length).toBe(1);
       const doc = result.items[0] as ChangeHistoryDocument;
-      expect(doc.object.type).toBe('rule');
-      expect(doc.object.id).toBe('id-1');
-      expect(doc.object.snapshot).toEqual({ name: 'Rule 1', enabled: true });
-      expect(doc.event.action).toBe('rule-create');
-      expect(doc.user.name).toBe('test-user');
-      expect(doc.kibana.space_id).toBe('default');
-      expect(doc.kibana.version).toBe('1.0.0');
-      expect(doc.event.module).toBe(TEST_MODULE);
-      expect(doc.event.dataset).toBe(TEST_DATASET);
+      expect(doc).toMatchObject({
+        '@timestamp': expect.any(String),
+        ecs: { version: '9.3.0' },
+        user: { name: 'test-user', id: 'test-user-profile-id' },
+        event: {
+          id: expect.any(String),
+          created: expect.any(String),
+          module: TEST_MODULE,
+          dataset: TEST_DATASET,
+          action: 'rule-create',
+          type: 'change',
+        },
+        object: {
+          type: 'rule',
+          id: 'id-1',
+          hash,
+          sequence: 1,
+          fields: { masked: [] },
+          snapshot: { name: 'Rule 1', enabled: true },
+        },
+        kibana: { space_id: 'default', version: '1.0.0' },
+      });
     });
   });
 
@@ -164,20 +167,15 @@ describe('ChangeHistoryClient', () => {
     let client: ChangeHistoryClient;
 
     beforeEach(async () => {
-      client = new ChangeHistoryClient({
-        module: TEST_MODULE,
-        dataset: TEST_DATASET,
-        logger,
-        kibanaVersion: '1.0.0',
-      });
+      client = new ChangeHistoryClient(defaultCostructorOpts);
       await client.initialize(esServer.getClient());
     });
 
     it('should log multiple changes and return them via getHistory with correct count and ordering', async () => {
       const changes: ObjectChange[] = [
-        { objectType: 'rule', objectId: 'id-a', after: { name: 'Rule A' }, sequence: '1' },
-        { objectType: 'rule', objectId: 'id-b', after: { name: 'Rule B' }, sequence: '1' },
-        { objectType: 'rule', objectId: 'id-a', after: { name: 'Rule A updated' }, sequence: '2' },
+        { objectType: 'rule', objectId: 'id-a', after: { name: 'Rule A' }, sequence: 1 },
+        { objectType: 'rule', objectId: 'id-b', after: { name: 'Rule B' }, sequence: 1 },
+        { objectType: 'rule', objectId: 'id-a', after: { name: 'Rule A updated' }, sequence: 2 },
       ];
       await client.logBulk(changes, { ...defaultLogOpts, spaceId: 'default' });
 
@@ -197,18 +195,16 @@ describe('ChangeHistoryClient', () => {
         name: 'Rule B',
       });
     });
+
+    // TODO: Add test for some documents failing and not others
+    // TODO: Add test for checking kibana spaces (underneath the hood)
   });
 
   describe('before/after diff', () => {
     let client: ChangeHistoryClient;
 
     beforeEach(async () => {
-      client = new ChangeHistoryClient({
-        module: TEST_MODULE,
-        dataset: TEST_DATASET,
-        logger,
-        kibanaVersion: '1.0.0',
-      });
+      client = new ChangeHistoryClient(defaultCostructorOpts);
       await client.initialize(esServer.getClient());
     });
 
@@ -236,16 +232,9 @@ describe('ChangeHistoryClient', () => {
     let client: ChangeHistoryClient;
 
     beforeEach(async () => {
-      client = new ChangeHistoryClient({
-        module: TEST_MODULE,
-        dataset: TEST_DATASET,
-        logger,
-        kibanaVersion: '1.0.0',
-      });
+      client = new ChangeHistoryClient(defaultCostructorOpts);
       await client.initialize(esServer.getClient());
     });
-
-    const maskedValuePattern = /^[\*]{16}[a-f0-9]{12}$/;
 
     it('should mask sensitive fields in snapshot and list them in object.fields.masked', async () => {
       const change: ObjectChange = {
@@ -257,31 +246,39 @@ describe('ChangeHistoryClient', () => {
           apiKey: 'sk-secret-key-12345',
         },
       };
+      const maskFields = {
+        user: { email: true },
+        apiKey: true,
+      };
       await client.log(change, {
         ...defaultLogOpts,
         spaceId: 'default',
-        maskFields: {
-          user: { email: true },
-          apiKey: true,
-        },
+        maskFields,
       });
 
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'masked-id');
       expect(result.total).toBe(1);
       const doc = result.items[0] as ChangeHistoryDocument;
 
-      expect(doc.object.fields.masked).toBeDefined();
-      expect(doc.object.fields.masked).toContain('user.email');
-      expect(doc.object.fields.masked).toContain('apiKey');
-      expect(doc.object.fields.masked).toHaveLength(2);
+      // Check hash
+      const hash = sha256(JSON.stringify(change.after));
+      expect(doc.object.hash).toEqual(hash);
 
-      const snapshot = doc.object.snapshot as Record<string, unknown>;
-      expect(snapshot.name).toBe('My Rule');
-      expect(snapshot.user).toEqual({
-        email: expect.stringMatching(maskedValuePattern),
-        name: 'Alice',
+      // Check masked fields
+      expect(doc.object.fields).toEqual({
+        masked: ['user.email', 'apiKey'],
       });
-      expect(snapshot.apiKey).toMatch(maskedValuePattern);
+      const snapshot = doc.object.snapshot as Record<string, unknown>;
+      const maskedApiKey = `****************${sha256('sk-secret-key-12345').slice(-12)}`;
+      const maskedEmail = `****************${sha256('secret@example.com').slice(-12)}`;
+      expect(snapshot).toEqual({
+        name: 'My Rule',
+        user: {
+          email: maskedEmail,
+          name: 'Alice',
+        },
+        apiKey: maskedApiKey,
+      });
     });
   });
 });

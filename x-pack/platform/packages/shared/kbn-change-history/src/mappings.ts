@@ -13,62 +13,69 @@ import { mappings, type MappingsDefinition } from '@kbn/es-mappings';
  * For field reference @see [README.md]
  */
 export const changeHistoryMappings = {
-  dynamic: false,
-  properties: {
-    '@timestamp': mappings.date(),
+  v1: {
+    dynamic: false,
+    properties: {
+      '@timestamp': mappings.date(),
 
-    user: mappings.object({
-      properties: {
-        id: mappings.keyword(),
-        name: mappings.keyword(),
-      },
-    }),
+      ecs: mappings.object({
+        properties: {
+          version: mappings.keyword(),
+        },
+      }),
 
-    event: mappings.object({
-      properties: {
-        id: mappings.keyword(),
-        module: mappings.keyword(),
-        dataset: mappings.keyword(),
-        action: mappings.keyword(),
-        type: mappings.keyword(),
-        outcome: mappings.keyword(),
-        reason: mappings.text(),
-        created: mappings.date(),
-        group: mappings.object({
-          properties: {
-            id: mappings.keyword(),
-          },
-        }),
-      },
-    }),
+      user: mappings.object({
+        properties: {
+          id: mappings.keyword(),
+          name: mappings.keyword(),
+        },
+      }),
 
-    object: mappings.object({
-      properties: {
-        id: mappings.keyword(),
-        type: mappings.keyword(),
-        index: mappings.keyword(),
-        hash: mappings.keyword(),
-        sequence: mappings.keyword(),
-        fields: mappings.object({
-          properties: {
-            changed: mappings.keyword(),
-            masked: mappings.keyword(),
-          },
-        }),
-        oldvalues: mappings.flattened(),
-        snapshot: mappings.flattened(),
-      },
-    }),
+      event: mappings.object({
+        properties: {
+          id: mappings.keyword(),
+          module: mappings.keyword(),
+          dataset: mappings.keyword(),
+          action: mappings.keyword(),
+          type: mappings.keyword(),
+          reason: mappings.text(),
+          created: mappings.date(),
+          group: mappings.object({
+            properties: {
+              id: mappings.keyword(),
+            },
+          }),
+        },
+      }),
 
-    tags: mappings.keyword(),
+      object: mappings.object({
+        properties: {
+          id: mappings.keyword(),
+          type: mappings.keyword(),
+          index: mappings.keyword(),
+          hash: mappings.keyword(),
+          sequence: mappings.integer(),
+          fields: mappings.object({
+            properties: {
+              changed: mappings.keyword(),
+              masked: mappings.keyword(),
+            },
+          }),
+          // oldvalues: mappings.object(), // unmapped field, please keep me commented out.
+          // snapshot: mappings.object(), // unmapped field, please keep me commented out.
+        },
+      }),
 
-    metadata: mappings.flattened(),
+      tags: mappings.keyword(),
 
-    kibana: mappings.object({
-      properties: {
-        space_id: mappings.keyword(),
-        version: mappings.keyword(),
-      },
-    }),
+      metadata: mappings.flattened(),
+
+      kibana: mappings.object({
+        properties: {
+          space_id: mappings.keyword(),
+          version: mappings.keyword(),
+        },
+      }),
+    },
   },
-} satisfies MappingsDefinition;
+} satisfies Record<string, MappingsDefinition>;

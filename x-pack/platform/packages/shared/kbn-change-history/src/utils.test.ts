@@ -9,49 +9,39 @@ import { sha256, maskSensitiveFields, standardDiffDocCalculation } from './utils
 
 describe('#standardDiffDocCalculation', () => {
   describe('empty objects', () => {
+    const expected = {
+      stats: { total: 0, additions: 0, deletions: 0, updates: 0 },
+      fieldChanges: [],
+      ignored: [],
+      oldvalues: {},
+      newvalues: {},
+    };
+
     it('should return empty diff when both objects are undefined', () => {
       const result = standardDiffDocCalculation({ a: undefined, b: undefined });
 
-      expect(result).toEqual({
-        stats: { total: 0, additions: 0, deletions: 0, updates: 0 },
-        fieldChanges: [],
-        ignored: [],
-        oldvalues: {},
-        newvalues: {},
-      });
+      expect(result).toEqual(expected);
     });
 
     it('should return empty diff when both objects are empty', () => {
-      const obj = {};
-      const result = standardDiffDocCalculation({ a: obj, b: structuredClone(obj) });
+      const result = standardDiffDocCalculation({ a: {}, b: {} });
 
-      expect(result).toEqual({
-        stats: { total: 0, additions: 0, deletions: 0, updates: 0 },
-        fieldChanges: [],
-        ignored: [],
-        oldvalues: {},
-        newvalues: {},
-      });
+      expect(result).toEqual(expected);
     });
 
     it('should return empty diff when objects are identical', () => {
       const obj = { type: 'dashboard', title: 'My Dashboard' };
       const result = standardDiffDocCalculation({ a: obj, b: structuredClone(obj) });
 
-      expect(result).toEqual({
-        stats: { total: 0, additions: 0, deletions: 0, updates: 0 },
-        fieldChanges: [],
-        ignored: [],
-        oldvalues: {},
-        newvalues: {},
-      });
+      expect(result).toEqual(expected);
     });
   });
 
   describe('additions', () => {
     it('should detect additions when first object is undefined', () => {
+      const a = undefined;
       const b = { type: 'dashboard', title: 'New Dashboard' };
-      const result = standardDiffDocCalculation({ a: undefined, b });
+      const result = standardDiffDocCalculation({ a, b });
 
       expect(result.stats).toEqual({
         total: 2,
@@ -76,6 +66,7 @@ describe('#standardDiffDocCalculation', () => {
         updates: 0,
       });
       expect(result.fieldChanges).toEqual(['title']);
+      expect(result.oldvalues).toEqual({ title: undefined });
       expect(result.newvalues).toEqual({ title: 'New Dashboard' });
     });
   });
@@ -83,7 +74,8 @@ describe('#standardDiffDocCalculation', () => {
   describe('deletions', () => {
     it('should detect deletions when second object is undefined', () => {
       const a = { type: 'dashboard', title: 'Old Dashboard' };
-      const result = standardDiffDocCalculation({ a, b: undefined });
+      const b = undefined;
+      const result = standardDiffDocCalculation({ a, b });
 
       expect(result.stats).toEqual({
         total: 2,
@@ -156,6 +148,7 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 1,
       });
+      expect(result.fieldChanges).toEqual(['count']);
       expect(result.oldvalues).toEqual({ count: 5 });
       expect(result.newvalues).toEqual({ count: '5' });
     });
@@ -171,6 +164,7 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 1,
       });
+      expect(result.fieldChanges).toEqual(['value']);
       expect(result.oldvalues).toEqual({ value: 'something' });
       expect(result.newvalues).toEqual({ value: null });
     });
@@ -303,6 +297,7 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 1,
       });
+      expect(result.fieldChanges).toEqual(['tags']);
       expect(result.oldvalues).toEqual({ tags: ['tag1', 'tag2'] });
       expect(result.newvalues).toEqual({ tags: ['tag2', 'tag1'] });
     });
@@ -318,6 +313,7 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 1,
       });
+      expect(result.fieldChanges).toEqual(['tags']);
       expect(result.oldvalues).toEqual({ tags: ['tag1', 'tag2'] });
       expect(result.newvalues).toEqual({ tags: ['tag1', 'tag2', 'tag3'] });
     });
@@ -333,6 +329,8 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 0,
       });
+      expect(result.fieldChanges).toEqual(['tags']);
+      expect(result.oldvalues).toEqual({ tags: undefined });
       expect(result.newvalues).toEqual({ tags: ['tag1'] });
     });
 
@@ -350,6 +348,8 @@ describe('#standardDiffDocCalculation', () => {
         updates: 1,
       });
       expect(result.fieldChanges).toEqual(['items']);
+      expect(result.oldvalues).toEqual({ items: [{ id: 1, name: 'Item 1' }] });
+      expect(result.newvalues).toEqual({ items: [{ id: 1, name: 'Item 1 Updated' }] });
     });
 
     it('should detect deletion inside arrays', () => {
@@ -363,6 +363,7 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 1,
       });
+      expect(result.fieldChanges).toEqual(['tags']);
       expect(result.oldvalues).toEqual({ tags: ['tag1'] });
       expect(result.newvalues).toEqual({ tags: [] });
     });
@@ -513,11 +514,11 @@ describe('#standardDiffDocCalculation', () => {
       const b = {
         config: { theme: 'light', layout: { columns: 3 } },
       };
-      const ignoreFields = { config: { theme: true } };
+      const ignoreFields = { config: { layout: true } };
       const result = standardDiffDocCalculation({ a, b, ignoreFields });
 
-      expect(result.ignored).toEqual(['config.theme']);
-      expect(result.fieldChanges).toContain('config.layout.columns');
+      expect(result.ignored).toEqual(['config.layout.columns']);
+      expect(result.fieldChanges).toEqual(['config.theme']);
     });
   });
 
@@ -570,24 +571,44 @@ describe('#standardDiffDocCalculation', () => {
       expect(result.newvalues).toEqual({ value: 'something' });
     });
 
-    it('should handle special characters in property names', () => {
-      const a = { 'my-property': 'old' };
-      const b = { 'my-property': 'new' };
+    it.each([
+      ['my-property', 'hyphen'],
+      ['my_property', 'underscore'],
+      ['my.property', 'dot'],
+      ['my[0]', 'brackets'],
+      ['@mention', 'at sign'],
+      ['$variable', 'dollar'],
+      ['ns:name', 'colon'],
+      ['path/to', 'slash'],
+      ['my property', 'space'],
+      ['café', 'unicode'],
+    ])('should handle special characters in property names (%s - %s)', (propName, _description) => {
+      const a = { [propName]: 'old' };
+      const b = { [propName]: 'new' };
       const result = standardDiffDocCalculation({ a, b });
 
       expect(result.stats.updates).toBe(1);
-      expect(result.fieldChanges).toEqual(['my-property']);
+      expect(result.fieldChanges).toEqual([propName]);
+      expect(result.oldvalues).toEqual({ [propName]: 'old' });
+      expect(result.newvalues).toEqual({ [propName]: 'new' });
     });
 
-    it('should handle property names with a dot in the middle', () => {
-      const a = { 'user.name': 'Alice', 'config.theme': 'dark' };
-      const b = { 'user.name': 'Bob', 'config.theme': 'light' };
+    // TODO: What about nested objects clashing due to dot notation?
+    it.skip('should handle property names with a dot in the middle', () => {
+      const a = { 'user.name': 'Alice', user: { name: 'Alice-nested' } };
+      const b = { 'user.name': 'Bob', user: { name: 'Bob-nested' } };
       const result = standardDiffDocCalculation({ a, b });
 
       expect(result.stats.updates).toBe(2);
-      expect(result.fieldChanges.sort()).toEqual(['config.theme', 'user.name'].sort());
-      expect(result.oldvalues).toEqual({ 'user.name': 'Alice', 'config.theme': 'dark' });
-      expect(result.newvalues).toEqual({ 'user.name': 'Bob', 'config.theme': 'light' });
+      expect(result.fieldChanges.sort()).toEqual(['user\\.name', 'user.name'].sort());
+      expect(result.oldvalues).toEqual({
+        'user\\.name': 'Alice',
+        'user.name': 'Alice-nested',
+      });
+      expect(result.newvalues).toEqual({
+        'user\\.name': 'Bob',
+        'user.name': 'Bob-nested',
+      });
     });
 
     it('should handle numeric property names', () => {
@@ -750,7 +771,7 @@ describe('#maskSensitiveFields', () => {
       const snapshot = { user: { email: 'bob@example.com' } };
       const result = maskSensitiveFields(snapshot);
 
-      expect(result.masked).toEqual([]);
+      expect(result.fields).toEqual([]);
       expect(result.snapshot).toEqual(snapshot);
     });
   });
@@ -760,7 +781,7 @@ describe('#maskSensitiveFields', () => {
       const snapshot = { secret: 'sensitive' };
       const result = maskSensitiveFields(snapshot, undefined);
 
-      expect(result.masked).toEqual([]);
+      expect(result.fields).toEqual([]);
       expect(result.snapshot).toEqual(snapshot);
     });
   });
@@ -771,7 +792,7 @@ describe('#maskSensitiveFields', () => {
       const maskFields = { user: true };
       const result = maskSensitiveFields(snapshot, maskFields);
 
-      expect(result.masked).toEqual(['user.email']);
+      expect(result.fields).toEqual(['user.email']);
       expect(result.snapshot.user.email).toMatch(maskedValuePattern);
       expect(result.snapshot.user.email).not.toBe('bob@example.com');
     });
@@ -781,7 +802,7 @@ describe('#maskSensitiveFields', () => {
       const maskFields = { user: { email: true } };
       const result = maskSensitiveFields(snapshot, maskFields);
 
-      expect(result.masked).toEqual(['user.email']);
+      expect(result.fields).toEqual(['user.email']);
       expect(result.snapshot.user.email).toMatch(maskedValuePattern);
       expect(result.snapshot.user.name).toBe('Bob');
     });
@@ -796,7 +817,7 @@ describe('#maskSensitiveFields', () => {
       const maskFields = { user: true, token: true };
       const result = maskSensitiveFields(snapshot, maskFields);
 
-      expect(result.masked.sort()).toEqual(['token', 'user.apiKey', 'user.email'].sort());
+      expect(result.fields.sort()).toEqual(['token', 'user.apiKey', 'user.email'].sort());
       expect(result.snapshot.user.email).toMatch(maskedValuePattern);
       expect(result.snapshot.user.apiKey).toMatch(maskedValuePattern);
       expect(result.snapshot.token).toMatch(maskedValuePattern);
@@ -809,7 +830,7 @@ describe('#maskSensitiveFields', () => {
       const maskFields = { config: true };
       const result = maskSensitiveFields(snapshot, maskFields);
 
-      expect(result.masked).toEqual([]);
+      expect(result.fields).toEqual([]);
       expect(result.snapshot).toEqual(snapshot);
     });
 
@@ -820,7 +841,7 @@ describe('#maskSensitiveFields', () => {
       const maskFields = { user: true };
       const result = maskSensitiveFields(snapshot, maskFields);
 
-      expect(result.masked).toEqual(['user.email']);
+      expect(result.fields).toEqual(['user.email']);
       expect(result.snapshot.user.email).toMatch(maskedValuePattern);
       expect(result.snapshot.user.count).toBe(5);
       expect(result.snapshot.user.active).toBe(true);
@@ -866,7 +887,7 @@ describe('#maskSensitiveFields', () => {
     it('should handle empty snapshot', () => {
       const result = maskSensitiveFields({}, { user: true });
 
-      expect(result.masked).toEqual([]);
+      expect(result.fields).toEqual([]);
       expect(result.snapshot).toEqual({});
     });
 
@@ -875,7 +896,7 @@ describe('#maskSensitiveFields', () => {
       const maskFields = { secret: true };
       const result = maskSensitiveFields(snapshot, maskFields);
 
-      expect(result.masked).toEqual(['secret']);
+      expect(result.fields).toEqual(['secret']);
       expect(result.snapshot.secret).toMatch(maskedValuePattern);
     });
 

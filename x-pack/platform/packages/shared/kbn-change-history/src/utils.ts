@@ -65,7 +65,7 @@ export function standardDiffDocCalculation(opts: ChangeTrackingDiffOptions): Cha
   // Object nesting is taken care of during flattening.
   // We need to take care of Arrays, TypedArrays and primitives
   // and ignore things deliberately excluded by JSON like functions and bigint
-  const check = (v: any) => {
+  const normalize = (v: any) => {
     switch (typeof v) {
       // eslint-disable-next-line prettier/prettier
       case 'number': case 'string': case 'boolean': return v;
@@ -81,12 +81,13 @@ export function standardDiffDocCalculation(opts: ChangeTrackingDiffOptions): Cha
   // I.e. ignoreFields = { type: true, status: true } ignores type and status from the diff.
   const ignore = (key: string) =>
     !!flatFilter &&
+    // TODO: should be tested for performance with a set of v large objects and a lot of ignored fields
     Object.entries(flatFilter).some(([k, v]) => !!v && (key === k || key.startsWith(k + '.')));
   for (const key of allKeys) {
     if (ignore(key)) result.ignored.push(key);
     else {
-      const valA = check(flatA[key]);
-      const valB = check(flatB[key]);
+      const valA = normalize(flatA[key]);
+      const valB = normalize(flatB[key]);
 
       if (Array.isArray(valB) || ArrayBuffer.isView(valB)) {
         if (!arrayDeepEquals(valA, valB)) {
@@ -133,10 +134,10 @@ export function standardDiffDocCalculation(opts: ChangeTrackingDiffOptions): Cha
 export function maskSensitiveFields(
   snapshot: Record<string, any>,
   maskFields?: ChangeTrackingDataMaskingFields
-): { masked: Array<string>; snapshot: Record<string, any> } {
-  const masked: string[] = [];
+): { fields: Array<string>; snapshot: Record<string, any> } {
+  const fields: string[] = [];
   if (!maskFields) {
-    return { masked, snapshot };
+    return { fields, snapshot };
   }
   const flatSnapshot = flatten(snapshot);
   const flatMaskings = flatten(maskFields);
@@ -146,13 +147,13 @@ export function maskSensitiveFields(
   for (const key of Object.keys(flatSnapshot)) {
     const value = flatSnapshot[key];
     if (isMasked(key) && typeof value === 'string') {
-      masked.push(key);
+      fields.push(key);
       flatSnapshot[key] = `****************${sha256(value).slice(-12)}`;
     }
   }
 
   return {
-    masked,
+    fields,
     snapshot: unflatten(flatSnapshot),
   };
 }
