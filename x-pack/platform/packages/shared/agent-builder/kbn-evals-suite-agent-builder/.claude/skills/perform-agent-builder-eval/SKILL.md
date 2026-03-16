@@ -1,30 +1,69 @@
 ---
 name: perform-agent-builder-eval
-description: Orchestrate agent-builder evaluation runs — init ES/Kibana/EDOT stack, collect eval parameters, output the run command, and stop services.
+description: Orchestrate agent-builder evaluation runs — init ES/Kibana/EDOT stack, run evaluations, and stop services.
 allowed-tools: Bash, Read
-argument-hint: [init|stop]
+argument-hint: [init|run|stop]
 ---
 
 # Perform Agent Builder Evaluation
 
-This skill manages the lifecycle of running agent-builder evaluations. It accepts `$ARGUMENTS` as one of: `init` or `stop`.
+This skill manages the lifecycle of running agent-builder evaluations. It accepts `$ARGUMENTS` as one of: `init`, `run`, or `stop`.
 
-- **`init`** — Launch ES, Kibana, and EDOT; collect eval parameters; output the run command
+- **`init`** — Launch ES, Kibana, EDOT, and Phoenix; restore snapshot data
+- **`run`** — Select parameters and execute evaluation jobs (requires `init` to have been run first)
 - **`stop`** — Kill background ES, Kibana, and EDOT processes
 
 ---
 
 ## Action: `init`
 
-Follow these steps sequentially. Each step requires confirmation before proceeding.
+Follow these steps sequentially.
 
-### Step 1: Prompt for GCS Credentials
+### Step 1: Preflight Checks
 
-Use `AskUserQuestion` to ask the user for the path to their GCS credentials file. The default path is **exactly** `~/.gcs/gcs.client.default.credentials_file.json` — do NOT suggest any other path (not `~/.config/gcloud/...`, not application_default_credentials, etc.).
+Run all preflight checks before launching any services. This catches problems early and avoids wasted time.
 
-> What is the path to your GCS credentials file? (default: ~/.gcs/gcs.client.default.credentials_file.json)
+#### 1a: Resolve GCS Credentials
 
-If the user accepts the default or leaves it blank, use `$HOME/.gcs/gcs.client.default.credentials_file.json` (expand `~` to the user's home directory). Validate that the resolved path starts with `/`. If it does not, ask again.
+The default GCS credentials path is **exactly** `$HOME/.gcs/gcs.client.default.credentials_file.json`.
+
+Check whether the default file exists (use Bash: `test -f "$HOME/.gcs/gcs.client.default.credentials_file.json"`).
+
+- **If it exists**: use it automatically and tell the user which path was detected. Do NOT prompt.
+- **If it does not exist**: use `AskUserQuestion` to ask the user for the path. Do NOT suggest any path other than the default (not `~/.config/gcloud/...`, not application_default_credentials, etc.). Validate that the provided path starts with `/` and the file exists. If not, ask again.
+
+#### 1b: Validate Vault Token
+
+Check that the user has a valid Vault token before proceeding:
+
+```bash
+vault token lookup -format=json 2>/dev/null | grep -q '"id"'
+```
+
+- **If valid**: tell the user Vault token is OK and continue.
+- **If invalid or expired**: tell the user to authenticate with `vault login --method oidc` (and connect to VPN if needed). Wait for them to confirm, then re-check.
+
+#### 1c: Detect Kibana
+
+Check if Kibana is already running:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://localhost:5601/api/status 2>/dev/null
+```
+
+- **If it responds (any 2xx/3xx/401)**: note that Kibana is already running. Do NOT launch it later.
+- **If it does not respond**: note that Kibana will need to be launched.
+
+#### 1d: Detect Phoenix
+
+Check if Phoenix is already running:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" http://localhost:6006 2>/dev/null
+```
+
+- **If it responds (any 2xx/3xx)**: note that Phoenix is already running. Do NOT prompt later.
+- **If it does not respond**: note that Phoenix is not running. The user will be prompted later.
 
 ### Step 2: Launch Elasticsearch
 
@@ -117,17 +156,11 @@ Then re-run the restore command.
 
 Tell the user the snapshot has been restored.
 
-### Step 5: Launch Kibana
+### Step 5: Launch Kibana (if needed)
 
-Use `AskUserQuestion` to ask the user whether Kibana should be started:
+If Step 1c detected Kibana is already running, skip this step and tell the user Kibana was detected as already running.
 
-> Should Kibana be started?
-
-Options:
-- **Yes** — Launch Kibana in the background (recommended if Kibana is not already running)
-- **No, it's already running** — Skip launching Kibana and proceed to the next step
-
-If the user selects **Yes**, launch Kibana in the background using `run_in_background`:
+Otherwise, launch Kibana in the background using `run_in_background`:
 
 ```bash
 yarn start --no-base-path
@@ -135,17 +168,17 @@ yarn start --no-base-path
 
 Tell the user Kibana is starting up.
 
-If the user selects **No, it's already running**, tell the user Kibana launch was skipped and proceed to the next step.
+### Step 6: Confirm Phoenix Running (if needed)
 
-### Step 6: Confirm Phoenix Running
+If Step 1d detected Phoenix is already running, skip this step and tell the user Phoenix was detected as already running.
 
-Use `AskUserQuestion` to confirm Phoenix is running:
+Otherwise, use `AskUserQuestion` to tell the user Phoenix is not running:
 
-> Is Phoenix running and ready to receive traces?
+> Phoenix is not running on localhost:6006. Please start it, then let me know.
 
 Options:
-- **Yes** — Continue
-- **Not yet** — Wait for the user to start Phoenix, then ask again
+- **It's running now** — Continue
+- **Not yet** — Wait for the user to start Phoenix, then re-check with a curl
 
 ### Step 7: Launch EDOT
 
@@ -157,76 +190,109 @@ ELASTICSEARCH_HOST=http://localhost:9200 ELASTICSEARCH_USERNAME=elastic ELASTICS
 
 Tell the user EDOT is starting up.
 
-### Step 8: Collect Eval Parameters and Output Run Command
+### Step 8: Confirm Ready
 
-#### 8a: Discover available connectors
+Tell the user:
+
+> **Stack is ready!**
+>
+> - Elasticsearch: running (snapshot restored)
+> - Kibana: running
+> - Phoenix: running
+> - EDOT: running
+>
+> Use `/perform-agent-builder-eval run` to start evaluation jobs.
+
+---
+
+## Action: `run`
+
+This action collects evaluation parameters and executes evaluation jobs. It requires the stack to already be running (via `init`).
+
+### Step 1: Verify Stack is Running
+
+Quickly check that ES and Kibana are reachable:
+
+```bash
+curl -s -u elastic:changeme http://localhost:9200/_cluster/health | grep -q '"status"'
+curl -s -o /dev/null -w "%{http_code}" http://localhost:5601/api/status 2>/dev/null
+```
+
+If either is unreachable, tell the user to run `/perform-agent-builder-eval init` first and stop.
+
+### Step 2: Discover Available Connectors
 
 Read `config/kibana.dev.yml` and parse the `xpack.actions.preconfigured` section to get the list of available connector IDs and names. These connectors are used for both `EVALUATION_CONNECTOR_ID` (the judge) and `--project` (the model being evaluated).
 
 If no connectors are found, tell the user to configure connectors in `config/kibana.dev.yml` under `xpack.actions.preconfigured` and abort.
 
-#### 8b: Select evaluation connector (judge)
+### Step 3: Collect Parameters
 
-Use `AskUserQuestion` to ask which connector to use as the evaluation judge. Present the discovered connectors as options:
+Use a single `AskUserQuestion` call with **3 questions**:
 
-> Which connector should be used as the evaluation judge (EVALUATION_CONNECTOR_ID)?
+1. **Judge** (header: "Judge"): "Which connector should be used as the evaluation judge (EVALUATION_CONNECTOR_ID)?"
+   - Options: one per discovered connector, using `id (name)` as the label.
+2. **Model** (header: "Model"): "Which model should be evaluated (--project)?"
+   - Options: one per discovered connector, using `id (name)` as the label.
+3. **Datasets** (header: "Datasets", **multiSelect: true**): "Which datasets should be evaluated in parallel?"
+   - Options:
+     - `agent-builder: text-retrieval: wix-qa`
+     - `agent-builder: text-retrieval: elastic-qa`
+     - `agent-builder: text-retrieval: quick-tester`
 
-Options: one per discovered connector, using `id (name)` as the label.
+Then use a second `AskUserQuestion` to ask how many iterations:
 
-#### 8c: Select project (model to evaluate)
-
-Use `AskUserQuestion` to ask which connector/model to evaluate. Present the discovered connectors as options:
-
-> Which model should be evaluated (--project)?
-
-Options: one per discovered connector, using `id (name)` as the label.
-
-#### 8d: Select dataset
-
-Use `AskUserQuestion` to ask which dataset to use:
-
-> Which dataset should be used?
+> How many iterations should each dataset be run? Each iteration produces a separate run ID.
 
 Options:
-- `agent-builder: text-retrieval: wix-qa`
-- `agent-builder: text-retrieval: elastic-qa`
-- `agent-builder: text-retrieval: quick-tester`
+- **1** — Single run per dataset
+- **2** — Two runs per dataset
+- **3** — Three runs per dataset
 
-#### 8e: Output the run command
+### Step 4: Execute Evaluations
 
-Using the collected values and the following defaults, output the exact command the user should run in a separate terminal:
+For each iteration (1 to N):
 
-- **SELECTED_EVALUATORS**: `Precision@K,Recall@K,F1@K,Latency,Input Tokens,Output Tokens,Tool Calls,Factuality,Groundedness,Relevance`
-- **RAG_EVAL_K**: `10,20,30,40`
-- **EVALUATION_REPETITIONS**: `1`
+1. Launch **one background job per selected dataset** in parallel using `run_in_background`. Each job runs:
 
-Display a summary and the command:
+```bash
+TRACING_ES_URL=http://elastic:changeme@localhost:9200 \
+SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Latency,Input Tokens,Output Tokens,Tool Calls,Factuality,Groundedness,Relevance" \
+RAG_EVAL_K=10,20,30,40 \
+KBN_EVALS_EXECUTOR=phoenix \
+EVALUATION_CONNECTOR_ID=<judge> \
+DATASET_NAME="<dataset>" \
+EVALUATION_REPETITIONS=1 \
+KBN_EVALS_SKIP_CONNECTOR_SETUP=true \
+node scripts/playwright test \
+  --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts \
+  evals/external/external_dataset.spec.ts \
+  --project <model>
+```
 
-> **Stack is ready!**
+2. Wait for **all parallel jobs in this iteration** to complete.
+3. For each completed job, read its output file and extract the `run_id` from the log line matching:
+   ```
+   info [scout-worker] You can query the data using: environment.hostname:"..." AND task.model.id:"..." AND run_id:"<RUN_ID>"
+   ```
+   Use a grep/regex to extract the `run_id` value from the quotes.
+4. If a job **failed** (non-zero exit code or no `run_id` found): record the error, display all successfully collected run IDs so far, report which dataset(s) failed, and **stop** — do not start the next iteration.
+5. If all jobs succeeded, tell the user which iteration completed and proceed to the next iteration.
+
+### Step 5: Display Results
+
+After all iterations complete (or after an error), display a summary table:
+
+> **Evaluation runs complete!**
 >
-> - Elasticsearch: running (snapshot with GCS credentials)
-> - Kibana: running (no base path)
-> - Phoenix: confirmed running
-> - EDOT: running
->
-> **Run the following command in a separate terminal to start the evaluation:**
->
-> ```bash
-> TRACING_ES_URL=http://elastic:changeme@localhost:9200 \
-> SELECTED_EVALUATORS="<value>" \
-> RAG_EVAL_K=<value> \
-> KBN_EVALS_EXECUTOR=phoenix \
-> EVALUATION_CONNECTOR_ID=<value> \
-> DATASET_NAME="<value>" \
-> EVALUATION_REPETITIONS=<value> \
-> KBN_EVALS_SKIP_CONNECTOR_SETUP=true \
-> node scripts/playwright test \
->   --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts \
->   evals/external/external_dataset.spec.ts \
->   --project <value>
-> ```
+> | Dataset | Iteration | Run ID |
+> |---------|-----------|--------|
+> | wix-qa  | 1         | `abc123` |
+> | wix-qa  | 2         | `def456` |
+> | elastic-qa | 1      | `ghi789` |
+> | elastic-qa | 2      | `jkl012` |
 
-Substitute the actual user-selected values into the command. The user will copy-paste and run this themselves. Do NOT append any extra notes or warnings after the command block.
+If any runs failed, add a note below the table listing which dataset/iteration failed and the error message.
 
 ---
 
