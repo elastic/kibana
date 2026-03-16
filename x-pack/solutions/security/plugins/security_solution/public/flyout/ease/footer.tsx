@@ -18,7 +18,11 @@ import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent
 import { NewAgentBuilderAttachment } from '../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../agent_builder/hooks/use_agent_builder_attachment';
 import { getRawData } from '../../assistant/helpers';
-import { stringifyEssentialAlertData } from '../../agent_builder/helpers';
+import {
+  getAlertDataViewAnonymizationTarget,
+  stringifyEssentialAlertData,
+} from '../../agent_builder/helpers';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ALERT_ATTACHMENT_PROMPT } from '../../agent_builder/components/prompts';
 
@@ -43,6 +47,7 @@ export const PanelFooter = memo(() => {
   });
 
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const spaceId = useSpaceId();
 
   const alertAttachment = useMemo(() => {
     const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
@@ -52,9 +57,10 @@ export const PanelFooter = memo(() => {
         alert: stringifyEssentialAlertData(rawData),
         attachmentLabel: rawData[ALERT_RULE_NAME]?.[0],
       },
+      anonymizationTarget: spaceId ? getAlertDataViewAnonymizationTarget(spaceId) : undefined,
       attachmentPrompt: ALERT_ATTACHMENT_PROMPT,
     };
-  }, [dataFormattedForFieldBrowser]);
+  }, [dataFormattedForFieldBrowser, spaceId]);
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(alertAttachment);
 
