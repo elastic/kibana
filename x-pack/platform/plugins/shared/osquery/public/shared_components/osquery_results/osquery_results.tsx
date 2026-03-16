@@ -18,6 +18,8 @@ import { KibanaRenderContextProvider } from '../../shared_imports';
 import type { StartPlugins } from '../../types';
 import type { OsqueryActionResultsProps } from './types';
 import { OsqueryResult } from './osquery_result';
+import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   ruleName,
@@ -66,7 +68,9 @@ const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapper
   <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
       <QueryClientProvider client={queryClient}>
-        <OsqueryActionResults {...restProps} />
+        <ExperimentalFeaturesProvider value={allowedExperimentalValues}>
+          <OsqueryActionResults {...restProps} />
+        </ExperimentalFeaturesProvider>
       </QueryClientProvider>
     </KibanaContextProvider>
   </KibanaRenderContextProvider>

@@ -13,6 +13,8 @@ import { KibanaContextProvider } from '../common/lib/kibana';
 import { queryClient } from '../query_client';
 import { KibanaRenderContextProvider } from '../shared_imports';
 import type { StartPlugins } from '../types';
+import { ExperimentalFeaturesProvider } from '../common/experimental_features_context';
+import { allowedExperimentalValues } from '../../common/experimental_features';
 
 export interface ServicesWrapperProps {
   services: CoreStart & StartPlugins;
@@ -22,7 +24,11 @@ export interface ServicesWrapperProps {
 const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({ services, children }) => (
   <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <ExperimentalFeaturesProvider value={allowedExperimentalValues}>
+          {children}
+        </ExperimentalFeaturesProvider>
+      </QueryClientProvider>
     </KibanaContextProvider>
   </KibanaRenderContextProvider>
 );

@@ -22,6 +22,8 @@ import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_sta
 import { ATTACHED_QUERY } from '../../agents/translations';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { OsqueryActionResultProps } from './types';
+import { ExperimentalFeaturesProvider } from '../../common/experimental_features_context';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 // eslint-disable-next-line react/display-name
 const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
@@ -77,7 +79,9 @@ const OsqueryActionResultWrapperComponent: React.FC<OsqueryActionResultsWrapperP
   <KibanaRenderContextProvider {...services}>
     <KibanaContextProvider services={services}>
       <QueryClientProvider client={queryClient}>
-        <OsqueryActionResult {...restProps} />
+        <ExperimentalFeaturesProvider value={allowedExperimentalValues}>
+          <OsqueryActionResult {...restProps} />
+        </ExperimentalFeaturesProvider>
       </QueryClientProvider>
     </KibanaContextProvider>
   </KibanaRenderContextProvider>
