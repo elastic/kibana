@@ -9,30 +9,18 @@ import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-interface WaterfallSizeWarningBaseProps {
+interface WaterfallSizeWarningProps {
   traceDocsTotal: number;
   maxTraceItems: number;
-}
-
-type WaterfallSizeWarningWithLink = WaterfallSizeWarningBaseProps & {
-  discoverHref: string;
-  'data-test-subj': string;
-};
-
-type WaterfallSizeWarningWithoutLink = WaterfallSizeWarningBaseProps & {
-  discoverHref?: undefined;
+  discoverHref?: string;
   'data-test-subj'?: string;
-};
-
-export type WaterfallSizeWarningProps =
-  | WaterfallSizeWarningWithLink
-  | WaterfallSizeWarningWithoutLink;
+}
 
 export function WaterfallSizeWarning({
   traceDocsTotal,
   maxTraceItems,
   discoverHref,
-  'data-test-subj': dataTestSubj,
+  'data-test-subj': dataTestSubj = 'waterfallSizeWarning',
 }: WaterfallSizeWarningProps) {
   return (
     <EuiCallOut
