@@ -96156,6 +96156,7 @@ components:
           - attributes:
               created_at: '2023-10-31T00:00:00Z'
               created_by: elastic
+              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               description: My pack description
               enabled: true
               name: My Pack
@@ -96168,6 +96169,7 @@ components:
                   query: select * from uptime;
               updated_at: '2023-10-31T00:00:00Z'
               updated_by: elastic
+              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             namespaces:
               - default
@@ -96212,6 +96214,7 @@ components:
           - attributes:
               created_at: '2022-07-26T09:28:08.597Z'
               created_by: elastic
+              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               description: Saved query description
               ecs_mapping:
                 host.uptime:
@@ -96223,6 +96226,7 @@ components:
               query: select * from uptime;
               updated_at: '2022-07-26T09:28:08.597Z'
               updated_by: elastic
+              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               version: 2.8.0
             id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             namespaces:
