@@ -73,8 +73,7 @@ const ensureAutoGapFillEnabledViaUi = () => {
     });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/246571
-describe.skip(
+describe(
   'Rule gaps auto fill status',
   {
     tags: ['@ess'],
@@ -160,11 +159,20 @@ describe.skip(
           // Verify that after filtering, rows have the expected status in the status column
           getGapAutoFillLogsTableRows()
             .should('exist')
-            .each(($row) => {
-              cy.wrap($row).find('td').eq(1).contains('No gaps');
+            .each((_row, index) => {
+              getGapAutoFillLogsTableRows()
+                .eq(index)
+                .find('td')
+                .eq(1)
+                .should('contain.text', 'No gaps');
 
               // Verify tooltip appears on hover and contains the expected text
-              cy.wrap($row).find('td').eq(1).find('.euiBadge').realHover();
+              getGapAutoFillLogsTableRows()
+                .eq(index)
+                .find('td')
+                .eq(1)
+                .find('.euiBadge')
+                .realHover();
 
               // Check that the tooltip is visible and contains the expected message
               cy.get(TOOLTIP)
