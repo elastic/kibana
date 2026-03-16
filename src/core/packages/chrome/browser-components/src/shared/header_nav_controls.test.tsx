@@ -16,10 +16,7 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { TestChromeProviders } from '../test_helpers';
 import { HeaderNavControls } from './header_nav_controls';
 
-const renderWithChrome = (
-  position: 'left' | 'center' | 'right' | 'extension',
-  controls: ChromeNavControl[]
-) => {
+const renderWithChrome = (position: 'left' | 'center' | 'right', controls: ChromeNavControl[]) => {
   const chrome = chromeServiceMock.createStartContract();
   const controls$ = new BehaviorSubject<ChromeNavControl[]>(controls);
   const getter =
@@ -27,9 +24,7 @@ const renderWithChrome = (
       ? chrome.navControls.getLeft$
       : position === 'center'
       ? chrome.navControls.getCenter$
-      : position === 'right'
-      ? chrome.navControls.getRight$
-      : chrome.navControls.getExtension$;
+      : chrome.navControls.getRight$;
   getter.mockReturnValue(controls$);
   return render(
     <TestChromeProviders chrome={chrome}>

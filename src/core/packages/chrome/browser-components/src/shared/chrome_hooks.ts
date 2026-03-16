@@ -132,7 +132,7 @@ export function useCustomNavLink() {
   return useObservable(customNavLink$, undefined);
 }
 
-export type NavControlPosition = 'left' | 'center' | 'right' | 'extension';
+export type NavControlPosition = 'left' | 'center' | 'right';
 
 const navControlGetters: Record<
   NavControlPosition,
@@ -141,7 +141,6 @@ const navControlGetters: Record<
   left: (chrome) => chrome.navControls.getLeft$(),
   center: (chrome) => chrome.navControls.getCenter$(),
   right: (chrome) => chrome.navControls.getRight$(),
-  extension: (chrome) => chrome.navControls.getExtension$(),
 };
 
 /**

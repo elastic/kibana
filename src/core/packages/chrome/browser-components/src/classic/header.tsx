@@ -63,13 +63,7 @@ export function ClassicHeader() {
               {
                 items: [
                   <EuiHideFor sizes={['m', 'l', 'xl']}>
-                    <>
-                      <HeaderNavControls position="extension" />
-                      <HeaderNavControls position="center" />
-                    </>
-                  </EuiHideFor>,
-                  <EuiHideFor sizes={['xs', 's']}>
-                    <HeaderNavControls position="extension" />
+                    <HeaderNavControls position="center" />
                   </EuiHideFor>,
                   <HeaderHelpMenu />,
                   <HeaderNavControls position="right" />,
