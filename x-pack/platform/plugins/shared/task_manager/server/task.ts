@@ -30,6 +30,33 @@ export enum TaskCost {
   ExtraLarge = 10,
 }
 
+/**
+ * String values for task cost as stored in the task schema (e.g. in saved objects).
+ * Use these when reading cost from task params or instance attributes.
+ */
+export enum TaskCostString {
+  Tiny = 'tiny',
+  Normal = 'normal',
+  ExtraLarge = 'extralarge',
+}
+
+/** Maps schema cost strings to their integer values for capacity calculations. */
+export const TASK_COST_STRING_TO_INT: Record<TaskCostString, TaskCost> = {
+  [TaskCostString.Tiny]: TaskCost.Tiny,
+  [TaskCostString.Normal]: TaskCost.Normal,
+  [TaskCostString.ExtraLarge]: TaskCost.ExtraLarge,
+};
+
+/**
+ * Translates a cost string from task params/instance (e.g. 'extralarge') to the
+ * corresponding TaskCost integer. Returns undefined if the string is invalid or null.
+ */
+export const getTaskCostFromString = (cost?: TaskCostString): number | undefined => {
+  if (cost) {
+    return TASK_COST_STRING_TO_INT[cost];
+  }
+};
+
 /*
  * Type definitions and validations for tasks.
  */
@@ -383,6 +410,14 @@ export interface TaskInstance {
    * Optionally override the priority defined in the task type for this specific task instance
    */
   priority?: TaskPriority;
+
+  /**
+   * Optional cost for this task instance, overriding the task type's default cost.
+   * When set, must be one of the TaskCostString enum values ('tiny', 'normal', 'extralarge').
+   * Used by the task selector and capacity logic to limit concurrent work.
+   * Use getTaskCostFromString() to translate to the integer TaskCost.
+   */
+  cost?: TaskCostString;
 }
 
 /**
