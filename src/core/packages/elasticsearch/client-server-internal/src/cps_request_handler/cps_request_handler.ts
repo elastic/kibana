@@ -19,6 +19,7 @@ interface StructuredAcceptedParams {
   body: string[];
   query: string[];
 }
+// (temp) trivial change
 
 type AcceptedParams = NonNullable<TransportRequestMetadata['acceptedParams']>;
 
