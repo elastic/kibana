@@ -2769,10 +2769,17 @@
           "\nValidates a stream name against Elasticsearch naming requirements.\nReturns an object indicating validity and an error message if invalid."
         ],
         "signature": [
-          "(name: string) => { valid: true; } | { valid: false; message: string; }"
+          "(name: string) => ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamNameValidationResult",
+            "text": "StreamNameValidationResult"
+          }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_name_validation.ts",
-        "lineNumber": 21,
+        "lineNumber": 76,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2788,8 +2795,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_name_validation.ts",
-            "lineNumber": 22,
-            "columnNumber": 3,
+            "lineNumber": 76,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -6382,7 +6389,7 @@
           "string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_name_validation.ts",
-        "lineNumber": 15,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6952,6 +6959,40 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/processing_simulation.ts",
         "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.StreamNameValidationError",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamNameValidationError",
+        "description": [],
+        "signature": [
+          "\"empty\" | \"uppercase\" | \"tooLong\" | \"reservedName\" | \"invalidPrefix\" | \"invalidCharacter\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_name_validation.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.StreamNameValidationResult",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamNameValidationResult",
+        "description": [],
+        "signature": [
+          "{ valid: true; } | StreamNameValidationInvalidResult"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_name_validation.ts",
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
