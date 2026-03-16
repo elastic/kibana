@@ -98,7 +98,7 @@ describe('Console highlighting', () => {
     expect(eventNameTokenType).not.toContain('text');
   });
 
-  it('returns to root after the top-level closing brace at end-of-line in the editor', () => {
+  it('highlights the next request method after the top-level closing brace in the editor', () => {
     const text = `GET _all
 {
   "a": {
@@ -114,6 +114,49 @@ GET _search`;
     const methodTokenType = getTokenTypeAtOffset(requestLineAfterJson, 0);
     expect(methodTokenType).toContain('method');
     expect(methodTokenType).not.toContain('text');
+  });
+
+  it('highlights the next request method after an indented top-level closing brace', () => {
+    const text = `POST kibana_sample_data_logs/_search
+  {
+    "query": {
+      "match_all": {}
+    }
+  }
+PUT _transform/my-managed-transform
+{
+  "source": {}
+}`;
+
+    const tokenizedLines = monaco.editor.tokenize(text, CONSOLE_TEST_LANG_ID);
+    const getLine = getLineTokens(tokenizedLines, text);
+
+    const putLine = getLine('PUT _transform/my-managed-transform');
+    const methodTokenType = getTokenTypeAtOffset(putLine, 0);
+    expect(methodTokenType).toContain('method');
+    expect(methodTokenType).not.toContain('text');
+  });
+
+  it('tokenizes intermediate closing braces as paren.rparen, not text', () => {
+    const text = `GET _all
+{
+  "a": {
+    "b": {
+      "c": 1
+    }
+  }
+}`;
+
+    const tokenizedLines = monaco.editor.tokenize(text, CONSOLE_TEST_LANG_ID);
+    const getLine = getLineTokens(tokenizedLines, text);
+
+    for (const line of ['  }', '}']) {
+      const tokens = getLine(line);
+      const braceType = getTokenTypeAtOffset(tokens, line.indexOf('}'));
+      expect(braceType).toContain('paren.rparen');
+      expect(braceType).not.toContain('text');
+      expect(braceType).not.toContain('invalid');
+    }
   });
 
   it('keeps nested braces and following JSON keys highlighted in output', () => {
@@ -209,14 +252,14 @@ describe('Lexer rule composition', () => {
     expect(stringifiedActions).not.toContain('@pop');
   });
 
-  it('json_root includes the Console-specific closing brace EOL rule', () => {
+  it('json_root includes the Console-specific closing brace rule', () => {
     const jsonRoot = (
       consoleSharedLexerRules.tokenizer as Record<string, monaco.languages.IMonarchLanguageRule[]>
     ).json_root;
 
     const hasRule = jsonRoot.some((rule) => {
       const regex = Array.isArray(rule) ? rule[0] : rule?.regex;
-      return regex instanceof RegExp && regex.source === '^}\\s*';
+      return regex instanceof RegExp && regex.source === '}';
     });
 
     expect(hasRule).toBe(true);
