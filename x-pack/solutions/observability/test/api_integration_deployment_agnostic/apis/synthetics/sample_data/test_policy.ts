@@ -7,7 +7,7 @@
 import expect from 'expect';
 import { omit, sortBy } from 'lodash';
 import type { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
-import { INSTALLED_VERSION } from '../../../services/synthetics_private_location';
+import { DEFAULT_SYNTHETICS_VERSION } from '../../../services/synthetics_private_location';
 import { commonVars } from './test_project_monitor_policy';
 
 interface PolicyProps {
@@ -32,7 +32,11 @@ export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
     name: 'test-monitor-name-Test private location 0-default',
     namespace: namespace ?? 'testnamespace',
     spaceIds: ['default'],
-    package: { name: 'synthetics', title: 'Elastic Synthetics', version: INSTALLED_VERSION },
+    package: {
+      name: 'synthetics',
+      title: 'Elastic Synthetics',
+      version: DEFAULT_SYNTHETICS_VERSION,
+    },
     enabled: true,
     policy_id: '5347cd10-0368-11ed-8df7-a7424c6f5167',
     policy_ids: ['5347cd10-0368-11ed-8df7-a7424c6f5167'],
