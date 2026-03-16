@@ -106,7 +106,8 @@
     "@kbn/workflows",
     "@kbn/lens-embeddable-utils",
     "@kbn/resizable-layout",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/core-ui-settings-browser"
   ],
   "exclude": ["target/**/*"]
 }
