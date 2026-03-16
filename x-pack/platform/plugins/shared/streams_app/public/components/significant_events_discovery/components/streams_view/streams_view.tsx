@@ -147,7 +147,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                   onClick={() => {
                     toasts.remove(toast);
                     router.push('/_discovery/{tab}', {
-                      path: { tab: 'insights' },
+                      path: { tab: 'significant_events' },
                       query: {},
                     });
                   }}
