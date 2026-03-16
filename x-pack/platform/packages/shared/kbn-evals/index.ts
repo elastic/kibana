@@ -86,5 +86,49 @@ export {
 } from './src/evaluators/security';
 export { createSimilarityEvaluator } from './src/evaluators/similarity';
 
+// Auto-generation: schema walker and smart generation
+export {
+  generateTestsFromToolSchema,
+  type JSONSchema,
+  type GenerateConfig,
+  type Difficulty,
+} from './src/generation/schema_walker';
+export { generateSmartExamples } from './src/generation/smart_gen';
+
+// Coverage analysis
+export {
+  analyzeCoverage,
+  type CoverageReport,
+  type ToolCoverageEntry,
+  type EvaluatorCoverageEntry,
+  type GateReadinessEntry,
+} from './src/coverage/analyzer';
+
+// Conversation simulation
+export {
+  type UserPersona,
+  NOVICE_PERSONA,
+  EXPERT_PERSONA,
+  ADVERSARIAL_PERSONA,
+  BUILT_IN_PERSONAS,
+  getPersona,
+} from './src/conversation_sim/personas';
+export { simulateConversations, type SimulatorConfig } from './src/conversation_sim/simulator';
+
+// Prompt optimization
+export { optimizePrompt, type OptimizationResult } from './src/prompt_optimization/optimizer';
+
+// Quality gates
+export {
+  type GateConfig,
+  serializeGateConfig,
+  parseGateConfig,
+} from './src/quality_gates/types';
+export {
+  calibrateThresholds,
+  type CalibrateOptions,
+  type CalibrationResult,
+} from './src/quality_gates/calibrate';
+
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';

@@ -17,6 +17,9 @@ import { startCmd } from './commands/start';
 import { stopCmd } from './commands/stop';
 import { logsCmd } from './commands/logs';
 import { scoutCmd } from './commands/scout';
+import { generateCmd } from './commands/generate';
+import { coverageCmd } from './commands/coverage';
+import { calibrateCmd } from './commands/calibrate';
 
 export async function run() {
   await new RunWithCommands(
@@ -35,6 +38,9 @@ export async function run() {
       envCmd,
       ciMapCmd,
       compareCmd,
+      generateCmd,
+      coverageCmd,
+      calibrateCmd,
     ]
   ).execute();
 }
