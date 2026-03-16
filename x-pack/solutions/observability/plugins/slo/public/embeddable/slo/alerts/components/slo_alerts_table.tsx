@@ -114,6 +114,14 @@ export const useSloAlertsQuery = (
   showAllGroupByInstances?: boolean
 ) => {
   return useMemo(() => {
+    if (slos.length === 0) {
+      return {
+        bool: {
+          filter: [{ match_none: {} }],
+        },
+      };
+    }
+
     const query: NonNullable<QueryDslQueryContainer> = {
       bool: {
         filter: [
