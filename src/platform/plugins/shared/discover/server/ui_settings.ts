@@ -182,7 +182,7 @@ export const getUiSettings: (
         'From this list the first field that is present and sortable in the current data view is used.',
     }),
     category: ['discover'],
-    schema: schema.arrayOf(schema.string()),
+    schema: schema.arrayOf(schema.string(), { maxSize: 20 }),
   },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
