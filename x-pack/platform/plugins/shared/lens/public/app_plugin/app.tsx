@@ -73,6 +73,7 @@ export type SaveProps = Simplify<
 function isComingFromContainerView(incomingState?: LensAppProps['incomingState']): boolean {
   return Boolean(
     incomingState?.originatingApp &&
+      incomingState?.originatingApp !== 'visualize' &&
       incomingState?.originatingPath &&
       // Exclude library lists (/list/*) - no "Save and Return" from Dashboard Viz tab
       !incomingState.originatingPath.includes('/list/')
