@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useGetTasks } from '../../containers/use_get_tasks';
 import { TasksTable } from './tasks_table';
+import { AddTaskFlyout } from './add_task_flyout';
 
 interface CaseViewTasksProps {
   caseId: string;
@@ -16,17 +17,25 @@ interface CaseViewTasksProps {
 
 export const CaseViewTasks = React.memo<CaseViewTasksProps>(({ caseId }) => {
   const { data, isLoading } = useGetTasks(caseId);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <TasksTable
-          caseId={caseId}
-          tasks={data?.tasks ?? []}
-          isLoading={isLoading}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <TasksTable
+            caseId={caseId}
+            tasks={data?.tasks ?? []}
+            isLoading={isLoading}
+            onAddTask={() => setIsFlyoutOpen(true)}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {isFlyoutOpen && (
+        <AddTaskFlyout caseId={caseId} onClose={() => setIsFlyoutOpen(false)} />
+      )}
+    </>
   );
 });
 

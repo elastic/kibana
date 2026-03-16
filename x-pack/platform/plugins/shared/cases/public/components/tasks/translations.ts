@@ -86,3 +86,33 @@ export const PRIORITY_HIGH = i18n.translate('xpack.cases.tasks.priority.high', {
 export const PRIORITY_CRITICAL = i18n.translate('xpack.cases.tasks.priority.critical', {
   defaultMessage: 'Critical',
 });
+
+export const CANCEL = i18n.translate('xpack.cases.tasks.cancel', {
+  defaultMessage: 'Cancel',
+});
+
+export const TASK_DESCRIPTION = i18n.translate('xpack.cases.tasks.fields.description', {
+  defaultMessage: 'Description',
+});
+
+export const TASK_TITLE_PLACEHOLDER = i18n.translate('xpack.cases.tasks.fields.titlePlaceholder', {
+  defaultMessage: 'Enter a task title',
+});
+
+export const TASK_DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.cases.tasks.fields.descriptionPlaceholder',
+  {
+    defaultMessage: 'Describe the task (optional)',
+  }
+);
+
+export const TASK_DUE_DATE_PLACEHOLDER = i18n.translate(
+  'xpack.cases.tasks.fields.dueDatePlaceholder',
+  {
+    defaultMessage: 'Select a due date',
+  }
+);
+
+export const TASK_TITLE_REQUIRED = i18n.translate('xpack.cases.tasks.fields.titleRequired', {
+  defaultMessage: 'A title is required.',
+});
