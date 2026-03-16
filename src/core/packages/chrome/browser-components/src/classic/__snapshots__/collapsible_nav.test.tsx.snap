@@ -748,39 +748,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   id="collapsibe-nav"
   isLocked={false}
   isNavOpen={false}
-  navLinks$={
-    BehaviorSubject {
-      "_value": Array [],
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
   navigateToApp={[Function]}
   navigateToUrl={[Function]}
   storage={
@@ -931,39 +898,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   isLocked={false}
   isNavOpen={false}
   isOpen={true}
-  navLinks$={
-    BehaviorSubject {
-      "_value": Array [],
-      "closed": false,
-      "currentObservers": null,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [
-        SafeSubscriber {
-          "_finalizers": Array [
-            Subscription {
-              "_finalizers": null,
-              "_parentage": [Circular],
-              "closed": false,
-              "initialTeardown": [Function],
-            },
-          ],
-          "_parentage": null,
-          "closed": false,
-          "destination": ConsumerObserver {
-            "partialObserver": Object {
-              "complete": undefined,
-              "error": undefined,
-              "next": [Function],
-            },
-          },
-          "initialTeardown": undefined,
-          "isStopped": false,
-        },
-      ],
-      "thrownError": null,
-    }
-  }
   navigateToApp={[Function]}
   navigateToUrl={[Function]}
   storage={

@@ -49,14 +49,12 @@ function mockRecentNavLink({ label = 'recent' }: Partial<ChromeRecentlyAccessedH
 
 function mockProps() {
   return {
-    appId$: new BehaviorSubject('test'),
     basePath: httpServiceMock.createSetupContract({ basePath: '/test' }).basePath,
     id: 'collapsibe-nav',
     isLocked: false,
     isNavOpen: false,
     homeHref: '/',
     url: '/',
-    navLinks$: new BehaviorSubject<ChromeNavLink[]>([]),
     storage: new StubBrowserStorage(),
     closeNav: () => {},
     navigateToApp: () => Promise.resolve(),
@@ -68,13 +66,16 @@ function mockProps() {
 function createChromeMock({
   recentlyAccessed = [],
   customNavLink,
+  navLinks = [],
 }: {
   recentlyAccessed?: ChromeRecentlyAccessedHistoryItem[];
   customNavLink?: ChromeNavLink;
+  navLinks?: ChromeNavLink[];
 } = {}) {
   const chrome = chromeServiceMock.createStartContract();
   chrome.recentlyAccessed.get$.mockReturnValue(new BehaviorSubject(recentlyAccessed));
   chrome.getCustomNavLink$.mockReturnValue(new BehaviorSubject(customNavLink));
+  chrome.navLinks.getNavLinks$.mockReturnValue(new BehaviorSubject(navLinks));
   return chrome;
 }
 
@@ -129,12 +130,15 @@ describe('CollapsibleNav', () => {
       mockRecentNavLink({ label: 'recent 2' }),
     ];
     const customNavLink = mockLink({ title: 'Custom link' });
-    const chrome = createChromeMock({ recentlyAccessed: recentNavLinks, customNavLink });
+    const chrome = createChromeMock({
+      recentlyAccessed: recentNavLinks,
+      customNavLink,
+      navLinks,
+    });
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isNavOpen={true}
-        navLinks$={new BehaviorSubject(navLinks)}
       />,
       { wrappingComponent: createWrapper(chrome) as any }
     );
@@ -144,12 +148,11 @@ describe('CollapsibleNav', () => {
   it('remembers collapsible section state', () => {
     const navLinks = [mockLink({ category: kibana }), mockLink({ category: observability })];
     const recentNavLinks = [mockRecentNavLink({})];
-    const chrome = createChromeMock({ recentlyAccessed: recentNavLinks });
+    const chrome = createChromeMock({ recentlyAccessed: recentNavLinks, navLinks });
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isNavOpen={true}
-        navLinks$={new BehaviorSubject(navLinks)}
       />,
       { wrappingComponent: createWrapper(chrome) as any }
     );
@@ -167,12 +170,11 @@ describe('CollapsibleNav', () => {
     const onClose = sinon.spy();
     const navLinks = [mockLink({ category: kibana }), mockLink({ title: 'categoryless' })];
     const recentNavLinks = [mockRecentNavLink({})];
-    const chrome = createChromeMock({ recentlyAccessed: recentNavLinks });
+    const chrome = createChromeMock({ recentlyAccessed: recentNavLinks, navLinks });
     const component = mount(
       <CollapsibleNav
         {...mockProps()}
         isNavOpen={true}
-        navLinks$={new BehaviorSubject(navLinks)}
       />,
       { wrappingComponent: createWrapper(chrome) as any }
     );

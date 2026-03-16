@@ -175,31 +175,14 @@ export class ChromeService {
       docTitle,
     });
 
-    // 6. Create cached observables for components
-    const navLinks$ = navLinks.getNavLinks$();
+    // 6. Build component deps (consumed by ChromeComponentsProvider in the layout service)
     const loadingCount$ = http.getLoadingCount$();
-    // 7. Build component deps (consumed by ChromeComponentsProvider in the layout service)
     const componentDeps: ChromeComponentsDeps = {
       application,
       basePath: http.basePath,
       docLinks,
-      navControls: {
-        left$: navControls.getLeft$(),
-        center$: navControls.getCenter$(),
-        right$: navControls.getRight$(),
-        extension$: navControls.getExtension$(),
-      },
       loadingCount$,
-      navLinks$,
       customBranding$: customBranding.customBranding$,
-      breadcrumbsAppendExtensions$: state.breadcrumbs.appendExtensionsWithBadges$,
-      appMenu$: state.appMenu.$,
-      headerBanner$: state.headerBanner.$,
-      sideNav: {
-        collapsed$: state.sideNav.collapsed.$,
-        initialCollapsed: state.sideNav.collapsed.get(),
-        onToggleCollapsed: state.sideNav.collapsed.set,
-      },
     };
 
     // 8. Return chrome API + componentDeps

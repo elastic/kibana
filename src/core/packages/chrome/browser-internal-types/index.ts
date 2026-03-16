@@ -13,7 +13,6 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
@@ -21,8 +20,6 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
-  ChromeNavControl,
-  ChromeNavLink,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
@@ -50,29 +47,12 @@ export interface ChromeApplicationContext
   currentActionMenu$: Observable<MountPoint<HTMLElement> | undefined>;
 }
 
-interface NavControlsObservables {
-  left$: Observable<ChromeNavControl[]>;
-  center$: Observable<ChromeNavControl[]>;
-  right$: Observable<ChromeNavControl[]>;
-  extension$: Observable<ChromeNavControl[]>;
-}
-
 export interface ChromeComponentsDeps {
   application: ChromeApplicationContext;
   basePath: HttpStart['basePath'];
   docLinks: DocLinksStart;
-  navControls: NavControlsObservables;
   loadingCount$: Observable<number>;
-  navLinks$: Observable<ChromeNavLink[]>;
   customBranding$: Observable<CustomBranding>;
-  breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
-  appMenu$: Observable<AppMenuConfig | undefined>;
-  headerBanner$: Observable<ChromeUserBanner | undefined>;
-  sideNav: {
-    collapsed$: Observable<boolean>;
-    initialCollapsed: boolean;
-    onToggleCollapsed: (collapsed: boolean) => void;
-  };
 }
 
 // ---------------------------------------------------------------------------

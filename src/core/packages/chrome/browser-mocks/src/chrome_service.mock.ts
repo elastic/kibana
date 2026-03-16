@@ -33,18 +33,8 @@ const mockComponentDeps = {
   } as ChromeComponentsDeps['application'],
   basePath: {} as ChromeComponentsDeps['basePath'],
   docLinks: {} as ChromeComponentsDeps['docLinks'],
-  navControls: { left$: of([]), center$: of([]), right$: of([]), extension$: of([]) },
   loadingCount$: of(0),
-  navLinks$: of([]),
   customBranding$: of({} as any),
-  breadcrumbsAppendExtensions$: of([]),
-  appMenu$: of(undefined),
-  headerBanner$: of(undefined),
-  sideNav: {
-    collapsed$: of(false),
-    initialCollapsed: false,
-    onToggleCollapsed: jest.fn(),
-  },
 } satisfies ChromeComponentsDeps;
 
 const createStartContractMock = () => {
@@ -73,10 +63,10 @@ const createStartContractMock = () => {
       registerCenter: jest.fn(),
       registerRight: jest.fn(),
       registerExtension: jest.fn(),
-      getLeft$: jest.fn(),
-      getCenter$: jest.fn(),
-      getRight$: jest.fn(),
-      getExtension$: jest.fn(),
+      getLeft$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+      getCenter$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+      getRight$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+      getExtension$: jest.fn().mockReturnValue(new BehaviorSubject([])),
       setHelpMenuLinks: jest.fn(),
       getHelpMenuLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     }),

@@ -16,7 +16,6 @@
     "@kbn/core-doc-links-browser",
     "@kbn/core-http-browser",
     "@kbn/core-custom-branding-common",
-    "@kbn/core-chrome-app-menu-components",
     "@kbn/core-mount-utils-browser",
   ]
 }

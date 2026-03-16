@@ -157,8 +157,6 @@ const Logo = ({ logoCss }: { logoCss: HeaderCss['logo'] }) => {
 export const ProjectHeader = () => {
   const {
     customBranding$,
-    breadcrumbsAppendExtensions$,
-    navControls,
   } = useChromeComponentsDeps();
 
   const breadcrumbs = useProjectBreadcrumbs();
@@ -190,15 +188,13 @@ export const ProjectHeader = () => {
               <EuiHeaderSectionItem css={headerCss.leftNavcontrols}>
                 <HeaderNavControls
                   side="left"
-                  navControls$={navControls.left$}
+                  position="left"
                   append={<div className="navcontrols__separator" />}
                 />
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem css={headerCss.breadcrumbsSectionItem}>
-                <BreadcrumbsWithExtensionsWrapper
-                  breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
-                >
+                <BreadcrumbsWithExtensionsWrapper>
                   <Breadcrumbs breadcrumbs={breadcrumbs} />
                 </BreadcrumbsWithExtensionsWrapper>
               </EuiHeaderSectionItem>
@@ -206,7 +202,7 @@ export const ProjectHeader = () => {
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
-                <HeaderNavControls navControls$={navControls.center$} />
+                <HeaderNavControls position="center" />
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem>
@@ -218,7 +214,7 @@ export const ProjectHeader = () => {
                   gap: ${euiTheme.size.s};
                 `}
               >
-                <HeaderNavControls navControls$={navControls.right$} />
+                <HeaderNavControls position="right" />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>

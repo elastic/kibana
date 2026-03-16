@@ -11,6 +11,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
+import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
 import { ClassicHeader } from './header';
@@ -45,16 +46,25 @@ describe('Header', () => {
     ]);
     chrome.recentlyAccessed.get$.mockReturnValue(recentlyAccessed$);
 
-    deps.navLinks$.next([
-      {
-        id: 'kibana',
-        title: 'kibana',
-        baseUrl: '',
-        href: '',
-        url: '',
-        visibleIn: ['globalSearch' as const],
-      },
-    ]);
+    chrome.navLinks.getNavLinks$.mockReturnValue(
+      new BehaviorSubject([
+        {
+          id: 'kibana',
+          title: 'kibana',
+          baseUrl: '',
+          href: '',
+          url: '',
+          visibleIn: ['globalSearch' as const],
+        },
+      ])
+    );
+
+    const breadcrumbsAppendExtensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>(
+      []
+    );
+    chrome.getBreadcrumbsAppendExtensionsWithBadges$.mockReturnValue(
+      breadcrumbsAppendExtensions$
+    );
 
     const component = mountWithIntl(
       <TestChromeProviders deps={deps} chrome={chrome}>
@@ -66,7 +76,7 @@ describe('Header', () => {
     expect(component.render()).toMatchSnapshot();
 
     act(() =>
-      deps.breadcrumbsAppendExtensions$.next([
+      breadcrumbsAppendExtensions$.next([
         { content: <div className="my-extension1">__render__</div> },
         { content: <div className="my-extension2">__render__</div> },
       ])

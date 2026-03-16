@@ -18,14 +18,7 @@ import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
-import type {
-  ChromeBreadcrumbsAppendExtension,
-  ChromeNavControl,
-  ChromeNavLink,
-  ChromeUserBanner,
-} from '@kbn/core-chrome-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { ChromeComponentsProvider, type ChromeComponentsDeps } from './context';
 
 /**
@@ -44,22 +37,7 @@ export const createMockChromeComponentsDeps = () => {
     basePath: http.basePath,
     docLinks: docLinksServiceMock.createStartContract(),
     loadingCount$: new BehaviorSubject<number>(0),
-    breadcrumbsAppendExtensions$: new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>([]),
     customBranding$: new BehaviorSubject<CustomBranding>({}),
-    navLinks$: new BehaviorSubject<ChromeNavLink[]>([]),
-    navControls: {
-      left$: new BehaviorSubject<ChromeNavControl[]>([]),
-      center$: new BehaviorSubject<ChromeNavControl[]>([]),
-      right$: new BehaviorSubject<ChromeNavControl[]>([]),
-      extension$: new BehaviorSubject<ChromeNavControl[]>([]),
-    },
-    appMenu$: new BehaviorSubject<AppMenuConfig | undefined>(undefined),
-    headerBanner$: new BehaviorSubject<ChromeUserBanner | undefined>(undefined),
-    sideNav: {
-      collapsed$: new BehaviorSubject<boolean>(false),
-      initialCollapsed: false,
-      onToggleCollapsed: jest.fn(),
-    },
   } satisfies ChromeComponentsDeps;
 };
 

@@ -36,10 +36,7 @@ export function ClassicHeader() {
     application,
     basePath,
     loadingCount$,
-    navControls,
-    breadcrumbsAppendExtensions$,
     customBranding$,
-    navLinks$,
   } = useChromeComponentsDeps();
   const breadcrumbs = useClassicBreadcrumbs();
 
@@ -78,27 +75,25 @@ export function ClassicHeader() {
                 ],
               },
               {
-                ...(navControls.center$ && {
-                  items: [
-                    <EuiShowFor sizes={['m', 'l', 'xl']}>
-                      <HeaderNavControls navControls$={navControls.center$} />
-                    </EuiShowFor>,
-                  ],
-                }),
+                items: [
+                  <EuiShowFor sizes={['m', 'l', 'xl']}>
+                    <HeaderNavControls position="center" />
+                  </EuiShowFor>,
+                ],
               },
               {
                 items: [
                   <EuiHideFor sizes={['m', 'l', 'xl']}>
                     <>
-                      <HeaderNavControls navControls$={navControls.extension$} />
-                      <HeaderNavControls navControls$={navControls.center$} />
+                      <HeaderNavControls position="extension" />
+                      <HeaderNavControls position="center" />
                     </>
                   </EuiHideFor>,
                   <EuiHideFor sizes={['xs', 's']}>
-                    <HeaderNavControls navControls$={navControls.extension$} />
+                    <HeaderNavControls position="extension" />
                   </EuiHideFor>,
                   <HeaderHelpMenu />,
-                  <HeaderNavControls navControls$={navControls.right$} />,
+                  <HeaderNavControls position="right" />,
                 ],
               },
             ]}
@@ -108,9 +103,7 @@ export function ClassicHeader() {
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem className="header__toggleNavButtonSection">
                 <CollapsibleNav
-                  appId$={application.currentAppId$}
                   id={navId}
-                  navLinks$={navLinks$}
                   isNavOpen={isNavOpen}
                   homeHref={homeHref}
                   basePath={basePath}
@@ -135,12 +128,10 @@ export function ClassicHeader() {
                 />
               </EuiHeaderSectionItem>
 
-              <HeaderNavControls side="left" navControls$={navControls.left$} />
+              <HeaderNavControls side="left" position="left" />
             </EuiHeaderSection>
 
-            <BreadcrumbsWithExtensionsWrapper
-              breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
-            >
+            <BreadcrumbsWithExtensionsWrapper>
               {Breadcrumbs}
             </BreadcrumbsWithExtensionsWrapper>
 

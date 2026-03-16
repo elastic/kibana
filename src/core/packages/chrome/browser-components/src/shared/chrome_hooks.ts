@@ -52,15 +52,6 @@ export function useProjectHome(): string {
   return useObservable(projectHome$, '/app/home');
 }
 
-/**
- * Returns an observable of the resolved project navigation tree.
- * Used by `GridLayoutProjectSideNav` to pass to the `Navigation` component.
- */
-export function useProjectNavigation$() {
-  const chrome = useChromeService();
-  return useMemo(() => chrome.project.getNavigation$(), [chrome]);
-}
-
 const LOADING_DEBOUNCE_TIME = 80;
 
 /**
@@ -106,7 +97,7 @@ export function useCustomNavLink() {
   return useObservable(customNavLink$, undefined);
 }
 
-type NavControlPosition = 'left' | 'center' | 'right' | 'extension';
+export type NavControlPosition = 'left' | 'center' | 'right' | 'extension';
 
 const navControlGetters: Record<
   NavControlPosition,
@@ -169,6 +160,62 @@ export function useHelpMenu(): HelpMenuState {
 }
 
 /**
+ * Returns the current side nav collapsed state and a toggle callback.
+ * Used by `GridLayoutProjectSideNav`.
+ */
+export function useSideNavCollapsed(): {
+  isCollapsed: boolean;
+  toggle: (collapsed: boolean) => void;
+} {
+  const chrome = useChromeService();
+  const collapsed$ = useMemo(() => chrome.sideNav.getIsCollapsed$(), [chrome]);
+  const isCollapsed = useObservable(collapsed$, chrome.sideNav.getIsCollapsed());
+  return { isCollapsed, toggle: chrome.sideNav.setIsCollapsed };
+}
+
+/**
+ * Returns the current app ID from `application.currentAppId$`.
+ * Used by `CollapsibleNav` (classic layout).
+ */
+export function useCurrentAppId(): string | undefined {
+  const { application } = useChromeComponentsDeps();
+  return useObservable(application.currentAppId$, undefined);
+}
+
+/**
+ * Returns the breadcrumb append extensions (including badge extensions).
+ * Used by `BreadcrumbsWithExtensionsWrapper`.
+ */
+export function useBreadcrumbsAppendExtensions() {
+  const chrome = useChromeService();
+  const extensions$ = useMemo(
+    () => chrome.getBreadcrumbsAppendExtensionsWithBadges$(),
+    [chrome]
+  );
+  return useObservable(extensions$, []);
+}
+
+/**
+ * Returns the current header banner, or `undefined` if none is set.
+ * Used by `HeaderTopBanner`.
+ */
+export function useHeaderBanner() {
+  const chrome = useChromeService();
+  const headerBanner$ = useMemo(() => chrome.getHeaderBanner$(), [chrome]);
+  return useObservable(headerBanner$, undefined);
+}
+
+/**
+ * Returns the current app menu config, or `undefined` if none is set.
+ * Used by `HeaderAppMenu`.
+ */
+export function useAppMenu() {
+  const chrome = useChromeService();
+  const appMenu$ = useMemo(() => chrome.getAppMenu$(), [chrome]);
+  return useObservable(appMenu$, undefined);
+}
+
+/**
  * Whether a legacy action menu mount point is currently set.
  * @deprecated Legacy action menus use imperative mount points. Prefer `chrome.setAppMenu()`.
  */
@@ -179,12 +226,8 @@ export function useHasLegacyActionMenu(): boolean {
 
 /** Whether the current app menu (registered via `chrome.setAppMenu()`) has items configured. */
 export function useHasAppMenuConfig(): boolean {
-  const { appMenu$ } = useChromeComponentsDeps();
-  const hasConfig$ = useMemo(
-    () => appMenu$.pipe(map((config) => !!config && !!config.items && config.items.length > 0)),
-    [appMenu$]
-  );
-  return useObservable(hasConfig$, false);
+  const config = useAppMenu();
+  return !!config?.items?.length;
 }
 
 /**
