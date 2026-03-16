@@ -36,3 +36,11 @@ src/
 `ChromeComponentsProvider` / `useChromeComponentsDeps` are **temporary**. They exist as an intermediate step toward a proper `ChromeStateProvider` in a dedicated package that exposes React hooks (`useChromeStyle`, `useChromeBreadcrumbs`, etc.) so components are fully decoupled from Observable props. Once `ChromeStateProvider` exists this provider can be replaced.
 
 Progress is tracked in the Chrome & Grid Evolution epic: kibana-team#2651 (private repo).
+
+## Internal vs public hooks boundary
+
+- Internal (`@kbn/core-chrome-browser-components`): component wiring uses `ChromeComponentsDeps` and `useChromeComponentsDeps`.
+- Service context (`@kbn/core-chrome-browser-context`, private): `ChromeServiceProvider` + `useChromeService`.
+- Public (`@kbn/core-chrome-browser-hooks`, shared): plugin-safe hooks built on `ChromeStart` (`useChromeStyle`, `useActiveSolutionNavId`, `useHasHeaderBanner`).
+
+Rule of thumb: if a hook depends on `ChromeComponentsDeps`, keep it internal; if it can be expressed via `ChromeStart`, expose it from `browser-hooks`.

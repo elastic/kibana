@@ -31,6 +31,7 @@ import {
   NavigationService,
   ToolsService,
   SkillsService,
+  PluginsService,
   EventsService,
   type AgentBuilderInternalService,
 } from './services';
@@ -143,6 +144,7 @@ export class AgentBuilderPlugin
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const skillsService = new SkillsService({ http });
+    const pluginsService = new PluginsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     const isExperimentalFeaturesEnabled = core.settings.client.get<boolean>(
@@ -168,6 +170,7 @@ export class AgentBuilderPlugin
       navigationService,
       toolsService,
       skillsService,
+      pluginsService,
       startDependencies,
       accessChecker,
       eventsService,

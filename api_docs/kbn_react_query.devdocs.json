@@ -13983,15 +13983,15 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_scheduled_execution_details.ts"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/results/use_all_results.ts"
               },
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/action_results/use_action_results.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
               },
               {
                 "plugin": "osquery",
@@ -14012,6 +14012,10 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/agent_policies/use_agent_policy.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
               },
               {
                 "plugin": "osquery",
@@ -14345,15 +14349,15 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_scheduled_execution_details.ts"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/results/use_all_results.ts"
               },
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/action_results/use_action_results.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
               },
               {
                 "plugin": "osquery",
@@ -14382,6 +14386,10 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/agent_policies/use_agent_policy.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/public/agents/use_agent_details.ts"
               },
               {
                 "plugin": "osquery",
