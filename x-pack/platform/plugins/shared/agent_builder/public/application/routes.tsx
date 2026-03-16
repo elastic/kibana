@@ -6,76 +6,33 @@
  */
 
 import { Route, Routes } from '@kbn/shared-ux-router';
-import React from 'react';
+import React, { useMemo } from 'react';
 
-import { AppLayout } from './components/layout';
-import { RouteDisplay } from './components/common/route_display';
+import { AppLayout } from './components/layout/app_layout';
 import { RootRedirect, LegacyConversationRedirect } from './components/redirects';
+import { allRoutes } from './route_config';
+import { useExperimentalFeatures } from './hooks/use_experimental_features';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+
+  const enabledRoutes = useMemo(() => {
+    return allRoutes.filter((route) => {
+      if (route.isExperimental && !isExperimentalFeaturesEnabled) {
+        return false;
+      }
+      return true;
+    });
+  }, [isExperimentalFeaturesEnabled]);
+
   return (
     <AppLayout>
       <Routes>
-        {/* Agent-scoped routes */}
-        <Route path="/agents/:agentId/conversations/:conversationId">
-          <RouteDisplay />
-        </Route>
-        <Route path="/agents/:agentId/skills">
-          <RouteDisplay />
-        </Route>
-        <Route path="/agents/:agentId/tools">
-          <RouteDisplay />
-        </Route>
-        <Route path="/agents/:agentId/plugins">
-          <RouteDisplay />
-        </Route>
-        <Route path="/agents/:agentId/connectors">
-          <RouteDisplay />
-        </Route>
-        <Route path="/agents/:agentId/instructions">
-          <RouteDisplay />
-        </Route>
-        <Route path="/agents/:agentId">
-          <RouteDisplay />
-        </Route>
-
-        {/* Manage routes (global CRUD) */}
-        <Route path="/manage/agents/new">
-          <RouteDisplay />
-        </Route>
-        <Route path="/manage/agents">
-          <RouteDisplay />
-        </Route>
-        <Route path="/manage/tools/bulk_import_mcp">
-          <RouteDisplay />
-        </Route>
-        <Route path="/manage/tools/new">
-          <RouteDisplay />
-        </Route>
-        <Route path="/manage/tools/:toolId">
-          <RouteDisplay />
-        </Route>
-        <Route path="/manage/tools">
-          <RouteDisplay />
-        </Route>
-        <Route path="/manage/skills/new">
-          <RouteDisplay />
-        </Route>
-        <Route path="/manage/skills/:skillId">
-          <RouteDisplay />
-        </Route>
-        <Route path="/manage/skills">
-          <RouteDisplay />
-        </Route>
-        <Route path="/manage/plugins/:pluginId">
-          <RouteDisplay />
-        </Route>
-        <Route path="/manage/plugins">
-          <RouteDisplay />
-        </Route>
-        <Route path="/manage/connectors">
-          <RouteDisplay />
-        </Route>
+        {enabledRoutes.map((route) => (
+          <Route key={route.path} path={route.path}>
+            {route.element}
+          </Route>
+        ))}
 
         {/* Legacy routes - redirect to new structure */}
         <Route path="/conversations/:conversationId">

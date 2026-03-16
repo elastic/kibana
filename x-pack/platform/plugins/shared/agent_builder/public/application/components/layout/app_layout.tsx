@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { UnifiedSidebar } from './unified_sidebar';
+import { UnifiedSidebar } from './unified_sidebar/unified_sidebar';
 
 interface AppLayoutProps {
   children: React.ReactNode;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom-v5-compat';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
@@ -14,6 +14,8 @@ import { i18n } from '@kbn/i18n';
 
 import { appPaths } from '../../../../utils/app_paths';
 import { useLastAgentId } from '../../../../hooks/use_last_agent_id';
+import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
+import { getManageNavItems } from '../../../../route_config';
 
 const labels = {
   back: i18n.translate('xpack.agentBuilder.sidebar.manage.back', {
@@ -21,21 +23,6 @@ const labels = {
   }),
   title: i18n.translate('xpack.agentBuilder.sidebar.manage.title', {
     defaultMessage: 'Manage Components',
-  }),
-  agents: i18n.translate('xpack.agentBuilder.sidebar.manage.agents', {
-    defaultMessage: 'Agents',
-  }),
-  tools: i18n.translate('xpack.agentBuilder.sidebar.manage.tools', {
-    defaultMessage: 'Tools',
-  }),
-  skills: i18n.translate('xpack.agentBuilder.sidebar.manage.skills', {
-    defaultMessage: 'Skills',
-  }),
-  plugins: i18n.translate('xpack.agentBuilder.sidebar.manage.plugins', {
-    defaultMessage: 'Plugins',
-  }),
-  connectors: i18n.translate('xpack.agentBuilder.sidebar.manage.connectors', {
-    defaultMessage: 'Connectors',
   }),
 };
 
@@ -46,6 +33,7 @@ interface ManageSidebarViewProps {
 export const ManageSidebarView: React.FC<ManageSidebarViewProps> = ({ pathname }) => {
   const lastAgentId = useLastAgentId();
   const { euiTheme } = useEuiTheme();
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
 
   const linkStyles = css`
     text-decoration: none;
@@ -63,13 +51,14 @@ export const ManageSidebarView: React.FC<ManageSidebarViewProps> = ({ pathname }
 
   const isActive = (path: string) => pathname.startsWith(path);
 
-  const navItems = [
-    { label: labels.agents, path: appPaths.manage.agents },
-    { label: labels.tools, path: appPaths.manage.tools },
-    { label: labels.skills, path: appPaths.manage.skills },
-    { label: labels.plugins, path: appPaths.manage.plugins },
-    { label: labels.connectors, path: appPaths.manage.connectors },
-  ];
+  const navItems = useMemo(() => {
+    return getManageNavItems().filter((item) => {
+      if (item.isExperimental && !isExperimentalFeaturesEnabled) {
+        return false;
+      }
+      return true;
+    });
+  }, [isExperimentalFeaturesEnabled]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

@@ -13,7 +13,7 @@ import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { storageKeys } from '../../../storage_keys';
-import { getSidebarViewForRoute, getAgentIdFromPath } from './get_sidebar_view';
+import { getSidebarViewForRoute, getAgentIdFromPath } from '../../../route_config';
 import { ConversationSidebarView } from './views/conversation_view';
 import { AgentSettingsSidebarView } from './views/agent_settings_view';
 import { ManageSidebarView } from './views/manage_view';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom-v5-compat';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import { appPaths } from '../../../../utils/app_paths';
-import { getAgentIdFromPath } from '../get_sidebar_view';
+import { getAgentIdFromPath, getAgentSettingsNavItems } from '../../../../route_config';
 
 const labels = {
   back: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.back', {
@@ -21,21 +21,6 @@ const labels = {
   }),
   title: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.title', {
     defaultMessage: 'Agent Settings',
-  }),
-  instructions: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.instructions', {
-    defaultMessage: 'Instructions',
-  }),
-  skills: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.skills', {
-    defaultMessage: 'Skills',
-  }),
-  tools: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.tools', {
-    defaultMessage: 'Tools',
-  }),
-  plugins: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.plugins', {
-    defaultMessage: 'Plugins',
-  }),
-  connectors: i18n.translate('xpack.agentBuilder.sidebar.agentSettings.connectors', {
-    defaultMessage: 'Connectors',
   }),
 };
 
@@ -61,15 +46,14 @@ export const AgentSettingsSidebarView: React.FC<AgentSettingsSidebarViewProps> =
     color: ${euiTheme.colors.primaryText};
   `;
 
-  const isActive = (path: string) => pathname === path;
+  const navItems = useMemo(() => {
+    return getAgentSettingsNavItems().map((item) => ({
+      label: item.label,
+      path: `/agents/${agentId}/${item.pathSuffix}`,
+    }));
+  }, [agentId]);
 
-  const navItems = [
-    { label: labels.instructions, path: appPaths.agent.instructions({ agentId }) },
-    { label: labels.skills, path: appPaths.agent.skills({ agentId }) },
-    { label: labels.tools, path: appPaths.agent.tools({ agentId }) },
-    { label: labels.plugins, path: appPaths.agent.plugins({ agentId }) },
-    { label: labels.connectors, path: appPaths.agent.connectors({ agentId }) },
-  ];
+  const isActive = (path: string) => pathname === path;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">

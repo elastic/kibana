@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { appPaths } from '../../../../utils/app_paths';
-import { getAgentIdFromPath } from '../get_sidebar_view';
+import { getAgentIdFromPath } from '../../../../route_config';
 import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
 import { storageKeys } from '../../../../storage_keys';
 
