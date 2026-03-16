@@ -84,10 +84,12 @@ export interface SmlTypeDefinition {
   id: string;
 
   /**
-   * Return all items to consider for indexing.
+   * Yield pages of items to consider for indexing.
    * Called by the crawler to enumerate candidates.
+   * Each yielded array is one page; the crawler processes pages
+   * with O(page_size) memory instead of loading everything at once.
    */
-  list: (context: SmlContext) => Promise<SmlListItem[]>;
+  list: (context: SmlContext) => AsyncIterable<SmlListItem[]>;
 
   /**
    * Return normalized data to index for a specific attachment.
@@ -153,6 +155,8 @@ export interface SmlCrawlerStateDocument {
   updated_at: string;
   /** Pending action set by the crawler. undefined (field omitted) when the action has been processed. */
   update_action: 'create' | 'update' | 'delete' | undefined;
+  /** Timestamp of the last crawl run that saw this item. Used for mark-and-sweep deletion. */
+  last_crawled_at: string;
 }
 
 /**

@@ -214,7 +214,6 @@ export class AgentBuilderPlugin
       spaces,
       actions,
       taskManager,
-      security: securityPlugin,
     }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
@@ -231,7 +230,6 @@ export class AgentBuilderPlugin
       featureFlags,
       dataStreams,
       taskManager,
-      securityPlugin,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
     });

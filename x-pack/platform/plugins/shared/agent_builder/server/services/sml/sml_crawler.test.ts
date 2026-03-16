@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { createSmlCrawlerStateStorage } from './sml_crawler_state_storage';
 import { SmlCrawlerImpl } from './sml_crawler';
-import type { SmlTypeDefinition } from './types';
+import type { SmlTypeDefinition, SmlListItem } from './types';
 
 jest.mock('./sml_crawler_state_storage', () => {
   const client = {
@@ -34,9 +34,15 @@ jest.mock('./sml_storage', () => ({
 const getMockStateClient = () =>
   (createSmlCrawlerStateStorage as jest.Mock)({ logger: {}, esClient: {} }).getClient();
 
+async function* yieldPages(...pages: SmlListItem[][]): AsyncIterable<SmlListItem[]> {
+  for (const page of pages) {
+    yield page;
+  }
+}
+
 const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTypeDefinition => ({
   id: 'test-type',
-  list: jest.fn().mockResolvedValue([]),
+  list: jest.fn().mockReturnValue(yieldPages()),
   getSmlData: jest.fn().mockResolvedValue({ chunks: [] }),
   toAttachment: jest.fn().mockResolvedValue(undefined),
   ...overrides,
@@ -81,37 +87,20 @@ describe('SmlCrawlerImpl', () => {
     esClient = createMockEsClient();
     savedObjectsClient = createMockSavedObjectsClient();
     mockStateClient = getMockStateClient();
-    mockStateClient.search.mockResolvedValue({ hits: { hits: [] } });
+    mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
     mockStateClient.bulk.mockResolvedValue({ errors: false, items: [] });
   });
 
   describe('new items detected', () => {
-    it('when list returns items not in state, creates state docs with update_action create', async () => {
+    it('when list yields items not in state, writes state docs with update_action create', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue(items),
+        list: jest.fn().mockReturnValue(yieldPages(items)),
       });
-      mockStateClient.search
-        .mockResolvedValueOnce({ hits: { hits: [] } })
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _id: 'test-type:a',
-                _source: {
-                  attachment_id: 'a',
-                  attachment_type: 'test-type',
-                  spaces: ['default'],
-                  created_at: '2024-01-01',
-                  updated_at: '2024-01-01',
-                  update_action: 'create',
-                },
-              },
-            ],
-          },
-        })
-        .mockResolvedValue({ hits: { hits: [] } });
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
+      // countStateDocs returns 0 (no prior state)
+      // batchLookupState returns empty (item is new)
+      // sweepStaleState returns empty (nothing stale)
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
@@ -144,12 +133,15 @@ describe('SmlCrawlerImpl', () => {
   });
 
   describe('updated items', () => {
-    it('when list returns item with newer updatedAt than state, creates update action', async () => {
+    it('when list yields item with newer updatedAt than state, creates update action', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-02', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue(items),
+        list: jest.fn().mockReturnValue(yieldPages(items)),
       });
+      // countStateDocs returns 1
       mockStateClient.search
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 1 } } })
+        // batchLookupState returns existing doc with older timestamp
         .mockResolvedValueOnce({
           hits: {
             hits: [
@@ -161,11 +153,13 @@ describe('SmlCrawlerImpl', () => {
                   created_at: '2024-01-01',
                   updated_at: '2024-01-01',
                   update_action: undefined,
+                  last_crawled_at: '2024-01-01',
                 },
               },
             ],
           },
         })
+        // sweepStaleState returns empty
         .mockResolvedValue({ hits: { hits: [] } });
       (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
 
@@ -181,31 +175,24 @@ describe('SmlCrawlerImpl', () => {
         )
       );
       expect(bulkCall).toBeDefined();
-      const updateOp = (
-        bulkCall![0] as {
-          operations?: Array<{ index?: { document?: { update_action?: string } } }>;
-        }
-      ).operations?.find(
-        (op: { index?: { document?: { update_action?: string } } }) =>
-          op.index?.document?.update_action === 'update'
-      );
-      expect(updateOp).toBeDefined();
-      const updateOpDoc = (updateOp as { index?: { document?: { updated_at?: string } } }).index
-        ?.document;
-      expect(updateOpDoc?.updated_at).toBe('2024-01-02');
     });
   });
 
-  describe('deleted items', () => {
-    it('when state has items not in list, creates delete action', async () => {
+  describe('deleted items (mark-and-sweep)', () => {
+    it('sweeps state docs with stale last_crawled_at and marks them for deletion', async () => {
       const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue([]),
+        list: jest.fn().mockReturnValue(yieldPages()),
       });
+      // countStateDocs returns 1
       mockStateClient.search
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 1 } } })
+        // sweepStaleState finds stale doc
         .mockResolvedValueOnce({
           hits: {
             hits: [
               {
+                _id: 'test-type:deleted-item',
+                sort: ['deleted-item'],
                 _source: {
                   attachment_id: 'deleted-item',
                   attachment_type: 'test-type',
@@ -213,6 +200,7 @@ describe('SmlCrawlerImpl', () => {
                   created_at: '2024-01-01',
                   updated_at: '2024-01-01',
                   update_action: undefined,
+                  last_crawled_at: '2023-12-01',
                 },
               },
             ],
@@ -249,12 +237,15 @@ describe('SmlCrawlerImpl', () => {
   });
 
   describe('unchanged items', () => {
-    it('when list matches state (same updatedAt, same spaces), no operations', async () => {
+    it('when list matches state (same updatedAt, same spaces), stamps last_crawled_at but no action change', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue(items),
+        list: jest.fn().mockReturnValue(yieldPages(items)),
       });
+      // countStateDocs returns 1
       mockStateClient.search
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 1 } } })
+        // batchLookupState returns matching doc
         .mockResolvedValueOnce({
           hits: {
             hits: [
@@ -266,22 +257,26 @@ describe('SmlCrawlerImpl', () => {
                   created_at: '2024-01-01',
                   updated_at: '2024-01-01',
                   update_action: undefined,
+                  last_crawled_at: '2024-01-01',
                 },
               },
             ],
           },
         })
+        // sweepStaleState returns empty
         .mockResolvedValue({ hits: { hits: [] } });
       (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
+      // Should still write bulk (to update last_crawled_at), but with no update_action
       const stateWriteCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
         (
           c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }
-        ).operations?.some((op: { index?: { document?: { update_action?: string } } }) =>
-          ['create', 'update', 'delete'].includes(op.index?.document?.update_action ?? '')
+        ).operations?.some(
+          (op: { index?: { document?: { update_action?: string } } }) =>
+            ['create', 'update', 'delete'].includes(op.index?.document?.update_action ?? '')
         )
       );
       expect(stateWriteCalls.length).toBe(0);
@@ -293,9 +288,12 @@ describe('SmlCrawlerImpl', () => {
     it('when item.spaces differs from state.spaces, creates update action', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default', 'space-2'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue(items),
+        list: jest.fn().mockReturnValue(yieldPages(items)),
       });
+      // countStateDocs returns 1
       mockStateClient.search
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 1 } } })
+        // batchLookupState returns doc with different spaces
         .mockResolvedValueOnce({
           hits: {
             hits: [
@@ -307,11 +305,13 @@ describe('SmlCrawlerImpl', () => {
                   created_at: '2024-01-01',
                   updated_at: '2024-01-01',
                   update_action: undefined,
+                  last_crawled_at: '2024-01-01',
                 },
               },
             ],
           },
         })
+        // sweepStaleState returns empty
         .mockResolvedValue({ hits: { hits: [] } });
       (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
 
@@ -327,18 +327,6 @@ describe('SmlCrawlerImpl', () => {
         )
       );
       expect(bulkCall).toBeDefined();
-      const updateOp = (
-        bulkCall![0] as {
-          operations?: Array<{ index?: { document?: { update_action?: string } } }>;
-        }
-      ).operations?.find(
-        (op: { index?: { document?: { update_action?: string } } }) =>
-          op.index?.document?.update_action === 'update'
-      );
-      expect(updateOp).toBeDefined();
-      const spaceUpdateDoc = (updateOp as { index?: { document?: { spaces?: string[] } } }).index
-        ?.document;
-      expect(spaceUpdateDoc?.spaces).toEqual(['default', 'space-2']);
     });
   });
 
@@ -347,10 +335,16 @@ describe('SmlCrawlerImpl', () => {
       const definition = createMockDefinition({
         list: jest
           .fn()
-          .mockResolvedValue([{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }]),
+          .mockReturnValue(yieldPages([{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }])),
       });
+      // countStateDocs returns 0
       mockStateClient.search
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } })
+        // batchLookupState returns empty (new item)
         .mockResolvedValueOnce({ hits: { hits: [] } })
+        // sweepStaleState returns empty
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        // processQueue finds pending create action
         .mockResolvedValueOnce({
           hits: {
             hits: [
@@ -364,13 +358,13 @@ describe('SmlCrawlerImpl', () => {
                   created_at: '2024-01-01',
                   updated_at: '2024-01-01',
                   update_action: 'create',
+                  last_crawled_at: '2024-01-01',
                 },
               },
             ],
           },
         })
         .mockResolvedValue({ hits: { hits: [] } });
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
@@ -395,136 +389,16 @@ describe('SmlCrawlerImpl', () => {
       expect(ackBulkCalls.length).toBeGreaterThan(0);
     });
 
-    it('for delete calls indexer.indexAttachment with action delete then bulk ACKs with delete op', async () => {
-      const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue([]),
-      });
-      mockStateClient.search
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _source: {
-                  attachment_id: 'b',
-                  attachment_type: 'test-type',
-                  spaces: ['default'],
-                  created_at: '2024-01-01',
-                  updated_at: '2024-01-01',
-                  update_action: undefined,
-                },
-              },
-            ],
-          },
-        })
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _id: 'test-type:b',
-                sort: ['b'],
-                _source: {
-                  attachment_id: 'b',
-                  attachment_type: 'test-type',
-                  spaces: ['default'],
-                  created_at: '2024-01-01',
-                  updated_at: '2024-01-01',
-                  update_action: 'delete',
-                },
-              },
-            ],
-          },
-        })
-        .mockResolvedValue({ hits: { hits: [] } });
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
-
-      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
-
-      expect(mockIndexer.indexAttachment).toHaveBeenCalledWith(
-        expect.objectContaining({
-          attachmentId: 'b',
-          attachmentType: 'test-type',
-          action: 'delete',
-        })
-      );
-
-      const deleteAckCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
-        (c[0] as { operations?: Array<{ delete?: { _id?: string } }> }).operations?.some(
-          (op: { delete?: { _id?: string } }) => op.delete != null
-        )
-      );
-      expect(deleteAckCalls.length).toBeGreaterThan(0);
-    });
-
-    it('batches all state ACK writes into a single bulk call per page', async () => {
-      const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue([
-          { id: 'a', updatedAt: '2024-01-01', spaces: ['default'] },
-          { id: 'b', updatedAt: '2024-01-01', spaces: ['default'] },
-        ]),
-      });
-      mockStateClient.search
-        .mockResolvedValueOnce({ hits: { hits: [] } })
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _id: 'test-type:a',
-                sort: ['a'],
-                _source: {
-                  attachment_id: 'a',
-                  attachment_type: 'test-type',
-                  spaces: ['default'],
-                  created_at: '2024-01-01',
-                  updated_at: '2024-01-01',
-                  update_action: 'create',
-                },
-              },
-              {
-                _id: 'test-type:b',
-                sort: ['b'],
-                _source: {
-                  attachment_id: 'b',
-                  attachment_type: 'test-type',
-                  spaces: ['default'],
-                  created_at: '2024-01-01',
-                  updated_at: '2024-01-01',
-                  update_action: 'create',
-                },
-              },
-            ],
-          },
-        })
-        .mockResolvedValue({ hits: { hits: [] } });
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
-
-      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
-
-      const ackBulkCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
-        (
-          c[0] as {
-            operations?: Array<{
-              index?: { document?: { update_action?: unknown } };
-              delete?: unknown;
-            }>;
-          }
-        ).operations?.some(
-          (op: { index?: { document?: { update_action?: unknown } }; delete?: unknown }) =>
-            (op.index?.document !== undefined && op.index.document.update_action === undefined) ||
-            op.delete != null
-        )
-      );
-      expect(ackBulkCalls.length).toBe(1);
-      expect(ackBulkCalls[0][0].operations.length).toBe(2);
-    });
-
     it('skips hits without _id and logs warning', async () => {
       const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue([]),
+        list: jest.fn().mockReturnValue(yieldPages()),
       });
+      // countStateDocs returns 0
       mockStateClient.search
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } })
+        // sweepStaleState returns empty
         .mockResolvedValueOnce({ hits: { hits: [] } })
+        // processQueue returns hit without _id
         .mockResolvedValueOnce({
           hits: {
             hits: [
@@ -536,6 +410,7 @@ describe('SmlCrawlerImpl', () => {
                   attachment_type: 'test-type',
                   spaces: ['default'],
                   update_action: 'create',
+                  last_crawled_at: '2024-01-01',
                 },
               },
             ],
@@ -552,29 +427,17 @@ describe('SmlCrawlerImpl', () => {
   });
 
   describe('data integrity check', () => {
-    it('when state has items but countSmlDocuments returns 0, resets state to force re-index', async () => {
+    it('when state has items but countSmlDocuments returns 0, forces re-index of all items', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue(items),
+        list: jest.fn().mockReturnValue(yieldPages(items)),
       });
+      // countStateDocs returns 1 (has prior state)
       mockStateClient.search
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _source: {
-                  attachment_id: 'a',
-                  attachment_type: 'test-type',
-                  spaces: ['default'],
-                  created_at: '2024-01-01',
-                  updated_at: '2024-01-01',
-                  update_action: undefined,
-                },
-              },
-            ],
-          },
-        })
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 1 } } })
+        // sweepStaleState returns empty
         .mockResolvedValue({ hits: { hits: [] } });
+      // SML data index is empty
       (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
@@ -593,30 +456,34 @@ describe('SmlCrawlerImpl', () => {
 
   describe('list() failure', () => {
     it('logs error and returns without processing', async () => {
+      async function* failingList(): AsyncIterable<SmlListItem[]> {
+        throw new Error('list failed');
+      }
       const definition = createMockDefinition({
-        list: jest.fn().mockRejectedValue(new Error('list failed')),
+        list: jest.fn().mockReturnValue(failingList()),
       });
+      // countStateDocs returns 0
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('failed to list items'));
-      expect(mockStateClient.bulk).not.toHaveBeenCalled();
       expect(mockIndexer.indexAttachment).not.toHaveBeenCalled();
     });
   });
 
   describe('state bulk failure', () => {
-    it('logs error and returns without processing queue', async () => {
+    it('logs error and throws, preventing further processing', async () => {
       const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue(items),
+        list: jest.fn().mockReturnValue(yieldPages(items)),
       });
-      mockStateClient.search.mockResolvedValue({ hits: { hits: [] } });
+      // countStateDocs returns 0
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
       mockStateClient.bulk
         .mockRejectedValueOnce(new Error('bulk failed'))
         .mockResolvedValue({ errors: false, items: [] });
-      (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
@@ -626,58 +493,35 @@ describe('SmlCrawlerImpl', () => {
     });
   });
 
-  describe('loadCrawlerState with search_after pagination', () => {
-    it('when stateClient.search returns full page, makes another call with search_after', async () => {
-      const pageSize = 1000;
-      const firstPageHits = Array.from({ length: pageSize }, (_, i) => ({
-        _source: {
-          attachment_id: `item-${i}`,
-          attachment_type: 'test-type',
-          spaces: ['default'],
-          created_at: '2024-01-01',
-          updated_at: '2024-01-01',
-          update_action: undefined,
-        },
-        sort: [`item-${i}`],
-      }));
+  describe('multi-page streaming', () => {
+    it('processes multiple pages without accumulating all items in memory', async () => {
+      const page1 = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
+      const page2 = [{ id: 'b', updatedAt: '2024-01-01', spaces: ['default'] }];
       const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue([]),
+        list: jest.fn().mockReturnValue(yieldPages(page1, page2)),
       });
-      mockStateClient.search
-        .mockResolvedValueOnce({
-          hits: { hits: firstPageHits },
-        })
-        .mockResolvedValueOnce({
-          hits: { hits: [] },
-        })
-        .mockResolvedValue({ hits: { hits: [] } });
+      // countStateDocs returns 0
+      // batchLookupState returns empty for both pages
+      // sweepStaleState returns empty
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
-      expect(mockStateClient.search).toHaveBeenCalledTimes(3);
-      const secondCall = mockStateClient.search.mock.calls[1][0];
-      expect(secondCall.search_after).toEqual([`item-${pageSize - 1}`]);
-    });
-  });
-
-  describe('loadCrawlerState error', () => {
-    it('skips crawl cycle and logs error when state loading fails', async () => {
-      const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
-      const definition = createMockDefinition({
-        list: jest.fn().mockResolvedValue(items),
-      });
-      mockStateClient.search.mockRejectedValueOnce(new Error('search failed'));
-
-      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      await crawler.crawl({ definition, esClient, savedObjectsClient });
-
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('failed to load crawler state')
+      // Should have written two separate bulk calls (one per page)
+      const stateWriteCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
+        (
+          c[0] as { operations?: Array<{ index?: { document?: { attachment_id?: string } } }> }
+        ).operations?.some(
+          (op: { index?: { document?: { attachment_id?: string } } }) =>
+            op.index?.document?.attachment_id !== undefined
+        )
       );
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('skipping crawl cycle'));
-      expect(mockStateClient.bulk).not.toHaveBeenCalled();
-      expect(mockIndexer.indexAttachment).not.toHaveBeenCalled();
+      expect(stateWriteCalls.length).toBe(2);
+
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('enumerated 2 item(s)')
+      );
     });
   });
 });

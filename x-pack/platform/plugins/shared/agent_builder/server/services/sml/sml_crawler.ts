@@ -9,7 +9,13 @@ import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
-import type { SmlTypeDefinition, SmlContext, SmlCrawlerStateDocument, SmlCrawler } from './types';
+import type {
+  SmlTypeDefinition,
+  SmlContext,
+  SmlCrawlerStateDocument,
+  SmlCrawler,
+  SmlListItem,
+} from './types';
 import type { SmlIndexer } from './sml_indexer';
 import {
   createSmlCrawlerStateStorage,
@@ -54,15 +60,40 @@ export class SmlCrawlerImpl implements SmlCrawler {
       logger: this.logger,
     };
 
+    const crawlStartTime = new Date().toISOString();
     this.logger.info(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
 
-    // 1. List current items from the source (all spaces at once)
-    let currentItems;
+    // Data integrity check: if the SML data index is empty for this type but
+    // state docs exist, clear state to force a full re-index.
+    const integrityResetNeeded = await this.checkDataIntegrity({
+      esClient,
+      stateClient,
+      attachmentType: definition.id,
+    });
+
+    // Stream source items page by page. For each page, batch-lookup state
+    // docs by ID, diff, and write state updates stamped with crawlStartTime.
+    let totalItems = 0;
+    let newCount = 0;
+    let updatedCount = 0;
+    let unchangedCount = 0;
+
     try {
-      currentItems = await definition.list(context);
-      this.logger.info(
-        `SML crawler: listed ${currentItems.length} item(s) from source for type '${definition.id}'`
-      );
+      for await (const page of definition.list(context)) {
+        totalItems += page.length;
+
+        const result = await this.processPage({
+          page,
+          stateClient,
+          attachmentType: definition.id,
+          crawlStartTime,
+          integrityResetNeeded,
+        });
+
+        newCount += result.newItems;
+        updatedCount += result.updatedItems;
+        unchangedCount += result.unchangedItems;
+      }
     } catch (error) {
       this.logger.error(
         `SML crawler: failed to list items for type '${definition.id}': ${(error as Error).message}`
@@ -70,151 +101,131 @@ export class SmlCrawlerImpl implements SmlCrawler {
       return;
     }
 
-    // 2. Load existing crawler state for this type
-    let existingState: SmlCrawlerStateDocument[];
-    try {
-      existingState = await this.loadCrawlerState({
-        stateClient,
-        attachmentType: definition.id,
-      });
-    } catch (error) {
-      this.logger.error(
-        `SML crawler: skipping crawl cycle for type '${definition.id}' — state loading failed. Will retry on next scheduled run.`
-      );
-      return;
-    }
     this.logger.info(
-      `SML crawler: loaded ${existingState.length} existing state doc(s) for type '${definition.id}'`
+      `SML crawler: enumerated ${totalItems} item(s) for type '${definition.id}': ${newCount} new, ${updatedCount} updated, ${unchangedCount} unchanged`
     );
 
-    // 2b. Data integrity check: if the crawler state has items but the SML data
-    // index is missing or empty for this type, the data was lost (e.g. index
-    // rename / cleanup). Reset the state so everything gets re-indexed.
-    if (existingState.length > 0) {
-      const smlDataCount = await this.countSmlDocuments({
-        esClient,
-        attachmentType: definition.id,
-      });
+    // Mark-and-sweep: delete state docs not seen in this crawl run.
+    const deletedCount = await this.sweepStaleState({
+      stateClient,
+      attachmentType: definition.id,
+      crawlStartTime,
+    });
+    if (deletedCount > 0) {
       this.logger.info(
-        `SML crawler: integrity check for type '${definition.id}' — ${existingState.length} state doc(s), ${smlDataCount} SML data doc(s) in index '${smlIndexName}'`
+        `SML crawler: marked ${deletedCount} item(s) as deleted for type '${definition.id}'`
       );
-      if (smlDataCount === 0) {
-        this.logger.warn(
-          `SML crawler: data integrity mismatch for type '${definition.id}' — ` +
-            `${existingState.length} state doc(s) but 0 documents in SML data index. ` +
-            `Resetting crawler state to force full re-index.`
-        );
-        existingState = [];
-      }
     }
 
-    // Build maps for comparison
-    const currentItemMap = new Map(currentItems.map((item) => [item.id, item]));
-    const existingStateMap = new Map(existingState.map((doc) => [doc.attachment_id, doc]));
-
-    const now = new Date().toISOString();
-    const operations: Array<{ id: string; document: SmlCrawlerStateDocument }> = [];
-    let newCount = 0;
-    let updatedCount = 0;
-    let deletedCount = 0;
-    let unchangedCount = 0;
-
-    // 3. Find new and updated items
-    for (const item of currentItems) {
-      const existing = existingStateMap.get(item.id);
-      if (!existing) {
-        newCount++;
-        operations.push({
-          id: `${definition.id}:${item.id}`,
-          document: {
-            attachment_id: item.id,
-            attachment_type: definition.id,
-            spaces: item.spaces,
-            created_at: now,
-            updated_at: item.updatedAt,
-            update_action: 'create',
-          },
-        });
-      } else if (
-        existing.updated_at < item.updatedAt ||
-        !arraysEqual(existing.spaces, item.spaces)
-      ) {
-        updatedCount++;
-        operations.push({
-          id: `${definition.id}:${item.id}`,
-          document: {
-            ...existing,
-            spaces: item.spaces,
-            updated_at: item.updatedAt,
-            update_action: 'update',
-          },
-        });
-      } else {
-        unchangedCount++;
-      }
-    }
-
-    // 4. Find deleted items
-    for (const [attachmentId, state] of existingStateMap) {
-      if (!currentItemMap.has(attachmentId)) {
-        deletedCount++;
-        operations.push({
-          id: `${definition.id}:${attachmentId}`,
-          document: {
-            ...state,
-            update_action: 'delete',
-          },
-        });
-      }
-    }
-
-    this.logger.info(
-      `SML crawler: diff for type '${definition.id}': ${newCount} new, ${updatedCount} updated, ${deletedCount} deleted, ${unchangedCount} unchanged`
-    );
-
-    // 5. Write state updates via storage client
-    if (operations.length > 0) {
-      this.logger.info(
-        `SML crawler: writing ${operations.length} state operation(s) for type '${definition.id}'`
-      );
-      try {
-        const bulkResponse = await stateClient.bulk({
-          refresh: 'wait_for',
-          operations: operations.map(({ id, document }) => ({
-            index: { _id: id, document },
-          })),
-        });
-        if (bulkResponse.errors) {
-          const failedOps = bulkResponse.items.filter((item) => item.index?.error);
-          this.logger.warn(
-            `SML crawler: ${failedOps.length} state write(s) failed for type '${
-              definition.id
-            }': ${JSON.stringify(failedOps.slice(0, 3))}`
-          );
-        } else {
-          this.logger.info(
-            `SML crawler: state operations written successfully for type '${definition.id}'`
-          );
-        }
-      } catch (error) {
-        this.logger.error(
-          `SML crawler: failed to update state for type '${definition.id}': ${
-            (error as Error).message
-          }`
-        );
-        return;
-      }
-    } else {
+    if (newCount === 0 && updatedCount === 0 && deletedCount === 0) {
       this.logger.info(`SML crawler: no state changes needed for type '${definition.id}'`);
     }
 
-    // 6. Process queued actions
+    // Process queued actions (create/update/delete)
     await this.processQueue({
       attachmentType: definition.id,
       esClient,
       savedObjectsClient,
       stateClient,
     });
+  }
+
+  /**
+   * Check whether we need to force a full re-index due to data integrity mismatch.
+   * Returns true if state has docs but the SML data index is empty.
+   */
+  private async checkDataIntegrity({
+    esClient,
+    stateClient,
+    attachmentType,
+  }: {
+    esClient: ElasticsearchClient;
+    stateClient: ReturnType<SmlCrawlerStateStorage['getClient']>;
+    attachmentType: string;
+  }): Promise<boolean> {
+    const stateCount = await this.countStateDocs({ stateClient, attachmentType });
+    if (stateCount === 0) return false;
+
+    const smlDataCount = await this.countSmlDocuments({ esClient, attachmentType });
+    this.logger.info(
+      `SML crawler: integrity check for type '${attachmentType}' — ${stateCount} state doc(s), ${smlDataCount} SML data doc(s) in index '${smlIndexName}'`
+    );
+    if (smlDataCount === 0) {
+      this.logger.warn(
+        `SML crawler: data integrity mismatch for type '${attachmentType}' — ` +
+          `${stateCount} state doc(s) but 0 documents in SML data index. ` +
+          `Forcing full re-index.`
+      );
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Process a single page of source items: batch-lookup state, diff,
+   * and write state updates with last_crawled_at stamped.
+   */
+  private async processPage({
+    page,
+    stateClient,
+    attachmentType,
+    crawlStartTime,
+    integrityResetNeeded,
+  }: {
+    page: SmlListItem[];
+    stateClient: ReturnType<SmlCrawlerStateStorage['getClient']>;
+    attachmentType: string;
+    crawlStartTime: string;
+    integrityResetNeeded: boolean;
+  }): Promise<{ newItems: number; updatedItems: number; unchangedItems: number }> {
+    if (page.length === 0) return { newItems: 0, updatedItems: 0, unchangedItems: 0 };
+
+    const stateMap = integrityResetNeeded
+      ? new Map<string, SmlCrawlerStateDocument>()
+      : await this.batchLookupState({ stateClient, attachmentType, ids: page.map((i) => i.id) });
+
+    let newItems = 0;
+    let updatedItems = 0;
+    let unchangedItems = 0;
+    const operations: Array<{ id: string; document: SmlCrawlerStateDocument }> = [];
+
+    for (const item of page) {
+      const existing = stateMap.get(item.id);
+      let updateAction: SmlCrawlerStateDocument['update_action'];
+
+      if (!existing) {
+        newItems++;
+        updateAction = 'create';
+      } else if (
+        existing.updated_at < item.updatedAt ||
+        !arraysEqual(existing.spaces, item.spaces)
+      ) {
+        updatedItems++;
+        updateAction = 'update';
+      } else {
+        unchangedItems++;
+        updateAction = existing.update_action;
+      }
+
+      operations.push({
+        id: `${attachmentType}:${item.id}`,
+        document: {
+          attachment_id: item.id,
+          attachment_type: attachmentType,
+          spaces: item.spaces,
+          created_at: existing?.created_at ?? crawlStartTime,
+          updated_at: item.updatedAt,
+          update_action: updateAction,
+          last_crawled_at: crawlStartTime,
+        },
+      });
+    }
+
+    if (operations.length > 0) {
+      await this.writeStateOperations({ stateClient, operations, attachmentType });
+    }
+
+    return { newItems, updatedItems, unchangedItems };
   }
 
   /**
@@ -403,59 +414,173 @@ export class SmlCrawlerImpl implements SmlCrawler {
   }
 
   /**
-   * Load all crawler state documents for a given attachment type.
+   * Batch-lookup state documents by their IDs using mget-style terms query.
+   * Returns a map of attachment_id → state document.
    */
-  private async loadCrawlerState({
+  private async batchLookupState({
     stateClient,
     attachmentType,
+    ids,
   }: {
     stateClient: ReturnType<SmlCrawlerStateStorage['getClient']>;
     attachmentType: string;
-  }): Promise<SmlCrawlerStateDocument[]> {
-    const allDocs: SmlCrawlerStateDocument[] = [];
-    const pageSize = 1000;
+    ids: string[];
+  }): Promise<Map<string, SmlCrawlerStateDocument>> {
+    const result = new Map<string, SmlCrawlerStateDocument>();
+    if (ids.length === 0) return result;
+
+    const docIds = ids.map((id) => `${attachmentType}:${id}`);
 
     try {
-      let searchAfter: Array<string | number> | undefined;
-      let hasMore = true;
+      const response = await stateClient.search({
+        track_total_hits: false,
+        query: { ids: { values: docIds } },
+        size: ids.length,
+      });
 
-      while (hasMore) {
-        const response = await stateClient.search({
-          track_total_hits: false,
-          query: {
-            bool: {
-              filter: [{ term: { attachment_type: attachmentType } }],
-            },
-          },
-          size: pageSize,
-          sort: [{ attachment_id: 'asc' }],
-          ...(searchAfter ? { search_after: searchAfter } : {}),
-        });
-
-        const hits = response.hits.hits;
-        for (const hit of hits) {
-          if (hit._source) {
-            allDocs.push(hit._source);
-          }
-        }
-
-        if (hits.length < pageSize) {
-          hasMore = false;
-        } else {
-          const lastHit = hits[hits.length - 1];
-          searchAfter = lastHit.sort as Array<string | number>;
+      for (const hit of response.hits.hits) {
+        if (hit._source) {
+          result.set(hit._source.attachment_id, hit._source);
         }
       }
     } catch (error) {
       this.logger.error(
-        `SML crawler: failed to load crawler state for type '${attachmentType}': ${
+        `SML crawler: failed to batch-lookup state for type '${attachmentType}': ${
           (error as Error).message
         }`
       );
       throw error;
     }
 
-    return allDocs;
+    return result;
+  }
+
+  /**
+   * Write state operations via bulk API.
+   */
+  private async writeStateOperations({
+    stateClient,
+    operations,
+    attachmentType,
+  }: {
+    stateClient: ReturnType<SmlCrawlerStateStorage['getClient']>;
+    operations: Array<{ id: string; document: SmlCrawlerStateDocument }>;
+    attachmentType: string;
+  }): Promise<void> {
+    try {
+      const bulkResponse = await stateClient.bulk({
+        refresh: 'wait_for',
+        operations: operations.map(({ id, document }) => ({
+          index: { _id: id, document },
+        })),
+      });
+      if (bulkResponse.errors) {
+        const failedOps = bulkResponse.items.filter((item) => item.index?.error);
+        this.logger.warn(
+          `SML crawler: ${failedOps.length} state write(s) failed for type '${attachmentType}': ${JSON.stringify(
+            failedOps.slice(0, 3)
+          )}`
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `SML crawler: failed to update state for type '${attachmentType}': ${
+          (error as Error).message
+        }`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Mark-and-sweep: find state docs not seen in this crawl run
+   * (last_crawled_at < crawlStartTime) and mark them for deletion.
+   * Returns the number of items marked as deleted.
+   */
+  private async sweepStaleState({
+    stateClient,
+    attachmentType,
+    crawlStartTime,
+  }: {
+    stateClient: ReturnType<SmlCrawlerStateStorage['getClient']>;
+    attachmentType: string;
+    crawlStartTime: string;
+  }): Promise<number> {
+    const pageSize = 1000;
+    let markedCount = 0;
+    let searchAfter: Array<string | number> | undefined;
+    let hasMore = true;
+
+    while (hasMore) {
+      const response = await stateClient.search({
+        track_total_hits: false,
+        query: {
+          bool: {
+            filter: [
+              { term: { attachment_type: attachmentType } },
+              { range: { last_crawled_at: { lt: crawlStartTime } } },
+            ],
+          },
+        },
+        size: pageSize,
+        sort: [{ attachment_id: 'asc' }],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+      });
+
+      const hits = response.hits.hits;
+      if (hits.length === 0) break;
+
+      const operations = hits
+        .filter((hit) => hit._id && hit._source)
+        .map((hit) => ({
+          id: hit._id!,
+          document: {
+            ...hit._source!,
+            update_action: 'delete' as const,
+            last_crawled_at: crawlStartTime,
+          },
+        }));
+
+      if (operations.length > 0) {
+        await this.writeStateOperations({ stateClient, operations, attachmentType });
+        markedCount += operations.length;
+      }
+
+      if (hits.length < pageSize) {
+        hasMore = false;
+      } else {
+        const lastHit = hits[hits.length - 1];
+        searchAfter = lastHit.sort as Array<string | number>;
+      }
+    }
+
+    return markedCount;
+  }
+
+  /**
+   * Count how many state docs exist for a given attachment type.
+   */
+  private async countStateDocs({
+    stateClient,
+    attachmentType,
+  }: {
+    stateClient: ReturnType<SmlCrawlerStateStorage['getClient']>;
+    attachmentType: string;
+  }): Promise<number> {
+    try {
+      const response = await stateClient.search({
+        track_total_hits: true,
+        query: {
+          bool: {
+            filter: [{ term: { attachment_type: attachmentType } }],
+          },
+        },
+        size: 0,
+      });
+      return (response.hits.total as { value: number })?.value ?? 0;
+    } catch {
+      return 0;
+    }
   }
 }
 

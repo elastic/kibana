@@ -50,7 +50,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
   id: VISUALIZATION_SML_TYPE,
   fetchFrequency: () => '1h',
 
-  list: async (context) => {
+  list: async function* (context) {
     const finder = context.savedObjectsClient.createPointInTimeFinder({
       type: 'lens',
       perPage: 1000,
@@ -58,19 +58,17 @@ export const visualizationSmlType: SmlTypeDefinition = {
       fields: ['title'],
     });
 
-    const items: Array<{ id: string; updatedAt: string; spaces: string[] }> = [];
-    for await (const response of finder.find()) {
-      for (const so of response.saved_objects) {
-        items.push({
+    try {
+      for await (const response of finder.find()) {
+        yield response.saved_objects.map((so) => ({
           id: so.id,
           updatedAt: so.updated_at ?? new Date().toISOString(),
           spaces: so.namespaces ?? [],
-        });
+        }));
       }
+    } finally {
+      await finder.close();
     }
-    await finder.close();
-
-    return items;
   },
 
   getSmlData: async (attachmentId, context) => {

@@ -23,6 +23,7 @@ const storageSettings = {
       created_at: types.date({}),
       updated_at: types.date({}),
       update_action: types.keyword({}),
+      last_crawled_at: types.date({}),
     },
   },
 } satisfies IndexStorageSettings;

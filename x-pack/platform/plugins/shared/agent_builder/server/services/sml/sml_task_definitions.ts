@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
+import { TaskManagerSetupContract, TaskManagerStartContract, TaskPriority, } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
@@ -67,6 +64,7 @@ export const registerSmlCrawlerTaskDefinition = ({
       title: 'Agent Builder: SML Crawler',
       timeout: '10m',
       maxAttempts: 3,
+      priority: TaskPriority.Low,
       createTaskRunner: (context) => {
         const { taskInstance } = context;
         const { attachmentType } = (taskInstance.params ?? {}) as Partial<SmlCrawlerTaskParams>;
