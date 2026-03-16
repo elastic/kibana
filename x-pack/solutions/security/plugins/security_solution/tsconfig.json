@@ -276,6 +276,7 @@
     "@kbn/as-code-filters-transforms",
     "@kbn/cps-utils",
     "@kbn/cps",
+    "@kbn/esql-language",
     "@kbn/workflows-ui",
     "@kbn/workflows-management-plugin",
     "@kbn/workflows",

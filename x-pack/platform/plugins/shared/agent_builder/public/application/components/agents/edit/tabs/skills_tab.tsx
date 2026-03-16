@@ -25,7 +25,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { PublicSkillDefinition, SkillSelection } from '@kbn/agent-builder-common';
+import type { PublicSkillSummary, SkillSelection } from '@kbn/agent-builder-common';
 import { hasSkillSelectionWildcard, getExplicitSkillIds } from '@kbn/agent-builder-common';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
@@ -38,7 +38,7 @@ import { appPaths } from '../../../../utils/app_paths';
 
 interface SkillsTabProps {
   control: Control<AgentFormData>;
-  skills: PublicSkillDefinition[];
+  skills: PublicSkillSummary[];
   isLoading: boolean;
   isFormDisabled: boolean;
 }
@@ -75,7 +75,7 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
 };
 
 interface SkillsSelectionProps {
-  skills: PublicSkillDefinition[];
+  skills: PublicSkillSummary[];
   skillsLoading: boolean;
   selectedSkills: SkillSelection[];
   onSkillsChange: (skills: SkillSelection[]) => void;
@@ -104,7 +104,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   );
 
   const isSkillActive = useCallback(
-    (skill: PublicSkillDefinition) => {
+    (skill: PublicSkillSummary) => {
       if (isAllBuiltinSelected && skill.readonly) {
         return true;
       }
@@ -171,7 +171,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   }, []);
 
   const handleTableChange = useCallback(
-    ({ page }: CriteriaWithPagination<PublicSkillDefinition>) => {
+    ({ page }: CriteriaWithPagination<PublicSkillSummary>) => {
       if (page) {
         setPageIndex(page.index);
         if (page.size !== pageSize) {
@@ -338,7 +338,7 @@ const ActiveSkillsStatus: React.FC<{ activeSkillsCount: number; totalSkills: num
   );
 };
 
-const SkillDetailsColumn: React.FC<{ skill: PublicSkillDefinition }> = ({ skill }) => {
+const SkillDetailsColumn: React.FC<{ skill: PublicSkillSummary }> = ({ skill }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
@@ -358,12 +358,12 @@ const SkillDetailsColumn: React.FC<{ skill: PublicSkillDefinition }> = ({ skill 
 };
 
 const createCheckboxColumn = (
-  isSkillActive: (skill: PublicSkillDefinition) => boolean,
+  isSkillActive: (skill: PublicSkillSummary) => boolean,
   onToggle: (skillId: string) => void,
   disabled: boolean
 ) => ({
   width: '40px',
-  render: (skill: PublicSkillDefinition) => (
+  render: (skill: PublicSkillSummary) => (
     <EuiCheckbox
       id={`skill-${skill.id}`}
       checked={isSkillActive(skill)}
@@ -375,9 +375,9 @@ const createCheckboxColumn = (
 
 const createSkillDetailsColumn = () => ({
   name: labels.skills.skillIdLabel,
-  sortable: (item: PublicSkillDefinition) => item.id,
+  sortable: (item: PublicSkillSummary) => item.id,
   width: '60%',
-  render: (item: PublicSkillDefinition) => <SkillDetailsColumn skill={item} />,
+  render: (item: PublicSkillSummary) => <SkillDetailsColumn skill={item} />,
 });
 
 const createTypeColumn = () => ({

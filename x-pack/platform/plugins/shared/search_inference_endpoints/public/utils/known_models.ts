@@ -26,7 +26,6 @@ export const KNOWN_MODEL_GROUPS: KnownModelGroup[] = [
       return (
         normalizedModelId.includes('elser_model') ||
         normalizedModelId.includes('jina') ||
-        normalizedModelId.includes('rainbow-sprinkles') ||
         normalizedModelId.includes('.rerank-v1')
       );
     },
@@ -38,7 +37,12 @@ export const KNOWN_MODEL_GROUPS: KnownModelGroup[] = [
     }),
     groupTest: (modelId: string) => {
       const normalizedModelId = modelId.toLowerCase();
-      return normalizedModelId.includes('claude') || normalizedModelId.includes('anthropic');
+      return (
+        normalizedModelId.includes('claude') ||
+        normalizedModelId.includes('anthropic') ||
+        normalizedModelId.includes('rainbow-sprinkles') ||
+        normalizedModelId.includes('gp-llm-v2')
+      );
     },
   },
   {

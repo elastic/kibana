@@ -2478,25 +2478,6 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-common.checkFTRCodeOwnersCLI",
-        "type": "Function",
-        "tags": [],
-        "label": "checkFTRCodeOwnersCLI",
-        "description": [],
-        "signature": [
-          "() => Promise<void>"
-        ],
-        "path": "src/platform/packages/shared/kbn-test/src/functional_test_runner/cli/code_owners.ts",
-        "lineNumber": 31,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/test",
         "id": "def-common.cleanupElasticsearch",
         "type": "Function",
         "tags": [],
@@ -3181,7 +3162,7 @@
           "(hostPath: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 728,
+        "lineNumber": 764,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3197,7 +3178,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 733,
+            "lineNumber": 769,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,

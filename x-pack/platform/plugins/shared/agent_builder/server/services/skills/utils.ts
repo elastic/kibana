@@ -6,7 +6,7 @@
  */
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import type { PublicSkillDefinition, PublicSkillSummary } from '@kbn/agent-builder-common';
 
 /**
  * Converts an InternalSkillDefinition to a PublicSkillDefinition
@@ -27,4 +27,20 @@ export const internalToPublicDefinition = async (
   tool_ids: await skill.getRegistryTools(),
   readonly: skill.readonly,
   plugin_id: skill.plugin_id,
+});
+
+/**
+ * Converts an InternalSkillDefinition to a PublicSkillSummary for listing.
+ * Strips heavy content fields; uses `referencedContentCount` for the count.
+ */
+export const internalToPublicSummary = async (
+  skill: InternalSkillDefinition
+): Promise<PublicSkillSummary> => ({
+  id: skill.id,
+  name: skill.name,
+  description: skill.description,
+  tool_ids: await skill.getRegistryTools(),
+  readonly: skill.readonly,
+  plugin_id: skill.plugin_id,
+  referenced_content_count: skill.referencedContentCount,
 });

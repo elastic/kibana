@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 
 import {
   StopAutoImportDataStreamRequestParams,
@@ -24,7 +24,7 @@ describe('data stream schemas', () => {
       const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('integration_id: Required');
+      expect(stringifyZodError(result.error)).toContain('integration_id: Invalid input');
     });
 
     it('requires data_stream_id', () => {
@@ -35,7 +35,7 @@ describe('data stream schemas', () => {
       const result = StopAutoImportDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('data_stream_id: Required');
+      expect(stringifyZodError(result.error)).toContain('data_stream_id: Invalid input');
     });
 
     it('rejects empty integration_id', () => {
@@ -145,7 +145,7 @@ describe('data stream schemas', () => {
       const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('integration_id: Required');
+      expect(stringifyZodError(result.error)).toContain('integration_id: Invalid input');
     });
 
     it('requires data_stream_id', () => {
@@ -156,7 +156,7 @@ describe('data stream schemas', () => {
       const result = UploadSamplesToDataStreamRequestParams.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('data_stream_id: Required');
+      expect(stringifyZodError(result.error)).toContain('data_stream_id: Invalid input');
     });
 
     it('rejects empty integration_id', () => {
@@ -226,7 +226,7 @@ describe('data stream schemas', () => {
       const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('samples: Required');
+      expect(stringifyZodError(result.error)).toContain('samples: Invalid input');
     });
 
     it('requires originalSource', () => {
@@ -237,7 +237,7 @@ describe('data stream schemas', () => {
       const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('originalSource: Required');
+      expect(stringifyZodError(result.error)).toContain('originalSource: Invalid input');
     });
 
     it('rejects non-array samples', () => {
@@ -249,7 +249,7 @@ describe('data stream schemas', () => {
       const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('samples: Expected array');
+      expect(stringifyZodError(result.error)).toContain('samples: Invalid input');
     });
 
     it('accepts empty samples array', () => {
@@ -319,7 +319,7 @@ describe('data stream schemas', () => {
       const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('Expected string');
+      expect(stringifyZodError(result.error)).toContain('Invalid input');
     });
 
     it('accepts large number of samples', () => {
@@ -376,7 +376,7 @@ describe('data stream schemas', () => {
       const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('Invalid enum value');
+      expect(stringifyZodError(result.error)).toContain('Invalid option');
     });
 
     it('strips unknown properties', () => {
@@ -436,7 +436,7 @@ describe('data stream schemas', () => {
       const result = UploadSamplesToDataStreamResponse.safeParse(payload);
       expectParseError(result);
 
-      expect(stringifyZodError(result.error)).toContain('success: Expected boolean');
+      expect(stringifyZodError(result.error)).toContain('success: Invalid input');
     });
 
     it('rejects unknown properties due to strict mode', () => {

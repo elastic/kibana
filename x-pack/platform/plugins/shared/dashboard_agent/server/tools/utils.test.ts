@@ -137,7 +137,7 @@ describe('upsertMarkdownPanel', () => {
     expect(result.changedPanel).toBeDefined();
     expect(result.panels).toHaveLength(2);
     expect(result.panels[0]).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
+      type: 'markdown',
       rawConfig: { content: '# Summary' },
       grid: { w: 48, h: 4, x: 0, y: 0 },
     });
@@ -160,7 +160,7 @@ describe('upsertMarkdownPanel', () => {
   it('updates existing markdown panel content and recalculates grid height', () => {
     const existingPanels: AttachmentPanel[] = [
       {
-        type: 'DASHBOARD_MARKDOWN',
+        type: 'markdown',
         panelId: 'markdown-1',
         rawConfig: { content: '# Old summary' },
         grid: { w: 48, h: 4, x: 0, y: 0 },
@@ -176,7 +176,7 @@ describe('upsertMarkdownPanel', () => {
     const result = upsertMarkdownPanel(existingPanels, '# New summary\n\nLine 1\nLine 2\nLine 3');
 
     expect(result.changedPanel).toMatchObject({
-      type: 'DASHBOARD_MARKDOWN',
+      type: 'markdown',
       panelId: 'markdown-1',
       rawConfig: { content: '# New summary\n\nLine 1\nLine 2\nLine 3' },
       grid: { w: 48, h: 6, x: 0, y: 0 },
@@ -187,7 +187,7 @@ describe('upsertMarkdownPanel', () => {
   it('does not change panels when markdown content is unchanged', () => {
     const existingPanels: AttachmentPanel[] = [
       {
-        type: 'DASHBOARD_MARKDOWN',
+        type: 'markdown',
         panelId: 'markdown-1',
         rawConfig: { content: '# Summary' },
         grid: { w: 48, h: 4, x: 0, y: 0 },
@@ -203,7 +203,7 @@ describe('upsertMarkdownPanel', () => {
   it('preserves existing x and y position when updating markdown content', () => {
     const existingPanels: AttachmentPanel[] = [
       {
-        type: 'DASHBOARD_MARKDOWN',
+        type: 'markdown',
         panelId: 'markdown-1',
         rawConfig: { content: '# Old' },
         grid: { w: 48, h: 4, x: 0, y: 10 },
