@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cloud-defend-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-cloud-security-posture'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/cloud-defend-plugin'
+  title: '@kbn/cloud-defend-plugin'
   description: Moon project for @kbn/cloud-defend-plugin
   channel: ''
   owner: '@elastic/kibana-cloud-security-posture'
-  metadata:
-    sourceRoot: x-pack/solutions/security/plugins/cloud_defend
+  sourceRoot: x-pack/solutions/security/plugins/cloud_defend
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -62,14 +61,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
