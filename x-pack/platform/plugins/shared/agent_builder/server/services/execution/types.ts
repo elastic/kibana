@@ -95,6 +95,8 @@ export interface AgentExecution {
   eventCount: number;
   /** Inline events emitted during the execution. The array index is the event number. */
   events: ChatEvent[];
+  /** Caller-provided metadata. */
+  metadata?: Record<string, string>;
 }
 
 /**
@@ -116,6 +118,8 @@ export interface ExecuteAgentParams {
    * - `undefined` (default): auto-decide based on context (already on TM -> local; otherwise check the experimental features UI setting).
    */
   useTaskManager?: boolean;
+  /** Arbitrary key-value metadata stored with the execution, searchable via findExecutions. */
+  metadata?: Record<string, string>;
 }
 
 /**
@@ -138,6 +142,35 @@ export interface ExecuteAgentResult {
 export interface FollowExecutionOptions {
   /** Only return events with event_number greater than this value. */
   since?: number;
+}
+
+/**
+ * Filter criteria for {@link AgentExecutionService.findExecutions}.
+ * All specified fields are ANDed together.
+ */
+export interface FindExecutionsFilter {
+  /** Match executions whose metadata contains all specified key-value pairs. */
+  metadata?: Record<string, string>;
+  /** Match executions with one of these statuses. */
+  status?: ExecutionStatus[];
+}
+
+/**
+ * Options for {@link AgentExecutionService.findExecutions}.
+ */
+export interface FindExecutionsOptions {
+  /** Space to scope results to. Defaults to current space from request if omitted. */
+  spaceId?: string;
+  /** Filter criteria. All specified fields are ANDed together. */
+  filter?: FindExecutionsFilter;
+  /** Maximum number of results to return. Defaults to 10. */
+  size?: number;
+  /**
+   * Sort field and order. Defaults to `{ field: '@timestamp', order: 'desc' }`.
+   * Note: field is an explicit union rather than derived from AgentExecutionProperties to avoid
+   * circular dependencies and to prevent exposing snake_case ES field names to consumers.
+   */
+  sort?: { field: '@timestamp' | 'status'; order: 'asc' | 'desc' };
 }
 
 /**
@@ -168,4 +201,14 @@ export interface AgentExecutionService {
    * The observable completes when the execution reaches a terminal status.
    */
   followExecution(executionId: string, options?: FollowExecutionOptions): Observable<ChatEvent>;
+
+  /**
+   * Find executions matching the given filters. Defaults to current space unless spaceId is explicitly provided.
+   * Callers that override spaceId are responsible for their own authorization.
+   * Note: returned executions have `events: []` (events are excluded for performance). Use `getExecution` or `readEvents` for full events.
+   */
+  findExecutions(
+    request: KibanaRequest,
+    options?: FindExecutionsOptions
+  ): Promise<AgentExecution[]>;
 }
