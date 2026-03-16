@@ -3261,6 +3261,9 @@
       "created_by": {
         "type": "keyword"
       },
+      "created_by_profile_uid": {
+        "type": "keyword"
+      },
       "description": {
         "type": "text"
       },
@@ -3305,6 +3308,9 @@
         "type": "date"
       },
       "updated_by": {
+        "type": "keyword"
+      },
+      "updated_by_profile_uid": {
         "type": "keyword"
       },
       "version": {
@@ -3366,6 +3372,9 @@
       "created_by": {
         "type": "text"
       },
+      "created_by_profile_uid": {
+        "type": "keyword"
+      },
       "description": {
         "type": "text"
       },
@@ -3393,6 +3402,9 @@
       },
       "updated_by": {
         "type": "text"
+      },
+      "updated_by_profile_uid": {
+        "type": "keyword"
       },
       "version": {
         "type": "keyword"
