@@ -12,7 +12,18 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, COMMON_HEADERS, KBN_ARCHIVES } from '../fixtures';
 
-const SEARCH_ENDPOINT = 'api/dashboards/search';
+const SEARCH_ENDPOINT = 'api/dashboards';
+
+const buildUrl = (params: Record<string, string | number | undefined>) => {
+  const searchParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) {
+      searchParams.set(key, String(value));
+    }
+  }
+  const query = searchParams.toString();
+  return query ? `${SEARCH_ENDPOINT}?${query}` : SEARCH_ENDPOINT;
+};
 
 apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
@@ -27,12 +38,11 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
   });
 
   apiTest('should retrieve a paginated list of dashboards', async ({ apiClient }) => {
-    const response = await apiClient.post(SEARCH_ENDPOINT, {
+    const response = await apiClient.get(SEARCH_ENDPOINT, {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
       },
-      body: {},
       responseType: 'json',
     });
 
@@ -43,13 +53,10 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
   });
 
   apiTest('should narrow results by search', async ({ apiClient }) => {
-    const response = await apiClient.post(SEARCH_ENDPOINT, {
+    const response = await apiClient.get(buildUrl({ search: '0*' }), {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
-      },
-      body: {
-        search: '0*',
       },
       responseType: 'json',
     });
@@ -60,13 +67,10 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
   });
 
   apiTest('should allow users to set a per page limit', async ({ apiClient }) => {
-    const response = await apiClient.post(SEARCH_ENDPOINT, {
+    const response = await apiClient.get(buildUrl({ per_page: 10 }), {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
-      },
-      body: {
-        per_page: 10,
       },
       responseType: 'json',
     });
@@ -79,14 +83,10 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
   apiTest(
     'should allow users to paginate through the list of dashboards',
     async ({ apiClient }) => {
-      const response = await apiClient.post(SEARCH_ENDPOINT, {
+      const response = await apiClient.get(buildUrl({ page: 5, per_page: 10 }), {
         headers: {
           ...COMMON_HEADERS,
           ...viewerCredentials.apiKeyHeader,
-        },
-        body: {
-          page: 5,
-          per_page: 10,
         },
         responseType: 'json',
       });

@@ -210,10 +210,8 @@ export const useDashboardListingTable = ({
         .search({
           search: searchTerm,
           per_page: listingLimit,
-          tags: {
-            included: (references ?? []).map(({ id }) => id),
-            excluded: (referencesToExclude ?? []).map(({ id }) => id),
-          },
+          tags: (references ?? []).map(({ id }) => id),
+          excluded_tags: (referencesToExclude ?? []).map(({ id }) => id),
         })
         .then(({ total, dashboards }) => {
           const searchEndTime = window.performance.now();

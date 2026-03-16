@@ -9,12 +9,12 @@
 
 import { checkForDuplicateDashboardTitle } from './check_for_duplicate_dashboard_title';
 import { extractTitleAndCount } from '../utils/extract_title_and_count';
-import type { DashboardSearchRequestBody } from '../../server';
+import type { DashboardSearchRequestParams } from '../../server';
 
 const mockSearchDashboards = jest.fn();
 jest.mock('./dashboard_client', () => ({
   dashboardClient: {
-    search: (searchBody: DashboardSearchRequestBody) => mockSearchDashboards(searchBody),
+    search: (searchParams: DashboardSearchRequestParams) => mockSearchDashboards(searchParams),
   },
 }));
 
