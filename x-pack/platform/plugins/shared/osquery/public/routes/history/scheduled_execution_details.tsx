@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { useParams, Redirect } from 'react-router-dom';
+import React, { useCallback, useMemo } from 'react';
+import { useParams, useHistory, Redirect } from 'react-router-dom';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -48,8 +48,16 @@ const ScheduledExecutionDetailsPageComponent = () => {
     executionCount: executionCountStr ?? '',
   });
 
+  const routerHistory = useHistory();
+  const handleGoBack = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      routerHistory.goBack();
+    },
+    [routerHistory]
+  );
   const historyPath = pagePathGetters.history();
-  const historyNavProps = useRouterNavigate(historyPath);
+  const historyNavProps = useRouterNavigate(historyPath, handleGoBack);
 
   const { data, isLoading, isError } = useScheduledExecutionDetails({
     scheduleId,
