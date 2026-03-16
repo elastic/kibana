@@ -23,6 +23,12 @@ import {
   useDetectionRulesByIntegration,
 } from '@kbn/siem-readiness';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
+import {
+  INTEGRATIONS_INSTALLED_TOOLTIP,
+  INTEGRATIONS_UNINSTALLED_TOOLTIP,
+  INTEGRATIONS_DISABLED,
+  INTEGRATIONS_UNINSTALLED,
+} from '../../../../../detection_engine/common/components/related_integrations/translations';
 
 interface DetectionRule {
   rule_id?: string;
@@ -141,7 +147,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
 
   const { getDetectionRules } = useSiemReadinessApi();
   const integrationDisplayNames = useIntegrationDisplayNames();
-  const { enabledPackagesSet } = useDetectionRulesByIntegration();
+  const { enabledPackagesSet, disabledPackagesSet } = useDetectionRulesByIntegration();
 
   const enabledRules = useMemo(
     () => (getDetectionRules.data?.data || []).filter((rule: DetectionRule) => rule.enabled),
@@ -360,10 +366,29 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
               }
             >
               <IntegrationSelectablePopover
-                options={tactic.missingPackages.map((pkg) => ({
-                  label: integrationDisplayNames.data?.get(pkg) || pkg,
-                  key: pkg,
-                }))}
+                options={tactic.missingPackages
+                  .map((pkg) => ({
+                    label: integrationDisplayNames.data?.get(pkg) || pkg,
+                    key: pkg,
+                  }))
+                  .sort((a, b) => a.label.localeCompare(b.label))}
+                statusMap={
+                  new Map(
+                    tactic.missingPackages.map((pkg) => {
+                      const isDisabled = disabledPackagesSet.has(pkg);
+                      return [
+                        pkg,
+                        {
+                          status: isDisabled ? INTEGRATIONS_DISABLED : INTEGRATIONS_UNINSTALLED,
+                          badgeColor: isDisabled ? 'primary' : 'default',
+                          tooltip: isDisabled
+                            ? INTEGRATIONS_INSTALLED_TOOLTIP
+                            : INTEGRATIONS_UNINSTALLED_TOOLTIP,
+                        },
+                      ];
+                    })
+                  )
+                }
                 showOnlySelectable
               />
             </EuiPopover>

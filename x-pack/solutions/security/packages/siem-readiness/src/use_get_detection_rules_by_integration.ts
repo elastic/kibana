@@ -100,9 +100,25 @@ export const useDetectionRulesByIntegration = (integrationPackages?: string | st
 
   const enabledPackagesSet = useMemo(() => new Set(enabledPackages), [enabledPackages]);
 
+  const disabledPackagesSet = useMemo(() => {
+    const disabled = new Set<string>();
+
+    for (const pkg of integrationItems ?? []) {
+      const isInstalled = pkg.status === 'installed';
+      const hasPolicies = (pkg.packagePoliciesInfo?.count ?? 0) > 0;
+
+      if (isInstalled && !hasPolicies) {
+        disabled.add(pkg.name);
+      }
+    }
+
+    return disabled;
+  }, [integrationItems]);
+
   return {
     ruleIntegrationCoverage,
     enabledPackages,
     enabledPackagesSet,
+    disabledPackagesSet,
   };
 };

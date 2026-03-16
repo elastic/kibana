@@ -25,6 +25,14 @@ import {
   useSiemReadinessApi,
 } from '@kbn/siem-readiness';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
+import {
+  INTEGRATIONS_INSTALLED_TOOLTIP,
+  INTEGRATIONS_UNINSTALLED_TOOLTIP,
+  INTEGRATIONS_ENABLED_TOOLTIP,
+  INTEGRATIONS_ENABLED,
+  INTEGRATIONS_DISABLED,
+  INTEGRATIONS_UNINSTALLED,
+} from '../../../../../detection_engine/common/components/related_integrations/translations';
 
 export const AllRuleCoveragePanel: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -36,7 +44,8 @@ export const AllRuleCoveragePanel: React.FC = () => {
     [getDetectionRules.data?.data]
   );
 
-  const { ruleIntegrationCoverage, enabledPackagesSet } = useDetectionRulesByIntegration();
+  const { ruleIntegrationCoverage, enabledPackagesSet, disabledPackagesSet } =
+    useDetectionRulesByIntegration();
 
   const integrationDisplayNames = useIntegrationDisplayNames();
 
@@ -68,14 +77,51 @@ export const AllRuleCoveragePanel: React.FC = () => {
   const enabledIntegrationsOptions = useMemo(() => {
     return relatedIntegrationNames
       .filter((name) => enabledPackagesSet.has(name))
-      .map((name) => ({ label: getIntegrationDisplayName(name), key: name }));
+      .map((name) => ({
+        label: getIntegrationDisplayName(name),
+        key: name,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   }, [relatedIntegrationNames, enabledPackagesSet, getIntegrationDisplayName]);
+
+  const enabledIntegrationsStatusMap = useMemo(() => {
+    const map = new Map<string, { status: string; badgeColor: string; tooltip: string }>();
+    relatedIntegrationNames
+      .filter((name) => enabledPackagesSet.has(name))
+      .forEach((name) => {
+        map.set(name, {
+          status: INTEGRATIONS_ENABLED,
+          badgeColor: 'success',
+          tooltip: INTEGRATIONS_ENABLED_TOOLTIP,
+        });
+      });
+    return map;
+  }, [relatedIntegrationNames, enabledPackagesSet]);
 
   const missingOrDisabledIntegrationsOptions = useMemo(() => {
     return relatedIntegrationNames
       .filter((name) => !enabledPackagesSet.has(name))
-      .map((name) => ({ label: getIntegrationDisplayName(name), key: name }));
+      .map((name) => ({
+        label: getIntegrationDisplayName(name),
+        key: name,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   }, [relatedIntegrationNames, enabledPackagesSet, getIntegrationDisplayName]);
+
+  const missingOrDisabledStatusMap = useMemo(() => {
+    const map = new Map<string, { status: string; badgeColor: string; tooltip: string }>();
+    relatedIntegrationNames
+      .filter((name) => !enabledPackagesSet.has(name))
+      .forEach((name) => {
+        const isDisabled = disabledPackagesSet.has(name);
+        map.set(name, {
+          status: isDisabled ? INTEGRATIONS_DISABLED : INTEGRATIONS_UNINSTALLED,
+          badgeColor: isDisabled ? 'primary' : 'default',
+          tooltip: isDisabled ? INTEGRATIONS_INSTALLED_TOOLTIP : INTEGRATIONS_UNINSTALLED_TOOLTIP,
+        });
+      });
+    return map;
+  }, [relatedIntegrationNames, enabledPackagesSet, disabledPackagesSet]);
 
   const chartBaseTheme = useMemo(
     () => ({
@@ -147,9 +193,19 @@ export const AllRuleCoveragePanel: React.FC = () => {
       truncateText: true,
       render: (actions: string, item) => {
         if (item.status === 'Enabled integrations') {
-          return <IntegrationSelectablePopover options={enabledIntegrationsOptions} />;
+          return (
+            <IntegrationSelectablePopover
+              options={enabledIntegrationsOptions}
+              statusMap={enabledIntegrationsStatusMap}
+            />
+          );
         } else {
-          return <IntegrationSelectablePopover options={missingOrDisabledIntegrationsOptions} />;
+          return (
+            <IntegrationSelectablePopover
+              options={missingOrDisabledIntegrationsOptions}
+              statusMap={missingOrDisabledStatusMap}
+            />
+          );
         }
       },
       mobileOptions: {
