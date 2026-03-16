@@ -6,16 +6,30 @@
  */
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceEndpointWithMetadata } from '../types';
 
 export const mockInferenceEndpoints: InferenceInferenceEndpointInfo[] = [];
 
-export const mockEISPreconfiguredEndpoints: InferenceInferenceEndpointInfo[] = [
+export const mockEISPreconfiguredEndpoints: Array<
+  InferenceInferenceEndpointInfo | InferenceEndpointWithMetadata
+> = [
   {
     inference_id: '.anthropic-claude-3.7-sonnet-chat_completion',
     task_type: 'chat_completion',
     service: 'elastic',
     service_settings: {
       model_id: 'anthropic-claude-3.7-sonnet',
+    },
+    metadata: {
+      heuristics: {
+        properties: ['multilingual', 'multimodal'],
+        status: 'ga',
+        release_date: '2025-02-24',
+      },
+      display: {
+        name: 'Anthropic Claude Sonnet 3.7',
+        model_creator: 'Anthropic',
+      },
     },
   },
   {
@@ -25,6 +39,17 @@ export const mockEISPreconfiguredEndpoints: InferenceInferenceEndpointInfo[] = [
     service_settings: {
       model_id: 'anthropic-claude-3.7-sonnet',
     },
+    metadata: {
+      heuristics: {
+        properties: ['multilingual', 'multimodal'],
+        status: 'ga',
+        release_date: '2025-02-24',
+      },
+      display: {
+        name: 'Anthropic Claude Sonnet 3.7',
+        model_creator: 'Anthropic',
+      },
+    },
   },
   {
     inference_id: '.anthropic-claude-4.5-opus-chat_completion',
@@ -33,6 +58,17 @@ export const mockEISPreconfiguredEndpoints: InferenceInferenceEndpointInfo[] = [
     service_settings: {
       model_id: 'anthropic-claude-4.5-opus',
     },
+    metadata: {
+      heuristics: {
+        properties: ['multilingual', 'multimodal'],
+        status: 'ga',
+        release_date: '2025-05-14',
+      },
+      display: {
+        name: 'Anthropic Claude Opus 4.5',
+        model_creator: 'Anthropic',
+      },
+    },
   },
   {
     inference_id: '.anthropic-claude-4.5-opus-completion',
@@ -40,6 +76,17 @@ export const mockEISPreconfiguredEndpoints: InferenceInferenceEndpointInfo[] = [
     service: 'elastic',
     service_settings: {
       model_id: 'anthropic-claude-4.5-opus',
+    },
+    metadata: {
+      heuristics: {
+        properties: ['multilingual', 'multimodal'],
+        status: 'ga',
+        release_date: '2025-05-14',
+      },
+      display: {
+        name: 'Anthropic Claude Opus 4.5',
+        model_creator: 'Anthropic',
+      },
     },
   },
   {

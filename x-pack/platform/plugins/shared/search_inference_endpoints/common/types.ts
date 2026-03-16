@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+
 export enum APIRoutes {
   GET_INFERENCE_ENDPOINTS = '/internal/inference_endpoints/endpoints',
   INFERENCE_ENDPOINT = '/internal/inference_endpoint/endpoints/{type}/{id}',
@@ -55,3 +57,32 @@ export interface InferenceFeatureResponse {
   maxNumberOfEndpoints?: number;
   recommendedEndpoints: string[];
 }
+export type InferenceEndpointWithMetadata = InferenceInferenceEndpointInfo & {
+  metadata: {
+    heuristics?: {
+      properties?: string[];
+      status?: string;
+      release_date?: string;
+    };
+    display?: {
+      name?: string;
+      model_creator?: string;
+    };
+  };
+};
+
+export type InferenceEndpointWithDisplayNameMetadata = InferenceEndpointWithMetadata & {
+  metadata: {
+    display: {
+      name: string;
+    };
+  };
+};
+
+export type InferenceEndpointWithDisplayCreatorMetadata = InferenceEndpointWithMetadata & {
+  metadata: {
+    display: {
+      model_creator: string;
+    };
+  };
+};

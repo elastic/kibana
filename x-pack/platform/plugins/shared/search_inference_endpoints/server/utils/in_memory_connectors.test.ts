@@ -6,6 +6,7 @@
  */
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceEndpointWithMetadata } from '../types';
 import { mockEISPreconfiguredEndpoints } from '../__mocks__/inference_endpoints';
 import {
   filterPreconfiguredEndpoints,
@@ -16,8 +17,8 @@ import {
 } from './in_memory_connectors';
 
 const makeEndpoint = (
-  overrides: Partial<InferenceInferenceEndpointInfo> = {}
-): InferenceInferenceEndpointInfo => ({
+  overrides: Partial<InferenceInferenceEndpointInfo | InferenceEndpointWithMetadata> = {}
+): InferenceInferenceEndpointInfo | InferenceEndpointWithMetadata => ({
   inference_id: '.test-model-chat_completion',
   task_type: 'chat_completion',
   service: 'elastic',
@@ -147,6 +148,19 @@ describe('getConnectorIdFromEndpoint', () => {
 });
 
 describe('getConnectorNameFromEndpoint', () => {
+  it('returns display name from metadata if available', () => {
+    const endpoint = makeEndpoint({
+      inference_id: '.my-model-chat_completion',
+      service_settings: {},
+      metadata: {
+        display: {
+          name: 'Name Provided by EIS',
+        },
+      },
+    });
+    expect(getConnectorNameFromEndpoint(endpoint)).toBe('Name Provided by EIS');
+  });
+
   it('falls back to inference_id when service_settings has no model_id', () => {
     const endpoint = makeEndpoint({
       inference_id: '.my-model-chat_completion',

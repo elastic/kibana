@@ -7,6 +7,7 @@
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { InMemoryConnector } from '@kbn/actions-plugin/server';
+import { isInferenceEndpointWithDisplayNameMetadata } from '../../common/type_guards';
 
 const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
 const EIS_SERVICE_PROVIDER = 'elastic';
@@ -71,6 +72,9 @@ const MODEL_ID_DISPLAY_NAMES: Record<string, string> = {
 };
 
 export function getConnectorNameFromEndpoint(endpoint: InferenceInferenceEndpointInfo): string {
+  if (isInferenceEndpointWithDisplayNameMetadata(endpoint)) {
+    return endpoint.metadata.display.name;
+  }
   const modelId = endpoint.service_settings?.model_id;
   if (modelId) {
     if (MODEL_ID_DISPLAY_NAMES[modelId]) {
