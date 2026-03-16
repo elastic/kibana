@@ -52,10 +52,16 @@ const expectedContent = JSON.stringify(
 describe('createTypeCheckConfigs', () => {
   let readFileSpy: jest.SpyInstance;
   let writeFileSpy: jest.SpyInstance;
+  let statSpy: jest.SpyInstance;
+  let utimesSpy: jest.SpyInstance;
+
+  const ARCHIVE_MTIME = new Date('2024-01-01T00:00:00Z');
 
   beforeEach(() => {
     readFileSpy = jest.spyOn(Fsp, 'readFile');
     writeFileSpy = jest.spyOn(Fsp, 'writeFile').mockResolvedValue(undefined as never);
+    statSpy = jest.spyOn(Fsp, 'stat').mockResolvedValue({ mtime: ARCHIVE_MTIME } as never);
+    utimesSpy = jest.spyOn(Fsp, 'utimes').mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -124,6 +130,50 @@ describe('createTypeCheckConfigs', () => {
       await createTypeCheckConfigs(makeLog(), [project], [project], { onlyCreateMissing: true });
 
       expect(writeFileSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('preserveTimestampOnWrite: true — update content but keep mtime stable', () => {
+    it('writes changed content but resets mtime to the pre-write value', async () => {
+      readFileSpy.mockResolvedValue('outdated content');
+
+      const project = makeProject('packages/foo');
+      await createTypeCheckConfigs(makeLog(), [project], [project], {
+        preserveTimestampOnWrite: true,
+      });
+
+      expect(writeFileSpy).toHaveBeenCalledTimes(1);
+      expect(statSpy).toHaveBeenCalledWith(`/repo/packages/foo/tsconfig.type_check.json`);
+      expect(utimesSpy).toHaveBeenCalledWith(
+        `/repo/packages/foo/tsconfig.type_check.json`,
+        ARCHIVE_MTIME,
+        ARCHIVE_MTIME
+      );
+    });
+
+    it('does NOT call utimes when the file content is already up-to-date', async () => {
+      readFileSpy.mockResolvedValue(expectedContent);
+
+      const project = makeProject('packages/foo');
+      await createTypeCheckConfigs(makeLog(), [project], [project], {
+        preserveTimestampOnWrite: true,
+      });
+
+      expect(writeFileSpy).not.toHaveBeenCalled();
+      expect(utimesSpy).not.toHaveBeenCalled();
+    });
+
+    it('creates a new file without calling utimes (no prior mtime to preserve)', async () => {
+      const enoent = Object.assign(new Error('ENOENT'), { code: 'ENOENT' });
+      readFileSpy.mockRejectedValue(enoent);
+
+      const project = makeProject('packages/foo');
+      await createTypeCheckConfigs(makeLog(), [project], [project], {
+        preserveTimestampOnWrite: true,
+      });
+
+      expect(writeFileSpy).toHaveBeenCalledTimes(1);
+      expect(utimesSpy).not.toHaveBeenCalled();
     });
   });
 });
