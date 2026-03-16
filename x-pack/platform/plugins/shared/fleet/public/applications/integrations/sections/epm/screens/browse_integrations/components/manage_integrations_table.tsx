@@ -126,10 +126,16 @@ export const ManageIntegrationsTable: React.FC<{
         default:
           displayStatus = 'in_progress';
       }
+      let availableAction: string | undefined;
+      if (item.status === 'approved') {
+        availableAction = 'approved';
+      } else if (isIntegrationPackageReady(item)) {
+        availableAction = 'review_approve';
+      }
       return {
         ...item,
         displayStatus,
-        availableAction: isIntegrationPackageReady(item) ? 'review_approve' : 'edit',
+        availableAction,
       };
     });
   }, [integrations]);
@@ -363,9 +369,10 @@ export const ManageIntegrationsTable: React.FC<{
   }, [selectedItems, deleteIntegration]);
 
   const handleBulkInstall = useCallback(async () => {
+    const approvedItems = selectedItems.filter((item) => item.status === 'approved');
     setIsBulkInstalling(true);
     try {
-      await Promise.all(selectedItems.map((item) => installToCluster(item.integrationId)));
+      await Promise.all(approvedItems.map((item) => installToCluster(item.integrationId)));
       setSelectedItems([]);
     } finally {
       setIsBulkInstalling(false);
@@ -627,7 +634,11 @@ export const ManageIntegrationsTable: React.FC<{
       key: 'review_approve',
       checked: selectedActions.includes('review_approve') ? 'on' : undefined,
     },
-    { label: 'Edit', key: 'edit', checked: selectedActions.includes('edit') ? 'on' : undefined },
+    {
+      label: 'Approved',
+      key: 'approved',
+      checked: selectedActions.includes('approved') ? 'on' : undefined,
+    },
   ];
 
   const statusOptions: EuiSelectableOption[] = [
@@ -654,7 +665,8 @@ export const ManageIntegrationsTable: React.FC<{
   ];
   const filteredIntegrations = integrationsWithActions.filter((item) => {
     const matchesAction =
-      selectedActions.length === 0 || selectedActions.includes(item.availableAction);
+      selectedActions.length === 0 ||
+      (item.availableAction !== undefined && selectedActions.includes(item.availableAction));
     const matchesStatus =
       selectedStatuses.length === 0 || selectedStatuses.includes(item.displayStatus);
     return matchesAction && matchesStatus;
