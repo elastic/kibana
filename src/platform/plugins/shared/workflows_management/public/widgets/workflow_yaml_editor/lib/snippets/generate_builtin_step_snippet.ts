@@ -29,6 +29,8 @@ interface GenerateBuiltInStepSnippetOptions {
  * @param workflowOutputs - Declared workflow outputs for workflow.output step snippet
  * @returns The formatted YAML step snippet with appropriate parameters and structure
  */
+// Switch is good readable
+// eslint-disable-next-line complexity
 export function generateBuiltInStepSnippet(
   stepType: BuiltInStepType,
   { full, withStepsSection }: GenerateBuiltInStepSnippetOptions = {},
@@ -119,6 +121,9 @@ export function generateBuiltInStepSnippet(
       parameters = {
         with: { message: '${1:Error message}' },
       };
+    case 'loop.break':
+    case 'loop.continue':
+      parameters = {};
       break;
     default:
       parameters = {

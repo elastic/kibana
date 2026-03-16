@@ -93,6 +93,14 @@ export const predefinedStepTypes = [
     displayName: 'Workflow Fail',
   },
   {
+    actionTypeId: 'loop.break',
+    displayName: 'Break',
+  },
+  {
+    actionTypeId: 'loop.continue',
+    displayName: 'Continue',
+  },
+  {
     actionTypeId: 'manual',
     displayName: 'Manual',
   },

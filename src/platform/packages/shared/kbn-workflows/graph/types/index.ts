@@ -51,6 +51,12 @@ export type {
   EnterWhileNodeConfigurationSchema,
 } from './nodes/loop_nodes';
 export type {
+  LoopBreakNode,
+  LoopBreakNodeSchema,
+  LoopContinueNode,
+  LoopContinueNodeSchema,
+} from './nodes/flow_control_nodes';
+export type {
   EnterRetryNode,
   EnterRetryNodeSchema,
   ExitRetryNode,
@@ -104,5 +110,9 @@ export {
   isExitStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
+  isLoopBreak,
+  isLoopContinue,
+  isLoopEnterNode,
   shouldSuggestInnerSteps,
 } from './guards';
+export type { LoopEnterNode } from './guards';
