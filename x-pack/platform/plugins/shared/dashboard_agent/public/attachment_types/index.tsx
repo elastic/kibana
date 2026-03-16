@@ -62,7 +62,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         checkSavedDashboardExist={checkSavedDashboardExist}
       />
     ),
-    getActionButtons: ({ attachment, openCanvas, isCanvas, setPreviewBadgeState }) => {
+    getActionButtons: ({ attachment, openCanvas, isCanvas }) => {
       if (isCanvas) {
         return [];
       }
@@ -79,7 +79,6 @@ export const registerDashboardAttachmentUiDefinition = ({
               return;
             }
 
-            setPreviewBadgeState?.('previewing');
             dashboardApi.setViewMode('edit');
             dashboardApi.setState(getStateFromAttachment(attachment));
           },
