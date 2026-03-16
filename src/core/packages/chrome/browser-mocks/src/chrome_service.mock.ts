@@ -107,7 +107,7 @@ const createStartContractMock = () => {
   return startContract;
 };
 
-interface ChromeServiceContract {
+export interface ChromeServiceContract {
   setup(): InternalChromeSetup;
   start(): Promise<InternalChromeStart>;
   stop(): void;
