@@ -302,7 +302,7 @@ describe('MenuItem onClick handler', () => {
       navItems: { primaryItems },
     } = createNavigationItems(tree);
     console.log('primaryItems', primaryItems);
-    
+
     const menuItem = primaryItems.find((item) => item.id === primaryNode.id);
     expect(menuItem).toBeDefined();
     expect(menuItem?.onClick).toBeDefined();
