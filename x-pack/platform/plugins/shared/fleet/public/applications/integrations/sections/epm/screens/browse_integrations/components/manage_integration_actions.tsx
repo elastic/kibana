@@ -173,6 +173,8 @@ export const ManageIntegrationActions: React.FC<{
           button={
             <EuiButtonIcon
               iconType="boxesVertical"
+              color="text"
+              style={{ color: euiTheme.colors.textSubdued }}
               aria-label={i18n.translate(
                 'xpack.fleet.epmList.manageIntegrations.actions.openMenuLabel',
                 { defaultMessage: 'Open actions menu' }

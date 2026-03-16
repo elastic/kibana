@@ -16,7 +16,6 @@ import {
   EuiFilterGroup,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -467,8 +466,10 @@ export const ManageIntegrationsTable: React.FC<{
         render: (status: TaskStatus) => {
           const { color, iconType, label, isInProgress } = getStatusDisplay(status);
           const badgeStyle = {
-            borderRadius: euiTheme.border.radius.small,
-            padding: `2px ${euiTheme.size.m}`,
+            borderRadius: '999px',
+            paddingLeft: euiTheme.size.s,
+            paddingRight: euiTheme.size.s,
+            gap: '2px',
             fontFamily: euiTheme.font.family,
             fontWeight: euiTheme.font.weight.medium,
             fontSize: euiTheme.size.m,
@@ -512,32 +513,23 @@ export const ManageIntegrationsTable: React.FC<{
             return (
               <EuiBadge
                 color="hollow"
+                iconType="check"
                 style={{
-                  color: euiTheme.colors.backgroundFilledText,
-                  borderRadius: euiTheme.border.radius.small,
+                  color: euiTheme.colors.textParagraph,
+                  borderRadius: '999px',
                   border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-                  padding: `2px ${euiTheme.size.m}`,
+                  paddingLeft: euiTheme.size.s,
+                  paddingRight: euiTheme.size.s,
+                  gap: '2px',
                   fontFamily: euiTheme.font.family,
                   fontWeight: euiTheme.font.weight.medium,
                   fontSize: euiTheme.size.m,
                 }}
               >
-                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon
-                      type="checkInCircleFilled"
-                      color="success"
-                      size="m"
-                      aria-hidden={true}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      id="xpack.fleet.epmList.manageIntegrations.status.approved"
-                      defaultMessage="Approved"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.status.approved"
+                  defaultMessage="Approved"
+                />
               </EuiBadge>
             );
           }
@@ -620,11 +612,11 @@ export const ManageIntegrationsTable: React.FC<{
       installToCluster,
       automaticImportVTwo?.components.DataStreamResultsFlyout,
       euiTheme.colors.backgroundLightText,
-      euiTheme.colors.backgroundFilledText,
+      euiTheme.colors.textParagraph,
       euiTheme.colors.borderBasePlain,
-      euiTheme.border.radius.small,
       euiTheme.font.family,
       euiTheme.font.weight.medium,
+      euiTheme.size.s,
       euiTheme.size.m,
       userProfiles,
     ]
