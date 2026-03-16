@@ -7,10 +7,11 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import React, { useLayoutEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
+import { useGoBack } from '../../../common/use_go_back';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
@@ -27,15 +28,8 @@ const LiveQueryDetailsPageComponent = () => {
   useBreadcrumbs(isHistoryEnabled ? 'history_details' : 'live_query_details', {
     liveQueryId: actionId,
   });
-  const history = useHistory();
-  const handleGoBack = useCallback(
-    (event: React.MouseEvent) => {
-      event.preventDefault();
-      history.goBack();
-    },
-    [history]
-  );
   const backNavigationTarget = isHistoryEnabled ? 'history' : 'live_queries';
+  const handleGoBack = useGoBack(backNavigationTarget);
   const liveQueryListProps = useRouterNavigate(backNavigationTarget, handleGoBack);
   const [isLive, setIsLive] = useState(false);
   const { data } = useLiveQueryDetails({ actionId, isLive });

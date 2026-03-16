@@ -59,6 +59,8 @@ interface HistoryDetailsButtonProps {
 }
 
 const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
+  const { push } = useHistory();
+
   const path = useMemo(() => {
     if (isScheduledRow(row)) {
       return pagePathGetters.history_scheduled_details({
@@ -74,7 +76,17 @@ const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
     return undefined;
   }, [row]);
 
-  const navProps = useRouterNavigate(path ?? '');
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      if (path) {
+        push(path, { fromHistory: true });
+      }
+    },
+    [push, path]
+  );
+
+  const navProps = useRouterNavigate(path ?? '', handleClick);
 
   const detailsText = i18n.translate(
     'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',
@@ -322,6 +334,7 @@ const UnifiedHistoryTableComponent = () => {
 
       if (row.packId) {
         return push(newQueryPath, {
+          fromHistory: true,
           form: pickBy(
             {
               packId: row.packId,
@@ -338,6 +351,7 @@ const UnifiedHistoryTableComponent = () => {
       }
 
       push(newQueryPath, {
+        fromHistory: true,
         form: pickBy(
           {
             query: row.queryText,

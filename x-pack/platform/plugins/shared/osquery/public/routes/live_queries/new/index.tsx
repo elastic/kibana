@@ -7,13 +7,14 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import qs from 'query-string';
 
 import { isArray } from 'lodash';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
+import { useGoBack } from '../../../common/use_go_back';
 import { LiveQuery } from '../../../live_queries';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
@@ -25,17 +26,10 @@ interface LocationState {
 const NewLiveQueryPageComponent = () => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   useBreadcrumbs(isHistoryEnabled ? 'new_query' : 'live_query_new');
-  const history = useHistory();
-  const { replace } = history;
+  const { replace } = useHistory();
   const location = useLocation<LocationState>();
-  const handleGoBack = useCallback(
-    (event: React.MouseEvent) => {
-      event.preventDefault();
-      history.goBack();
-    },
-    [history]
-  );
   const backNavigationTarget = isHistoryEnabled ? 'history' : 'live_queries';
+  const handleGoBack = useGoBack(backNavigationTarget);
   const backNavigationProps = useRouterNavigate(backNavigationTarget, handleGoBack);
   const [initialFormData, setInitialFormData] = useState<Record<string, unknown> | undefined>({});
 
