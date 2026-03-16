@@ -18,6 +18,7 @@ import { ApiPrivileges } from '@kbn/core-security-server';
 import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
+import { InferenceFeatureRegistry } from './inference_feature_registry';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   SearchInferenceEndpointsPluginSetup,
@@ -45,10 +46,12 @@ export class SearchInferenceEndpointsPlugin
   private readonly logger: Logger;
   private readonly config: SearchInferenceEndpointsConfig;
   private dynamicConnectorsPoller?: DynamicConnectorsPoller;
+  private readonly featureRegistry: InferenceFeatureRegistry;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<SearchInferenceEndpointsConfig>();
+    this.featureRegistry = new InferenceFeatureRegistry(this.logger);
   }
 
   public setup(
@@ -101,7 +104,11 @@ export class SearchInferenceEndpointsPlugin
       },
     });
 
-    return {};
+    return {
+      features: {
+        register: this.featureRegistry.register.bind(this.featureRegistry),
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: SearchInferenceEndpointsPluginStartDependencies) {
@@ -118,7 +125,13 @@ export class SearchInferenceEndpointsPlugin
       this.dynamicConnectorsPoller.start();
     }
 
-    return {};
+    return {
+      features: {
+        get: this.featureRegistry.get.bind(this.featureRegistry),
+        getAll: this.featureRegistry.getAll.bind(this.featureRegistry),
+        register: this.featureRegistry.register.bind(this.featureRegistry),
+      },
+    };
   }
 
   public stop() {

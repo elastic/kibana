@@ -4120,7 +4120,7 @@
             "section": "def-common.AttachmentType",
             "text": "AttachmentType"
           },
-          ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; } | ({ type: string; attachmentId: string; } & { data?: { [x: string]: ",
+          ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; } | ({ type: string; attachmentId: string; owner: string; } & { data?: { [x: string]: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -4144,7 +4144,7 @@
             "section": "def-common.JsonValue",
             "text": "JsonValue"
           },
-          "; }; } & { metadata?: { [x: string]: ",
+          "; }; owner: string; } & { metadata?: { [x: string]: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
