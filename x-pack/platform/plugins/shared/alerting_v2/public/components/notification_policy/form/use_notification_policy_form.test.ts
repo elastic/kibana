@@ -15,7 +15,6 @@ const EXISTING_POLICY: NotificationPolicyResponse = {
   version: 'WzEsMV0=',
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
-  rule_labels: ['team-observability'],
   enabled: true,
   matcher: 'data.severity : "critical"',
   group_by: ['host.name', 'service.name'],

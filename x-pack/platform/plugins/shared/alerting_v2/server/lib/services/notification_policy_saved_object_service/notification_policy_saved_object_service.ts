@@ -234,8 +234,8 @@ export class NotificationPolicySavedObjectService
     perPage,
     search,
     filter,
-    sortField = 'updatedAt',
-    sortOrder = 'desc',
+    sortField = 'name.keyword',
+    sortOrder = 'asc',
   }: {
     page: number;
     perPage: number;

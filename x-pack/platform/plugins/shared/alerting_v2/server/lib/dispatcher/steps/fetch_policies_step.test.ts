@@ -87,7 +87,6 @@ describe('FetchPoliciesStep', () => {
         attributes: {
           name: 'Policy 1',
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
-          rule_labels: ['production'],
           auth: { apiKey: 'key-1', owner: 'elastic', createdByUser: false },
           createdBy: null,
           updatedBy: null,
