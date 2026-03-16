@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
-import { EuiCallOut, EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiPageSection, EuiPageHeader, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import type { Repository, EmptyRepository } from '../../../../common/types';
 
 import type { Error } from '../../../shared_imports';
@@ -68,13 +68,16 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   const [isDefaultRepository, setIsDefaultRepository] = useState<boolean>(
     () => defaultRepository === name
   );
+  const [pendingRepository, setPendingRepository] = useState<Repository | EmptyRepository | null>(
+    null
+  );
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   // Saving repository states
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  // Save repository
-  const onSave = async (editedRepository: Repository | EmptyRepository) => {
+  const doSave = async (editedRepository: Repository | EmptyRepository) => {
     setIsSaving(true);
     setSaveError(null);
     const { error } = await editRepository(editedRepository);
@@ -90,6 +93,15 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         encodeURI(`${BASE_PATH}/${encodeURIComponent(section)}/${encodeURIComponent(name)}`)
       );
     }
+  };
+
+  // Save repository — intercept to confirm when changing the default
+  const onSave = (editedRepository: Repository | EmptyRepository) => {
+    if (isDefaultRepository && defaultRepository && defaultRepository !== name) {
+      setPendingRepository(editedRepository);
+      return;
+    }
+    doSave(editedRepository);
   };
 
   const renderLoading = () => {
@@ -161,51 +173,98 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
     ) : null;
   };
 
-  return (
-    <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.snapshotRestore.editRepositoryTitle"
-              defaultMessage="Edit repository"
-            />
-          </span>
-        }
-      />
-
-      <EuiSpacer size="l" />
-
-      {isManagedRepository ? (
-        <>
-          <EuiCallOut
-            announceOnMount
-            size="m"
-            color="warning"
-            iconType="info"
-            title={
-              <FormattedMessage
-                id="xpack.snapshotRestore.editRepository.managedRepositoryWarningTitle"
-                defaultMessage="This is a managed repository. Changing this repository might affect other systems that use it. Proceed with caution."
-              />
-            }
+  const renderConfirmDefaultModal = () => {
+    if (!pendingRepository) {
+      return null;
+    }
+    return (
+      <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.editRepository.confirmDefaultModal.title"
+            defaultMessage="Change default repository?"
           />
-          <EuiSpacer size="l" />
-        </>
-      ) : null}
+        }
+        onCancel={() => setPendingRepository(null)}
+        onConfirm={() => {
+          const repo = pendingRepository;
+          setPendingRepository(null);
+          doSave(repo);
+        }}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.editRepository.confirmDefaultModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.editRepository.confirmDefaultModal.confirmButtonLabel"
+            defaultMessage="Change default"
+          />
+        }
+        data-test-subj="confirmDefaultRepositoryModal"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.snapshotRestore.editRepository.confirmDefaultModal.description"
+            defaultMessage="Changing the default repository will update the snapshot repository used by all data streams."
+          />
+        </p>
+      </EuiConfirmModal>
+    );
+  };
 
-      <RepositoryForm
-        repository={repository}
-        isManagedRepository={isManagedRepository}
-        isEditing={true}
-        isSaving={isSaving}
-        saveError={renderSaveError()}
-        clearSaveError={clearSaveError}
-        onSave={onSave}
-        isDefaultRepository={isDefaultRepository}
-        isFirstRepository={isOnlyRepository}
-        onToggleDefault={setIsDefaultRepository}
-      />
-    </EuiPageSection>
+  return (
+    <Fragment>
+      {renderConfirmDefaultModal()}
+      <EuiPageSection restrictWidth style={{ width: '100%' }}>
+        <EuiPageHeader
+          pageTitle={
+            <span data-test-subj="pageTitle">
+              <FormattedMessage
+                id="xpack.snapshotRestore.editRepositoryTitle"
+                defaultMessage="Edit repository"
+              />
+            </span>
+          }
+        />
+
+        <EuiSpacer size="l" />
+
+        {isManagedRepository ? (
+          <>
+            <EuiCallOut
+              announceOnMount
+              size="m"
+              color="warning"
+              iconType="info"
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.editRepository.managedRepositoryWarningTitle"
+                  defaultMessage="This is a managed repository. Changing this repository might affect other systems that use it. Proceed with caution."
+                />
+              }
+            />
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
+
+        <RepositoryForm
+          repository={repository}
+          isManagedRepository={isManagedRepository}
+          isEditing={true}
+          isSaving={isSaving}
+          saveError={renderSaveError()}
+          clearSaveError={clearSaveError}
+          onSave={onSave}
+          isDefaultRepository={isDefaultRepository}
+          isFirstRepository={isOnlyRepository}
+          onToggleDefault={setIsDefaultRepository}
+        />
+      </EuiPageSection>
+    </Fragment>
   );
 };

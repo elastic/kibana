@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
+  EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiInMemoryTable,
@@ -18,6 +19,7 @@ import {
   EuiPopover,
   EuiToolTip,
   EuiIconTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -52,6 +54,8 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
   const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
   const [openActionsRowName, setOpenActionsRowName] = useState<string | undefined>(undefined);
+  const [pendingDefaultName, setPendingDefaultName] = useState<string | undefined>(undefined);
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const closeActionsMenu = () => setOpenActionsRowName(undefined);
 
@@ -187,7 +191,11 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                         !isDefault
                           ? () => {
                               closeActionsMenu();
-                              onSetDefaultRepository(name);
+                              if (defaultRepository) {
+                                setPendingDefaultName(name);
+                              } else {
+                                onSetDefaultRepository(name);
+                              }
                             }
                           : undefined
                       }
@@ -377,8 +385,53 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     ],
   };
 
+  const renderConfirmDefaultModal = () => {
+    if (!pendingDefaultName) {
+      return null;
+    }
+    return (
+      <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryList.table.confirmDefaultModal.title"
+            defaultMessage="Change default repository?"
+          />
+        }
+        onCancel={() => setPendingDefaultName(undefined)}
+        onConfirm={() => {
+          onSetDefaultRepository(pendingDefaultName);
+          setPendingDefaultName(undefined);
+        }}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryList.table.confirmDefaultModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryList.table.confirmDefaultModal.confirmButtonLabel"
+            defaultMessage="Change default"
+          />
+        }
+        data-test-subj="confirmDefaultRepositoryModal"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryList.table.confirmDefaultModal.description"
+            defaultMessage="Changing the default repository will update the snapshot repository used by all data streams."
+          />
+        </p>
+      </EuiConfirmModal>
+    );
+  };
+
   return (
-    <EuiInMemoryTable
+    <Fragment>
+      {renderConfirmDefaultModal()}
+      <EuiInMemoryTable
       items={repositories}
       itemId="name"
       columns={columns}
@@ -397,5 +450,6 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       })}
       data-test-subj="repositoryTable"
     />
+    </Fragment>
   );
 };

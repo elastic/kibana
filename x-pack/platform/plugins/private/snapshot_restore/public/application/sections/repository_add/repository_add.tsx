@@ -6,11 +6,11 @@
  */
 
 import { parse } from 'query-string';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
+import { EuiConfirmModal, EuiPageSection, EuiSpacer, EuiPageHeader, useGeneratedHtmlId } from '@elastic/eui';
 import type { Repository, EmptyRepository } from '../../../../common/types';
 
 import { SectionError } from '../../../shared_imports';
@@ -32,7 +32,11 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
   const [isDefaultRepository, setIsDefaultRepository] = useState<boolean>(false);
 
   const { data: repositoriesData } = useLoadRepositories();
-  const { setDefaultRepository } = useDefaultRepository();
+  const { defaultRepository, setDefaultRepository } = useDefaultRepository();
+  const [pendingRepository, setPendingRepository] = useState<Repository | EmptyRepository | null>(
+    null
+  );
+  const confirmModalTitleId = useGeneratedHtmlId();
 
   const isFirstRepository = !repositoriesData?.repositories?.length;
 
@@ -42,7 +46,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     docTitleService.setTitle('repositoryAdd');
   }, []);
 
-  const onSave = async (newRepository: Repository | EmptyRepository) => {
+  const doSave = async (newRepository: Repository | EmptyRepository) => {
     setIsSaving(true);
     setSaveError(null);
     const { name } = newRepository;
@@ -63,6 +67,14 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
           : encodeURI(`${BASE_PATH}/${encodeURIComponent(section)}/${encodeURIComponent(name)}`)
       );
     }
+  };
+
+  const onSave = (newRepository: Repository | EmptyRepository) => {
+    if (isDefaultRepository && defaultRepository) {
+      setPendingRepository(newRepository);
+      return;
+    }
+    doSave(newRepository);
   };
 
   const emptyRepository = {
@@ -90,31 +102,78 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     setSaveError(null);
   };
 
-  return (
-    <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.snapshotRestore.addRepositoryTitle"
-              defaultMessage="Register repository"
-            />
-          </span>
+  const renderConfirmDefaultModal = () => {
+    if (!pendingRepository) {
+      return null;
+    }
+    return (
+      <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.addRepository.confirmDefaultModal.title"
+            defaultMessage="Change default repository?"
+          />
         }
-      />
+        onCancel={() => setPendingRepository(null)}
+        onConfirm={() => {
+          const repo = pendingRepository;
+          setPendingRepository(null);
+          doSave(repo);
+        }}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.addRepository.confirmDefaultModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.addRepository.confirmDefaultModal.confirmButtonLabel"
+            defaultMessage="Change default"
+          />
+        }
+        data-test-subj="confirmDefaultRepositoryModal"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.snapshotRestore.addRepository.confirmDefaultModal.description"
+            defaultMessage="Changing the default repository will update the snapshot repository used by all data streams."
+          />
+        </p>
+      </EuiConfirmModal>
+    );
+  };
 
-      <EuiSpacer size="l" />
+  return (
+    <Fragment>
+      {renderConfirmDefaultModal()}
+      <EuiPageSection restrictWidth style={{ width: '100%' }}>
+        <EuiPageHeader
+          pageTitle={
+            <span data-test-subj="pageTitle">
+              <FormattedMessage
+                id="xpack.snapshotRestore.addRepositoryTitle"
+                defaultMessage="Register repository"
+              />
+            </span>
+          }
+        />
 
-      <RepositoryForm
-        repository={emptyRepository}
-        isSaving={isSaving}
-        saveError={renderSaveError()}
-        clearSaveError={clearSaveError}
-        onSave={onSave}
-        isDefaultRepository={isDefaultRepository}
-        isFirstRepository={isFirstRepository}
-        onToggleDefault={setIsDefaultRepository}
-      />
-    </EuiPageSection>
+        <EuiSpacer size="l" />
+
+        <RepositoryForm
+          repository={emptyRepository}
+          isSaving={isSaving}
+          saveError={renderSaveError()}
+          clearSaveError={clearSaveError}
+          onSave={onSave}
+          isDefaultRepository={isDefaultRepository}
+          isFirstRepository={isFirstRepository}
+          onToggleDefault={setIsDefaultRepository}
+        />
+      </EuiPageSection>
+    </Fragment>
   );
 };
