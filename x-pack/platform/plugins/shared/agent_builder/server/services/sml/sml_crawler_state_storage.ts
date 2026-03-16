@@ -17,8 +17,8 @@ const storageSettings = {
   name: smlCrawlerStateIndexName,
   schema: {
     properties: {
-      attachment_id: types.keyword({}),
-      attachment_type: types.keyword({}),
+      item_id: types.keyword({}),
+      type_id: types.keyword({}),
       spaces: types.keyword({}),
       created_at: types.date({}),
       updated_at: types.date({}),

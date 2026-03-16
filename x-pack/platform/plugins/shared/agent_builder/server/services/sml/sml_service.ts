@@ -370,17 +370,7 @@ const searchSml = async ({
           ],
         },
       },
-      _source: [
-        'id',
-        'type',
-        'title',
-        'attachment_reference_id',
-        'content',
-        'created_at',
-        'updated_at',
-        'spaces',
-        'permissions',
-      ],
+      _source: true,
     });
 
     const total =
@@ -396,7 +386,7 @@ const searchSml = async ({
           id: source.id ?? '',
           type: source.type ?? '',
           title: source.title ?? '',
-          attachment_reference_id: source.attachment_reference_id ?? '',
+          item_id: source.item_id ?? '',
           content: source.content ?? '',
           created_at: source.created_at ?? '',
           updated_at: source.updated_at ?? '',
@@ -464,7 +454,7 @@ const getDocumentsByIds = async ({
         id: source.id ?? '',
         type: source.type ?? '',
         title: source.title ?? '',
-        attachment_reference_id: source.attachment_reference_id ?? '',
+        item_id: source.item_id ?? '',
         content: source.content ?? '',
         created_at: source.created_at ?? '',
         updated_at: source.updated_at ?? '',

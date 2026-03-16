@@ -20,7 +20,7 @@ const storageSettings = {
       id: types.keyword({}),
       type: types.keyword({}),
       title: types.text({}),
-      attachment_reference_id: types.keyword({}),
+      item_id: types.keyword({}),
       content: types.text({}),
       created_at: types.date({}),
       updated_at: types.date({}),

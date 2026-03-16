@@ -71,11 +71,11 @@ export const visualizationSmlType: SmlTypeDefinition = {
     }
   },
 
-  getSmlData: async (attachmentId, context) => {
+  getSmlData: async (itemId, context) => {
     try {
-      const so = await context.savedObjectsClient.get('lens', attachmentId);
+      const so = await context.savedObjectsClient.get('lens', itemId);
       const attrs = so.attributes as LensAttributes;
-      const title = attrs.title ?? attachmentId;
+      const title = attrs.title ?? itemId;
       const esql = extractEsql(attrs);
       const chartType = getChartType(attrs);
       const description = (attrs as { description?: string }).description ?? '';
@@ -94,7 +94,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
       };
     } catch (error) {
       context.logger.warn(
-        `SML visualization: failed to get data for '${attachmentId}': ${(error as Error).message}`
+        `SML visualization: failed to get data for '${itemId}': ${(error as Error).message}`
       );
       return undefined;
     }
@@ -103,7 +103,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
   toAttachment: async (item, context) => {
     const resolveResult = await context.savedObjectsClient.resolve(
       'lens',
-      item.attachment_reference_id
+      item.item_id
     );
     const savedObject = resolveResult.saved_object as { error?: { message?: string } };
     if (savedObject?.error) {
@@ -119,7 +119,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
     return {
       type: VISUALIZATION_SML_TYPE,
       data: {
-        query: lensAttributes.title ?? item.attachment_reference_id,
+        query: lensAttributes.title ?? item.item_id,
         visualization: lensApiConfig as unknown as Record<string, unknown>,
         chart_type: lensApiConfig.type,
         esql: extractEsql(lensAttributes),

@@ -63,7 +63,7 @@ describe('createSmlSearchTool', () => {
     const hits: SmlSearchResult[] = [
       {
         id: 'chunk-1',
-        attachment_reference_id: 'ref-1',
+        item_id: 'ref-1',
         type: 'visualization',
         title: 'CPU Chart',
         content: 'Chart content',

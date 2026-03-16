@@ -255,7 +255,7 @@ describe('visualizationSmlType', () => {
   });
 
   describe('toAttachment', () => {
-    it('calls resolve with lens and item.attachment_reference_id', async () => {
+    it('calls resolve with lens and item.item_id', async () => {
       const savedObject = {
         id: 'viz-1',
         type: 'lens',
@@ -283,7 +283,7 @@ describe('visualizationSmlType', () => {
       });
 
       await visualizationSmlType.toAttachment!(
-        { attachment_reference_id: 'viz-1' } as never,
+        { item_id: 'viz-1' } as never,
         createContext() as never
       );
 
@@ -318,7 +318,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { attachment_reference_id: 'viz-1' } as never,
+        { item_id: 'viz-1' } as never,
         createContext() as never
       );
 
@@ -344,7 +344,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { attachment_reference_id: 'viz-1' } as never,
+        { item_id: 'viz-1' } as never,
         createContext() as never
       );
 
@@ -356,7 +356,7 @@ describe('visualizationSmlType', () => {
 
       await expect(
         visualizationSmlType.toAttachment!(
-          { attachment_reference_id: 'viz-1' } as never,
+          { item_id: 'viz-1' } as never,
           createContext() as never
         )
       ).rejects.toThrow('Connection failed');
@@ -389,7 +389,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { attachment_reference_id: 'viz-1' } as never,
+        { item_id: 'viz-1' } as never,
         createContext() as never
       );
 

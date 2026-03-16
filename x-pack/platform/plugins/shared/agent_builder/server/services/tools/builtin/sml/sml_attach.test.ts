@@ -45,7 +45,7 @@ const createSmlDoc = (overrides: Partial<SmlDocument> = {}): SmlDocument => ({
   id: 'chunk-1',
   type: 'visualization',
   title: 'Test Viz',
-  attachment_reference_id: 'ref-1',
+  item_id: 'ref-1',
   content: 'content',
   created_at: '2024-01-01',
   updated_at: '2024-01-02',
@@ -180,7 +180,11 @@ describe('createSmlAttachTool', () => {
     expect(successData.attachment_id).toBe('att-123');
     expect(successData.attachment_type).toBe('visualization');
     expect(mockAttachmentsAdd).toHaveBeenCalledWith(
-      { type: 'visualization', data: { layers: [] } },
+      {
+        type: 'visualization',
+        data: { layers: [] },
+        origin: { saved_object_id: 'ref-1' },
+      },
       expect.any(String)
     );
   });

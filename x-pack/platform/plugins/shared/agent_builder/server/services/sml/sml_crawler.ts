@@ -210,8 +210,8 @@ export class SmlCrawlerImpl implements SmlCrawler {
       operations.push({
         id: `${attachmentType}:${item.id}`,
         document: {
-          attachment_id: item.id,
-          attachment_type: attachmentType,
+          item_id: item.id,
+          type_id: attachmentType,
           spaces: item.spaces,
           created_at: existing?.created_at ?? crawlStartTime,
           updated_at: item.updatedAt,
@@ -256,14 +256,14 @@ export class SmlCrawlerImpl implements SmlCrawler {
         query: {
           bool: {
             filter: [
-              { term: { attachment_type: attachmentType } },
+              { term: { type_id: attachmentType } },
               { exists: { field: 'update_action' } },
             ],
             must_not: [{ term: { update_action: '' } }],
           },
         },
         size: pageSize,
-        sort: [{ attachment_id: 'asc' }],
+        sort: [{ item_id: 'asc' }],
         ...(searchAfter ? { search_after: searchAfter } : {}),
       });
 
@@ -307,12 +307,12 @@ export class SmlCrawlerImpl implements SmlCrawler {
           return limit(async () => {
             try {
               this.logger.info(
-                `SML crawler: processing '${action}' for attachment '${doc.attachment_id}' (type: ${doc.attachment_type})`
+                `SML crawler: processing '${action}' for item '${doc.item_id}' (type: ${doc.type_id})`
               );
 
               await this.indexer.indexAttachment({
-                attachmentId: doc.attachment_id,
-                attachmentType: doc.attachment_type,
+                itemId: doc.item_id,
+                attachmentType: doc.type_id,
                 action,
                 spaces: doc.spaces,
                 esClient,
@@ -334,7 +334,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
             } catch (error) {
               errorCount++;
               this.logger.error(
-                `SML crawler: failed to process action '${action}' for '${doc.attachment_id}': ${
+                `SML crawler: failed to process action '${action}' for '${doc.item_id}': ${
                   (error as Error).message
                 }`
               );
@@ -415,7 +415,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
 
   /**
    * Batch-lookup state documents by their IDs using mget-style terms query.
-   * Returns a map of attachment_id → state document.
+   * Returns a map of item_id → state document.
    */
   private async batchLookupState({
     stateClient,
@@ -440,7 +440,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
 
       for (const hit of response.hits.hits) {
         if (hit._source) {
-          result.set(hit._source.attachment_id, hit._source);
+          result.set(hit._source.item_id, hit._source);
         }
       }
     } catch (error) {
@@ -517,13 +517,13 @@ export class SmlCrawlerImpl implements SmlCrawler {
         query: {
           bool: {
             filter: [
-              { term: { attachment_type: attachmentType } },
+              { term: { type_id: attachmentType } },
               { range: { last_crawled_at: { lt: crawlStartTime } } },
             ],
           },
         },
         size: pageSize,
-        sort: [{ attachment_id: 'asc' }],
+        sort: [{ item_id: 'asc' }],
         ...(searchAfter ? { search_after: searchAfter } : {}),
       });
 
@@ -572,7 +572,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
         track_total_hits: true,
         query: {
           bool: {
-            filter: [{ term: { attachment_type: attachmentType } }],
+            filter: [{ term: { type_id: attachmentType } }],
           },
         },
         size: 0,

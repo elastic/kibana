@@ -24,10 +24,10 @@ export interface SmlIndexerDeps {
 
 export interface SmlIndexer {
   /**
-   * Index, update, or delete SML data for a specific attachment.
+   * Index, update, or delete SML data for a specific item.
    */
   indexAttachment: (params: {
-    attachmentId: string;
+    itemId: string;
     attachmentType: string;
     action: SmlIndexAction;
     spaces: string[];
@@ -51,7 +51,7 @@ class SmlIndexerImpl implements SmlIndexer {
   }
 
   async indexAttachment({
-    attachmentId,
+    itemId,
     attachmentType,
     action,
     spaces,
@@ -59,7 +59,7 @@ class SmlIndexerImpl implements SmlIndexer {
     savedObjectsClient,
     logger: contextLogger,
   }: {
-    attachmentId: string;
+    itemId: string;
     attachmentType: string;
     action: SmlIndexAction;
     spaces: string[];
@@ -68,7 +68,7 @@ class SmlIndexerImpl implements SmlIndexer {
     logger: Logger;
   }): Promise<void> {
     this.logger.info(
-      `SML indexer: indexAttachment called — id='${attachmentId}', type='${attachmentType}', action='${action}', spaces=[${spaces.join(
+      `SML indexer: indexAttachment called — id='${itemId}', type='${attachmentType}', action='${action}', spaces=[${spaces.join(
         ', '
       )}]`
     );
@@ -76,7 +76,7 @@ class SmlIndexerImpl implements SmlIndexer {
     const definition = this.registry.get(attachmentType);
     if (!definition) {
       this.logger.warn(
-        `SML indexer: type definition '${attachmentType}' not found — skipping indexing for '${attachmentId}'. Registered types: [${this.registry
+        `SML indexer: type definition '${attachmentType}' not found — skipping indexing for '${itemId}'. Registered types: [${this.registry
           .list()
           .map((t) => t.id)
           .join(', ')}]`
@@ -85,8 +85,8 @@ class SmlIndexerImpl implements SmlIndexer {
     }
 
     if (action === 'delete') {
-      this.logger.info(`SML indexer: deleting chunks for attachment '${attachmentId}'`);
-      await this.deleteChunks({ attachmentId, esClient });
+      this.logger.info(`SML indexer: deleting chunks for item '${itemId}'`);
+      await this.deleteChunks({ itemId, esClient });
       return;
     }
 
@@ -97,33 +97,33 @@ class SmlIndexerImpl implements SmlIndexer {
     };
 
     this.logger.info(
-      `SML indexer: calling getSmlData for attachment '${attachmentId}' of type '${attachmentType}'`
+      `SML indexer: calling getSmlData for item '${itemId}' of type '${attachmentType}'`
     );
-    const smlData = await definition.getSmlData(attachmentId, context);
+    const smlData = await definition.getSmlData(itemId, context);
     if (!smlData || smlData.chunks.length === 0) {
       this.logger.info(
-        `SML indexer: no SML data returned for attachment '${attachmentId}' of type '${attachmentType}' — deleting existing chunks`
+        `SML indexer: no SML data returned for item '${itemId}' of type '${attachmentType}' — deleting existing chunks`
       );
-      await this.deleteChunks({ attachmentId, esClient });
+      await this.deleteChunks({ itemId, esClient });
       return;
     }
 
     this.logger.info(
       `SML indexer: getSmlData returned ${
         smlData.chunks.length
-      } chunk(s) for attachment '${attachmentId}'. First chunk title: '${
+      } chunk(s) for item '${itemId}'. First chunk title: '${
         smlData.chunks[0]?.title
       }', content length: ${smlData.chunks[0]?.content?.length ?? 0}`
     );
 
-    await this.deleteChunks({ attachmentId, esClient });
+    await this.deleteChunks({ itemId, esClient });
 
     const storage = createSmlStorage({ logger: this.logger, esClient });
     const smlClient = storage.getClient();
 
     const now = new Date().toISOString();
     const bulkOps = smlData.chunks.map((chunk) => {
-      const chunkId = `${attachmentType}:${attachmentId}:${uuidv4()}`;
+      const chunkId = `${attachmentType}:${itemId}:${uuidv4()}`;
       return {
         index: {
           _id: chunkId,
@@ -131,7 +131,7 @@ class SmlIndexerImpl implements SmlIndexer {
             id: chunkId,
             type: chunk.type,
             title: chunk.title,
-            attachment_reference_id: attachmentId,
+            item_id: itemId,
             content: chunk.content,
             created_at: now,
             updated_at: now,
@@ -144,7 +144,7 @@ class SmlIndexerImpl implements SmlIndexer {
 
     if (bulkOps.length > 0) {
       this.logger.info(
-        `SML indexer: writing ${bulkOps.length} chunk(s) to index '${smlIndexName}' for attachment '${attachmentId}'`
+        `SML indexer: writing ${bulkOps.length} chunk(s) to index '${smlIndexName}' for item '${itemId}'`
       );
       try {
         const response = await smlClient.bulk({
@@ -155,18 +155,18 @@ class SmlIndexerImpl implements SmlIndexer {
         if (response.errors) {
           const errorItems = response.items.filter((item) => item.index?.error);
           this.logger.error(
-            `SML indexer: bulk index errors for '${attachmentId}': ${JSON.stringify(
+            `SML indexer: bulk index errors for '${itemId}': ${JSON.stringify(
               errorItems.slice(0, 3)
             )}`
           );
         } else {
           this.logger.info(
-            `SML indexer: successfully indexed ${smlData.chunks.length} chunk(s) for attachment '${attachmentId}'`
+            `SML indexer: successfully indexed ${smlData.chunks.length} chunk(s) for item '${itemId}'`
           );
         }
       } catch (error) {
         this.logger.error(
-          `SML indexer: failed to index SML data for attachment '${attachmentId}': ${
+          `SML indexer: failed to index SML data for item '${itemId}': ${
             (error as Error).message
           }`
         );
@@ -176,45 +176,44 @@ class SmlIndexerImpl implements SmlIndexer {
   }
 
   /**
-   * Delete all SML chunks for a given attachment.
+   * Delete all SML chunks for a given item.
    * Uses `ignore_unavailable` and `allow_no_indices` so this is safe
    * even before the index has been created.
    */
   private async deleteChunks({
-    attachmentId,
+    itemId,
     esClient,
   }: {
-    attachmentId: string;
+    itemId: string;
     esClient: ElasticsearchClient;
   }): Promise<void> {
     try {
       this.logger.debug(
-        `SML indexer: deleting existing chunks for attachment '${attachmentId}' from index '${smlIndexName}'`
+        `SML indexer: deleting existing chunks for item '${itemId}' from index '${smlIndexName}'`
       );
       const result = await esClient.deleteByQuery({
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
         query: {
-          term: { attachment_reference_id: attachmentId },
+          term: { item_id: itemId },
         },
         refresh: false,
       });
       if (result.deleted && result.deleted > 0) {
         this.logger.info(
-          `SML indexer: deleted ${result.deleted} existing chunk(s) for attachment '${attachmentId}'`
+          `SML indexer: deleted ${result.deleted} existing chunk(s) for item '${itemId}'`
         );
       }
     } catch (error) {
-      // Silently ignore index-not-found — nothing to delete.
       if (isNotFoundError(error)) {
         this.logger.debug(
-          `SML indexer: index '${smlIndexName}' not found — nothing to delete for '${attachmentId}'`
+          `SML indexer: index '${smlIndexName}' not found — nothing to delete for '${itemId}'`
         );
         return;
       }
       this.logger.warn(
-        `SML indexer: failed to delete chunks for attachment '${attachmentId}': ${
+        `SML indexer: failed to delete chunks for item '${itemId}': ${
           (error as Error).message
         }`
       );

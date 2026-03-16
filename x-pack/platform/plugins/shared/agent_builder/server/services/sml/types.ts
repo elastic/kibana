@@ -85,9 +85,9 @@ export interface SmlTypeDefinition {
   list: (context: SmlContext) => AsyncIterable<SmlListItem[]>;
 
   /**
-   * Return normalized data to index for a specific attachment.
+   * Return normalized data to index for a specific item.
    */
-  getSmlData: (attachmentId: string, context: SmlContext) => Promise<SmlData | undefined>;
+  getSmlData: (itemId: string, context: SmlContext) => Promise<SmlData | undefined>;
 
   /**
    * Convert an SML document into a conversation attachment.
@@ -110,12 +110,12 @@ export interface SmlTypeDefinition {
 export interface SmlDocument {
   /** Unique id of the chunk */
   id: string;
-  /** Type of the attachment */
+  /** SML type (e.g., 'visualization', 'dashboard') */
   type: string;
   /** Display title */
   title: string;
-  /** Unique id of the source asset */
-  attachment_reference_id: string;
+  /** Unique id of the source item (e.g., saved object ID) */
+  item_id: string;
   /** Searchable content */
   content: string;
   /** Timestamp when first created */
@@ -140,8 +140,10 @@ export type SmlSearchResult = SmlDocument & {
  * Crawler state document stored in the crawler state index.
  */
 export interface SmlCrawlerStateDocument {
-  attachment_id: string;
-  attachment_type: string;
+  /** Source item ID (e.g., saved object ID) */
+  item_id: string;
+  /** SML type definition ID (e.g., 'visualization') */
+  type_id: string;
   /** Space IDs this item belongs to (from the source saved object) */
   spaces: string[];
   created_at: string;
@@ -162,7 +164,7 @@ export type SmlIndexAction = 'create' | 'update' | 'delete';
  */
 export interface SmlIndexAttachmentParams {
   request: KibanaRequest;
-  attachmentId: string;
+  itemId: string;
   attachmentType: string;
   action: SmlIndexAction;
   spaceId?: string;
@@ -209,7 +211,7 @@ export interface SmlService {
 
   /** Index a single attachment (event-driven) */
   indexAttachment: (params: {
-    attachmentId: string;
+    itemId: string;
     attachmentType: string;
     action: SmlIndexAction;
     spaces: string[];
