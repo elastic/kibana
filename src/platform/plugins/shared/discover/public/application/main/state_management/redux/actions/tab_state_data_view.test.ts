@@ -147,7 +147,7 @@ describe('tab_state_data_view actions', () => {
     });
 
     it('should mark data view switch app state updates as system triggered', async () => {
-      const params = setupTestParams(dataViewComplexMock);
+      const params = await setupTestParams(dataViewComplexMock);
       const updateAppStateSpy = jest.spyOn(internalStateActions, 'updateAppState').mockClear();
 
       await params.internalState.dispatch(

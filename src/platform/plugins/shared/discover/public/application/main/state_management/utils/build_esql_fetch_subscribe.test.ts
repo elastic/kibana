@@ -52,12 +52,7 @@ async function getTestProps({
   // Reset the profile state to match the expected initial state for tests
   toolkit.internalState.dispatch(
     toolkit.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-      resetDefaultProfileState: {
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
-      },
+      resetDefaultProfileState: 'none',
     })
   );
 
