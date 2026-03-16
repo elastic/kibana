@@ -3443,6 +3443,26 @@
                 "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/reset_monitor.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/reset_monitor.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/reset_monitor.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/reset_monitor.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/reset_monitor.ts"
+              },
+              {
                 "plugin": "cloudDefend",
                 "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
               },
@@ -31848,6 +31868,26 @@
               {
                 "plugin": "@kbn/test-suites-xpack-observability",
                 "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/reset_monitor.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/reset_monitor.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/reset_monitor.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/reset_monitor.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/reset_monitor.ts"
               },
               {
                 "plugin": "cloudDefend",
