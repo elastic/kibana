@@ -19,7 +19,6 @@ src/
 |---|---|
 | `ChromeComponentsDeps` | External-service deps (`application`, `http`, `docLinks`, `customBranding`) passed to `ChromeComponentsProvider` — assembled by the layout layer using `Pick` from service interfaces |
 | `ChromeComponentsProvider` | Context provider; wrap the layout tree once with the assembled `ChromeComponentsDeps` |
-| `useChromeComponentsDeps` | Hook to read `ChromeComponentsDeps` from context (use inside provider) |
 | `ClassicHeader` | Classic header; self-hydrates from context |
 | `ProjectHeader` | Project header; self-hydrates from context |
 | `GridLayoutProjectSideNav` | Project side-navigation for grid layout; self-hydrates from context |
@@ -27,7 +26,7 @@ src/
 | `HeaderTopBanner` | Top banner; self-hydrates from context |
 | `AppMenuBar` | Project app menu bar; self-hydrates from context |
 | `Sidebar` | Sidebar wrapper |
-| `LoadingIndicator` | Horizontal/bar loading indicator |
+| `useHasAppMenu` | Whether an app menu (legacy or new) is active |
 | `HeaderBreadcrumbsBadges` | Breadcrumb badge renderer, used by `browser-internal` state |
 
 ## Context architecture
