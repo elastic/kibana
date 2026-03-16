@@ -110,46 +110,50 @@ async function runTask({
     return { state: { namespace } };
   }
 
+  const errors: string[] = [];
+
+  const { assetManagerClient, esClient } = await createAssetManagerClient({
+    core,
+    fakeRequest,
+    logger,
+    namespace,
+    analytics: telemetryReporter,
+    isServerless: false,
+  });
+  const index = getLatestEntitiesIndexName(namespace);
+  const abortSignal = abortController.signal;
+
+  // Report Entity Store usage per entity type
+  await Promise.all(
+    ALL_ENTITY_TYPES.map(async (entityType) => {
+      try {
+        const { count: storeSize } = await getStoreSize(esClient, index, entityType, abortSignal);
+        telemetryReporter.reportEvent(ENTITY_STORE_USAGE_EVENT, {
+          storeSize,
+          entityType,
+          namespace,
+        });
+      } catch (e) {
+        logger.error(`Error reporting store usage for ${entityType}: ${getErrorMessage(e)}`);
+        errors.push(getErrorMessage(e));
+      }
+    })
+  );
+
+  // Report status
   try {
-    const { assetManagerClient, esClient } = await createAssetManagerClient({
-      core,
-      fakeRequest,
-      logger,
+    const statusResult = await assetManagerClient.getStatus(true);
+    telemetryReporter.reportEvent(ENTITY_STORE_HEALTH_REPORT_EVENT, {
       namespace,
-      analytics: telemetryReporter,
-      isServerless: false,
+      ...toHealthReportPayload(statusResult),
     });
-    const index = getLatestEntitiesIndexName(namespace);
-    const abortSignal = abortController.signal;
-
-    // Report Entity Store usage per entity type
-    await Promise.all(
-      ALL_ENTITY_TYPES.map(async (entityType) => {
-        try {
-          const { count: storeSize } = await getStoreSize(esClient, index, entityType, abortSignal);
-          telemetryReporter.reportEvent(ENTITY_STORE_USAGE_EVENT, {
-            storeSize,
-            entityType,
-            namespace,
-          });
-        } catch (e) {
-          logger.error(`Error reporting store usage for ${entityType}: ${getErrorMessage(e)}`);
-        }
-      })
-    );
-
-    // Report status
-    try {
-      const statusResult = await assetManagerClient.getStatus(true);
-      telemetryReporter.reportEvent(ENTITY_STORE_HEALTH_REPORT_EVENT, {
-        namespace,
-        ...toHealthReportPayload(statusResult),
-      });
-    } catch (e) {
-      logger.error(`Error reporting entity store health: ${getErrorMessage(e)}`);
-    }
   } catch (e) {
-    logger.error(`Error running status report task: ${getErrorMessage(e)}`);
+    logger.error(`Error reporting entity store health: ${getErrorMessage(e)}`);
+    errors.push(getErrorMessage(e));
+  }
+
+  if (errors.length > 0) {
+    throw new Error(errors.join(', '));
   }
 
   return { state: { namespace } };
