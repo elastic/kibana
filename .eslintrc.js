@@ -1623,6 +1623,10 @@ module.exports = {
         },
       },
       rules: {
+        'playwright/expect-expect': [
+          'warn',
+          { assertFunctionPatterns: ['^expect.*', '^assert.*', '^verify.*'] },
+        ],
         'playwright/no-commented-out-tests': 'error',
         'playwright/no-conditional-expect': 'error',
         'playwright/no-conditional-in-test': 'warn',
