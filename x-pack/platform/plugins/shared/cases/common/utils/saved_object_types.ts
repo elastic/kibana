@@ -13,6 +13,8 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_TASK_SAVED_OBJECT,
+  CASE_TASK_TEMPLATE_SAVED_OBJECT,
 } from '../constants';
 
 interface CasesConfigType {
@@ -20,6 +22,9 @@ interface CasesConfigType {
     enabled?: boolean;
   };
   attachments?: {
+    enabled?: boolean;
+  };
+  tasks?: {
     enabled?: boolean;
   };
 }
@@ -44,6 +49,10 @@ export const getSavedObjectsTypes = (config?: Partial<CasesConfigType>): string[
 
   if (config?.attachments?.enabled) {
     experimentalSOs.push(CASE_ATTACHMENT_SAVED_OBJECT);
+  }
+
+  if (config?.tasks?.enabled !== false) {
+    experimentalSOs.push(CASE_TASK_SAVED_OBJECT, CASE_TASK_TEMPLATE_SAVED_OBJECT);
   }
 
   return [...baseSavedObjects, ...experimentalSOs];

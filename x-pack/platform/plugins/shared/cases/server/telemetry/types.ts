@@ -42,6 +42,7 @@ export interface ReferencesAggregation {
 export interface CollectTelemetryDataParams {
   savedObjectsClient: TelemetrySavedObjectsClient;
   logger: Logger;
+  tasksEnabled?: boolean;
 }
 
 export interface TypeLong {

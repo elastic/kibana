@@ -152,6 +152,7 @@ export class CasePlugin
           logger: this.logger,
           kibanaVersion: this.kibanaVersion,
           templatesConfig: this.caseConfig.templates,
+          tasksConfig: this.caseConfig.tasks,
         });
       }
 

@@ -19,6 +19,7 @@ import type { CasesTelemetry, CollectTelemetryDataParams } from './types';
 export const collectTelemetryData = async ({
   savedObjectsClient,
   logger,
+  tasksEnabled = true,
 }: CollectTelemetryDataParams): Promise<Partial<CasesTelemetry>> => {
   try {
     const [
@@ -40,7 +41,7 @@ export const collectTelemetryData = async ({
       getPushedTelemetryData({ savedObjectsClient, logger }),
       getConfigurationTelemetryData({ savedObjectsClient, logger }),
       getCasesSystemActionData({ savedObjectsClient, logger }),
-      getTasksTelemetryData({ savedObjectsClient, logger }),
+      tasksEnabled ? getTasksTelemetryData({ savedObjectsClient, logger }) : undefined,
     ]);
 
     return {
@@ -52,7 +53,7 @@ export const collectTelemetryData = async ({
       pushes,
       configuration,
       casesSystemAction,
-      tasks,
+      ...(tasks !== undefined && { tasks }),
     };
   } catch (err) {
     logger.debug('Failed collecting Cases telemetry data');
