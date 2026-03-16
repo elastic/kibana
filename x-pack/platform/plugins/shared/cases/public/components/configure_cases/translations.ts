@@ -214,3 +214,102 @@ export const SHOW_ALL_TEMPLATES = i18n.translate(
     defaultMessage: 'Show all templates',
   }
 );
+
+export const TASK_TEMPLATES_TITLE = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.title',
+  {
+    defaultMessage: 'Task templates',
+  }
+);
+
+export const TASK_TEMPLATES_DESCRIPTION = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.description',
+  {
+    defaultMessage:
+      'Create reusable task templates that can be applied to cases to quickly add a set of predefined tasks.',
+  }
+);
+
+export const ADD_TASK_TEMPLATE = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.addTaskTemplate',
+  {
+    defaultMessage: 'Add task template',
+  }
+);
+
+export const EDIT_TASK_TEMPLATE = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.editTaskTemplate',
+  {
+    defaultMessage: 'Edit task template',
+  }
+);
+
+export const DELETE_TASK_TEMPLATE = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.deleteTaskTemplate',
+  {
+    defaultMessage: 'Delete task template',
+  }
+);
+
+export const TASK_TEMPLATE_NAME = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.name',
+  {
+    defaultMessage: 'Name',
+  }
+);
+
+export const TASK_TEMPLATE_DESCRIPTION = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.description_field',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const TASK_TEMPLATE_TASKS_COUNT = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.tasksCount',
+  {
+    defaultMessage: 'Tasks',
+  }
+);
+
+export const NO_TASK_TEMPLATES = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.noTemplates',
+  {
+    defaultMessage: 'No task templates',
+  }
+);
+
+export const TASK_TEMPLATE_NAME_REQUIRED = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.nameRequired',
+  {
+    defaultMessage: 'A name is required.',
+  }
+);
+
+export const TASK_TEMPLATE_TASKS_REQUIRED = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.tasksRequired',
+  {
+    defaultMessage: 'At least one task is required.',
+  }
+);
+
+export const TASK_TEMPLATE_TASK_TITLE = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.taskTitle',
+  {
+    defaultMessage: 'Task title',
+  }
+);
+
+export const ADD_TASK_TO_TEMPLATE = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.addTaskToTemplate',
+  {
+    defaultMessage: 'Add task',
+  }
+);
+
+export const REMOVE_TASK_FROM_TEMPLATE = i18n.translate(
+  'xpack.cases.configureCases.taskTemplates.removeTaskFromTemplate',
+  {
+    defaultMessage: 'Remove',
+  }
+);

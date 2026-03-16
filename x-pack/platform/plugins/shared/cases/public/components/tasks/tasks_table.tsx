@@ -11,6 +11,7 @@ import {
   EuiBasicTable,
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -246,19 +247,23 @@ export const TasksTable = React.memo<TasksTableProps>(
           {
             name: i18n.EDIT_TASK,
             render: (row: TaskRow) => (
-              <EuiButtonIcon
+              <EuiButtonEmpty
                 iconType="pencil"
+                size="xs"
                 aria-label={i18n.EDIT_TASK}
                 data-test-subj={`cases-tasks-edit-${row.id}`}
                 onClick={() => onEditTask?.(row)}
-              />
+              >
+                {i18n.EDIT_TASK}
+              </EuiButtonEmpty>
             ),
           },
           {
             name: i18n.ADD_SUBTASK,
             render: (row: TaskRow) => (
-              <EuiButtonIcon
+              <EuiButtonEmpty
                 iconType="branch"
+                size="xs"
                 aria-label={i18n.ADD_SUBTASK}
                 data-test-subj={`cases-tasks-add-subtask-${row.id}`}
                 onClick={() => {
@@ -266,19 +271,24 @@ export const TasksTable = React.memo<TasksTableProps>(
                   setExpandedIds((prev) => new Set([...prev, row.id]));
                   onAddSubTask?.(row);
                 }}
-              />
+              >
+                {i18n.ADD_SUBTASK}
+              </EuiButtonEmpty>
             ),
           },
           {
             name: i18n.DELETE_TASK,
             render: (row: TaskRow) => (
-              <EuiButtonIcon
+              <EuiButtonEmpty
                 iconType="trash"
-                aria-label={i18n.DELETE_TASK}
+                size="xs"
                 color="danger"
+                aria-label={i18n.DELETE_TASK}
                 data-test-subj={`cases-tasks-delete-${row.id}`}
                 onClick={() => deleteTask(row.id)}
-              />
+              >
+                {i18n.DELETE_TASK}
+              </EuiButtonEmpty>
             ),
           },
         ],

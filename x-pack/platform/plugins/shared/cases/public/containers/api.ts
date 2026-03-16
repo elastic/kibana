@@ -74,12 +74,17 @@ import {
   INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
 } from '../../common/constants';
 import type { CaseTask } from '../../common/types/domain/task/v1';
+import type { CaseTaskTemplate } from '../../common/types/domain/task_template/v1';
 import {
   getCaseTasksUrl,
   getCaseTaskDetailsUrl,
   getCaseTasksReorderUrl,
   getCaseTasksApplyTemplateUrl,
 } from '../../common/api';
+import {
+  CASES_TASK_TEMPLATES_URL,
+  CASE_TASK_TEMPLATE_DETAILS_URL,
+} from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
@@ -830,4 +835,92 @@ export const applyTaskTemplate = async (
     }
   );
   return response;
+};
+
+// ---------------------------------------------------------------------------
+// Task Templates API
+// ---------------------------------------------------------------------------
+
+export interface FindTaskTemplatesRequest {
+  scope?: 'global' | 'space';
+  owners?: string[];
+  search?: string;
+  page?: number;
+  per_page?: number;
+}
+
+export interface CreateTaskTemplateRequest {
+  name: string;
+  description?: string;
+  scope?: 'global' | 'space';
+  tags?: string[];
+  tasks: Array<{
+    title: string;
+    description?: string;
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    relative_due_days?: number | null;
+    sort_order?: number;
+    subtasks?: Array<{
+      title: string;
+      description?: string;
+      priority: 'low' | 'medium' | 'high' | 'critical';
+      relative_due_days?: number | null;
+      sort_order?: number;
+    }>;
+  }>;
+  owner: string;
+}
+
+export interface UpdateTaskTemplateRequest {
+  version: string;
+  name?: string;
+  description?: string;
+  scope?: 'global' | 'space';
+  tags?: string[];
+  tasks?: CreateTaskTemplateRequest['tasks'];
+}
+
+export const findTaskTemplates = async (
+  params?: FindTaskTemplatesRequest,
+  signal?: AbortSignal
+): Promise<{ templates: CaseTaskTemplate[]; total: number }> => {
+  const query = params
+    ? Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined))
+    : {};
+  return KibanaServices.get().http.fetch<{ templates: CaseTaskTemplate[]; total: number }>(
+    CASES_TASK_TEMPLATES_URL,
+    { method: 'GET', query, signal }
+  );
+};
+
+export const createTaskTemplate = async (
+  request: CreateTaskTemplateRequest,
+  signal?: AbortSignal
+): Promise<CaseTaskTemplate> => {
+  return KibanaServices.get().http.fetch<CaseTaskTemplate>(CASES_TASK_TEMPLATES_URL, {
+    method: 'POST',
+    body: JSON.stringify(request),
+    signal,
+  });
+};
+
+export const updateTaskTemplate = async (
+  templateId: string,
+  request: UpdateTaskTemplateRequest,
+  signal?: AbortSignal
+): Promise<CaseTaskTemplate> => {
+  const url = CASE_TASK_TEMPLATE_DETAILS_URL.replace('{template_id}', templateId);
+  return KibanaServices.get().http.fetch<CaseTaskTemplate>(url, {
+    method: 'PATCH',
+    body: JSON.stringify(request),
+    signal,
+  });
+};
+
+export const deleteTaskTemplate = async (
+  templateId: string,
+  signal?: AbortSignal
+): Promise<void> => {
+  const url = CASE_TASK_TEMPLATE_DETAILS_URL.replace('{template_id}', templateId);
+  await KibanaServices.get().http.fetch(url, { method: 'DELETE', signal });
 };

@@ -17,6 +17,9 @@ export const casesQueriesKeys = {
   tasks: ['tasks'] as const,
   tasksList: (caseId: string, params?: unknown) =>
     [...casesQueriesKeys.tasks, 'list', caseId, params] as const,
+  taskTemplates: ['task-templates'] as const,
+  taskTemplatesList: (params?: unknown) =>
+    [...casesQueriesKeys.taskTemplates, 'list', params] as const,
   users: ['users'] as const,
   connectors: ['connectors'] as const,
   alerts: ['alerts'] as const,
@@ -91,6 +94,9 @@ export const casesMutationsKeys = {
   updateTask: ['update-task'] as const,
   deleteTask: ['delete-task'] as const,
   reorderTasks: ['reorder-tasks'] as const,
+  createTaskTemplate: ['create-task-template'] as const,
+  updateTaskTemplate: ['update-task-template'] as const,
+  deleteTaskTemplate: ['delete-task-template'] as const,
 };
 
 export const inferenceKeys = {

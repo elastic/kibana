@@ -15,6 +15,7 @@ import { useSuggestUserProfiles } from '../../containers/user_profiles/use_sugge
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useIsUserTyping } from '../../common/use_is_user_typing';
 import * as i18n from './translations';
 
 type UserProfileOption = EuiComboBoxOptionOption<string> & UserProfileWithAvatar;
@@ -35,11 +36,12 @@ interface TaskAssigneesFieldProps {
 export const TaskAssigneesField: React.FC<TaskAssigneesFieldProps> = ({ value, onChange }) => {
   const { owner: owners } = useCasesContext();
   const [searchTerm, setSearchTerm] = useState('');
+  const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
 
   const { data: currentUserProfile, isLoading: isLoadingCurrentUser } = useGetCurrentUserProfile();
 
   const { data: suggestedProfiles = [], isLoading: isLoadingSuggested, isFetching: isFetchingSuggested } =
-    useSuggestUserProfiles({ name: searchTerm, owners });
+    useSuggestUserProfiles({ name: searchTerm, owners, onDebounce });
 
   // Bulk-get profiles for already-selected assignees that aren't in the suggestion results
   const missingUids = differenceWith(
@@ -60,7 +62,12 @@ export const TaskAssigneesField: React.FC<TaskAssigneesFieldProps> = ({ value, o
     .map(({ uid }) => options.find((o) => o.key === uid))
     .filter((o): o is UserProfileOption => o != null);
 
-  const isLoading = isLoadingCurrentUser || isLoadingSuggested || isFetchingSuggested || isLoadingBulk;
+  const isLoading =
+    isLoadingCurrentUser ||
+    isLoadingSuggested ||
+    isFetchingSuggested ||
+    isLoadingBulk ||
+    isUserTyping;
 
   const handleChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<string>>) => {
@@ -69,9 +76,15 @@ export const TaskAssigneesField: React.FC<TaskAssigneesFieldProps> = ({ value, o
     [onChange]
   );
 
-  const handleSearchChange = useCallback((term: string) => {
-    if (!isEmpty(term)) setSearchTerm(term);
-  }, []);
+  const handleSearchChange = useCallback(
+    (term: string) => {
+      if (!isEmpty(term)) {
+        setSearchTerm(term);
+      }
+      onContentChange(term);
+    },
+    [onContentChange]
+  );
 
   const handleSelfAssign = useCallback(() => {
     if (!currentUserProfile) return;
