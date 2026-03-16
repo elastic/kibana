@@ -163,6 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
           location: { id: testFleetPolicyID },
           spaceId,
           mws: [mwObject],
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });

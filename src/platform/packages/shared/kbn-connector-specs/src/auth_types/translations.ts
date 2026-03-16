@@ -117,10 +117,17 @@ export const OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const OAUTH_TOKEN_ENDPOINT_AUTH_METHOD_LABEL = i18n.translate(
+  'connectorSpecs.oauthTokenEndpointAuthMethod.label',
+  {
+    defaultMessage: 'Token endpoint auth method',
+  }
+);
+
 export const OAUTH_AUTHORIZATION_CODE_LABEL = i18n.translate(
   'connectorSpecs.oauthAuthorizationCode.label',
   {
-    defaultMessage: 'OAuth2 Authorization Code',
+    defaultMessage: 'OAuth 2.0 Authorization Code',
   }
 );
 

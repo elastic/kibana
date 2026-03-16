@@ -9,13 +9,12 @@ import qs from 'query-string';
 import axios from 'axios';
 import { stableStringify } from '@kbn/std';
 import type { Logger } from '@kbn/core/server';
-import type { RefreshTokenOAuthRequestParams } from './request_oauth_refresh_token';
-import type { JWTOAuthRequestParams } from './request_oauth_jwt_token';
-import type { ClientCredentialsOAuthRequestParams } from './request_oauth_client_credentials_token';
 import { request } from './axios_utils';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { AsApiContract } from '../../common';
-import { getBasicAuthHeader } from './get_basic_auth_header';
+import type { RefreshTokenOAuthRequestParams } from './request_oauth_refresh_token';
+import type { JWTOAuthRequestParams } from './request_oauth_jwt_token';
+import type { ClientCredentialsOAuthRequestParams } from './request_oauth_client_credentials_token';
 import type { AuthorizationCodeOAuthRequestParams } from './request_oauth_authorization_code_token';
 
 export interface OAuthTokenResponse {
@@ -25,6 +24,12 @@ export interface OAuthTokenResponse {
   refreshToken?: string;
   refreshTokenExpiresIn?: number;
 }
+
+type OAuthBodyRequest =
+  | AuthorizationCodeOAuthRequestParams
+  | ClientCredentialsOAuthRequestParams
+  | JWTOAuthRequestParams
+  | RefreshTokenOAuthRequestParams;
 
 export async function requestOAuthToken<T>(
   tokenUrl: string,
@@ -36,11 +41,6 @@ export async function requestOAuthToken<T>(
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
 
-  type OAuthBodyRequest =
-    | AuthorizationCodeOAuthRequestParams
-    | ClientCredentialsOAuthRequestParams
-    | JWTOAuthRequestParams
-    | RefreshTokenOAuthRequestParams;
   // Extract client credentials for Basic Auth if needed
   const {
     client_id: clientId,
@@ -53,12 +53,10 @@ export async function requestOAuthToken<T>(
     grant_type: grantType,
   };
 
-  const requestHeaders = {
-    ...(useBasicAuth && clientId && clientSecret
-      ? getBasicAuthHeader({ username: clientId, password: clientSecret })
-      : {}),
-    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-  };
+  const basicAuth =
+    useBasicAuth && clientId && clientSecret
+      ? { username: clientId, password: clientSecret }
+      : undefined;
 
   const res = await request({
     axios: axiosInstance,
@@ -66,7 +64,10 @@ export async function requestOAuthToken<T>(
     method: 'post',
     logger,
     data: qs.stringify(requestData),
-    headers: requestHeaders,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    },
+    ...(basicAuth ? { auth: basicAuth } : {}),
     configurationUtilities,
     validateStatus: () => true,
   });
@@ -77,7 +78,7 @@ export async function requestOAuthToken<T>(
       accessToken: res.data.access_token,
       expiresIn: res.data.expires_in,
       refreshToken: res.data.refresh_token,
-      refreshTokenExpiresIn: res.data.refresh_token_expires_in,
+      refreshTokenExpiresIn: res.data.refresh_expires_in ?? res.data.refresh_token_expires_in,
     };
   } else {
     const errString = stableStringify(res.data);
