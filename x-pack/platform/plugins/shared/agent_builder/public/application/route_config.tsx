@@ -174,12 +174,14 @@ export const getAgentIdFromPath = (pathname: string): string | undefined => {
   return match ? match[1] : undefined;
 };
 
-export const getAgentSettingsNavItems = (): Array<{ label: string; pathSuffix: string }> => {
+export const getAgentSettingsNavItems = (
+  agentId: string
+): Array<{ label: string; path: string }> => {
   return agentRoutes
     .filter((route) => route.navLabel && route.sidebarView === 'agentSettings')
     .map((route) => ({
       label: route.navLabel!,
-      pathSuffix: route.path.replace('/agents/:agentId/', ''),
+      path: route.path.replace(':agentId', agentId),
     }));
 };
 

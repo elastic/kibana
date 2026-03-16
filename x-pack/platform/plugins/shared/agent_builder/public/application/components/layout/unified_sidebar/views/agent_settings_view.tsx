@@ -47,10 +47,7 @@ export const AgentSettingsSidebarView: React.FC<AgentSettingsSidebarViewProps> =
   `;
 
   const navItems = useMemo(() => {
-    return getAgentSettingsNavItems().map((item) => ({
-      label: item.label,
-      path: `/agents/${agentId}/${item.pathSuffix}`,
-    }));
+    return getAgentSettingsNavItems(agentId);
   }, [agentId]);
 
   const isActive = (path: string) => pathname === path;
