@@ -25,13 +25,13 @@ import { EmptyPrompt } from '../shared/empty_prompt';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 
-const OPENCODE_CALLBACK_URL = 'http://localhost:14642';
+const ELASTIC_CONSOLE_CALLBACK_URL = 'http://localhost:14642';
 
 type CallbackDeliveryStatus = 'idle' | 'sending' | 'sent' | 'failed';
 
 async function sendCredentials(payload: object): Promise<boolean> {
   try {
-    const res = await fetch(OPENCODE_CALLBACK_URL, {
+    const res = await fetch(ELASTIC_CONSOLE_CALLBACK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -42,11 +42,14 @@ async function sendCredentials(payload: object): Promise<boolean> {
   }
 }
 
-export const OpencodePanel: React.FC = () => {
+export const ElasticConsolePanel: React.FC = () => {
   useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.opencodePanel.breadcrumbs.opencode', {
-      defaultMessage: 'OpenCode Local Setup',
-    }),
+    text: i18n.translate(
+      'xpack.observability_onboarding.elasticConsolePanel.breadcrumbs.elasticConsole',
+      {
+        defaultMessage: 'Elastic Console Local Setup',
+      }
+    ),
   });
   const { onPageReady } = usePerformanceContext();
 
@@ -59,7 +62,7 @@ export const OpencodePanel: React.FC = () => {
     refetch,
   } = useFetcher(
     (callApi) => {
-      return callApi('POST /internal/observability_onboarding/opencode/setup');
+      return callApi('POST /internal/observability_onboarding/elastic-console/setup');
     },
     [],
     { showToastOnError: false }
@@ -93,7 +96,7 @@ export const OpencodePanel: React.FC = () => {
       onPageReady({
         meta: {
           description:
-            '[ttfmp_onboarding] Requests to setup the opencode flow succeeded and the UI has rendered',
+            '[ttfmp_onboarding] Requests to setup the elastic-console flow succeeded and the UI has rendered',
         },
       });
     }
@@ -107,7 +110,9 @@ export const OpencodePanel: React.FC = () => {
   }, [setupData, buildPayload]);
 
   if (error) {
-    return <EmptyPrompt onboardingFlowType="opencode" error={error} onRetryClick={refetch} />;
+    return (
+      <EmptyPrompt onboardingFlowType="elastic-console" error={error} onRetryClick={refetch} />
+    );
   }
 
   const showCopyFallback = callbackStatus === 'failed';
@@ -119,15 +124,15 @@ export const OpencodePanel: React.FC = () => {
           <EuiCallOut
             announceOnMount
             title={i18n.translate(
-              'xpack.observability_onboarding.opencodePanel.callbackSuccess.title',
-              { defaultMessage: 'Credentials sent to opencode' }
+              'xpack.observability_onboarding.elasticConsolePanel.callbackSuccess.title',
+              { defaultMessage: 'Credentials sent to Elastic Console' }
             )}
             color="success"
             iconType="check"
           >
             <p>
               {i18n.translate(
-                'xpack.observability_onboarding.opencodePanel.callbackSuccess.description',
+                'xpack.observability_onboarding.elasticConsolePanel.callbackSuccess.description',
                 {
                   defaultMessage:
                     'Your credentials have been delivered. You can return to your terminal.',
@@ -142,7 +147,7 @@ export const OpencodePanel: React.FC = () => {
                 <EuiCallOut
                   announceOnMount
                   title={i18n.translate(
-                    'xpack.observability_onboarding.opencodePanel.callbackFailed.title',
+                    'xpack.observability_onboarding.elasticConsolePanel.callbackFailed.title',
                     {
                       defaultMessage: 'Could not deliver credentials automatically',
                     }
@@ -152,10 +157,10 @@ export const OpencodePanel: React.FC = () => {
                 >
                   <p>
                     {i18n.translate(
-                      'xpack.observability_onboarding.opencodePanel.callbackFailed.description',
+                      'xpack.observability_onboarding.elasticConsolePanel.callbackFailed.description',
                       {
                         defaultMessage:
-                          'The opencode CLI may no longer be running. Copy the configuration below and paste it manually.',
+                          'The Elastic Console CLI may no longer be running. Copy the configuration below and paste it manually.',
                       }
                     )}
                   </p>
@@ -166,10 +171,13 @@ export const OpencodePanel: React.FC = () => {
 
             <EuiText>
               <p>
-                {i18n.translate('xpack.observability_onboarding.opencodePanel.description', {
-                  defaultMessage:
-                    'Copy the configuration below to connect your local Elastic OpenCode distribution. It contains the Elasticsearch URL, Kibana URL, and a pre-configured API key with full permissions.',
-                })}
+                {i18n.translate(
+                  'xpack.observability_onboarding.elasticConsolePanel.description',
+                  {
+                    defaultMessage:
+                      'Copy the configuration below to connect your local Elastic Console distribution. It contains the Elasticsearch URL, Kibana URL, and a pre-configured API key with full permissions.',
+                  }
+                )}
               </p>
             </EuiText>
 
@@ -188,12 +196,12 @@ export const OpencodePanel: React.FC = () => {
                     <EuiCopy textToCopy={configJson}>
                       {(copy) => (
                         <EuiButton
-                          data-test-subj="observabilityOnboardingOpencodePanelCopyButton"
+                          data-test-subj="observabilityOnboardingElasticConsolePanelCopyButton"
                           iconType="copyClipboard"
                           onClick={copy}
                         >
                           {i18n.translate(
-                            'xpack.observability_onboarding.opencodePanel.copyToClipboard',
+                            'xpack.observability_onboarding.elasticConsolePanel.copyToClipboard',
                             { defaultMessage: 'Copy to clipboard' }
                           )}
                         </EuiButton>
@@ -207,7 +215,7 @@ export const OpencodePanel: React.FC = () => {
         )}
 
         <EuiSpacer size="xl" />
-        <FeedbackButtons flow="opencode" />
+        <FeedbackButtons flow="elastic-console" />
       </EuiFlexGroup>
     </EuiPanel>
   );

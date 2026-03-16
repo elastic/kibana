@@ -17,7 +17,7 @@ function interpolateEnvVars(text: string): string {
 }
 
 const setupFlowRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'POST /internal/observability_onboarding/opencode/setup',
+  endpoint: 'POST /internal/observability_onboarding/elastic-console/setup',
   security: {
     authz: {
       enabled: false,
@@ -53,13 +53,13 @@ const setupFlowRoute = createObservabilityOnboardingServerRoute({
 
     const timestamp = new Date().toISOString();
     const { encoded: apiKeyEncoded } = await client.asCurrentUser.security.createApiKey({
-      name: `opencode-${timestamp}`,
+      name: `elastic-console-${timestamp}`,
       metadata: {
         managed: true,
-        application: 'opencode',
+        application: 'elastic-console',
       },
       role_descriptors: {
-        opencode_full: {
+        elastic_console_full: {
           cluster: ['all'],
           indices: [
             {
@@ -78,7 +78,7 @@ const setupFlowRoute = createObservabilityOnboardingServerRoute({
       },
     });
 
-    const providerConfigPath = resolve(process.cwd(), 'config', 'opencode-provider.json');
+    const providerConfigPath = resolve(process.cwd(), 'config', 'elastic-console-provider.json');
     const providerRaw = await readFile(providerConfigPath, 'utf-8');
     const provider = JSON.parse(interpolateEnvVars(providerRaw)) as Record<string, unknown>;
 
@@ -91,6 +91,6 @@ const setupFlowRoute = createObservabilityOnboardingServerRoute({
   },
 });
 
-export const opencodeOnboardingRouteRepository = {
+export const elasticConsoleOnboardingRouteRepository = {
   ...setupFlowRoute,
 };

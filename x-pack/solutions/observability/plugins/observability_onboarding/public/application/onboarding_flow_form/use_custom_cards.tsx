@@ -55,7 +55,10 @@ export function useCustomCards(
     history,
     `/cloudforwarder/${location.search}`
   );
-  const { href: opencodeUrl } = reactRouterNavigate(history, `/opencode/${location.search}`);
+  const { href: elasticConsoleUrl } = reactRouterNavigate(
+    history,
+    `/elastic-console/${location.search}`
+  );
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isManagedOtlpServiceAvailable ? otelApmQuickstartUrl : apmUrl;
@@ -506,18 +509,18 @@ export function useCustomCards(
     ...(isDev
       ? [
           {
-            id: 'opencode-quick-start',
-            name: 'opencode-quick-start',
+            id: 'elastic-console-quick-start',
+            name: 'elastic-console-quick-start',
             type: 'virtual' as const,
             title: i18n.translate(
-              'xpack.observability_onboarding.packageList.opencodeTitle',
-              { defaultMessage: 'Elastic OpenCode' }
+              'xpack.observability_onboarding.packageList.elasticConsoleTitle',
+              { defaultMessage: 'Elastic Console' }
             ),
             description: i18n.translate(
-              'xpack.observability_onboarding.packageList.opencodeDescription',
+              'xpack.observability_onboarding.packageList.elasticConsoleDescription',
               {
                 defaultMessage:
-                  'Get connection details for your locally running Elastic OpenCode distribution.',
+                  'Get connection details for your locally running Elastic Console distribution.',
               }
             ),
             categories: ['observability' as const],
@@ -527,7 +530,7 @@ export function useCustomCards(
                 src: 'launch',
               },
             ],
-            url: opencodeUrl,
+            url: elasticConsoleUrl,
             version: '',
             integration: '',
             isQuickstart: true,

@@ -9,29 +9,29 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { PageTemplate } from './template';
 import { CustomHeader } from '../header';
-import { OpencodePanel } from '../quickstart_flows/opencode';
+import { ElasticConsolePanel } from '../quickstart_flows/elastic_console';
 
-export const OpencodePage = () => (
+export const ElasticConsolePage = () => (
   <PageTemplate
     customHeader={
       <CustomHeader
         euiIconType="launch"
         headlineCopy={i18n.translate(
-          'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.opencode.text',
+          'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.elasticConsole.text',
           {
-            defaultMessage: 'Elastic OpenCode Local Setup',
+            defaultMessage: 'Elastic Console Local Setup',
           }
         )}
         captionCopy={i18n.translate(
-          'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.opencode.description',
+          'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.elasticConsole.description',
           {
             defaultMessage:
-              'Get the connection details for your locally running Elastic OpenCode distribution.',
+              'Get the connection details for your locally running Elastic Console distribution.',
           }
         )}
       />
     }
   >
-    <OpencodePanel />
+    <ElasticConsolePanel />
   </PageTemplate>
 );

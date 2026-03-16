@@ -58,7 +58,7 @@ All Agent Builder APIs require authentication via an API key. The Elastic Consol
 ### Obtaining credentials
 
 ```
-POST /internal/observability_onboarding/opencode/setup
+POST /internal/observability_onboarding/elastic-console/setup
 ```
 
 This returns:

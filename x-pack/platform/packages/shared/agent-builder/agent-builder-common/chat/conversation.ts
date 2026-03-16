@@ -260,7 +260,7 @@ export interface Conversation {
   state?: ConversationInternalState;
   /**
    * Whether the conversation has been flagged for handover to an external agent.
-   * When true, an external agent (e.g. opencode) can pick up this conversation.
+   * When true, an external agent (e.g. Elastic Console) can pick up this conversation.
    */
   handover_requested?: boolean;
 }

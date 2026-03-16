@@ -19,7 +19,7 @@ import {
   FirehosePage,
   OtelApmPage,
   CloudForwarderPage,
-  OpencodePage,
+  ElasticConsolePage,
 } from './pages';
 import type { ObservabilityOnboardingAppServices } from '..';
 import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
@@ -74,8 +74,8 @@ export function ObservabilityOnboardingFlow() {
           </Route>
         )}
         {isDev && (
-          <Route path="/opencode">
-            <OpencodePage />
+          <Route path="/elastic-console">
+            <ElasticConsolePage />
           </Route>
         )}
         <Route>
