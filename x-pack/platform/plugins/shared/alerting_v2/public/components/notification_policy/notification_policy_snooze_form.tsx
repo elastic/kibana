@@ -132,6 +132,10 @@ export const NotificationPolicySnoozeForm = ({
             value={durationValue}
             onChange={(e) => setDurationValue(Math.max(1, parseInt(e.target.value, 10) || 1))}
             compressed
+            aria-label={i18n.translate(
+              'xpack.alertingV2.notificationPolicy.snooze.durationValueAriaLabel',
+              { defaultMessage: 'Snooze duration value' }
+            )}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ width: 120 }}>
