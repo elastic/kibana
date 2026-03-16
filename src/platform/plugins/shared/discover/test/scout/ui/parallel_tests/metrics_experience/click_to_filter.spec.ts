@@ -59,16 +59,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('charts should re-render with breakdown', async () => {
-        await expect
-          .poll(
-            async () => {
-              const card = metricsExperience.getCardByIndex(0);
-              const loading = card.locator('[role="progressbar"]');
-              return (await loading.count()) === 0;
-            },
-            { timeout: 30000 }
-          )
-          .toBe(true);
+        await metricsExperience.waitForCardRenderComplete(0);
         await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
       });
 

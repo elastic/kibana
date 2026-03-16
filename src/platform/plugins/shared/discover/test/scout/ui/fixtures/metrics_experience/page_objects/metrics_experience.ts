@@ -8,6 +8,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { PaginationLocators } from './pagination';
 import { createGridPagination } from './pagination';
 import type { MetricsFlyout } from './flyout';
@@ -111,6 +112,17 @@ export class MetricsExperiencePage {
   public async openInsightsFlyout(cardIndex: number): Promise<void> {
     await this.openCardContextMenu(cardIndex);
     await this.chartActions.viewDetails.click();
+  }
+
+  /**
+   * Waits for the embeddable panel inside a card to signal that rendering is
+   * complete via the `data-render-complete="true"` attribute set by Lens.
+   */
+  public async waitForCardRenderComplete(index: number): Promise<void> {
+    const panel = this.getCardByIndex(index).locator(
+      '[data-test-subj="embeddablePanel"][data-render-complete="true"]'
+    );
+    await expect(panel).toBeVisible();
   }
 
   /**
