@@ -121,7 +121,7 @@ export function QueryDetailsFlyout({
       {
         ...item.query,
         title: title.trim(),
-        description,
+        description: description.trim(),
         esql: { query: query.trim() },
         severity_score: severityScore,
       },
