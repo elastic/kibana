@@ -122,3 +122,4 @@ export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
 export const KbnReactKibanaMount = require('@kbn/react-kibana-mount');
 export const KbnVisualizationsCommon = require('@kbn/visualizations-common');
 export const KbnCoreSidebarContext = require('@kbn/core-chrome-sidebar-context');
+export const KbnCoreChromeBrowserContext = require('@kbn/core-chrome-browser-context');
