@@ -993,6 +993,23 @@ const equalsDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'double',
           optional: false,
           description: 'An expression.',
@@ -5797,6 +5814,23 @@ const notEqualsDefinition: FunctionDefinition = {
         {
           name: 'right',
           type: 'date_nanos',
+          optional: false,
+          description: 'An expression.',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+          description: 'An expression.',
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
           optional: false,
           description: 'An expression.',
         },
