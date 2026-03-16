@@ -213,6 +213,14 @@ export const IMPORT_EXCEPTION_LIST_AS_NEW_LIST = i18n.translate(
   }
 );
 
+export const IMPORT_ENDPOINT_ARTIFACTS_ERROR_TEXT = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.importEndpointArtifactsErrorText',
+  {
+    defaultMessage:
+      'On this page only shared exception lists can be imported, but at least one file contains Endpoint artifacts. Endpoint artifacts can be imported on their respective pages.',
+  }
+);
+
 export const IMPORT_EXCEPTION_ENDPOINT_LIST_WARNING = i18n.translate(
   'xpack.securitySolution.exceptionsTable.importExceptionEndpointListWarning',
   {

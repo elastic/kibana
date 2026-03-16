@@ -34,10 +34,15 @@ import type {
   BulkErrorSchema,
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_ARTIFACT_LIST_IDS,
+  ENDPOINT_ARTIFACT_LISTS,
+} from '@kbn/securitysolution-list-constants';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ToastInput, Toast, ErrorToastOptions } from '@kbn/core-notifications-browser';
 
+import { parseListIdsFromImportedFile } from '../../../common/utils/exception_list_items';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useImportExceptionList } from '../../hooks/use_import_exception_list';
 
 import * as i18n from '../../translations';
@@ -65,6 +70,9 @@ export const ImportExceptionListFlyout = React.memo(
     const [asNewList, setAsNewList] = useState(false);
     const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
     const [endpointListImporting, setEndpointListImporting] = useState(false);
+    const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+      'endpointExceptionsMovedUnderManagement'
+    );
 
     const resetForm = useCallback(() => {
       if (filePickerRef.current?.fileInput) {
@@ -80,8 +88,21 @@ export const ImportExceptionListFlyout = React.memo(
     const { start: importExceptionList, ...importExceptionListState } = useImportExceptionList();
     const ctrl = useRef(new AbortController());
 
-    const handleImportExceptionList = useCallback(() => {
+    const handleImportExceptionList = useCallback(async () => {
       if (!importExceptionListState.loading && files) {
+        if (isEndpointExceptionsMovedFFEnabled) {
+          for (const file of Array.from(files)) {
+            const listIds = await parseListIdsFromImportedFile(file);
+
+            if (ENDPOINT_ARTIFACT_LIST_IDS.some((id) => listIds.has(id))) {
+              addError(new Error(i18n.IMPORT_ENDPOINT_ARTIFACTS_ERROR_TEXT), {
+                title: i18n.UPLOAD_ERROR,
+              });
+              return;
+            }
+          }
+        }
+
         ctrl.current = new AbortController();
 
         Array.from(files).forEach((file) =>
@@ -95,7 +116,16 @@ export const ImportExceptionListFlyout = React.memo(
           })
         );
       }
-    }, [asNewList, files, http, importExceptionList, importExceptionListState.loading, overwrite]);
+    }, [
+      importExceptionListState.loading,
+      files,
+      isEndpointExceptionsMovedFFEnabled,
+      addError,
+      importExceptionList,
+      http,
+      overwrite,
+      asNewList,
+    ]);
 
     const handleImportSuccess = useCallback(
       (response: ImportExceptionsResponseSchema) => {
