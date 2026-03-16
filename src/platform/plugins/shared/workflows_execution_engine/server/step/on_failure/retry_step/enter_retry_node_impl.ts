@@ -83,6 +83,9 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   private advanceRetryAttempt(): void {
     const retryState = this.stepExecutionRuntime.getCurrentStepState();
     if (!retryState) {
+      this.workflowLogger.logDebug(
+        `Retry state missing for step "${this.node.stepId}" during retry attempt advancement`
+      );
       return;
     }
 

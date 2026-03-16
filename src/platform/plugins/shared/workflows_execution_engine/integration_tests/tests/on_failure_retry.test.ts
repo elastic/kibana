@@ -152,8 +152,8 @@ steps:
 
             // At least the first delay (1s) must be observed between first and second attempt
             expect(firstToSecondDelay).toBeGreaterThanOrEqual(1000);
-            // Second delay is expected >= 0 (timing may vary with scope/state)
-            expect(secondToThirdDelay).toBeGreaterThanOrEqual(0);
+            // Second delay should also be ~1s for fixed strategy
+            expect(secondToThirdDelay).toBeGreaterThanOrEqual(999);
           });
 
           it('should not execute finalStep', async () => {
