@@ -16,6 +16,8 @@ export interface IExternalReferenceMetaDataProps {
     actionId: string;
     agentIds: string[];
     queryId: string;
+    scheduleId?: string;
+    executionCount?: number;
   };
 }
 const AttachmentContent = lazy(() => import('./external_references_content'));
