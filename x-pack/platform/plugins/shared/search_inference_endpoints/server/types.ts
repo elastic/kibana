@@ -39,8 +39,13 @@ export interface SearchInferenceEndpointsPluginSetup {
   features: InferenceFeatureRegistryContract;
 }
 
+export interface ResolvedInferenceEndpoints {
+  endpoints: InferenceInferenceEndpointInfo[];
+  warnings: string[];
+}
+
 export interface InferenceEndpointsContract {
-  getForFeature: (featureId: string) => Promise<InferenceInferenceEndpointInfo[]>;
+  getForFeature: (featureId: string) => Promise<ResolvedInferenceEndpoints>;
 }
 
 export interface SearchInferenceEndpointsPluginStart {

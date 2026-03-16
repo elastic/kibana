@@ -81,10 +81,10 @@ describe('InferenceEndpoints', () => {
     await expect(ep.getForFeature('unknown')).rejects.toThrow('not registered');
   });
 
-  it('returns empty array when no endpoints resolved', async () => {
+  it('returns empty result when no endpoints resolved', async () => {
     registry.register(createValidFeature({ featureId: 'f1' }));
     const ep = makeEndpoints(createSoRepo(), createEsClient());
-    await expect(ep.getForFeature('f1')).resolves.toEqual([]);
+    await expect(ep.getForFeature('f1')).resolves.toEqual({ endpoints: [], warnings: [] });
   });
 
   it('returns hydrated endpoints from SO override', async () => {
@@ -94,14 +94,14 @@ describe('InferenceEndpoints', () => {
       createSoRepo([{ feature_id: 'f1', endpoints: [{ id: 'ep1' }] }]),
       createEsClient({ ep1: info })
     );
-    await expect(ep.getForFeature('f1')).resolves.toEqual([info]);
+    await expect(ep.getForFeature('f1')).resolves.toEqual({ endpoints: [info], warnings: [] });
   });
 
   it('returns hydrated endpoints from recommendedEndpoints', async () => {
     registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
     const info = createEndpointInfo('rec1');
     const ep = makeEndpoints(createSoRepo(), createEsClient({ rec1: info }));
-    await expect(ep.getForFeature('f1')).resolves.toEqual([info]);
+    await expect(ep.getForFeature('f1')).resolves.toEqual({ endpoints: [info], warnings: [] });
   });
 
   it('walks the fallback chain to parent recommendedEndpoints', async () => {
@@ -109,7 +109,7 @@ describe('InferenceEndpoints', () => {
     registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
     const info = createEndpointInfo('prec1');
     const ep = makeEndpoints(createSoRepo(), createEsClient({ prec1: info }));
-    await expect(ep.getForFeature('child')).resolves.toEqual([info]);
+    await expect(ep.getForFeature('child')).resolves.toEqual({ endpoints: [info], warnings: [] });
   });
 
   it('walks the full chain: child -> parent -> grandparent', async () => {
@@ -120,7 +120,7 @@ describe('InferenceEndpoints', () => {
     registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
     const info = createEndpointInfo('gp_ep');
     const ep = makeEndpoints(createSoRepo(), createEsClient({ gp_ep: info }));
-    await expect(ep.getForFeature('child')).resolves.toEqual([info]);
+    await expect(ep.getForFeature('child')).resolves.toEqual({ endpoints: [info], warnings: [] });
   });
 
   it('prefers SO override over recommendedEndpoints', async () => {
@@ -130,7 +130,7 @@ describe('InferenceEndpoints', () => {
       createSoRepo([{ feature_id: 'f1', endpoints: [{ id: 'so_ep' }] }]),
       createEsClient({ so_ep: soInfo, rec1: createEndpointInfo('rec1') })
     );
-    await expect(ep.getForFeature('f1')).resolves.toEqual([soInfo]);
+    await expect(ep.getForFeature('f1')).resolves.toEqual({ endpoints: [soInfo], warnings: [] });
   });
 
   it('skips SO entry with empty endpoints and falls through to recommended', async () => {
@@ -140,23 +140,26 @@ describe('InferenceEndpoints', () => {
       createSoRepo([{ feature_id: 'f1', endpoints: [] }]),
       createEsClient({ rec1: info })
     );
-    await expect(ep.getForFeature('f1')).resolves.toEqual([info]);
+    await expect(ep.getForFeature('f1')).resolves.toEqual({ endpoints: [info], warnings: [] });
   });
 
   it('handles SO 404 and falls through to recommended', async () => {
     registry.register(createValidFeature({ featureId: 'f1', recommendedEndpoints: ['rec1'] }));
     const info = createEndpointInfo('rec1');
     const ep = makeEndpoints(createSoRepo('not_found'), createEsClient({ rec1: info }));
-    await expect(ep.getForFeature('f1')).resolves.toEqual([info]);
+    await expect(ep.getForFeature('f1')).resolves.toEqual({ endpoints: [info], warnings: [] });
   });
 
-  it('skips ES endpoints that no longer exist (404) without failing', async () => {
+  it('returns warning for ES endpoints that no longer exist (404)', async () => {
     registry.register(
       createValidFeature({ featureId: 'f1', recommendedEndpoints: ['ep1', 'ep2'] })
     );
     const info = createEndpointInfo('ep2');
     const ep = makeEndpoints(createSoRepo(), createEsClient({ ep1: 'not_found', ep2: info }));
-    await expect(ep.getForFeature('f1')).resolves.toEqual([info]);
+    const result = await ep.getForFeature('f1');
+    expect(result.endpoints).toEqual([info]);
+    expect(result.warnings).toHaveLength(1);
+    expect(result.warnings[0]).toContain('ep1');
   });
 
   it('propagates non-404 ES errors', async () => {
@@ -181,12 +184,12 @@ describe('InferenceEndpoints', () => {
     await expect(ep.getForFeature('f1')).rejects.toThrow('Connection refused');
   });
 
-  it('detects cycles and returns empty array', async () => {
+  it('detects cycles and returns empty result', async () => {
     registry.register(createValidFeature({ featureId: 'a' }));
     registry.register(createValidFeature({ featureId: 'b', parentFeatureId: 'a' }));
     // Inject cycle
     (registry as any).features.get('a').parentFeatureId = 'b';
     const ep = makeEndpoints(createSoRepo(), createEsClient());
-    await expect(ep.getForFeature('a')).resolves.toEqual([]);
+    await expect(ep.getForFeature('a')).resolves.toEqual({ endpoints: [], warnings: [] });
   });
 });

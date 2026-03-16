@@ -12,6 +12,7 @@ import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/
 import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
+import type { ResolvedInferenceEndpoints } from './types';
 
 export class InferenceEndpoints {
   constructor(
@@ -28,10 +29,10 @@ export class InferenceEndpoints {
    * @param featureId - The feature to resolve endpoints for.
    * @throws If `featureId` is not registered.
    */
-  async getForFeature(featureId: string): Promise<InferenceInferenceEndpointInfo[]> {
+  async getForFeature(featureId: string): Promise<ResolvedInferenceEndpoints> {
     const endpointIds = await this.resolveEndpointIds(featureId);
     if (endpointIds.length === 0) {
-      return [];
+      return { endpoints: [], warnings: [] };
     }
     return this.fetchEndpoints(endpointIds);
   }
@@ -78,21 +79,38 @@ export class InferenceEndpoints {
     return [];
   }
 
-  private async fetchEndpoints(ids: string[]): Promise<InferenceInferenceEndpointInfo[]> {
+  private async fetchEndpoints(ids: string[]): Promise<ResolvedInferenceEndpoints> {
+    const endpoints: InferenceInferenceEndpointInfo[] = [];
+    const warnings: string[] = [];
+
     const results = await Promise.all(
       ids.map(async (id) => {
         try {
-          const { endpoints } = await this.esClient.inference.get({ inference_id: id });
-          return endpoints[0] ?? null;
+          const response = await this.esClient.inference.get({ inference_id: id });
+          return { id, endpoint: response.endpoints[0] ?? null };
         } catch (e) {
           if (e?.statusCode === 404) {
-            return null;
+            return { id, endpoint: null };
           }
           throw e;
         }
       })
     );
-    return results.filter((ep): ep is InferenceInferenceEndpointInfo => ep !== null);
+
+    for (const { id, endpoint } of results) {
+      if (endpoint) {
+        endpoints.push(endpoint);
+      } else {
+        warnings.push(
+          i18n.translate('xpack.searchInferenceEndpoints.endpoints.endpointNotFound', {
+            defaultMessage: 'Inference endpoint "{endpointId}" was not found in Elasticsearch.',
+            values: { endpointId: id },
+          })
+        );
+      }
+    }
+
+    return { endpoints, warnings };
   }
 
   private async readSettingsFeatures(): Promise<InferenceSettingsAttributes['features']> {
