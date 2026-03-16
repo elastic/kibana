@@ -15,9 +15,8 @@ export const getSignificantEventsSettingsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_significant_events/settings',
   options: {
     access: 'internal',
-    summary: 'Get significant events model settings',
-    description:
-      'Returns the current model settings (connector IDs) for knowledge indicator extraction, rule generation, and discovery.',
+    summary: 'Get settings for Significant Events',
+    description: 'Returns the settings defined by the user for the Significant Events feature.',
   },
   security: {
     authz: {
@@ -43,9 +42,9 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_significant_events/settings',
   options: {
     access: 'internal',
-    summary: 'Update significant events model settings',
+    summary: 'Update significant events settings',
     description:
-      'Sets one or more model settings (connector IDs). Omitted fields are left unchanged. Use empty string to use the default connector for that setting.',
+      'Sets one or more significant events settings. Omitted fields are left unchanged. Currently supports model settings (connector IDs): use empty string to use the default connector for that setting. Additional settings may be supported in the future.',
   },
   security: {
     authz: {
