@@ -10,8 +10,6 @@ import { generateCmd } from './commands/generate';
 import { validateCmd } from './commands/validate';
 import { evalGenerateCmd } from './commands/eval_generate';
 import { evalRunCmd } from './commands/eval_run';
-import { exportCmd } from './commands/export';
-import { importCmd } from './commands/import';
 
 export async function run() {
   await new RunWithCommands(
@@ -19,6 +17,6 @@ export async function run() {
       description: 'Agent Builder skill development CLI',
       usage: 'node scripts/agent_builder_skill <command> [options]',
     },
-    [generateCmd, validateCmd, evalGenerateCmd, evalRunCmd, exportCmd, importCmd]
+    [generateCmd, validateCmd, evalGenerateCmd, evalRunCmd]
   ).execute();
 }
