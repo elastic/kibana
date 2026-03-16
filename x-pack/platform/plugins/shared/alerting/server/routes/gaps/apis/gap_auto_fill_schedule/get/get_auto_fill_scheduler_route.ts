@@ -10,7 +10,7 @@ import type {
   GetGapAutoFillSchedulerParamsV1,
 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
 import { getGapAutoFillSchedulerParamsSchemaV1 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler';
-import { RULES_MANAGEMENT_SETTINGS_API_PRIVILEGE } from '../../../../constants';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
@@ -25,9 +25,7 @@ export const getAutoFillSchedulerRoute = (
   router.get(
     {
       path: `${INTERNAL_ALERTING_GAPS_AUTO_FILL_SCHEDULER_API_PATH}/{id}`,
-      security: {
-        authz: { requiredPrivileges: [RULES_MANAGEMENT_SETTINGS_API_PRIVILEGE] },
-      },
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
         params: getGapAutoFillSchedulerParamsSchemaV1,
