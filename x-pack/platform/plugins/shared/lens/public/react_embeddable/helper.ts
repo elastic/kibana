@@ -7,7 +7,13 @@
 
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  EVENT_ANNOTATION_GROUP_TYPE,
+  type EventAnnotationGroupConfig,
+} from '@kbn/event-annotation-common';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
+import fastIsEqual from 'fast-deep-equal';
 import type {
   DatasourceStates,
   FormBasedPersistedState,
@@ -16,6 +22,8 @@ import type {
   LensSerializedState,
   StructuredDatasourceStates,
   TextBasedPersistedState,
+  XYState,
+  XYByReferenceAnnotationLayerConfig,
 } from '@kbn/lens-common';
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
@@ -293,4 +301,145 @@ export function stripInheritedContext(state: LensSerializedState): StrippedLensS
     hide_border,
     drilldowns,
   };
+}
+
+export function hasAnnotationGroupReference(state: LensRuntimeState, groupId: string): boolean {
+  const refs = state.attributes?.references ?? [];
+  return refs.some((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE && ref.id === groupId);
+}
+
+/**
+ * Returns updated state with library annotation group data for all by-reference
+ * annotation layers that reference the given group ID, or undefined if no layers matched.
+ *
+ * Handles both hydrated layers (annotationGroupId on the layer) and persisted layers
+ * (annotationGroupRef resolved via the references array).
+ */
+export function updateAttributesWithAnnotation(
+  state: LensRuntimeState,
+  groupId: string,
+  libraryGroup: EventAnnotationGroupConfig
+): LensRuntimeState | undefined {
+  const { attributes } = state;
+  if (attributes.visualizationType !== 'lnsXY') return undefined;
+
+  const vizState = attributes.state.visualization as XYState | undefined;
+  if (!vizState?.layers) return undefined;
+
+  // In the persisted form, annotation layers use annotationGroupRef (a reference name)
+  // instead of annotationGroupId. Build a lookup to resolve these via the references array.
+  const refNameToGroupId = new Map<string, string>();
+  for (const ref of attributes.references ?? []) {
+    if (ref.type === EVENT_ANNOTATION_GROUP_TYPE) {
+      refNameToGroupId.set(ref.name, ref.id);
+    }
+  }
+
+  let changed = false;
+  const layers = vizState.layers.map((layer) => {
+    // Hydrated form: annotationGroupId is directly on the layer during inline editing
+    // and on saved dashboards after injection.
+    if ('annotationGroupId' in layer && layer.annotationGroupId === groupId) {
+      changed = true;
+      return {
+        ...(layer as XYByReferenceAnnotationLayerConfig),
+        annotations: structuredClone(libraryGroup.annotations),
+        ignoreGlobalFilters: libraryGroup.ignoreGlobalFilters,
+        indexPatternId: libraryGroup.indexPatternId,
+        __lastSaved: libraryGroup,
+      };
+    }
+
+    // Persisted form: duplicated panels on unsaved dashboards store annotationGroupRef
+    // instead of annotationGroupId — resolve it via the references array.
+    if (
+      'annotationGroupRef' in layer &&
+      refNameToGroupId.get((layer as { annotationGroupRef: string }).annotationGroupRef) === groupId
+    ) {
+      changed = true;
+      return {
+        layerId: layer.layerId,
+        layerType: layer.layerType,
+        annotationGroupId: groupId,
+        annotations: structuredClone(libraryGroup.annotations),
+        ignoreGlobalFilters: libraryGroup.ignoreGlobalFilters,
+        indexPatternId: libraryGroup.indexPatternId,
+        __lastSaved: libraryGroup,
+      } as XYByReferenceAnnotationLayerConfig;
+    }
+
+    return layer;
+  });
+
+  return changed
+    ? {
+        ...state,
+        attributes: {
+          ...attributes,
+          state: { ...attributes.state, visualization: { ...vizState, layers } },
+        },
+      }
+    : undefined;
+}
+
+/**
+ * Saves all modified linked (by-reference) annotation layers to the library.
+ * Each layer with local changes is committed via `updateAnnotationGroup`, which
+ * also fires `annotationGroupUpdated$` to notify other panels.
+ *
+ * Returns an immutably-updated viz state with `__lastSaved` synced on each
+ * saved layer, so serialization produces clean by-reference layers rather than
+ * "linked with local changes" layers.
+ */
+export async function saveUpdatedLinkedAnnotationsToLibrary(
+  vizState: unknown,
+  eventAnnotationService: EventAnnotationServiceType
+): Promise<unknown> {
+  const xyState = vizState as XYState | undefined;
+  if (!xyState?.layers) return vizState;
+
+  let updatedLayers: XYState['layers'] | undefined;
+
+  for (let i = 0; i < xyState.layers.length; i++) {
+    const layer = xyState.layers[i];
+    if (
+      'annotationGroupId' in layer &&
+      '__lastSaved' in layer &&
+      !fastIsEqual(
+        {
+          annotations: layer.annotations,
+          ignoreGlobalFilters: layer.ignoreGlobalFilters,
+          indexPatternId: layer.indexPatternId,
+        },
+        {
+          annotations: (layer as XYByReferenceAnnotationLayerConfig).__lastSaved.annotations,
+          ignoreGlobalFilters: (layer as XYByReferenceAnnotationLayerConfig).__lastSaved
+            .ignoreGlobalFilters,
+          indexPatternId: (layer as XYByReferenceAnnotationLayerConfig).__lastSaved.indexPatternId,
+        }
+      )
+    ) {
+      const refLayer = layer as XYByReferenceAnnotationLayerConfig;
+      const groupConfig: EventAnnotationGroupConfig = {
+        annotations: refLayer.annotations,
+        indexPatternId: refLayer.indexPatternId,
+        ignoreGlobalFilters: refLayer.ignoreGlobalFilters,
+        title: refLayer.__lastSaved.title,
+        description: refLayer.__lastSaved.description,
+        tags: refLayer.__lastSaved.tags,
+        dataViewSpec: refLayer.__lastSaved.dataViewSpec,
+      };
+
+      await eventAnnotationService.updateAnnotationGroup(groupConfig, refLayer.annotationGroupId);
+
+      if (!updatedLayers) {
+        updatedLayers = [...xyState.layers];
+      }
+      updatedLayers[i] = { ...refLayer, __lastSaved: groupConfig };
+    }
+  }
+
+  if (!updatedLayers) return vizState;
+
+  return { ...xyState, layers: updatedLayers };
 }

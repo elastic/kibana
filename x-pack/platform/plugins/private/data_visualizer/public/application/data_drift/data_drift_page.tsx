@@ -31,6 +31,7 @@ import {
   DatePickerWrapper,
   FROZEN_TIER_PREFERENCE,
   FullTimeRangeSelector,
+  mlTimefilterRefresh$,
   useTimefilter,
 } from '@kbn/ml-date-picker';
 import moment from 'moment';
@@ -153,7 +154,7 @@ const isBarBetween = (start: number, end: number, min: number, max: number) => {
 };
 export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const {
-    services: { data: dataService, uiSettings },
+    services: { data: dataService, uiSettings, cps },
   } = useDataVisualizerKibana();
   const { dataView, savedSearch } = useDataSource();
 
@@ -393,6 +394,13 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     setDataComparisonListState,
     dataComparisonListState,
   ]);
+
+  useEffect(() => {
+    const subscription = cps?.cpsManager?.getProjectRouting$()?.subscribe(() => {
+      mlTimefilterRefresh$.next({ lastRefresh: Date.now() });
+    });
+    return () => subscription?.unsubscribe();
+  }, [cps?.cpsManager]);
 
   return (
     <EuiPageBody data-test-subj="dataComparisonDataDriftPage" paddingSize="none" panelled={false}>

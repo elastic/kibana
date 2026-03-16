@@ -578,7 +578,7 @@ function getValueColumns(layer: MetricStateESQL) {
         ]
       : []),
     ...(secondaryMetric
-      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric.column)]
+      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric.column, 'number')]
       : []),
   ];
 }
@@ -616,7 +616,7 @@ export function fromAPItoLensState(config: MetricState): MetricAttributesWithout
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

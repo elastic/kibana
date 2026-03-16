@@ -25,7 +25,7 @@ import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { AgentExecutionService } from '../services/execution';
-import { validateToolSelection } from '../services/agents/persisted/client/utils';
+import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
@@ -387,6 +387,8 @@ export function registerChatRoutes({
             'Content-Type': cloud?.isCloudEnabled
               ? 'application/octet-stream'
               : 'text/event-stream',
+            // another attempt at disabling compression
+            'Content-Encoding': 'identity',
             'Cache-Control': 'no-cache',
             Connection: 'keep-alive',
             'Transfer-Encoding': 'chunked',

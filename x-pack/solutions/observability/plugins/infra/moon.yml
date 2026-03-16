@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/infra-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-presentation-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/infra-plugin'
+  title: '@kbn/infra-plugin'
   description: Moon project for @kbn/infra-plugin
   channel: ''
   owner: '@elastic/obs-presentation-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/infra
+  sourceRoot: x-pack/solutions/observability/plugins/infra
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -140,6 +139,8 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/inspector-plugin'
   - '@kbn/css-utils'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/controls-constants'
 tags:
   - plugin
   - prod
@@ -155,14 +156,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

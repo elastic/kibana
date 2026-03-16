@@ -142,7 +142,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: `error validating connector type config: Field \"index\": Expected string, received number`,
+            message: `error validating connector type config: ✖ Invalid input: expected string, received number\n  → at index`,
           });
         });
     });

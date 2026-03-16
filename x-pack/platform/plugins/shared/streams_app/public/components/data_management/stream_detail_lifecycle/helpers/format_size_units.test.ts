@@ -93,6 +93,12 @@ describe('format_size_units', () => {
         expect(getTimeSizeAndUnitLabel('100d')).toBe('100 days');
       });
 
+      it('should handle decimal values', () => {
+        expect(getTimeSizeAndUnitLabel('0.04d')).toBe('0.04 days');
+        expect(getTimeSizeAndUnitLabel('1.5h')).toBe('1.5 hours');
+        expect(getTimeSizeAndUnitLabel('1.0d')).toBe('1.0 day');
+      });
+
       it('should be case sensitive for units', () => {
         // Only lowercase units should be recognized
         expect(getTimeSizeAndUnitLabel('30D')).toBe('30D'); // Should return original
