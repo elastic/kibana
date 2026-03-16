@@ -49,6 +49,11 @@ export enum ReadOperations {
   GetFieldDefinitions = 'getFieldDefinitions',
   GetTemplate = 'getTemplate',
   FindTemplates = 'findTemplates',
+  // Task operations
+  GetTask = 'getTask',
+  FindTasks = 'findTasks',
+  GetTaskTemplate = 'getTaskTemplate',
+  FindTaskTemplates = 'findTaskTemplates',
 }
 
 /**
@@ -69,6 +74,15 @@ export enum WriteOperations {
   ReopenCase = 'reopenCase',
   AssignCase = 'assignCase',
   ManageTemplate = 'manageTemplate',
+  // Task operations
+  CreateTask = 'createTask',
+  UpdateTask = 'updateTask',
+  DeleteTask = 'deleteTask',
+  ReorderTasks = 'reorderTasks',
+  ApplyTaskTemplate = 'applyTaskTemplate',
+  CreateTaskTemplate = 'createTaskTemplate',
+  UpdateTaskTemplate = 'updateTaskTemplate',
+  DeleteTaskTemplate = 'deleteTaskTemplate',
 }
 
 /**

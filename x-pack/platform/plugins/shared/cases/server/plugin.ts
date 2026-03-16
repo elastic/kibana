@@ -53,6 +53,7 @@ import { UserProfileService } from './services';
 import {
   LICENSING_CASE_ASSIGNMENT_FEATURE,
   LICENSING_CASE_OBSERVABLES_FEATURE,
+  LICENSING_CASE_TASKS_FEATURE,
 } from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerCaseFileKinds } from './files';
@@ -280,6 +281,7 @@ export class CasePlugin
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
     plugins.licensing.featureUsage.register(LICENSING_CASE_OBSERVABLES_FEATURE, 'platinum');
+    plugins.licensing.featureUsage.register(LICENSING_CASE_TASKS_FEATURE, 'platinum');
 
     const getCasesClient = (
       clientSource: CasesClientSource

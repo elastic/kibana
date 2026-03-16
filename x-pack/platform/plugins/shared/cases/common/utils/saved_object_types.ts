@@ -14,10 +14,15 @@ import {
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASE_TASK_SAVED_OBJECT,
+  CASE_TASK_TEMPLATE_SAVED_OBJECT,
 } from '../constants';
 
 interface CasesConfigType {
   templates?: {
+    enabled?: boolean;
+  };
+  tasks?: {
     enabled?: boolean;
   };
 }
@@ -40,6 +45,10 @@ export const getSavedObjectsTypes = (config?: Partial<CasesConfigType>): string[
 
   if (config?.templates?.enabled) {
     experimentalSOs.push(CASE_TEMPLATE_SAVED_OBJECT);
+  }
+
+  if (config?.tasks?.enabled) {
+    experimentalSOs.push(CASE_TASK_SAVED_OBJECT, CASE_TASK_TEMPLATE_SAVED_OBJECT);
   }
 
   return [...baseSavedObjects, ...experimentalSOs];

@@ -57,4 +57,12 @@ describe('getSavedObjectsTypes', () => {
     const types = getSavedObjectsTypes({ templates: { enabled: true } });
     expect(types).toEqual([...baseTypes, CASE_TEMPLATE_SAVED_OBJECT]);
   });
+
+  it('includes the task types only when the tasks flag is on', () => {
+    expect(getSavedObjectsTypes({ tasks: { enabled: true } })).toEqual(
+      expect.arrayContaining(['cases-tasks', 'cases-task-templates'])
+    );
+    expect(getSavedObjectsTypes({ tasks: { enabled: false } })).not.toContain('cases-tasks');
+    expect(getSavedObjectsTypes()).not.toContain('cases-task-templates');
+  });
 });

@@ -16,6 +16,8 @@ import type {
   AttachmentService,
   TemplatesService,
   FieldDefinitionsService,
+  CaseTaskService,
+  CaseTaskTemplateService,
 } from '.';
 import type { AttachmentGetter } from './attachments/operations/get';
 import type { LicensingService } from './licensing';
@@ -48,6 +50,8 @@ export type LicensingServiceMock = jest.Mocked<LicensingService>;
 export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 export type TemplatesServiceMock = jest.Mocked<TemplatesService>;
 export type FieldDefinitionsServiceMock = jest.Mocked<FieldDefinitionsService>;
+export type CaseTaskServiceMock = jest.Mocked<CaseTaskService>;
+export type CaseTaskTemplateServiceMock = jest.Mocked<CaseTaskTemplateService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
   const service: PublicMethodsOf<CaseServiceMock> = lazyObject({
@@ -259,4 +263,32 @@ export const createFieldDefinitionsServiceMock = (): FieldDefinitionsServiceMock
   });
 
   return service as unknown as FieldDefinitionsServiceMock;
+};
+
+export const createCaseTaskServiceMock = (): CaseTaskServiceMock => {
+  const service: PublicMethodsOf<CaseTaskService> = lazyObject({
+    createTask: jest.fn(),
+    bulkCreateTasks: jest.fn(),
+    getTask: jest.fn(),
+    getTasksByCase: jest.fn(),
+    findTasks: jest.fn(),
+    updateTask: jest.fn(),
+    deleteTask: jest.fn(),
+    deleteTasksByCase: jest.fn(),
+    reorderTasks: jest.fn(),
+  });
+
+  return service as unknown as CaseTaskServiceMock;
+};
+
+export const createCaseTaskTemplateServiceMock = (): CaseTaskTemplateServiceMock => {
+  const service: PublicMethodsOf<CaseTaskTemplateService> = lazyObject({
+    createTemplate: jest.fn(),
+    getTemplate: jest.fn(),
+    findTemplates: jest.fn(),
+    updateTemplate: jest.fn(),
+    deleteTemplate: jest.fn(),
+  });
+
+  return service as unknown as CaseTaskTemplateServiceMock;
 };
