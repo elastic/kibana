@@ -8,7 +8,7 @@
  */
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { MetricsESQLResponseObject } from '../../../../types';
+import type { MetricsESQLResponse } from '../../../../types';
 import { parseMetricsResponse } from './parse_metrics_response';
 
 describe('parseMetricsResponse', () => {
@@ -20,7 +20,7 @@ describe('parseMetricsResponse', () => {
   });
 
   it('returns empty metricItems and allDimensions for empty array', () => {
-    const response: MetricsESQLResponseObject[] = [];
+    const response: MetricsESQLResponse[] = [];
     expect(parseMetricsResponse(response)).toEqual({
       metricItems: [],
       allDimensions: [],
@@ -28,7 +28,7 @@ describe('parseMetricsResponse', () => {
   });
 
   it('returns units: [] when unit is null', () => {
-    const response: MetricsESQLResponseObject[] = [
+    const response: MetricsESQLResponse[] = [
       {
         metric_name: 'my.metric',
         data_stream: 'my-index',
@@ -47,15 +47,15 @@ describe('parseMetricsResponse', () => {
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: [],
-          dimensionFields: ['host.name'],
+          dimensionFields: [{ name: 'host.name' }],
         },
       ],
-      allDimensions: ['host.name'],
+      allDimensions: [{ name: 'host.name' }],
     });
   });
 
   it('returns one metric when data_stream is a single string', () => {
-    const response: MetricsESQLResponseObject[] = [
+    const response: MetricsESQLResponse[] = [
       {
         metric_name: 'cpu.usage',
         data_stream: 'my-index',
@@ -74,15 +74,15 @@ describe('parseMetricsResponse', () => {
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
-          dimensionFields: ['host.name'],
+          dimensionFields: [{ name: 'host.name' }],
         },
       ],
-      allDimensions: ['host.name'],
+      allDimensions: [{ name: 'host.name' }],
     });
   });
 
   it('returns two metrics when data_stream is an array of two', () => {
-    const response: MetricsESQLResponseObject[] = [
+    const response: MetricsESQLResponse[] = [
       {
         metric_name: 'cpu.usage',
         data_stream: ['stream-a', 'stream-b'],
@@ -101,7 +101,7 @@ describe('parseMetricsResponse', () => {
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
-          dimensionFields: ['host.name'],
+          dimensionFields: [{ name: 'host.name' }],
         },
         {
           metricName: 'cpu.usage',
@@ -109,15 +109,15 @@ describe('parseMetricsResponse', () => {
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['percent'],
-          dimensionFields: ['host.name'],
+          dimensionFields: [{ name: 'host.name' }],
         },
       ],
-      allDimensions: ['host.name'],
+      allDimensions: [{ name: 'host.name' }],
     });
   });
 
   it('normalises single string metric_type, field_type and dimension_fields to one-element arrays', () => {
-    const response: MetricsESQLResponseObject[] = [
+    const response: MetricsESQLResponse[] = [
       {
         metric_name: 'my.metric',
         data_stream: 'my-index',
@@ -136,15 +136,15 @@ describe('parseMetricsResponse', () => {
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
           units: ['bytes'],
-          dimensionFields: ['host.name'],
+          dimensionFields: [{ name: 'host.name' }],
         },
       ],
-      allDimensions: ['host.name'],
+      allDimensions: [{ name: 'host.name' }],
     });
   });
 
   it('preserves arrays for metric_type, field_type and dimension_fields', () => {
-    const response: MetricsESQLResponseObject[] = [
+    const response: MetricsESQLResponse[] = [
       {
         metric_name: 'my.metric',
         data_stream: 'my-index',
@@ -163,15 +163,15 @@ describe('parseMetricsResponse', () => {
           metricTypes: ['gauge', 'counter'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
           units: ['bytes'],
-          dimensionFields: ['host.name', 'pod.name'],
+          dimensionFields: [{ name: 'host.name' }, { name: 'pod.name' }],
         },
       ],
-      allDimensions: ['host.name', 'pod.name'],
+      allDimensions: [{ name: 'host.name' }, { name: 'pod.name' }],
     });
   });
 
   it('returns allDimensions as union of all dimension_fields across rows with no duplicates', () => {
-    const response: MetricsESQLResponseObject[] = [
+    const response: MetricsESQLResponse[] = [
       {
         metric_name: 'metric.a',
         data_stream: 'ds-1',
@@ -199,8 +199,9 @@ describe('parseMetricsResponse', () => {
     ];
     const result = parseMetricsResponse(response);
     expect(result.allDimensions).toHaveLength(3);
-    expect(result.allDimensions).toContain('host.name');
-    expect(result.allDimensions).toContain('pod.name');
-    expect(result.allDimensions).toContain('container.id');
+    const dimensionNames = result.allDimensions.map((d) => d.name);
+    expect(dimensionNames).toContain('host.name');
+    expect(dimensionNames).toContain('pod.name');
+    expect(dimensionNames).toContain('container.id');
   });
 });

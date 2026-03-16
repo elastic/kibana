@@ -13,7 +13,7 @@ import { useMetricFieldsFilter } from './use_metric_fields_filter';
 import type { ParsedMetricItem } from '../../../../types';
 
 describe('useMetricFieldsFilter', () => {
-  const baseDimensions: string[] = ['host.name', 'service.name'];
+  const baseDimensions = [{ name: 'host.name' }, { name: 'service.name' }];
 
   const baseMetricItems: ParsedMetricItem[] = [
     {
@@ -22,7 +22,7 @@ describe('useMetricFieldsFilter', () => {
       units: ['ms'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-      dimensionFields: [baseDimensions[0], baseDimensions[1]],
+      dimensionFields: baseDimensions,
     },
     {
       metricName: 'system.memory.utilization',
@@ -30,7 +30,7 @@ describe('useMetricFieldsFilter', () => {
       units: ['ms'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-      dimensionFields: [baseDimensions[0], baseDimensions[1]],
+      dimensionFields: baseDimensions,
     },
   ];
 

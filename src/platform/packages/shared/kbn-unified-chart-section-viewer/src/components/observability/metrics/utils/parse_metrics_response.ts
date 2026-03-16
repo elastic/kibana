@@ -7,19 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  MetricsESQLResponseObject,
-  ParsedMetricItem,
-  ParsedMetricsResult,
-} from '../../../../types';
+import type { MetricsESQLResponse, ParsedMetricItem, ParsedMetricsResult } from '../../../../types';
 import { toArray } from './to_array';
 import { ALLOWED_METRIC_TYPES } from '../../../../common/constants';
 
 const ALLOWED_METRIC_TYPES_SET = new Set(ALLOWED_METRIC_TYPES);
 
-export const parseMetricsResponse = (
-  response: MetricsESQLResponseObject[]
-): ParsedMetricsResult => {
+export const parseMetricsResponse = (response: MetricsESQLResponse[]): ParsedMetricsResult => {
   const result: ParsedMetricItem[] = [];
   const allDimensionsSet = new Set<string>();
 
@@ -37,9 +31,12 @@ export const parseMetricsResponse = (
     const dataStreams = toArray(metric.data_stream);
     const units = toArray(metric.unit);
     const fieldTypes = toArray(metric.field_type);
-    const dimensionFields = toArray(metric.dimension_fields);
+    const dimensions = toArray(metric.dimension_fields);
 
-    dimensionFields.forEach((d) => allDimensionsSet.add(d));
+    const dimensionFields = dimensions.map((name) => {
+      allDimensionsSet.add(name);
+      return { name };
+    });
 
     for (const stream of dataStreams) {
       result.push({
@@ -55,6 +52,6 @@ export const parseMetricsResponse = (
 
   return {
     metricItems: result,
-    allDimensions: Array.from(allDimensionsSet),
+    allDimensions: Array.from(allDimensionsSet).map((name) => ({ name })),
   };
 };

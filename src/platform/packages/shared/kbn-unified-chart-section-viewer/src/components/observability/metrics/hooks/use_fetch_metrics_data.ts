@@ -13,7 +13,7 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import type {
   Dimension,
-  MetricsESQLResponseObject,
+  MetricsESQLResponse,
   ParsedMetricsResult,
   MetricsInfoResponse,
 } from '../../../../types';
@@ -43,19 +43,19 @@ export function useFetchMetricsData({
 
   const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
 
-  const dimensions = useMemo(
+  const selectedDimensions = useMemo(
     () => selectedDimensionNames?.map((dimension) => dimension.name),
     [selectedDimensionNames]
   );
 
   const metricsInfoQuery = useMemo(
-    () => buildMetricsInfoQuery(esql, dimensions),
-    [esql, dimensions]
+    () => buildMetricsInfoQuery(esql, selectedDimensions),
+    [esql, selectedDimensions]
   );
 
   const [{ value, error, loading }, executeFetch] =
     useAsyncFn(async (): Promise<ParsedMetricsResult | null> => {
-      const result = await executeEsqlQuery<MetricsESQLResponseObject>({
+      const result = await executeEsqlQuery<MetricsESQLResponse>({
         esqlQuery: metricsInfoQuery,
         search: services.data.search.search,
         signal: fetchParams.abortController?.signal,
@@ -72,7 +72,9 @@ export function useFetchMetricsData({
         metricItems: [...(parsed?.metricItems ?? [])].sort((a, b) =>
           a.metricName.localeCompare(b.metricName)
         ),
-        allDimensions: [...(parsed?.allDimensions ?? [])].sort((a, b) => a.localeCompare(b)),
+        allDimensions: [...(parsed?.allDimensions ?? [])].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        ),
       };
     }, [
       metricsInfoQuery,

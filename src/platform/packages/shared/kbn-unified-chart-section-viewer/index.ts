@@ -14,7 +14,7 @@ export type {
   ParsedMetricItem,
   MetricsInfoResponse,
   ParsedMetricsResult,
-  MetricsESQLResponseObject,
+  MetricsESQLResponse,
   Dimension,
   MetricUnit,
   UnifiedMetricsGridProps,

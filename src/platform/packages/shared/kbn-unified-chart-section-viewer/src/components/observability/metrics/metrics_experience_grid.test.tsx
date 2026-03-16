@@ -82,7 +82,7 @@ const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field1',
-    dimensionFields: [dimensions[0].name],
+    dimensionFields: [dimensions[0]],
     dataStream: 'metrics-*',
     units: [],
     metricTypes: [],
@@ -90,7 +90,7 @@ const metricItems: ParsedMetricItem[] = [
   },
   {
     metricName: 'field2',
-    dimensionFields: [dimensions[1].name],
+    dimensionFields: [dimensions[1]],
     dataStream: 'metrics-*',
     units: [],
     metricTypes: [],
@@ -152,7 +152,7 @@ describe('MetricsExperienceGrid', () => {
 
     useFetchMetricsDataMock.mockReturnValue({
       metricItems,
-      allDimensions: dimensions.map((dimension) => dimension.name),
+      allDimensions: dimensions,
       loading: false,
       error: null,
     });

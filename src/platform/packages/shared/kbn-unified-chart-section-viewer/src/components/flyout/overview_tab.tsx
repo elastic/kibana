@@ -27,7 +27,7 @@ import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
 import { MetricTypeBadge } from './metric_type_badge';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
-import type { ParsedMetricItem } from '../../types';
+import type { Dimension, ParsedMetricItem } from '../../types';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
@@ -52,7 +52,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     if (!metricItem.dimensionFields || metricItem.dimensionFields.length === 0) {
       return [];
     }
-    return [...metricItem.dimensionFields].sort((a, b) => a.localeCompare(b));
+    return [...metricItem.dimensionFields].sort((a, b) => a.name.localeCompare(b.name));
   }, [metricItem.dimensionFields]);
 
   // Calculate pagination - 0 means show all
@@ -145,10 +145,10 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   // Create list items from dimensions
   const dimensionListItems = useMemo(
     () =>
-      paginatedDimensions.map((dimension: string) => {
+      paginatedDimensions.map((dimension: Dimension) => {
         return {
           'data-test-subj': `metricsExperienceFlyoutOverviewTabDimensionItem-${dimension}`,
-          label: <FieldNameWithIcon name={dimension} />,
+          label: <FieldNameWithIcon name={dimension.name} />,
         };
       }),
     [paginatedDimensions]

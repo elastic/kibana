@@ -163,12 +163,12 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('renders dimensions list when dimensions are present', () => {
-      const dimensions = [
+      const dimensionFields = [
         { name: 'service.name' },
         { name: 'host.name' },
         { name: 'attributes.state' },
       ];
-      const metricItem = createMockMetric({ dimensionFields: dimensions.map((d) => d.name) });
+      const metricItem = createMockMetric({ dimensionFields });
       const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDimensionsLabel')).toBeInTheDocument();
@@ -181,10 +181,10 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('shows pagination when dimensions count is 20 or more', () => {
-      const dimensions = Array.from({ length: 20 }, (_, i) => ({
+      const dimensionFields = Array.from({ length: 20 }, (_, i) => ({
         name: `dimension.${String(i).padStart(2, '0')}`,
       }));
-      const metricItem = createMockMetric({ dimensionFields: dimensions.map((d) => d.name) });
+      const metricItem = createMockMetric({ dimensionFields });
       const { getByTestId } = render(<OverviewTab metricItem={metricItem} />);
 
       expect(
@@ -193,8 +193,8 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('does not show pagination when dimensions count is less than 20', () => {
-      const dimensions = [{ name: 'dimension.01' }, { name: 'dimension.02' }];
-      const metricItem = createMockMetric({ dimensionFields: dimensions.map((d) => d.name) });
+      const dimensionFields = [{ name: 'dimension.01' }, { name: 'dimension.02' }];
+      const metricItem = createMockMetric({ dimensionFields });
       const { queryByTestId } = render(<OverviewTab metricItem={metricItem} />);
 
       expect(
@@ -203,10 +203,10 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('keeps pagination visible when on last page with fewer items than page size', () => {
-      const dimensions = Array.from({ length: 25 }, (_, i) => ({
+      const dimensionFields = Array.from({ length: 25 }, (_, i) => ({
         name: `dimension.${String(i).padStart(2, '0')}`,
       }));
-      const metricItem = createMockMetric({ dimensionFields: dimensions.map((d) => d.name) });
+      const metricItem = createMockMetric({ dimensionFields });
       const { getByTestId } = render(<OverviewTab metricItem={metricItem} />);
 
       expect(
@@ -215,8 +215,12 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('sorts dimensions alphabetically', () => {
-      const dimensions = [{ name: 'zebra.field' }, { name: 'alpha.field' }, { name: 'beta.field' }];
-      const metricItem = createMockMetric({ dimensionFields: dimensions.map((d) => d.name) });
+      const dimensionFields = [
+        { name: 'zebra.field' },
+        { name: 'alpha.field' },
+        { name: 'beta.field' },
+      ];
+      const metricItem = createMockMetric({ dimensionFields });
       const { container } = render(<OverviewTab metricItem={metricItem} />);
 
       const dimensionsList = container.querySelector(

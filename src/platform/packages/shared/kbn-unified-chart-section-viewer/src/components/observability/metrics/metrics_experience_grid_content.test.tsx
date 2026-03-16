@@ -17,7 +17,7 @@ import type {
   UnifiedHistogramFetchParams,
 } from '@kbn/unified-histogram/types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { ParsedMetricItem, MetricUnit } from '../../../types';
+import type { ParsedMetricItem, MetricUnit, Dimension } from '../../../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { getFetch$Mock, getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -47,7 +47,7 @@ const useMetricsExperienceStateMock =
 
 const usePaginationMock = hooks.usePagination as jest.MockedFunction<typeof hooks.usePagination>;
 
-const dimensions: string[] = ['foo', 'qux'];
+const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 
 const metricItems: ParsedMetricItem[] = [
   {

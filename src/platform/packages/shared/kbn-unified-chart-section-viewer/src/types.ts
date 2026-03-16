@@ -49,7 +49,7 @@ export type MetricUnit =
   | 'count'
   | `{${string}}`; // otel special units of count
 
-export interface MetricsESQLResponseObject {
+export interface MetricsESQLResponse {
   metric_name: string;
   data_stream: string[] | string;
   unit: MetricUnit[] | null;
@@ -64,17 +64,17 @@ export interface ParsedMetricItem {
   units: MetricUnit[];
   metricTypes: MappingTimeSeriesMetricType[];
   fieldTypes: ES_FIELD_TYPES[];
-  dimensionFields: string[];
+  dimensionFields: Dimension[];
 }
 
 export interface ParsedMetricsResult {
   metricItems: ParsedMetricItem[];
-  allDimensions: string[];
+  allDimensions: Dimension[];
 }
 
 export interface MetricsInfoResponse {
   loading: boolean;
   error: Error | null;
   metricItems: ParsedMetricItem[];
-  allDimensions: string[];
+  allDimensions: Dimension[];
 }

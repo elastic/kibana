@@ -65,7 +65,7 @@ describe('MetricsGrid', () => {
       units: ['ms'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.LONG],
-      dimensionFields: ['host.name'],
+      dimensionFields: [{ name: 'host.name' }],
     },
     {
       metricName: 'system.memory.utilization',
@@ -73,7 +73,7 @@ describe('MetricsGrid', () => {
       units: ['ms'],
       metricTypes: ['counter'],
       fieldTypes: [ES_FIELD_TYPES.LONG],
-      dimensionFields: ['host.name'],
+      dimensionFields: [{ name: 'host.name' }],
     },
   ];
 
@@ -279,7 +279,7 @@ describe('MetricsGrid', () => {
           units: ['ms'],
           metricTypes: ['counter'],
           fieldTypes: [ES_FIELD_TYPES.LONG],
-          dimensionFields: ['host.name'],
+          dimensionFields: [{ name: 'host.name' }],
         },
         {
           metricName: 'system.network.utilization',
@@ -287,7 +287,7 @@ describe('MetricsGrid', () => {
           units: ['ms'],
           metricTypes: ['counter'],
           fieldTypes: [ES_FIELD_TYPES.LONG],
-          dimensionFields: ['host.name'],
+          dimensionFields: [{ name: 'host.name' }],
         },
       ];
 

@@ -16,7 +16,13 @@ const mockMetric: ParsedMetricItem = {
   dataStream: 'metrics-*',
   units: ['ms'],
   metricTypes: ['histogram'],
-  dimensionFields: ['host.name', 'container.id', 'host.ip', 'cpu.cores', 'region'],
+  dimensionFields: [
+    { name: 'host.name' },
+    { name: 'container.id' },
+    { name: 'host.ip' },
+    { name: 'cpu.cores' },
+    { name: 'region' },
+  ],
 };
 
 const mockCounterMetric: ParsedMetricItem = {
@@ -310,7 +316,7 @@ TS metrics-*
       dataStream: 'metrics-*',
       units: ['ms'],
       metricTypes: ['histogram'],
-      dimensionFields: ['service-name', 'container-id', 'host-ip'],
+      dimensionFields: [{ name: 'service-name' }, { name: 'container-id' }, { name: 'host-ip' }],
     };
 
     it('should escape field names with hyphens in single dimension', () => {
@@ -359,7 +365,7 @@ TS metrics-*
         dataStream: 'metrics-*',
         units: ['ms'],
         metricTypes: ['histogram'],
-        dimensionFields: ['field`with`ticks'],
+        dimensionFields: [{ name: 'field`with`ticks' }],
       };
 
       const query = createESQLQuery({

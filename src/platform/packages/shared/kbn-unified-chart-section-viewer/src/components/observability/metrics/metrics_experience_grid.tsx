@@ -55,14 +55,17 @@ export const MetricsExperienceGrid = ({
     selectedDimensionNames: selectedDimensions,
   });
 
-  // TODO: simplify the dimensions to a string array
-  const dimensions = allDimensions.map((name) => ({ name }));
   const { filteredMetricItems } = useMetricFieldsFilter({
     metricItems,
     searchTerm,
   });
 
-  useDiscoverFieldForBreakdown(breakdownField, dimensions, selectedDimensions, onDimensionsChange);
+  useDiscoverFieldForBreakdown(
+    breakdownField,
+    allDimensions,
+    selectedDimensions,
+    onDimensionsChange
+  );
 
   const onToolbarDimensionsChange = useCallback(
     (nextSelectedDimensions: Dimension[]) => {
@@ -95,8 +98,7 @@ export const MetricsExperienceGrid = ({
   ]);
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
-    metricItems,
-    dimensions,
+    allDimensions,
     renderToggleActions,
     onDimensionsChange: onToolbarDimensionsChange,
     isLoading: isDiscoverLoading,
