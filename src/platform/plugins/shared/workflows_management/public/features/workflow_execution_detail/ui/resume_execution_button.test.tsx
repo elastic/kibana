@@ -182,5 +182,28 @@ describe('ResumeExecutionButton', () => {
         expect(screen.getByTestId('test-step-modal')).toBeInTheDocument();
       });
     });
+
+    it('disables the button and shows a loading state after successful submit', async () => {
+      renderComponent();
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      capturedOnSubmit!({ stepInputs: {} });
+      await waitFor(() => {
+        expect(screen.getByTestId('provideActionButton')).toBeDisabled();
+      });
+    });
+
+    it('does not disable the button when submit fails', async () => {
+      mockHttpPost.mockRejectedValueOnce(new Error('fail'));
+      renderComponent();
+      fireEvent.click(screen.getByTestId('provideActionButton'));
+      await waitFor(() => expect(capturedOnSubmit).toBeDefined());
+      capturedOnSubmit!({ stepInputs: {} });
+      await waitFor(() => {
+        expect(mockAddError).toHaveBeenCalledTimes(1);
+        // Button must remain enabled so the user can retry
+        expect(screen.getByTestId('provideActionButton')).not.toBeDisabled();
+      });
+    });
   });
 });

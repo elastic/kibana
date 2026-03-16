@@ -32,6 +32,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { clearResumeParam } = useWorkflowUrlState();
   const [isModalOpen, setIsModalOpen] = useState(autoOpen);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Honour autoOpen changes (e.g. when navigated to with ?resume=true)
   useEffect(() => {
@@ -53,6 +54,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
             { defaultMessage: 'Workflow resumed' }
           ),
         });
+        setIsSubmitted(true);
         clearResumeParam();
         closeModal();
       } catch (error) {
@@ -88,7 +90,8 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
               color="warning"
               size="s"
               onClick={openModal}
-              disabled={!canExecuteWorkflow}
+              disabled={!canExecuteWorkflow || isSubmitted}
+              isLoading={isSubmitted}
               data-test-subj="provideActionButton"
             >
               <FormattedMessage

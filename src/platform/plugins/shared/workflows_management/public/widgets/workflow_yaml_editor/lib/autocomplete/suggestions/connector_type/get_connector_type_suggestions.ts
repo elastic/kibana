@@ -18,6 +18,7 @@ import {
   LoopContinueStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
+  WaitForInputStepSchema,
   WaitStepSchema,
   WhileStepSchema,
   WorkflowExecuteAsyncStepSchema,
@@ -267,6 +268,11 @@ function getBuiltInStepTypesFromSchema(): Array<{
       schema: WaitStepSchema,
       description: 'Wait for a specified duration',
       icon: monaco.languages.CompletionItemKind.Constant,
+    },
+    {
+      schema: WaitForInputStepSchema,
+      description: 'Pause execution until external input is provided (human-in-the-loop)',
+      icon: monaco.languages.CompletionItemKind.Event,
     },
     {
       schema: WorkflowExecuteStepSchema,
