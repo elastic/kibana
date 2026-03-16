@@ -28,8 +28,7 @@ export const ResetMonitorModal = ({
       await resetMonitors(configIds);
       kibanaService.toasts.addSuccess({
         title: i18n.translate('xpack.synthetics.resetMonitorModal.success', {
-          defaultMessage:
-            '{count, plural, one {# monitor} other {# monitors}} reset successfully',
+          defaultMessage: '{count, plural, one {# monitor} other {# monitors}} reset successfully',
           values: { count: configIds.length },
         }),
         toastLifeTimeMs: 3000,
@@ -51,8 +50,7 @@ export const ResetMonitorModal = ({
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
       title={i18n.translate('xpack.synthetics.resetMonitorModal.title', {
-        defaultMessage:
-          'Reset {count, number} {count, plural, one {monitor} other {monitors}}?',
+        defaultMessage: 'Reset {count, number} {count, plural, one {monitor} other {monitors}}?',
         values: { count: configIds.length },
       })}
       titleProps={{ id: modalTitleId }}

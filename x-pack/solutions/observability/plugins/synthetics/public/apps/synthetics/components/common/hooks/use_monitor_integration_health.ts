@@ -14,12 +14,8 @@ import {
 } from '../../../state';
 import { ConfigKey, LocationHealthStatusValue } from '../../../../../../common/runtime_types';
 import { fetchMonitorHealthAction, selectMonitorHealth } from '../../../state/monitor_health';
-import {
-  resetMonitorAPI,
-  resetMonitorBulkAPI,
-} from '../../../state/monitor_management/api';
+import { resetMonitorAPI, resetMonitorBulkAPI } from '../../../state/monitor_management/api';
 import { useSyntheticsRefreshContext } from '../../../contexts';
-
 
 export interface MonitorIntegrationStatus {
   configId: string;

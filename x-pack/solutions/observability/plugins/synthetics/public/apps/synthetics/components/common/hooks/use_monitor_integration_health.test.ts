@@ -63,7 +63,7 @@ const unhealthyMonitor = {
   ],
 };
 
-const setupSelectors = (healthData: { monitors: typeof healthyMonitor[]; errors: unknown[] }) => {
+const setupSelectors = (healthData: { monitors: (typeof healthyMonitor)[]; errors: unknown[] }) => {
   (reactRedux.useSelector as jest.Mock).mockImplementation((selector: any) => {
     const fakeState = {
       monitorList: {
@@ -107,9 +107,7 @@ describe('useMonitorIntegrationHealth', () => {
     it('getUnhealthyLocationStatuses returns only unhealthy locations', () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
 
-      const { result } = renderHook(() =>
-        useMonitorIntegrationHealth({ configIds: ['mon-2'] })
-      );
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
 
       const statuses = result.current.getUnhealthyLocationStatuses('mon-2');
       expect(statuses).toHaveLength(1);
@@ -144,9 +142,7 @@ describe('useMonitorIntegrationHealth', () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
       mockedResetMonitorAPI.mockResolvedValue({ id: 'mon-2', reset: true });
 
-      const { result } = renderHook(() =>
-        useMonitorIntegrationHealth({ configIds: ['mon-2'] })
-      );
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
 
       await act(async () => {
         await result.current.resetMonitor('mon-2');
@@ -164,9 +160,7 @@ describe('useMonitorIntegrationHealth', () => {
       setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
       mockedResetMonitorAPI.mockRejectedValue(new Error('Server error'));
 
-      const { result } = renderHook(() =>
-        useMonitorIntegrationHealth({ configIds: ['mon-2'] })
-      );
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
 
       await act(async () => {
         await result.current.resetMonitor('mon-2').catch(() => {});
@@ -183,9 +177,7 @@ describe('useMonitorIntegrationHealth', () => {
         result: [{ id: 'mon-2', reset: true }],
       });
 
-      const { result } = renderHook(() =>
-        useMonitorIntegrationHealth({ configIds: ['mon-2'] })
-      );
+      const { result } = renderHook(() => useMonitorIntegrationHealth({ configIds: ['mon-2'] }));
 
       await act(async () => {
         await result.current.resetMonitors(['mon-2']);
