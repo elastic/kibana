@@ -127,9 +127,7 @@ describe('transformAlertsOut', () => {
   });
 
   it('should default show_all_group_by_instances to false when missing', () => {
-    expect(
-      transformAlertsOut({ slos: [] } as unknown as AlertsEmbeddableState)
-    ).toMatchObject({
+    expect(transformAlertsOut({ slos: [] } as unknown as AlertsEmbeddableState)).toMatchObject({
       show_all_group_by_instances: false,
       slos: [],
     });
