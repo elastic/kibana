@@ -40,6 +40,7 @@ import { createEventLogger } from './create_event_logger';
 import { PLUGIN_ID } from '../common/constants';
 import { registerEventLogProvider } from './register_event_log_provider';
 import { registerRoutes } from './routes/register_routes';
+import { registerPipelineWorkflowSteps } from './lib/attack_discovery/pipeline/workflow_steps';
 import type { CallbackIds } from './services/app_context';
 import { appContextService } from './services/app_context';
 import { removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
@@ -150,6 +151,13 @@ export class ElasticAssistantPlugin
     }
 
     registerRoutes(router, this.logger, this.config, enableDataGeneratorRoutes);
+
+    if (plugins.workflowsExtensions) {
+      registerPipelineWorkflowSteps({
+        workflowsExtensions: plugins.workflowsExtensions,
+        logger: this.logger,
+      });
+    }
 
     // The featureFlags service is not available in the core setup, so we need
     // to wait for the start services to be available to read the feature flags.

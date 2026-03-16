@@ -224,6 +224,21 @@ const createCaseForUnmatched = async ({
   return { casesCreated, alertsAttached, caseIds, alertIdsByCaseId };
 };
 
+const PIPELINE_TO_CASES_TYPE_KEY: Record<string, string> = {
+  ipv4: 'observable-type-ipv4',
+  ipv6: 'observable-type-ipv6',
+  url: 'observable-type-url',
+  hostname: 'observable-type-hostname',
+  file_hash: 'observable-type-file-hash',
+  file_path: 'observable-type-file-path',
+  email: 'observable-type-email',
+  domain: 'observable-type-domain',
+  agent_id: 'observable-type-agent-id',
+};
+
+const toCasesTypeKey = (pipelineKey: string): string =>
+  PIPELINE_TO_CASES_TYPE_KEY[pipelineKey] ?? pipelineKey;
+
 const addObservablesToCases = async ({
   casesClient,
   entities,
@@ -244,7 +259,7 @@ const addObservablesToCases = async ({
 
       if (caseEntities.length > 0) {
         const observables = caseEntities.slice(0, 50).map((e) => ({
-          typeKey: e.typeKey,
+          typeKey: toCasesTypeKey(e.typeKey),
           value: e.value,
           description: `Auto-extracted from alert via pipeline (field: ${e.sourceField})`,
         }));

@@ -73,6 +73,21 @@ const computeTemporalDecay = (updatedAt: string, decayDays: number): number => {
   return Math.max(0.1, 1.0 - daysSinceUpdate / decayDays);
 };
 
+const CASES_TO_PIPELINE_TYPE_KEY: Record<string, ObservableTypeKey> = {
+  'observable-type-ipv4': 'ipv4',
+  'observable-type-ipv6': 'ipv6',
+  'observable-type-url': 'url',
+  'observable-type-hostname': 'hostname',
+  'observable-type-file-hash': 'file_hash',
+  'observable-type-file-path': 'file_path',
+  'observable-type-email': 'email',
+  'observable-type-domain': 'domain',
+  'observable-type-agent-id': 'agent_id',
+};
+
+const normalizeCasesTypeKey = (casesKey: string): string =>
+  CASES_TO_PIPELINE_TYPE_KEY[casesKey] ?? casesKey;
+
 const scoreEntityOverlap = ({
   alertEntities,
   caseObservables,
@@ -86,7 +101,8 @@ const scoreEntityOverlap = ({
 }): { score: number; matchedEntities: Array<{ typeKey: ObservableTypeKey; value: string }> } => {
   const caseObsSet = new Map<string, string>();
   for (const obs of caseObservables) {
-    caseObsSet.set(`${obs.typeKey}::${obs.value.toLowerCase()}`, obs.typeKey);
+    const normalizedKey = normalizeCasesTypeKey(obs.typeKey);
+    caseObsSet.set(`${normalizedKey}::${obs.value.toLowerCase()}`, normalizedKey);
   }
 
   const matchedEntities: Array<{ typeKey: ObservableTypeKey; value: string }> = [];
