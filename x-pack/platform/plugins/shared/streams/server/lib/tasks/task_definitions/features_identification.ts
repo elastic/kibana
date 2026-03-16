@@ -20,6 +20,7 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
 import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
+import { resolveConnectorId } from '../../../routes/utils/resolve_connector_id';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
@@ -29,7 +30,6 @@ import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_f
 import type { StreamsFeaturesIdentifiedProps } from '../../telemetry';
 
 export interface FeaturesIdentificationTaskParams {
-  connectorId: string;
   start: number;
   end: number;
   streamName: string;
@@ -53,7 +53,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               }
 
               const taskStart = Date.now();
-              const { connectorId, start, end, streamName, _task } = runContext.taskInstance
+              const { start, end, streamName, _task } = runContext.taskInstance
                 .params as TaskParams<FeaturesIdentificationTaskParams>;
 
               const telemetryProps: StreamsFeaturesIdentifiedProps = {
@@ -76,9 +76,20 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 streamsClient,
                 inferenceClient,
                 soClient,
+                modelSettingsClient,
+                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
+
+              const taskLogger = taskContext.logger.get('features_identification');
+              const settings = await modelSettingsClient.getSettings();
+              const connectorId = await resolveConnectorId({
+                connectorId: settings.connectorIdKnowledgeIndicatorExtraction,
+                uiSettingsClient,
+                logger: taskLogger,
+              });
+              taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
               try {
                 const [stream, { featurePromptOverride }] = await Promise.all([
@@ -183,7 +194,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(
                   _task,
-                  { connectorId, start, end, streamName },
+                  { start, end, streamName },
                   { features }
                 );
 
@@ -232,7 +243,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 await taskClient.fail<FeaturesIdentificationTaskParams>(
                   _task,
-                  { connectorId, start, end, streamName },
+                  { start, end, streamName },
                   errorMessage
                 );
 
