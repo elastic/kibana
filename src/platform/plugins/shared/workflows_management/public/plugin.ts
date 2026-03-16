@@ -91,6 +91,7 @@ export class WorkflowsPlugin
         // Load application bundle
         const { renderApp } = await import('./application');
         const services = await this.createWorkflowsStartServices(core);
+
         return renderApp(services, params);
       },
     });
@@ -131,6 +132,9 @@ export class WorkflowsPlugin
       storage: new Storage(localStorage),
       workflowsManagement: { telemetry: this.telemetryService.getClient() },
     };
+
+    // Make sure the workflows extensions registries are ready before using the services
+    await depsStart.workflowsExtensions.isReady();
 
     return {
       ...coreStart,

@@ -69,6 +69,17 @@ export class WorkflowEditorPage {
   }
 
   /**
+   * Resolves the Monaco `data-uri` attribute from an editor container locator.
+   */
+  private async getEditorUri(editor: Locator): Promise<string> {
+    const uri = await editor.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
+    if (!uri) {
+      throw new Error('Editor data-uri not found');
+    }
+    return uri;
+  }
+
+  /**
    * Set the value of the main workflow YAML editor
    */
   async setYamlEditorValue(value: string): Promise<void> {
@@ -80,10 +91,7 @@ export class WorkflowEditorPage {
    * Uses the Monaco model API directly for reliable, non-flaky value setting.
    */
   async setEditorValue(editor: Locator, value: string): Promise<void> {
-    const uri = await editor.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
-    if (!uri) {
-      throw new Error('Editor data-uri not found');
-    }
+    const uri = await this.getEditorUri(editor);
     await this.page.evaluate(
       ({ modelUri, editorValue }) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
@@ -107,11 +115,7 @@ export class WorkflowEditorPage {
    * editor and scroll it into view.
    */
   async setCursorToText(searchText: string, occurrence: number = 1): Promise<void> {
-    const uri = await this.yamlEditor.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
-    if (!uri) {
-      throw new Error('Editor data-uri not found');
-    }
-
+    const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate(
       ({ modelUri, text, occ }) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- global Monaco env
@@ -245,10 +249,7 @@ export class WorkflowEditorPage {
     await this.page.waitForTimeout(1000);
 
     // Use Monaco API to find the text and position cursor right after it
-    const uri = await this.yamlEditor.locator('.monaco-editor[data-uri]').getAttribute('data-uri');
-    if (!uri) {
-      throw new Error('Editor data-uri not found');
-    }
+    const uri = await this.getEditorUri(this.yamlEditor);
     await this.page.evaluate(
       ({ modelUri, text }) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monaco environment is global, but we don't have a type for it
@@ -297,5 +298,66 @@ export class WorkflowEditorPage {
   getCurrentMarkers(testSubjId: string = 'kibanaCodeEditor'): Locator {
     const selector = `[data-test-subj="${testSubjId}"] .cdr.squiggly-error`;
     return this.page.locator(selector);
+  }
+
+  /**
+   * Returns the range of line numbers currently visible in the YAML editor viewport.
+   */
+  async getEditorVisibleLineRange(): Promise<{ startLine: number; endLine: number }> {
+    const uri = await this.getEditorUri(this.yamlEditor);
+    return this.page.evaluate((modelUri) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- global Monaco env
+      const monacoEnv = (window as any).MonacoEnvironment;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+
+      const editors = monacoEnv.monaco.editor.getEditors();
+      const editorInstance = editors.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Monaco editor instances are untyped in the browser context
+        (e: any) => e.getModel()?.uri?.toString() === modelUri
+      );
+      if (!editorInstance) {
+        throw new Error('No editor instance found for the YAML model');
+      }
+
+      const ranges = editorInstance.getVisibleRanges();
+      if (ranges.length === 0) {
+        throw new Error('Editor returned no visible ranges');
+      }
+      return {
+        startLine: ranges[0].startLineNumber,
+        endLine: ranges[ranges.length - 1].endLineNumber,
+      };
+    }, uri);
+  }
+
+  /**
+   * Returns the line number where `searchText` first appears in the YAML editor.
+   */
+  async getLineOfText(searchText: string): Promise<number> {
+    const uri = await this.getEditorUri(this.yamlEditor);
+    return this.page.evaluate(
+      ({ modelUri, text }) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- global Monaco env
+        const monacoEnv = (window as any).MonacoEnvironment;
+        if (!monacoEnv?.monaco?.editor) {
+          throw new Error('MonacoEnvironment.monaco.editor is not available');
+        }
+
+        const model = monacoEnv.monaco.editor.getModel(modelUri);
+        if (!model) {
+          throw new Error('Editor model not found');
+        }
+
+        const content = model.getValue();
+        const offset = content.indexOf(text);
+        if (offset === -1) {
+          throw new Error(`Text "${text}" not found in editor`);
+        }
+        return model.getPositionAt(offset).lineNumber;
+      },
+      { modelUri: uri, text: searchText }
+    );
   }
 }

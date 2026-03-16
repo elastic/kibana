@@ -6,12 +6,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
   CaseResponseProperties as CaseResponsePropertiesSchema,
   UpdateCaseRequest as UpdateCaseRequestSchema,
 } from '../../bundled-types.gen';
 import { CasesStepBaseConfigSchema } from './shared';
+import * as i18n from '../translations';
 
 export const UpdateCaseStepTypeId = 'cases.updateCase';
 
@@ -42,6 +44,24 @@ export const updateCaseStepCommonDefinition: CommonStepDefinition<
   UpdateCaseStepOutputSchema
 > = {
   id: UpdateCaseStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.UPDATE_CASE_STEP_LABEL,
+  description: i18n.UPDATE_CASE_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.UPDATE_CASE_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Update case status and severity
+\`\`\`yaml
+- name: update_case
+  type: ${UpdateCaseStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    updates:
+      status: "in-progress"
+      severity: "high"
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

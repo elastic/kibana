@@ -24,8 +24,25 @@ describe('useAttacksListData', () => {
   const mockAggregations = {
     attacks: {
       buckets: [
-        { key: 'attack-1', doc_count: 10, attackRelatedAlerts: { doc_count: 5 } },
-        { key: 'attack-2', doc_count: 8, attackRelatedAlerts: { doc_count: 3 } },
+        {
+          key: 'attack-1',
+          doc_count: 10,
+          attackRelatedAlerts: { doc_count: 5 },
+          alertsSeverities: {
+            buckets: [
+              { key: 'critical', doc_count: 2 },
+              { key: 'high', doc_count: 3 },
+            ],
+          },
+        },
+        {
+          key: 'attack-2',
+          doc_count: 8,
+          attackRelatedAlerts: { doc_count: 3 },
+          alertsSeverities: {
+            buckets: [{ key: 'low', doc_count: 3 }],
+          },
+        },
       ],
     },
     total_attacks: {
@@ -72,11 +89,13 @@ describe('useAttacksListData', () => {
       id: 'attack-1',
       name: 'Title attack-1',
       alertsCount: 5,
+      severityCount: { Critical: 2, High: 3 },
     });
     expect(result.current.items[1]).toEqual({
       id: 'attack-2',
       name: 'Title attack-2',
       alertsCount: 3,
+      severityCount: { Low: 3 },
     });
     expect(result.current.total).toBe(20);
     expect(result.current.isLoading).toBe(false);
