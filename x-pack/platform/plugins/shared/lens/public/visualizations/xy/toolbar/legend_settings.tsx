@@ -124,11 +124,11 @@ export const XyLegendSettings = ({
           legend: { ...state.legend, maxLines: val },
         });
       }}
-      widthLimit={state?.legend.widthLimit}
-      onWidthLimitChange={(val) => {
+      listLayoutMaxWidth={state?.legend.listLayoutMaxWidth}
+      onListLayoutMaxWidthChange={(val) => {
         setState({
           ...state,
-          legend: { ...state.legend, widthLimit: val },
+          legend: { ...state.legend, listLayoutMaxWidth: val },
         });
       }}
       shouldTruncate={state?.legend.shouldTruncate ?? defaultParamsFromDatasources}

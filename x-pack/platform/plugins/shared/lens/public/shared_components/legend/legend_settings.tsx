@@ -101,11 +101,11 @@ export interface LegendSettingsProps<LegendStats extends LegendValue = XYLegendV
   /**
    * Sets the max label width in pixels (list layout only)
    */
-  widthLimit?: number;
+  listLayoutMaxWidth?: number;
   /**
-   * Callback on width limit option change
+   * Callback on max width limit option change
    */
-  onWidthLimitChange?: (value: number) => void;
+  onListLayoutMaxWidthChange?: (value: number) => void;
   /**
    * Defines if the legend items will be truncated or not
    */
@@ -224,7 +224,7 @@ export const WidthLimitInput = ({
 }) => {
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange: setValue });
   const pixelLimitLabel = i18n.translate('xpack.lens.shared.widthLimitLabel', {
-    defaultMessage: 'Pixel limit',
+    defaultMessage: 'Width limit',
   });
   return (
     <EuiFieldNumber
@@ -335,8 +335,8 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
   onLegendStatsChange = noop,
   maxLines,
   onMaxLinesChange = noop,
-  widthLimit,
-  onWidthLimitChange = noop,
+  listLayoutMaxWidth,
+  onListLayoutMaxWidthChange = noop,
   shouldTruncate,
   onTruncateLegendChange = noop,
   legendSize,
@@ -545,8 +545,8 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
               {usesWidthLimitTruncation ? (
                 <WidthLimitInput
                   disabled={!shouldTruncate}
-                  value={widthLimit ?? DEFAULT_TRUNCATE_WIDTH_LIMIT}
-                  setValue={onWidthLimitChange}
+                  value={listLayoutMaxWidth ?? DEFAULT_TRUNCATE_WIDTH_LIMIT}
+                  setValue={onListLayoutMaxWidthChange}
                 />
               ) : (
                 <MaxLinesInput
