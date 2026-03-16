@@ -24,7 +24,11 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import {
+  type Datatable,
+  buildExpression,
+  buildExpressionFunction,
+} from '@kbn/expressions-plugin/common';
 import { getSortingCriteria } from '@kbn/sort-predicates';
 import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -77,6 +81,68 @@ import {
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
 });
+
+/**
+ * When a categorical column carries a value-based palette (with stops) but no colorMapping,
+ * strip the palette and fall back to the default categorical color mapping.
+ * When it already has a colorMapping, keep it and just drop the value-based palette.
+ */
+function reconcileCategoricalColumn(column: ColumnState): ColumnState {
+  const { palette, colorMapping } = column;
+  const hasValueBasedPalette = Boolean(palette?.params?.stops?.length);
+  const needsTransition = hasValueBasedPalette || (palette != null && colorMapping != null);
+  if (!needsTransition) return column;
+
+  return {
+    ...column,
+    palette: undefined,
+    colorMapping: colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG,
+  };
+}
+
+/**
+ * When a numeric column carries a colorMapping, strip it and ensure a valid value-based palette.
+ * Also fixes palettes incompatible with numeric coloring:
+ *  - categorical-only palettes (canDynamicColoring=false) are replaced with the default
+ *  - legacy palettes without stops get stops computed from the data bounds
+ */
+function reconcileNumericColumn(
+  column: ColumnState,
+  currentData: Datatable | undefined,
+  stateColumns: ColumnState[],
+  paletteMap: Map<string, { canDynamicColoring?: boolean }>,
+  paletteSvc: PaletteRegistry
+): ColumnState {
+  const { palette, colorMapping } = column;
+
+  if (colorMapping) {
+    const dataBounds =
+      getDataBoundsForAccessor(column.columnId, currentData, stateColumns) ??
+      getFallbackDataBounds();
+    return {
+      ...column,
+      colorMapping: undefined,
+      palette: palette ?? getColorByValuePalette(paletteSvc, dataBounds),
+    };
+  }
+
+  if (!palette) return column;
+
+  const paletteEntry = paletteMap.get(palette.name);
+  if (!paletteEntry) return column;
+
+  const hasStops = Boolean(palette.params?.stops?.length);
+  const needsStopsComputed = !paletteEntry.canDynamicColoring || !hasStops;
+  if (!needsStopsComputed) return column;
+
+  const dataBounds =
+    getDataBoundsForAccessor(column.columnId, currentData, stateColumns) ?? getFallbackDataBounds();
+  const basePalette = paletteEntry.canDynamicColoring ? palette : undefined;
+  return {
+    ...column,
+    palette: getColorByValuePalette(paletteSvc, dataBounds, basePalette),
+  };
+}
 
 export const getDatatableVisualization = ({
   paletteService,
@@ -144,6 +210,8 @@ export const getDatatableVisualization = ({
 
   onDatasourceUpdate(state, frame) {
     const datasource = frame?.datasourceLayers?.[state.layerId];
+    const currentData =
+      frame?.activeData?.[state.layerId] ?? frame?.activeData?.[DatatableInspectorTables.Default];
     const paletteMap = new Map(
       paletteService
         .getAll()
@@ -153,67 +221,21 @@ export const getDatatableVisualization = ({
 
     // Normalize column color configuration when the underlying column type changes
     const columns = state.columns.map((column) => {
-      const newColumn = { ...column };
-      const accessor = newColumn.columnId;
-      const currentData =
-        frame?.activeData?.[state.layerId] ?? frame?.activeData?.[DatatableInspectorTables.Default];
+      const { columnId, palette, colorMapping } = column;
+      const hasColorConfig = palette != null || colorMapping != null;
+      if (!hasColorConfig) return column;
 
-      const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
+      const { isNumeric, isCategory: isCategorical } = getAccessorType(datasource, columnId);
+      const isColorable = isNumeric || isCategorical;
+      if (!isColorable) return column;
 
-      const isColorable = isNumeric || isBucketable;
-
-      // If there is no color config or the column is not colorable, return the column as is
-      if ((!newColumn.palette && !newColumn.colorMapping) || !isColorable) {
-        return newColumn;
+      if (isCategorical) {
+        return reconcileCategoricalColumn(column);
       }
-
-      const showColorByTerms = isBucketable;
-
-      // Numeric column carrying term-based colorMapping → switch to value-based palette
-      if (!showColorByTerms && newColumn.colorMapping) {
-        delete newColumn.colorMapping;
-        if (!newColumn.palette) {
-          const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
-          newColumn.palette = getColorByValuePalette(
-            paletteService,
-            dataBounds ?? getFallbackDataBounds()
-          );
-        }
-      }
-
-      // Bucket column carrying value-based palette → switch to term-based colorMapping
-      if (showColorByTerms && newColumn.palette) {
-        const isValueBasedPalette = hasPaletteStops(newColumn.palette);
-        if (isValueBasedPalette || newColumn.colorMapping) {
-          delete newColumn.palette;
-          if (!newColumn.colorMapping) {
-            newColumn.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
-          }
-        }
-      }
-
-      // Numeric column with categorical-only palette (canDynamicColoring=false) or stop-less (legacy color by terms) palette → recompute proper stops
-      const paletteEntry = paletteMap.get(newColumn.palette?.name ?? '');
-      if (paletteEntry && !showColorByTerms) {
-        const hasStops = hasPaletteStops(newColumn.palette);
-        if (!paletteEntry.canDynamicColoring || !hasStops) {
-          const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
-          const palette = getColorByValuePalette(
-            paletteService,
-            dataBounds ?? getFallbackDataBounds(),
-            paletteEntry.canDynamicColoring ? newColumn.palette : undefined
-          );
-          return { ...newColumn, palette };
-        }
-      }
-
-      return newColumn;
+      return reconcileNumericColumn(column, currentData, state.columns, paletteMap, paletteService);
     });
 
-    return {
-      ...state,
-      columns,
-    };
+    return { ...state, columns };
   },
 
   getSuggestions({
