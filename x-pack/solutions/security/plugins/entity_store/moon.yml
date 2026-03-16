@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/entity-store'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/core-analysis'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/entity-store'
+  title: '@kbn/entity-store'
   description: Moon project for @kbn/entity-store
   channel: ''
   owner: '@elastic/core-analysis'
-  metadata:
-    sourceRoot: x-pack/solutions/security/plugins/entity_store
+  sourceRoot: x-pack/solutions/security/plugins/entity_store
 dependsOn:
   - '@kbn/core'
   - '@kbn/core-plugins-server'
@@ -39,8 +38,12 @@ dependsOn:
   - '@kbn/scout-security'
   - '@kbn/core-saved-objects-server'
   - '@kbn/std'
+  - '@kbn/object-utils'
   - '@kbn/es-query'
   - '@kbn/security-plugin'
+  - '@kbn/streamlang'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/tracing-utils'
 tags:
   - plugin
   - prod
@@ -58,14 +61,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

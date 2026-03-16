@@ -236,6 +236,64 @@ describe('LensVisService suggestions', () => {
     expect(lensVis.currentSuggestionContext?.suggestion).not.toBeDefined();
   });
 
+  test('should not append histogram for METRICS_INFO command queries', async () => {
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'TS metrics-* | METRICS_INFO | LIMIT 100' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'var0',
+          name: 'var0',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      isPlainRecord: true,
+      allSuggestions: [],
+      isTransformationalESQL: false,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(UnifiedHistogramSuggestionType.unsupported);
+    expect(lensVis.currentSuggestionContext?.suggestion).not.toBeDefined();
+  });
+
+  test('should not append histogram for TS_INFO command queries', async () => {
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'TS metrics-* | TS_INFO | LIMIT 100' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'var0',
+          name: 'var0',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      isPlainRecord: true,
+      allSuggestions: [],
+      isTransformationalESQL: false,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(UnifiedHistogramSuggestionType.unsupported);
+    expect(lensVis.currentSuggestionContext?.suggestion).not.toBeDefined();
+  });
+
   test('should return histogramSuggestion if no suggestions returned by the api with the breakdown field if it is given', async () => {
     const breakdown = convertDatatableColumnToDataViewFieldSpec({
       name: 'var0',

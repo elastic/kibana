@@ -19,8 +19,11 @@ import {
   DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
 } from '../../../application/gaps/types/scheduler';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { backfillInitiator } from '../../../../common/constants';
-import { gapStatus } from '../../../../common/constants';
+import {
+  backfillInitiator,
+  gapStatus,
+  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
+} from '../../../../common/constants';
 import * as gapAutoFillSchedulerTask from './gap_auto_fill_scheduler_task';
 import { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import { rulesClientMock } from '../../../rules_client.mock';
@@ -1004,6 +1007,50 @@ describe('Gap Auto Fill Scheduler Task', () => {
 
         expect(result).toEqual({ state: {}, shouldDeleteTask: true });
         expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('initialization failed'));
+      });
+    });
+
+    describe('90-day lookback boundary', () => {
+      it('should apply a safety margin so range.start is strictly within the 90-day window', async () => {
+        mockSavedObjectsRepository.get.mockResolvedValue({
+          id: mockConfigId,
+          type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
+          attributes: { ...mockSchedulerConfig, gapFillRange: 'now-90d' },
+          references: [],
+        });
+
+        const mockRuleIds = ['rule-1'];
+        (rulesClient.getRuleIdsWithGaps as jest.Mock).mockResolvedValue({
+          ruleIds: mockRuleIds,
+        });
+        stubRulesFindOnce(mockRuleIds);
+
+        const gap = buildGap(
+          'rule-1',
+          '2024-10-05T00:00:00.000Z',
+          '2024-10-06T00:00:00.000Z',
+          gapStatus.UNFILLED
+        );
+        stubFindGapsPageOnce([gap]);
+
+        mockedProcessGapsBatch.processGapsBatch.mockResolvedValue({
+          processedGapsCount: 1,
+          hasErrors: false,
+          results: [
+            { ruleId: 'rule-1', processedGaps: 1, status: GapFillSchedulePerRuleStatus.SUCCESS },
+          ],
+          truncatedRuleIds: [],
+        });
+
+        await taskRunner.run();
+
+        expect(mockedProcessGapsBatch.processGapsBatch).toHaveBeenCalledTimes(1);
+        const callArgs = mockedProcessGapsBatch.processGapsBatch.mock.calls[0][1];
+        const rangeStartMs = new Date(callArgs.range.start).getTime();
+        const exactlyNinetyDaysAgoMs =
+          new Date('2025-01-01T00:00:00.000Z').getTime() - MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS;
+
+        expect(rangeStartMs).toBeGreaterThan(exactlyNinetyDaysAgoMs);
       });
     });
   });

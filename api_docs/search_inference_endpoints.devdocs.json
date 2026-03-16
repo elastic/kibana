@@ -15,7 +15,7 @@
       "label": "SearchInferenceEndpointsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/search_inference_endpoints/public/types.ts",
-      "lineNumber": 25,
+      "lineNumber": 26,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -31,7 +31,7 @@
       "label": "SearchInferenceEndpointsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/search_inference_endpoints/public/types.ts",
-      "lineNumber": 27,
+      "lineNumber": 28,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -43,7 +43,297 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "searchInferenceEndpoints",
+        "id": "def-server.InferenceFeatureConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceFeatureConfig",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "searchInferenceEndpoints",
+            "id": "def-server.InferenceFeatureConfig.featureId",
+            "type": "string",
+            "tags": [],
+            "label": "featureId",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchInferenceEndpoints",
+            "id": "def-server.InferenceFeatureConfig.parentFeatureId",
+            "type": "string",
+            "tags": [],
+            "label": "parentFeatureId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchInferenceEndpoints",
+            "id": "def-server.InferenceFeatureConfig.featureName",
+            "type": "string",
+            "tags": [],
+            "label": "featureName",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchInferenceEndpoints",
+            "id": "def-server.InferenceFeatureConfig.featureDescription",
+            "type": "string",
+            "tags": [],
+            "label": "featureDescription",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchInferenceEndpoints",
+            "id": "def-server.InferenceFeatureConfig.taskType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "taskType",
+            "description": [],
+            "signature": [
+              "\"completion\" | \"sparse_embedding\" | \"text_embedding\" | \"rerank\" | \"chat_completion\""
+            ],
+            "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchInferenceEndpoints",
+            "id": "def-server.InferenceFeatureConfig.maxNumberOfEndpoints",
+            "type": "number",
+            "tags": [],
+            "label": "maxNumberOfEndpoints",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchInferenceEndpoints",
+            "id": "def-server.InferenceFeatureConfig.recommendedEndpoints",
+            "type": "Array",
+            "tags": [],
+            "label": "recommendedEndpoints",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchInferenceEndpoints",
+        "id": "def-server.InferenceFeatureRegistryContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceFeatureRegistryContract",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "searchInferenceEndpoints",
+            "id": "def-server.InferenceFeatureRegistryContract.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [],
+            "signature": [
+              "(feature: ",
+              {
+                "pluginId": "searchInferenceEndpoints",
+                "scope": "server",
+                "docId": "kibSearchInferenceEndpointsPluginApi",
+                "section": "def-server.InferenceFeatureConfig",
+                "text": "InferenceFeatureConfig"
+              },
+              ") => ",
+              "RegisterResult"
+            ],
+            "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "searchInferenceEndpoints",
+                "id": "def-server.InferenceFeatureRegistryContract.register.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "feature",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "searchInferenceEndpoints",
+                    "scope": "server",
+                    "docId": "kibSearchInferenceEndpointsPluginApi",
+                    "section": "def-server.InferenceFeatureConfig",
+                    "text": "InferenceFeatureConfig"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+                "lineNumber": 27,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchInferenceEndpoints",
+        "id": "def-server.InferenceFeatureRegistryStartContract",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceFeatureRegistryStartContract",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "searchInferenceEndpoints",
+            "scope": "server",
+            "docId": "kibSearchInferenceEndpointsPluginApi",
+            "section": "def-server.InferenceFeatureRegistryStartContract",
+            "text": "InferenceFeatureRegistryStartContract"
+          },
+          " extends ",
+          {
+            "pluginId": "searchInferenceEndpoints",
+            "scope": "server",
+            "docId": "kibSearchInferenceEndpointsPluginApi",
+            "section": "def-server.InferenceFeatureRegistryContract",
+            "text": "InferenceFeatureRegistryContract"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "searchInferenceEndpoints",
+            "id": "def-server.InferenceFeatureRegistryStartContract.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "searchInferenceEndpoints",
+                "scope": "server",
+                "docId": "kibSearchInferenceEndpointsPluginApi",
+                "section": "def-server.InferenceFeatureConfig",
+                "text": "InferenceFeatureConfig"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "searchInferenceEndpoints",
+            "id": "def-server.InferenceFeatureRegistryStartContract.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(featureId: string) => ",
+              {
+                "pluginId": "searchInferenceEndpoints",
+                "scope": "server",
+                "docId": "kibSearchInferenceEndpointsPluginApi",
+                "section": "def-server.InferenceFeatureConfig",
+                "text": "InferenceFeatureConfig"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "searchInferenceEndpoints",
+                "id": "def-server.InferenceFeatureRegistryStartContract.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "featureId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+                "lineNumber": 32,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
@@ -55,11 +345,34 @@
       "label": "SearchInferenceEndpointsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-      "lineNumber": 12,
+      "lineNumber": 35,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "searchInferenceEndpoints",
+          "id": "def-server.SearchInferenceEndpointsPluginSetup.features",
+          "type": "Object",
+          "tags": [],
+          "label": "features",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "searchInferenceEndpoints",
+              "scope": "server",
+              "docId": "kibSearchInferenceEndpointsPluginApi",
+              "section": "def-server.InferenceFeatureRegistryContract",
+              "text": "InferenceFeatureRegistryContract"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+          "lineNumber": 36,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -71,11 +384,34 @@
       "label": "SearchInferenceEndpointsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
-      "lineNumber": 14,
+      "lineNumber": 39,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "searchInferenceEndpoints",
+          "id": "def-server.SearchInferenceEndpointsPluginStart.features",
+          "type": "Object",
+          "tags": [],
+          "label": "features",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "searchInferenceEndpoints",
+              "scope": "server",
+              "docId": "kibSearchInferenceEndpointsPluginApi",
+              "section": "def-server.InferenceFeatureRegistryStartContract",
+              "text": "InferenceFeatureRegistryStartContract"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/types.ts",
+          "lineNumber": 40,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

@@ -10,8 +10,11 @@ import { type UseEuiTheme } from '@elastic/eui';
 
 export const GroupPanelStyle = ({ euiTheme }: UseEuiTheme) => css`
   .euiAccordion__triggerWrapper {
-    background-color: ${euiTheme.colors.backgroundBaseSubdued};
     border-bottom: ${euiTheme.border.thin};
     padding-left: ${euiTheme.size.s};
+  }
+
+  &[data-is-open='false'] .euiAccordion__triggerWrapper {
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
   }
 `;

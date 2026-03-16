@@ -12,7 +12,13 @@ import { z as z4 } from '@kbn/zod/v4';
 import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { PassThroughAny as PassThroughAnyV4 } from '@kbn/zod-helpers/v4';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
-import { convert, convertPathParameters, convertQuery, resetDefsCounter } from './lib';
+import {
+  convert,
+  convertPathParameters,
+  convertQuery,
+  registerZodV4Component,
+  resetDefsCounter,
+} from './lib';
 
 import { createLargeSchema, createLargeSchemaV4 } from './lib.test.util';
 
@@ -579,6 +585,82 @@ describe('zod v4', () => {
         query: [],
         shared: {},
       });
+    });
+  });
+
+  describe('registerZodV4Component', () => {
+    beforeEach(() => resetDefsCounter());
+
+    test('recursive schema: stable name used in $defs and $ref', () => {
+      const condition: z4.ZodType = z4.lazy(() =>
+        z4.union([
+          z4.object({ field: z4.string(), eq: z4.string() }),
+          z4.object({ and: z4.array(condition) }),
+          z4.object({ or: z4.array(condition) }),
+        ])
+      );
+      registerZodV4Component(condition, 'Condition');
+
+      const body = z4.object({ condition, name: z4.string() });
+      const result = convert(body as any);
+
+      // components/schemas should use the stable name, not an auto-generated one
+      expect(result.shared).toHaveProperty('Condition');
+      expect(Object.keys(result.shared).some((k) => k.startsWith('_zod_v4_'))).toBe(false);
+
+      // the body schema should reference the stable name
+      expect(result.schema).toMatchObject({
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          condition: { $ref: '#/components/schemas/Condition' },
+        },
+      });
+
+      // no COMPONENT_ID_MARKER should leak into the output
+      const outputStr = JSON.stringify(result);
+      expect(outputStr).not.toContain('x-kbn-oas-component-id');
+    });
+
+    test('non-recursive schema: stable name used when schema is inlined (single use)', () => {
+      const address = z4.object({ street: z4.string(), city: z4.string() });
+      registerZodV4Component(address, 'Address');
+
+      const body = z4.object({ address, name: z4.string() });
+      const result = convert(body as any);
+
+      // Address should be extracted to shared under the stable name
+      expect(result.shared).toHaveProperty('Address');
+      expect(result.shared.Address).toMatchObject({
+        type: 'object',
+        properties: {
+          street: { type: 'string' },
+          city: { type: 'string' },
+        },
+      });
+
+      // the body schema should reference the stable name
+      expect(result.schema).toMatchObject({
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          address: { $ref: '#/components/schemas/Address' },
+        },
+      });
+
+      // no COMPONENT_ID_MARKER should leak into the output
+      const outputStr = JSON.stringify(result);
+      expect(outputStr).not.toContain('x-kbn-oas-component-id');
+    });
+
+    test('registered schema passed directly to convert() produces $ref', () => {
+      const tag = z4.object({ id: z4.string(), label: z4.string() });
+      registerZodV4Component(tag, 'Tag');
+
+      const result = convert(tag as any);
+
+      expect(result.shared).toHaveProperty('Tag');
+      expect(result.schema).toEqual({ $ref: '#/components/schemas/Tag' });
     });
   });
 });

@@ -56,18 +56,19 @@ interface FeatureExtractionTaskOutput {
   traceId?: string | null;
 }
 
-interface CodeEvaluatorParams {
-  input: Record<string, unknown>;
-  output: FeatureExtractionTaskOutput;
-  expected: {
-    min_features?: number;
-    max_features?: number;
-    max_confidence?: number;
-    required_types?: ValidFeatureType[];
-    forbidden_types?: ValidFeatureType[];
-  };
-  metadata: Record<string, unknown> | null | undefined;
-}
+type FeatureExtractionOutput = BaseFeature[] | FeatureExtractionTaskOutput;
+
+type FeatureExtractionEvaluator = Evaluator<
+  FeatureExtractionEvaluationExample,
+  FeatureExtractionOutput
+>;
+
+const getFeaturesFromOutput = (output: FeatureExtractionOutput | undefined): BaseFeature[] => {
+  if (!output) {
+    return [];
+  }
+  return Array.isArray(output) ? output : output.features ?? [];
+};
 
 /**
  * Validates that every feature's `type` is one of the valid feature types.
@@ -77,8 +78,8 @@ interface CodeEvaluatorParams {
 const typeValidationEvaluator = {
   name: 'type_validation',
   kind: 'CODE' as const,
-  evaluate: async ({ output }: CodeEvaluatorParams) => {
-    const features = output?.features ?? [];
+  evaluate: async ({ output }) => {
+    const features = getFeaturesFromOutput(output);
     if (features.length === 0) {
       return { score: 1, explanation: 'No features to validate (vacuously valid)' };
     }
@@ -103,7 +104,7 @@ const typeValidationEvaluator = {
       },
     };
   },
-};
+} satisfies FeatureExtractionEvaluator;
 
 /**
  * Parses a `field.path=value` evidence string into key-value pairs.
@@ -204,16 +205,20 @@ function isEvidenceGrounded(evidence: string, documents: Array<Record<string, un
 const evidenceGroundingEvaluator = {
   name: 'evidence_grounding',
   kind: 'CODE' as const,
-  evaluate: async ({ input, output }: CodeEvaluatorParams) => {
-    const features = output?.features ?? [];
-    const rawDocs = Array.isArray(input.sample_documents)
-      ? (input.sample_documents as Array<Record<string, unknown>>)
-      : [];
+  evaluate: async ({ input, output }) => {
+    const features = getFeaturesFromOutput(output);
+    const rawDocs: Array<Record<string, unknown>> = input.sample_documents.map((hit) => ({
+      _id: hit._id,
+      _source: hit._source,
+    }));
 
     const docsById = new Map<string, Record<string, unknown>>();
     const documents = rawDocs.map((doc) => {
-      const id = doc._id as string | undefined;
-      const source = doc._source as Record<string, unknown> | undefined;
+      const id = typeof doc._id === 'string' ? doc._id : undefined;
+      const source =
+        doc._source != null && typeof doc._source === 'object'
+          ? (doc._source as Record<string, unknown>)
+          : undefined;
       const resolved = source ?? doc;
       if (id) {
         docsById.set(id, resolved);
@@ -310,7 +315,7 @@ const evidenceGroundingEvaluator = {
       },
     };
   },
-};
+} satisfies FeatureExtractionEvaluator;
 
 /**
  * If min_features or max_features is specified in expected output,
@@ -319,8 +324,8 @@ const evidenceGroundingEvaluator = {
 const featureCountEvaluator = {
   name: 'feature_count',
   kind: 'CODE' as const,
-  evaluate: async ({ output, expected }: CodeEvaluatorParams) => {
-    const count = output?.features?.length ?? 0;
+  evaluate: async ({ output, expected }) => {
+    const count = getFeaturesFromOutput(output).length;
     const { min_features = -Infinity, max_features = Infinity } = expected;
 
     const issues: string[] = [];
@@ -342,7 +347,7 @@ const featureCountEvaluator = {
       details: { count, min_features, max_features },
     };
   },
-};
+} satisfies FeatureExtractionEvaluator;
 
 /**
  * If max_confidence is specified, verifies no feature exceeds it.
@@ -350,10 +355,10 @@ const featureCountEvaluator = {
 const confidenceBoundsEvaluator = {
   name: 'confidence_bounds',
   kind: 'CODE' as const,
-  evaluate: async ({ output, expected }: CodeEvaluatorParams) => {
+  evaluate: async ({ output, expected }) => {
     const { max_confidence = 100 } = expected;
 
-    const features = output?.features ?? [];
+    const features = getFeaturesFromOutput(output);
     if (features.length === 0) {
       return {
         score: 1,
@@ -379,7 +384,7 @@ const confidenceBoundsEvaluator = {
       },
     };
   },
-};
+} satisfies FeatureExtractionEvaluator;
 
 /**
  * If required_types or forbidden_types is specified, checks feature types accordingly.
@@ -387,14 +392,14 @@ const confidenceBoundsEvaluator = {
 const typeAssertionsEvaluator = {
   name: 'type_assertions',
   kind: 'CODE' as const,
-  evaluate: async ({ output, expected }: CodeEvaluatorParams) => {
+  evaluate: async ({ output, expected }) => {
     const { required_types, forbidden_types } = expected;
 
     if (!required_types?.length && !forbidden_types?.length) {
       return { score: 1, explanation: 'No type assertions specified — skipping' };
     }
 
-    const features = output?.features ?? [];
+    const features = getFeaturesFromOutput(output);
     const presentTypes = new Set(features.map((f) => f.type));
     const issues: string[] = [];
     let totalAssertions = 0;
@@ -434,7 +439,7 @@ const typeAssertionsEvaluator = {
       details: { presentTypes: [...presentTypes], required_types, forbidden_types, issues },
     };
   },
-};
+} satisfies FeatureExtractionEvaluator;
 
 export const createFeatureExtractionEvaluators = (scenarioCriteria?: {
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
@@ -455,10 +460,13 @@ export const createFeatureExtractionEvaluators = (scenarioCriteria?: {
   const { criteriaFn, criteria } = scenarioCriteria;
   return [
     ...base,
-    createScenarioCriteriaLlmEvaluator({
-      criteriaFn,
-      criteria,
-      transformOutput: (output) => (output as FeatureExtractionTaskOutput)?.features,
-    }),
+    createScenarioCriteriaLlmEvaluator<FeatureExtractionEvaluationExample, FeatureExtractionOutput>(
+      {
+        criteriaFn: (c) =>
+          criteriaFn(c) as Evaluator<FeatureExtractionEvaluationExample, FeatureExtractionOutput>,
+        criteria,
+        transformOutput: (output) => getFeaturesFromOutput(output),
+      }
+    ),
   ];
 };

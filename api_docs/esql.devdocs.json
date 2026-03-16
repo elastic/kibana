@@ -132,7 +132,7 @@
         "label": "ESQLMenu",
         "description": [],
         "signature": [
-          "(props: { hideHistory?: boolean | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; }) => React.JSX.Element"
+          "(props: { hideHistory?: boolean | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/shared/esql/public/lazy_esql_menu.tsx",
         "lineNumber": 38,
@@ -342,7 +342,7 @@
           ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
-        "lineNumber": 1503,
+        "lineNumber": 1476,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
