@@ -13,13 +13,12 @@ import {
   detectFileFormat,
   extractWorkflowPreview,
   isValidWorkflowId,
+  MAX_AGGREGATE_IMPORT_BYTES,
   MAX_IMPORT_WORKFLOWS,
   MAX_WORKFLOW_YAML_LENGTH,
   WorkflowExportManifestSchema,
 } from '../../../../common/lib/export';
 import type { WorkflowPreview } from '../../../../common/lib/export';
-
-const MAX_AGGREGATE_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB
 
 export interface ClientPreflightResult {
   format: 'zip' | 'yaml';
@@ -89,12 +88,20 @@ async function parseZipFile(buffer: ArrayBuffer): Promise<ClientPreflightResult>
       continue;
     }
 
-    const yaml = await entry.async('string');
-    totalBytes += yaml.length;
+    let yaml: string;
+    try {
+      yaml = await entry.async('string');
+    } catch {
+      parseErrors.push(`Entry [${name}] could not be read (corrupted or invalid encoding)`);
+      // eslint-disable-next-line no-continue
+      continue;
+    }
 
-    if (totalBytes > MAX_AGGREGATE_SIZE_BYTES) {
+    totalBytes += new TextEncoder().encode(yaml).byteLength;
+
+    if (totalBytes > MAX_AGGREGATE_IMPORT_BYTES) {
       throw new Error(
-        `Archive exceeds the total decompressed size limit of ${MAX_AGGREGATE_SIZE_BYTES} bytes`
+        `Archive exceeds the total decompressed size limit of ${MAX_AGGREGATE_IMPORT_BYTES} bytes`
       );
     }
 
@@ -136,7 +143,8 @@ function parseYamlFile(content: string, filename: string): ClientPreflightResult
   }
 
   const ext = filename.lastIndexOf('.') !== -1 ? filename.slice(filename.lastIndexOf('.')) : '.yml';
-  const id = filename.slice(0, filename.length - ext.length) || 'workflow';
+  const rawId = filename.slice(0, filename.length - ext.length);
+  const id = rawId && isValidWorkflowId(rawId) ? rawId : 'workflow';
 
   const preview = extractWorkflowPreview(id, content);
 

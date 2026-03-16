@@ -54,6 +54,21 @@ type ConflictResolution =
 const isConflictResolution = (value: string): value is ConflictResolution =>
   value === CONFLICT_RESOLUTION_OVERWRITE || value === CONFLICT_RESOLUTION_GENERATE_NEW_IDS;
 
+const CONFLICT_RESOLUTION_OPTIONS = [
+  {
+    value: CONFLICT_RESOLUTION_GENERATE_NEW_IDS,
+    text: i18n.translate('workflows.importFlyout.conflictResolution.generateNewIds', {
+      defaultMessage: 'Create as new workflows',
+    }),
+  },
+  {
+    value: CONFLICT_RESOLUTION_OVERWRITE,
+    text: i18n.translate('workflows.importFlyout.conflictResolution.overwrite', {
+      defaultMessage: 'Overwrite existing workflows',
+    }),
+  },
+];
+
 interface ImportWorkflowsFlyoutProps {
   onClose: () => void;
 }
@@ -368,21 +383,6 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
     [conflictIds, isImportComplete, importStatusMap]
   );
 
-  const conflictResolutionSelectOptions = [
-    {
-      value: CONFLICT_RESOLUTION_GENERATE_NEW_IDS,
-      text: i18n.translate('workflows.importFlyout.conflictResolution.generateNewIds', {
-        defaultMessage: 'Create as new workflows',
-      }),
-    },
-    {
-      value: CONFLICT_RESOLUTION_OVERWRITE,
-      text: i18n.translate('workflows.importFlyout.conflictResolution.overwrite', {
-        defaultMessage: 'Overwrite existing workflows',
-      }),
-    },
-  ];
-
   const title = i18n.translate('workflows.importFlyout.title', {
     defaultMessage: 'Import workflows',
   });
@@ -496,7 +496,7 @@ export const ImportWorkflowsFlyout: React.FC<ImportWorkflowsFlyoutProps> = ({ on
                 <EuiFlexItem grow={false}>
                   <EuiSelect
                     data-test-subj="import-workflows-conflict-resolution"
-                    options={conflictResolutionSelectOptions}
+                    options={CONFLICT_RESOLUTION_OPTIONS}
                     value={conflictResolution}
                     onChange={(e) => {
                       if (isConflictResolution(e.target.value)) {

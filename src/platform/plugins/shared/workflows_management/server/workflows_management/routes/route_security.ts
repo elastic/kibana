@@ -22,7 +22,8 @@ export const WORKFLOW_CREATE_SECURITY: RouteSecurity = {
 export const WORKFLOW_BULK_CREATE_SECURITY: RouteSecurity = {
   authz: {
     requiredPrivileges: [
-      { anyRequired: [WorkflowsManagementApiActions.create, WorkflowsManagementApiActions.update] },
+      WorkflowsManagementApiActions.create,
+      WorkflowsManagementApiActions.update,
     ],
   },
 };

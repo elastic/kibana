@@ -11,7 +11,16 @@ import { WORKFLOW_ID_PATTERN } from '@kbn/workflows';
 
 export const MAX_IMPORT_WORKFLOWS = 500;
 
+/** Maximum total decompressed size of all workflow entries in a ZIP archive (50 MB). */
+export const MAX_AGGREGATE_IMPORT_BYTES = 50 * 1024 * 1024;
+
 export const WORKFLOW_EXECUTE_TYPES = new Set(['workflow.execute', 'workflow.executeAsync']);
+
+/** The YAML key under `with:` that holds the target workflow ID. */
+export const WORKFLOW_REFERENCE_KEY = 'workflow-id';
+
+/** Returns true when a workflow-id value is a dynamic template (e.g. `{{ inputs.id }}`). */
+export const isDynamicWorkflowReference = (value: string): boolean => value.includes('{{');
 
 const UNSAFE_IDS = new Set(['__proto__', 'constructor', 'prototype']);
 

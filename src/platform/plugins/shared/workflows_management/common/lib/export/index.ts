@@ -17,6 +17,7 @@ export type { WorkflowExportEntry, WorkflowExportManifest } from './workflow_exp
 export {
   detectFileFormat,
   isValidWorkflowId,
+  MAX_AGGREGATE_IMPORT_BYTES,
   MAX_IMPORT_WORKFLOWS,
 } from './workflow_import_constants';
 export { extractReferencedWorkflowIds } from './extract_workflow_references';

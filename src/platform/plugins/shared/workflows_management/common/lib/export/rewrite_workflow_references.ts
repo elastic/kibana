@@ -10,7 +10,11 @@
 import type { Pair, Scalar } from 'yaml';
 import { isMap, isPair, isScalar, parseDocument, visit } from 'yaml';
 
-import { WORKFLOW_EXECUTE_TYPES } from './workflow_import_constants';
+import {
+  isDynamicWorkflowReference,
+  WORKFLOW_EXECUTE_TYPES,
+  WORKFLOW_REFERENCE_KEY,
+} from './workflow_import_constants';
 
 /**
  * Rewrites `workflow-id` references inside `workflow.execute` and
@@ -48,13 +52,13 @@ export const rewriteWorkflowReferences = (yaml: string, idMapping: Map<string, s
         (item): item is Pair<Scalar, Scalar> =>
           isPair(item) &&
           isScalar(item.key) &&
-          item.key.value === 'workflow-id' &&
+          item.key.value === WORKFLOW_REFERENCE_KEY &&
           isScalar(item.value)
       );
       if (!workflowIdPair || !workflowIdPair.value) return;
 
       const oldId = String(workflowIdPair.value.value);
-      if (oldId.includes('{{')) return;
+      if (isDynamicWorkflowReference(oldId)) return;
 
       const newId = idMapping.get(oldId);
       if (newId) {

@@ -9,10 +9,12 @@
 
 import type { WorkflowYaml } from '@kbn/workflows';
 
-import { WORKFLOW_EXECUTE_TYPES } from './workflow_import_constants';
+import {
+  isDynamicWorkflowReference,
+  WORKFLOW_EXECUTE_TYPES,
+  WORKFLOW_REFERENCE_KEY,
+} from './workflow_import_constants';
 import { isRecord } from '../type_guards';
-
-const isDynamicValue = (value: string): boolean => value.includes('{{');
 
 function collectFromSteps(steps: unknown, ids: Set<string>): void {
   if (!Array.isArray(steps)) return;
@@ -28,11 +30,11 @@ function collectFromSteps(steps: unknown, ids: Set<string>): void {
     if (typeof stepType === 'string' && WORKFLOW_EXECUTE_TYPES.has(stepType)) {
       const { with: withBlock } = step;
       if (isRecord(withBlock)) {
-        const workflowId = withBlock['workflow-id'];
+        const workflowId = withBlock[WORKFLOW_REFERENCE_KEY];
         if (
           typeof workflowId === 'string' &&
           workflowId.length > 0 &&
-          !isDynamicValue(workflowId)
+          !isDynamicWorkflowReference(workflowId)
         ) {
           ids.add(workflowId);
         }

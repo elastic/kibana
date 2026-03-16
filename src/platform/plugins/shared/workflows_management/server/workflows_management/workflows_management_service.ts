@@ -458,10 +458,9 @@ export class WorkflowsService {
     }
 
     // Phase 3: Schedule triggers for successfully created workflows (in parallel)
+    const createdIds = new Set(created.map((w) => w.id));
     const workflowsToSchedule = validWorkflows.filter(
-      (vw) =>
-        created.some((w) => w.id === vw.id) &&
-        vw.definition?.triggers?.some((t) => t.type === 'scheduled')
+      (vw) => createdIds.has(vw.id) && vw.definition?.triggers?.some((t) => t.type === 'scheduled')
     );
 
     await Promise.allSettled(

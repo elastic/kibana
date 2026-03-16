@@ -38,16 +38,18 @@ export function registerPostBulkCreateWorkflowsRoute({
         const spaceId = spaces.getSpaceId(request);
         const { overwrite } = request.query;
 
+        if (!request.authzResult?.[WorkflowsManagementApiActions.create]) {
+          return response.forbidden({
+            body: {
+              message: 'Creating workflows requires the create privilege',
+            },
+          });
+        }
+
         if (overwrite && !request.authzResult?.[WorkflowsManagementApiActions.update]) {
           return response.forbidden({
             body: {
               message: 'Overwriting workflows requires the update privilege',
-            },
-          });
-        } else if (!request.authzResult?.[WorkflowsManagementApiActions.create]) {
-          return response.forbidden({
-            body: {
-              message: 'Creating workflows requires the create privilege',
             },
           });
         }
