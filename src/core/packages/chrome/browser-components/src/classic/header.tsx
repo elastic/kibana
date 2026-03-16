@@ -20,7 +20,6 @@ import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import { useChromeComponentsDeps } from '../context';
 import { CollapsibleNav } from './collapsible_nav';
-import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderLogo } from './header_logo';
 import { HeaderMenuButton } from './header_menu_button';
@@ -157,9 +156,6 @@ export function ClassicHeader() {
             >
               {Breadcrumbs}
             </BreadcrumbsWithExtensionsWrapper>
-
-            {/* TODO: Remove once setBadge() is consolidated — https://github.com/elastic/kibana/issues/256050 */}
-            <HeaderBadge badge$={classic.badge$} />
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>

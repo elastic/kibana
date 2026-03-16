@@ -3801,6 +3801,18 @@
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/connectors.ts"
               },
               {
+                "plugin": "inference",
+                "path": "x-pack/platform/plugins/shared/inference/server/routes/endpoints.ts"
+              },
+              {
+                "plugin": "workflowsExtensions",
+                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_step_definitions.ts"
+              },
+              {
+                "plugin": "workflowsExtensions",
+                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_trigger_definitions.ts"
+              },
+              {
                 "plugin": "productDocBase",
                 "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
@@ -3867,14 +3879,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/tines_simulation.ts"
-              },
-              {
-                "plugin": "workflowsExtensions",
-                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_step_definitions.ts"
-              },
-              {
-                "plugin": "workflowsExtensions",
-                "path": "src/platform/plugins/shared/workflows_extensions/server/routes/get_trigger_definitions.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -7342,6 +7346,10 @@
               },
               {
                 "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_resume_workflow_execution.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/server/workflows_management/routes/post_run_workflow.ts"
               },
               {
@@ -7379,6 +7387,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/internal/user_prompts.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
               },
               {
                 "plugin": "cloudConnect",
@@ -16391,6 +16403,18 @@
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
+              },
+              {
+                "plugin": "automaticImportVTwo",
+                "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
+              },
+              {
                 "plugin": "automaticImportVTwo",
                 "path": "x-pack/platform/plugins/shared/automatic_import_v2/server/routes/integrations_route.ts"
               },
@@ -16757,6 +16781,14 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/action_results/get_action_results_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/unified_history/get_unified_history_route.ts"
+              },
+              {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
               },
               {
                 "plugin": "dataUsage",
@@ -17336,6 +17368,10 @@
               },
               {
                 "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/resolution/group.ts"
+              },
+              {
+                "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/get_maintainers.ts"
               },
               {
@@ -17780,6 +17816,10 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/update_pack_route.ts"
+              },
+              {
+                "plugin": "searchInferenceEndpoints",
+                "path": "x-pack/platform/plugins/shared/search_inference_endpoints/server/routes/inference_settings.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -18303,6 +18343,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
               },
               {
                 "plugin": "aiops",
@@ -19285,6 +19329,14 @@
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph/route.ts"
               },
               {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph_entities/route.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph_events/route.ts"
+              },
+              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/get_unallowed_field_values.ts"
               },
@@ -19311,6 +19363,22 @@
               {
                 "plugin": "entityStore",
                 "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/uninstall.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/resolution/link.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/resolution/unlink.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/init.ts"
+              },
+              {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/routes/apis/entity_maintainers/run.ts"
               },
               {
                 "plugin": "controls",
@@ -19411,6 +19479,14 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph_entities/route.test.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph_events/route.test.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -19697,6 +19773,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/skills.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/routes/plugins.ts"
               },
               {
                 "plugin": "automaticImportVTwo",

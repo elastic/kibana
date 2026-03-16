@@ -7,18 +7,18 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import type { PublicSkillSummary } from '@kbn/agent-builder-common';
 import React from 'react';
 import { labels } from '../../utils/i18n';
 
 export const createSkillIdColumn = (options?: {
   onClick?: (skillId: string) => void;
-}): EuiBasicTableColumn<PublicSkillDefinition> => ({
+}): EuiBasicTableColumn<PublicSkillSummary> => ({
   field: 'id',
   name: labels.skills.skillIdLabel,
   sortable: true,
   width: '30%',
-  render: (id: string, skill: PublicSkillDefinition) => (
+  render: (id: string, skill: PublicSkillSummary) => (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
         {options?.onClick ? (
@@ -47,14 +47,14 @@ export const createSkillIdColumn = (options?: {
   ),
 });
 
-export const createSkillDescriptionColumn = (): EuiBasicTableColumn<PublicSkillDefinition> => ({
+export const createSkillDescriptionColumn = (): EuiBasicTableColumn<PublicSkillSummary> => ({
   field: 'description',
   name: labels.skills.descriptionLabel,
   truncateText: true,
   width: '40%',
 });
 
-export const createSkillTypeColumn = (): EuiBasicTableColumn<PublicSkillDefinition> => ({
+export const createSkillTypeColumn = (): EuiBasicTableColumn<PublicSkillSummary> => ({
   field: 'readonly',
   name: labels.skills.typeLabel,
   width: '100px',

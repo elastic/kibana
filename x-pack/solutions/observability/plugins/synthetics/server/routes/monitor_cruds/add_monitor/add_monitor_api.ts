@@ -7,7 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { isValidNamespace, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
   legacySyntheticsMonitorTypeSingle,
@@ -77,11 +77,21 @@ export class AddEditMonitorAPI {
     });
 
     try {
+      const monitorPrivateLocations = monitorWithNamespace[ConfigKey.LOCATIONS].filter(
+        (loc) => !loc.isServiceManaged
+      );
+      const references = monitorPrivateLocations.map((loc) => ({
+        id: `${newMonitorId}-${loc.id}`,
+        name: `${newMonitorId}-${loc.id}`,
+        type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      }));
+
       const newMonitorPromise = this.routeContext.monitorConfigRepository.create({
         normalizedMonitor: monitorWithNamespace,
         id: newMonitorId,
         spaceId,
         savedObjectType,
+        references: references.length > 0 ? references : undefined,
       });
 
       const syncErrorsPromise = syntheticsMonitorClient.addMonitors(

@@ -386,13 +386,11 @@ describe('WiredStream', () => {
         isServerless: false,
         isWiredStreamViewsEnabled: true,
         isDev: false,
-        scopedClusterClient: {
-          asCurrentUser: {
-            indices: {
-              getDataStream: jest.fn().mockResolvedValue({
-                data_streams: [{ _meta: { managed_by: 'streams' } }],
-              }),
-            },
+        esClient: {
+          indices: {
+            getDataStream: jest.fn().mockResolvedValue({
+              data_streams: [{ _meta: { managed_by: 'streams' } }],
+            }),
           },
         },
       } as unknown as StateDependencies);
@@ -647,15 +645,12 @@ describe('WiredStream', () => {
         isServerless: false,
         isWiredStreamViewsEnabled: true,
         isDev: false,
-        scopedClusterClient: {
-          asCurrentUser: {
-            indices: {
-              getDataStream: jest.fn().mockResolvedValue({
-                data_streams: [{ _meta: { managed_by: 'streams' } }],
-              }),
-            },
+        esClient: {
+          indices: {
+            getDataStream: jest.fn().mockResolvedValue({
+              data_streams: [{ _meta: { managed_by: 'streams' } }],
+            }),
           },
-          asInternalUser: {},
         },
       } as unknown as StateDependencies);
 
