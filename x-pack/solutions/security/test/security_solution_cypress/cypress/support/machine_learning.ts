@@ -24,6 +24,7 @@ export const executeSetupModuleRequest = ({ moduleName }: { moduleName: string }
     method: 'POST',
     url: `/internal/ml/modules/setup/${moduleName}`,
     failOnStatusCode: true,
+    timeout: 120000,
     body: {
       prefix: '',
       groups: [ML_GROUP_ID],
