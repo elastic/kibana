@@ -102,5 +102,5 @@ To use the Microsoft Teams connector, you need a Microsoft Azure AD application 
    - `ChannelMessage.Read.All` — Read channel messages
    - `Chat.Read.All` — Read all chats and messages
 4. Grant admin consent for the permissions.
-5. Under **Certificates & secrets**, create a new client secret.
+5. Under **Certificates & secrets**, create a new client secret. <!-- TODO: Add support for certificate auth -->
 6. Copy the **Application (client) ID**, **client secret value**, and **tenant ID**. In the connector configuration, enter these values.
