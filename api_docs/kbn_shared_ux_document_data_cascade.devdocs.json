@@ -138,7 +138,7 @@
           "<G, L>) => null"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
-        "lineNumber": 50,
+        "lineNumber": 49,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -161,7 +161,7 @@
               "<G, L>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
-            "lineNumber": 51,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -200,7 +200,7 @@
           "<G, L>) => null"
         ],
         "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
-        "lineNumber": 41,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -223,7 +223,7 @@
               "<G, L>"
             ],
             "path": "src/platform/packages/shared/shared-ux/document_data_cascade/impl/src/components/data_cascade_impl/data_cascade_impl.tsx",
-            "lineNumber": 42,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

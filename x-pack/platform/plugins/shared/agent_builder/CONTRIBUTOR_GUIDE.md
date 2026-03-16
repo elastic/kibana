@@ -458,6 +458,8 @@ For canvas content that needs to register buttons dynamically (e.g., a "Save" bu
 
 The `getActionButtons` function provides **static** buttons. The `registerActionButtons` callback allows canvas content to add **dynamic** buttons that are merged with the static ones.
 
+The callbacks object also exposes `closeCanvas`, which allows canvas content to close the flyout from within attachment UI actions (for example after an "Edit in app" navigation).
+
 ```tsx
 import React, { useEffect, useState } from 'react';
 import {
@@ -473,7 +475,7 @@ interface MyCanvasContentProps extends AttachmentRenderProps<MyAttachment> {
 
 const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
   attachment,
-  callbacks: { registerActionButtons, updateOrigin },
+  callbacks: { registerActionButtons, updateOrigin, closeCanvas },
 }) => {
   const [api, setApi] = useState<MyApi | undefined>();
 
@@ -509,6 +511,23 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
     <MyCanvasContent {...props} callbacks={callbacks} />
   ),
 };
+```
+
+#### Closing the canvas from canvas content
+
+Use `closeCanvas` when an action inside `renderCanvasContent` should dismiss the flyout.
+
+```tsx
+renderCanvasContent: (props, { closeCanvas }) => (
+  <EuiButton
+    onClick={async () => {
+      await locator.navigate({ /* ... */ });
+      closeCanvas();
+    }}
+  >
+    Edit in app
+  </EuiButton>
+);
 ```
 
 #### Linking by-value attachments to persistent storage with updateOrigin
@@ -579,6 +598,26 @@ The `origin` parameter accepts any shape - it will be validated by the attachmen
   description?: string;
 }
 ```
+
+#### Updating origin from outside attachment context
+
+If you need to update an attachment's origin from outside the `getActionButtons` context (e.g., from a different plugin or component that has the conversation and attachment IDs), you can use the `updateAttachmentOrigin` API from the `agentBuilder` plugin's start contract:
+
+```ts
+// In your plugin
+class MyPlugin {
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    // Update an attachment's origin directly
+    await agentBuilder.updateAttachmentOrigin(
+      conversationId,
+      attachmentId,
+      { saved_object_id: savedObjectId }
+    );
+  }
+}
+```
+
+This is useful when the save operation happens outside the attachment's UI, such as when a separate "Save to library" workflow completes asynchronously. It is your responsibility to pass the `conversationId` and `attachmentId` to your plugin when navigating away from the chat - how you do this is up to you (e.g., URL parameters, local storage, or other mechanisms).
 
 ## Registering skills
 

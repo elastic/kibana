@@ -235,10 +235,10 @@ describe('Color Schema', () => {
         mapping: [
           {
             values: ['value1', 'value2', 'value3'],
-            color: { type: 'colorCode', value: 'red' },
+            color: { type: 'color_code', value: 'red' },
           },
         ],
-        unassignedColor: { type: 'colorCode', value: 'green' },
+        unassignedColor: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -252,7 +252,7 @@ describe('Color Schema', () => {
         mapping: [
           {
             values: ['value1', 'value2', 'value3'],
-            color: { type: 'colorCode', value: 'red' },
+            color: { type: 'color_code', value: 'red' },
           },
         ],
       };
@@ -271,7 +271,7 @@ describe('Color Schema', () => {
             color: { type: 'from_palette', palette: 'default', index: 0 },
           },
         ],
-        unassignedColor: { type: 'colorCode', value: 'green' },
+        unassignedColor: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -305,7 +305,7 @@ describe('Color Schema', () => {
           },
           {
             values: ['value4', 'value5', 'value6'],
-            color: { type: 'colorCode', value: 'green' },
+            color: { type: 'color_code', value: 'green' },
           },
         ],
       };
@@ -354,7 +354,7 @@ describe('Color Schema', () => {
             palette: 'default',
           },
         ],
-        unassignedColor: { type: 'colorCode', value: 'green' },
+        unassignedColor: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);

@@ -690,6 +690,10 @@
                 "path": "src/platform/plugins/shared/data/public/search/search_interceptor/search_interceptor.ts"
               },
               {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.ts"
               },
@@ -886,6 +890,26 @@
                 "path": "x-pack/platform/plugins/shared/automatic_import/public/services/telemetry/service.ts"
               },
               {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
+              },
+              {
+                "plugin": "cloudConnect",
+                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
+              },
+              {
                 "plugin": "@kbn/cloud",
                 "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
@@ -954,26 +978,6 @@
                 "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/telemetry/event_reporter.ts"
               },
               {
-                "plugin": "cloudConnect",
-                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
-              },
-              {
-                "plugin": "cloudConnect",
-                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
-              },
-              {
-                "plugin": "cloudConnect",
-                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
-              },
-              {
-                "plugin": "cloudConnect",
-                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
-              },
-              {
-                "plugin": "cloudConnect",
-                "path": "x-pack/platform/plugins/shared/cloud_connect/public/telemetry/client.ts"
-              },
-              {
                 "plugin": "productIntercept",
                 "path": "x-pack/platform/plugins/private/product_intercept/public/telemetry/event_reporter.ts"
               },
@@ -984,6 +988,18 @@
               {
                 "plugin": "workflowsExecutionEngine",
                 "path": "src/platform/plugins/shared/workflows_execution_engine/server/lib/telemetry/workflow_execution_telemetry_client.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
               },
               {
                 "plugin": "agentBuilder",
@@ -1824,6 +1840,10 @@
               {
                 "plugin": "workflowsManagement",
                 "path": "src/platform/plugins/shared/workflows_management/public/common/lib/telemetry/telemetry_service.ts"
+              },
+              {
+                "plugin": "@kbn/esql-editor",
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.performance.test.ts"
               },
               {
                 "plugin": "@kbn/esql-editor",

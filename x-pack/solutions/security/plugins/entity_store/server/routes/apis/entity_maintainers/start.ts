@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
@@ -14,14 +14,9 @@ import { wrapMiddlewares } from '../../middleware';
 import { maintainerIdParamsSchema } from './utils/validator';
 
 export function registerStartMaintainer(router: EntityStorePluginRouter) {
-  /**
-   * Start (or re-start) an entity maintainer task.
-   * The task is re-scheduled using the registration configurations (e.g. interval).
-   * The task state is set to the maintainer's supplied initial state.
-   */
   router.versioned
     .put({
-      path: `${ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_START}/{id}`,
+      path: `${ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_START}`,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

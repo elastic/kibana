@@ -23,10 +23,7 @@ import type {
   ICustomClusterClient,
   IScopedClusterClient,
   ElasticsearchClientConfig,
-  AsScopedOptions,
-  OriginOnlyRouting,
   SpaceNPRERouting,
-  AllProjectsRouting,
 } from '@kbn/core-elasticsearch-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
@@ -47,13 +44,26 @@ import type { AgentFactoryProvider } from './agent_manager';
 
 const noop = () => undefined;
 
+interface CommonFactoryRoutingOpts {
+  logger: Logger;
+}
+
+interface SpaceFactoryRoutingOpts extends CommonFactoryRoutingOpts {
+  projectRouting: 'space';
+  request: ScopeableUrlRequest;
+}
+
+/**
+ * Discriminated union of routing options passed to {@link OnRequestHandlerFactory}.
+ * Each variant carries exactly the data needed for that routing mode.
+ * @internal
+ */
+export type FactoryRoutingOpts = CommonFactoryRoutingOpts | SpaceFactoryRoutingOpts;
 /**
  * A factory that produces an {@link OnRequestHandler}, which can be bound to a request context.
  * @internal
  */
-export type OnRequestHandlerFactory = (opts: {
-  projectRouting: 'origin-only' | 'all' | ScopeableUrlRequest;
-}) => OnRequestHandler;
+export type OnRequestHandlerFactory = (opts: FactoryRoutingOpts) => OnRequestHandler;
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
@@ -62,6 +72,7 @@ export class ClusterClient implements ICustomClusterClient {
   private readonly security?: InternalSecurityServiceSetup;
   private readonly rootScopedClient: Client;
   private readonly kibanaVersion: string;
+  private readonly logger: Logger;
   private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
   private readonly onRequestHandlerFactory: OnRequestHandlerFactory;
@@ -96,11 +107,12 @@ export class ClusterClient implements ICustomClusterClient {
     this.authHeaders = authHeaders;
     this.security = security;
     this.kibanaVersion = kibanaVersion;
+    this.logger = logger;
     this.getExecutionContext = getExecutionContext;
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
     this.onRequestHandlerFactory = onRequestHandlerFactory;
 
-    const internalUserOnRequest = onRequestHandlerFactory({ projectRouting: 'origin-only' });
+    const internalUserOnRequest = onRequestHandlerFactory({ logger });
 
     this.asInternalUser = configureClient(config, {
       logger,
@@ -121,25 +133,17 @@ export class ClusterClient implements ICustomClusterClient {
     });
   }
 
+  asScoped(request: ScopeableRequest): IScopedClusterClient;
   asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
-  asScoped(
-    request: ScopeableRequest,
-    opts?: OriginOnlyRouting | AllProjectsRouting
-  ): IScopedClusterClient;
-  asScoped(request: ScopeableRequest, opts: AsScopedOptions = { projectRouting: 'origin-only' }) {
+  asScoped(request: ScopeableUrlRequest, opts?: SpaceNPRERouting): IScopedClusterClient {
     const createScopedClient = () => {
       const scopedHeaders = this.getScopedHeaders(request);
-      const { projectRouting } = opts;
-
       const transportClass = createTransport({
         scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
-        onRequest: this.onRequestHandlerFactory(
-          projectRouting === 'space'
-            ? { projectRouting: request as ScopeableUrlRequest }
-            : { projectRouting }
-        ),
+        onRequest: this.onRequestHandlerFactory({ ...opts, logger: this.logger, request }),
+        logger: this.logger,
       });
 
       // TODO: callers who pass { Transport: CustomTransport } to child() bypass our

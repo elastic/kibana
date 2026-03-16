@@ -19,7 +19,12 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type {
+  EmitEventFn,
+  EmitEventParams,
   ServerTriggerDefinition,
+  TriggerEventHandlerParams,
+  WorkflowsClient,
+  WorkflowsRouteHandlerContext,
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
   WorkflowsExtensionsServerPluginSetupDeps,

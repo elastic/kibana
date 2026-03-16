@@ -16,7 +16,8 @@ import {
   WATCHLISTS_MANAGEMENT_TABLE,
 } from '../../../screens/entity_analytics/watchlists_management';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/256685
+describe.skip(
   'Entity Analytics Watchlists Management Page ',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
