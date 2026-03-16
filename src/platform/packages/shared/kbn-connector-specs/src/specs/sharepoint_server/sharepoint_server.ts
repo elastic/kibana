@@ -57,6 +57,8 @@ export const SharepointServer: ConnectorSpec = {
   actions: {
     getWeb: {
       isTool: true,
+      description:
+        'Returns metadata about the SharePoint site: title, URL, description, and locale. Use this to orient yourself or confirm the connector is pointed at the right site.',
       input: z.object({}).optional(),
       output: z.any(),
       handler: async (ctx) => {
@@ -71,6 +73,8 @@ export const SharepointServer: ConnectorSpec = {
 
     getLists: {
       isTool: true,
+      description:
+        'Returns all lists and document libraries on the site. Each result includes a Title (use this as listTitle for getListItems) and a RootFolder.ServerRelativeUrl (use this as path for getFolderContents).',
       input: z.object({}).optional(),
       output: ODataCollectionOutputSchema,
       handler: async (ctx) => {
@@ -88,8 +92,14 @@ export const SharepointServer: ConnectorSpec = {
 
     getListItems: {
       isTool: true,
+      description:
+        'Returns items from a list or document library by its display name. To find valid list titles, call getLists first and use the Title field from those results.',
       input: z.object({
-        listTitle: z.string().describe('Title of the list'),
+        listTitle: z
+          .string()
+          .describe(
+            "Exact display name of the list, as returned in the Title field of getLists. Case-sensitive. Example: 'Documents', 'Tasks', 'Site Pages'"
+          ),
       }),
       output: ODataCollectionOutputSchema,
       handler: async (ctx, input) => {
@@ -108,10 +118,14 @@ export const SharepointServer: ConnectorSpec = {
 
     getFolderContents: {
       isTool: true,
+      description:
+        "Lists files and subfolders at a given folder path. Returns two arrays: 'files' (each has Name, ServerRelativeUrl, TimeLastModified, Length) and 'folders' (each has Name, ServerRelativeUrl). Use the ServerRelativeUrl values as the path for further getFolderContents or downloadFile calls. To get a starting path, call getLists and use the RootFolder.ServerRelativeUrl of a document library.",
       input: z.object({
         path: z
           .string()
-          .describe('Server-relative URL of the folder (e.g., /sites/mysite/Shared Documents)'),
+          .describe(
+            "Server-relative URL of the folder: starts with '/', no hostname. Get this from getLists (RootFolder.ServerRelativeUrl) or from a previous getFolderContents result (ServerRelativeUrl on a folder). Example: '/sites/mysite/Shared Documents' or '/sites/mysite/Shared Documents/Reports'"
+          ),
       }),
       output: z.object({
         files: z.array(z.any()).describe('Files in the folder'),
@@ -141,11 +155,13 @@ export const SharepointServer: ConnectorSpec = {
 
     downloadFile: {
       isTool: true,
+      description:
+        'Downloads a file and returns its content as text. Best for plain-text files (.txt, .csv, .md, .xml, .json). For binary files (PDF, Word, Excel), the text output will be garbled — use the download workflow instead. Get the path from getFolderContents results (the ServerRelativeUrl field on a file).',
       input: z.object({
         path: z
           .string()
           .describe(
-            'Server-relative URL of the file (e.g., /sites/mysite/Shared Documents/file.docx)'
+            "Server-relative URL of the file: starts with '/', no hostname. Get this from the ServerRelativeUrl field in getFolderContents results. Example: '/sites/mysite/Shared Documents/report.txt'"
           ),
       }),
       output: z.object({
@@ -173,8 +189,15 @@ export const SharepointServer: ConnectorSpec = {
 
     getSitePageContents: {
       isTool: true,
+      description:
+        "Returns the content of a SharePoint site page (wiki or modern page). To find a pageId, call getListItems with listTitle='Site Pages' and use the Id field (an integer) from the desired item.",
       input: z.object({
-        pageId: z.number().int().describe('Integer item ID of the site page'),
+        pageId: z
+          .number()
+          .int()
+          .describe(
+            "Integer item ID of the page. Get this from getListItems with listTitle='Site Pages': look for the Id field (not the GUID) on the desired page. Example: 3"
+          ),
       }),
       output: z.any(),
       handler: async (ctx, input) => {
@@ -196,10 +219,16 @@ export const SharepointServer: ConnectorSpec = {
 
     search: {
       isTool: true,
+      description:
+        "Runs a full-text search across the site using Keyword Query Language (KQL). Use this when you don't know where content lives. Results include file paths, titles, and URLs. Use from/size to page through large result sets.",
       input: z.object({
-        query: z.string().describe('KQL search query string'),
-        from: z.number().optional().describe('Start row offset for pagination'),
-        size: z.number().optional().describe('Number of results to return'),
+        query: z
+          .string()
+          .describe(
+            "KQL query string. Use plain keywords for broad search, or field:value pairs for filtered search. Examples: 'budget report', 'FileExtension:docx', 'author:Jane AND project plan', 'ContentType:Document AND title:policy'"
+          ),
+        from: z.number().optional().describe('Zero-based start row for pagination (default: 0)'),
+        size: z.number().optional().describe('Number of results to return (default: 10)'),
       }),
       output: z.any(),
       handler: async (ctx, input) => {

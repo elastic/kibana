@@ -1,6 +1,11 @@
 version: '1'
 name: 'sources.sharepoint-server.list'
-description: 'List/fetch SharePoint Server resources. Actions and inputs: getWeb (no inputs); getLists (no inputs); getListItems (list_title); getFolderContents (path).'
+description: >
+  Browse SharePoint Server resources. Always provide list_action (required) to select what to fetch:
+  "getWeb" — site metadata, no other inputs needed;
+  "getLists" — all lists and document libraries, no other inputs needed;
+  "getListItems" — items in a named list, requires list_title (exact Title from getLists);
+  "getFolderContents" — files and subfolders at a path, requires path (ServerRelativeUrl from getLists or a previous getFolderContents result, starts with /).
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -14,14 +19,15 @@ inputs:
       - "getListItems"
       - "getFolderContents"
     required: true
+    description: "Required. Which action to perform. Choose one: getWeb, getLists, getListItems, getFolderContents."
   - name: list_title
     type: string
     required: false
-    description: "Title of the list (for getListItems)"
+    description: "Required when list_action is 'getListItems'. Exact display name of the list (the Title field from getLists). Example: 'Documents', 'Tasks'."
   - name: path
     type: string
     required: false
-    description: "Server-relative folder path (for getFolderContents)"
+    description: "Required when list_action is 'getFolderContents'. Server-relative URL of the folder, starts with '/'. Get this from getLists (RootFolder.ServerRelativeUrl) or from a previous getFolderContents result. Example: '/sites/mysite/Shared Documents'."
 steps:
   - name: get-web
     type: sharepoint-server.getWeb
