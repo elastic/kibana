@@ -1,0 +1,60 @@
+version: '1'
+name: 'sources.amazon_s3.download'
+description: 'Download a file from an Amazon S3 bucket.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: bucket
+    type: string
+    required: true
+    description: "The name of the S3 bucket containing the file to download."
+  - name: key
+    type: string
+    required: true
+    description: "The key of the file to download from the S3 bucket."
+  - name: maximumDownloadSizeBytes
+    type: number
+    required: false
+    default: 131072
+    description: "Maximum file size in bytes that can be downloaded for the file content. If the file size exceeds this limit, a pre-signed URL will be returned for direct download from S3. Default is 128 KB. Don't ask to override this unless necessary to complete a task as it may run over the token count."
+steps:
+  - name: downloadFile
+    type: amazon_s3.downloadFile
+    connector-id: <%= amazon_s3-stack-connector-id %>
+    with:
+      bucket: "${{ inputs.bucket }}"
+      key: "${{ inputs.key }}"
+      maximumDownloadSizeBytes: ${{ inputs.maximumDownloadSizeBytes }}
+  - name: extract_content
+    type: if
+    condition: "${{steps.downloadFile.output.hasContent}}"
+    steps:
+      - name: perform_extract_content
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: /_ingest/pipeline/_simulate
+          body:
+            pipeline:
+              processors:
+                - attachment:
+                    field: data
+                    indexed_chars: -1
+                    remove_binary: true
+            docs:
+              - _id: "${{steps.downloadFile.output.etag}}"
+                _source:
+                  filename: "${{steps.downloadFile.output.key}}"
+                  data: "${{steps.downloadFile.output.content}}"
+    else:
+      - name: return_presigned_url
+        type: data.stringifyJson
+        source: {
+          contentUrl: "${{steps.downloadFile.output.contentUrl}}",
+          message: "${{steps.downloadFile.output.message}}"
+        }
+        with:
+          {pretty: true}
+

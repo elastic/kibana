@@ -8,9 +8,12 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
-import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH } from '../fixtures';
-
-const SLO_BURN_RATE_EMBEDDABLE_ID = 'SLO_BURN_RATE_EMBEDDABLE';
+import {
+  apiTest,
+  COMMON_HEADERS,
+  DASHBOARD_API_PATH,
+  SLO_BURN_RATE_EMBEDDABLE_ID,
+} from '../fixtures';
 
 apiTest.describe(
   'SLO Burn Rate Embeddable',
