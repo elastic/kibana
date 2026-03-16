@@ -33,6 +33,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./install_tsds_disable'));
     loadTestFile(require.resolve('./install_tag_assets'));
     loadTestFile(require.resolve('./install_with_streaming'));
+    loadTestFile(require.resolve('./install_with_dependencies'));
     loadTestFile(require.resolve('./bulk_upgrade'));
     loadTestFile(require.resolve('./bulk_uninstall'));
     loadTestFile(require.resolve('./bulk_install_upgrade'));
@@ -57,5 +58,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./custom_integrations'));
     loadTestFile(require.resolve('./rollback'));
     loadTestFile(require.resolve('./knowledge_base'));
+    loadTestFile(require.resolve('./review_upgrade'));
   });
 }

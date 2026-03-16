@@ -3167,6 +3167,291 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/agent_builder/plugins:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List all installed plugins and their managed assets. Plugins are installable packages that bundle agent capabilities such as skills, following the [Claude agent plugin specification](https://code.claude.com/docs/en/plugins).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-plugins
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listPluginsResponseExample:
+                  description: Example response that returns one installed plugin
+                  value:
+                    results:
+                      - created_at: '2025-01-01T00:00:00.000Z'
+                        description: Financial analysis tools and skills for Claude
+                        id: financial-analysis
+                        manifest:
+                          author:
+                            name: Anthropic
+                            url: https://www.anthropic.com
+                          keywords:
+                            - finance
+                            - analysis
+                          repository: https://github.com/anthropics/financial-services-plugins
+                        name: financial-analysis
+                        skill_ids:
+                          - financial-analysis-analyze-portfolio
+                        source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+                        unmanaged_assets:
+                          agents: []
+                          commands: []
+                          hooks: []
+                          lsp_servers: []
+                          mcp_servers: []
+                          output_styles: []
+                        updated_at: '2025-01-01T00:00:00.000Z'
+                        version: 1.0.0
+          description: Indicates a successful response
+      summary: List plugins
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X GET "${KIBANA_URL}/api/agent_builder/plugins" \
+             -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/plugins
+      x-state: Technical Preview; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/agent_builder/plugins/{pluginId}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins/{pluginId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete an installed plugin by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+      operationId: delete-agent-builder-plugins-pluginid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the plugin.
+          in: path
+          name: pluginId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deletePluginResponseExample:
+                  description: Example response showing that deletion of the plugin has been successful
+                  value:
+                    success: true
+          description: Indicates a successful response
+      summary: Delete a plugin
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/agent_builder/plugins/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/agent_builder/plugins/{id}
+      x-state: Technical Preview; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins/{pluginId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a specific plugin by ID.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-plugins-pluginid
+      parameters:
+        - description: The unique identifier of the plugin.
+          in: path
+          name: pluginId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getPluginByIdResponseExample:
+                  description: Example response returning a single installed plugin
+                  value:
+                    created_at: '2025-01-01T00:00:00.000Z'
+                    description: Financial analysis tools and skills for Claude
+                    id: financial-analysis
+                    manifest:
+                      author:
+                        name: Anthropic
+                        url: https://www.anthropic.com
+                      keywords:
+                        - finance
+                        - analysis
+                      repository: https://github.com/anthropics/financial-services-plugins
+                    name: financial-analysis
+                    skill_ids:
+                      - financial-analysis-analyze-portfolio
+                    source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+                    unmanaged_assets:
+                      agents: []
+                      commands: []
+                      hooks: []
+                      lsp_servers: []
+                      mcp_servers: []
+                      output_styles: []
+                    updated_at: '2025-01-01T00:00:00.000Z'
+                    version: 1.0.0
+          description: Indicates a successful response
+      summary: Get a plugin by id
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/plugins/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/plugins/{id}
+      x-state: Technical Preview; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/agent_builder/plugins/install:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins/install</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Install a plugin from a [GitHub Claude plugin URL](https://code.claude.com/docs/en/plugins) or a direct ZIP URL. Plugins bundle agent capabilities such as skills.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+      operationId: post-agent-builder-plugins-install
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              installPluginFromGithubExample:
+                description: Example request for installing a plugin from a GitHub URL
+                value:
+                  url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+              installPluginFromZipExample:
+                description: Example request for installing a plugin from a direct zip URL
+                value:
+                  url: https://my-server.example.com/my-plugin.zip
+              installPluginWithNameOverrideExample:
+                description: Example request for installing a plugin with a custom name
+                value:
+                  plugin_name: my-custom-plugin-name
+                  url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                plugin_name:
+                  description: Optional name override for the plugin. Defaults to the manifest name.
+                  type: string
+                url:
+                  description: URL to install the plugin from (GitHub URL or direct zip URL).
+                  type: string
+              required:
+                - url
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                installPluginResponseExample:
+                  description: Example response returning the definition of the installed plugin
+                  value:
+                    created_at: '2025-01-01T00:00:00.000Z'
+                    description: Financial analysis tools and skills for Claude
+                    id: financial-analysis
+                    manifest:
+                      author:
+                        name: Anthropic
+                        url: https://www.anthropic.com
+                      keywords:
+                        - finance
+                        - analysis
+                      repository: https://github.com/anthropics/financial-services-plugins
+                    name: financial-analysis
+                    skill_ids:
+                      - financial-analysis-analyze-portfolio
+                    source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+                    unmanaged_assets:
+                      agents: []
+                      commands: []
+                      hooks: []
+                      lsp_servers: []
+                      mcp_servers: []
+                      output_styles: []
+                    updated_at: '2025-01-01T00:00:00.000Z'
+                    version: 1.0.0
+          description: Indicates a successful response
+      summary: Install a plugin
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/plugins/install" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "url": "https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis"
+            }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/plugins/install
+            {
+              "url": "https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis"
+            }
+      x-state: Technical Preview; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/agent_builder/skills:
     get:
       description: |-
@@ -3195,7 +3480,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new user-defined skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Create a new user-defined skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: post-agent-builder-skills
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3274,7 +3559,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: delete-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3331,7 +3616,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing user-created skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Update an existing user-created skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: put-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -20511,7 +20796,9 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Download a file associated with a response action.
+        Download a file associated with a response action. Files are downloaded in a password-protected `.zip` archive to prevent the file from running. Use password `elastic` to open the `.zip` in a safe environment.
+        > info
+        > Files retrieved from third-party-protected hosts require a different password. Refer to [Third-party response actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions) for your system's password.
       operationId: EndpointFileDownload
       parameters:
         - in: path
@@ -42019,6 +42306,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: Skip dependency validation when installing a package with dependencies
+          in: query
+          name: skipDependencyCheck
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -43215,6 +43509,103 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/fleet/epm/packages/{pkgName}/review_upgrade:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/review_upgrade</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: post-fleet-epm-packages-pkgname-review-upgrade
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Package name to review upgrade for
+          in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              acceptUpgrade:
+                value:
+                  action: accept
+                  target_version: 2.0.0
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                action:
+                  enum:
+                    - accept
+                    - decline
+                    - pending
+                  type: string
+                target_version:
+                  type: string
+              required:
+                - action
+                - target_version
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    success: true
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Review a pending policy upgrade for a package with deprecations
+      tags:
+        - Elastic Package Manager (EPM)
+      x-state: Generally available; added in 9.4.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/epm/packages/{pkgName}/rollback:
     post:
       description: |-
@@ -62053,6 +62444,7 @@ paths:
                         required:
                           - type
                           - id
+                      maxItems: 100
                       type: array
                 includeReferencesDeep:
                   default: false
@@ -62081,6 +62473,7 @@ paths:
                     - type: string
                     - items:
                         type: string
+                      maxItems: 100
                       type: array
                   description: The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.
       responses:
@@ -66247,6 +66640,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66271,6 +66666,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -66339,6 +66735,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66363,6 +66761,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -66438,6 +66837,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66462,6 +66863,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -66530,6 +66932,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -66554,6 +66958,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -66629,6 +67034,8 @@ paths:
                           items:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -66653,6 +67060,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                           type: array
                         rules:
@@ -67015,6 +67423,8 @@ paths:
                                       - anyOf:
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
                                               format:
                                                 description: A non-empty string.
                                                 minLength: 1
@@ -67044,6 +67454,18 @@ paths:
                                               - type
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
+                                              format:
+                                                not: {}
+                                              type:
+                                                not: {}
+                                            required:
+                                              - description
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
                                               type:
                                                 enum:
                                                   - system
@@ -67251,6 +67673,8 @@ paths:
                                       - anyOf:
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
                                               format:
                                                 description: A non-empty string.
                                                 minLength: 1
@@ -67280,6 +67704,8 @@ paths:
                                               - type
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
                                               type:
                                                 enum:
                                                   - system
@@ -67551,6 +67977,8 @@ paths:
                           index:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -67575,6 +68003,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                         required:
                           - index
@@ -67682,6 +68111,9 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                description:
+                  default: ''
+                  type: string
                 esql:
                   additionalProperties: false
                   type: object
@@ -68570,7 +69002,72 @@ paths:
         required: true
       responses:
         '200':
-          description: A successful response.
+          content:
+            application/json:
+              examples:
+                postSyntheticMonitorsResponseWithWarning:
+                  description: A response when a browser monitor specifies a timeout but has no private locations.
+                  summary: Response with warning
+                  value: |-
+                    {
+                      "type": "browser",
+                      "name": "Example journey",
+                      "enabled": true,
+                      "warnings": [
+                        {
+                          "id": "monitor-id",
+                          "message": "For browser monitors, timeout is only supported on private locations. Browser monitor \"Example journey\" specifies a timeout and is running on public locations: \"public-1, public-2\". The timeout will have no effect on these locations.",
+                          "publicLocationIds": ["public-1", "public-2"]
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    description: |
+                      An optional array of warnings about the monitor configuration.
+                    items:
+                      $ref: '#/components/schemas/Synthetics_monitorWarning'
+                    type: array
+          description: |
+            A successful response. The response may include a `warnings` array when the monitor configuration has non-critical issues. For example, if a browser monitor specifies a timeout but has no private locations configured, a warning is returned indicating the timeout will have no effect.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidBrowserTimeout:
+                  description: A 400 error when a browser monitor timeout is below 30 seconds.
+                  summary: Invalid browser timeout
+                  value: |-
+                    {
+                      "statusCode": 400,
+                      "error": "Bad Request",
+                      "message": "Browser Monitor timeout is invalid",
+                      "attributes": {
+                        "details": "Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds."
+                      }
+                    }
+              schema:
+                type: object
+                properties:
+                  attributes:
+                    type: object
+                    properties:
+                      details:
+                        example: Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds.
+                        type: string
+                  error:
+                    example: Bad Request
+                    type: string
+                  message:
+                    example: Browser Monitor timeout is invalid
+                    type: string
+                  statusCode:
+                    example: 400
+                    type: integer
+          description: |
+            Bad request. For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
       summary: Create a monitor
       tags:
         - synthetics
@@ -68845,7 +69342,39 @@ paths:
         required: true
       responses:
         '200':
-          description: OK
+          content:
+            application/json:
+              examples:
+                putSyntheticMonitorResponseWithWarning:
+                  description: A response when a browser monitor specifies a timeout but has no private locations.
+                  summary: Response with warning
+                  value: |-
+                    {
+                      "type": "browser",
+                      "name": "Example journey",
+                      "enabled": true,
+                      "warnings": [
+                        {
+                          "id": "monitor-id",
+                          "message": "For browser monitors, timeout is only supported on private locations. Browser monitor \"Example journey\" specifies a timeout and is running on public locations: \"public-1, public-2\". The timeout will have no effect on these locations.",
+                          "publicLocationIds": ["public-1", "public-2"]
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    description: |
+                      An optional array of warnings about the monitor configuration.
+                    items:
+                      $ref: '#/components/schemas/Synthetics_monitorWarning'
+                    type: array
+          description: |
+            A successful response. The response may include a `warnings` array when the monitor configuration has non-critical issues.
+        '400':
+          description: |
+            Bad request. For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
       summary: Update a monitor
       tags:
         - synthetics
@@ -93402,6 +93931,11 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entitySourceIds:
+          description: List of entity source IDs associated with the watchlist
+          items:
+            type: string
+          type: array
         id:
           description: The unique ID of the watchlist
           type: string
@@ -95622,6 +96156,7 @@ components:
           - attributes:
               created_at: '2023-10-31T00:00:00Z'
               created_by: elastic
+              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               description: My pack description
               enabled: true
               name: My Pack
@@ -95634,6 +96169,7 @@ components:
                   query: select * from uptime;
               updated_at: '2023-10-31T00:00:00Z'
               updated_by: elastic
+              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             namespaces:
               - default
@@ -95678,6 +96214,7 @@ components:
           - attributes:
               created_at: '2022-07-26T09:28:08.597Z'
               created_by: elastic
+              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               description: Saved query description
               ecs_mapping:
                 host.uptime:
@@ -95689,6 +96226,7 @@ components:
               query: select * from uptime;
               updated_at: '2022-07-26T09:28:08.597Z'
               updated_by: elastic
+              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               version: 2.8.0
             id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             namespaces:
@@ -98310,6 +98848,8 @@ components:
           default: 16
           description: |
             The monitor timeout in seconds. The monitor will fail if it doesn't complete within this time.
+
+            For browser monitors, the minimum timeout is 30 seconds. Browser monitor timeouts are only applied when the monitor runs on private locations. If a browser monitor specifies a timeout but has no private locations configured, the timeout will have no effect and a warning will be returned in the response.
           type: number
       required:
         - name
@@ -98491,6 +99031,21 @@ components:
             - host
             - type
       title: ICMP monitor fields
+    Synthetics_monitorWarning:
+      title: Monitor warning
+      type: object
+      properties:
+        message:
+          description: A human-readable warning message.
+          type: string
+        monitorId:
+          description: The monitor ID associated with the warning.
+          type: string
+        publicLocationIds:
+          description: The public location IDs associated with the warning.
+          items:
+            type: string
+          type: array
     Synthetics_parameterRequest:
       title: Parameter request
       type: object

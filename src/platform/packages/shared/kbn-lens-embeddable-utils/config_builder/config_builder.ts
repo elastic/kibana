@@ -62,11 +62,11 @@ const compatibilityMap: Record<string, string> = {
   lnsLegacyMetric: 'legacy_metric',
   lnsXY: 'xy',
   lnsGauge: 'gauge',
-  lnsHeatmap: 'heatmap',
-  lnsTagcloud: 'tagcloud',
+  lnsHeatmap: 'heat_map',
+  lnsTagcloud: 'tag_cloud',
   lnsChoropleth: 'region_map',
   lnsPie: 'pie',
-  lnsDatatable: 'datatable',
+  lnsDatatable: 'data_table',
 };
 
 /**
@@ -115,11 +115,11 @@ const apiConvertersByChart = {
     fromAPItoLensState: fromGaugeAPItoLensState,
     fromLensStateToAPI: fromGaugeLensStateToAPI,
   },
-  heatmap: {
+  heat_map: {
     fromAPItoLensState: fromHeatmapAPItoLensState,
     fromLensStateToAPI: fromHeatmapLensStateToAPI,
   },
-  tagcloud: {
+  tag_cloud: {
     fromAPItoLensState: fromTagcloudAPItoLensState,
     fromLensStateToAPI: fromTagcloudLensStateToAPI,
   },
@@ -128,7 +128,7 @@ const apiConvertersByChart = {
     fromLensStateToAPI: fromRegionMapLensStateToAPI,
   },
   ...addPartitionChartConverters(),
-  datatable: {
+  data_table: {
     fromAPItoLensState: fromDatatableAPItoLensState,
     fromLensStateToAPI: fromDatatableLensStateToAPI,
   },
