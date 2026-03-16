@@ -284,7 +284,12 @@ export class Plugin
         const { pathname, search } = params.history.location;
 
         if (pathname.startsWith(RULES_PATH)) {
-          const suffix = pathname.slice(RULES_PATH.length) || '/';
+          let suffix = pathname.slice(RULES_PATH.length) || '/';
+          const isTopLevelRoute =
+            suffix === '/' || suffix === '/logs' || suffix.startsWith('/create');
+          if (!isTopLevelRoute) {
+            suffix = `/rule${suffix}`;
+          }
           await coreStart.application.navigateToApp('rules', {
             path: suffix + search,
             replace: true,

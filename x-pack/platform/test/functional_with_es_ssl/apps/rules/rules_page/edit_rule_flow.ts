@@ -80,9 +80,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Wait for navigation to edit page
         await retry.try(async () => {
           const url = await browser.getCurrentUrl();
-          if (!url.includes(`/app/rules/edit/${testRuleId}`)) {
+          if (!url.includes(`/app/rules/rule/edit/${testRuleId}`)) {
             throw new Error(
-              `Expected URL to contain '/app/rules/edit/${testRuleId}' but got: ${url}`
+              `Expected URL to contain '/app/rules/rule/edit/${testRuleId}' but got: ${url}`
             );
           }
         });
@@ -101,7 +101,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('returns to rules list after saving', async () => {
         // We should be on the edit page from the previous test
         const currentUrl = await browser.getCurrentUrl();
-        expect(currentUrl).to.contain(`/app/rules/edit/${testRuleId}`);
+        expect(currentUrl).to.contain(`/app/rules/rule/edit/${testRuleId}`);
 
         // Make a small change to the rule name
         const updatedName = `${testRuleName}-updated`;
@@ -194,7 +194,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Edit from rule details page', () => {
       it('navigates to edit page when clicking edit button from details', async () => {
         // Navigate directly to rule details page
-        await pageObjects.common.navigateToUrl('rules', testRuleId, {
+        await pageObjects.common.navigateToUrl('rules', `rule/${testRuleId}`, {
           shouldUseHashForSubUrl: false,
         });
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -211,9 +211,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Wait for navigation to edit page
         await retry.try(async () => {
           const url = await browser.getCurrentUrl();
-          if (!url.includes(`/app/rules/edit/${testRuleId}`)) {
+          if (!url.includes(`/app/rules/rule/edit/${testRuleId}`)) {
             throw new Error(
-              `Expected URL to contain '/app/rules/edit/${testRuleId}' but got: ${url}`
+              `Expected URL to contain '/app/rules/rule/edit/${testRuleId}' but got: ${url}`
             );
           }
         });
@@ -227,7 +227,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('returns to rule details page after saving from details', async () => {
         // We should be on the edit page from the previous test
         const currentUrl = await browser.getCurrentUrl();
-        expect(currentUrl).to.contain(`/app/rules/edit/${testRuleId}`);
+        expect(currentUrl).to.contain(`/app/rules/rule/edit/${testRuleId}`);
 
         // Make a small change
         const updatedName = `${testRuleName}-details-updated`;
@@ -246,7 +246,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          if (!url.includes(`/app/rules/${testRuleId}`) || url.includes('/edit/')) {
+          if (!url.includes(`/app/rules/rule/${testRuleId}`) || url.includes('/edit/')) {
             throw new Error(`Expected to be on rule details page but got: ${url}`);
           }
         });
@@ -276,7 +276,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('returns to rule details page after clicking cancel from details', async () => {
         // Navigate to rule details page
-        await pageObjects.common.navigateToUrl('rules', testRuleId, {
+        await pageObjects.common.navigateToUrl('rules', `rule/${testRuleId}`, {
           shouldUseHashForSubUrl: false,
         });
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -297,7 +297,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          if (!url.includes(`/app/rules/${testRuleId}`) || url.includes('/edit/')) {
+          if (!url.includes(`/app/rules/rule/${testRuleId}`) || url.includes('/edit/')) {
             throw new Error(`Expected to be on rule details page but got: ${url}`);
           }
         });
