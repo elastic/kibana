@@ -16,11 +16,12 @@ import {
   maxToolsPerSkill,
 } from '@kbn/agent-builder-common';
 import type { ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
+import type { SkillListOptions } from './persisted/client';
 
 export interface SkillRegistry {
   has(skillId: string): Promise<boolean>;
   get(skillId: string): Promise<InternalSkillDefinition | undefined>;
-  list(): Promise<InternalSkillDefinition[]>;
+  list(options?: SkillListOptions): Promise<InternalSkillDefinition[]>;
   create(params: PersistedSkillCreateRequest): Promise<InternalSkillDefinition>;
   update(skillId: string, update: PersistedSkillUpdateRequest): Promise<InternalSkillDefinition>;
   delete(skillId: string): Promise<boolean>;
@@ -69,10 +70,10 @@ export const createSkillRegistry = ({
       return persistedProvider.get(skillId);
     },
 
-    async list() {
+    async list(options) {
       const [builtinSkills, persistedSkills] = await Promise.all([
-        builtinProvider.list(),
-        persistedProvider.list(),
+        builtinProvider.list(options),
+        persistedProvider.list(options),
       ]);
       return [...builtinSkills, ...persistedSkills];
     },

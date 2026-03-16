@@ -20,6 +20,7 @@ describe('internalToPublicDefinition', () => {
     basePath: 'skills/platform',
     getRegistryTools: () => [],
     ...overrides,
+    referencedContentCount: overrides.referencedContentCount ?? 0,
   });
 
   it('converts basic fields', async () => {
@@ -84,6 +85,20 @@ describe('internalToPublicDefinition', () => {
     const result = await internalToPublicDefinition(skill);
 
     expect(result.tool_ids).toEqual([]);
+  });
+
+  it('includes plugin_id when present', async () => {
+    const skill = createMockInternalSkill({ plugin_id: 'my-plugin' });
+    const result = await internalToPublicDefinition(skill);
+
+    expect(result.plugin_id).toBe('my-plugin');
+  });
+
+  it('does not include plugin_id when absent', async () => {
+    const skill = createMockInternalSkill();
+    const result = await internalToPublicDefinition(skill);
+
+    expect(result.plugin_id).toBeUndefined();
   });
 
   it('does not include basePath or getInlineTools in the public definition', async () => {

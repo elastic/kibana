@@ -421,7 +421,8 @@ describe('RulesClientFactory', () => {
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test'
+      'Failed to create UIAM API key for alerting rule : test',
+      expect.objectContaining({ tags: expect.any(Array) })
     );
     expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
       name: 'uiam-test',
@@ -463,7 +464,11 @@ describe('RulesClientFactory', () => {
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test: UIAM service unavailable'
+      'Failed to create UIAM API key for alerting rule : test: UIAM service unavailable',
+      expect.objectContaining({
+        tags: expect.any(Array),
+        error: expect.objectContaining({ stack_trace: uiamError.stack }),
+      })
     );
     expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
       name: 'uiam-test',
@@ -502,7 +507,8 @@ describe('RulesClientFactory', () => {
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials'
+      'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials',
+      expect.objectContaining({ tags: expect.any(Array) })
     );
     expect(uiamApiKeys.grant).not.toHaveBeenCalled();
   });
@@ -543,7 +549,8 @@ describe('RulesClientFactory', () => {
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials'
+      'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials',
+      expect.objectContaining({ tags: expect.any(Array) })
     );
     expect(uiamApiKeys.grant).not.toHaveBeenCalled();
   });

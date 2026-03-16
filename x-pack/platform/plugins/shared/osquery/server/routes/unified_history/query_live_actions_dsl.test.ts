@@ -110,7 +110,7 @@ describe('buildLiveActionsQuery', () => {
 
       expect(filters).toContainEqual({
         simple_query_string: {
-          query: '*myquery*',
+          query: 'myquery*',
           fields: ['pack_name', 'queries.query', 'queries.id'],
           analyze_wildcard: true,
         },
@@ -151,7 +151,7 @@ describe('buildLiveActionsQuery', () => {
       expect(result.body.search_after).toEqual([1710936000000, 42]);
       expect(filters).toContainEqual({
         simple_query_string: {
-          query: '*myquery*',
+          query: 'myquery*',
           fields: ['pack_name', 'queries.query', 'queries.id'],
           analyze_wildcard: true,
         },
