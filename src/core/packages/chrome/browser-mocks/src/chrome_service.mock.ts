@@ -8,15 +8,13 @@
  */
 
 import { BehaviorSubject, of } from 'rxjs';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type {
-  ChromeService,
   InternalChromeSetup,
   InternalChromeStart,
-} from '@kbn/core-chrome-browser-internal';
-import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
+  ChromeComponentsDeps,
+} from '@kbn/core-chrome-browser-internal-types';
 import { lazyObject } from '@kbn/lazy-object';
 import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-mocks';
 
@@ -135,7 +133,11 @@ const createStartContractMock = () => {
   return startContract;
 };
 
-type ChromeServiceContract = PublicMethodsOf<ChromeService>;
+interface ChromeServiceContract {
+  setup(): InternalChromeSetup;
+  start(): Promise<InternalChromeStart>;
+  stop(): void;
+}
 const createMock = () => {
   const mocked: jest.Mocked<ChromeServiceContract> = lazyObject({
     setup: jest.fn().mockReturnValue(createSetupContractMock()),
