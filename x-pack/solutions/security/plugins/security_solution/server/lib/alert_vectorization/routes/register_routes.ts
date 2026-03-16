@@ -8,6 +8,7 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
+import type { GetGetResult } from '@elastic/elasticsearch/lib/api/types';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { ConfigType } from '../../../config';
 import { createAlertVectorIndexService } from '../vector_storage';
@@ -134,8 +135,8 @@ export const registerAlertVectorizationRoutes = (
 
           const alerts = alertsResponse.docs
             .filter(
-              (doc): doc is { _id: string; _index: string; _source: Record<string, unknown> } =>
-                'found' in doc && !!doc.found && '_source' in doc && doc._id != null
+              (doc): doc is GetGetResult<Record<string, unknown>> & { _source: Record<string, unknown> } =>
+                'found' in doc && !!doc.found && '_source' in doc && doc._source != null
             )
             .map((doc) => ({
               id: doc._id,

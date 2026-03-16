@@ -11,7 +11,7 @@ import { createAlertEmbeddingService } from './alert_embedding_service';
 import type { AlertVectorIndexService } from '../vector_storage';
 
 describe('AlertEmbeddingService', () => {
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let logger: Logger;
   let vectorIndexService: jest.Mocked<AlertVectorIndexService>;
 

@@ -11,7 +11,7 @@ import { createAlertVectorIndexService } from './alert_vector_index_service';
 import { getAlertVectorIndexName } from '../types';
 
 describe('AlertVectorIndexService', () => {
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let logger: Logger;
   const spaceId = 'default';
 
@@ -102,6 +102,7 @@ describe('AlertVectorIndexService', () => {
         _index: '.security-alert-vectors-default',
         _primary_term: 1,
         _seq_no: 1,
+        _shards: { total: 1, successful: 1, failed: 0 },
         _version: 1,
         result: 'created',
       });

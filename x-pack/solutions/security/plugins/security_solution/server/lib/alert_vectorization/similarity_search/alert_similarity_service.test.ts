@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createAlertSimilarityService } from './alert_similarity_service';
@@ -13,7 +13,7 @@ import type { AlertVectorIndexService } from '../vector_storage';
 import type { AlertEmbeddingService } from '../embedding';
 
 describe('AlertSimilarityService', () => {
-  let esClient: jest.Mocked<ElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let logger: Logger;
   let vectorIndexService: jest.Mocked<AlertVectorIndexService>;
   let embeddingService: jest.Mocked<AlertEmbeddingService>;
