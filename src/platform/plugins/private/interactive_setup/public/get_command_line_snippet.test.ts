@@ -19,7 +19,7 @@ describe('getCommandLineSnippet', () => {
       value: { userAgent: 'Windows' },
       writable: true,
     });
-    const { getCommandLineSnippet } = await import('./get_command_line_snippet');
+    const { getCommandLineSnippet } = await import('./get_command_line_snippet.js');
     expect(getCommandLineSnippet('kibana')).toEqual('bin\\kibana.bat');
     expect(getCommandLineSnippet('kibana', '--silent')).toEqual('bin\\kibana.bat --silent');
   });
@@ -29,7 +29,7 @@ describe('getCommandLineSnippet', () => {
       value: { userAgent: 'Linux' },
       writable: true,
     });
-    const { getCommandLineSnippet } = await import('./get_command_line_snippet');
+    const { getCommandLineSnippet } = await import('./get_command_line_snippet.js');
     expect(getCommandLineSnippet('kibana')).toEqual('bin/kibana');
     expect(getCommandLineSnippet('kibana', '--silent')).toEqual('bin/kibana --silent');
   });

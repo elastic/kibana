@@ -89,7 +89,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
         core,
         parentApi,
         loadContent: async () => {
-          const { InspectorPanel } = await import('./async_services');
+          const { InspectorPanel } = await import('./async_services.js');
           return (
             <InspectorPanel
               views={views}

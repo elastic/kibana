@@ -10,6 +10,6 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config } from './config';
 
 export const plugin = async (pluginInitializerContext: PluginInitializerContext) => {
-  const { CrossClusterReplicationServerPlugin } = await import('./plugin');
+  const { CrossClusterReplicationServerPlugin } = await import('./plugin.js');
   return new CrossClusterReplicationServerPlugin(pluginInitializerContext);
 };

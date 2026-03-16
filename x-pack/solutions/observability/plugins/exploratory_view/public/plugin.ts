@@ -102,7 +102,7 @@ export class Plugin
       euiIconType: 'logoObservability',
       id: 'exploratory-view',
       mount: async (params: AppMountParameters<unknown>) => {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application/index.js');
         const [coreStart, pluginsStart] = await core.getStartServices();
 
         return renderApp({

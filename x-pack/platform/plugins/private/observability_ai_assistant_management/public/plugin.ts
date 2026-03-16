@@ -101,7 +101,7 @@ export class AiAssistantManagementObservabilityPlugin
         hideFromGlobalSearch: !this.isServerless,
         order: 2,
         mount: async (mountParams) => {
-          const { mountManagementSection } = await import('./app');
+          const { mountManagementSection } = await import('./app.js');
 
           return mountManagementSection({
             core,

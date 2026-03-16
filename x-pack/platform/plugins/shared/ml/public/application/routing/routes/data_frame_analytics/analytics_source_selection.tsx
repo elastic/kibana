@@ -21,7 +21,7 @@ import {
 } from '../../breadcrumbs';
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../data_frame_analytics/pages/source_selection')).Page,
+  default: (await import('../../../data_frame_analytics/pages/source_selection/index.js')).Page,
 }));
 
 export const analyticsSourceSelectionRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({

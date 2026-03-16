@@ -9,6 +9,6 @@
 
 export { SETTING_CATEGORY } from './ui_settings';
 export const plugin = async () => {
-  const { PresentationUtilPlugin } = await import('./plugin');
+  const { PresentationUtilPlugin } = await import('./plugin.js');
   return new PresentationUtilPlugin();
 };

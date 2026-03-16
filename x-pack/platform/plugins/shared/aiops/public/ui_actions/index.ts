@@ -23,7 +23,7 @@ export function registerAiopsUiActions(
     ADD_PANEL_TRIGGER,
     'create-pattern-analysis-embeddable',
     async () => {
-      const { createAddPatternAnalysisEmbeddableAction } = await import('./actions');
+      const { createAddPatternAnalysisEmbeddableAction } = await import('./actions.js');
       const addPatternAnalysisAction = createAddPatternAnalysisEmbeddableAction(
         coreStart,
         pluginStart
@@ -32,18 +32,18 @@ export function registerAiopsUiActions(
     }
   );
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, 'create-change-point-chart', async () => {
-    const { createAddChangePointChartAction } = await import('./actions');
+    const { createAddChangePointChartAction } = await import('./actions.js');
     const addChangePointChartAction = createAddChangePointChartAction(coreStart, pluginStart);
     return addChangePointChartAction;
   });
 
   uiActions.addTriggerActionAsync(CATEGORIZE_FIELD_TRIGGER, 'ACTION_CATEGORIZE_FIELD', async () => {
-    const { createCategorizeFieldAction } = await import('./actions');
+    const { createCategorizeFieldAction } = await import('./actions.js');
     return createCategorizeFieldAction(coreStart, pluginStart);
   });
 
   uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'open-change-point-in-ml-app', async () => {
-    const { createOpenChangePointInMlAppAction } = await import('./actions');
+    const { createOpenChangePointInMlAppAction } = await import('./actions.js');
     const openChangePointInMlAppAction = createOpenChangePointInMlAppAction(coreStart, pluginStart);
     return openChangePointInMlAppAction;
   });
@@ -52,7 +52,7 @@ export function registerAiopsUiActions(
     ADD_PANEL_TRIGGER,
     'create-log-rate-analysis-embeddable',
     async () => {
-      const { createAddLogRateAnalysisEmbeddableAction } = await import('./actions');
+      const { createAddLogRateAnalysisEmbeddableAction } = await import('./actions.js');
       const addLogRateAnalysisAction = createAddLogRateAnalysisEmbeddableAction(
         coreStart,
         pluginStart

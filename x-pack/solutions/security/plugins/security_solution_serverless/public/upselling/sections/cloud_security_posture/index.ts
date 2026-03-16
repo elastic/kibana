@@ -8,7 +8,7 @@
 import { lazy } from 'react';
 
 export const CloudSecurityPostureIntegrationPliBlockLazy = lazy(() =>
-  import('./cloud_security_posture_integration_pli_block').then(
+  import('./cloud_security_posture_integration_pli_block.js').then(
     ({ CloudSecurityPostureIntegrationPliBlock }) => ({
       default: CloudSecurityPostureIntegrationPliBlock,
     })

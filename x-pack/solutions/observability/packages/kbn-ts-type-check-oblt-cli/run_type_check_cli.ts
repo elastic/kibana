@@ -50,7 +50,7 @@ run(
 
     // Lazy-load so --help can run before TS project metadata is available.
     const { TS_PROJECTS } = await import('@kbn/ts-projects');
-    const { updateRootRefsConfig, ROOT_REFS_CONFIG_PATH } = await import('./root_refs_config');
+    const { updateRootRefsConfig, ROOT_REFS_CONFIG_PATH } = await import('./root_refs_config.js');
 
     await Promise.all([
       updateRootRefsConfig(log),

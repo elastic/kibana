@@ -10,7 +10,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { Props } from './map_renderer';
 
 const Component = dynamic(async () => {
-  const { MapRenderer } = await import('../embeddable_module');
+  const { MapRenderer } = await import('../embeddable_module.js');
   return {
     default: MapRenderer,
   };

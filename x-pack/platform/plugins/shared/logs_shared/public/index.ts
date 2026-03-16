@@ -30,14 +30,14 @@ export type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_a
 export type { LogsOverviewProps } from './components/logs_overview';
 
 export const LogEntryFlyout = dynamic(
-  () => import('./components/logging/log_entry_flyout/log_entry_flyout')
+  () => import('./components/logging/log_entry_flyout/log_entry_flyout.js')
 );
 export const LogAIAssistant = dynamic(
-  () => import('./components/log_ai_assistant/log_ai_assistant')
+  () => import('./components/log_ai_assistant/log_ai_assistant.js')
 );
 
 export const OpenInLogsExplorerButton = dynamic(
-  () => import('./components/open_in_logs_explorer_button')
+  () => import('./components/open_in_logs_explorer_button.js')
 );
 
 // State machine utils

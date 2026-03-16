@@ -101,7 +101,7 @@ export const movingAverage: ExpressionFunctionMovingAverage = {
   },
 
   async fn(input, args) {
-    const { movingAverageFn } = await import('./moving_average_fn');
+    const { movingAverageFn } = await import('./moving_average_fn.js');
     return movingAverageFn(input, args);
   },
 };

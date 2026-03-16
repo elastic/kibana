@@ -8,6 +8,6 @@
 import type { PluginInitializer } from '@kbn/core/server';
 
 export const plugin: PluginInitializer<void, void> = async () => {
-  const { GenAiStreamingResponseExamplePlugin } = await import('./plugin');
+  const { GenAiStreamingResponseExamplePlugin } = await import('./plugin.js');
   return new GenAiStreamingResponseExamplePlugin();
 };

@@ -16,23 +16,23 @@ import type { ConvertTsvbToLensVisualization } from './types';
 const getConvertFnByType = (type: PANEL_TYPES) => {
   const convertionFns: { [key in PANEL_TYPES]?: () => Promise<ConvertTsvbToLensVisualization> } = {
     [PANEL_TYPES.TIMESERIES]: async () => {
-      const { convertToLens } = await import('./timeseries');
+      const { convertToLens } = await import('./timeseries/index.js');
       return convertToLens;
     },
     [PANEL_TYPES.TOP_N]: async () => {
-      const { convertToLens } = await import('./top_n');
+      const { convertToLens } = await import('./top_n/index.js');
       return convertToLens;
     },
     [PANEL_TYPES.METRIC]: async () => {
-      const { convertToLens } = await import('./metric');
+      const { convertToLens } = await import('./metric/index.js');
       return convertToLens;
     },
     [PANEL_TYPES.GAUGE]: async () => {
-      const { convertToLens } = await import('./gauge');
+      const { convertToLens } = await import('./gauge/index.js');
       return convertToLens;
     },
     [PANEL_TYPES.TABLE]: async () => {
-      const { convertToLens } = await import('./table');
+      const { convertToLens } = await import('./table/index.js');
       return convertToLens;
     },
   };

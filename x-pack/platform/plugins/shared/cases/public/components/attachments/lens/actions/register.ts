@@ -17,7 +17,7 @@ export const registerUIActions = (
     ON_OPEN_PANEL_MENU,
     ADD_TO_EXISTING_CASE_ACTION_ID,
     async () => {
-      const { createAddToExistingCaseLensAction } = await import('./add_to_existing_case');
+      const { createAddToExistingCaseLensAction } = await import('./add_to_existing_case.js');
       return createAddToExistingCaseLensAction(casesActionContextProps, services);
     }
   );

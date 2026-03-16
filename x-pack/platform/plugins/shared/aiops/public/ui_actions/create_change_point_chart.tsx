@@ -67,7 +67,7 @@ export function createAddChangePointChartAction(
         },
         loadContent: async ({ closeFlyout }) => {
           const { EmbeddableChangePointUserInput } = await import(
-            '../embeddables/change_point_chart/change_point_config_input'
+            '../embeddables/change_point_chart/change_point_config_input.js'
           );
           return (
             <EmbeddableChangePointUserInput

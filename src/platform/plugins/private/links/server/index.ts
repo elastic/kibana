@@ -27,6 +27,6 @@ export type {
 } from './embeddable_schemas';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { LinksServerPlugin } = await import('./plugin');
+  const { LinksServerPlugin } = await import('./plugin.js');
   return new LinksServerPlugin(initContext);
 };

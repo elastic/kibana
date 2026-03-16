@@ -19,6 +19,6 @@ export const config: PluginConfigDescriptor<HeatmapConfig> = {
 };
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { VisTypeHeatmapServerPlugin } = await import('./plugin');
+  const { VisTypeHeatmapServerPlugin } = await import('./plugin.js');
   return new VisTypeHeatmapServerPlugin(initializerContext);
 };

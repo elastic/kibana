@@ -88,7 +88,7 @@ export class CPSManager implements ICPSManager {
    */
   private async initializeDefaultProjectRouting() {
     try {
-      const { fetchDefaultProjectRouting } = await import('./async_services');
+      const { fetchDefaultProjectRouting } = await import('./async_services.js');
       const projectRouting = await fetchDefaultProjectRouting(this.http);
       this.updateDefaultProjectRouting(projectRouting);
     } catch (error) {
@@ -222,7 +222,7 @@ export class CPSManager implements ICPSManager {
 
   private async getProjectFetcher() {
     if (!this.projectFetcherPromise) {
-      this.projectFetcherPromise = import('./async_services').then(({ createProjectFetcher }) =>
+      this.projectFetcherPromise = import('./async_services.js').then(({ createProjectFetcher }) =>
         createProjectFetcher(this.http, this.logger)
       );
     }

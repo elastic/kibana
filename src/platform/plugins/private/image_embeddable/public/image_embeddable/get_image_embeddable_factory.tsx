@@ -88,7 +88,7 @@ export const getImageEmbeddableFactory = () => {
             parentApi,
             loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
               const { getImageEditor } = await import(
-                '../components/image_editor/get_image_editor'
+                '../components/image_editor/get_image_editor.js'
               );
               return await getImageEditor({
                 closeFlyout,

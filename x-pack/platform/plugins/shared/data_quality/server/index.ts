@@ -6,6 +6,6 @@
  */
 
 export const plugin = async () => {
-  const { DataQualityPlugin } = await import('./plugin');
+  const { DataQualityPlugin } = await import('./plugin.js');
   return new DataQualityPlugin();
 };

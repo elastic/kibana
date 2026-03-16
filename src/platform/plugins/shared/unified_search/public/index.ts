@@ -37,7 +37,7 @@ export async function createFilterAction(
   id: string,
   type: string
 ) {
-  const { createFilterAction: createAction } = await import('./actions/actions_module');
+  const { createFilterAction: createAction } = await import('./actions/actions_module.js');
   return createAction(filterManager, timeFilter, coreStart, id, type);
 }
 

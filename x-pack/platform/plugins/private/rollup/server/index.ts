@@ -10,6 +10,6 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config } from './config';
 
 export const plugin = async (pluginInitializerContext: PluginInitializerContext) => {
-  const { RollupPlugin } = await import('./plugin');
+  const { RollupPlugin } = await import('./plugin.js');
   return new RollupPlugin(pluginInitializerContext);
 };

@@ -12,7 +12,9 @@ import type { DiscoverFlyoutStreamFieldProps } from './discover_flyout_stream_fi
 import type { DiscoverFlyoutStreamProcessingLinkProps } from './discover_flyout_stream_processing_link';
 
 const DiscoverFlyoutStreamField = dynamic(() =>
-  import('./discover_flyout_stream_field').then((m) => ({ default: m.DiscoverFlyoutStreamField }))
+  import('./discover_flyout_stream_field.js').then((m) => ({
+    default: m.DiscoverFlyoutStreamField,
+  }))
 );
 
 export function createDiscoverFlyoutStreamFieldLink(
@@ -24,7 +26,7 @@ export function createDiscoverFlyoutStreamFieldLink(
 }
 
 const DiscoverFlyoutStreamProcessingLink = dynamic(() =>
-  import('./discover_flyout_stream_processing_link').then((m) => ({
+  import('./discover_flyout_stream_processing_link.js').then((m) => ({
     default: m.DiscoverFlyoutStreamProcessingLink,
   }))
 );

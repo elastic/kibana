@@ -26,7 +26,7 @@ import {
 } from './menu_i18n';
 
 const LazyHelpPopover = React.lazy(async () => {
-  const module = await import('./help_popover');
+  const module = await import('./help_popover.js');
   return { default: module.HelpPopover };
 });
 

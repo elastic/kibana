@@ -10,7 +10,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config } from './config';
 
 export const plugin = async (context: PluginInitializerContext) => {
-  const { IndexMgmtServerPlugin } = await import('./plugin');
+  const { IndexMgmtServerPlugin } = await import('./plugin.js');
   return new IndexMgmtServerPlugin(context);
 };
 

@@ -17,7 +17,7 @@ import type { IngestPipelineFlyoutWithContextProps } from './ingest_pipeline_fly
 
 export const IngestPipelineFlyout = dynamic<ComponentType<IngestPipelineFlyoutWithContextProps>>(
   () =>
-    import('./ingest_pipeline_flyout_with_context').then((mod) => ({
+    import('./ingest_pipeline_flyout_with_context.js').then((mod) => ({
       default: mod.IngestPipelineFlyoutWithContext,
     }))
 );

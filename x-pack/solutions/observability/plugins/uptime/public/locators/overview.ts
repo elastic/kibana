@@ -22,7 +22,7 @@ export class UptimeOverviewLocatorDefinition
   public readonly getLocation = async (
     params: UptimeOverviewLocatorInfraParams | UptimeOverviewLocatorParams
   ) => {
-    const { getLocation } = await import('./get_location');
+    const { getLocation } = await import('./get_location.js');
     return getLocation(params);
   };
 }

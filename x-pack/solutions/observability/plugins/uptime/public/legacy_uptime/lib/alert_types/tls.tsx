@@ -20,7 +20,7 @@ import { CERTIFICATES_ROUTE } from '../../../../common/constants/ui';
 let validateFunc: (ruleParams: any) => ValidationResult;
 
 const { defaultActionMessage, defaultRecoveryMessage, description } = TlsTranslations;
-const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
+const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert.js'));
 export const initTlsAlertType: AlertTypeInitializer = ({
   core,
   plugins,
@@ -44,7 +44,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   validate: (ruleParams: any) => {
     if (!validateFunc) {
       (async function loadValidate() {
-        const { validateTLSAlertParams } = await import('./lazy_wrapper/validate_tls_alert');
+        const { validateTLSAlertParams } = await import('./lazy_wrapper/validate_tls_alert.js');
         validateFunc = validateTLSAlertParams;
       })();
     }

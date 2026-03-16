@@ -14,5 +14,5 @@ import type { UrlFormatEditorFormatParams } from './url';
 export type { UrlFormatEditor, UrlFormatEditorFormatParams } from './url';
 
 export const urlFormatEditorFactory: FieldFormatEditorFactory<UrlFormatEditorFormatParams> = () =>
-  import('./url').then((m) => m.UrlFormatEditor);
+  import('./url.js').then((m) => m.UrlFormatEditor);
 urlFormatEditorFactory.formatId = formatId;

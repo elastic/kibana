@@ -442,6 +442,8 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   }
 };
 export const updateCustomIntegrationHandler: FleetRequestHandler<
+  TypeOf<typeof CustomIntegrationRequestSchema.params>,
+  undefined,
   TypeOf<typeof CustomIntegrationRequestSchema.body>
 > = async (context, request, response) => {
   const [coreContext] = await Promise.all([context.core, context.fleet]);
@@ -601,8 +603,8 @@ export const getVerificationKeyIdHandler: FleetRequestHandler = async (
  * and prompt for users to authorize the transforms with the appropriate permissions after package is done installing
  */
 export const reauthorizeTransformsHandler: FleetRequestHandler<
-  TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
-  TypeOf<typeof InstallPackageFromRegistryRequestSchema.query>,
+  TypeOf<typeof ReauthorizeTransformRequestSchema.params>,
+  TypeOf<typeof ReauthorizeTransformRequestSchema.query>,
   TypeOf<typeof ReauthorizeTransformRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;

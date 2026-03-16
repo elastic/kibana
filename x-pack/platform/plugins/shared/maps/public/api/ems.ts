@@ -10,6 +10,6 @@ import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
 export async function suggestEMSTermJoinConfig(
   sampleValuesConfig: SampleValuesConfig
 ): Promise<EMSTermJoinConfig | null> {
-  const { suggestEMSTermJoinConfig: suggestEms } = await import('../ems_autosuggest');
+  const { suggestEMSTermJoinConfig: suggestEms } = await import('../ems_autosuggest/index.js');
   return await suggestEms(sampleValuesConfig);
 }

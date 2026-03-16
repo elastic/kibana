@@ -13,7 +13,7 @@ import type { EmbeddableConsoleDependencies } from '../../../types/embeddable_co
 
 type EmbeddableConsoleInternalProps = EmbeddableConsoleDependencies;
 const Console = dynamic(async () => ({
-  default: (await import('./embeddable_console')).EmbeddableConsole,
+  default: (await import('./embeddable_console.js')).EmbeddableConsole,
 }));
 
 export const EmbeddableConsole = (props: EmbeddableConsoleInternalProps) => <Console {...props} />;

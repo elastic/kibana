@@ -42,7 +42,7 @@ export function registerCases(
       ),
       timelineAvatar: 'machineLearningApp',
       children: React.lazy(async () => {
-        const { initComponent } = await import('./change_point_charts_attachment');
+        const { initComponent } = await import('./change_point_charts_attachment.js');
 
         return {
           default: initComponent(pluginStart.fieldFormats, ChangePointDetectionComponent),
@@ -76,7 +76,7 @@ export function registerCases(
       ),
       timelineAvatar: 'machineLearningApp',
       children: React.lazy(async () => {
-        const { initComponent } = await import('./log_pattern_attachment');
+        const { initComponent } = await import('./log_pattern_attachment.js');
 
         return { default: initComponent(pluginStart.fieldFormats, LogPatternAttachmentComponent) };
       }),
@@ -111,7 +111,7 @@ export function registerCases(
       ),
       timelineAvatar: 'machineLearningApp',
       children: React.lazy(async () => {
-        const { initComponent } = await import('./log_rate_analysis_attachment');
+        const { initComponent } = await import('./log_rate_analysis_attachment.js');
 
         return {
           default: initComponent(

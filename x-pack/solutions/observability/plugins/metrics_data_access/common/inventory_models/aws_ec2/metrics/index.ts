@@ -19,7 +19,7 @@ export const metrics: InventoryMetricsConfig<SQSAggregations> = {
   },
   requiredTsvb: ['awsEC2CpuUtilization', 'awsEC2NetworkTraffic', 'awsEC2DiskIOBytes'],
   getAggregations: async (args) => {
-    const { snapshot } = await import('./snapshot');
+    const { snapshot } = await import('./snapshot/index.js');
     const catalog = new MetricsCatalog(snapshot, args?.schema);
     return catalog;
   },

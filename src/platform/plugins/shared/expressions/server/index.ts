@@ -15,7 +15,7 @@ export type { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
 // Kibana Platform.
 export { ExpressionsServerPlugin as Plugin };
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { ExpressionsServerPlugin } = await import('./plugin');
+  const { ExpressionsServerPlugin } = await import('./plugin.js');
   return new ExpressionsServerPlugin(initializerContext);
 }
 

@@ -114,7 +114,7 @@ export class ObservabilityAIAssistantPlugin
         ? withSuspense(
             withProviders(
               lazy(() =>
-                import('./components/insight/insight').then((m) => ({ default: m.Insight }))
+                import('./components/insight/insight.js').then((m) => ({ default: m.Insight }))
               ),
               services
             )

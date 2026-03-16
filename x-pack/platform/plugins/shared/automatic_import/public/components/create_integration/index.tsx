@@ -11,7 +11,7 @@ import type { Services } from '../../services';
 import type { CreateIntegrationComponent } from './types';
 
 const CreateIntegration = React.lazy(() =>
-  import('./create_integration').then((module) => ({
+  import('./create_integration.js').then((module) => ({
     default: module.CreateIntegration,
   }))
 );

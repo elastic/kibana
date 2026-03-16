@@ -18,7 +18,7 @@ import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../datavisualizer/index_based/index_data_visualizer'))
+  default: (await import('../../../datavisualizer/index_based/index_data_visualizer.js'))
     .IndexDataVisualizerPage,
 }));
 

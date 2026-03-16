@@ -31,7 +31,7 @@ export const metrics: InventoryMetricsConfig<PodAggregations> = {
     ...nginxRequiredMetrics,
   ],
   getAggregations: async () => {
-    const { snapshot } = await import('./snapshot');
+    const { snapshot } = await import('./snapshot/index.js');
     const catalog = new MetricsCatalog(snapshot);
     return catalog;
   },

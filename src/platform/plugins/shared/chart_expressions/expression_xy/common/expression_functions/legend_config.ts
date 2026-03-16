@@ -129,7 +129,7 @@ export const legendConfigFunction: LegendConfigFn = {
     },
   },
   async fn(input, args, handlers) {
-    const { legendConfigFn } = await import('./expression_module');
+    const { legendConfigFn } = await import('./expression_module.js');
     return await legendConfigFn(input, args, handlers);
   },
 };

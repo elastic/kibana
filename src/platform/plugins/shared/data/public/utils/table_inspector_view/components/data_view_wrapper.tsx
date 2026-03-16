@@ -13,7 +13,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
 
-const DataViewComponent = lazy(() => import('./data_view'));
+const DataViewComponent = lazy(() => import('./data_view.js'));
 
 export const getDataViewComponentWrapper = (
   getStartServices: () => {

@@ -8,5 +8,5 @@
 import { dynamic } from '@kbn/shared-ux-utility';
 
 export const SearchHomepage = dynamic(async () => ({
-  default: (await import('./components/stack_app')).App,
+  default: (await import('./components/stack_app.js')).App,
 }));

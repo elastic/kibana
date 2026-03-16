@@ -17,7 +17,7 @@ export class EuiProviderDevWarningPlugin
       id: 'euiProviderDevWarning',
       title: 'EUI Provider Dev Warning',
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const [coreStart] = await core.getStartServices();
         coreStart.chrome.docTitle.change('EuiProvider test');
         return renderApp(coreStart, params);

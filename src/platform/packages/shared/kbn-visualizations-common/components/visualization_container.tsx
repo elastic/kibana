@@ -26,8 +26,8 @@ export interface VisualizationContainerProps {
   error?: string;
 }
 
-const VisualizationNoResults = lazy(() => import('./visualization_noresults'));
-const VisualizationError = lazy(() => import('./visualization_error'));
+const VisualizationNoResults = lazy(() => import('./visualization_noresults.js'));
+const VisualizationError = lazy(() => import('./visualization_error.js'));
 
 const visualizationContainerStyles = {
   base: ({ euiTheme }: UseEuiTheme) =>

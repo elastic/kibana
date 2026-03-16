@@ -17,7 +17,7 @@ import {
 } from '../../../../common/storage_explorer_types';
 
 const StorageExplorer = dynamic(() =>
-  import('../../app/storage_explorer').then((mod) => ({ default: mod.StorageExplorer }))
+  import('../../app/storage_explorer/index.js').then((mod) => ({ default: mod.StorageExplorer }))
 );
 
 export const storageExplorer = {

@@ -30,6 +30,6 @@ export type ProfilingConfig = TypeOf<typeof configSchema>;
 export type { ProfilingDataAccessPluginSetup, ProfilingDataAccessPluginStart };
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { ProfilingDataAccessPlugin } = await import('./plugin');
+  const { ProfilingDataAccessPlugin } = await import('./plugin.js');
   return new ProfilingDataAccessPlugin(initializerContext);
 }

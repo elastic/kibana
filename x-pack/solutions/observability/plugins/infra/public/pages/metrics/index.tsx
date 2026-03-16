@@ -49,15 +49,17 @@ const HOSTS_FEEDBACK_LINK = 'https://ela.st/host-feedback';
 const METRICS_EXPLORER_FEEDBACK_URL = 'https://ela.st/survey-infra-metricsexplorer';
 
 const MetricsExplorerPage = dynamic(() =>
-  import('./metrics_explorer').then((mod) => ({ default: mod.MetricsExplorerPage }))
+  import('./metrics_explorer/index.js').then((mod) => ({ default: mod.MetricsExplorerPage }))
 );
 const SnapshotPage = dynamic(() =>
-  import('./inventory_view').then((mod) => ({ default: mod.SnapshotPage }))
+  import('./inventory_view/index.js').then((mod) => ({ default: mod.SnapshotPage }))
 );
 const NodeDetail = dynamic(() =>
-  import('./metric_detail').then((mod) => ({ default: mod.NodeDetail }))
+  import('./metric_detail/index.js').then((mod) => ({ default: mod.NodeDetail }))
 );
-const HostsPage = dynamic(() => import('./hosts').then((mod) => ({ default: mod.HostsPage })));
+const HostsPage = dynamic(() =>
+  import('./hosts/index.js').then((mod) => ({ default: mod.HostsPage }))
+);
 
 export const InfrastructurePage = () => {
   const config = usePluginConfig();

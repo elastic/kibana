@@ -19,9 +19,9 @@ export class PainlessLexerEnhanced extends PainlessLexer {
   private lastToken?: Token;
 
   nextToken(): Token {
-    this.lastToken = super.nextToken();
-
-    return this.lastToken;
+    const token = super.nextToken();
+    this.lastToken = token;
+    return token;
   }
 
   isSlashRegex(): boolean {

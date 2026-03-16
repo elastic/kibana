@@ -47,7 +47,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, Sl
     validateParams: async (
       actionParams: SlackActionParams
     ): Promise<GenericValidationResult<SlackActionParams>> => {
-      const translations = await import('./translations');
+      const translations = await import('./translations.js');
       const errors = {
         message: new Array<string>(),
       };
@@ -57,8 +57,8 @@ export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, Sl
       }
       return validationResult;
     },
-    actionConnectorFields: lazy(() => import('./slack_connectors')),
-    actionParamsFields: lazy(() => import('./slack_params')),
+    actionConnectorFields: lazy(() => import('./slack_connectors.js')),
+    actionParamsFields: lazy(() => import('./slack_params.js')),
     convertParamsBetweenGroups: (
       params: PostMessageParams | SlackActionParams
     ): PostMessageParams | SlackActionParams | {} => {

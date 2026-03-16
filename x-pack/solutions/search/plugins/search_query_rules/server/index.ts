@@ -10,7 +10,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export { config } from './config';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { SearchQueryRulesPlugin } = await import('./plugin');
+  const { SearchQueryRulesPlugin } = await import('./plugin.js');
   return new SearchQueryRulesPlugin(initializerContext);
 }
 

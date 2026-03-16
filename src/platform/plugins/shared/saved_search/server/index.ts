@@ -13,6 +13,6 @@ export type { DiscoverSessionTab, DiscoverSessionTabAttributes } from './saved_o
 export { getSavedSearch } from './services/saved_searches';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { SavedSearchServerPlugin } = await import('./plugin');
+  const { SavedSearchServerPlugin } = await import('./plugin.js');
   return new SavedSearchServerPlugin(initContext);
 };

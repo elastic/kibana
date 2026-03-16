@@ -18,7 +18,7 @@ import {
 } from '../lib';
 
 const RuleForm: React.LazyExoticComponent<React.FC<RuleFormProps<any>>> = lazy(() =>
-  import('../src/rule_form').then((module) => ({ default: module.RuleForm }))
+  import('../src/rule_form.js').then((module) => ({ default: module.RuleForm }))
 );
 
 const inLineContainerCss = css`

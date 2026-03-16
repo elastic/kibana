@@ -15,7 +15,7 @@ export class HardeningPlugin implements Plugin<HardeningPluginSetup, HardeningPl
       id: 'hardeningPlugin',
       title: 'Hardening Plugin',
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const [coreStart] = await core.getStartServices();
         coreStart.chrome.docTitle.change('Hardening test');
         return renderApp(coreStart, params);

@@ -24,6 +24,6 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 export const plugin = async (ctx: PluginInitializerContext) => {
-  const { TriggersActionsPlugin } = await import('./plugin');
+  const { TriggersActionsPlugin } = await import('./plugin.js');
   return new TriggersActionsPlugin(ctx);
 };

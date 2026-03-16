@@ -20,23 +20,23 @@ const withSuspense: WithSuspense = (Component) =>
     );
   };
 
-const LandingLinksIconsCategoriesLazy = lazy(() => import('./landing_links_icons_categories'));
+const LandingLinksIconsCategoriesLazy = lazy(() => import('./landing_links_icons_categories.js'));
 export const LandingLinksIconsCategories = withSuspense(LandingLinksIconsCategoriesLazy);
 
-const LandingLinksIconsLazy = lazy(() => import('./landing_links_icons'));
+const LandingLinksIconsLazy = lazy(() => import('./landing_links_icons.js'));
 export const LandingLinksIcons = withSuspense(LandingLinksIconsLazy);
 
-const LandingLinksIconsGroupsLazy = lazy(() => import('./landing_links_icons_groups'));
+const LandingLinksIconsGroupsLazy = lazy(() => import('./landing_links_icons_groups.js'));
 export const LandingLinksIconsGroups = withSuspense(LandingLinksIconsGroupsLazy);
 
-const LandingLinksImagesLazy = lazy(() => import('./landing_links_images'));
+const LandingLinksImagesLazy = lazy(() => import('./landing_links_images.js'));
 export const LandingLinksImages = withSuspense(LandingLinksImagesLazy);
 
-const LandingLinksImageCardsLazy = lazy(() => import('./landing_links_images_cards'));
+const LandingLinksImageCardsLazy = lazy(() => import('./landing_links_images_cards.js'));
 export const LandingLinksImageCards = withSuspense(LandingLinksImageCardsLazy);
 
 const LandingLinksIconsCategoriesGroupsLazy = lazy(
-  () => import('./landing_links_icons_categories_groups')
+  () => import('./landing_links_icons_categories_groups.js')
 );
 export const LandingLinksIconsCategoriesGroups = withSuspense(
   LandingLinksIconsCategoriesGroupsLazy

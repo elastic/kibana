@@ -146,7 +146,7 @@ export class IndexMgmtUIPlugin
           order: 0,
           mount: async (params) => {
             const { mountManagementSection } = await import(
-              './application/mount_management_section'
+              './application/mount_management_section.js'
             );
             return mountManagementSection({
               coreSetup,
@@ -182,7 +182,9 @@ export class IndexMgmtUIPlugin
       apiService: this.apiService,
       extensionsService: this.extensionsService.setup(),
       renderIndexManagementApp: async (params: IndexManagementAppMountParams) => {
-        const { mountManagementSection } = await import('./application/mount_management_section');
+        const { mountManagementSection } = await import(
+          './application/mount_management_section.js'
+        );
         return mountManagementSection({
           coreSetup,
           usageCollection,

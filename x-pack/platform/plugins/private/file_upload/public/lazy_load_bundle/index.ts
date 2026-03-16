@@ -49,7 +49,7 @@ export async function lazyLoadModules(): Promise<LazyLoadedFileUploadModules> {
 
   loadModulesPromise = new Promise(async (resolve, reject) => {
     try {
-      const { GeoUploadWizard, importerFactory, IndexNameForm } = await import('./lazy');
+      const { GeoUploadWizard, importerFactory, IndexNameForm } = await import('./lazy/index.js');
       resolve({
         GeoUploadWizard,
         importerFactory,

@@ -10,7 +10,7 @@ import React, { lazy, Suspense } from 'react';
 import type { MetricsDataClient } from '../../../lib/metrics_client';
 import type { NodeMetricsTableProps } from '../shared';
 
-const LazyIntegratedPodMetricsTable = lazy(() => import('./integrated_pod_metrics_table'));
+const LazyIntegratedPodMetricsTable = lazy(() => import('./integrated_pod_metrics_table.js'));
 
 export function createLazyPodMetricsTable(core: CoreStart, metricsClient: MetricsDataClient) {
   return ({ timerange, kuery, sourceId, isOtel }: NodeMetricsTableProps) => {

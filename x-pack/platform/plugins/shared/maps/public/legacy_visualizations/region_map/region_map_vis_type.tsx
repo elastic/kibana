@@ -20,7 +20,7 @@ export const title = i18n.translate('xpack.maps.regionMapMap.vis.title', {
 
 const LazyRegionMapEditor = function (props: VisEditorOptionsProps) {
   const Component = dynamic(async () => {
-    const { RegionMapEditor } = await import('./region_map_editor');
+    const { RegionMapEditor } = await import('./region_map_editor.js');
     return {
       default: RegionMapEditor,
     };

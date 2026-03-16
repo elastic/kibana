@@ -27,7 +27,7 @@ import type { TimeseriesVisParams } from './types';
 import type { TimeseriesRenderValue } from './metrics_fn';
 
 const TimeseriesVisualization = lazy(
-  () => import('./application/components/timeseries_visualization')
+  () => import('./application/components/timeseries_visualization.js')
 );
 
 const checkIfDataExists = (visData: TimeseriesVisData | {}, model: TimeseriesVisParams) => {

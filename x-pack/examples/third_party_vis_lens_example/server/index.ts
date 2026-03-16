@@ -8,6 +8,6 @@
 import type { PluginInitializer } from '@kbn/core/server';
 
 export const plugin: PluginInitializer<void, void> = async () => {
-  const { ThirdPartyVisLensExamplePlugin } = await import('./plugin');
+  const { ThirdPartyVisLensExamplePlugin } = await import('./plugin.js');
   return new ThirdPartyVisLensExamplePlugin();
 };

@@ -9,7 +9,7 @@ import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core
 import { configSchema, type ConfigSchema } from './config';
 
 export const plugin = async (ctx: PluginInitializerContext) => {
-  const { TransformServerPlugin } = await import('./plugin');
+  const { TransformServerPlugin } = await import('./plugin.js');
   return new TransformServerPlugin(ctx);
 };
 

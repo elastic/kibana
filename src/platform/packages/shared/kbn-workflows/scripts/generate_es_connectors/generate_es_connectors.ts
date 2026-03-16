@@ -183,7 +183,9 @@ async function generateZodSchemas(contracts: ContractMeta[]) {
     console.log('1/3 Generating Zod schemas from OpenAPI spec...');
 
     console.log('- Importing openapi-ts config...');
-    const buildTsConfig = await import('./openapi_ts.config').then((module) => module.default);
+    const buildTsConfig = (await import('./openapi_ts.config.js').then(
+      (module) => module.default
+    )) as unknown as (config: { include: string[] }) => import('@hey-api/openapi-ts').UserConfig;
     console.log(`- Openapi-ts config imported in ${formatDuration(startedAt, performance.now())}`);
 
     const createClientStartedAt = performance.now();

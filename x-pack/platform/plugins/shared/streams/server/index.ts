@@ -15,6 +15,6 @@ export type { StreamsConfig, StreamsPluginSetup, StreamsPluginStart, StreamsRout
 export { config };
 
 export const plugin = async (context: PluginInitializerContext<StreamsConfig>) => {
-  const { StreamsPlugin } = await import('./plugin');
+  const { StreamsPlugin } = await import('./plugin.js');
   return new StreamsPlugin(context);
 };

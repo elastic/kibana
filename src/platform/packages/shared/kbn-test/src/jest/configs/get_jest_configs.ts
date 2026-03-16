@@ -309,15 +309,16 @@ const NO_WARNINGS_CONSOLE = {
 async function getTestPathsWithSearchSource(configPath: string): Promise<string[]> {
   try {
     // Use dynamic imports to avoid loading Jest modules in test environment
-    const [{ readConfig }, { SearchSource }, Runtime] = await Promise.all([
+    const [{ readConfig }, { SearchSource }, runtimeMod] = await Promise.all([
       import('jest-config'),
       import('jest'),
       import('jest-runtime'),
     ]);
 
+    const Runtime = runtimeMod.default as unknown as (typeof runtimeMod.default)['default'];
     const config = await readConfig(EMPTY_ARGV, configPath);
     const searchSource = new SearchSource(
-      await Runtime.default.createContext(config.projectConfig, {
+      await Runtime.createContext(config.projectConfig, {
         maxWorkers: 1,
         watchman: false,
         watch: false,

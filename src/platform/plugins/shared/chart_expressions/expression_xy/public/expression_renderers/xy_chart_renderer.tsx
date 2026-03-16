@@ -221,8 +221,8 @@ export const getXyChartRenderer = ({
 
     // Lazy loaded parts
     const [{ XYChartReportable }, { calculateMinInterval, getDataLayers }] = await Promise.all([
-      import('../components/xy_chart'),
-      import('../helpers'),
+      import('../components/xy_chart.js'),
+      import('../helpers/index.js'),
     ]);
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));

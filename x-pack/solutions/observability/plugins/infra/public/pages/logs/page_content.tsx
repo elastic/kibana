@@ -29,10 +29,10 @@ import { NotFoundPage } from '../404';
 import { getLogsAppRoutes } from './routes';
 
 const LogEntryCategoriesPage = dynamic(() =>
-  import('./log_entry_categories').then((mod) => ({ default: mod.LogEntryCategoriesPage }))
+  import('./log_entry_categories/index.js').then((mod) => ({ default: mod.LogEntryCategoriesPage }))
 );
 const LogEntryRatePage = dynamic(() =>
-  import('./log_entry_rate').then((mod) => ({ default: mod.LogEntryRatePage }))
+  import('./log_entry_rate/index.js').then((mod) => ({ default: mod.LogEntryRatePage }))
 );
 
 export const LogsPageContent: React.FunctionComponent = () => {

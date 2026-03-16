@@ -38,7 +38,7 @@ export class DashboardAgentPlugin
     _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
+    import('./attachment_types/index.js').then(({ registerDashboardAttachmentUiDefinition }) => {
       const dashboardLocator = plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR);
       const findDashboardsServicePromise = plugins.dashboard.findDashboardsService();
       this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({

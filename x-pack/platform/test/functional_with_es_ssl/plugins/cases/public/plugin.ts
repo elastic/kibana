@@ -42,7 +42,7 @@ export class CasesFixturePlugin
       title: 'Cases Fixture App',
       async mount(params: AppMountParameters) {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         return renderApp({ coreStart, pluginsStart, mountParams: params });
       },
     });

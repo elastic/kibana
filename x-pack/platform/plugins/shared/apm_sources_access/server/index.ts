@@ -14,7 +14,7 @@ import {
 } from '../common/config_schema';
 
 const plugin = async (initContext: PluginInitializerContext) => {
-  const { ApmSourcesAccessPlugin } = await import('./plugin');
+  const { ApmSourcesAccessPlugin } = await import('./plugin.js');
   return new ApmSourcesAccessPlugin(initContext);
 };
 

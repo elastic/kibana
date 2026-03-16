@@ -11,7 +11,7 @@ import type { ConfigSchema } from './config';
 import { configSchema } from './config';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { GraphPlugin } = await import('./plugin');
+  const { GraphPlugin } = await import('./plugin.js');
   return new GraphPlugin(initializerContext);
 };
 

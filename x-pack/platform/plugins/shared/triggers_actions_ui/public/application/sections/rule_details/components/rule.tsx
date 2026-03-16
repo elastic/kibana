@@ -38,8 +38,8 @@ import { RuleAlertActionsCell } from './rule_alert_actions_cell';
 import { RuleAlertSearchBar } from './rule_alert_search_bar';
 import { AlertSummaryWidget } from '../../alert_summary_widget';
 
-const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
-const RuleDefinition = lazy(() => import('./rule_definition'));
+const RuleEventLogList = lazy(() => import('./rule_event_log_list.js'));
+const RuleDefinition = lazy(() => import('./rule_definition.js'));
 const AlertsTable = lazy(() => import('@kbn/response-ops-alerts-table')) as AlertsTableType;
 
 export type RuleComponentProps = {

@@ -25,10 +25,10 @@ import { queryClient } from './query_client';
 import type { TriggersAndActionsUiServices } from './rules_app';
 
 const RuleDetailsRouteWrapper = lazy(
-  () => import('./sections/rule_details/components/rule_details_route_wrapper')
+  () => import('./sections/rule_details/components/rule_details_route_wrapper.js')
 );
-const RulesPage = lazy(() => import('./sections/rules_page/rules_page'));
-const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
+const RulesPage = lazy(() => import('./sections/rules_page/rules_page.js'));
+const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route.js'));
 
 export const renderRulesPageApp = (deps: TriggersAndActionsUiServices) => {
   const { element } = deps;

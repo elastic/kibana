@@ -169,7 +169,7 @@ export class DataPublicPlugin
     setSearchService(search);
 
     uiActions.addTriggerActionAsync(ON_SELECT_RANGE, 'ACTION_SELECT_RANGE', async () => {
-      const { createSelectRangeActionDefinition } = await import('./actions');
+      const { createSelectRangeActionDefinition } = await import('./actions/index.js');
       const rangeSelectAction = createSelectRangeActionDefinition(() => ({
         uiActions,
       }));
@@ -177,7 +177,7 @@ export class DataPublicPlugin
     });
 
     uiActions.addTriggerActionAsync(ON_CLICK_VALUE, 'ACTION_VALUE_CLICK', async () => {
-      const { createValueClickActionDefinition } = await import('./actions');
+      const { createValueClickActionDefinition } = await import('./actions/index.js');
       const valueClickAction = createValueClickActionDefinition(() => ({
         uiActions,
       }));
@@ -188,7 +188,7 @@ export class DataPublicPlugin
       'MULTI_VALUE_CLICK_TRIGGER',
       'ACTION_MULTI_VALUE_CLICK',
       async () => {
-        const { createMultiValueClickActionDefinition } = await import('./actions');
+        const { createMultiValueClickActionDefinition } = await import('./actions/index.js');
         const multiValueClickAction = createMultiValueClickActionDefinition(() => ({
           query,
         }));
@@ -200,15 +200,17 @@ export class DataPublicPlugin
     const dataServices = {
       actions: {
         createFiltersFromValueClickAction: async (context: ValueClickDataContext) => {
-          const { createFiltersFromValueClickAction } = await import('./actions/filters');
+          const { createFiltersFromValueClickAction } = await import('./actions/filters/index.js');
           return createFiltersFromValueClickAction(context);
         },
         createFiltersFromRangeSelectAction: async (context: RangeSelectDataContext) => {
-          const { createFiltersFromRangeSelectAction } = await import('./actions/filters');
+          const { createFiltersFromRangeSelectAction } = await import('./actions/filters/index.js');
           return createFiltersFromRangeSelectAction(context);
         },
         createFiltersFromMultiValueClickAction: async (context: MultiValueClickDataContext) => {
-          const { createFiltersFromMultiValueClickAction } = await import('./actions/filters');
+          const { createFiltersFromMultiValueClickAction } = await import(
+            './actions/filters/index.js'
+          );
           return createFiltersFromMultiValueClickAction(context);
         },
       },

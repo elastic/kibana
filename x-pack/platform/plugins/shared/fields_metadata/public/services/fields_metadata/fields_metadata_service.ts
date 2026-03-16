@@ -27,7 +27,7 @@ export class FieldsMetadataService {
 
   private async getClient({ http }: FieldsMetadataServiceStartDeps) {
     if (!this.client) {
-      const { FieldsMetadataClient } = await import('./fields_metadata_client');
+      const { FieldsMetadataClient } = await import('./fields_metadata_client.js');
       const client = new FieldsMetadataClient(http);
       this.client = client;
     }

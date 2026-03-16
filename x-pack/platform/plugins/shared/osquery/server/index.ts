@@ -17,7 +17,7 @@ export const config: PluginConfigDescriptor<ConfigSchemaType> = {
   },
 };
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { OsqueryPlugin } = await import('./plugin');
+  const { OsqueryPlugin } = await import('./plugin.js');
 
   return new OsqueryPlugin(initializerContext);
 }

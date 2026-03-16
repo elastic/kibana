@@ -62,7 +62,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
           return () => {};
         }
 
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application/index.js');
         const tearDownApp = renderApp(element, {
           http,
           uiSettings,

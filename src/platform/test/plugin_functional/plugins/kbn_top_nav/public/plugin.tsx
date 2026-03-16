@@ -38,7 +38,7 @@ export class TopNavTestPlugin implements Plugin<TopNavTestPluginSetup, TopNavTes
       id: 'topNavMenu',
       title: 'Top nav menu example',
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const services = await core.getStartServices();
         return renderApp(services[1] as AppPluginDependencies, params);
       },

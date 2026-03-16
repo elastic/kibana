@@ -14,5 +14,5 @@ import type { StaticLookupFormatEditorFormatParams } from './static_lookup';
 export type { StaticLookupFormatEditor } from './static_lookup';
 export const staticLookupFormatEditorFactory: FieldFormatEditorFactory<
   StaticLookupFormatEditorFormatParams
-> = () => import('./static_lookup').then((m) => m.StaticLookupFormatEditor);
+> = () => import('./static_lookup.js').then((m) => m.StaticLookupFormatEditor);
 staticLookupFormatEditorFactory.formatId = formatId;

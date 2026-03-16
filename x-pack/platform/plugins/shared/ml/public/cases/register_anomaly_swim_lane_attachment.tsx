@@ -32,7 +32,7 @@ export function registerAnomalySwimLaneCasesAttachment(
       ),
       timelineAvatar: PLUGIN_ICON,
       children: React.lazy(async () => {
-        const { initComponent } = await import('./anomaly_swim_lane_attachment');
+        const { initComponent } = await import('./anomaly_swim_lane_attachment.js');
         return {
           default: initComponent(pluginStart.fieldFormats),
         };

@@ -18,7 +18,7 @@ export class MapsAppTileMapLocatorDefinition
   constructor(protected readonly deps: MapsAppTileMapLocatorDependencies) {}
 
   public readonly getLocation = async (params: MapsAppTileMapLocatorParams) => {
-    const { getLocation } = await import('./get_location');
+    const { getLocation } = await import('./get_location.js');
     return getLocation(params, this.deps);
   };
 }

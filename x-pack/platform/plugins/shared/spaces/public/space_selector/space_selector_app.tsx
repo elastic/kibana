@@ -29,7 +29,7 @@ export const spaceSelectorApp = Object.freeze({
       mount: async ({ element }: AppMountParameters) => {
         const [[coreStart], { renderSpaceSelectorApp }] = await Promise.all([
           getStartServices(),
-          import('./space_selector'),
+          import('./space_selector.js'),
         ]);
         return renderSpaceSelectorApp(
           coreStart,

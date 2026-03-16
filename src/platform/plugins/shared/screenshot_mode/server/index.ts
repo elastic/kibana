@@ -20,6 +20,6 @@ export type {
 } from './types';
 
 export async function plugin() {
-  const { ScreenshotModePlugin } = await import('./plugin');
+  const { ScreenshotModePlugin } = await import('./plugin.js');
   return new ScreenshotModePlugin();
 }

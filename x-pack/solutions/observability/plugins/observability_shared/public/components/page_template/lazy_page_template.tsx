@@ -13,7 +13,7 @@ import type {
   WrappedPageTemplateProps,
 } from './page_template';
 
-export const LazyObservabilityPageTemplate = React.lazy(() => import('./page_template'));
+export const LazyObservabilityPageTemplate = React.lazy(() => import('./page_template.js'));
 
 export type LazyObservabilityPageTemplateProps = WrappedPageTemplateProps;
 

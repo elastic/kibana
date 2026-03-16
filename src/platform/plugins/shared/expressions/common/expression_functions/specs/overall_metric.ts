@@ -102,7 +102,7 @@ export const overallMetric: ExpressionFunctionOverallMetric = {
   },
 
   async fn(input, args) {
-    const { overallMetricFn } = await import('./overall_metric_fn');
+    const { overallMetricFn } = await import('./overall_metric_fn.js');
     return overallMetricFn(input, args);
   },
 };

@@ -15,7 +15,7 @@ import { TILE_MAP_RENDER } from './types';
 import { getCore } from '../../kibana_services';
 
 const Component = dynamic(async () => {
-  const { TileMapVisualization } = await import('./tile_map_visualization');
+  const { TileMapVisualization } = await import('./tile_map_visualization.js');
   return {
     default: TileMapVisualization,
   };

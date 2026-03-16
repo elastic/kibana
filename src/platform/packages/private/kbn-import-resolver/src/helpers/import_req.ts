@@ -11,7 +11,7 @@ import Path from 'path';
 
 import normalizePath from 'normalize-path';
 
-export type ImportType = 'esm' | 'require' | 'require-resolve' | 'jest';
+export type ImportType = 'esm' | 'dynamic-import' | 'require' | 'require-resolve' | 'jest';
 
 interface WrapOptions {
   prefix?: string;
@@ -53,6 +53,20 @@ export function reduceImportRequest(
 
     // this is also a very ambiguous request, but TS complains about leaving .ts or .tsx on a request so strip it
     return req.slice(0, -indexInIndexMatch[1].length);
+  }
+
+  // Under moduleResolution: nodenext, dynamic import() requires .js extensions.
+  // For dynamic imports, preserve the .js extension (or convert .ts/.tsx to .js).
+  if (type === 'dynamic-import') {
+    if (/\.tsx?$/.test(req)) {
+      return reduced.replace(/\.tsx?$/, '.js');
+    }
+    if (req.endsWith('.js')) {
+      return reduced;
+    }
+  }
+  if (original?.endsWith('.js') && /\.tsx?$/.test(req)) {
+    return reduced.replace(/\.tsx?$/, '.js');
   }
 
   const extMatch = req.match(EXT_RE);

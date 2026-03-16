@@ -328,15 +328,15 @@ const startFleetServerWithDocker = async ({
               esUrl: esURL.toString(),
             });
 
-        await execa('docker', ['kill', containerName])
+        await execa('docker', ['rm', '-f', containerName])
           .then(() => {
             log.info(
-              `Killed an existing container with name [${containerName}]. New one will be started.`
+              `Removed an existing container with name [${containerName}]. New one will be started.`
             );
           })
           .catch((error) => {
             if (!/no such container/i.test(error.message)) {
-              log.verbose(`Attempt to kill currently running fleet-server container with name [${containerName}] was unsuccessful:
+              log.verbose(`Attempt to remove fleet-server container with name [${containerName}] was unsuccessful:
       ${error}`);
             }
           });
@@ -413,6 +413,8 @@ const startFleetServerWithDocker = async ({
         } catch (logError) {
           log.verbose(`Failed to retrieve Docker logs for [${containerName}]: ${logError.message}`);
         }
+
+        await execa('docker', ['rm', '-f', containerName]).catch(() => {});
 
         if (retryAttempt < maxRetries) {
           retryAttempt++;

@@ -14,7 +14,7 @@ import { untilPluginStartServicesReady } from '../../../services/kibana_services
 export function registerOptionsListControl(embeddable: EmbeddableSetup) {
   embeddable.registerReactEmbeddableFactory(OPTIONS_LIST_CONTROL, async () => {
     const [{ getOptionsListControlFactory }] = await Promise.all([
-      import('../../../controls_module'),
+      import('../../../controls_module.js'),
       untilPluginStartServicesReady(),
     ]);
     return getOptionsListControlFactory();

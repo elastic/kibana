@@ -90,7 +90,7 @@ export class ObservabilityAIAssistantAppPlugin
           return () => {};
         }
 
-        const { Application } = await import('./application');
+        const { Application } = await import('./application.js');
 
         ReactDOM.render(
           <Application
@@ -154,7 +154,7 @@ export class ObservabilityAIAssistantAppPlugin
     const service = pluginsStart.observabilityAIAssistant.service;
 
     service.register(async ({ registerRenderFunction }) => {
-      const { registerFunctions } = await import('./functions');
+      const { registerFunctions } = await import('./functions/index.js');
 
       await registerFunctions({ pluginsStart, registerRenderFunction });
     });
@@ -174,7 +174,7 @@ export class ObservabilityAIAssistantAppPlugin
     const LazilyLoadedRootCauseAnalysisContainer = withSuspense(
       withProviders(
         lazy(() =>
-          import('./components/rca/rca_container').then((m) => ({
+          import('./components/rca/rca_container/index.js').then((m) => ({
             default: m.RootCauseAnalysisContainer,
           }))
         )

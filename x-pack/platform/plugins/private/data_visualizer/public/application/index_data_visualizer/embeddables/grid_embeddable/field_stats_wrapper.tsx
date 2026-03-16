@@ -25,9 +25,9 @@ import type {
 import FieldStatsUnavailableMessage from './embeddable_error_msg';
 
 const EmbeddableESQLFieldStatsTableWrapper = dynamic(
-  () => import('./embeddable_esql_field_stats_table')
+  () => import('./embeddable_esql_field_stats_table.js')
 );
-const EmbeddableFieldStatsTableWrapper = dynamic(() => import('./embeddable_field_stats_table'));
+const EmbeddableFieldStatsTableWrapper = dynamic(() => import('./embeddable_field_stats_table.js'));
 
 function isESQLFieldStatisticTableEmbeddableState(
   input: FieldStatisticTableEmbeddableProps

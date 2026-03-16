@@ -26,7 +26,7 @@ enum MODE {
 }
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../jobs/new_job/pages/index_or_search')).Page,
+  default: (await import('../../../jobs/new_job/pages/index_or_search/index.js')).Page,
 }));
 
 interface IndexOrSearchPageProps extends PageProps {

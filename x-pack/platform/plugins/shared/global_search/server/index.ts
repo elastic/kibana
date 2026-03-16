@@ -15,7 +15,7 @@ export const plugin: PluginInitializer<
   GlobalSearchPluginSetupDeps,
   GlobalSearchPluginStartDeps
 > = async (context) => {
-  const { GlobalSearchPlugin } = await import('./plugin');
+  const { GlobalSearchPlugin } = await import('./plugin.js');
   return new GlobalSearchPlugin(context);
 };
 

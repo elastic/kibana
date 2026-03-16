@@ -76,9 +76,9 @@ export const getServices = async (
     { mlApiProvider },
   ] = await Promise.all([
     getStartServices(),
-    import('../../application/services/anomaly_detector_service'),
-    import('../../application/services/anomaly_timeline_service'),
-    import('../../application/services/ml_api_service'),
+    import('../../application/services/anomaly_detector_service.js'),
+    import('../../application/services/anomaly_timeline_service.js'),
+    import('../../application/services/ml_api_service/index.js'),
   ]);
 
   const httpService = new HttpService(coreStart.http);

@@ -36,14 +36,14 @@ export function getServiceNowITSMConnectorType(): ConnectorTypeModel<
 > {
   return {
     id: CONNECTOR_ID,
-    iconClass: lazy(() => import('./logo')),
+    iconClass: lazy(() => import('./logo.js')),
     selectMessage: SERVICENOW_ITSM_DESC,
     actionTypeTitle: CONNECTOR_NAME,
-    actionConnectorFields: lazy(() => import('../lib/servicenow/servicenow_connectors')),
+    actionConnectorFields: lazy(() => import('../lib/servicenow/servicenow_connectors.js')),
     validateParams: async (
       actionParams: ServiceNowITSMActionParams
     ): Promise<GenericValidationResult<unknown>> => {
-      const translations = await import('../lib/servicenow/translations');
+      const translations = await import('../lib/servicenow/translations.js');
       const errors = {
         'subActionParams.incident.short_description': new Array<string>(),
         'subActionParams.incident.correlation_id': new Array<string>(),
@@ -83,7 +83,7 @@ export function getServiceNowITSMConnectorType(): ConnectorTypeModel<
 
       return validationResult;
     },
-    actionParamsFields: lazy(() => import('./servicenow_itsm_params')),
+    actionParamsFields: lazy(() => import('./servicenow_itsm_params.js')),
     customConnectorSelectItem: {
       getText: getConnectorDescriptiveTitle,
       getComponent: getSelectedConnectorIcon,

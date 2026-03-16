@@ -38,7 +38,7 @@ export function createBurnRatePanelAction(
 
       try {
         const { openConfiguration } = await import(
-          '../embeddable/slo/burn_rate/open_configuration'
+          '../embeddable/slo/burn_rate/open_configuration.js'
         );
         const initialState = await openConfiguration(coreStart, pluginsStart, sloClient);
         embeddable.addNewPanel(

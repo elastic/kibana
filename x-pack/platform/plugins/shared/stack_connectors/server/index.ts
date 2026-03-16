@@ -16,6 +16,6 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { StackConnectorsPlugin } = await import('./plugin');
+  const { StackConnectorsPlugin } = await import('./plugin.js');
   return new StackConnectorsPlugin(initContext);
 };

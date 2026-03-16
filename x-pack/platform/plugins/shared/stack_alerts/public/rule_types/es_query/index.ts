@@ -27,7 +27,7 @@ export function getRuleType(alerting: AlertingSetup): RuleTypeModel<EsQueryRuleP
     }),
     iconClass: 'logoElastic',
     documentationUrl: (docLinks) => docLinks.links.alerting.esQuery,
-    ruleParamsExpression: lazy(() => import('./expression')),
+    ruleParamsExpression: lazy(() => import('./expression/index.js')),
     validate: validateExpression,
     defaultActionMessage: i18n.translate(
       'xpack.stackAlerts.esQuery.ui.alertType.defaultActionMessage',

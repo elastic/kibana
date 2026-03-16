@@ -13,7 +13,7 @@ import type { ChangePointDetectionSharedComponent } from './change_point_detecti
 import type { PatternAnalysisSharedComponent } from './pattern_analysis';
 import type { LogRateAnalysisEmbeddableWrapper } from './log_rate_analysis_embeddable_wrapper';
 
-const ChangePointDetectionLazy = dynamic(async () => import('./change_point_detection'));
+const ChangePointDetectionLazy = dynamic(async () => import('./change_point_detection.js'));
 
 export const getChangePointDetectionComponent = (
   coreStart: CoreStart,
@@ -26,7 +26,7 @@ export const getChangePointDetectionComponent = (
 
 export type { ChangePointDetectionSharedComponent } from './change_point_detection';
 
-const PatternAnalysisLazy = dynamic(async () => import('./pattern_analysis'));
+const PatternAnalysisLazy = dynamic(async () => import('./pattern_analysis.js'));
 
 export const getPatternAnalysisComponent = (
   coreStart: CoreStart,
@@ -40,7 +40,7 @@ export const getPatternAnalysisComponent = (
 export type { PatternAnalysisSharedComponent } from './pattern_analysis';
 
 const LogRateAnalysisEmbeddableWrapperLazy = dynamic(
-  async () => import('./log_rate_analysis_embeddable_wrapper')
+  async () => import('./log_rate_analysis_embeddable_wrapper.js')
 );
 
 export const getLogRateAnalysisEmbeddableWrapperComponent = (

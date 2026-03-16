@@ -17,7 +17,7 @@ interface ValidationErrors {
 export function getConnectorType(): D3SecurityConnector {
   return {
     id: CONNECTOR_ID,
-    iconClass: lazy(() => import('./logo')),
+    iconClass: lazy(() => import('./logo.js')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.d3security.selectMessageText', {
       defaultMessage: 'Create event or trigger playbook workflow actions in D3 SOAR.',
     }),
@@ -35,7 +35,7 @@ export function getConnectorType(): D3SecurityConnector {
         subAction: [],
       };
       const { subAction, subActionParams } = actionParams;
-      const translations = await import('./translations');
+      const translations = await import('./translations.js');
 
       if (!subActionParams.body?.length) {
         errors.body.push(translations.BODY_REQUIRED);
@@ -48,7 +48,7 @@ export function getConnectorType(): D3SecurityConnector {
       }
       return { errors };
     },
-    actionConnectorFields: lazy(() => import('./connector')),
-    actionParamsFields: lazy(() => import('./params')),
+    actionConnectorFields: lazy(() => import('./connector.js')),
+    actionParamsFields: lazy(() => import('./params.js')),
   };
 }

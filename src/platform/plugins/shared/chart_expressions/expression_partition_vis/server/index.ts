@@ -8,7 +8,7 @@
  */
 
 export async function plugin() {
-  const { ExpressionPartitionVisPlugin } = await import('./plugin');
+  const { ExpressionPartitionVisPlugin } = await import('./plugin.js');
   return new ExpressionPartitionVisPlugin();
 }
 

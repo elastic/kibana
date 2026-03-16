@@ -28,6 +28,6 @@ export const config: PluginConfigDescriptor<MapConfig> = {
 };
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { MapsEmsPlugin } = await import('./plugin');
+  const { MapsEmsPlugin } = await import('./plugin.js');
   return new MapsEmsPlugin(initializerContext);
 };

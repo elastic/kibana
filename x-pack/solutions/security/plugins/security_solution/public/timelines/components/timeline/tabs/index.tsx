@@ -51,23 +51,23 @@ const tabWithSuspense = <P extends {}, R = {}>(
 };
 
 const QueryTab = tabWithSuspense(
-  lazy(() => import('./query')),
+  lazy(() => import('./query/index.js')),
   <TimelineTabFallback />
 );
 const EqlTab = tabWithSuspense(
-  lazy(() => import('./eql')),
+  lazy(() => import('./eql/index.js')),
   <TimelineTabFallback />
 );
 const NotesTab = tabWithSuspense(
-  lazy(() => import('./notes')),
+  lazy(() => import('./notes/index.js')),
   <TimelineTabFallback />
 );
 const PinnedTab = tabWithSuspense(
-  lazy(() => import('./pinned')),
+  lazy(() => import('./pinned/index.js')),
   <TimelineTabFallback />
 );
 const EsqlTab = tabWithSuspense(
-  lazy(() => import('./esql')),
+  lazy(() => import('./esql/index.js')),
   <TimelineTabFallback />
 );
 

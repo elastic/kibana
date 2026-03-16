@@ -8,6 +8,6 @@
 import type { PluginInitializer } from '@kbn/core/server';
 
 export const plugin: PluginInitializer<void, void> = async () => {
-  const { AlertingExamplePlugin } = await import('./plugin');
+  const { AlertingExamplePlugin } = await import('./plugin.js');
   return new AlertingExamplePlugin();
 };

@@ -35,9 +35,13 @@ const mockPackageList = jest.fn<
 >(() => <div data-test-subj="packageList" />);
 
 jest.mock('@kbn/fleet-plugin/public');
-jest
-  .spyOn(module, 'PackageList')
-  .mockImplementation(() => Promise.resolve({ PackageListGrid: mockPackageList }));
+jest.spyOn(module, 'PackageList').mockImplementation(
+  () =>
+    Promise.resolve({
+      default: {},
+      PackageListGrid: mockPackageList,
+    }) as unknown as ReturnType<typeof module.PackageList>
+);
 
 const mockUseStoredIntegrationTabId = useStoredIntegrationTabId as jest.MockedFunction<
   typeof useStoredIntegrationTabId

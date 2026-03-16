@@ -12,7 +12,7 @@ import { TlsTranslationsLegacy } from '../../../../common/rules/legacy_uptime/tr
 import type { AlertTypeInitializer } from '.';
 
 const { defaultActionMessage, description } = TlsTranslationsLegacy;
-const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
+const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert.js'));
 export const initTlsLegacyAlertType: AlertTypeInitializer<RuleTypeModel> = ({
   core,
   plugins,

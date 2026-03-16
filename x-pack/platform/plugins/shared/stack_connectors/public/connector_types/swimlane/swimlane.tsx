@@ -35,13 +35,13 @@ export function getConnectorType(): ConnectorTypeModel<
 > {
   return {
     id: CONNECTOR_ID,
-    iconClass: lazy(() => import('./logo')),
+    iconClass: lazy(() => import('./logo.js')),
     selectMessage: SW_SELECT_MESSAGE_TEXT,
     actionTypeTitle: SW_ACTION_TYPE_TITLE,
     validateParams: async (
       actionParams: SwimlaneActionParams
     ): Promise<GenericValidationResult<unknown>> => {
-      const translations = await import('./translations');
+      const translations = await import('./translations.js');
       const errors = {
         'subActionParams.incident.ruleName': new Array<string>(),
         'subActionParams.incident.alertId': new Array<string>(),
@@ -62,7 +62,7 @@ export function getConnectorType(): ConnectorTypeModel<
 
       return validationResult;
     },
-    actionConnectorFields: lazy(() => import('./swimlane_connectors')),
-    actionParamsFields: lazy(() => import('./swimlane_params')),
+    actionConnectorFields: lazy(() => import('./swimlane_connectors.js')),
+    actionParamsFields: lazy(() => import('./swimlane_params.js')),
   };
 }

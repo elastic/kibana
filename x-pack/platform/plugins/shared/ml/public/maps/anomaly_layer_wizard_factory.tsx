@@ -79,7 +79,7 @@ export class AnomalyLayerWizardFactory {
     mlLocator?: LocatorPublic<SerializableRecord>;
   }> {
     const [coreStart, pluginStart] = await this.getStartServices();
-    const { jobsApiProvider } = await import('../application/services/ml_api_service/jobs');
+    const { jobsApiProvider } = await import('../application/services/ml_api_service/jobs.js');
 
     const httpService = new HttpService(coreStart.http);
     const mlJobsService = jobsApiProvider(httpService);
@@ -100,7 +100,7 @@ export class AnomalyLayerWizardFactory {
       console.error('Unable to get job management path.');
     }
 
-    const { anomalyLayerWizard } = await import('./anomaly_layer_wizard');
+    const { anomalyLayerWizard } = await import('./anomaly_layer_wizard.js');
 
     anomalyLayerWizard.getIsDisabled = () => !this.canGetJobs;
 

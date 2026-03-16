@@ -8,6 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const plugin = async (context: PluginInitializerContext) => {
-  const { LogstashPlugin } = await import('./plugin');
+  const { LogstashPlugin } = await import('./plugin.js');
   return new LogstashPlugin(context);
 };

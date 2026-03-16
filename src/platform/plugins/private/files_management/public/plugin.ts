@@ -21,7 +21,7 @@ export class FilesManagementPlugin
       title: PLUGIN_NAME,
       order: 1,
       async mount(params: ManagementAppMountParams) {
-        const { mountManagementSection } = await import('./mount_management_section');
+        const { mountManagementSection } = await import('./mount_management_section.js');
         const [coreStart, depsStart] = await core.getStartServices();
 
         const { docTitle } = coreStart.chrome;

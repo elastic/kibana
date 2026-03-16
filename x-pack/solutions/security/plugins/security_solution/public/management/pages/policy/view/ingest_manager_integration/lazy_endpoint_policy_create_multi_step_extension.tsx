@@ -11,7 +11,7 @@ import type { PackagePolicyCreateMultiStepExtensionComponent } from '@kbn/fleet-
 export const LazyEndpointPolicyCreateMultiStepExtension =
   lazy<PackagePolicyCreateMultiStepExtensionComponent>(async () => {
     const { EndpointPolicyCreateMultiStepExtension } = await import(
-      './endpoint_policy_create_multi_step_extension'
+      './endpoint_policy_create_multi_step_extension.js'
     );
     return {
       default: EndpointPolicyCreateMultiStepExtension,

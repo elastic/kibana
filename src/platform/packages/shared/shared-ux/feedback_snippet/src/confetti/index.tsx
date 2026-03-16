@@ -14,7 +14,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
  */
 
 export const Confetti = dynamic(() =>
-  import('./confetti.component').then((mod) => ({
+  import('./confetti.component.js').then((mod) => ({
     default: mod.ConfettiComponent,
   }))
 );

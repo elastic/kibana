@@ -57,11 +57,11 @@ import { ConnectorProvider } from './context/connector_context';
 import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
 
-const TriggersActionsUIHome = lazy(() => import('./home'));
+const TriggersActionsUIHome = lazy(() => import('./home.js'));
 const RuleDetailsRoute = lazy(
-  () => import('./sections/rule_details/components/rule_details_route')
+  () => import('./sections/rule_details/components/rule_details_route.js')
 );
-const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
+const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route.js'));
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;

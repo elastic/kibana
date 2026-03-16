@@ -12,7 +12,7 @@ import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import type { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import type { PieTypeProps } from '../../types';
 
-const PieOptionsLazy = lazy(() => import('./pie'));
+const PieOptionsLazy = lazy(() => import('./pie.js'));
 
 export const getPieOptions =
   ({ showElasticChartsOptions, palettes }: PieTypeProps) =>

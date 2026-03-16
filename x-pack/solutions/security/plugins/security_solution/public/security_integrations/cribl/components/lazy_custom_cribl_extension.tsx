@@ -9,5 +9,5 @@ import { lazy } from 'react';
 
 export const LazyCustomCriblExtension = lazy<PackagePolicyReplaceDefineStepExtensionComponent>(
   async () =>
-    import('./custom_cribl_form').then(({ CustomCriblForm }) => ({ default: CustomCriblForm }))
+    import('./custom_cribl_form.js').then(({ CustomCriblForm }) => ({ default: CustomCriblForm }))
 );

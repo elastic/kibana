@@ -65,7 +65,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     embeddable.registerReactEmbeddableFactory(FIELD_LIST_ID, async () => {
       const { getFieldListFactory } = await import(
-        './react_embeddables/field_list/field_list_embeddable'
+        './react_embeddables/field_list/field_list_embeddable.js'
       );
       const [coreStart, deps] = await startServicesPromise;
       return getFieldListFactory(coreStart, deps);
@@ -73,7 +73,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     embeddable.registerReactEmbeddableFactory(DATA_TABLE_ID, async () => {
       const { getDataTableFactory } = await import(
-        './react_embeddables/data_table/data_table_react_embeddable'
+        './react_embeddables/data_table/data_table_react_embeddable.js'
       );
       const [coreStart, deps] = await startServicesPromise;
       return getDataTableFactory(coreStart, deps);
@@ -92,7 +92,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_FIELD_LIST_ACTION_ID, async () => {
       const { createFieldListAction } = await import(
-        './react_embeddables/field_list/create_field_list_action'
+        './react_embeddables/field_list/create_field_list_action.js'
       );
       return createFieldListAction;
     });
@@ -101,14 +101,14 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     registerSearchPanelAction(deps.uiActions);
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
       const { createDataTableAction } = await import(
-        './react_embeddables/data_table/create_data_table_action'
+        './react_embeddables/data_table/create_data_table_action.js'
       );
       return createDataTableAction;
     });
 
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SAVED_BOOK_ACTION_ID, async () => {
       const { createSavedBookAction } = await import(
-        './react_embeddables/saved_book/create_saved_book_action'
+        './react_embeddables/saved_book/create_saved_book_action.js'
       );
       return createSavedBookAction(core);
     });

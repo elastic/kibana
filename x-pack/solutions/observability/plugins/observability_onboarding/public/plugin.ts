@@ -98,11 +98,11 @@ export class ObservabilityOnboardingPlugin
       async mount(appMountParameters: AppMountParameters) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-          import('./application/app'),
+          import('./application/app.js'),
           core.getStartServices(),
         ]);
 
-        const { createCallApi } = await import('./services/rest/create_call_api');
+        const { createCallApi } = await import('./services/rest/create_call_api.js');
 
         createCallApi(core);
 

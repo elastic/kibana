@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ObjectType, SchemaTypeError, type Type } from '@kbn/config-schema';
+import { SchemaTypeError, type Type } from '@kbn/config-schema';
 import type { ZodType } from '@kbn/zod/v4';
 
 /**
@@ -81,7 +81,7 @@ export type RouteValidationFunction<T> = (
  *
  * @public
  */
-export type RouteValidationSpec<T> = ObjectType | Type<T> | ZodType<T> | RouteValidationFunction<T>;
+export type RouteValidationSpec<T> = Type<T> | ZodType<T> | RouteValidationFunction<T>;
 
 /**
  * The configuration object to the RouteValidator class.

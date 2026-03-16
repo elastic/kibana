@@ -42,12 +42,12 @@ export function createMultiValueClickActionDefinition(
     id: ACTION_MULTI_VALUE_CLICK,
     shouldAutoExecute: async () => true,
     isCompatible: async (context: MultiValueClickContext) => {
-      const { createFiltersFromMultiValueClickAction } = await import('./filters');
+      const { createFiltersFromMultiValueClickAction } = await import('./filters/index.js');
       const filters = await createFiltersFromMultiValueClickAction(context.data);
       return Boolean(filters);
     },
     execute: async ({ data }: MultiValueClickActionContext) => {
-      const { createFiltersFromMultiValueClickAction } = await import('./filters');
+      const { createFiltersFromMultiValueClickAction } = await import('./filters/index.js');
       const filters = await createFiltersFromMultiValueClickAction(data);
       if (!filters || filters?.length === 0) return;
       const {

@@ -13,6 +13,6 @@ export { config } from './config';
 export type { NotificationsServerStart as NotificationsPluginStart } from './types';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { NotificationsPlugin } = await import('./plugin');
+  const { NotificationsPlugin } = await import('./plugin.js');
   return new NotificationsPlugin(initializerContext);
 }

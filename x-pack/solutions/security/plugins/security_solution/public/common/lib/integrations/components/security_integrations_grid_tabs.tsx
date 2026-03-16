@@ -43,7 +43,7 @@ export interface SecurityIntegrationsGridTabsProps {
 const emptyStateStyles = { paddingTop: '16px' };
 
 export const PackageListGrid = lazy(async () => ({
-  default: await import('@kbn/fleet-plugin/public')
+  default: await import('@kbn/fleet-plugin/public/index.js')
     .then((module) => module.PackageList())
     .then((pkg) => pkg.PackageListGrid),
 }));

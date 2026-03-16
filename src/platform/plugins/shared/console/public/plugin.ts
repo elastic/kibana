@@ -98,7 +98,7 @@ export class ConsoleUIPlugin
           } = core;
           const { data, licensing } = deps;
 
-          const { renderApp } = await import('./application');
+          const { renderApp } = await import('./application/index.js');
 
           return renderApp({
             ...startServices,

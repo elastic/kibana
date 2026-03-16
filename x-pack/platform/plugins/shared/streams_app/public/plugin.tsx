@@ -38,7 +38,7 @@ import { StreamsTelemetryService } from './telemetry/service';
 import { StreamsAppLocatorDefinition } from '../common/locators';
 
 const StreamsApplication = dynamic(() =>
-  import('./application').then((mod) => ({ default: mod.StreamsApplication }))
+  import('./application.js').then((mod) => ({ default: mod.StreamsApplication }))
 );
 
 export const renderApp = ({

@@ -46,7 +46,7 @@ export const getAddAlertsTableAction = (
         core: coreServices,
         parentApi: embeddable,
         loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-          const { ConfigEditor } = await import('../components/config_editor');
+          const { ConfigEditor } = await import('../components/config_editor.js');
           return (
             <ConfigEditor
               coreServices={coreServices}

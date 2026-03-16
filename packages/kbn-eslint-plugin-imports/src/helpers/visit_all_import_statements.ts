@@ -107,13 +107,13 @@ export function visitAllImportStatements(fn: Visitor) {
       passSourceAsString(fn, node.source, node, 'esm');
     },
     ImportExpression(node: TSESTree.ImportExpression) {
-      passSourceAsString(fn, node.source, node, 'esm');
+      passSourceAsString(fn, node.source, node, 'dynamic-import');
     },
     CallExpression(node: TSESTree.CallExpression | T.CallExpression) {
       const { callee, arguments: args } = node;
       // babel parser used for .js files treats import() calls as CallExpressions with callees of type "Import"
       if (T.isImport(callee)) {
-        passSourceAsString(fn, args[0], node, 'esm');
+        passSourceAsString(fn, args[0], node, 'dynamic-import');
         return;
       }
 

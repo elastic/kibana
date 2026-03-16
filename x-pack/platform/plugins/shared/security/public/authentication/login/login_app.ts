@@ -34,7 +34,7 @@ export const loginApp = Object.freeze({
       async mount({ element }: AppMountParameters) {
         const [[coreStart], { renderLoginPage }] = await Promise.all([
           getStartServices(),
-          import('./login_page'),
+          import('./login_page.js'),
         ]);
         return renderLoginPage(
           coreStart,

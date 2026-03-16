@@ -13,6 +13,6 @@ export type { CPSServerSetup, CPSServerStart } from './types';
 export { config } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { CPSServerPlugin } = await import('./plugin');
+  const { CPSServerPlugin } = await import('./plugin.js');
   return new CPSServerPlugin(initContext);
 };

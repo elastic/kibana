@@ -86,7 +86,7 @@ export function palette(): PaletteExpressionFunctionDefinition {
     },
     async fn(...args) {
       /** Build optimization: prevent adding extra code into initial bundle **/
-      const { paletteExpressionFn } = await import('./palette_fn');
+      const { paletteExpressionFn } = await import('./palette_fn.js');
       return paletteExpressionFn(...args);
     },
   };

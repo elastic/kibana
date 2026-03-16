@@ -86,7 +86,7 @@ export class UnifiedSearchPublicPlugin
     const SearchBar = getCustomSearchBar();
 
     uiActions.addTriggerActionAsync(ON_APPLY_FILTER, ACTION_GLOBAL_APPLY_FILTER, async () => {
-      const { createFilterAction } = await import('./actions/actions_module');
+      const { createFilterAction } = await import('./actions/actions_module.js');
       return createFilterAction(data.query.filterManager, data.query.timefilter.timefilter, core);
     });
 
@@ -94,7 +94,7 @@ export class UnifiedSearchPublicPlugin
       UPDATE_FILTER_REFERENCES_TRIGGER,
       UPDATE_FILTER_REFERENCES_ACTION,
       async () => {
-        const { createUpdateFilterReferencesAction } = await import('./actions/actions_module');
+        const { createUpdateFilterReferencesAction } = await import('./actions/actions_module.js');
         return createUpdateFilterReferencesAction(data.query.filterManager);
       }
     );

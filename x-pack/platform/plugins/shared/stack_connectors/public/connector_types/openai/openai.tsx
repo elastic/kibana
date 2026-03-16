@@ -19,7 +19,7 @@ interface ValidationErrors {
 export function getConnectorType(): OpenAIConnector {
   return {
     id: CONNECTOR_ID,
-    iconClass: lazy(() => import('./logo')),
+    iconClass: lazy(() => import('./logo.js')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.genAi.selectMessageText', {
       defaultMessage: 'Send a request to an OpenAI or Azure OpenAI service.',
     }),
@@ -28,7 +28,7 @@ export function getConnectorType(): OpenAIConnector {
       actionParams: ActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {
       const { subAction, subActionParams } = actionParams;
-      const translations = await import('./translations');
+      const translations = await import('./translations.js');
       const errors: ValidationErrors = {
         body: [],
         subAction: [],
@@ -55,9 +55,9 @@ export function getConnectorType(): OpenAIConnector {
       }
       return { errors };
     },
-    actionConnectorFields: lazy(() => import('./connector')),
-    actionParamsFields: lazy(() => import('./params')),
-    actionReadOnlyExtraComponent: lazy(() => import('./dashboard_link')),
+    actionConnectorFields: lazy(() => import('./connector.js')),
+    actionParamsFields: lazy(() => import('./params.js')),
+    actionReadOnlyExtraComponent: lazy(() => import('./dashboard_link.js')),
     connectorForm: {
       serializer: formSerializer,
       deserializer: formDeserializer,

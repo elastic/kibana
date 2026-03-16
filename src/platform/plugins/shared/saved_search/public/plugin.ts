@@ -184,6 +184,6 @@ export class SavedSearchPublicPlugin
 }
 
 const getSavedSearchesService = once(async (deps: SavedSearchesServiceDeps) => {
-  const { SavedSearchesService } = await import('./service/saved_searches_service');
+  const { SavedSearchesService } = await import('./service/saved_searches_service.js');
   return new SavedSearchesService(deps);
 });

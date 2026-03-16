@@ -15,7 +15,7 @@ import { type FieldListItem } from '../../types';
 const Fallback = () => <Fragment />;
 
 const LazyFieldListFilters = React.lazy(
-  () => import('./field_list_filters')
+  () => import('./field_list_filters.js')
 ) as GenericFieldListFilters;
 
 function WrappedFieldListFilters<T extends FieldListItem = DataViewField>(

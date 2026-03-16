@@ -9,7 +9,7 @@ import React, { Suspense } from 'react';
 import type { DataStreamResultsFlyoutComponent } from './types';
 
 const DataStreamResultsFlyout = React.lazy(() =>
-  import('./data_stream_results_flyout').then((module) => ({
+  import('./data_stream_results_flyout.js').then((module) => ({
     default: module.DataStreamResultsFlyout,
   }))
 );

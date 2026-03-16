@@ -36,7 +36,7 @@ interface WizardPageProps extends PageProps {
 }
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../jobs/new_job/pages/new_job')).Page,
+  default: (await import('../../../jobs/new_job/pages/new_job/index.js')).Page,
 }));
 
 const getBaseBreadcrumbs = (navigateToApp: NavigateToApp) => [

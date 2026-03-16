@@ -3,6 +3,7 @@
   "compilerOptions": {
     "target": "es5",
     "module": "esnext",
+    "moduleResolution": "bundler",
   },
   "include": [
     // in the build we populate this to include **/public/**/* but

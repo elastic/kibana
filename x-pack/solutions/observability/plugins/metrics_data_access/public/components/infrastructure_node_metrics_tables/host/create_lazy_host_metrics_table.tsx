@@ -10,7 +10,7 @@ import React, { lazy, Suspense } from 'react';
 import type { MetricsDataClient } from '../../../lib/metrics_client';
 import type { NodeMetricsTableProps } from '../shared';
 
-const LazyIntegratedHostMetricsTable = lazy(() => import('./integrated_host_metrics_table'));
+const LazyIntegratedHostMetricsTable = lazy(() => import('./integrated_host_metrics_table.js'));
 
 export function createLazyHostMetricsTable(core: CoreStart, metricsClient: MetricsDataClient) {
   return ({ timerange, kuery, sourceId, isOtel }: NodeMetricsTableProps) => {

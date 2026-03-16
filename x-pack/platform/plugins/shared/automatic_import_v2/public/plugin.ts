@@ -38,7 +38,7 @@ export class AutomaticImportV2Plugin
       title: PLUGIN_NAME,
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const [coreStart, plugins] = await core.getStartServices();
         return renderApp({ coreStart, plugins, params });
       },

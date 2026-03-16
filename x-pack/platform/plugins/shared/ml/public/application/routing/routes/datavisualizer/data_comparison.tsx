@@ -23,7 +23,7 @@ import {
 import { basicResolvers } from '../../resolvers';
 
 const DataDriftPage = dynamic(async () => ({
-  default: (await import('../../../datavisualizer/data_drift/data_drift_page')).DataDriftPage,
+  default: (await import('../../../datavisualizer/data_drift/data_drift_page.js')).DataDriftPage,
 }));
 
 export const dataDriftRouteFactory = (

@@ -18,7 +18,7 @@ import type { ComponentTemplatesFlyoutWithContextProps } from './component_templ
 export const ComponentTemplateFlyout = dynamic<
   ComponentType<ComponentTemplatesFlyoutWithContextProps>
 >(() =>
-  import('./component_templates_flyout_with_context').then((mod) => ({
+  import('./component_templates_flyout_with_context.js').then((mod) => ({
     default: mod.ComponentTemplatesFlyoutWithContext,
   }))
 );

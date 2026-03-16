@@ -174,7 +174,7 @@ export const getLinksEmbeddableFactory = () => {
             core: coreServices,
             parentApi,
             loadContent: async ({ closeFlyout }) => {
-              const { getEditorFlyout } = await import('../editor/get_editor_flyout');
+              const { getEditorFlyout } = await import('../editor/get_editor_flyout.js');
               return getEditorFlyout({
                 initialState: {
                   description:

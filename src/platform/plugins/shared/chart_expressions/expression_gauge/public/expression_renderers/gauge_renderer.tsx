@@ -103,7 +103,7 @@ export const gaugeRenderer: (
       handlers.event(event);
     };
 
-    const { GaugeComponent } = await import('../components/gauge_component');
+    const { GaugeComponent } = await import('../components/gauge_component.js');
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 

@@ -78,7 +78,7 @@ export class WorkflowsExtensionsExamplePlugin
       title: WORKFLOWS_EXTENSIONS_EXAMPLE_APP_TITLE,
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const [coreStart] = await core.getStartServices();
         return renderApp(coreStart, params);
       },

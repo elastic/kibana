@@ -15,7 +15,7 @@ import type { FeedbackRegistryEntry } from '@kbn/feedback-registry';
 import type { FeedbackFormData } from '../types';
 
 const LazyFeedbackContainer = lazy(() =>
-  import('./feedback_container').then((m) => ({ default: m.FeedbackContainer }))
+  import('./feedback_container.js').then((m) => ({ default: m.FeedbackContainer }))
 );
 
 interface Props {

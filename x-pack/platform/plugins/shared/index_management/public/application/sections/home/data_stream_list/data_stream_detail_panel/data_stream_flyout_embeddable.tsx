@@ -16,7 +16,7 @@ import type { ComponentType } from 'react';
 import type { DataStreamFlyoutWithContextProps } from './data_stream_flyout_with_context_types';
 
 export const DataStreamFlyout = dynamic<ComponentType<DataStreamFlyoutWithContextProps>>(() =>
-  import('./data_stream_flyout_with_context').then((mod) => ({
+  import('./data_stream_flyout_with_context.js').then((mod) => ({
     default: mod.DataStreamFlyoutWithContext,
   }))
 );

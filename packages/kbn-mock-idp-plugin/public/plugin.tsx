@@ -46,7 +46,7 @@ export const plugin: PluginInitializer<
       mount: async (params) => {
         const [[coreStart], { LoginPage }] = await Promise.all([
           coreSetup.getStartServices(),
-          import('./login_page'),
+          import('./login_page.js'),
         ]);
 
         ReactDOM.render(

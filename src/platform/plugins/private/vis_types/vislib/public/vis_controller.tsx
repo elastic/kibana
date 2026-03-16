@@ -81,7 +81,7 @@ export const createVislibVisController = (
         return;
       }
 
-      const { Vis: Vislib } = await import('./vislib/vis');
+      const { Vis: Vislib } = await import('./vislib/vis.js');
       const { uiState, event: fireEvent, hasCompatibleActions } = handlers;
 
       this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);

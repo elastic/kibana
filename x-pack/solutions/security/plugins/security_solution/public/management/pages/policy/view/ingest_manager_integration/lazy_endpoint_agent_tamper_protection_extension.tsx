@@ -16,8 +16,8 @@ export const getLazyEndpointAgentTamperProtectionExtension = ({
   lazy(async () => {
     const [{ withSecurityContext }, { EndpointAgentTamperProtectionExtension }] = await Promise.all(
       [
-        import('../../../../../common/components/with_security_context/with_security_context'),
-        import('./endpoint_agent_tamper_protection_extension'),
+        import('../../../../../common/components/with_security_context/with_security_context.js'),
+        import('./endpoint_agent_tamper_protection_extension.js'),
       ]
     );
     return {

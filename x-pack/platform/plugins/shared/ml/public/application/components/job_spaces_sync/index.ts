@@ -8,5 +8,5 @@
 import { dynamic } from '@kbn/shared-ux-utility';
 
 export const JobSpacesSyncFlyout = dynamic(async () => ({
-  default: (await import('./job_spaces_sync_flyout')).JobSpacesSyncFlyout,
+  default: (await import('./job_spaces_sync_flyout.js')).JobSpacesSyncFlyout,
 }));

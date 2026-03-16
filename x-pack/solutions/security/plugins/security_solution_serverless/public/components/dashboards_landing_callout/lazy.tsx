@@ -7,7 +7,7 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-const DashboardsLandingCalloutLazy = lazy(() => import('./dashboard_landing_callout'));
+const DashboardsLandingCalloutLazy = lazy(() => import('./dashboard_landing_callout.js'));
 
 export const DashboardsLandingCallout = () => (
   <Suspense fallback={<EuiLoadingSpinner size="s" />}>

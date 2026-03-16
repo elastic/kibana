@@ -29,7 +29,7 @@ export function createFlyout(
   } = coreStart;
 
   const LazyFlyoutContents = lazy(async () => {
-    const { FileDataVisualizerLite } = await import('../file_upload_lite');
+    const { FileDataVisualizerLite } = await import('../file_upload_lite.js');
     return {
       default: FileDataVisualizerLite,
     };

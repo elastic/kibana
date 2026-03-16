@@ -11,7 +11,7 @@ import React, { lazy, Suspense } from 'react';
 import type { AlertsSearchBarProps } from '../application/sections/alerts_search_bar';
 
 const AlertsSearchBarLazy: React.FC<AlertsSearchBarProps> = lazy(
-  () => import('../application/sections/alerts_search_bar/alerts_search_bar')
+  () => import('../application/sections/alerts_search_bar/alerts_search_bar.js')
 );
 
 const queryClient = new QueryClient();

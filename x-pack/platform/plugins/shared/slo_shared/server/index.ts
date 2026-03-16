@@ -9,7 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import type { SloSharedPluginSetup, SloSharedPluginStart } from './types';
 
 const plugin = async (initContext: PluginInitializerContext) => {
-  const { SloSharedPlugin } = await import('./plugin');
+  const { SloSharedPlugin } = await import('./plugin.js');
   return new SloSharedPlugin(initContext);
 };
 

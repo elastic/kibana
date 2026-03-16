@@ -23,7 +23,7 @@ export const VectorTileInspectorView = {
   },
   component: (props: InspectorViewProps) => {
     const Component = dynamic(async () => {
-      const { VectorTileInspector } = await import('./components/vector_tile_inspector');
+      const { VectorTileInspector } = await import('./components/vector_tile_inspector.js');
       return {
         default: VectorTileInspector,
       };

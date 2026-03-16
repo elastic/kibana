@@ -75,7 +75,7 @@ export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLo
   id = VISUALIZE_APP_LOCATOR;
 
   public async getLocation(params: VisualizeLocatorParams) {
-    const { getLocation } = await import('./locator_location');
+    const { getLocation } = await import('./locator_location.js');
     return getLocation(params);
   }
 }

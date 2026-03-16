@@ -36,7 +36,7 @@ export const createSavedBookAction = (core: CoreStart) => {
         core,
         parentApi: parent,
         loadContent: async ({ closeFlyout }) => {
-          const { getSavedBookEditor } = await import('./saved_book_editor');
+          const { getSavedBookEditor } = await import('./saved_book_editor.js');
           return getSavedBookEditor({
             closeFlyout,
             stateManager: newBookStateManager,

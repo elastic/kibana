@@ -9,7 +9,7 @@ import React, { Suspense } from 'react';
 import type { CreateIntegrationSideCardButtonComponent } from './types';
 
 const CreateIntegrationSideCardButton = React.lazy(() =>
-  import('./create_integration_card_button').then((module) => ({
+  import('./create_integration_card_button.js').then((module) => ({
     default: module.CreateIntegrationSideCardButton,
   }))
 );

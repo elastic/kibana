@@ -84,7 +84,7 @@ export class RollupPlugin implements Plugin {
           docTitle.change(pluginName);
           params.setBreadcrumbs([{ text: pluginName }]);
 
-          const { renderApp } = await import('./application');
+          const { renderApp } = await import('./application.js');
           const unmountAppCallback = await renderApp(core, params);
 
           return () => {

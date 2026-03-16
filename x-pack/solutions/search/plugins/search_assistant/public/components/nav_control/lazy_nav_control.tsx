@@ -14,7 +14,7 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 
 const LazyNavControlWithProvider = dynamic(() =>
-  import('.').then((m) => ({ default: m.NavControlWithProvider }))
+  import('./index.js').then((m) => ({ default: m.NavControlWithProvider }))
 );
 
 interface NavControlInitiatorProps {

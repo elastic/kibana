@@ -80,20 +80,23 @@ export function useKibanaEnvironmentContext() {
 
 export const createLazyComponentWithKibanaContext = <T extends React.ComponentType<any>>(
   coreSetup: InfraClientCoreSetup,
-  lazyComponentFactory: () => Promise<{ default: T }>
+  lazyComponentFactory: () =>
+    | Promise<{ default: T }>
+    | Promise<{ default: { default: T; [key: string]: any } }>
 ) =>
   React.lazy(() =>
-    Promise.all([lazyComponentFactory(), coreSetup.getStartServices()]).then(
-      ([{ default: LazilyLoadedComponent }, [core, plugins, pluginStart]]) => {
-        const { Provider } = createKibanaContextForPlugin(core, plugins, pluginStart);
+    Promise.all([
+      lazyComponentFactory() as Promise<{ default: T }>,
+      coreSetup.getStartServices(),
+    ]).then(([{ default: LazilyLoadedComponent }, [core, plugins, pluginStart]]) => {
+      const { Provider } = createKibanaContextForPlugin(core, plugins, pluginStart);
 
-        return {
-          default: (props: PropsOf<T>) => (
-            <Provider>
-              <LazilyLoadedComponent {...props} />
-            </Provider>
-          ),
-        };
-      }
-    )
+      return {
+        default: (props: PropsOf<T>) => (
+          <Provider>
+            <LazilyLoadedComponent {...props} />
+          </Provider>
+        ),
+      };
+    })
   );

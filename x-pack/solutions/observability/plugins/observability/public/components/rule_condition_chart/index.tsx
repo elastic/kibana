@@ -8,7 +8,7 @@
 import React, { lazy, Suspense } from 'react';
 import type { RuleConditionChartProps } from './rule_condition_chart';
 
-const RuleConditionChartLazy = lazy(() => import('./rule_condition_chart'));
+const RuleConditionChartLazy = lazy(() => import('./rule_condition_chart.js'));
 
 export function RuleConditionChart(props: RuleConditionChartProps) {
   return (

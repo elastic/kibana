@@ -49,7 +49,7 @@ describe('getGoogleOAuthJwtAccessToken', () => {
     }));
 
     // Dynamically import the function after mocking
-    const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
+    const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token.js');
 
     const accessToken = await getGoogleOAuthJwtAccessToken(getGoogleOAuthJwtAccessTokenOptions);
     expect(accessToken).toBe('mocked_access_token');
@@ -81,7 +81,7 @@ describe('getGoogleOAuthJwtAccessToken', () => {
       },
     });
     // Dynamically import the function
-    const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
+    const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token.js');
 
     const accessToken = await getGoogleOAuthJwtAccessToken(getGoogleOAuthJwtAccessTokenOptions);
     expect(accessToken).toEqual('testtokenvalue');
@@ -107,7 +107,7 @@ describe('getGoogleOAuthJwtAccessToken', () => {
     }));
 
     // Dynamically import the function after mocking
-    const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
+    const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token.js');
     const accessToken = await getGoogleOAuthJwtAccessToken(getGoogleOAuthJwtAccessTokenOptions);
     expect(accessToken).toBe('mocked_access_token');
     expect(connectorTokenClient.updateOrReplace).toHaveBeenCalledWith(
@@ -130,7 +130,7 @@ describe('getGoogleOAuthJwtAccessToken', () => {
     }));
 
     // Dynamically import the function after mocking
-    const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
+    const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token.js');
     const accessToken = await getGoogleOAuthJwtAccessToken({
       connectorId: 'failing_connector',
       logger,
@@ -154,7 +154,7 @@ describe('getGoogleOAuthJwtAccessToken', () => {
     connectorTokenClient.get.mockResolvedValue({ connectorToken: null, hasErrors: false });
 
     // Dynamically import the function after mocking
-    const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
+    const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token.js');
 
     await expect(
       getGoogleOAuthJwtAccessToken({

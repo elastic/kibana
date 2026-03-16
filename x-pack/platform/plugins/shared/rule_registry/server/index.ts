@@ -53,6 +53,6 @@ export type {
 export type { AlertsClient } from './alert_data_client/alerts_client';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { RuleRegistryPlugin } = await import('./plugin');
+  const { RuleRegistryPlugin } = await import('./plugin.js');
   return new RuleRegistryPlugin(initContext);
 };

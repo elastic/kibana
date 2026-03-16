@@ -46,7 +46,7 @@ export const synchronizeMovementAction = createAction<EmbeddableApiContext>({
   execute: async () => {
     const core = getCore();
     const LazyModal = lazy(async () => {
-      const { SynchronizeMovementModal } = await import('./modal');
+      const { SynchronizeMovementModal } = await import('./modal.js');
       return {
         default: SynchronizeMovementModal,
       };

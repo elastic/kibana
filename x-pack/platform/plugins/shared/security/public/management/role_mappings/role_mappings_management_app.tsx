@@ -49,11 +49,11 @@ export const roleMappingsManagementApp = Object.freeze({
           { SecurityFeaturesAPIClient },
         ] = await Promise.all([
           getStartServices(),
-          import('./role_mappings_grid'),
-          import('./edit_role_mapping'),
-          import('./role_mappings_api_client'),
-          import('../roles'),
-          import('../security_features'),
+          import('./role_mappings_grid/index.js'),
+          import('./edit_role_mapping/index.js'),
+          import('./role_mappings_api_client.js'),
+          import('../roles/index.js'),
+          import('../security_features/index.js'),
         ]);
 
         core.chrome.docTitle.change(title);

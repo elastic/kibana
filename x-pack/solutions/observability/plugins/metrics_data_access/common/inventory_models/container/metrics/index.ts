@@ -17,16 +17,16 @@ export const metrics: InventoryMetricsConfig<
   ContainerCharts
 > = {
   getAggregations: async (args) => {
-    const { snapshot } = await import('./snapshot');
+    const { snapshot } = await import('./snapshot/index.js');
     const catalog = new MetricsCatalog(snapshot, args?.schema);
     return catalog;
   },
   getFormulas: async (args) => {
-    const { formulas } = await import('./formulas');
+    const { formulas } = await import('./formulas/index.js');
     const catalog = new MetricsCatalog(formulas, args?.schema);
     return catalog;
   },
-  getCharts: async () => import('./charts').then(({ charts }) => charts),
+  getCharts: async () => import('./charts/index.js').then(({ charts }) => charts),
   getWaffleMapTooltipMetrics: () => ['cpu', 'memory', 'rx', 'tx'],
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour

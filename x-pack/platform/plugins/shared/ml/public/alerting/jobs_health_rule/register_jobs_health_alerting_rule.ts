@@ -28,7 +28,7 @@ export function registerJobsHealthAlertingRule(
     documentationUrl(docLinks) {
       return docLinks.links.ml.alertingRules;
     },
-    ruleParamsExpression: lazy(() => import('./anomaly_detection_jobs_health_rule_trigger')),
+    ruleParamsExpression: lazy(() => import('./anomaly_detection_jobs_health_rule_trigger.js')),
     validate: (alertParams: MlAnomalyDetectionJobsHealthRuleParams) => {
       const validationResult = {
         errors: {

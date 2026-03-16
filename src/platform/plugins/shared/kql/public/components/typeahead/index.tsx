@@ -12,7 +12,7 @@ import React from 'react';
 const Fallback = () => <div />;
 
 const LazySuggestionsComponent = React.lazy(async () => {
-  const { SuggestionsComponent } = await import('./suggestions_component');
+  const { SuggestionsComponent } = await import('./suggestions_component.js');
   return { default: SuggestionsComponent };
 });
 export const SuggestionsComponent = (

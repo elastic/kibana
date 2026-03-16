@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let mockApiServer: http.Server;
 
     before(async () => {
-      const { setupMockServer } = await import('./mock_agentless_api');
+      const { setupMockServer } = await import('./mock_agentless_api.js');
       const mockAgentlessApiService = setupMockServer();
       mockApiServer = mockAgentlessApiService.listen(8089);
 

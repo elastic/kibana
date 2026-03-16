@@ -13,6 +13,6 @@ export const config: PluginConfigDescriptor = {
 };
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { CanvasPlugin } = await import('./plugin');
+  const { CanvasPlugin } = await import('./plugin.js');
   return new CanvasPlugin(initializerContext);
 };

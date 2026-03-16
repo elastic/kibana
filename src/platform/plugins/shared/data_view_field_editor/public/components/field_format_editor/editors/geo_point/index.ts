@@ -14,5 +14,5 @@ import type { GeoPointFormatEditorFormatParams } from './geo_point';
 export type { GeoPointFormatEditor } from './geo_point';
 export const geoPointFormatEditorFactory: FieldFormatEditorFactory<
   GeoPointFormatEditorFormatParams
-> = () => import('./geo_point').then((m) => m.GeoPointFormatEditor);
+> = () => import('./geo_point.js').then((m) => m.GeoPointFormatEditor);
 geoPointFormatEditorFactory.formatId = formatId;

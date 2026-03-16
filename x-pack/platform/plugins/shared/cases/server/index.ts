@@ -31,7 +31,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   ],
 };
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { CasePlugin } = await import('./plugin');
+  const { CasePlugin } = await import('./plugin.js');
   return new CasePlugin(initializerContext);
 };
 

@@ -18,7 +18,7 @@ export class MapsAppRegionMapLocatorDefinition
   constructor(protected readonly deps: MapsAppRegionMapLocatorDependencies) {}
 
   public readonly getLocation = async (params: MapsAppRegionMapLocatorParams) => {
-    const { getLocation } = await import('./get_location');
+    const { getLocation } = await import('./get_location.js');
     return getLocation(params, this.deps);
   };
 }

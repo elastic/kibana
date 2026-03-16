@@ -38,7 +38,7 @@ describe('ConnectorForm', () => {
 
   it('calls on change with correct init state', async () => {
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
-      actionConnectorFields: lazy(() => import('./connector_mock')),
+      actionConnectorFields: lazy(() => import('./connector_mock.js')),
     });
 
     appMockRenderer.render(
@@ -66,7 +66,7 @@ describe('ConnectorForm', () => {
 
   it('calls onFormModifiedChange when form is modified', async () => {
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
-      actionConnectorFields: lazy(() => import('./connector_mock')),
+      actionConnectorFields: lazy(() => import('./connector_mock.js')),
     });
 
     appMockRenderer.render(
@@ -89,7 +89,7 @@ describe('ConnectorForm', () => {
 
   it('calls onChange when the form is invalid', async () => {
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
-      actionConnectorFields: lazy(() => import('./connector_mock')),
+      actionConnectorFields: lazy(() => import('./connector_mock.js')),
     });
 
     const result = appMockRenderer.render(
@@ -122,7 +122,7 @@ describe('ConnectorForm', () => {
 
   it('registers the pre submit validator correctly', async () => {
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
-      actionConnectorFields: lazy(() => import('./connector_mock')),
+      actionConnectorFields: lazy(() => import('./connector_mock.js')),
     });
 
     appMockRenderer.render(
@@ -150,7 +150,7 @@ describe('ConnectorForm', () => {
     const formSerializer = jest.fn((data) => data);
     const formDeserializer = jest.fn((data) => data);
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
-      actionConnectorFields: lazy(() => import('./connector_mock')),
+      actionConnectorFields: lazy(() => import('./connector_mock.js')),
       connectorForm: {
         serializer: formSerializer,
         deserializer: formDeserializer,

@@ -51,7 +51,7 @@ export class AiopsPlugin
       ChangePointDetectionComponent: getChangePointDetectionComponent(core, plugins),
       getPatternAnalysisAvailable: async () => {
         const { getPatternAnalysisAvailable } = await import(
-          './components/log_categorization/log_categorization_enabled'
+          './components/log_categorization/log_categorization_enabled.js'
         );
         return getPatternAnalysisAvailable(core.application);
       },

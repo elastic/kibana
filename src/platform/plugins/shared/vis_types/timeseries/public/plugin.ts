@@ -125,7 +125,7 @@ export class MetricsPlugin implements Plugin<void, void> {
     setUsageCollectionStart(usageCollection);
 
     uiActions.registerActionAsync(CREATE_TSVB_PANEL, async () => {
-      const { addTSVBPanelAction } = await import('./add_tsvb_panel_action');
+      const { addTSVBPanelAction } = await import('./add_tsvb_panel_action.js');
       return addTSVBPanelAction({ data, embeddable });
     });
     uiActions.attachAction(ADD_PANEL_TRIGGER, CREATE_TSVB_PANEL);

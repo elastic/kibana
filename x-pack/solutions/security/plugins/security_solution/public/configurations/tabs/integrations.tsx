@@ -80,6 +80,6 @@ export const ConfigurationsIntegrationsHome = React.memo<IntegrationsPageProps>(
 ConfigurationsIntegrationsHome.displayName = 'ConfigurationsIntegrationsHome';
 
 export const LazyConfigurationsIntegrationsHome = withLazyHook(ConfigurationsIntegrationsHome, () =>
-  import('@kbn/fleet-plugin/public').then((module) => module.AvailablePackagesHook())
+  import('@kbn/fleet-plugin/public/index.js').then((module) => module.AvailablePackagesHook())
 );
 LazyConfigurationsIntegrationsHome.displayName = 'LazyConfigurationsIntegrationsHome';

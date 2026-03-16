@@ -41,14 +41,20 @@ export function createVisToADJobAction(
       try {
         if (isLensApi(embeddable)) {
           const [{ showLensVisToADJobFlyout }, [coreStart, { share, data, lens, dashboard }]] =
-            await Promise.all([import('../embeddables/job_creation/lens'), getStartServices()]);
+            await Promise.all([
+              import('../embeddables/job_creation/lens/index.js'),
+              getStartServices(),
+            ]);
           if (lens === undefined) {
             return;
           }
           await showLensVisToADJobFlyout(embeddable, coreStart, share, data, dashboard, lens);
         } else if (isMapApi(embeddable)) {
           const [{ showMapVisToADJobFlyout }, [coreStart, { share, data, dashboard }]] =
-            await Promise.all([import('../embeddables/job_creation/map'), getStartServices()]);
+            await Promise.all([
+              import('../embeddables/job_creation/map/index.js'),
+              getStartServices(),
+            ]);
           await showMapVisToADJobFlyout(embeddable, coreStart, share, data, dashboard);
         }
       } catch (e) {
@@ -79,14 +85,14 @@ export function createVisToADJobAction(
           }
 
           const { getChartInfoFromVisualization, isCompatibleVisualizationType } = await import(
-            '../application/jobs/new_job/job_from_lens'
+            '../application/jobs/new_job/job_from_lens/index.js'
           );
 
           const chartInfo = await getChartInfoFromVisualization(lens, vis);
           return isCompatibleVisualizationType(chartInfo);
         } else if (isMapApi(embeddable)) {
           const { isCompatibleMapVisualization } = await import(
-            '../application/jobs/new_job/job_from_map'
+            '../application/jobs/new_job/job_from_map/index.js'
           );
 
           return isCompatibleMapVisualization(embeddable);

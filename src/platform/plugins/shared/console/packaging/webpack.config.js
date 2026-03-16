@@ -194,6 +194,9 @@ module.exports = [
     resolve: {
       alias: {},
       extensions: ['.js', '.ts', '.tsx', '.scss', '.css'],
+      extensionAlias: {
+        '.js': ['.ts', '.tsx', '.js'],
+      },
     },
     optimization: {
       minimize: false,

@@ -23,16 +23,16 @@ import {
 } from './utils';
 
 const FileAttachmentEvent = lazy(() =>
-  import('./file_attachment_event').then((module) => ({ default: module.FileAttachmentEvent }))
+  import('./file_attachment_event.js').then((module) => ({ default: module.FileAttachmentEvent }))
 );
 const FileDeleteButton = lazy(() =>
-  import('./file_delete_button').then((module) => ({ default: module.FileDeleteButton }))
+  import('./file_delete_button.js').then((module) => ({ default: module.FileDeleteButton }))
 );
 const FileDownloadButton = lazy(() =>
-  import('./file_download_button').then((module) => ({ default: module.FileDownloadButton }))
+  import('./file_download_button.js').then((module) => ({ default: module.FileDownloadButton }))
 );
 const FileThumbnail = lazy(() =>
-  import('./file_thumbnail').then((module) => ({ default: module.FileThumbnail }))
+  import('./file_thumbnail.js').then((module) => ({ default: module.FileThumbnail }))
 );
 
 function getFileDownloadButton(fileId: string) {

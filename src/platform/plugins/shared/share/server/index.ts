@@ -36,7 +36,7 @@ export {
 } from './unused_urls_task';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { SharePlugin } = await import('./plugin');
+  const { SharePlugin } = await import('./plugin.js');
   return new SharePlugin(initializerContext);
 }
 

@@ -93,7 +93,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             core,
             parentApi: api.parentApi,
             loadContent: async ({ closeFlyout }) => {
-              const { getSavedBookEditor } = await import('./saved_book_editor');
+              const { getSavedBookEditor } = await import('./saved_book_editor.js');
               return getSavedBookEditor({
                 closeFlyout,
                 stateManager: bookStateManager,

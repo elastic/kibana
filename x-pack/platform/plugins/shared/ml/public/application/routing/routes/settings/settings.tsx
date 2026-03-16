@@ -21,7 +21,7 @@ import {
 } from '../../breadcrumbs';
 
 const Settings = dynamic(async () => ({
-  default: (await import('../../../settings')).Settings,
+  default: (await import('../../../settings/index.js')).Settings,
 }));
 
 export const settingsRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({

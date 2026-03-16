@@ -12,7 +12,9 @@ import type { TimelineItem } from '../../../../common/search_strategy';
 import type { AlertWorkflowStatus } from '../../types';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 
-const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
+const StatefulAlertBulkActions = lazy(
+  () => import('../toolbar/bulk_actions/alert_bulk_actions.js')
+);
 
 interface OwnProps {
   tableId: TableId;

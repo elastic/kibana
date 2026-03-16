@@ -39,7 +39,7 @@ export class XyVisualization {
         },
       ] = await core.getStartServices();
       const [{ getXyVisualization }, paletteService, eventAnnotationService] = await Promise.all([
-        import('../../async_services'),
+        import('../../async_services.js'),
         charts.palettes.getPalettes(),
         eventAnnotation.getService(),
       ]);

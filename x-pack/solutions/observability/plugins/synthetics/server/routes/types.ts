@@ -6,7 +6,6 @@
  */
 
 import type { Subject } from 'rxjs';
-import type { ObjectType } from '@kbn/config-schema';
 import type {
   RequestHandler,
   RouteConfig,
@@ -55,7 +54,7 @@ export interface UMServerRoute<T> {
  * provided by Kibana core.
  */
 export type UMRouteDefinition<T> = UMServerRoute<T> &
-  Omit<RouteConfig<ObjectType, ObjectType, ObjectType, RouteMethod>, 'security'> & {
+  Omit<RouteConfig<unknown, unknown, unknown, RouteMethod>, 'security'> & {
     security?: RouteSecurity;
   };
 
@@ -65,7 +64,7 @@ export type UMRouteDefinition<T> = UMServerRoute<T> &
  * to successfully interact with the Kibana platform.
  */
 export type UMKibanaRoute = UMRouteDefinition<
-  RequestHandler<ObjectType, ObjectType, ObjectType, UptimeRequestHandlerContext>
+  RequestHandler<unknown, unknown, unknown, UptimeRequestHandlerContext>
 >;
 
 export type SyntheticsRestApiRouteFactory<

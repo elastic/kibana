@@ -9,10 +9,6 @@
 
 import React, { Suspense } from 'react';
 
-type Loader<TElement extends React.ComponentType<any>> = () => Promise<{
-  default: TElement;
-}>;
-
 /**
  * Options for the lazy loaded component
  */
@@ -20,6 +16,12 @@ export interface DynamicOptions {
   /* Fallback UI element to use when loading the component */
   fallback?: React.SuspenseProps['fallback'];
 }
+
+type ExtractDynamicDefault<M> = M extends { default: infer T extends React.ComponentType<any> }
+  ? T
+  : M extends { default: { default: infer T extends React.ComponentType<any> } }
+  ? T
+  : never;
 
 /**
  * Lazy load and wrap with Suspense any component.
@@ -32,13 +34,28 @@ export interface DynamicOptions {
  * // Lazy load a named exported component
  * const MobileHeader = dynamic<MobileHeaderProps>(() => import('./components/header').then(mod => ({default: mod.MobileHeader})))
  */
+
+// Inferred types from loader (handles ESM, CJS-wrapped, and union shapes from nodenext)
+export function dynamic<M extends { default: any }, TRef = {}>(
+  loader: () => Promise<M>,
+  options?: DynamicOptions
+): React.ForwardRefExoticComponent<
+  React.PropsWithoutRef<React.ComponentPropsWithRef<ExtractDynamicDefault<M>>> &
+    React.RefAttributes<TRef>
+>;
+
+// Explicit type parameter for backwards compatibility: dynamic<ComponentType<Props>>(...)
 export function dynamic<TElement extends React.ComponentType<any>, TRef = {}>(
-  loader: Loader<TElement>,
-  options: DynamicOptions = {}
-) {
+  loader: () => Promise<any>,
+  options?: DynamicOptions
+): React.ForwardRefExoticComponent<
+  React.PropsWithoutRef<React.ComponentPropsWithRef<TElement>> & React.RefAttributes<TRef>
+>;
+
+export function dynamic(loader: () => Promise<any>, options: DynamicOptions = {}) {
   const Component = React.lazy(loader);
 
-  return React.forwardRef<TRef, React.ComponentPropsWithRef<TElement>>((props, ref) => (
+  return React.forwardRef((props, ref) => (
     <Suspense fallback={options.fallback ?? null}>
       {React.createElement(Component, { ...props, ref })}
     </Suspense>

@@ -144,7 +144,7 @@ export class ManagementPlugin
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: this.appUpdater,
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const [coreStart, deps] = await core.getStartServices();
         const chromeStyle$ = coreStart.chrome.getChromeStyle$();
 

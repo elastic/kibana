@@ -21,7 +21,7 @@ export type GetCreateCaseFlyoutProps = Omit<
 >;
 
 export const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
-  () => import('../../components/create/flyout')
+  () => import('../../components/create/flyout/index.js')
 );
 export const getCreateCaseFlyoutLazy = ({
   externalReferenceAttachmentTypeRegistry,

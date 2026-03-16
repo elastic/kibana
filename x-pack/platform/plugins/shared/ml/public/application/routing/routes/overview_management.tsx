@@ -19,7 +19,7 @@ import { initSavedObjects } from '../resolvers';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { AccessDeniedCallout } from '../../access_denied';
 
-const OverviewPage = React.lazy(() => import('../../overview/overview_page'));
+const OverviewPage = React.lazy(() => import('../../overview/overview_page.js'));
 
 export const overviewRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   id: 'overview',

@@ -113,7 +113,7 @@ export class CanvasPlugin
       order: 3000,
       updater$: this.appUpdater,
       mount: async (params: AppMountParameters) => {
-        const { CanvasSrcPlugin } = await import('../canvas_plugin_src/plugin');
+        const { CanvasSrcPlugin } = await import('../canvas_plugin_src/plugin.js');
         const srcPlugin = new CanvasSrcPlugin();
 
         srcPlugin.setup(coreSetup, { canvas: canvasApi });
@@ -128,11 +128,11 @@ export class CanvasPlugin
         srcPlugin.start(coreStart, startPlugins);
 
         const { expressions } = startPlugins;
-        const languages = await import('./components/expression_input/language');
+        const languages = await import('./components/expression_input/language.js');
         languages.registerExpressionsLanguage(Object.values(expressions.getFunctions()));
 
         // Load application bundle
-        const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
+        const { renderApp, initializeCanvas, teardownCanvas } = await import('./application.js');
 
         const canvasStore = await initializeCanvas(
           coreSetup,
@@ -170,12 +170,12 @@ export class CanvasPlugin
 
     canvasApi.addArgumentUIs(async () => {
       // @ts-expect-error
-      const { argTypeSpecs } = await import('./expression_types/arg_types');
+      const { argTypeSpecs } = await import('./expression_types/arg_types/index.js');
       return argTypeSpecs;
     });
 
     canvasApi.addTransitions(async () => {
-      const { transitions } = await import('./transitions');
+      const { transitions } = await import('./transitions/index.js');
       return transitions;
     });
 

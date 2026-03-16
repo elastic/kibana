@@ -19,6 +19,6 @@ export const config: PluginConfigDescriptor<PieConfig> = {
 };
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { VisTypePieServerPlugin } = await import('./plugin');
+  const { VisTypePieServerPlugin } = await import('./plugin.js');
   return new VisTypePieServerPlugin(initializerContext);
 };

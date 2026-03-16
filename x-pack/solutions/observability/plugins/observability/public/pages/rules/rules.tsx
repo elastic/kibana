@@ -21,7 +21,7 @@ import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { RulesTab } from './rules_tab';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 
-const GlobalLogsTab = lazy(() => import('./global_logs_tab'));
+const GlobalLogsTab = lazy(() => import('./global_logs_tab.js'));
 
 const RULES_TAB_NAME = 'rules';
 

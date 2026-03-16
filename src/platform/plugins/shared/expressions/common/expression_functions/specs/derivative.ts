@@ -96,7 +96,7 @@ export const derivative: ExpressionFunctionDerivative = {
   },
 
   async fn(input, args) {
-    const { derivativeFn } = await import('./derivative_fn');
+    const { derivativeFn } = await import('./derivative_fn.js');
     return derivativeFn(input, args);
   },
 };

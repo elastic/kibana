@@ -10,6 +10,6 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export type { UrlDrilldownState } from './types';
 
 export const plugin = async (context: PluginInitializerContext) => {
-  const { UrlDrilldownPlugin } = await import('./plugin');
+  const { UrlDrilldownPlugin } = await import('./plugin.js');
   return new UrlDrilldownPlugin();
 };

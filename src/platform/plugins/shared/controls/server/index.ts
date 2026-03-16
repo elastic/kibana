@@ -8,6 +8,6 @@
  */
 
 export const plugin = async () => {
-  const { ControlsPlugin } = await import('./plugin');
+  const { ControlsPlugin } = await import('./plugin.js');
   return new ControlsPlugin();
 };

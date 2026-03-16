@@ -21,7 +21,7 @@ export const siemMigrationIntegrationsCardConfig: OnboardingCardConfig<Integrati
     () =>
       import(
         /* webpackChunkName: "onboarding_siem_migrations_integrations_card" */
-        './integrations_card'
+        './integrations_card.js'
       )
   ),
   checkComplete: checkIntegrationsCardComplete,

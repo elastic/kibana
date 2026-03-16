@@ -90,7 +90,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
     if (plugins.observability) {
       const getUxDataHelper = async () => {
         const { fetchUxOverviewDate, hasRumData, createCallApmApi } = await import(
-          './components/app/rum_dashboard/ux_overview_fetchers'
+          './components/app/rum_dashboard/ux_overview_fetchers.js'
         );
         // have to do this here as well in case app isn't mounted yet
         createCallApmApi(core);
@@ -198,7 +198,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       async mount(appMountParameters: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-          import('./application/ux_app'),
+          import('./application/ux_app.js'),
           core.getStartServices(),
         ]);
 

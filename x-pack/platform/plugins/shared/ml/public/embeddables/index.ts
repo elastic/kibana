@@ -18,13 +18,13 @@ export type * from './types';
 
 export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSetup) {
   embeddable.registerReactEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, async () => {
-    const { getAnomalySwimLaneEmbeddableFactory } = await import('./anomaly_swimlane');
+    const { getAnomalySwimLaneEmbeddableFactory } = await import('./anomaly_swimlane/index.js');
     return getAnomalySwimLaneEmbeddableFactory(core.getStartServices);
   });
 
   embeddable.registerReactEmbeddableFactory(ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE, async () => {
     const { getAnomalyChartsReactEmbeddableFactory } = await import(
-      './anomaly_charts/anomaly_charts_embeddable_factory'
+      './anomaly_charts/anomaly_charts_embeddable_factory.js'
     );
     return getAnomalyChartsReactEmbeddableFactory(core.getStartServices);
   });
@@ -32,7 +32,9 @@ export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSet
   embeddable.registerReactEmbeddableFactory(
     ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
     async () => {
-      const { getSingleMetricViewerEmbeddableFactory } = await import('./single_metric_viewer');
+      const { getSingleMetricViewerEmbeddableFactory } = await import(
+        './single_metric_viewer/index.js'
+      );
       return getSingleMetricViewerEmbeddableFactory(core.getStartServices);
     }
   );

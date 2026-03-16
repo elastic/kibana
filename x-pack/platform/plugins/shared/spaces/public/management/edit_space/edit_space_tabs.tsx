@@ -42,7 +42,7 @@ export interface GetTabsProps {
 
 const SuspenseEditSpaceSettingsTab = withSuspense(
   React.lazy(() =>
-    import('./edit_space_general_tab').then(({ EditSpaceSettingsTab }) => ({
+    import('./edit_space_general_tab.js').then(({ EditSpaceSettingsTab }) => ({
       default: EditSpaceSettingsTab,
     }))
   )
@@ -50,7 +50,7 @@ const SuspenseEditSpaceSettingsTab = withSuspense(
 
 const SuspenseEditSpaceAssignedRolesTab = withSuspense(
   React.lazy(() =>
-    import('./edit_space_roles_tab').then(({ EditSpaceAssignedRolesTab }) => ({
+    import('./edit_space_roles_tab.js').then(({ EditSpaceAssignedRolesTab }) => ({
       default: EditSpaceAssignedRolesTab,
     }))
   )
@@ -58,7 +58,7 @@ const SuspenseEditSpaceAssignedRolesTab = withSuspense(
 
 const SuspenseEditSpaceContentTab = withSuspense(
   React.lazy(() =>
-    import('./edit_space_content_tab').then(({ EditSpaceContentTab }) => ({
+    import('./edit_space_content_tab.js').then(({ EditSpaceContentTab }) => ({
       default: EditSpaceContentTab,
     }))
   )

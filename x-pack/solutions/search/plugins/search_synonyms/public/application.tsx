@@ -21,7 +21,7 @@ export const renderApp = async (
   services: AppPluginStartDependencies,
   element: HTMLElement
 ) => {
-  const { SearchSynonymsRouter } = await import('./search_synonyms_router');
+  const { SearchSynonymsRouter } = await import('./search_synonyms_router.js');
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>

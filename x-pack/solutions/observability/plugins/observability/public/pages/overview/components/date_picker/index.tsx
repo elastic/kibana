@@ -8,7 +8,7 @@
 import React, { lazy, Suspense } from 'react';
 import type { DatePickerProps } from './date_picker';
 
-const DatePickerLazy = lazy(() => import('./date_picker'));
+const DatePickerLazy = lazy(() => import('./date_picker.js'));
 
 export function DatePicker(props: DatePickerProps) {
   return (

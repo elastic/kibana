@@ -37,4 +37,4 @@ export {
 } from './embeddable';
 export type { DiscoverServices } from './build_services';
 
-export const loadSharingDataHelpers = () => import('./utils/get_sharing_data');
+export const loadSharingDataHelpers = () => import('./utils/get_sharing_data.js');

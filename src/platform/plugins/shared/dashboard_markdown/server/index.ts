@@ -24,6 +24,6 @@ export type {
 } from './api';
 
 export const plugin = async () => {
-  const { MarkdownPlugin } = await import('./plugin');
+  const { MarkdownPlugin } = await import('./plugin.js');
   return new MarkdownPlugin();
 };

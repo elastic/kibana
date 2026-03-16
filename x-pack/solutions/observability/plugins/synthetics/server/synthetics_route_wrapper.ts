@@ -13,7 +13,7 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
-import type { SyntheticsRouteWrapper } from './routes/types';
+import type { RouteContext, SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   syntheticsRoute,
@@ -78,7 +78,9 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           monitorConfigRepository,
         };
 
-        const res = await server.fleet.runWithCache(() => syntheticsRoute.handler(data));
+        const res = await server.fleet.runWithCache(() =>
+          syntheticsRoute.handler(data as RouteContext)
+        );
 
         if (isKibanaResponse(res)) {
           return res;

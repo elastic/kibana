@@ -24,7 +24,7 @@ export const createCategorizeFieldAction = (coreStart: CoreStart, plugins: Aiops
     },
     execute: async (context: CategorizeFieldContext) => {
       const { field, dataView, originatingApp, additionalFilter, focusTrapProps } = context;
-      const { showCategorizeFlyout } = await import('./show_flyout');
+      const { showCategorizeFlyout } = await import('./show_flyout.js');
       showCategorizeFlyout(
         field,
         dataView,

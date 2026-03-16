@@ -19,13 +19,13 @@ export function setupBookEmbeddable(
   contentManagement: ContentManagementPublicSetup
 ) {
   embeddable.registerReactEmbeddableFactory(BOOK_EMBEDDABLE_TYPE, async () => {
-    const { getSavedBookEmbeddableFactory } = await import('./saved_book_react_embeddable');
+    const { getSavedBookEmbeddableFactory } = await import('./saved_book_react_embeddable.js');
     const [coreStart] = await core.getStartServices();
     return getSavedBookEmbeddableFactory(coreStart);
   });
 
   embeddable.registerLegacyURLTransform(BOOK_EMBEDDABLE_TYPE, async () => {
-    const { bookTransforms } = await import('../../../common/book/transforms');
+    const { bookTransforms } = await import('../../../common/book/transforms/index.js');
     return bookTransforms.transformOut as EmbeddableTransforms<object, object>['transformOut'];
   });
 

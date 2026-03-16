@@ -81,15 +81,15 @@ import { useMlIndexUtils } from '../util/index_service';
 import { useJobSelection } from './hooks/use_job_selection';
 
 const AnnotationFlyout = dynamic(async () => ({
-  default: (await import('../components/annotations/annotation_flyout')).AnnotationFlyout,
+  default: (await import('../components/annotations/annotation_flyout/index.js')).AnnotationFlyout,
 }));
 
 const AnomaliesMap = dynamic(async () => ({
-  default: (await import('./anomalies_map')).AnomaliesMap,
+  default: (await import('./anomalies_map.js')).AnomaliesMap,
 }));
 
 const ExplorerChartsContainer = dynamic(async () => ({
-  default: (await import('./explorer_charts/explorer_charts_container')).ExplorerChartsContainer,
+  default: (await import('./explorer_charts/explorer_charts_container.js')).ExplorerChartsContainer,
 }));
 
 interface ExplorerPageProps {

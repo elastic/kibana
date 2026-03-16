@@ -34,7 +34,7 @@ import { Priority } from './priority';
 import type { JsonEditorProps } from './json_editor';
 import { OptionalFieldLabel } from '../../../common/optional_field_label';
 
-const JsonEditorLazy: React.FC<JsonEditorProps> = lazy(() => import('./json_editor'));
+const JsonEditorLazy: React.FC<JsonEditorProps> = lazy(() => import('./json_editor.js'));
 
 type FormViewProps = Omit<CreateAlertProps, 'editAction'>;
 

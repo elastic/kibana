@@ -8,6 +8,6 @@
  */
 
 export const plugin = async () => {
-  const { UserProfilesPlugin } = await import('./plugin');
+  const { UserProfilesPlugin } = await import('./plugin.js');
   return new UserProfilesPlugin();
 };

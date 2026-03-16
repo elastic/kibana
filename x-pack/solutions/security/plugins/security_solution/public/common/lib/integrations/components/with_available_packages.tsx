@@ -35,7 +35,8 @@ export const withAvailablePackages = <T extends { availablePackages: AvailablePa
         return <Component {...({ ...props, availablePackages } as T)} />;
       }
     ),
-    () => import('@kbn/fleet-plugin/public').then((module) => module.AvailablePackagesHook()),
+    () =>
+      import('@kbn/fleet-plugin/public/index.js').then((module) => module.AvailablePackagesHook()),
     <EuiSkeletonText
       data-test-subj="loadingPackages"
       isLoading={true}

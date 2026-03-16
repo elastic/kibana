@@ -35,7 +35,7 @@ describe('elasticsearch client', () => {
     delete process.env.ELASTICSEARCH_API_KEY;
 
     // Re-import to get fresh module with new env vars
-    await import('./elasticsearch');
+    await import('./elasticsearch.js');
 
     expect(mockClient).toHaveBeenCalledWith({
       cloud: { id: 'cloud-id:base64encoded' },
@@ -48,7 +48,7 @@ describe('elasticsearch client', () => {
     delete process.env.ELASTICSEARCH_CLOUD_ID;
     delete process.env.ELASTICSEARCH_API_KEY;
 
-    await import('./elasticsearch');
+    await import('./elasticsearch.js');
 
     expect(mockClient).toHaveBeenCalledWith({
       node: 'http://localhost:9200',
@@ -60,7 +60,7 @@ describe('elasticsearch client', () => {
     process.env.ELASTICSEARCH_CLOUD_ID = 'cloud-id:base64encoded';
     process.env.ELASTICSEARCH_ENDPOINT = 'http://localhost:9200';
 
-    await import('./elasticsearch');
+    await import('./elasticsearch.js');
 
     expect(mockClient).toHaveBeenCalledWith({
       cloud: { id: 'cloud-id:base64encoded' },
@@ -77,7 +77,7 @@ describe('elasticsearch client', () => {
     delete process.env.ELASTICSEARCH_CLOUD_ID;
     delete process.env.ELASTICSEARCH_PASSWORD;
 
-    await import('./elasticsearch');
+    await import('./elasticsearch.js');
 
     expect(mockClient).toHaveBeenCalledWith({
       node: 'http://localhost:9200',
@@ -92,7 +92,7 @@ describe('elasticsearch client', () => {
     delete process.env.ELASTICSEARCH_CLOUD_ID;
     delete process.env.ELASTICSEARCH_API_KEY;
 
-    await import('./elasticsearch');
+    await import('./elasticsearch.js');
 
     expect(mockClient).toHaveBeenCalledWith({
       node: 'http://localhost:9200',
@@ -109,7 +109,7 @@ describe('elasticsearch client', () => {
     process.env.ELASTICSEARCH_PASSWORD = 'mypass';
     process.env.ELASTICSEARCH_ENDPOINT = 'http://localhost:9200';
 
-    await import('./elasticsearch');
+    await import('./elasticsearch.js');
 
     expect(mockClient).toHaveBeenCalledWith({
       node: 'http://localhost:9200',
@@ -129,7 +129,7 @@ describe('elasticsearch client', () => {
     delete process.env.ELASTICSEARCH_CLOUD_ID;
     delete process.env.ELASTICSEARCH_API_KEY;
 
-    await import('./elasticsearch');
+    await import('./elasticsearch.js');
 
     expect(mockClient).toHaveBeenCalledWith({
       node: 'http://localhost:9200',
@@ -147,7 +147,7 @@ describe('elasticsearch client', () => {
     delete process.env.ELASTICSEARCH_CLOUD_ID;
     delete process.env.ELASTICSEARCH_API_KEY;
 
-    await import('./elasticsearch');
+    await import('./elasticsearch.js');
 
     expect(mockClient).toHaveBeenCalledWith({
       node: 'http://localhost:9200',
@@ -163,7 +163,7 @@ describe('elasticsearch client', () => {
     delete process.env.ELASTICSEARCH_CLOUD_ID;
     delete process.env.ELASTICSEARCH_API_KEY;
 
-    await import('./elasticsearch');
+    await import('./elasticsearch.js');
 
     expect(mockClient).toHaveBeenCalledWith({
       node: 'http://localhost:9200',
@@ -178,7 +178,7 @@ describe('elasticsearch client', () => {
     delete process.env.ELASTICSEARCH_USERNAME;
     delete process.env.ELASTICSEARCH_PASSWORD;
 
-    await import('./elasticsearch');
+    await import('./elasticsearch.js');
 
     expect(mockClient).toHaveBeenCalledWith({
       node: 'http://localhost:9200',

@@ -75,7 +75,7 @@ export class TransformUiPlugin {
       }),
       order: 5,
       mount: async (params) => {
-        const { mountManagementSection } = await import('./app/mount_management_section');
+        const { mountManagementSection } = await import('./app/mount_management_section.js');
         return mountManagementSection(
           coreSetup,
           params,

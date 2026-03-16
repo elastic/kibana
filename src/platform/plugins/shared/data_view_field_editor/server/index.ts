@@ -10,6 +10,6 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { IndexPatternPlugin } = await import('./plugin');
+  const { IndexPatternPlugin } = await import('./plugin.js');
   return new IndexPatternPlugin(initializerContext);
 }

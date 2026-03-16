@@ -35,7 +35,9 @@ export function registerAnomalyChartsCasesAttachment(
       ),
       timelineAvatar: PLUGIN_ICON,
       children: React.lazy(async () => {
-        const { initializeAnomalyChartsAttachment } = await import('./anomaly_charts_attachments');
+        const { initializeAnomalyChartsAttachment } = await import(
+          './anomaly_charts_attachments.js'
+        );
         const services = await getAnomalyChartsServiceDependencies(coreStart, pluginStart);
 
         return {

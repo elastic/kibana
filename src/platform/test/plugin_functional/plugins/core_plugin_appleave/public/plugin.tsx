@@ -20,7 +20,7 @@ export class CoreAppLeavePlugin
       appRoute: '/app/appleave1',
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const [coreStart] = await core.getStartServices();
         params.onAppLeave((actions) => actions.confirm('confirm-message', 'confirm-title'));
         return renderApp('AppLeave 1', params, coreStart);
@@ -32,7 +32,7 @@ export class CoreAppLeavePlugin
       appRoute: '/app/appleave2',
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const [coreStart] = await core.getStartServices();
         params.onAppLeave((actions) => actions.confirm('confirm-message', 'confirm-title'));
         return renderApp('AppLeave 2', params, coreStart);

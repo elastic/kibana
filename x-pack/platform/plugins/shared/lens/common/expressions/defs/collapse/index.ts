@@ -66,7 +66,7 @@ export const collapse: CollapseExpressionFunction = {
 
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/
-    const { collapseFn } = await import('../../impl/async_fns');
+    const { collapseFn } = await import('../../impl/async_fns.js');
     return collapseFn(...args);
   },
 };

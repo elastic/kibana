@@ -80,7 +80,7 @@ export const getTimelionVisualizationConfig = (
       isSyncCursorEnabled,
     }
   ) {
-    const { getTimelionRequestHandler } = await import('./async_services');
+    const { getTimelionRequestHandler } = await import('./async_services.js');
     const visParams = {
       expression: args.expression,
       interval: args.interval,

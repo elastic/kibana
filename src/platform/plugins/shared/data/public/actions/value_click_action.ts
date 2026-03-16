@@ -42,7 +42,7 @@ export function createValueClickActionDefinition(
     shouldAutoExecute: async () => true,
     isCompatible: async (context: ValueClickContext) => {
       const { createFiltersFromValueClickAction, appendFilterToESQLQueryFromValueClickAction } =
-        await import('./filters');
+        await import('./filters/index.js');
       if (context.data.query && isOfAggregateQueryType(context.data.query)) {
         const queryString = await appendFilterToESQLQueryFromValueClickAction(context.data);
         return queryString != null;
@@ -56,13 +56,15 @@ export function createValueClickActionDefinition(
           // ES|QL charts have a different way of applying filters,
           // they are appending a where clause to the query
 
-          const { appendFilterToESQLQueryFromValueClickAction } = await import('./filters');
+          const { appendFilterToESQLQueryFromValueClickAction } = await import(
+            './filters/index.js'
+          );
           const queryString = appendFilterToESQLQueryFromValueClickAction(context.data);
           await getStartServices().uiActions.executeTriggerActions('UPDATE_ESQL_QUERY_TRIGGER', {
             queryString,
           });
         } else {
-          const { createFiltersFromValueClickAction } = await import('./filters');
+          const { createFiltersFromValueClickAction } = await import('./filters/index.js');
           const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
           if (filters.length > 0) {
             await getStartServices().uiActions.executeTriggerActions(ON_APPLY_FILTER, {

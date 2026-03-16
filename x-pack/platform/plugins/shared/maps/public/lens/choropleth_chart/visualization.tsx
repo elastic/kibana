@@ -191,7 +191,7 @@ export const getVisualization = ({
   DimensionEditorComponent(props) {
     if (props.groupId === REGION_KEY_GROUP_ID) {
       const DimensionEditor = dynamic(async () => {
-        const { RegionKeyEditor } = await import('./region_key_editor');
+        const { RegionKeyEditor } = await import('./region_key_editor.js');
         return {
           default: RegionKeyEditor,
         };

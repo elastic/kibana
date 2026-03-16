@@ -8,6 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { DatasetQualityServerPlugin } = await import('./plugin');
+  const { DatasetQualityServerPlugin } = await import('./plugin.js');
   return new DatasetQualityServerPlugin(initializerContext);
 }

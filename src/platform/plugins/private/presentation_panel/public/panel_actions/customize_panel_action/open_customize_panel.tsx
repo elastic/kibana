@@ -25,7 +25,7 @@ export function openCustomizePanelFlyout({
     core,
     parentApi: api.parentApi,
     loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-      const { CustomizePanelEditor } = await import('./customize_panel_editor');
+      const { CustomizePanelEditor } = await import('./customize_panel_editor.js');
       const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
         uiSettings: core.uiSettings,
       });

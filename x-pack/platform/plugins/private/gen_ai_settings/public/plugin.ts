@@ -71,7 +71,7 @@ export class GenAiSettingsPlugin
         keywords: ['ai', 'generative', 'settings', 'configuration'],
 
         mount: async (mountParams) => {
-          const { mountManagementSection } = await import('./management_section/mount_section');
+          const { mountManagementSection } = await import('./management_section/mount_section.js');
 
           return mountManagementSection({
             core,

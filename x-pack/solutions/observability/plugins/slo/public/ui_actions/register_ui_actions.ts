@@ -27,19 +27,19 @@ export function registerSloUiActions(
   // Only register these actions in stateful kibana, and the serverless observability project
   if (Boolean((serverless && cloud?.serverless.projectType === 'observability') || !serverless)) {
     uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SLO_OVERVIEW_ACTION_ID, async () => {
-      const { createOverviewPanelAction } = await import('./add_panel_actions_module');
+      const { createOverviewPanelAction } = await import('./add_panel_actions_module.js');
       return createOverviewPanelAction(coreStart, pluginsStart, sloClient);
     });
     uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SLO_ERROR_BUDGET_ACTION_ID, async () => {
-      const { createAddErrorBudgetPanelAction } = await import('./add_panel_actions_module');
+      const { createAddErrorBudgetPanelAction } = await import('./add_panel_actions_module.js');
       return createAddErrorBudgetPanelAction(coreStart, pluginsStart, sloClient);
     });
     uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SLO_ALERTS_ACTION_ID, async () => {
-      const { createAddAlertsPanelAction } = await import('./add_panel_actions_module');
+      const { createAddAlertsPanelAction } = await import('./add_panel_actions_module.js');
       return createAddAlertsPanelAction(coreStart, pluginsStart, sloClient);
     });
     uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_BURN_RATE_ACTION_ID, async () => {
-      const { createBurnRatePanelAction } = await import('./add_panel_actions_module');
+      const { createBurnRatePanelAction } = await import('./add_panel_actions_module.js');
       return createBurnRatePanelAction(coreStart, pluginsStart, sloClient);
     });
   }

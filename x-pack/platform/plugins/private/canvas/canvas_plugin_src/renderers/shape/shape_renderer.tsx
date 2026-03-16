@@ -41,7 +41,7 @@ export const getShapeRenderer =
       config: ShapeRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
-      const { ShapeComponent } = await import('./components/shape_component');
+      const { ShapeComponent } = await import('./components/shape_component.js');
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });

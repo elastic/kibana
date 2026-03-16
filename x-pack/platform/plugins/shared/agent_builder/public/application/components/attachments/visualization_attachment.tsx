@@ -13,7 +13,7 @@ import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachme
 import type { AgentBuilderStartDependencies } from '../../../types';
 
 const LazyVisualizeLens = React.lazy(() =>
-  import('../tools/esql/visualize_lens').then((m) => ({ default: m.VisualizeLens }))
+  import('../tools/esql/visualize_lens/index.js').then((m) => ({ default: m.VisualizeLens }))
 );
 
 /**

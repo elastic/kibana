@@ -8,7 +8,7 @@
  */
 
 export async function plugin() {
-  const { ExpressionXyPlugin } = await import('./plugin');
+  const { ExpressionXyPlugin } = await import('./plugin.js');
   return new ExpressionXyPlugin();
 }
 

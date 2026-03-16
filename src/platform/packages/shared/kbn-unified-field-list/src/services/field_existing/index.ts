@@ -10,6 +10,6 @@
 import type { LoadFieldExistingHandler } from './load_field_existing';
 
 export const loadFieldExisting: LoadFieldExistingHandler = async (params) => {
-  const { loadFieldExisting: loadFieldExistingHandler } = await import('./load_field_existing');
+  const { loadFieldExisting: loadFieldExistingHandler } = await import('./load_field_existing.js');
   return await loadFieldExistingHandler(params);
 };

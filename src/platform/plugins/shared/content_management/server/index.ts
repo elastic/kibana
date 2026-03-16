@@ -10,7 +10,7 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { ContentManagementPlugin } = await import('./plugin');
+  const { ContentManagementPlugin } = await import('./plugin.js');
   return new ContentManagementPlugin(initializerContext);
 }
 

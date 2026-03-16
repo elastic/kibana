@@ -17,7 +17,7 @@ import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
-const SiemReadinessDashboardLazy = lazy(() => import('./pages'));
+const SiemReadinessDashboardLazy = lazy(() => import('./pages/index.js'));
 
 const queryClient = new QueryClient();
 

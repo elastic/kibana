@@ -15,10 +15,12 @@ import type { LogCategorizationAppStateProps } from './components/log_categoriza
 import type { LogCategorizationEmbeddableWrapperProps } from './components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover_wrapper';
 import type { ChangePointDetectionAppStateProps } from './components/change_point_detection';
 
-const LogRateAnalysisAppStateLazy = React.lazy(() => import('./components/log_rate_analysis'));
+const LogRateAnalysisAppStateLazy = React.lazy(
+  () => import('./components/log_rate_analysis/index.js')
+);
 
 const LogRateAnalysisContentWrapperLazy = React.lazy(
-  () => import('./components/log_rate_analysis/log_rate_analysis_content')
+  () => import('./components/log_rate_analysis/log_rate_analysis_content/index.js')
 );
 
 const LazyWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
@@ -47,7 +49,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentWrapperProps> = (p
   </LazyWrapper>
 );
 
-const LogCategorizationAppStateLazy = React.lazy(() => import('./components/log_categorization'));
+const LogCategorizationAppStateLazy = React.lazy(
+  () => import('./components/log_categorization/index.js')
+);
 
 /**
  * Lazy-wrapped LogCategorizationAppStateProps React component
@@ -62,7 +66,7 @@ export const LogCategorization: FC<LogCategorizationAppStateProps> = (props) => 
 const LogCategorizationForDiscoverLazy = React.lazy(
   () =>
     import(
-      './components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover_wrapper'
+      './components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover_wrapper.js'
     )
 );
 
@@ -78,7 +82,9 @@ export const LogCategorizationForDiscover: FC<LogCategorizationEmbeddableWrapper
   </LazyWrapper>
 );
 
-const ChangePointDetectionLazy = React.lazy(() => import('./components/change_point_detection'));
+const ChangePointDetectionLazy = React.lazy(
+  () => import('./components/change_point_detection/index.js')
+);
 /**
  * Lazy-wrapped ChangePointDetectionAppStateProps React component
  * @param {ChangePointDetectionAppStateProps}  props - properties specifying the data on which to run the analysis.

@@ -13,7 +13,7 @@ import type {
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 const TutorialDirectoryHeaderLinkLazy = React.lazy(
-  () => import('./tutorial_directory_header_link')
+  () => import('./tutorial_directory_header_link.js')
 );
 export const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = () => (
   <React.Suspense fallback={<EuiLoadingSpinner />}>
@@ -21,7 +21,7 @@ export const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent =
   </React.Suspense>
 );
 
-const TutorialModuleNoticeLazy = React.lazy(() => import('./tutorial_module_notice'));
+const TutorialModuleNoticeLazy = React.lazy(() => import('./tutorial_module_notice.js'));
 export const TutorialModuleNotice: TutorialModuleNoticeComponent = ({
   moduleName,
 }: {

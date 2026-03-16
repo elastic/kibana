@@ -20,6 +20,6 @@ export type {
 export { config };
 
 export const plugin = async (context: PluginInitializerContext<EntityManagerConfig>) => {
-  const { EntityManagerServerPlugin } = await import('./plugin');
+  const { EntityManagerServerPlugin } = await import('./plugin.js');
   return new EntityManagerServerPlugin(context);
 };

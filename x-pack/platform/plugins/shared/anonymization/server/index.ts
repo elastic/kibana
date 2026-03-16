@@ -21,7 +21,7 @@ export const plugin: PluginInitializer<
   AnonymizationSetupDeps,
   AnonymizationStartDeps
 > = async (initializerContext: PluginInitializerContext<AnonymizationConfig>) => {
-  const { AnonymizationPlugin } = await import('./plugin');
+  const { AnonymizationPlugin } = await import('./plugin.js');
   return new AnonymizationPlugin(initializerContext);
 };
 

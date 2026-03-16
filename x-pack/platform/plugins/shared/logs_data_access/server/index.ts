@@ -15,6 +15,6 @@ export type {
 } from './services/get_logs_rates_service';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { LogsDataAccessPlugin } = await import('./plugin');
+  const { LogsDataAccessPlugin } = await import('./plugin.js');
   return new LogsDataAccessPlugin(initializerContext);
 }

@@ -19,8 +19,8 @@ export const getLazyEndpointPolicyResponseExtension = ({
 }: FleetUiExtensionGetterOptions) => {
   return lazy<PackagePolicyResponseExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPolicyResponseExtension }] = await Promise.all([
-      import('../../../../../common/components/with_security_context/with_security_context'),
-      import('./endpoint_policy_response_extension'),
+      import('../../../../../common/components/with_security_context/with_security_context.js'),
+      import('./endpoint_policy_response_extension.js'),
     ]);
 
     return {

@@ -12,7 +12,7 @@ export { config } from './config';
 //  as well as, Kibana Platform `plugin()` initializer.
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { ServerlessWorkplaceAIPlugin } = await import('./plugin');
+  const { ServerlessWorkplaceAIPlugin } = await import('./plugin.js');
   return new ServerlessWorkplaceAIPlugin(initializerContext);
 }
 

@@ -9,7 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ConfigSchema } from './config_schema';
 
 export async function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
-  const { AiopsPlugin } = await import('./plugin');
+  const { AiopsPlugin } = await import('./plugin.js');
   return new AiopsPlugin(initializerContext);
 }
 

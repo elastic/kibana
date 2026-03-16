@@ -25,7 +25,7 @@ import { queryClient } from '../query_client';
 import type { Section } from '../constants';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';
 
-const ReportingTabs = lazy(() => import('./components/reporting_tabs'));
+const ReportingTabs = lazy(() => import('./components/reporting_tabs.js'));
 
 export async function mountManagementSection({
   coreStart,

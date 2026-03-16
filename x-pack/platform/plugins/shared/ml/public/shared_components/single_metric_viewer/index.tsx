@@ -15,7 +15,7 @@ import type {
 import type { MlDependencies } from '../../application/app';
 import type { SingleMetricViewerSharedComponent } from './single_metric_viewer';
 
-const SingleMetricViewerLazy = dynamic(async () => import('./single_metric_viewer'));
+const SingleMetricViewerLazy = dynamic(async () => import('./single_metric_viewer.js'));
 
 export const getSingleMetricViewerComponent = (
   coreStart: CoreStart,

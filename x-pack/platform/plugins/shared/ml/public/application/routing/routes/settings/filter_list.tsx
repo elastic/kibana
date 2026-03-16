@@ -19,7 +19,7 @@ import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { type NavigateToApp, getADSettingsBreadcrumbs } from '../../breadcrumbs';
 
 const FilterLists = dynamic(async () => ({
-  default: (await import('../../../settings/filter_lists')).FilterLists,
+  default: (await import('../../../settings/filter_lists/index.js')).FilterLists,
 }));
 
 export const filterListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({

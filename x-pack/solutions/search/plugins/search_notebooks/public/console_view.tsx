@@ -17,10 +17,10 @@ import type { QueryClient } from '@kbn/react-query';
 import type { NotebookListValue, AppMetricsTracker } from './types';
 
 const SearchNotebooksButton = dynamic(async () => ({
-  default: (await import('./components/notebooks_button')).SearchNotebooksButton,
+  default: (await import('./components/notebooks_button.js')).SearchNotebooksButton,
 }));
 const SearchNotebooksView = dynamic(async () => ({
-  default: (await import('./components/notebooks_view')).SearchNotebooksView,
+  default: (await import('./components/notebooks_view.js')).SearchNotebooksView,
 }));
 
 export const notebooksConsoleView = (

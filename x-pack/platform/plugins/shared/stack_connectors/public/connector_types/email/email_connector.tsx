@@ -35,7 +35,7 @@ import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;
 
-const ExchangeFormFields = lazy(() => import('./exchange_form'));
+const ExchangeFormFields = lazy(() => import('./exchange_form.js'));
 
 const shouldDisableEmailConfiguration = (service: string | null | undefined) =>
   isEmpty(service) ||

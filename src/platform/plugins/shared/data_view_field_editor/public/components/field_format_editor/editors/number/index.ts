@@ -13,5 +13,5 @@ import type { NumberFormatEditorParams } from './number';
 
 export type { NumberFormatEditor } from './number';
 export const numberFormatEditorFactory: FieldFormatEditorFactory<NumberFormatEditorParams> = () =>
-  import('./number').then((m) => m.NumberFormatEditor);
+  import('./number.js').then((m) => m.NumberFormatEditor);
 numberFormatEditorFactory.formatId = formatId;

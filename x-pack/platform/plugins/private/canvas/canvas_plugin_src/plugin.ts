@@ -62,40 +62,40 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
 
     plugins.canvas.addDatasourceUIs(async () => {
       // @ts-expect-error
-      const { datasourceSpecs } = await import('./canvas_addons');
+      const { datasourceSpecs } = await import('./canvas_addons.js');
       return datasourceSpecs;
     });
 
     plugins.canvas.addElements(async () => {
-      const { initializeElements } = await import('./canvas_addons');
+      const { initializeElements } = await import('./canvas_addons.js');
       return initializeElements(core, plugins);
     });
 
     plugins.canvas.addModelUIs(async () => {
       // @ts-expect-error Untyped local
-      const { modelSpecs } = await import('./canvas_addons');
+      const { modelSpecs } = await import('./canvas_addons.js');
       return modelSpecs;
     });
 
     plugins.canvas.addViewUIs(async () => {
-      const { initializeViews } = await import('./canvas_addons');
+      const { initializeViews } = await import('./canvas_addons.js');
 
       return initializeViews(core, plugins);
     });
 
     plugins.canvas.addArgumentUIs(async () => {
-      const { initializeArgs } = await import('./canvas_addons');
+      const { initializeArgs } = await import('./canvas_addons.js');
       return initializeArgs(core, plugins);
     });
 
     plugins.canvas.addTagUIs(async () => {
-      const { tagSpecs } = await import('./canvas_addons');
+      const { tagSpecs } = await import('./canvas_addons.js');
       return tagSpecs;
     });
 
     plugins.canvas.addTransformUIs(async () => {
       // @ts-expect-error Untyped local
-      const { transformSpecs } = await import('./canvas_addons');
+      const { transformSpecs } = await import('./canvas_addons.js');
       return transformSpecs;
     });
   }

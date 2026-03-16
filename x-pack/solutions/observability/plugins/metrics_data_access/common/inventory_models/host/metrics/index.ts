@@ -11,12 +11,12 @@ import type { HostCharts } from './charts';
 import type { InventoryMetricsConfig } from '../../shared/metrics/types';
 
 const legacyMetrics: Array<keyof HostAggregations> = ['cpu', 'tx', 'rx'];
-const loadFormulas = () => import('./formulas').then((m) => m.formulas);
+const loadFormulas = () => import('./formulas/index.js').then((m) => m.formulas);
 
 export const metrics: InventoryMetricsConfig<HostAggregations, HostFormulas, HostCharts> = {
   legacyMetrics,
   getAggregations: async (args) => {
-    const { snapshot } = await import('./snapshot');
+    const { snapshot } = await import('./snapshot/index.js');
     const catalog = new MetricsCatalog(snapshot, args?.schema, {
       includeLegacyMetrics: (args?.schema ?? 'ecs') === 'ecs',
       legacyMetrics,
@@ -30,7 +30,7 @@ export const metrics: InventoryMetricsConfig<HostAggregations, HostFormulas, Hos
   },
   getCharts: async (args) => {
     const formulas = await loadFormulas();
-    const { initCharts } = await import('./charts');
+    const { initCharts } = await import('./charts/index.js');
     const formulasCatalog = new MetricsCatalog(formulas, args?.schema);
 
     return initCharts(formulasCatalog);

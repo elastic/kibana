@@ -70,12 +70,12 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
     const { expressions } = this;
 
     const loader: IExpressionLoader = async (element, expression, params) => {
-      const { ExpressionLoader } = await import('./loader');
+      const { ExpressionLoader } = await import('./loader.js');
       return new ExpressionLoader(element, expression, params);
     };
 
     const render: IExpressionRenderer = async (element, data, options) => {
-      const { ExpressionRenderHandler } = await import('./render');
+      const { ExpressionRenderHandler } = await import('./render.js');
       const handler = new ExpressionRenderHandler(element, options);
       handler.render(data as SerializableRecord);
       return handler;

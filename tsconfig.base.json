@@ -2606,18 +2606,25 @@
       "@elastic/kibana-d3-color": ["node_modules/@types/d3-color"],
       // Allows for importing from `kibana` package for the exported types.
       "@emotion/core": ["typings/@emotion"],
-      // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
-      // We should be able to remove this once we support cjs/esm interop.
-      "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
-      "@opentelemetry/semantic-conventions/incubating": [
-        "typings/@opentelemetry/semantic-conventions/incubating"
-      ],
+      // @emotion/* exports fields lack a "types" condition, causing nodenext to fail type resolution
+      "@emotion/react": ["node_modules/@emotion/react/types/index.d.ts"],
+      "@emotion/css": ["node_modules/@emotion/css/types/index.d.ts"],
+      "@emotion/serialize": ["node_modules/@emotion/serialize/types/index.d.ts"],
+      "@emotion/styled": ["node_modules/@emotion/styled/types/index.d.ts"],
+      "@emotion/cache": ["node_modules/@emotion/cache/types/index.d.ts"],
       "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
-      "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"],
       "zod": ["typings/zod/v3"],
-      "zod/v4": ["typings/zod/v4"],
-      "vega-lite": ["typings/vega/vega_lite"],
-      "vega-tooltip": ["typings/vega/vega_tooltip"]
+      "elasticsearch-8.x/lib/api/types": ["node_modules/elasticsearch-8.x/lib/api/types"],
+      "cypress/types/net-stubbing": ["node_modules/cypress/types/net-stubbing"],
+      "zod/v4/core/json-schema": ["node_modules/zod/v4/core/json-schema"],
+      "langsmith/dist/evaluation/_runner": ["node_modules/langsmith/dist/evaluation/_runner"],
+      "antlr4": ["typings/antlr4"],
+      "monaco-editor/esm/vs/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess": ["node_modules/monaco-editor/esm/vs/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess.d.ts"],
+      "@elastic/ebt/shippers/fullstory": ["node_modules/@elastic/ebt/shippers/fullstory/index.d.ts"],
+      "@elastic/elasticsearch/lib/api/api": ["node_modules/@elastic/elasticsearch/lib/api/api"],
+      "@elastic/elasticsearch/lib/api/api/*": ["node_modules/@elastic/elasticsearch/lib/api/api/*"],
+      "canvg": ["node_modules/canvg/lib/index"],
+      "node-diff3": ["node_modules/node-diff3/index"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
@@ -2647,9 +2654,10 @@
     // Node 8 should support everything output by esnext, we override this
     // in webpack with loader-level compiler options
     "target": "esnext",
-    // Use commonjs for node, overridden in webpack to keep import statements
-    // to maintain support for things like `await import()`
-    "module": "commonjs",
+    // Use nodenext for Node.js module resolution, which respects package.json "exports".
+    // Since root package.json has no "type": "module", all .ts files remain CJS context.
+    // Babel handles actual emit (CJS for server, ESM for webpack).
+    "module": "nodenext",
     // Allows default imports from modules with no default export. This does not affect code emit, just type checking.
     // We have to enable this option explicitly since `esModuleInterop` doesn't enable it automatically when ES2015 or
     // ESNext module format is used.
@@ -2661,9 +2669,9 @@
     "allowJs": true,
     // Emits __importStar and __importDefault helpers for runtime babel ecosystem compatibility.
     "esModuleInterop": true,
-    // Resolve modules in the same way as Node.js. Aka make `require` works the
-    // same in TypeScript as it does in Node.js.
-    "moduleResolution": "node",
+    // Resolve modules using Node.js nodenext algorithm, which respects package.json "exports"
+    // and conditional exports. Required to pair with module: "nodenext".
+    "moduleResolution": "nodenext",
     // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
     "resolveJsonModule": true,
     // Disallow inconsistently-cased references to the same file.

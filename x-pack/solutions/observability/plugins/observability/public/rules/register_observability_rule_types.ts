@@ -120,7 +120,7 @@ export const registerObservabilityRuleTypes = (
     alertDetailsAppSection: lazy(
       () =>
         import(
-          '../components/custom_threshold/components/alert_details_app_section/alert_details_app_section'
+          '../components/custom_threshold/components/alert_details_app_section/alert_details_app_section.js'
         )
     ),
     priority: 110,

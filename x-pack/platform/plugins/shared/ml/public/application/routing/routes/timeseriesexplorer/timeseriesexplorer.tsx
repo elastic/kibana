@@ -23,7 +23,7 @@ import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_u
 import { basicResolvers } from '../../resolvers';
 
 const TimeSeriesExplorerUrlStateManager = dynamic(async () => ({
-  default: (await import('./state_manager')).TimeSeriesExplorerUrlStateManager,
+  default: (await import('./state_manager.js')).TimeSeriesExplorerUrlStateManager,
 }));
 
 export const timeSeriesExplorerRouteFactory = (

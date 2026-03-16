@@ -8,6 +8,6 @@
  */
 
 export async function plugin() {
-  const { ExpressionMetricPlugin } = await import('./plugin');
+  const { ExpressionMetricPlugin } = await import('./plugin.js');
   return new ExpressionMetricPlugin();
 }

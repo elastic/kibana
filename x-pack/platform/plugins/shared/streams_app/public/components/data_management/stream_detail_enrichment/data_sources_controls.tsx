@@ -30,7 +30,7 @@ import {
 } from './data_sources_flyout/data_source_card';
 
 const DataSourcesFlyout = dynamic(() =>
-  import('./data_sources_flyout').then((mod) => ({ default: mod.DataSourcesFlyout }))
+  import('./data_sources_flyout/index.js').then((mod) => ({ default: mod.DataSourcesFlyout }))
 );
 
 const manageDataSourcesLabel = i18n.translate(

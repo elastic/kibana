@@ -36,7 +36,7 @@ export class ObservabilityLogsExplorerPlugin
       visibleIn: [],
       mount: async (appMountParams) => {
         const [coreStart, { discover }] = await core.getStartServices();
-        const { renderDiscoverRedirect } = await import('./redirect_to_discover');
+        const { renderDiscoverRedirect } = await import('./redirect_to_discover.js');
         return renderDiscoverRedirect(coreStart, discover, appMountParams);
       },
     });
@@ -48,7 +48,7 @@ export class ObservabilityLogsExplorerPlugin
       visibleIn: [],
       mount: async (appMountParams) => {
         const [coreStart, { discover }] = await core.getStartServices();
-        const { renderDiscoverRedirect } = await import('./redirect_to_discover');
+        const { renderDiscoverRedirect } = await import('./redirect_to_discover.js');
         return renderDiscoverRedirect(coreStart, discover, appMountParams);
       },
     });

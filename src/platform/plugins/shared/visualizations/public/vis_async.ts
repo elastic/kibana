@@ -14,7 +14,7 @@ export const createVisAsync = async <TVisParams extends VisParams = VisParams>(
   visType: string,
   visState: SerializedVis<TVisParams> = {} as any
 ) => {
-  const { Vis } = await import('./vis');
+  const { Vis } = await import('./vis.js');
   const vis = new Vis(visType, visState);
 
   await vis.setState(visState);

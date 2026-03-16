@@ -11,6 +11,6 @@ import type { ParsedExpression } from './parser';
 
 /** Build optimizations, we want to exclude the parser from the main bundle **/
 export const parseTimelionExpressionAsync = async (input: string): Promise<ParsedExpression> => {
-  const { parseTimelionExpression } = await import('./parser');
+  const { parseTimelionExpression } = await import('./parser.js');
   return parseTimelionExpression(input);
 };

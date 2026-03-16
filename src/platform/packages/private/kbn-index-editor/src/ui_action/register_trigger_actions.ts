@@ -18,7 +18,7 @@ export function registerIndexEditorActions(deps: EditLookupIndexFlyoutDeps) {
     EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
     ACTION_EDIT_LOOKUP_INDEX,
     async () => {
-      const { createEditLookupIndexContentAction } = await import('./create_edit_index_action');
+      const { createEditLookupIndexContentAction } = await import('./create_edit_index_action.js');
       return createEditLookupIndexContentAction({
         data: deps.data,
         coreStart: deps.coreStart,

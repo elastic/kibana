@@ -13,7 +13,7 @@ import { configSchema } from '../common/config';
 //  as well as, Kibana Platform `plugin()` initializer.
 
 export async function plugin(ctx: PluginInitializerContext<SLOConfig>) {
-  const { SLOPlugin } = await import('./plugin');
+  const { SLOPlugin } = await import('./plugin.js');
   return new SLOPlugin(ctx);
 }
 

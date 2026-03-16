@@ -29,6 +29,6 @@ export type {
 export { transformType } from '../common/bwc/transform_type';
 
 export const plugin = async () => {
-  const { EmbeddableServerPlugin } = await import('./plugin');
+  const { EmbeddableServerPlugin } = await import('./plugin.js');
   return new EmbeddableServerPlugin();
 };

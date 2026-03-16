@@ -11,7 +11,7 @@ import type { EmbeddableSearchBarSharedComponent } from './embeddable_search_bar
 import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
 
 const LazyEmbeddableSearchBar = dynamic(async () => {
-  const Component = await import('./embeddable_search_bar');
+  const Component = await import('./embeddable_search_bar.js');
   return { default: Component.EmbeddableSearchBar };
 });
 

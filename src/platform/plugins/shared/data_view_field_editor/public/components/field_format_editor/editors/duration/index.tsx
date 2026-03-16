@@ -14,5 +14,5 @@ import type { DurationFormatEditorFormatParams } from './duration';
 export type { DurationFormatEditor } from './duration';
 export const durationFormatEditorFactory: FieldFormatEditorFactory<
   DurationFormatEditorFormatParams
-> = () => import('./duration').then((m) => m.DurationFormatEditor);
+> = () => import('./duration.js').then((m) => m.DurationFormatEditor);
 durationFormatEditorFactory.formatId = formatId;

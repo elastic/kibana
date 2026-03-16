@@ -36,7 +36,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
 //  as well as, Kibana Platform `plugin()` initializer.
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { DashboardPlugin } = await import('./plugin');
+  const { DashboardPlugin } = await import('./plugin.js');
   return new DashboardPlugin(initializerContext);
 }
 

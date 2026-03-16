@@ -69,7 +69,7 @@ export const math: ExpressionFunctionDefinition<
     },
   },
   fn: async (input, args) => {
-    const { mathFn } = await import('./math_fn');
+    const { mathFn } = await import('./math_fn.js');
     return mathFn(input, args);
   },
 };

@@ -16,6 +16,6 @@ export type {
 } from './services/fields_metadata/types';
 
 export async function plugin(context: PluginInitializerContext) {
-  const { FieldsMetadataPlugin } = await import('./plugin');
+  const { FieldsMetadataPlugin } = await import('./plugin.js');
   return new FieldsMetadataPlugin(context);
 }

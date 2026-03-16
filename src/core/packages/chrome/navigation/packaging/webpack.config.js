@@ -57,6 +57,9 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
+    extensionAlias: {
+      '.js': ['.ts', '.tsx', '.js'],
+    },
 
     // Redirect @kbn/* imports to local stubs so the source files can be
     // bundled without any Kibana-specific packages installed at runtime.

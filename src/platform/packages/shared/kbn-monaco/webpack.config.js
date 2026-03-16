@@ -52,6 +52,9 @@ const workerConfig = (languages) => ({
   },
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
+    extensionAlias: {
+      '.js': ['.ts', '.tsx', '.js'],
+    },
     alias: {
       // swap default umd import for the esm one provided in vscode-uri package
       'vscode-uri$': require.resolve('vscode-uri').replace(/\/umd\/index.js/, '/esm/index.mjs'),

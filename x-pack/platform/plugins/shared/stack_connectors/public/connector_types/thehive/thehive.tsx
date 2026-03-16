@@ -19,7 +19,7 @@ import type { TheHiveConnector } from './types';
 export function getConnectorType(): TheHiveConnector {
   return {
     id: CONNECTOR_ID,
-    iconClass: lazy(() => import('./logo')),
+    iconClass: lazy(() => import('./logo.js')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.thehive.descriptionText', {
       defaultMessage: 'Create cases and alerts in TheHive',
     }),
@@ -27,7 +27,7 @@ export function getConnectorType(): TheHiveConnector {
     validateParams: async (
       actionParams: ExecutorParams
     ): Promise<GenericValidationResult<unknown>> => {
-      const translations = await import('./translations');
+      const translations = await import('./translations.js');
 
       const errors = {
         'pushToServiceParam.incident.title': new Array<string>(),
@@ -79,7 +79,7 @@ export function getConnectorType(): TheHiveConnector {
 
       return validationResult;
     },
-    actionConnectorFields: lazy(() => import('./connector')),
-    actionParamsFields: lazy(() => import('./params')),
+    actionConnectorFields: lazy(() => import('./connector.js')),
+    actionParamsFields: lazy(() => import('./params.js')),
   };
 }

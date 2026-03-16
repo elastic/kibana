@@ -124,7 +124,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
 export type APMConfig = TypeOf<typeof configSchema>;
 
 export const plugin = async (initContext: PluginInitializerContext) => {
-  const { APMPlugin } = await import('./plugin');
+  const { APMPlugin } = await import('./plugin.js');
   return new APMPlugin(initContext);
 };
 

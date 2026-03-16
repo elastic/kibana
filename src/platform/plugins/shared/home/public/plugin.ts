@@ -120,7 +120,7 @@ export class HomePublicPlugin
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
         );
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application/index.js');
         return await renderApp(params.element, coreStart, params.history);
       },
     });

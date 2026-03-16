@@ -26,7 +26,7 @@ export class CorePluginDeprecationsPlugin
       id: 'core-plugin-deprecations',
       title: 'Core Plugin Deprecations',
       async mount(params) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         await core.getStartServices();
         return renderApp(params);
       },

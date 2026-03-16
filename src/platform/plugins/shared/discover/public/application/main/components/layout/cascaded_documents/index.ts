@@ -26,7 +26,7 @@ export {
  */
 export const LazyCascadedDocumentsLayout = withSuspense<CascadedDocumentsLayoutProps>(
   lazy(() =>
-    import('./cascaded_document_layout').then(({ CascadedDocumentsLayout }) => {
+    import('./cascaded_document_layout.js').then(({ CascadedDocumentsLayout }) => {
       return {
         default: CascadedDocumentsLayout,
       };

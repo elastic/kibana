@@ -10,7 +10,7 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const plugin = async (context: PluginInitializerContext) => {
-  const { SavedObjectsManagementPlugin } = await import('./plugin');
+  const { SavedObjectsManagementPlugin } = await import('./plugin.js');
   return new SavedObjectsManagementPlugin(context);
 };
 

@@ -21,7 +21,7 @@ type MatchesProperty<T, K extends keyof T> = K extends keyof T ? true : false;
 
 describe('dynamic', () => {
   it(`should create a lazy loaded component starting from a dynamic default import`, async () => {
-    const LazyTestComponent = dynamic(() => import('./test_component'));
+    const LazyTestComponent = dynamic(() => import('./test_component.js'));
 
     const { queryByText } = render(<LazyTestComponent>Hello</LazyTestComponent>);
 
@@ -33,7 +33,7 @@ describe('dynamic', () => {
 
   it(`should create a lazy loaded component starting from a dynamic named import`, async () => {
     const LazyTestComponent = dynamic(() =>
-      import('./test_component').then((mod) => ({ default: mod.TestComponent }))
+      import('./test_component.js').then((mod) => ({ default: mod.TestComponent }))
     );
 
     const { queryByText } = render(<LazyTestComponent>Hello</LazyTestComponent>);
@@ -45,7 +45,7 @@ describe('dynamic', () => {
   });
 
   it(`should accept an optional "fallback" node to display while loading the component`, async () => {
-    const LazyTestComponent = dynamic(() => import('./test_component'), {
+    const LazyTestComponent = dynamic(() => import('./test_component.js'), {
       fallback: <span>Loading</span>,
     });
 
@@ -61,7 +61,7 @@ describe('dynamic', () => {
   describe('the created lazy loaded component', () => {
     it(`should forward the ref property if provided`, async () => {
       const LazyForwardeRefTestComponent = dynamic(() =>
-        import('./test_component').then((mod) => ({ default: mod.ForwardeRefTestComponent }))
+        import('./test_component.js').then((mod) => ({ default: mod.ForwardeRefTestComponent }))
       );
 
       const ref = React.createRef<HTMLSpanElement>();
@@ -77,9 +77,9 @@ describe('dynamic', () => {
     });
 
     it('should be properly typed respecting the original properties contract', () => {
-      const LazyTestComponent = dynamic(() => import('./test_component'));
+      const LazyTestComponent = dynamic(() => import('./test_component.js'));
       const LazyForwardeRefTestComponent = dynamic(() =>
-        import('./test_component').then((mod) => ({ default: mod.ForwardeRefTestComponent }))
+        import('./test_component.js').then((mod) => ({ default: mod.ForwardeRefTestComponent }))
       );
 
       type LazyTestComponentProps = React.ComponentPropsWithRef<typeof LazyTestComponent>;

@@ -40,7 +40,7 @@ export class StateContainersExamplesPlugin implements Plugin {
       title: examples.stateContainersExampleBrowserHistory.title,
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const { renderApp, History } = await import('./todo/app');
+        const { renderApp, History } = await import('./todo/app.js');
         const [coreStart] = await core.getStartServices();
         return renderApp(
           coreStart,
@@ -58,7 +58,7 @@ export class StateContainersExamplesPlugin implements Plugin {
       title: examples.stateContainersExampleHashHistory.title,
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const { renderApp, History } = await import('./todo/app');
+        const { renderApp, History } = await import('./todo/app.js');
         const [coreStart] = await core.getStartServices();
         return renderApp(
           coreStart,
@@ -77,7 +77,7 @@ export class StateContainersExamplesPlugin implements Plugin {
       title: examples.stateContainersExampleWithDataServices.title,
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./with_data_services/application');
+        const { renderApp } = await import('./with_data_services/application.js');
         const [coreStart, depsStart] = await core.getStartServices();
         return renderApp(coreStart, depsStart as AppPluginDependencies, params, { exampleLinks });
       },

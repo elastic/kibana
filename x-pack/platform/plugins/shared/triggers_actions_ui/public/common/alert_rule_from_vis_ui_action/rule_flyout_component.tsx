@@ -78,7 +78,7 @@ export async function getRuleFlyoutComponent(
         }
   ) as RuleFormData<EsQueryRuleParams>;
 
-  const { RuleForm } = await import('@kbn/response-ops-rule-form/flyout');
+  const { RuleForm } = await import('@kbn/response-ops-rule-form/flyout/index.js');
 
   return (
     <KibanaContextProvider services={ruleFormPlugins}>

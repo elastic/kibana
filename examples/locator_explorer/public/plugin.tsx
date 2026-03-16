@@ -27,7 +27,7 @@ export class LocatorExplorerPlugin implements Plugin<void, void, SetupDeps, Star
       title: 'Locator explorer',
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const { renderApp } = await import('./app');
+        const { renderApp } = await import('./app.js');
         return renderApp(
           {
             share,

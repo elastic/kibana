@@ -22,7 +22,7 @@ export function getTransformHealthRuleType(): RuleTypeModel<TransformHealthRuleP
     documentationUrl(docLinks) {
       return docLinks.links.transforms.alertingRules;
     },
-    ruleParamsExpression: lazy(() => import('./transform_health_rule_trigger')),
+    ruleParamsExpression: lazy(() => import('./transform_health_rule_trigger.js')),
     validate: (ruleParams: TransformHealthRuleParams) => {
       const validationResult = {
         errors: {

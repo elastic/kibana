@@ -19,6 +19,6 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { InspectComponentPluginServer } = await import('./plugin');
+  const { InspectComponentPluginServer } = await import('./plugin.js');
   return new InspectComponentPluginServer(initializerContext);
 };

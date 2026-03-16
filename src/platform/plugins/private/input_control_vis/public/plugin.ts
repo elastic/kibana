@@ -93,7 +93,7 @@ export class InputControlVisPlugin implements Plugin<void, void> {
 
   public start(core: CoreStart, { uiActions }: InputControlVisPluginStartDependencies) {
     uiActions.addTriggerActionAsync(PANEL_BADGE_TRIGGER, 'ACTION_DEPRECATION_BADGE', async () => {
-      const { inputControlDeprecationBadge } = await import('./deprecation_badge');
+      const { inputControlDeprecationBadge } = await import('./deprecation_badge.js');
       return inputControlDeprecationBadge;
     });
 

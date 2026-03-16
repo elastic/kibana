@@ -54,7 +54,7 @@ describe('load_features_from_snapshot', () => {
     });
 
     const esClient = makeEsClient();
-    const { loadFeaturesFromSnapshot } = await import('./load_features_from_snapshot');
+    const { loadFeaturesFromSnapshot } = await import('./load_features_from_snapshot.js');
     const features = await loadFeaturesFromSnapshot(
       esClient,
       log,
@@ -86,7 +86,7 @@ describe('load_features_from_snapshot', () => {
     });
 
     const { loadFeaturesFromSnapshot, FEATURES_TEMP_INDEX } = await import(
-      './load_features_from_snapshot'
+      './load_features_from_snapshot.js'
     );
     const features = await loadFeaturesFromSnapshot(
       esClient,
@@ -122,7 +122,7 @@ describe('load_features_from_snapshot', () => {
     });
 
     const esClient = makeEsClient();
-    const { loadFeaturesFromSnapshot } = await import('./load_features_from_snapshot');
+    const { loadFeaturesFromSnapshot } = await import('./load_features_from_snapshot.js');
 
     await expect(
       loadFeaturesFromSnapshot(esClient, log, 'healthy-baseline', gcs, 'logs')
@@ -131,7 +131,7 @@ describe('load_features_from_snapshot', () => {
 
   it('cleans up the temp index at the end even if search throws', async () => {
     const { loadFeaturesFromSnapshot, FEATURES_TEMP_INDEX } = await import(
-      './load_features_from_snapshot'
+      './load_features_from_snapshot.js'
     );
     mockRestoreSnapshot.mockResolvedValue({
       success: true,

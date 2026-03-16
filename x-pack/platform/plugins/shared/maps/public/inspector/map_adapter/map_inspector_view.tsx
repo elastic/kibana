@@ -23,7 +23,7 @@ export const MapInspectorView = {
   },
   component: (props: { adapters: Adapters }) => {
     const Component = dynamic(async () => {
-      const { MapViewComponent } = await import('./map_view_component');
+      const { MapViewComponent } = await import('./map_view_component.js');
       return {
         default: MapViewComponent,
       };

@@ -108,7 +108,7 @@ export class CasesUiPlugin
             unknown
           ];
 
-          const { renderApp } = await import('./application');
+          const { renderApp } = await import('./application.js');
 
           return renderApp({
             mountParams: params,

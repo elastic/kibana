@@ -30,4 +30,4 @@ export const withSuspense = <P extends {}, R = {}>(
     );
   });
 
-export const LazyReplacementCard = React.lazy(() => import('./replacement_card'));
+export const LazyReplacementCard = React.lazy(() => import('./replacement_card/index.js'));

@@ -10,7 +10,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 
 export const FieldsStatsGrid = withSuspense(
   React.lazy(() =>
-    import('./fields_stats_grid').then(({ FieldsStatsGrid: FieldsStatsGridComponent }) => ({
+    import('./fields_stats_grid.js').then(({ FieldsStatsGrid: FieldsStatsGridComponent }) => ({
       default: FieldsStatsGridComponent,
     }))
   )

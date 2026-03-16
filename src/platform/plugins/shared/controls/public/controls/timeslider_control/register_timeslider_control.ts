@@ -14,7 +14,7 @@ import { untilPluginStartServicesReady } from '../../services/kibana_services';
 export function registerTimeSliderControl(embeddable: EmbeddableSetup) {
   embeddable.registerReactEmbeddableFactory(TIME_SLIDER_CONTROL, async () => {
     const [{ getTimesliderControlFactory }] = await Promise.all([
-      import('../../controls_module'),
+      import('../../controls_module.js'),
       untilPluginStartServicesReady(),
     ]);
     return getTimesliderControlFactory();

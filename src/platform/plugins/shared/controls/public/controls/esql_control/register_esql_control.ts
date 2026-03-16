@@ -14,7 +14,7 @@ import { untilPluginStartServicesReady } from '../../services/kibana_services';
 export function registerESQLControl(embeddable: EmbeddableSetup) {
   embeddable.registerReactEmbeddableFactory(ESQL_CONTROL, async () => {
     const [{ getESQLControlFactory }] = await Promise.all([
-      import('../../controls_module'),
+      import('../../controls_module.js'),
       untilPluginStartServicesReady(),
     ]);
     return getESQLControlFactory();

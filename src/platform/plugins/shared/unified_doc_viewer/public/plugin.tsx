@@ -31,8 +31,12 @@ const fallback = (
   </EuiDelayRender>
 );
 
-const LazyDocViewerTable = dynamic(() => import('./components/doc_viewer_table'), { fallback });
-const LazySourceViewer = dynamic(() => import('./components/doc_viewer_source'), { fallback });
+const LazyDocViewerTable = dynamic(() => import('./components/doc_viewer_table/index.js'), {
+  fallback,
+});
+const LazySourceViewer = dynamic(() => import('./components/doc_viewer_source/index.js'), {
+  fallback,
+});
 
 export interface UnifiedDocViewerSetup {
   registry: DocViewsRegistry;

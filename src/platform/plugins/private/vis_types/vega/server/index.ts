@@ -20,7 +20,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 };
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { VisTypeVegaPlugin } = await import('./plugin');
+  const { VisTypeVegaPlugin } = await import('./plugin.js');
   return new VisTypeVegaPlugin(initializerContext);
 }
 

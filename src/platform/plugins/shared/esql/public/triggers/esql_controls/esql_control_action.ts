@@ -116,7 +116,7 @@ export class CreateESQLControlAction implements Action<Context> {
       core: this.core,
       parentApi,
       loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-        const { loadESQLControlFlyout } = await import('./esql_control_helpers');
+        const { loadESQLControlFlyout } = await import('./esql_control_helpers.js');
         return await loadESQLControlFlyout({
           queryString,
           core: this.core,

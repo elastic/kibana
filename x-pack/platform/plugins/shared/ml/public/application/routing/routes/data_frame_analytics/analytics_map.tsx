@@ -18,7 +18,7 @@ import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../data_frame_analytics/pages/job_map/page')).Page,
+  default: (await import('../../../data_frame_analytics/pages/job_map/page.js')).Page,
 }));
 
 export const analyticsMapRouteFactory = (

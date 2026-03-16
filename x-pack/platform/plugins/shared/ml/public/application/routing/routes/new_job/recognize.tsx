@@ -23,7 +23,7 @@ import { DataSourceContextProvider } from '../../../contexts/ml';
 import { useNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../jobs/new_job/recognize')).Page,
+  default: (await import('../../../jobs/new_job/recognize/index.js')).Page,
 }));
 
 export const recognizeRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({

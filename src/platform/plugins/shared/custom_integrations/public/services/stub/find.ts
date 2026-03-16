@@ -25,11 +25,11 @@ export type CustomIntegrationsFindServiceFactory = PluginServiceFactory<
  */
 export const findServiceFactory: CustomIntegrationsFindServiceFactory = () => ({
   findAppendedIntegrations: async (params) => {
-    const { integrations } = await import('./fixtures/integrations');
+    const { integrations } = await import('./fixtures/integrations.js');
     return filterCustomIntegrations(integrations, params);
   },
   findReplacementIntegrations: async (params) => {
-    const { integrations } = await import('./fixtures/integrations');
+    const { integrations } = await import('./fixtures/integrations.js');
     return filterCustomIntegrations(integrations, params);
   },
 });

@@ -29,7 +29,7 @@ import {
 } from '../../../services/new_job_capabilities/load_new_job_capabilities';
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../data_frame_analytics/pages/analytics_creation')).Page,
+  default: (await import('../../../data_frame_analytics/pages/analytics_creation/index.js')).Page,
 }));
 export const analyticsJobsCreationRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB),

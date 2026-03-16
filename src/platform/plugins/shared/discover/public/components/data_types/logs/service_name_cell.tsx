@@ -24,7 +24,7 @@ import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import type { CellRenderersExtensionParams } from '../../../context_awareness';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
 
-const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
+const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon/index.js'));
 const dataTestSubj = 'serviceNameCell';
 
 const agentIconStyle = ({ euiTheme }: UseEuiTheme) => css`

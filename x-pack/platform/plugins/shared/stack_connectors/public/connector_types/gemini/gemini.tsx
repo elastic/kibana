@@ -18,7 +18,7 @@ interface ValidationErrors {
 export function getConnectorType(): GeminiConnector {
   return {
     id: CONNECTOR_ID,
-    iconClass: lazy(() => import('./logo')),
+    iconClass: lazy(() => import('./logo.js')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.gemini.selectMessageText', {
       defaultMessage: 'Send a request to Google Gemini.',
     }),
@@ -27,7 +27,7 @@ export function getConnectorType(): GeminiConnector {
       actionParams: GeminiActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {
       const { subAction, subActionParams } = actionParams;
-      const translations = await import('./translations');
+      const translations = await import('./translations.js');
       const errors: ValidationErrors = {
         body: [],
         subAction: [],
@@ -54,8 +54,8 @@ export function getConnectorType(): GeminiConnector {
       }
       return { errors };
     },
-    actionConnectorFields: lazy(() => import('./connector')),
-    actionParamsFields: lazy(() => import('./params')),
-    actionReadOnlyExtraComponent: lazy(() => import('./dashboard_link')),
+    actionConnectorFields: lazy(() => import('./connector.js')),
+    actionParamsFields: lazy(() => import('./params.js')),
+    actionReadOnlyExtraComponent: lazy(() => import('./dashboard_link.js')),
   };
 }

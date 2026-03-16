@@ -26,7 +26,7 @@ export const accessAgreementApp = Object.freeze({
       async mount({ element }: AppMountParameters) {
         const [[coreStart], { renderAccessAgreementPage }] = await Promise.all([
           getStartServices(),
-          import('./access_agreement_page'),
+          import('./access_agreement_page.js'),
         ]);
         return renderAccessAgreementPage(
           coreStart,

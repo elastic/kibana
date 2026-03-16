@@ -205,7 +205,7 @@ export class Plugin implements InfraClientPluginClass {
           getLogsExplorerAccessible$(coreStart.application)
         );
 
-        const { renderApp } = await import('./apps/logs_app');
+        const { renderApp } = await import('./apps/logs_app.js');
         return renderApp(coreStart, plugins, pluginStart, isLogsExplorerAccessible, params);
       },
     });
@@ -276,7 +276,7 @@ export class Plugin implements InfraClientPluginClass {
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
         const [coreStart, plugins, pluginStart] = await core.getStartServices();
-        const { renderApp } = await import('./apps/metrics_app');
+        const { renderApp } = await import('./apps/metrics_app.js');
 
         const isCloudEnv = !!pluginsSetup.cloud?.isCloudEnabled;
         const isServerlessEnv = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;

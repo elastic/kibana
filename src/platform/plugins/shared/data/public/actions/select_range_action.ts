@@ -36,7 +36,7 @@ export function createSelectRangeActionDefinition(
     shouldAutoExecute: async () => true,
     execute: async (context: SelectRangeActionContext) => {
       try {
-        const { createFiltersFromRangeSelectAction } = await import('./filters');
+        const { createFiltersFromRangeSelectAction } = await import('./filters/index.js');
         const filters = await createFiltersFromRangeSelectAction(context.data);
         if (filters.length > 0) {
           await getStartServices().uiActions.executeTriggerActions(ON_APPLY_FILTER, {

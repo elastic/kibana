@@ -13,7 +13,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 //  as well as, Kibana Platform `plugin()` initializer.
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { VisualizationsPlugin } = await import('./plugin');
+  const { VisualizationsPlugin } = await import('./plugin.js');
   return new VisualizationsPlugin(initializerContext);
 }
 

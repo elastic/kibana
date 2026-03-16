@@ -10,11 +10,11 @@ import { FIELD_STATS_EMBEDDABLE_TYPE } from '../../../../../common/embeddables/c
 
 export const registerEmbeddables = (embeddable: EmbeddableSetup, core: DataVisualizerCoreSetup) => {
   embeddable.registerReactEmbeddableFactory(FIELD_STATS_EMBEDDABLE_TYPE, async () => {
-    const { getFieldStatsChartEmbeddableFactory } = await import('./field_stats_factory');
+    const { getFieldStatsChartEmbeddableFactory } = await import('./field_stats_factory.js');
     return getFieldStatsChartEmbeddableFactory(core.getStartServices);
   });
   embeddable.registerLegacyURLTransform(FIELD_STATS_EMBEDDABLE_TYPE, async () => {
-    const { transformOut } = await import('../../../../../common/embeddables/transform_out');
+    const { transformOut } = await import('../../../../../common/embeddables/transform_out.js');
     return transformOut;
   });
 };

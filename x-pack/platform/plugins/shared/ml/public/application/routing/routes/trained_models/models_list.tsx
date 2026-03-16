@@ -20,7 +20,7 @@ import { MlPageHeader } from '../../../components/page_header';
 import { PageTitle } from '../../../components/page_title';
 
 const ModelsList = dynamic(async () => ({
-  default: (await import('../../../model_management/models_list')).ModelsList,
+  default: (await import('../../../model_management/models_list.js')).ModelsList,
 }));
 
 export const modelsListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({

@@ -39,7 +39,7 @@ export const getHttp = (basepath = BASE_PATH) => {
       }
 
       if (path === '/api/fleet/epm/categories') {
-        return await import('./fixtures/categories');
+        return await import('./fixtures/categories.js');
       }
 
       if (path === '/api/fleet/epm/packages') {
@@ -50,29 +50,29 @@ export const getHttp = (basepath = BASE_PATH) => {
           );
         }
 
-        return await import('./fixtures/packages');
+        return await import('./fixtures/packages.js');
       }
 
       // Ideally, this would be a markdown file instead of a ts file, but we don't have
       // markdown-loader in our package.json, so we'll make do with what we have.
       if (path.match('/api/fleet/epm/packages/nginx/.*/.*/')) {
-        const { readme } = await import('./fixtures/readme.nginx');
+        const { readme } = await import('./fixtures/readme.nginx.js');
         return readme;
       }
 
       if (path.startsWith('/api/fleet/epm/packages/nginx')) {
-        return await import('./fixtures/integration.nginx');
+        return await import('./fixtures/integration.nginx.js');
       }
 
       // Ideally, this would be a markdown file instead of a ts file, but we don't have
       // markdown-loader in our package.json, so we'll make do with what we have.
       if (path.match('/api/fleet/epm/packages/okta/.*/.*/')) {
-        const { readme } = await import('./fixtures/readme.okta');
+        const { readme } = await import('./fixtures/readme.okta.js');
         return readme;
       }
 
       if (path.startsWith('/api/fleet/epm/packages/okta')) {
-        return await import('./fixtures/integration.okta');
+        return await import('./fixtures/integration.okta.js');
       }
 
       if (path.startsWith('/api/fleet/check-permissions')) {

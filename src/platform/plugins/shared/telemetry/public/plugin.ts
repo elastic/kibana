@@ -208,7 +208,7 @@ export class TelemetryPlugin
 
     if (config.localShipper) {
       // Make it async to exclude the shipper from the initial page load since this config will likely be false most of the time.
-      import('./local_shipper')
+      import('./local_shipper/index.js')
         .then(({ initializeLocalShipper }) => initializeLocalShipper(coreSetup))
         .catch(() => {});
     }

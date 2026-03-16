@@ -17,7 +17,7 @@ import { Overview } from './overview';
 import { Details } from './details';
 import { AlertFlyout } from '../../alerts/alert_flyout';
 
-const QualityIssueFlyout = dynamic(() => import('./quality_issue_flyout'));
+const QualityIssueFlyout = dynamic(() => import('./quality_issue_flyout/index.js'));
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export

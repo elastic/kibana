@@ -8,6 +8,7 @@
  */
 
 /// <reference path="./emotion.d.ts" />
+/// <reference path="./nodenext_compat.d.ts" />
 
 declare module '*.html' {
   const template: string;

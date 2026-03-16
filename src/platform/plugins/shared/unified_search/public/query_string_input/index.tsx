@@ -14,7 +14,7 @@ import type { QueryBarTopRowProps } from './query_bar_top_row';
 const Fallback = () => <div />;
 
 const LazyQueryBarTopRow = React.lazy(async () => {
-  const { QueryBarTopRow } = await import('../ui_module');
+  const { QueryBarTopRow } = await import('../ui_module.js');
   return { default: QueryBarTopRow };
 });
 

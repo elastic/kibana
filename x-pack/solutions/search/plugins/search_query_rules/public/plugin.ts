@@ -36,7 +36,7 @@ export class QueryRulesPlugin
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       title: PLUGIN_TITLE,
       async mount({ element, history }: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         const [coreStart, depsStart] = await core.getStartServices();
 
         coreStart.chrome.docTitle.change(PLUGIN_NAME);

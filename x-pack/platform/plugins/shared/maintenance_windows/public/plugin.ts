@@ -32,7 +32,7 @@ export class MaintenanceWindowsPublicPlugin
         defaultMessage: 'Maintenance Windows',
       }),
       async mount(params: ManagementAppMountParams) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
 
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,

@@ -12,7 +12,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import type { ControlGroupRendererProps } from './control_group_renderer';
 
 const Component = dynamic(async () => {
-  const { ControlGroupRenderer } = await import('./control_group_renderer');
+  const { ControlGroupRenderer } = await import('./control_group_renderer.js');
   return {
     default: ControlGroupRenderer,
   };

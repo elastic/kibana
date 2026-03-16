@@ -10,4 +10,4 @@
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { lazy } from 'react';
 
-export const CompareDocuments = withSuspense(lazy(() => import('./compare_documents')));
+export const CompareDocuments = withSuspense(lazy(() => import('./compare_documents.js')));

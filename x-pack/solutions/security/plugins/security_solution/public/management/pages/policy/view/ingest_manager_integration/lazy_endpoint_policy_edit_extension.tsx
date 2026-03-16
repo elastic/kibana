@@ -19,8 +19,8 @@ export const getLazyEndpointPolicyEditExtension = ({
 }: FleetUiExtensionGetterOptions) => {
   return lazy<PackagePolicyEditExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPolicyEditExtension }] = await Promise.all([
-      import('../../../../../common/components/with_security_context/with_security_context'),
-      import('./endpoint_policy_edit_extension/endpoint_policy_edit_extension'),
+      import('../../../../../common/components/with_security_context/with_security_context.js'),
+      import('./endpoint_policy_edit_extension/endpoint_policy_edit_extension.js'),
     ]);
 
     return {

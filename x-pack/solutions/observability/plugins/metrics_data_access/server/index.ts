@@ -23,6 +23,6 @@ export type { ESSearchClient, LogQueryFields } from './lib/metrics';
 export { fetchMetrics, BasicMetricValueRT } from './lib/metrics';
 
 export async function plugin(context: PluginInitializerContext) {
-  const { MetricsDataPlugin } = await import('./plugin');
+  const { MetricsDataPlugin } = await import('./plugin.js');
   return new MetricsDataPlugin(context);
 }

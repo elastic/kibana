@@ -24,7 +24,7 @@ export const registerApp = ({
     euiIconType: 'logoElasticsearch', // TODO: Workplace AI solution icon
     visibleIn: ['sideNav', 'globalSearch'],
     mount: async (params: AppMountParameters) => {
-      const { renderApp } = await import('./mount');
+      const { renderApp } = await import('./mount.js');
       const [coreStart, pluginsStart, services] = await core.getStartServices();
       return renderApp({ core: coreStart, plugins: pluginsStart, services, params });
     },

@@ -80,7 +80,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
         'aria-labelledby': 'flyoutTitle',
       },
       loadContent: async ({ closeFlyout }) => {
-        const { loadAlertRuleFlyoutContent } = await import('./load_alert_rule_flyout_content');
+        const { loadAlertRuleFlyoutContent } = await import('./load_alert_rule_flyout_content.js');
         return await loadAlertRuleFlyoutContent({
           embeddable,
           data,

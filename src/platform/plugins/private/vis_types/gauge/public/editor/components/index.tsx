@@ -12,7 +12,7 @@ import React, { lazy } from 'react';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import type { GaugeTypeProps, GaugeVisParams } from '../../types';
 
-const GaugeOptionsLazy = lazy(() => import('./gauge'));
+const GaugeOptionsLazy = lazy(() => import('./gauge/index.js'));
 
 export const getGaugeOptions =
   ({ showElasticChartsOptions }: GaugeTypeProps) =>

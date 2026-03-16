@@ -18,7 +18,7 @@ export const createVisualizeEmbeddableAsync = async (
 ) => {
   // Build optimization. Move app styles from main bundle
 
-  const { VisualizeEmbeddable } = await import('./visualize_embeddable');
+  const { VisualizeEmbeddable } = await import('./visualize_embeddable.js');
 
   return new VisualizeEmbeddable(...args);
 };

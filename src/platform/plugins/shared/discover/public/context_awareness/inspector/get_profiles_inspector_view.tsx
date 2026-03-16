@@ -14,7 +14,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import type { ContextsAdapter } from '../hooks';
 
 const ProfilesInspectorViewComponent = withSuspense(
-  lazy(() => import('./profiles_inspector_view'))
+  lazy(() => import('./profiles_inspector_view/index.js'))
 );
 
 export interface InspectorAdapters extends Adapters {

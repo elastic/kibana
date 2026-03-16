@@ -33,7 +33,7 @@ export function renderOptInStatusNoticeBanner({
 }: RenderBannerConfig) {
   const OptedInNoticeBannerLazy = withSuspense(
     React.lazy(() =>
-      import('../../components/opt_in_status_notice_banner').then(
+      import('../../components/opt_in_status_notice_banner.js').then(
         ({ OptInStatusNoticeBanner }) => ({
           default: OptInStatusNoticeBanner,
         })

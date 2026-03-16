@@ -9,6 +9,6 @@ import type { PluginInitializer } from '@kbn/core/server';
 
 export { config } from './config';
 export const plugin: PluginInitializer<{}, {}, {}, {}> = async (context) => {
-  const { BannersPlugin } = await import('./plugin');
+  const { BannersPlugin } = await import('./plugin.js');
   return new BannersPlugin(context);
 };

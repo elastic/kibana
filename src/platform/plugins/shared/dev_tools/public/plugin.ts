@@ -85,7 +85,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
           executionContext,
         };
 
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         return renderApp(
           element,
           application,

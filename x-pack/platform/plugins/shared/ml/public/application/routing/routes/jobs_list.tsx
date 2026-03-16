@@ -25,7 +25,7 @@ import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_upda
 import { basicResolvers, initSavedObjects } from '../resolvers';
 
 const JobsPage = dynamic(async () => ({
-  default: (await import('../../jobs/jobs_list')).JobsPage,
+  default: (await import('../../jobs/jobs_list/index.js')).JobsPage,
 }));
 
 export const jobListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({

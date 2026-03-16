@@ -41,6 +41,6 @@ export const config: PluginConfigDescriptor = {
 export { ErrorWithStatusCode as ListsErrorWithStatusCode } from './error_with_status_code';
 
 export const plugin = async (initializerContext: PluginInitializerContext): Promise<ListPlugin> => {
-  const { ListPlugin } = await import('./plugin');
+  const { ListPlugin } = await import('./plugin.js');
   return new ListPlugin(initializerContext);
 };

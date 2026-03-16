@@ -17,7 +17,7 @@ import { useKibanaContextForPluginProvider } from '../../utils';
 import type { DatasetQualityDetailsContextValue } from './context';
 import { DatasetQualityDetailsContext } from './context';
 
-const DatasetQualityDetails = dynamic(() => import('./dataset_quality_details'));
+const DatasetQualityDetails = dynamic(() => import('./dataset_quality_details.js'));
 
 export interface DatasetQualityDetailsProps {
   controller: DatasetQualityDetailsController;

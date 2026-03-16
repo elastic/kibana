@@ -46,7 +46,7 @@ interface ExpandedRowProps {
 }
 
 const JobMap = dynamic(async () => ({
-  default: (await import('../data_frame_analytics/pages/job_map')).JobMap,
+  default: (await import('../data_frame_analytics/pages/job_map/index.js')).JobMap,
 }));
 
 const useBadgeFormatter = () => {

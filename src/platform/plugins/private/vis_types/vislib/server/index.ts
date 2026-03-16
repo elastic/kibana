@@ -19,6 +19,6 @@ export const config: PluginConfigDescriptor<VislibConfig> = {
 };
 
 export const plugin = async () => {
-  const { VisTypeVislibServerPlugin } = await import('./plugin');
+  const { VisTypeVislibServerPlugin } = await import('./plugin.js');
   return new VisTypeVislibServerPlugin();
 };

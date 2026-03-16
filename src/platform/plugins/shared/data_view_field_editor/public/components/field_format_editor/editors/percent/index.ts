@@ -13,5 +13,5 @@ import { formatId } from './constants';
 
 export type { PercentFormatEditor } from './percent';
 export const percentFormatEditorFactory: FieldFormatEditorFactory<NumberFormatEditorParams> = () =>
-  import('./percent').then((m) => m.PercentFormatEditor);
+  import('./percent.js').then((m) => m.PercentFormatEditor);
 percentFormatEditorFactory.formatId = formatId;

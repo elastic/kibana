@@ -20,7 +20,7 @@ export function setupApp(core: CoreSetup<StartDeps>, developerExamples: Develope
     title,
     visibleIn: [],
     async mount(mountParams: AppMountParameters) {
-      const { renderApp } = await import('./app');
+      const { renderApp } = await import('./app.js');
       const [coreStart, deps] = await core.getStartServices();
       return renderApp(coreStart, deps, mountParams);
     },

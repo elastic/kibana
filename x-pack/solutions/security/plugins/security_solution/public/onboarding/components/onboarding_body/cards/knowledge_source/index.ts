@@ -21,7 +21,7 @@ export const knowledgeSourceCardConfig: OnboardingCardConfig = {
     () =>
       import(
         /* webpackChunkName: "onboarding_knowledge_source_card" */
-        './knowledge_source_card'
+        './knowledge_source_card.js'
       )
   ),
   checkComplete: checkKnowledgeSourceComplete,

@@ -133,11 +133,11 @@ export const getGaugeVisTypeDefinition = (
   },
   requiresSearch: true,
   navigateToLens: async (vis, timefilter) => {
-    const { convertGaugeToLens } = await import('../convert_to_lens');
+    const { convertGaugeToLens } = await import('../convert_to_lens/index.js');
     return vis ? convertGaugeToLens(vis, timefilter) : null;
   },
   getExpressionVariables: async (vis, timeFilter) => {
-    const { convertGaugeToLens } = await import('../convert_to_lens');
+    const { convertGaugeToLens } = await import('../convert_to_lens/index.js');
     return {
       canNavigateToLens: Boolean(vis?.params ? await convertGaugeToLens(vis, timeFilter) : null),
     };

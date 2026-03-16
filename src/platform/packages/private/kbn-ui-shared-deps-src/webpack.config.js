@@ -116,6 +116,9 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
+    extensionAlias: {
+      '.js': ['.ts', '.tsx', '.js'],
+    },
     mainFields: ['browser', 'module', 'main'],
     conditionNames: ['browser', 'module', 'import', 'require', 'default'],
     alias: {

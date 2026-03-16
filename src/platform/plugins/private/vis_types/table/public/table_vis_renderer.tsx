@@ -18,7 +18,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { TableVisRenderValue } from './table_vis_fn';
 
-const TableVisualizationComponent = lazy(() => import('./components/table_visualization'));
+const TableVisualizationComponent = lazy(() => import('./components/table_visualization.js'));
 
 /** @internal **/
 const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {

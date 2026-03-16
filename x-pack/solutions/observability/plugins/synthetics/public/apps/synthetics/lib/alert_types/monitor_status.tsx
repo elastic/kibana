@@ -21,7 +21,7 @@ import { getDescriptionFields } from './get_description_fields';
 const { defaultActionMessage, defaultRecoveryMessage, description } =
   SyntheticsMonitorStatusTranslations;
 
-const MonitorStatusAlert = React.lazy(() => import('./lazy_wrapper/monitor_status'));
+const MonitorStatusAlert = React.lazy(() => import('./lazy_wrapper/monitor_status.js'));
 
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   core,

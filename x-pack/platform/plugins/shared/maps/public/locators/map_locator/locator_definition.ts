@@ -16,7 +16,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
   constructor(protected readonly deps: MapsAppLocatorDependencies) {}
 
   public readonly getLocation = async (params: MapsAppLocatorParams) => {
-    const { getLocation } = await import('./get_location');
+    const { getLocation } = await import('./get_location.js');
     return getLocation(params, this.deps);
   };
 }

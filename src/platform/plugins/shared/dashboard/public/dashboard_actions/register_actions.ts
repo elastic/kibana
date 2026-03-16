@@ -28,51 +28,51 @@ export const registerActions = async (plugins: DashboardStartDependencies) => {
   const { uiActions, share } = plugins;
 
   uiActions.registerActionAsync(ACTION_CLONE_PANEL, async () => {
-    const { ClonePanelAction } = await import('../dashboard_renderer/dashboard_module');
+    const { ClonePanelAction } = await import('../dashboard_renderer/dashboard_module.js');
     return new ClonePanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_CLONE_PANEL);
 
   uiActions.registerActionAsync(ACTION_EXPAND_PANEL, async () => {
-    const { ExpandPanelAction } = await import('../dashboard_renderer/dashboard_module');
+    const { ExpandPanelAction } = await import('../dashboard_renderer/dashboard_module.js');
     return new ExpandPanelAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_EXPAND_PANEL);
 
   uiActions.registerActionAsync(BADGE_FILTERS_NOTIFICATION, async () => {
-    const { FiltersNotificationAction } = await import('../dashboard_renderer/dashboard_module');
+    const { FiltersNotificationAction } = await import('../dashboard_renderer/dashboard_module.js');
     return new FiltersNotificationAction();
   });
   uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, BADGE_FILTERS_NOTIFICATION);
 
   uiActions.registerActionAsync(ACTION_ADD_SECTION, async () => {
-    const { AddSectionAction } = await import('../dashboard_renderer/dashboard_module');
+    const { AddSectionAction } = await import('../dashboard_renderer/dashboard_module.js');
     return new AddSectionAction();
   });
   uiActions.attachAction(ADD_PANEL_TRIGGER, ACTION_ADD_SECTION);
 
   if (share) {
     uiActions.registerActionAsync(ACTION_EXPORT_CSV, async () => {
-      const { ExportCSVAction } = await import('../dashboard_renderer/dashboard_module');
+      const { ExportCSVAction } = await import('../dashboard_renderer/dashboard_module.js');
       return new ExportCSVAction();
     });
     uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_EXPORT_CSV);
   }
 
   uiActions.registerActionAsync(ACTION_ADD_TO_LIBRARY, async () => {
-    const { AddToLibraryAction } = await import('../dashboard_renderer/dashboard_module');
+    const { AddToLibraryAction } = await import('../dashboard_renderer/dashboard_module.js');
     return new AddToLibraryAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_ADD_TO_LIBRARY);
 
   uiActions.registerActionAsync(ACTION_UNLINK_FROM_LIBRARY, async () => {
-    const { UnlinkFromLibraryAction } = await import('../dashboard_renderer/dashboard_module');
+    const { UnlinkFromLibraryAction } = await import('../dashboard_renderer/dashboard_module.js');
     return new UnlinkFromLibraryAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_UNLINK_FROM_LIBRARY);
 
   uiActions.registerActionAsync(ACTION_COPY_TO_DASHBOARD, async () => {
-    const { CopyToDashboardAction } = await import('../dashboard_renderer/dashboard_module');
+    const { CopyToDashboardAction } = await import('../dashboard_renderer/dashboard_module.js');
     return new CopyToDashboardAction();
   });
   uiActions.attachAction(ON_OPEN_PANEL_MENU, ACTION_COPY_TO_DASHBOARD);

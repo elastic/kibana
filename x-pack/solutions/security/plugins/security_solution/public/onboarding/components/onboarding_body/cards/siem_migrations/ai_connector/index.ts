@@ -21,7 +21,7 @@ export const aiConnectorCardConfig: OnboardingCardConfig<AIConnectorCardMetadata
     () =>
       import(
         /* webpackChunkName: "onboarding_siem_migrations_ai_connector_card" */
-        './ai_connector_card'
+        './ai_connector_card.js'
       )
   ),
   checkComplete: checkAiConnectorsCardComplete,

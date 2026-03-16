@@ -19,7 +19,7 @@ import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 
 const Page = dynamic(async () => ({
-  default: (await import('../../../aiops/log_rate_analysis')).LogRateAnalysisPage,
+  default: (await import('../../../aiops/log_rate_analysis.js')).LogRateAnalysisPage,
 }));
 
 export const logRateAnalysisRouteFactory = (

@@ -14,7 +14,7 @@ export const config: PluginConfigDescriptor = {
 };
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { ApmDataAccessPlugin } = await import('./plugin');
+  const { ApmDataAccessPlugin } = await import('./plugin.js');
   return new ApmDataAccessPlugin(initializerContext);
 }
 

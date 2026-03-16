@@ -43,7 +43,7 @@ export const getProgressRenderer =
       config: ProgressRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
-      const { ProgressComponent } = await import('./components');
+      const { ProgressComponent } = await import('./components/index.js');
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });

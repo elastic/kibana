@@ -66,7 +66,7 @@ export function revealImage(): ExpressionFunctionDefinition<
       }
 
       const { resolveWithMissingImage, elasticOutline, isValidUrl } = await import(
-        '../../../public/lib'
+        '../../../public/lib/index.js'
       );
 
       if (args.image && !isValidUrl(args.image)) {

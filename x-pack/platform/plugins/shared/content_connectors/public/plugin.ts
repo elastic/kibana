@@ -59,7 +59,7 @@ export class SearchConnectorsPlugin
           order: 8,
           keywords: ['content connectors', 'search'],
           async mount(params: ManagementAppMountParams) {
-            const { renderApp } = await import('./app');
+            const { renderApp } = await import('./app.js');
 
             const connectorsDefinitions = getConnectorFullTypes(core.http.staticAssets);
             return renderApp(

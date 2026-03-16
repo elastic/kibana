@@ -100,7 +100,7 @@ export const getMetricVisRenderer = (
         handlers.done();
       };
 
-      const { MetricVis } = await import('../components/metric_vis');
+      const { MetricVis } = await import('../components/metric_vis.js');
 
       performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 

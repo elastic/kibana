@@ -19,7 +19,7 @@ export function renderWelcomeTelemetryNotice(
 ) {
   const WelcomeTelemetryNoticeLazy = withSuspense(
     React.lazy(() =>
-      import('./components/welcome_telemetry_notice').then(({ WelcomeTelemetryNotice }) => ({
+      import('./components/welcome_telemetry_notice.js').then(({ WelcomeTelemetryNotice }) => ({
         default: WelcomeTelemetryNotice,
       }))
     )

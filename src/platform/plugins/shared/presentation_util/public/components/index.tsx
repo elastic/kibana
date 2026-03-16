@@ -30,25 +30,29 @@ export const withSuspense = <P extends {}, R = {}>(
     );
   });
 
-export const LazyLabsBeakerButton = React.lazy(() => import('./labs/labs_beaker_button'));
+export const LazyLabsBeakerButton = React.lazy(() => import('./labs/labs_beaker_button.js'));
 
-export const LazyLabsFlyout = React.lazy(() => import('./labs/labs_flyout'));
+export const LazyLabsFlyout = React.lazy(() => import('./labs/labs_flyout.js'));
 
-export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker/dashboard_picker'));
+export const LazyDashboardPicker = React.lazy(
+  () => import('./dashboard_picker/dashboard_picker.js')
+);
 
 export const LazySavedObjectSaveModalDashboard = React.lazy(
-  () => import('./saved_object_save_modal_dashboard')
+  () => import('./saved_object_save_modal_dashboard.js')
 );
 
 /**
  * Used with `showSaveModal` to pass `SaveResult` back from `onSave`
  */
 export const LazySavedObjectSaveModalDashboardWithSaveResult = React.lazy(
-  () => import('./saved_object_save_modal_dashboard_with_save_result')
+  () => import('./saved_object_save_modal_dashboard_with_save_result.js')
 );
 
-export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/data_view_picker'));
+export const LazyDataViewPicker = React.lazy(
+  () => import('./data_view_picker/data_view_picker.js')
+);
 
-export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_picker'));
+export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_picker.js'));
 
 export type * from './types';

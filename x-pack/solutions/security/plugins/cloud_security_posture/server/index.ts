@@ -9,7 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 export type { CspServerPluginSetup, CspServerPluginStart } from './types';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { CspPlugin } = await import('./plugin');
+  const { CspPlugin } = await import('./plugin.js');
   return new CspPlugin(initializerContext);
 };
 

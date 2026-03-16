@@ -38,7 +38,7 @@ describe('writePluginMdxDocs', () => {
 
   describe('writePluginDocs', () => {
     it('calls writePluginDocSplitByFolder when serviceFolders is defined', async () => {
-      const { writePluginDocSplitByFolder } = await import('./write_plugin_split_by_folder');
+      const { writePluginDocSplitByFolder } = await import('./write_plugin_split_by_folder.js');
 
       const doc = createMockPluginApi({
         serviceFolders: ['service_a'],

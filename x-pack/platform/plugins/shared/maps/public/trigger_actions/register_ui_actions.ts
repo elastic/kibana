@@ -23,14 +23,14 @@ export function registerUiActions(core: CoreStart, plugins: MapsPluginStartDepen
       VISUALIZE_GEO_FIELD_TRIGGER,
       ACTION_VISUALIZE_GEO_FIELD,
       async () => {
-        const { visualizeGeoFieldAction } = await import('./visualize_geo_field_action');
+        const { visualizeGeoFieldAction } = await import('./visualize_geo_field_action.js');
         return visualizeGeoFieldAction;
       }
     );
   }
 
   plugins.uiActions.registerActionAsync('addMapPanelAction', async () => {
-    const { getAddMapPanelAction } = await import('./add_map_panel_action');
+    const { getAddMapPanelAction } = await import('./add_map_panel_action.js');
     return getAddMapPanelAction(plugins);
   });
   plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addMapPanelAction');
@@ -38,14 +38,14 @@ export function registerUiActions(core: CoreStart, plugins: MapsPluginStartDepen
   plugins.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, 'addMapPanelAction');
 
   plugins.uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, FILTER_BY_MAP_EXTENT, async () => {
-    const { filterByMapExtentAction } = await import('./context_menu_actions_module');
+    const { filterByMapExtentAction } = await import('./context_menu_actions_module.js');
     return filterByMapExtentAction;
   });
   plugins.uiActions.addTriggerActionAsync(
     ON_OPEN_PANEL_MENU,
     SYNCHRONIZE_MOVEMENT_ACTION,
     async () => {
-      const { synchronizeMovementAction } = await import('./context_menu_actions_module');
+      const { synchronizeMovementAction } = await import('./context_menu_actions_module.js');
       return synchronizeMovementAction;
     }
   );

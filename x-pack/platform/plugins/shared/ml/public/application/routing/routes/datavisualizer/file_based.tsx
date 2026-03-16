@@ -18,7 +18,7 @@ import { useRouteResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 const FileDataVisualizerPage = dynamic(async () => ({
-  default: (await import('../../../datavisualizer/file_based')).FileDataVisualizerPage,
+  default: (await import('../../../datavisualizer/file_based/index.js')).FileDataVisualizerPage,
 }));
 
 export const fileBasedRouteFactory = (

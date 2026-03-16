@@ -14,20 +14,20 @@ export const createLayerDescriptors = {
     indexPatternTitle: string
   ): Promise<LayerDescriptor[]> {
     const { createSecurityLayerDescriptors } = await import(
-      '../classes/layers/wizards/solution_layers/security'
+      '../classes/layers/wizards/solution_layers/security/index.js'
     );
     return createSecurityLayerDescriptors(indexPatternId, indexPatternTitle);
   },
   async createBasemapLayerDescriptor(): Promise<LayerDescriptor | null> {
     const { createBasemapLayerDescriptor } = await import(
-      '../classes/layers/create_basemap_layer_descriptor'
+      '../classes/layers/create_basemap_layer_descriptor.js'
     );
     return createBasemapLayerDescriptor();
   },
   async createESSearchSourceLayerDescriptor(
     params: CreateLayerDescriptorParams
   ): Promise<LayerDescriptor> {
-    const { createLayerDescriptor } = await import('../classes/sources/es_search_source');
+    const { createLayerDescriptor } = await import('../classes/sources/es_search_source/index.js');
     return createLayerDescriptor(params);
   },
 };

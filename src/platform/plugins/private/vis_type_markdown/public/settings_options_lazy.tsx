@@ -11,7 +11,7 @@ import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 // @ts-ignore
-const SettingsOptionsComponent = lazy(() => import('./settings_options'));
+const SettingsOptionsComponent = lazy(() => import('./settings_options.js'));
 
 export const SettingsOptions = (props: any) => (
   <Suspense fallback={<EuiLoadingSpinner />}>

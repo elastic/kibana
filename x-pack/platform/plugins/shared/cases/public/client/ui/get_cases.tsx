@@ -20,7 +20,7 @@ export type GetCasesProps = Omit<
   | 'getFilesClient'
 >;
 
-const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../components/app/routes'));
+const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../components/app/routes.js'));
 
 export const getCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,

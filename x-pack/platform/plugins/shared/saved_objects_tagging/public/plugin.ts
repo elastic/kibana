@@ -49,7 +49,7 @@ export class SavedObjectTaggingPlugin
       title,
       order: 1.5,
       mount: async (mountParams) => {
-        const { mountSection } = await import('./management');
+        const { mountSection } = await import('./management/index.js');
         return mountSection({
           tagClient: this.tagClient!,
           tagCache: this.tagCache!,

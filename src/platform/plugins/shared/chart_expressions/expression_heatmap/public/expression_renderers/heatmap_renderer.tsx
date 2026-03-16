@@ -116,7 +116,7 @@ export const heatmapRenderer: (
     handlers.event(chartSizeEvent);
 
     const timeZone = getTimeZone(getUISettings());
-    const { HeatmapComponent } = await import('../components/heatmap_component');
+    const { HeatmapComponent } = await import('../components/heatmap_component.js');
     const { isInteractive } = handlers;
 
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);

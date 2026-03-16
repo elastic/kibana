@@ -7,4 +7,4 @@
 
 import { dynamic } from '@kbn/shared-ux-utility';
 
-export const AnomalySwimLane = dynamic(async () => import('./anomaly_swim_lane'));
+export const AnomalySwimLane = dynamic(async () => import('./anomaly_swim_lane.js'));

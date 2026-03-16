@@ -95,7 +95,7 @@ export class ServerlessSearchPlugin
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       visibleIn: ['globalSearch'],
       async mount({ element, history }: AppMountParameters) {
-        const { renderApp } = await import('./application/connectors');
+        const { renderApp } = await import('./application/connectors.js');
         const [coreStart, services] = await core.getStartServices();
         coreStart.chrome.docTitle.change(connectorsTitle);
         docLinks.setDocLinks(coreStart.docLinks.links);
@@ -112,7 +112,7 @@ export class ServerlessSearchPlugin
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       visibleIn: ['globalSearch'],
       async mount({ element, history }: AppMountParameters) {
-        const { renderApp } = await import('./application/web_crawlers');
+        const { renderApp } = await import('./application/web_crawlers.js');
         const [coreStart, services] = await core.getStartServices();
         coreStart.chrome.docTitle.change(WEB_CRAWLERS_LABEL);
         docLinks.setDocLinks(coreStart.docLinks.links);

@@ -35,7 +35,7 @@ export const resetSessionApp = Object.freeze({
       async mount({ element }: AppMountParameters) {
         const [[coreStart], { renderResetSessionPage }] = await Promise.all([
           getStartServices(),
-          import('./reset_session_page'),
+          import('./reset_session_page.js'),
         ]);
 
         // Get the next URL and logoutUrl from query parameters

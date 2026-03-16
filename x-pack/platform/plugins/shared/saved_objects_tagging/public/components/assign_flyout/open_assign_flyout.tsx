@@ -34,7 +34,7 @@ const LoadingIndicator = () => (
 );
 
 const LazyAssignFlyout = React.lazy(() =>
-  import('./assign_flyout').then(({ AssignFlyout }) => ({ default: AssignFlyout }))
+  import('./assign_flyout.js').then(({ AssignFlyout }) => ({ default: AssignFlyout }))
 );
 
 export const getAssignFlyoutOpener =

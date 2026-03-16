@@ -220,7 +220,7 @@ export class SyntheticsPlugin
       ],
       mount: async (params: AppMountParameters) => {
         kibanaService.appMountParameters = params;
-        const { renderApp } = await import('./apps/synthetics/render_app');
+        const { renderApp } = await import('./apps/synthetics/render_app.js');
         await coreSetup.getStartServices();
 
         return renderApp(params);

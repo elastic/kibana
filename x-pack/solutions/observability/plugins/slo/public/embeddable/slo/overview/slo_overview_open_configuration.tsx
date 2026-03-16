@@ -32,7 +32,7 @@ export async function openSloConfiguration(
   return new Promise(async (resolve, reject) => {
     try {
       const LazySloConfiguration = lazy(async () => {
-        const { SloConfiguration } = await import('./slo_configuration');
+        const { SloConfiguration } = await import('./slo_configuration.js');
         return {
           default: SloConfiguration,
         };

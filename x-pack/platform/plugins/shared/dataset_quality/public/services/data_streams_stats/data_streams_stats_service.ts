@@ -28,7 +28,7 @@ export class DataStreamsStatsService {
 
   private async getClient({ http, telemetryClient }: DataStreamsStatsServiceStartDeps) {
     if (!this.client) {
-      const { DataStreamsStatsClient } = await import('./data_streams_stats_client');
+      const { DataStreamsStatsClient } = await import('./data_streams_stats_client.js');
       const client = new DataStreamsStatsClient(http, telemetryClient);
       this.client = client;
     }

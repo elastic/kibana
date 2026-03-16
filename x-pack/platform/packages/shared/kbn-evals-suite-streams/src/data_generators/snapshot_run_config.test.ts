@@ -22,7 +22,7 @@ describe('snapshot_run_config', () => {
     delete process.env.SIGEVENTS_SNAPSHOT_RUN;
     jest.resetModules();
 
-    const mod = await import('./snapshot_run_config');
+    const mod = await import('./snapshot_run_config.js');
     expect(mod.SIGEVENTS_SNAPSHOT_RUN).toBe('2026-02-25');
   });
 
@@ -30,7 +30,7 @@ describe('snapshot_run_config', () => {
     process.env.SIGEVENTS_SNAPSHOT_RUN = '2026-02-26-test';
     jest.resetModules();
 
-    const mod = await import('./snapshot_run_config');
+    const mod = await import('./snapshot_run_config.js');
     expect(mod.SIGEVENTS_SNAPSHOT_RUN).toBe('2026-02-26-test');
   });
 
@@ -38,7 +38,7 @@ describe('snapshot_run_config', () => {
     process.env.SIGEVENTS_SNAPSHOT_RUN = '2026-02-26-test';
     jest.resetModules();
 
-    const { resolveBasePath } = await import('./snapshot_run_config');
+    const { resolveBasePath } = await import('./snapshot_run_config.js');
     expect(
       resolveBasePath({ bucket: GCS_BUCKET, basePathPrefix: OTEL_DEMO_GCS_BASE_PATH_PREFIX })
     ).toBe('2026-02-26-test/otel-demo');

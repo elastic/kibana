@@ -56,7 +56,7 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
       title: 'Alerting Fixture App',
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         return renderApp(coreStart, depsStart, params);
       },
     });

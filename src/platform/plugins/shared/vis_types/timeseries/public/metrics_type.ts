@@ -171,7 +171,7 @@ export const metricsVisDefinition: VisTypeDefinition<
     return [];
   },
   getExpressionVariables: async (vis, timeFilter) => {
-    const { convertTSVBtoLensConfiguration } = await import('./convert_to_lens');
+    const { convertTSVBtoLensConfiguration } = await import('./convert_to_lens/index.js');
     return {
       canNavigateToLens: Boolean(
         vis?.params
@@ -181,7 +181,7 @@ export const metricsVisDefinition: VisTypeDefinition<
     };
   },
   navigateToLens: async (vis, timeFilter) => {
-    const { convertTSVBtoLensConfiguration } = await import('./convert_to_lens');
+    const { convertTSVBtoLensConfiguration } = await import('./convert_to_lens/index.js');
     return vis?.params
       ? await convertTSVBtoLensConfiguration(vis, timeFilter?.getAbsoluteTime())
       : null;

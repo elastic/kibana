@@ -18,7 +18,7 @@ export class GaugeVisualization {
   setup(core: CoreSetup, { editorFrame, charts }: GaugeVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
       const [{ getGaugeVisualization }, palettes] = await Promise.all([
-        import('../../async_services'),
+        import('../../async_services.js'),
         charts.palettes.getPalettes(),
       ]);
       return getGaugeVisualization({ paletteService: palettes });

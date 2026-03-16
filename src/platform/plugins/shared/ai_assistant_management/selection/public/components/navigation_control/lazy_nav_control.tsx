@@ -15,7 +15,7 @@ import { useIsNavControlVisible } from '../../hooks/use_is_nav_control_visible';
 import type { AIExperienceSelection } from '../../types';
 
 const LazyNavControl = dynamic(() =>
-  import('.').then((m) => ({ default: m.AIAssistantHeaderButton }))
+  import('./index.js').then((m) => ({ default: m.AIAssistantHeaderButton }))
 );
 
 export const NavControlInitiator = ({

@@ -50,6 +50,6 @@ export type {
 } from './services/files/types';
 
 export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { FleetPlugin } = await import('./plugin');
+  const { FleetPlugin } = await import('./plugin.js');
   return new FleetPlugin(initializerContext);
 };

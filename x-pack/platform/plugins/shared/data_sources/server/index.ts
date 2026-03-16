@@ -8,6 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const plugin = async (context: PluginInitializerContext) => {
-  const { DataSourcesServerPlugin } = await import('./plugin');
+  const { DataSourcesServerPlugin } = await import('./plugin.js');
   return new DataSourcesServerPlugin(context);
 };

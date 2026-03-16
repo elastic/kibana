@@ -38,7 +38,7 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
   }
 
   public async isCompatible({ attributes }: InlineEditLensEmbeddableContext) {
-    const { isEmbeddableEditActionCompatible } = await import('../../../async_services');
+    const { isEmbeddableEditActionCompatible } = await import('../../../async_services.js');
     return isEmbeddableEditActionCompatible(this.core, attributes);
   }
 
@@ -54,7 +54,7 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
     mountInlinePanel({
       core: this.core,
       loadContent: async ({ closeFlyout } = { closeFlyout: noop }) => {
-        const { getEditEmbeddableFlyout } = await import('../../../async_services');
+        const { getEditEmbeddableFlyout } = await import('../../../async_services.js');
         if (attributes) {
           return await getEditEmbeddableFlyout({
             core: this.core,

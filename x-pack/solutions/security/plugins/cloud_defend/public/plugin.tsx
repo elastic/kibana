@@ -20,14 +20,14 @@ import { LoadingState } from './components/loading_state';
 import { SetupContext } from './application/setup_context';
 
 const LazyPolicyReplaceDefineStepExtension = lazy(
-  () => import('./components/fleet_extensions/package_policy_replace_define_step_extension')
+  () => import('./components/fleet_extensions/package_policy_replace_define_step_extension.js')
 );
 
 const LazyCustomAssets = lazy(
-  () => import('./components/fleet_extensions/custom_assets_extension')
+  () => import('./components/fleet_extensions/custom_assets_extension.js')
 );
 
-const RouterLazy = lazy(() => import('./application/router'));
+const RouterLazy = lazy(() => import('./application/router.js'));
 const Router = (props: CloudDefendRouterProps) => (
   <Suspense fallback={<LoadingState />}>
     <RouterLazy {...props} />

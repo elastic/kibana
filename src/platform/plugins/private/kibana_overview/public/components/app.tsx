@@ -50,7 +50,7 @@ export const KibanaOverviewApp = ({
 
   const Overview = withSuspense(
     React.lazy(() =>
-      import('./overview').then(({ Overview: OverviewComponent }) => {
+      import('./overview/index.js').then(({ Overview: OverviewComponent }) => {
         return { default: OverviewComponent };
       })
     )

@@ -15,7 +15,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { AssetInventoryLoading } from './components/asset_inventory_loading';
 
-const AssetsPageLazy = lazy(() => import('./pages'));
+const AssetsPageLazy = lazy(() => import('./pages/index.js'));
 
 // Initializing react-query
 const queryClient = new QueryClient({

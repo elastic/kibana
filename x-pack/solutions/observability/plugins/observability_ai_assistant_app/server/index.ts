@@ -20,6 +20,6 @@ export const config: PluginConfigDescriptor<ObservabilityAIAssistantAppConfig> =
 };
 
 export const plugin = async (ctx: PluginInitializerContext<ObservabilityAIAssistantAppConfig>) => {
-  const { ObservabilityAIAssistantAppPlugin } = await import('./plugin');
+  const { ObservabilityAIAssistantAppPlugin } = await import('./plugin.js');
   return new ObservabilityAIAssistantAppPlugin(ctx);
 };

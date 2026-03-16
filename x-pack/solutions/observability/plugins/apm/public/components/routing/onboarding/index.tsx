@@ -11,7 +11,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import { INSTRUCTION_VARIANT } from '../../app/onboarding/instruction_variants';
 
 const Onboarding = dynamic(() =>
-  import('../../app/onboarding').then((mod) => ({ default: mod.Onboarding }))
+  import('../../app/onboarding/index.js').then((mod) => ({ default: mod.Onboarding }))
 );
 
 export const onboarding = {

@@ -6,6 +6,6 @@
  */
 
 export async function plugin() {
-  const { TaskManagerDependenciesPlugin } = await import('./plugin');
+  const { TaskManagerDependenciesPlugin } = await import('./plugin.js');
   return new TaskManagerDependenciesPlugin();
 }

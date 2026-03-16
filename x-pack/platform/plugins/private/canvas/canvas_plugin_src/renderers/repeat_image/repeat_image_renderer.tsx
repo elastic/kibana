@@ -42,8 +42,8 @@ export const getRepeatImageRenderer =
       handlers: IInterpreterRenderHandlers
     ) => {
       const [{ elasticOutline, isValidUrl }, { RepeatImageComponent }] = await Promise.all([
-        import('../../../public/lib'),
-        import('./repeat_image_component'),
+        import('../../../public/lib/index.js'),
+        import('./repeat_image_component.js'),
       ]);
       const settings = {
         ...config,

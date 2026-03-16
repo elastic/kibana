@@ -44,7 +44,7 @@ const landmarkHeading = i18n.translate('console.embeddableConsole.landmarkHeadin
 });
 
 const ConsoleWrapper = dynamic(async () => ({
-  default: (await import('./console_wrapper')).ConsoleWrapper,
+  default: (await import('./console_wrapper.js')).ConsoleWrapper,
 }));
 
 const getInitialConsoleHeight = (

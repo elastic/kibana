@@ -12,7 +12,7 @@ import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
 import type { Props } from './editor_flyout_content_container';
 
 const ContentEditorFlyoutContentContainer = React.lazy(() =>
-  import('./editor_flyout_content_container').then(
+  import('./editor_flyout_content_container.js').then(
     ({ ContentEditorFlyoutContentContainer: _ContentEditorFlyoutContentContainer }) => ({
       default: _ContentEditorFlyoutContentContainer,
     })

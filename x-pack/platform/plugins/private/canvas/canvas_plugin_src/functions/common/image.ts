@@ -55,7 +55,7 @@ export const image: ExpressionImageFunction = () => {
         throw new Error(errors.invalidImageMode());
       }
 
-      const { elasticLogo, resolveWithMissingImage } = await import('../../../public/lib');
+      const { elasticLogo, resolveWithMissingImage } = await import('../../../public/lib/index.js');
       const modeStyle = mode === 'stretch' ? '100% 100%' : mode;
       return {
         type: 'image',

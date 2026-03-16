@@ -14,7 +14,7 @@ export type { ConsoleSetup, ConsoleStart, SpecDefinitionsJson } from './types';
 export { config } from './config';
 
 export const plugin = async (ctx: PluginInitializerContext) => {
-  const { ConsoleServerPlugin } = await import('./plugin');
+  const { ConsoleServerPlugin } = await import('./plugin.js');
 
   return new ConsoleServerPlugin(ctx);
 };

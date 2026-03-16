@@ -19,7 +19,7 @@ export interface Props extends Pick<ExportJobsFlyoutContentProps, 'currentTab'> 
 }
 
 const ExportJobsFlyoutContent = dynamic(async () => ({
-  default: (await import('./export_jobs_flyout_content')).ExportJobsFlyoutContent,
+  default: (await import('./export_jobs_flyout_content.js')).ExportJobsFlyoutContent,
 }));
 
 export const ExportJobsFlyout: FC<Props> = ({ isDisabled, ...rest }) => {

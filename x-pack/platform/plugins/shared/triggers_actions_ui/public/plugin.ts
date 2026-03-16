@@ -309,7 +309,7 @@ export class Plugin
               unknown
             ];
 
-            const { renderRulesPageApp } = await import('./application/rules_page_app');
+            const { renderRulesPageApp } = await import('./application/rules_page_app.js');
 
             // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
             // subset of this privilege are not authorized to access this endpoint and will receive a 404
@@ -392,7 +392,7 @@ export class Plugin
 
             return () => {};
           }
-          const { renderApp } = await import('./application/rules_app');
+          const { renderApp } = await import('./application/rules_app.js');
 
           // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
           // subset of this privilege are not authorized to access this endpoint and will receive a 404
@@ -451,7 +451,7 @@ export class Plugin
           unknown
         ];
 
-        const { renderApp } = await import('./application/connectors_app');
+        const { renderApp } = await import('./application/connectors_app.js');
 
         // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
         // subset of this privilege are not authorized to access this endpoint and will receive a 404
@@ -496,7 +496,7 @@ export class Plugin
         capabilitiesId: PLUGIN_ID,
         order: 0,
         async mount(params: ManagementAppMountParams) {
-          const { renderApp } = await import('./application/alerts_app');
+          const { renderApp } = await import('./application/alerts_app.js');
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             PluginsStart,

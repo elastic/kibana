@@ -22,7 +22,7 @@ export { monaco } from '@kbn/monaco';
 export * from './react_monaco_editor/languages/supported';
 
 const LazyCodeEditorBase = React.lazy(() =>
-  import(/* webpackChunkName: "code-editor-entry" */ './code_editor').then((m) => ({
+  import(/* webpackChunkName: "code-editor-entry" */ './code_editor.js').then((m) => ({
     default: m.CodeEditor,
   }))
 );

@@ -13,5 +13,5 @@ import type { NumberFormatEditorParams } from '../number/number';
 
 export type { BytesFormatEditor } from './bytes';
 export const bytesFormatEditorFactory: FieldFormatEditorFactory<NumberFormatEditorParams> = () =>
-  import('./bytes').then((m) => m.BytesFormatEditor);
+  import('./bytes.js').then((m) => m.BytesFormatEditor);
 bytesFormatEditorFactory.formatId = formatId;

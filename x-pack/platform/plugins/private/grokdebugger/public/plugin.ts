@@ -36,7 +36,7 @@ export class GrokDebuggerUIPlugin implements Plugin<void, void, AppPublicPluginD
       mount: async ({ element }) => {
         const [coreStart] = await coreSetup.getStartServices();
         const license: ILicense = await firstValueFrom(plugins.licensing.license$);
-        const { renderApp } = await import('./render_app');
+        const { renderApp } = await import('./render_app.js');
         return renderApp(license, element, coreStart);
       },
     });

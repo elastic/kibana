@@ -16,7 +16,7 @@ import type { AppServices } from './types';
 import { queryClient } from './utils/query_client';
 
 export const renderApp = async (core: CoreStart, services: AppServices, element: HTMLElement) => {
-  const { PlaygroundRouter } = await import('./playground_router');
+  const { PlaygroundRouter } = await import('./playground_router.js');
 
   ReactDOM.render(
     core.rendering.addContext(

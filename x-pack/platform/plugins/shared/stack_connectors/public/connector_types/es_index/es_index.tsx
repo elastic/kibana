@@ -25,12 +25,12 @@ export function getConnectorType(): ConnectorTypeModel<EsIndexConfig, unknown, I
     actionTypeTitle: i18n.translate('xpack.stackConnectors.components.index.connectorTypeTitle', {
       defaultMessage: 'Index data',
     }),
-    actionConnectorFields: lazy(() => import('./es_index_connector')),
-    actionParamsFields: lazy(() => import('./es_index_params')),
+    actionConnectorFields: lazy(() => import('./es_index_connector.js')),
+    actionParamsFields: lazy(() => import('./es_index_params.js')),
     validateParams: async (
       actionParams: IndexActionParams
     ): Promise<GenericValidationResult<IndexActionParams>> => {
-      const translations = await import('./translations');
+      const translations = await import('./translations.js');
       const errors = {
         documents: new Array<string>(),
         indexOverride: new Array<string>(),

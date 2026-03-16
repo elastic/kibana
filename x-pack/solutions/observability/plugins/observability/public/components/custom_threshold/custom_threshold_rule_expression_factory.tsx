@@ -20,7 +20,9 @@ export const createCustomThresholdRuleExpression = (getStartServices: GetStartSe
   // but KqlPluginStart is only available during the start phase.
   return dynamic(async () => {
     const kql = await getStartServices().then(([, pluginsStart]) => pluginsStart.kql);
-    const { default: Expressions } = await import('./custom_threshold_rule_expression');
+    const { default: Expressions } = (await import(
+      './custom_threshold_rule_expression.js'
+    )) as unknown as { default: React.ComponentType<CustomThresholdRuleExpressionProps> };
     return {
       default: (props: Omit<CustomThresholdRuleExpressionProps, 'kql'>) => (
         <Expressions {...props} kql={kql} />

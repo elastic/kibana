@@ -25,7 +25,7 @@ import { ML_PAGES } from '../../../../locator';
 import { PageTitle } from '../../../components/page_title';
 
 const SuppliedConfigurations = dynamic(async () => ({
-  default: (await import('../../../supplied_configurations/supplied_configurations'))
+  default: (await import('../../../supplied_configurations/supplied_configurations.js'))
     .SuppliedConfigurations,
 }));
 

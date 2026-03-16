@@ -72,6 +72,6 @@ export const featureFlags: FeatureFlagDefinitions = [
 ];
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { FeatureFlagsExamplePlugin } = await import('./plugin');
+  const { FeatureFlagsExamplePlugin } = await import('./plugin.js');
   return new FeatureFlagsExamplePlugin(initializerContext);
 }

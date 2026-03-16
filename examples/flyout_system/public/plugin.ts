@@ -24,7 +24,7 @@ export class FlyoutSystemExamplesPlugin implements Plugin<void, void, SetupDeps>
       title: PLUGIN_NAME,
       async mount(params: AppMountParameters) {
         // Load application bundle
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application.js');
         // Get start services as specified in kibana.json
         const [coreStart] = await core.getStartServices();
         // Render the application

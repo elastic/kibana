@@ -287,23 +287,23 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     const getApmDataHelper = async () => {
       const { fetchObservabilityOverviewPageData, getHasData } = await import(
-        './services/rest/apm_observability_overview_fetchers'
+        './services/rest/apm_observability_overview_fetchers.js'
       );
-      const { fetchSpanLinks } = await import('./services/rest/span_links');
-      const { fetchErrorsByTraceId } = await import('./services/rest/fetch_errors_by_trace_id');
+      const { fetchSpanLinks } = await import('./services/rest/span_links.js');
+      const { fetchErrorsByTraceId } = await import('./services/rest/fetch_errors_by_trace_id.js');
       const { fetchRootSpanByTraceId } = await import(
-        './services/rest/fetch_trace_root_span_by_trace_id'
+        './services/rest/fetch_trace_root_span_by_trace_id.js'
       );
-      const { fetchSpan } = await import('./services/rest/fetch_span');
+      const { fetchSpan } = await import('./services/rest/fetch_span.js');
       const { fetchLatencyOverallTransactionDistribution } = await import(
-        './services/rest/fetch_latency_overall_transaction_distribution'
+        './services/rest/fetch_latency_overall_transaction_distribution.js'
       );
       const { fetchLatencyOverallSpanDistribution } = await import(
-        './services/rest/fetch_latency_overall_span_distribution'
+        './services/rest/fetch_latency_overall_span_distribution.js'
       );
-      const { hasFleetApmIntegrations } = await import('./tutorial/tutorial_apm_fleet_check');
+      const { hasFleetApmIntegrations } = await import('./tutorial/tutorial_apm_fleet_check.js');
 
-      const { createCallApmApi } = await import('./services/rest/create_call_apm_api');
+      const { createCallApmApi } = await import('./services/rest/create_call_apm_api.js');
 
       // have to do this here as well in case app isn't mounted yet
       createCallApmApi(core);
@@ -334,15 +334,19 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     // Registers custom component that is going to be render on fleet section
     pluginSetupDeps.home?.tutorials.registerCustomComponent('TutorialFleetInstructions', () =>
-      import('./tutorial/tutorial_fleet_instructions').then((mod) => mod.TutorialFleetInstructions)
+      import('./tutorial/tutorial_fleet_instructions/index.js').then(
+        (mod) => mod.TutorialFleetInstructions
+      )
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent('TutorialConfigAgent', () =>
-      import('./tutorial/config_agent').then((mod) => mod.TutorialConfigAgent)
+      import('./tutorial/config_agent/index.js').then((mod) => mod.TutorialConfigAgent)
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent('TutorialConfigAgentRumScript', () =>
-      import('./tutorial/config_agent/rum_script').then((mod) => mod.TutorialConfigAgentRumScript)
+      import('./tutorial/config_agent/rum_script.js').then(
+        (mod) => mod.TutorialConfigAgentRumScript
+      )
     );
 
     plugins.observability.dashboard.register({
@@ -474,7 +478,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
         const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
-          import('./application'),
+          import('./application/index.js'),
           core.getStartServices(),
         ]);
         return renderApp({
@@ -493,12 +497,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    import('./components/alerting/rule_types/register_apm_rule_types').then(
+    import('./components/alerting/rule_types/register_apm_rule_types.js').then(
       ({ registerApmRuleTypes }) => {
         registerApmRuleTypes(observabilityRuleTypeRegistry);
       }
     );
-    import('./embeddable/register_embeddables').then(({ registerEmbeddables }) => {
+    import('./embeddable/register_embeddables.js').then(({ registerEmbeddables }) => {
       registerEmbeddables({
         coreSetup: core,
         pluginsSetup: plugins,
@@ -519,7 +523,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     const { fleet, discoverShared } = plugins;
 
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
-      const mod = await import('./assistant_functions');
+      const mod = await import('./assistant_functions/index.js');
 
       mod.registerAssistantFunctions({
         registerRenderFunction,

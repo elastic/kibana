@@ -31,13 +31,13 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
 const WorkflowYAMLEditor = React.lazy(() =>
-  import('../../../widgets/workflow_yaml_editor').then((module) => ({
+  import('../../../widgets/workflow_yaml_editor/index.js').then((module) => ({
     default: module.WorkflowYAMLEditor,
   }))
 );
 
 const WorkflowVisualEditor = React.lazy(() =>
-  import('../../../features/workflow_visual_editor').then((module) => ({
+  import('../../../features/workflow_visual_editor/index.js').then((module) => ({
     default: module.WorkflowVisualEditor,
   }))
 );

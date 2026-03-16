@@ -388,8 +388,8 @@ export class VisualizationsPlugin
          */
         const history = createHashHistory();
         const [{ createVisEmbeddableFromObject }, { renderApp }] = await Promise.all([
-          import('./legacy/embeddable'),
-          import('./visualize_app'),
+          import('./legacy/embeddable/index.js'),
+          import('./visualize_app/index.js'),
         ]);
         const services: VisualizeServices = {
           ...coreStart,
@@ -484,7 +484,7 @@ export class VisualizationsPlugin
         plugins: { embeddable: embeddableStart },
       } = start();
 
-      const { getVisualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
+      const { getVisualizeEmbeddableFactory } = await import('./embeddable/embeddable_module.js');
       return getVisualizeEmbeddableFactory({ embeddableStart });
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
@@ -513,7 +513,7 @@ export class VisualizationsPlugin
     embeddable.registerLegacyURLTransform(
       VISUALIZE_EMBEDDABLE_TYPE,
       async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
-        const { getTransformOut } = await import('./embeddable/embeddable_module');
+        const { getTransformOut } = await import('./embeddable/embeddable_module.js');
         return getTransformOut(transformDrilldownsOut);
       }
     );

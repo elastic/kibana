@@ -27,7 +27,7 @@ import { AnnotationUpdatesService } from '../../../services/annotations_service'
 import { AnomalyExplorerContextProvider } from '../../../explorer/anomaly_explorer_context';
 
 const ExplorerUrlStateManager = dynamic(async () => ({
-  default: (await import('./state_manager')).ExplorerUrlStateManager,
+  default: (await import('./state_manager.js')).ExplorerUrlStateManager,
 }));
 
 export const explorerRouteFactory = (

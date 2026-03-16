@@ -13,7 +13,7 @@ import { SIGNALS_INDEX_KEY } from '../common/constants';
 import { AppClient } from './types';
 
 export const plugin = async (context: PluginInitializerContext) => {
-  const { Plugin } = await import('./plugin');
+  const { Plugin } = await import('./plugin.js');
   return new Plugin(context);
 };
 

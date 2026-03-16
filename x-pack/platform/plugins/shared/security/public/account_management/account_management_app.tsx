@@ -48,7 +48,7 @@ export const accountManagementApp = Object.freeze({
       async mount({ element, history }: AppMountParameters) {
         const [[coreStart], { AccountManagementPage }] = await Promise.all([
           getStartServices(),
-          import('./account_management_page'),
+          import('./account_management_page.js'),
         ]);
 
         render(

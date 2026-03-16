@@ -15,7 +15,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
  * the withSuspense` HOC to load this component.
  */
 export const FiltersBuilderLazy = React.lazy(async () => {
-  const { FiltersBuilder } = await import('../ui_module');
+  const { FiltersBuilder } = await import('../ui_module.js');
   return { default: FiltersBuilder };
 });
 

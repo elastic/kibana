@@ -44,7 +44,7 @@ export const extendedDataLayerFunction: ExtendedDataLayerFn = {
     },
   },
   async fn(input, args, context) {
-    const { extendedDataLayerFn } = await import('./expression_module');
+    const { extendedDataLayerFn } = await import('./expression_module.js');
     return await extendedDataLayerFn(input, args, context);
   },
 };

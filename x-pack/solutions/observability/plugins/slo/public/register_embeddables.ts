@@ -62,7 +62,7 @@ export const registerEmbeddables = async ({
 
     plugins.embeddable.registerReactEmbeddableFactory(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
       const { getOverviewEmbeddableFactory } = await import(
-        './embeddable/slo/overview/slo_embeddable_factory'
+        './embeddable/slo/overview/slo_embeddable_factory.js'
       );
       return getOverviewEmbeddableFactory({ coreStart, pluginsStart, sloClient });
     });
@@ -70,7 +70,7 @@ export const registerEmbeddables = async ({
       SLO_OVERVIEW_EMBEDDABLE_ID,
       async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
         const { getTransformOut } = await import(
-          '../common/embeddables/overview/transforms/get_transform_out'
+          '../common/embeddables/overview/transforms/get_transform_out.js'
         );
         const transformOut = getTransformOut(transformDrilldownsOut);
         return (
@@ -84,7 +84,7 @@ export const registerEmbeddables = async ({
 
     plugins.embeddable.registerReactEmbeddableFactory(SLO_ALERTS_EMBEDDABLE_ID, async () => {
       const { getAlertsEmbeddableFactory } = await import(
-        './embeddable/slo/alerts/slo_alerts_embeddable_factory'
+        './embeddable/slo/alerts/slo_alerts_embeddable_factory.js'
       );
 
       return getAlertsEmbeddableFactory({ coreStart, pluginsStart, sloClient, kibanaVersion });
@@ -92,7 +92,7 @@ export const registerEmbeddables = async ({
 
     plugins.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
       const { getErrorBudgetEmbeddableFactory } = await import(
-        './embeddable/slo/error_budget/error_budget_react_embeddable_factory'
+        './embeddable/slo/error_budget/error_budget_react_embeddable_factory.js'
       );
       return getErrorBudgetEmbeddableFactory({
         coreStart,
@@ -103,7 +103,7 @@ export const registerEmbeddables = async ({
 
     plugins.embeddable.registerReactEmbeddableFactory(SLO_BURN_RATE_EMBEDDABLE_ID, async () => {
       const { getBurnRateEmbeddableFactory } = await import(
-        './embeddable/slo/burn_rate/burn_rate_react_embeddable_factory'
+        './embeddable/slo/burn_rate/burn_rate_react_embeddable_factory.js'
       );
       return getBurnRateEmbeddableFactory({
         coreStart,

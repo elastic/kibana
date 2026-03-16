@@ -11,7 +11,7 @@ import type { PackagePolicyCreateExtensionComponent } from '@kbn/fleet-plugin/pu
 export const LazySyntheticsPolicyCreateExtension = lazy<PackagePolicyCreateExtensionComponent>(
   async () => {
     const { SyntheticsPolicyCreateExtensionWrapper } = await import(
-      './synthetics_policy_create_extension_wrapper'
+      './synthetics_policy_create_extension_wrapper.js'
     );
     return {
       default: SyntheticsPolicyCreateExtensionWrapper,

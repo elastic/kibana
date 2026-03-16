@@ -10,6 +10,6 @@
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { SavedObjectsExamplePlugin } = await import('./plugin');
+  const { SavedObjectsExamplePlugin } = await import('./plugin.js');
   return new SavedObjectsExamplePlugin(initializerContext);
 }

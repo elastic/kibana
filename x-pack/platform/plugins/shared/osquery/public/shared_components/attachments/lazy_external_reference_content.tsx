@@ -20,7 +20,7 @@ export interface IExternalReferenceMetaDataProps {
     executionCount?: number;
   };
 }
-const AttachmentContent = lazy(() => import('./external_references_content'));
+const AttachmentContent = lazy(() => import('./external_references_content.js'));
 
 export const getLazyExternalContent =
   // eslint-disable-next-line react/display-name

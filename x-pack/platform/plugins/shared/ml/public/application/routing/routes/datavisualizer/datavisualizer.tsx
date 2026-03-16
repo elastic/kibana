@@ -17,7 +17,7 @@ import { useRouteResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 const DatavisualizerSelector = dynamic(async () => ({
-  default: (await import('../../../datavisualizer')).DatavisualizerSelector,
+  default: (await import('../../../datavisualizer/index.js')).DatavisualizerSelector,
 }));
 
 export const selectorRouteFactory = (
