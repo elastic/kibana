@@ -6,9 +6,23 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiCodeBlock } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiCodeBlock,
+  EuiComboBox,
+  EuiBadge,
+} from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
-import { UseMultiFields, UseField, SelectField, Field } from '../../../../shared_imports';
+import {
+  UseMultiFields,
+  UseField,
+  SelectField,
+  Field,
+  useFormData,
+} from '../../../../shared_imports';
 import { ScheduleItemField } from '../schedule_item_field';
 import {
   CORRELATION_TYPE_CONFIG,
@@ -21,6 +35,9 @@ import {
   CORRELATION_REMOTE_CLUSTERS_CONFIG,
 } from './field_configs';
 import { CorrelationInfoIcon } from './correlation_info_icon';
+import { useRemoteClusters } from './use_remote_clusters';
+import { useCorrelationTypeRecommendation } from './use_correlation_type_recommendation';
+import { CorrelationTypeRecommendationCallout } from './correlation_type_recommendation';
 import * as i18n from './translations';
 
 const CORRELATION_TYPE_OPTIONS = [
@@ -51,6 +68,30 @@ interface CorrelationEditProps {
 }
 
 export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
+  const { clusters: remoteClusters, isLoading: remoteClustersLoading } = useRemoteClusters();
+
+  const [formData] = useFormData({
+    watch: [`${path}.rules`, `${path}.groupBy`, `${path}.type`],
+  });
+
+  const nestedData = path
+    .split('.')
+    .reduce(
+      (acc: Record<string, unknown> | undefined, key: string) =>
+        (acc?.[key] ?? undefined) as Record<string, unknown> | undefined,
+      formData as Record<string, unknown> | undefined
+    );
+
+  const selectedRules = (nestedData?.rules ?? []) as string[];
+  const groupByFields = (nestedData?.groupBy ?? []) as string[];
+  const currentTypeFromForm = (nestedData?.type ?? 'temporal') as string;
+
+  const recommendation = useCorrelationTypeRecommendation({
+    selectedRules,
+    groupByFields,
+    currentType: currentTypeFromForm,
+  });
+
   const showConditionSection = useCallback(
     (correlationType: string) =>
       correlationType === 'event_count' || correlationType === 'value_count',
@@ -98,6 +139,14 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
           </EuiFormRow>
           <EuiSpacer size="m" />
 
+          {recommendation && (
+            <CorrelationTypeRecommendationCallout
+              recommendation={recommendation}
+              currentType={typeValue}
+              onApply={(type) => correlationType.setValue(type)}
+            />
+          )}
+
           <EuiFormRow
             label={i18n.CORRELATION_RULES_LABEL}
             helpText={i18n.CORRELATION_RULES_HELP_TEXT}
@@ -137,14 +186,37 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
             helpText={i18n.CORRELATION_REMOTE_CLUSTERS_HELP_TEXT}
             fullWidth
           >
-            <Field
-              field={correlationRemoteClusters}
-              euiFieldProps={{
-                fullWidth: true,
-                noSuggestions: true,
-                placeholder: 'cluster-west, cluster-east',
-                'data-test-subj': 'correlationRemoteClusters',
+            <EuiComboBox
+              placeholder={
+                remoteClustersLoading
+                  ? i18n.CORRELATION_REMOTE_CLUSTERS_LOADING
+                  : i18n.CORRELATION_REMOTE_CLUSTERS_PLACEHOLDER
+              }
+              options={remoteClusters.map((c) => ({
+                label: c.label,
+                color: c.isConnected ? undefined : 'subdued',
+                append: c.isConnected ? undefined : (
+                  <EuiBadge color="hollow">
+                    {i18n.CORRELATION_REMOTE_CLUSTERS_DISCONNECTED}
+                  </EuiBadge>
+                ),
+              }))}
+              selectedOptions={(correlationRemoteClusters.value as string[]).map((v: string) => ({
+                label: v,
+              }))}
+              onChange={(selected) =>
+                correlationRemoteClusters.setValue(selected.map((s) => s.label))
+              }
+              onCreateOption={(value) => {
+                correlationRemoteClusters.setValue([
+                  ...(correlationRemoteClusters.value as string[]),
+                  value,
+                ]);
               }}
+              isLoading={remoteClustersLoading}
+              isClearable
+              fullWidth
+              data-test-subj="correlationRemoteClusters"
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
@@ -214,7 +286,13 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
         </>
       );
     },
-    [showConditionSection, showConditionField]
+    [
+      showConditionSection,
+      showConditionField,
+      remoteClusters,
+      remoteClustersLoading,
+      recommendation,
+    ]
   );
 
   return (

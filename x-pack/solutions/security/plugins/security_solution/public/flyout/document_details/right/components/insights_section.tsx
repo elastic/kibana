@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { CorrelationsOverview } from './correlations_overview';
+import { ContributingAlertSection } from './contributing_alert_section';
 import { PrevalenceOverview } from './prevalence_overview';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { INSIGHTS_TEST_ID } from './test_ids';
@@ -57,6 +58,8 @@ export const InsightsSection = memo(() => {
       )}
       <EuiSpacer size="s" />
       <CorrelationsOverview />
+      <EuiSpacer size="s" />
+      <ContributingAlertSection />
       <EuiSpacer size="s" />
       <PrevalenceOverview />
     </ExpandableSection>

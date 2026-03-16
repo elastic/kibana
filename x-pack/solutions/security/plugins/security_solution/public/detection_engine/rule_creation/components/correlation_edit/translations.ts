@@ -196,6 +196,27 @@ export const CORRELATION_INFO_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const CORRELATION_REMOTE_CLUSTERS_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationRemoteClustersPlaceholder',
+  {
+    defaultMessage: 'Select or type cluster names',
+  }
+);
+
+export const CORRELATION_REMOTE_CLUSTERS_LOADING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationRemoteClustersLoading',
+  {
+    defaultMessage: 'Loading remote clusters...',
+  }
+);
+
+export const CORRELATION_REMOTE_CLUSTERS_DISCONNECTED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationRemoteClustersDisconnected',
+  {
+    defaultMessage: 'disconnected',
+  }
+);
+
 export const CONDITION_OPERATOR_EQ = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.conditionOperatorEq',
   {

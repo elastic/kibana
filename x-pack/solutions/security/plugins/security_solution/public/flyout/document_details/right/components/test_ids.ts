@@ -192,6 +192,20 @@ export const CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID =
 export const CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
   `${CORRELATIONS_TEST_ID}RelatedAlertsByAncestry` as const;
 
+/* Contributing Alert */
+
+export const CONTRIBUTING_ALERT_TEST_ID = `${PREFIX}ContributingAlert` as const;
+export const CONTRIBUTING_ALERT_RULE_NAME_TEST_ID =
+  `${CONTRIBUTING_ALERT_TEST_ID}RuleName` as const;
+export const CONTRIBUTING_ALERT_SEVERITY_TEST_ID = `${CONTRIBUTING_ALERT_TEST_ID}Severity` as const;
+export const CONTRIBUTING_ALERT_RISK_SCORE_TEST_ID =
+  `${CONTRIBUTING_ALERT_TEST_ID}RiskScore` as const;
+export const CONTRIBUTING_ALERT_REASON_TEST_ID = `${CONTRIBUTING_ALERT_TEST_ID}Reason` as const;
+export const CONTRIBUTING_ALERT_TIMESTAMP_TEST_ID =
+  `${CONTRIBUTING_ALERT_TEST_ID}Timestamp` as const;
+export const CONTRIBUTING_ALERT_KEY_FIELDS_TEST_ID =
+  `${CONTRIBUTING_ALERT_TEST_ID}KeyFields` as const;
+
 /* Insights Prevalence */
 
 export const PREVALENCE_TEST_ID = `${PREFIX}InsightsPrevalence` as const;
