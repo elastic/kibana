@@ -10,7 +10,7 @@ import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 
 export const pageCss = ({ euiTheme }: UseEuiTheme) => ({
-  background: 'transparent',
+  background: euiTheme.colors.emptyShade,
   width: '100%',
   alignSelf: 'center',
   marginLeft: 0,

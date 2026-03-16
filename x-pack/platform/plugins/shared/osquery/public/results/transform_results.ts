@@ -12,7 +12,9 @@ import type { ResultEdges } from '../../common/search_strategy';
 
 /**
  * Resolves a dot-notation path from a source object.
- * Tries nested path first (e.g., source.process.pid), then flat key (e.g., source['process.pid']).
+ * Uses lodash `get` which resolves both nested paths (e.g., source.process.pid)
+ * and flat dot-notation keys (e.g., source['process.pid']), preferring flat keys
+ * when both exist. Falls back to a direct property lookup if `get` returns undefined.
  */
 export function getNestedOrFlat(path: string, source: unknown): unknown {
   const nested = get(path, source);

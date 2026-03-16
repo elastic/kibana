@@ -106,4 +106,6 @@ export interface SetupPlugins {
 
 export type StartServices = CoreStart & StartPlugins;
 
+export type { ExperimentalFeatures } from '../common/experimental_features';
+
 export type AddToTimelineHandler = (dataProviders: OsqueryDataProvider[]) => void;

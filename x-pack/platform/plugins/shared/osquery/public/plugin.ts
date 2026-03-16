@@ -98,6 +98,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           ...depsStart,
           storage,
           kibanaVersion,
+          experimentalFeatures,
         } as unknown as ServicesWrapperProps['services'])
       );
     });
@@ -143,12 +144,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         ...plugins,
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
+        experimentalFeatures: this.experimentalFeatures,
       }),
       OsqueryResults: getLazyOsqueryResults({
         ...core,
         ...plugins,
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
+        experimentalFeatures: this.experimentalFeatures,
       }),
       OsqueryResponseActionTypeForm: getLazyOsqueryResponseActionTypeForm(),
       fetchAllLiveQueries: useAllLiveQueries,

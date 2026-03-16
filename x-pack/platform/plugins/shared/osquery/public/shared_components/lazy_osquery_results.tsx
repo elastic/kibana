@@ -6,12 +6,13 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { StartServices } from '../types';
+import type { StartServices, ExperimentalFeatures } from '../types';
 import type { OsqueryActionResultsProps } from './osquery_results/types';
 
 interface BigServices extends StartServices {
   kibanaVersion: string;
   storage: unknown;
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 const OsqueryResults = lazy(() => import('./osquery_results/osquery_results'));

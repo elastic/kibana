@@ -148,7 +148,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   const showPaginationLimitToast = useCallback(() => {
-    toasts.addDanger({
+    toasts.addWarning({
       title: PAGINATION_LIMIT_TITLE,
       text: toMountPoint(<PaginationLimitToastContent />, startServices),
     });
@@ -378,7 +378,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const SearchBar = unifiedSearch.ui.SearchBar;
 
-  const sourceFieldNames = useMemo(() => {
+  const sourceFieldNamesKey = useMemo(() => {
     if (!allResultsData?.edges.length) return null;
     const names = new Set<string>();
     const MAX_DEPTH = 5;
@@ -396,26 +396,27 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
     allResultsData.edges.slice(0, 5).forEach((edge) => collectPaths(edge._source));
 
-    return names;
+    return Array.from(names).sort().join(',');
   }, [allResultsData?.edges]);
 
   const [filteredDataView, setFilteredDataView] = useState(dataView);
   useEffect(() => {
     if (!dataView) return;
-    if (!sourceFieldNames) {
+    if (!sourceFieldNamesKey) {
       setFilteredDataView(dataView);
 
       return;
     }
 
+    const fieldSet = new Set(sourceFieldNamesKey.split(','));
     const spec = dataView.toSpec();
     // Strip id so dataViews.create() doesn't return the cached full DataView
     spec.id = undefined;
     spec.fields = Object.fromEntries(
-      Object.entries(spec.fields ?? {}).filter(([name]) => sourceFieldNames.has(name))
+      Object.entries(spec.fields ?? {}).filter(([name]) => fieldSet.has(name))
     );
     dataService.dataViews.create(spec, true).then(setFilteredDataView);
-  }, [dataView, sourceFieldNames, dataService.dataViews]);
+  }, [dataView, sourceFieldNamesKey, dataService.dataViews]);
 
   const searchBarIndexPatterns = useMemo(
     () => (filteredDataView ? [filteredDataView] : []),
