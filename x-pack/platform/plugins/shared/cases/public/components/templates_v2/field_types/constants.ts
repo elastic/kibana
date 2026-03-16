@@ -21,30 +21,34 @@ export const exampleTemplateDefinition = `
 name: Example template
 # description is optional
 description: A short description of the template
+# severity is optional (low, medium, high, critical)
+severity: low
+# category is optional
+category: General
 # tags are optional
 tags:
   - example
 fields:
-  - name: severity
+  - name: summary
+    control: INPUT_TEXT
+    label: Summary
+    type: keyword
+  - name: effort
+    control: INPUT_NUMBER
+    label: Effort estimate
+    type: integer
+  - name: details
+    control: TEXTAREA
+    label: Details
+    type: keyword
+  - name: priority
     control: SELECT_BASIC
-    label: Select label
+    label: Priority
     type: keyword
     metadata:
       options:
         - low
-        - moderate
+        - medium
         - high
-        - critical
-  - name: name
-    control: INPUT_TEXT
-    label: Input text label
-    type: keyword
-  - name: effort
-    control: INPUT_NUMBER
-    label: Input number label
-    type: integer
-  - name: details
-    control: TEXTAREA
-    label: Textarea label
-    type: keyword
+        - urgent
 `.trimStart();

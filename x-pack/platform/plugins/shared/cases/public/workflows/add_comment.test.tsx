@@ -11,7 +11,7 @@ import { addCommentStepDefinition } from './add_comment';
 describe('addCommentStepDefinition', () => {
   it('returns a public step definition with expected metadata', () => {
     expect(addCommentStepDefinition.id).toBe('cases.addComment');
-    expect(addCommentStepDefinition.actionsMenuGroup).toBe('kibana');
+    expect(addCommentStepDefinition.category).toBe('kibana');
     expect(addCommentStepDefinition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 

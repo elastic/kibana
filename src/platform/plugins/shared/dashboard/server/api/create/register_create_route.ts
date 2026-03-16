@@ -9,46 +9,58 @@
 
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
+import { once } from 'lodash';
+import { getRouteConfig } from '../get_route_config';
 import {
   createRequestParamsSchema,
-  createRequestQuerySchema,
   getCreateRequestBodySchema,
   getCreateResponseBodySchema,
 } from './schemas';
 import { create } from './create';
-import { throwOnUnmappedKeys } from '../scope_tooling';
-import { DASHBOARD_API_PATH } from '../../../common/constants';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
-export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerCreateRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  isDashboardAppRequest: boolean
+) {
+  const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const createRoute = router.post({
-    path: `${DASHBOARD_API_PATH}/{id?}`,
+    path: `${basePath}/{id?}`,
     summary: 'Create a dashboard with an auto-generated ID or a specified ID',
-    ...commonRouteConfig,
+    ...routeConfig,
+  });
+
+  // Do not call getDashboardStateSchema when registering route.
+  // Route is registered during setup and before all plugins have registered embeddable schemas.
+  // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
+  const getCachedDashboardStateSchema = once(() => {
+    return getDashboardStateSchema(isDashboardAppRequest);
   });
 
   createRoute.addVersion(
     {
-      version: INTERNAL_API_VERSION,
+      version: routeVersion,
       validate: () => ({
         request: {
           params: createRequestParamsSchema,
-          query: createRequestQuerySchema,
-          body: getCreateRequestBodySchema(),
+          body: getCreateRequestBodySchema(isDashboardAppRequest),
         },
         response: {
           200: {
-            body: getCreateResponseBodySchema,
+            body: () => getCreateResponseBodySchema(isDashboardAppRequest),
           },
         },
       }),
     },
     async (ctx, req, res) => {
       try {
-        const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
-        if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body);
-
-        const result = await create(ctx, req.body, req.params);
+        const result = await create(
+          ctx,
+          getCachedDashboardStateSchema(),
+          req.body,
+          req.params,
+          isDashboardAppRequest
+        );
         return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {

@@ -6,14 +6,12 @@
       "jest",
       "node",
       "react",
-      "@kbn/ambient-ui-types",
-      "@emotion/react/types/css-prop"
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
-    "../../../../../typings/emotion.d.ts"
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
@@ -36,7 +34,6 @@
     "@kbn/data-views-plugin",
     "@kbn/user-profile-components",
     "@kbn/core-chrome-browser-mocks",
-    "@kbn/core-chrome-browser",
     "@kbn/ai-assistant-icon",
     "@kbn/product-doc-base-plugin",
     "@kbn/spaces-plugin",
@@ -58,6 +55,7 @@
     "@kbn/agent-builder-common",
     "@kbn/kibana-react-plugin",
     "@kbn/core-analytics-browser",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/shared-ux-ai-components"
   ]
 }

@@ -24,6 +24,10 @@ import { mockEncryptedSO } from '../utils/mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 
+jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
+  getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('fleet-package-policies'),
+}));
+
 const testMonitors = [
   {
     type: 'browser',
