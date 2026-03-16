@@ -148,7 +148,6 @@ export class CaseCommentModel {
             updated_by: this.params.user,
           },
           options,
-          owner,
         }),
         this.partialUpdateCaseWithAttachmentDataSkipRefresh({ date: updatedAt }),
       ]);
@@ -264,12 +263,10 @@ export class CaseCommentModel {
     createdDate,
     commentReq,
     id,
-    owner,
   }: {
     createdDate: string;
     commentReq: AttachmentRequestV2;
     id: string;
-    owner: string;
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
@@ -294,7 +291,6 @@ export class CaseCommentModel {
         references,
         id,
         refresh: true,
-        owner,
       });
 
       const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
@@ -305,10 +301,10 @@ export class CaseCommentModel {
         isLegacyAttachmentRequest(attachment)
           ? [
               commentableCase.handleAlertComments([attachment]),
-              this.createLegacyCommentUserAction(comment, attachment),
+              this.createCommentUserAction(comment, attachment),
             ]
           : // TO-DO: handle alert comments for unified attachments
-            [this.createUnifiedCommentUserAction(comment, attachment, owner)]
+            [this.createCommentUserAction(comment, attachment)]
       );
 
       return commentableCase;
@@ -426,13 +422,7 @@ export class CaseCommentModel {
       }
     }
 
-    if (
-      req.some(
-        (attachment) =>
-          isLegacyAttachmentRequest(attachment) &&
-          attachment.owner !== this.caseInfo.attributes.owner
-      )
-    ) {
+    if (req.some((attachment) => attachment.owner !== this.caseInfo.attributes.owner)) {
       throw Boom.badRequest('The owner field of the comment must match the case');
     }
 
@@ -514,9 +504,9 @@ export class CaseCommentModel {
     });
   }
 
-  private async createLegacyCommentUserAction(
+  private async createCommentUserAction(
     comment: SavedObject<AttachmentAttributesV2>,
-    req: AttachmentRequest
+    req: AttachmentRequestV2
   ) {
     await this.params.services.userActionService.creator.createUserAction({
       userAction: {
@@ -534,37 +524,16 @@ export class CaseCommentModel {
   }
 
   private async bulkCreateCommentUserAction(
-    attachments: Array<{ id: string } & AttachmentRequestV2>,
-    owner: string
+    attachments: Array<{ id: string } & AttachmentRequestV2>
   ) {
     await this.params.services.userActionService.creator.bulkCreateAttachmentCreation({
       caseId: this.caseInfo.id,
       attachments: attachments.map(({ id, ...attachment }) => ({
         id,
-        owner: isLegacyAttachmentRequest(attachment) ? attachment.owner : owner,
+        owner: attachment.owner,
         attachment,
       })),
       user: this.params.user,
-    });
-  }
-
-  private async createUnifiedCommentUserAction(
-    comment: SavedObject<AttachmentAttributesV2>,
-    req: UnifiedAttachmentPayload,
-    owner: string
-  ) {
-    await this.params.services.userActionService.creator.createUserAction({
-      userAction: {
-        type: UserActionTypes.comment,
-        action: UserActionActions.create,
-        caseId: this.caseInfo.id,
-        attachmentId: comment.id,
-        payload: {
-          attachment: req,
-        },
-        user: this.params.user,
-        owner,
-      },
     });
   }
 
@@ -610,10 +579,8 @@ export class CaseCommentModel {
 
   public async bulkCreate({
     attachments,
-    owner,
   }: {
     attachments: CommentRequestWithId;
-    owner: string;
   }): Promise<CaseCommentModel> {
     try {
       await this.validateCreateCommentRequest(attachments);
@@ -639,7 +606,6 @@ export class CaseCommentModel {
           };
         }),
         refresh: true,
-        owner,
       });
 
       const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
@@ -656,7 +622,7 @@ export class CaseCommentModel {
 
       await Promise.all([
         commentableCase.handleAlertComments(attachmentsWithoutErrors),
-        this.bulkCreateCommentUserAction(attachmentsWithoutErrors, owner),
+        this.bulkCreateCommentUserAction(attachmentsWithoutErrors),
       ]);
 
       return commentableCase;
