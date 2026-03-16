@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useLocation } from 'react-router-dom';
 import { createStore } from 'redux';
 import type { StartServices } from '../../../types';
@@ -23,6 +24,12 @@ const LocationProbe = () => {
   const { pathname, search } = useLocation();
 
   return <div>{`${pathname}${search}`}</div>;
+};
+
+const ExpandableFlyoutApiProbe = () => {
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  return <div>{typeof openPreviewPanel}</div>;
 };
 
 describe('flyoutProviders', () => {
@@ -54,5 +61,19 @@ describe('flyoutProviders', () => {
     );
 
     expect(screen.getByText('NoRouterFallback')).toBeInTheDocument();
+  });
+
+  it('provides expandable flyout context to children', () => {
+    const store = createStore(() => ({}));
+
+    render(
+      flyoutProviders({
+        services,
+        store,
+        children: <ExpandableFlyoutApiProbe />,
+      })
+    );
+
+    expect(screen.getByText('function')).toBeInTheDocument();
   });
 });

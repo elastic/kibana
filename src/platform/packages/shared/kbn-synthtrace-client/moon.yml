@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/synthtrace-client'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-presentation-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/synthtrace-client'
+  title: '@kbn/synthtrace-client'
   description: Moon project for @kbn/synthtrace-client
   channel: ''
   owner: '@elastic/obs-presentation-team'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-synthtrace-client
+  sourceRoot: src/platform/packages/shared/kbn-synthtrace-client
 dependsOn:
   - '@kbn/datemath'
   - '@kbn/safer-lodash-set'
@@ -34,14 +33,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
