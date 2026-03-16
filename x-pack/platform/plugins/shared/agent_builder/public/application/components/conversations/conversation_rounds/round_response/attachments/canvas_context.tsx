@@ -14,7 +14,7 @@ interface CanvasState {
   version?: number;
 }
 
-const getAttachmentPreviewKey = (attachmentId: string, version?: number) =>
+export const getAttachmentPreviewKey = (attachmentId: string, version?: number) =>
   `${attachmentId}:${version ?? 'latest'}`;
 
 interface CanvasContextValue {

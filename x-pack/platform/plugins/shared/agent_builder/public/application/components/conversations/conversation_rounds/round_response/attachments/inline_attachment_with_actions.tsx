@@ -10,15 +10,12 @@ import type {
   UnknownAttachment,
   ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentPreviewState } from '@kbn/agent-builder-browser/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { AttachmentHeader } from './attachment_header';
-import { useCanvasContext } from './canvas_context';
-
-type PreviewState = 'none' | 'preview_available' | 'previewing';
-const getAttachmentPreviewKey = (attachmentId: string, attachmentVersion?: number) =>
-  `${attachmentId}:${attachmentVersion ?? 'latest'}`;
+import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
 interface InlineAttachmentWithActionsProps {
   attachment: UnknownAttachment;
@@ -31,7 +28,7 @@ interface InlineAttachmentWithActionsProps {
   /**
    * Shared preview state for header actions/badges.
    */
-  previewBadgeState?: PreviewState;
+  previewBadgeState?: AttachmentPreviewState;
 }
 
 /**
@@ -96,7 +93,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
 
   const isPreviewingAttachment = previewedAttachmentKey === attachmentPreviewKey;
 
-  const resolvedPreviewBadgeState: PreviewState =
+  const resolvedPreviewBadgeState: AttachmentPreviewState =
     previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
 
   if (!uiDefinition) {
