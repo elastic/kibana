@@ -74,7 +74,6 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
       },
       path: {
         tab: 'notes',
-        subTab: 'entity',
       },
     });
   });
