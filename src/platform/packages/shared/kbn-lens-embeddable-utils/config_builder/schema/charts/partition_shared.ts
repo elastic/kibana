@@ -33,7 +33,7 @@ export const valueDisplaySchema = schema.maybe(
         })
       ),
     },
-    { meta: { description: 'Configuration for displaying values in chart cells' } }
+    { meta: { id: 'valueDisplay', title: 'Value Display', description: 'Configuration for displaying values in chart cells' } }
   )
 );
 
