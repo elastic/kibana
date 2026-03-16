@@ -33,6 +33,10 @@ export const ApproveIntegrationRequest = z
      */
     version: NonEmptyString,
     /**
+     * The categories of the integration
+     */
+    categories: z.array(z.string()).optional(),
+    /**
      * The LangSmith tracing options
      */
     langSmithOptions: LangSmithOptions.optional(),
