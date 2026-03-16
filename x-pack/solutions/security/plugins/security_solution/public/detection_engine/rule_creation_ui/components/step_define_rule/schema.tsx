@@ -171,6 +171,7 @@ export const schema: FormSchema<DefineStepRule> = {
   threatQueryBar: {},
   newTermsFields: {},
   historyWindowSize: {},
+  correlation: {},
   [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: {
     validations: [
       {

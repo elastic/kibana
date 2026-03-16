@@ -169,6 +169,17 @@ export interface DefineStepRule {
   newTermsFields: string[];
   historyWindowSize: string;
   shouldLoadQueryDynamically: boolean;
+  correlation?: {
+    type: string;
+    rules: string[];
+    groupBy: string[];
+    timespan: string;
+    condition?: {
+      operator: string;
+      value: number;
+      field?: string;
+    };
+  };
   [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: string[];
   [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: AlertSuppressionDurationType;
   [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: Duration;

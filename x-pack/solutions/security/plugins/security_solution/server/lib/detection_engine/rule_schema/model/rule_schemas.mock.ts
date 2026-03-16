@@ -11,6 +11,7 @@ import { getThreatMappingMock } from '../../rule_types/indicator_match/threat_ma
 import type {
   BaseRuleParams,
   CompleteRule,
+  CorrelationRuleParams,
   EqlRuleParams,
   EsqlRuleParams,
   MachineLearningRuleParams,
@@ -113,6 +114,24 @@ export const getEsqlRuleParams = (rewrites?: Partial<EsqlRuleParams>): EsqlRuleP
     type: 'esql',
     language: 'esql',
     query: 'from auditbeat* metadata _id',
+    ...rewrites,
+  };
+};
+
+export const getCorrelationRuleParams = (
+  rewrites?: Partial<CorrelationRuleParams>
+): CorrelationRuleParams => {
+  return {
+    ...getBaseRuleParams(),
+    type: 'correlation',
+    language: 'esql',
+    query: 'FROM .alerts-security.alerts-default METADATA _id, _index',
+    correlation: {
+      rules: ['rule-uuid-1', 'rule-uuid-2'],
+      type: 'temporal',
+      groupBy: ['host.name'],
+      timespan: '5m',
+    },
     ...rewrites,
   };
 };

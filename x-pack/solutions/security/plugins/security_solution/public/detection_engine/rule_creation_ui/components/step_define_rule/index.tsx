@@ -83,6 +83,7 @@ import { ThresholdEdit } from '../../../rule_creation/components/threshold_edit'
 import { AnomalyThresholdEdit } from '../../../rule_creation/components/anomaly_threshold_edit/anomaly_threshold_edit';
 import { HistoryWindowStartEdit } from '../../../rule_creation/components/history_window_start_edit';
 import { NewTermsFieldsEdit } from '../../../rule_creation/components/new_terms_fields_edit';
+import { CorrelationEdit } from '../../../rule_creation/components/correlation_edit';
 import { EsqlQueryEdit } from '../../../rule_creation/components/esql_query_edit';
 import { CreateCustomMlJobButton } from '../../../rule_creation/components/create_ml_job_button/create_ml_job_button';
 import { ThreatMatchEdit } from '../threat_match_edit';
@@ -667,6 +668,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 <NewTermsFieldsEdit path="newTermsFields" fieldNames={termsAggregationFieldNames} />
                 <HistoryWindowStartEdit path="historyWindowSize" />
               </>
+            </EuiFormRow>
+          )}
+          {isCorrelationRule(ruleType) && (
+            <EuiFormRow data-test-subj="correlationInput" fullWidth>
+              <CorrelationEdit path="correlation" />
             </EuiFormRow>
           )}
           <EuiSpacer size="m" />
