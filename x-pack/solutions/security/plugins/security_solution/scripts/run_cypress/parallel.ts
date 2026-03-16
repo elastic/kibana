@@ -40,9 +40,9 @@ import {
   retrieveIntegrationsConfigAware,
   setDefaultToolingLoggingLevel,
 } from './utils';
-import type { SpecGroup } from './utils';
+import type { LoadBalancerConfig, SpecGroup } from './utils';
 import { getFTRConfig } from './get_ftr_config';
-import { DW_LOAD_BALANCER_CONFIG } from './dw_config';
+import { resolveLoadBalancerConfig } from './lb_config_registry';
 import { isInBuildkite, isSpecCompleted, markSpecCompleted } from './buildkite_checkpoint';
 
 const filterCompletedSpecs = async (
@@ -109,8 +109,6 @@ ${JSON.stringify(argv, null, 2)}
       const cypressConfigFilePath = require.resolve(`../../../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
 
-      // Adjust tooling log level based on the `TOOLING_LOG_LEVEL` property, which can be
-      // defined in the cypress config file or set in the `env`
       setDefaultToolingLoggingLevel(cypressConfigFile?.env?.TOOLING_LOG_LEVEL);
 
       const log = prefixedOutputLogger('cy.parallel()', createToolingLogger());
@@ -135,8 +133,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       log.info('Arguments spec pattern:', specArg);
       log.info('Resulting spec pattern:', specPattern);
 
-      // The grep function will filter Cypress specs by tags: it will include and exclude
-      // spec files according to the tags configuration.
       const grepSpecPattern = grep({
         ...cypressConfigFile,
         specPattern,
@@ -149,13 +145,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const isGrepReturnedSpecPattern = !isGrepReturnedFilePaths && grepSpecPattern === specPattern;
       const grepFilterSpecs = cypressConfigFile.env?.grepFilterSpecs;
 
-      // IMPORTANT!
-      // When grep returns the same spec pattern as it gets in its arguments, we treat it as
-      // it couldn't find any concrete specs to execute (maybe because all of them are skipped).
-      // In this case, we do an early return - it's important to do that.
-      // If we don't return early, these specs will start executing, and Cypress will be skipping
-      // tests at runtime: those that should be excluded according to the tags passed in the config.
-      // This can take so much time that the job can fail by timeout in CI.
       if (grepFilterSpecs && isGrepReturnedSpecPattern) {
         log.info('No tests found - all tests could have been skipped via Cypress tags');
         // eslint-disable-next-line no-process-exit
@@ -163,7 +152,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       }
 
       const concreteFilePaths = isGrepReturnedFilePaths
-        ? grepSpecPattern // use the returned concrete file paths
+        ? grepSpecPattern
         : globby.sync(
             specPattern,
             excludeSpecPattern
@@ -171,19 +160,17 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                   ignore: excludeSpecPattern,
                 }
               : undefined
-          ); // convert the glob pattern to concrete file paths
+          );
 
       const shareStacks = process.env.CYPRESS_SHARE_STACKS === 'true';
+      const lbConfig: LoadBalancerConfig | undefined = resolveLoadBalancerConfig();
 
       let files: string[];
-      if (shareStacks) {
-        files = retrieveIntegrationsConfigAware(concreteFilePaths, DW_LOAD_BALANCER_CONFIG);
+      if (shareStacks && lbConfig) {
+        files = retrieveIntegrationsConfigAware(concreteFilePaths, lbConfig);
       } else {
-        const orderedFilePaths = orderSpecFilesForLoadBalance(
-          concreteFilePaths,
-          DW_LOAD_BALANCER_CONFIG
-        );
-        files = retrieveIntegrations(orderedFilePaths, DW_LOAD_BALANCER_CONFIG);
+        const orderedFilePaths = orderSpecFilesForLoadBalance(concreteFilePaths, lbConfig);
+        files = retrieveIntegrations(orderedFilePaths, lbConfig);
       }
 
       log.info('Resolved spec files after retrieveIntegrations:', files);
@@ -197,8 +184,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
           return acc;
         }, [] as string[]);
 
-        // to avoid running too many tests, we limit the number of files to 3
-        // we may extend this in the future
         files = files.slice(0, 3);
       }
 
@@ -647,8 +632,6 @@ ${specGroups
 
         const initialResults = await runSpecGroups(specGroups);
 
-        // Only rebuild the full stack for specs that had infrastructure failures.
-        // Test assertion failures were already retried in-place against the same stack.
         const specsNeedingInfraRetry = [...infraFailedSpecFilePaths];
         const retryGroups = groupSpecsByFtrConfig(specsNeedingInfraRetry);
         const retryResults = await runSpecGroups(retryGroups, true);

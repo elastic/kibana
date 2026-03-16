@@ -12,9 +12,11 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
 import type { DashboardReadResponseBody } from './types';
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function read(
   requestCtx: RequestHandlerContext,
+  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   isDashboardAppRequest: boolean = false
 ): Promise<DashboardReadResponseBody> {
@@ -31,7 +33,12 @@ export async function read(
     id
   );
 
-  const response = getDashboardCRUResponseBody(savedObject, 'read', isDashboardAppRequest);
+  const response = getDashboardCRUResponseBody(
+    savedObject,
+    'read',
+    dashboardStateSchema,
+    isDashboardAppRequest
+  );
   return {
     ...response,
     meta: {
