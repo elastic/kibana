@@ -205,9 +205,8 @@ with an accept/decline UX. NEVER just describe changes in text when edit tools a
 
 When using edit tools:
 1. Provide step definitions as structured JSON objects, NOT as YAML strings
-2. Always include a \`proposalId\` — generate a unique identifier for each change
-3. Include a \`description\` explaining what the change does
-4. Validate the workflow AFTER the user accepts the proposed change
+2. Include a \`description\` explaining what the change does
+3. Validate the workflow AFTER the user accepts the proposed change
 5. For multi-step changes, call multiple edit tools — each creates a separate proposal
 6. Each edit tool reads the current YAML from the ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment and updates it,
    so sequential tool calls within a round see each other's changes
