@@ -204,16 +204,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const anonymizationMetadata: ChatCompleteAnonymizationMetadata | undefined =
     context.anonymizationEnabled
       ? {
-          // Keep the LLM response tokenized so Agent Builder UI can resolve originals
-          // via the replacements API with permission gating (RFC §7.5).
-          keepTokenized: true,
-          ...(conversation?.replacements_id
-            ? { replacementsId: conversation.replacements_id }
-            : {}),
-          ...(processedConversation.anonymizationTarget
-            ? { target: processedConversation.anonymizationTarget }
-            : {}),
-        }
+        // Keep the LLM response tokenized so Agent Builder UI can resolve originals
+        // via the replacements API with permission gating (RFC §7.5).
+        keepTokenized: true,
+        ...(conversation?.replacements_id
+          ? { replacementsId: conversation.replacements_id }
+          : {}),
+        ...(processedConversation.anonymizationTarget
+          ? { target: processedConversation.anonymizationTarget }
+          : {}),
+      }
       : undefined;
 
   const agentGraph = createAgentGraph({

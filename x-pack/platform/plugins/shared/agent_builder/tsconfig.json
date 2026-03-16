@@ -116,6 +116,6 @@
     "@kbn/fs",
     "@kbn/react-hooks",
     "@kbn/anonymization-ui",
-    "@kbn/anonymization-common",
+    "@kbn/anonymization-common"
   ]
 }

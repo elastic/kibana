@@ -12,7 +12,6 @@ import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerPromptReturn, ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
 import { isToolHandlerInterruptReturn } from '@kbn/agent-builder-server/tools';
-import { extractReplacementsId } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type {
   ToolCallAction,
@@ -32,6 +31,7 @@ import {
   errorAction,
   structuredAnswerAction,
 } from './actions';
+import { extractReplacementsId } from '@kbn/inference-common';
 
 const getResponseReplacementsId = (message: AIMessageChunk): string | undefined => {
   return extractReplacementsId(message.additional_kwargs);

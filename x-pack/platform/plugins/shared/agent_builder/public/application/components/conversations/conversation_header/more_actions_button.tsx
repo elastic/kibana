@@ -361,6 +361,22 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({
         </EuiContextMenuItem>,
       ]
       : []),
+    ...(showAnonymizationToggle
+      ? [
+        <EuiContextMenuItem
+          key="anonymizationToggle"
+          icon={showAnonymized ? 'eye' : 'eyeClosed'}
+          size="s"
+          data-test-subj="agentBuilderAnonymizationToggle"
+          onClick={() => {
+            setShowAnonymized(!showAnonymized);
+            closePopover();
+          }}
+        >
+          {showAnonymized ? fullscreenLabels.showOriginalValues : fullscreenLabels.showAnonymized}
+        </EuiContextMenuItem>,
+      ]
+      : []),
     ...(hasAccessToGenAiSettings
       ? [
         <EuiContextMenuItem

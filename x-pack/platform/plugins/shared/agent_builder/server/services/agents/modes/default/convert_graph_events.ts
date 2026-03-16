@@ -32,7 +32,6 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { RunToolReturn } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import { extractReplacementsId } from '@kbn/inference-common';
 import { AgentPromptRequestSourceType } from '@kbn/agent-builder-common/agents';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { StateType } from './state';
@@ -47,6 +46,7 @@ import {
 } from './actions';
 import type { InternalEvent } from './events';
 import { createFinalStateEvent } from './events';
+import { extractReplacementsId } from '@kbn/inference-common';
 
 export type ConvertedEvents = ChatAgentEvent | InternalEvent;
 

@@ -47,8 +47,7 @@ export const generateTitle = ({
       });
     } catch (e) {
       logger.warn(
-        `[agent_builder.generateTitle] Failed to generate title, falling back to default: ${
-          e instanceof Error ? e.message : String(e)
+        `[agent_builder.generateTitle] Failed to generate title, falling back to default: ${e instanceof Error ? e.message : String(e)
         }`
       );
       return conversation.title;
