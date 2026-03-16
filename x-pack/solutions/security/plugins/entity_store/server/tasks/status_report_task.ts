@@ -99,7 +99,11 @@ async function runTask({
   telemetryReporter: TelemetryReporter;
   abortController: AbortController;
 }): Promise<RunResult> {
-  const namespace = taskInstance.state.namespace as string;
+  const namespace = taskInstance.state.namespace as string | undefined;
+
+  if (!namespace) {
+    throw new Error('Namespace is required for status report task');
+  }
 
   if (!fakeRequest) {
     logger.error('No fake request found, skipping status report task');
