@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PartitionState } from '../../schema/charts/partition';
-
 export const esqlCharts = [
   {
     title: 'basic pie',
@@ -1521,4 +1519,4 @@ export const esqlCharts = [
       mode: 'percentage',
     },
   },
-] as Omit<PartitionState, 'ignore_global_filters' | 'sampling'>[];
+];
