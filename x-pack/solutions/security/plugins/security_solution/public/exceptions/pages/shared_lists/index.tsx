@@ -564,6 +564,7 @@ export const SharedLists = React.memo(() => {
           addError={addError}
           handleCloseFlyout={() => {
             setDisplayCreateSharedListFlyout(false);
+            // Without requestAnimationFrame, the flyout's cleanup resets focus before we can move it to the button.
             requestAnimationFrame(() => createButtonRef.current?.focus());
           }}
         />
