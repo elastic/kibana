@@ -125,18 +125,8 @@ export class LensApp {
   }
 
   async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
-    const label =
-      coloringType === 'none'
-        ? 'None'
-        : `${coloringType.slice(0, 1).toUpperCase()}${coloringType.slice(1)}`;
-
-    // EuiComboBox appends the options list using a deterministic test subject:
-    // `${data-test-subj}-optionsList`
     await this.page.testSubj.click('lnsDatatable_dynamicColoring_groups');
-    const optionsList = this.page.testSubj.locator(
-      'lnsDatatable_dynamicColoring_groups-optionsList'
-    );
-    await optionsList.getByRole('option', { name: label }).click();
+    await this.page.testSubj.click(`lnsDatatable_dynamicColoring_groups_${coloringType}`);
   }
 
   async setPalette(paletteId: string, isLegacy: boolean) {

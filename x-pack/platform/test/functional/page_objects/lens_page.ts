@@ -1365,10 +1365,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
-      const label =
-        coloringType === 'none'
-          ? 'None'
-          : `${coloringType.slice(0, 1).toUpperCase()}${coloringType.slice(1)}`;
+      const label = coloringType.charAt(0).toUpperCase() + coloringType.slice(1);
       await this.selectOptionFromComboBox('lnsDatatable_dynamicColoring_groups', label);
     },
 

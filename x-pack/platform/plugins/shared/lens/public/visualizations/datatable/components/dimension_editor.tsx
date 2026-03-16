@@ -45,28 +45,36 @@ type ColumnType = DatatableVisualizationState['columns'][number];
 
 const dynamicColorModeOptions: Array<EuiComboBoxOptionOption<ColumnType['colorMode']>> = [
   {
+    id: `${idPrefix}none`,
     value: 'none',
     label: i18n.translate('xpack.lens.table.dynamicColoring.none', {
       defaultMessage: 'None',
     }),
+    'data-test-subj': 'lnsDatatable_dynamicColoring_groups_none',
   },
   {
+    id: `${idPrefix}cell`,
     value: 'cell',
     label: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
       defaultMessage: 'Cell',
     }),
+    'data-test-subj': 'lnsDatatable_dynamicColoring_groups_cell',
   },
   {
+    id: `${idPrefix}text`,
     value: 'text',
     label: i18n.translate('xpack.lens.table.dynamicColoring.text', {
       defaultMessage: 'Text',
     }),
+    'data-test-subj': 'lnsDatatable_dynamicColoring_groups_text',
   },
   {
+    id: `${idPrefix}badge`,
     value: 'badge',
     label: i18n.translate('xpack.lens.table.dynamicColoring.badge', {
       defaultMessage: 'Badge',
     }),
+    'data-test-subj': 'lnsDatatable_dynamicColoring_groups_badge',
   },
 ];
 
