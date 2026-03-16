@@ -66,7 +66,11 @@ export const LOADING_DEBOUNCE_TIME = 250;
 export function useIsLoading(): boolean {
   const { http } = useChromeComponentsDeps();
   const isLoading$ = useMemo(
-    () => http.getLoadingCount$().pipe(debounceTime(LOADING_DEBOUNCE_TIME), map((c) => c > 0)),
+    () =>
+      http.getLoadingCount$().pipe(
+        debounceTime(LOADING_DEBOUNCE_TIME),
+        map((c) => c > 0)
+      ),
     [http]
   );
   return useObservable(isLoading$, false);
@@ -219,10 +223,7 @@ export function useCurrentAppId(): string | undefined {
  */
 export function useBreadcrumbsAppendExtensions() {
   const chrome = useChromeService();
-  const extensions$ = useMemo(
-    () => chrome.getBreadcrumbsAppendExtensionsWithBadges$(),
-    [chrome]
-  );
+  const extensions$ = useMemo(() => chrome.getBreadcrumbsAppendExtensionsWithBadges$(), [chrome]);
   return useObservable(extensions$, []);
 }
 

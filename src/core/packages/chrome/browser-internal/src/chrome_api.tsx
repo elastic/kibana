@@ -38,11 +38,7 @@ export interface ChromeApiDeps {
   sidebar: SidebarStart;
 }
 
-export function createChromeApi({
-  state,
-  services,
-  sidebar,
-}: ChromeApiDeps): InternalChromeStart {
+export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): InternalChromeStart {
   const { projectNavigation } = services;
 
   const validateProjectStyle = () => {

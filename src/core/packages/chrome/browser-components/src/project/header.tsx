@@ -8,12 +8,7 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
-import {
-  EuiHeader,
-  EuiHeaderSection,
-  EuiHeaderSectionItem,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { Breadcrumbs } from './breadcrumbs';

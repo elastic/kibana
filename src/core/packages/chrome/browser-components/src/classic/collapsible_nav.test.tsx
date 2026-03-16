@@ -128,13 +128,9 @@ describe('CollapsibleNav', () => {
       customNavLink,
       navLinks,
     });
-    const component = mount(
-      <CollapsibleNav
-        {...mockProps()}
-        isNavOpen={true}
-      />,
-      { wrappingComponent: createWrapper(chrome) as any }
-    );
+    const component = mount(<CollapsibleNav {...mockProps()} isNavOpen={true} />, {
+      wrappingComponent: createWrapper(chrome) as any,
+    });
     expect(component.render()).toMatchSnapshot();
   });
 
@@ -142,13 +138,9 @@ describe('CollapsibleNav', () => {
     const navLinks = [mockLink({ category: kibana }), mockLink({ category: observability })];
     const recentNavLinks = [mockRecentNavLink({})];
     const chrome = createChromeMock({ recentlyAccessed: recentNavLinks, navLinks });
-    const component = mount(
-      <CollapsibleNav
-        {...mockProps()}
-        isNavOpen={true}
-      />,
-      { wrappingComponent: createWrapper(chrome) as any }
-    );
+    const component = mount(<CollapsibleNav {...mockProps()} isNavOpen={true} />, {
+      wrappingComponent: createWrapper(chrome) as any,
+    });
     expectShownNavLinksCount(component, 3);
     clickGroup(component, 'kibana');
     clickGroup(component, 'recentlyViewed');
@@ -164,13 +156,9 @@ describe('CollapsibleNav', () => {
     const navLinks = [mockLink({ category: kibana }), mockLink({ title: 'categoryless' })];
     const recentNavLinks = [mockRecentNavLink({})];
     const chrome = createChromeMock({ recentlyAccessed: recentNavLinks, navLinks });
-    const component = mount(
-      <CollapsibleNav
-        {...mockProps()}
-        isNavOpen={true}
-      />,
-      { wrappingComponent: createWrapper(chrome) as any }
-    );
+    const component = mount(<CollapsibleNav {...mockProps()} isNavOpen={true} />, {
+      wrappingComponent: createWrapper(chrome) as any,
+    });
     component.setProps({
       closeNav: () => {
         component.setProps({ isNavOpen: false });
