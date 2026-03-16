@@ -280,6 +280,20 @@ export interface CasesTelemetry {
     totalCasesCreated: number;
     totalRules: number;
   };
+  tasks: {
+    all: {
+      total: number;
+      byStatus: {
+        open: number;
+        inProgress: number;
+        completed: number;
+        cancelled: number;
+      };
+    };
+    templates: {
+      total: number;
+    };
+  };
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;
