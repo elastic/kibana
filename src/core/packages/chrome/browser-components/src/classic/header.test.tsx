@@ -62,9 +62,7 @@ describe('Header', () => {
     const breadcrumbsAppendExtensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>(
       []
     );
-    chrome.getBreadcrumbsAppendExtensionsWithBadges$.mockReturnValue(
-      breadcrumbsAppendExtensions$
-    );
+    chrome.getBreadcrumbsAppendExtensionsWithBadges$.mockReturnValue(breadcrumbsAppendExtensions$);
 
     const component = mountWithIntl(
       <TestChromeProviders deps={deps} chrome={chrome}>

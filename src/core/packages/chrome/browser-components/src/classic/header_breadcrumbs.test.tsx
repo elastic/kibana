@@ -30,10 +30,7 @@ describe('HeaderBreadcrumbs', () => {
   it('forces the last breadcrumb inactivity', async () => {
     render(
       <HeaderBreadcrumbs
-        breadcrumbs={[
-          { text: 'First' },
-          { text: 'Last', href: '/something', onClick: jest.fn() },
-        ]}
+        breadcrumbs={[{ text: 'First' }, { text: 'Last', href: '/something', onClick: jest.fn() }]}
       />
     );
 

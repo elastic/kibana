@@ -87,9 +87,7 @@ export const HeaderHelpMenu = () => {
   const kibanaVersion = useKibanaVersion();
   const chromeStyle = useChromeStyle();
   const kibanaDocLink =
-    chromeStyle === 'project'
-      ? docLinks.links.elasticStackGetStarted
-      : docLinks.links.kibana.guide;
+    chromeStyle === 'project' ? docLinks.links.elasticStackGetStarted : docLinks.links.kibana.guide;
 
   const {
     menuLinks: providedDefaultContentLinks,

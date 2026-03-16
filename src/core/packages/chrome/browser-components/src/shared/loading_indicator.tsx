@@ -18,10 +18,7 @@ export interface LoadingIndicatorProps {
   customLogo?: string;
 }
 
-export const LoadingIndicator = ({
-  showAsBar = false,
-  customLogo,
-}: LoadingIndicatorProps) => {
+export const LoadingIndicator = ({ showAsBar = false, customLogo }: LoadingIndicatorProps) => {
   const isLoading = useIsLoading();
 
   const loadingSubj = isLoading ? 'globalLoadingIndicator' : 'globalLoadingIndicator-hidden';
@@ -75,11 +72,7 @@ export const LoadingIndicator = ({
       {showAsBar ? (
         <EuiProgress
           className={!isLoading ? 'kbnLoadingIndicator-hidden' : undefined}
-          css={
-            !isLoading
-              ? css({ visibility: 'hidden', animationPlayState: 'paused' })
-              : undefined
-          }
+          css={!isLoading ? css({ visibility: 'hidden', animationPlayState: 'paused' }) : undefined}
           data-test-subj={testSubj}
           position="fixed"
           color="accent"

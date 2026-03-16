@@ -51,10 +51,7 @@ export function ClassicHeader() {
             className="header__firstBar"
             sections={[
               {
-                items: [
-                  <HeaderPageAnnouncer breadcrumbs={breadcrumbs} />,
-                  <HeaderLogo />,
-                ],
+                items: [<HeaderPageAnnouncer breadcrumbs={breadcrumbs} />, <HeaderLogo />],
               },
               {
                 items: [
@@ -109,9 +106,7 @@ export function ClassicHeader() {
               <HeaderNavControls position="left" />
             </EuiHeaderSection>
 
-            <BreadcrumbsWithExtensionsWrapper>
-              {Breadcrumbs}
-            </BreadcrumbsWithExtensionsWrapper>
+            <BreadcrumbsWithExtensionsWrapper>{Breadcrumbs}</BreadcrumbsWithExtensionsWrapper>
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem>
