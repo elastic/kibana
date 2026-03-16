@@ -9,7 +9,7 @@ import type { SCRIPT_TAGS } from '../service/scripts_library/constants';
 import type { SupportedHostOsType } from '../constants';
 
 export interface EndpointScript<
-  TFileType extends 'script' | 'archive' | undefined = 'script' | 'archive' | undefined
+  TFileType extends 'script' | 'archive' | undefined = 'script' | 'archive'
 > {
   id: string;
   name: string;

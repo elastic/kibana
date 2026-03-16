@@ -32,7 +32,7 @@ type ScriptFormStateItem =
       // required by submit hook types
       name: string;
       platform: EndpointScript['platform'];
-      fileType: EndpointScript['fileType'];
+      fileType: EndpointScript['fileType'] | undefined;
       pathToExecutable: EndpointScript['pathToExecutable'];
       file?: File;
     };
@@ -131,7 +131,7 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
         fileType: formState.scriptItem.fileType as 'archive' | 'script',
         pathToExecutable:
           formState.scriptItem.fileType === 'archive'
-            ? (formState.scriptItem.pathToExecutable as unknown as string)
+            ? (formState.scriptItem.pathToExecutable as string)
             : undefined,
       }),
       [formState.scriptItem]
