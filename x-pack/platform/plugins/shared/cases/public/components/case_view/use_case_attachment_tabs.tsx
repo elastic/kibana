@@ -58,10 +58,12 @@ export const AttachmentsBadge = ({
   isActive,
   count,
   euiTheme,
+  dataTestSubj = 'case-view-attachments-badge',
 }: {
   isActive: boolean;
   count?: number;
   euiTheme: EuiThemeComputed<{}>;
+  dataTestSubj?: string;
 }) => (
   <EuiNotificationBadge
     size="m"
@@ -69,7 +71,7 @@ export const AttachmentsBadge = ({
       border-radius: 999px;
       margin-left: ${euiTheme.size.xs};
     `}
-    data-test-subj="case-view-attachments-badge"
+    data-test-subj={dataTestSubj}
     color={isActive ? 'accent' : 'subdued'}
   >
     {count ?? 0}

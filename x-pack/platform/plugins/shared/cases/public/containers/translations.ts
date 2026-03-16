@@ -100,3 +100,19 @@ export const OBSERVABLE_MAX_REACHED = (maxObservables: number) =>
     defaultMessage:
       "You've reached the maximum number of observables {maxObservables} that can be added to a case. Some observables were not added.",
   });
+
+export const TASK_ADDED = i18n.translate('xpack.cases.containers.tasks.added', {
+  defaultMessage: 'Task added',
+});
+
+export const TASK_UPDATED = i18n.translate('xpack.cases.containers.tasks.updated', {
+  defaultMessage: 'Task updated',
+});
+
+export const TASK_DELETED = i18n.translate('xpack.cases.containers.tasks.deleted', {
+  defaultMessage: 'Task deleted',
+});
+
+export const TASK_LIST_APPLIED = i18n.translate('xpack.cases.containers.tasks.listApplied', {
+  defaultMessage: 'Task list applied',
+});

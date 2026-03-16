@@ -26,6 +26,9 @@ import {
   INTERNAL_CASE_SIMILAR_CASES_URL,
   INTERNAL_CASE_OBSERVABLES_DELETE_URL,
   INTERNAL_CASE_WORKFLOW_RUN_URL,
+  CASE_TASKS_URL,
+  CASE_TASK_DETAILS_URL,
+  CASE_TASKS_APPLY_TEMPLATE_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -115,4 +118,16 @@ export const getCaseSimilarCasesUrl = (caseId: string) => {
 
 export const getRunCaseWorkflowUrl = (workflowId: string): string => {
   return INTERNAL_CASE_WORKFLOW_RUN_URL.replace('{workflow_id}', workflowId);
+};
+
+export const getCaseTasksUrl = (caseId: string): string => {
+  return CASE_TASKS_URL.replace('{case_id}', caseId);
+};
+
+export const getCaseTaskDetailsUrl = (caseId: string, taskId: string): string => {
+  return CASE_TASK_DETAILS_URL.replace('{case_id}', caseId).replace('{task_id}', taskId);
+};
+
+export const getCaseTasksApplyTemplateUrl = (caseId: string): string => {
+  return CASE_TASKS_APPLY_TEMPLATE_URL.replace('{case_id}', caseId);
 };

@@ -30,6 +30,7 @@ import type {
   FindCasesContainingAllDocumentsRequest,
   UpdateSummary,
   CasesPatchResponse,
+  taskApiV1,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -64,6 +65,9 @@ import {
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseSimilarCasesUrl,
+  getCaseTasksUrl,
+  getCaseTaskDetailsUrl,
+  getCaseTasksApplyTemplateUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -73,7 +77,9 @@ import {
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
   INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
+  CASES_TASK_TEMPLATES_URL,
 } from '../../common/constants';
+import type { CaseTask } from '../../common/types/domain/task/v1';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
@@ -727,3 +733,53 @@ export const getSimilarCases = async ({
 
   return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
 };
+
+export const getCaseTasks = async (
+  caseId: string,
+  signal?: AbortSignal
+): Promise<taskApiV1.TasksResponse> =>
+  KibanaServices.get().http.fetch<taskApiV1.TasksResponse>(getCaseTasksUrl(caseId), {
+    method: 'GET',
+    signal,
+  });
+
+export const createTask = async (
+  caseId: string,
+  request: taskApiV1.TaskCreateRequest
+): Promise<CaseTask> =>
+  KibanaServices.get().http.fetch<CaseTask>(getCaseTasksUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+
+export const updateTask = async (
+  caseId: string,
+  taskId: string,
+  request: taskApiV1.TaskPatchRequest
+): Promise<CaseTask> =>
+  KibanaServices.get().http.fetch<CaseTask>(getCaseTaskDetailsUrl(caseId, taskId), {
+    method: 'PATCH',
+    body: JSON.stringify(request),
+  });
+
+export const deleteTask = async (caseId: string, taskId: string): Promise<void> =>
+  KibanaServices.get().http.fetch(getCaseTaskDetailsUrl(caseId, taskId), { method: 'DELETE' });
+
+export const applyTaskTemplate = async (
+  caseId: string,
+  templateId: string
+): Promise<taskApiV1.TasksResponse> =>
+  KibanaServices.get().http.fetch<taskApiV1.TasksResponse>(getCaseTasksApplyTemplateUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify({ template_id: templateId } as taskApiV1.ApplyTaskTemplateRequest),
+  });
+
+export const getTaskTemplates = async (
+  owners: string[],
+  signal?: AbortSignal
+): Promise<taskApiV1.TaskTemplatesResponse> =>
+  KibanaServices.get().http.fetch<taskApiV1.TaskTemplatesResponse>(CASES_TASK_TEMPLATES_URL, {
+    method: 'GET',
+    query: { owner: owners },
+    signal,
+  });
