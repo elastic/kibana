@@ -10,8 +10,9 @@
 /**
  * Click to filter tests.
  *
- * Validates that breaking down metrics by a dimension re-renders charts
- * with the selected dimension and the grid remains functional.
+ * Validates that clicking on a chart data point after selecting a breakdown
+ * dimension appends a WHERE clause to the ES|QL query with the corresponding
+ * dimension value.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -44,31 +45,44 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    spaceTest('should apply breakdown dimension and re-render charts', async ({ pageObjects }) => {
-      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
-      const { metricsExperience } = pageObjects;
-      await expect(metricsExperience.grid).toBeVisible();
-      await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
-
-      await spaceTest.step('select a breakdown dimension', async () => {
-        await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
-        await expect(
-          metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
-        ).toBeVisible();
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-      });
-
-      await spaceTest.step('charts should re-render with breakdown', async () => {
-        await metricsExperience.waitForCardRenderComplete(0);
-        await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
-      });
-
-      await spaceTest.step('grid should remain visible with breakdown', async () => {
+    spaceTest(
+      'should append WHERE clause when clicking a chart data point',
+      async ({ pageObjects }) => {
+        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+        const { metricsExperience, discover } = pageObjects;
         await expect(metricsExperience.grid).toBeVisible();
-        await expect(
-          metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
-        ).toBeVisible();
-      });
-    });
+        await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+
+        await spaceTest.step('select a breakdown dimension', async () => {
+          await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
+          await expect(
+            metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+          ).toBeVisible();
+          await discover.waitUntilSearchingHasFinished();
+        });
+
+        await spaceTest.step('wait for chart to render with breakdown', async () => {
+          await metricsExperience.waitForCardRenderComplete(0);
+        });
+
+        const queryBefore = await discover.getEsqlQueryValue();
+
+        await spaceTest.step('click a chart data point to trigger filter', async () => {
+          await metricsExperience.clickChartDataPoint(0);
+          await discover.waitUntilSearchingHasFinished();
+        });
+
+        await spaceTest.step('ES|QL query should contain a WHERE clause', async () => {
+          const queryAfter = await discover.getEsqlQueryValue();
+          expect(queryAfter).not.toStrictEqual(queryBefore);
+          expect(queryAfter.toUpperCase()).toContain('WHERE');
+        });
+
+        await spaceTest.step('chart should re-render with the filtered query', async () => {
+          await metricsExperience.waitForCardRenderComplete(0);
+          await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
+        });
+      }
+    );
   }
 );
