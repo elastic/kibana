@@ -13,8 +13,8 @@ import {
   disableSigEventsSkill,
   type EnableSigEventsSkillResult,
   type DisableSigEventsSkillResult,
-} from '../../../../agent_builder/sig_events_skill_enablement';
-import { registerSigEventsTools } from '../../../../agent_builder/register_tools';
+} from '../../../../lib/agent_builder/sig_events_skill_enablement';
+import { registerSigEventsTools } from '../../../../lib/agent_builder/register_tools';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
 const enableRoute = createServerRoute({
@@ -41,7 +41,7 @@ const enableRoute = createServerRoute({
             'Override the default skill content (markdown) shown to the model. If omitted, the default content is used.'
           ),
       })
-      .optional(),
+      .nullish(),
   }),
   security: {
     authz: {

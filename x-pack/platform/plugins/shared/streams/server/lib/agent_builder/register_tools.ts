@@ -6,8 +6,8 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import type { GetScopedClients } from '../routes/types';
-import type { StreamsServer } from '../types';
+import type { GetScopedClients } from '../../routes/types';
+import type { StreamsServer } from '../../types';
 import {
   createListStreamsTool,
   createListFeaturesTool,

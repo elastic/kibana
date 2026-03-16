@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
+import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { SIG_EVENTS_TOOL_IDS } from './constants';
 import type { SigEventsToolsDeps } from './types';
 

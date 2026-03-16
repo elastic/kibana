@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GetScopedClients } from '../../routes/types';
-import type { StreamsServer } from '../../types';
+import type { GetScopedClients } from '../../../routes/types';
+import type { StreamsServer } from '../../../types';
 
 export interface SigEventsToolsDeps {
   getScopedClients: GetScopedClients;
