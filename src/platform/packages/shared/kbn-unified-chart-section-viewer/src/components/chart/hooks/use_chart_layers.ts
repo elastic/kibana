@@ -44,6 +44,11 @@ export const useChartLayers = ({
     const type = firstNonNullable(metricItem.fieldTypes);
     const instrument = firstNonNullable(metricItem.metricTypes);
     const resolvedUnit = firstNonNullable(metricItem.units);
+
+    if (!type || !instrument) {
+      return [];
+    }
+
     const metricField = createMetricAggregation({
       type,
       instrument,

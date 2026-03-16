@@ -102,4 +102,28 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0]).not.toHaveProperty('format');
     expect(layer.yAxis[0]).not.toHaveProperty('formatString');
   });
+
+  describe('when type or instrument is null or undefined', () => {
+    it('should return empty layers when fieldTypes is empty', () => {
+      const metricNoType: ParsedMetricItem = { ...mockMetric, fieldTypes: [] };
+      const { result } = renderHook(() =>
+        useChartLayers({
+          metricItem: metricNoType,
+          dimensions: [],
+        })
+      );
+      expect(result.current).toEqual([]);
+    });
+
+    it('should return empty layers when metricTypes is empty', () => {
+      const metricNoInstrument: ParsedMetricItem = { ...mockMetric, metricTypes: [] };
+      const { result } = renderHook(() =>
+        useChartLayers({
+          metricItem: metricNoInstrument,
+          dimensions: [],
+        })
+      );
+      expect(result.current).toEqual([]);
+    });
+  });
 });

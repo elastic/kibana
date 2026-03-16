@@ -147,7 +147,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     () =>
       paginatedDimensions.map((dimension: Dimension) => {
         return {
-          'data-test-subj': `metricsExperienceFlyoutOverviewTabDimensionItem-${dimension}`,
+          'data-test-subj': `metricsExperienceFlyoutOverviewTabDimensionItem-${dimension.name}`,
           label: <FieldNameWithIcon name={dimension.name} />,
         };
       }),
@@ -219,7 +219,7 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
                     count: paginatedDimensions.length,
                     page: activePage + 1,
                     total: pageCount,
-                    dimensions: paginatedDimensions.map((d) => `${d}`).join('. '),
+                    dimensions: paginatedDimensions.map((d) => `${d.name}`).join('. '),
                   },
                 })}
               </div>
