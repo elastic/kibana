@@ -956,7 +956,6 @@ describe('buildContextOverrideFromExecution', () => {
       error: null,
       workflowId: 'wf-1',
       workflowDefinition: { version: '1', name: 'test', enabled: true, triggers: [], steps: [] },
-      stepExecutions: [],
       duration: 1000,
       yaml: '',
       context: {},

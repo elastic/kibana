@@ -76,7 +76,7 @@ describe('StepExecuteManualForm', () => {
 
   it('should show error callout when errors is provided', () => {
     renderWithProviders(<StepExecuteManualForm {...defaultProps} errors="Unexpected token" />);
-    expect(screen.getByText('Invalid JSON')).toBeInTheDocument();
+    expect(screen.getByTestId('workflow-input-validation-callout')).toBeInTheDocument();
     expect(screen.getByText('Unexpected token')).toBeInTheDocument();
   });
 

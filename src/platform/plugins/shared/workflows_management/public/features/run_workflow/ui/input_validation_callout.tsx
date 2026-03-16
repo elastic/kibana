@@ -19,8 +19,18 @@ const TITLE = i18n.translate('workflows.inputValidationCallout.title', {
   defaultMessage: 'Input data is not valid',
 });
 
-export const InputValidationCallout: React.FC<InputValidationCalloutProps> = ({ errors }) => (
-  <EuiCallOut announceOnMount color="danger" iconType="help" size="s" title={TITLE}>
-    <p>{errors}</p>
-  </EuiCallOut>
+export const InputValidationCallout: React.FC<InputValidationCalloutProps> = React.memo(
+  ({ errors }) => (
+    <EuiCallOut
+      announceOnMount
+      color="danger"
+      iconType="help"
+      size="s"
+      title={TITLE}
+      data-test-subj="workflow-input-validation-callout"
+    >
+      <p>{errors}</p>
+    </EuiCallOut>
+  )
 );
+InputValidationCallout.displayName = 'InputValidationCallout';
