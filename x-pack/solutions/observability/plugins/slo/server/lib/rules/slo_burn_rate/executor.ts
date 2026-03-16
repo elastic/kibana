@@ -145,7 +145,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         const viewInAppUrl = addSpaceIdToPath(
           basePath.publicBaseUrl,
           spaceId,
-          `/app/observability/slos/${slo.id}${urlQuery}`
+          `/app/slos/${slo.id}${urlQuery}`
         );
         if (shouldAlert) {
           const shouldSuppress = shouldSuppressInstanceId(suppressResults, instanceId);
@@ -237,7 +237,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
       const viewInAppUrl = addSpaceIdToPath(
         basePath.publicBaseUrl,
         spaceId,
-        `/app/observability/slos/${slo.id}${urlQuery}`
+        `/app/slos/${slo.id}${urlQuery}`
       );
 
       const context = {
