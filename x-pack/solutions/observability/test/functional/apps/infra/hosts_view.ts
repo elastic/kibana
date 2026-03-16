@@ -239,6 +239,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
 
   // Failing: See https://github.com/elastic/kibana/issues/257428
+  // Failing: See https://github.com/elastic/kibana/issues/257429
   describe.skip('Hosts View', function () {
     let synthEsInfraClient: InfraSynthtraceEsClient;
     let synthEsLogsClient: LogsSynthtraceEsClient;
