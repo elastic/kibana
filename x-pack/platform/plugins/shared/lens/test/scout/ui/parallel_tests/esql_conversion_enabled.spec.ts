@@ -55,6 +55,7 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
       await lens.getConvertToEsqModalConfirmButton().click();
 
       await expect(modal).toBeHidden();
+      await expect(lens.getEditInLensButton()).toBeHidden();
 
       await lens.getApplyFlyoutButton().click();
 
@@ -100,6 +101,26 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
       // The button is disabled after clicking on "Apply and close" button
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
       await expect(lens.getApplyFlyoutButton()).toBeDisabled();
+    }
+  );
+
+  spaceTest(
+    'should correctly cancel the conversion and close the flyout',
+    async ({ pageObjects, page }) => {
+      const { dashboard, lens } = pageObjects;
+
+      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      await expect(page.getByTestId('ESQLEditor')).toBeHidden();
+
+      await lens.getConvertToEsqlButton().click();
+      await lens.getConvertToEsqModalConfirmButton().click();
+      await expect(page.getByTestId('ESQLEditor')).toBeVisible();
+
+      await lens.getCancelFlyoutButton().click();
+      await expect(lens.getInlineEditor()).toBeHidden();
+
+      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      await expect(page.getByTestId('ESQLEditor')).toBeHidden();
     }
   );
 
