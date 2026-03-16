@@ -1027,6 +1027,7 @@ x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
 x-pack/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerts-close-reason @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
