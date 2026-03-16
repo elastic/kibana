@@ -31,7 +31,12 @@ import {
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { getElasticsearchPrompt } from './prompts';
+import { z } from '@kbn/zod';
+import type {
+  ToolSchema,
+  ToolSchemaType,
+} from '@kbn/inference-common/src/chat_complete/tool_schema';
+import { getElasticsearchPrompt, getRefineSearchTermPrompt } from './prompts';
 import { progressMessages } from './i18n';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { OpenAPIToolSet, type OperationObject, type Tool } from '../../utils/openapi_tool_set';
@@ -87,14 +92,64 @@ const isDangerousOperation = (
   return methods.some((method) => DANGEROUS_HTTP_METHODS.has(method));
 };
 
+const schemaTypeToZod = (prop: ToolSchemaType): z.ZodTypeAny => {
+  const desc = prop.description ?? '';
+  switch (prop.type) {
+    case 'number':
+      return z.number().optional().describe(desc);
+    case 'boolean':
+      return z.boolean().optional().describe(desc);
+    case 'array':
+      return z.array(z.any()).optional().describe(desc);
+    case 'object':
+      return z.record(z.any()).optional().describe(desc);
+    default:
+      return z.string().optional().describe(desc);
+  }
+};
+
 /**
- * Converts an OpenAPI-based Tool into a LangChain-compatible
+ * Converts a ToolSchema to a Zod schema with lenient validation for `body`
+ * properties. Body fields use `z.any()` so the LLM can generate arrays,
+ * objects, or strings without Zod rejecting type mismatches against the
+ * (often over-simplified) OpenAPI spec types.
+ */
+const toolSchemaToZod = (schema: ToolSchema): z.ZodObject<Record<string, z.ZodTypeAny>> => {
+  const shape: Record<string, z.ZodTypeAny> = {};
+  for (const [key, prop] of Object.entries(schema.properties)) {
+    if (key === 'body' && prop.type === 'object') {
+      const bodyShape: Record<string, z.ZodTypeAny> = {};
+      if ('properties' in prop && prop.properties) {
+        for (const [bodyKey, bodyProp] of Object.entries(prop.properties)) {
+          bodyShape[bodyKey] = z
+            .any()
+            .optional()
+            .describe(bodyProp.description ?? '');
+        }
+      }
+      shape[key] = z
+        .object(bodyShape)
+        .passthrough()
+        .optional()
+        .describe(prop.description ?? 'The request body');
+    } else {
+      shape[key] = schemaTypeToZod(prop);
+    }
+  }
+  return z.object(shape);
+};
+
+/**
+ * Converts an OpenAPI-based Tool into a LangChain-compatible tool.
+ * Uses a custom Zod schema so that body properties accept any JSON type,
+ * avoiding validation failures when the LLM generates arrays/objects for
+ * fields the OpenAPI spec typed as strings.
  */
 const toLangchainTool = (tool: Tool, esClient: IScopedClusterClient) => {
   return toTool(async (args) => tool.handler(args as Record<string, unknown>, esClient), {
     name: tool.name,
     description: tool.description,
-    schema: tool.schema,
+    schema: toolSchemaToZod(tool.schema),
   });
 };
 
@@ -121,13 +176,27 @@ const parseToolResponse = async (
   error?: string;
   statusCode?: number;
 }> => {
-  const parsedContent = JSON.parse(toolMessage.content as string);
+  const content = toolMessage.content as string;
+  let parsedContent: Record<string, unknown>;
+  try {
+    parsedContent = JSON.parse(content);
+  } catch {
+    return {
+      name: toolMessage.name || 'unknown',
+      error: content,
+    };
+  }
   if ('error' in parsedContent) {
     return {
       name: toolMessage.name || 'unknown',
-      error: parsedContent.error,
-      statusCode: parsedContent.statusCode,
-      console_request: parsedContent.consoleRequest,
+      error:
+        typeof parsedContent.error === 'string'
+          ? parsedContent.error
+          : JSON.stringify(parsedContent.error),
+      statusCode:
+        typeof parsedContent.statusCode === 'number' ? parsedContent.statusCode : undefined,
+      console_request:
+        typeof parsedContent.consoleRequest === 'string' ? parsedContent.consoleRequest : undefined,
     };
   }
   const truncatedContent = await truncateJsonResponse(parsedContent.response, chatModel);
@@ -135,7 +204,8 @@ const parseToolResponse = async (
   return {
     name: toolMessage.name || 'unknown',
     response: truncatedContent,
-    console_request: parsedContent.consoleRequest,
+    console_request:
+      typeof parsedContent.consoleRequest === 'string' ? parsedContent.consoleRequest : undefined,
   };
 };
 
@@ -269,9 +339,20 @@ export const createElasticsearchToolGraph = async ({
       };
     }
     const connector = model.connector;
-    // Retrieve documentation
+
+    // Refine the user query into an API-focused search term so the
+    // semantic search ranks the correct OpenAPI spec higher.
+    const refinedResponse = await model.chatModel.invoke(
+      getRefineSearchTermPrompt({ nlQuery: state.nlQuery })
+    );
+    const refinedContent = refinedResponse.content;
+    const refinedSearchTerm =
+      typeof refinedContent === 'string' && refinedContent.trim()
+        ? refinedContent.trim()
+        : state.nlQuery;
+
     const result = await llmTasks.retrieveDocumentation({
-      searchTerm: state.nlQuery,
+      searchTerm: refinedSearchTerm,
       products: ['elasticsearch'],
       resourceTypes: ['openapi_spec'],
       max: 5,

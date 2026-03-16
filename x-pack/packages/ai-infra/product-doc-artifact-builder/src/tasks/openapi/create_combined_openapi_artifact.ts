@@ -72,6 +72,14 @@ const OPENAPI_SPEC_MAPPING = {
       type: 'object',
       enabled: false,
     },
+    requestBody: {
+      type: 'object',
+      enabled: false,
+    },
+    components: {
+      type: 'object',
+      enabled: false,
+    },
     'x-codeSamples': {
       type: 'object',
       enabled: false,
