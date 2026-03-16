@@ -26,7 +26,6 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 
-import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import { DocTitleService } from './services/doc_title';
 import { NavControlsService } from './services/nav_controls';
 import { NavLinksService } from './services/nav_links';
@@ -175,17 +174,7 @@ export class ChromeService {
       docTitle,
     });
 
-    // 6. Build component deps (consumed by ChromeComponentsProvider in the layout service)
-    const loadingCount$ = http.getLoadingCount$();
-    const componentDeps: ChromeComponentsDeps = {
-      application,
-      basePath: http.basePath,
-      docLinks,
-      loadingCount$,
-      customBranding$: customBranding.customBranding$,
-    };
-
-    // 8. Return chrome API + componentDeps
+    // 6. Return chrome API
     const chrome = createChromeApi({
       state,
       services: {
@@ -195,7 +184,6 @@ export class ChromeService {
         docTitle,
         projectNavigation,
       },
-      componentDeps,
       sidebar,
     });
 

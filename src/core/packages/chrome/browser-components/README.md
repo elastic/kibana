@@ -17,9 +17,9 @@ src/
 
 | Export | Description |
 |---|---|
-| `ChromeComponentsDeps` | Deps passed to `ChromeComponentsProvider` — single contract between `ChromeService` and the layout |
+| `ChromeComponentsDeps` | External-service deps passed to `ChromeComponentsProvider` — assembled by the layout layer |
 | `ChromeApplicationContext` | Minimal application contract used inside `ChromeComponentsDeps`; replaces `InternalApplicationStart` to break the private-package dependency |
-| `ChromeComponentsProvider` | Context provider; wrap the layout tree once with `chrome.componentDeps` |
+| `ChromeComponentsProvider` | Context provider; wrap the layout tree once with the assembled `ChromeComponentsDeps` |
 | `useChromeComponentsDeps` | Hook to read `ChromeComponentsDeps` from context (use inside provider) |
 | `ClassicHeader` | Classic header; self-hydrates from context |
 | `ProjectHeader` | Project header; self-hydrates from context |
@@ -31,11 +31,10 @@ src/
 | `LoadingIndicator` | Horizontal/bar loading indicator |
 | `HeaderBreadcrumbsBadges` | Breadcrumb badge renderer, used by `browser-internal` state |
 
-## Note: `ChromeComponentsProvider` is a stepping stone
+## Context architecture
 
-`ChromeComponentsProvider` / `useChromeComponentsDeps` are **temporary**. They exist as an intermediate step toward a proper `ChromeStateProvider` in a dedicated package that exposes React hooks (`useChromeStyle`, `useChromeBreadcrumbs`, etc.) so components are fully decoupled from Observable props. Once `ChromeStateProvider` exists this provider can be replaced.
-
-Progress is tracked in the Chrome & Grid Evolution epic: kibana-team#2651 (private repo).
+- **`ChromeComponentsDeps`** contains only 5 external-service fields (`application`, `basePath`, `docLinks`, `loadingCount$`, `customBranding$`). The layout layer assembles these and wraps the tree via `ChromeComponentsProvider`.
+- **Chrome-owned state** (breadcrumbs, nav controls, help menu, etc.) is accessed directly via `useChromeService()` hooks — not through `ChromeComponentsDeps`.
 
 ## Internal vs public hooks boundary
 

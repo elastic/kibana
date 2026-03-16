@@ -9,11 +9,6 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
@@ -30,46 +25,11 @@ import type {
   SolutionId,
 } from '@kbn/core-chrome-browser';
 
-// ---------------------------------------------------------------------------
-// Types previously in @kbn/core-chrome-browser-components/context.tsx
-// Moved here to break the circular dependency:
-//   browser-internal-types -> browser-components -> browser-context -> browser-internal-types
-// ---------------------------------------------------------------------------
-
-/**
- * Minimal application contract needed by Chrome components.
- * Replaces `InternalApplicationStart` to break the dependency on the private
- * `@kbn/core-application-browser-internal` package.
- */
-export interface ChromeApplicationContext
-  extends Pick<ApplicationStart, 'navigateToApp' | 'navigateToUrl' | 'currentAppId$'> {
-  /** Current app's action menu mount point. */
-  currentActionMenu$: Observable<MountPoint<HTMLElement> | undefined>;
-}
-
-export interface ChromeComponentsDeps {
-  application: ChromeApplicationContext;
-  basePath: HttpStart['basePath'];
-  docLinks: DocLinksStart;
-  loadingCount$: Observable<number>;
-  customBranding$: Observable<CustomBranding>;
-}
-
-// ---------------------------------------------------------------------------
-// Internal chrome service types
-// ---------------------------------------------------------------------------
-
 /** @internal */
 export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
-  /**
-   * Deps passed to `ChromeComponentsProvider` by the layout service.
-   * Will be removed once all fields are migrated to useChromeService() reads.
-   */
-  componentDeps: ChromeComponentsDeps;
-
   /**
    * Get an observable of the current badge.
    * Only consumed by chrome components; plugins use `setBadge()`.

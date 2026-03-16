@@ -241,21 +241,24 @@ describe('start', () => {
     });
   });
 
-  describe('componentDeps', () => {
-    it('exposes componentDeps for use by the layout service', async () => {
-      const { chrome } = await start();
-      expect(chrome.componentDeps).toBeDefined();
-      expect(chrome.componentDeps.application).toBeDefined();
+  describe('render smoke tests', () => {
+    const buildComponentDeps = (startDeps: ReturnType<typeof defaultStartDeps>) => ({
+      application: startDeps.application,
+      basePath: startDeps.http.basePath,
+      docLinks: startDeps.docLinks,
+      loadingCount$: startDeps.http.getLoadingCount$(),
+      customBranding$: startDeps.customBranding.customBranding$,
     });
 
     it('ClassicHeader renders within ChromeComponentsProvider', async () => {
-      const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
+      const startDeps = defaultStartDeps();
+      const { chrome } = await start({ startDeps });
 
       render(
         <KibanaRenderContextProvider {...startDeps}>
           <CoreEnvContextProvider value={coreContextMock.create().env}>
             <ChromeServiceProvider value={{ chrome }}>
-              <ChromeComponentsProvider value={chrome.componentDeps}>
+              <ChromeComponentsProvider value={buildComponentDeps(startDeps)}>
                 <ClassicHeader />
               </ChromeComponentsProvider>
             </ChromeServiceProvider>
@@ -265,11 +268,12 @@ describe('start', () => {
     });
 
     it('ChromelessHeader renders within ChromeComponentsProvider', async () => {
-      const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
+      const startDeps = defaultStartDeps();
+      await start({ startDeps });
 
       render(
         <KibanaRenderContextProvider {...startDeps}>
-          <ChromeComponentsProvider value={chrome.componentDeps}>
+          <ChromeComponentsProvider value={buildComponentDeps(startDeps)}>
             <ChromelessHeader />
           </ChromeComponentsProvider>
         </KibanaRenderContextProvider>

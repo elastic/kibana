@@ -13,7 +13,6 @@ import type { ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type {
   InternalChromeSetup,
   InternalChromeStart,
-  ChromeComponentsDeps,
 } from '@kbn/core-chrome-browser-internal-types';
 import { lazyObject } from '@kbn/lazy-object';
 import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-mocks';
@@ -24,23 +23,8 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
   });
 };
 
-const mockComponentDeps = {
-  application: {
-    currentActionMenu$: new BehaviorSubject<any>(undefined),
-    currentAppId$: new BehaviorSubject<string | undefined>(undefined),
-    navigateToApp: jest.fn(),
-    navigateToUrl: jest.fn(),
-  } as ChromeComponentsDeps['application'],
-  basePath: {} as ChromeComponentsDeps['basePath'],
-  docLinks: {} as ChromeComponentsDeps['docLinks'],
-  loadingCount$: of(0),
-  customBranding$: of({} as any),
-} satisfies ChromeComponentsDeps;
-
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
-    componentDeps:
-      mockComponentDeps as unknown as DeeplyMockedKeys<InternalChromeStart>['componentDeps'],
     withProvider: jest.fn((children) => children),
     sidebar: lazyObject(sidebarServiceMock.createStartContract()),
     navLinks: lazyObject({

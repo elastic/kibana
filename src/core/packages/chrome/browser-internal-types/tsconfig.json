@@ -12,10 +12,5 @@
   ],
   "kbn_references": [
     "@kbn/core-chrome-browser",
-    "@kbn/core-application-browser",
-    "@kbn/core-doc-links-browser",
-    "@kbn/core-http-browser",
-    "@kbn/core-custom-branding-common",
-    "@kbn/core-mount-utils-browser",
   ]
 }

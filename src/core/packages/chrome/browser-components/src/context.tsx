@@ -9,24 +9,40 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
-import type {
-  ChromeApplicationContext,
-  ChromeComponentsDeps,
-} from '@kbn/core-chrome-browser-internal-types';
+import type { Observable } from 'rxjs';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
-export type { ChromeApplicationContext, ChromeComponentsDeps };
+/**
+ * Minimal application contract needed by Chrome components.
+ * Replaces `InternalApplicationStart` to break the dependency on the private
+ * `@kbn/core-application-browser-internal` package.
+ */
+export interface ChromeApplicationContext
+  extends Pick<ApplicationStart, 'navigateToApp' | 'navigateToUrl' | 'currentAppId$'> {
+  currentActionMenu$: Observable<MountPoint<HTMLElement> | undefined>;
+}
+
+export interface ChromeComponentsDeps {
+  application: ChromeApplicationContext;
+  basePath: HttpStart['basePath'];
+  docLinks: DocLinksStart;
+  loadingCount$: Observable<number>;
+  customBranding$: Observable<CustomBranding>;
+}
 
 const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null);
 
 /**
  * Provides `ChromeComponentsDeps` to all context-aware Chrome components (`Header`,
  * `ProjectHeader`, `GridLayoutProjectSideNav`, `HeaderTopBanner`, `ChromelessHeader`,
- * `AppMenuBar`, `Sidebar`). Wrap the layout tree once with `chrome.componentDeps`.
+ * `AppMenuBar`, `Sidebar`).
  *
- * @temporary This provider is a stepping stone toward a proper `ChromeStateProvider` that will
- * expose React hooks (`useChromeStyle`, `useChromeBreadcrumbs`, etc.) and allow components to
- * self-hydrate without Observable props. Once that package exists this provider can be replaced.
- * @see kibana-team#2651 (Chrome & Grid Evolution epic — private repo)
+ * The layout layer assembles these five external-service fields and wraps the layout
+ * tree once. Chrome-owned state is accessed separately via `useChromeService()` hooks.
  */
 export const ChromeComponentsProvider: FC<PropsWithChildren<{ value: ChromeComponentsDeps }>> = ({
   value,
@@ -36,8 +52,6 @@ export const ChromeComponentsProvider: FC<PropsWithChildren<{ value: ChromeCompo
 /**
  * Reads `ChromeComponentsDeps` from the nearest `ChromeComponentsProvider`.
  * Throws if called outside the provider.
- *
- * @temporary See `ChromeComponentsProvider` for the migration plan.
  */
 export const useChromeComponentsDeps = (): ChromeComponentsDeps => {
   const ctx = useContext(ChromeComponentsContext);
