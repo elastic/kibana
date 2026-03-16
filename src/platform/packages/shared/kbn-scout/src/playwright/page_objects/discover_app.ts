@@ -341,6 +341,10 @@ export class DiscoverApp {
     }
   }
 
+  async getEsqlQueryValue(): Promise<string> {
+    return this.codeEditor.getCodeEditorValue();
+  }
+
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);

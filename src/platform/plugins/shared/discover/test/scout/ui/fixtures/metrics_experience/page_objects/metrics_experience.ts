@@ -126,6 +126,18 @@ export class MetricsExperiencePage {
   }
 
   /**
+   * Clicks at the center of the chart canvas in a metric card to trigger
+   * Lens's click-to-filter action (appends a WHERE clause to the query).
+   * Requires a breakdown dimension to be active so the click targets a
+   * specific series data point.
+   */
+  public async clickChartDataPoint(index: number): Promise<void> {
+    const canvas = this.getChartCanvasForCard(index);
+    await canvas.waitFor({ state: 'visible' });
+    await canvas.click();
+  }
+
+  /**
    * Returns the chart canvas locator within a metric card's Lens embeddable.
    */
   public getChartCanvasForCard(index: number): Locator {
