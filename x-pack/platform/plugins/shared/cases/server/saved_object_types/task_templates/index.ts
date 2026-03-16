@@ -50,7 +50,7 @@ export const caseTaskTemplateSavedObjectType: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: false,
+    importableAndExportable: true,
     visibleInManagement: false,
   },
 };

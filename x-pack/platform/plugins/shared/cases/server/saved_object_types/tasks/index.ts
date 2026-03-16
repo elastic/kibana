@@ -78,7 +78,7 @@ export const caseTaskSavedObjectType: SavedObjectsType = {
     },
   },
   management: {
-    importableAndExportable: false,
+    importableAndExportable: true,
     visibleInManagement: false,
   },
 };
