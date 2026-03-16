@@ -43,9 +43,7 @@ export const RulesTableSearchBar = React.memo(function RulesTableSearchBar() {
     [setFilterOptions, startTransaction]
   );
 
-  return (
-    <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />
-  );
+  return <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />;
 });
 
 RulesTableSearchBar.displayName = 'RulesTableSearchBar';
@@ -63,7 +61,8 @@ export const RulesTableFiltersSidebarContent = React.memo<RulesTableFiltersProps
     const { data: ruleManagementFields } = useRuleManagementFilters();
     const allTags = ruleManagementFields?.aggregated_fields.tags ?? [];
     const rulesCustomCount = ruleManagementFields?.rules_summary.custom_count;
-    const rulesPrebuiltInstalledCount = ruleManagementFields?.rules_summary.prebuilt_installed_count;
+    const rulesPrebuiltInstalledCount =
+      ruleManagementFields?.rules_summary.prebuilt_installed_count;
 
     const {
       showCustomRules,
