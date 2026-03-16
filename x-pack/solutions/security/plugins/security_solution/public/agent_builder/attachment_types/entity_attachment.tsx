@@ -84,8 +84,7 @@ type EntityInlineContentProps = AttachmentRenderProps<EntityAttachment> & {
 
 const EntityInlineContent: React.FC<EntityInlineContentProps> = ({
   attachment,
-  // hopefully available in https://github.com/elastic/kibana/pull/257214
-  /* openSidebarConversation,*/
+  openSidebarConversation,
   numEntities,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -129,10 +128,10 @@ const EntityInlineContent: React.FC<EntityInlineContentProps> = ({
         });
 
         // Open the sidebar so the conversation remains accessible
-        // openSidebarConversation?.();
+        openSidebarConversation?.();
       }
     },
-    [application]
+    [application, openSidebarConversation]
   );
 
   return (
