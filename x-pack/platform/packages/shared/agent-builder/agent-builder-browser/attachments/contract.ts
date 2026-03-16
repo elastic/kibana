@@ -38,7 +38,7 @@ export interface CanvasRenderCallbacks {
   /** Register action buttons to display in the canvas header */
   registerActionButtons: (buttons: ActionButton[]) => void;
   /** Update the attachment's origin reference (e.g., after saving to library) */
-  updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
+  updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
 }
 
 /**
@@ -52,7 +52,7 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
   isCanvas: boolean;
   /** Function to update the attachment's origin reference */
-  updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
+  updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
   openCanvas?: () => void;
 }
