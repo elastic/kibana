@@ -163,6 +163,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const query = {
           id: 'first',
           title: 'initial title',
+          description: '',
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
           },
@@ -209,6 +210,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const query = {
           id: 'first',
           title: 'initial title',
+          description: '',
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
           },
@@ -260,6 +262,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: queryId,
             title: 'Significant Query',
+            description: '',
             esql: {
               query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'query'")`,
             },

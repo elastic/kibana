@@ -74,6 +74,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'my-error-query',
               title: 'error query',
+              description: '',
               esql: {
                 query:
                   'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
@@ -770,6 +771,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   {
                     id: 'my-error-query',
                     title: 'error query',
+                    description: '',
                     esql: {
                       query:
                         'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
