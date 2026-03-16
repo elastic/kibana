@@ -12,7 +12,14 @@ import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_sc
 import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
 
 export const createRequestParamsSchema = schema.maybe(
-  schema.object({ id: schema.maybe(schema.string()) }, { unknowns: 'forbid' })
+  schema.object(
+    {
+      id: schema.maybe(
+        schema.string({ meta: { description: 'A unique identifier for the markdown panel.' } })
+      ),
+    },
+    { unknowns: 'forbid' }
+  )
 );
 
 export const createRequestBodySchema = markdownAttributesSchema;

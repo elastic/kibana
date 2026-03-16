@@ -23,12 +23,12 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest.afterAll(async ({ kbnClient, apiServices }) => {
     await apiServices.spaces.delete(spaceId);
-    await kbnClient.savedObjects.cleanStandardList();
+    await kbnClient.savedObjects.clean({ types: ['dashobard_markdown'] });
   });
 
   apiTest('should create a markdown panel', async ({ apiClient }) => {
     const content = '# Hello world';
-
+    const title = `Test title ${Date.now()}`;
     const response = await apiClient.post(MARKDOWN_API_PATH, {
       headers: {
         ...COMMON_HEADERS,
@@ -36,6 +36,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
       },
       body: {
         content,
+        title,
       },
       responseType: 'json',
     });
@@ -43,11 +44,13 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(200);
     expect(response.body.data).toMatchObject({
       content,
+      title,
     });
   });
 
   apiTest('can create a markdown panel with a specific id', async ({ apiClient }) => {
     const content = `Test content ${Date.now()}`;
+    const title = `Test title ${Date.now()}`;
     const id = `test-markdown-${Date.now()}-${Math.random()}`;
 
     const response = await apiClient.post(`${MARKDOWN_API_PATH}/${id}`, {
@@ -57,6 +60,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
       },
       body: {
         content,
+        title,
       },
       responseType: 'json',
     });
@@ -89,7 +93,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest('should create a markdown panel in a specific space', async ({ apiClient }) => {
     const content = '# Space-scoped markdown';
-
+    const title = `Space-scoped markdown ${Date.now()}`;
     const response = await apiClient.post(`s/${spaceId}/${MARKDOWN_API_PATH}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -97,12 +101,13 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
       },
       body: {
         content,
+        title,
       },
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.data).toMatchObject({ content });
+    expect(response.body.data).toMatchObject({ content, title });
   });
 
   apiTest('should create a markdown panel with a specific id in a space', async ({ apiClient }) => {
@@ -130,6 +135,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     async ({ apiClient }) => {
       const content = `Isolated content`;
       const id = `isolated-markdown-panel`;
+      const title = `Isolated markdown panel ${Date.now()}`;
 
       const createResponse = await apiClient.post(`s/${spaceId}/${MARKDOWN_API_PATH}/${id}`, {
         headers: {
@@ -138,6 +144,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
         },
         body: {
           content,
+          title,
         },
         responseType: 'json',
       });
@@ -171,6 +178,24 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
       '[request body.content]: expected value of type [string] but got [undefined]'
+    );
+  });
+
+  apiTest('validation - returns error when title is not provided', async ({ apiClient }) => {
+    const response = await apiClient.post(MARKDOWN_API_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        content: '## Heading\n\nSome **bold** text',
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      '[request body.title]: expected value of type [string] but got [undefined]'
     );
   });
 
