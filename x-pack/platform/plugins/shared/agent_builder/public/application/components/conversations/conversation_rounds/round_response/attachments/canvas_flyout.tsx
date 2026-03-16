@@ -138,7 +138,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         title={title}
         actionButtons={canvasHeaderActionButtons}
         onClose={closeCanvas}
-        previewState="preview_only"
+        previewBadgeState="preview_available"
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
         <React.Fragment key={`${attachment.id}:${canvasState.version ?? 'latest'}`}>

@@ -44,22 +44,17 @@ interface AttachmentHeaderProps {
   /**
    * Controls preview UI state from the parent.
    * - none: show regular action buttons
-   * - preview_only: show "Preview Only" badge
-   * - currently_previewing: show "You're previewing this" and hide action buttons
+   * - preview_available: show "Preview Only" badge
+   * - previewing: show "You're previewing this" and hide action buttons
    */
-  previewState?: 'none' | 'preview_only' | 'currently_previewing';
-  // Backward-compatible props. Prefer `previewState`.
-  showPreviewBadge?: boolean;
-  showCurrentlyPreviewingBadge?: boolean;
+  previewBadgeState?: 'none' | 'preview_available' | 'previewing';
 }
 
 export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   title,
   actionButtons,
   onClose,
-  previewState,
-  showPreviewBadge = false,
-  showCurrentlyPreviewingBadge = false,
+  previewBadgeState = 'none',
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -89,17 +84,9 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     return null;
   }
 
-  const resolvedPreviewState =
-    previewState ??
-    (showCurrentlyPreviewingBadge
-      ? 'currently_previewing'
-      : showPreviewBadge
-      ? 'preview_only'
-      : 'none');
-
   return (
     <EuiSplitPanel.Inner color="subdued" css={headerStyles} paddingSize="m">
-      {resolvedPreviewState === 'preview_only' && (
+      {previewBadgeState === 'preview_available' && (
         <EuiBadge iconType="lock" color="primary" css={badgeStyles}>
           {PREVIEW_ONLY_LABEL}
         </EuiBadge>
@@ -110,10 +97,8 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
             {title}
           </EuiText>
         </EuiFlexItem>
-        {resolvedPreviewState !== 'currently_previewing' && (
-          <AttachmentActions buttons={actionButtons} />
-        )}
-        {resolvedPreviewState === 'currently_previewing' && (
+        {previewBadgeState !== 'previewing' && <AttachmentActions buttons={actionButtons} />}
+        {previewBadgeState === 'previewing' && (
           <EuiBadge iconType="eye" color="success">
             {CURRENTLY_PREVIEWING_LABEL}
           </EuiBadge>

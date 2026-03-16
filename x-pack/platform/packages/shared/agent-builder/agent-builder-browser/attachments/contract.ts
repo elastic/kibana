@@ -20,7 +20,7 @@ export enum ActionButtonType {
   OVERFLOW = 'overflow',
 }
 
-export type AttachmentPreviewState = 'none' | 'preview_only' | 'currently_previewing';
+export type AttachmentPreviewState = 'none' | 'preview_available' | 'previewing';
 /**
  * Props passed to custom attachment content renderers.
  */
@@ -68,7 +68,7 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
    * Optional callback for externally-controlled inline preview state.
    * Use to mark an attachment as currently previewed outside canvas.
    */
-  setPreviewState?: (previewState: AttachmentPreviewState) => void;
+  setPreviewBadgeState?: (previewBadgeState: AttachmentPreviewState) => void;
 }
 
 /**

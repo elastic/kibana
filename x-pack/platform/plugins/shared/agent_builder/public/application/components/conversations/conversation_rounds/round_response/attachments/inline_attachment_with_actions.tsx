@@ -16,7 +16,7 @@ import { useConversationContext } from '../../../../../context/conversation/conv
 import { AttachmentHeader } from './attachment_header';
 import { useCanvasContext } from './canvas_context';
 
-type PreviewState = 'none' | 'preview_only' | 'currently_previewing';
+type PreviewState = 'none' | 'preview_available' | 'previewing';
 const getAttachmentPreviewKey = (attachmentId: string, attachmentVersion?: number) =>
   `${attachmentId}:${attachmentVersion ?? 'latest'}`;
 
@@ -31,7 +31,7 @@ interface InlineAttachmentWithActionsProps {
   /**
    * Shared preview state for header actions/badges.
    */
-  previewState?: PreviewState;
+  previewBadgeState?: PreviewState;
 }
 
 /**
@@ -44,7 +44,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   conversationId,
   screenContext,
   version,
-  previewState,
+  previewBadgeState,
 }) => {
   const {
     openCanvas: openCanvasContext,
@@ -77,9 +77,9 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
         updateOrigin,
         openCanvas,
         isCanvas: false,
-        setPreviewState: (nextPreviewState) => {
+        setPreviewBadgeState: (nextPreviewState) => {
           setPreviewedAttachmentKey(
-            nextPreviewState === 'currently_previewing' ? attachmentPreviewKey : null
+            nextPreviewState === 'previewing' ? attachmentPreviewKey : null
           );
         },
       }),
@@ -96,8 +96,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
 
   const isPreviewingAttachment = previewedAttachmentKey === attachmentPreviewKey;
 
-  const resolvedPreviewState: PreviewState =
-    previewState ?? (isPreviewingAttachment ? 'currently_previewing' : 'none');
+  const resolvedPreviewBadgeState: PreviewState =
+    previewBadgeState ?? (isPreviewingAttachment ? 'previewing' : 'none');
 
   if (!uiDefinition) {
     return null;
@@ -110,7 +110,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       <AttachmentHeader
         title={title}
         actionButtons={inlineActionButtons}
-        previewState={resolvedPreviewState}
+        previewBadgeState={resolvedPreviewBadgeState}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
         {uiDefinition?.renderInlineContent?.({

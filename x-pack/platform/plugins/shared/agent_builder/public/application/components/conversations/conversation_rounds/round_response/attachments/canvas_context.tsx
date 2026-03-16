@@ -76,13 +76,7 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
       previewedAttachmentKey,
       setPreviewedAttachmentKey,
     }),
-    [
-      canvasState,
-      previewedAttachmentKey,
-      openCanvas,
-      closeCanvas,
-      setCanvasAttachmentOrigin,
-    ]
+    [canvasState, previewedAttachmentKey, openCanvas, closeCanvas, setCanvasAttachmentOrigin]
   );
 
   return <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>;
