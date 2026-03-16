@@ -46,6 +46,7 @@ export const ListNotificationPoliciesPage = () => {
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [search, setSearch] = useState('');
   const [destinationType, setDestinationType] = useState('');
+  const [enabled, setEnabled] = useState('');
   const [policyToDelete, setPolicyToDelete] = useState<NotificationPolicyResponse | null>(null);
 
   const { navigateToUrl } = useService(CoreStart('application'));
@@ -100,6 +101,7 @@ export const ListNotificationPoliciesPage = () => {
     perPage,
     search: search || undefined,
     destinationType: destinationType || undefined,
+    enabled: enabled === 'true' ? true : enabled === 'false' ? false : undefined,
   });
 
   const handleSearchChange = (value: string) => {
@@ -109,6 +111,11 @@ export const ListNotificationPoliciesPage = () => {
 
   const handleDestinationTypeChange = (value: string) => {
     setDestinationType(value);
+    setPage(0);
+  };
+
+  const handleEnabledChange = (value: string) => {
+    setEnabled(value);
     setPage(0);
   };
 
@@ -272,6 +279,8 @@ export const ListNotificationPoliciesPage = () => {
             onSearchChange={handleSearchChange}
             destinationType={destinationType}
             onDestinationTypeChange={handleDestinationTypeChange}
+            enabled={enabled}
+            onEnabledChange={handleEnabledChange}
             onRefresh={() => refetch()}
           />
         </EuiFlexItem>

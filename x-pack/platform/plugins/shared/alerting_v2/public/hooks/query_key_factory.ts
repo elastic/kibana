@@ -26,6 +26,11 @@ export const notificationPolicyKeys = {
   unsnooze: () => [...notificationPolicyKeys.all, 'unsnooze'] as const,
   detail: (id: string) => [...notificationPolicyKeys.all, 'detail', id] as const,
   lists: () => [...notificationPolicyKeys.all, 'list'] as const,
-  list: (filters: { page: number; perPage: number; search?: string; destinationType?: string }) =>
-    [...notificationPolicyKeys.lists(), filters] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    destinationType?: string;
+    enabled?: boolean;
+  }) => [...notificationPolicyKeys.lists(), filters] as const,
 };

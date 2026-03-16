@@ -37,6 +37,7 @@ export class NotificationPoliciesApi {
     perPage?: number;
     search?: string;
     destinationType?: string;
+    enabled?: boolean;
   }) {
     return this.http.get<FindNotificationPoliciesResponse>(
       INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
@@ -46,6 +47,7 @@ export class NotificationPoliciesApi {
           perPage: params.perPage,
           search: params.search || undefined,
           destinationType: params.destinationType || undefined,
+          enabled: params.enabled,
         },
       }
     );

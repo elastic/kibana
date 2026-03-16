@@ -311,6 +311,10 @@ export class NotificationPolicyClient {
       conditions.push(nodeBuilder.is(`${attrPrefix}.createdBy`, params.createdBy));
     }
 
+    if (params.enabled !== undefined) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false'));
+    }
+
     if (conditions.length === 0) {
       return undefined;
     }

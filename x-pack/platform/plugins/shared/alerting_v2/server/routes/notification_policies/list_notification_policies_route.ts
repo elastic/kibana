@@ -27,6 +27,7 @@ const listNotificationPoliciesQuerySchema = schema.object({
   search: schema.maybe(schema.string()),
   destinationType: schema.maybe(schema.string()),
   createdBy: schema.maybe(schema.string()),
+  enabled: schema.maybe(schema.boolean()),
   sortField: schema.maybe(sortFieldSchema),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
 });
@@ -61,7 +62,7 @@ export class ListNotificationPoliciesRoute {
 
   async handle() {
     try {
-      const { page, perPage, search, destinationType, createdBy, sortField, sortOrder } =
+      const { page, perPage, search, destinationType, createdBy, enabled, sortField, sortOrder } =
         this.request.query ?? {};
       const result = await this.notificationPolicyClient.findNotificationPolicies({
         page,
@@ -69,6 +70,7 @@ export class ListNotificationPoliciesRoute {
         search,
         destinationType,
         createdBy,
+        enabled,
         sortField,
         sortOrder,
       });

@@ -12,6 +12,27 @@ import useDebounce from 'react-use/lib/useDebounce';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
+const ENABLED_OPTIONS = [
+  {
+    value: '',
+    text: i18n.translate('xpack.alertingV2.notificationPoliciesSearchBar.enabled.all', {
+      defaultMessage: 'All states',
+    }),
+  },
+  {
+    value: 'true',
+    text: i18n.translate('xpack.alertingV2.notificationPoliciesSearchBar.enabled.enabled', {
+      defaultMessage: 'Enabled',
+    }),
+  },
+  {
+    value: 'false',
+    text: i18n.translate('xpack.alertingV2.notificationPoliciesSearchBar.enabled.disabled', {
+      defaultMessage: 'Disabled',
+    }),
+  },
+];
+
 const DESTINATION_TYPE_OPTIONS = [
   {
     value: '',
@@ -32,6 +53,8 @@ interface NotificationPoliciesSearchBarProps {
   onSearchChange: (search: string) => void;
   destinationType: string;
   onDestinationTypeChange: (destinationType: string) => void;
+  enabled: string;
+  onEnabledChange: (enabled: string) => void;
   onRefresh: () => void;
 }
 
@@ -39,6 +62,8 @@ export const NotificationPoliciesSearchBar = ({
   onSearchChange,
   destinationType,
   onDestinationTypeChange,
+  enabled,
+  onEnabledChange,
   onRefresh,
 }: NotificationPoliciesSearchBarProps) => {
   const [searchInput, setSearchInput] = useState('');
@@ -74,6 +99,18 @@ export const NotificationPoliciesSearchBar = ({
           aria-label={i18n.translate(
             'xpack.alertingV2.notificationPoliciesSearchBar.destinationTypeAriaLabel',
             { defaultMessage: 'Filter by destination type' }
+          )}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSelect
+          compressed
+          options={ENABLED_OPTIONS}
+          value={enabled}
+          onChange={(e) => onEnabledChange(e.target.value)}
+          aria-label={i18n.translate(
+            'xpack.alertingV2.notificationPoliciesSearchBar.enabledAriaLabel',
+            { defaultMessage: 'Filter by state' }
           )}
         />
       </EuiFlexItem>

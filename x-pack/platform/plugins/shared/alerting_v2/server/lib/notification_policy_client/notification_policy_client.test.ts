@@ -577,6 +577,30 @@ describe('NotificationPolicyClient', () => {
       );
     });
 
+    it('builds KQL filter for enabled=true', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ enabled: true });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.objectContaining({ type: 'function' }),
+        })
+      );
+    });
+
+    it('builds KQL filter for enabled=false', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ enabled: false });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.objectContaining({ type: 'function' }),
+        })
+      );
+    });
+
     it('maps sort field name to name.keyword', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
 
