@@ -6,22 +6,23 @@
  */
 
 import React from 'react';
-import type { Store, AnyAction } from 'redux';
+import type { AnyAction, Store } from 'redux';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import type { History as HistoryPackageHistoryInterface } from 'history';
-import { createMemoryHistory } from 'history';
 import { coreMock } from '@kbn/core/public/mocks';
+import { analyzerCellActionRenderer } from '../../../flyout_v2/analyzer/components/cell_actions';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { MockResolver } from './mock_resolver';
-import type { DataAccessLayer, SpyMiddleware, SideEffectSimulator, TimeFilters } from '../../types';
+import type { DataAccessLayer, SideEffectSimulator, SpyMiddleware, TimeFilters } from '../../types';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
 import { uiSetting } from '../../mocks/ui_setting';
 import { EMPTY_RESOLVER } from '../../store/helpers';
 import type { State } from '../../../common/store/types';
 import { createMockStore, mockGlobalState } from '../../../common/mock';
 import { createResolver } from '../../store/actions';
+
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
  */
@@ -81,8 +82,6 @@ export class Simulator {
     history,
     filters,
     shouldUpdate,
-    isSplitPanel,
-    showPanelOnClick,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -100,11 +99,9 @@ export class Simulator {
      * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
      */
     databaseDocumentID: string;
-    history?: HistoryPackageHistoryInterface<never>;
+    history: HistoryPackageHistoryInterface;
     filters: TimeFilters;
     shouldUpdate: boolean;
-    isSplitPanel?: boolean;
-    showPanelOnClick?: () => void;
   }) {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
@@ -133,9 +130,7 @@ export class Simulator {
       [resolverMiddlewareFactory(dataAccessLayer), this.spyMiddleware.middleware]
     );
 
-    // If needed, create a fake 'history' instance.
-    // Resolver will use to read and write query string values.
-    this.history = history ?? createMemoryHistory();
+    this.history = history;
 
     // Used for `KibanaContextProvider`
     const coreStart = coreMock.createStart();
@@ -156,8 +151,7 @@ export class Simulator {
         indices={indices}
         filters={filters}
         shouldUpdate={shouldUpdate}
-        isSplitPanel={isSplitPanel}
-        showPanelOnClick={showPanelOnClick}
+        renderCellActions={analyzerCellActionRenderer}
       />
     );
   }

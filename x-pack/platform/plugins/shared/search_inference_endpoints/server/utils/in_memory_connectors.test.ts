@@ -1,0 +1,194 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { mockEISPreconfiguredEndpoints } from '../__mocks__/inference_endpoints';
+import {
+  filterPreconfiguredEndpoints,
+  findEndpointsWithoutConnectors,
+  connectorFromEndpoint,
+  getConnectorIdFromEndpoint,
+  getConnectorNameFromEndpoint,
+} from './in_memory_connectors';
+
+const makeEndpoint = (
+  overrides: Partial<InferenceInferenceEndpointInfo> = {}
+): InferenceInferenceEndpointInfo => ({
+  inference_id: '.test-model-chat_completion',
+  task_type: 'chat_completion',
+  service: 'elastic',
+  service_settings: { model_id: 'test-model' },
+  ...overrides,
+});
+
+describe('filterPreconfiguredEndpoints', () => {
+  it('returns endpoints that are elastic service, start with ".", and are chat_completion', () => {
+    const endpoint = makeEndpoint();
+    expect(filterPreconfiguredEndpoints([endpoint])).toEqual([endpoint]);
+  });
+
+  it('filters out endpoints where service is not elastic', () => {
+    const endpoint = makeEndpoint({ service: 'openai' });
+    expect(filterPreconfiguredEndpoints([endpoint])).toEqual([]);
+  });
+
+  it('filters out endpoints where inference_id does not start with "."', () => {
+    const endpoint = makeEndpoint({ inference_id: 'test-model-chat_completion' });
+    expect(filterPreconfiguredEndpoints([endpoint])).toEqual([]);
+  });
+
+  it('filters out endpoints where task_type is not chat_completion', () => {
+    expect(
+      filterPreconfiguredEndpoints([
+        makeEndpoint({ task_type: 'completion' }),
+        makeEndpoint({ task_type: 'text_embedding' }),
+        makeEndpoint({ task_type: 'sparse_embedding' }),
+      ])
+    ).toEqual([]);
+  });
+
+  it('returns only matching endpoints from a mixed list', () => {
+    const valid = makeEndpoint();
+    const results = filterPreconfiguredEndpoints([
+      valid,
+      makeEndpoint({ service: 'elasticsearch' }),
+      makeEndpoint({ inference_id: 'no-dot-chat_completion' }),
+      makeEndpoint({ task_type: 'sparse_embedding' }),
+    ]);
+    expect(results).toEqual([valid]);
+  });
+
+  it('returns an empty array for an empty input', () => {
+    expect(filterPreconfiguredEndpoints([])).toEqual([]);
+  });
+
+  it('filters the EIS mock endpoints to only chat_completion elastic endpoints with a "." prefix', () => {
+    const results = filterPreconfiguredEndpoints(mockEISPreconfiguredEndpoints);
+    expect(results.length).toBeGreaterThan(0);
+    results.forEach((endpoint) => {
+      expect(endpoint.service).toBe('elastic');
+      expect(endpoint.inference_id).toMatch(/^\./);
+      expect(endpoint.task_type).toBe('chat_completion');
+    });
+  });
+});
+
+describe('findEndpointsWithoutConnectors', () => {
+  const endpointA = makeEndpoint({ inference_id: '.model-a-chat_completion' });
+  const endpointB = makeEndpoint({ inference_id: '.model-b-chat_completion' });
+  const connectorA = connectorFromEndpoint(endpointA);
+
+  it('returns all endpoints when there are no existing connectors', () => {
+    expect(findEndpointsWithoutConnectors([endpointA, endpointB], [])).toEqual([
+      endpointA,
+      endpointB,
+    ]);
+  });
+
+  it('excludes endpoints that already have a matching connector', () => {
+    expect(findEndpointsWithoutConnectors([endpointA, endpointB], [connectorA])).toEqual([
+      endpointB,
+    ]);
+  });
+
+  it('ignores connectors without an inferenceId in config', () => {
+    const connectorWithoutInferenceId = { ...connectorA, config: {} };
+    const result = findEndpointsWithoutConnectors([endpointA], [connectorWithoutInferenceId]);
+    expect(result).toEqual([endpointA]);
+  });
+
+  it('returns an empty array when all endpoints have matching connectors', () => {
+    const connectorB = connectorFromEndpoint(endpointB);
+    expect(
+      findEndpointsWithoutConnectors([endpointA, endpointB], [connectorA, connectorB])
+    ).toEqual([]);
+  });
+});
+
+describe('connectorFromEndpoint', () => {
+  it('maps endpoint fields to the correct connector shape', () => {
+    const endpoint = makeEndpoint({
+      inference_id: '.my-model-chat_completion',
+      task_type: 'chat_completion',
+      service: 'elastic',
+      service_settings: { model_id: 'my-model' },
+    });
+
+    expect(connectorFromEndpoint(endpoint)).toEqual({
+      id: '.my-model-chat_completion',
+      name: 'My Model',
+      actionTypeId: '.inference',
+      exposeConfig: true,
+      config: {
+        provider: 'elastic',
+        taskType: 'chat_completion',
+        inferenceId: '.my-model-chat_completion',
+        providerConfig: { model_id: 'my-model' },
+      },
+      secrets: {},
+      isPreconfigured: true,
+      isSystemAction: false,
+      isConnectorTypeDeprecated: false,
+      isDynamic: true,
+      isDeprecated: false,
+    });
+  });
+});
+
+describe('getConnectorIdFromEndpoint', () => {
+  it('returns the inference_id as the connector id', () => {
+    const endpoint = makeEndpoint({ inference_id: '.my-model-chat_completion' });
+    expect(getConnectorIdFromEndpoint(endpoint)).toBe('.my-model-chat_completion');
+  });
+});
+
+describe('getConnectorNameFromEndpoint', () => {
+  it('falls back to inference_id when service_settings has no model_id', () => {
+    const endpoint = makeEndpoint({
+      inference_id: '.my-model-chat_completion',
+      service_settings: {},
+    });
+    expect(getConnectorNameFromEndpoint(endpoint)).toBe('.my-model-chat_completion');
+  });
+
+  it('converts hyphens to spaces and title-cases the model id', () => {
+    const endpoint = makeEndpoint({ service_settings: { model_id: 'some-model-name' } });
+    expect(getConnectorNameFromEndpoint(endpoint)).toBe('Some Model Name');
+  });
+
+  it('returns the display name for rainbow-sprinkles', () => {
+    const endpoint = makeEndpoint({ service_settings: { model_id: 'rainbow-sprinkles' } });
+    expect(getConnectorNameFromEndpoint(endpoint)).toBe('Anthropic Claude Sonnet 3.7');
+  });
+
+  it('returns the display name for gp-llm-v2', () => {
+    const endpoint = makeEndpoint({ service_settings: { model_id: 'gp-llm-v2' } });
+    expect(getConnectorNameFromEndpoint(endpoint)).toBe('Anthropic Claude Sonnet 4.5');
+  });
+
+  it('replaces "Openai" with "OpenAI"', () => {
+    const endpoint = makeEndpoint({ service_settings: { model_id: 'openai-gpt-4.1' } });
+    expect(getConnectorNameFromEndpoint(endpoint)).toBe('OpenAI GPT 4.1');
+  });
+
+  it('handles a model_id with multiple OpenAI and GPT replacements', () => {
+    const endpoint = makeEndpoint({
+      service_settings: { model_id: 'openai-text-embedding-3-large' },
+    });
+    expect(getConnectorNameFromEndpoint(endpoint)).toBe('OpenAI Text Embedding 3 Large');
+  });
+
+  it.each(
+    mockEISPreconfiguredEndpoints
+      .filter((e) => e.service_settings?.model_id)
+      .map((e) => [e.inference_id, e.service_settings!.model_id as string])
+  )('returns a non-empty string name for mock endpoint %s', (_inferenceId, _modelId) => {
+    const endpoint = makeEndpoint({ service_settings: { model_id: _modelId } });
+    expect(typeof getConnectorNameFromEndpoint(endpoint)).toBe('string');
+    expect(getConnectorNameFromEndpoint(endpoint).length).toBeGreaterThan(0);
+  });
+});

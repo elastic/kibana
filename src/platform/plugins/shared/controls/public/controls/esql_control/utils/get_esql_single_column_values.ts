@@ -16,6 +16,7 @@ import { coreServices } from '../../../services/kibana_services';
 
 export interface GetESQLSingleColumnValuesSuccess {
   values: string[];
+  columnType?: string;
 }
 
 export interface GetESQLSingleColumnValuesFailure {
@@ -57,7 +58,8 @@ export const getESQLSingleColumnValues = async ({
         .map((value) => value[0])
         .filter(Boolean)
         .map((option) => String(option));
-      return { values };
+      const columnType = results.response.columns[0].type;
+      return { values, columnType };
     }
 
     return { errors: [new Error('Query must return a single column')] };

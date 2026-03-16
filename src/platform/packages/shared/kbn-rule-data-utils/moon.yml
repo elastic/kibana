@@ -4,22 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/rule-data-utils'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/security-detections-response'
-toolchain:
+  defaultOwner: '@elastic/security-detection-rule-management'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/rule-data-utils'
+  title: '@kbn/rule-data-utils'
   description: Moon project for @kbn/rule-data-utils
   channel: ''
-  owner: '@elastic/security-detections-response'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-rule-data-utils
+  owner: '@elastic/security-detection-rule-management'
+  sourceRoot: src/platform/packages/shared/kbn-rule-data-utils
 dependsOn:
   - '@kbn/es-query'
-  - '@kbn/elastic-assistant-common'
 tags:
   - shared-common
   - package
@@ -33,14 +31,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

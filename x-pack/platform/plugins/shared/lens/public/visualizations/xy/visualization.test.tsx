@@ -4096,7 +4096,7 @@ describe('xy_visualization', () => {
     });
 
     describe('annotations layer', () => {
-      it('should return no action for by-value annotation layer', () => {
+      it('should return no action for by-value annotation layer when not saveable', () => {
         const annotationLayer: XYByValueAnnotationLayerConfig = {
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
@@ -4117,6 +4117,33 @@ describe('xy_visualization', () => {
             jest.fn()
           )
         ).toEqual([]);
+      });
+
+      it('should show save to library action for by-value annotation layer when saveable', () => {
+        const annotationLayer: XYByValueAnnotationLayerConfig = {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation2],
+          ignoreGlobalFilters: true,
+          indexPatternId: 'myIndexPattern',
+        };
+
+        const baseState = exampleState();
+        const actions = xyVisualization.getSupportedActionsForLayer?.(
+          'annotation',
+          {
+            ...baseState,
+            layers: [annotationLayer],
+          },
+          jest.fn(),
+          jest.fn(),
+          true
+        );
+        expect(
+          actions?.some(
+            (action) => action['data-test-subj'] === 'lnsXY_annotationLayer_saveToLibrary'
+          )
+        ).toBeTruthy();
       });
 
       describe('by-ref layer', () => {
@@ -4153,16 +4180,6 @@ describe('xy_visualization', () => {
           ).toMatchInlineSnapshot(`
             Array [
               Object {
-                "data-test-subj": "lnsXY_annotationLayer_saveToLibrary",
-                "description": "Saves annotation group as separate saved object",
-                "displayName": "Save to library",
-                "execute": [Function],
-                "icon": "save",
-                "isCompatible": true,
-                "order": 100,
-                "showOutsideList": false,
-              },
-              Object {
                 "data-test-subj": "lnsXY_annotationLayer_unlinkFromLibrary",
                 "description": "Saves the annotation group as a part of the Lens Saved Object",
                 "displayName": "Unlink from library",
@@ -4185,7 +4202,7 @@ describe('xy_visualization', () => {
           `);
         });
 
-        it('should hide save action if not saveable', () => {
+        it('should not show save to library action for by-ref layer', () => {
           const baseState = exampleState();
           expect(
             xyVisualization
@@ -4197,7 +4214,7 @@ describe('xy_visualization', () => {
                 },
                 jest.fn(),
                 jest.fn(),
-                false
+                true
               )
               .some((action) => action['data-test-subj'] === 'lnsXY_annotationLayer_saveToLibrary')
           ).toBeFalsy();

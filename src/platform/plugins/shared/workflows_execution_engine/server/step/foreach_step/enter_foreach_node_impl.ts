@@ -32,8 +32,9 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
   private async enterForeach(): Promise<void> {
     this.stepExecutionRuntime.startStep();
+    const foreachConfig = this.node.configuration.foreach;
     this.stepExecutionRuntime.setInput({
-      foreach: this.node.configuration.foreach,
+      foreach: Array.isArray(foreachConfig) ? JSON.stringify(foreachConfig) : foreachConfig,
     });
     const evaluatedItems = this.getItems();
 
@@ -121,6 +122,10 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       throw new Error(
         'Foreach configuration is required. Please specify an array or expression that evaluates to an array.'
       );
+    }
+
+    if (Array.isArray(expression)) {
+      return expression;
     }
 
     if (isTemplateExpression(expression)) {

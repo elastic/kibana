@@ -21,7 +21,7 @@ import { alertDetectionsLinks, alertSummaryLink, alertsLink } from '../../detect
 import { links as rulesLinks } from '../../rules/links';
 import { links as siemMigrationsLinks } from '../../siem_migrations/links';
 import { links as timelinesLinks } from '../../timelines/links';
-import { links as casesLinks } from '../../cases/links';
+import { getCasesLinks } from '../../cases/links';
 import { links as managementLinks, getManagementFilteredLinks } from '../../management/links';
 import { exploreLinks } from '../../explore/links';
 import { onboardingLinks } from '../../onboarding/links';
@@ -36,7 +36,7 @@ export const appLinks: AppLinkItems = Object.freeze([
   alertSummaryLink,
   attackDiscoveryLinks,
   findingsLinks,
-  casesLinks,
+  getCasesLinks(false),
   configurationsLinks,
   timelinesLinks,
   indicatorsLinks,
@@ -64,6 +64,9 @@ export const getFilteredLinks = async (
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
 
+  const templatesEnabled = plugins.cases.config.templatesEnabled;
+  const filteredCasesLinks = getCasesLinks(templatesEnabled);
+
   return Object.freeze([
     dashboardsLinks,
     core.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
@@ -72,7 +75,7 @@ export const getFilteredLinks = async (
     alertSummaryLink,
     attackDiscoveryLinks,
     findingsLinks,
-    casesLinks,
+    filteredCasesLinks,
     filteredConfigurationsLinks,
     timelinesLinks,
     indicatorsLinks,
