@@ -44,11 +44,7 @@ export abstract class AbstractFileSystem {
     const fileListPath = Path.join(TMP_DIR, 'ts-artifacts.list');
     const nullDelimiter = '\0';
 
-    const archiveEntries = files;
-    const fileListContent = Buffer.from(
-      `${archiveEntries.join(nullDelimiter)}${nullDelimiter}`,
-      'utf8'
-    );
+    const fileListContent = Buffer.from(`${files.join(nullDelimiter)}${nullDelimiter}`, 'utf8');
 
     await Fs.promises.mkdir(TMP_DIR, { recursive: true });
 
@@ -101,7 +97,7 @@ export abstract class AbstractFileSystem {
 
     const totalShas = options.shas.length;
 
-    this.log.info(`Searching ${totalShas} candidate commit(s) for cached TypeScript artifacts...`);
+    this.log.info(`[Cache] Searching ${totalShas} candidate commit(s) for cached artifacts...`);
 
     for (let i = 0; i < totalShas; i++) {
       const sha = options.shas[i];
@@ -134,7 +130,7 @@ export abstract class AbstractFileSystem {
           await cleanTypeCheckArtifacts(this.log);
         }
 
-        this.log.info(`Found archive for ${shortSha}, extracting...`);
+        this.log.info(`[Cache] Found archive for ${shortSha}, extracting...`);
 
         await this.extract(archivePath);
 
@@ -144,9 +140,7 @@ export abstract class AbstractFileSystem {
       this.log.verbose(`[${i + 1}/${totalShas}] No archive for ${shortSha}`);
     }
 
-    this.log.info(
-      `No cached TypeScript build artifacts found after checking ${totalShas} commit(s).`
-    );
+    this.log.info(`[Cache] No cached artifacts found after checking ${totalShas} commit(s).`);
 
     return undefined;
   }
