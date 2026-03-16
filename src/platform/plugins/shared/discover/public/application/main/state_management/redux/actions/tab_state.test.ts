@@ -10,6 +10,7 @@
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTab, selectTabRuntimeState } from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
+import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
@@ -87,6 +88,10 @@ describe('tab_state actions', () => {
   describe('syncPreviousStateSnapshots', () => {
     it('should sync previousStateSnapshotsByProfileId for the current profile when triggered separately', async () => {
       const { internalState, tabId } = await setup();
+      const previousStateSnapshotsByProfileId = structuredClone(
+        selectTab(internalState.getState(), tabId).resetDefaultProfileState
+          .previousStateSnapshotsByProfileId
+      );
 
       internalState.dispatch(
         internalStateActions.setAppState({
@@ -100,11 +105,9 @@ describe('tab_state actions', () => {
       );
 
       expect(
-        Object.values(
-          selectTab(internalState.getState(), tabId).resetDefaultProfileState
-            .previousStateSnapshotsByProfileId
-        )
-      ).toContainEqual({});
+        selectTab(internalState.getState(), tabId).resetDefaultProfileState
+          .previousStateSnapshotsByProfileId
+      ).toEqual(previousStateSnapshotsByProfileId);
 
       internalState.dispatch(internalStateActions.syncPreviousStateSnapshots({ tabId }));
 
@@ -116,6 +119,108 @@ describe('tab_state actions', () => {
       ).toContainEqual({
         columns: ['message'],
         hideChart: true,
+      });
+    });
+  });
+
+  describe('updateAppStateAndReplaceUrl', () => {
+    it('should only sync changed app state fields after replacing the URL for the active tab', async () => {
+      const { internalState, runtimeStateManager, stateStorageContainer, tabId } = await setup();
+      const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
+        .scopedProfilesManager$.getValue()
+        .getContexts().dataSourceContext.profileId;
+
+      const setSpy = jest.spyOn(stateStorageContainer, 'set');
+
+      internalState.dispatch(
+        internalStateActions.setAppState({
+          tabId,
+          appState: {
+            columns: ['field1'],
+            rowHeight: 3,
+          },
+        })
+      );
+
+      internalState.dispatch(
+        internalStateActions.setAppState({
+          tabId,
+          appState: {
+            columns: ['field1'],
+            rowHeight: 8,
+          },
+          isSystemTriggered: true,
+        })
+      );
+
+      await internalState.dispatch(
+        internalStateActions.updateAppStateAndReplaceUrl({
+          tabId,
+          appState: {
+            columns: ['message'],
+          },
+        })
+      );
+
+      expect(setSpy).toHaveBeenCalledWith(
+        APP_STATE_URL_KEY,
+        expect.objectContaining({
+          columns: ['message'],
+          rowHeight: 8,
+        }),
+        { replace: true }
+      );
+      expect(selectTab(internalState.getState(), tabId).appState).toEqual(
+        expect.objectContaining({
+          columns: ['message'],
+          rowHeight: 8,
+        })
+      );
+      expect(
+        selectTab(internalState.getState(), tabId).resetDefaultProfileState
+          .previousStateSnapshotsByProfileId
+      ).toEqual(
+        expect.objectContaining({
+          [profileId]: {
+            columns: ['message'],
+            rowHeight: 3,
+          },
+        })
+      );
+    });
+
+    it('should not sync previousStateSnapshotsByProfileId after replacing the URL for system-triggered updates', async () => {
+      const { internalState, runtimeStateManager, tabId } = await setup();
+      const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
+        .scopedProfilesManager$.getValue()
+        .getContexts().dataSourceContext.profileId;
+
+      internalState.dispatch(
+        internalStateActions.setAppState({
+          tabId,
+          appState: {
+            columns: ['field1'],
+          },
+        })
+      );
+
+      await internalState.dispatch(
+        internalStateActions.updateAppStateAndReplaceUrl({
+          tabId,
+          appState: {
+            columns: ['field2'],
+          },
+          isSystemTriggered: true,
+        })
+      );
+
+      expect(
+        selectTab(internalState.getState(), tabId).resetDefaultProfileState
+          .previousStateSnapshotsByProfileId
+      ).toEqual({
+        [profileId]: {
+          columns: ['field1'],
+        },
       });
     });
   });

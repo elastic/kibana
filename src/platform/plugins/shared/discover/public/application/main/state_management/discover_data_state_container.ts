@@ -400,7 +400,7 @@ export function getDataStateContainer({
               );
             } else {
               internalState.dispatch(
-                injectCurrentTab(internalStateActions.syncPreviousStateSnapshots)()
+                injectCurrentTab(internalStateActions.syncPreviousStateSnapshots)({})
               );
             }
           }

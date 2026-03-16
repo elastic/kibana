@@ -107,17 +107,15 @@ const setPreviousStateSnapshotField = <TField extends DefaultProfileStateField>(
 const syncPreviousStateSnapshots = (
   tab: TabState,
   profileId: string,
-  compareWithPreviousAppState: boolean
+  nextAppState?: TabState['appState']
 ) => {
   const previousStateSnapshots = tab.resetDefaultProfileState.previousStateSnapshotsByProfileId;
   const previousStateSnapshot = previousStateSnapshots[profileId] ?? {};
+  const snapshotAppState = nextAppState ?? tab.appState;
 
   for (const field of DEFAULT_PROFILE_STATE_FIELDS) {
-    if (
-      !compareWithPreviousAppState ||
-      !isEqual(tab.previousAppState[field], tab.appState[field])
-    ) {
-      setPreviousStateSnapshotField(previousStateSnapshot, field, tab.appState[field]);
+    if (!nextAppState || !isEqual(tab.appState[field], nextAppState[field])) {
+      setPreviousStateSnapshotField(previousStateSnapshot, field, snapshotAppState[field]);
     }
   }
 
@@ -280,17 +278,20 @@ export const internalStateSlice = createSlice({
           appState = { ...appState, dataSource: createEsqlDataSource() };
         }
 
+        if (!action.payload.isSystemTriggered) {
+          syncPreviousStateSnapshots(tab, action.payload.profileId, appState);
+        }
+
         tab.previousAppState = tab.appState;
         tab.appState = appState;
-
-        if (!action.payload.isSystemTriggered) {
-          syncPreviousStateSnapshots(tab, action.payload.profileId, true);
-        }
       }),
 
-    syncPreviousStateSnapshots: (state, action: TabAction<{ profileId: string }>) =>
+    syncPreviousStateSnapshots: (
+      state,
+      action: TabAction<{ profileId: string; appState?: TabState['appState'] }>
+    ) =>
       withTab(state, action.payload, (tab) => {
-        syncPreviousStateSnapshots(tab, action.payload.profileId, false);
+        syncPreviousStateSnapshots(tab, action.payload.profileId, action.payload.appState);
       }),
 
     /**

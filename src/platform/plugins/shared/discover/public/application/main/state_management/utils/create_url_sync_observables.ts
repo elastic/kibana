@@ -49,7 +49,7 @@ export const createUrlSyncObservables = ({
         return;
       }
 
-      dispatch(internalStateActions.setAppState({ tabId, appState }));
+      dispatch(internalStateActions.setAppState({ tabId, appState, isSystemTriggered: true }));
     },
     state$: appState$,
   };

@@ -16,6 +16,7 @@ import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_sta
 import { getPersistedTabMock } from '../redux/__mocks__/internal_state.mocks';
 import { createUrlSyncObservables } from './create_url_sync_observables';
 import { selectTab } from '../redux/selectors';
+import { selectTabRuntimeState } from '../redux';
 import type { DiscoverAppState } from '../redux/types';
 
 describe('createUrlSyncObservables', () => {
@@ -45,6 +46,7 @@ describe('createUrlSyncObservables', () => {
         internalState$: from(toolkit.internalState),
       }),
       internalState: toolkit.internalState,
+      runtimeStateManager: toolkit.runtimeStateManager,
       tabId: persistedTab.id,
     };
   };
@@ -59,11 +61,19 @@ describe('createUrlSyncObservables', () => {
   });
 
   it('should allow appStateContainer to get and set app state', async () => {
-    const { result, internalState, tabId } = await setup();
+    const { result, internalState, runtimeStateManager, tabId } = await setup();
 
     const currentAppState = result.appStateContainer.get();
     expect(currentAppState).toBeDefined();
     expect(currentAppState.query).toBeDefined();
+
+    const profileId = selectTabRuntimeState(runtimeStateManager, tabId)
+      .scopedProfilesManager$.getValue()
+      .getContexts().dataSourceContext.profileId;
+    const previousStateSnapshotsByProfileId = structuredClone(
+      selectTab(internalState.getState(), tabId).resetDefaultProfileState
+        .previousStateSnapshotsByProfileId
+    );
 
     let state = internalState.getState();
     let tab = selectTab(state, tabId);
@@ -79,6 +89,12 @@ describe('createUrlSyncObservables', () => {
     state = internalState.getState();
     tab = selectTab(state, tabId);
     expect(tab.appState.hideChart).toBe(true);
+    expect(tab.resetDefaultProfileState.previousStateSnapshotsByProfileId).toEqual(
+      previousStateSnapshotsByProfileId
+    );
+    expect(tab.resetDefaultProfileState.previousStateSnapshotsByProfileId[profileId]).toBe(
+      previousStateSnapshotsByProfileId[profileId]
+    );
   });
 
   it('should allow globalStateContainer to get and set global state', async () => {
