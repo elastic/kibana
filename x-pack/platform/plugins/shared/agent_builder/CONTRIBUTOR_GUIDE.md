@@ -411,7 +411,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
   ),
 
   // Customize buttons based on viewport context
-  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas }) => {
+  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas, setPreviewBadgeState }) => {
     const buttons = [];
 
     if (isSidebar) {
@@ -439,6 +439,16 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
       });
     }
 
+    // Optional: if preview happens outside canvas, keep inline badge state in sync
+    buttons.push({
+      label: 'Preview',
+      icon: 'eye',
+      type: ActionButtonType.SECONDARY,
+      handler: () => {
+        setPreviewBadgeState?.('previewing');
+      },
+    });
+
     return buttons;
   },
 };
@@ -451,6 +461,13 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isSidebar`** - `true` when rendered in the sidebar (constrained width)
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
+- **`setPreviewBadgeState`** - Optional callback to control inline preview badge state when preview is driven outside the canvas
+
+`setPreviewBadgeState` accepts:
+
+- **`none`** - regular inline state
+- **`preview_available`** - show "Preview Only" badge
+- **`previewing`** - show "You're previewing this" badge and hide inline action buttons
 
 #### Dynamic canvas buttons with registerActionButtons
 
