@@ -78,7 +78,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   // Clear dynamic buttons when the canvas attachment changes
   useEffect(() => {
     setDynamicButtons([]);
-  }, [canvasState?.attachment.id]);
+  }, [canvasState?.attachment.id, canvasState?.version]);
 
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
     setDynamicButtons(buttons);
@@ -141,10 +141,12 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         previewState="preview_only"
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        {uiDefinition.renderCanvasContent(
-          { attachment, isSidebar },
-          { registerActionButtons, updateOrigin, closeCanvas }
-        )}
+        <React.Fragment key={`${attachment.id}:${canvasState.version ?? 'latest'}`}>
+          {uiDefinition.renderCanvasContent(
+            { attachment, isSidebar },
+            { registerActionButtons, updateOrigin, closeCanvas }
+          )}
+        </React.Fragment>
       </EuiFlyoutBody>
     </EuiFlyout>
   );
