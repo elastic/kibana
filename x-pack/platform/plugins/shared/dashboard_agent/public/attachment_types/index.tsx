@@ -30,6 +30,8 @@ export const registerDashboardAttachmentUiDefinition = ({
     attachments,
     addAttachment,
     openChat,
+    setChatConfig,
+    clearChatConfig,
   },
 }: {
   dashboardLocator?: DashboardRendererProps['locator'];
@@ -39,7 +41,12 @@ export const registerDashboardAttachmentUiDefinition = ({
 }) => {
   let dashboardApi: DashboardApi | undefined;
 
-  const updatesManager = createDashboardUpdatesManager({ chat$, addAttachment });
+  const updatesManager = createDashboardUpdatesManager({
+    chat$,
+    addAttachment,
+    setChatConfig,
+    clearChatConfig,
+  });
 
   const dashboardAppApiSubscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
     dashboardApi = api;

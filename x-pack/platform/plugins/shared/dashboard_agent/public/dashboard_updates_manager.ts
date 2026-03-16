@@ -13,23 +13,15 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { ChatEvent } from '@kbn/agent-builder-common/chat';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common/chat';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  type AttachmentPanel,
-  type DashboardSection,
-} from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type {
   DashboardAttachment,
   DashboardAttachmentData,
   DashboardAttachmentOrigin,
 } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import type { DashboardPanel, DashboardState } from '@kbn/dashboard-plugin/server';
-import { type LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
-import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { getStateFromAttachment } from './attachment_types/attachment_to_dashboard_state';
-
-const lensConfigBuilder = new LensConfigBuilder();
+import { toDashboardAttachmentData } from './attachment_types/dashboard_attachment_data';
 
 type VersionedDashboardAttachment = VersionedAttachment<
   typeof DASHBOARD_ATTACHMENT_TYPE,
@@ -48,75 +40,22 @@ export interface DashboardUpdatesManager {
 interface CreateDashboardUpdatesManagerParams {
   chat$: Observable<ChatEvent>;
   addAttachment: (attachment: AttachmentInput) => void;
+  setChatConfig: (config: { sessionTag: string; attachments: AttachmentInput[] }) => void;
+  clearChatConfig: (() => void) | undefined;
 }
 
 export const createDashboardUpdatesManager = ({
   chat$,
   addAttachment,
+  setChatConfig,
+  clearChatConfig,
 }: CreateDashboardUpdatesManagerParams): DashboardUpdatesManager => {
   let dashboardApi: DashboardApi | undefined;
   let chatLiveUpdatesSubscription: Subscription | undefined;
   let manualUpdatesSubscription: Subscription | undefined;
   let currentAttachmentId: string | undefined;
   let currentAttachmentOrigin: DashboardAttachmentOrigin | undefined;
-
-  const toAttachmentPanel = (panel: DashboardPanel): AttachmentPanel => {
-    if (
-      panel.type === 'lens' &&
-      panel.config &&
-      typeof panel.config === 'object' &&
-      'attributes' in panel.config
-    ) {
-      const lensConfig = panel.config as { attributes: LensAttributes; title?: string };
-      // Convert LensAttributes (internal format) to API format for the attachment
-      if (isLensLegacyAttributes(lensConfig.attributes)) {
-        return {
-          type: 'lens',
-          panelId: panel.uid ?? '',
-          visualization: lensConfigBuilder.toAPIFormat(lensConfig.attributes),
-          title: typeof lensConfig.title === 'string' ? lensConfig.title : undefined,
-          grid: panel.grid,
-        };
-      }
-    }
-
-    return {
-      type: panel.type,
-      panelId: panel.uid ?? '',
-      rawConfig: panel.config as Record<string, unknown>,
-      title:
-        panel.config && typeof panel.config === 'object' && 'title' in panel.config
-          ? ((panel.config as { title?: unknown }).title as string | undefined)
-          : undefined,
-      grid: panel.grid,
-    };
-  };
-
-  const toDashboardAttachmentData = (state: DashboardState): DashboardAttachmentData => {
-    const topLevelPanels: AttachmentPanel[] = [];
-    const sections: DashboardSection[] = [];
-
-    for (const item of state.panels ?? []) {
-      if ('panels' in item) {
-        sections.push({
-          sectionId: item.uid ?? '',
-          title: item.title,
-          collapsed: item.collapsed ?? false,
-          grid: { y: item.grid.y },
-          panels: item.panels.map(toAttachmentPanel),
-        });
-      } else {
-        topLevelPanels.push(toAttachmentPanel(item));
-      }
-    }
-
-    return {
-      title: state.title ?? '',
-      description: state.description ?? '',
-      panels: topLevelPanels,
-      ...(sections.length ? { sections } : {}),
-    };
-  };
+  let lastContextAttachmentHash: string | undefined;
 
   const shouldSyncManualChanges = (): boolean => {
     if (!dashboardApi || !currentAttachmentId) {
@@ -146,6 +85,37 @@ export const createDashboardUpdatesManager = ({
     });
   };
 
+  const syncDashboardContextToChatConfig = () => {
+    if (!dashboardApi) {
+      return;
+    }
+
+    const currentDashboardState = dashboardApi.getSerializedState().attributes;
+    if (!currentDashboardState) {
+      return;
+    }
+
+    const savedObjectId = dashboardApi.savedObjectId$.getValue();
+    const attachment: AttachmentInput = {
+      id: savedObjectId
+        ? `dashboard-context:${savedObjectId}`
+        : `dashboard-context:${dashboardApi.uuid}`,
+      type: DASHBOARD_ATTACHMENT_TYPE,
+      data: toDashboardAttachmentData(currentDashboardState, savedObjectId),
+    };
+
+    const nextHash = JSON.stringify(attachment);
+    if (nextHash === lastContextAttachmentHash) {
+      return;
+    }
+    lastContextAttachmentHash = nextHash;
+
+    setChatConfig({
+      sessionTag: 'dashboard',
+      attachments: [attachment],
+    });
+  };
+
   const startManualUpdatesSubscription = () => {
     manualUpdatesSubscription?.unsubscribe();
 
@@ -165,6 +135,7 @@ export const createDashboardUpdatesManager = ({
       .pipe(auditTime(150))
       .subscribe(() => {
         syncManualChangesToAttachment();
+        syncDashboardContextToChatConfig();
       });
   };
 
@@ -226,6 +197,7 @@ export const createDashboardUpdatesManager = ({
   const setDashboardApi = (api: DashboardApi | undefined) => {
     dashboardApi = api;
     if (api) {
+      syncDashboardContextToChatConfig();
       startChatLiveUpdatesSubscription();
       startManualUpdatesSubscription();
     } else {
@@ -233,6 +205,8 @@ export const createDashboardUpdatesManager = ({
       chatLiveUpdatesSubscription = undefined;
       manualUpdatesSubscription?.unsubscribe();
       manualUpdatesSubscription = undefined;
+      clearChatConfig?.();
+      lastContextAttachmentHash = undefined;
     }
   };
 
@@ -252,6 +226,7 @@ export const createDashboardUpdatesManager = ({
     dashboardApi = undefined;
     currentAttachmentId = undefined;
     currentAttachmentOrigin = undefined;
+    lastContextAttachmentHash = undefined;
   };
 
   return {
