@@ -115,5 +115,28 @@ export {
 } from './src/evaluators/security';
 export { createSimilarityEvaluator } from './src/evaluators/similarity';
 
+export {
+  createRedTeamRunner,
+  createGuardrailsEngine,
+  DEFAULT_GUARDRAIL_RULES,
+  promptInjectionModule,
+  privilegeEscalationModule,
+  infoExtractionModule,
+  jailbreakingModule,
+} from './src/red_team';
+export type {
+  AttackCategory,
+  Severity,
+  AttackExample,
+  AttackModule,
+  AttackModuleConfig,
+  AttackResult,
+  RedTeamRunSummary,
+  GuardrailRule,
+  GuardrailAction,
+  GuardrailMatch,
+  GuardrailCheckResult,
+} from './src/red_team';
+
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';

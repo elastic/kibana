@@ -17,6 +17,7 @@ import { startCmd } from './commands/start';
 import { stopCmd } from './commands/stop';
 import { logsCmd } from './commands/logs';
 import { scoutCmd } from './commands/scout';
+import { redTeamCmd } from './commands/red_team';
 
 export async function run() {
   await new RunWithCommands(
@@ -35,6 +36,7 @@ export async function run() {
       envCmd,
       ciMapCmd,
       compareCmd,
+      redTeamCmd,
     ]
   ).execute();
 }
