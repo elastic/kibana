@@ -119,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: locWithSpace.agentPolicyId },
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });
@@ -169,6 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: locWithSpace.agentPolicyId },
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });
@@ -212,6 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: locWithSpace.id },
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });
@@ -237,6 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: newBrowserMonitorId,
           isBrowser: true,
           location: { id: locWithSpace.id },
+          packageVersion: testPrivateLocations.installedVersion,
         })
       );
     });

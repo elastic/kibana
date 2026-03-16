@@ -1452,6 +1452,10 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
                 },
               },
             },
+            _meta: {
+              optional: true,
+              description: 'Reason for the failure if the query execution was unsuccessful.',
+            },
           },
         },
         _meta: {
