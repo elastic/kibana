@@ -24,6 +24,7 @@ export const SKILL_NAME_REGEX = /^[a-z0-9-_]+$/;
 export const MAX_SKILL_NAME_LENGTH = 64;
 export const MAX_DESCRIPTION_LENGTH = 1024;
 export const MAX_INLINE_TOOLS = 7;
+export const MIN_CONTENT_LENGTH = 200;
 
 export const ELASTIC_LICENSE_HEADER = `/*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one

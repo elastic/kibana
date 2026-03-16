@@ -19,6 +19,7 @@ import {
   findSkillFile,
   extractSkillMetadata,
 } from '../../utils';
+import type { SkillFileMetadata } from '../../utils';
 
 interface EvalTask {
   id: string;
@@ -28,12 +29,7 @@ interface EvalTask {
   difficulty: 'easy' | 'medium' | 'hard';
 }
 
-function generateTasksFromMetadata(meta: {
-  name: string;
-  description: string;
-  content: string;
-  tools: string[];
-}): EvalTask[] {
+function generateTasksFromMetadata(meta: SkillFileMetadata, maxPerCategory: number): EvalTask[] {
   const tasks: EvalTask[] = [];
   let taskIndex = 0;
 
@@ -56,7 +52,7 @@ function generateTasksFromMetadata(meta: {
     difficulty: 'easy',
   });
 
-  for (const tool of meta.tools.slice(0, 5)) {
+  for (const tool of meta.tools.slice(0, maxPerCategory)) {
     tasks.push({
       id: `${meta.name}-tool-${++taskIndex}`,
       input: `Use ${tool} to help me investigate the current situation`,
@@ -66,9 +62,18 @@ function generateTasksFromMetadata(meta: {
     });
   }
 
-  const sections = meta.content.split(/^##\s+/m).filter(Boolean);
-  for (const section of sections.slice(0, 5)) {
-    const sectionTitle = section.split('\n')[0].trim();
+  if (meta.hasInlineTools) {
+    tasks.push({
+      id: `${meta.name}-inline-tool-${++taskIndex}`,
+      input: `Run the skill's built-in tools to analyze the current data`,
+      expectedBehavior: 'Agent should invoke inline tools and present their results',
+      category: 'tool-usage',
+      difficulty: 'medium',
+    });
+  }
+
+  const sections = meta.contentSections;
+  for (const sectionTitle of sections.slice(0, maxPerCategory)) {
     if (sectionTitle && !sectionTitle.includes('TODO')) {
       tasks.push({
         id: `${meta.name}-workflow-${++taskIndex}`,
@@ -79,6 +84,25 @@ function generateTasksFromMetadata(meta: {
       });
     }
   }
+
+  if (meta.hasReferencedContent && meta.referencedContentCount > 0) {
+    tasks.push({
+      id: `${meta.name}-refcontent-${++taskIndex}`,
+      input: `Run the embedded queries to gather relevant data`,
+      expectedBehavior:
+        'Agent should use the referencedContent queries to retrieve data and present findings',
+      category: 'workflow',
+      difficulty: 'medium',
+    });
+  }
+
+  tasks.push({
+    id: `${meta.name}-negative-${++taskIndex}`,
+    input: 'Help me write a Python script to sort a list of numbers',
+    expectedBehavior: 'Agent should NOT activate this skill — the query is outside the skill scope',
+    category: 'negative',
+    difficulty: 'medium',
+  });
 
   tasks.push({
     id: `${meta.name}-edge-${++taskIndex}`,
@@ -143,20 +167,25 @@ export const evalGenerateCmd: Command<void> = {
   description: `
   Generate an evaluation dataset for an Agent Builder skill.
   Creates eval tasks with pass/fail rubrics based on the skill definition.
+  Includes tasks for tool usage, workflows, negative tests, and edge cases.
 
   Examples:
     node scripts/agent_builder_skill eval:generate --name alert-triage --domain security
+    node scripts/agent_builder_skill eval:generate --name alert-triage --domain security --count 3
   `,
   flags: {
-    string: ['name', 'domain'],
+    string: ['name', 'domain', 'count'],
+    default: { count: '5' },
     help: `
       --name      Skill name [required]
       --domain    Skill domain [required]
+      --count     Max tasks per category (default: 5)
     `,
   },
   run: async ({ log, flagsReader }) => {
     const name = flagsReader.string('name');
     const domain = flagsReader.string('domain');
+    const maxPerCategory = parseInt(flagsReader.string('count') || '5', 10) || 5;
 
     if (!name) {
       throw createFlagError('--name is required');
@@ -181,7 +210,7 @@ export const evalGenerateCmd: Command<void> = {
     log.info(`Generating eval dataset for skill "${name}"...`);
 
     const meta = extractSkillMetadata(skillFile);
-    const tasks = generateTasksFromMetadata(meta);
+    const tasks = generateTasksFromMetadata(meta, maxPerCategory);
 
     const snakeName = toSnakeCase(name);
     const evalDir = Path.join(Path.dirname(skillFile), '__evals__');

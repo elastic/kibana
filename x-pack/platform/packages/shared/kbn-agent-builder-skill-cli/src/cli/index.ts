@@ -6,6 +6,7 @@
  */
 
 import { RunWithCommands } from '@kbn/dev-cli-runner';
+import { listCmd } from './commands/list';
 import { generateCmd } from './commands/generate';
 import { validateCmd } from './commands/validate';
 import { evalGenerateCmd } from './commands/eval_generate';
@@ -17,6 +18,6 @@ export async function run() {
       description: 'Agent Builder skill development CLI',
       usage: 'node scripts/agent_builder_skill <command> [options]',
     },
-    [generateCmd, validateCmd, evalGenerateCmd, evalRunCmd]
+    [listCmd, generateCmd, validateCmd, evalGenerateCmd, evalRunCmd]
   ).execute();
 }

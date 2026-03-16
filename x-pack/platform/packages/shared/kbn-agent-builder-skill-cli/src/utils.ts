@@ -128,34 +128,6 @@ export function findSkillFile(
   return null;
 }
 
-/**
- * Discovers tool files in a plugin directory by searching for files
- * that export tool definitions with Zod schemas.
- */
-export function discoverToolFiles(repoRoot: string, pluginPath: string, log: ToolingLog): string[] {
-  const toolsDir = Path.join(repoRoot, pluginPath, 'tools');
-  if (!Fs.existsSync(toolsDir)) {
-    log.warning(`Tools directory not found: ${toolsDir}`);
-    return [];
-  }
-
-  const files: string[] = [];
-  const entries = Fs.readdirSync(toolsDir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    if (entry.isDirectory()) {
-      const toolFile = Path.join(toolsDir, entry.name, 'tool.ts');
-      if (Fs.existsSync(toolFile)) {
-        files.push(toolFile);
-      }
-    } else if (entry.name.endsWith('_tool.ts')) {
-      files.push(Path.join(toolsDir, entry.name));
-    }
-  }
-
-  return files;
-}
-
 export interface SkillFileMetadata {
   id: string;
   name: string;
@@ -163,11 +135,17 @@ export interface SkillFileMetadata {
   content: string;
   basePath: string;
   tools: string[];
+  hasInlineTools: boolean;
+  hasReferencedContent: boolean;
+  referencedContentCount: number;
+  hasTest: boolean;
+  hasEvals: boolean;
+  contentSections: string[];
 }
 
 /**
  * Extracts metadata from a skill definition file using regex.
- * Parses name, description, content, basePath, and tool IDs.
+ * Parses name, description, content, basePath, tool IDs, and structural info.
  */
 export function extractSkillMetadata(filePath: string): SkillFileMetadata {
   const source = Fs.readFileSync(filePath, 'utf-8');
@@ -179,17 +157,99 @@ export function extractSkillMetadata(filePath: string): SkillFileMetadata {
   const contentMatch = source.match(/content:\s*`([^`]*)`/s);
   const toolMatches = source.match(/['"]([a-z]+\.[a-z._]+)['"]/g);
 
+  const hasInlineTools = source.includes('getInlineTools');
+  const hasReferencedContent = source.includes('referencedContent');
+  const referencedContentMatches = source.match(/relativePath:\s*['"][^'"]+['"]/g);
+  const referencedContentCount = referencedContentMatches?.length ?? 0;
+
+  const hasTest = Fs.existsSync(filePath.replace('.ts', '.test.ts'));
+
+  const evalDir = Path.join(Path.dirname(filePath), '__evals__');
+  const hasEvals = Fs.existsSync(evalDir) && Fs.readdirSync(evalDir).length > 0;
+
+  const contentText = contentMatch?.[1]?.trim() ?? '';
+  const contentSections = contentText
+    .split(/^##\s+/m)
+    .filter(Boolean)
+    .map((s) => s.split('\n')[0].trim());
+
   return {
     id: idMatch?.[1] ?? 'unknown',
     name: nameMatch?.[1] ?? 'unknown',
     description: descMatch?.[1]?.trim() ?? '',
-    content: contentMatch?.[1]?.trim() ?? '',
+    content: contentText,
     basePath: basePathMatch?.[1] ?? '',
     tools:
       toolMatches
         ?.map((t) => t.replace(/['"]/g, ''))
         .filter((t) => t.includes('.') && !t.includes('/') && !t.includes('@')) ?? [],
+    hasInlineTools,
+    hasReferencedContent,
+    referencedContentCount,
+    hasTest,
+    hasEvals,
+    contentSections,
   };
+}
+
+/**
+ * Discovers all registered tool IDs across the given plugin paths by
+ * scanning tool files for `id:` fields matching the dot-notation pattern.
+ */
+export function discoverRegisteredToolIds(repoRoot: string, pluginPaths: string[]): Set<string> {
+  const ids = new Set<string>();
+
+  for (const pluginPath of pluginPaths) {
+    const toolsDir = Path.join(repoRoot, pluginPath, 'tools');
+    if (!Fs.existsSync(toolsDir)) continue;
+
+    function walkTools(dir: string) {
+      const entries = Fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = Path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          walkTools(fullPath);
+        } else if (entry.name.endsWith('.ts') && !entry.name.endsWith('.test.ts')) {
+          const content = Fs.readFileSync(fullPath, 'utf-8');
+          const toolIdMatches = content.match(/id:\s*['"]([a-z]+\.[a-z._]+)['"]/g);
+          if (toolIdMatches) {
+            for (const m of toolIdMatches) {
+              const idVal = m.match(/['"]([^'"]+)['"]/);
+              if (idVal) ids.add(idVal[1]);
+            }
+          }
+        }
+      }
+    }
+
+    walkTools(toolsDir);
+
+    const skillsDir = Path.join(repoRoot, pluginPath, 'skills');
+    if (!Fs.existsSync(skillsDir)) continue;
+    function walkSkillInlineTools(dir: string) {
+      const entries = Fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = Path.join(dir, entry.name);
+        if (entry.isDirectory() && entry.name !== '__evals__') {
+          walkSkillInlineTools(fullPath);
+        } else if (entry.name.endsWith('.ts') && !entry.name.endsWith('.test.ts')) {
+          const content = Fs.readFileSync(fullPath, 'utf-8');
+          if (content.includes('getInlineTools')) {
+            const inlineIdMatches = content.match(/id:\s*['"]([a-z]+\.[a-z._-]+)['"]/g);
+            if (inlineIdMatches) {
+              for (const m of inlineIdMatches) {
+                const idVal = m.match(/['"]([^'"]+)['"]/);
+                if (idVal) ids.add(idVal[1]);
+              }
+            }
+          }
+        }
+      }
+    }
+    walkSkillInlineTools(skillsDir);
+  }
+
+  return ids;
 }
 
 export function ensureDir(dirPath: string): void {
