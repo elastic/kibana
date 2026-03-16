@@ -803,8 +803,7 @@ function normalizeMaxIterations(raw?: MaxIterations): {
   maxIterations: number;
   onLimit: 'continue' | 'fail';
 } {
-  if (raw == null)
-    return { maxIterations: DEFAULT_LOOP_MAX_ITERATIONS, onLimit: 'continue' };
+  if (raw == null) return { maxIterations: DEFAULT_LOOP_MAX_ITERATIONS, onLimit: 'continue' };
   if (typeof raw === 'number') return { maxIterations: raw, onLimit: 'continue' };
   return { maxIterations: raw.limit, onLimit: raw['on-limit'] };
 }
