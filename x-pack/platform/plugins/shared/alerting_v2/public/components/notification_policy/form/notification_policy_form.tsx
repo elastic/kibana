@@ -20,8 +20,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { FREQUENCY_OPTIONS, THROTTLE_INTERVAL_PATTERN, WORKFLOW_OPTIONS } from './constants';
-import type { NotificationPolicyDestination, NotificationPolicyFormState } from './types';
+import { FREQUENCY_OPTIONS, THROTTLE_INTERVAL_PATTERN } from './constants';
+import { WorkflowSelector } from './components/workflow_selector';
+import type { NotificationPolicyFormState } from './types';
 
 export const NotificationPolicyForm = () => {
   const { control } = useFormContext<NotificationPolicyFormState>();
@@ -367,49 +368,7 @@ export const NotificationPolicyForm = () => {
           </EuiTitle>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
-          <Controller
-            name="destinations"
-            control={control}
-            rules={{
-              validate: (value) =>
-                value.length > 0
-                  ? true
-                  : i18n.translate(
-                      'xpack.alertingV2.notificationPolicy.form.destination.required',
-                      { defaultMessage: 'At least one destination is required' }
-                    ),
-            }}
-            render={({ field, fieldState: { error } }) => (
-              <EuiFormRow
-                label={i18n.translate('xpack.alertingV2.notificationPolicy.form.destination', {
-                  defaultMessage: 'Destinations',
-                })}
-                isInvalid={!!error}
-                error={error?.message}
-              >
-                <EuiComboBox
-                  fullWidth
-                  isInvalid={!!error}
-                  data-test-subj="destinationsInput"
-                  placeholder={i18n.translate(
-                    'xpack.alertingV2.notificationPolicy.form.destination.placeholder',
-                    { defaultMessage: 'Add destination' }
-                  )}
-                  selectedOptions={field.value.map((d: NotificationPolicyDestination) => {
-                    const workflow = WORKFLOW_OPTIONS.find((w) => w.value === d.id);
-                    return {
-                      label: workflow?.label ?? '',
-                      value: workflow?.value ?? '',
-                    };
-                  })}
-                  onChange={(options) => {
-                    field.onChange(options.map((o) => ({ type: 'workflow', id: o.value })));
-                  }}
-                  options={WORKFLOW_OPTIONS}
-                />
-              </EuiFormRow>
-            )}
-          />
+          <WorkflowSelector />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
     </>
