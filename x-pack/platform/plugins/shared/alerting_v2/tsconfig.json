@@ -63,7 +63,8 @@
     "@kbn/workflows",
     "@kbn/core-http-server-utils",
     "@kbn/eval-kql",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/react-hooks"
   ],
   "exclude": ["target/**/*"]
 }
