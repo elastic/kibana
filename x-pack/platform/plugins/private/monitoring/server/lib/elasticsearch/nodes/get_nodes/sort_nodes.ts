@@ -30,9 +30,5 @@ export function sortNodes<T extends Node>(
     return nodes;
   }
 
-  return orderBy(
-    nodes,
-    (node) => getSortKey(node[sort!.field]),
-    sort.direction
-  );
+  return orderBy(nodes, (node) => getSortKey(node[sort!.field]), sort.direction);
 }
