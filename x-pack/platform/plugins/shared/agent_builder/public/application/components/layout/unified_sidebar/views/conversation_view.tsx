@@ -6,32 +6,17 @@
  */
 
 import React, { useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom-v5-compat';
+import { Link } from 'react-router-dom-v5-compat';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiHorizontalRule,
-  EuiSelect,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { appPaths } from '../../../../utils/app_paths';
 import { getAgentIdFromPath } from '../../../../route_config';
-import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
-import { storageKeys } from '../../../../storage_keys';
+import { AgentSelector } from '../agent_selector';
 
 const labels = {
-  agentLabel: i18n.translate('xpack.agentBuilder.sidebar.conversation.agentLabel', {
-    defaultMessage: 'Agent',
-  }),
-  selectAgent: i18n.translate('xpack.agentBuilder.sidebar.conversation.selectAgent', {
-    defaultMessage: 'Select agent',
-  }),
   customize: i18n.translate('xpack.agentBuilder.sidebar.conversation.customize', {
     defaultMessage: 'Customize',
   }),
@@ -52,9 +37,6 @@ interface ConversationSidebarViewProps {
 
 export const ConversationSidebarView: React.FC<ConversationSidebarViewProps> = ({ pathname }) => {
   const agentId = getAgentIdFromPath(pathname) ?? 'elastic-ai-agent';
-  const { agents, isLoading } = useAgentBuilderAgents();
-  const navigate = useNavigate();
-  const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.agentId);
 
   const linkStyles = css`
     text-decoration: none;
@@ -64,41 +46,17 @@ export const ConversationSidebarView: React.FC<ConversationSidebarViewProps> = (
     }
   `;
 
-  const handleAgentChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const newAgentId = e.target.value;
-      setStoredAgentId(newAgentId);
-      navigate(appPaths.agent.root({ agentId: newAgentId }));
-    },
-    [navigate, setStoredAgentId]
+  const getNavigationPath = useCallback(
+    (newAgentId: string) => appPaths.agent.root({ agentId: newAgentId }),
+    []
   );
-
-  const agentOptions = agents.map((agent) => ({
-    value: agent.id,
-    text: agent.name,
-  }));
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          <strong>{labels.agentLabel}</strong>
-        </EuiText>
-        {isLoading ? (
-          <EuiLoadingSpinner size="s" />
-        ) : (
-          <EuiSelect
-            compressed
-            options={agentOptions}
-            value={agentId}
-            onChange={handleAgentChange}
-            aria-label={labels.selectAgent}
-          />
-        )}
-      </EuiFlexItem>
+      <AgentSelector agentId={agentId} getNavigationPath={getNavigationPath} />
 
       <EuiFlexItem grow={false}>
-        <Link to={appPaths.agent.skills({ agentId })} css={linkStyles}>
+        <Link to={appPaths.agent.instructions({ agentId })} css={linkStyles}>
           <EuiText size="s">{labels.customize}</EuiText>
         </Link>
       </EuiFlexItem>
