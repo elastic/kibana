@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC, PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
@@ -78,10 +78,8 @@ function createChromeMock({
   return chrome;
 }
 
-function createWrapper(
-  chrome: ReturnType<typeof createChromeMock>
-): FC<PropsWithChildren<unknown>> {
-  return ({ children }) => (
+function createWrapper(chrome: ReturnType<typeof createChromeMock>) {
+  return ({ children }: PropsWithChildren<unknown>) => (
     <TestChromeProviders chrome={chrome}>{children}</TestChromeProviders>
   );
 }
@@ -107,7 +105,7 @@ describe('CollapsibleNav', () => {
   it('renders the default nav', () => {
     const chrome = createChromeMock();
     const component = mount(<CollapsibleNav {...mockProps()} />, {
-      wrappingComponent: createWrapper(chrome),
+      wrappingComponent: createWrapper(chrome) as any,
     });
     expect(component).toMatchSnapshot();
 
@@ -138,7 +136,7 @@ describe('CollapsibleNav', () => {
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
       />,
-      { wrappingComponent: createWrapper(chrome) }
+      { wrappingComponent: createWrapper(chrome) as any }
     );
     expect(component.render()).toMatchSnapshot();
   });
@@ -153,7 +151,7 @@ describe('CollapsibleNav', () => {
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
       />,
-      { wrappingComponent: createWrapper(chrome) }
+      { wrappingComponent: createWrapper(chrome) as any }
     );
     expectShownNavLinksCount(component, 3);
     clickGroup(component, 'kibana');
@@ -176,7 +174,7 @@ describe('CollapsibleNav', () => {
         isNavOpen={true}
         navLinks$={new BehaviorSubject(navLinks)}
       />,
-      { wrappingComponent: createWrapper(chrome) }
+      { wrappingComponent: createWrapper(chrome) as any }
     );
     component.setProps({
       closeNav: () => {

@@ -201,7 +201,7 @@ export function CollapsibleNav({
                 <EuiListGroup
                   listItems={[
                     createEuiListItem({
-                      link: customNavLink,
+                      link: customNavLink as ChromeNavLink,
                       basePath,
                       navigateToUrl,
                       dataTestSubj: 'collapsibleNavCustomNavLink',
