@@ -80,9 +80,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Wait for navigation to edit page
         await retry.try(async () => {
           const url = await browser.getCurrentUrl();
-          if (!url.includes(`/app/rules/rule/edit/${testRuleId}`)) {
+          if (!url.includes(`/app/rules/edit/${testRuleId}`)) {
             throw new Error(
-              `Expected URL to contain '/app/rules/rule/edit/${testRuleId}' but got: ${url}`
+              `Expected URL to contain '/app/rules/edit/${testRuleId}' but got: ${url}`
             );
           }
         });
@@ -101,7 +101,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('returns to rules list after saving', async () => {
         // We should be on the edit page from the previous test
         const currentUrl = await browser.getCurrentUrl();
-        expect(currentUrl).to.contain(`/app/rules/rule/edit/${testRuleId}`);
+        expect(currentUrl).to.contain(`/app/rules/edit/${testRuleId}`);
 
         // Make a small change to the rule name
         const updatedName = `${testRuleName}-updated`;
@@ -211,9 +211,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Wait for navigation to edit page
         await retry.try(async () => {
           const url = await browser.getCurrentUrl();
-          if (!url.includes(`/app/rules/rule/edit/${testRuleId}`)) {
+          if (!url.includes(`/app/rules/edit/${testRuleId}`)) {
             throw new Error(
-              `Expected URL to contain '/app/rules/rule/edit/${testRuleId}' but got: ${url}`
+              `Expected URL to contain '/app/rules/edit/${testRuleId}' but got: ${url}`
             );
           }
         });
@@ -227,7 +227,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('returns to rule details page after saving from details', async () => {
         // We should be on the edit page from the previous test
         const currentUrl = await browser.getCurrentUrl();
-        expect(currentUrl).to.contain(`/app/rules/rule/edit/${testRuleId}`);
+        expect(currentUrl).to.contain(`/app/rules/edit/${testRuleId}`);
 
         // Make a small change
         const updatedName = `${testRuleName}-details-updated`;
