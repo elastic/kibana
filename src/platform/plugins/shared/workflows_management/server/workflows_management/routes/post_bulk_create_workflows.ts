@@ -44,6 +44,12 @@ export function registerPostBulkCreateWorkflowsRoute({
               message: 'Overwriting workflows requires the update privilege',
             },
           });
+        } else if (!request.authzResult?.[WorkflowsManagementApiActions.create]) {
+          return response.forbidden({
+            body: {
+              message: 'Creating workflows requires the create privilege',
+            },
+          });
         }
 
         const result = await api.bulkCreateWorkflows(request.body.workflows, spaceId, request, {
