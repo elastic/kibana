@@ -25,7 +25,7 @@ describe('getEuiTableColumn ', () => {
       render: expect.any(Function),
       maxWidth: '17ch',
       minWidth: '4em',
-      className: 'eui-textNumber',
+      className: 'eui-textNumber eui-textNoWrap',
       align: RIGHT_ALIGNMENT,
       'data-test-subj': 'number-custom-field-column',
     });
