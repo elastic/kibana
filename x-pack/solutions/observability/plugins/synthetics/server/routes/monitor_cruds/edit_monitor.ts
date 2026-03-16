@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import { isEmpty } from 'lodash';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { invalidOriginError } from './add_monitor';
@@ -256,10 +256,11 @@ export const syncEditedMonitor = async ({
   const monitorPrivateLocations = normalizedMonitor[ConfigKey.LOCATIONS].filter(
     (loc) => !loc.isServiceManaged
   );
+  const packagePolicySoType = await getPackagePolicySavedObjectType();
   const references = monitorPrivateLocations.map((loc) => ({
     id: `${monitorId}-${loc.id}`,
     name: `${monitorId}-${loc.id}`,
-    type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    type: packagePolicySoType,
   }));
 
   try {
