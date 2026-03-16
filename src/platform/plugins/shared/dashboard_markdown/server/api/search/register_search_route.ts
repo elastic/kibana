@@ -10,14 +10,14 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { commonRouteConfig, INTERNAL_API_VERSION } from '../constants';
-import { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
+import { searchRequestQuerySchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
 import { MARKDOWN_API_PATH } from '../../../common/constants';
 
 export function registerSearchRoute(router: VersionedRouter<RequestHandlerContext>) {
   const searchRoute = router.get({
-    path: `${MARKDOWN_API_PATH}/search`,
-    summary: `Search markdown panels`,
+    path: MARKDOWN_API_PATH,
+    summary: `List markdown panels`,
     ...commonRouteConfig,
   });
 
@@ -26,7 +26,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
       version: INTERNAL_API_VERSION,
       validate: {
         request: {
-          body: searchRequestBodySchema,
+          query: searchRequestQuerySchema,
         },
         response: {
           200: {
@@ -38,7 +38,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
     async (ctx, req, res) => {
       let result;
       try {
-        result = await search(ctx, req.body);
+        result = await search(ctx, req.query);
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();

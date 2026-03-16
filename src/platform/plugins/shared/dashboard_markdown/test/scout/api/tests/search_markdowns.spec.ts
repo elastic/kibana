@@ -12,7 +12,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, COMMON_HEADERS, MARKDOWN_API_PATH } from '../fixtures';
 
-const SEARCH_ENDPOINT = `${MARKDOWN_API_PATH}/search`;
+const SEARCH_ENDPOINT = MARKDOWN_API_PATH;
 const TOTAL_MARKDOWNS = 100;
 const MANY_MARKDOWNS_KBN_ARCHIVE_PATH =
   'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many_markdowns.json';
@@ -21,6 +21,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
+    await kbnClient.savedObjects.clean({ types: ['markdown'] });
     viewerCredentials = await requestAuth.getApiKey('viewer');
     await kbnClient.importExport.load(MANY_MARKDOWNS_KBN_ARCHIVE_PATH);
   });
@@ -35,7 +36,6 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
       },
-      body: {},
       responseType: 'json',
     });
 
@@ -45,13 +45,10 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   });
 
   apiTest('should narrow results by search', async ({ apiClient }) => {
-    const response = await apiClient.get(SEARCH_ENDPOINT, {
+    const response = await apiClient.get(`${SEARCH_ENDPOINT}?search=0*`, {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
-      },
-      body: {
-        search: '0*',
       },
       responseType: 'json',
     });
@@ -62,13 +59,10 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   });
 
   apiTest('should allow users to set a per page limit', async ({ apiClient }) => {
-    const response = await apiClient.get(SEARCH_ENDPOINT, {
+    const response = await apiClient.get(`${SEARCH_ENDPOINT}?per_page=5`, {
       headers: {
         ...COMMON_HEADERS,
         ...viewerCredentials.apiKeyHeader,
-      },
-      body: {
-        per_page: 5,
       },
       responseType: 'json',
     });
@@ -81,14 +75,10 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
   apiTest(
     'should allow users to paginate through the list of markdown panels',
     async ({ apiClient }) => {
-      const response = await apiClient.get(SEARCH_ENDPOINT, {
+      const response = await apiClient.get(`${SEARCH_ENDPOINT}?page=2&per_page=10`, {
         headers: {
           ...COMMON_HEADERS,
           ...viewerCredentials.apiKeyHeader,
-        },
-        body: {
-          page: 2,
-          per_page: 10,
         },
         responseType: 'json',
       });

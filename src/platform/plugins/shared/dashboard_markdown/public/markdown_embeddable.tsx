@@ -53,14 +53,20 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const isByReference = libraryId !== undefined;
     const initialLibraryState = isByReference
       ? await loadFromLibrary(libraryId)
-      : ({} as MarkdownAttributes);
+      : ({
+          title: '',
+          description: '',
+          content: '',
+        } as MarkdownAttributes);
 
     const titleManager = initializeTitleManager(initialState);
     const content$ = new BehaviorSubject<string>(
       isByReference ? initialLibraryState.content : (initialState as MarkdownByValueState).content
     );
-    const defaultTitle$ = new BehaviorSubject(initialLibraryState.title);
-    const defaultDescription$ = new BehaviorSubject(initialLibraryState.description);
+    const defaultTitle$ = new BehaviorSubject<string | undefined>(initialLibraryState.title);
+    const defaultDescription$ = new BehaviorSubject<string | undefined>(
+      initialLibraryState.description
+    );
     const isEditing$ = new BehaviorSubject<boolean>(false);
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);

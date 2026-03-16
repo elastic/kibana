@@ -12,7 +12,7 @@ import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_sc
 
 const MAX_PER_PAGE = 10000;
 
-export const searchRequestBodySchema = schema.object({
+export const searchRequestQuerySchema = schema.object({
   page: schema.maybe(
     schema.number({
       meta: {

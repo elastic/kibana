@@ -10,7 +10,7 @@
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 
-import type { MarkdownSearchRequestBody, MarkdownSearchResponseBody } from '../../server/api';
+import type { MarkdownSearchRequestQuery, MarkdownSearchResponseBody } from '../../server/api';
 import {
   MARKDOWN_API_PATH,
   MARKDOWN_API_VERSION,
@@ -50,12 +50,13 @@ export const markdownClient = {
       });
     return result;
   },
-  search: async (searchBody: MarkdownSearchRequestBody) => {
+  search: async (searchQuery: MarkdownSearchRequestQuery) => {
+    const { search, ...query } = searchQuery;
     return await coreServices.http.post<MarkdownSearchResponseBody>(`${MARKDOWN_API_PATH}/search`, {
       version: MARKDOWN_API_VERSION,
       body: JSON.stringify({
-        ...searchBody,
-        search: searchBody.search ? `${searchBody.search}*` : undefined,
+        ...query,
+        search: search ? `${search}*` : undefined,
       }),
     });
   },

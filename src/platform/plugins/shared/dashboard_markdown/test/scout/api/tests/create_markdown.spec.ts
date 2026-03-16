@@ -23,7 +23,7 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest.afterAll(async ({ kbnClient, apiServices }) => {
     await apiServices.spaces.delete(spaceId);
-    await kbnClient.savedObjects.clean({ types: ['dashboard_markdown'] });
+    await kbnClient.savedObjects.cleanStandardList();
   });
 
   apiTest('should create a markdown panel', async ({ apiClient }) => {

@@ -108,6 +108,7 @@ apiTest.describe('markdown - update', { tag: tags.deploymentAgnostic }, () => {
           ...editorCredentials.apiKeyHeader,
         },
         body: {
+          title: 'Does not matter',
           content: '# Does not matter',
         },
         responseType: 'json',
