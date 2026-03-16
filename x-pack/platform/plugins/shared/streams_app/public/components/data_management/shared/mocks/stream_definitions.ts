@@ -84,6 +84,7 @@ export const createMockWiredStreamDefinition = (
     view_index_metadata: true,
     create_snapshot_repository: true,
   },
+  data_stream_exists: true,
   inherited_fields: {
     'attributes.inherited_field': {
       type: 'keyword',

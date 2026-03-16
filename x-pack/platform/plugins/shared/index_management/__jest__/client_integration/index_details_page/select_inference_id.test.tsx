@@ -8,6 +8,8 @@
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   installConsoleTruncationWarningFilter,
@@ -18,12 +20,6 @@ import {
 
 const mockDispatch = jest.fn();
 const mockNavigateToUrl = jest.fn();
-
-const mockIsAtLeast = jest.fn((level: string) => {
-  // Default: enterprise license, so all levels return true
-  // Individual tests can override this mock implementation
-  return true;
-});
 
 jest.mock('../../../public/application/app_context', () => ({
   ...jest.requireActual('../../../public/application/app_context'),
@@ -103,6 +99,7 @@ jest.mock('@kbn/inference-endpoint-ui-common', () => {
   const MockInferenceFlyoutWrapper = ({
     onFlyoutClose,
     onSubmitSuccess,
+    allowedTaskTypes,
   }: {
     onFlyoutClose: () => void;
     onSubmitSuccess: (id: string) => void;
@@ -110,6 +107,7 @@ jest.mock('@kbn/inference-endpoint-ui-common', () => {
     toasts?: unknown;
     isEdit?: boolean;
     enforceAdaptiveAllocations?: boolean;
+    allowedTaskTypes?: InferenceTaskType[];
   }) => (
     <div data-test-subj="inference-flyout-wrapper">
       <button data-test-subj="mock-flyout-close" onClick={onFlyoutClose}>
@@ -121,6 +119,9 @@ jest.mock('@kbn/inference-endpoint-ui-common', () => {
       >
         Submit
       </button>
+      {allowedTaskTypes && (
+        <div data-test-subj="mock-allowed-task-types">{allowedTaskTypes.join(',')}</div>
+      )}
     </div>
   );
 
@@ -136,13 +137,6 @@ jest.mock('../../../public/application/services/api', () => ({
   useLoadInferenceEndpoints: jest.fn(),
 }));
 
-jest.mock('../../../public/hooks/use_license', () => ({
-  useLicense: jest.fn(() => ({
-    isLoading: false,
-    isAtLeast: mockIsAtLeast,
-  })),
-}));
-
 let user: ReturnType<typeof userEvent.setup>;
 
 let restoreConsoleErrorFilter: () => void;
@@ -152,8 +146,6 @@ beforeEach(() => {
   jest.clearAllMocks();
   user = userEvent.setup();
   restoreConsoleErrorFilter = installConsoleTruncationWarningFilter();
-  // Reset to default: enterprise license (all levels return true)
-  mockIsAtLeast.mockImplementation(() => true);
 });
 
 afterEach(async () => {
@@ -174,17 +166,18 @@ describe('SelectInferenceId', () => {
     });
 
     it('SHOULD display selected endpoint in button', async () => {
-      renderSelectInferenceId();
+      renderSelectInferenceId({ initialValue: '' });
 
       const button = await screen.findByTestId('inferenceIdButton');
-      expect(button).toHaveTextContent('.preconfigured-elser');
+      expect(button).toHaveTextContent(defaultInferenceEndpoints.JINAv5);
     });
 
-    it('SHOULD prioritize ELSER endpoint as default selection', async () => {
-      renderSelectInferenceId();
+    it('SHOULD prioritize Jina v5 endpoint as default selection', async () => {
+      renderSelectInferenceId({ initialValue: '' });
 
       const button = await screen.findByTestId('inferenceIdButton');
-      expect(button).toHaveTextContent('.preconfigured-elser');
+      expect(button).toHaveTextContent(defaultInferenceEndpoints.JINAv5);
+      expect(button).not.toHaveTextContent('.preconfigured-elser');
       expect(button).not.toHaveTextContent('endpoint-1');
       expect(button).not.toHaveTextContent('endpoint-2');
     });
@@ -263,6 +256,16 @@ describe('SelectInferenceId', () => {
       await user.click(await screen.findByTestId('createInferenceEndpointButton'));
 
       expect(await screen.findByTestId('inference-flyout-wrapper')).toBeInTheDocument();
+    });
+
+    it('SHOULD pass allowedTaskTypes to restrict endpoint creation to compatible types', async () => {
+      renderSelectInferenceId();
+
+      await user.click(await screen.findByTestId('inferenceIdButton'));
+      await user.click(await screen.findByTestId('createInferenceEndpointButton'));
+
+      const allowedTaskTypes = await screen.findByTestId('mock-allowed-task-types');
+      expect(allowedTaskTypes).toHaveTextContent('text_embedding,sparse_embedding');
     });
 
     describe('AND flyout close is triggered', () => {
@@ -354,16 +357,16 @@ describe('SelectInferenceId', () => {
       renderSelectInferenceId({ initialValue: '' });
 
       const button = screen.getByTestId('inferenceIdButton');
-      expect(button).toHaveTextContent('No inference endpoint selected');
+      expect(button).toHaveTextContent(defaultInferenceEndpoints.ELSER);
     });
 
-    it('SHOULD display "No inference endpoint selected" message', () => {
+    it('SHOULD default to the ELSER endpoint when no endpoints are returned', () => {
       setupInferenceEndpointsMocks({ data: [], isLoading: false, error: null });
 
       renderSelectInferenceId({ initialValue: '' });
 
       const button = screen.getByTestId('inferenceIdButton');
-      expect(button).toHaveTextContent('No inference endpoint selected');
+      expect(button).toHaveTextContent(defaultInferenceEndpoints.ELSER);
     });
   });
 
@@ -418,24 +421,24 @@ describe('SelectInferenceId', () => {
       renderSelectInferenceId({ initialValue: '' });
 
       const button = await screen.findByTestId('inferenceIdButton');
-      await waitFor(() => expect(button).toHaveTextContent('.preconfigured-elser'));
+      await waitFor(() => expect(button).toHaveTextContent(defaultInferenceEndpoints.JINAv5));
     });
 
-    describe('AND .elser-2-elastic is available', () => {
-      it('SHOULD prioritize .elser-2-elastic over other endpoints IF has enterprise license', async () => {
+    describe('AND .elser-2-elasticsearch is available', () => {
+      it('SHOULD prioritize .elser-2-elasticsearch over lower-priority endpoints', async () => {
         setupInferenceEndpointsMocks({
           data: [
             {
-              inference_id: '.elser-2-elastic',
-              task_type: 'sparse_embedding',
-              service: 'elastic',
-              service_settings: { model_id: 'elser-2-elastic' },
-            },
-            {
-              inference_id: '.preconfigured-elser',
+              inference_id: defaultInferenceEndpoints.ELSER,
               task_type: 'sparse_embedding',
               service: 'elastic',
               service_settings: { model_id: 'elser' },
+            },
+            {
+              inference_id: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
+              task_type: 'sparse_embedding',
+              service: 'elastic',
+              service_settings: { model_id: 'elser-2-elastic' },
             },
             {
               inference_id: 'endpoint-1',
@@ -449,41 +452,9 @@ describe('SelectInferenceId', () => {
         renderSelectInferenceId({ initialValue: '' });
 
         const button = await screen.findByTestId('inferenceIdButton');
-        await waitFor(() => expect(button).toHaveTextContent('.elser-2-elastic'));
-      });
-
-      it('SHOULD fall back to .preconfigured-elser instead of .elser-2-elastic IF has NO enterprise license', async () => {
-        // Mock license to return false for enterprise
-        mockIsAtLeast.mockImplementation((level: string) => level !== 'enterprise');
-
-        setupInferenceEndpointsMocks({
-          data: [
-            {
-              inference_id: '.elser-2-elastic',
-              task_type: 'sparse_embedding',
-              service: 'elastic',
-              service_settings: { model_id: 'elser-2-elastic' },
-            },
-            {
-              inference_id: '.preconfigured-elser',
-              task_type: 'sparse_embedding',
-              service: 'elastic',
-              service_settings: { model_id: 'elser' },
-            },
-            {
-              inference_id: 'endpoint-1',
-              task_type: 'text_embedding',
-              service: 'openai',
-              service_settings: { model_id: 'text-embedding-3-large' },
-            },
-          ] as InferenceAPIConfigResponse[],
-        });
-
-        renderSelectInferenceId({ initialValue: '' });
-
-        const button = await screen.findByTestId('inferenceIdButton');
-        await waitFor(() => expect(button).toHaveTextContent('.preconfigured-elser'));
-        expect(button).not.toHaveTextContent('.elser-2-elastic');
+        await waitFor(() =>
+          expect(button).toHaveTextContent(defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID)
+        );
       });
     });
   });

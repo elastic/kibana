@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/kbn-health-gateway-status-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/kbn-health-gateway-status-plugin'
+  title: '@kbn/kbn-health-gateway-status-plugin'
   description: Moon project for @kbn/kbn-health-gateway-status-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/health_gateway/plugins/status
+  sourceRoot: src/platform/test/health_gateway/plugins/status
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'

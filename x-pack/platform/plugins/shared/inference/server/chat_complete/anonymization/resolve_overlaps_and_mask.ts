@@ -17,14 +17,20 @@ export function resolveOverlapsAndMask({
   detectedMatches,
   state,
   rules,
+  salt,
 }: {
   detectedMatches: DetectedMatch[];
   state: AnonymizationState;
   rules: RegexAnonymizationRule[];
+  salt?: string;
 }): AnonymizationState {
   if (detectedMatches.length === 0) {
     return state;
   }
+
+  // Work on copies to avoid mutating the input state
+  const nextRecords = state.records.map((r) => ({ ...r }));
+  const newAnonymizations: AnonymizationState['anonymizations'] = [];
 
   // Group matches by record and field
   const matchesByRecordAndField = detectedMatches.reduce((acc, match) => {
@@ -42,14 +48,24 @@ export function resolveOverlapsAndMask({
   // Process each record and field
   matchesByRecordAndField.forEach((fieldMatches, recordIndex) => {
     fieldMatches.forEach((matches, fieldName) => {
-      const originalText = state.records[recordIndex][fieldName];
+      const originalText = nextRecords[recordIndex]?.[fieldName];
+      if (typeof originalText !== 'string') {
+        return;
+      }
 
-      // Resolve overlaps (first rule wins)
+      // Sort by position first, then by rule priority (lower ruleIndex = higher priority)
+      const sorted = [...matches].sort((a, b) => {
+        if (a.start !== b.start) {
+          return a.start - b.start;
+        }
+        return a.ruleIndex - b.ruleIndex;
+      });
+
+      // Resolve overlaps: for overlapping ranges, earlier rule wins (lower ruleIndex)
       const nonOverlappingMatches: DetectedMatch[] = [];
       let lastEnd = -1;
 
-      for (const match of matches) {
-        // Skip if this match overlaps with a higher priority match
+      for (const match of sorted) {
         if (match.start < lastEnd) {
           continue;
         }
@@ -64,18 +80,19 @@ export function resolveOverlapsAndMask({
         let lastIndex = 0;
 
         for (const match of nonOverlappingMatches) {
-          // Add text before the match
           result += originalText.substring(lastIndex, match.start);
 
-          // Create and add the mask
-          const mask = getEntityMask({
-            value: match.matchValue,
-            class_name: match.class_name,
-          });
+          const mask = getEntityMask(
+            {
+              value: match.matchValue,
+              class_name: match.class_name,
+              field: match.recordKey,
+            },
+            salt
+          );
           result += mask;
 
-          // Add to anonymizations
-          state.anonymizations.push({
+          newAnonymizations.push({
             rule: {
               type: rules[match.ruleIndex].type,
             },
@@ -89,14 +106,14 @@ export function resolveOverlapsAndMask({
           lastIndex = match.end;
         }
 
-        // Add remaining text after the last match
         result += originalText.substring(lastIndex);
-
-        // Update the record with masked text
-        state.records[recordIndex][fieldName] = result;
+        nextRecords[recordIndex][fieldName] = result;
       }
     });
   });
 
-  return state;
+  return {
+    records: nextRecords,
+    anonymizations: [...state.anonymizations, ...newAnonymizations],
+  };
 }

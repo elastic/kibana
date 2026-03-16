@@ -23,7 +23,11 @@ export {
 
 export { DEFAULT_TAB_STATE } from './constants';
 
-export { type InternalStateStore, createInternalStateStore } from './internal_state';
+export {
+  type InternalStateStore,
+  type InternalStateDispatch,
+  createInternalStateStore,
+} from './internal_state';
 
 export const internalStateActions = {
   ...omit(internalStateSlice.actions, 'setTabs', 'setDefaultProfileAdHocDataViewIds'),
@@ -34,6 +38,7 @@ export const internalStateActions = {
 export {
   InternalStateProvider,
   useInternalStateDispatch,
+  useInternalStateGetState,
   useInternalStateSelector,
   CurrentTabProvider,
   useCurrentTabSelector,
@@ -66,7 +71,10 @@ export {
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
+  useCurrentTabDataStateContainer,
   RuntimeStateProvider,
+  RuntimeStateManagerProvider,
+  useRuntimeStateManager,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';

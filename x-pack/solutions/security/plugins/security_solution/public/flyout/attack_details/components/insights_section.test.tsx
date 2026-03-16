@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { AttackDetailsContext } from '../context';
-import { INSIGHTS_ENTITIES_TEST_ID } from '../constants/test_ids';
+import { INSIGHTS_CORRELATIONS_TEST_ID, INSIGHTS_ENTITIES_TEST_ID } from '../constants/test_ids';
 import { InsightsSection } from './insights_section';
 import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -36,6 +36,10 @@ jest.mock('../hooks/use_attack_entities_counts', () => ({
     loading: false,
     error: false,
   }),
+}));
+
+jest.mock('../hooks/use_original_alert_ids', () => ({
+  useOriginalAlertIds: jest.fn().mockReturnValue(['alert-1', 'alert-2']),
 }));
 
 jest.mock('../../../flyout_v2/shared/components/expandable_section', () => ({
@@ -111,7 +115,19 @@ describe('InsightsSection', () => {
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: 'attack-details-left',
       params: { attackId: 'attack-1', indexName: '.alerts-default' },
-      path: { tab: 'insights' },
+      path: { tab: 'insights', subTab: 'entity' },
     });
+  });
+
+  it('renders Correlations overview with Related alerts count and non-clickable title', () => {
+    renderWithEui(<InsightsSection />);
+
+    expect(screen.getByTestId(INSIGHTS_CORRELATIONS_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByText('Related alerts')).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleText`)).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`${INSIGHTS_CORRELATIONS_TEST_ID}TitleLink`)
+    ).not.toBeInTheDocument();
   });
 });

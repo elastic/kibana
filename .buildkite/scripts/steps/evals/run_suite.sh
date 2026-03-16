@@ -38,6 +38,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Generate LiteLLM connectors (or skip when only EIS models are requested).
+# This must run after bootstrap so Node is available for the generator script.
+source .buildkite/scripts/steps/evals/setup_connectors.sh
+
 # Fan out into one Buildkite step per connector project when requested.
 # This is the only practical way to run all connector projects within the 1h job timeout.
 EVAL_FANOUT="${EVAL_FANOUT:-}"
@@ -128,6 +132,7 @@ EOF
           KBN_EVALS: "1"
           FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
           EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
+          EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
           EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_PROJECT: "${connector_id}"
