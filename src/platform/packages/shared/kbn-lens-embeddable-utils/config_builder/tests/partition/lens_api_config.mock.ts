@@ -151,12 +151,10 @@ export const esqlCharts = [
   {
     title: 'basic mosaic',
     type: 'mosaic',
-    metrics: [
-      {
-        operation: 'count',
-        empty_as_null: true,
-      },
-    ],
+    metric: {
+      operation: 'count',
+      empty_as_null: true,
+    },
     group_by: [
       {
         operation: 'terms',
@@ -417,12 +415,10 @@ export const esqlCharts = [
   {
     title: 'mosaic with multiple groups',
     type: 'mosaic',
-    metrics: [
-      {
-        operation: 'count',
-        empty_as_null: true,
-      },
-    ],
+    metric: {
+      operation: 'count',
+      empty_as_null: true,
+    },
     group_by: [
       {
         operation: 'terms',
@@ -1176,12 +1172,10 @@ export const esqlCharts = [
   {
     title: 'mosaic with color mapping',
     type: 'mosaic',
-    metrics: [
-      {
-        operation: 'count',
-        empty_as_null: true,
-      },
-    ],
+    metric: {
+      operation: 'count',
+      empty_as_null: true,
+    },
     group_by: [
       {
         operation: 'terms',
@@ -1411,12 +1405,10 @@ export const esqlCharts = [
   {
     title: 'ESQL mosaic',
     type: 'mosaic',
-    metrics: [
-      {
-        operation: 'value',
-        column: 'count',
-      },
-    ],
+    metric: {
+      operation: 'value',
+      column: 'count',
+    },
     group_by: [
       {
         operation: 'value',
