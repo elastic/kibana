@@ -331,7 +331,7 @@ const defaultJsonExtractProcessorFormState = (
 ): JsonExtractFormState => ({
   action: 'json_extract' as const,
   field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
-  extractions: [{ selector: '', target_field: '' }],
+  extractions: [{ selector: '', target_field: '', type: 'keyword' }],
   ignore_failure: true,
   ignore_missing: true,
   where: ALWAYS_CONDITION,

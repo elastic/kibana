@@ -102,6 +102,9 @@ function buildExtractionExpression(
  *
  * Limitations:
  * - JSON_EXTRACT does not support wildcards, recursive descent, array slicing, filter expressions, or negative array indices
+ * - `ignore_failure` has no ES|QL equivalent. In Ingest Pipeline, a failing script processor
+ *   can be caught by `ignore_failure: true`; in ES|QL, a runtime error (e.g. non-string input
+ *   to JSON_EXTRACT) will fail the entire query. This is an inherent transpilation gap.
  *
  * @example Unconditional with type:
  *    ```typescript

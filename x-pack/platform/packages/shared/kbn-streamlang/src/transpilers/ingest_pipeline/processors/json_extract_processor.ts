@@ -15,6 +15,13 @@ import { painlessFieldAccessor, painlessFieldAssignment } from '../../../../type
 import { parseJsonPath, segmentsToStrings } from '../../shared/json_path_parser';
 
 /**
+ * Escapes a string for safe inclusion inside a Painless double-quoted string literal.
+ */
+function escapePainlessString(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+/**
  * Generates Painless code to traverse a parsed JSON object and extract a value.
  * Uses defensive null checks at each level.
  *
@@ -27,20 +34,16 @@ function generateTraversalExpression(varName: string, parts: string[]): string {
     return varName;
   }
 
-  // Build a chain of safe navigation
-  // For each part, we check if current is a Map (object) or List (array)
-  // and access accordingly
   let expr = varName;
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
     const isNumeric = /^\d+$/.test(part);
 
     if (isNumeric) {
-      // Array index access
       expr = `(${expr} instanceof List && ((List)${expr}).size() > ${part} ? ((List)${expr}).get(${part}) : null)`;
     } else {
-      // Object key access
-      expr = `(${expr} instanceof Map ? ((Map)${expr}).get("${part}") : null)`;
+      const escaped = escapePainlessString(part);
+      expr = `(${expr} instanceof Map ? ((Map)${expr}).get("${escaped}") : null)`;
     }
   }
 
@@ -67,7 +70,8 @@ function generateTypeCast(varName: string, type: JsonExtractType): string {
       return `(${varName} instanceof Boolean ? (Boolean)${varName} : Boolean.parseBoolean(${varName}.toString()))`;
     case 'keyword':
     default:
-      return `${varName}.toString()`;
+      // For Maps/Lists, produce a proper JSON string via Processors.json(); for scalars, use toString().
+      return `(${varName} instanceof Map || ${varName} instanceof List ? Processors.json(${varName}) : ${varName}.toString())`;
   }
 }
 
@@ -138,30 +142,14 @@ export function processJsonExtractProcessor(
 
   const source = generateJsonExtractScript(field, extractions, ignore_missing);
 
-  const scriptProcessor: IngestProcessorContainer = {
+  return {
     script: {
       lang: 'painless',
       source,
-    },
+      description: `JsonExtract processor: extract from ${field}`,
+      ...(processor.tag && { tag: processor.tag }),
+      ...(processor.if && { if: processor.if }),
+      ...(processor.ignore_failure === true && { ignore_failure: true }),
+    } as IngestProcessorContainer['script'],
   };
-
-  if (scriptProcessor.script) {
-    (
-      scriptProcessor.script as Record<string, unknown>
-    ).description = `JsonExtract processor: extract from ${field}`;
-  }
-
-  if (processor.tag && scriptProcessor.script) {
-    (scriptProcessor.script as Record<string, unknown>).tag = processor.tag;
-  }
-
-  if (processor.if && scriptProcessor.script) {
-    (scriptProcessor.script as Record<string, unknown>).if = processor.if;
-  }
-
-  if (processor.ignore_failure === true && scriptProcessor.script) {
-    (scriptProcessor.script as Record<string, unknown>).ignore_failure = true;
-  }
-
-  return scriptProcessor;
 }

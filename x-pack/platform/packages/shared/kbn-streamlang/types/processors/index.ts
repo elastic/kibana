@@ -796,6 +796,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     redactProcessorSchema,
     mathProcessorSchema,
     splitProcessorSchema,
+    jsonExtractProcessorSchema,
   ])
 );
 
