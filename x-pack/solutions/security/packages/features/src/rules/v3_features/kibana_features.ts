@@ -66,7 +66,12 @@ export const getRulesV3BaseKibanaFeature = (
         read: params.savedObjects,
       },
       alerting: {
-        rule: { all: alertingFeatures },
+        rule: {
+          all: alertingFeatures,
+          enable: alertingFeatures,
+          manual_run: alertingFeatures,
+          manage_rule_settings: alertingFeatures,
+        },
       },
       management: {
         insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
