@@ -17,7 +17,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Unsnooze Notification Policy API', function () {
+  describe('Snooze Notification Policy API', function () {
     let roleAuthc: RoleCredentials;
 
     before(async () => {
@@ -45,71 +45,84 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       return response.body;
     }
 
-    async function snoozePolicy(id: string, snoozedUntil: string) {
+    it('should snooze a notification policy with a future date', async () => {
+      const policy = await createPolicy('test-snooze');
+      const futureDate = new Date(Date.now() + 86_400_000).toISOString();
+
       const response = await supertestWithoutAuth
-        .post(`${NOTIFICATION_POLICY_API_PATH}/${id}/_snooze`)
+        .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_snooze`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ snoozed_until: snoozedUntil });
+        .send({ snoozed_until: futureDate });
 
       expect(response.status).to.be(200);
-      return response.body;
-    }
-
-    it('should unsnooze a snoozed notification policy', async () => {
-      const policy = await createPolicy('test-unsnooze');
-      const futureDate = new Date(Date.now() + 86_400_000).toISOString();
-      await snoozePolicy(policy.id, futureDate);
-
-      const response = await supertestWithoutAuth
-        .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_unsnooze`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader());
-
-      expect(response.status).to.be(200);
-      expect(response.body.snoozedUntil).to.be(null);
+      expect(response.body.snoozedUntil).to.be(futureDate);
       expect(response.body.enabled).to.be(true);
     });
 
-    it('should preserve enabled state when unsnoozing a disabled policy', async () => {
-      const policy = await createPolicy('test-unsnooze-disabled');
+    it('should preserve enabled state when snoozing', async () => {
+      const policy = await createPolicy('test-snooze-preserve-enabled');
       const futureDate = new Date(Date.now() + 86_400_000).toISOString();
-      await snoozePolicy(policy.id, futureDate);
 
-      // Disable the policy
+      // Disable the policy first
       await supertestWithoutAuth
         .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_disable`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader());
 
-      // Unsnooze should not change enabled state
+      // Snooze should not change enabled state
       const response = await supertestWithoutAuth
-        .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_unsnooze`)
+        .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_snooze`)
         .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader());
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ snoozed_until: futureDate });
 
       expect(response.status).to.be(200);
-      expect(response.body.snoozedUntil).to.be(null);
+      expect(response.body.snoozedUntil).to.be(futureDate);
       expect(response.body.enabled).to.be(false);
     });
 
-    it('should unsnooze an already unsnoozed notification policy', async () => {
-      const policy = await createPolicy('test-unsnooze-noop');
+    it('should update snoozedUntil when snoozing an already snoozed policy', async () => {
+      const policy = await createPolicy('test-snooze-overwrite');
+      const firstDate = new Date(Date.now() + 86_400_000).toISOString();
+      const secondDate = new Date(Date.now() + 172_800_000).toISOString();
+
+      await supertestWithoutAuth
+        .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_snooze`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ snoozed_until: firstDate });
 
       const response = await supertestWithoutAuth
-        .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_unsnooze`)
+        .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_snooze`)
         .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader());
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ snoozed_until: secondDate });
 
       expect(response.status).to.be(200);
-      expect(response.body.snoozedUntil).to.be(null);
+      expect(response.body.snoozedUntil).to.be(secondDate);
     });
 
-    it('should return 404 when unsnoozing a non-existent notification policy', async () => {
+    it('should reject an invalid date format', async () => {
+      const policy = await createPolicy('test-snooze-invalid-date');
+
       const response = await supertestWithoutAuth
-        .post(`${NOTIFICATION_POLICY_API_PATH}/non-existent-id/_unsnooze`)
+        .post(`${NOTIFICATION_POLICY_API_PATH}/${policy.id}/_snooze`)
         .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader());
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ snoozed_until: 'not-a-date' });
+
+      expect(response.status).to.be(400);
+    });
+
+    it('should return 404 when snoozing a non-existent notification policy', async () => {
+      const futureDate = new Date(Date.now() + 86_400_000).toISOString();
+
+      const response = await supertestWithoutAuth
+        .post(`${NOTIFICATION_POLICY_API_PATH}/non-existent-id/_snooze`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ snoozed_until: futureDate });
 
       expect(response.status).to.be(404);
     });
