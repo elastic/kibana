@@ -35,13 +35,29 @@ export function createConversationCoherenceEvaluator(config: {
           throw new Error('No tool call found in LLM response');
         }
 
-        return toolCall.function.arguments;
+        const result = toolCall.function.arguments;
+        const scoreFields = [
+          'topic_consistency',
+          'context_retention',
+          'contradiction_score',
+          'resolution_quality',
+        ] as const;
+        for (const field of scoreFields) {
+          const val = result[field];
+          if (typeof val !== 'number' || !Number.isFinite(val)) {
+            throw new Error(
+              `LLM returned invalid ${field}: ${JSON.stringify(val)} — expected a finite number`
+            );
+          }
+        }
+
+        return result;
       }
 
       const scores = await pRetry(runCoherenceAnalysis, {
         retries: 3,
         onFailedAttempt: (error) => {
-          const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
+          const isLastAttempt = error.retriesLeft === 0;
           if (isLastAttempt) {
             log.error(
               new Error(

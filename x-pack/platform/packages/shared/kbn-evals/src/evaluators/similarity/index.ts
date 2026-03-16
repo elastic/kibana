@@ -50,6 +50,21 @@ function cosineSimilarity(a: number[], b: number[]): number {
   return dotProduct / denominator;
 }
 
+function sortKeys(value: unknown): unknown {
+  if (value === null || value === undefined || typeof value !== 'object') {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map(sortKeys);
+  }
+  return Object.keys(value as Record<string, unknown>)
+    .sort()
+    .reduce<Record<string, unknown>>((acc, key) => {
+      acc[key] = sortKeys((value as Record<string, unknown>)[key]);
+      return acc;
+    }, {});
+}
+
 export function createSimilarityEvaluator(config?: { threshold?: number }): Evaluator {
   const threshold = config?.threshold ?? 0.7;
 
@@ -57,8 +72,18 @@ export function createSimilarityEvaluator(config?: { threshold?: number }): Eval
     name: 'similarity',
     kind: 'CODE',
     evaluate: async ({ output, expected }) => {
-      const expectedText = typeof expected === 'string' ? expected : JSON.stringify(expected ?? '');
-      const outputText = typeof output === 'string' ? output : JSON.stringify(output ?? '');
+      const expectedText =
+        typeof expected === 'string'
+          ? expected
+          : expected == null
+            ? ''
+            : JSON.stringify(sortKeys(expected));
+      const outputText =
+        typeof output === 'string'
+          ? output
+          : output == null
+            ? ''
+            : JSON.stringify(sortKeys(output));
 
       if (expectedText.trim().length === 0 && outputText.trim().length === 0) {
         return {
