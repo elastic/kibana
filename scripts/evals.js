@@ -284,10 +284,10 @@ var ENV_DOCS = [
     example: 'EVALUATIONS_ES_API_KEY=...',
   },
   {
-    name: 'KBN_EVALS_PREFLIGHT_EXPORT',
+    name: 'KBN_EVALS_SKIP_PREFLIGHT_EXPORT',
     description:
-      'Disable Elasticsearch export preflight checks (not recommended for CI). Preflight validates the golden cluster schema and runs a small sentinel write.',
-    example: 'KBN_EVALS_PREFLIGHT_EXPORT=false',
+      'Skip the Elasticsearch export preflight check (not recommended for CI). Preflight runs a small sentinel write against the configured evaluations cluster.',
+    example: 'KBN_EVALS_SKIP_PREFLIGHT_EXPORT=true',
   },
   {
     name: 'SELECTED_EVALUATORS',

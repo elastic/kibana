@@ -389,7 +389,7 @@ export class EvaluationScoreRepository {
    * to become brittle as the schema evolves; a representative write will fail for the reasons we
    * actually care about (missing data stream/template, auth/privilege issues, mapper errors, etc).
    */
-  async preflightExport(_runId: string): Promise<void> {
+  async preflightExport(): Promise<void> {
     // For local (Scout) clusters, keep bootstrapping behavior unchanged.
     await this.prepareLocalExportTarget();
 

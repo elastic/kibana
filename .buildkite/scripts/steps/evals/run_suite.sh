@@ -60,15 +60,12 @@ record_suite_failure() {
 
   local suite_key_safe
   suite_key_safe="$(printf '%s' "$EVAL_SUITE_ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
-  local failures_key="kbn-evals:suite-failures:${suite_key_safe}"
+  local project_key_safe
+  project_key_safe="$(printf '%s' "$EVAL_PROJECT" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
 
-  local existing
-  existing="$(buildkite-agent meta-data get "$failures_key" --default '' 2>/dev/null || true)"
-  if [[ -z "${existing}" ]]; then
-    buildkite-agent meta-data set "$failures_key" "${EVAL_PROJECT}" >/dev/null 2>&1 || true
-  else
-    buildkite-agent meta-data set "$failures_key" "${existing}"$'\n'"${EVAL_PROJECT}" >/dev/null 2>&1 || true
-  fi
+  # Use one key per failing project to avoid non-atomic read/modify/write races when fanout steps fail concurrently.
+  local failure_key="kbn-evals:suite-failures:${suite_key_safe}:${project_key_safe}"
+  buildkite-agent meta-data set "$failure_key" "${EVAL_PROJECT}" >/dev/null 2>&1 || true
 }
 
 on_exit() {

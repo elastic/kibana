@@ -273,12 +273,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       }
 
       const shouldPreflightExport =
-        process.env.KBN_EVALS_PREFLIGHT_EXPORT !== 'false' &&
+        process.env.KBN_EVALS_SKIP_PREFLIGHT_EXPORT !== 'true' &&
         Boolean(process.env.EVALUATIONS_ES_URL || process.env.EVALUATIONS_ES_API_KEY);
       if (shouldPreflightExport) {
         try {
           log.info('Running evaluations Elasticsearch export preflight');
-          await scoreRepository.preflightExport(currentRunId);
+          await scoreRepository.preflightExport();
         } catch (error) {
           throw new Error('Evaluation results export preflight failed', { cause: error });
         }

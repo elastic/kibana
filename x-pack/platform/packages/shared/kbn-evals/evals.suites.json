@@ -42,7 +42,7 @@
     {
       "id": "streams/significant-events",
       "name": "Streams Significant Events",
-      "slackChannel": "#significant-events-dev",
+      "slackChannel": "#significant-events-alerts",
       "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-streams/evals/significant_events/playwright.config.ts",
       "tags": [
         "platform",

@@ -178,7 +178,8 @@ describe('EvaluationScoreRepository', () => {
       }),
     ];
 
-    it('should successfully export scores when index template and datastream exist', async () => {
+    it('should create index template then export scores when template does not exist', async () => {
+      mockEsClient.indices.existsIndexTemplate.mockResolvedValueOnce(false);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 2,
         failed: 0,
@@ -196,6 +197,25 @@ describe('EvaluationScoreRepository', () => {
       );
       expect(mockLog.debug).toHaveBeenCalledWith(
         expect.stringContaining('Successfully indexed 2 evaluation scores')
+      );
+    });
+
+    it('should export scores without creating template when it already exists', async () => {
+      mockEsClient.indices.existsIndexTemplate.mockResolvedValueOnce(true);
+      mockEsClient.helpers.bulk.mockResolvedValue({
+        total: 2,
+        failed: 0,
+        successful: 2,
+      } as any);
+
+      await repository.exportScores(mockDocuments);
+
+      expect(mockEsClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockEsClient.helpers.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          datasource: mockDocuments,
+          refresh: 'wait_for',
+        })
       );
     });
 
@@ -312,7 +332,7 @@ describe('EvaluationScoreRepository', () => {
       const prev = process.env.EVALUATIONS_ES_URL;
       process.env.EVALUATIONS_ES_URL = 'https://example.test';
       try {
-        await expect(repository.preflightExport('run-preflight')).resolves.toBeUndefined();
+        await expect(repository.preflightExport()).resolves.toBeUndefined();
 
         expect(mockEsClient.indices.getIndexTemplate).not.toHaveBeenCalled();
         expect(mockEsClient.create).toHaveBeenCalledWith(
@@ -340,12 +360,26 @@ describe('EvaluationScoreRepository', () => {
       }
     });
 
+    it('bootstraps template and datastream for local clusters before the sentinel write', async () => {
+      // Local cluster path: no EVALUATIONS_ES_URL/EVALUATIONS_ES_API_KEY.
+      mockEsClient.indices.existsIndexTemplate.mockResolvedValueOnce(false);
+      mockEsClient.indices.getDataStream.mockRejectedValueOnce({ statusCode: 404 });
+
+      await expect(repository.preflightExport()).resolves.toBeUndefined();
+
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalled();
+      expect(mockEsClient.indices.createDataStream).toHaveBeenCalledWith({
+        name: 'kibana-evaluations',
+      });
+      expect(mockEsClient.create).toHaveBeenCalled();
+    });
+
     it('ignores delete 403 errors for writer keys without delete privileges', async () => {
       const prev = process.env.EVALUATIONS_ES_URL;
       process.env.EVALUATIONS_ES_URL = 'https://example.test';
       mockEsClient.delete.mockRejectedValueOnce({ statusCode: 403 });
       try {
-        await expect(repository.preflightExport('run-preflight')).resolves.toBeUndefined();
+        await expect(repository.preflightExport()).resolves.toBeUndefined();
       } finally {
         if (prev) process.env.EVALUATIONS_ES_URL = prev;
         else delete process.env.EVALUATIONS_ES_URL;
