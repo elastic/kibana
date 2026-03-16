@@ -8,25 +8,26 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useCallback } from 'react';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 
-export const ResetLocationMonitors = ({ locationId }: { locationId: string }) => {
-  const {
-    getUnhealthyMonitorCountForLocation,
-    getUnhealthyConfigIdsForLocation,
-    resetMonitors,
-    isResetting,
-  } = useMonitorIntegrationHealth();
+export const ResetLocationMonitors = ({
+  locationId,
+  setMonitorPendingReset,
+}: {
+  locationId: string;
+  setMonitorPendingReset: (ids: string[]) => void;
+}) => {
+  const { getUnhealthyMonitorCountForLocation, getUnhealthyConfigIdsForLocation } =
+    useMonitorIntegrationHealth();
 
   const unhealthyMonitorCount = getUnhealthyMonitorCountForLocation(locationId);
 
-  const handleReset = useCallback(async () => {
+  const handleReset = () => {
     const ids = getUnhealthyConfigIdsForLocation(locationId);
     if (ids.length > 0) {
-      await resetMonitors(ids);
+      setMonitorPendingReset(ids);
     }
-  }, [locationId, getUnhealthyConfigIdsForLocation, resetMonitors]);
+  };
 
   if (unhealthyMonitorCount === 0) {
     return null;
@@ -38,7 +39,6 @@ export const ResetLocationMonitors = ({ locationId }: { locationId: string }) =>
       size="s"
       iconType="refresh"
       color="warning"
-      isLoading={isResetting}
       onClick={handleReset}
     >
       {RESET_MONITORS_LABEL}

@@ -36,6 +36,8 @@ import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locati
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { UnhealthyCountBadge } from './unhealthy_count_badge';
 import { RESET_MONITORS_LABEL, ResetLocationMonitors } from './reset_location_monitors';
+import { ResetMonitorModal } from '../../monitors_page/management/monitor_list_table/reset_monitor_modal';
+import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 
 interface ListItem extends PrivateLocation {
   monitors: number;
@@ -56,6 +58,8 @@ export const PrivateLocationsTable = ({
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [monitorPendingReset, setMonitorPendingReset] = useState<string[]>([]);
+  const { resetMonitors } = useMonitorIntegrationHealth();
 
   const { locationMonitors, loading } = useLocationMonitors();
 
@@ -139,7 +143,12 @@ export const PrivateLocationsTable = ({
           name: RESET_MONITORS_LABEL,
           description: RESET_MONITORS_LABEL,
           render: (item: ListItem) => {
-            return <ResetLocationMonitors locationId={item.id} />;
+            return (
+              <ResetLocationMonitors
+                locationId={item.id}
+                setMonitorPendingReset={setMonitorPendingReset}
+              />
+            );
           },
           isPrimary: false,
           'data-test-subj': 'action-reset',
@@ -239,6 +248,13 @@ export const PrivateLocationsTable = ({
           ],
         }}
       />
+      {monitorPendingReset.length > 0 && (
+        <ResetMonitorModal
+          configIds={monitorPendingReset}
+          onClose={() => setMonitorPendingReset([])}
+          resetMonitors={resetMonitors}
+        />
+      )}
     </div>
   );
 };

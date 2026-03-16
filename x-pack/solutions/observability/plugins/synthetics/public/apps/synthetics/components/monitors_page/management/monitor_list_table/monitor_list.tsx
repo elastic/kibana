@@ -15,6 +15,8 @@ import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { MonitorListHeader } from './monitor_list_header';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { DeleteMonitor } from './delete_monitor';
+import { ResetMonitorModal } from './reset_monitor_modal';
+import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import type { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import type { MonitorListPageState } from '../../../../state';
 import type {
@@ -51,6 +53,8 @@ export const MonitorList = ({
   const isXl = useIsWithinMinBreakpoint('xxl');
 
   const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<string[]>([]);
+  const [monitorPendingReset, setMonitorPendingReset] = useState<string[]>([]);
+  const { resetMonitors } = useMonitorIntegrationHealth();
 
   const handleOnChange = useCallback(
     ({
@@ -125,6 +129,7 @@ export const MonitorList = ({
           recordRangeLabel={recordRangeLabel}
           selectedItems={selectedItems}
           setMonitorPendingDeletion={setMonitorPendingDeletion}
+          setMonitorPendingReset={setMonitorPendingReset}
         />
         <EuiHorizontalRule margin="s" />
         <EuiBasicTable
@@ -147,6 +152,13 @@ export const MonitorList = ({
           selection={selection}
         />
       </EuiPanel>
+      {monitorPendingReset.length > 0 && (
+        <ResetMonitorModal
+          configIds={monitorPendingReset}
+          onClose={() => setMonitorPendingReset([])}
+          resetMonitors={resetMonitors}
+        />
+      )}
       {monitorPendingDeletion.length > 0 && (
         <DeleteMonitor
           configIds={monitorPendingDeletion}

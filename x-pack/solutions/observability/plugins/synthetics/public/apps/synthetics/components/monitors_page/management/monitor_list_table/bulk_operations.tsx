@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
@@ -15,11 +15,13 @@ import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_i
 export const BulkOperations = ({
   selectedItems,
   setMonitorPendingDeletion,
+  setMonitorPendingReset,
 }: {
   selectedItems: EncryptedSyntheticsSavedMonitor[];
   setMonitorPendingDeletion: (val: string[]) => void;
+  setMonitorPendingReset: (val: string[]) => void;
 }) => {
-  const { isUnhealthy, resetMonitors, isResetting } = useMonitorIntegrationHealth();
+  const { isUnhealthy } = useMonitorIntegrationHealth();
 
   const onDeleted = () => {
     setMonitorPendingDeletion(selectedItems.map((item) => item[ConfigKey.CONFIG_ID]));
@@ -28,9 +30,9 @@ export const BulkOperations = ({
   const selectedConfigIds = selectedItems.map((item) => item[ConfigKey.CONFIG_ID]);
   const unhealthyConfigIds = selectedConfigIds.filter((id) => isUnhealthy(id));
 
-  const onReset = useCallback(async () => {
-    await resetMonitors(unhealthyConfigIds);
-  }, [resetMonitors, unhealthyConfigIds]);
+  const onReset = () => {
+    setMonitorPendingReset(unhealthyConfigIds);
+  };
 
   if (selectedItems.length === 0) {
     return null;
@@ -45,7 +47,6 @@ export const BulkOperations = ({
             iconType="refresh"
             iconSide="left"
             onClick={onReset}
-            isLoading={isResetting}
             color="warning"
           >
             {i18n.translate('xpack.synthetics.bulkOperations.resetIntegration', {
