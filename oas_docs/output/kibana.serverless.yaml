@@ -39730,6 +39730,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: Skip dependency validation when installing a package with dependencies
+          in: query
+          name: skipDependencyCheck
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -62176,6 +62183,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62200,6 +62209,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62268,6 +62278,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62292,6 +62304,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62367,6 +62380,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62391,6 +62406,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62459,6 +62475,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -62483,6 +62501,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -62558,6 +62577,8 @@ paths:
                           items:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -62582,6 +62603,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                           type: array
                         rules:
@@ -63498,6 +63520,8 @@ paths:
                           index:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -63522,6 +63546,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                         required:
                           - index
@@ -63629,6 +63654,9 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                description:
+                  default: ''
+                  type: string
                 esql:
                   additionalProperties: false
                   type: object

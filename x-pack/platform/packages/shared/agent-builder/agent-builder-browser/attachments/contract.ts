@@ -39,6 +39,8 @@ export interface CanvasRenderCallbacks {
   registerActionButtons: (buttons: ActionButton[]) => void;
   /** Update the attachment's origin reference (e.g., after saving to library) */
   updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
+  /** Close the canvas (expanded flyout view) */
+  closeCanvas: () => void;
 }
 
 /**

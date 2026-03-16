@@ -22,7 +22,7 @@ export {
   visualizationAttachmentDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
-  type ScreenContextTimeRange,
+  type TimeRange,
   screenContextTimeRangeSchema,
   type EsqlAttachmentData,
   type VisualizationAttachmentData,

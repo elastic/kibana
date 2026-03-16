@@ -15648,19 +15648,19 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@12.10.0":
-  version "12.10.0"
-  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.10.0.tgz#d2924cb38074e8e6141643dd8bd7a0666aaac868"
-  integrity sha512-eOtz3whDMWrB4KWVatIBrKuxECHqip6PfA8fTpaS2RUGVpiEAe+nqDKsLqkViVWxDGreq0lWX71Xth/SPAzXiw==
+"@xyflow/react@12.10.1":
+  version "12.10.1"
+  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.10.1.tgz#6c61cc271ac4b21dd6d60525b527c8e9f0395f28"
+  integrity sha512-5eSWtIK/+rkldOuFbOOz44CRgQRjtS9v5nufk77DV+XBnfCGL9HAQ8PG00o2ZYKqkEU/Ak6wrKC95Tu+2zuK3Q==
   dependencies:
-    "@xyflow/system" "0.0.74"
+    "@xyflow/system" "0.0.75"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.74":
-  version "0.0.74"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.74.tgz#4bc01af020504387c88a3b13ac6d426b47cba845"
-  integrity sha512-7v7B/PkiVrkdZzSbL+inGAo6tkR/WQHHG0/jhSvLQToCsfa8YubOGmBYd1s08tpKpihdHDZFwzQZeR69QSBb4Q==
+"@xyflow/system@0.0.75":
+  version "0.0.75"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.75.tgz#8bf988fe7943f0d7a26a594acd6a588af1d6b764"
+  integrity sha512-iXs+AGFLi8w/VlAoc/iSxk+CxfT6o64Uw/k0CKASOPqjqz6E0rb5jFZgJtXGZCpfQI6OQpu5EnumP5fGxQheaQ==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-interpolate" "^3.0.4"
@@ -26603,7 +26603,12 @@ mime-db@1.52.0:
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.52.0.tgz#bbabcdc02859f4987301c856e3387ce5ec43bf70"
   integrity sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==
 
-"mime-db@>= 1.40.0 < 2", mime-db@^1.52.0, mime-db@^1.54.0:
+mime-db@1.53.0, mime-db@^1.52.0:
+  version "1.53.0"
+  resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.53.0.tgz#3cb63cd820fc29896d9d4e8c32ab4fcd74ccb447"
+  integrity sha512-oHlN/w+3MQ3rba9rqFr6V/ypF10LSkdwUysQL7GkXoTgIWeV+tcXGA852TBxH+gsh8UWoyhR1hKcoMJTuWflpg==
+
+"mime-db@>= 1.40.0 < 2", mime-db@^1.54.0:
   version "1.54.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.54.0.tgz#cddb3ee4f9c64530dff640236661d42cb6a314f5"
   integrity sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ==
