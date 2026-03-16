@@ -126,20 +126,14 @@ export function Waterfall({
 
   return (
     <Container>
-      {waterfall.exceedsMax &&
-        (discoverHref ? (
-          <WaterfallSizeWarning
-            traceDocsTotal={waterfall.traceDocsTotal}
-            maxTraceItems={waterfall.maxTraceItems}
-            discoverHref={discoverHref}
-            data-test-subj="apmWaterfallSizeWarning"
-          />
-        ) : (
-          <WaterfallSizeWarning
-            traceDocsTotal={waterfall.traceDocsTotal}
-            maxTraceItems={waterfall.maxTraceItems}
-          />
-        ))}
+      {waterfall.exceedsMax && (
+        <WaterfallSizeWarning
+          traceDocsTotal={waterfall.traceDocsTotal}
+          maxTraceItems={waterfall.maxTraceItems}
+          discoverHref={discoverHref}
+          data-test-subj="apmWaterfallSizeWarning"
+        />
+      )}
 
       <div
         data-test-subj="apmWaterfallTimelineContainer"
