@@ -42,6 +42,44 @@ describe('String TruncateFormat', () => {
     expect(truncate.convert('This is some text')).toBe('Thi...');
   });
 
+  test('html context escapes angle brackets in XML/HTML content', () => {
+    // https://github.com/elastic/kibana/issues/257948
+    const truncateFormat = new TruncateFormat({ fieldLength: 100 }, jest.fn());
+
+    expect(
+      truncateFormat.convert(
+        '<root><item><name>Hello World</name><value>12345</value></item></root>',
+        HTML_CONTEXT_TYPE
+      )
+    ).toBe(
+      '&lt;root&gt;&lt;item&gt;&lt;name&gt;Hello World&lt;/name&gt;&lt;value&gt;12345&lt;/value&gt;&lt;/item&gt;&lt;/root&gt;'
+    );
+  });
+
+  test('html context escapes and truncates XML/HTML content', () => {
+    // https://github.com/elastic/kibana/issues/257948
+    const truncateFormat = new TruncateFormat({ fieldLength: 10 }, jest.fn());
+
+    expect(
+      truncateFormat.convert(
+        '<root><item><name>Hello World</name></item></root>',
+        HTML_CONTEXT_TYPE
+      )
+    ).toBe('&lt;root&gt;&lt;ite...');
+  });
+
+  test('text context preserves XML/HTML tags as-is', () => {
+    // https://github.com/elastic/kibana/issues/257948
+    const truncateFormat = new TruncateFormat({ fieldLength: 100 }, jest.fn());
+
+    expect(
+      truncateFormat.convert(
+        '<root><item><name>Hello World</name></item></root>',
+        TEXT_CONTEXT_TYPE
+      )
+    ).toBe('<root><item><name>Hello World</name></item></root>');
+  });
+
   test('missing value', () => {
     const truncate = new TruncateFormat({ fieldLength: 3.2 }, jest.fn());
 

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { truncate } from 'lodash';
+import { truncate, escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
@@ -47,6 +47,6 @@ export class TruncateFormat extends FieldFormat {
       return missing;
     }
 
-    return this.textConvert(val, options);
+    return escape(this.textConvert(val, options));
   };
 }
