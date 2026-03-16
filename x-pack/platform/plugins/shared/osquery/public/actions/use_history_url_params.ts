@@ -83,7 +83,7 @@ export const serializeHistoryUrlParams = (
 
 export const useHistoryUrlParams = () => {
   const history = useHistory();
-  const { search, pathname } = useLocation();
+  const { search } = useLocation();
 
   const filters = useMemo(() => parseHistoryUrlParams(search), [search]);
 
@@ -91,9 +91,10 @@ export const useHistoryUrlParams = () => {
     (nextFilters: HistoryUrlFilters) => {
       const serialized = serializeHistoryUrlParams(nextFilters);
       const qs = stringify(serialized, { sort: false, skipNull: true });
-      history.replace({ pathname, search: qs ? `?${qs}` : '' });
+      const currentPathname = history.location.pathname;
+      history.replace({ pathname: currentPathname, search: qs ? `?${qs}` : '' });
     },
-    [history, pathname]
+    [history]
   );
 
   const currentFilters = useCallback(

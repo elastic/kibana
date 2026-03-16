@@ -15,11 +15,12 @@ import { isArray } from 'lodash';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { useGoBack } from '../../../common/use_go_back';
+import type { LocationStateWithFromHistory } from '../../../common/use_go_back';
 import { LiveQuery } from '../../../live_queries';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
-interface LocationState {
+interface LocationState extends LocationStateWithFromHistory {
   form: Record<string, unknown>;
 }
 

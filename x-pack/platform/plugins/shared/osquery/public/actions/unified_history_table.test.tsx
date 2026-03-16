@@ -39,7 +39,11 @@ jest.mock('../common/lib/kibana', () => ({
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useHistory: () => ({ push: mockPush, replace: mockReplace, location: { search: '' } }),
+  useHistory: () => ({
+    push: mockPush,
+    replace: mockReplace,
+    location: { search: '', pathname: '/history' },
+  }),
   useLocation: () => ({ search: '', pathname: '/history' }),
 }));
 
