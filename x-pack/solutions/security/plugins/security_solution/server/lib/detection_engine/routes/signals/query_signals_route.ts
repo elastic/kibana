@@ -6,7 +6,7 @@
  */
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';

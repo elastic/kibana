@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
 import significantEventsSystemPrompt from './system_prompt.text';
 import significantEventsUserPrompt from './user_prompt.text';
@@ -26,7 +26,6 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
     input: z.object({
       name: z.string(),
       description: z.string(),
-      dataset_analysis: z.string(),
       available_feature_types: z.string(),
       computed_feature_instructions: z.string(),
     }),
@@ -78,11 +77,16 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                 items: {
                   type: 'object',
                   properties: {
-                    kql: {
+                    esql: {
                       type: 'string',
                     },
                     title: {
                       type: 'string',
+                    },
+                    description: {
+                      type: 'string',
+                      description:
+                        'A semantically searchable description explaining what the query detects and why it matters. Should be 1-2 sentences that help users find this query when searching by concept or intent.',
                     },
                     category: {
                       type: 'string',
@@ -106,7 +110,7 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                       },
                     },
                   },
-                  required: ['kql', 'title', 'category', 'severity_score'],
+                  required: ['esql', 'title', 'description', 'category', 'severity_score'],
                 },
               },
             },

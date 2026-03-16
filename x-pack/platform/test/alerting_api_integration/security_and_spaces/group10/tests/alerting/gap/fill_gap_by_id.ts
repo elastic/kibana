@@ -7,7 +7,11 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { ManualRunOnlyUserAtSpace1, UserAtSpaceScenarios } from '../../../../scenarios';
+import {
+  ManualRunOnlyUserAtSpace1,
+  AllWithoutBackfillPrivilegesUserAtSpace1,
+  UserAtSpaceScenarios,
+} from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 import { getFindGaps } from '../../../../rule_gaps_utils';
@@ -40,7 +44,11 @@ export default function fillGapByIdTests({ getService }: FtrProviderContext) {
       });
     }
 
-    const ScenariosToTest = [...UserAtSpaceScenarios, ManualRunOnlyUserAtSpace1];
+    const ScenariosToTest = [
+      ...UserAtSpaceScenarios,
+      ManualRunOnlyUserAtSpace1,
+      AllWithoutBackfillPrivilegesUserAtSpace1,
+    ];
 
     for (const scenario of ScenariosToTest) {
       const { user, space } = scenario;
@@ -126,6 +134,7 @@ export default function fillGapByIdTests({ getService }: FtrProviderContext) {
                 break;
 
               case 'global_read at space1':
+              case 'all_without_backfill_privileges at space1':
                 expect(response.statusCode).to.eql(403);
                 expect(response.body).to.eql({
                   error: 'Forbidden',
@@ -183,6 +192,7 @@ export default function fillGapByIdTests({ getService }: FtrProviderContext) {
               case 'no_kibana_privileges at space1':
               case 'space_1_all at space2':
               case 'global_read at space1':
+              case 'all_without_backfill_privileges at space1':
                 expect(response.statusCode).to.eql(403);
                 break;
 
@@ -239,6 +249,7 @@ export default function fillGapByIdTests({ getService }: FtrProviderContext) {
               case 'space_1_all_alerts_none_actions at space1':
               case 'superuser at space1':
               case 'manual_run_only at space1':
+              case 'all_without_backfill_privileges at space1':
               case 'space_1_all at space1':
               case 'space_1_all_with_restricted_fixture at space1':
                 expect(response1.statusCode).to.eql(400);

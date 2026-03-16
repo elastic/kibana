@@ -94,10 +94,10 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       });
 
       const total = getTotal(result.hits);
-      expect(total).toBe(1);
+      expect(total).toBe(3);
       const hasExpected = result.hits.hits.some((h) => {
         const src = h._source as { host?: { name?: string; domain?: string } } | undefined;
-        return src?.host?.name === 'server-01' && src?.host?.domain === 'example.com';
+        return src?.host?.name === 'server-01';
       });
       expect(hasExpected).toBe(true);
     }
@@ -125,9 +125,12 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   );
 
   apiTest(
-    'user: DSL from doc with user.entity.id returns exactly that document',
+    'user: DSL from doc with user.name + event.module returns exactly that document',
     async ({ esClient }) => {
-      const docSource = { user: { entity: { id: 'non-generated-user' } } };
+      const docSource = {
+        user: { name: 'arnlod.schmidt', domain: 'elastic.co' },
+        event: { module: 'entityanalytics_ad' },
+      };
       const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
       expect(dsl).toBeDefined();
 
@@ -140,17 +143,18 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const total = getTotal(result.hits);
       expect(total).toBe(1);
       expect(result.hits.hits[0]._source).toMatchObject({
-        user: { entity: { id: 'non-generated-user' } },
+        user: { name: 'arnlod.schmidt', domain: 'elastic.co' },
+        event: { module: 'entityanalytics_ad' },
       });
     }
   );
 
   apiTest(
-    'user: DSL from doc with user.name + host.entity.id returns expected document',
+    'user: DSL from doc with user.name + event.module returns expected document',
     async ({ esClient }) => {
       const docSource = {
         user: { name: 'john.doe' },
-        host: { entity: { id: 'host-123' } },
+        event: { module: 'okta' },
       };
       const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
       expect(dsl).toBeDefined();
@@ -165,15 +169,59 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(total).toBe(1);
       expect(result.hits.hits[0]._source).toMatchObject({
         user: { name: 'john.doe' },
-        host: { entity: { id: 'host-123' } },
       });
     }
   );
 
   apiTest(
-    'service: DSL from doc with service.entity.id returns exactly that document',
+    'user: DSL from doc with data_stream.dataset only returns expected document',
     async ({ esClient }) => {
-      const docSource = { service: { entity: { id: 'non-generated-service-id' } } };
+      const docSource = {
+        user: { name: 'cloudtrail.user' },
+        data_stream: { dataset: 'aws.cloudtrail' },
+      };
+      const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX,
+        query: { ...dsl },
+        size: 10,
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        user: { name: 'cloudtrail.user' },
+      });
+    }
+  );
+
+  apiTest(
+    'user: DSL from doc with no event.module or data_stream.dataset (unknown fallback) returns expected document',
+    async ({ esClient }) => {
+      const docSource = { user: { name: 'no.module.user' } };
+      const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX,
+        query: { ...dsl },
+        size: 10,
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        user: { name: 'no.module.user' },
+      });
+    }
+  );
+
+  apiTest(
+    'service: DSL from doc with service.name returns exactly that document',
+    async ({ esClient }) => {
+      const docSource = { service: { name: 'mailchimp' } };
       const dsl = getEuidDslFilterBasedOnDocument('service', docSource);
       expect(dsl).toBeDefined();
 
@@ -186,7 +234,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const total = getTotal(result.hits);
       expect(total).toBe(1);
       expect(result.hits.hits[0]._source).toMatchObject({
-        service: { entity: { id: 'non-generated-service-id' } },
+        service: { entity: { id: 'mailchimp' } },
       });
     }
   );
@@ -244,7 +292,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
 
       const hasServiceEntityId = result.hits.hits.some((h) => {
         const src = h._source as { service?: { entity?: { id?: string } } } | undefined;
-        return src?.service?.entity?.id === 'non-generated-service-id';
+        return src?.service?.entity?.id === 'mailchimp';
       });
       expect(hasServiceEntityId).toBe(true);
 
@@ -271,7 +319,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
 
       const hasUserEntityId = result.hits.hits.some((h) => {
         const src = h._source as { user?: { entity?: { id?: string } } } | undefined;
-        return src?.user?.entity?.id === 'non-generated-user';
+        return src?.user?.entity?.id === 'arnlod.schmidt';
       });
       expect(hasUserEntityId).toBe(true);
 
@@ -310,7 +358,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
 
       const hasHostEntityId = result.hits.hits.some((h) => {
         const src = h._source as { host?: { entity?: { id?: string } } } | undefined;
-        return src?.host?.entity?.id === 'non-generated-host';
+        return src?.host?.entity?.id === 'host-with-entity-id';
       });
       expect(hasHostEntityId).toBe(true);
 

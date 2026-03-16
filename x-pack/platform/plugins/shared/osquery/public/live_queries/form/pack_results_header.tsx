@@ -4,13 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
+import { AddTagsFlyout } from '../../actions/components/add_tags_flyout';
+import { useLiveQueryDetails } from '../../actions/use_live_query_details';
+import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
+import { useKibana } from '../../common/lib/kibana';
 import type { AddToTimelineHandler } from '../../types';
+
+const ADD_TAGS_LABEL = i18n.translate('xpack.osquery.packResultsHeader.addTagsLabel', {
+  defaultMessage: 'Add tags',
+});
+
+const EMPTY_TAGS: string[] = [];
 
 interface PackResultsHeadersProps {
   actionId?: string;
@@ -33,6 +44,19 @@ const iconsListCss = {
 export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
   ({ actionId, agentIds, queryIds, addToTimeline }) => {
     const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' } as const), []);
+    const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
+    const permissions = useKibana().services.application.capabilities.osquery;
+    const canEditTags = !!permissions.writeLiveQueries;
+    const showAddTags = isHistoryEnabled && canEditTags && !!actionId;
+
+    const { data: liveQueryDetails } = useLiveQueryDetails({
+      actionId,
+      skip: !showAddTags,
+    });
+
+    const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+    const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
+    const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
     return (
       <>
@@ -69,12 +93,32 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                       addToTimeline={addToTimeline}
                     />
                   </EuiFlexItem>
+                  {showAddTags && (
+                    <EuiFlexItem>
+                      <EuiButtonIcon
+                        iconType="tag"
+                        color="text"
+                        iconSize="l"
+                        size="xs"
+                        aria-label={ADD_TAGS_LABEL}
+                        onClick={handleOpenFlyout}
+                        data-test-subj="add-tags-button"
+                      />
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               )}
             </span>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size={'l'} />
+        {isFlyoutOpen && actionId && (
+          <AddTagsFlyout
+            actionId={actionId}
+            currentTags={liveQueryDetails?.tags ?? EMPTY_TAGS}
+            onClose={handleCloseFlyout}
+          />
+        )}
       </>
     );
   }

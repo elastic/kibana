@@ -28,6 +28,7 @@ import { useRefDimensions } from './use_ref_dimensions';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
@@ -99,6 +100,27 @@ export function ServiceMap({
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
+  const apmRouter = useApmRouter();
+  const { query } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
+
+  const fullMapHref =
+    serviceName && 'rangeFrom' in query && 'rangeTo' in query && query.rangeFrom && query.rangeTo
+      ? apmRouter.link('/service-map', {
+          query: {
+            rangeFrom: query.rangeFrom,
+            rangeTo: query.rangeTo,
+            environment: query.environment,
+            kuery: query.kuery,
+            comparisonEnabled: query.comparisonEnabled,
+            offset: query.offset,
+            serviceGroup: 'serviceGroup' in query ? query.serviceGroup ?? '' : '',
+          },
+        })
+      : undefined;
 
   const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
@@ -244,6 +266,7 @@ export function ServiceMap({
               end={end}
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
+              fullMapHref={fullMapHref}
             />
           </div>
         </EuiPanel>
