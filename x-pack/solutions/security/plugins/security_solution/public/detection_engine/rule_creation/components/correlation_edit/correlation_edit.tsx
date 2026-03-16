@@ -19,6 +19,7 @@ import {
   CORRELATION_CONDITION_VALUE_CONFIG,
   CORRELATION_CONDITION_FIELD_CONFIG,
 } from './field_configs';
+import { CorrelationInfoIcon } from './correlation_info_icon';
 import * as i18n from './translations';
 
 const CORRELATION_TYPE_OPTIONS = [
@@ -76,7 +77,11 @@ export function CorrelationEdit({ path }: CorrelationEditProps): JSX.Element {
       return (
         <>
           <EuiFormRow
-            label={i18n.CORRELATION_TYPE_LABEL}
+            label={
+              <>
+                {i18n.CORRELATION_TYPE_LABEL} <CorrelationInfoIcon />
+              </>
+            }
             helpText={i18n.CORRELATION_TYPE_HELP_TEXT}
             fullWidth
           >

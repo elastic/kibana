@@ -356,6 +356,7 @@ export interface DocLinks {
     readonly prebuiltRuleCustomizationPromoBlog: string;
     readonly resolvePrebuiltRuleConflicts: string;
     readonly createEsqlRuleType: string;
+    readonly createCorrelationRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
       readonly riskScorePrerequisites: string;

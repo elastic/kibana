@@ -175,6 +175,13 @@ export const CORRELATION_TYPE_VALUE_COUNT = i18n.translate(
   }
 );
 
+export const CORRELATION_INFO_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.correlationInfoIconAriaLabel',
+  {
+    defaultMessage: 'Correlation rule info',
+  }
+);
+
 export const CONDITION_OPERATOR_EQ = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.conditionOperatorEq',
   {

@@ -490,6 +490,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       prebuiltRuleCustomizationPromoBlog: `${ELASTIC_WEBSITE_URL}blog/security-prebuilt-rules-editing`,
       resolvePrebuiltRuleConflicts: `${ELASTIC_DOCS}solutions/security/detect-and-alert/prebuilt-rules-update-modified-unmodified#resolve-reduce-rule-conflicts`,
       createEsqlRuleType: `${ELASTIC_DOCS}solutions/security/detect-and-alert/create-detection-rule#create-esql-rule`,
+      createCorrelationRuleType: `${ELASTIC_DOCS}solutions/security/detect-and-alert/create-detection-rule`,
       ruleUiAdvancedParams: `${ELASTIC_DOCS}solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params`,
       thirdPartyLlmProviders: `${ELASTIC_DOCS}solutions/security/ai/set-up-connectors-for-large-language-models-llm`,
       entityAnalytics: {

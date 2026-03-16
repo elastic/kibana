@@ -24,6 +24,7 @@ import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
 import { HostAlertsTable } from '../components/detection_response/host_alerts_table';
 import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
+import { CorrelationHitRate } from '../components/detection_response/correlation_hit_rate';
 import { UserAlertsTable } from '../components/detection_response/user_alerts_table';
 import * as i18n from './translations';
 import { CasesTable } from '../components/detection_response/cases_table';
@@ -59,6 +60,7 @@ const DetectionResponseComponent = () => {
   const canReadCases = userCasesPermissions.read;
   const canReadAlerts = hasAlertsRead && hasIndexRead;
   const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
+  const isCorrelationEnabled = useIsExperimentalFeatureEnabled('correlationRulesEnabled');
   const additionalFilters = useMemo(() => (filterQuery ? [filterQuery] : []), [filterQuery]);
 
   if (!canReadAlerts && !canReadCases) {
@@ -111,6 +113,11 @@ const DetectionResponseComponent = () => {
                         {canReadAlerts && (
                           <EuiFlexItem>
                             <RuleAlertsTable signalIndexName={signalIndexName} />
+                          </EuiFlexItem>
+                        )}
+                        {canReadAlerts && isCorrelationEnabled && (
+                          <EuiFlexItem>
+                            <CorrelationHitRate signalIndexName={signalIndexName} />
                           </EuiFlexItem>
                         )}
                         {canReadCases && (

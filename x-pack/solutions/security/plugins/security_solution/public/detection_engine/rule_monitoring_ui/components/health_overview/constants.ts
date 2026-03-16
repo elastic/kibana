@@ -14,6 +14,7 @@ export const RULE_TYPE_NAMES: Record<string, string> = {
   'siem.indicatorRule': 'Indicator Match',
   'siem.newTermsRule': 'New Terms',
   'siem.esqlRule': 'ES|QL',
+  'siem.correlationRule': 'Correlation',
 };
 
 export const LOG_LEVELS = ['error', 'warn', 'info', 'debug', 'trace'] as const;

@@ -269,6 +269,13 @@ export const isEqlAlertWithGroupId = (ecsData: Ecs): boolean => {
   return isEql && groupId?.length > 0;
 };
 
+export const isCorrelationAlertWithGroupId = (ecsData: Ecs): boolean => {
+  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
+  const groupId = getField(ecsData, ALERT_GROUP_ID);
+  const normalizedType = Array.isArray(ruleType) ? ruleType[0] : ruleType;
+  return normalizedType === 'correlation' && groupId?.length > 0;
+};
+
 const getRuleType = (ecsData: Ecs): RuleType | undefined => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
   return Array.isArray(ruleType) ? ruleType[0] : ruleType;
@@ -1113,7 +1120,7 @@ export const sendAlertToTimelineAction = async ({
       [ecsData._id],
       'dataProvider'
     );
-    if (isEqlAlertWithGroupId(ecsData)) {
+    if (isEqlAlertWithGroupId(ecsData) || isCorrelationAlertWithGroupId(ecsData)) {
       const tempEql = buildEqlDataProviderOrFilter([ecsData._id], ecs);
       dataProviders = tempEql.dataProviders;
       filters = tempEql.filters;

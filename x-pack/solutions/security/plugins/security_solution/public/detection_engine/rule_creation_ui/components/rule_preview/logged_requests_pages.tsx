@@ -34,6 +34,9 @@ const ruleRequestsTypesMap = {
   esql: {
     findMatches: 'pageDelimiter',
   },
+  correlation: {
+    findCorrelations: 'pageDelimiter',
+  },
 };
 
 type RuleTypesWithPages = keyof typeof ruleRequestsTypesMap;

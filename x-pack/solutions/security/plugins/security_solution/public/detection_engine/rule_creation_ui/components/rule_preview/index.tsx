@@ -51,6 +51,7 @@ const RULE_TYPES_SUPPORTING_LOGGED_REQUESTS: Type[] = [
   'query',
   'saved_query',
   'new_terms',
+  'correlation',
 ];
 
 const timeRanges = [
