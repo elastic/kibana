@@ -29,6 +29,8 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   isSidebar: boolean;
   /** Data from the screen context attachment, if present in the conversation */
   screenContext?: ScreenContextAttachmentData;
+  /** Callback to open the agent builder sidebar with the current conversation loaded. Undefined when already in the sidebar. */
+  openSidebarConversation?: () => void;
 }
 
 /**
@@ -39,8 +41,6 @@ export interface CanvasRenderCallbacks {
   registerActionButtons: (buttons: ActionButton[]) => void;
   /** Update the attachment's origin reference (e.g., after saving to library) */
   updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
-  /** Callback to open the agent builder sidebar with the current conversation loaded. Undefined when already in the sidebar. */
-  openSidebarConversation?: () => void;
 }
 
 /**
@@ -102,10 +102,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.
    *
+   * The `props` object includes `openSidebarConversation` for opening the sidebar with the current conversation.
+   *
    * The `callbacks` object provides:
    * - `registerActionButtons`: dynamically register action buttons in the canvas header
    * - `updateOrigin`: link by-value attachments to persistent storage after saving
-   * - `openSidebarConversation`: open the sidebar with the current conversation (undefined when in sidebar)
    */
   renderCanvasContent?: (
     props: AttachmentRenderProps<TAttachment>,

@@ -94,7 +94,12 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
         showCurrentlyPreviewingBadge={isViewingAttachmentInCanvas}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.({ attachment, isSidebar, screenContext })}
+        {uiDefinition?.renderInlineContent?.({
+          attachment,
+          isSidebar,
+          screenContext,
+          openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+        })}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );
