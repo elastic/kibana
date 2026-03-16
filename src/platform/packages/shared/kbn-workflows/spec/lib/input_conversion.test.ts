@@ -50,7 +50,6 @@ describe('convertLegacyInputsToJsonSchema', () => {
         },
       },
       required: ['username'],
-      additionalProperties: false,
     });
   });
 
@@ -103,7 +102,6 @@ describe('convertLegacyInputsToJsonSchema', () => {
     const result = convertLegacyInputsToJsonSchema([]);
     expect(result).toEqual({
       properties: {},
-      additionalProperties: false,
     });
   });
 

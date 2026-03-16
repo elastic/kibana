@@ -82,7 +82,6 @@ export function convertLegacyInputsToJsonSchema(
   return {
     properties,
     ...(required.length > 0 ? { required } : {}),
-    additionalProperties: false,
   };
 }
 
