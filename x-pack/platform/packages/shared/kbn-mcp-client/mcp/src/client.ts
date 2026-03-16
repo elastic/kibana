@@ -19,8 +19,9 @@ import type {
   CallToolResponse,
   ContentPart,
   ListToolsResponse,
-  Tool,
   McpClientOptions,
+  McpToolStreamEvent,
+  Tool,
 } from './types';
 import { isTextPart } from './types';
 
@@ -213,5 +214,27 @@ export class McpClient {
     return {
       content: textParts,
     };
+  }
+
+  /**
+   * Call a tool with streaming. Yields task and result events.
+   * Use this for tools that support task-based execution and streaming.
+   * The async iterable is guaranteed to end with either a 'result' or 'error' event.
+   *
+   * @param params - Tool name and arguments
+   * @returns AsyncGenerator of stream events (taskCreated, taskStatus, result, error)
+   */
+  callToolStream(params: CallToolParams): AsyncGenerator<McpToolStreamEvent> {
+    if (!this.connected) {
+      throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);
+    }
+
+    this.logger.debug(
+      `Calling tool ${params.name} (stream) on MCP server ${this.name}, ${this.version}`
+    );
+    return this.client.experimental.tasks.callToolStream({
+      name: params.name,
+      arguments: params.arguments,
+    }) as AsyncGenerator<McpToolStreamEvent>;
   }
 }

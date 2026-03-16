@@ -127,3 +127,45 @@ export interface ListToolsResponse {
    */
   tools: Tool[];
 }
+
+/**
+ * Stream event when a task is created (first message for task-based tool calls).
+ */
+export interface McpToolStreamTaskCreated {
+  type: 'taskCreated';
+  task: { taskId: string; [key: string]: unknown };
+}
+
+/**
+ * Stream event for task status updates.
+ */
+export interface McpToolStreamTaskStatus {
+  type: 'taskStatus';
+  task: { taskId: string; status: string; [key: string]: unknown };
+}
+
+/**
+ * Stream event for the final successful tool result.
+ */
+export interface McpToolStreamResult {
+  type: 'result';
+  result: { content: ContentPart[]; [key: string]: unknown };
+}
+
+/**
+ * Stream event for a terminal error.
+ */
+export interface McpToolStreamError {
+  type: 'error';
+  error: { message: string; code?: number; [key: string]: unknown };
+}
+
+/**
+ * Events yielded by callToolStream. The stream is guaranteed to end with
+ * either 'result' or 'error'.
+ */
+export type McpToolStreamEvent =
+  | McpToolStreamTaskCreated
+  | McpToolStreamTaskStatus
+  | McpToolStreamResult
+  | McpToolStreamError;

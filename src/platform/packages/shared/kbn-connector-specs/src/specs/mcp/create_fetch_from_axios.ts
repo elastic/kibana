@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
 import type { AxiosInstance } from 'axios';
 import type { FetchLike } from '@kbn/mcp-client';
 
@@ -13,6 +14,9 @@ import type { FetchLike } from '@kbn/mcp-client';
  * Axios instance. Use this when you already have an axios instance with auth,
  * SSL, and proxy configured (e.g. from getAxiosInstanceWithAuth) so that
  * McpClient can reuse the same transport and auth instead of duplicating it.
+ *
+ * Response bodies are streamed (Node stream → Web ReadableStream) so that
+ * MCP transport can consume SSE and other streaming responses incrementally.
  *
  * @param axiosInstance - Axios instance with auth and any other config already applied
  * @returns A FetchLike suitable for passing to McpClient as the `fetch` option
@@ -43,7 +47,7 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       headers: Object.keys(headers).length ? headers : undefined,
       data: init?.body ?? undefined,
       signal: init?.signal ?? undefined,
-      responseType: 'arraybuffer',
+      responseType: 'stream',
       validateStatus: () => true,
     });
 
@@ -56,7 +60,10 @@ export function createFetchFromAxios(axiosInstance: AxiosInstance): FetchLike {
       }
     }
 
-    return new Response(res.data, {
+    const nodeStream = res.data as Readable;
+    const bodyStream = Readable.toWeb(nodeStream);
+
+    return new Response(bodyStream, {
       status: res.status,
       statusText: res.statusText ?? '',
       headers: resHeaders,

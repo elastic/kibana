@@ -52,6 +52,10 @@ export const mcpConnectorSpec: ConnectorSpec = {
     fields: ['serverUrl'],
   },
 
+  policies: {
+    streaming: { enabled: true, mechanism: 'sse' },
+  },
+
   actions: {
     listTools: {
       isTool: true,
@@ -112,6 +116,51 @@ export const mcpConnectorSpec: ConnectorSpec = {
             arguments: typedInput.arguments,
           });
           return result;
+        } finally {
+          await mcpClient.disconnect();
+        }
+      },
+    },
+
+    callToolStream: {
+      isTool: true,
+      supportsStreaming: true,
+      description: i18n.translate('connectors.mcp.actions.callToolStream.description', {
+        defaultMessage: 'Call a tool on the MCP server with streaming (task events + result)',
+      }),
+      input: z.object({
+        name: z.string().describe('Tool name'),
+        arguments: z.record(z.string(), z.unknown()).optional().describe('Tool arguments'),
+      }),
+      handler: async (ctx, input) => {
+        const serverUrl = (ctx.config?.serverUrl as string) ?? '';
+        if (!serverUrl) {
+          throw new Error('MCP connector config.serverUrl is required');
+        }
+        const typedInput = input as { name: string; arguments?: Record<string, unknown> };
+        const mcpClient = createMcpClientFromAxios({
+          logger: ctx.log,
+          axiosInstance: ctx.client,
+          url: serverUrl,
+          name: `kibana-mcp-${serverUrl}`,
+          version: MCP_CLIENT_VERSION,
+        });
+        try {
+          await mcpClient.connect();
+          const events: Array<
+            | { type: 'taskCreated'; task: { taskId: string; [key: string]: unknown } }
+            | { type: 'taskStatus'; task: { taskId: string; status: string; [key: string]: unknown } }
+            | { type: 'result'; result: { content: unknown[]; [key: string]: unknown } }
+            | { type: 'error'; error: { message: string; code?: number; [key: string]: unknown } }
+          > = [];
+          const stream = mcpClient.callToolStream({
+            name: typedInput.name,
+            arguments: typedInput.arguments,
+          });
+          for await (const event of stream) {
+            events.push(event);
+          }
+          return { events };
         } finally {
           await mcpClient.disconnect();
         }
