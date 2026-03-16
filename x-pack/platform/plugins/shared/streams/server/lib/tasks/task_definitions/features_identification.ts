@@ -326,12 +326,7 @@ function reconcileFeatures({
     if (existing && !isComputed) {
       newFeaturesCount--;
       logger.debug(
-        () =>
-          `Overwriting feature with id [${
-            feature.id
-          }] since it already exists.\nExisting feature: ${JSON.stringify(
-            existing
-          )}\nNew feature: ${JSON.stringify(feature)}`
+        () => `Overwriting duplicate feature [${feature.id}] with existing uuid [${existing.uuid}]`
       );
     }
     return {

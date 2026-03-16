@@ -106,6 +106,7 @@ export class FeatureClient {
       minConfidence?: number;
       limit?: number;
       includeDeleted?: boolean;
+      includeExpired?: boolean;
     }
   ): Promise<{ hits: Feature[]; total: number }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
@@ -116,7 +117,10 @@ export class FeatureClient {
     const filterClauses: QueryDslQueryContainer[] = [
       ...termsQuery(STREAM_NAME, streamNames),
       ...(filters?.id?.length ? termsQuery(FEATURE_ID, filters.id) : []),
-      {
+    ];
+
+    if (!filters?.includeExpired) {
+      filterClauses.push({
         bool: {
           should: [
             { bool: { must_not: { exists: { field: FEATURE_EXPIRES_AT } } } },
@@ -124,8 +128,8 @@ export class FeatureClient {
           ],
           minimum_should_match: 1,
         },
-      },
-    ];
+      });
+    }
 
     if (!filters?.includeDeleted) {
       filterClauses.push({
@@ -225,7 +229,7 @@ export class FeatureClient {
   }
 
   async hardDeleteFeatures(stream: string) {
-    const features = await this.getFeatures(stream, { includeDeleted: true });
+    const features = await this.getFeatures(stream, { includeDeleted: true, includeExpired: true });
     return this.clients.storageClient.bulk({
       operations: features.hits.map((feature) => ({
         delete: { _id: feature.uuid },

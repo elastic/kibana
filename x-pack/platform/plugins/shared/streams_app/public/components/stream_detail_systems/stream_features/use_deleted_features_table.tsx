@@ -152,8 +152,8 @@ export function useDeletedFeaturesTable({
         field: 'deleted_at',
         name: DELETED_AT_COLUMN_HEADER_LABEL,
         width: '20%',
-        render: (deletedAt: string) => (
-          <EuiText size="s">{new Date(deletedAt).toLocaleString()}</EuiText>
+        render: (deletedAt: string | undefined) => (
+          <EuiText size="s">{deletedAt ? new Date(deletedAt).toLocaleString() : '-'}</EuiText>
         ),
       },
     ],
