@@ -39,6 +39,8 @@ export interface CanvasRenderCallbacks {
   registerActionButtons: (buttons: ActionButton[]) => void;
   /** Update the attachment's origin reference (e.g., after saving to library) */
   updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
+  /** Callback to open the agent builder sidebar with the current conversation loaded. Undefined when already in the sidebar. */
+  openSidebarConversation?: () => void;
 }
 
 /**
@@ -103,6 +105,7 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * The `callbacks` object provides:
    * - `registerActionButtons`: dynamically register action buttons in the canvas header
    * - `updateOrigin`: link by-value attachments to persistent storage after saving
+   * - `openSidebarConversation`: open the sidebar with the current conversation (undefined when in sidebar)
    */
   renderCanvasContent?: (
     props: AttachmentRenderProps<TAttachment>,
