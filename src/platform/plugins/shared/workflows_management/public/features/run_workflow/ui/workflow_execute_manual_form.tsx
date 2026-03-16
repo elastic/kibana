@@ -78,7 +78,9 @@ export const WorkflowExecuteManualForm = ({
           if (!res.success) {
             setErrors(
               res.error.issues
-                .map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
+                .map((e: z.ZodIssue) =>
+                  e.path.length > 0 ? `${e.path.join('.')}: ${e.message}` : e.message
+                )
                 .join(', ')
             );
           } else {
@@ -106,7 +108,11 @@ export const WorkflowExecuteManualForm = ({
         const res = inputsValidator.safeParse(JSON.parse(value));
         if (!res.success) {
           setErrors(
-            res.error.issues.map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`).join(', ')
+            res.error.issues
+              .map((e: z.ZodIssue) =>
+                e.path.length > 0 ? `${e.path.join('.')}: ${e.message}` : e.message
+              )
+              .join(', ')
           );
         } else {
           setErrors(null);
