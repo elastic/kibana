@@ -32,6 +32,7 @@ jest.mock('../../..', () => ({
       'gcp.credentials.service_account_email': 'gcpCredentialsServiceAccountInput',
       audience: 'gcpCredentialsAudienceInput',
       'gcp.credentials.audience': 'gcpCredentialsAudienceInput',
+      gcp_credentials_cloud_connector_id: 'gcpCredentialsCloudConnectorIdInput',
     };
     const testSubj = testSubjMap[fieldName] || `mock-var-field-${fieldName}`;
 
@@ -131,6 +132,15 @@ describe('GCPCloudConnectorForm', () => {
                   title: 'Audience',
                   multi: false,
                   required: true,
+                  show_user: true,
+                  secret: true,
+                },
+                {
+                  name: 'gcp_credentials_cloud_connector_id',
+                  type: 'text',
+                  title: 'Cloud Connector ID',
+                  multi: false,
+                  required: false,
                   show_user: true,
                   secret: true,
                 },

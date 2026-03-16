@@ -98,7 +98,9 @@ jest.mock('../common', () => ({
   ),
 }));
 
-const mockCloudConnectorSetup = jest.fn(() => <div data-test-subj="cloud-connector-setup-mock" />);
+const mockCloudConnectorSetup = jest.fn((_props?: unknown) => (
+  <div data-test-subj="cloud-connector-setup-mock" />
+));
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   ...jest.requireActual('@kbn/fleet-plugin/public'),
