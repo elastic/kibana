@@ -12,9 +12,9 @@ import {
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiTitle,
   EuiToolTip,
+  euiCanAnimate,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -84,10 +84,7 @@ export function PackageCard({
   if (release && release !== 'ga' && showReleaseBadge) {
     releaseBadge = (
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
-        <span>
-          <InlineReleaseBadge release={release} />
-        </span>
+        <InlineReleaseBadge release={release} />
       </EuiFlexItem>
     );
   }
@@ -96,15 +93,12 @@ export function PackageCard({
   if (isUnverified && showLabels) {
     verifiedBadge = (
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
-        <span>
-          <EuiBadge color="warning">
-            <FormattedMessage
-              id="xpack.fleet.packageCard.unverifiedLabel"
-              defaultMessage="Unverified"
-            />
-          </EuiBadge>
-        </span>
+        <EuiBadge color="warning">
+          <FormattedMessage
+            id="xpack.fleet.packageCard.unverifiedLabel"
+            defaultMessage="Unverified"
+          />
+        </EuiBadge>
       </EuiFlexItem>
     );
   }
@@ -113,21 +107,15 @@ export function PackageCard({
   if (isReauthorizationRequired && showLabels) {
     hasDeferredInstallationsBadge = (
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
-        <span>
-          <EuiToolTip
-            display="inlineBlock"
-            content={DEFERRED_ASSETS_WARNING_MSG}
-            title={DEFERRED_ASSETS_WARNING_LABEL}
-            css={css`
-              width: 100%;
-            `}
-          >
-            <EuiBadge color="warning" tabIndex={0}>
-              {DEFERRED_ASSETS_WARNING_LABEL}{' '}
-            </EuiBadge>
-          </EuiToolTip>
-        </span>
+        <EuiToolTip
+          display="inlineBlock"
+          content={DEFERRED_ASSETS_WARNING_MSG}
+          title={DEFERRED_ASSETS_WARNING_LABEL}
+        >
+          <EuiBadge color="warning" tabIndex={0}>
+            {DEFERRED_ASSETS_WARNING_LABEL}{' '}
+          </EuiBadge>
+        </EuiToolTip>
       </EuiFlexItem>
     );
   }
@@ -136,15 +124,12 @@ export function PackageCard({
   if (isUpdateAvailable && showLabels) {
     updateAvailableBadge = (
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
-        <span>
-          <EuiBadge color="hollow" iconType="sortUp">
-            <FormattedMessage
-              id="xpack.fleet.packageCard.updateAvailableLabel"
-              defaultMessage="Update available"
-            />
-          </EuiBadge>
-        </span>
+        <EuiBadge color="hollow" iconType="sortUp">
+          <FormattedMessage
+            id="xpack.fleet.packageCard.updateAvailableLabel"
+            defaultMessage="Update available"
+          />
+        </EuiBadge>
       </EuiFlexItem>
     );
   }
@@ -154,15 +139,12 @@ export function PackageCard({
   if (isDeprecated && showLabels) {
     deprecatedBadge = (
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
-        <span>
-          <EuiBadge color="warning" iconType="warning">
-            <FormattedMessage
-              id="xpack.fleet.packageCard.deprecatedLabel"
-              defaultMessage="Deprecated"
-            />
-          </EuiBadge>
-        </span>
+        <EuiBadge color="warning" iconType="warning">
+          <FormattedMessage
+            id="xpack.fleet.packageCard.deprecatedLabel"
+            defaultMessage="Deprecated"
+          />
+        </EuiBadge>
       </EuiFlexItem>
     );
   }
@@ -189,15 +171,12 @@ export function PackageCard({
   if (type === 'content') {
     contentBadge = (
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
-        <span>
-          <EuiBadge color="hollow">
-            <FormattedMessage
-              id="xpack.fleet.packageCard.contentPackageLabel"
-              defaultMessage="Content only"
-            />
-          </EuiBadge>
-        </span>
+        <EuiBadge color="hollow">
+          <FormattedMessage
+            id="xpack.fleet.packageCard.contentPackageLabel"
+            defaultMessage="Content only"
+          />
+        </EuiBadge>
       </EuiFlexItem>
     );
   }
@@ -241,11 +220,7 @@ export function PackageCard({
 
           [class*='euiCard__description'] {
             flex-grow: 1;
-            ${descriptionLineClamp
-              ? installationStatusVisible
-                ? getLineClampStyles(1) // Show only one line of description if installation status is shown
-                : getLineClampStyles(descriptionLineClamp)
-              : ''}
+            ${getLineClampStyles(descriptionLineClamp)}
           }
 
           [class*='euiCard__titleButton'] {
@@ -259,6 +234,34 @@ export function PackageCard({
           border-color: ${isQuickstart ? theme.euiTheme.colors.accent : null};
           max-height: ${maxCardHeight ? `${maxCardHeight}px` : null};
           overflow: ${maxCardHeight ? 'hidden' : null};
+
+          ${euiCanAnimate} {
+            transition: transform ${theme.euiTheme.animation.normal}
+                ${theme.euiTheme.animation.resistance},
+              box-shadow ${theme.euiTheme.animation.normal}
+                ${theme.euiTheme.animation.resistance};
+          }
+
+          &:hover {
+            ${euiCanAnimate} {
+              transform: translateY(-2px);
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08),
+                0 1px 3px rgba(0, 0, 0, 0.04);
+            }
+          }
+
+          [class*='euiCard__icon'] {
+            ${euiCanAnimate} {
+              transition: transform ${theme.euiTheme.animation.fast}
+                ${theme.euiTheme.animation.resistance};
+            }
+          }
+
+          &:hover [class*='euiCard__icon'] {
+            ${euiCanAnimate} {
+              transform: scale(1.08);
+            }
+          }
         `}
         data-test-subj={testid}
         betaBadgeProps={quickstartBadge(isQuickstart)}
@@ -290,8 +293,8 @@ export function PackageCard({
             width: ${installationStatusVisible
               ? `calc(100% - ${theme.euiTheme.base * 4}px)`
               : '100%'};
-            overflow-x: hidden;
-            text-overflow: ellipsis;
+            overflow: hidden;
+            max-height: 2.2em;
 
             & > .euiFlexItem {
               min-width: 0;

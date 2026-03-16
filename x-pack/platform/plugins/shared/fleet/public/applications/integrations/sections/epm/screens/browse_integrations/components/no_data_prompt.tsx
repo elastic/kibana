@@ -19,7 +19,7 @@ export const NoDataPrompt: React.FC = () => {
 
   return (
     <EuiEmptyPrompt
-      iconType="info"
+      iconType="search"
       titleSize="s"
       title={
         <h3>

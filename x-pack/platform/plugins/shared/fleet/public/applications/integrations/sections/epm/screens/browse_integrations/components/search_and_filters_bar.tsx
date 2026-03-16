@@ -218,9 +218,8 @@ const SetupMethodFilter: React.FC<{
           iconType="arrowDown"
           onClick={togglePopover}
           isSelected={isOpen}
-          numFilters={activeCount}
           hasActiveFilters={activeCount > 0}
-          numActiveFilters={activeCount}
+          numActiveFilters={activeCount > 0 ? activeCount : undefined}
         >
           <FormattedMessage
             id="xpack.fleet.epm.browseIntegrations.searchAndFilterBar.setupMethodLabel"
@@ -314,9 +313,8 @@ const SignalFilter: React.FC<{
           iconType="arrowDown"
           onClick={togglePopover}
           isSelected={isOpen}
-          numFilters={activeCount}
           hasActiveFilters={activeCount > 0}
-          numActiveFilters={activeCount}
+          numActiveFilters={activeCount > 0 ? activeCount : undefined}
         >
           <FormattedMessage
             id="xpack.fleet.epm.browseIntegrations.searchAndFilterBar.allSignalsLabel"
