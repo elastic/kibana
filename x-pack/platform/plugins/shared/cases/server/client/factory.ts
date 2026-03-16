@@ -46,6 +46,8 @@ import {
   AttachmentService,
   AlertService,
   TemplatesService,
+  CaseTaskService,
+  CaseTaskTemplateService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -255,6 +257,11 @@ export class CasesClientFactory {
       attachmentService,
       licensingService,
       notificationService,
+      taskService: new CaseTaskService({ log: this.logger, unsecuredSavedObjectsClient }),
+      taskTemplateService: new CaseTaskTemplateService({
+        log: this.logger,
+        unsecuredSavedObjectsClient,
+      }),
     };
   }
 
