@@ -55,7 +55,13 @@ export const DeprecationCallout: React.FC<{
             announceOnMount
             data-test-subj="deprecationCallout"
             title={
-              isUpcoming
+              isUpcoming && deprecated?.since
+                ? i18n.translate('xpack.fleet.epm.upcomingDeprecatedIntegrationTitle', {
+                    defaultMessage:
+                      'This integration will be deprecated starting from version {version}',
+                    values: { version: deprecated.since },
+                  })
+                : isUpcoming
                 ? i18n.translate('xpack.fleet.epm.upcomingDeprecatedIntegrationTitle', {
                     defaultMessage: 'This integration will be deprecated in a future version',
                   })
@@ -67,21 +73,13 @@ export const DeprecationCallout: React.FC<{
             iconType="warning"
           >
             <p>{deprecated?.description}</p>
-            {deprecated?.since && (
+            {deprecated?.since && !isUpcomingDeprecation(packageInfo.version, deprecated) && (
               <p>
-                {isUpcomingDeprecation(packageInfo.version, deprecated) ? (
-                  <FormattedMessage
-                    id="xpack.fleet.epm.upcomingDeprecatedSinceVersion"
-                    defaultMessage="Starting from version {version}, this integration will be deprecated."
-                    values={{ version: deprecated?.since }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.fleet.epm.deprecatedSinceVersion"
-                    defaultMessage="Deprecated since version {version}"
-                    values={{ version: deprecated?.since }}
-                  />
-                )}
+                <FormattedMessage
+                  id="xpack.fleet.epm.deprecatedSinceVersion"
+                  defaultMessage="Deprecated since version {version}"
+                  values={{ version: deprecated?.since }}
+                />
               </p>
             )}
             {deprecated?.replaced_by?.package && (

@@ -183,12 +183,13 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                           type="warning"
                           color="warning"
                           content={
-                            isUpcomingDeprecated
+                            isUpcomingDeprecated && item.deprecated?.since
                               ? i18n.translate(
                                   'xpack.fleet.installedIntegrations.upcomingDeprecationTooltip',
                                   {
                                     defaultMessage:
-                                      'This integration will be deprecated in a future version',
+                                      'This integration will be deprecated starting from version {version}',
+                                    values: { version: item.deprecated?.since },
                                   }
                                 )
                               : isDeprecated
