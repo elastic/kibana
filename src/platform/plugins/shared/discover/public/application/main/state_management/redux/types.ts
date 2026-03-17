@@ -142,13 +142,13 @@ export const DEFAULT_PROFILE_STATE_FIELDS = [
 
 export type DefaultProfileStateField = (typeof DEFAULT_PROFILE_STATE_FIELDS)[number];
 
-export type ProfileStateSnapshot = Partial<Pick<DiscoverAppState, DefaultProfileStateField>>;
-
-export type ProfileStateSnapshotsByProfileId = Record<string, ProfileStateSnapshot | undefined>;
-
 type NonEmptyDefaultProfileStateFields = [DefaultProfileStateField, ...DefaultProfileStateField[]];
 
 export type DefaultProfileStateFields = 'all' | 'none' | NonEmptyDefaultProfileStateFields;
+
+export type ProfileStateSnapshot = Partial<Pick<DiscoverAppState, DefaultProfileStateField>>;
+
+export type ProfileStateSnapshotsByProfileId = Record<string, ProfileStateSnapshot | undefined>;
 
 export interface DefaultProfileState {
   resetId: string;
