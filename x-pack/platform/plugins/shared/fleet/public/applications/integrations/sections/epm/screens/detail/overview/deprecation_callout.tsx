@@ -10,23 +10,43 @@ import { EuiCallOut, EuiSpacer, EuiLink, EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import semverLt from 'semver/functions/lt';
+
+import semverValid from 'semver/functions/valid';
+
 import { getNormalizedInputs } from '../../../../../../../../common/services';
 import { doesPackageHaveIntegrations } from '../../../../../../../../common/services/packages_with_integrations';
 import { useLink } from '../../../../../../../hooks';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
+import type { DeprecationInfo } from '../../../../../../../../common/types';
+
+export const isUpcomingDeprecation = (version: string, deprecated?: DeprecationInfo): boolean =>
+  !!deprecated?.since && !!semverValid(version) && semverLt(version, deprecated.since) === true;
+
+/**
+ * Resolves the effective deprecation info for a package/integration from all sources,
+ * in priority order: conditions.deprecated → package.deprecated → integrationInfo.deprecated.
+ */
+export const getPackageDeprecationInfo = (
+  packageInfo: PackageInfo,
+  integrationInfo?: RegistryPolicyTemplate
+): DeprecationInfo | undefined => {
+  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
+  return (
+    packageInfo?.conditions?.deprecated ||
+    packageInfo?.deprecated ||
+    (hasIntegrations && integrationInfo?.deprecated ? integrationInfo.deprecated : undefined)
+  );
+};
 
 export const DeprecationCallout: React.FC<{
   packageInfo: PackageInfo;
   integrationInfo?: RegistryPolicyTemplate;
 }> = ({ packageInfo, integrationInfo }) => {
+  const deprecated = getPackageDeprecationInfo(packageInfo, integrationInfo);
   const { getHref } = useLink();
-  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
-  const deprecated =
-    packageInfo?.conditions?.deprecated ||
-    packageInfo?.deprecated ||
-    (hasIntegrations && integrationInfo?.deprecated ? integrationInfo.deprecated : undefined);
-
-  return (
+  const isUpcoming = isUpcomingDeprecation(packageInfo.version, deprecated);
+  return deprecated ? (
     <>
       {' '}
       {deprecated ? (
@@ -34,14 +54,26 @@ export const DeprecationCallout: React.FC<{
           <EuiCallOut
             announceOnMount
             data-test-subj="deprecationCallout"
-            title={i18n.translate('xpack.fleet.epm.deprecatedIntegrationTitle', {
-              defaultMessage: 'This integration is deprecated',
-            })}
+            title={
+              isUpcoming && deprecated?.since
+                ? i18n.translate('xpack.fleet.epm.upcomingDeprecatedIntegrationTitle', {
+                    defaultMessage:
+                      'This integration will be deprecated starting from version {version}',
+                    values: { version: deprecated.since },
+                  })
+                : isUpcoming
+                ? i18n.translate('xpack.fleet.epm.futureDeprecatedIntegrationTitle', {
+                    defaultMessage: 'This integration will be deprecated in a future version',
+                  })
+                : i18n.translate('xpack.fleet.epm.deprecatedIntegrationTitle', {
+                    defaultMessage: 'This integration is deprecated',
+                  })
+            }
             color="warning"
             iconType="warning"
           >
             <p>{deprecated?.description}</p>
-            {deprecated?.since && (
+            {deprecated?.since && !isUpcomingDeprecation(packageInfo.version, deprecated) && (
               <p>
                 <FormattedMessage
                   id="xpack.fleet.epm.deprecatedSinceVersion"
@@ -74,7 +106,7 @@ export const DeprecationCallout: React.FC<{
         </>
       ) : null}
     </>
-  );
+  ) : null;
 };
 
 interface DeprecatedFeature {

@@ -24,6 +24,8 @@ export type {
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowOutputGraphNode,
+  WorkflowOutputGraphNodeSchema,
 } from './nodes/base';
 export type {
   EnterConditionBranchNode,
@@ -48,6 +50,12 @@ export type {
   EnterWhileNodeConfiguration,
   EnterWhileNodeConfigurationSchema,
 } from './nodes/loop_nodes';
+export type {
+  LoopBreakNode,
+  LoopBreakNodeSchema,
+  LoopContinueNode,
+  LoopContinueNodeSchema,
+} from './nodes/flow_control_nodes';
 export type {
   EnterRetryNode,
   EnterRetryNodeSchema,
@@ -100,6 +108,7 @@ export {
   isKibana,
   isWait,
   isWaitForInput,
+  isWorkflowOutput,
   isEnterForeach,
   isEnterWhile,
   isEnterIf,
@@ -124,5 +133,9 @@ export {
   isExitCaseBranch,
   isEnterDefaultBranch,
   isExitDefaultBranch,
+  isLoopBreak,
+  isLoopContinue,
+  isLoopEnterNode,
   shouldSuggestInnerSteps,
 } from './guards';
+export type { LoopEnterNode } from './guards';

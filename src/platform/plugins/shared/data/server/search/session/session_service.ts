@@ -436,8 +436,9 @@ export class SearchSessionService implements ISearchSessionService {
     const sessions = await savedObjectsClient.bulkGet<SearchSessionSavedObjectAttributes>(
       sessionIds.map((id) => ({ id, type: SEARCH_SESSION_TYPE }))
     );
-    sessions.saved_objects.forEach((session) => this.throwOnUserConflict(user, session));
-    return sessions.saved_objects;
+    const filteredSessions = sessions.saved_objects.filter((session) => !session.error);
+    filteredSessions.forEach((session) => this.throwOnUserConflict(user, session));
+    return filteredSessions;
   };
 
   /**

@@ -15,6 +15,8 @@ export enum SYNTHETICS_API_URLS {
   TEST_NOW_MONITOR = '/api/synthetics/monitor/test',
 
   // Service end points
+  SYNTHETICS_MONITOR_RESET = '/internal/synthetics/monitors/{monitorId}/_reset',
+  SYNTHETICS_MONITORS_BULK_RESET = '/internal/synthetics/monitors/_bulk_reset',
   INDEX_TEMPLATES = '/internal/synthetics/service/index_templates',
   SERVICE_LOCATIONS = '/internal/uptime/service/locations',
   SYNTHETICS_MONITOR_INSPECT = '/internal/synthetics/service/monitor/inspect',
@@ -40,7 +42,6 @@ export enum SYNTHETICS_API_URLS {
   JOURNEY = `/internal/synthetics/journey/{checkGroup}`,
   SYNTHETICS_SUCCESSFUL_CHECK = `/internal/synthetics/synthetics/check/success`,
   JOURNEY_SCREENSHOT_BLOCKS = `/internal/synthetics/journey/screenshot/block`,
-  JOURNEY_FAILED_STEPS = `/internal/synthetics/journeys/failed_steps`,
   NETWORK_EVENTS = `/internal/synthetics/network_events`,
   JOURNEY_SCREENSHOT = `/internal/synthetics/journey/screenshot/{checkGroup}/{stepIndex}`,
   DELETE_PACKAGE_POLICY = `/internal/synthetics/monitor/policy/{packagePolicyId}`,
