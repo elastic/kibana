@@ -29,7 +29,11 @@ const PERF_TIERS = [
   { alertCount: 5_000, hostCount: 100, maxDurationMs: 20_000, label: '5k alerts' },
 ];
 
-apiTest.describe('Correlation engine performance', { tag: CORRELATION_PERF_TAGS }, () => {
+// TODO(spike): Performance tests require a full alerting pipeline that runs
+// source rules, waits for alerts, then previews the correlation rule. This takes
+// too long in CI (>60s setup). Re-enable once correlation rules run as scheduled
+// tasks in the detection engine.
+apiTest.describe.skip('Correlation engine performance', { tag: CORRELATION_PERF_TAGS }, () => {
   let headers: Record<string, string>;
   const sourceRuleIdsByTier: Record<string, string[]> = {};
 
