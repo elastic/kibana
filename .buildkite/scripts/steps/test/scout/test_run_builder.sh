@@ -8,6 +8,8 @@ echo '--- Verify Playwright CLI is functional'
 node scripts/scout run-playwright-test-check
 
 echo '--- Update Scout Test Config Manifests'
+# Updates **/test/scout/.meta (manifest) files. Those paths are excluded from affected-packages
+# so they do not cause extra modules to be considered "changed" in the next step.
 node scripts/scout.js update-test-config-manifests --concurrencyLimit 3
 
 SCOUT_TEST_DISTRIBUTION_STRATEGY="${SCOUT_TEST_DISTRIBUTION_STRATEGY:-configs}"
@@ -47,6 +49,9 @@ if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then
 
 else
   echo '--- Discover Playwright Configs and upload to Buildkite artifacts'
+  # When SCOUT_SELECTIVE_TESTING_ENABLED: affected modules come from git diff (excluding test/scout/.meta),
+  # then @kbn/scout* are removed; discover-playwright-configs keeps only configs for that set and writes
+  # the filtered list to .scout/test_configs/scout_playwright_configs.json (then copied to artifact).
   # Look for both stateful and serverless tests when run on "main" / PRs to "main", otherwise only stateful tests to be discovered and run
   if [[ "${BUILDKITE_BRANCH:-}" == "main" || "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" == "main" ]]; then
     SCOUT_DISCOVERY_TARGET="local"

@@ -72,7 +72,7 @@ export const readAffectedModules = (filePath: string, log: ToolingLog): Set<stri
  *
  * Behavior:
  * - Module maps to an affected @kbn/ ID -> keep
- * - Module does not map to any @kbn/ ID -> keep (safe default)
+ * - Module does not map to any @kbn/ ID -> drop (so selective testing only runs configs we can identify)
  * - Module maps to a @kbn/ ID NOT in affected set -> drop
  * - If the file cannot be read or is invalid -> return all modules (no filtering)
  */
@@ -102,7 +102,7 @@ export const filterModulesByAffectedModules = (
     const moduleId = moduleRoot ? moduleIdLookup.get(moduleRoot) : undefined;
 
     if (!moduleId) {
-      kept.push(module);
+      dropped.push(`${module.name} (unmapped)`);
     } else if (affectedModules.has(moduleId)) {
       kept.push(module);
     } else {

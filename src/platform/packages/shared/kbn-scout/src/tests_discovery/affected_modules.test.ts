@@ -193,7 +193,7 @@ describe('affected_modules', () => {
       expect(result[0].name).toBe('kbn-scout');
     });
 
-    it('should keep modules that do not map to any @kbn/ ID', () => {
+    it('should drop modules that do not map to any @kbn/ ID', () => {
       const modulesWithUnmapped: ModuleDiscoveryInfo[] = [
         ...modules,
         createModule(
@@ -212,8 +212,8 @@ describe('affected_modules', () => {
 
       const result = filterModulesByAffectedModules(modulesWithUnmapped, '/affected.json', mockLog);
 
-      expect(result).toHaveLength(2);
-      expect(result.map((m) => m.name)).toEqual(['kbn-scout', 'unknown_module']);
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('kbn-scout');
     });
 
     it('should return all modules when the file cannot be read', () => {
