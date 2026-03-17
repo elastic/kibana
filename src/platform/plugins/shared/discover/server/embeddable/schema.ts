@@ -14,7 +14,7 @@ import { aggregateQuerySchema, querySchema, timeRangeSchema } from '@kbn/es-quer
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
-import { runtimeFieldsSchema } from './schema.runtime_fields';
+import { runtimeFieldsSchema } from './schema_runtime_fields';
 
 const columnSchema = schema.object({
   name: schema.string({
