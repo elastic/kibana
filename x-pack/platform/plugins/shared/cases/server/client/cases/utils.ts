@@ -26,7 +26,12 @@ import type {
   Observable,
   User,
 } from '../../../common/types/domain';
-import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
+import {
+  DefaultCloseReasonRt,
+  AttachmentType,
+  CaseStatuses,
+  UserActionTypes,
+} from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CaseRequestCustomFields,
@@ -59,6 +64,24 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
   }
 
   return uniqBy(assignees, 'uid');
+};
+
+export const getCloseReasonIfValid = (
+  closeReason?: string,
+  customCloseReasons: ReadonlySet<string> = new Set()
+): string | undefined => {
+  if (closeReason == null) {
+    return undefined;
+  }
+
+  if (closeReason.trim().length <= 0) {
+    return undefined;
+  }
+
+  const isDefaultCaseCloseReason = DefaultCloseReasonRt.is(closeReason);
+  const isCustomCaseCloseReason = customCloseReasons.has(closeReason);
+
+  return isDefaultCaseCloseReason || isCustomCaseCloseReason ? closeReason : undefined;
 };
 
 type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;

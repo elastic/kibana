@@ -28,18 +28,19 @@ export const CaseStatusRt = rt.union([
 
 export const caseStatuses = Object.values(CaseStatuses);
 
-/**
- * Close reason
- */
-export const CaseCloseReasonRt = rt.union([
+export const DefaultCloseReasonRt = rt.union([
   rt.literal('false_positive'),
   rt.literal('duplicate'),
   rt.literal('true_positive'),
   rt.literal('benign_positive'),
   rt.literal('automated_closure'),
   rt.literal('other'),
-  rt.string,
 ]);
+
+/**
+ * Close reason
+ */
+export const CaseCloseReasonRt = rt.union([DefaultCloseReasonRt, rt.string]);
 
 /**
  * Severity

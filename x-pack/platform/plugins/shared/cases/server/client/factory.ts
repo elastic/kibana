@@ -14,6 +14,7 @@ import type {
   IBasePath,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
@@ -78,6 +79,7 @@ interface CasesClientFactoryArgs {
   filesPluginStart: FilesStart;
   usageCounter?: IUsageCounter;
   config: ConfigType;
+  uiSettings: UiSettingsServiceStart;
 }
 
 /**
@@ -175,6 +177,7 @@ export class CasesClientFactory {
       fileService,
       usageCounter: this.options.usageCounter,
       config: this.options.config,
+      uiSettingsClient: this.options.uiSettings.asScopedToClient(unsecuredSavedObjectsClient),
     });
   }
 

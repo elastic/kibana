@@ -48,6 +48,7 @@ import { arraysDifference, getCaseToUpdate } from '../utils';
 import {
   dedupAssignees,
   fillMissingCustomFields,
+  getCloseReasonIfValid,
   getClosedInfoForUpdate,
   getDurationForUpdate,
   getInProgressInfoForUpdate,
@@ -64,9 +65,11 @@ import type {
   AttachmentAttributes,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
-import { CaseStatuses, AttachmentType } from '../../../common/types/domain';
+import { AttachmentType, CaseStatuses } from '../../../common/types/domain';
 import { validateCustomFields } from './validators';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
+
+const CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY = 'securitySolution:alertCloseReasons';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -228,11 +231,13 @@ async function updateAlerts({
   casesWithStatusChangedAndSynced,
   caseService,
   alertsService,
+  customCloseReasons,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   alertsService: AlertService;
+  customCloseReasons: ReadonlySet<string>;
 }): Promise<Map<string, number>> {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -242,11 +247,14 @@ async function updateAlerts({
 
   // build a map of case id to the status it has, and optionally a closing reason
   const casesToSyncToStatus = casesToSync.reduce((acc, { updateReq, originalCase }) => {
+    const closeReason =
+      updateReq.status === CaseStatuses.closed
+        ? getCloseReasonIfValid(updateReq.closeReason, customCloseReasons)
+        : undefined;
+
     acc.set(updateReq.id, [
       updateReq.status ?? originalCase.attributes.status ?? CaseStatuses.open,
-      updateReq.status && updateReq.status === CaseStatuses.closed
-        ? updateReq.closeReason
-        : undefined,
+      closeReason,
     ]);
     return acc;
   }, new Map<string, [CaseStatuses, string?]>());
@@ -418,6 +426,13 @@ export const bulkUpdate = async (
     logger,
     authorization,
   } = clientArgs;
+  const customCloseReasonsSetting =
+    (await clientArgs.uiSettingsClient?.get<string[] | unknown>(
+      CUSTOM_ALERT_CLOSE_REASONS_SETTING_KEY
+    )) ?? [];
+  const customCloseReasons = new Set(
+    Array.isArray(customCloseReasonsSetting) ? customCloseReasonsSetting : []
+  );
 
   try {
     const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
@@ -481,10 +496,11 @@ export const bulkUpdate = async (
         }
 
         const fieldsToUpdate = getCaseToUpdate(originalCase.attributes, updateCase);
+        const closeReason = getCloseReasonIfValid(updateCase.closeReason, customCloseReasons);
         // Explicitly add the closing reason if it exists in the request
         const fieldsToUpdateIncludingCloseReason =
-          fieldsToUpdate.status === CaseStatuses.closed && updateCase.closeReason != null
-            ? { ...fieldsToUpdate, closeReason: updateCase.closeReason }
+          fieldsToUpdate.status === CaseStatuses.closed && closeReason != null
+            ? { ...fieldsToUpdate, closeReason }
             : fieldsToUpdate;
 
         const { id, version, ...restFields } = fieldsToUpdateIncludingCloseReason;
@@ -552,6 +568,7 @@ export const bulkUpdate = async (
       casesWithSyncSettingChangedToOn,
       caseService,
       alertsService,
+      customCloseReasons,
     });
 
     userActionsDict = userActionService.creator.addSyncedAlertsCountToUserActions({

@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { IUiSettingsClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -67,6 +67,7 @@ export interface CasesClientArgs {
   readonly fileService: FileServiceStart;
   readonly usageCounter?: IUsageCounter;
   readonly config: ConfigType;
+  readonly uiSettingsClient?: IUiSettingsClient;
 }
 
 export type CasesSearchParams = Partial<

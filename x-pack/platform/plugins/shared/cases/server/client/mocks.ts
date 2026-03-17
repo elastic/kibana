@@ -27,6 +27,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { lazyObject } from '@kbn/lazy-object';
 import type { CasesFindRequestWithCustomFields, CasesSearchRequest } from '../../common/types/api';
 import type { CasesClient, CasesClientInternal } from '.';
@@ -254,6 +255,7 @@ export const createCasesClientMockArgs = () => {
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
     fileService: createFileServiceMock(),
     config: ConfigSchema.validate({}),
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
   };
 };
 
@@ -280,6 +282,7 @@ export const createCasesClientFactoryMockArgs = () => {
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     config: ConfigSchema.validate({}),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
   };
 };

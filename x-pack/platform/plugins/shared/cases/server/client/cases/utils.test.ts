@@ -23,6 +23,7 @@ import {
   createIncident,
   dedupAssignees,
   getClosedInfoForUpdate,
+  getCloseReasonIfValid,
   getDurationForUpdate,
   getEntity,
   getLatestPushInfo,
@@ -85,6 +86,29 @@ describe('utils', () => {
 
     it('returns undefined when the assignees is undefined', () => {
       expect(dedupAssignees()).toBeUndefined();
+    });
+  });
+
+  describe('getCloseReasonIfValid', () => {
+    it('returns default close reasons', () => {
+      expect(getCloseReasonIfValid('false_positive')).toBe('false_positive');
+      expect(getCloseReasonIfValid('automated_closure')).toBe('automated_closure');
+    });
+
+    it('returns configured custom close reasons', () => {
+      expect(getCloseReasonIfValid('my custom reason', new Set(['my custom reason']))).toBe(
+        'my custom reason'
+      );
+    });
+
+    it('returns undefined for unknown custom close reasons', () => {
+      expect(getCloseReasonIfValid('my custom reason')).toBeUndefined();
+    });
+
+    it('returns undefined for empty values', () => {
+      expect(getCloseReasonIfValid('')).toBeUndefined();
+      expect(getCloseReasonIfValid('   ')).toBeUndefined();
+      expect(getCloseReasonIfValid()).toBeUndefined();
     });
   });
 

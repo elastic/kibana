@@ -291,6 +291,7 @@ export class CasePlugin
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       usageCounter: this.usageCounter!,
       config: this.caseConfig,
+      uiSettings: core.uiSettings,
     });
 
     return {
