@@ -284,7 +284,7 @@ const deleteExistingItemsForOverwrite = async ({
       namespaceType: 'agnostic',
     });
 
-    logger.info(
+    logger.debug(
       `Deleted ${
         findResult.data.length
       } items from list [${importedListId}] in space [${spaceId}] to prepare for import with overwrite${
@@ -292,7 +292,7 @@ const deleteExistingItemsForOverwrite = async ({
       }.`
     );
   } else {
-    logger.info('No exception list items found to delete on import with overwrite.');
+    logger.debug('No exception list items found to delete on import with overwrite.');
   }
 };
 
