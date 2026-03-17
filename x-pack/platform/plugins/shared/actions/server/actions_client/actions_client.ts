@@ -47,7 +47,9 @@ import type {
   ConnectorTokenClientContract,
   HookServices,
   ActionType,
+  ConnectorLifecycleListener,
 } from '../types';
+import { invokePostDeleteListeners } from '../lib/invoke_lifecycle_listeners';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import type {
   ExecuteOptions as EnqueueExecutionOptions,
@@ -112,6 +114,7 @@ export interface ConstructorOptions {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  connectorLifecycleListeners?: ConnectorLifecycleListener[];
 }
 
 export interface ActionsClientContext {
@@ -136,6 +139,7 @@ export interface ActionsClientContext {
   ) => Promise<AxiosInstance>;
   spaces?: SpacesServiceSetup;
   isESOCanEncrypt: boolean;
+  connectorLifecycleListeners?: ConnectorLifecycleListener[];
 }
 
 export class ActionsClient {
@@ -161,6 +165,7 @@ export class ActionsClient {
     getAxiosInstanceWithAuth,
     spaces,
     isESOCanEncrypt,
+    connectorLifecycleListeners,
   }: ConstructorOptions) {
     this.context = {
       logger,
@@ -182,6 +187,7 @@ export class ActionsClient {
       getAxiosInstanceWithAuth,
       spaces,
       isESOCanEncrypt,
+      connectorLifecycleListeners,
     };
   }
 
@@ -522,6 +528,21 @@ export class ActionsClient {
         );
       }
     }
+
+    // Invoke cross-plugin lifecycle listeners (fire-and-forget to avoid blocking the API response)
+    void invokePostDeleteListeners(
+      this.context.connectorLifecycleListeners,
+      actionTypeId,
+      {
+        connectorId: id,
+        config,
+        logger: this.context.logger,
+        request: this.context.request,
+        services: hookServices,
+      },
+      this.context.logger
+    );
+
     return result;
   }
 
