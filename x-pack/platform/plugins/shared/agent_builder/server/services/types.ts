@@ -32,7 +32,7 @@ import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
 import type { AuditLogService } from '../audit';
 import type { AgentExecutionService, TaskHandler } from './execution';
-import type { MeteringService } from './metering';
+import type { MeteringService, ConsumptionServiceStart } from './metering';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
 export interface InternalSetupServices {
@@ -63,6 +63,7 @@ export interface InternalStartServices {
   taskHandler: TaskHandler;
   sml: SmlService;
   plugins: PluginsServiceStart;
+  consumption: ConsumptionServiceStart;
 }
 
 export interface ServiceSetupDeps {

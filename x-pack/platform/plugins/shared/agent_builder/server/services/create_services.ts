@@ -23,7 +23,12 @@ import { type SkillService, createSkillService } from './skills';
 import { createSmlService, type SmlServiceInstance } from './sml';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
-import { createMeteringService, type MeteringService } from './metering';
+import {
+  createMeteringService,
+  type MeteringService,
+  createConsumptionService,
+  type ConsumptionService,
+} from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
 
 interface ServiceInstances {
@@ -35,6 +40,7 @@ interface ServiceInstances {
   plugins: PluginsService;
   metering: MeteringService;
   sml: SmlServiceInstance;
+  consumption: ConsumptionService;
 }
 
 export class ServiceManager {
@@ -62,6 +68,7 @@ export class ServiceManager {
       plugins: createPluginsService(),
       metering: createMeteringService({ cloud, usageApi, logger: logger.get('metering') }),
       sml: createSmlService(),
+      consumption: createConsumptionService(),
     };
 
     this.internalSetup = {
@@ -209,6 +216,8 @@ export class ServiceManager {
       config: this.config,
     });
 
+    const consumption = this.services.consumption.start({ elasticsearch, spaces });
+
     this.internalStart = {
       tools,
       agents,
@@ -226,6 +235,7 @@ export class ServiceManager {
       savedObjects,
       sml,
       plugins,
+      consumption,
     };
 
     return this.internalStart;
