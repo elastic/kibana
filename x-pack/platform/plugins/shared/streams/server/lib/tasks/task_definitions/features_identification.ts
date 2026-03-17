@@ -76,14 +76,14 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 streamsClient,
                 inferenceClient,
                 soClient,
-                modelSettingsClient,
+                sigEventsSettingsClient,
                 uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
               const taskLogger = taskContext.logger.get('features_identification');
-              const settings = await modelSettingsClient.getSettings();
+              const settings = await sigEventsSettingsClient.getSettings();
               const connectorId = await resolveConnectorId({
                 connectorId: settings.connectorIdKnowledgeIndicatorExtraction,
                 uiSettingsClient,

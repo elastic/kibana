@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ModelSettings } from '../../../../lib/saved_objects/significant_events/model_settings_config_service';
+import type { SigEventsSettings } from '../../../../lib/saved_objects/significant_events/sig_events_settings_service';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -23,12 +23,12 @@ export const getSignificantEventsSettingsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ request, getScopedClients, server }): Promise<ModelSettings> => {
-    const { modelSettingsClient, licensing, uiSettingsClient } = await getScopedClients({
+  handler: async ({ request, getScopedClients, server }): Promise<SigEventsSettings> => {
+    const { sigEventsSettingsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    return modelSettingsClient.getSettings();
+    return sigEventsSettingsClient.getSettings();
   },
 });
 
@@ -55,11 +55,11 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     body: putSignificantEventsSettingsBodySchema,
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ success: true }> => {
-    const { modelSettingsClient, licensing, uiSettingsClient } = await getScopedClients({
+    const { sigEventsSettingsClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    await modelSettingsClient.updateSettings(params.body);
+    await sigEventsSettingsClient.updateSettings(params.body);
     return { success: true };
   },
 });

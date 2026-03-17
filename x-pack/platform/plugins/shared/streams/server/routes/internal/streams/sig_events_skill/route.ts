@@ -54,7 +54,9 @@ const enableRoute = createServerRoute({
     getScopedClients,
     params,
   }): Promise<EnableSigEventsSkillResult> => {
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { licensing, uiSettingsClient, sigEventsSettingsClient } = await getScopedClients({
+      request,
+    });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     if (!server.agentBuilderStart) {
@@ -71,10 +73,17 @@ const enableRoute = createServerRoute({
         }
       }
     }
-    return enableSigEventsSkill(server.agentBuilderStart, request, {
+    const result = await enableSigEventsSkill(server.agentBuilderStart, request, {
       toolIds: params?.body?.tool_ids,
       content: params?.body?.content,
     });
+    const sigEventsSkill: { enabled: true; content?: string; toolIds?: string[] } = {
+      enabled: true,
+      ...(params?.body?.content !== undefined && { content: params.body.content }),
+      ...(params?.body?.tool_ids !== undefined && { toolIds: params.body.tool_ids }),
+    };
+    await sigEventsSettingsClient.updateSettings({ sigEventsSkill });
+    return result;
   },
 });
 
@@ -96,14 +105,20 @@ const disableRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<DisableSigEventsSkillResult> => {
-    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    const { licensing, uiSettingsClient, sigEventsSettingsClient } = await getScopedClients({
+      request,
+    });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     if (!server.agentBuilderStart) {
       throw new Error('Agent Builder is not available. Ensure the agentBuilder plugin is enabled.');
     }
     // We cannot unregister tools so we only clean up the skill and restore the default agent.
-    return disableSigEventsSkill(server.agentBuilderStart, request, logger);
+    const result = await disableSigEventsSkill(server.agentBuilderStart, request, logger);
+    await sigEventsSettingsClient.updateSettings({
+      sigEventsSkill: { enabled: false },
+    });
+    return result;
   },
 });
 

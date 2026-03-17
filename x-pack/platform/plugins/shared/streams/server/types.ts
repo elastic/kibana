@@ -33,6 +33,8 @@ import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/ser
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server';
 import type { StreamsConfig } from '../common/config';
+import type { SigEventsSettingsService } from './lib/saved_objects/significant_events/sig_events_settings_service';
+import type { GetScopedClients } from './routes/types';
 
 export interface StreamsServer {
   core: CoreStart;
@@ -45,6 +47,8 @@ export interface StreamsServer {
   taskManager: TaskManagerStartContract;
   agentBuilderStart?: AgentBuilderPluginStart;
   agentBuilderSetup?: AgentBuilderPluginSetup;
+  sigEventsSettingsService?: SigEventsSettingsService;
+  getScopedClients?: GetScopedClients;
 }
 
 export interface ElasticsearchAccessorOptions {

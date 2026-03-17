@@ -74,7 +74,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 inferenceClient,
                 queryClient,
                 streamsClient,
-                modelSettingsClient,
+                sigEventsSettingsClient,
                 uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
@@ -152,7 +152,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 let errorMessage = getErrorMessage(error);
                 try {
                   const onboardingLogger = taskContext.logger.get('onboarding');
-                  const settings = await modelSettingsClient.getSettings();
+                  const settings = await sigEventsSettingsClient.getSettings();
                   const connectorIdForError = await resolveConnectorId({
                     connectorId: settings.connectorIdRuleGeneration,
                     uiSettingsClient,

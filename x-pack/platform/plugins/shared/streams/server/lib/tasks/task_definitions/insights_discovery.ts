@@ -53,14 +53,14 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 inferenceClient,
                 queryClient,
                 insightClient,
-                modelSettingsClient,
+                sigEventsSettingsClient,
                 uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
               const taskLogger = taskContext.logger.get('insights_discovery');
-              const settings = await modelSettingsClient.getSettings();
+              const settings = await sigEventsSettingsClient.getSettings();
               const connectorId = await resolveConnectorId({
                 connectorId: settings.connectorIdDiscovery,
                 uiSettingsClient,

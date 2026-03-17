@@ -57,14 +57,14 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 soClient,
                 featureClient,
                 scopedClusterClient,
-                modelSettingsClient,
+                sigEventsSettingsClient,
                 uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
               const taskLogger = taskContext.logger.get('significant_events_queries_generation');
-              const settings = await modelSettingsClient.getSettings();
+              const settings = await sigEventsSettingsClient.getSettings();
               const connectorId = await resolveConnectorId({
                 connectorId: settings.connectorIdRuleGeneration,
                 uiSettingsClient,
