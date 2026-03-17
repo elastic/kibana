@@ -111,7 +111,9 @@ export const command = {
     });
 
     await time('run install scripts', async () => {
-      await runInstallScripts(log, { quiet });
+      if (shouldInstall) {
+        await runInstallScripts(log, { quiet });
+      }
     });
 
     await time('pre-build webpack bundles for packages', async () => {
