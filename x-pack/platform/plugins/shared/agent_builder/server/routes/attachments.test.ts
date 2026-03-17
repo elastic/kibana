@@ -485,7 +485,7 @@ describe('Attachment Routes', () => {
       const result = mockResponse.ok.mock.calls[0][0];
       expect(result.body.attachments).toEqual([
         expect.objectContaining({
-          attachment_id: 'att-1',
+          id: 'att-1',
           is_stale: false,
         }),
       ]);
@@ -509,7 +509,7 @@ describe('Attachment Routes', () => {
       const result = mockResponse.ok.mock.calls[0][0];
       expect(result.body.attachments).toEqual([
         expect.objectContaining({
-          attachment_id: 'att-no-origin',
+          id: 'att-no-origin',
           is_stale: false,
         }),
       ]);
@@ -533,13 +533,14 @@ describe('Attachment Routes', () => {
       const result = mockResponse.ok.mock.calls[0][0];
       expect(result.body.attachments).toEqual([
         expect.objectContaining({
-          attachment_id: 'att-no-resolve',
+          id: 'att-no-resolve',
           is_stale: false,
         }),
       ]);
     });
 
-    it('uses custom isStale when provided and invokes it with full VersionedAttachment', async () => {
+    it('uses custom isStale when provided and returns resolved data for stale attachments', async () => {
+      const resolvedData = { value: 'fresh' };
       const attachment = createMockAttachment({
         id: 'att-custom',
         type: 'custom',
@@ -556,13 +557,14 @@ describe('Attachment Routes', () => {
       });
       mockConversationsClient.get.mockResolvedValue(createMockConversation([attachment]));
       const isStaleMock = jest.fn().mockResolvedValue(true);
+      const resolveMock = jest.fn().mockResolvedValue(resolvedData);
       mockGetInternalServices().attachments.getTypeDefinition.mockImplementation((type: string) => {
         if (type === 'custom') {
           return {
             id: 'custom',
             validate: (input: unknown) => ({ valid: true, data: input }),
             format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-            resolve: jest.fn(),
+            resolve: resolveMock,
             isStale: isStaleMock,
           };
         }
@@ -593,11 +595,15 @@ describe('Attachment Routes', () => {
         }),
         expect.any(Object)
       );
+      expect(resolveMock).toHaveBeenCalledWith({ id: 'source-1' }, expect.any(Object));
       const result = mockResponse.ok.mock.calls[0][0];
       expect(result.body.attachments).toEqual([
         expect.objectContaining({
-          attachment_id: 'att-custom',
+          id: 'att-custom',
           is_stale: true,
+          data: resolvedData,
+          type: 'custom',
+          origin: { id: 'source-1' },
         }),
       ]);
     });

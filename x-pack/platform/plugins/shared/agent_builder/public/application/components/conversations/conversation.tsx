@@ -40,14 +40,12 @@ import { CanvasProvider } from './conversation_rounds/round_response/attachments
 import { CanvasFlyout } from './conversation_rounds/round_response/attachments/canvas_flyout';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationContext } from '../../context/conversation/conversation_context';
-import { useConversation } from '../../hooks/use_conversation';
 import { useStaleAttachmentsCheck } from '../../hooks/use_stale_attachments_check';
 import { getStaleAttachmentInputs } from '../../context/conversation/get_stale_attachment_inputs';
 import { StaleAttachmentsPanel } from './stale_attachments_panel';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
-  const { conversation } = useConversation();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
   const { isResponseLoading } = useSendMessage();
@@ -82,13 +80,8 @@ export const Conversation: React.FC<{}> = () => {
   }, [stagedAttachments]);
 
   const staleAttachmentInputs = useMemo(
-    () =>
-      getStaleAttachmentInputs(
-        staleResponse ?? { attachments: [] },
-        conversation?.attachments ?? [],
-        stagedAttachmentIds
-      ),
-    [conversation?.attachments, stagedAttachmentIds, staleResponse]
+    () => getStaleAttachmentInputs(staleResponse ?? { attachments: [] }, stagedAttachmentIds),
+    [stagedAttachmentIds, staleResponse]
   );
 
   const hasStaleAttachments = staleAttachmentInputs.length > 0;

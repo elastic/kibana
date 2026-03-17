@@ -12,6 +12,7 @@ import type { CheckStaleAttachmentsResponse } from '../../../common/http_api/att
 import { useAgentBuilderServices } from './use_agent_builder_service';
 
 const STALE_CHECK_DEBOUNCE_MS = 300;
+const STALE_CHECK_DEBOUNCE_OPTIONS = { wait: STALE_CHECK_DEBOUNCE_MS } as const;
 
 export interface UseStaleAttachmentsCheckResult {
   staleResponse: CheckStaleAttachmentsResponse | undefined;
@@ -34,29 +35,24 @@ export const useStaleAttachmentsCheck = (
   );
   const isStaleCheckInFlightRef = useRef(false);
 
-  const { run: scheduleStaleCheck } = useDebounceFn(
-    async () => {
-      if (!conversationId) {
-        setStaleResponse(undefined);
-        return;
-      }
-
-      if (isStaleCheckInFlightRef.current) {
-        return;
-      }
-
-      isStaleCheckInFlightRef.current = true;
-      try {
-        const response = await attachmentsService.checkStale(conversationId);
-        setStaleResponse(response);
-      } finally {
-        isStaleCheckInFlightRef.current = false;
-      }
-    },
-    {
-      wait: STALE_CHECK_DEBOUNCE_MS,
+  const { run: scheduleStaleCheck } = useDebounceFn(async () => {
+    if (!conversationId) {
+      setStaleResponse(undefined);
+      return;
     }
-  );
+
+    if (isStaleCheckInFlightRef.current) {
+      return;
+    }
+
+    isStaleCheckInFlightRef.current = true;
+    try {
+      const response = await attachmentsService.checkStale(conversationId);
+      setStaleResponse(response);
+    } finally {
+      isStaleCheckInFlightRef.current = false;
+    }
+  }, STALE_CHECK_DEBOUNCE_OPTIONS);
 
   useEffect(() => {
     scheduleStaleCheck();

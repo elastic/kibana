@@ -14,6 +14,8 @@ export type {
   EsqlAttachment,
   VisualizationAttachment,
 } from './attachments';
+
+export type { StaleAttachment, FreshAttachment, AttachmentStaleCheckResult } from './stale_check';
 export {
   AttachmentType,
   textAttachmentDataSchema,

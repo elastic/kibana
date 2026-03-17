@@ -15,6 +15,7 @@ import type {
   AttachmentType,
   AttachmentRefActor,
   AttachmentRefOperation,
+  AttachmentStaleCheckResult,
 } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_OPERATION,
@@ -60,10 +61,7 @@ export interface ResolvedAttachmentRef {
 /**
  * Result of evaluating staleness for a single attachment.
  */
-export interface StaleCheckResult {
-  attachment_id: string;
-  is_stale: boolean;
-}
+export type StaleCheckResult = AttachmentStaleCheckResult;
 
 /**
  * Interface for managing conversation attachment state.
@@ -570,12 +568,29 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     return Promise.all(
       activeAttachments.map(async (attachment): Promise<StaleCheckResult> => {
         if (attachment.origin === undefined) {
-          return { attachment_id: attachment.id, is_stale: false };
+          return { id: attachment.id, is_stale: false };
         }
 
         const typeDefinition = this.options.getTypeDefinition(attachment.type);
         const isStale = await typeDefinition?.isStale?.(attachment, resolveContext);
-        return { attachment_id: attachment.id, is_stale: isStale ?? false };
+
+        if (!isStale) {
+          return { id: attachment.id, is_stale: false };
+        }
+
+        const resolvedData = await typeDefinition?.resolve?.(attachment.origin, resolveContext);
+        if (!resolvedData) {
+          return { id: attachment.id, is_stale: false };
+        }
+
+        return {
+          id: attachment.id,
+          is_stale: true,
+          data: resolvedData as Record<string, unknown>,
+          type: attachment.type,
+          hidden: attachment.hidden,
+          origin: attachment.origin,
+        };
       })
     );
   }
