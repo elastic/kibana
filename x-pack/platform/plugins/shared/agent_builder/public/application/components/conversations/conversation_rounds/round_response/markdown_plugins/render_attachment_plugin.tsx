@@ -146,6 +146,7 @@ export const createRenderAttachmentRenderer = ({
         attachmentsService={attachmentsService}
         isSidebar={isSidebar}
         screenContext={screenContext}
+        version={versionToUse}
       />
     );
   };
