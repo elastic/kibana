@@ -12,6 +12,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
@@ -55,6 +56,10 @@ const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
 
 const closeButtonAriaLabel = i18n.translate('esqlEditor.visor.closeButtonAriaLabel', {
   defaultMessage: 'Close quick search visor',
+});
+
+const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip', {
+  defaultMessage: 'Technical preview',
 });
 
 export function QuickSearchVisor({
@@ -250,6 +255,9 @@ export function QuickSearchVisor({
         >
           {isNlToEsqlEnabled && (
             <>
+              <EuiFlexItem grow={false} css={styles.techPreviewIcon}>
+                <EuiIconTip type="beaker" size="s" color="subdued" content={techPreviewTooltip} />
+              </EuiFlexItem>
               <EuiFlexItem grow={false} css={styles.modeSelectWrapper}>
                 <ModeSelector onModeChange={onModeChange} />
               </EuiFlexItem>
