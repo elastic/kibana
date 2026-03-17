@@ -9,7 +9,7 @@ import React from 'react';
 import type { StoryFn } from '@storybook/react';
 import { EuiLink } from '@elastic/eui';
 import styled from '@emotion/styled';
-import { FlyoutTitle } from './flyout_title';
+import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 
 const FixWidthWrapper = styled.div`
   width: 350px;
