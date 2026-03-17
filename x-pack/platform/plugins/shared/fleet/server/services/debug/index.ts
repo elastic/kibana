@@ -104,7 +104,7 @@ export async function fetchSavedObjectNames(
     type,
     aggs: {
       names: {
-        terms: { field: `${type}.attributes.name` },
+        terms: { field: `${type}.attributes.name` }, // cf. SavedObjectsFindOptions definition in src/core/packages/saved-objects/api-server/src/apis/find.ts
       },
     },
   });
