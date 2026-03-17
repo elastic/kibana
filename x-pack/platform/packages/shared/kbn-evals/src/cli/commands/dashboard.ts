@@ -7,7 +7,12 @@
 
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { generateDashboardBody, generateDataViewBody, DASHBOARD_ID, DATA_VIEW_ID } from '../../dashboard/saved_objects';
+import {
+  generateDashboardBody,
+  generateDataViewBody,
+  DASHBOARD_ID,
+  DATA_VIEW_ID,
+} from '../../dashboard/saved_objects';
 
 const DEFAULT_KBN_URL = 'http://elastic:changeme@localhost:5620';
 
@@ -158,7 +163,9 @@ const createOrUpdateDashboard = async ({
 
   if (!response.ok) {
     const body = await response.text();
-    throw new Error(`Failed to create/update dashboard: ${response.status} ${response.statusText}\n${body}`);
+    throw new Error(
+      `Failed to create/update dashboard: ${response.status} ${response.statusText}\n${body}`
+    );
   }
 
   const result = (await response.json()) as { id: string };
