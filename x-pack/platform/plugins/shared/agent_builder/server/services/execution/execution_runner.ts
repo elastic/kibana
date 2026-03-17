@@ -257,7 +257,7 @@ const createDeanonymizeTitleFn = ({
   request: KibanaRequest;
   logger: Logger;
 }): ((title: string) => Promise<string>) | undefined => {
-  if (!anonymizationEnabled || !conversation.replacementsId) {
+  if (!anonymizationEnabled || !conversation.replacements_id) {
     return undefined;
   }
 
@@ -265,12 +265,12 @@ const createDeanonymizeTitleFn = ({
     const namespace = deps.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
     const result = await deps.inference.deanonymizeText(
       namespace,
-      conversation.replacementsId!,
+      conversation.replacements_id!,
       title
     );
     if (ANONYMIZATION_TOKEN_PATTERN.test(result)) {
       logger.warn(
-        `[agent_builder.anonymization.title_guard] token_pattern_detected=true replacements_id=${conversation.replacementsId} — falling back to default title`
+        `[agent_builder.anonymization.title_guard] token_pattern_detected=true replacements_id=${conversation.replacements_id} — falling back to default title`
       );
       return 'New conversation';
     }
@@ -387,7 +387,7 @@ const buildPersistenceEvents = ({
       agentId,
       conversationClient,
       conversationId: conversationId || conversation.id,
-      replacementsId: conversation.replacementsId,
+      replacementsId: conversation.replacements_id,
       title$,
       roundCompletedEvents$,
     });

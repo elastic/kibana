@@ -177,7 +177,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({
   const { conversation } = useConversation();
   const { accessChecker } = useAgentBuilderServices();
   const anonymizationEnabled = accessChecker.getAccess().hasAnonymizationEnabled;
-  const showAnonymizationToggle = anonymizationEnabled && Boolean(conversation?.replacementsId);
+  const showAnonymizationToggle = anonymizationEnabled && Boolean(conversation?.replacements_id);
 
   const closePopover = () => {
     setIsPopoverOpen(false);

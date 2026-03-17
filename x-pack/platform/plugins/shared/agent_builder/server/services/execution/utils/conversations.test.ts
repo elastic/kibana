@@ -45,10 +45,10 @@ describe('conversations utils', () => {
         expect(conversationClient.get).toHaveBeenCalledWith('test-conversation');
       });
 
-      it('assigns replacementsId when legacy conversation does not have one', async () => {
+      it('assigns replacements_id when legacy conversation does not have one', async () => {
         const conversationClient = createConversationClientMock();
         conversationClient.get.mockResolvedValue(
-          createEmptyConversation({ replacementsId: undefined })
+          createEmptyConversation({ replacements_id: undefined })
         );
 
         const result = await getConversation({
@@ -59,7 +59,7 @@ describe('conversations utils', () => {
         });
 
         expect(result.operation).toBe('UPDATE');
-        expect(result.replacementsId).toBeDefined();
+        expect(result.replacements_id).toBeDefined();
       });
 
       it('returns CREATE operation when autoCreateConversationWithId=true and conversation does not exist', async () => {
@@ -94,10 +94,10 @@ describe('conversations utils', () => {
         expect(result.operation).toBe('UPDATE');
       });
 
-      it('does not assign replacementsId when anonymization is disabled', async () => {
+      it('does not assign replacements_id when anonymization is disabled', async () => {
         const conversationClient = createConversationClientMock();
         conversationClient.get.mockResolvedValue(
-          createEmptyConversation({ replacementsId: undefined })
+          createEmptyConversation({ replacements_id: undefined })
         );
 
         const result = await getConversation({
@@ -108,7 +108,7 @@ describe('conversations utils', () => {
         });
 
         expect(result.operation).toBe('UPDATE');
-        expect(result.replacementsId).toBeUndefined();
+        expect(result.replacements_id).toBeUndefined();
       });
     });
   });
@@ -116,7 +116,7 @@ describe('conversations utils', () => {
   describe('updateConversation$', () => {
     it('persists inference-returned replacements id when present', async () => {
       const conversationClient = createConversationClientMock();
-      const conversation = createEmptyConversation({ replacementsId: 'existing-id' });
+      const conversation = createEmptyConversation({ replacements_id: 'existing-id' });
       const newRound = createRound({ id: 'round-2', input: { message: 'new' } });
       const roundCompleteEvent: RoundCompleteEvent = {
         type: ChatEventType.roundComplete,
@@ -141,7 +141,7 @@ describe('conversations utils', () => {
 
       expect(conversationClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          replacementsId: 'inference-id',
+          replacements_id: 'inference-id',
         })
       );
     });
@@ -286,7 +286,7 @@ describe('conversations utils', () => {
 
       expect(conversationClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          replacementsId: 'fallback-replacements-id',
+          replacements_id: 'fallback-replacements-id',
         })
       );
     });

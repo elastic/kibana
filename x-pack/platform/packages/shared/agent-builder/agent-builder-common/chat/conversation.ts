@@ -248,7 +248,7 @@ export interface Conversation {
   /** update date */
   updated_at: string;
   /** replacements document id used for anonymization continuity across turns */
-  replacementsId?: string;
+  replacements_id?: string;
   /** list of round for this conversation */
   rounds: ConversationRound[];
   /**

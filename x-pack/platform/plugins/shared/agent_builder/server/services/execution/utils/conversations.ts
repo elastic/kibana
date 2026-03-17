@@ -43,7 +43,7 @@ export const createConversation$ = ({
         id: conversationId,
         title,
         agent_id: agentId,
-        replacementsId: roundCompletedEvent.data.replacements_id ?? replacementsId,
+        replacements_id: roundCompletedEvent.data.replacements_id ?? replacementsId,
         state: roundCompletedEvent.data.conversation_state,
         rounds: [roundCompletedEvent.data.round],
         ...(roundCompletedEvent.data.attachments
@@ -88,7 +88,7 @@ export const updateConversation$ = ({
       return conversationClient.update({
         id: conversation.id,
         title,
-        replacementsId: roundCompletedEvent.data.replacements_id ?? conversation.replacementsId,
+        replacements_id: roundCompletedEvent.data.replacements_id ?? conversation.replacements_id,
         rounds: updatedRound,
         state: conversation_state,
         ...(roundCompletedEvent.data.attachments !== undefined
@@ -150,10 +150,10 @@ export const getConversation = async ({
     const conversation = await conversationClient.get(conversationId);
     return {
       ...conversation,
-      replacementsId:
-        anonymizationEnabled && !conversation.replacementsId
+      replacements_id:
+        anonymizationEnabled && !conversation.replacements_id
           ? uuidv4()
-          : conversation.replacementsId,
+          : conversation.replacements_id,
       operation: 'UPDATE',
     };
   }
@@ -164,10 +164,10 @@ export const getConversation = async ({
     const conversation = await conversationClient.get(conversationId);
     return {
       ...conversation,
-      replacementsId:
-        anonymizationEnabled && !conversation.replacementsId
+      replacements_id:
+        anonymizationEnabled && !conversation.replacements_id
           ? uuidv4()
-          : conversation.replacementsId,
+          : conversation.replacements_id,
       operation: 'UPDATE',
     };
   } else {
@@ -193,7 +193,7 @@ export const placeholderConversation = ({
     agent_id: agentId,
     rounds: [],
     updated_at: new Date().toISOString(),
-    replacementsId: anonymizationEnabled ? uuidv4() : undefined,
+    replacements_id: anonymizationEnabled ? uuidv4() : undefined,
     created_at: new Date().toISOString(),
     user: {
       id: 'unknown',

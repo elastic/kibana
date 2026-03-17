@@ -169,7 +169,7 @@ describe('runDefaultAgentMode', () => {
     await runDefaultAgentMode(
       {
         nextInput: { message: 'hello' },
-        conversation: { replacementsId: 'repl-1', rounds: [] } as any,
+        conversation: { replacements_id: 'repl-1', rounds: [] } as any,
         agentConfiguration: { tools: [] } as any,
       } as any,
       context

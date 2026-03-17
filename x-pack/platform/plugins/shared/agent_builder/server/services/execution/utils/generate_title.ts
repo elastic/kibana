@@ -41,7 +41,7 @@ export const generateTitle = ({
         previousRounds: conversation.rounds,
         nextInput,
         chatModel,
-        replacementsId: anonymizationEnabled ? conversation.replacementsId : undefined,
+        replacementsId: anonymizationEnabled ? conversation.replacements_id : undefined,
         deanonymizeTitle,
         abortSignal,
       });

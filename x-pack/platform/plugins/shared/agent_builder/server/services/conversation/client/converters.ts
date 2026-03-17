@@ -55,7 +55,7 @@ const convertBaseFromEs = (document: Document) => {
     title: document._source.title,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
-    replacementsId: document._source.replacements_id,
+    replacements_id: document._source.replacements_id,
   };
 };
 
@@ -182,7 +182,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     title: conversation.title,
     created_at: conversation.created_at,
     updated_at: conversation.updated_at,
-    replacements_id: conversation.replacementsId,
+    replacements_id: conversation.replacements_id,
     // Explicitly omit rounds to ensure migration
     rounds: undefined,
     conversation_rounds: serializeStepResults(conversation.rounds),
@@ -231,7 +231,7 @@ export const createRequestToEs = ({
     title: conversation.title,
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
-    replacements_id: conversation.replacementsId,
+    replacements_id: conversation.replacements_id,
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
     state: conversation.state,
