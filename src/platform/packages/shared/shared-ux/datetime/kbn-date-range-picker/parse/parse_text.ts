@@ -391,7 +391,8 @@ function dateStringToDate(
   }
 
   if (/^(now|[+-]|\d)/.test(dateString)) {
-    return dateMath.parse(dateString, options)?.toDate() ?? null;
+    const parsed = dateMath.parse(dateString, options);
+    return parsed?.isValid() ? parsed.toDate() : null;
   }
 
   return null;
