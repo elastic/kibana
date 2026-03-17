@@ -76,7 +76,7 @@ describe('useNotificationPolicyForm', () => {
       expect(onSubmitCreate).toHaveBeenCalledWith({
         name: 'My policy',
         description: 'A description',
-        destinations: [{ type: 'workflow', id: 'workflow-1' }],
+        destinations: [],
       });
     });
 

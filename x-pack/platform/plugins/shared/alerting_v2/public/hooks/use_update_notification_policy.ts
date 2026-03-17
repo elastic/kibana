@@ -28,8 +28,9 @@ export const useUpdateNotificationPolicy = () => {
   return useMutation<NotificationPolicyResponse, Error, UpdateNotificationPolicyVariables>({
     mutationKey: notificationPolicyKeys.update(),
     mutationFn: ({ id, data }) => notificationPoliciesApi.updateNotificationPolicy(id, data),
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.lists(), exact: false });
+      queryClient.invalidateQueries({ queryKey: notificationPolicyKeys.detail(id), exact: false });
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.notificationPolicy.updateSuccess', {
           defaultMessage: 'Notification policy updated successfully',

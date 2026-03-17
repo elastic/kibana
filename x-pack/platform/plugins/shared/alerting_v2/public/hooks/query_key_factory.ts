@@ -15,6 +15,12 @@ export const ruleKeys = {
   delete: () => [...ruleKeys.all, 'delete'] as const,
 };
 
+export const workflowKeys = {
+  all: ['workflow'] as const,
+  searches: () => [...workflowKeys.all, 'search'] as const,
+  search: (params: { query: string }) => [...workflowKeys.searches(), params] as const,
+};
+
 export const notificationPolicyKeys = {
   all: ['notificationPolicy'] as const,
   create: () => [...notificationPolicyKeys.all, 'create'] as const,
