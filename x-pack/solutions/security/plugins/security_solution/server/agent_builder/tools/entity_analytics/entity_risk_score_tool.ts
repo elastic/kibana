@@ -11,14 +11,14 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
-import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
-import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_risk_score';
-import type { EntityType } from '../../../common/entity_analytics/types';
-import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
-import { getRiskIndex } from '../../../common/search_strategy/security_solution/risk_score/common';
-import { securityTool } from './constants';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
+import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
+import { createGetRiskScores } from '../../../lib/entity_analytics/risk_score/get_risk_score';
+import type { EntityType } from '../../../../common/entity_analytics/types';
+import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../../common/constants';
+import { getRiskIndex } from '../../../../common/search_strategy/security_solution/risk_score/common';
+import { securityTool } from '../constants';
 
 const entityRiskScoreSchema = z.object({
   identifierType: z
