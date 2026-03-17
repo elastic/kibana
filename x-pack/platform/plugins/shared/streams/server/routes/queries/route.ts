@@ -7,7 +7,7 @@
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamQuery } from '@kbn/streams-schema';
 import { streamQuerySchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
 import { createServerRoute } from '../create_server_route';
@@ -99,6 +99,7 @@ const upsertQueryRoute = createServerRoute({
     await queryClient.upsert(definition, {
       id: queryId,
       title: body.title,
+      description: body.description,
       esql: body.esql,
       severity_score: body.severity_score,
       evidence: body.evidence,

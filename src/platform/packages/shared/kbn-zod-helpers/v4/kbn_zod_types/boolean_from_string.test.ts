@@ -1,0 +1,50 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString, isBooleanFromString } from './boolean_from_string';
+
+describe('BooleanFromString', () => {
+  it('parses string "true" to boolean true', () => {
+    expect(BooleanFromString.parse('true')).toBe(true);
+  });
+
+  it('parses string "false" to boolean false', () => {
+    expect(BooleanFromString.parse('false')).toBe(false);
+  });
+
+  it('passes through boolean true as-is', () => {
+    expect(BooleanFromString.parse(true)).toBe(true);
+  });
+
+  it('passes through boolean false as-is', () => {
+    expect(BooleanFromString.parse(false)).toBe(false);
+  });
+
+  it('has the correct zod and kbn type', () => {
+    expect(BooleanFromString instanceof z.ZodUnion).toBe(true);
+    expect(isBooleanFromString(BooleanFromString)).toBe(true);
+  });
+
+  it('zod chaining works as expected', () => {
+    const zodChain = BooleanFromString.optional().default(false).describe('test description');
+    expect(zodChain.parse(undefined)).toBe(false);
+    expect(zodChain.description).toBe('test description');
+  });
+
+  it('zod wrapping works as expected', () => {
+    const zodSchema = z.optional(BooleanFromString).describe('wrapped with zod');
+    expect(zodSchema.description).toBe('wrapped with zod');
+  });
+
+  it('should throw an error when input is not a boolean or "true" or "false"', () => {
+    expect(() => BooleanFromString.parse('not a boolean')).toThrow();
+    expect(() => BooleanFromString.parse(42)).toThrow();
+  });
+});

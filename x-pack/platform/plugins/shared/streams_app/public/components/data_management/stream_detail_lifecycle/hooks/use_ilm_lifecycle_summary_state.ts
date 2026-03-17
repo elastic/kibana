@@ -6,6 +6,7 @@
  */
 
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
+import { isEqual } from 'lodash';
 import type { DeleteContext, EsIlmPolicyPhases } from './ilm_policy_phase_helpers';
 
 type ModalType = 'delete' | 'edit' | 'createPolicy' | null;
@@ -21,6 +22,7 @@ export interface LifecycleSummaryUiState {
   editFlyoutCanonicalInitialPhases: IlmPolicyPhases | null;
   isSavingEditFlyout: boolean;
   previewPhases: IlmPolicyPhases | null;
+  flyoutInvalidPhases: PhaseName[];
   editingPhase: PhaseName | undefined;
   createPolicyBackModal: 'delete' | 'edit' | null;
   pendingEditEsPhases: EsIlmPolicyPhases | null;
@@ -49,6 +51,7 @@ export type LifecycleSummaryUiAction =
   | { type: 'closeEditFlyout' }
   | { type: 'setEditingPhase'; payload: PhaseName | undefined }
   | { type: 'setPreviewPhases'; payload: IlmPolicyPhases | null }
+  | { type: 'setFlyoutInvalidPhases'; payload: PhaseName[] }
   | { type: 'setPendingEditEsPhases'; payload: EsIlmPolicyPhases | null }
   | { type: 'setPendingNewPolicyEsPhases'; payload: EsIlmPolicyPhases | null };
 
@@ -63,6 +66,7 @@ export const initialLifecycleSummaryUiState: LifecycleSummaryUiState = {
   editFlyoutCanonicalInitialPhases: null,
   isSavingEditFlyout: false,
   previewPhases: null,
+  flyoutInvalidPhases: [],
   editingPhase: undefined,
   createPolicyBackModal: null,
   pendingEditEsPhases: null,
@@ -116,6 +120,7 @@ export const lifecycleSummaryUiReducer = (
         editFlyoutCanonicalInitialPhases: action.payload.canonicalInitialPhases,
         previewPhases: null,
         editingPhase: action.payload.editingPhase,
+        flyoutInvalidPhases: [],
       };
     case 'closeEditFlyout':
       return {
@@ -124,12 +129,17 @@ export const lifecycleSummaryUiReducer = (
         editFlyoutInitialPhases: null,
         editFlyoutCanonicalInitialPhases: null,
         previewPhases: null,
+        flyoutInvalidPhases: [],
         editingPhase: undefined,
       };
     case 'setEditingPhase':
       return { ...state, editingPhase: action.payload };
     case 'setPreviewPhases':
+      if (isEqual(state.previewPhases, action.payload)) return state;
       return { ...state, previewPhases: action.payload };
+    case 'setFlyoutInvalidPhases':
+      if (isEqual(state.flyoutInvalidPhases, action.payload)) return state;
+      return { ...state, flyoutInvalidPhases: action.payload };
     case 'setPendingEditEsPhases':
       return { ...state, pendingEditEsPhases: action.payload };
     case 'setPendingNewPolicyEsPhases':

@@ -21,6 +21,9 @@ import type {
   ReportAgentUpdatedParams,
   ReportRoundCompleteParams,
   ReportRoundErrorParams,
+  ReportSkillCreatedParams,
+  ReportSkillDeletedParams,
+  ReportSkillUpdatedParams,
   ReportToolCallErrorParams,
   ReportToolCallSuccessParams,
   ReportToolCreatedParams,
@@ -102,6 +105,36 @@ export class AnalyticsService {
     } catch (error) {
       // Do not fail the request if telemetry fails
       this.logger.debug('Failed to report ToolCreated telemetry event', { error });
+    }
+  }
+
+  reportSkillCreated({ skillId }: { skillId: string }): void {
+    try {
+      this.analytics.reportEvent<ReportSkillCreatedParams>(AGENT_BUILDER_EVENT_TYPES.SkillCreated, {
+        skill_id: skillId,
+      });
+    } catch (error) {
+      this.logger.debug('Failed to report SkillCreated telemetry event', { error });
+    }
+  }
+
+  reportSkillUpdated({ skillId }: { skillId: string }): void {
+    try {
+      this.analytics.reportEvent<ReportSkillUpdatedParams>(AGENT_BUILDER_EVENT_TYPES.SkillUpdated, {
+        skill_id: skillId,
+      });
+    } catch (error) {
+      this.logger.debug('Failed to report SkillUpdated telemetry event', { error });
+    }
+  }
+
+  reportSkillDeleted({ skillId }: { skillId: string }): void {
+    try {
+      this.analytics.reportEvent<ReportSkillDeletedParams>(AGENT_BUILDER_EVENT_TYPES.SkillDeleted, {
+        skill_id: skillId,
+      });
+    } catch (error) {
+      this.logger.debug('Failed to report SkillDeleted telemetry event', { error });
     }
   }
 

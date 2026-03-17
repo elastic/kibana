@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { EsqlService } from './esql_service';
 
-interface BuildServerESQLCallbacksOptions {
+export interface BuildServerESQLCallbacksOptions {
   client: ElasticsearchClient;
 }
 
