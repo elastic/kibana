@@ -35,7 +35,7 @@ describe('useGapAutoFillCapabilities', () => {
     jest.clearAllMocks();
     mockUseUserPrivileges.mockReturnValue({
       rulesPrivileges: {
-        rules: { read: true, edit: true },
+        rules: { read: true, edit: false },
         rulesManagementSettings: { edit: true },
       },
     });
@@ -48,7 +48,7 @@ describe('useGapAutoFillCapabilities', () => {
     );
   });
 
-  it('returns edit access when license and CRUD permissions are available', () => {
+  it('returns edit access when license and rules_management_settings permissions are available', () => {
     const { result } = renderHook(() => useGapAutoFillCapabilities());
 
     expect(result.current.hasEnterpriseLicense).toBe(true);
@@ -68,7 +68,7 @@ describe('useGapAutoFillCapabilities', () => {
     expect(result.current.canEditGapAutoFill).toBe(false);
   });
 
-  it('denies edit rights when license is enterprise but user lacks CRUD', () => {
+  it('denies edit rights when license is enterprise but user lacks rules_management_settings', () => {
     mockUseLicense.mockReturnValue({
       isEnterprise: () => true,
     });
@@ -82,7 +82,7 @@ describe('useGapAutoFillCapabilities', () => {
     const { result } = renderHook(() => useGapAutoFillCapabilities());
 
     expect(result.current.canAccessGapAutoFill).toBe(true);
-    expect(result.current.canEditGapAutoFill).toBe(false);
+    expect(result.current.canEditGapAutoFill).toBe(true);
   });
 
   it('denies access when rule gaps auto-fill feature is disabled', () => {

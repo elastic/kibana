@@ -18,7 +18,7 @@ export const useGapAutoFillCapabilities = () => {
   const license = useLicense();
   const productFeatureKeys = useProductFeatureKeys();
   const hasEnterpriseLicense = license.isEnterprise();
-  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges.rules;
+  const { read: canReadRules } = useUserPrivileges().rulesPrivileges.rules;
   const canAccessRulesManagementSettings =
     useUserPrivileges().rulesPrivileges.rulesManagementSettings?.edit ?? false;
   const hasRuleGapsAutoFillFeature = productFeatureKeys.has(
@@ -28,21 +28,13 @@ export const useGapAutoFillCapabilities = () => {
   return useMemo(
     () => ({
       hasEnterpriseLicense,
-      canAccessGapAutoFill:
-        hasEnterpriseLicense &&
-        hasRuleGapsAutoFillFeature &&
-        canReadRules &&
-        canAccessRulesManagementSettings,
+      canAccessGapAutoFill: hasEnterpriseLicense && hasRuleGapsAutoFillFeature && canReadRules,
       canEditGapAutoFill:
-        hasEnterpriseLicense &&
-        hasRuleGapsAutoFillFeature &&
-        canEditRules &&
-        canAccessRulesManagementSettings,
+        hasEnterpriseLicense && hasRuleGapsAutoFillFeature && canAccessRulesManagementSettings,
     }),
     [
       hasEnterpriseLicense,
       hasRuleGapsAutoFillFeature,
-      canEditRules,
       canReadRules,
       canAccessRulesManagementSettings,
     ]
