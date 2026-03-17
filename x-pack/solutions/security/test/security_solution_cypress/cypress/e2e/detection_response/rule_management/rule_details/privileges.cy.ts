@@ -22,8 +22,8 @@ import {
   rulesReadUser,
   secAll as rulesNone,
   secAllUser as rulesNoneUser,
-  rulesReadWithManualRun,
-  rulesReadWithManualRunUser,
+  rulesReadManualRunAll,
+  rulesReadManualRunAllUser,
 } from '../../../../tasks/privileges';
 
 import { RULES_URL } from '../../../../urls/navigation';
@@ -60,8 +60,8 @@ import {
   unsnoozeRule,
 } from '../../../../tasks/rule_snoozing';
 import { UNSNOOZED_BADGE } from '../../../../screens/rule_snoozing';
-const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser, rulesReadWithManualRunUser];
-const rolesToCreate = [rulesAll, rulesRead, rulesNone, rulesReadWithManualRun];
+const usersToCreate = [rulesAllUser, rulesReadUser, rulesNoneUser, rulesReadManualRunAllUser];
+const rolesToCreate = [rulesAll, rulesRead, rulesNone, rulesReadManualRunAll];
 
 // As part of the rules RBAC effort, we have created these tests with roles that only have the new rules feature 'securitySolutionRulesVX' enabled in order to test
 // the features that said roles should have access to. Notice that the roles created are very minimal and only contain the new rules feature.
@@ -188,7 +188,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
     });
 
     beforeEach(() => {
-      loginWithUser(rulesReadWithManualRunUser);
+      loginWithUser(rulesReadManualRunAllUser);
       visit(RULES_URL);
       goToRuleDetailsOf(ruleNameForManualRunPrivilegesTest);
     });

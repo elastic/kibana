@@ -9,6 +9,7 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import {
   GAP_AUTO_FILL_STATUS_BADGE,
   RULE_GAPS_OVERVIEW_PANEL,
+  RULE_SETTINGS_BUTTON,
   RULE_SETTINGS_ENABLE_SWITCH,
   RULE_SETTINGS_MODAL,
   RULE_SETTINGS_SAVE_BUTTON,
@@ -25,11 +26,21 @@ import {
   getGapAutoFillSchedulerApi,
 } from '../../../../tasks/api_calls/gaps';
 import { RULES_MONITORING_TAB } from '../../../../screens/alerts_detection_rules';
-import { login } from '../../../../tasks/login';
+import { login, loginWithUser } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getCustomQueryRuleParams } from '../../../../objects/rule';
 import { getGapAutoFillLogsTableRows } from '../../../../tasks/rule_details';
+import { visit } from '../../../../tasks/navigation';
+import { RULES_URL } from '../../../../urls/navigation';
+import {
+  createUsersAndRoles,
+  deleteUsersAndRoles,
+  rulesReadManagementSettingsAllUser,
+  rulesReadManagementSettingsAll,
+  rulesAllManagementSettingsUserNoneUser,
+  rulesAllManagementSettingsUserNone,
+} from '../../../../tasks/privileges';
 
 const visitMonitoringTab = () => {
   visitRulesManagementTable();
@@ -80,8 +91,13 @@ describe(
   },
   () => {
     describe('Platinum user flows', () => {
+      const rbacRolesToCreate = [rulesReadManagementSettingsAll];
+      const rbacUsersToCreate = [rulesReadManagementSettingsAllUser];
+
       beforeEach(() => {
-        login();
+        deleteUsersAndRoles(rbacUsersToCreate, rbacRolesToCreate);
+        createUsersAndRoles(rbacUsersToCreate, rbacRolesToCreate);
+        loginWithUser(rulesReadManagementSettingsAllUser);
         deleteAlertsAndRules();
         deleteGapAutoFillScheduler();
         createRule(
@@ -211,3 +227,43 @@ describe(
     });
   }
 );
+
+describe('Auto gap fill RBAC', { tags: ['@ess'] }, () => {
+  const rbacRolesToCreate = [rulesReadManagementSettingsAll, rulesAllManagementSettingsUserNone];
+  const rbacUsersToCreate = [rulesReadManagementSettingsAllUser, rulesAllManagementSettingsUserNoneUser];
+
+  before(() => {
+    deleteAlertsAndRules();
+    deleteGapAutoFillScheduler();
+    deleteUsersAndRoles(rbacUsersToCreate, rbacRolesToCreate);
+    createUsersAndRoles(rbacUsersToCreate, rbacRolesToCreate);
+    createRule(
+      getCustomQueryRuleParams({
+        rule_id: '1',
+        name: 'Rule 1',
+        interval: '1m',
+        from: 'now-1m',
+      })
+    );
+  });
+
+  after(() => {
+    deleteGapAutoFillScheduler();
+    deleteUsersAndRoles(rbacUsersToCreate, rbacRolesToCreate);
+    deleteAlertsAndRules();
+  });
+
+  describe('User with rules.all no rulesManagementSettings', () => {
+    beforeEach(() => {
+      loginWithUser(rulesAllManagementSettingsUserNoneUser);
+      visit(RULES_URL);
+    });
+
+    it('shows the settings button and modal but disables edits', () => {
+      cy.get(RULE_SETTINGS_BUTTON).should('exist').click();
+      cy.get(RULE_SETTINGS_MODAL).should('exist');
+      cy.get(RULE_SETTINGS_ENABLE_SWITCH).should('be.disabled');
+      cy.get(RULE_SETTINGS_SAVE_BUTTON).should('be.disabled');
+    });
+  });
+});
