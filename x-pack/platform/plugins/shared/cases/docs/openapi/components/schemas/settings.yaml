@@ -8,6 +8,8 @@ properties:
     type: boolean
     example: true
   extractObservables:
-    description: Auto extracts observables
+    description: >
+      When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments.
+      Optional; defaults to false when omitted.
     type: boolean
     example: false
