@@ -186,6 +186,11 @@ export const getAgentIdFromPath = (pathname: string): string | undefined => {
   return match ? match[1] : undefined;
 };
 
+export const getConversationIdFromPath = (pathname: string): string | undefined => {
+  const match = pathname.match(/^\/agents\/[^/]+\/conversations\/([^/]+)/);
+  return match ? match[1] : undefined;
+};
+
 export const getAgentSettingsNavItems = (
   agentId: string
 ): Array<{ label: string; path: string }> => {
