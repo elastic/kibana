@@ -206,9 +206,7 @@ describe('generateCmd', () => {
 
       await generateCmd.run({ log, flagsReader } as any);
 
-      expect(process.stdout.write).toHaveBeenCalledWith(
-        expect.stringContaining('"query"')
-      );
+      expect(process.stdout.write).toHaveBeenCalledWith(expect.stringContaining('"query"'));
     });
 
     it('writes to file when --output is provided', async () => {
