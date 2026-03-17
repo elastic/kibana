@@ -596,13 +596,15 @@ export const QueryBarTopRow = React.memo(
           isInvalid={isDateRangeInvalid}
           isLoading={props.isLoading}
           disabled={props.isDisabled}
-          width="restricted"
-          dateFormat={uiSettings.get('dateFormat')}
+          width="full"
           compressed
-          collapsed={shouldShowDatePickerAsBadge()}
+          collapsed={false}
           showTimeWindowButtons
           presets={commonlyUsedRanges}
           recent={recentlyUsedRanges}
+          settings={dateRangePickerSettings}
+          onSettingsChange={setDateRangePickerSettings}
+          timeZone={uiSettings.get('dateFormat:tz')}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
