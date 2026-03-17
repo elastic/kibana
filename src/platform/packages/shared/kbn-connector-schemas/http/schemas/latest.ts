@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ConfigSchema, HTTP_METHODS, ParamsSchema } from './v1';
+export { ConfigSchema, HTTP_METHODS, HttpSecretsSchema, ParamsSchema } from './v1';

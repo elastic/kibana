@@ -289,6 +289,13 @@ export const AUTHENTICATION_OAUTH2 = i18n.translate(
   }
 );
 
+export const AUTHENTICATION_QUERY_PARAM = i18n.translate(
+  'xpack.stackConnectors.components.auth.authenticationMethodQueryParamLabel',
+  {
+    defaultMessage: 'Query parameter',
+  }
+);
+
 export const INVALID_JSON = i18n.translate(
   'xpack.stackConnectors.components.additionalFieldsFormatErrorMessage',
   {

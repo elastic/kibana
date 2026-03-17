@@ -56,6 +56,7 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
           readOnly={readOnly}
           isPfxEnabled={isPfxEnabled}
           isOAuth2Enabled={true}
+          isQueryParamEnabled={true}
         />
       </React.Suspense>
     </>

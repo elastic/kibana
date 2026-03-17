@@ -12,7 +12,9 @@ export {
   AuthConfiguration,
   authTypeSchema,
   hasAuthSchema,
+  SecretConfiguration,
   SecretConfigurationSchema,
+  SecretConfigurationSchemaValidation,
 } from './schemas/latest';
 
 export type {

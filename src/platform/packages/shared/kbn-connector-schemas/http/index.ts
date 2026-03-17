@@ -8,7 +8,7 @@
  */
 export * from './constants';
 
-export { ConfigSchema, ParamsSchema, HTTP_METHODS } from './schemas/latest';
+export { ConfigSchema, ParamsSchema, HTTP_METHODS, HttpSecretsSchema } from './schemas/latest';
 
 export type {
   ConnectorTypeConfigType,

@@ -34,7 +34,6 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { isEqual } from 'lodash';
 import { AuthType, SSLCertType, MAX_HEADERS } from '@kbn/connector-schemas/common/auth/constants';
 import { useSecretHeaders } from './use_secret_headers';
-import { useSecretQueryParams } from './use_secret_query_params';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
 import { HeaderFields } from './header_fields';
@@ -46,6 +45,7 @@ interface Props {
   readOnly: boolean;
   isOAuth2Enabled?: boolean;
   isPfxEnabled?: boolean;
+  isQueryParamEnabled?: boolean;
 }
 
 export interface InternalFormData {
@@ -62,6 +62,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
   readOnly,
   isPfxEnabled = true,
   isOAuth2Enabled = false,
+  isQueryParamEnabled = false,
 }) => {
   const isModified = useFormIsModified();
   const { setFieldValue, getFieldDefaultValue, getFormData, updateFieldValues } = useFormContext();
@@ -74,8 +75,6 @@ export const AuthConfig: FunctionComponent<Props> = ({
       '__internal__.hasHeaders',
       '__internal__.hasCA',
       '__internal__.headers',
-      '__internal__.hasQueryParams',
-      '__internal__.queryParams',
     ],
   });
   const {
@@ -83,26 +82,16 @@ export const AuthConfig: FunctionComponent<Props> = ({
     isLoading: isLoadingHeaders,
     isFetching: isFetchingHeaders,
   } = useSecretHeaders(connectorId);
-  const {
-    data: secretQueryParamKeys = [],
-    isLoading: isLoadingQueryParams,
-    isFetching: isFetchingQueryParams,
-  } = useSecretQueryParams(connectorId);
 
   const loadingHeaders = isLoadingHeaders || isFetchingHeaders;
-  const loadingQueryParams = isLoadingQueryParams || isFetchingQueryParams;
   const authType = config == null ? AuthType.Basic : config.authType;
   const certType = config == null ? SSLCertType.CRT : config.certType;
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
   const hasCA = __internal__ != null ? __internal__.hasCA : false;
-  const hasQueryParams = __internal__ != null ? __internal__.hasQueryParams : false;
 
   // Default Values
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
-  const hasQueryParamsDefaultValue = !!getFieldDefaultValue<boolean | undefined>(
-    'secrets.secretQueryParams'
-  );
   const authTypeDefaultValue =
     getFieldDefaultValue('config.hasAuth') === false
       ? null
@@ -114,49 +103,6 @@ export const AuthConfig: FunctionComponent<Props> = ({
     getFieldDefaultValue('config.verificationMode') === 'none';
 
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
-
-  useEffect(() => {
-    if (loadingQueryParams) return;
-
-    const formData = getFormData();
-    const secretQueryParamKeysSet = new Set(secretQueryParamKeys);
-    const currentParams: Array<{ key: string; value: string }> = (
-      formData.__internal__?.queryParams ?? []
-    ).map((param: { key: string; value: string }) => {
-      if (secretQueryParamKeysSet.has(param.key)) {
-        return { ...param, value: '' };
-      }
-      return param;
-    });
-    const currentParamKeysSet = new Set(currentParams.map((p) => p.key));
-    const newSecretParams = secretQueryParamKeys
-      .filter((key) => !currentParamKeysSet.has(key))
-      .map((key) => ({ key, value: '' }));
-
-    let mergedParams = [...currentParams, ...newSecretParams];
-
-    if (mergedParams.length === 0 && hasQueryParams) {
-      mergedParams = [{ key: '', value: '' }];
-    }
-
-    if (mergedParams.length !== currentParams.length || newSecretParams.length > 0) {
-      updateFieldValues({
-        __internal__: {
-          ...formData.__internal__,
-          ...(!isModified && { hasQueryParams: mergedParams.length > 0 }),
-          queryParams: mergedParams,
-        },
-      });
-    }
-  }, [
-    connectorId,
-    getFormData,
-    secretQueryParamKeys,
-    updateFieldValues,
-    hasQueryParams,
-    loadingQueryParams,
-    isModified,
-  ]);
 
   useEffect(() => {
     if (loadingHeaders) return;
@@ -240,6 +186,12 @@ export const AuthConfig: FunctionComponent<Props> = ({
       ),
       'data-test-subj': 'authOAuth2',
     },
+    (isQueryParamEnabled || authType === AuthType.QueryParam) && {
+      value: AuthType.QueryParam,
+      label: i18n.AUTHENTICATION_QUERY_PARAM,
+      children: authType === AuthType.QueryParam && <QueryParamFields readOnly={readOnly} />,
+      'data-test-subj': 'authQueryParam',
+    },
   ].filter(Boolean);
 
   return (
@@ -289,31 +241,6 @@ export const AuthConfig: FunctionComponent<Props> = ({
         </EuiFlexGroup>
       ) : (
         <>{hasHeaders && <HeaderFields maxHeaders={MAX_HEADERS} readOnly={readOnly} />}</>
-      )}
-      <EuiSpacer size="m" />
-      <UseField
-        style={{ visibility: loadingQueryParams ? 'hidden' : 'visible' }}
-        path="__internal__.hasQueryParams"
-        component={ToggleField}
-        config={{
-          defaultValue: hasQueryParamsDefaultValue,
-          label: i18n.QUERY_PARAMS_SWITCH,
-        }}
-        componentProps={{
-          euiFieldProps: {
-            disabled: readOnly,
-            'data-test-subj': 'webhookViewQueryParamsSwitch',
-          },
-        }}
-      />
-      {loadingQueryParams ? (
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <>{hasQueryParams && <QueryParamFields readOnly={readOnly} />}</>
       )}
       <EuiSpacer size="m" />
       <UseField

@@ -15,13 +15,13 @@ import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
-import { SecretConfigurationSchema } from '@kbn/connector-schemas/common/auth';
 import type { ActionParamsType } from '@kbn/connector-schemas/http';
 import {
   CONNECTOR_ID,
   CONNECTOR_ID_SYSTEM,
   CONNECTOR_NAME,
   ConfigSchema,
+  HttpSecretsSchema,
   ParamsSchema,
 } from '@kbn/connector-schemas/http';
 import { z } from '@kbn/zod/v4';
@@ -74,7 +74,7 @@ export const getConnectorType = (): HttpConnectorType => ({
       customValidator: validateConnectorTypeConfig,
     },
     secrets: {
-      schema: SecretConfigurationSchema,
+      schema: HttpSecretsSchema,
     },
     params: {
       schema: ParamsSchema,
