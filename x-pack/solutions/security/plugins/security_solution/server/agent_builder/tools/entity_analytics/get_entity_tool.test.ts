@@ -8,17 +8,17 @@
 import { ToolResultType, type ErrorResult, type EsqlResults } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import {
   createToolAvailabilityContext,
   createToolHandlerContext,
   createToolTestMocks,
   setupMockCoreStartServices,
-} from '../__mocks__/test_helpers';
-import type { ExperimentalFeatures } from '../../../common';
+} from '../../__mocks__/test_helpers';
+import type { ExperimentalFeatures } from '../../../../common';
 import { getEntityTool } from './get_entity_tool';
 
-jest.mock('../utils/get_agent_builder_resource_availability', () => ({
+jest.mock('../../utils/get_agent_builder_resource_availability', () => ({
   getAgentBuilderResourceAvailability: jest.fn(),
 }));
 

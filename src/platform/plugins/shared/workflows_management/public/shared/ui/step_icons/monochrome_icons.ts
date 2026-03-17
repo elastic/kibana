@@ -19,6 +19,8 @@ export const MonochromeIcons = new Set([
   'wait',
   'workflow.execute',
   'workflow.executeAsync',
+  'workflow.output',
+  'workflow.fail',
   // connector icons, which are monochrome and should be colored with currentColor
   '.http',
   '.inference',
