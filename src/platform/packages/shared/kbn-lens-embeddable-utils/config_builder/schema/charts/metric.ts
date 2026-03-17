@@ -369,7 +369,9 @@ export const esqlMetricState = schema.object({
   /**
    * Configure how to break down the metric (e.g. show one metric per term).
    */
-  breakdown_by: schema.maybe(esqlColumnSchema.extends(metricStateBreakdownByOptionsSchema)),
+  breakdown_by: schema.maybe(
+    esqlColumnWithFormatSchema.extends(metricStateBreakdownByOptionsSchema)
+  ),
 });
 
 export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {
