@@ -70,12 +70,12 @@ spaceTest.describe(
       await expect(pageObjects.metricsExperience.grid).toBeHidden();
     });
 
-    // spaceTest('should not render grid with STATS command', async ({ pageObjects }) => {
-    //   await pageObjects.discover.writeAndSubmitEsqlQuery(
-    //     `${testData.ESQL_QUERIES.TS} | STATS count()`
-    //   );
-    //   await expect(pageObjects.metricsExperience.grid).toBeHidden();
-    // });
+    spaceTest('should not render grid with STATS command', async ({ pageObjects }) => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(
+        `${testData.ESQL_QUERIES.TS} | STATS count()`
+      );
+      await expect(pageObjects.metricsExperience.grid).toBeHidden();
+    });
 
     // spaceTest('should persist grid when changing time range', async ({ pageObjects }) => {
     //   await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
