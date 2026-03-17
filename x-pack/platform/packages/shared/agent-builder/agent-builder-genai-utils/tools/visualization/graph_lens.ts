@@ -396,8 +396,9 @@ What is the most appropriate time range for this visualization?`,
       logger.warn(`Failed to generate time range, defaulting to now-24h: ${error.message}`);
       action = {
         type: 'generate_time_range',
-        success: true,
+        success: false,
         timeRange: { from: 'now-24h', to: 'now' },
+        error: error.message,
       };
     }
 
