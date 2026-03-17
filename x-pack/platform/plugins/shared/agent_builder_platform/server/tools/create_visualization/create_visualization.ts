@@ -96,7 +96,8 @@ This tool will:
         }
 
         // Step 2: Generate visualization configuration with shared chart-type + graph flow
-        const { selectedChartType, validatedConfig, esqlQuery } = await buildVisualizationConfig({
+        const { selectedChartType, validatedConfig, esqlQuery, timeRange } =
+          await buildVisualizationConfig({
           nlQuery,
           index,
           chartType,
@@ -114,6 +115,7 @@ This tool will:
           visualization: validatedConfig,
           chart_type: selectedChartType,
           esql: esqlQuery,
+          ...(timeRange && { time_range: timeRange }),
         };
 
         // Step 4: Try to store as attachment (optional - may fail if visualization type not registered)
