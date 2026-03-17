@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, useEffect, useRef, useState, useMemo } from 'react';
-import { from } from 'rxjs';
+import React, { Suspense, useEffect, useRef } from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import type { DiscoverStateContainer } from '../../../state_management/discover_state';
-import { createTabAppStateObservable } from '../../../state_management/utils/create_tab_app_state_observable';
+import type { DiscoverInternalState } from '../../../state_management/redux';
+import { selectTab } from '../../../state_management/redux/selectors';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { CreateAlertFlyout, getManageRulesUrl, getTimeField } from './get_alerts';
@@ -28,70 +27,44 @@ const DynamicRuleFormFlyout = React.lazy(() =>
 
 export function CreateESQLRuleFlyout({
   services,
-  stateContainer,
+  tabId,
+  getState,
   onClose,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
-  stateContainer: DiscoverStateContainer;
+  tabId: string;
+  getState: () => DiscoverInternalState;
   onClose: () => void;
 }) {
-  const [query, setQuery] = useState<string>(
-    (stateContainer.getCurrentTab().appState.query as AggregateQuery)?.esql || ''
-  );
+  const currentTab = selectTab(getState(), tabId);
+  const query = (currentTab.appState.query as AggregateQuery)?.esql || '';
 
   const { http, data, dataViews, notifications, history, core } = services;
 
-  // Use a ref to avoid stale closure issues with onClose
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
-  // Track the initial pathname to detect actual navigation (not just query param changes)
   const initialPathnameRef = useRef(history.location.pathname);
 
-  // Create the app state observable once and memoize it
-  // Note: We create this manually instead of using ExtendedDiscoverStateContainer
-  // because we receive a DiscoverStateContainer from the top nav
-  const appState$ = useMemo(
-    () =>
-      createTabAppStateObservable({
-        tabId: stateContainer.getCurrentTab().id,
-        internalState$: from(stateContainer.internalState),
-        getState: stateContainer.internalState.getState,
-      }),
-    [stateContainer]
-  );
-
   useEffect(() => {
-    const querySubscription = appState$.subscribe((appState) => {
-      const esqlQuery = (appState.query as AggregateQuery)?.esql;
-      if (esqlQuery !== undefined) {
-        setQuery(esqlQuery || '');
-      }
-    });
-
-    // Listen for route changes within Discover to close the flyout
-    // Only close on actual navigation (pathname change), not query param changes
     const unlisten = history.listen((location) => {
       if (location.pathname !== initialPathnameRef.current) {
         onCloseRef.current();
       }
     });
 
-    // Listen for app changes (navigating away from Discover entirely)
     const appChangeSubscription = core.application.currentAppId$.subscribe((appId) => {
-      // If the app changes to something other than Discover, close the flyout
       if (appId && appId !== 'discover') {
         onCloseRef.current();
       }
     });
 
     return () => {
-      querySubscription.unsubscribe();
       unlisten();
       appChangeSubscription.unsubscribe();
     };
-  }, [appState$, history, core.application.currentAppId$]);
+  }, [history, core.application.currentAppId$]);
 
   return (
     <Suspense fallback={<EuiLoadingSpinner size="l" />}>
@@ -113,11 +86,13 @@ export function CreateESQLRuleFlyout({
 export const getCreateRuleMenuItem = ({
   discoverParams,
   services,
-  stateContainer,
+  tabId,
+  getState,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
-  stateContainer: DiscoverStateContainer;
+  tabId: string;
+  getState: () => DiscoverInternalState;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
@@ -147,7 +122,8 @@ export const getCreateRuleMenuItem = ({
               onFinishAction={onFinishAction}
               discoverParams={discoverParams}
               services={services}
-              stateContainer={stateContainer}
+              tabId={tabId}
+              getState={getState}
             />
           );
         },
@@ -179,7 +155,8 @@ export const getCreateRuleMenuItem = ({
         <CreateESQLRuleFlyout
           discoverParams={discoverParams}
           services={services}
-          stateContainer={stateContainer}
+          tabId={tabId}
+          getState={getState}
           onClose={onFinishAction}
         />
       );

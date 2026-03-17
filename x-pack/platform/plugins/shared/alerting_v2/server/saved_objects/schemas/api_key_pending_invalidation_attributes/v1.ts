@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { ruleModelVersions } from './rule_model_versions';
-export { notificationPolicyModelVersions } from './notification_policy_model_versions';
-export { apiKeyPendingInvalidationModelVersions } from './api_key_pending_invalidation_model_versions';
+import { schema } from '@kbn/config-schema';
+
+export const apiKeyPendingInvalidationAttributesSchemaV1 = schema.object({
+  apiKeyId: schema.string(),
+  createdAt: schema.string(),
+  uiamApiKey: schema.maybe(schema.string()),
+});

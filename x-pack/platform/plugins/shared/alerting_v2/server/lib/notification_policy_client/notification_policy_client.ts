@@ -16,9 +16,14 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { stringifyZodError } from '@kbn/zod-helpers';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { inject, injectable } from 'inversify';
 import { omit } from 'lodash';
-import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
+import {
+  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+  type NotificationPolicySavedObjectAttributes,
+} from '../../saved_objects';
+import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
@@ -34,6 +39,7 @@ import type {
   SnoozeNotificationPolicyParams,
   UpdateNotificationPolicyParams,
 } from './types';
+import { NotificationPolicyNamespaceToken } from './tokens';
 import { validateDateString } from './utils';
 
 const resolveActionAttrs = (
@@ -62,7 +68,11 @@ export class NotificationPolicyClient {
     @inject(NotificationPolicySavedObjectServiceScopedToken)
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
-    @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract
+    @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract,
+    @inject(EncryptedSavedObjectsClientToken)
+    private readonly esoClient: EncryptedSavedObjectsClient,
+    @inject(NotificationPolicyNamespaceToken)
+    private readonly namespace: string | undefined
   ) {}
 
   public async createNotificationPolicy(
@@ -98,6 +108,7 @@ export class NotificationPolicyClient {
 
       return { id, version, ...omit(attributes, ['auth']), auth: toAuthResponse(attributes.auth) };
     } catch (e) {
+      this.markApiKeysForInvalidation(attributes.auth?.apiKey, false);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(`Notification policy with id "${conflictId}" already exists`);
@@ -167,6 +178,8 @@ export class NotificationPolicyClient {
       id: params.options.id,
     });
 
+    const oldAuth = await this.getDecryptedAuth(params.options.id);
+
     const policyName = parsed.data.name ?? existingPolicy.name;
     const apiKeyAttrs = await this.apiKeyService.create(`Notification Policy: ${policyName}`);
 
@@ -178,20 +191,16 @@ export class NotificationPolicyClient {
       updatedAt: now,
     };
 
+    let updated: { id: string; version?: string };
     try {
-      const updated = await this.notificationPolicySavedObjectService.update({
+      updated = await this.notificationPolicySavedObjectService.update({
         id: params.options.id,
         attrs: nextAttrs,
         version: params.options.version,
       });
-
-      return {
-        id: params.options.id,
-        version: updated.version,
-        ...omit(nextAttrs, ['auth']),
-        auth: toAuthResponse(nextAttrs.auth),
-      };
     } catch (e) {
+      // If update fails we explicitly mark the new API key for invalidation
+      this.markApiKeysForInvalidation(nextAttrs.auth?.apiKey, false);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(
           `Notification policy with id "${params.options.id}" has already been updated by another user`
@@ -199,6 +208,15 @@ export class NotificationPolicyClient {
       }
       throw e;
     }
+
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+
+    return {
+      id: params.options.id,
+      version: updated.version,
+      ...omit(nextAttrs, ['auth']),
+      auth: toAuthResponse(nextAttrs.auth),
+    };
   }
 
   public async findNotificationPolicies(
@@ -277,7 +295,39 @@ export class NotificationPolicyClient {
 
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {
     await this.getNotificationPolicy({ id });
+    const auth = await this.getDecryptedAuth(id);
     await this.notificationPolicySavedObjectService.delete({ id });
+    this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
+  }
+
+  private markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {
+    if (!apiKey || createdByUser) {
+      return;
+    }
+
+    // the apiKeyService already handles and logs errors, so we can swallow them here
+    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch(() => {});
+  }
+
+  private async getDecryptedAuth(
+    id: string
+  ): Promise<{ apiKey: string; createdByUser: boolean } | null> {
+    try {
+      const doc =
+        await this.esoClient.getDecryptedAsInternalUser<NotificationPolicySavedObjectAttributes>(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id,
+          this.namespace ? { namespace: this.namespace } : undefined
+        );
+      const auth = doc.attributes?.auth;
+      if (!auth?.apiKey) return null;
+      return {
+        apiKey: auth.apiKey,
+        createdByUser: auth.createdByUser,
+      };
+    } catch {
+      return null;
+    }
   }
 
   private async updatePolicyState(

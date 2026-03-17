@@ -301,9 +301,37 @@
       }
     }
   },
+  "alerting_api_key_pending_invalidation": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
+      }
+    }
+  },
   "alerting_notification_policy": {
     "dynamic": false,
     "properties": {
+      "auth": {
+        "properties": {
+          "apiKey": {
+            "type": "binary"
+          },
+          "createdByUser": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
       "createdAt": {
         "type": "date"
       },
@@ -319,6 +347,20 @@
         },
         "type": "text"
       },
+      "destinations": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -328,44 +370,16 @@
         },
         "type": "text"
       },
-      "updatedAt": {
-        "type": "date"
-      },
-      "updatedBy": {
+      "rule_labels": {
         "type": "keyword"
-      },
-      "destinations": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "keyword"
-          },
-          "id": {
-            "type": "keyword"
-          }
-        }
-      },
-      "enabled": {
-        "type": "boolean"
       },
       "snoozedUntil": {
         "type": "date"
       },
-      "auth": {
-        "type": "object",
-        "properties": {
-          "apiKey": {
-            "type": "binary"
-          },
-          "createdByUser": {
-            "type": "boolean"
-          },
-          "owner": {
-            "type": "keyword"
-          }
-        }
+      "updatedAt": {
+        "type": "date"
       },
-      "rule_labels": {
+      "updatedBy": {
         "type": "keyword"
       }
     }
