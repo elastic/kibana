@@ -182,7 +182,7 @@ export default function (providerContext: FtrProviderContext) {
             apiClientDefaultSpaceOnly.createAgentPolicy('default', {
               space_ids: [TEST_SPACE_1],
             }),
-          /No enough permissions to create policies in space test1/
+          /Not enough permissions to create policies in space test1/
         );
       });
 
@@ -240,7 +240,6 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should allow creating a policy assigned to a different space even when URL space has a policy with the same name', async () => {
         const sharedName = `cross-space-name-create-${Date.now()}`;
-
         // Create a policy with that name in the default space
         await apiClient.createAgentPolicy('default', { name: sharedName });
 
@@ -258,14 +257,15 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should prevent creating a single-space policy with same name as an existing policy in the target space', async () => {
-        const existingPolicy = await apiClient.createAgentPolicy(TEST_SPACE_1);
+        const sharedName = `cross-space-name-create-${Date.now()}`;
+        await apiClient.createAgentPolicy(TEST_SPACE_1, { name: sharedName });
 
         // Try to create a policy from the default URL with space_ids: [TEST_SPACE_1] and same name
         // Should conflict because both policies are in TEST_SPACE_1
         await expectToRejectWithError(
           () =>
             apiClient.createAgentPolicy('default', {
-              name: existingPolicy.item.name,
+              name: sharedName,
               space_ids: [TEST_SPACE_1],
             }),
           /409 "Conflict" Agent Policy\s.* already exists with name\s.*$/i
