@@ -86,6 +86,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   referenced_by_count: 0,
                   is_system_action: true,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: createdConnector.id,
@@ -351,6 +352,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   referenced_by_count: 0,
                   is_system_action: true,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   id: createdConnector.id,
@@ -593,6 +595,7 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   referenced_by_count: 0,
                   is_system_action: true,
                   is_connector_type_deprecated: false,
+                  auth_mode: 'shared',
                 },
                 {
                   connector_type_id: '.email',

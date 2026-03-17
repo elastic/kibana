@@ -14,6 +14,7 @@ import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/moc
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { CreateSpacePage } from './create_space_page';
 import type { SolutionView, Space } from '../../../common/types/latest';
@@ -105,7 +106,7 @@ describe('ManageSpacePage', () => {
         })
       );
     });
-  });
+  }, 15000);
 
   it('validates the form (name, initials, solution view...)', async () => {
     const spacesManager = spacesManagerMock.create();
@@ -315,6 +316,192 @@ describe('ManageSpacePage', () => {
       });
     });
   });
+
+  it('hides CustomizeCps component when project_routing capability is not present', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    renderWithIntl(
+      <CreateSpacePage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        eventTracker={eventTracker}
+        allowFeatureVisibility
+        allowSolutionVisibility
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
+  });
+
+  it('shows CustomizeCps component when project_routing.manage_space_default capability is true', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    renderWithIntl(
+      <CreateSpacePage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+          project_routing: { manage_space_default: true },
+        }}
+        eventTracker={eventTracker}
+        allowFeatureVisibility
+        allowSolutionVisibility
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
+  });
+
+  it('hides CustomizeCps component when project_routing.manage_space_default capability is false', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    renderWithIntl(
+      <CreateSpacePage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+          project_routing: { manage_space_default: false },
+        }}
+        eventTracker={eventTracker}
+        allowFeatureVisibility
+        allowSolutionVisibility
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('cpsDefaultScopePanel')).not.toBeInTheDocument();
+  });
+
+  it('includes projectRouting in createSpace call when provided', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    const mockFetchProjects = jest.fn().mockResolvedValue({
+      origin: {
+        _alias: 'local_project',
+        _id: 'abcde1234567890',
+        _organization: 'org1234567890',
+        _type: 'observability',
+        env: 'local',
+      },
+      linkedProjects: [
+        {
+          _alias: 'linked_local_project',
+          _id: 'badce1234567890',
+          _organization: 'org1234567890',
+          _type: 'observability',
+          env: 'local',
+        },
+      ],
+    });
+
+    renderWithIntl(
+      <KibanaContextProvider
+        services={{
+          cps: {
+            cpsManager: { fetchProjects: mockFetchProjects },
+          },
+          application: {
+            capabilities: {
+              navLinks: {},
+              management: {},
+              catalogue: {},
+              spaces: { manage: true },
+              project_routing: { manage_space_default: true },
+            },
+          },
+        }}
+      >
+        <CreateSpacePage
+          spacesManager={spacesManager as unknown as SpacesManager}
+          getFeatures={featuresStart.getFeatures}
+          notifications={notificationServiceMock.createStartContract()}
+          history={history}
+          capabilities={{
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: { manage: true },
+            project_routing: { manage_space_default: true },
+          }}
+          eventTracker={eventTracker}
+          allowFeatureVisibility
+          allowSolutionVisibility
+        />
+      </KibanaContextProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('addSpaceName')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('addSpaceName'), {
+      target: { value: 'New Space Name' },
+    });
+    fireEvent.change(screen.getByTestId('descriptionSpaceText'), {
+      target: { value: 'some description' },
+    });
+
+    await updateSolutionView('oblt');
+
+    // Click "This project" (sets routing to _alias:_origin)
+    await userEvent.click(screen.getByRole('button', { name: /this project/i }));
+
+    await userEvent.click(screen.getByTestId('save-space-button'));
+
+    await waitFor(() => {
+      expect(spacesManager.createSpace).toHaveBeenCalled();
+    });
+
+    const callArgs = (spacesManager.createSpace as jest.Mock).mock.calls[0][0];
+    expect(callArgs).toMatchObject({
+      id: 'new-space-name',
+      name: 'New Space Name',
+      description: 'some description',
+      solution: 'oblt',
+      projectRouting: '_alias:_origin',
+    });
+  }, 10000);
 });
 
 async function updateSolutionView(solution: SolutionView) {

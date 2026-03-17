@@ -9,7 +9,7 @@
 
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -20,10 +20,15 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 import { usageApiPluginMock } from '@kbn/usage-api-plugin/server/mocks';
-import type { ActionType, ActionsApiRequestHandlerContext } from './types';
+import type { ActionType, ActionsApiRequestHandlerContext, InMemoryConnector } from './types';
 import type { ActionsConfig } from './config';
 import { ActionTypeRegistry } from './action_type_registry';
-import type { ActionsPluginsSetup, ActionsPluginsStart, PluginSetupContract } from './plugin';
+import type {
+  ActionsPluginsSetup,
+  ActionsPluginsStart,
+  PluginSetupContract,
+  PluginStartContract,
+} from './plugin';
 import { ActionsPlugin } from './plugin';
 import {
   AlertHistoryEsIndexConnectorId,
@@ -60,9 +65,13 @@ function getConfig(overrides = {}) {
     usage: {
       url: 'ca.path',
     },
-    oAuthRateLimit: {
-      authorize: { lookbackWindow: '1h', limit: 100 },
-      callback: { lookbackWindow: '1h', limit: 100 },
+    auth: {
+      oauth_authorization_code: {
+        rate_limits: {
+          authorize: { lookbackWindow: '1h', limit: 100 },
+          callback: { lookbackWindow: '1h', limit: 100 },
+        },
+      },
     },
     ...overrides,
   };
@@ -114,13 +123,12 @@ describe('Actions Plugin', () => {
         usage: {
           url: 'ca.path',
         },
-        oAuthRateLimit: {
-          authorize: { lookbackWindow: '1h', limit: 100 },
-          callback: { lookbackWindow: '1h', limit: 100 },
-        },
         auth: {
           oauth_authorization_code: {
-            enabled: false,
+            rate_limits: {
+              authorize: { lookbackWindow: '1h', limit: 100 },
+              callback: { lookbackWindow: '1h', limit: 100 },
+            },
           },
         },
       });
@@ -155,7 +163,7 @@ describe('Actions Plugin', () => {
       );
     });
 
-    it('should register user_connector_token saved object type and encryption', async () => {
+    it('should always register user_connector_token saved object type and encryption', async () => {
       await plugin.setup(coreSetup, pluginsSetup);
       expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
         expect.objectContaining({ name: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
@@ -527,13 +535,12 @@ describe('Actions Plugin', () => {
         usage: {
           url: 'ca.path',
         },
-        oAuthRateLimit: {
-          authorize: { lookbackWindow: '1h', limit: 100 },
-          callback: { lookbackWindow: '1h', limit: 100 },
-        },
         auth: {
           oauth_authorization_code: {
-            enabled: false,
+            rate_limits: {
+              authorize: { lookbackWindow: '1h', limit: 100 },
+              callback: { lookbackWindow: '1h', limit: 100 },
+            },
           },
         },
       });
@@ -767,6 +774,82 @@ describe('Actions Plugin', () => {
           );
         });
       });
+
+      describe('Dynamic connectors', () => {
+        let pluginStart: PluginStartContract;
+        beforeEach(async () => {
+          setup(getConfig());
+          // coreMock.createSetup doesn't support Plugin generics
+
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType(serverLogConnectorType);
+
+          pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+        });
+
+        it('should allow adding a dynamic connector', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          expect(pluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(true);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(2);
+          expect(pluginStart.inMemoryConnectors[1]).toEqual({
+            ...newDynamicConnector,
+            isPreconfigured: true,
+            isDynamic: true,
+          });
+        });
+        it('should always add dynamic connector as isDynamic & isPreconfigured', () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: false,
+            isDynamic: false,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          expect(pluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(true);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(2);
+          expect(pluginStart.inMemoryConnectors[1].id).toBe(newDynamicConnector.id);
+          expect(pluginStart.inMemoryConnectors[1].isPreconfigured).toBe(true);
+          expect(pluginStart.inMemoryConnectors[1].isDynamic).toBe(true);
+        });
+        it('should not allow adding a dynamic connector for an existing connector id', () => {
+          const existingConnector = pluginStart.inMemoryConnectors[0];
+
+          const newDynamicConnector: InMemoryConnector = {
+            id: existingConnector.id,
+            actionTypeId: '.inference',
+            name: 'Inference',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          expect(pluginStart.registerDynamicConnector(newDynamicConnector)).toEqual(false);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+          expect(pluginStart.inMemoryConnectors[0]).toEqual(existingConnector);
+        });
+      });
     });
 
     describe('isActionTypeEnabled()', () => {
@@ -835,15 +918,14 @@ describe('Actions Plugin', () => {
           expect(err.message).toMatchInlineSnapshot(`
             "[
               {
+                \\"origin\\": \\"string\\",
                 \\"code\\": \\"too_small\\",
                 \\"minimum\\": 1,
-                \\"type\\": \\"string\\",
                 \\"inclusive\\": true,
-                \\"exact\\": false,
-                \\"message\\": \\"String must contain at least 1 character(s)\\",
                 \\"path\\": [
                   \\"text\\"
-                ]
+                ],
+                \\"message\\": \\"Too small: expected string to have >=1 characters\\"
               }
             ]"
           `);

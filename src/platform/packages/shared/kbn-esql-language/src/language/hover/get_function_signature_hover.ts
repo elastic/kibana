@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ESQLFunction } from '../../types';
+import { type ESQLFunction } from '@elastic/esql/types';
 import {
   getFunctionDefinition,
   getFormattedFunctionSignature,

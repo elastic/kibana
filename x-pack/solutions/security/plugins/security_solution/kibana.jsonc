@@ -17,6 +17,7 @@
     "requiredPlugins": [
       "actions",
       "alerting",
+      "anonymization",
       "cases",
       "cloud",
       "cloudDefend",
@@ -83,7 +84,8 @@
       "automaticImport",
       "serverless",
       "agentBuilder",
-      "llmTasks"
+      "llmTasks",
+      "cps"
     ],
     "requiredBundles": [
       "esUiShared",

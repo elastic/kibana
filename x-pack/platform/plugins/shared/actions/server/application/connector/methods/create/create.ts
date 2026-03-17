@@ -116,7 +116,6 @@ export async function create({
       outcome: 'unknown',
     })
   );
-
   const authMode = inferAuthMode({
     authTypeRegistry: context.authTypeRegistry,
     secrets,

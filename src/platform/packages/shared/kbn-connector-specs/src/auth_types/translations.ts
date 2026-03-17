@@ -117,10 +117,17 @@ export const OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const OAUTH_TOKEN_ENDPOINT_AUTH_METHOD_LABEL = i18n.translate(
+  'connectorSpecs.oauthTokenEndpointAuthMethod.label',
+  {
+    defaultMessage: 'Token endpoint auth method',
+  }
+);
+
 export const OAUTH_AUTHORIZATION_CODE_LABEL = i18n.translate(
   'connectorSpecs.oauthAuthorizationCode.label',
   {
-    defaultMessage: 'OAuth2 Authorization Code',
+    defaultMessage: 'OAuth 2.0 Authorization Code',
   }
 );
 
@@ -178,5 +185,37 @@ export const PFX_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
   'connectorSpecs.pfxVerificationMode.label',
   {
     defaultMessage: 'Verification mode',
+  }
+);
+
+export const AWS_CREDENTIALS_LABEL = i18n.translate('connectorSpecs.awsCredentials.label', {
+  defaultMessage: 'AWS Credentials',
+});
+
+export const AWS_ACCESS_KEY_ID_LABEL = i18n.translate(
+  'connectorSpecs.awsCredentials.accessKeyId.label',
+  {
+    defaultMessage: 'Access Key ID',
+  }
+);
+
+export const AWS_ACCESS_KEY_ID_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.awsCredentials.accessKeyId.requiredMessage',
+  {
+    defaultMessage: 'Access Key ID is required',
+  }
+);
+
+export const AWS_SECRET_ACCESS_KEY_LABEL = i18n.translate(
+  'connectorSpecs.awsCredentials.secretAccessKey.label',
+  {
+    defaultMessage: 'Secret Access Key',
+  }
+);
+
+export const AWS_SECRET_ACCESS_KEY_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.awsCredentials.secretAccessKey.requiredMessage',
+  {
+    defaultMessage: 'Secret Access Key is required',
   }
 );

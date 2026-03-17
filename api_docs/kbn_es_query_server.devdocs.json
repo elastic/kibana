@@ -103,6 +103,38 @@
     "objects": [
       {
         "parentPluginId": "@kbn/es-query-server",
+        "id": "def-server.aggregateQuerySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "aggregateQuerySchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ esql: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query-server/src/query.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query-server",
         "id": "def-server.querySchema",
         "type": "Object",
         "tags": [],

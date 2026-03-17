@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/triggers-actions-ui-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/triggers-actions-ui-plugin'
+  title: '@kbn/triggers-actions-ui-plugin'
   description: Moon project for @kbn/triggers-actions-ui-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/triggers_actions_ui
+  sourceRoot: x-pack/platform/plugins/shared/triggers_actions_ui
 dependsOn:
   - '@kbn/core'
   - '@kbn/alerting-plugin'
@@ -85,7 +84,6 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-publishing'
   - '@kbn/esql-utils'
-  - '@kbn/esql-language'
   - '@kbn/response-ops-alerts-delete'
   - '@kbn/content-management-plugin'
   - '@kbn/esql-types'
@@ -101,6 +99,9 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/deeplinks-observability'
+  - '@kbn/cps-utils'
+  - '@kbn/cps'
+  - '@kbn/security-plugin'
 tags:
   - plugin
   - prod
@@ -117,14 +118,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

@@ -11,16 +11,11 @@ import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
 
 export const generateSchema = (
   spec: ConnectorSpec,
-  {
-    authorizationCodeEnabled,
-    authMode,
-  }: { authorizationCodeEnabled?: boolean; authMode?: AuthMode } = {
-    authorizationCodeEnabled: false,
-  }
+  { isPfxEnabled, authMode }: { isPfxEnabled?: boolean; authMode?: AuthMode } = {}
 ) => {
   return z.object({
     config: spec.schema ?? z.object({}),
-    secrets: generateSecretsSchemaFromSpec(spec.auth, { authorizationCodeEnabled, authMode }),
+    secrets: generateSecretsSchemaFromSpec(spec.auth, { isPfxEnabled, authMode }),
     authMode: z
       .preprocess(
         // if the authMode is an empty string, set it to undefined

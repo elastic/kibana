@@ -26,6 +26,22 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
       },
     }),
 
+  // empty state labels
+  noPrivilegeEmptyTitle: i18n.translate(
+    'xpack.securitySolution.scriptsLibrary.noPrivilegeEmptyTitle',
+    { defaultMessage: 'There are no scripts to display.' }
+  ),
+  emptyStateTitle: i18n.translate('xpack.securitySolution.scriptsLibrary.emptyStateTitle', {
+    defaultMessage: 'Add your first script',
+  }),
+  emptyStateInfo: i18n.translate('xpack.securitySolution.scriptsLibrary.emptyStateInfo', {
+    defaultMessage: 'View and manage scripts to upload and execute on Elastic Defend agents.',
+  }),
+  emptyStatePrimaryButtonLabel: i18n.translate(
+    'xpack.securitySolution.scriptsLibrary.emptyStatePrimaryButtonLabel',
+    { defaultMessage: 'Upload script' }
+  ),
+
   // table labels
   table: {
     noItemsMessage: i18n.translate('xpack.securitySolution.scriptsLibrary.table.noItemsMessage', {
@@ -226,6 +242,38 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
             defaultMessage: 'Remove',
           }
         ),
+        fileType: {
+          label: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileTypeLabel',
+            {
+              defaultMessage: 'File type',
+            }
+          ),
+          placeholder: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileType.selectPlaceholder',
+            {
+              defaultMessage: 'Select file type',
+            }
+          ),
+          archive: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileType.archiveOptionLabel',
+            {
+              defaultMessage: 'Archive (.zip, .rar, .gz, etc.)',
+            }
+          ),
+          script: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileType.scriptOptionLabel',
+            {
+              defaultMessage: 'Script file (.py, .sh, .ps1, etc.)',
+            }
+          ),
+          validationErrorMessage: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileType.validationErrorMessage',
+            {
+              defaultMessage: 'File type selection is required.',
+            }
+          ),
+        },
         name: {
           label: i18n.translate(
             'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.nameLabel',
@@ -288,6 +336,12 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
             {
               defaultMessage:
                 'Specify the path to the main script within the archive file for proper execution.',
+            }
+          ),
+          validationErrorMessage: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.pathToExecutable.validationErrorMessage',
+            {
+              defaultMessage: 'Path to executable is required for archive files.',
             }
           ),
         },

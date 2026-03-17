@@ -25,6 +25,18 @@ describe('Heatmap', () => {
     it('should convert a heatmap with dynamic colors', () => {
       validateConverter(dslMocks.withDynamicColors, heatmapStateSchema);
     });
+
+    it('should convert a heatmap with sort predicates', () => {
+      validateConverter(dslMocks.withSortPredicates, heatmapStateSchema);
+    });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(dslMocks.defaultColorByValueAttributes, heatmapStateSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(dslMocks.selectorColorByValueAttributes, heatmapStateSchema);
+    });
   });
 
   describe('ESQL', () => {
@@ -34,6 +46,10 @@ describe('Heatmap', () => {
 
     it('should convert a heatmap with x and y axes', () => {
       validateConverter(esqlMocks.withXAndYAxes, heatmapStateSchema);
+    });
+
+    it('should convert a heatmap with sort predicates', () => {
+      validateConverter(esqlMocks.withSortPredicates, heatmapStateSchema);
     });
   });
 });

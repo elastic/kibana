@@ -25,6 +25,20 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "auth": Object {
+          "oauth_authorization_code": Object {
+            "rate_limits": Object {
+              "authorize": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+              "callback": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+            },
+          },
+        },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
@@ -35,16 +49,6 @@ describe('config validation', () => {
         "microsoftExchangeUrl": "https://login.microsoftonline.com",
         "microsoftGraphApiScope": "https://graph.microsoft.com/.default",
         "microsoftGraphApiUrl": "https://graph.microsoft.com/v1.0",
-        "oAuthRateLimit": Object {
-          "authorize": Object {
-            "limit": 100,
-            "lookbackWindow": "1h",
-          },
-          "callback": Object {
-            "limit": 100,
-            "lookbackWindow": "1h",
-          },
-        },
         "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
         "responseTimeout": "PT1M",
@@ -69,6 +73,20 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "auth": Object {
+          "oauth_authorization_code": Object {
+            "rate_limits": Object {
+              "authorize": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+              "callback": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+            },
+          },
+        },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
@@ -79,16 +97,6 @@ describe('config validation', () => {
         "microsoftExchangeUrl": "https://login.microsoftonline.com",
         "microsoftGraphApiScope": "https://graph.microsoft.com/.default",
         "microsoftGraphApiUrl": "https://graph.microsoft.com/v1.0",
-        "oAuthRateLimit": Object {
-          "authorize": Object {
-            "limit": 100,
-            "lookbackWindow": "1h",
-          },
-          "callback": Object {
-            "limit": 100,
-            "lookbackWindow": "1h",
-          },
-        },
         "preconfigured": Object {
           "mySlack1": Object {
             "actionTypeId": ".slack",
@@ -222,6 +230,20 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "auth": Object {
+          "oauth_authorization_code": Object {
+            "rate_limits": Object {
+              "authorize": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+              "callback": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+            },
+          },
+        },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
@@ -232,16 +254,6 @@ describe('config validation', () => {
         "microsoftExchangeUrl": "https://login.microsoftonline.com",
         "microsoftGraphApiScope": "https://graph.microsoft.com/.default",
         "microsoftGraphApiUrl": "https://graph.microsoft.com/v1.0",
-        "oAuthRateLimit": Object {
-          "authorize": Object {
-            "limit": 100,
-            "lookbackWindow": "1h",
-          },
-          "callback": Object {
-            "limit": 100,
-            "lookbackWindow": "1h",
-          },
-        },
         "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
         "responseTimeout": "PT1M",
@@ -402,6 +414,20 @@ describe('config validation', () => {
         "allowedHosts": Array [
           "*",
         ],
+        "auth": Object {
+          "oauth_authorization_code": Object {
+            "rate_limits": Object {
+              "authorize": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+              "callback": Object {
+                "limit": 100,
+                "lookbackWindow": "1h",
+              },
+            },
+          },
+        },
         "enableFooterInEmail": true,
         "enabledActionTypes": Array [
           "*",
@@ -412,16 +438,6 @@ describe('config validation', () => {
         "microsoftExchangeUrl": "https://login.microsoftonline.com",
         "microsoftGraphApiScope": "https://graph.microsoft.com/.default",
         "microsoftGraphApiUrl": "https://graph.microsoft.com/v1.0",
-        "oAuthRateLimit": Object {
-          "authorize": Object {
-            "limit": 100,
-            "lookbackWindow": "1h",
-          },
-          "callback": Object {
-            "limit": 100,
-            "lookbackWindow": "1h",
-          },
-        },
         "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
         "rateLimiter": Object {

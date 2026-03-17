@@ -96,6 +96,7 @@ export interface ExecuteOptions<Source = unknown> {
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
   connectorTokenClient?: ConnectorTokenClientContract;
+  signal?: AbortSignal;
 }
 
 type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'request'> & {
@@ -156,6 +157,7 @@ export class ActionExecutor {
     spaceId: spaceIdOverride,
     source,
     taskInfo,
+    signal,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     const {
       actionTypeRegistry,
@@ -202,6 +204,7 @@ export class ActionExecutor {
       source,
       spaceId,
       taskInfo,
+      signal,
     });
   }
 
@@ -396,6 +399,7 @@ export class ActionExecutor {
     source,
     spaceId,
     taskInfo,
+    signal,
   }: ExecuteHelperOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
@@ -567,6 +571,7 @@ export class ActionExecutor {
             ...(actionType.isSystemActionType ? { request } : {}),
             connectorUsageCollector,
             connectorTokenClient,
+            signal,
             authMode,
             profileUid,
           });

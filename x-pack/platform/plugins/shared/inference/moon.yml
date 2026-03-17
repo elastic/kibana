@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/inference-plugin'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
-toolchain:
+  defaultOwner: '@elastic/search-kibana'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/inference-plugin'
+  title: '@kbn/inference-plugin'
   description: Moon project for @kbn/inference-plugin
   channel: ''
-  owner: '@elastic/appex-ai-infra'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/inference
+  owner: '@elastic/search-kibana'
+  sourceRoot: x-pack/platform/plugins/shared/inference
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/esql-language'
@@ -44,6 +43,8 @@ dependsOn:
   - '@kbn/core-ui-settings-common'
   - '@kbn/setup-node-env'
   - '@kbn/es-errors'
+  - '@kbn/anonymization-plugin'
+  - '@kbn/anonymization-common'
 tags:
   - plugin
   - prod
@@ -62,14 +63,24 @@ fileGroups:
     - '!.storybook/**/*.js'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

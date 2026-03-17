@@ -125,9 +125,10 @@ function formatDateInstant(dateString: string, date: Date | null, dateFormat: st
 }
 
 /**
- * Parses date math like "now-7m" or "now+3d/d" into parts
+ * Parses date math like "now-7m" or "now+3d/d" into parts.
+ * Returns `null` for values that are not relative date math (absolute dates, bare `now`, rounding-only).
  */
-function dateMathToRelativeParts(
+export function dateMathToRelativeParts(
   value: string
 ): { count: number; unit: string; isFuture: boolean; round?: string } | null {
   const match = value.match(/^now([+-])(\d+)([smhdwMy])(\/[smhdwMy])?$/);

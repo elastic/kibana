@@ -91,8 +91,8 @@ describe('OAuthStateClient', () => {
       expect(mockUnsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         OAUTH_STATE_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          state: expect.any(String),
-          codeVerifier: expect.any(String),
+          state: expect.stringMatching(/^[A-Za-z0-9_-]{43}$/),
+          codeVerifier: expect.stringMatching(/^[A-Za-z0-9_-]{128}$/),
           connectorId: 'connector-1',
           kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
           spaceId: 'default',

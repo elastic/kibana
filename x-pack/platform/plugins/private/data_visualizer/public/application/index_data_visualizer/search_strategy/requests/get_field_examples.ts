@@ -29,8 +29,16 @@ import { MAX_EXAMPLES_DEFAULT } from './constants';
 import { buildFilterCriteria } from '../../../../../common/utils/build_query_filters';
 
 export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, field: Field) => {
-  const { index, timeFieldName, earliestMs, latestMs, query, runtimeFieldMap, maxExamples } =
-    params;
+  const {
+    index,
+    timeFieldName,
+    earliestMs,
+    latestMs,
+    query,
+    runtimeFieldMap,
+    maxExamples,
+    projectRouting,
+  } = params;
 
   // Request at least 100 docs so that we have a chance of obtaining
   // 'maxExamples' of the field.
@@ -59,6 +67,7 @@ export const getFieldExamplesRequest = (params: FieldStatsCommonRequestParams, f
     index,
     size,
     ...searchBody,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 };
 

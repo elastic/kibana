@@ -20,7 +20,6 @@ import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector
 import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
-import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
 import type { GetAllUnsecuredParams } from './types/params';
 
@@ -33,7 +32,6 @@ interface GetAllHelperOpts {
   namespace?: string;
   savedObjectsClient: SavedObjectClientForFind;
   connectorTypeRegistry: ActionTypeRegistry;
-  authorizationCodeEnabled: boolean;
 }
 
 export async function getAll({
@@ -52,8 +50,6 @@ export async function getAll({
     throw error;
   }
 
-  const authorizationCodeEnabled = context.authorizationCodeEnabled ?? false;
-
   return await getAllHelper({
     auditLogger: context.auditLogger,
     esClient: context.scopedClusterClient.asInternalUser,
@@ -64,7 +60,6 @@ export async function getAll({
     logger: context.logger,
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     connectorTypeRegistry: context.actionTypeRegistry,
-    authorizationCodeEnabled,
   });
 }
 
@@ -76,7 +71,6 @@ export async function getAllUnsecured({
   logger,
   spaceId,
   connectorTypeRegistry,
-  authorizationCodeEnabled,
 }: GetAllUnsecuredParams): Promise<ConnectorWithExtraFindData[]> {
   const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
 
@@ -89,7 +83,6 @@ export async function getAllUnsecured({
     namespace,
     savedObjectsClient: internalSavedObjectsRepository,
     connectorTypeRegistry,
-    authorizationCodeEnabled,
   });
 }
 
@@ -102,7 +95,6 @@ async function getAllHelper({
   namespace,
   savedObjectsClient,
   connectorTypeRegistry,
-  authorizationCodeEnabled,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
@@ -110,8 +102,7 @@ async function getAllHelper({
     const connector = connectorFromSavedObject(
       rawAction,
       isConnectorDeprecated(rawAction.attributes),
-      connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId),
-      authorizationCodeEnabled
+      connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId)
     );
     return omit(connector, 'secrets');
   });
@@ -130,7 +121,6 @@ async function getAllHelper({
   const mergedResult = [
     ...savedObjectsActions,
     ...(await filterInferenceConnectors(esClient, inMemoryConnectors)).map((connector) => {
-      const authMode = getAuthMode(connector.authMode, authorizationCodeEnabled);
       return {
         id: connector.id,
         actionTypeId: connector.actionTypeId,
@@ -140,7 +130,7 @@ async function getAllHelper({
         isSystemAction: connector.isSystemAction,
         isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
         ...(connector.exposeConfig ? { config: connector.config } : {}),
-        ...(authMode !== undefined ? { authMode } : {}),
+        authMode: connector.authMode ? connector.authMode : 'shared',
       };
     }),
   ].sort((a, b) => a.name.localeCompare(b.name));
@@ -185,14 +175,12 @@ export async function getAllSystemConnectors({
     throw error;
   }
 
-  const authorizationCodeEnabled = context.authorizationCodeEnabled ?? false;
   const systemConnectors = context.inMemoryConnectors.filter(
     (connector) => connector.isSystemAction
   );
 
   const transformedSystemConnectors = systemConnectors
     .map((systemConnector) => {
-      const authMode = getAuthMode(systemConnector.authMode, authorizationCodeEnabled);
       return {
         id: systemConnector.id,
         actionTypeId: systemConnector.actionTypeId,
@@ -203,7 +191,7 @@ export async function getAllSystemConnectors({
         isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(
           systemConnector.actionTypeId
         ),
-        ...(authMode !== undefined ? { authMode } : {}),
+        authMode: systemConnector.authMode ? systemConnector.authMode : 'shared',
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));

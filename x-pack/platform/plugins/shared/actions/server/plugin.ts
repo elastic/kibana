@@ -190,6 +190,13 @@ export interface PluginStartContract {
   ): Params;
 
   isSystemActionConnector: (connectorId: string) => boolean;
+
+  /**
+   * Add a new dynamic InMemoryConnector to the inMemoryConnectors list if a connector with the id doesn't already exist.
+   * @param connector to add to the inMemoryConnectors list
+   * @returns boolean indicating whether the connector was added or not
+   */
+  registerDynamicConnector: (connector: InMemoryConnector) => boolean;
 }
 
 export interface ActionsPluginsSetup {
@@ -327,24 +334,17 @@ export class ActionsPlugin
     this.security = plugins.security;
     this.spaces = plugins.spaces;
 
-    const authorizationCodeEnabled =
-      this.actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
-    if (authorizationCodeEnabled) {
-      includedHiddenTypes.push(USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE);
-    }
+    includedHiddenTypes.push(USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE);
 
     this.authTypeRegistry = new AuthTypeRegistry();
-    registerAuthTypes(this.authTypeRegistry, {
-      authorizationCodeEnabled,
-    });
+    registerAuthTypes(this.authTypeRegistry);
 
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.actionTypeRegistry!,
       plugins.taskManager.index,
-      this.inMemoryConnectors,
-      authorizationCodeEnabled
+      this.inMemoryConnectors
     );
 
     const usageCollection = plugins.usageCollection;
@@ -409,9 +409,7 @@ export class ActionsPlugin
       });
     }
 
-    if (authorizationCodeEnabled) {
-      initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
-    }
+    initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
 
     const subActionFramework = createSubActionConnectorFramework({
       actionTypeRegistry,
@@ -421,11 +419,8 @@ export class ActionsPlugin
 
     // Initialize OAuth rate limiter
     const oauthRateLimiter = new OAuthRateLimiter({
-      config: this.actionsConfig.oAuthRateLimit,
+      config: this.actionsConfig.auth.oauth_authorization_code.rate_limits,
     });
-    this.logger.info(
-      `OAuth rate limiter initialized with authorize limit: ${this.actionsConfig.oAuthRateLimit.authorize.limit}`
-    );
 
     // Routes
     defineRoutes({
@@ -436,7 +431,6 @@ export class ActionsPlugin
       logger: this.logger,
       core,
       oauthRateLimiter,
-      authorizationCodeEnabled,
     });
 
     return {
@@ -536,8 +530,6 @@ export class ActionsPlugin
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       spaceId?: string;
     }) => {
-      const authorizationCodeEnabled =
-        this.actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
       return new ActionsClient({
         logger,
         unsecuredSavedObjectsClient,
@@ -573,7 +565,6 @@ export class ActionsPlugin
         isESOCanEncrypt: isESOCanEncrypt!,
         encryptedSavedObjectsClient,
         getCurrentUserProfileIdFromAPIKey,
-        authorizationCodeEnabled,
       });
     };
 
@@ -722,11 +713,7 @@ export class ActionsPlugin
     this.eventLogService!.isEsContextReady()
       .then(() => {
         scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
-        const authorizationCodeEnabled =
-          this.actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
-        if (authorizationCodeEnabled) {
-          scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
-        }
+        scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
       })
       .catch(() => {});
 
@@ -771,6 +758,8 @@ export class ActionsPlugin
             inMemoryConnector.isSystemAction && inMemoryConnector.id === connectorId
         );
       },
+      registerDynamicConnector: (connector: InMemoryConnector) =>
+        this.registerDynamicConnector(connector),
     };
   }
 
@@ -850,7 +839,7 @@ export class ActionsPlugin
 
   private setSystemActions = () => {
     const systemConnectors = createSystemConnectors(this.actionTypeRegistry?.list() ?? []);
-    this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
+    this.inMemoryConnectors.push(...systemConnectors);
   };
 
   private throwIfSystemActionsInConfig = () => {
@@ -879,7 +868,6 @@ export class ActionsPlugin
       logger,
       getAxiosInstanceWithAuthHelper,
       spaces,
-      actionsConfig,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -889,8 +877,6 @@ export class ActionsPlugin
       const coreContext = await context.core;
       const inMemoryConnectors = getInMemoryConnectors();
 
-      const authorizationCodeEnabled =
-        actionsConfig.auth?.oauth_authorization_code.enabled ?? false;
       return {
         getActionsClient: () => {
           if (isESOCanEncrypt !== true) {
@@ -939,7 +925,6 @@ export class ActionsPlugin
             spaces: spaces?.spacesService,
             isESOCanEncrypt: isESOCanEncrypt!,
             encryptedSavedObjectsClient,
-            authorizationCodeEnabled,
           });
         },
         listTypes: (featureId?: string) => {
@@ -972,6 +957,19 @@ export class ActionsPlugin
     return async (getAxiosParams: GetAxiosInstanceWithAuthFnOpts) => {
       return await getAxiosInstanceFn(getAxiosParams);
     };
+  };
+
+  private registerDynamicConnector = (connector: InMemoryConnector): boolean => {
+    if (!this.inMemoryConnectors.find((c) => c.id === connector.id)) {
+      this.inMemoryConnectors.push({
+        ...connector,
+        isDynamic: true,
+        isPreconfigured: true,
+      });
+      this.logger.info(`Registered dynamic connector with id ${connector.id}`);
+      return true;
+    }
+    return false;
   };
 
   public stop() {

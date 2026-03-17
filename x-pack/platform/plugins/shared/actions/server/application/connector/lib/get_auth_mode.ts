@@ -7,12 +7,6 @@
 
 import type { Connector } from '../types';
 
-export function getAuthMode(
-  authMode: Connector['authMode'] | undefined,
-  authorizationCodeEnabled: boolean
-): Connector['authMode'] | undefined {
-  if (!authorizationCodeEnabled) {
-    return undefined;
-  }
+export function getAuthMode(authMode: Connector['authMode'] | undefined): Connector['authMode'] {
   return authMode ?? 'shared';
 }

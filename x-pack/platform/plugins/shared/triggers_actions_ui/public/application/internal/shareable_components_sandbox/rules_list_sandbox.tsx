@@ -14,7 +14,7 @@ const style = {
 
 export const RulesListSandbox = () => {
   const {
-    services: { validateEmailAddresses, enabledEmailServices, authorizationCodeEnabled },
+    services: { validateEmailAddresses, enabledEmailServices },
   } = useConnectorContext();
 
   return (
@@ -23,7 +23,6 @@ export const RulesListSandbox = () => {
         connectorServices: {
           validateEmailAddresses,
           enabledEmailServices,
-          authorizationCodeEnabled,
         },
         rulesListProps: {},
       })}

@@ -86,7 +86,7 @@ export class OAuthStateClient {
   }> {
     const id = SavedObjectsUtils.generateId();
     const state = generateRandomString(32);
-    const codeVerifier = generateRandomString(128); // PKCE spec recommends 43-128 chars
+    const codeVerifier = generateRandomString(96); // 96 bytes -> exactly 128 base64url chars (PKCE spec: 43-128 chars)
     const codeChallenge = generateCodeChallenge(codeVerifier);
     const now = new Date();
     const expiresAt = new Date(now.getTime() + STATE_EXPIRATION_MS);

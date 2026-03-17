@@ -28,7 +28,6 @@ const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
   connectorServices = {
     validateEmailAddresses: jest.fn(),
     enabledEmailServices: ['*'],
-    authorizationCodeEnabled: false,
   },
 }) => {
   const { form } = useForm({ defaultValue });
