@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../primitive.gen';
 import {
@@ -32,6 +32,10 @@ export const ApproveIntegrationRequest = z
      * The version of the integration
      */
     version: NonEmptyString,
+    /**
+     * The categories of the integration
+     */
+    categories: z.array(z.string()).optional(),
     /**
      * The LangSmith tracing options
      */
@@ -122,6 +126,19 @@ export const DeleteAutoImportIntegrationRequestParams = z.object({
 });
 export type DeleteAutoImportIntegrationRequestParamsInput = z.input<
   typeof DeleteAutoImportIntegrationRequestParams
+>;
+
+export type DownloadAutoImportIntegrationRequestParams = z.infer<
+  typeof DownloadAutoImportIntegrationRequestParams
+>;
+export const DownloadAutoImportIntegrationRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+});
+export type DownloadAutoImportIntegrationRequestParamsInput = z.input<
+  typeof DownloadAutoImportIntegrationRequestParams
 >;
 
 export type GetAllAutoImportIntegrationsResponse = z.infer<
