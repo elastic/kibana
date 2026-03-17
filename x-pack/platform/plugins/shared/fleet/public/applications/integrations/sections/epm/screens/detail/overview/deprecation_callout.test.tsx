@@ -305,12 +305,9 @@ describe('DeprecationCallout', () => {
       );
 
       expect(
-        screen.getByText('This integration will be deprecated in a future version')
+        screen.getByText('This integration will be deprecated starting from version 2.0.0')
       ).toBeInTheDocument();
       expect(screen.getByText('Will be gone soon')).toBeInTheDocument();
-      expect(
-        screen.getByText(/Starting from version 2.0.0, this integration will be deprecated./)
-      ).toBeInTheDocument();
     });
 
     it('renders the replaced_by link when provided', () => {
