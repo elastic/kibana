@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import type { ContentPart } from '@kbn/mcp-client';
-import { createMcpClientFromAxios } from '../mcp/create_mcp_client_from_axios';
+import { createMcpClientFromAxios } from './create_mcp_client_from_axios';
 
 const MCP_CLIENT_VERSION = '1.0.0';
 
@@ -394,7 +394,8 @@ export const GithubMcpConnector: ConnectorSpec = {
               after: input.after,
             },
           });
-          return compactListResult(parseContent(result.content), compactIssue);
+          // return compactListResult(parseContent(result.content), compactIssue);
+          return result.content;
         });
       },
     },
