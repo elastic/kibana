@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/server-route-repository-utils'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-rendering-browser'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -70,6 +71,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - public/**/*.json
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:

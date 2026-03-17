@@ -13,8 +13,6 @@ import { generateSpanLinksData } from '../fixtures/synthtrace/generate_span_link
 import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span_stacktrace_data';
 import { testData } from '../fixtures';
 
-globalSetupHook.setTimeout(2 * 60 * 1000); // 2 minutes
-
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
