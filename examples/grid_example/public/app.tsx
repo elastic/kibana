@@ -355,7 +355,7 @@ const customLayoutStyles = ({ euiTheme }: UseEuiTheme) => {
       height: `calc(100% + 2px)`,
     },
 
-    '&:has(.kbnGridSection--blocked) .kbnGridSection--dragHandle': {
+    '&:has(.kbnGridSection--blocked) .kbnGridSectionHeader': {
       cursor: 'not-allowed !important',
     },
   });
