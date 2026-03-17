@@ -60,14 +60,15 @@ const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
       'xpack.osquery.pack.queriesTable.viewResultsMoreActionsAriaLabel',
       { defaultMessage: 'More actions' }
     );
-    const viewQueryLabel = i18n.translate('xpack.osquery.pack.queriesTable.viewQueryMenuLabel', {
-      defaultMessage: 'View query',
-    });
 
     const handleViewQueryClick = useCallback(() => {
       close();
       onViewQuery();
     }, [close, onViewQuery]);
+
+    const viewQueryLabel = i18n.translate('xpack.osquery.pack.queriesTable.viewQueryMenuLabel', {
+      defaultMessage: 'View query',
+    });
 
     const menuItems = useMemo(
       () => [
@@ -377,6 +378,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     () =>
       scheduleId && executionCount != null ? <EuiText size="s">{executionCount}</EuiText> : null,
     [scheduleId, executionCount]
+      scheduleId && executionCount != null ? <EuiText size="s">{executionCount}</EuiText> : null,
   );
 
   const renderTagsColumn = useCallback(
