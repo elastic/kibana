@@ -123,9 +123,7 @@ export class WorkflowListPage {
 
   /** Sets a file on the import file picker input using an in-memory buffer. */
   async uploadFile(file: { name: string; mimeType: string; buffer: Buffer }) {
-    const input = this.page.testSubj
-      .locator('import-workflows-file-picker')
-      .locator('input[type="file"]');
+    const input = this.page.testSubj.locator('import-workflows-file-picker');
     await input.setInputFiles(file);
   }
 

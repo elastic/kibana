@@ -135,12 +135,13 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
         ...adminCredentials.apiKeyHeader,
         'Content-Type': 'application/json',
       },
+      responseType: 'buffer',
       body: JSON.stringify({ ids: [workflowId] }),
     });
 
     expect(exportResponse).toHaveStatusCode(200);
 
-    const zipBuffer = Buffer.from(exportResponse.body as unknown as string, 'binary');
+    const zipBuffer = exportResponse.body as Buffer;
     const zip = new AdmZip(zipBuffer);
     const entryNames = zip.getEntries().map((e) => e.entryName);
     expect(entryNames.some((n) => n.endsWith('.yml'))).toBe(true);
@@ -176,11 +177,12 @@ apiTest.describe('Workflows Import/Export API', { tag: [...tags.stateful.classic
           ...adminCredentials.apiKeyHeader,
           'Content-Type': 'application/json',
         },
+        responseType: 'buffer',
         body: JSON.stringify({ ids: [originalId] }),
       });
       expect(exportResponse).toHaveStatusCode(200);
 
-      const zipBuffer = Buffer.from(exportResponse.body as unknown as string, 'binary');
+      const zipBuffer = exportResponse.body as Buffer;
       const zip = new AdmZip(zipBuffer);
       const workflowEntries = zip
         .getEntries()
