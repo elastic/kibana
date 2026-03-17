@@ -9,7 +9,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { EsQueryConfig } from '@kbn/es-query';
-import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+
+export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
 
 /**
  * registering a new instance of the rule data client

@@ -30,7 +30,7 @@ export const useSwitchModesTour = (): React.ReactNode => {
     setIsDismissed(true);
   }, [services.storage]);
 
-  const areToursEnabled = services.notifications?.tours?.isEnabled() ?? true;
+  const areToursEnabled = services.notifications.tours.isEnabled();
   const shouldShow =
     areToursEnabled &&
     services.uiSettings.get(ENABLE_ESQL) &&
@@ -63,7 +63,7 @@ export const useSwitchModesTour = (): React.ReactNode => {
               id="discover.tabsView.switchModesCalloutDescription"
               defaultMessage="Use the tab menu {icon} on each tab to switch between Classic and ES|QL."
               values={{
-                icon: <EuiIcon type="boxesVertical" size="s" aria-hidden={true} />,
+                icon: <EuiIcon type="boxesVertical" size="m" aria-hidden={true} />,
               }}
             />
           </p>

@@ -15,7 +15,7 @@
     "server/**/*.json"
   ],
   "kbn_references": [
-    "@kbn/core",
+    "@kbn/core","@kbn/eval-kql",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -71,6 +71,9 @@
     "@kbn/core-http-server-mocks",
     "@kbn/connector-specs",
     "@kbn/workflows-extensions",
+    "@kbn/core-data-streams-server",
+    "@kbn/data-streams",
+    "@kbn/es-mappings",
     "@kbn/alerts-ui-shared",
     "@kbn/ai-assistant-icon",
     "@kbn/licensing-plugin",
@@ -79,7 +82,9 @@
     "@kbn/shared-ux-utility",
     "@kbn/licensing-types",
     "@kbn/core-lifecycle-server-mocks",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common"
   ],
   "exclude": ["target/**/*"]
 }

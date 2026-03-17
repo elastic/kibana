@@ -138,7 +138,6 @@ export const applicationUsageSchema = {
   cloud_connect: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
-  searchInferenceEndpoints: commonSchema,
   searchPlayground: commonSchema,
   searchSynonyms: commonSchema,
   searchQueryRules: commonSchema,

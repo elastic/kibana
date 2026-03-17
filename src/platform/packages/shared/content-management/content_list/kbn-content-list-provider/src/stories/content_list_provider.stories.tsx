@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import {
   EuiPanel,
@@ -22,18 +22,34 @@ import {
   EuiIcon,
   EuiCallOut,
 } from '@elastic/eui';
-import { MOCK_DASHBOARDS, createMockFindItems } from '@kbn/content-list-mock-data/storybook';
+import {
+  MOCK_DASHBOARDS,
+  MOCK_TAGS,
+  createMockFindItems,
+  extractTagIds,
+  mockTagsService,
+} from '@kbn/content-list-mock-data/storybook';
+import { TagBadge, TagListComponent } from '@kbn/content-management-tags';
+import type { Tag } from '@kbn/content-management-tags';
 import { ContentListProvider, useContentListConfig } from '../context';
+import type { ContentListServices } from '../context';
 import { useContentListItems } from '../state';
 import { useContentListSort } from '../features/sorting';
 import { useContentListPagination } from '../features/pagination';
+import { useContentListFilters, useTagFilterToggle } from '../features/filtering';
 import type { FindItemsParams, FindItemsResult } from '../datasource';
+import { getIncludeExcludeFilter } from '../datasource';
+
+// =============================================================================
+// Story Args
+// =============================================================================
 
 interface StoryArgs {
   entityName: string;
   entityNamePlural: string;
-  enableSorting: boolean;
-  enablePagination: boolean;
+  hasSorting: boolean;
+  hasPagination: boolean;
+  hasTags: boolean;
   initialSortField: 'title' | 'updatedAt';
   initialSortDirection: 'asc' | 'desc';
   numberOfItems: number;
@@ -41,30 +57,120 @@ interface StoryArgs {
 }
 
 /**
- * Demo component that displays the config context.
+ * Demo component that displays the config context and active filters.
  */
 const ConfigDisplay = () => {
   const config = useContentListConfig();
+  const { filters } = useContentListFilters();
 
   return (
-    <EuiPanel hasBorder paddingSize="s">
-      <EuiText size="xs">
-        <strong>Config Context:</strong>
-        <pre style={{ fontSize: '11px', margin: '8px 0 0' }}>
-          {JSON.stringify(
-            {
-              id: config.id,
-              labels: config.labels,
-              queryKeyScope: config.queryKeyScope,
-              features: config.features,
-              supports: config.supports,
-            },
-            null,
-            2
-          )}
-        </pre>
-      </EuiText>
-    </EuiPanel>
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem>
+        <EuiPanel hasBorder paddingSize="s">
+          <EuiText size="xs">
+            <strong>Config Context:</strong>
+            <pre style={{ fontSize: '11px', margin: '8px 0 0' }}>
+              {JSON.stringify(
+                {
+                  id: config.id,
+                  labels: config.labels,
+                  queryKeyScope: config.queryKeyScope,
+                  features: config.features,
+                  supports: config.supports,
+                },
+                null,
+                2
+              )}
+            </pre>
+          </EuiText>
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ minWidth: 250 }}>
+        <EuiPanel hasBorder paddingSize="s">
+          <EuiText size="xs">
+            <strong>Active Filters:</strong>
+            <pre style={{ fontSize: '11px', margin: '8px 0 0' }}>
+              {JSON.stringify(filters, null, 2)}
+            </pre>
+          </EuiText>
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+/**
+ * Lookup map from tag ID to {@link Tag} object for resolving tag badges.
+ */
+const TAG_MAP = new Map<string, Tag>(MOCK_TAGS.filter((t) => t.id).map((t) => [t.id!, t]));
+
+/**
+ * Resolves an array of tag IDs to their {@link Tag} objects.
+ */
+const resolveTagObjects = (tagIds?: string[]): Tag[] =>
+  tagIds?.reduce<Tag[]>((acc, id) => {
+    const tag = TAG_MAP.get(id);
+    if (tag) {
+      acc.push(tag);
+    }
+    return acc;
+  }, []) ?? [];
+
+/**
+ * Demo component for filtering by tags using `useTagFilterToggle`.
+ *
+ * Renders clickable tag badges that toggle include filters. Active tags
+ * are visually distinguished. A clear button resets all filters.
+ */
+const TagControls = () => {
+  const { supports } = useContentListConfig();
+  const { filters, clearFilters } = useContentListFilters();
+  const toggleTag = useTagFilterToggle();
+
+  if (!supports.tags) {
+    return (
+      <EuiCallOut announceOnMount size="s" color="warning">
+        Tags are disabled
+      </EuiCallOut>
+    );
+  }
+
+  const activeIncludes = new Set(getIncludeExcludeFilter(filters.tag)?.include ?? []);
+
+  const handleTagClick = (tag: Tag) => {
+    if (!tag.id) {
+      return;
+    }
+    toggleTag(tag.id, tag.name, false);
+  };
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="tag" aria-label="Tags" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">Filter by tag:</EuiText>
+      </EuiFlexItem>
+      {MOCK_TAGS.filter((t) => !t.managed && t.id).map((tag) => (
+        <EuiFlexItem key={tag.id} grow={false}>
+          <TagBadge
+            tag={{
+              ...tag,
+              color: activeIncludes.has(tag.id as string) ? tag.color : '#D3DAE6',
+            }}
+            onClick={() => handleTagClick(tag)}
+          />
+        </EuiFlexItem>
+      ))}
+      {activeIncludes.size > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiButton size="s" iconType="cross" onClick={clearFilters}>
+            Clear
+          </EuiButton>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };
 
@@ -73,7 +179,18 @@ const ConfigDisplay = () => {
  */
 const ItemsList = () => {
   const { items, totalItems, refetch } = useContentListItems();
+  const { supports } = useContentListConfig();
+  const toggleTag = useTagFilterToggle();
   const pagination = useContentListPagination();
+
+  const handleTagClick = useCallback(
+    (tag: Tag, withModifierKey: boolean) => {
+      if (tag.id) {
+        toggleTag(tag.id, tag.name, withModifierKey);
+      }
+    },
+    [toggleTag]
+  );
 
   return (
     <div>
@@ -135,6 +252,17 @@ const ItemsList = () => {
         columns={[
           { field: 'title', name: 'Title', render: (title: string) => <strong>{title}</strong> },
           { field: 'description', name: 'Description' },
+          ...(supports.tags
+            ? [
+                {
+                  field: 'tags' as const,
+                  name: 'Tags',
+                  render: (tagIds: string[] | undefined) => (
+                    <TagListComponent tags={resolveTagObjects(tagIds)} onClick={handleTagClick} />
+                  ),
+                },
+              ]
+            : []),
           {
             field: 'updatedAt',
             name: 'Updated',
@@ -193,13 +321,17 @@ const SortControls = () => {
 };
 
 const meta: Meta<StoryArgs> = {
-  title: 'Content Management/Content List',
+  title: 'Content List/Components',
   parameters: { layout: 'padded' },
   argTypes: {
     entityName: { control: 'text', description: 'Singular entity name' },
     entityNamePlural: { control: 'text', description: 'Plural entity name' },
-    enableSorting: { control: 'boolean', description: 'Enable sorting feature' },
-    enablePagination: { control: 'boolean', description: 'Enable pagination feature' },
+    hasSorting: { control: 'boolean', description: 'Enable sorting feature.' },
+    hasPagination: { control: 'boolean', description: 'Enable pagination feature.' },
+    hasTags: {
+      control: 'boolean',
+      description: 'Enable tag filtering. Provides a mock tags service with 8 tags.',
+    },
     initialSortField: {
       control: 'select',
       options: ['title', 'updatedAt'],
@@ -232,7 +364,6 @@ const ProviderStory = ({ args }: { args: StoryArgs }) => {
     [args.entityName, args.entityNamePlural]
   );
 
-  // Memoize dataSource to maintain stable reference.
   const dataSource = useMemo(() => {
     const mockFindItems = createMockFindItems({
       items: MOCK_DASHBOARDS.slice(0, args.numberOfItems),
@@ -241,7 +372,7 @@ const ProviderStory = ({ args }: { args: StoryArgs }) => {
     const findItems = async (params: FindItemsParams): Promise<FindItemsResult> => {
       const result = await mockFindItems({
         searchQuery: params.searchQuery,
-        filters: {},
+        filters: params.filters,
         sort: params.sort ?? { field: 'title', direction: 'asc' },
         page: params.page,
       });
@@ -252,29 +383,41 @@ const ProviderStory = ({ args }: { args: StoryArgs }) => {
           description: item.attributes.description,
           type: item.type,
           updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+          tags: extractTagIds(item.references),
         })),
         total: result.total,
+        counts: result.counts,
       };
     };
 
     return { findItems };
   }, [args.numberOfItems]);
 
-  // Memoize features to maintain stable reference.
   const features = useMemo(
     () => ({
-      sorting: args.enableSorting
+      sorting: args.hasSorting
         ? {
             initialSort: { field: args.initialSortField, direction: args.initialSortDirection },
           }
         : (false as const),
-      pagination: args.enablePagination ? { initialPageSize: 5 } : (false as const),
+      pagination: args.hasPagination ? { initialPageSize: 5 } : (false as const),
+      tags: args.hasTags,
     }),
-    [args.enableSorting, args.enablePagination, args.initialSortField, args.initialSortDirection]
+    [
+      args.hasSorting,
+      args.hasPagination,
+      args.hasTags,
+      args.initialSortField,
+      args.initialSortDirection,
+    ]
   );
 
-  // Key forces re-mount when configuration changes.
-  const key = `${args.enableSorting}-${args.enablePagination}-${args.initialSortField}-${args.initialSortDirection}-${args.numberOfItems}`;
+  const services: ContentListServices | undefined = useMemo(
+    () => (args.hasTags ? { tags: mockTagsService } : undefined),
+    [args.hasTags]
+  );
+
+  const key = `${args.hasSorting}-${args.hasPagination}-${args.hasTags}-${args.initialSortField}-${args.initialSortDirection}-${args.numberOfItems}`;
 
   return (
     <ContentListProvider
@@ -283,6 +426,7 @@ const ProviderStory = ({ args }: { args: StoryArgs }) => {
       labels={labels}
       dataSource={dataSource}
       features={features}
+      services={services}
     >
       {args.showConfig && (
         <>
@@ -291,6 +435,8 @@ const ProviderStory = ({ args }: { args: StoryArgs }) => {
         </>
       )}
       <SortControls />
+      <EuiSpacer size="s" />
+      <TagControls />
       <EuiSpacer size="m" />
       <ItemsList />
     </ContentListProvider>
@@ -301,8 +447,9 @@ export const Provider: Story = {
   args: {
     entityName: 'dashboard',
     entityNamePlural: 'dashboards',
-    enableSorting: true,
-    enablePagination: true,
+    hasSorting: true,
+    hasPagination: true,
+    hasTags: true,
     initialSortField: 'title',
     initialSortDirection: 'asc',
     numberOfItems: 8,

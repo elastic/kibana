@@ -47,11 +47,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   }, [startMs, endMs]);
 
   const [query, setQuery] = useState<string>('');
-  // Only show rule-backed queries in the stream detail view; the discovery page shows all queries.
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
     query,
-    ruleBacked: true,
   });
 
   const { removeQuery } = useSignificantEventsApi({ name: definition.stream.name });
@@ -98,7 +96,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             setInitialFlow('ai');
             setIsEditFlyoutOpen(true);
           }}
-          aiFeatures={aiFeatures}
         />
         {editFlyout(true)}
       </>

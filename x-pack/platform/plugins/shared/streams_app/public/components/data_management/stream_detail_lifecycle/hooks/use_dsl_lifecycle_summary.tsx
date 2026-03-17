@@ -18,6 +18,7 @@ import {
 } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
+import { isEqual } from 'lodash';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_description';
 import type { DataStreamStats } from './use_data_stream_stats';
@@ -46,7 +47,9 @@ interface UseDslLifecycleSummaryResult {
   onRemoveDownsampleStep?: (stepNumber: number) => void;
   onEditDownsampleStep?: (stepNumber: number) => void;
   onAddDownsampleStep?: () => void;
+  selectedStepIndex?: number;
   isEditLifecycleFlyoutOpen: boolean;
+  flyoutInvalidStepIndices: number[];
   modals: React.ReactNode;
 }
 
@@ -309,12 +312,18 @@ export const useDslLifecycleSummary = ({
 
       {uiState.isEditDslStepsFlyoutOpen && uiState.editFlyoutInitialSteps && (
         <EditDslStepsFlyout
-          initialSteps={uiState.editFlyoutInitialSteps}
+          initialSteps={uiState.previewSteps ?? uiState.editFlyoutInitialSteps}
           selectedStepIndex={uiState.selectedStepIndex}
           setSelectedStepIndex={(index) =>
             dispatchUi({ type: 'setSelectedStepIndex', payload: index })
           }
-          onChange={(next) => dispatchUi({ type: 'setPreviewSteps', payload: next })}
+          onChange={(next, meta) => {
+            const currentPreview = uiState.previewSteps ?? uiState.editFlyoutInitialSteps;
+            if (!isEqual(next, currentPreview)) {
+              dispatchUi({ type: 'setPreviewSteps', payload: next });
+            }
+            dispatchUi({ type: 'setFlyoutInvalidStepIndices', payload: meta.invalidStepIndices });
+          }}
           onSave={handleFlyoutSave}
           onClose={closeEditFlyout}
           isSaving={uiState.isSavingEditFlyout}
@@ -330,7 +339,9 @@ export const useDslLifecycleSummary = ({
     onRemoveDownsampleStep: isDsl ? handleRemoveDslDownsampleStep : undefined,
     onEditDownsampleStep: isDsl ? handleEditDslDownsampleStep : undefined,
     onAddDownsampleStep: isDsl ? handleAddDslDownsampleStep : undefined,
+    selectedStepIndex: uiState.selectedStepIndex,
     isEditLifecycleFlyoutOpen: uiState.isEditDslStepsFlyoutOpen,
+    flyoutInvalidStepIndices: uiState.flyoutInvalidStepIndices,
     modals,
   };
 };

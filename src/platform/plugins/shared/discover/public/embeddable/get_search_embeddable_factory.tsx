@@ -8,8 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { BehaviorSubject, firstValueFrom, merge } from 'rxjs';
-
+import { BehaviorSubject, firstValueFrom, merge, skip, map } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
@@ -28,21 +27,24 @@ import {
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
+import { SearchEmbeddableInlineEditHoverActions } from './components/search_embeddable_inline_edit_hover_actions';
+import { SearchEmbeddableDeletedTabPrompt } from './components/search_embeddable_deleted_tab_prompt';
+import { SearchEmbeddableMissingDataViewPrompt } from './components/search_embeddable_missing_data_view_prompt';
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
+import { initializeInlineEditingApi } from './initialize_inline_editing_api';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
-import { BaseAppWrapper } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
+import { isTabDeleted } from './utils/is_tab_deleted';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -77,10 +79,9 @@ export const getSearchEmbeddableFactory = ({
       const solutionNavId =
         runtimeState.nonPersistedDisplayOptions?.solutionNavIdOverride ??
         (await firstValueFrom(discoverServices.core.chrome.getActiveSolutionNavId$()));
-      const { getRenderAppWrapper } = await discoverServices.profilesManager.resolveRootProfile({
+      await discoverServices.profilesManager.resolveRootProfile({
         solutionNavId,
       });
-      const AppWrapper = getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper;
       const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
       const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
         scopedEbtManager,
@@ -92,6 +93,12 @@ export const getSearchEmbeddableFactory = ({
       const defaultDescription$ = new BehaviorSubject<string | undefined>(
         runtimeState?.savedObjectDescription
       );
+      const selectedTabId$ = new BehaviorSubject<string | undefined>(runtimeState.selectedTabId);
+
+      const tabs = runtimeState.tabs ?? [];
+
+      const isSelectedTabDeleted = (tabId: string | undefined, availableTabs: typeof tabs = tabs) =>
+        isTabDeleted(tabId, availableTabs);
 
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -103,7 +110,9 @@ export const getSearchEmbeddableFactory = ({
       const titleManager = initializeTitleManager(initialState);
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
-      const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
+      const searchEmbeddable = await initializeSearchEmbeddableApi({
+        initialState: runtimeState,
+        dataLoading$,
         discoverServices,
       });
 
@@ -116,7 +125,18 @@ export const getSearchEmbeddableFactory = ({
           serializeTimeRange: timeRangeManager.getLatestState,
           serializeDynamicActions: drilldownsManager.getLatestState,
           savedObjectId,
+          selectedTabId: selectedTabId$.getValue(),
         });
+
+      const inlineEditingApi = initializeInlineEditingApi({
+        uuid,
+        parentApi,
+        tabs,
+        selectedTabId$,
+        searchEmbeddable,
+        blockingError$,
+        dataLoading$,
+      });
 
       const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddableState>({
         uuid,
@@ -126,14 +146,31 @@ export const getSearchEmbeddableFactory = ({
           drilldownsManager.anyStateChange$,
           searchEmbeddable.anyStateChange$,
           titleManager.anyStateChange$,
-          timeRangeManager.anyStateChange$
+          timeRangeManager.anyStateChange$,
+          selectedTabId$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          inlineEditingApi.anyStateChange$
         ),
         getComparators: () => {
+          const isDeleted = isSelectedTabDeleted(selectedTabId$.getValue());
+          const shouldSkipTabComparators = isDeleted || inlineEditingApi.isEditing();
+
           return {
             ...drilldownsManager.comparators,
             ...titleComparators,
             ...timeRangeComparators,
             ...searchEmbeddable.comparators,
+            // While the selected tab is missing or inline editing is in progress,
+            // skip tab-dependent comparators so unsaved-changes badges don't appear
+            // until the user explicitly applies a tab change.
+            ...(shouldSkipTabComparators
+              ? Object.fromEntries(
+                  Object.keys(searchEmbeddable.comparators).map((k) => [k, 'skip'])
+                )
+              : {}),
+            selectedTabId: shouldSkipTabComparators ? 'skip' : 'referenceEquality',
             attributes: 'skip',
             breakdownField: 'skip',
             hideAggregatedPreview: 'skip',
@@ -159,9 +196,21 @@ export const getSearchEmbeddableFactory = ({
               serializedState: lastSaved,
               discoverServices,
             });
-            searchEmbeddable.reinitializeState(lastSavedRuntimeState);
+
+            selectedTabId$.next(lastSavedRuntimeState.selectedTabId);
+            await searchEmbeddable.reinitializeState(lastSavedRuntimeState);
           }
+          inlineEditingApi.stopInlineEditing();
         },
+      });
+
+      const editApi = initializeEditApi({
+        uuid,
+        parentApi,
+        partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
+        discoverServices,
+        isEditable: startServices.isEditable,
+        getTitle: () => titleManager.api.title$.getValue(),
       });
 
       const api: SearchEmbeddableApi = finalizeApi({
@@ -170,14 +219,21 @@ export const getSearchEmbeddableFactory = ({
         ...searchEmbeddable.api,
         ...timeRangeManager.api,
         ...drilldownsManager.api,
-        ...initializeEditApi({
-          uuid,
-          parentApi,
-          partialApi: { ...searchEmbeddable.api, fetchContext$, savedObjectId$ },
-          discoverServices,
-          isEditable: startServices.isEditable,
-          getTitle: () => titleManager.api.title$.getValue(),
-        }),
+        ...editApi,
+        ...(editApi && savedObjectId$.getValue()
+          ? {
+              onEdit: inlineEditingApi.startInlineEditing,
+              overrideHoverActions$: inlineEditingApi.overrideHoverActions$,
+              OverriddenHoverActionsComponent: () => (
+                <SearchEmbeddableInlineEditHoverActions
+                  draftSelectedTabId$={inlineEditingApi.draftSelectedTabId$}
+                  tabs={tabs}
+                  onEditInDiscover={editApi.onEdit}
+                  onSelectTab={inlineEditingApi.previewInlineTabSelection}
+                />
+              ),
+            }
+          : {}),
         dataLoading$,
         blockingError$,
         savedObjectId$,
@@ -247,9 +303,20 @@ export const getSearchEmbeddableFactory = ({
       return {
         api,
         Component: () => {
-          const [savedSearch, dataViews] = useBatchedPublishingSubjects(
+          const [
+            savedSearch,
+            dataViews,
+            isInlineEditing,
+            draftSelectedTabId,
+            selectedTabId,
+            isInlineEditDirty,
+          ] = useBatchedPublishingSubjects(
             api.savedSearch$,
-            api.dataViews$
+            api.dataViews$,
+            inlineEditingApi.isInlineEditing$,
+            inlineEditingApi.draftSelectedTabId$,
+            selectedTabId$,
+            inlineEditingApi.inlineEditDirty$
           );
 
           useEffect(() => {
@@ -260,26 +327,13 @@ export const getSearchEmbeddableFactory = ({
             };
           }, []);
 
-          const dataView = useMemo(() => {
-            const hasDataView = (dataViews ?? []).length > 0;
-            if (!hasDataView) {
-              blockingError$.next(
-                new Error(
-                  i18n.translate('discover.embeddable.search.dataViewError', {
-                    defaultMessage: 'Missing data view {indexPatternId}',
-                    values: {
-                      indexPatternId:
-                        typeof runtimeState.serializedSearchSource?.index === 'string'
-                          ? runtimeState.serializedSearchSource.index
-                          : runtimeState.serializedSearchSource?.index?.id ?? '',
-                    },
-                  })
-                )
-              );
-              return;
-            }
-            return dataViews![0];
-          }, [dataViews]);
+          const selectedTabIdForDisplay = isInlineEditing
+            ? draftSelectedTabId ?? selectedTabId
+            : selectedTabId;
+          const isSelectedTabDeletedForDisplay = isTabDeleted(selectedTabIdForDisplay, tabs);
+          const hasPendingInlineTabChanges = isInlineEditing && isInlineEditDirty;
+
+          const dataView = useMemo(() => dataViews?.[0], [dataViews]);
 
           const onAddFilter = useCallback<DocViewFilterFn>(
             async (field, value, operator) => {
@@ -310,6 +364,42 @@ export const getSearchEmbeddableFactory = ({
             [savedSearch, dataView]
           );
 
+          if (isSelectedTabDeletedForDisplay) {
+            return (
+              <SearchEmbeddableDeletedTabPrompt
+                api={api}
+                canShowDashboardWriteControls={Boolean(
+                  discoverServices.capabilities.dashboard_v2?.showWriteControls
+                )}
+                inlineEditing={{
+                  hasPendingChanges: hasPendingInlineTabChanges,
+                  isActive: isInlineEditing,
+                  onApply: inlineEditingApi.applyInlineTabSelection,
+                  onCancel: inlineEditingApi.cancelInlineTabSelection,
+                }}
+              />
+            );
+          }
+
+          if (!dataView) {
+            return (
+              <SearchEmbeddableMissingDataViewPrompt
+                api={api}
+                canShowDashboardWriteControls={Boolean(
+                  discoverServices.capabilities.dashboard_v2?.showWriteControls
+                )}
+                inlineEditing={{
+                  hasPendingChanges: hasPendingInlineTabChanges,
+                  isActive: isInlineEditing,
+                  onApply: inlineEditingApi.applyInlineTabSelection,
+                  onCancel: inlineEditingApi.cancelInlineTabSelection,
+                }}
+                isByReference={Boolean(savedObjectId$.getValue())}
+                onEditInDiscover={editApi?.onEdit}
+              />
+            );
+          }
+
           return (
             <KibanaRenderContextProvider {...discoverServices.core}>
               <KibanaContextProvider services={discoverServices}>
@@ -317,42 +407,46 @@ export const getSearchEmbeddableFactory = ({
                   scopedProfilesManager={scopedProfilesManager}
                   scopedEBTManager={scopedEbtManager}
                 >
-                  <AppWrapper>
-                    {renderAsFieldStatsTable ? (
-                      <SearchEmbeddablFieldStatsTableComponent
-                        api={{
-                          ...api,
-                          fetchContext$,
-                        }}
+                  {renderAsFieldStatsTable ? (
+                    <SearchEmbeddablFieldStatsTableComponent
+                      api={{
+                        ...api,
+                        fetchContext$,
+                      }}
+                      dataView={dataView!}
+                      onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
+                      stateManager={searchEmbeddable.stateManager}
+                    />
+                  ) : (
+                    <CellActionsProvider
+                      getTriggerCompatibleActions={
+                        discoverServices.uiActions.getTriggerCompatibleActions
+                      }
+                    >
+                      <SearchEmbeddableGridComponent
+                        api={{ ...api, fetchWarnings$, fetchContext$ }}
                         dataView={dataView!}
-                        onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
+                        onAddFilter={
+                          runtimeState.nonPersistedDisplayOptions?.enableFilters === false
+                            ? undefined
+                            : onAddFilter
+                        }
+                        enableDocumentViewer={
+                          runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
+                          undefined
+                            ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
+                            : true
+                        }
+                        inlineEditing={{
+                          isActive: isInlineEditing,
+                          hasPendingChanges: hasPendingInlineTabChanges,
+                          onApply: inlineEditingApi.applyInlineTabSelection,
+                          onCancel: inlineEditingApi.cancelInlineTabSelection,
+                        }}
                         stateManager={searchEmbeddable.stateManager}
                       />
-                    ) : (
-                      <CellActionsProvider
-                        getTriggerCompatibleActions={
-                          discoverServices.uiActions.getTriggerCompatibleActions
-                        }
-                      >
-                        <SearchEmbeddableGridComponent
-                          api={{ ...api, fetchWarnings$, fetchContext$ }}
-                          dataView={dataView!}
-                          onAddFilter={
-                            runtimeState.nonPersistedDisplayOptions?.enableFilters === false
-                              ? undefined
-                              : onAddFilter
-                          }
-                          enableDocumentViewer={
-                            runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
-                            undefined
-                              ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
-                              : true
-                          }
-                          stateManager={searchEmbeddable.stateManager}
-                        />
-                      </CellActionsProvider>
-                    )}
-                  </AppWrapper>
+                    </CellActionsProvider>
+                  )}
                 </ScopedServicesProvider>
               </KibanaContextProvider>
             </KibanaRenderContextProvider>
