@@ -339,7 +339,7 @@ inputs:
     type: string
     default: "hello world"
 
-outputs:
+outputs: 
   required:
     - b
   properties:
