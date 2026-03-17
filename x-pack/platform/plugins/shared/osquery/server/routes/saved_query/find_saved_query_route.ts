@@ -66,16 +66,25 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
             filters.push(`(${userFilters.join(' OR ')})`);
           }
 
+          if (request.query.search) {
+            const searchTerm = request.query.search
+              .replace(/[\\{}()|"<>]/g, '')
+              .trim();
+            if (searchTerm) {
+              const searchFilter = [
+                `${savedQuerySavedObjectType}.attributes.id: ${searchTerm}*`,
+                `${savedQuerySavedObjectType}.attributes.description: ${searchTerm}*`,
+              ].join(' OR ');
+              filters.push(`(${searchFilter})`);
+            }
+          }
+
           const savedQueries = await spaceScopedClient.find<SavedQuerySavedObject>({
             type: savedQuerySavedObjectType,
             page: request.query.page || 1,
             perPage: request.query.pageSize,
             sortField: request.query.sort || 'id',
             sortOrder: request.query.sortOrder || 'desc',
-            ...(request.query.search && {
-              search: request.query.search,
-              searchFields: ['id', 'description'],
-            }),
             ...(filters.length && { filter: filters.join(' AND ') }),
           });
 
