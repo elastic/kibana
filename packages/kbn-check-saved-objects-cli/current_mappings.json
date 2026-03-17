@@ -358,6 +358,9 @@
         },
         "type": "object"
       },
+      "enabled": {
+        "type": "boolean"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -369,6 +372,9 @@
       },
       "rule_labels": {
         "type": "keyword"
+      },
+      "snoozedUntil": {
+        "type": "date"
       },
       "updatedAt": {
         "type": "date"
