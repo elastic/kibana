@@ -405,6 +405,10 @@ export class WorkflowsService {
     // Phase 1: Validate all workflows and prepare bulk operations
     for (let i = 0; i < workflows.length; i++) {
       try {
+        const customId = workflows[i].id;
+        if (customId) {
+          this.validateWorkflowId(customId);
+        }
         const prepared = this.prepareWorkflowDocument(
           workflows[i],
           zodSchema,

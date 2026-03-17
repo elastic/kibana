@@ -1348,7 +1348,7 @@ steps:
       expect(result.created[1].name).toBe('workflow two');
       expect(mockEsClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          refresh: true,
+          refresh: 'wait_for',
           require_alias: true,
         })
       );
