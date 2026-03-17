@@ -9,10 +9,7 @@ import { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { AttackDetailsLeftPanelKey } from '../constants/panel_keys';
-import {
-  INSIGHTS_TAB_ID,
-  ENTITIES_TAB_ID,
-} from '../constants/left_panel_paths';
+import { INSIGHTS_TAB_ID, ENTITIES_TAB_ID } from '../constants/left_panel_paths';
 import { useAttackDetailsContext } from '../context';
 
 export interface UseNavigateToAttackDetailsLeftPanelParams {
