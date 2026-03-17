@@ -54,7 +54,7 @@ describe('ScriptNameNavLink component', () => {
     const nameElement = getByTestId('test-name-link');
     expect(nameElement).toHaveAttribute(
       'href',
-      '/app/security/administration/scripts_library?page=1&pageSize=10&sortField=name&sortDirection=asc&selectedScriptId=script-1&show=details'
+      '/app/security/administration/script_library?page=1&pageSize=10&sortField=name&sortDirection=asc&selectedScriptId=script-1&show=details'
     );
   });
 
@@ -66,7 +66,7 @@ describe('ScriptNameNavLink component', () => {
     const nameElement = getByTestId('test-name-link');
     expect(nameElement).toHaveAttribute(
       'href',
-      '/app/security/administration/scripts_library?page=2&pageSize=20&sortField=updatedAt&sortDirection=desc&selectedScriptId=script-1&show=details'
+      '/app/security/administration/script_library?page=2&pageSize=20&sortField=updatedAt&sortDirection=desc&selectedScriptId=script-1&show=details'
     );
   });
 });
