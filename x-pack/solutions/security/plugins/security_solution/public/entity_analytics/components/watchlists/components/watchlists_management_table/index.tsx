@@ -208,7 +208,7 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string }> = ({ space
         >
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.watchlistsManagement.deleteConfirmBody"
-            defaultMessage='This action will delete "{watchlistName}". Click "Delete" to continue.'
+            defaultMessage='This action will delete "{watchlistName}". This action cannot be undone.'
             values={{ watchlistName: pendingDelete?.name ?? '' }}
           />
         </EuiConfirmModal>
