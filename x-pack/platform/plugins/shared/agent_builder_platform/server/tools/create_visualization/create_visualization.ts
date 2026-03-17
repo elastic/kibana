@@ -98,17 +98,17 @@ This tool will:
         // Step 2: Generate visualization configuration with shared chart-type + graph flow
         const { selectedChartType, validatedConfig, esqlQuery, timeRange } =
           await buildVisualizationConfig({
-          nlQuery,
-          index,
-          chartType,
-          esql,
-          existingConfig,
-          parsedExistingConfig,
-          modelProvider,
-          logger,
-          events,
-          esClient,
-        });
+            nlQuery,
+            index,
+            chartType,
+            esql,
+            existingConfig,
+            parsedExistingConfig,
+            modelProvider,
+            logger,
+            events,
+            esClient,
+          });
 
         const visualizationData = {
           query: nlQuery,

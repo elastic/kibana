@@ -30,8 +30,11 @@ const MAX_ALL_LIMIT = 250;
  * custom row limits for Agent Builder's index search tool.
  */
 export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): string => {
-  const { defaultLimit = DEFAULT_LIMIT, maxAllLimit = MAX_ALL_LIMIT, disableNamedParams = false } =
-    params;
+  const {
+    defaultLimit = DEFAULT_LIMIT,
+    maxAllLimit = MAX_ALL_LIMIT,
+    disableNamedParams = false,
+  } = params;
 
   return `<instructions>
 
