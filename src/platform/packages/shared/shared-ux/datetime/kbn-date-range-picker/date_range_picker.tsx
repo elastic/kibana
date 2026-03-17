@@ -138,6 +138,12 @@ export interface DateRangePickerProps {
   settings: DateRangePickerSettings;
   /** Called when the user changes a setting in the settings panel. */
   onSettingsChange: (settings: DateRangePickerSettings) => void;
+  /**
+   * A valid time zone name, from the IANA database, e.g. "America/Los_Angeles".
+   * This is only informational, it won't affect how dates are handled.
+   * @link https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+   */
+  timeZone?: string;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {

@@ -115,6 +115,11 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   settings: DateRangePickerSettings;
   /** Called when the user changes a setting in the settings panel. */
   onSettingsChange: (settings: DateRangePickerSettings) => void;
+  /**
+   * A valid time zone name from the IANA database, e.g. "America/Los_Angeles".
+   * Displayed informally in the panel footer.
+   */
+  timeZone?: string;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -155,6 +160,7 @@ export function DateRangePickerProvider({
   calendarOptions,
   settings = { roundRelativeTime: true },
   onSettingsChange,
+  timeZone,
 }: PropsWithChildren<DateRangePickerProps>) {
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -277,6 +283,7 @@ export function DateRangePickerProvider({
       calendarOptions,
       settings,
       onSettingsChange,
+      timeZone,
     }),
     [
       text,
@@ -303,6 +310,7 @@ export function DateRangePickerProvider({
       calendarOptions,
       settings,
       onSettingsChange,
+      timeZone,
     ]
   );
 
