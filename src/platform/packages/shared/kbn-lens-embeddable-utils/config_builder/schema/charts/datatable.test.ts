@@ -15,7 +15,7 @@ type DatatableWithoutDefaultsConfig = Omit<DatatableState, 'sampling' | 'ignore_
 
 describe('Datatable Schema', () => {
   const baseDatatableConfig: Omit<DatatableWithoutDefaultsConfig, 'metrics'> = {
-    type: 'datatable',
+    type: 'data_table',
     dataset: {
       type: 'dataView',
       id: 'test-data-view',
@@ -449,7 +449,7 @@ describe('Datatable Schema', () => {
 
     it('throws when using term buckets operation in an esql configuration', () => {
       const input: DatatableWithoutDefaultsConfig = {
-        type: 'datatable',
+        type: 'data_table',
         dataset: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
@@ -472,7 +472,7 @@ describe('Datatable Schema', () => {
 
     it('throws when esql datatable has no metrics and no rows', () => {
       const input: Omit<DatatableWithoutDefaultsConfig, 'metrics' | 'rows'> = {
-        type: 'datatable',
+        type: 'data_table',
         dataset: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
@@ -486,7 +486,7 @@ describe('Datatable Schema', () => {
 
     it('throws on empty metrics array for esql', () => {
       const input: DatatableWithoutDefaultsConfig = {
-        type: 'datatable',
+        type: 'data_table',
         dataset: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
@@ -505,7 +505,7 @@ describe('Datatable Schema', () => {
 
     it('throws on empty rows array for esql', () => {
       const input: DatatableWithoutDefaultsConfig = {
-        type: 'datatable',
+        type: 'data_table',
         dataset: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
@@ -723,7 +723,7 @@ describe('Datatable Schema', () => {
                 {
                   values: ['value1', 'value2', 'value3'],
                   color: {
-                    type: 'colorCode',
+                    type: 'color_code',
                     value: '#000000',
                   },
                 },
@@ -751,7 +751,7 @@ describe('Datatable Schema', () => {
 
     it('validates esql configuration', () => {
       const input: DatatableWithoutDefaultsConfig = {
-        type: 'datatable',
+        type: 'data_table',
         title: 'Datatable',
         description: 'ESQL table full configuration',
         dataset: {
@@ -819,7 +819,7 @@ describe('Datatable Schema', () => {
                 {
                   values: ['value1', 'value2', 'value3'],
                   color: {
-                    type: 'colorCode',
+                    type: 'color_code',
                     value: '#000000',
                   },
                 },
@@ -841,7 +841,7 @@ describe('Datatable Schema', () => {
 
     it('allows no metrics when using esql', () => {
       const input: Omit<DatatableWithoutDefaultsConfig, 'metrics'> = {
-        type: 'datatable',
+        type: 'data_table',
         title: 'Datatable',
         description: 'ESQL table without metrics',
         dataset: {
@@ -864,7 +864,7 @@ describe('Datatable Schema', () => {
                 {
                   values: ['value1', 'value2', 'value3'],
                   color: {
-                    type: 'colorCode',
+                    type: 'color_code',
                     value: '#000000',
                   },
                 },
