@@ -23,130 +23,134 @@ import {
   createIdConsistencyEvaluator,
 } from '../../../src/evaluators/feature_duplication_evaluators';
 
-evaluate.describe('Streams features duplication (harness)', () => {
-  const from = kbnDatemath.parse('now-10m')!;
-  const to = kbnDatemath.parse('now')!;
+evaluate.describe(
+  'Streams features duplication (harness)',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    const from = kbnDatemath.parse('now-10m')!;
+    const to = kbnDatemath.parse('now')!;
 
-  async function runRepeatedFeatureIdentification({
-    esClient,
-    streamName,
-    runs,
-    inferenceClient,
-    logger,
-    sampleSize,
-  }: {
-    esClient: ElasticsearchClient;
-    streamName: string;
-    runs: number;
-    inferenceClient: BoundInferenceClient;
-    logger: Logger;
-    sampleSize: number;
-  }): Promise<{
-    runs: Array<{
-      features: BaseFeature[];
-    }>;
-  }> {
-    const outputs: Array<{ features: BaseFeature[] }> = [];
+    async function runRepeatedFeatureIdentification({
+      esClient,
+      streamName,
+      runs,
+      inferenceClient,
+      logger,
+      sampleSize,
+    }: {
+      esClient: ElasticsearchClient;
+      streamName: string;
+      runs: number;
+      inferenceClient: BoundInferenceClient;
+      logger: Logger;
+      sampleSize: number;
+    }): Promise<{
+      runs: Array<{
+        features: BaseFeature[];
+      }>;
+    }> {
+      const outputs: Array<{ features: BaseFeature[] }> = [];
 
-    for (let i = 0; i < runs; i++) {
-      const { hits: sampleDocuments } = await getSampleDocuments({
-        esClient,
-        index: streamName,
-        size: sampleSize,
-        start: from.valueOf(),
-        end: to.valueOf(),
-      });
+      for (let i = 0; i < runs; i++) {
+        const { hits: sampleDocuments } = await getSampleDocuments({
+          esClient,
+          index: streamName,
+          size: sampleSize,
+          start: from.valueOf(),
+          end: to.valueOf(),
+        });
 
-      const { features } = await identifyFeatures({
-        streamName,
-        sampleDocuments,
-        systemPrompt: featuresPrompt,
-        inferenceClient,
-        logger,
-        signal: new AbortController().signal,
-      });
+        const { features } = await identifyFeatures({
+          streamName,
+          sampleDocuments,
+          systemPrompt: featuresPrompt,
+          inferenceClient,
+          logger,
+          signal: new AbortController().signal,
+        });
 
-      outputs.push({ features });
+        outputs.push({ features });
+      }
+
+      return { runs: outputs };
     }
 
-    return { runs: outputs };
-  }
-
-  FEATURES_DUPLICATION_DATASETS.forEach((dataset) => {
-    evaluate.describe(dataset.name, { tag: tags.stateful.classic }, () => {
-      evaluate.beforeAll(async ({ apiServices }) => {
-        await apiServices.streams.enable();
-      });
-
-      evaluate.afterAll(async ({ apiServices, esClient }) => {
-        await apiServices.streams.disable();
-        await esClient.indices.deleteDataStream({
-          name: 'logs*',
+    FEATURES_DUPLICATION_DATASETS.forEach((dataset) => {
+      evaluate.describe(dataset.name, () => {
+        evaluate.beforeAll(async ({ apiServices }) => {
+          await apiServices.streams.enable();
         });
-      });
 
-      evaluate(
-        dataset.name,
-        async ({
-          config,
-          esClient,
-          inferenceClient,
-          evaluationConnector,
-          evaluators,
-          logger,
-          executorClient,
-          traceEsClient,
-          log,
-        }) => {
-          const evaluatorInferenceClient = inferenceClient.bindTo({
-            connectorId: evaluationConnector.id,
+        evaluate.afterAll(async ({ apiServices, esClient }) => {
+          await apiServices.streams.disable();
+          await esClient.indices.deleteDataStream({
+            name: 'logs*',
           });
+        });
 
-          await indexSynthtraceScenario({
-            scenario: dataset.input.scenario,
-            scenarioOpts: dataset.input.scenarioOpts,
+        evaluate(
+          dataset.name,
+          async ({
             config,
-            from,
-            to,
-          });
+            esClient,
+            inferenceClient,
+            evaluationConnector,
+            evaluators,
+            logger,
+            executorClient,
+            traceEsClient,
+            log,
+          }) => {
+            const evaluatorInferenceClient = inferenceClient.bindTo({
+              connectorId: evaluationConnector.id,
+            });
 
-          await esClient.indices.refresh({ index: dataset.input.stream_name });
+            await indexSynthtraceScenario({
+              scenario: dataset.input.scenario,
+              scenarioOpts: dataset.input.scenarioOpts,
+              config,
+              from,
+              to,
+            });
 
-          await executorClient.runExperiment(
-            {
-              dataset: {
-                name: dataset.name,
-                description: dataset.description,
-                examples: [{ input: dataset.input }],
+            await esClient.indices.refresh({ index: dataset.input.stream_name });
+
+            await executorClient.runExperiment(
+              {
+                dataset: {
+                  name: dataset.name,
+                  description: dataset.description,
+                  examples: [{ input: dataset.input }],
+                },
+                task: async ({
+                  input,
+                }: {
+                  input: { stream_name: string; runs: number; sample_document_count: number };
+                }) => {
+                  const result = await runRepeatedFeatureIdentification({
+                    esClient,
+                    streamName: input.stream_name,
+                    runs: input.runs,
+                    inferenceClient,
+                    logger,
+                    sampleSize: input.sample_document_count,
+                  });
+                  return { ...result, traceId: getCurrentTraceId() };
+                },
               },
-              task: async ({
-                input,
-              }: {
-                input: { stream_name: string; runs: number; sample_document_count: number };
-              }) => {
-                const result = await runRepeatedFeatureIdentification({
-                  esClient,
-                  streamName: input.stream_name,
-                  runs: input.runs,
-                  inferenceClient,
-                  logger,
-                  sampleSize: input.sample_document_count,
-                });
-                return { ...result, traceId: getCurrentTraceId() };
-              },
-            },
-            [
-              featureDuplicationEvaluator,
-              createSemanticUniquenessEvaluator({ inferenceClient: evaluatorInferenceClient }),
-              createIdConsistencyEvaluator({ inferenceClient: evaluatorInferenceClient }),
-              evaluators.traceBasedEvaluators.inputTokens,
-              evaluators.traceBasedEvaluators.outputTokens,
-              evaluators.traceBasedEvaluators.cachedTokens,
-              createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
-            ]
-          );
-        }
-      );
+              [
+                featureDuplicationEvaluator,
+                createSemanticUniquenessEvaluator({ inferenceClient: evaluatorInferenceClient }),
+                createIdConsistencyEvaluator({ inferenceClient: evaluatorInferenceClient }),
+                evaluators.traceBasedEvaluators.inputTokens,
+                evaluators.traceBasedEvaluators.outputTokens,
+                evaluators.traceBasedEvaluators.cachedTokens,
+                createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+              ]
+            );
+          }
+        );
+      });
     });
-  });
-});
+  }
+);
