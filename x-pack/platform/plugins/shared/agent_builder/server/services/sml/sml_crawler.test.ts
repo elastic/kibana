@@ -274,9 +274,8 @@ describe('SmlCrawlerImpl', () => {
       const stateWriteCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
         (
           c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }
-        ).operations?.some(
-          (op: { index?: { document?: { update_action?: string } } }) =>
-            ['create', 'update', 'delete'].includes(op.index?.document?.update_action ?? '')
+        ).operations?.some((op: { index?: { document?: { update_action?: string } } }) =>
+          ['create', 'update', 'delete'].includes(op.index?.document?.update_action ?? '')
         )
       );
       expect(stateWriteCalls.length).toBe(0);
@@ -519,9 +518,7 @@ describe('SmlCrawlerImpl', () => {
       );
       expect(stateWriteCalls.length).toBe(2);
 
-      expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('enumerated 2 item(s)')
-      );
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('enumerated 2 item(s)'));
     });
   });
 });

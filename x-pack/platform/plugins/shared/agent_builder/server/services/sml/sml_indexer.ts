@@ -213,9 +213,7 @@ class SmlIndexerImpl implements SmlIndexer {
         return;
       }
       this.logger.warn(
-        `SML indexer: failed to delete chunks for origin '${originId}': ${
-          (error as Error).message
-        }`
+        `SML indexer: failed to delete chunks for origin '${originId}': ${(error as Error).message}`
       );
     }
   }
