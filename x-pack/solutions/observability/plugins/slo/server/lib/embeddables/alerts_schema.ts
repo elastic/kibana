@@ -28,10 +28,6 @@ const AlertsCustomSchema = schema.object({
     defaultValue: [],
     meta: { description: 'List of SLOs to display alerts for' },
   }),
-  show_all_group_by_instances: schema.boolean({
-    defaultValue: false,
-    meta: { description: 'Whether to show all group-by instances' },
-  }),
 });
 
 export const getAlertsEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {

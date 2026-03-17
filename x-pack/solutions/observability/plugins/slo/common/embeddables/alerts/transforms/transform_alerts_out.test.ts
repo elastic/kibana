@@ -24,7 +24,6 @@ describe('transformAlertsOut', () => {
       } as unknown as AlertsEmbeddableState)
     ).toMatchInlineSnapshot(`
       Object {
-        "show_all_group_by_instances": true,
         "slos": Array [
           Object {
             "group_by": Array [
@@ -32,14 +31,39 @@ describe('transformAlertsOut', () => {
             ],
             "name": "Legacy SLO",
             "slo_id": "legacy-slo-id",
-            "slo_instance_id": "legacy-instance-id",
+            "slo_instance_id": "*",
           },
         ],
       }
     `);
   });
 
-  it('should return state unchanged when already in snake_case', () => {
+  it('should migrate legacy show_all_group_by_instances true + specific instance to slo_instance_id *', () => {
+    expect(
+      transformAlertsOut({
+        show_all_group_by_instances: true,
+        slos: [
+          {
+            slo_id: 'slo-1',
+            slo_instance_id: 'host-1',
+            name: 'SLO',
+            group_by: ['host.name'],
+          },
+        ],
+      })
+    ).toEqual({
+      slos: [
+        {
+          slo_id: 'slo-1',
+          slo_instance_id: '*',
+          name: 'SLO',
+          group_by: ['host.name'],
+        },
+      ],
+    });
+  });
+
+  it('should not migrate when show_all_group_by_instances is false', () => {
     expect(
       transformAlertsOut({
         show_all_group_by_instances: false,
@@ -52,21 +76,16 @@ describe('transformAlertsOut', () => {
           },
         ],
       })
-    ).toMatchInlineSnapshot(`
-      Object {
-        "show_all_group_by_instances": false,
-        "slos": Array [
-          Object {
-            "group_by": Array [
-              "url.domain",
-            ],
-            "name": "New SLO",
-            "slo_id": "new-slo-id",
-            "slo_instance_id": "new-instance-id",
-          },
-        ],
-      }
-    `);
+    ).toEqual({
+      slos: [
+        {
+          slo_id: 'new-slo-id',
+          slo_instance_id: 'new-instance-id',
+          name: 'New SLO',
+          group_by: ['url.domain'],
+        },
+      ],
+    });
   });
 
   it('should prefer snake_case fields over legacy camelCase when both are present', () => {
@@ -86,61 +105,29 @@ describe('transformAlertsOut', () => {
           },
         ],
       } as unknown as AlertsEmbeddableState)
-    ).toMatchInlineSnapshot(`
-      Object {
-        "show_all_group_by_instances": true,
-        "slos": Array [
-          Object {
-            "group_by": Array [
-              "field.a",
-            ],
-            "name": "SLO",
-            "slo_id": "new-slo-id",
-            "slo_instance_id": "new-instance-id",
-          },
-        ],
-      }
-    `);
+    ).toEqual({
+      slos: [
+        {
+          slo_id: 'new-slo-id',
+          slo_instance_id: '*',
+          name: 'SLO',
+          group_by: ['field.a'],
+        },
+      ],
+    });
   });
 
-  it('should migrate legacy showAllGroupByInstances to show_all_group_by_instances', () => {
-    expect(
-      transformAlertsOut({
-        showAllGroupByInstances: true,
-        slos: [],
-      } as unknown as AlertsEmbeddableState)
-    ).toMatchInlineSnapshot(`
-      Object {
-        "show_all_group_by_instances": true,
-        "slos": Array [],
-      }
-    `);
-  });
-
-  it('should not include legacy showAllGroupByInstances in output', () => {
+  it('should not include show_all_group_by_instances or showAllGroupByInstances in output', () => {
     const result = transformAlertsOut({
       showAllGroupByInstances: false,
       slos: [],
     } as unknown as AlertsEmbeddableState);
     expect(result).not.toHaveProperty('showAllGroupByInstances');
-    expect(result).toHaveProperty('show_all_group_by_instances', false);
-  });
-
-  it('should default show_all_group_by_instances to false when missing', () => {
-    expect(transformAlertsOut({ slos: [] } as unknown as AlertsEmbeddableState)).toMatchObject({
-      show_all_group_by_instances: false,
-      slos: [],
-    });
+    expect(result).not.toHaveProperty('show_all_group_by_instances');
   });
 
   it('should handle empty slos array', () => {
-    expect(
-      transformAlertsOut({
-        show_all_group_by_instances: false,
-        slos: [],
-      })
-    ).toEqual({
-      show_all_group_by_instances: false,
+    expect(transformAlertsOut({ slos: [] } as unknown as AlertsEmbeddableState)).toEqual({
       slos: [],
     });
   });
@@ -164,27 +151,22 @@ describe('transformAlertsOut', () => {
           },
         ],
       } as unknown as AlertsEmbeddableState)
-    ).toMatchInlineSnapshot(`
-      Object {
-        "show_all_group_by_instances": false,
-        "slos": Array [
-          Object {
-            "group_by": Array [],
-            "name": "Snake SLO",
-            "slo_id": "snake-slo",
-            "slo_instance_id": "*",
-          },
-          Object {
-            "group_by": Array [
-              "host.name",
-            ],
-            "name": "Legacy SLO",
-            "slo_id": "legacy-slo",
-            "slo_instance_id": "instance-1",
-          },
-        ],
-      }
-    `);
+    ).toEqual({
+      slos: [
+        {
+          slo_id: 'snake-slo',
+          slo_instance_id: '*',
+          name: 'Snake SLO',
+          group_by: [],
+        },
+        {
+          slo_id: 'legacy-slo',
+          slo_instance_id: 'instance-1',
+          name: 'Legacy SLO',
+          group_by: ['host.name'],
+        },
+      ],
+    });
   });
 
   it('should preserve other state properties (e.g. title, drilldowns)', () => {
@@ -196,7 +178,6 @@ describe('transformAlertsOut', () => {
       } as unknown as AlertsEmbeddableState)
     ).toMatchObject({
       title: 'My Alerts Panel',
-      show_all_group_by_instances: false,
       slos: [],
     });
   });
@@ -218,6 +199,31 @@ describe('transformAlertsOut', () => {
           slo_instance_id: '*',
           name: '',
           group_by: [],
+        },
+      ],
+    });
+  });
+
+  it('should not migrate slo_instance_id when already *', () => {
+    expect(
+      transformAlertsOut({
+        show_all_group_by_instances: true,
+        slos: [
+          {
+            slo_id: 'slo-1',
+            slo_instance_id: '*',
+            name: 'SLO',
+            group_by: ['host.name'],
+          },
+        ],
+      })
+    ).toEqual({
+      slos: [
+        {
+          slo_id: 'slo-1',
+          slo_instance_id: '*',
+          name: 'SLO',
+          group_by: ['host.name'],
         },
       ],
     });

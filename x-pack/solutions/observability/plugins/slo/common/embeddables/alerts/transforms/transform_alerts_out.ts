@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_VALUE } from '@kbn/slo-schema';
 import type {
   AlertsEmbeddableState,
   SloItem,
@@ -33,19 +34,36 @@ export interface LegacyAlertsState {
   slos: LegacyAlertsSloItem[];
 }
 
+/**
+ * Migration: When legacy show_all_group_by_instances was true and a slo had a specific instance,
+ * the toggle overrode the selection — user intended "all instances". Set slo_instance_id to "*".
+ */
+function migrateSlos(
+  slos: SloItem[],
+  legacyShowAll: boolean
+): SloItem[] {
+  if (!legacyShowAll) return slos;
+  return slos.map((slo) =>
+    slo.slo_instance_id !== ALL_VALUE
+      ? { ...slo, slo_instance_id: ALL_VALUE }
+      : slo
+  );
+}
+
 /** Transforms SLO Alerts embeddable state for serialization. Migrates legacy camelCase to snake_case. */
 export function transformAlertsOut(storedState: AlertsEmbeddableState): AlertsEmbeddableState {
   const state = storedState as AlertsEmbeddableState & {
     slos?: Array<Record<string, unknown>>;
     showAllGroupByInstances?: boolean;
+    show_all_group_by_instances?: boolean;
   };
-  const { showAllGroupByInstances: _legacy, ...rest } = state;
-  const slos =
+  const { show_all_group_by_instances: _dropped, showAllGroupByInstances: _legacy, ...rest } = state;
+  const rawSlos =
     state.slos?.map((slo) => {
       const hasLegacy = 'id' in slo || 'instanceId' in slo || 'groupBy' in slo;
       return hasLegacy ? mapLegacySloItem(slo) : (slo as SloItem);
     }) ?? [];
-  const showAllGroupByInstances =
-    state.show_all_group_by_instances ?? state.showAllGroupByInstances ?? false;
-  return { ...rest, slos, show_all_group_by_instances: showAllGroupByInstances };
+  const legacyShowAll = state.show_all_group_by_instances ?? state.showAllGroupByInstances ?? false;
+  const slos = migrateSlos(rawSlos, legacyShowAll);
+  return { ...rest, slos };
 }

@@ -77,21 +77,9 @@ export function getAlertsEmbeddableFactory({
       }
 
       const titleManager = initializeTitleManager(initialState);
-      const hasSlosWithAllInstances = initialState?.slos?.some(
-        (slo) => slo.slo_instance_id === ALL_VALUE
-      );
-      const normalizedInitialState: AlertsCustomState = {
-        ...initialState,
-        show_all_group_by_instances: hasSlosWithAllInstances
-          ? true
-          : initialState?.show_all_group_by_instances ?? false,
-      };
       const sloAlertsStateManager = initializeStateManager<AlertsCustomState>(
-        normalizedInitialState,
-        {
-          slos: [],
-          show_all_group_by_instances: false,
-        }
+        { slos: initialState?.slos ?? [] },
+        { slos: [] }
       );
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
@@ -117,7 +105,6 @@ export function getAlertsEmbeddableFactory({
           ...titleComparators,
           ...drilldownsManager.comparators,
           slos: 'referenceEquality',
-          show_all_group_by_instances: 'referenceEquality',
         }),
         onReset: (lastSaved) => {
           drilldownsManager.reinitializeState(lastSaved ?? {});
@@ -141,16 +128,11 @@ export function getAlertsEmbeddableFactory({
           onEdit();
         },
         serializeState,
-        getSloAlertsConfig: () => {
-          return {
-            slos: sloAlertsStateManager.api.slos$.getValue(),
-            show_all_group_by_instances:
-              sloAlertsStateManager.api.showAllGroupByInstances$.getValue(),
-          };
-        },
+        getSloAlertsConfig: () => ({
+          slos: sloAlertsStateManager.api.slos$.getValue(),
+        }),
         updateSloAlertsConfig: (update) => {
           sloAlertsStateManager.api.setSlos(update.slos);
-          sloAlertsStateManager.api.setShowAllGroupByInstances(update.show_all_group_by_instances);
         },
       });
 
@@ -163,10 +145,8 @@ export function getAlertsEmbeddableFactory({
       return {
         api,
         Component: () => {
-          const [slos, showAllGroupByInstances] = useBatchedPublishingSubjects(
-            sloAlertsStateManager.api.slos$,
-            sloAlertsStateManager.api.showAllGroupByInstances$
-          );
+          const [slos] = useBatchedPublishingSubjects(sloAlertsStateManager.api.slos$);
+          const hasSlosWithAllInstances = slos.some((s) => s.slo_instance_id === ALL_VALUE);
           const fetchContext = useFetchContext(api);
           const I18nContext = deps.i18n.Context;
 
@@ -202,7 +182,7 @@ export function getAlertsEmbeddableFactory({
                       slos={slos}
                       timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
                       reloadSubject={reload$}
-                      showAllGroupByInstances={showAllGroupByInstances}
+                      showAllGroupByInstances={hasSlosWithAllInstances}
                     />
                   </QueryClientProvider>
                 </PluginContext.Provider>

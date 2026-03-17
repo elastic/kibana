@@ -137,7 +137,6 @@ export function SloAlertsWrapper({
             deps={deps}
             timeRange={timeRange}
             onLoaded={() => setIsSummaryLoaded(true)}
-            showAllGroupByInstances={showAllGroupByInstances}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
@@ -147,7 +146,6 @@ export function SloAlertsWrapper({
             timeRange={timeRange}
             onLoaded={() => setIsTableLoaded(true)}
             lastReloadRequestTime={lastRefreshTime}
-            showAllGroupByInstances={showAllGroupByInstances}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
