@@ -17,6 +17,10 @@ jest.mock('../../../../common/hooks/esql/use_esql_availability', () => ({
 }));
 const useEsqlAvailabilityMock = useEsqlAvailability as jest.Mock;
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
 describe('SelectRuleType', () => {
   it('renders correctly', () => {
     const Component = () => {
