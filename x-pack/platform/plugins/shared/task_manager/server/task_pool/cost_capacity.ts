@@ -70,7 +70,7 @@ export class CostCapacity implements ICapacity {
     const allAvailableCapacity = this.capacity - this.usedCapacity(tasksInPool);
     if (taskDefinition && !isNullish(taskDefinition.maxConcurrency)) {
       // calculate the max capacity that can be used for this task type based on cost
-      const maxCapacityForType = taskDefinition.maxConcurrency * taskDefinition.cost; // check
+      const maxCapacityForType = taskDefinition.maxConcurrency * taskDefinition.cost;
       return Math.max(
         Math.min(
           allAvailableCapacity,
