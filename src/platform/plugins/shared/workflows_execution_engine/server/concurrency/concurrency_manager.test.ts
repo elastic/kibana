@@ -10,7 +10,6 @@
 import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ConcurrencyManager } from './concurrency_manager';
-import type { ConcurrencySemaphoreRepository } from '../repositories/concurrency_semaphore_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
@@ -19,7 +18,6 @@ describe('ConcurrencyManager', () => {
   let mockContext: WorkflowContext;
   let mockWorkflowTaskManager: jest.Mocked<WorkflowTaskManager>;
   let mockWorkflowExecutionRepository: jest.Mocked<WorkflowExecutionRepository>;
-  let mockConcurrencySemaphoreRepository: jest.Mocked<ConcurrencySemaphoreRepository>;
 
   beforeEach(() => {
     mockWorkflowTaskManager = {
@@ -34,16 +32,9 @@ describe('ConcurrencyManager', () => {
       updateWorkflowExecution: jest.fn(),
     } as unknown as jest.Mocked<WorkflowExecutionRepository>;
 
-    mockConcurrencySemaphoreRepository = {
-      tryAcquireSlot: jest.fn().mockResolvedValue(true),
-      releaseSlot: jest.fn().mockResolvedValue(undefined),
-      reconcileSlots: jest.fn().mockResolvedValue(undefined),
-    } as unknown as jest.Mocked<ConcurrencySemaphoreRepository>;
-
     concurrencyManager = new ConcurrencyManager(
       mockWorkflowTaskManager,
-      mockWorkflowExecutionRepository,
-      mockConcurrencySemaphoreRepository
+      mockWorkflowExecutionRepository
     );
 
     mockContext = {
@@ -613,40 +604,36 @@ describe('ConcurrencyManager', () => {
     });
 
     describe('queue strategy', () => {
-      it('should allow execution when semaphore slot is acquired', async () => {
+      it('should always queue the execution (never acquire slot directly)', async () => {
         const settings: ConcurrencySettings = {
           key: 'server-1',
           strategy: 'queue',
           max: 2,
           maxQueueSize: 5,
         };
-        mockConcurrencySemaphoreRepository.tryAcquireSlot.mockResolvedValue(true);
+        mockWorkflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([]);
 
         const result = await concurrencyManager.checkConcurrency(
           settings,
           'server-1',
-          'exec-2',
+          'exec-1',
           'default'
         );
 
-        expect(result).toBe(true);
-        expect(mockConcurrencySemaphoreRepository.tryAcquireSlot).toHaveBeenCalledWith(
-          'server-1',
-          'default',
-          'exec-2',
-          2
+        expect(result).toBe(false);
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+          { id: 'exec-1', status: ExecutionStatus.QUEUED },
+          { refresh: 'wait_for' }
         );
-        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
       });
 
-      it('should mark execution as QUEUED when no semaphore slot available with room in queue', async () => {
+      it('should queue the execution when there are already queued items', async () => {
         const settings: ConcurrencySettings = {
           key: 'server-1',
           strategy: 'queue',
           max: 2,
           maxQueueSize: 5,
         };
-        mockConcurrencySemaphoreRepository.tryAcquireSlot.mockResolvedValue(false);
         mockWorkflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
           { id: 'exec-3', workflowId: 'wf-1' },
         ]);
@@ -659,10 +646,10 @@ describe('ConcurrencyManager', () => {
         );
 
         expect(result).toBe(false);
-        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
-          id: 'exec-4',
-          status: ExecutionStatus.QUEUED,
-        });
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+          { id: 'exec-4', status: ExecutionStatus.QUEUED },
+          { refresh: 'wait_for' }
+        );
       });
 
       it('should mark execution as SKIPPED when queue is full', async () => {
@@ -672,7 +659,6 @@ describe('ConcurrencyManager', () => {
           max: 1,
           maxQueueSize: 2,
         };
-        mockConcurrencySemaphoreRepository.tryAcquireSlot.mockResolvedValue(false);
         mockWorkflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
           { id: 'exec-2', workflowId: 'wf-1' },
           { id: 'exec-3', workflowId: 'wf-1' },
@@ -696,49 +682,19 @@ describe('ConcurrencyManager', () => {
         });
       });
 
-      it('should not call forceRunIdleTasks or search-based methods for queue strategy', async () => {
+      it('should not call forceRunIdleTasks, semaphore, or search-based methods for queue strategy', async () => {
         const settings: ConcurrencySettings = {
           key: 'server-1',
           strategy: 'queue',
           max: 1,
           maxQueueSize: 5,
         };
-        mockConcurrencySemaphoreRepository.tryAcquireSlot.mockResolvedValue(false);
         mockWorkflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([]);
 
         await concurrencyManager.checkConcurrency(settings, 'server-1', 'exec-2', 'default');
 
         expect(mockWorkflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
         expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
-        expect(
-          mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup
-        ).not.toHaveBeenCalled();
-      });
-
-      it('should use semaphore instead of search-based check for queue strategy', async () => {
-        const settings: ConcurrencySettings = {
-          key: 'server-1',
-          strategy: 'queue',
-          max: 7,
-          maxQueueSize: 100,
-        };
-        mockConcurrencySemaphoreRepository.tryAcquireSlot.mockResolvedValue(true);
-
-        const result = await concurrencyManager.checkConcurrency(
-          settings,
-          'server-1',
-          'exec-1',
-          'default'
-        );
-
-        expect(result).toBe(true);
-        expect(mockConcurrencySemaphoreRepository.tryAcquireSlot).toHaveBeenCalledWith(
-          'server-1',
-          'default',
-          'exec-1',
-          7
-        );
-        // Search-based check should NOT be used for queue strategy
         expect(
           mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup
         ).not.toHaveBeenCalled();

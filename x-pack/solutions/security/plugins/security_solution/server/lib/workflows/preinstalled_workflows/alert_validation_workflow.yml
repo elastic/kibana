@@ -47,6 +47,9 @@ settings:
     max: 7
     maxQueueSize: 10000
     key: "alert.validation"
+  on-failure:
+    retry:
+      max-attempts: 1
 
 # ---------------------------------------------------------------------------
 # Configuration constants
@@ -911,11 +914,11 @@ steps:
           - name: onechat_runAgent_step
             type: ai.agent
             agent-id: "elastic-ai-agent"
-            connector-id: Anthropic-Claude-Sonnet-4-5
+            connector-id: gpt41Azure
             create-conversation: true
             on-failure:
               retry:
-                max-attempts: 10
+                max-attempts: 3
                 delay: "30s"
             with:
               message: "{{ steps.build_agent_message.output.message }}"
@@ -1080,6 +1083,10 @@ steps:
               # Add the new tags for this execution.
               - name: add_result_tags
                 type: kibana.SetAlertTags
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
                 with:
                   ids:
                     - '{{ foreach.item._id }}'
@@ -1104,6 +1111,10 @@ steps:
                   # Tag the alert so it can be identified as auto-closed.
                   - name: set_close_tags
                     type: kibana.SetAlertTags
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
                     with:
                       ids:
                         - '{{ foreach.item._id }}'
@@ -1115,6 +1126,10 @@ steps:
                   # Close the alert with reason "false_positive".
                   - name: close_alert_as_false_positive
                     type: kibana.SetAlertsStatus
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
                     with:
                       status: 'closed'
                       signal_ids:

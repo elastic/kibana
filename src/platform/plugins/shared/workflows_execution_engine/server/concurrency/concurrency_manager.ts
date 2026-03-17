@@ -9,7 +9,6 @@
 
 import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { ConcurrencySemaphoreRepository } from '../repositories/concurrency_semaphore_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
@@ -22,25 +21,22 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
  * - Enforcing concurrency limits per group
  * - Implementing collision strategies (drop, cancel-in-progress, queue)
  *
- * The 'queue' strategy uses an atomic ES-backed semaphore to avoid the TOCTOU
- * race inherent in search-based concurrency checks (where ES NRT refresh lag
- * can allow more executions through than the configured max).
+ * The 'queue' strategy always enqueues new executions and relies on the
+ * plugin's promoteFromQueue() to atomically acquire semaphore slots and
+ * schedule Task Manager tasks in FIFO order.
  */
 export class ConcurrencyManager {
   private readonly templatingEngine: WorkflowTemplatingEngine;
   private readonly workflowTaskManager: WorkflowTaskManager;
   private readonly workflowExecutionRepository: WorkflowExecutionRepository;
-  private readonly concurrencySemaphoreRepository: ConcurrencySemaphoreRepository;
 
   constructor(
     workflowTaskManager: WorkflowTaskManager,
-    workflowExecutionRepository: WorkflowExecutionRepository,
-    concurrencySemaphoreRepository: ConcurrencySemaphoreRepository
+    workflowExecutionRepository: WorkflowExecutionRepository
   ) {
     this.templatingEngine = new WorkflowTemplatingEngine();
     this.workflowTaskManager = workflowTaskManager;
     this.workflowExecutionRepository = workflowExecutionRepository;
-    this.concurrencySemaphoreRepository = concurrencySemaphoreRepository;
   }
 
   /**
@@ -82,8 +78,9 @@ export class ConcurrencyManager {
    * Checks concurrency limits and applies the collision strategy if needed.
    *
    * For 'queue' strategy:
-   * - Uses an atomic semaphore to acquire a slot (no TOCTOU race)
-   * - If no slot is available, queues the execution or skips if the queue is full
+   * - Always enqueues the new execution (FIFO fairness — older queued items run first)
+   * - Skips if the queue is already at maxQueueSize
+   * - Slot acquisition and promotion happen separately via promoteFromQueue()
    *
    * For 'drop' strategy:
    * - Queries for non-terminal executions with the same concurrency group key
@@ -111,20 +108,12 @@ export class ConcurrencyManager {
 
     const maxConcurrency = concurrencySettings.max ?? 1;
 
-    // --- Queue strategy: atomic semaphore-based slot acquisition ---
+    // --- Queue strategy: always enqueue, promote separately ---
+    // New executions always join the back of the queue to guarantee FIFO
+    // ordering. Slot acquisition happens in promoteFromQueue(), which the
+    // caller invokes after this method returns false. This prevents a new
+    // trigger from jumping ahead of older queued executions.
     if (concurrencySettings.strategy === 'queue') {
-      const acquired = await this.concurrencySemaphoreRepository.tryAcquireSlot(
-        concurrencyGroupKey,
-        spaceId,
-        currentExecutionId,
-        maxConcurrency
-      );
-
-      if (acquired) {
-        return true;
-      }
-
-      // No slot available — check queue capacity before queuing
       const maxQueueSize = concurrencySettings.maxQueueSize;
       const queued = await this.workflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup(
         concurrencyGroupKey,
@@ -143,10 +132,14 @@ export class ConcurrencyManager {
         return false;
       }
 
-      await this.workflowExecutionRepository.updateWorkflowExecution({
-        id: currentExecutionId,
-        status: ExecutionStatus.QUEUED,
-      });
+      // Use refresh: 'wait_for' so the QUEUED document is immediately visible
+      // to the promoteFromQueue() search that the caller runs right after this
+      // returns false. Without it, NRT lag (~1s) can hide the just-written doc
+      // and leave the execution stuck in QUEUED when slots are actually free.
+      await this.workflowExecutionRepository.updateWorkflowExecution(
+        { id: currentExecutionId, status: ExecutionStatus.QUEUED },
+        { refresh: 'wait_for' }
+      );
       return false;
     }
 

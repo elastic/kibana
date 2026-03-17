@@ -466,7 +466,11 @@ export class WorkflowsExecutionEnginePlugin
               // Check concurrency limits and apply collision strategy if needed
               const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
               if (!canProceed) {
-                // Execution was dropped due to concurrency limit, skip running
+                await this.tryPromoteQueuedExecutions(workflowExecution, fakeRequest).catch((err) =>
+                  this.logger.error(
+                    `Promotion failed after queueing execution ${workflowExecution.id}: ${err}`
+                  )
+                );
                 return;
               }
 
@@ -533,8 +537,7 @@ export class WorkflowsExecutionEnginePlugin
     this.concurrencySemaphoreRepository = concurrencySemaphoreRepository;
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
-      workflowExecutionRepository,
-      concurrencySemaphoreRepository
+      workflowExecutionRepository
     );
 
     const dependencies: ContextDependencies = {
@@ -644,7 +647,13 @@ export class WorkflowsExecutionEnginePlugin
       // Check concurrency limits and apply collision strategy if needed
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
-        // Execution was dropped due to concurrency limit, return execution ID
+        // For queue strategy, trigger promotion so the oldest queued execution
+        // fills any available slot (the current execution was just enqueued at the back).
+        await this.tryPromoteQueuedExecutions(workflowExecution, request).catch((err) =>
+          this.logger.error(
+            `Promotion failed after queueing execution ${workflowExecution.id}: ${err}`
+          )
+        );
         return {
           workflowExecutionId: workflowExecution.id as string,
         };
@@ -711,7 +720,11 @@ export class WorkflowsExecutionEnginePlugin
       // Check concurrency limits and apply collision strategy if needed
       const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
       if (!canProceed) {
-        // Execution was dropped due to concurrency limit, skip scheduling
+        await this.tryPromoteQueuedExecutions(workflowExecution, request).catch((err) =>
+          this.logger.error(
+            `Promotion failed after queueing execution ${workflowExecution.id}: ${err}`
+          )
+        );
         return {
           workflowExecutionId: workflowExecution.id as string,
         };
@@ -1013,11 +1026,12 @@ export class WorkflowsExecutionEnginePlugin
    * Checks concurrency limits and applies collision strategy if needed.
    * This helper method consolidates the duplicated concurrency check logic.
    *
+   * For 'queue' strategy: always returns false (execution is queued for FIFO promotion).
    * For 'drop' strategy: if limit is exceeded, ConcurrencyManager marks execution as SKIPPED.
    * For 'cancel-in-progress' strategy: ConcurrencyManager cancels old executions to make room.
    *
    * @param workflowExecution - The workflow execution (might be partial)
-   * @returns Promise<boolean> - true if execution can proceed, false if it should be dropped
+   * @returns Promise<boolean> - true if execution can proceed, false if it should be dropped/queued
    */
   private async checkConcurrencyIfNeeded(
     workflowExecution: Partial<EsWorkflowExecution>
@@ -1086,16 +1100,135 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   /**
-   * Releases the semaphore slot held by a completed/failed execution and promotes
-   * queued executions to fill freed slots. Replaces the old search-based
-   * promoteNextQueuedIfNeeded with semaphore-based slot management.
+   * Triggers promotion of the oldest QUEUED executions for a queue-strategy
+   * workflow. Extracts the concurrency group key and max from the execution's
+   * workflow definition, then delegates to promoteFromQueue().
+   *
+   * Called by entry points (executeWorkflow, scheduleWorkflow, workflow:scheduled)
+   * after checkConcurrencyIfNeeded returns false for a queue-strategy execution,
+   * so that any available slots are filled with the oldest queued items (FIFO).
+   */
+  private async tryPromoteQueuedExecutions(
+    workflowExecution: Partial<EsWorkflowExecution>,
+    fakeRequest: KibanaRequest
+  ): Promise<void> {
+    const concurrency = workflowExecution.workflowDefinition?.settings?.concurrency;
+    if (
+      concurrency?.strategy !== 'queue' ||
+      !workflowExecution.concurrencyGroupKey ||
+      !workflowExecution.spaceId
+    ) {
+      return;
+    }
+
+    await this.promoteFromQueue(
+      workflowExecution.concurrencyGroupKey,
+      workflowExecution.spaceId,
+      concurrency.max ?? 1,
+      fakeRequest
+    );
+  }
+
+  /**
+   * Promotes the oldest QUEUED executions into free semaphore slots and
+   * schedules Task Manager tasks for them (FIFO order).
    *
    * Flow:
-   * 1. Release the completed execution's semaphore slot (atomic, no search needed)
-   * 2. Fetch QUEUED executions ordered FIFO
-   * 3. For each, atomically acquire a semaphore slot
-   * 4. If acquired, promote QUEUED → PENDING and schedule a TM task
-   * 5. If scheduling fails, release the slot and revert to QUEUED
+   * 1. Fetch QUEUED executions ordered by createdAt ascending
+   * 2. For each, atomically acquire a semaphore slot
+   * 3. If acquired, promote QUEUED → PENDING and schedule a TM task
+   * 4. If scheduling fails, release the slot and revert to QUEUED
+   *
+   * Called from two places:
+   * - releaseSlotAndPromote (after an execution completes — slot just freed)
+   * - callers of checkConcurrencyIfNeeded (after a new execution is queued —
+   *   fills any slots that may have opened since the last promotion)
+   */
+  private async promoteFromQueue(
+    concurrencyGroupKey: string,
+    spaceId: string,
+    max: number,
+    fakeRequest: KibanaRequest
+  ): Promise<void> {
+    if (
+      !this.workflowExecutionRepository ||
+      !this.workflowTaskManager ||
+      !this.concurrencySemaphoreRepository
+    ) {
+      return;
+    }
+
+    // Fetch candidates from the queue (grab a few more than max to allow for
+    // concurrent promoters on other nodes — extras will simply fail to acquire a slot)
+    const queued = await this.workflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup(
+      concurrencyGroupKey,
+      spaceId,
+      max
+    );
+
+    for (const exec of queued) {
+      const acquired = await this.concurrencySemaphoreRepository.tryAcquireSlot(
+        concurrencyGroupKey,
+        spaceId,
+        exec.id,
+        max
+      );
+
+      if (!acquired) {
+        break; // All slots occupied — remaining queued items can't proceed
+      }
+
+      const result = await this.workflowExecutionRepository.promoteQueuedExecution(exec.id);
+      if (result === 'updated') {
+        try {
+          await this.workflowTaskManager.scheduleExecutionTask({
+            executionId: exec.id,
+            workflowId: exec.workflowId,
+            spaceId,
+            fakeRequest,
+          });
+        } catch (err) {
+          this.logger.error(
+            `Failed to schedule promoted execution ${exec.id}, reverting to QUEUED: ${err}`
+          );
+          await this.concurrencySemaphoreRepository
+            .releaseSlot(concurrencyGroupKey, spaceId, exec.id)
+            .catch((releaseErr) =>
+              this.logger.error(
+                `Failed to release semaphore slot for reverted execution ${exec.id}: ${releaseErr}`
+              )
+            );
+          await this.workflowExecutionRepository
+            .updateWorkflowExecution(
+              { id: exec.id, status: ExecutionStatus.QUEUED },
+              { refresh: 'wait_for' }
+            )
+            .catch((revertErr) =>
+              this.logger.error(`Failed to revert execution ${exec.id} to QUEUED: ${revertErr}`)
+            );
+        }
+      } else {
+        // Execution was no longer QUEUED — either promoted by another concurrent
+        // promoter (PENDING/RUNNING) or cancelled/completed.
+        // Only release the semaphore slot if the execution is terminal. If it's
+        // still active, the slot is legitimately held by the other promoter and
+        // releasing it would create a phantom free slot, allowing over-promotion.
+        const current = await this.workflowExecutionRepository.getWorkflowExecutionById(
+          exec.id,
+          spaceId
+        );
+        if (!current || TerminalExecutionStatuses.includes(current.status)) {
+          await this.concurrencySemaphoreRepository
+            .releaseSlot(concurrencyGroupKey, spaceId, exec.id)
+            .catch(() => {});
+        }
+      }
+    }
+  }
+
+  /**
+   * Releases the semaphore slot held by a completed/failed execution and then
+   * promotes queued executions to fill freed slots.
    *
    * Early-returns for non-queue workflows so there's zero overhead for
    * drop/cancel-in-progress strategies.
@@ -1126,79 +1259,11 @@ export class WorkflowsExecutionEnginePlugin
     const groupKey = execution.concurrencyGroupKey;
     const max = concurrency.max ?? 1;
 
-    // Step 1: Release the completing execution's semaphore slot
     if (TerminalExecutionStatuses.includes(execution.status)) {
       await this.concurrencySemaphoreRepository.releaseSlot(groupKey, spaceId, workflowRunId);
     }
 
-    // Step 2: Fetch candidates from the queue (grab a few more than max to allow for
-    // concurrent promoters on other nodes — extras will simply fail to acquire a slot)
-    const queued = await this.workflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup(
-      groupKey,
-      spaceId,
-      max
-    );
-
-    // Step 3–5: For each queued execution, try to acquire a slot and promote
-    for (const exec of queued) {
-      const acquired = await this.concurrencySemaphoreRepository.tryAcquireSlot(
-        groupKey,
-        spaceId,
-        exec.id,
-        max
-      );
-
-      if (!acquired) {
-        break; // All slots occupied — remaining queued items can't proceed
-      }
-
-      const result = await this.workflowExecutionRepository.promoteQueuedExecution(exec.id);
-      if (result === 'updated') {
-        try {
-          await this.workflowTaskManager.scheduleExecutionTask({
-            executionId: exec.id,
-            workflowId: exec.workflowId,
-            spaceId,
-            fakeRequest,
-          });
-        } catch (err) {
-          this.logger.error(
-            `Failed to schedule promoted execution ${exec.id}, reverting to QUEUED: ${err}`
-          );
-          // Release the slot we just acquired and revert status
-          await this.concurrencySemaphoreRepository
-            .releaseSlot(groupKey, spaceId, exec.id)
-            .catch((releaseErr) =>
-              this.logger.error(
-                `Failed to release semaphore slot for reverted execution ${exec.id}: ${releaseErr}`
-              )
-            );
-          await this.workflowExecutionRepository
-            .updateWorkflowExecution(
-              { id: exec.id, status: ExecutionStatus.QUEUED },
-              { refresh: 'wait_for' }
-            )
-            .catch((revertErr) =>
-              this.logger.error(`Failed to revert execution ${exec.id} to QUEUED: ${revertErr}`)
-            );
-        }
-      } else {
-        // Execution was no longer QUEUED — either promoted by another concurrent
-        // promoter (PENDING/RUNNING) or cancelled/completed.
-        // Only release the semaphore slot if the execution is terminal. If it's
-        // still active, the slot is legitimately held by the other promoter and
-        // releasing it would create a phantom free slot, allowing over-promotion.
-        const current = await this.workflowExecutionRepository.getWorkflowExecutionById(
-          exec.id,
-          spaceId
-        );
-        if (!current || TerminalExecutionStatuses.includes(current.status)) {
-          await this.concurrencySemaphoreRepository
-            .releaseSlot(groupKey, spaceId, exec.id)
-            .catch(() => {});
-        }
-      }
-    }
+    await this.promoteFromQueue(groupKey, spaceId, max, fakeRequest);
   }
 
   /**
