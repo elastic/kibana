@@ -8,6 +8,7 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { manageDashboardTool } from '../tools';
 import { dashboardTools } from '../../common';
+import { gridLayoutPrompt } from './grid_layout_prompt';
 
 export const dashboardManagementSkill = defineSkillType({
   id: 'dashboard-management',
@@ -20,7 +21,7 @@ export const dashboardManagementSkill = defineSkillType({
 Use this skill when:
 - A user asks to create a dashboard composed of one or more visualizations.
 - A user asks to update an in-memory dashboard from a previous tool result.
-- A request includes ordered panel-management actions (add, remove, markdown, metadata).
+- A request includes ordered panel-management actions (add/remove panels, markdown, metadata, section edits).
 - You need to add existing visualization attachments to a dashboard.
 
 Do **not** use this skill when:
@@ -56,8 +57,10 @@ Use this contract:
   "operations": [
     { "operation": "set_metadata", "title": "optional", "description": "optional" },
     { "operation": "upsert_markdown", "markdownContent": "..." },
-    { "operation": "add_panels_from_attachments", "attachmentIds": ["single-attachment-id"] },
-    { "operation": "remove_panels", "panelIds": [] }
+    { "operation": "add_panels_from_attachments", "items": [{ "attachmentId": "id", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 }, "sectionId": "optional-section-id" }] },
+    { "operation": "add_section", "title": "Section title", "grid": { "y": 16 }, "panels": [{ "attachmentId": "id", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 } }] },
+    { "operation": "remove_section", "sectionId": "existing-section-id", "panelAction": "promote" },
+    { "operation": "remove_panels", "panelIds": ["panel-id"] }
   ]
 }
 \`\`\`
@@ -67,7 +70,8 @@ Use this contract:
 When creating a dashboard, prefer this sequence:
 1. \`set_metadata\` to set title/description
 2. \`upsert_markdown\` to add a summary panel
-3. Add visualizations with **separate** \`add_panels_from_attachments\` operations in the exact display order (one attachment ID per operation)
+3. Add visualizations with \`add_panels_from_attachments\` using \`items[]\` — each item specifies \`attachmentId\` and a required \`grid: { x, y, w, h }\`
+4. For sectioned dashboards, use \`add_section\` (with \`grid.y\`) and add section panels with section-relative coordinates
 
 If you omit metadata on a new dashboard, creation can fail.
 
@@ -76,7 +80,9 @@ If you omit metadata on a new dashboard, creation can fail.
 1. Extract the dashboard attachment ID from the previous tool result: look for \`data.dashboardAttachment.id\`.
 2. Call ${dashboardTools.manageDashboard} with \`dashboardAttachmentId\` and an ordered \`operations[]\` list.
 3. Use:
-   - ordered \`add_panels_from_attachments\` operations to add new or previously created visualization attachments (one per operation when order matters)
+   - \`add_panels_from_attachments\` with \`items[]\` to add visualization attachments with their dashboard grid layout, optionally targeting an existing section via \`sectionId\`
+   - \`add_section\` to create a new section (server generates \`sectionId\`)
+   - \`remove_section\` with required \`panelAction: "promote" | "delete"\`
    - \`remove_panels\` to remove by \`panelId\`
    - \`set_metadata\` / \`upsert_markdown\` for dashboard metadata and summary updates
 
@@ -87,6 +93,7 @@ If you omit metadata on a new dashboard, creation can fail.
 After a successful call, the tool returns:
 - \`data.dashboardAttachment.id\`: the attachment ID needed for future updates.
 - \`data.dashboardAttachment.content.panels\`: array of \`{ type, panelId, title }\` for each panel on the dashboard.
+- \`data.dashboardAttachment.content.sections\`: ordered section list with \`sectionId\`, \`title\`, \`collapsed\`, \`grid.y\`, and section panels.
 - \`data.failures\`: array of \`{ type, identifier, error }\` for attachment resolution failures. Only present when there are failures.
 - \`data.version\`: the version number of the dashboard attachment, incrementing with each update.
 
@@ -110,9 +117,21 @@ A well-composed dashboard tells a coherent story about the data:
 
 When the user's request is vague (e.g., "create a dashboard for my logs"), explore the discovered index mapping thoroughly and compose a rich dashboard that covers the breadth of the available data — overview metrics, time-series trends, breakdowns, and distributions. Let the fields drive the panel count rather than defaulting to a minimal set.
 
+## Section Guidelines
+
+- Use sections when the dashboard spans multiple topics or has roughly 6+ visualization panels.
+- Keep simple dashboards flat when a single story is clearer than grouping.
+- Section IDs are server-generated. Never invent IDs; always reuse \`sectionId\` from the latest tool result.
+- New sections should default to \`collapsed: false\`.
+- Panel coordinates inside a section are section-relative (\`y: 0\` is the top of that section).
+- Reorganizing existing panels between top-level and sections is not supported yet; use add/remove operations instead.
+
 ## Edge Cases
 
 - **Missing \`attachment_id\` from visualization creation:** Treat that panel as failed for dashboard composition and do not include it in \`attachmentIds\`.
+
+${gridLayoutPrompt}
+
 - **Missing dashboard attachment ID on updates:** If the user asks to update a dashboard but the prior \`dashboardAttachment.id\` is not available in conversation context, ask the user to clarify which dashboard they mean or offer to create a new one.
 - **User asks to update a panel in place:** Prefer ordered remove + add operations in the same call.
 
@@ -140,15 +159,47 @@ See \`./examples/manage-dashboard-payloads\` for complete payload examples cover
     },
     {
       "operation": "add_panels_from_attachments",
-      "attachmentIds": ["viz-1"]
+      "items": [
+        { "attachmentId": "viz-1", "grid": { "x": 0, "y": 0, "w": 24, "h": 5 } },
+        { "attachmentId": "viz-2", "grid": { "x": 24, "y": 0, "w": 24, "h": 5 } },
+        { "attachmentId": "viz-3", "grid": { "x": 0, "y": 5, "w": 48, "h": 8 } }
+      ]
+    }
+  ]
+}
+\`\`\`
+
+## Create a new sectioned dashboard
+
+\`\`\`json
+{
+  "operations": [
+    {
+      "operation": "set_metadata",
+      "title": "Web Server Performance",
+      "description": "Overview by metrics, trends, and breakdowns"
     },
     {
-      "operation": "add_panels_from_attachments",
-      "attachmentIds": ["viz-2"]
+      "operation": "upsert_markdown",
+      "markdownContent": "### Web Server Performance\n\nTraffic health and anomaly overview."
     },
     {
-      "operation": "add_panels_from_attachments",
-      "attachmentIds": ["viz-3"]
+      "operation": "add_section",
+      "title": "Key Metrics",
+      "grid": { "y": 4 },
+      "panels": [
+        { "attachmentId": "viz-1", "grid": { "x": 0, "y": 0, "w": 12, "h": 5 } },
+        { "attachmentId": "viz-2", "grid": { "x": 12, "y": 0, "w": 12, "h": 5 } }
+      ]
+    },
+    {
+      "operation": "add_section",
+      "title": "Traffic Trends",
+      "grid": { "y": 16 },
+      "panels": [
+        { "attachmentId": "viz-3", "grid": { "x": 0, "y": 0, "w": 24, "h": 10 } },
+        { "attachmentId": "viz-4", "grid": { "x": 24, "y": 0, "w": 24, "h": 10 } }
+      ]
     }
   ]
 }
@@ -163,7 +214,7 @@ See \`./examples/manage-dashboard-payloads\` for complete payload examples cover
     { "operation": "remove_panels", "panelIds": ["panel-xyz"] },
     {
       "operation": "add_panels_from_attachments",
-      "attachmentIds": ["viz-attachment-789"]
+      "items": [{ "attachmentId": "viz-attachment-789", "grid": { "x": 0, "y": 0, "w": 24, "h": 8 } }]
     },
     {
       "operation": "upsert_markdown",
@@ -183,7 +234,27 @@ Use this when the user wants to add a visualization that was already created ear
   "operations": [
     {
       "operation": "add_panels_from_attachments",
-      "attachmentIds": ["viz-attachment-456"]
+      "items": [{ "attachmentId": "viz-attachment-456", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 } }]
+    }
+  ]
+}
+\`\`\`
+
+## Update a dashboard — add panels to an existing section
+
+\`\`\`json
+{
+  "dashboardAttachmentId": "abc-123",
+  "operations": [
+    {
+      "operation": "add_panels_from_attachments",
+      "items": [
+        {
+          "attachmentId": "viz-attachment-999",
+          "sectionId": "sec-uuid-1",
+          "grid": { "x": 0, "y": 10, "w": 24, "h": 10 }
+        }
+      ]
     }
   ]
 }
@@ -226,10 +297,9 @@ Use this when the user wants to add a visualization that was already created ear
         "title": "Web Server Performance",
         "description": "Overview of web server request traffic and host resource usage",
         "panels": [
-          { "type": "generic", "panelId": "md-001", "title": "Summary" },
-          { "type": "lens", "panelId": "viz-001", "title": "Total Requests" },
-          { "type": "lens", "panelId": "viz-002", "title": "Average CPU Usage" },
-          { "type": "lens", "panelId": "viz-003", "title": "Requests Over Time" }
+          { "type": "lens", "panelId": "viz-001", "title": "Total Requests", "grid": { "x": 0, "y": 0, "w": 12, "h": 5 } },
+          { "type": "lens", "panelId": "viz-002", "title": "Average CPU Usage", "grid": { "x": 12, "y": 0, "w": 12, "h": 5 } },
+          { "type": "lens", "panelId": "viz-003", "title": "Requests Over Time", "grid": { "x": 0, "y": 5, "w": 24, "h": 10 } }
         ]
       }
     }
@@ -240,6 +310,8 @@ Use this when the user wants to add a visualization that was already created ear
 Key fields to remember:
 - \`data.dashboardAttachment.id\` — save this value. Pass it as \`dashboardAttachmentId\` in follow-up update calls.
 - \`data.dashboardAttachment.content.panels[].panelId\` — use these when the user asks to remove a specific panel via \`remove_panels.panelIds\`.
+- \`data.dashboardAttachment.content.panels[].grid\` — current position and size of each panel. Use this to find gaps when adding new panels to an existing dashboard.
+- \`data.dashboardAttachment.content.sections[]\` — section metadata and section-level panel lists. Use each section's \`sectionId\` for section-targeted updates.
 - \`data.version\` — increments with each update to the dashboard.
 - Panels with \`type: "generic"\` are non-visualization panels (e.g., markdown summary). Panels with \`type: "lens"\` are visualizations.
 

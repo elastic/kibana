@@ -111,7 +111,7 @@ function buildFormBasedPartitionLayer(layer: unknown) {
   const datasource = generateLayer(DEFAULT_LAYER_ID, layer);
   const newLayer = datasource[DEFAULT_LAYER_ID];
 
-  const metricColumns = layer.metrics?.flatMap(fromMetricAPItoLensState) ?? [];
+  const metricColumns = layer.metrics?.flatMap((col) => fromMetricAPItoLensState(col)) ?? [];
   const metricColumnsWithIds = metricColumns.map((col, index) => ({
     column: col,
     id: getAccessorName('metric', index),
@@ -391,7 +391,7 @@ export function fromAPItoLensState(config: PartitionState): PartitionLensWithout
       datasourceStates: layers,
       ...(internalReferences.length ? { internalReferences } : {}),
       visualization: visualizationState,
-      ...(Object.keys(adHocDataViews).length ? { adHocDataViews } : {}),
+      adHocDataViews,
     },
     references,
   };

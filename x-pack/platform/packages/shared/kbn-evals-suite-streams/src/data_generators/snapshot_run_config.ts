@@ -11,8 +11,8 @@ export interface GcsConfig {
 }
 
 /**
- * Identifies which snapshot run to replay. Each run is stored in its own
- * GCS subfolder: `<basePathPrefix>/<run-id>/`.
+ * Identifies which snapshot run to replay. Each run is stored at the top
+ * level of the bucket: `<run-id>/<dataset>/`.
  *
  * Override at runtime with:
  *   SIGEVENTS_SNAPSHOT_RUN=2026-02-23 node scripts/scout ...
@@ -20,4 +20,4 @@ export interface GcsConfig {
 export const SIGEVENTS_SNAPSHOT_RUN = process.env.SIGEVENTS_SNAPSHOT_RUN || '2026-02-25';
 
 export const resolveBasePath = (gcs: GcsConfig) =>
-  `${gcs.basePathPrefix}/${SIGEVENTS_SNAPSHOT_RUN}`;
+  `${SIGEVENTS_SNAPSHOT_RUN}/${gcs.basePathPrefix}`;

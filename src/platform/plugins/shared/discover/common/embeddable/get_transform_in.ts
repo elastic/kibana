@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { extractReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
@@ -71,15 +70,16 @@ export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['trans
       }
     });
 
+    const { references = [], ...otherAttrs } = storedState.attributes;
     return {
       state: {
         ...storedState,
         attributes: {
-          ...omit(storedState.attributes, 'references'),
+          ...otherAttrs,
           tabs,
         },
       },
-      references: [...tabReferences, ...drilldownReferences],
+      references: [...references, ...tabReferences, ...drilldownReferences],
     };
   }
   return transformIn;
