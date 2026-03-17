@@ -376,23 +376,23 @@ export function getDataStateContainer({
           let shouldApplyDefaultProfileState = true;
 
           if (didProfileChange) {
-            const nextProfileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
-            const nextProfileSnapshot =
-              getCurrentTab().defaultProfileState.snapshotsByProfileId[nextProfileId];
-            const nextProfileStateUpdate = getProfileStateSnapshot(
-              nextProfileSnapshot ?? {},
+            const profileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
+            const profileStateSnapshot =
+              getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId];
+            const profileStateUpdate = getProfileStateSnapshot(
+              profileStateSnapshot ?? {},
               defaultProfileState.fieldsToReset
             );
-            const hasNextProfileStateUpdate =
-              nextProfileStateUpdate && Object.keys(nextProfileStateUpdate).length > 0;
+            const hasProfileStateUpdate =
+              profileStateUpdate && Object.keys(profileStateUpdate).length > 0;
 
-            shouldApplyDefaultProfileState = !hasNextProfileStateUpdate;
+            shouldApplyDefaultProfileState = !hasProfileStateUpdate;
 
-            if (hasNextProfileStateUpdate) {
+            if (hasProfileStateUpdate) {
               await withSkipNextFetch(() =>
                 internalState.dispatch(
                   injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
-                    appState: nextProfileStateUpdate,
+                    appState: profileStateUpdate,
                   })
                 )
               );
