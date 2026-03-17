@@ -18,12 +18,12 @@ import type { Logger } from '@kbn/logging';
 import {
   IdentifierType,
   EntityRiskLevels,
-} from '../../../common/api/entity_analytics/common/common.gen';
-import type { ExperimentalFeatures } from '../../../common';
-import { AssetCriticalityLevel } from '../../../common/api/entity_analytics/asset_criticality/common.gen';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import { securityTool } from './constants';
+} from '../../../../common/api/entity_analytics/common/common.gen';
+import type { ExperimentalFeatures } from '../../../../common';
+import { AssetCriticalityLevel } from '../../../../common/api/entity_analytics/asset_criticality/common.gen';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
+import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
+import { securityTool } from '../constants';
 
 const ENTITY_STORE_KEEP_FIELDS = [
   '@timestamp',
