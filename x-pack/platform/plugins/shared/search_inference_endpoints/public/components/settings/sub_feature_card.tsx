@@ -25,8 +25,11 @@ import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import * as translations from '../../../common/translations';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
+import { getModelId } from '../../utils/get_model_id';
 import type { InferenceFeatureConfig } from './feature_metadata';
 import { AddModelPopover } from './add_model_popover';
+
+const COLLAPSED_COUNT = 1;
 
 interface SubFeatureCardProps {
   featureId: string;
@@ -44,21 +47,23 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const { data: inferenceEndpoints = [] } = useQueryInferenceEndpoints();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const iconMap = useMemo(
+  const endpointDisplayMap = useMemo(
     () =>
       new Map(
         inferenceEndpoints.map((ep) => [
           ep.inference_id,
-          SERVICE_PROVIDERS[ep.service as ServiceProviderKeys]?.icon ?? 'compute',
+          {
+            icon: SERVICE_PROVIDERS[ep.service as ServiceProviderKeys]?.icon ?? 'compute',
+            label: getModelId(ep) ?? ep.inference_id,
+          },
         ])
       ),
     [inferenceEndpoints]
   );
 
-  const collapsedCount = 1;
-  const hasOverflow = endpointIds.length > collapsedCount;
-  const visibleEndpoints = isExpanded ? endpointIds : endpointIds.slice(0, collapsedCount);
-  const hiddenCount = endpointIds.length - collapsedCount;
+  const hasOverflow = endpointIds.length > COLLAPSED_COUNT;
+  const visibleEndpoints = isExpanded ? endpointIds : endpointIds.slice(0, COLLAPSED_COUNT);
+  const hiddenCount = endpointIds.length - COLLAPSED_COUNT;
   const canAddMore =
     !feature.maxNumberOfEndpoints || endpointIds.length < feature.maxNumberOfEndpoints;
 
@@ -78,6 +83,22 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     },
     [endpointIds, featureId, onEndpointsChange]
   );
+
+  const removeButton = (endpointId: string, index: number) =>
+    endpointIds.length > 1 ? (
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="cross"
+          aria-label={i18n.translate('xpack.searchInferenceEndpoints.settings.removeModel', {
+            defaultMessage: 'Remove model',
+          })}
+          size="s"
+          color="text"
+          onClick={() => handleRemove(index)}
+          data-test-subj={`remove-endpoint-${endpointId}`}
+        />
+      </EuiFlexItem>
+    ) : null;
 
   return (
     <EuiFlexGroup responsive={false} data-test-subj={`subFeatureCard-${featureId}`}>
@@ -112,31 +133,23 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                 <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`endpoint-row-${endpointId}`}>
                   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type={iconMap.get(endpointId) ?? 'compute'} size="m" aria-hidden />
+                      <EuiIcon
+                        type={endpointDisplayMap.get(endpointId)?.icon ?? 'compute'}
+                        size="m"
+                        aria-hidden
+                      />
                     </EuiFlexItem>
                     <EuiFlexItem grow>
-                      <EuiText size="s">{endpointId}</EuiText>
+                      <EuiText size="s">
+                        {endpointDisplayMap.get(endpointId)?.label ?? endpointId}
+                      </EuiText>
                     </EuiFlexItem>
                     {index === 0 && (
                       <EuiFlexItem grow={false}>
                         <EuiBadge color="hollow">{translations.SETTINGS_DEFAULT_BADGE}</EuiBadge>
                       </EuiFlexItem>
                     )}
-                    {endpointIds.length > 1 && (
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          iconType="cross"
-                          aria-label={i18n.translate(
-                            'xpack.searchInferenceEndpoints.settings.removeModel',
-                            { defaultMessage: 'Remove model' }
-                          )}
-                          size="s"
-                          color="text"
-                          onClick={() => handleRemove(index)}
-                          data-test-subj={`remove-endpoint-${endpointId}`}
-                        />
-                      </EuiFlexItem>
-                    )}
+                    {removeButton(endpointId, index)}
                   </EuiFlexGroup>
                 </EuiSplitPanel.Inner>
                 {index !== visibleEndpoints.length - 1 && <EuiHorizontalRule margin="none" />}
@@ -164,7 +177,11 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             )}
             {(!hasOverflow || isExpanded) && canAddMore && (
               <EuiFlexItem grow={false}>
-                <AddModelPopover existingEndpointIds={endpointIds} onAdd={handleAdd} />
+                <AddModelPopover
+                  existingEndpointIds={endpointIds}
+                  onAdd={handleAdd}
+                  taskType={feature.taskType || undefined}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
