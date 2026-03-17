@@ -40,7 +40,7 @@ const parseGroundTruthBlocks = (expectedGroundTruth: string): Record<string, str
   return blocks;
 };
 
-const makeDeterministicFeatureUuid = (scenarioId: string, id: string): string => {
+const makeDeterministicKIUuid = (scenarioId: string, id: string): string => {
   const digest = createHash('sha256')
     .update(`canonical:${normalizeIdPart(scenarioId)}:${normalizeIdPart(id)}`)
     .digest('hex');
@@ -50,7 +50,7 @@ const makeDeterministicFeatureUuid = (scenarioId: string, id: string): string =>
   )}-${digest.slice(20, 32)}`;
 };
 
-const makeFeature = ({
+const makeKI = ({
   streamName,
   scenarioId,
   id,
@@ -68,7 +68,7 @@ const makeFeature = ({
   properties: Record<string, unknown>;
 }): Feature => ({
   id,
-  uuid: makeDeterministicFeatureUuid(scenarioId, id),
+  uuid: makeDeterministicKIUuid(scenarioId, id),
   status: 'active',
   last_seen: CANONICAL_LAST_SEEN,
   stream_name: streamName,
@@ -80,14 +80,14 @@ const makeFeature = ({
 });
 
 /**
- * Builds a deterministic "canonical" feature set from the dataset's
+ * Builds a deterministic "canonical" KI set from the dataset's
  * `expected_ground_truth` string (e.g. `entities=[...], deps=[...], infra=[...]`).
  *
  * This is intended to decouple query-generation evals from snapshot-extracted
- * features so query-generation regressions can be distinguished from feature
+ * KIs so query-generation regressions can be distinguished from KI
  * identification regressions.
  */
-export const canonicalFeaturesFromExpectedGroundTruth = ({
+export const canonicalKIsFromExpectedGroundTruth = ({
   streamName,
   scenarioId,
   expectedGroundTruth,
@@ -100,13 +100,13 @@ export const canonicalFeaturesFromExpectedGroundTruth = ({
 
   const { entities = [], deps = [], infra = [] } = blocks;
 
-  const features: Feature[] = [];
+  const kis: Feature[] = [];
 
   for (const entity of entities) {
     const name = entity.trim();
     const id = `entity-${normalizeIdPart(name)}`;
-    features.push(
-      makeFeature({
+    kis.push(
+      makeKI({
         streamName,
         scenarioId,
         id,
@@ -130,8 +130,8 @@ export const canonicalFeaturesFromExpectedGroundTruth = ({
     if (!from || !to) continue;
 
     const id = `dep-${normalizeIdPart(from)}-${normalizeIdPart(to)}`;
-    features.push(
-      makeFeature({
+    kis.push(
+      makeKI({
         streamName,
         scenarioId,
         id,
@@ -146,8 +146,8 @@ export const canonicalFeaturesFromExpectedGroundTruth = ({
   for (const item of infra) {
     const name = item.trim();
     const id = `infra-${normalizeIdPart(name)}`;
-    features.push(
-      makeFeature({
+    kis.push(
+      makeKI({
         streamName,
         scenarioId,
         id,
@@ -159,5 +159,5 @@ export const canonicalFeaturesFromExpectedGroundTruth = ({
     );
   }
 
-  return features;
+  return kis;
 };

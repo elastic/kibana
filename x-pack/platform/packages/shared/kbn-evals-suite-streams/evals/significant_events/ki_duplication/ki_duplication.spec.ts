@@ -15,19 +15,19 @@ import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { evaluate } from '../../../src/evaluate';
-import { FEATURES_DUPLICATION_DATASETS } from './features_duplication_datasets';
+import { KI_DUPLICATION_DATASETS } from './ki_duplication_datasets';
 import { indexSynthtraceScenario } from '../../synthtrace_helpers';
 import {
-  featureDuplicationEvaluator,
+  kiDuplicationEvaluator,
   createSemanticUniquenessEvaluator,
   createIdConsistencyEvaluator,
-} from '../../../src/evaluators/feature_duplication_evaluators';
+} from '../../../src/evaluators/ki_duplication_evaluators';
 
-evaluate.describe('Streams features duplication (harness)', () => {
+evaluate.describe('KI duplication (harness)', () => {
   const from = kbnDatemath.parse('now-10m')!;
   const to = kbnDatemath.parse('now')!;
 
-  async function runRepeatedFeatureIdentification({
+  async function runRepeatedKIIdentification({
     esClient,
     streamName,
     runs,
@@ -72,7 +72,7 @@ evaluate.describe('Streams features duplication (harness)', () => {
     return { runs: outputs };
   }
 
-  FEATURES_DUPLICATION_DATASETS.forEach((dataset) => {
+  KI_DUPLICATION_DATASETS.forEach((dataset) => {
     evaluate.describe(dataset.name, { tag: tags.stateful.classic }, () => {
       evaluate.beforeAll(async ({ apiServices }) => {
         await apiServices.streams.enable();
@@ -124,7 +124,7 @@ evaluate.describe('Streams features duplication (harness)', () => {
               }: {
                 input: { stream_name: string; runs: number; sample_document_count: number };
               }) => {
-                const result = await runRepeatedFeatureIdentification({
+                const result = await runRepeatedKIIdentification({
                   esClient,
                   streamName: input.stream_name,
                   runs: input.runs,
@@ -136,7 +136,7 @@ evaluate.describe('Streams features duplication (harness)', () => {
               },
             },
             [
-              featureDuplicationEvaluator,
+              kiDuplicationEvaluator,
               createSemanticUniquenessEvaluator({ inferenceClient: evaluatorInferenceClient }),
               createIdConsistencyEvaluator({ inferenceClient: evaluatorInferenceClient }),
               evaluators.traceBasedEvaluators.inputTokens,
