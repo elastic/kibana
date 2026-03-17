@@ -411,7 +411,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
   ),
 
   // Customize buttons based on viewport context
-  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas }) => {
+  getActionButtons: ({ attachment, isCanvas, isSidebar, openCanvas, setPreviewBadgeState }) => {
     const buttons = [];
 
     if (isSidebar) {
@@ -439,6 +439,16 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
       });
     }
 
+    // Optional: if preview happens outside canvas, keep inline badge state in sync
+    buttons.push({
+      label: 'Preview',
+      icon: 'eye',
+      type: ActionButtonType.SECONDARY,
+      handler: () => {
+        setPreviewBadgeState?.('previewing');
+      },
+    });
+
     return buttons;
   },
 };
@@ -451,12 +461,21 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isSidebar`** - `true` when rendered in the sidebar (constrained width)
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
+- **`setPreviewBadgeState`** - Optional callback to control inline preview badge state when preview is driven outside the canvas
+
+`setPreviewBadgeState` accepts:
+
+- **`none`** - regular inline state
+- **`preview_available`** - show "Preview Only" badge
+- **`previewing`** - show "You're previewing this" badge and hide inline action buttons
 
 #### Dynamic canvas buttons with registerActionButtons
 
 For canvas content that needs to register buttons dynamically (e.g., a "Save" button that depends on runtime state like an API being available), use the `registerActionButtons` callback passed as the second argument to `renderCanvasContent`.
 
 The `getActionButtons` function provides **static** buttons. The `registerActionButtons` callback allows canvas content to add **dynamic** buttons that are merged with the static ones.
+
+The callbacks object also exposes `closeCanvas`, which allows canvas content to close the flyout from within attachment UI actions (for example after an "Edit in app" navigation).
 
 ```tsx
 import React, { useEffect, useState } from 'react';
@@ -473,7 +492,7 @@ interface MyCanvasContentProps extends AttachmentRenderProps<MyAttachment> {
 
 const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
   attachment,
-  callbacks: { registerActionButtons, updateOrigin },
+  callbacks: { registerActionButtons, updateOrigin, closeCanvas },
 }) => {
   const [api, setApi] = useState<MyApi | undefined>();
 
@@ -509,6 +528,23 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
     <MyCanvasContent {...props} callbacks={callbacks} />
   ),
 };
+```
+
+#### Closing the canvas from canvas content
+
+Use `closeCanvas` when an action inside `renderCanvasContent` should dismiss the flyout.
+
+```tsx
+renderCanvasContent: (props, { closeCanvas }) => (
+  <EuiButton
+    onClick={async () => {
+      await locator.navigate({ /* ... */ });
+      closeCanvas();
+    }}
+  >
+    Edit in app
+  </EuiButton>
+);
 ```
 
 #### Linking by-value attachments to persistent storage with updateOrigin

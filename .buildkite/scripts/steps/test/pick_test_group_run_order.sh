@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/bootstrap.sh
 
 echo '--- Pick Test Group Run Order'
