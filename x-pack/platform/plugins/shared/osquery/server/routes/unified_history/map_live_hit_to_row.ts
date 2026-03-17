@@ -78,5 +78,6 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
     totalRows: undefined,
     userId: get('user_id') as string | undefined,
     actionId,
+    tags: (source.tags as string[] | undefined) ?? [],
   };
 };

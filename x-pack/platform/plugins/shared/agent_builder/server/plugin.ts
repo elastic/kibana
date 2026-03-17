@@ -278,6 +278,7 @@ export class AgentBuilderPlugin
       execution: {
         executeAgent: execution.executeAgent.bind(execution),
         getExecution: execution.getExecution.bind(execution),
+        findExecutions: execution.findExecutions.bind(execution),
       },
       runtime: {
         createModelProvider: modelProviderFactory,

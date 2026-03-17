@@ -154,6 +154,10 @@ export interface ExecutionStart {
    * Retrieve an agent execution by its ID.
    */
   getExecution: AgentExecutionService['getExecution'];
+  /**
+   * Find executions matching the given filters.
+   */
+  findExecutions: AgentExecutionService['findExecutions'];
 }
 
 /**
