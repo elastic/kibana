@@ -63,8 +63,7 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
             <EuiIconTip
               content={i18n.translate('xpack.osquery.liveQuery.timeoutHint', {
                 defaultMessage:
-                  'Default and minimum: 60 seconds. Maximum: {maxSeconds} seconds. Increase this value if your query needs more time to run.',
-                values: { maxSeconds: QUERY_TIMEOUT.MAX },
+                  'The default and minimum timeout period is 60 seconds. Increase this value if your query needs more time to run.',
               })}
             />
           </EuiFlexItem>
