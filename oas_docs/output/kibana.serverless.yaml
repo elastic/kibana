@@ -19644,10 +19644,11 @@ paths:
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
+                  maximum: 2
+                  minimum: 0
                   type: number
               required:
                 - name
-                - description
                 - riskModifier
         required: true
       responses:
@@ -19756,10 +19757,11 @@ paths:
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
+                  maximum: 2
+                  minimum: 0
                   type: number
               required:
                 - name
-                - description
                 - riskModifier
         required: true
       responses:
@@ -24249,7 +24251,6 @@ paths:
                                                   type: string
                                               required:
                                                 - description
-                                                - since
                                             enabled:
                                               type: boolean
                                             id:
@@ -24320,7 +24321,6 @@ paths:
                                                         type: string
                                                     required:
                                                       - description
-                                                      - since
                                                   enabled:
                                                     type: boolean
                                                   id:
@@ -24399,7 +24399,6 @@ paths:
                                                   type: string
                                               required:
                                                 - description
-                                                - since
                                             enabled:
                                               description: Enable or disable that input. Defaults to `true` (enabled).
                                               type: boolean
@@ -24422,7 +24421,6 @@ paths:
                                                         type: string
                                                     required:
                                                       - description
-                                                      - since
                                                   enabled:
                                                     description: Enable or disable that stream. Defaults to `true` (enabled).
                                                     type: boolean
@@ -25325,7 +25323,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -25396,7 +25393,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   type: boolean
                                                 id:
@@ -25475,7 +25471,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
@@ -25498,7 +25493,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
@@ -26183,7 +26177,6 @@ paths:
                                                   type: string
                                               required:
                                                 - description
-                                                - since
                                             enabled:
                                               type: boolean
                                             id:
@@ -26254,7 +26247,6 @@ paths:
                                                         type: string
                                                     required:
                                                       - description
-                                                      - since
                                                   enabled:
                                                     type: boolean
                                                   id:
@@ -26333,7 +26325,6 @@ paths:
                                                   type: string
                                               required:
                                                 - description
-                                                - since
                                             enabled:
                                               description: Enable or disable that input. Defaults to `true` (enabled).
                                               type: boolean
@@ -26356,7 +26347,6 @@ paths:
                                                         type: string
                                                     required:
                                                       - description
-                                                      - since
                                                   enabled:
                                                     description: Enable or disable that stream. Defaults to `true` (enabled).
                                                     type: boolean
@@ -27020,7 +27010,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -27091,7 +27080,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   type: boolean
                                                 id:
@@ -27170,7 +27158,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
@@ -27193,7 +27180,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
@@ -28095,7 +28081,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -28166,7 +28151,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   type: boolean
                                                 id:
@@ -28245,7 +28229,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
@@ -28268,7 +28251,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
@@ -29045,7 +29027,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -29116,7 +29097,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   type: boolean
                                                 id:
@@ -29195,7 +29175,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
@@ -29218,7 +29197,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
@@ -30969,7 +30947,6 @@ paths:
                             type: string
                         required:
                           - description
-                          - since
                       enabled:
                         description: Enable or disable that input. Defaults to `true` (enabled).
                         type: boolean
@@ -30992,7 +30969,6 @@ paths:
                                   type: string
                               required:
                                 - description
-                                - since
                             enabled:
                               description: Enable or disable that stream. Defaults to `true` (enabled).
                               type: boolean
@@ -31377,7 +31353,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -31448,7 +31423,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         type: boolean
                                       id:
@@ -31527,7 +31501,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
@@ -31550,7 +31523,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
@@ -37568,7 +37540,6 @@ paths:
                                   type: string
                               required:
                                 - description
-                                - since
                             elastic:
                               additionalProperties: true
                               type: object
@@ -37606,7 +37577,6 @@ paths:
                               type: string
                           required:
                             - description
-                            - since
                         description:
                           type: string
                         discovery:
@@ -39160,7 +39130,6 @@ paths:
                                 type: string
                             required:
                               - description
-                              - since
                           elastic:
                             additionalProperties: true
                             type: object
@@ -39198,7 +39167,6 @@ paths:
                             type: string
                         required:
                           - description
-                          - since
                       description:
                         type: string
                       discovery:
@@ -39954,7 +39922,6 @@ paths:
                                 type: string
                             required:
                               - description
-                              - since
                           elastic:
                             additionalProperties: true
                             type: object
@@ -39992,7 +39959,6 @@ paths:
                             type: string
                         required:
                           - description
-                          - since
                       description:
                         type: string
                       discovery:
@@ -47947,7 +47913,6 @@ paths:
                                         type: string
                                     required:
                                       - description
-                                      - since
                                   enabled:
                                     type: boolean
                                   id:
@@ -48018,7 +47983,6 @@ paths:
                                               type: string
                                           required:
                                             - description
-                                            - since
                                         enabled:
                                           type: boolean
                                         id:
@@ -48097,7 +48061,6 @@ paths:
                                         type: string
                                     required:
                                       - description
-                                      - since
                                   enabled:
                                     description: Enable or disable that input. Defaults to `true` (enabled).
                                     type: boolean
@@ -48120,7 +48083,6 @@ paths:
                                               type: string
                                           required:
                                             - description
-                                            - since
                                         enabled:
                                           description: Enable or disable that stream. Defaults to `true` (enabled).
                                           type: boolean
@@ -48491,7 +48453,6 @@ paths:
                                 type: string
                             required:
                               - description
-                              - since
                           enabled:
                             type: boolean
                           id:
@@ -48562,7 +48523,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -48771,7 +48731,6 @@ paths:
                                 type: string
                             required:
                               - description
-                              - since
                           enabled:
                             description: Enable or disable that input. Defaults to `true` (enabled).
                             type: boolean
@@ -48794,7 +48753,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                   type: boolean
@@ -49057,7 +49015,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -49128,7 +49085,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         type: boolean
                                       id:
@@ -49207,7 +49163,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
@@ -49230,7 +49185,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
@@ -49652,7 +49606,6 @@ paths:
                                         type: string
                                     required:
                                       - description
-                                      - since
                                   enabled:
                                     type: boolean
                                   id:
@@ -49723,7 +49676,6 @@ paths:
                                               type: string
                                           required:
                                             - description
-                                            - since
                                         enabled:
                                           type: boolean
                                         id:
@@ -49802,7 +49754,6 @@ paths:
                                         type: string
                                     required:
                                       - description
-                                      - since
                                   enabled:
                                     description: Enable or disable that input. Defaults to `true` (enabled).
                                     type: boolean
@@ -49825,7 +49776,6 @@ paths:
                                               type: string
                                           required:
                                             - description
-                                            - since
                                         enabled:
                                           description: Enable or disable that stream. Defaults to `true` (enabled).
                                           type: boolean
@@ -50296,7 +50246,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -50367,7 +50316,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         type: boolean
                                       id:
@@ -50446,7 +50394,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
@@ -50469,7 +50416,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
@@ -50844,7 +50790,6 @@ paths:
                                 type: string
                             required:
                               - description
-                              - since
                           enabled:
                             type: boolean
                           id:
@@ -50915,7 +50860,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -51121,7 +51065,6 @@ paths:
                                 type: string
                             required:
                               - description
-                              - since
                           enabled:
                             description: Enable or disable that input. Defaults to `true` (enabled).
                             type: boolean
@@ -51144,7 +51087,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                   type: boolean
@@ -51406,7 +51348,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -51477,7 +51418,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         type: boolean
                                       id:
@@ -51556,7 +51496,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
@@ -51579,7 +51518,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
@@ -52345,7 +52283,6 @@ paths:
                                               type: string
                                           required:
                                             - description
-                                            - since
                                         enabled:
                                           type: boolean
                                         id:
@@ -52416,7 +52353,6 @@ paths:
                                                     type: string
                                                 required:
                                                   - description
-                                                  - since
                                               enabled:
                                                 type: boolean
                                               id:
@@ -52495,7 +52431,6 @@ paths:
                                               type: string
                                           required:
                                             - description
-                                            - since
                                         enabled:
                                           description: Enable or disable that input. Defaults to `true` (enabled).
                                           type: boolean
@@ -52518,7 +52453,6 @@ paths:
                                                     type: string
                                                 required:
                                                   - description
-                                                  - since
                                               enabled:
                                                 description: Enable or disable that stream. Defaults to `true` (enabled).
                                                 type: boolean
@@ -52847,7 +52781,6 @@ paths:
                                           type: string
                                       required:
                                         - description
-                                        - since
                                     enabled:
                                       type: boolean
                                     id:
@@ -52918,7 +52851,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             type: boolean
                                           id:
