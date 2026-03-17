@@ -242,6 +242,38 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
             defaultMessage: 'Remove',
           }
         ),
+        fileType: {
+          label: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileTypeLabel',
+            {
+              defaultMessage: 'File type',
+            }
+          ),
+          placeholder: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileType.selectPlaceholder',
+            {
+              defaultMessage: 'Select file type',
+            }
+          ),
+          archive: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileType.archiveOptionLabel',
+            {
+              defaultMessage: 'Archive (.zip, .rar, .gz, etc.)',
+            }
+          ),
+          script: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileType.scriptOptionLabel',
+            {
+              defaultMessage: 'Script file (.py, .sh, .ps1, etc.)',
+            }
+          ),
+          validationErrorMessage: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileType.validationErrorMessage',
+            {
+              defaultMessage: 'File type selection is required.',
+            }
+          ),
+        },
         name: {
           label: i18n.translate(
             'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.nameLabel',
@@ -304,6 +336,12 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
             {
               defaultMessage:
                 'Specify the path to the main script within the archive file for proper execution.',
+            }
+          ),
+          validationErrorMessage: i18n.translate(
+            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.pathToExecutable.validationErrorMessage',
+            {
+              defaultMessage: 'Path to executable is required for archive files.',
             }
           ),
         },

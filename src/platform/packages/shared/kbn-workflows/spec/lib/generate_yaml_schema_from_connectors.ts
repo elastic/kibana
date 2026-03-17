@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { convertLegacyInputsToJsonSchema } from './input_conversion';
+import { convertLegacyFieldsToJsonSchema } from './field_conversion';
 import { type ConnectorContractUnion } from '../..';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
@@ -22,9 +22,13 @@ import {
   getTriggerSchema,
   getWhileStepSchema,
   getWorkflowSettingsSchema,
+  LoopBreakStepSchema,
+  LoopContinueStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
+  WorkflowOutputStepSchema,
   WorkflowSchemaBase,
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
@@ -80,7 +84,7 @@ export function generateYamlSchemaFromConnectors(
         ) {
           normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
         } else if (Array.isArray(data.inputs)) {
-          normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+          normalizedInputs = convertLegacyFieldsToJsonSchema(data.inputs);
         }
       }
       const { inputs: _, ...rest } = data;
@@ -127,6 +131,10 @@ function createRecursiveStepSchema(
       DataSetStepSchema,
       WorkflowExecuteStepSchema,
       WorkflowExecuteAsyncStepSchema,
+      WorkflowOutputStepSchema,
+      WorkflowFailStepSchema,
+      LoopBreakStepSchema,
+      LoopContinueStepSchema,
       ...connectorSchemas,
       ...aliasSchemas,
     ]);
