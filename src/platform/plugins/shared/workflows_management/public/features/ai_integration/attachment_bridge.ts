@@ -18,6 +18,7 @@ import {
   WORKFLOW_YAML_CHANGED_EVENT,
   WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
 } from '../../../common/agent_builder/constants';
+import { yamlLanguageService } from '../../shared/ui/yaml_editor/yaml_language_service';
 
 export interface WorkflowYamlChangedPayload {
   proposalId: string;
@@ -236,6 +237,17 @@ export class AttachmentBridge {
         manager.acceptOverlapping(change.startLine, changeEnd);
         const hunkChange = { ...change, proposalId: `${change.proposalId}::${i}` };
         manager.proposeChange(hunkChange);
+      }
+    }
+
+    // Multi-hunk applies cause intermediate onDidChangeContent events that
+    // can make monaco-yaml's async worker validate stale model states.
+    // Re-run validation via the monaco-yaml API which includes a built-in
+    // staleness guard (compares model versionId before/after the async call).
+    if (changes.length > 1) {
+      const monacoYaml = yamlLanguageService.getInstance();
+      if (monacoYaml) {
+        monacoYaml.update({});
       }
     }
   }
