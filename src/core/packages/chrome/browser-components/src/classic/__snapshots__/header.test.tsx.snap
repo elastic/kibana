@@ -96,9 +96,6 @@ exports[`Header renders 1`] = `
         />
         <div
           class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
-        />
-        <div
-          class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
         >
           <div
             class="euiPopover emotion-euiPopover-inline-block"
