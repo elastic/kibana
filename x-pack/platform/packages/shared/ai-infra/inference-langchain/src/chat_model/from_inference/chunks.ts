@@ -28,9 +28,7 @@ export const completionChunkToLangchain = (chunk: ChatCompletionChunkEvent): AIM
 
   const additionalKwargs = {
     ...(chunk.refusal ? { refusal: chunk.refusal } : {}),
-    ...(chunk.metadata?.anonymization
-      ? { anonymization: { replacementsId: chunk.metadata.anonymization.replacementsId } }
-      : {}),
+    ...(chunk.metadata?.anonymization ? { anonymization: chunk.metadata.anonymization } : {}),
   };
 
   return new AIMessageChunk({

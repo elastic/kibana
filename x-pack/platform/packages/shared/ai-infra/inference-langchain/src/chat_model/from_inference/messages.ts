@@ -11,9 +11,7 @@ import { AIMessage } from '@langchain/core/messages';
 export const responseToLangchainMessage = (response: ChatCompleteResponse): AIMessage => {
   const additionalKwargs = {
     ...(response.refusal ? { refusal: response.refusal } : {}),
-    ...(response.metadata?.anonymization
-      ? { anonymization: { replacementsId: response.metadata.anonymization.replacementsId } }
-      : {}),
+    ...(response.metadata?.anonymization ? { anonymization: response.metadata.anonymization } : {}),
   };
   return new AIMessage({
     content: response.content,
