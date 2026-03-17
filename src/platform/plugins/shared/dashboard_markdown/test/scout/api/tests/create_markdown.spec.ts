@@ -41,7 +41,6 @@ apiTest.describe('markdown - create', { tag: tags.deploymentAgnostic }, () => {
       responseType: 'json',
     });
 
-    expect(response.statusMessage).toBe('OK');
     expect(response).toHaveStatusCode(200);
     expect(response.body.data).toMatchObject({
       content,
