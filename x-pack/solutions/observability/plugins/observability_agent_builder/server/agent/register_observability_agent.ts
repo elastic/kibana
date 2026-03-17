@@ -54,6 +54,8 @@ export async function registerObservabilityAgent({
         ${getEntityLinkingInstructions({ urlPrefix })}
       `),
         tools: [{ tool_ids: OBSERVABILITY_AGENT_TOOL_IDS }],
+        skill_ids: [],
+        enable_elastic_capabilities: false,
       };
     },
   });
