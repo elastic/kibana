@@ -7,19 +7,19 @@
 
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
-import { getRiskIndex } from '../../../common/search_strategy/security_solution/risk_score/common';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import { getRiskIndex } from '../../../../common/search_strategy/security_solution/risk_score/common';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import {
   createToolAvailabilityContext,
   createToolHandlerContext,
   createToolTestMocks,
   setupMockCoreStartServices,
-} from '../__mocks__/test_helpers';
+} from '../../__mocks__/test_helpers';
 import { entityRiskScoreTool } from './entity_risk_score_tool';
-import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_risk_score';
+import { createGetRiskScores } from '../../../lib/entity_analytics/risk_score/get_risk_score';
 
-jest.mock('../../lib/entity_analytics/risk_score/get_risk_score');
+jest.mock('../../../lib/entity_analytics/risk_score/get_risk_score');
 
 const mockCreateGetRiskScores = createGetRiskScores as jest.Mock;
 
