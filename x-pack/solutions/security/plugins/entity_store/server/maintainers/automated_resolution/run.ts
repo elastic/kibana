@@ -64,7 +64,7 @@ export async function runAutomatedResolution(deps: RunDeps): Promise<AutomatedRe
   }
 
   // Step 2: Find matching groups (batched)
-  const matchBuckets = await findMatchingGroups(esClient, index, values);
+  const matchBuckets = await findMatchingGroups(esClient, index, values, logger);
   logger.debug(`Step 2: Found ${matchBuckets.length} match groups`);
 
   if (abortController.signal.aborted) {
@@ -165,7 +165,8 @@ async function collectNewEmailValues(
 async function findMatchingGroups(
   esClient: ElasticsearchClient,
   index: string,
-  values: string[]
+  values: string[],
+  logger: Logger
 ): Promise<MatchBucket[]> {
   const allBuckets: MatchBucket[] = [];
 
@@ -225,6 +226,25 @@ async function findMatchingGroups(
     for (const bucket of emailGroupBuckets) {
       const unresolvedFilter = bucket.unresolved as AggregationsFilterAggregate;
       const unresolvedTopHits = unresolvedFilter.hits as AggregationsTopHitsAggregate;
+
+      // top_hits is capped at TOP_HITS_SIZE. If there are more unresolved entities
+      // than the cap, the extras will be permanently skipped (watermark advances past them).
+      // This is acceptable because 100+ unresolved entities per email is not realistic
+      // with real identity providers (typically 2-5 per email).
+      const totalUnresolved =
+        typeof unresolvedTopHits.hits.total === 'number'
+          ? unresolvedTopHits.hits.total
+          : unresolvedTopHits.hits.total?.value ?? 0;
+      if (totalUnresolved > TOP_HITS_SIZE) {
+        logger.warn(
+          `Email bucket '${
+            bucket.key
+          }' has ${totalUnresolved} unresolved entities but top_hits is capped at ${TOP_HITS_SIZE}; ${
+            totalUnresolved - TOP_HITS_SIZE
+          } entities will be skipped`
+        );
+      }
+
       const unresolvedEntities: EntityHit[] = unresolvedTopHits.hits.hits.map((hit) => ({
         entityId: getFieldValue(hit._source, ENTITY_ID_FIELD) ?? '',
         namespace: getFieldValue(hit._source, ENTITY_NAMESPACE_FIELD) ?? '',
