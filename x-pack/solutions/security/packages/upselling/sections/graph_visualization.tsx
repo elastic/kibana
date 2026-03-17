@@ -5,48 +5,31 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { EuiEmptyPrompt, EuiButton, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useNavigation } from '@kbn/security-solution-navigation';
-
-const GRAPH_VISUALIZATION_UPSELL_TITLE = i18n.translate(
-  'securitySolutionPackages.upselling.graphVisualization.title',
-  {
-    defaultMessage: 'Graph visualization requires a Platinum license',
-  }
-);
-
-const GRAPH_VISUALIZATION_UPSELL_BUTTON = i18n.translate(
-  'securitySolutionPackages.upselling.graphVisualization.upgradeButton',
-  {
-    defaultMessage: 'Upgrade',
-  }
-);
+import React, { memo } from 'react';
+import { EuiLink, EuiPanel } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const GraphVisualizationUpsellingSection = memo(
   ({ upgradeHref }: { upgradeHref?: string }) => {
-    const { navigateTo } = useNavigation();
-    const goToSubscription = useCallback(() => {
-      navigateTo({ url: upgradeHref });
-    }, [navigateTo, upgradeHref]);
-
     return (
-      <EuiEmptyPrompt
-        color="subdued"
-        icon={<EuiIcon type="lock" size="xl" aria-hidden={true} />}
-        title={<h3>{GRAPH_VISUALIZATION_UPSELL_TITLE}</h3>}
-        actions={
-          upgradeHref
-            ? [
-                // eslint-disable-next-line @elastic/eui/href-or-on-click
-                <EuiButton href={upgradeHref} onClick={goToSubscription} fill>
-                  {GRAPH_VISUALIZATION_UPSELL_BUTTON}
-                </EuiButton>,
-              ]
-            : undefined
-        }
-      />
+      <div data-test-subj="graph-visualization-upselling">
+        <EuiPanel hasShadow={false}>
+          <FormattedMessage
+            id="securitySolutionPackages.upselling.graphVisualization.description"
+            defaultMessage="This feature requires a {subscription}."
+            values={{
+              subscription: (
+                <EuiLink href={upgradeHref} target="_blank">
+                  <FormattedMessage
+                    id="securitySolutionPackages.upselling.graphVisualization.subscriptionLink"
+                    defaultMessage="Platinum subscription"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiPanel>
+      </div>
     );
   }
 );

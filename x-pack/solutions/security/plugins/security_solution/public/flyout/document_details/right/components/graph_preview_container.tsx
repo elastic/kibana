@@ -121,7 +121,7 @@ export const GraphPreviewContainer: React.FC = () => {
             )}
           />
         ),
-        iconType: allowFlyoutExpansion && shouldShowGraph ? 'arrowStart' : undefined,
+        iconType: allowFlyoutExpansion ? 'arrowStart' : undefined,
         ...(allowFlyoutExpansion &&
           shouldShowGraph && {
             link: {
@@ -136,13 +136,9 @@ export const GraphPreviewContainer: React.FC = () => {
           }),
       }}
       data-test-subj={GRAPH_PREVIEW_TEST_ID}
-      content={
-        shouldShowGraph && !isLoading && !isError
-          ? {
-              paddingSize: 'none',
-            }
-          : undefined
-      }
+      content={{
+        paddingSize: 'none',
+      }}
     >
       {shouldShowGraph ? (
         <GraphPreview isLoading={isLoading} isError={isError} data={data} />
