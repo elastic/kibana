@@ -9,8 +9,8 @@ import { hasSameFingerprint, type BaseFeature } from '@kbn/streams-schema';
 import { uniqBy, uniqWith } from 'lodash';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
-import { SemanticUniquenessPrompt } from './semantic_uniqueness_prompt';
-import { IdConsistencyPrompt } from './id_consistency_prompt';
+import { SemanticUniquenessPrompt } from './semantic_uniqueness/prompt';
+import { IdConsistencyPrompt } from './id_consistency/prompt';
 
 /**
  * Checks that all unique-by-id features are semantically distinct.
@@ -71,9 +71,26 @@ export const createSemanticUniquenessEvaluator = ({
       finalToolChoice: { function: 'analyze' as const },
       maxRetries: 3,
       toolCallbacks: {
-        analyze: async (toolCall) => ({
-          response: toolCall.function.arguments,
-        }),
+        analyze: async (toolCall) => {
+          const { k, duplicate_clusters } = toolCall.function.arguments;
+
+          if (!isFinite(k) || k < 0 || k > uniqueById) {
+            throw new Error(
+              `Expected k to be a number between 0 and ${uniqueById}, got ${JSON.stringify(k)}`
+            );
+          }
+
+          const knownIds = new Set(compactUniqueFeatures.map((f) => f.id));
+          for (const cluster of duplicate_clusters) {
+            for (const id of cluster.ids ?? []) {
+              if (!knownIds.has(id)) {
+                throw new Error(`duplicate_clusters references unknown feature id "${id}"`);
+              }
+            }
+          }
+
+          return { response: toolCall.function.arguments };
+        },
       },
     });
 
@@ -184,9 +201,18 @@ export const createIdConsistencyEvaluator = ({
       finalToolChoice: { function: 'evaluate' as const },
       maxRetries: 3,
       toolCallbacks: {
-        evaluate: async (toolCall) => ({
-          response: toolCall.function.arguments,
-        }),
+        evaluate: async (toolCall) => {
+          const { collision_groups } = toolCall.function.arguments;
+
+          const ambiguousIds = new Set(ambiguous.map(([id]) => id));
+          for (const group of collision_groups) {
+            if (!ambiguousIds.has(group.id)) {
+              throw new Error(`collision_groups references unknown id "${group.id}"`);
+            }
+          }
+
+          return { response: toolCall.function.arguments };
+        },
       },
     });
 

@@ -7,8 +7,8 @@
 
 import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
-import systemPromptText from './id_consistency_system_prompt.text';
-import userPromptText from './id_consistency_user_prompt.text';
+import systemPromptText from './system_prompt.text';
+import userPromptText from './user_prompt.text';
 
 const ID_CONSISTENCY_OUTPUT_SCHEMA = {
   type: 'object',

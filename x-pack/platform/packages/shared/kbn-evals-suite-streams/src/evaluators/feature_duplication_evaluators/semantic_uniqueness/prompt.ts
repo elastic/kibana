@@ -7,8 +7,8 @@
 
 import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
-import systemPromptText from './semantic_uniqueness_system_prompt.text';
-import userPromptText from './semantic_uniqueness_user_prompt.text';
+import systemPromptText from './system_prompt.text';
+import userPromptText from './user_prompt.text';
 
 const SEMANTIC_UNIQUENESS_OUTPUT_SCHEMA = {
   type: 'object',
