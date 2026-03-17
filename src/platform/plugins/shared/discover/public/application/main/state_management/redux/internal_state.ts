@@ -47,7 +47,12 @@ import {
   type RecentlyClosedTabState,
   TabInitializationStatus,
 } from './types';
-import { loadDataViewList, initializeTabs, initializeSingleTab } from './actions';
+import {
+  loadDataViewList,
+  initializeTabs,
+  initializeSingleTab,
+  type RawAppStatePayload,
+} from './actions';
 import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
@@ -264,12 +269,7 @@ export const internalStateSlice = createSlice({
     /**
      * Set the tab app state, overwriting existing state and pushing to URL history
      */
-    setAppState: (
-      state,
-      action: TabAction<
-        Pick<TabState, 'appState'> & { profileId: string; isSystemTriggered?: boolean }
-      >
-    ) =>
+    setAppState: (state, action: TabAction<RawAppStatePayload & { profileId: string }>) =>
       withTab(state, action.payload, (tab) => {
         let appState = action.payload.appState;
 

@@ -30,7 +30,7 @@ import {
   transitionedFromDataViewToEsql,
 } from '../internal_state';
 import { selectTab } from '../selectors';
-import { selectTabRuntimeState } from '../runtime_state';
+import { type RuntimeStateManager, selectTabRuntimeState } from '../runtime_state';
 import type {
   DiscoverAppState,
   DiscoverInternalState,
@@ -40,9 +40,19 @@ import type {
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
 
-type AppStatePayload = TabActionPayload<
-  Pick<TabState, 'appState'> & { isSystemTriggered?: boolean }
->;
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type RawAppStatePayload = {
+  appState: DiscoverAppState;
+  /**
+   * Marks app state changes that come from URL syncing or other internal updates
+   * instead of direct user actions. These updates skip profile state snapshot
+   * syncing so they do not overwrite restorable profile state. This should
+   * rarely be needed outside of URL syncing and specific edge cases.
+   */
+  isSystemTriggered?: boolean;
+};
+
+type AppStatePayload = TabActionPayload<RawAppStatePayload>;
 
 const mergeAppState = (
   currentState: DiscoverInternalState,
@@ -53,10 +63,7 @@ const mergeAppState = (
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
-const getCurrentProfileId = (
-  runtimeStateManager: Parameters<typeof selectTabRuntimeState>[0],
-  tabId: string
-) => {
+const getCurrentProfileId = (runtimeStateManager: RuntimeStateManager, tabId: string) => {
   return selectTabRuntimeState(runtimeStateManager, tabId)
     .scopedProfilesManager$.getValue()
     .getContexts().dataSourceContext.profileId;
@@ -65,7 +72,6 @@ const getCurrentProfileId = (
 export const setAppState: InternalStateThunkActionCreator<[AppStatePayload]> = (payload) =>
   function setAppStateThunkFn(dispatch, _, { runtimeStateManager }) {
     const profileId = getCurrentProfileId(runtimeStateManager, payload.tabId);
-
     dispatch(internalStateSlice.actions.setAppState({ ...payload, profileId }));
   };
 
@@ -74,7 +80,6 @@ export const syncProfileStateSnapshot: InternalStateThunkActionCreator<
 > = (payload) =>
   function syncProfileStateSnapshotThunkFn(dispatch, _, { runtimeStateManager }) {
     const profileId = getCurrentProfileId(runtimeStateManager, payload.tabId);
-
     dispatch(internalStateSlice.actions.syncProfileStateSnapshot({ ...payload, profileId }));
   };
 
