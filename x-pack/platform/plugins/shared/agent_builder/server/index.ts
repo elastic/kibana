@@ -30,7 +30,6 @@ export type {
   SmlContext,
   SmlToAttachmentContext,
   SmlListItem,
-  SmlConversationAttachment,
   SmlSearchResult,
   SmlIndexAttachmentParams,
 } from './services/sml';

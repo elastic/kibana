@@ -13,7 +13,6 @@ export type {
   SmlContext,
   SmlToAttachmentContext,
   SmlListItem,
-  SmlConversationAttachment,
   SmlSearchResult,
   SmlDocument,
   SmlCrawlerStateDocument,

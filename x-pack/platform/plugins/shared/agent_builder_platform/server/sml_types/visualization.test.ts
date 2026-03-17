@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { SmlListItem } from '@kbn/agent-builder-plugin/server';
 import { visualizationSmlType } from './visualization';
 
 jest.mock('@kbn/lens-embeddable-utils/config_builder', () => ({
@@ -25,6 +26,14 @@ const createContext = () => ({
   savedObjectsClient: mockSavedObjectsClient,
   logger: loggingSystemMock.createLogger(),
 });
+
+async function collectPages(iterable: AsyncIterable<SmlListItem[]>): Promise<SmlListItem[]> {
+  const items: SmlListItem[] = [];
+  for await (const page of iterable) {
+    items.push(...page);
+  }
+  return items;
+}
 
 describe('visualizationSmlType', () => {
   beforeEach(() => {
@@ -46,7 +55,7 @@ describe('visualizationSmlType', () => {
         close: jest.fn(),
       });
 
-      await visualizationSmlType.list!(createContext() as never);
+      await collectPages(visualizationSmlType.list(createContext() as never));
 
       expect(mockSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: 'lens',
@@ -75,7 +84,7 @@ describe('visualizationSmlType', () => {
         close: closeMock,
       });
 
-      const result = await visualizationSmlType.list!(createContext() as never);
+      const result = await collectPages(visualizationSmlType.list(createContext() as never));
 
       expect(result).toEqual([
         {
@@ -105,12 +114,12 @@ describe('visualizationSmlType', () => {
         close: jest.fn(),
       });
 
-      const result = await visualizationSmlType.list!(createContext() as never);
+      const result = await collectPages(visualizationSmlType.list(createContext() as never));
 
       expect(result).toHaveLength(1);
-      expect(result![0].id).toBe('viz-2');
-      expect(result![0].updatedAt).toBeDefined();
-      expect(new Date(result![0].updatedAt).getTime()).not.toBeNaN();
+      expect(result[0].id).toBe('viz-2');
+      expect(result[0].updatedAt).toBeDefined();
+      expect(new Date(result[0].updatedAt).getTime()).not.toBeNaN();
     });
 
     it('defaults spaces to [] when so.namespaces is undefined', async () => {
@@ -131,7 +140,7 @@ describe('visualizationSmlType', () => {
         close: jest.fn(),
       });
 
-      const result = await visualizationSmlType.list!(createContext() as never);
+      const result = await collectPages(visualizationSmlType.list(createContext() as never));
 
       expect(result).toEqual([
         {
