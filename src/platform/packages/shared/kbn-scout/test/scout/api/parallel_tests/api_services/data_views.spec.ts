@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expect } from '@kbn/scout/api';
 import { apiTest, tags } from '../../../../../src/playwright';
-import { expect } from '../../../../../api';
 
 apiTest.describe(
   'Data Views API Service',
