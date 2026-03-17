@@ -11,7 +11,12 @@ import { fieldList } from '@kbn/data-views-plugin/common';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { getDefaultProfileState } from './get_default_profile_state';
+import { DEFAULT_PROFILE_STATE_FIELDS, type DefaultProfileStateField } from '../redux/types';
+import {
+  getDefaultProfileState,
+  getFieldsToReset,
+  getProfileStateSnapshot,
+} from './default_profile_state';
 
 const emptyDataView = buildDataViewMock({
   name: 'emptyDataView',
@@ -23,6 +28,13 @@ const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
 });
 
 scopedProfilesManager.resolveDataSourceProfile({});
+
+const getResetByField = (
+  fieldsToReset: DefaultProfileStateField[]
+): Record<DefaultProfileStateField, boolean> =>
+  Object.fromEntries(
+    DEFAULT_PROFILE_STATE_FIELDS.map((field) => [field, fieldsToReset.includes(field)])
+  ) as Record<DefaultProfileStateField, boolean>;
 
 describe('getDefaultProfileState', () => {
   describe('getPreFetchState', () => {
@@ -164,5 +176,46 @@ describe('getDefaultProfileState', () => {
       });
       expect(appState).toEqual(undefined);
     });
+  });
+});
+
+describe('getProfileStateSnapshot', () => {
+  const appState = {
+    columns: ['message'],
+    rowHeight: 3,
+    breakdownField: 'extension',
+    hideChart: true,
+  };
+
+  it('should return undefined for none', () => {
+    expect(getProfileStateSnapshot(appState, 'none')).toBeUndefined();
+  });
+
+  it('should return all tracked fields for all', () => {
+    expect(getProfileStateSnapshot(appState, 'all')).toEqual(appState);
+  });
+
+  it('should return only requested fields', () => {
+    expect(getProfileStateSnapshot(appState, ['columns', 'hideChart'])).toEqual({
+      columns: ['message'],
+      hideChart: true,
+    });
+  });
+});
+
+describe('getFieldsToReset', () => {
+  it('should return none when no fields should reset', () => {
+    expect(getFieldsToReset(getResetByField([]))).toBe('none');
+  });
+
+  it('should return all when all fields should reset', () => {
+    expect(getFieldsToReset(getResetByField([...DEFAULT_PROFILE_STATE_FIELDS]))).toBe('all');
+  });
+
+  it('should return only selected fields', () => {
+    expect(getFieldsToReset(getResetByField(['columns', 'breakdownField']))).toEqual([
+      'columns',
+      'breakdownField',
+    ]);
   });
 });

@@ -9,8 +9,13 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { uniqBy } from 'lodash';
+import { pick, uniqBy } from 'lodash';
 import type { DiscoverAppState, DefaultProfileStateField } from '../redux';
+import {
+  DEFAULT_PROFILE_STATE_FIELDS,
+  type DefaultProfileStateFields,
+  type ProfileStateSnapshot,
+} from '../redux/types';
 import type { DefaultAppStateColumn, ScopedProfilesManager } from '../../../../context_awareness';
 import { getMergedAccessor } from '../../../../context_awareness';
 import type { DataDocumentsMsg } from '../discover_data_state_container';
@@ -102,6 +107,37 @@ export const getDefaultProfileState = ({
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
     },
   };
+};
+
+export const getProfileStateSnapshot = (
+  appState: TabState['appState'],
+  fieldsToReset: TabState['defaultProfileState']['fieldsToReset']
+): ProfileStateSnapshot | undefined => {
+  if (fieldsToReset === 'none') {
+    return undefined;
+  }
+
+  const profileStateFields = fieldsToReset === 'all' ? DEFAULT_PROFILE_STATE_FIELDS : fieldsToReset;
+
+  return pick(appState, profileStateFields);
+};
+
+export const getFieldsToReset = (
+  shouldResetByField: Record<DefaultProfileStateField, boolean>
+): DefaultProfileStateFields => {
+  const fields = DEFAULT_PROFILE_STATE_FIELDS.filter((field) => shouldResetByField[field]);
+
+  if (fields.length === 0) {
+    return 'none';
+  }
+
+  if (fields.length === DEFAULT_PROFILE_STATE_FIELDS.length) {
+    return 'all';
+  }
+
+  const [firstField, ...restFields] = fields;
+
+  return [firstField, ...restFields];
 };
 
 const getDefaultState = (scopedProfilesManager: ScopedProfilesManager, dataView: DataView) => {

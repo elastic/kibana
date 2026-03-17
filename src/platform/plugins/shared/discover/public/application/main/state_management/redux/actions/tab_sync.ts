@@ -19,18 +19,14 @@ import { selectTab, selectTabAppState } from '../selectors';
 import { selectTabRuntimeState } from '../runtime_state';
 import { addLog } from '../../../../../utils/add_log';
 import { internalStateActions } from '..';
-import {
-  DEFAULT_PROFILE_STATE_FIELDS,
-  type DiscoverAppState,
-  type DefaultProfileStateFields,
-  type DefaultProfileStateField,
-} from '../types';
+import { type DiscoverAppState } from '../types';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { getCurrentUrlState } from '../../utils/cleanup_url_state';
 import { buildStateSubscribe } from '../../utils/build_state_subscribe';
 import { createUrlSyncObservables } from '../../utils/create_url_sync_observables';
 import { createTabPersistableStateObservable } from '../../utils/create_tab_persistable_state_observable';
 import { createSearchSessionRestorationDataProvider } from '../../utils/create_search_session_restoration_data_provider';
+import { getFieldsToReset } from '../../utils/default_profile_state';
 import {
   createDataViewDataSource,
   DataSourceType,
@@ -288,21 +284,3 @@ export const stopSyncing: InternalStateThunkActionCreator<[TabActionPayload]> = 
     unsubscribeFn?.();
     tabRuntimeState.unsubscribeFn$.next(undefined);
   };
-
-const getFieldsToReset = (
-  shouldResetByField: Record<DefaultProfileStateField, boolean>
-): DefaultProfileStateFields => {
-  const fields = DEFAULT_PROFILE_STATE_FIELDS.filter((field) => shouldResetByField[field]);
-
-  if (fields.length === 0) {
-    return 'none';
-  }
-
-  if (fields.length === DEFAULT_PROFILE_STATE_FIELDS.length) {
-    return 'all';
-  }
-
-  const [firstField, ...restFields] = fields;
-
-  return [firstField, ...restFields];
-};

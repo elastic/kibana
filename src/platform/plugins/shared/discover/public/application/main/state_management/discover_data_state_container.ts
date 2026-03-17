@@ -30,7 +30,7 @@ import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/disco
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
-import { isEqual, pick, sortBy } from 'lodash';
+import { isEqual, sortBy } from 'lodash';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
@@ -39,10 +39,9 @@ import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
-import { getDefaultProfileState } from './utils/get_default_profile_state';
+import { getDefaultProfileState, getProfileStateSnapshot } from './utils/default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
-import { DEFAULT_PROFILE_STATE_FIELDS, type ProfileStateSnapshot } from './redux/types';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import { createSearchSource } from './utils/create_search_source';
 
@@ -619,16 +618,3 @@ export function getDataStateContainer({
     cleanupEsql,
   };
 }
-
-const getProfileStateSnapshot = (
-  appState: TabState['appState'],
-  fieldsToReset: TabState['defaultProfileState']['fieldsToReset']
-): ProfileStateSnapshot | undefined => {
-  if (fieldsToReset === 'none') {
-    return undefined;
-  }
-
-  const profileStateFields = fieldsToReset === 'all' ? DEFAULT_PROFILE_STATE_FIELDS : fieldsToReset;
-
-  return pick(appState, profileStateFields);
-};
