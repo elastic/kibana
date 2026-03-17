@@ -178,6 +178,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                             fieldName: choice.field,
                             meta: column?.meta,
                             variable: column?.variable,
+                            // If the new column is not numeric, remove the format selector params
                             ...(!isNewColumnNumeric && col.params ? { params: undefined } : {}),
                           };
                         }),
