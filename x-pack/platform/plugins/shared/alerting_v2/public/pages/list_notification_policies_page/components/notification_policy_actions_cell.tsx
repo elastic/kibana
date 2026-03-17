@@ -139,7 +139,13 @@ export const NotificationPolicyActionsCell = ({
       title: (
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="bellSlash" />
+            <EuiIcon
+              type="bellSlash"
+              aria-label={i18n.translate(
+                'xpack.alertingV2.notificationPoliciesList.action.snoozeNotifications.ariaLabel',
+                { defaultMessage: 'Snooze notifications' }
+              )}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {i18n.translate(

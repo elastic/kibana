@@ -46,7 +46,8 @@ export const NotificationPolicySnoozePopover = ({
       <EuiButton
         iconType="bellSlash"
         color="accent"
-        size="s"
+        // @ts-expect-error - size "xs" is not a valid prop for EuiButton
+        size="xs"
         onClick={togglePopover}
         isLoading={isLoading}
       >
