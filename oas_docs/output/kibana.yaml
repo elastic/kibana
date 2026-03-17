@@ -26884,7 +26884,6 @@ paths:
                                                         type: string
                                                     required:
                                                       - dataset
-                                                      - type
                                                   deprecated:
                                                     additionalProperties: false
                                                     type: object
@@ -27960,7 +27959,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - dataset
-                                                    - type
                                                 deprecated:
                                                   additionalProperties: false
                                                   type: object
@@ -28818,7 +28816,6 @@ paths:
                                                         type: string
                                                     required:
                                                       - dataset
-                                                      - type
                                                   deprecated:
                                                     additionalProperties: false
                                                     type: object
@@ -29655,7 +29652,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - dataset
-                                                    - type
                                                 deprecated:
                                                   additionalProperties: false
                                                   type: object
@@ -30730,7 +30726,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - dataset
-                                                    - type
                                                 deprecated:
                                                   additionalProperties: false
                                                   type: object
@@ -31680,7 +31675,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - dataset
-                                                    - type
                                                 deprecated:
                                                   additionalProperties: false
                                                   type: object
@@ -34012,7 +34006,6 @@ paths:
                                             type: string
                                         required:
                                           - dataset
-                                          - type
                                       deprecated:
                                         additionalProperties: false
                                         type: object
@@ -50582,7 +50575,6 @@ paths:
                                               type: string
                                           required:
                                             - dataset
-                                            - type
                                         deprecated:
                                           additionalProperties: false
                                           type: object
@@ -51126,7 +51118,6 @@ paths:
                                       type: string
                                   required:
                                     - dataset
-                                    - type
                                 deprecated:
                                   additionalProperties: false
                                   type: object
@@ -51692,7 +51683,6 @@ paths:
                                             type: string
                                         required:
                                           - dataset
-                                          - type
                                       deprecated:
                                         additionalProperties: false
                                         type: object
@@ -52287,7 +52277,6 @@ paths:
                                               type: string
                                           required:
                                             - dataset
-                                            - type
                                         deprecated:
                                           additionalProperties: false
                                           type: object
@@ -52931,7 +52920,6 @@ paths:
                                             type: string
                                         required:
                                           - dataset
-                                          - type
                                       deprecated:
                                         additionalProperties: false
                                         type: object
@@ -53479,7 +53467,6 @@ paths:
                                       type: string
                                   required:
                                     - dataset
-                                    - type
                                 deprecated:
                                   additionalProperties: false
                                   type: object
@@ -54041,7 +54028,6 @@ paths:
                                             type: string
                                         required:
                                           - dataset
-                                          - type
                                       deprecated:
                                         additionalProperties: false
                                         type: object
@@ -54980,7 +54966,6 @@ paths:
                                                     type: string
                                                 required:
                                                   - dataset
-                                                  - type
                                               deprecated:
                                                 additionalProperties: false
                                                 type: object
@@ -55482,7 +55467,6 @@ paths:
                                                 type: string
                                             required:
                                               - dataset
-                                              - type
                                           deprecated:
                                             additionalProperties: false
                                             type: object
