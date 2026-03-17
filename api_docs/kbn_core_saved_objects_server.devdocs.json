@@ -8878,6 +8878,14 @@
             "path": "x-pack/platform/plugins/shared/osquery/server/lib/saved_query/saved_object_model_versions.ts"
           },
           {
+            "plugin": "osquery",
+            "path": "x-pack/platform/plugins/shared/osquery/server/lib/saved_query/saved_object_model_versions.ts"
+          },
+          {
+            "plugin": "osquery",
+            "path": "x-pack/platform/plugins/shared/osquery/server/lib/saved_query/saved_object_model_versions.ts"
+          },
+          {
             "plugin": "@kbn/core",
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts"
           },
