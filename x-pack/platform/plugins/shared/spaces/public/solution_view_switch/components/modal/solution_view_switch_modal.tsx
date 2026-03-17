@@ -24,7 +24,7 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import spaceSelectorImage from './assets/space_selector.svg';
+import spaceSelectorImage from './assets/space_selector.png';
 import { BenefitRow } from './benefit_row';
 import { SolutionSelector } from './solution_selector';
 import type { SolutionViewSwitchModalProps, SupportedSolutionView } from '../../types';
