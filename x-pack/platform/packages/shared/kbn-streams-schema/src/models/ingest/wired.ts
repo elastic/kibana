@@ -97,6 +97,13 @@ export namespace WiredStream {
   export type Source = IngestBaseStream.Source<WiredStream.Definition>;
 
   export interface GetResponse extends IngestBaseStream.GetResponse<Definition> {
+    /**
+     * Whether the backing data stream exists in Elasticsearch.
+     *
+     * Note: when the caller lacks `view_index_metadata`, this will be `false`
+     * (consistent with classic streams).
+     */
+    data_stream_exists: boolean;
     inherited_fields: InheritedFieldDefinition;
     effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
     effective_settings: WiredIngestStreamEffectiveSettings;
@@ -116,6 +123,7 @@ const WiredStreamSchema = {
   GetResponse: z.intersection(
     IngestBaseStream.GetResponse.right,
     z.object({
+      data_stream_exists: z.boolean(),
       inherited_fields: inheritedFieldDefinitionSchema,
       effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
       effective_settings: wiredIngestStreamEffectiveSettingsSchema,

@@ -52,4 +52,4 @@ export {
 } from './user_profiles';
 
 // Services
-export { mockFavoritesClient, mockTagsService } from './services';
+export { mockFavoritesClient, createMockFavoritesClient, mockTagsService } from './services';

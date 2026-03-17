@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createChromeComponents } from './src/chrome_components';
-export type { ChromeComponentsDeps } from './src/chrome_components';
+export { ChromeComponentsProvider } from './src/context';
+export type { ChromeComponentsDeps } from './src/context';
 
-export { Header } from './src/classic';
-export type { HeaderProps } from './src/classic';
+export { ClassicHeader } from './src/classic';
 export { ProjectHeader } from './src/project';
+export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { Sidebar } from './src/sidebar';
-export { LoadingIndicator, HeaderBreadcrumbsBadges } from './src/shared';
+export { AppMenuBar } from './src/project/app_menu';
+export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';
+export { useHasAppMenu } from './src/shared/chrome_hooks';

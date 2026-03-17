@@ -39,7 +39,7 @@ export function SloErrorBudget({
     };
   }, [reloadSubject]);
 
-  const kqlQuery = `slo.id:"${sloId}" and slo.instanceId:"${sloInstanceId}"`;
+  const kqlQuery = `slo.id:"${sloId}" and slo.instanceId:"${sloInstanceId ?? ALL_VALUE}"`;
 
   const { data: sloList } = useFetchSloList({
     kqlQuery,

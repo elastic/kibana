@@ -1286,9 +1286,19 @@ paths:
                   description: Configuration settings for the agent.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: When true, enables built-in Elastic capabilities for the agent.
+                      type: boolean
                     instructions:
                       description: Optional system instructions that define the agent behavior.
                       type: string
+                    skill_ids:
+                      description: Array of skill IDs to be available to the agent.
+                      items:
+                        description: Skill ID to be available to the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       items:
                         additionalProperties: false
@@ -1326,6 +1336,13 @@ paths:
                   type: array
                 name:
                   description: Display name for the agent.
+                  type: string
+                visibility:
+                  description: '**Technical Preview; added in 9.4.0.** Optional visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                  enum:
+                    - public
+                    - shared
+                    - private
                   type: string
               required:
                 - id
@@ -1415,6 +1432,163 @@ paths:
               }
             }
       x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/agent_builder/agents/{agent_id}/consumption:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{agent_id}/consumption</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns paginated, per-conversation token consumption data for a given agent. Includes input/output token counts, round counts, LLM call counts, and warnings for conversations with high token usage. Requires the manageAgents privilege.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
+      operationId: post-agent-builder-agents-agent-id-consumption
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the agent.
+          in: path
+          name: agent_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              consumptionDefaultExample:
+                description: Get consumption data for an agent with default pagination
+                value:
+                  size: 25
+                  sort_field: updated_at
+                  sort_order: desc
+              consumptionFilteredExample:
+                description: Get consumption data filtered by username with warnings
+                value:
+                  has_warnings: true
+                  size: 10
+                  sort_field: total_tokens
+                  sort_order: desc
+                  usernames:
+                    - elastic
+                    - admin
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                has_warnings:
+                  description: Filter to conversations with or without high-token warnings.
+                  type: boolean
+                search:
+                  description: Free-text search filter on conversation title.
+                  type: string
+                search_after:
+                  description: Cursor for pagination. Pass the search_after value from the previous response.
+                  items: {}
+                  maxItems: 10000
+                  type: array
+                size:
+                  default: 25
+                  description: Number of results per page.
+                  maximum: 100
+                  minimum: 1
+                  type: number
+                sort_field:
+                  default: updated_at
+                  description: Field to sort results by.
+                  enum:
+                    - updated_at
+                    - total_tokens
+                    - round_count
+                  type: string
+                sort_order:
+                  default: desc
+                  description: Sort direction.
+                  enum:
+                    - asc
+                    - desc
+                  type: string
+                usernames:
+                  description: Filter results to conversations by these usernames.
+                  items:
+                    type: string
+                  maxItems: 10000
+                  type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                consumptionResponseExample:
+                  description: Example response with per-conversation token usage data
+                  value:
+                    aggregations:
+                      total_with_warnings: 0
+                      usernames:
+                        - elastic
+                        - admin
+                    results:
+                      - conversation_id: conv-abc123
+                        created_at: '2025-03-01T10:00:00Z'
+                        llm_calls: 8
+                        round_count: 5
+                        title: Help me search my data
+                        token_usage:
+                          input_tokens: 15000
+                          output_tokens: 3000
+                          total_tokens: 18000
+                        updated_at: '2025-03-01T10:15:00Z'
+                        user:
+                          id: uid-1
+                          username: elastic
+                        warnings: []
+                      - conversation_id: conv-def456
+                        created_at: '2025-03-02T14:00:00Z'
+                        llm_calls: 20
+                        round_count: 12
+                        title: Analyze server logs
+                        token_usage:
+                          input_tokens: 250000
+                          output_tokens: 8000
+                          total_tokens: 258000
+                        updated_at: '2025-03-02T14:30:00Z'
+                        user:
+                          id: uid-2
+                          username: admin
+                        warnings:
+                          - input_tokens: 250000
+                            round_id: round-7
+                            type: high_input_tokens
+                    search_after:
+                      - 1709391000000
+                      - '2025-03-02T14:30:00Z'
+                    total: 2
+          description: Indicates a successful response
+      summary: Get agent consumption data
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X POST "${KIBANA_URL}/api/agent_builder/agents/elastic-ai-agent/consumption" \
+             -H "Authorization: ApiKey ${API_KEY}" \
+             -H "Content-Type: application/json" \
+             -H "elastic-api-version: 2023-10-31" \
+             -d '{"size": 25, "sort_field": "updated_at", "sort_order": "desc"}'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/agents/elastic-ai-agent/consumption
+            {"size": 25, "sort_field": "updated_at", "sort_order": "desc"}
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -1592,9 +1766,19 @@ paths:
                   description: Updated configuration settings for the agent.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: When true, enables built-in Elastic capabilities for the agent.
+                      type: boolean
                     instructions:
                       description: Updated system instructions that define the agent behavior.
                       type: string
+                    skill_ids:
+                      description: Array of skill IDs to be available to the agent.
+                      items:
+                        description: Skill ID to be available to the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       items:
                         additionalProperties: false
@@ -1627,6 +1811,13 @@ paths:
                   type: array
                 name:
                   description: Updated display name for the agent.
+                  type: string
+                visibility:
+                  description: '**Technical Preview; added in 9.4.0.** Updated visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                  enum:
+                    - public
+                    - shared
+                    - private
                   type: string
       responses:
         '200':
@@ -2010,14 +2201,15 @@ paths:
                 id:
                   description: Optional custom ID for the attachment.
                   type: string
-                origin: {}
+                origin:
+                  description: Origin string (e.g. saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
+                  type: string
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
                   type: string
               required:
                 - type
                 - data
-                - origin
       responses:
         '200':
           content:
@@ -2367,13 +2559,14 @@ paths:
               updateOriginExample:
                 description: Example request for linking an attachment to a saved visualization
                 value:
-                  origin:
-                    saved_object_id: abc123
+                  origin: abc123
             schema:
               additionalProperties: false
               type: object
               properties:
-                origin: {}
+                origin:
+                  description: The origin string (e.g., saved object ID for visualizations and dashboards).
+                  type: string
               required:
                 - origin
       responses:
@@ -2389,8 +2582,7 @@ paths:
                       current_version: 1
                       description: Sales chart
                       id: att-123
-                      origin:
-                        saved_object_id: abc123
+                      origin: abc123
                       type: visualization
                       versions:
                         - content_hash: sha256-xyz
@@ -3048,6 +3240,291 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/agent_builder/plugins:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List all installed plugins and their managed assets. Plugins are installable packages that bundle agent capabilities such as skills, following the [Claude agent plugin specification](https://code.claude.com/docs/en/plugins).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-plugins
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listPluginsResponseExample:
+                  description: Example response that returns one installed plugin
+                  value:
+                    results:
+                      - created_at: '2025-01-01T00:00:00.000Z'
+                        description: Financial analysis tools and skills for Claude
+                        id: financial-analysis
+                        manifest:
+                          author:
+                            name: Anthropic
+                            url: https://www.anthropic.com
+                          keywords:
+                            - finance
+                            - analysis
+                          repository: https://github.com/anthropics/financial-services-plugins
+                        name: financial-analysis
+                        skill_ids:
+                          - financial-analysis-analyze-portfolio
+                        source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+                        unmanaged_assets:
+                          agents: []
+                          commands: []
+                          hooks: []
+                          lsp_servers: []
+                          mcp_servers: []
+                          output_styles: []
+                        updated_at: '2025-01-01T00:00:00.000Z'
+                        version: 1.0.0
+          description: Indicates a successful response
+      summary: List plugins
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X GET "${KIBANA_URL}/api/agent_builder/plugins" \
+             -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/plugins
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/agent_builder/plugins/{pluginId}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins/{pluginId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete an installed plugin by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+      operationId: delete-agent-builder-plugins-pluginid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the plugin.
+          in: path
+          name: pluginId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deletePluginResponseExample:
+                  description: Example response showing that deletion of the plugin has been successful
+                  value:
+                    success: true
+          description: Indicates a successful response
+      summary: Delete a plugin
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "${KIBANA_URL}/api/agent_builder/plugins/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn://api/agent_builder/plugins/{id}
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins/{pluginId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a specific plugin by ID.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-plugins-pluginid
+      parameters:
+        - description: The unique identifier of the plugin.
+          in: path
+          name: pluginId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getPluginByIdResponseExample:
+                  description: Example response returning a single installed plugin
+                  value:
+                    created_at: '2025-01-01T00:00:00.000Z'
+                    description: Financial analysis tools and skills for Claude
+                    id: financial-analysis
+                    manifest:
+                      author:
+                        name: Anthropic
+                        url: https://www.anthropic.com
+                      keywords:
+                        - finance
+                        - analysis
+                      repository: https://github.com/anthropics/financial-services-plugins
+                    name: financial-analysis
+                    skill_ids:
+                      - financial-analysis-analyze-portfolio
+                    source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+                    unmanaged_assets:
+                      agents: []
+                      commands: []
+                      hooks: []
+                      lsp_servers: []
+                      mcp_servers: []
+                      output_styles: []
+                    updated_at: '2025-01-01T00:00:00.000Z'
+                    version: 1.0.0
+          description: Indicates a successful response
+      summary: Get a plugin by id
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/plugins/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/plugins/{id}
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/agent_builder/plugins/install:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins/install</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Install a plugin from a [GitHub Claude plugin URL](https://code.claude.com/docs/en/plugins) or a direct ZIP URL. Plugins bundle agent capabilities such as skills.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+      operationId: post-agent-builder-plugins-install
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              installPluginFromGithubExample:
+                description: Example request for installing a plugin from a GitHub URL
+                value:
+                  url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+              installPluginFromZipExample:
+                description: Example request for installing a plugin from a direct zip URL
+                value:
+                  url: https://my-server.example.com/my-plugin.zip
+              installPluginWithNameOverrideExample:
+                description: Example request for installing a plugin with a custom name
+                value:
+                  plugin_name: my-custom-plugin-name
+                  url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                plugin_name:
+                  description: Optional name override for the plugin. Defaults to the manifest name.
+                  type: string
+                url:
+                  description: URL to install the plugin from (GitHub URL or direct zip URL).
+                  type: string
+              required:
+                - url
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                installPluginResponseExample:
+                  description: Example response returning the definition of the installed plugin
+                  value:
+                    created_at: '2025-01-01T00:00:00.000Z'
+                    description: Financial analysis tools and skills for Claude
+                    id: financial-analysis
+                    manifest:
+                      author:
+                        name: Anthropic
+                        url: https://www.anthropic.com
+                      keywords:
+                        - finance
+                        - analysis
+                      repository: https://github.com/anthropics/financial-services-plugins
+                    name: financial-analysis
+                    skill_ids:
+                      - financial-analysis-analyze-portfolio
+                    source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
+                    unmanaged_assets:
+                      agents: []
+                      commands: []
+                      hooks: []
+                      lsp_servers: []
+                      mcp_servers: []
+                      output_styles: []
+                    updated_at: '2025-01-01T00:00:00.000Z'
+                    version: 1.0.0
+          description: Indicates a successful response
+      summary: Install a plugin
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "${KIBANA_URL}/api/agent_builder/plugins/install" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "url": "https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis"
+            }'
+        - lang: Console
+          source: |
+            POST kbn://api/agent_builder/plugins/install
+            {
+              "url": "https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis"
+            }
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/agent_builder/skills:
     get:
       description: |-
@@ -3076,7 +3553,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new user-defined skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Create a new user-defined skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: post-agent-builder-skills
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3123,7 +3600,7 @@ paths:
                       - name
                       - relativePath
                       - content
-                  maxItems: 20
+                  maxItems: 100
                   type: array
                 tool_ids:
                   default: []
@@ -3131,7 +3608,7 @@ paths:
                   items:
                     description: Tool ID from the tool registry.
                     type: string
-                  maxItems: 5
+                  maxItems: 100
                   type: array
               required:
                 - id
@@ -3155,7 +3632,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: delete-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3212,7 +3689,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing user-created skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Update an existing user-created skill.<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageSkills.
       operationId: put-agent-builder-skills-skillid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3262,14 +3739,14 @@ paths:
                       - name
                       - relativePath
                       - content
-                  maxItems: 20
+                  maxItems: 100
                   type: array
                 tool_ids:
                   description: Updated tool IDs from the tool registry.
                   items:
                     description: Updated tool ID.
                     type: string
-                  maxItems: 5
+                  maxItems: 100
                   type: array
       responses: {}
       summary: Update a skill
@@ -8990,6 +9467,826 @@ paths:
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/_find</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rules/backfill/_find:
+    post:
+      operationId: post-alerting-rules-backfill-find
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The end date for filtering backfills.
+          in: query
+          name: end
+          required: false
+          schema:
+            type: string
+        - description: The page number to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of backfills to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 10
+            minimum: 0
+            type: number
+        - description: A comma-separated list of rule identifiers.
+          in: query
+          name: rule_ids
+          required: false
+          schema:
+            type: string
+        - description: The initiator of the backfill, either `user` for manual backfills or `system` for automatic gap fills.
+          in: query
+          name: initiator
+          required: false
+          schema:
+            enum:
+              - user
+              - system
+            type: string
+        - description: The start date for filtering backfills.
+          in: query
+          name: start
+          required: false
+          schema:
+            type: string
+        - description: The field to sort backfills by.
+          in: query
+          name: sort_field
+          required: false
+          schema:
+            enum:
+              - createdAt
+              - start
+            type: string
+        - description: The sort order.
+          in: query
+          name: sort_order
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                findBackfillResponse:
+                  summary: Find backfills response
+                  value:
+                    data:
+                      - created_at: '2024-01-30T00:00:00.000Z'
+                        duration: 12h
+                        enabled: true
+                        id: 85bdf571-f4fb-4666-a8d2-e05e1220ebc6
+                        initiator: user
+                        rule:
+                          api_key_owner: elastic
+                          consumer: alerts
+                          created_at: '2022-12-05T23:40:33.132Z'
+                          created_by: elastic
+                          enabled: true
+                          id: 3583a470-74f6-11ed-9801-35303b735aef
+                          name: my alert
+                          params:
+                            aggField: sheet.version
+                            aggType: avg
+                            groupBy: top
+                            index:
+                              - test-index
+                            termField: name.keyword
+                            termSize: 6
+                            threshold:
+                              - 1000
+                            thresholdComparator: '>'
+                            timeField: '@timestamp'
+                            timeWindowSize: 5
+                            timeWindowUnit: m
+                          revision: 0
+                          rule_type_id: .index-threshold
+                          schedule:
+                            interval: 1m
+                          tags:
+                            - cpu
+                          updated_at: '2022-12-05T23:40:33.132Z'
+                          updated_by: elastic
+                        schedule:
+                          - interval: 12h
+                            run_at: '2024-01-01T12:00:00.000Z'
+                            status: pending
+                          - interval: 12h
+                            run_at: '2024-01-02T00:00:00.000Z'
+                            status: pending
+                        space_id: default
+                        start: '2024-01-01T00:00:00.000Z'
+                        status: pending
+                    page: 1
+                    per_page: 10
+                    total: 1
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        created_at:
+                          type: string
+                        duration:
+                          type: string
+                        enabled:
+                          type: boolean
+                        end:
+                          type: string
+                        id:
+                          type: string
+                        initiator:
+                          enum:
+                            - user
+                            - system
+                          type: string
+                        initiator_id:
+                          type: string
+                        rule:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            api_key_created_by_user:
+                              nullable: true
+                              type: boolean
+                            api_key_owner:
+                              nullable: true
+                              type: string
+                            consumer:
+                              type: string
+                            created_at:
+                              type: string
+                            created_by:
+                              nullable: true
+                              type: string
+                            enabled:
+                              type: boolean
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            params:
+                              additionalProperties: {}
+                              description: The parameters for the rule.
+                              type: object
+                            revision:
+                              type: number
+                            rule_type_id:
+                              type: string
+                            schedule:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                interval:
+                                  type: string
+                              required:
+                                - interval
+                            tags:
+                              items:
+                                type: string
+                              type: array
+                            updated_at:
+                              type: string
+                            updated_by:
+                              nullable: true
+                              type: string
+                          required:
+                            - id
+                            - name
+                            - tags
+                            - rule_type_id
+                            - params
+                            - api_key_owner
+                            - consumer
+                            - enabled
+                            - schedule
+                            - created_by
+                            - updated_by
+                            - created_at
+                            - updated_at
+                            - revision
+                        schedule:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              interval:
+                                type: string
+                              run_at:
+                                type: string
+                              status:
+                                enum:
+                                  - complete
+                                  - pending
+                                  - running
+                                  - error
+                                  - timeout
+                                type: string
+                            required:
+                              - run_at
+                              - status
+                              - interval
+                          type: array
+                        space_id:
+                          type: string
+                        start:
+                          type: string
+                        status:
+                          enum:
+                            - complete
+                            - pending
+                            - running
+                            - error
+                            - timeout
+                          type: string
+                      required:
+                        - id
+                        - created_at
+                        - duration
+                        - enabled
+                        - rule
+                        - space_id
+                        - initiator
+                        - start
+                        - status
+                        - schedule
+                    type: array
+                  page:
+                    type: number
+                  per_page:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - page
+                  - per_page
+                  - total
+                  - data
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+      summary: Find backfills for rules
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/backfill/_find</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rules/backfill/_schedule:
+    post:
+      operationId: post-alerting-rules-backfill-schedule
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              scheduleBackfillRequest:
+                summary: Schedule a backfill for an index threshold rule
+                value:
+                  - ranges:
+                      - end: '2024-01-02T00:00:00.000Z'
+                        start: '2024-01-01T00:00:00.000Z'
+                    rule_id: 3583a470-74f6-11ed-9801-35303b735aef
+            schema:
+              items:
+                additionalProperties: false
+                type: object
+                properties:
+                  ranges:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        end:
+                          type: string
+                        start:
+                          type: string
+                      required:
+                        - start
+                        - end
+                    type: array
+                  rule_id:
+                    type: string
+                  run_actions:
+                    type: boolean
+                required:
+                  - rule_id
+                  - ranges
+              maxItems: 100
+              minItems: 1
+              type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                scheduleBackfillResponse:
+                  summary: Schedule backfill response
+                  value:
+                    - created_at: '2024-01-30T00:00:00.000Z'
+                      duration: 12h
+                      enabled: true
+                      id: 85bdf571-f4fb-4666-a8d2-e05e1220ebc6
+                      initiator: user
+                      rule:
+                        api_key_owner: elastic
+                        consumer: alerts
+                        created_at: '2022-12-05T23:40:33.132Z'
+                        created_by: elastic
+                        enabled: true
+                        id: 3583a470-74f6-11ed-9801-35303b735aef
+                        name: my alert
+                        params:
+                          aggField: sheet.version
+                          aggType: avg
+                          groupBy: top
+                          index:
+                            - test-index
+                          termField: name.keyword
+                          termSize: 6
+                          threshold:
+                            - 1000
+                          thresholdComparator: '>'
+                          timeField: '@timestamp'
+                          timeWindowSize: 5
+                          timeWindowUnit: m
+                        revision: 0
+                        rule_type_id: .index-threshold
+                        schedule:
+                          interval: 1m
+                        tags:
+                          - cpu
+                        updated_at: '2022-12-05T23:40:33.132Z'
+                        updated_by: elastic
+                      schedule:
+                        - interval: 12h
+                          run_at: '2024-01-01T12:00:00.000Z'
+                          status: pending
+                        - interval: 12h
+                          run_at: '2024-01-02T00:00:00.000Z'
+                          status: pending
+                      space_id: default
+                      start: '2024-01-01T00:00:00.000Z'
+                      status: pending
+              schema:
+                items:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        created_at:
+                          type: string
+                        duration:
+                          type: string
+                        enabled:
+                          type: boolean
+                        end:
+                          type: string
+                        id:
+                          type: string
+                        initiator:
+                          enum:
+                            - user
+                            - system
+                          type: string
+                        initiator_id:
+                          type: string
+                        rule:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            api_key_created_by_user:
+                              nullable: true
+                              type: boolean
+                            api_key_owner:
+                              nullable: true
+                              type: string
+                            consumer:
+                              type: string
+                            created_at:
+                              type: string
+                            created_by:
+                              nullable: true
+                              type: string
+                            enabled:
+                              type: boolean
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            params:
+                              additionalProperties: {}
+                              description: The parameters for the rule.
+                              type: object
+                            revision:
+                              type: number
+                            rule_type_id:
+                              type: string
+                            schedule:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                interval:
+                                  type: string
+                              required:
+                                - interval
+                            tags:
+                              items:
+                                type: string
+                              type: array
+                            updated_at:
+                              type: string
+                            updated_by:
+                              nullable: true
+                              type: string
+                          required:
+                            - id
+                            - name
+                            - tags
+                            - rule_type_id
+                            - params
+                            - api_key_owner
+                            - consumer
+                            - enabled
+                            - schedule
+                            - created_by
+                            - updated_by
+                            - created_at
+                            - updated_at
+                            - revision
+                        schedule:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              interval:
+                                type: string
+                              run_at:
+                                type: string
+                              status:
+                                enum:
+                                  - complete
+                                  - pending
+                                  - running
+                                  - error
+                                  - timeout
+                                type: string
+                            required:
+                              - run_at
+                              - status
+                              - interval
+                          type: array
+                        space_id:
+                          type: string
+                        start:
+                          type: string
+                        status:
+                          enum:
+                            - complete
+                            - pending
+                            - running
+                            - error
+                            - timeout
+                          type: string
+                      required:
+                        - id
+                        - created_at
+                        - duration
+                        - enabled
+                        - rule
+                        - space_id
+                        - initiator
+                        - start
+                        - status
+                        - schedule
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            message:
+                              type: string
+                            rule:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                name:
+                                  type: string
+                              required:
+                                - id
+                            status:
+                              type: number
+                          required:
+                            - message
+                            - rule
+                      required:
+                        - error
+                type: array
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a rule with the given ID does not exist.
+      summary: Schedule a backfill for rules
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/backfill/_schedule</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rules/backfill/{id}:
+    delete:
+      operationId: delete-alerting-rules-backfill-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the backfill.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a backfill with the given ID does not exist.
+      summary: Delete a backfill by ID
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/backfill/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+    get:
+      operationId: get-alerting-rules-backfill-id
+      parameters:
+        - description: The identifier for the backfill.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getBackfillResponse:
+                  summary: Get a backfill for an index threshold rule
+                  value:
+                    created_at: '2024-01-30T00:00:00.000Z'
+                    duration: 12h
+                    enabled: true
+                    id: 85bdf571-f4fb-4666-a8d2-e05e1220ebc6
+                    initiator: user
+                    rule:
+                      api_key_owner: elastic
+                      consumer: alerts
+                      created_at: '2022-12-05T23:40:33.132Z'
+                      created_by: elastic
+                      enabled: true
+                      id: 3583a470-74f6-11ed-9801-35303b735aef
+                      name: my alert
+                      params:
+                        aggField: sheet.version
+                        aggType: avg
+                        groupBy: top
+                        index:
+                          - test-index
+                        termField: name.keyword
+                        termSize: 6
+                        threshold:
+                          - 1000
+                        thresholdComparator: '>'
+                        timeField: '@timestamp'
+                        timeWindowSize: 5
+                        timeWindowUnit: m
+                      revision: 0
+                      rule_type_id: .index-threshold
+                      schedule:
+                        interval: 1m
+                      tags:
+                        - cpu
+                      updated_at: '2022-12-05T23:40:33.132Z'
+                      updated_by: elastic
+                    schedule:
+                      - interval: 12h
+                        run_at: '2024-01-01T12:00:00.000Z'
+                        status: pending
+                      - interval: 12h
+                        run_at: '2024-01-02T00:00:00.000Z'
+                        status: pending
+                    space_id: default
+                    start: '2024-01-01T00:00:00.000Z'
+                    status: pending
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  created_at:
+                    type: string
+                  duration:
+                    type: string
+                  enabled:
+                    type: boolean
+                  end:
+                    type: string
+                  id:
+                    type: string
+                  initiator:
+                    enum:
+                      - user
+                      - system
+                    type: string
+                  initiator_id:
+                    type: string
+                  rule:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      api_key_created_by_user:
+                        nullable: true
+                        type: boolean
+                      api_key_owner:
+                        nullable: true
+                        type: string
+                      consumer:
+                        type: string
+                      created_at:
+                        type: string
+                      created_by:
+                        nullable: true
+                        type: string
+                      enabled:
+                        type: boolean
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      params:
+                        additionalProperties: {}
+                        description: The parameters for the rule.
+                        type: object
+                      revision:
+                        type: number
+                      rule_type_id:
+                        type: string
+                      schedule:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          interval:
+                            type: string
+                        required:
+                          - interval
+                      tags:
+                        items:
+                          type: string
+                        type: array
+                      updated_at:
+                        type: string
+                      updated_by:
+                        nullable: true
+                        type: string
+                    required:
+                      - id
+                      - name
+                      - tags
+                      - rule_type_id
+                      - params
+                      - api_key_owner
+                      - consumer
+                      - enabled
+                      - schedule
+                      - created_by
+                      - updated_by
+                      - created_at
+                      - updated_at
+                      - revision
+                  schedule:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        interval:
+                          type: string
+                        run_at:
+                          type: string
+                        status:
+                          enum:
+                            - complete
+                            - pending
+                            - running
+                            - error
+                            - timeout
+                          type: string
+                      required:
+                        - run_at
+                        - status
+                        - interval
+                    type: array
+                  space_id:
+                    type: string
+                  start:
+                    type: string
+                  status:
+                    enum:
+                      - complete
+                      - pending
+                      - running
+                      - error
+                      - timeout
+                    type: string
+                required:
+                  - id
+                  - created_at
+                  - duration
+                  - enabled
+                  - rule
+                  - space_id
+                  - initiator
+                  - start
+                  - status
+                  - schedule
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates a backfill with the given ID does not exist.
+      summary: Get a backfill by ID
+      tags:
+        - alerting
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/backfill/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/apm/agent_keys:
@@ -17152,7 +18449,9 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Download a file associated with a response action.
+        Download a file associated with a response action. Files are downloaded in a password-protected `.zip` archive to prevent the file from running. Use password `elastic` to open the `.zip` in a safe environment.
+        > info
+        > Files retrieved from third-party-protected hosts require a different password. Refer to [Third-party response actions](https://www.elastic.co/docs/solutions/security/endpoint-response-actions/third-party-response-actions) for your system's password.
       operationId: EndpointFileDownload
       parameters:
         - in: path
@@ -18502,10 +19801,11 @@ paths:
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
+                  maximum: 2
+                  minimum: 0
                   type: number
               required:
                 - name
-                - description
                 - riskModifier
         required: true
       responses:
@@ -18614,10 +19914,11 @@ paths:
                   type: string
                 riskModifier:
                   description: Risk score modifier associated with the watchlist
+                  maximum: 2
+                  minimum: 0
                   type: number
               required:
                 - name
-                - description
                 - riskModifier
         required: true
       responses:
@@ -23107,7 +24408,6 @@ paths:
                                                   type: string
                                               required:
                                                 - description
-                                                - since
                                             enabled:
                                               type: boolean
                                             id:
@@ -23178,7 +24478,6 @@ paths:
                                                         type: string
                                                     required:
                                                       - description
-                                                      - since
                                                   enabled:
                                                     type: boolean
                                                   id:
@@ -23257,7 +24556,6 @@ paths:
                                                   type: string
                                               required:
                                                 - description
-                                                - since
                                             enabled:
                                               description: Enable or disable that input. Defaults to `true` (enabled).
                                               type: boolean
@@ -23280,7 +24578,6 @@ paths:
                                                         type: string
                                                     required:
                                                       - description
-                                                      - since
                                                   enabled:
                                                     description: Enable or disable that stream. Defaults to `true` (enabled).
                                                     type: boolean
@@ -24183,7 +25480,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -24254,7 +25550,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   type: boolean
                                                 id:
@@ -24333,7 +25628,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
@@ -24356,7 +25650,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
@@ -25041,7 +26334,6 @@ paths:
                                                   type: string
                                               required:
                                                 - description
-                                                - since
                                             enabled:
                                               type: boolean
                                             id:
@@ -25112,7 +26404,6 @@ paths:
                                                         type: string
                                                     required:
                                                       - description
-                                                      - since
                                                   enabled:
                                                     type: boolean
                                                   id:
@@ -25191,7 +26482,6 @@ paths:
                                                   type: string
                                               required:
                                                 - description
-                                                - since
                                             enabled:
                                               description: Enable or disable that input. Defaults to `true` (enabled).
                                               type: boolean
@@ -25214,7 +26504,6 @@ paths:
                                                         type: string
                                                     required:
                                                       - description
-                                                      - since
                                                   enabled:
                                                     description: Enable or disable that stream. Defaults to `true` (enabled).
                                                     type: boolean
@@ -25878,7 +27167,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -25949,7 +27237,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   type: boolean
                                                 id:
@@ -26028,7 +27315,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
@@ -26051,7 +27337,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
@@ -26953,7 +28238,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -27024,7 +28308,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   type: boolean
                                                 id:
@@ -27103,7 +28386,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
@@ -27126,7 +28408,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
@@ -27903,7 +29184,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -27974,7 +29254,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   type: boolean
                                                 id:
@@ -28053,7 +29332,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
@@ -28076,7 +29354,6 @@ paths:
                                                       type: string
                                                   required:
                                                     - description
-                                                    - since
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
@@ -29827,7 +31104,6 @@ paths:
                             type: string
                         required:
                           - description
-                          - since
                       enabled:
                         description: Enable or disable that input. Defaults to `true` (enabled).
                         type: boolean
@@ -29850,7 +31126,6 @@ paths:
                                   type: string
                               required:
                                 - description
-                                - since
                             enabled:
                               description: Enable or disable that stream. Defaults to `true` (enabled).
                               type: boolean
@@ -30235,7 +31510,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -30306,7 +31580,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         type: boolean
                                       id:
@@ -30385,7 +31658,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
@@ -30408,7 +31680,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
@@ -36426,7 +37697,6 @@ paths:
                                   type: string
                               required:
                                 - description
-                                - since
                             elastic:
                               additionalProperties: true
                               type: object
@@ -36464,7 +37734,6 @@ paths:
                               type: string
                           required:
                             - description
-                            - since
                         description:
                           type: string
                         discovery:
@@ -38018,7 +39287,6 @@ paths:
                                 type: string
                             required:
                               - description
-                              - since
                           elastic:
                             additionalProperties: true
                             type: object
@@ -38056,7 +39324,6 @@ paths:
                             type: string
                         required:
                           - description
-                          - since
                       description:
                         type: string
                       discovery:
@@ -38574,6 +39841,13 @@ paths:
           schema:
             default: false
             type: boolean
+        - description: Skip dependency validation when installing a package with dependencies
+          in: query
+          name: skipDependencyCheck
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
@@ -38805,7 +40079,6 @@ paths:
                                 type: string
                             required:
                               - description
-                              - since
                           elastic:
                             additionalProperties: true
                             type: object
@@ -38843,7 +40116,6 @@ paths:
                             type: string
                         required:
                           - description
-                          - since
                       description:
                         type: string
                       discovery:
@@ -39770,6 +41042,103 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/fleet/epm/packages/{pkgName}/review_upgrade:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/review_upgrade</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: post-fleet-epm-packages-pkgname-review-upgrade
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Package name to review upgrade for
+          in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              acceptUpgrade:
+                value:
+                  action: accept
+                  target_version: 2.0.0
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                action:
+                  enum:
+                    - accept
+                    - decline
+                    - pending
+                  type: string
+                target_version:
+                  type: string
+              required:
+                - action
+                - target_version
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    success: true
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Review a pending policy upgrade for a package with deprecations
+      tags:
+        - Elastic Package Manager (EPM)
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/epm/packages/{pkgName}/rollback:
     post:
       description: |-
@@ -46701,7 +48070,6 @@ paths:
                                         type: string
                                     required:
                                       - description
-                                      - since
                                   enabled:
                                     type: boolean
                                   id:
@@ -46772,7 +48140,6 @@ paths:
                                               type: string
                                           required:
                                             - description
-                                            - since
                                         enabled:
                                           type: boolean
                                         id:
@@ -46851,7 +48218,6 @@ paths:
                                         type: string
                                     required:
                                       - description
-                                      - since
                                   enabled:
                                     description: Enable or disable that input. Defaults to `true` (enabled).
                                     type: boolean
@@ -46874,7 +48240,6 @@ paths:
                                               type: string
                                           required:
                                             - description
-                                            - since
                                         enabled:
                                           description: Enable or disable that stream. Defaults to `true` (enabled).
                                           type: boolean
@@ -47245,7 +48610,6 @@ paths:
                                 type: string
                             required:
                               - description
-                              - since
                           enabled:
                             type: boolean
                           id:
@@ -47316,7 +48680,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -47525,7 +48888,6 @@ paths:
                                 type: string
                             required:
                               - description
-                              - since
                           enabled:
                             description: Enable or disable that input. Defaults to `true` (enabled).
                             type: boolean
@@ -47548,7 +48910,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                   type: boolean
@@ -47811,7 +49172,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -47882,7 +49242,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         type: boolean
                                       id:
@@ -47961,7 +49320,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
@@ -47984,7 +49342,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
@@ -48406,7 +49763,6 @@ paths:
                                         type: string
                                     required:
                                       - description
-                                      - since
                                   enabled:
                                     type: boolean
                                   id:
@@ -48477,7 +49833,6 @@ paths:
                                               type: string
                                           required:
                                             - description
-                                            - since
                                         enabled:
                                           type: boolean
                                         id:
@@ -48556,7 +49911,6 @@ paths:
                                         type: string
                                     required:
                                       - description
-                                      - since
                                   enabled:
                                     description: Enable or disable that input. Defaults to `true` (enabled).
                                     type: boolean
@@ -48579,7 +49933,6 @@ paths:
                                               type: string
                                           required:
                                             - description
-                                            - since
                                         enabled:
                                           description: Enable or disable that stream. Defaults to `true` (enabled).
                                           type: boolean
@@ -49050,7 +50403,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -49121,7 +50473,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         type: boolean
                                       id:
@@ -49200,7 +50551,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
@@ -49223,7 +50573,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
@@ -49598,7 +50947,6 @@ paths:
                                 type: string
                             required:
                               - description
-                              - since
                           enabled:
                             type: boolean
                           id:
@@ -49669,7 +51017,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -49875,7 +51222,6 @@ paths:
                                 type: string
                             required:
                               - description
-                              - since
                           enabled:
                             description: Enable or disable that input. Defaults to `true` (enabled).
                             type: boolean
@@ -49898,7 +51244,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                   type: boolean
@@ -50160,7 +51505,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -50231,7 +51575,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         type: boolean
                                       id:
@@ -50310,7 +51653,6 @@ paths:
                                       type: string
                                   required:
                                     - description
-                                    - since
                                 enabled:
                                   description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
@@ -50333,7 +51675,6 @@ paths:
                                             type: string
                                         required:
                                           - description
-                                          - since
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
@@ -51099,7 +52440,6 @@ paths:
                                               type: string
                                           required:
                                             - description
-                                            - since
                                         enabled:
                                           type: boolean
                                         id:
@@ -51170,7 +52510,6 @@ paths:
                                                     type: string
                                                 required:
                                                   - description
-                                                  - since
                                               enabled:
                                                 type: boolean
                                               id:
@@ -51249,7 +52588,6 @@ paths:
                                               type: string
                                           required:
                                             - description
-                                            - since
                                         enabled:
                                           description: Enable or disable that input. Defaults to `true` (enabled).
                                           type: boolean
@@ -51272,7 +52610,6 @@ paths:
                                                     type: string
                                                 required:
                                                   - description
-                                                  - since
                                               enabled:
                                                 description: Enable or disable that stream. Defaults to `true` (enabled).
                                                 type: boolean
@@ -51601,7 +52938,6 @@ paths:
                                           type: string
                                       required:
                                         - description
-                                        - since
                                     enabled:
                                       type: boolean
                                     id:
@@ -51672,7 +53008,6 @@ paths:
                                                 type: string
                                             required:
                                               - description
-                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -57814,6 +59149,7 @@ paths:
                         required:
                           - type
                           - id
+                      maxItems: 100
                       type: array
                 includeReferencesDeep:
                   default: false
@@ -57842,6 +59178,7 @@ paths:
                     - type: string
                     - items:
                         type: string
+                      maxItems: 100
                       type: array
                   description: The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.
       responses:
@@ -60921,6 +62258,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -60945,6 +62284,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -61013,6 +62353,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -61037,6 +62379,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -61112,6 +62455,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -61136,6 +62481,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -61204,6 +62550,8 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  description:
+                                    type: string
                                   esql:
                                     type: object
                                     properties:
@@ -61228,6 +62576,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - description
                                   - esql
                               type: array
                             rules:
@@ -61303,6 +62652,8 @@ paths:
                           items:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -61327,6 +62678,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                           type: array
                         rules:
@@ -61689,6 +63041,8 @@ paths:
                                       - anyOf:
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
                                               format:
                                                 description: A non-empty string.
                                                 minLength: 1
@@ -61718,6 +63072,18 @@ paths:
                                               - type
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
+                                              format:
+                                                not: {}
+                                              type:
+                                                not: {}
+                                            required:
+                                              - description
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
                                               type:
                                                 enum:
                                                   - system
@@ -61925,6 +63291,8 @@ paths:
                                       - anyOf:
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
                                               format:
                                                 description: A non-empty string.
                                                 minLength: 1
@@ -61954,6 +63322,8 @@ paths:
                                               - type
                                           - type: object
                                             properties:
+                                              description:
+                                                type: string
                                               type:
                                                 enum:
                                                   - system
@@ -62225,6 +63595,8 @@ paths:
                           index:
                             type: object
                             properties:
+                              description:
+                                type: string
                               esql:
                                 type: object
                                 properties:
@@ -62249,6 +63621,7 @@ paths:
                             required:
                               - id
                               - title
+                              - description
                               - esql
                         required:
                           - index
@@ -62356,6 +63729,9 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                description:
+                  default: ''
+                  type: string
                 esql:
                   additionalProperties: false
                   type: object
@@ -72667,7 +74043,7 @@ components:
       type: object
       properties:
         reason:
-          $ref: '#/components/schemas/Security_Detections_API_ReasonEnum'
+          $ref: '#/components/schemas/Security_Detections_API_Reason'
         signal_ids:
           description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
           items:
@@ -72696,7 +74072,7 @@ components:
           additionalProperties: true
           type: object
         reason:
-          $ref: '#/components/schemas/Security_Detections_API_ReasonEnum'
+          $ref: '#/components/schemas/Security_Detections_API_Reason'
         status:
           enum:
             - closed
@@ -75503,8 +76879,12 @@ components:
             - risk_score
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_QueryRuleCreateFields'
+    Security_Detections_API_Reason:
+      description: 'The reason for closing the alerts. Can be one of following predefined reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user through the advanced settings.'
+      oneOf:
+        - $ref: '#/components/schemas/Security_Detections_API_ReasonEnum'
+        - type: string
     Security_Detections_API_ReasonEnum:
-      description: The reason for closing the alerts
       enum:
         - false_positive
         - duplicate
@@ -81759,6 +83139,11 @@ components:
         description:
           description: Description of the watchlist
           type: string
+        entitySourceIds:
+          description: List of entity source IDs associated with the watchlist
+          items:
+            type: string
+          type: array
         id:
           description: The unique ID of the watchlist
           type: string
@@ -83979,6 +85364,7 @@ components:
           - attributes:
               created_at: '2023-10-31T00:00:00Z'
               created_by: elastic
+              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               description: My pack description
               enabled: true
               name: My Pack
@@ -83991,6 +85377,7 @@ components:
                   query: select * from uptime;
               updated_at: '2023-10-31T00:00:00Z'
               updated_by: elastic
+              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             namespaces:
               - default
@@ -84035,6 +85422,7 @@ components:
           - attributes:
               created_at: '2022-07-26T09:28:08.597Z'
               created_by: elastic
+              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               description: Saved query description
               ecs_mapping:
                 host.uptime:
@@ -84046,6 +85434,7 @@ components:
               query: select * from uptime;
               updated_at: '2022-07-26T09:28:08.597Z'
               updated_by: elastic
+              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
               version: 2.8.0
             id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             namespaces:

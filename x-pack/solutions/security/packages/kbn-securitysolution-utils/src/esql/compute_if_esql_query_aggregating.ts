@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse } from '@elastic/esql';
+import { Parser } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 
 export const isAggregatingQuery = (astExpression: ESQLAstQueryExpression): boolean =>
@@ -17,6 +17,6 @@ export const isAggregatingQuery = (astExpression: ESQLAstQueryExpression): boole
  * @returns boolean
  */
 export const computeIsESQLQueryAggregating = (esqlQuery: string): boolean => {
-  const { root } = parse(esqlQuery);
+  const { root } = Parser.parse(esqlQuery);
   return isAggregatingQuery(root);
 };

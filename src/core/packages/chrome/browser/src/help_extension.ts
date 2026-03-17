@@ -27,15 +27,17 @@ export interface ChromeHelpExtension {
    */
   links?: ChromeHelpExtensionMenuLink[];
   /**
-   * React-first alternative to `content`. Receives menu actions and returns a ReactNode.
-   * Preferred over `content` which is deprecated.
+   * Custom content to render below the list of links. Receives menu actions and returns a ReactNode.
+   *
+   * @example
+   * ```tsx
+   * core.chrome.setHelpExtension({
+   *   appName: 'My App',
+   *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
+   * });
+   * ```
    */
-  reactContent?: (menuActions: ChromeHelpMenuActions) => ReactNode;
-  /**
-   * Custom content to occur below the list of links
-   * @deprecated Use `reactContent` instead.
-   */
-  content?: (element: HTMLDivElement, menuActions: ChromeHelpMenuActions) => () => void;
+  content?: (menuActions: ChromeHelpMenuActions) => ReactNode;
 }
 
 /** @public */

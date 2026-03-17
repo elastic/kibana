@@ -1,3 +1,5 @@
+name: Sync CI on comment
+
 on:
   issue_comment:
     types:
