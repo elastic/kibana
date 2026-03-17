@@ -5,50 +5,63 @@
  * 2.0.
  */
 
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
-import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
+import { act } from 'react-dom/test-utils';
+import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 const JOIN_TYPE = 'join';
 
 describe('Processor: Join', () => {
   let onUpdate: jest.Mock;
-  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let testBed: SetupResult;
+  const { httpSetup } = setupEnvironment();
+
+  beforeAll(() => {
+    jest.useFakeTimers({ legacyFakeTimers: true });
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(async () => {
-    jest.clearAllMocks();
-    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    renderProcessorEditor(httpSetup, {
-      value: {
-        processors: [],
-      },
-      onFlyoutOpen: jest.fn(),
-      onUpdate,
+    await act(async () => {
+      testBed = await setup(httpSetup, {
+        value: {
+          processors: [],
+        },
+        onFlyoutOpen: jest.fn(),
+        onUpdate,
+      });
     });
 
-    fireEvent.click(screen.getByTestId('addProcessorButton'));
-    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
-      target: { value: JOIN_TYPE },
-    });
+    const { component, actions } = testBed;
 
-    await screen.findByTestId('addProcessorForm');
-    await screen.findByTestId('fieldNameField');
+    component.update();
+
+    // Open flyout to add new processor
+    actions.addProcessor();
+    // Add type (the other fields are not visible until a type is selected)
+    await actions.addProcessorType(JOIN_TYPE);
   });
 
   test('allows a whitespace separator', async () => {
-    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
-      target: { value: 'field_1' },
-    });
-    fireEvent.change(within(screen.getByTestId('separatorValueField')).getByTestId('input'), {
-      target: { value: ' ' },
-    });
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
 
-    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
-    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
+    // Add required fields
+    form.setInputValue('fieldNameField.input', 'field_1');
+    form.setInputValue('separatorValueField.input', ' ');
 
-    const processors = getProcessorValue(onUpdate);
-    expect(processors[0][JOIN_TYPE]).toMatchObject({
+    // Save the field
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, JOIN_TYPE);
+
+    expect(processors[0]?.[JOIN_TYPE]).toEqual({
       field: 'field_1',
       separator: ' ',
     });
