@@ -36,6 +36,8 @@ import {
 
 import {
   AgentPolicySchemaV3,
+  EpmPackagesSchemaV6,
+  EpmPackagesSchemaV7,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
@@ -1184,6 +1186,13 @@ export const getSavedObjectTypes = (
           name: { type: 'keyword' },
           version: { type: 'keyword' },
           internal: { type: 'boolean' },
+          dependencies: {
+            type: 'nested',
+            properties: {
+              name: { type: 'keyword' },
+              version: { type: 'keyword' },
+            },
+          },
           keep_policies_up_to_date: { type: 'boolean', index: false },
           es_index_patterns: {
             dynamic: false,
@@ -1303,118 +1312,28 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: schema.object(
-              {
-                name: schema.string(),
-                version: schema.string(),
-                internal: schema.maybe(schema.boolean()),
-                keep_policies_up_to_date: schema.maybe(schema.boolean()),
-                es_index_patterns: schema.maybe(schema.any()),
-                verification_status: schema.string(),
-                verification_key_id: schema.maybe(schema.string()),
-                installed_es: schema.maybe(
-                  schema.arrayOf(
-                    schema.object({
-                      id: schema.string(),
-                      type: schema.string(),
-                      version: schema.maybe(schema.string()),
-                      deferred: schema.maybe(schema.boolean()),
-                    }),
-                    { maxSize: 10000 }
-                  )
-                ),
-                latest_install_failed_attempts: schema.maybe(schema.any()),
-                latest_executed_state: schema.maybe(schema.any()),
-                installed_kibana: schema.maybe(schema.any()),
-                installed_kibana_space_id: schema.maybe(schema.string()),
-                package_assets: schema.maybe(schema.any()),
-                additional_spaces_installed_kibana: schema.maybe(schema.any()),
-                install_started_at: schema.string(),
-                install_version: schema.string(),
-                install_status: schema.string(),
-                install_source: schema.string(),
-                install_format_schema_version: schema.maybe(schema.string()),
-                experimental_data_stream_features: schema.maybe(
-                  schema.arrayOf(
-                    schema.object({
-                      data_stream: schema.string(),
-                      features: schema.maybe(
-                        schema.arrayOf(
-                          schema.object(
-                            {
-                              synthetic_source: schema.maybe(schema.boolean()),
-                              tsdb: schema.maybe(schema.boolean()),
-                            },
-                            { unknowns: 'ignore' }
-                          ),
-                          { maxSize: 10 }
-                        )
-                      ),
-                    }),
-                    { maxSize: 1000 }
-                  )
-                ),
-                previous_version: schema.maybe(schema.string()),
-                pending_upgrade_review: schema.maybe(schema.any()),
+            forwardCompatibility: EpmPackagesSchemaV6.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV6.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '7': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                dependencies: {
+                  type: 'nested',
+                  properties: {
+                    name: { type: 'keyword' },
+                    version: { type: 'keyword' },
+                  },
+                },
               },
-              { unknowns: 'ignore' }
-            ),
-            create: schema.object(
-              {
-                name: schema.string(),
-                version: schema.string(),
-                internal: schema.maybe(schema.boolean()),
-                keep_policies_up_to_date: schema.maybe(schema.boolean()),
-                es_index_patterns: schema.maybe(schema.any()),
-                verification_status: schema.string(),
-                verification_key_id: schema.maybe(schema.string()),
-                installed_es: schema.maybe(
-                  schema.arrayOf(
-                    schema.object({
-                      id: schema.string(),
-                      type: schema.string(),
-                      version: schema.maybe(schema.string()),
-                      deferred: schema.maybe(schema.boolean()),
-                    }),
-                    { maxSize: 10000 }
-                  )
-                ),
-                latest_install_failed_attempts: schema.maybe(schema.any()),
-                latest_executed_state: schema.maybe(schema.any()),
-                installed_kibana: schema.maybe(schema.any()),
-                installed_kibana_space_id: schema.maybe(schema.string()),
-                package_assets: schema.maybe(schema.any()),
-                additional_spaces_installed_kibana: schema.maybe(schema.any()),
-                install_started_at: schema.string(),
-                install_version: schema.string(),
-                install_status: schema.string(),
-                install_source: schema.string(),
-                install_format_schema_version: schema.maybe(schema.string()),
-                experimental_data_stream_features: schema.maybe(
-                  schema.arrayOf(
-                    schema.object({
-                      data_stream: schema.string(),
-                      features: schema.maybe(
-                        schema.arrayOf(
-                          schema.object(
-                            {
-                              synthetic_source: schema.maybe(schema.boolean()),
-                              tsdb: schema.maybe(schema.boolean()),
-                            },
-                            { unknowns: 'ignore' }
-                          ),
-                          { maxSize: 10 }
-                        )
-                      ),
-                    }),
-                    { maxSize: 1000 }
-                  )
-                ),
-                previous_version: schema.maybe(schema.string()),
-                pending_upgrade_review: schema.maybe(schema.any()),
-              },
-              { unknowns: 'ignore' }
-            ),
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV7,
           },
         },
       },

@@ -30,6 +30,7 @@ const createMockPersistedSkill = (
 const createMockClient = (): jest.Mocked<SkillClient> => ({
   has: jest.fn(),
   get: jest.fn(),
+  bulkGet: jest.fn(),
   list: jest.fn(),
   create: jest.fn(),
   bulkCreate: jest.fn(),

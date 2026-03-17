@@ -18,7 +18,7 @@ export function validateImageConfig(
 ): draftConfig is ImageConfig {
   if (!draftConfig.src) return false;
   if (draftConfig.src.type === 'file') {
-    if (!draftConfig.src.fileId) return false;
+    if (!draftConfig.src.file_id) return false;
   } else if (draftConfig.src.type === 'url') {
     if (!draftConfig.src.url) return false;
     if (!validateUrl(draftConfig.src.url).isValid) return false;
