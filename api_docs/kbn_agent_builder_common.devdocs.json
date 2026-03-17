@@ -21,6 +21,132 @@
     "functions": [
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.canChangeAgentVisibility",
+        "type": "Function",
+        "tags": [],
+        "label": "canChangeAgentVisibility",
+        "description": [],
+        "signature": [
+          "({ agentId, owner, currentUser, isAdmin, }: { agentId?: string | undefined; owner?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | undefined; currentUser?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | null | undefined; isAdmin: boolean; }) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.canChangeAgentVisibility.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  agentId,\n  owner,\n  currentUser,\n  isAdmin,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+            "lineNumber": 36,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.canChangeAgentVisibility.$1.agentId",
+                "type": "string",
+                "tags": [],
+                "label": "agentId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 37,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.canChangeAgentVisibility.$1.owner",
+                "type": "Object",
+                "tags": [],
+                "label": "owner",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 38,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.canChangeAgentVisibility.$1.currentUser",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "currentUser",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 39,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.canChangeAgentVisibility.$1.isAdmin",
+                "type": "boolean",
+                "tags": [],
+                "label": "isAdmin",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 40,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.createAgentBuilderError",
         "type": "Function",
         "tags": [],
@@ -54,7 +180,7 @@
           ", Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 50,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -76,7 +202,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -93,7 +219,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -110,7 +236,7 @@
               "Record<string, any> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -138,7 +264,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 167,
+        "lineNumber": 168,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -151,7 +277,7 @@
             "label": "{\n  agentId,\n  customMessage,\n  meta = {},\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 171,
+            "lineNumber": 172,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -164,7 +290,7 @@
                 "label": "agentId",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 172,
+                "lineNumber": 173,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -180,7 +306,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 173,
+                "lineNumber": 174,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -196,7 +322,7 @@
                   "Record<string, any> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 174,
+                "lineNumber": 175,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -225,7 +351,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 89,
+        "lineNumber": 90,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -241,7 +367,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -258,7 +384,7 @@
               "Record<string, any>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -286,7 +412,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 198,
+        "lineNumber": 199,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -299,7 +425,7 @@
             "label": "{\n  conversationId,\n  customMessage,\n  meta = {},\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 202,
+            "lineNumber": 203,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -312,7 +438,7 @@
                 "label": "conversationId",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 203,
+                "lineNumber": 204,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -328,7 +454,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 204,
+                "lineNumber": 205,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -344,7 +470,7 @@
                   "Record<string, any> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 205,
+                "lineNumber": 206,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -389,7 +515,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 327,
+        "lineNumber": 357,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -405,7 +531,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 328,
+            "lineNumber": 358,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -428,7 +554,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 329,
+            "lineNumber": 359,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -445,7 +571,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 330,
+            "lineNumber": 360,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -468,7 +594,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 331,
+            "lineNumber": 361,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -485,7 +611,7 @@
               "Record<string, any>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 332,
+            "lineNumber": 362,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -513,7 +639,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 70,
+        "lineNumber": 71,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -529,7 +655,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 71,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -546,11 +672,98 @@
               "Record<string, any> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 72,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.createPluginNotFoundError",
+        "type": "Function",
+        "tags": [],
+        "label": "createPluginNotFoundError",
+        "description": [],
+        "signature": [
+          "({ pluginId, customMessage, meta, }: { pluginId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderPluginNotFoundError",
+            "text": "AgentBuilderPluginNotFoundError"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+        "lineNumber": 228,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.createPluginNotFoundError.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  pluginId,\n  customMessage,\n  meta = {},\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+            "lineNumber": 232,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.createPluginNotFoundError.$1.pluginId",
+                "type": "string",
+                "tags": [],
+                "label": "pluginId",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+                "lineNumber": 233,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.createPluginNotFoundError.$1.customMessage",
+                "type": "string",
+                "tags": [],
+                "label": "customMessage",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+                "lineNumber": 234,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.createPluginNotFoundError.$1.meta",
+                "type": "Object",
+                "tags": [],
+                "label": "meta",
+                "description": [],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+                "lineNumber": 235,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -574,7 +787,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 227,
+        "lineNumber": 257,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -590,7 +803,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 228,
+            "lineNumber": 258,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -607,7 +820,7 @@
               "Record<string, any> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 229,
+            "lineNumber": 259,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -635,7 +848,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 139,
+        "lineNumber": 140,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -648,7 +861,7 @@
             "label": "{\n  skillId,\n  customMessage,\n  meta = {},\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 143,
+            "lineNumber": 144,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -661,7 +874,7 @@
                 "label": "skillId",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 144,
+                "lineNumber": 145,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -677,7 +890,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 145,
+                "lineNumber": 146,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -693,7 +906,7 @@
                   "Record<string, any> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 146,
+                "lineNumber": 147,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -722,7 +935,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 111,
+        "lineNumber": 112,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -735,7 +948,7 @@
             "label": "{\n  toolId,\n  customMessage,\n  meta = {},\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 115,
+            "lineNumber": 116,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -748,7 +961,7 @@
                 "label": "toolId",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 116,
+                "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -764,7 +977,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 117,
+                "lineNumber": 118,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -780,7 +993,7 @@
                   "Record<string, any> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 118,
+                "lineNumber": 119,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -811,7 +1024,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 250,
+        "lineNumber": 280,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -827,7 +1040,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 251,
+            "lineNumber": 281,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -841,7 +1054,7 @@
             "label": "meta",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 252,
+            "lineNumber": 282,
             "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false,
@@ -857,7 +1070,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 252,
+                "lineNumber": 282,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false
@@ -888,7 +1101,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 275,
+        "lineNumber": 305,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -904,7 +1117,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 276,
+            "lineNumber": 306,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -918,7 +1131,7 @@
             "label": "meta",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 277,
+            "lineNumber": 307,
             "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false,
@@ -934,7 +1147,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 277,
+                "lineNumber": 307,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1138,6 +1351,292 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.hasAgentReadAccess",
+        "type": "Function",
+        "tags": [],
+        "label": "hasAgentReadAccess",
+        "description": [
+          "Legacy agents without a visibility field are treated as Public."
+        ],
+        "signature": [
+          "({ visibility, owner, currentUser, isAdmin, }: { visibility?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentVisibility",
+            "text": "AgentVisibility"
+          },
+          " | undefined; owner?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | undefined; currentUser?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | null | undefined; isAdmin: boolean; }) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.hasAgentReadAccess.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  visibility,\n  owner,\n  currentUser,\n  isAdmin,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+            "lineNumber": 51,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentReadAccess.$1.visibility",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "visibility",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.AgentVisibility",
+                    "text": "AgentVisibility"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 52,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentReadAccess.$1.owner",
+                "type": "Object",
+                "tags": [],
+                "label": "owner",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 53,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentReadAccess.$1.currentUser",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "currentUser",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 54,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentReadAccess.$1.isAdmin",
+                "type": "boolean",
+                "tags": [],
+                "label": "isAdmin",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 55,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.hasAgentWriteAccess",
+        "type": "Function",
+        "tags": [],
+        "label": "hasAgentWriteAccess",
+        "description": [
+          "Legacy agents without a visibility field are treated as Public."
+        ],
+        "signature": [
+          "({ visibility, owner, currentUser, isAdmin, }: { visibility?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentVisibility",
+            "text": "AgentVisibility"
+          },
+          " | undefined; owner?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | undefined; currentUser?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | null | undefined; isAdmin: boolean; }) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.hasAgentWriteAccess.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  visibility,\n  owner,\n  currentUser,\n  isAdmin,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+            "lineNumber": 71,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentWriteAccess.$1.visibility",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "visibility",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.AgentVisibility",
+                    "text": "AgentVisibility"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 72,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentWriteAccess.$1.owner",
+                "type": "Object",
+                "tags": [],
+                "label": "owner",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 73,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentWriteAccess.$1.currentUser",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "currentUser",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 74,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.hasAgentWriteAccess.$1.isAdmin",
+                "type": "boolean",
+                "tags": [],
+                "label": "isAdmin",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 75,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.hasSkillSelectionWildcard",
         "type": "Function",
         "tags": [],
@@ -1219,7 +1718,7 @@
           ", Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1235,7 +1734,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1274,7 +1773,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 295,
+        "lineNumber": 325,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1290,7 +1789,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 295,
+            "lineNumber": 325,
             "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
@@ -1320,7 +1819,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 163,
+        "lineNumber": 164,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1336,11 +1835,108 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 163,
+            "lineNumber": 164,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.isAgentOwner",
+        "type": "Function",
+        "tags": [],
+        "label": "isAgentOwner",
+        "description": [],
+        "signature": [
+          "({ owner, currentUser, }: { owner?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | undefined; currentUser?: ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          " | null | undefined; }) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.isAgentOwner.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  owner,\n  currentUser,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+            "lineNumber": 15,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.isAgentOwner.$1.owner",
+                "type": "Object",
+                "tags": [],
+                "label": "owner",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 16,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.isAgentOwner.$1.currentUser",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "currentUser",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.UserIdAndName",
+                    "text": "UserIdAndName"
+                  },
+                  " | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/access_control.ts",
+                "lineNumber": 17,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1366,7 +1962,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 85,
+        "lineNumber": 86,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1382,7 +1978,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 85,
+            "lineNumber": 86,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
@@ -1540,7 +2136,7 @@
           ".contextLengthExceeded>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 313,
+        "lineNumber": 343,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1556,7 +2152,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 314,
+            "lineNumber": 344,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1645,7 +2241,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 192,
+        "lineNumber": 193,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1661,7 +2257,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 193,
+            "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1750,7 +2346,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 345,
+        "lineNumber": 375,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1766,7 +2362,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 345,
+            "lineNumber": 375,
             "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
@@ -1789,7 +2385,7 @@
           "(toolName: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts",
-        "lineNumber": 36,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1805,7 +2401,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts",
-            "lineNumber": 36,
+            "lineNumber": 38,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -1835,7 +2431,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 66,
+        "lineNumber": 67,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1851,7 +2447,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -1971,6 +2567,52 @@
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/events.ts",
             "lineNumber": 189,
             "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.isPluginNotFoundError",
+        "type": "Function",
+        "tags": [],
+        "label": "isPluginNotFoundError",
+        "description": [
+          "\nChecks if the given error is a {@link AgentBuilderPluginNotFoundError}"
+        ],
+        "signature": [
+          "(err: unknown) => err is ",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderPluginNotFoundError",
+            "text": "AgentBuilderPluginNotFoundError"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+        "lineNumber": 224,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.isPluginNotFoundError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+            "lineNumber": 224,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2169,7 +2811,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 223,
+        "lineNumber": 253,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2185,7 +2827,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 223,
+            "lineNumber": 253,
             "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
@@ -2313,7 +2955,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 135,
+        "lineNumber": 136,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2329,7 +2971,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 135,
+            "lineNumber": 136,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -2535,7 +3177,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 107,
+        "lineNumber": 108,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2551,7 +3193,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 107,
+            "lineNumber": 108,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -2776,7 +3418,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 243,
+        "lineNumber": 273,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2792,7 +3434,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 243,
+            "lineNumber": 273,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -2822,7 +3464,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 266,
+        "lineNumber": 296,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2838,7 +3480,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 267,
+            "lineNumber": 297,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3121,7 +3763,7 @@
         "label": "AgentAnswerStepConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 139,
+        "lineNumber": 134,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3139,7 +3781,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 140,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3157,7 +3799,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 144,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3521,7 +4163,7 @@
         "label": "AgentConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 86,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3539,7 +4181,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 87,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3557,7 +4199,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 94,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3582,7 +4224,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 101,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3607,7 +4249,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 106,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3625,7 +4267,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 112,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3650,7 +4292,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 117,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3675,7 +4317,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 122,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3693,7 +4335,7 @@
           "\nDefinition of a agentBuilder agent."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 31,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3708,7 +4350,7 @@
               "\nId of the agent"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 35,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3732,7 +4374,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 39,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3747,7 +4389,7 @@
               "\nHuman-readable name for the agent."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 43,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3762,7 +4404,7 @@
               "\nHuman-readable description for the agent."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 47,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3777,7 +4419,7 @@
               "\nread-only attribute.\nBuilt-in agents are readonly, user-created agent are not."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 51,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3802,7 +4444,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 56,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3827,7 +4469,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 60,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3845,7 +4487,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 64,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3863,7 +4505,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 68,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3881,7 +4523,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 72,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3899,7 +4541,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 76,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3923,7 +4565,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 80,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3939,7 +4581,7 @@
         "label": "AgentResearchStepConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 128,
+        "lineNumber": 123,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3957,7 +4599,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 129,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3975,7 +4617,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 133,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5175,6 +5817,312 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.ParsedPluginArchive",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParsedPluginArchive",
+        "description": [
+          "\nResult of parsing and validating a Claude plugin zip archive."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedPluginArchive.manifest",
+            "type": "Object",
+            "tags": [],
+            "label": "manifest",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.PluginManifest",
+                "text": "PluginManifest"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedPluginArchive.skills",
+            "type": "Array",
+            "tags": [],
+            "label": "skills",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ParsedSkillFile",
+                "text": "ParsedSkillFile"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedPluginArchive.unmanagedAssets",
+            "type": "Object",
+            "tags": [],
+            "label": "unmanagedAssets",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.UnmanagedPluginAssets",
+                "text": "UnmanagedPluginAssets"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.ParsedSkillFile",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParsedSkillFile",
+        "description": [
+          "\nA fully parsed skill from a plugin archive."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedSkillFile.dirName",
+            "type": "string",
+            "tags": [],
+            "label": "dirName",
+            "description": [
+              "Directory name of the skill within the archive (e.g. `pdf-processor`)"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedSkillFile.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "Frontmatter metadata"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ParsedSkillMeta",
+                "text": "ParsedSkillMeta"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedSkillFile.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [
+              "Markdown body content (without frontmatter)"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedSkillFile.referencedFiles",
+            "type": "Array",
+            "tags": [],
+            "label": "referencedFiles",
+            "description": [
+              "Sibling files found alongside SKILL.md"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ParsedSkillReferencedFile",
+                "text": "ParsedSkillReferencedFile"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.ParsedSkillMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParsedSkillMeta",
+        "description": [
+          "\nMetadata extracted from the YAML frontmatter of a skill's SKILL.md file."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedSkillMeta.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedSkillMeta.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedSkillMeta.disableModelInvocation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableModelInvocation",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedSkillMeta.allowedTools",
+            "type": "Array",
+            "tags": [],
+            "label": "allowedTools",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.ParsedSkillReferencedFile",
+        "type": "Interface",
+        "tags": [],
+        "label": "ParsedSkillReferencedFile",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedSkillReferencedFile.relativePath",
+            "type": "string",
+            "tags": [],
+            "label": "relativePath",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.ParsedSkillReferencedFile.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.PersistedSkillCreateRequest",
         "type": "Interface",
         "tags": [],
@@ -5183,7 +6131,7 @@
           "\nShape for creating a persisted (user-created) skill."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-        "lineNumber": 56,
+        "lineNumber": 68,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5198,7 +6146,7 @@
               "\nUnique identifier for the skill."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-            "lineNumber": 60,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5213,7 +6161,7 @@
               "\nName of the skill."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-            "lineNumber": 64,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5228,7 +6176,7 @@
               "\nDescription of what the skill does."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-            "lineNumber": 68,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5243,7 +6191,7 @@
               "\nSkill instructions content (markdown)."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-            "lineNumber": 72,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5268,7 +6216,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-            "lineNumber": 76,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5286,7 +6234,25 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-            "lineNumber": 80,
+            "lineNumber": 92,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PersistedSkillCreateRequest.plugin_id",
+            "type": "string",
+            "tags": [],
+            "label": "plugin_id",
+            "description": [
+              "\nIf this skill is managed by a plugin, the plugin name."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5304,7 +6270,7 @@
           "\nShape for updating a persisted (user-created) skill."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-        "lineNumber": 86,
+        "lineNumber": 102,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5322,7 +6288,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-            "lineNumber": 90,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5340,7 +6306,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-            "lineNumber": 94,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5358,7 +6324,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-            "lineNumber": 98,
+            "lineNumber": 114,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5383,7 +6349,7 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-            "lineNumber": 102,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5401,7 +6367,609 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
-            "lineNumber": 106,
+            "lineNumber": 122,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.PluginDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginDefinition",
+        "description": [
+          "\nPublic API-facing representation of an installed plugin."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginDefinition.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginDefinition.manifest",
+            "type": "Object",
+            "tags": [],
+            "label": "manifest",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.PluginManifestMetadata",
+                "text": "PluginManifestMetadata"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginDefinition.source_url",
+            "type": "string",
+            "tags": [],
+            "label": "source_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginDefinition.skill_ids",
+            "type": "Array",
+            "tags": [],
+            "label": "skill_ids",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginDefinition.unmanaged_assets",
+            "type": "Object",
+            "tags": [],
+            "label": "unmanaged_assets",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.UnmanagedPluginAssets",
+                "text": "UnmanagedPluginAssets"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginDefinition.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginDefinition.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.PluginManifest",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginManifest",
+        "description": [
+          "\nClaude plugin manifest schema.\n\nFollows the spec at https://code.claude.com/docs/en/plugins-reference#plugin-manifest-schema\n`name` is the only required field."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.author",
+            "type": "Object",
+            "tags": [],
+            "label": "author",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.PluginManifestAuthor",
+                "text": "PluginManifestAuthor"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.homepage",
+            "type": "string",
+            "tags": [],
+            "label": "homepage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.repository",
+            "type": "string",
+            "tags": [],
+            "label": "repository",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.license",
+            "type": "string",
+            "tags": [],
+            "label": "license",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.keywords",
+            "type": "Array",
+            "tags": [],
+            "label": "keywords",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.commands",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "commands",
+            "description": [],
+            "signature": [
+              "string | string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.agents",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "agents",
+            "description": [],
+            "signature": [
+              "string | string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.skills",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "skills",
+            "description": [],
+            "signature": [
+              "string | string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.hooks",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hooks",
+            "description": [],
+            "signature": [
+              "string | string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.mcpServers",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mcpServers",
+            "description": [],
+            "signature": [
+              "string | string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.outputStyles",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "outputStyles",
+            "description": [],
+            "signature": [
+              "string | string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifest.lspServers",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "lspServers",
+            "description": [],
+            "signature": [
+              "string | string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/parsing.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.PluginManifestAuthor",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginManifestAuthor",
+        "description": [
+          "\nAuthor information from the plugin manifest."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifestAuthor.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifestAuthor.email",
+            "type": "string",
+            "tags": [],
+            "label": "email",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifestAuthor.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.PluginManifestMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginManifestMetadata",
+        "description": [
+          "\nManifest metadata stored alongside a persisted plugin.\nContains the optional manifest fields that are not promoted to\ntop-level plugin fields."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifestMetadata.author",
+            "type": "Object",
+            "tags": [],
+            "label": "author",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.PluginManifestAuthor",
+                "text": "PluginManifestAuthor"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifestMetadata.homepage",
+            "type": "string",
+            "tags": [],
+            "label": "homepage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifestMetadata.repository",
+            "type": "string",
+            "tags": [],
+            "label": "repository",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifestMetadata.license",
+            "type": "string",
+            "tags": [],
+            "label": "license",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PluginManifestMetadata.keywords",
+            "type": "Array",
+            "tags": [],
+            "label": "keywords",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5538,6 +7106,24 @@
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
             "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.PublicSkillDefinition.plugin_id",
+            "type": "string",
+            "tags": [],
+            "label": "plugin_id",
+            "description": [
+              "\nIf this skill was installed from a plugin, the plugin name."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6217,6 +7803,48 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.TimeRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeRange",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/attachment_types.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.TimeRange.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/attachment_types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.TimeRange.to",
+            "type": "string",
+            "tags": [],
+            "label": "to",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/attachment_types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.ToolCallEventData",
         "type": "Interface",
         "tags": [],
@@ -6870,6 +8498,120 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.UnmanagedPluginAssets",
+        "type": "Interface",
+        "tags": [],
+        "label": "UnmanagedPluginAssets",
+        "description": [
+          "\nAssets present in the plugin archive that are not yet supported for installation.\nEach field contains the list of file paths found for that asset type."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.UnmanagedPluginAssets.commands",
+            "type": "Array",
+            "tags": [],
+            "label": "commands",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.UnmanagedPluginAssets.agents",
+            "type": "Array",
+            "tags": [],
+            "label": "agents",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.UnmanagedPluginAssets.hooks",
+            "type": "Array",
+            "tags": [],
+            "label": "hooks",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.UnmanagedPluginAssets.mcp_servers",
+            "type": "Array",
+            "tags": [],
+            "label": "mcp_servers",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.UnmanagedPluginAssets.output_styles",
+            "type": "Array",
+            "tags": [],
+            "label": "output_styles",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.UnmanagedPluginAssets.lsp_servers",
+            "type": "Array",
+            "tags": [],
+            "label": "lsp_servers",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/plugins/plugin_definition.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.UpdateOriginResponse",
         "type": "Interface",
         "tags": [],
@@ -7213,8 +8955,8 @@
         "tags": [],
         "label": "AgentVisibility",
         "description": [],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 20,
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7334,7 +9076,7 @@
         "label": "ToolResultType",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 10,
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7407,7 +9149,7 @@
           "<ErrCode>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 282,
+        "lineNumber": 312,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7441,7 +9183,7 @@
           ".agentNotFound, Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 155,
+        "lineNumber": 156,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7475,7 +9217,7 @@
           ".badRequest, Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 77,
+        "lineNumber": 78,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7509,7 +9251,7 @@
           ".conversationNotFound, Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 183,
+        "lineNumber": 184,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7528,7 +9270,7 @@
           "\"elastic-ai-agent\""
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 29,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7554,7 +9296,7 @@
           "<TCode, TMeta>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 32,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7605,7 +9347,7 @@
           ".hookExecutionError, Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 321,
+        "lineNumber": 351,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7639,7 +9381,41 @@
           ".internalError, Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 58,
+        "lineNumber": 59,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentBuilderPluginNotFoundError",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentBuilderPluginNotFoundError",
+        "description": [
+          "\nError thrown when trying to retrieve a plugin not present in the current context."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentBuilderErrorCode",
+            "text": "AgentBuilderErrorCode"
+          },
+          ".pluginNotFound, Record<string, any>>"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+        "lineNumber": 215,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7691,7 +9467,7 @@
           ".requestAborted, Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 214,
+        "lineNumber": 244,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7743,7 +9519,7 @@
           ".skillNotFound, Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 127,
+        "lineNumber": 128,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7777,7 +9553,7 @@
           ".toolNotFound, Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 99,
+        "lineNumber": 100,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7811,7 +9587,7 @@
           ".workflowAborted, Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 234,
+        "lineNumber": 264,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7845,7 +9621,7 @@
           ".workflowExecutionFailed, Record<string, any>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 257,
+        "lineNumber": 287,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7896,7 +9672,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 150,
+        "lineNumber": 145,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7912,7 +9688,7 @@
           "\nThe type of an agent.\nOnly one type for now, this enum is mostly here for future-proofing."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8488,7 +10264,7 @@
           ".error, Object>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 149,
+        "lineNumber": 152,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8514,7 +10290,7 @@
           ".esqlResults, Object>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 88,
+        "lineNumber": 91,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8814,7 +10590,7 @@
           ".other, T>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 136,
+        "lineNumber": 139,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8833,8 +10609,35 @@
           "string[]"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts",
-        "lineNumber": 24,
+        "lineNumber": 25,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.PublicSkillSummary",
+        "type": "Type",
+        "tags": [],
+        "label": "PublicSkillSummary",
+        "description": [
+          "\nLightweight version of {@link PublicSkillDefinition} used for listing.\nOmits heavy `content` and `referenced_content` fields; carries only the count."
+        ],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.PublicSkillDefinition",
+            "text": "PublicSkillDefinition"
+          },
+          ", \"content\" | \"referenced_content\"> & { referenced_content_count: number; }"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/definition.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8859,7 +10662,7 @@
           ".query, Object>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 106,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8974,7 +10777,7 @@
           ".resource, Object>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 70,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9041,7 +10844,7 @@
           "[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 157,
+        "lineNumber": 152,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9060,7 +10863,7 @@
           ".error; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9324,7 +11127,7 @@
           "UnknownToolResult"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9481,7 +11284,7 @@
           "\nGlobal utility exposing all error utilities from a single export."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-        "lineNumber": 352,
+        "lineNumber": 382,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -9513,7 +11316,7 @@
               ", Record<string, any>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 353,
+            "lineNumber": 383,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9530,7 +11333,7 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 45,
+                "lineNumber": 46,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9555,7 +11358,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 354,
+            "lineNumber": 384,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9572,7 +11375,7 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 66,
+                "lineNumber": 67,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9597,7 +11400,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 355,
+            "lineNumber": 385,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9614,7 +11417,7 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 107,
+                "lineNumber": 108,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9639,7 +11442,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 356,
+            "lineNumber": 386,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9656,7 +11459,7 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 135,
+                "lineNumber": 136,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9681,7 +11484,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 357,
+            "lineNumber": 387,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9698,7 +11501,7 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 163,
+                "lineNumber": 164,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9723,7 +11526,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 358,
+            "lineNumber": 388,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9740,8 +11543,50 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 193,
+                "lineNumber": 194,
                 "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.AgentBuilderErrorUtils.isPluginNotFoundError",
+            "type": "Function",
+            "tags": [],
+            "label": "isPluginNotFoundError",
+            "description": [],
+            "signature": [
+              "(err: unknown) => err is ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.AgentBuilderPluginNotFoundError",
+                "text": "AgentBuilderPluginNotFoundError"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+            "lineNumber": 389,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.AgentBuilderErrorUtils.isPluginNotFoundError.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "err",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+                "lineNumber": 224,
+                "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -9765,7 +11610,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 359,
+            "lineNumber": 390,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9782,7 +11627,7 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 243,
+                "lineNumber": 273,
                 "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9807,7 +11652,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 360,
+            "lineNumber": 391,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9824,7 +11669,7 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 267,
+                "lineNumber": 297,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9858,7 +11703,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 361,
+            "lineNumber": 392,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9875,7 +11720,7 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 295,
+                "lineNumber": 325,
                 "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9909,7 +11754,7 @@
               ".contextLengthExceeded>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 362,
+            "lineNumber": 393,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9926,7 +11771,7 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 314,
+                "lineNumber": 344,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9951,7 +11796,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 363,
+            "lineNumber": 394,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -9965,7 +11810,7 @@
                 "label": "message",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 71,
+                "lineNumber": 72,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -9981,7 +11826,7 @@
                   "Record<string, any> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 72,
+                "lineNumber": 73,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10006,7 +11851,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 364,
+            "lineNumber": 395,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10023,7 +11868,7 @@
                   "{ toolId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 111,
+                "lineNumber": 112,
                 "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10048,7 +11893,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 365,
+            "lineNumber": 396,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10065,7 +11910,7 @@
                   "{ skillId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 139,
+                "lineNumber": 140,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10090,7 +11935,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 366,
+            "lineNumber": 397,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10107,7 +11952,7 @@
                   "{ agentId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 167,
+                "lineNumber": 168,
                 "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10132,7 +11977,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 367,
+            "lineNumber": 398,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10149,8 +11994,50 @@
                   "{ conversationId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 198,
+                "lineNumber": 199,
                 "columnNumber": 49,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.AgentBuilderErrorUtils.createPluginNotFoundError",
+            "type": "Function",
+            "tags": [],
+            "label": "createPluginNotFoundError",
+            "description": [],
+            "signature": [
+              "({ pluginId, customMessage, meta, }: { pluginId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.AgentBuilderPluginNotFoundError",
+                "text": "AgentBuilderPluginNotFoundError"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+            "lineNumber": 399,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-common",
+                "id": "def-common.AgentBuilderErrorUtils.createPluginNotFoundError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ pluginId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
+                "lineNumber": 228,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -10174,7 +12061,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 368,
+            "lineNumber": 400,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10188,7 +12075,7 @@
                 "label": "message",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 251,
+                "lineNumber": 281,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10204,7 +12091,7 @@
                   "{ workflow?: string | undefined; } | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 252,
+                "lineNumber": 282,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10229,7 +12116,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 369,
+            "lineNumber": 401,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10243,7 +12130,7 @@
                 "label": "message",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 276,
+                "lineNumber": 306,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10259,7 +12146,7 @@
                   "{ workflow?: string | undefined; } | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 277,
+                "lineNumber": 307,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10295,7 +12182,7 @@
               "<ErrCode>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 370,
+            "lineNumber": 402,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10309,7 +12196,7 @@
                 "label": "message",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 300,
+                "lineNumber": 330,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10325,7 +12212,7 @@
                   "ErrCode"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 301,
+                "lineNumber": 331,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10341,7 +12228,7 @@
                   "ExecutionErrorMetaMap[ErrCode]"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 302,
+                "lineNumber": 332,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10382,7 +12269,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 371,
+            "lineNumber": 403,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10396,7 +12283,7 @@
                 "label": "message",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 328,
+                "lineNumber": 358,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10418,7 +12305,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 329,
+                "lineNumber": 359,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10431,7 +12318,7 @@
                 "label": "hookId",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 330,
+                "lineNumber": 360,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10453,7 +12340,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 331,
+                "lineNumber": 361,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10469,7 +12356,7 @@
                   "{ [x: string]: any; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 332,
+                "lineNumber": 362,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10494,7 +12381,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-            "lineNumber": 372,
+            "lineNumber": 404,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -10511,7 +12398,7 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts",
-                "lineNumber": 345,
+                "lineNumber": 375,
                 "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false
@@ -10697,7 +12584,7 @@
           "\nList of internally used namespaces\nNote: those are not necessarily all protected."
         ],
         "signature": [
-          "{ readonly platformCore: \"platform.core\"; readonly platformDashboard: \"platform.dashboard\"; readonly filestore: \"filestore\"; readonly attachments: \"attachments\"; readonly observability: \"observability\"; readonly security: \"security\"; }"
+          "{ readonly platformCore: \"platform.core\"; readonly platformDashboard: \"platform.dashboard\"; readonly filestore: \"filestore\"; readonly attachments: \"attachments\"; readonly observability: \"observability\"; readonly security: \"security\"; readonly workflows: \"platform.workflows\"; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/namespaces.ts",
         "lineNumber": 12,
@@ -10778,6 +12665,127 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.VISIBILITY_BADGE_COLOR",
+        "type": "Object",
+        "tags": [],
+        "label": "VISIBILITY_BADGE_COLOR",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VISIBILITY_BADGE_COLOR.AgentVisibility.Private",
+            "type": "string",
+            "tags": [],
+            "label": "[AgentVisibility.Private]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VISIBILITY_BADGE_COLOR.AgentVisibility.Shared",
+            "type": "string",
+            "tags": [],
+            "label": "[AgentVisibility.Shared]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VISIBILITY_BADGE_COLOR.AgentVisibility.Public",
+            "type": "string",
+            "tags": [],
+            "label": "[AgentVisibility.Public]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.VISIBILITY_ICON",
+        "type": "Object",
+        "tags": [],
+        "label": "VISIBILITY_ICON",
+        "description": [
+          "Map from agent visibility to the icon used in the UI."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VISIBILITY_ICON.AgentVisibility.Public",
+            "type": "string",
+            "tags": [],
+            "label": "[AgentVisibility.Public]",
+            "description": [],
+            "signature": [
+              "\"globe\""
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VISIBILITY_ICON.AgentVisibility.Shared",
+            "type": "string",
+            "tags": [],
+            "label": "[AgentVisibility.Shared]",
+            "description": [],
+            "signature": [
+              "\"users\""
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.VISIBILITY_ICON.AgentVisibility.Private",
+            "type": "string",
+            "tags": [],
+            "label": "[AgentVisibility.Private]",
+            "description": [],
+            "signature": [
+              "\"lock\""
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/visibility.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ]
