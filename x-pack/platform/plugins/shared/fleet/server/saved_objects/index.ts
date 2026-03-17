@@ -354,6 +354,7 @@ export const getSavedObjectTypes = (
           has_agent_version_conditions: { type: 'boolean' },
           min_agent_version: { type: 'keyword' },
           package_agent_version_conditions: { type: 'flattened', index: false },
+          package_agent_version_conditions_v2: { dynamic: false, properties: {} },
         },
       },
       migrations: {
@@ -540,6 +541,7 @@ export const getSavedObjectTypes = (
           has_agent_version_conditions: { type: 'boolean' },
           min_agent_version: { type: 'keyword' },
           package_agent_version_conditions: { type: 'flattened', index: false },
+          package_agent_version_conditions_v2: { dynamic: false, properties: {} },
         },
       },
       modelVersions: {
