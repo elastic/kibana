@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -44,39 +44,30 @@ export const AttachmentRunbookGroup: React.FC = () => {
 
   const [isRunbookModalOpen, setIsRunbookModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [isAttachmentsOpen, setIsAttachmentsOpen] = useState(false);
 
-  const openRunbookModal = useCallback(() => {
+  const openRunbookModal = () => {
     setIsRunbookModalOpen(true);
-  }, []);
+  };
 
-  const closeRunbookModal = useCallback(() => {
+  const closeRunbookModal = () => {
     setIsRunbookModalOpen(false);
-  }, []);
+  };
 
-  const onAddRunbook = useCallback(() => {
-    openRunbookModal();
-  }, [openRunbookModal]);
-
-  const openDeleteConfirm = useCallback(() => {
+  const openDeleteConfirm = () => {
     setIsDeleteConfirmOpen(true);
-  }, []);
+  };
 
-  const closeDeleteConfirm = useCallback(() => {
+  const closeDeleteConfirm = () => {
     setIsDeleteConfirmOpen(false);
-  }, []);
+  };
 
-  const onConfirmDeleteRunbook = useCallback(() => {
+  const onConfirmDeleteRunbook = () => {
     const nextArtifacts = (artifacts ?? []).filter(
       (artifact) => artifact.type !== RUNBOOK_ARTIFACT_TYPE
     );
     setValue('artifacts', nextArtifacts);
     closeDeleteConfirm();
-  }, [artifacts, closeDeleteConfirm, setValue]);
-
-  const toggleAttachmentsOpen = useCallback(() => {
-    setIsAttachmentsOpen((prev) => !prev);
-  }, []);
+  };
 
   return (
     <>
@@ -84,13 +75,12 @@ export const AttachmentRunbookGroup: React.FC = () => {
         title={i18n.translate('xpack.alertingV2.ruleForm.attachmentsGroupTitle', {
           defaultMessage: 'Attachments',
         })}
-        isOpen={isAttachmentsOpen}
-        onToggle={toggleAttachmentsOpen}
+        defaultOpen={false}
       >
         {!hasRunbook ? (
           <EuiButton
             iconType="plusInCircle"
-            onClick={onAddRunbook}
+            onClick={openRunbookModal}
             size="s"
             data-test-subj="addRunbookButton"
             color="text"
