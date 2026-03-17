@@ -53,7 +53,7 @@ describe('EventOverviewFlyoutContent', () => {
       dataView: mockDataView,
     });
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Loading, null, jest.fn()]);
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
   });
 
   it('fetches clicked document using document id and index', () => {
@@ -75,7 +75,7 @@ describe('EventOverviewFlyoutContent', () => {
 
     const { getByTestId } = renderEventOverviewFlyoutContent();
 
-    expect(getByTestId('analyzer-event-overview-loading')).toBeInTheDocument();
+    expect(getByTestId('document-overview-wrapper-loading')).toBeInTheDocument();
     expect(useEsDocSearch).toHaveBeenCalledWith(
       expect.objectContaining({
         skip: true,
@@ -83,8 +83,38 @@ describe('EventOverviewFlyoutContent', () => {
     );
   });
 
+  it('renders loading while alerts privileges are loading for an alert', () => {
+    const alertHit = createAlertHit();
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, alertHit, jest.fn()]);
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
+
+    const { getByTestId } = renderEventOverviewFlyoutContent();
+
+    expect(getByTestId('document-overview-wrapper-loading')).toBeInTheDocument();
+  });
+
+  it('does not render loading when alerts privileges are loading but document is not an alert', () => {
+    const nonAlertHit: DataTableRecord = {
+      id: '2',
+      raw: {},
+      flattened: { 'event.kind': 'event' },
+      isAnchor: false,
+    } as DataTableRecord;
+    (useEsDocSearch as jest.Mock).mockReturnValue([
+      ElasticRequestState.Found,
+      nonAlertHit,
+      jest.fn(),
+    ]);
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
+
+    const { getByTestId, queryByTestId } = renderEventOverviewFlyoutContent();
+
+    expect(queryByTestId('document-overview-wrapper-loading')).not.toBeInTheDocument();
+    expect(getByTestId('overviewTabStub')).toBeInTheDocument();
+  });
+
   it('renders OverviewTab when document is found', () => {
-    const hit = { id: '1' } as DataTableRecord;
+    const hit = { id: '1', raw: {}, flattened: { 'event.kind': 'event' } } as DataTableRecord;
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, hit, jest.fn()]);
 
     const { getByTestId } = renderEventOverviewFlyoutContent();
@@ -102,7 +132,7 @@ describe('EventOverviewFlyoutContent', () => {
 
     const { getByTestId } = renderEventOverviewFlyoutContent();
 
-    expect(getByTestId('analyzer-event-overview-not-found')).toBeInTheDocument();
+    expect(getByTestId('document-overview-wrapper-not-found')).toBeInTheDocument();
   });
 
   it('renders error state when document fetch fails', () => {
@@ -110,13 +140,13 @@ describe('EventOverviewFlyoutContent', () => {
 
     const { getByTestId } = renderEventOverviewFlyoutContent();
 
-    expect(getByTestId('analyzer-event-overview-fetch-error')).toBeInTheDocument();
+    expect(getByTestId('document-overview-fetch-error')).toBeInTheDocument();
   });
 
   it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
     const alertHit = createAlertHit();
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, alertHit, jest.fn()]);
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: false });
 
     const { getByTestId, queryByTestId } = renderEventOverviewFlyoutContent();
 

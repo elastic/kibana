@@ -6,10 +6,9 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import { type DataTableRecord } from '@kbn/discover-utils';
+import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import React, { memo } from 'react';
-import { isAlert } from '../../../flyout/shared/utils/document_utils';
+import React, { memo, useMemo } from 'react';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { ExpandableSection } from '../../shared/components/expandable_section';
@@ -43,6 +42,8 @@ export interface AboutSectionProps {
  * For all other events, it shows the event kind description, a list of event categories and event renderer.
  */
 export const AboutSection = memo(({ hit }: AboutSectionProps) => {
+  const isAlert = useMemo(() => (getFieldValue(hit, 'event.kind') as string) === 'signal', [hit]);
+
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
     title: LOCAL_STORAGE_SECTION_KEY,
@@ -58,7 +59,7 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
       sectionId={LOCAL_STORAGE_SECTION_KEY}
       title={ABOUT_SECTION_TITLE}
     >
-      {isAlert(hit) ? (
+      {isAlert ? (
         <>
           <EuiFlexItem grow={false}>
             <AlertDescription hit={hit} onShowRuleSummary={undefined} />

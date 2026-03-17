@@ -28,7 +28,7 @@ describe('<OverviewTab />', () => {
   });
 
   it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
-    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false });
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: false });
     const alertHit = createAlertHit();
 
     const { getByTestId } = render(
@@ -38,5 +38,19 @@ describe('<OverviewTab />', () => {
     );
 
     expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
+  });
+
+  it('renders loading while alerts privileges are loading for an alert', () => {
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
+    const alertHit = createAlertHit();
+
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <OverviewTab hit={alertHit} renderCellActions={jest.fn()} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('document-overview-loading')).toBeInTheDocument();
+    expect(queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
   });
 });

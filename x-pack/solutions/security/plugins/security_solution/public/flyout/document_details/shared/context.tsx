@@ -9,6 +9,7 @@ import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-pl
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { useEventDetails } from './hooks/use_event_details';
 import { FlyoutError } from '../../shared/components/flyout_error';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
@@ -19,7 +20,6 @@ import type { DocumentDetailsProps } from './types';
 import type { GetFieldsData } from './hooks/use_get_fields_data';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { isAlertsIndex } from '../../shared/utils/document_utils';
 
 export interface DocumentDetailsContext {
   /**
@@ -103,7 +103,7 @@ export const DocumentDetailsProvider = memo(
     children,
   }: DocumentDetailsProviderProps) => {
     const { hasAlertsRead } = useAlertsPrivileges();
-    const missingAlertsPrivilege = !hasAlertsRead && isAlertsIndex(indexName);
+    const missingAlertsPrivilege = !hasAlertsRead && indexName?.includes(DEFAULT_ALERTS_INDEX);
     const {
       browserFields,
       dataAsNestedObject,
