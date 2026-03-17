@@ -2115,14 +2115,15 @@ paths:
                 id:
                   description: Optional custom ID for the attachment.
                   type: string
-                origin: {}
+                origin:
+                  description: Origin string (e.g. saved object ID) for by-reference attachments. When provided without data, the content is resolved once at creation time.
+                  type: string
                 type:
                   description: The type of the attachment (e.g., text, esql, visualization).
                   type: string
               required:
                 - type
                 - data
-                - origin
       responses:
         '200':
           content:
@@ -2472,13 +2473,14 @@ paths:
               updateOriginExample:
                 description: Example request for linking an attachment to a saved visualization
                 value:
-                  origin:
-                    saved_object_id: abc123
+                  origin: abc123
             schema:
               additionalProperties: false
               type: object
               properties:
-                origin: {}
+                origin:
+                  description: The origin string (e.g., saved object ID for visualizations and dashboards).
+                  type: string
               required:
                 - origin
       responses:
@@ -2494,8 +2496,7 @@ paths:
                       current_version: 1
                       description: Sales chart
                       id: att-123
-                      origin:
-                        saved_object_id: abc123
+                      origin: abc123
                       type: visualization
                       versions:
                         - content_hash: sha256-xyz
