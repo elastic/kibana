@@ -54,7 +54,84 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.getHistorySnapshotIndexPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "getHistorySnapshotIndexPattern",
+        "description": [
+          "\nReturns the index pattern matching all history snapshot indices for a namespace.\nUsed for delete and status."
+        ],
+        "signature": [
+          "(namespace: string) => string"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/asset_manager/history_snapshot_index.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.getHistorySnapshotIndexPattern.$1",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/asset_manager/history_snapshot_index.ts",
+            "lineNumber": 42,
+            "columnNumber": 48,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityStore",
+        "id": "def-server.getLatestEntitiesIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "getLatestEntitiesIndexName",
+        "description": [],
+        "signature": [
+          "(namespace: string) => `.entities.v${number}.latest.security_${string}`"
+        ],
+        "path": "x-pack/solutions/security/plugins/entity_store/server/domain/asset_manager/latest_index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityStore",
+            "id": "def-server.getLatestEntitiesIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/entity_store/server/domain/asset_manager/latest_index.ts",
+            "lineNumber": 13,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "entityStore",
@@ -64,7 +141,7 @@
         "label": "BulkObject",
         "description": [],
         "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -80,7 +157,7 @@
               "z.infer<any>"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -96,7 +173,7 @@
               "z.infer<any>"
             ],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -112,7 +189,7 @@
         "label": "BulkObjectResponse",
         "description": [],
         "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -125,7 +202,7 @@
             "label": "_id",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -138,7 +215,7 @@
             "label": "status",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -151,7 +228,7 @@
             "label": "type",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -164,7 +241,7 @@
             "label": "reason",
             "description": [],
             "path": "x-pack/solutions/security/plugins/entity_store/server/domain/crud/crud_client.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -97,12 +97,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     const {
       isSelected: isCloudConnectorSelected,
       cloudProvider,
+      accountType,
       iacTemplateUrl,
       cloudConnectorVars,
       handleCloudConnectorUpdate,
     } = useVarGroupCloudConnector({
       varGroups,
       varGroupSelections,
+      packagePolicy,
       updatePackagePolicy,
     });
 
@@ -313,7 +315,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   cloudProvider={cloudProvider}
                   templateName={packageInfo.name}
                   iacTemplateUrl={iacTemplateUrl}
-                  accountType="single-account"
+                  accountType={accountType}
                 />
               </EuiFlexItem>
             )}
