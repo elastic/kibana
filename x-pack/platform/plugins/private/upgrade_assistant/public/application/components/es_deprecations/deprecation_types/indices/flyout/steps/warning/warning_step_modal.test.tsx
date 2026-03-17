@@ -9,8 +9,9 @@ import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { EnrichedDeprecationInfo } from '../../../../../../../../../common/types';
-import type { IndexWarning, IndexWarningType } from '@kbn/reindex-service-plugin/common';
+import type { IndexWarning } from '@kbn/reindex-service-plugin/common';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { LoadingState } from '../../../../../../types';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { WarningModalStep } from './warning_step_modal';
 
@@ -29,22 +30,40 @@ jest.mock('../../../../../../../app_context', () => ({
 }));
 
 jest.mock('./warning_step_checkbox', () => ({
-  DeprecatedSettingWarningCheckbox: ({ isChecked, onChange, id }: any) => (
-    <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-testid={id} />
-  ),
-  ReplaceIndexWithAliasWarningCheckbox: ({ isChecked, onChange, id }: any) => (
-    <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-testid={id} />
-  ),
-  MakeIndexReadonlyWarningCheckbox: ({ isChecked, onChange, id }: any) => (
-    <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-testid={id} />
-  ),
+  DeprecatedSettingWarningCheckbox: ({
+    isChecked,
+    onChange,
+    id,
+  }: {
+    isChecked: boolean;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    id: string;
+  }) => <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-testid={id} />,
+  ReplaceIndexWithAliasWarningCheckbox: ({
+    isChecked,
+    onChange,
+    id,
+  }: {
+    isChecked: boolean;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    id: string;
+  }) => <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-testid={id} />,
+  MakeIndexReadonlyWarningCheckbox: ({
+    isChecked,
+    onChange,
+    id,
+  }: {
+    isChecked: boolean;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    id: string;
+  }) => <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-testid={id} />,
 }));
 
 jest.mock('../callouts', () => ({
   FollowerIndexCallout: () => <div data-testid="FollowerIndexCallout" />,
   ESTransformsTargetCallout: () => <div data-testid="ESTransformsTargetCallout" />,
   MlAnomalyCallout: () => <div data-testid="MlAnomalyCallout" />,
-  FetchFailedCallOut: ({ errorMessage }: any) => (
+  FetchFailedCallOut: ({ errorMessage }: { errorMessage: string }) => (
     <div data-testid="FetchFailedCallOut">{errorMessage}</div>
   ),
 }));
@@ -53,9 +72,9 @@ jest.mock('../../../../../common/nodes_low_disk_space', () => ({
   NodesLowSpaceCallOut: () => <div data-testid="NodesLowSpaceCallOut" />,
 }));
 
-// Define a local mock ReindexState type for testing
 const mockReindexState = {
   status: ReindexStatus.inProgress,
+  loadingState: LoadingState.Success,
   meta: {
     indexName: 'test-index',
     reindexName: 'test-index-reindex',
@@ -66,23 +85,22 @@ const mockReindexState = {
     isClosedIndex: false,
     isFollowerIndex: false,
   },
-  errorMessage: '',
-  loadingState: 'idle' as any, // type assertion workaround for tests
+  errorMessage: null,
   reindexTaskPercComplete: null, // valid value for number | null
 };
 
 const mockDeprecation: EnrichedDeprecationInfo = {
-  type: 'index' as any,
+  type: 'index_settings',
   level: 'warning',
   resolveDuringUpgrade: false,
-  url: '',
+  url: 'doc_url',
   message: 'Deprecation message',
   correctiveAction: undefined,
 };
 
 const mockWarnings: IndexWarning[] = [
-  { warningType: 'indexSetting' as IndexWarningType, meta: {}, flow: 'readonly' },
-  { warningType: 'replaceIndexWithAlias' as IndexWarningType, meta: {}, flow: 'readonly' },
+  { warningType: 'indexSetting', meta: {}, flow: 'readonly' },
+  { warningType: 'replaceIndexWithAlias', meta: {}, flow: 'readonly' },
 ];
 
 const baseProps = {
