@@ -11,7 +11,7 @@
         "label": "Content",
         "description": [],
         "signature": [
-          "({ columnId, dataView, fieldFormats, isCompressed, isSingleLine, row, shouldShowFieldHandler, }: ContentProps) => React.JSX.Element"
+          "({ columnId, dataView, fieldFormats, isCompressed, isSingleLine, row, shouldShowFieldHandler, columnsMeta, }: ContentProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/content.tsx",
         "lineNumber": 91,
@@ -24,7 +24,7 @@
             "id": "def-public.Content.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  columnId,\n  dataView,\n  fieldFormats,\n  isCompressed,\n  isSingleLine = false,\n  row,\n  shouldShowFieldHandler,\n}",
+            "label": "{\n  columnId,\n  dataView,\n  fieldFormats,\n  isCompressed,\n  isSingleLine = false,\n  row,\n  shouldShowFieldHandler,\n  columnsMeta,\n}",
             "description": [],
             "signature": [
               "ContentProps"
@@ -361,7 +361,15 @@
             "section": "def-public.FieldFormatsStart",
             "text": "FieldFormatsStart"
           },
-          "; closePopover: () => void; isCompressed?: boolean | undefined; } & { isTracesSummary?: boolean | undefined; } & ",
+          "; closePopover: () => void; isCompressed?: boolean | undefined; columnsMeta: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableColumnsMeta",
+            "text": "DataTableColumnsMeta"
+          },
+          " | undefined; } & { isTracesSummary?: boolean | undefined; } & ",
           {
             "pluginId": "@kbn/discover-contextual-components",
             "scope": "public",
@@ -836,7 +844,15 @@
             "section": "def-public.FieldFormatsStart",
             "text": "FieldFormatsStart"
           },
-          "; closePopover: () => void; isCompressed?: boolean | undefined; } & { isTracesSummary?: boolean | undefined; } & ",
+          "; closePopover: () => void; isCompressed?: boolean | undefined; columnsMeta: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableColumnsMeta",
+            "text": "DataTableColumnsMeta"
+          },
+          " | undefined; } & { isTracesSummary?: boolean | undefined; } & ",
           {
             "pluginId": "@kbn/discover-contextual-components",
             "scope": "public",
@@ -910,7 +926,15 @@
                 "section": "def-public.FieldFormatsStart",
                 "text": "FieldFormatsStart"
               },
-              "; closePopover: () => void; isCompressed?: boolean | undefined; }"
+              "; closePopover: () => void; isCompressed?: boolean | undefined; columnsMeta: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableColumnsMeta",
+                "text": "DataTableColumnsMeta"
+              },
+              " | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell.tsx",
             "lineNumber": 19,
@@ -954,7 +978,15 @@
             "section": "def-public.FieldFormatsStart",
             "text": "FieldFormatsStart"
           },
-          "; closePopover: () => void; isCompressed?: boolean | undefined; } & { isTracesSummary?: boolean | undefined; }"
+          "; closePopover: () => void; isCompressed?: boolean | undefined; columnsMeta: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.DataTableColumnsMeta",
+            "text": "DataTableColumnsMeta"
+          },
+          " | undefined; } & { isTracesSummary?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
         "lineNumber": 48,

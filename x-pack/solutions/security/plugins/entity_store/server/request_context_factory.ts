@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
   EntityStoreApiRequestHandlerContext,
+  EntityStoreCoreSetup,
   EntityStoreRequestHandlerContext,
-  EntityStoreStartPlugins,
 } from './types';
-import { AssetManager } from './domain/asset_manager';
+import { AssetManagerClient } from './domain/asset_manager';
+import { EntityMaintainersClient } from './domain/entity_maintainers';
 import { FeatureFlags } from './infra/feature_flags';
-import { EngineDescriptorClient } from './domain/definitions/saved_objects';
-import { CcsLogsExtractionClient } from './domain/ccs_logs_extraction_client';
-import { LogsExtractionClient } from './domain/logs_extraction_client';
-import { CRUDClient } from './domain/crud_client';
+import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
+import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
+import { HistorySnapshotClient } from './domain/history_snapshot';
+import { CRUDClient } from './domain/crud';
+import { ResolutionClient } from './domain/resolution';
 import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {
-  coreSetup: CoreSetup<EntityStoreStartPlugins, void>;
+  coreSetup: EntityStoreCoreSetup;
   context: Omit<EntityStoreRequestHandlerContext, 'entityStore'>;
   logger: Logger;
   request: KibanaRequest;
@@ -55,40 +56,68 @@ export async function createRequestHandlerContext({
     logger
   );
 
+  const globalStateClient = new EntityStoreGlobalStateClient(
+    core.savedObjects.client,
+    namespace,
+    logger
+  );
+
   const esClient = core.elasticsearch.client.asCurrentUser;
   const crudClient = new CRUDClient({
     logger,
     esClient,
     namespace,
   });
-  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, crudClient);
+  const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, namespace);
   const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
     esClient,
     dataViewsService,
     engineDescriptorClient,
+    globalStateClient,
     ccsLogsExtractionClient,
+  });
+
+  const historySnapshotClient = new HistorySnapshotClient({
+    logger,
+    esClient,
+    namespace,
+    globalStateClient,
   });
 
   return {
     core,
     logger,
-    assetManager: new AssetManager({
+    assetManagerClient: new AssetManagerClient({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,
       taskManager: taskManagerStart,
       engineDescriptorClient,
+      globalStateClient,
       namespace,
       isServerless,
       logsExtractionClient,
       security: startPlugins.security,
       analytics,
+      savedObjectsClient: core.savedObjects.client,
+    }),
+    entityMaintainersClient: new EntityMaintainersClient({
+      logger,
+      taskManager: taskManagerStart,
+      namespace,
+      analytics,
     }),
     crudClient,
+    resolutionClient: new ResolutionClient({
+      logger,
+      esClient: core.elasticsearch.client.asCurrentUser,
+      namespace,
+    }),
     ccsLogsExtractionClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
+    historySnapshotClient,
     security: startPlugins.security,
     namespace,
   };

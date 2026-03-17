@@ -253,6 +253,39 @@ describe('When on the package policy create page', () => {
               package: 'nginx',
               path: 'access',
             },
+            {
+              title: 'Nginx error logs',
+              release: 'ga',
+              type: 'logs',
+              package: 'nginx',
+              dataset: 'nginx.error',
+              path: 'error',
+              ingest_pipeline: 'default',
+              agent: {
+                privileges: {
+                  root: options?.dataStreamRequiresRoot,
+                },
+              },
+              streams: [
+                {
+                  input: 'logfile',
+                  title: 'Nginx error logs',
+                  template_path: 'stream.yml.hbs',
+                  vars: [
+                    {
+                      name: 'paths',
+                      type: 'text',
+                      title: 'Paths',
+                      multi: true,
+                      required: true,
+                      show_user: true,
+                      default: ['/var/log/nginx/error.log*'],
+                    },
+                  ],
+                  description: 'Collect Nginx error logs',
+                },
+              ],
+            },
           ],
           latestVersion: '1.3.0',
           keepPoliciesUpToDate: false,
@@ -337,6 +370,19 @@ describe('When on the package policy create page', () => {
                 paths: {
                   type: 'text',
                   value: ['/var/log/nginx/access.log*'],
+                },
+              },
+            },
+            {
+              data_stream: {
+                dataset: 'nginx.error',
+                type: 'logs',
+              },
+              enabled: true,
+              vars: {
+                paths: {
+                  type: 'text',
+                  value: ['/var/log/nginx/error.log*'],
                 },
               },
             },
@@ -683,7 +729,6 @@ describe('When on the package policy create page', () => {
           await act(async () => {
             fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
           });
-
           expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
             ...newPackagePolicy,
             inputs: [
@@ -698,6 +743,9 @@ describe('When on the package policy create page', () => {
                         value: ['/path/to/log'],
                       },
                     },
+                  },
+                  {
+                    ...newPackagePolicy.inputs[0].streams[1],
                   },
                 ],
               },

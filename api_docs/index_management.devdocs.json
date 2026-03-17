@@ -1203,7 +1203,7 @@
           " | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/index_management/common/lib/utils.ts",
-        "lineNumber": 71,
+        "lineNumber": 140,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1233,7 +1233,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/lib/utils.ts",
-            "lineNumber": 72,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1250,7 +1250,7 @@
               "\"settings\" | \"mappings\" | \"aliases\""
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/lib/utils.ts",
-            "lineNumber": 73,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

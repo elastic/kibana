@@ -4,22 +4,22 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/presentation-publishing-schemas'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/presentation-publishing-schemas'
+  title: '@kbn/presentation-publishing-schemas'
   description: Moon project for @kbn/presentation-publishing-schemas
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: src/platform/packages/shared/presentation/presentation_publishing_schemas
+  sourceRoot: src/platform/packages/shared/presentation/presentation_publishing_schemas
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/utility-types'
+  - '@kbn/es-query-server'
 tags:
   - shared-server
   - package
@@ -33,14 +33,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

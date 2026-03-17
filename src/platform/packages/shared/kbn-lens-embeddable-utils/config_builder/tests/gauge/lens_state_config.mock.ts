@@ -457,3 +457,194 @@ export const gaugeESQLAttributes: LensAttributes = {
   version: 2,
   references: [],
 };
+
+export const defaultColorByValueAttributes: LensAttributes = {
+  description: '',
+  state: {
+    visualization: {
+      shape: 'horizontalBullet',
+      layerId: '4153c826-5f82-4fb5-942b-5947250e8b58',
+      layerType: 'data',
+      ticksPosition: 'bands',
+      labelMajorMode: 'auto',
+      colorMode: 'palette',
+      palette: {
+        name: 'status',
+        type: 'palette',
+        params: {
+          name: 'status',
+          reverse: false,
+          rangeType: 'percent',
+          rangeMin: 0,
+          rangeMax: 100,
+          progression: 'fixed',
+          // correct stops
+          stops: [
+            {
+              color: '#24c292',
+              stop: 25,
+            },
+            {
+              color: '#aee8d2',
+              stop: 50,
+            },
+            {
+              color: '#ffc9c2',
+              stop: 75,
+            },
+            {
+              color: '#f6726a',
+              stop: 100,
+            },
+          ],
+          steps: 4,
+          colorStops: [],
+          continuity: 'above',
+          maxSteps: 5,
+        },
+      },
+      metricAccessor: '6ffc4622-070d-45ac-ba12-5089f2992217',
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '4153c826-5f82-4fb5-942b-5947250e8b58': {
+            columns: {
+              '6ffc4622-070d-45ac-ba12-5089f2992217': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  // @ts-expect-error
+                  emptyAsNull: true,
+                },
+              },
+            },
+            columnOrder: ['6ffc4622-070d-45ac-ba12-5089f2992217'],
+            incompleteColumns: {},
+          },
+        },
+      },
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  title: 'default color by value palette',
+  version: 2,
+  visualizationType: 'lnsGauge',
+  references: [
+    {
+      type: 'index-pattern',
+      id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      name: 'indexpattern-datasource-layer-4153c826-5f82-4fb5-942b-5947250e8b58',
+    },
+  ],
+};
+
+export const selectorColorByValueAttributes: LensAttributes = {
+  description: '',
+  state: {
+    visualization: {
+      shape: 'horizontalBullet',
+      layerId: '4153c826-5f82-4fb5-942b-5947250e8b58',
+      layerType: 'data',
+      ticksPosition: 'bands',
+      labelMajorMode: 'auto',
+      colorMode: 'palette',
+      palette: {
+        type: 'palette',
+        name: 'temperature',
+        params: {
+          name: 'temperature',
+          reverse: false,
+          rangeType: 'percent',
+          rangeMin: 0,
+          rangeMax: null,
+          progression: 'fixed',
+          // incorrect stops - set to lower bound values
+          stops: [
+            {
+              color: '#61a2ff',
+              stop: 0,
+            },
+            {
+              color: '#c8deff',
+              stop: 25,
+            },
+            {
+              color: '#ffccc6',
+              stop: 50,
+            },
+            {
+              color: '#f6726a',
+              stop: 75,
+            },
+          ],
+          steps: 4,
+          continuity: 'above',
+          maxSteps: 5,
+        },
+      },
+      metricAccessor: '6ffc4622-070d-45ac-ba12-5089f2992217',
+    },
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
+    datasourceStates: {
+      formBased: {
+        layers: {
+          '4153c826-5f82-4fb5-942b-5947250e8b58': {
+            columns: {
+              '6ffc4622-070d-45ac-ba12-5089f2992217': {
+                label: 'Count of records',
+                dataType: 'number',
+                operationType: 'count',
+                isBucketed: false,
+                sourceField: '___records___',
+                params: {
+                  // @ts-expect-error
+                  emptyAsNull: true,
+                },
+              },
+            },
+            columnOrder: ['6ffc4622-070d-45ac-ba12-5089f2992217'],
+            incompleteColumns: {},
+          },
+        },
+      },
+      indexpattern: {
+        layers: {},
+      },
+      textBased: {
+        layers: {},
+      },
+    },
+    internalReferences: [],
+    adHocDataViews: {},
+  },
+  title: 'testing color by value palette',
+  version: 2,
+  visualizationType: 'lnsGauge',
+  references: [
+    {
+      type: 'index-pattern',
+      id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+      name: 'indexpattern-datasource-layer-4153c826-5f82-4fb5-942b-5947250e8b58',
+    },
+  ],
+};

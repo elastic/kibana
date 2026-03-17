@@ -22,13 +22,14 @@ import {
 import type { SloTabId, SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
 import { sloDetailsLocatorID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   SloOverviewDetailsContent,
   SloOverviewDetailsFlyoutFooter,
 } from '../../../embeddable/slo/common/slo_overview_details';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export interface SLODetailsFlyoutProps {
   sloId: string;
@@ -63,10 +64,16 @@ export default function SLODetailsFlyout({
   initialTabId,
 }: SLODetailsFlyoutProps) {
   const { share } = useKibana().services;
-
+  const { telemetry } = usePluginContext();
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'sloDetailsFlyout',
   });
+
+  useEffect(() => {
+    if (telemetry) {
+      telemetry.reportSloDetailsFlyoutViewed();
+    }
+  }, [telemetry]);
 
   const {
     data: slo,
@@ -99,7 +106,12 @@ export default function SLODetailsFlyout({
     }
     if (slo && sloDetailsUrl) {
       return (
-        <EuiLink href={sloDetailsUrl} data-test-subj="sloDetailsFlyoutTitleLink" target="_blank">
+        <EuiLink
+          href={sloDetailsUrl}
+          data-test-subj="sloDetailsFlyoutTitleLink"
+          target="_blank"
+          data-event-element="linkOpenFullSloInApp"
+        >
           {slo.name}
         </EuiLink>
       );
@@ -181,6 +193,7 @@ export default function SLODetailsFlyout({
       size={size}
       session={session}
       resizable
+      data-event-location="sloDetailsFlyout"
     >
       <EuiFlyoutHeader hasBorder={!slo}>
         <EuiTitle size="s">

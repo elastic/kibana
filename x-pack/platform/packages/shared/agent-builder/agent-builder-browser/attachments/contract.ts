@@ -11,6 +11,7 @@ import type {
   UnknownAttachment,
   AttachmentVersion,
   UpdateOriginResponse,
+  ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
 
 export enum ActionButtonType {
@@ -18,6 +19,8 @@ export enum ActionButtonType {
   SECONDARY = 'secondary',
   OVERFLOW = 'overflow',
 }
+
+export type AttachmentPreviewState = 'none' | 'preview_available' | 'previewing';
 /**
  * Props passed to custom attachment content renderers.
  */
@@ -26,6 +29,27 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   attachment: TAttachment;
   /** Whether the attachment is being rendered in a sidebar context */
   isSidebar: boolean;
+  /** Data from the screen context attachment, if present in the conversation */
+  screenContext?: ScreenContextAttachmentData;
+  /** Callback to open the agent builder sidebar with the current conversation loaded. Undefined when already in the sidebar. */
+  openSidebarConversation?: () => void;
+}
+
+/**
+ * Callbacks available to canvas content renderers.
+ */
+export interface CanvasRenderCallbacks {
+  /** Register action buttons to display in the canvas header */
+  registerActionButtons: (buttons: ActionButton[]) => void;
+  /** Update the attachment's origin reference (e.g., after saving to library) */
+  updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
+  /** Close the canvas (expanded flyout view) */
+  closeCanvas: () => void;
+  /**
+   * Optional callback for externally-controlled inline preview state.
+   * Use to mark an attachment as currently previewed outside canvas.
+   */
+  setPreviewState?: (previewState: AttachmentPreviewState) => void;
 }
 
 /**
@@ -39,9 +63,16 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   /** Whether the attachment is being rendered in canvas mode (expanded flyout view) */
   isCanvas: boolean;
   /** Function to update the attachment's origin reference */
-  updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
+  updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
   openCanvas?: () => void;
+  /** Callback to open the agent builder sidebar with the current conversation loaded. */
+  openSidebarConversation?: () => void;
+  /**
+   * Optional callback for externally-controlled inline preview state.
+   * Use to mark an attachment as currently previewed outside canvas.
+   */
+  setPreviewBadgeState?: (previewBadgeState: AttachmentPreviewState) => void;
 }
 
 /**
@@ -84,8 +115,17 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
   /**
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.
+   *
+   * The `props` object includes `openSidebarConversation` for opening the sidebar with the current conversation.
+   *
+   * The `callbacks` object provides:
+   * - `registerActionButtons`: dynamically register action buttons in the canvas header
+   * - `updateOrigin`: link by-value attachments to persistent storage after saving
    */
-  renderCanvasContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
+  renderCanvasContent?: (
+    props: AttachmentRenderProps<TAttachment>,
+    callbacks: CanvasRenderCallbacks
+  ) => ReactNode;
   /**
    * Optional function to provide action buttons for inline-rendered attachments.
    * Buttons will appear alongside or below the rendered content.

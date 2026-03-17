@@ -15,11 +15,14 @@ import { collectAllCustomPropertyItems } from './collect_all_custom_property_ite
 import { collectAllVariables } from './collect_all_variables';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateCustomProperties } from './validate_custom_properties';
+import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateTriggerConditions } from './validate_trigger_conditions';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
+import { validateWorkflowInputs } from './validate_workflow_inputs';
+import { validateWorkflowOutputsInYaml } from './validate_workflow_outputs_in_yaml';
 import { getPropertyHandler } from '../../../../common/schema';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
@@ -27,6 +30,7 @@ import {
   selectEditorWorkflowLookup,
   selectIsWorkflowTab,
   selectWorkflowDefinition,
+  selectWorkflows,
   selectYamlLineCounter,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -42,6 +46,8 @@ const SEVERITY_MAP = {
 export interface UseYamlValidationResult {
   error: Error | null;
   isLoading: boolean;
+  /** Custom validation results (source of truth for accordion; avoids interceptor timing issues) */
+  validationResults: YamlValidationResult[];
 }
 
 export function useYamlValidation(
@@ -49,6 +55,7 @@ export function useYamlValidation(
 ): UseYamlValidationResult {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [validationResults, setValidationResults] = useState<YamlValidationResult[]>([]);
   const decorationsCollection = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const yamlDocument = useSelector(selectYamlDocument);
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
@@ -57,6 +64,7 @@ export function useYamlValidation(
   const lineCounter = useSelector(selectYamlLineCounter);
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
   const connectors = useSelector(selectConnectors);
+  const workflows = useSelector(selectWorkflows);
   const { application } = useKibana().services;
 
   useEffect(() => {
@@ -71,31 +79,22 @@ export function useYamlValidation(
       }
 
       if (!isWorkflowTab) {
-        // clear decorations and markers
         if (decorationsCollection.current) {
           decorationsCollection.current.clear();
         }
         CUSTOM_YAML_VALIDATION_MARKER_OWNERS.forEach((owner) => {
           monaco.editor.setModelMarkers(model, owner, []);
         });
+        setValidationResults([]);
         setIsLoading(false);
         setError(null);
         return;
       }
 
-      if (!yamlDocument || !workflowGraph || !workflowDefinition) {
-        let errorMessage = 'Error validating variables';
-        if (!yamlDocument) {
-          errorMessage += '. Yaml document is not loaded';
-        }
-        if (!workflowGraph) {
-          errorMessage += '. Workflow graph is not loaded';
-        }
-        if (!workflowDefinition) {
-          errorMessage += '. Workflow definition is not loaded';
-        }
+      if (!yamlDocument) {
+        setValidationResults([]);
         setIsLoading(false);
-        setError(new Error(errorMessage));
+        setError(new Error('Error validating: Yaml document is not loaded'));
         return;
       }
 
@@ -117,19 +116,33 @@ export function useYamlValidation(
         absolute: true,
       });
 
-      // Build validation results - only include validations that don't require workflowDefinition
-      // Monaco YAML's schema validation will show errors independently
-      const validationResults: YamlValidationResult[] = [
+      // These validations only need the parsed YAML document, not the full workflow graph.
+      // They must run even when workflowGraph/workflowDefinition are unavailable
+      // (e.g. during editing when the YAML doesn't fully match the workflow schema yet)
+      // so that connector-id, step-name, liquid-template, custom-property, and
+      // workflow-inputs validation still provide feedback.
+      const results: YamlValidationResult[] = [
         ...validateStepNameUniqueness(yamlDocument),
-        ...validateLiquidTemplate(model.getValue()),
+        ...validateLiquidTemplate(model.getValue(), yamlDocument),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
+        ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
         ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
+        ...(workflowLookup && lineCounter
+          ? [
+              ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
+              ...validateIfConditions(workflowLookup, lineCounter),
+            ]
+          : []),
       ];
 
-      // Only run validations that require workflowDefinition if it's available
+      // Variable and JSON-schema-default validations require a fully parsed
+      // workflowGraph and workflowDefinition. When those are unavailable
+      // (e.g. YAML has structural issues that prevent graph construction),
+      // these validations are skipped gracefully; the remaining validators
+      // above still provide feedback.
       if (workflowGraph && workflowDefinition) {
         const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
-        validationResults.push(
+        results.push(
           ...validateTriggerConditions(workflowDefinition, yamlDocument),
           ...validateVariablesInternal(
             variableItems,
@@ -142,15 +155,15 @@ export function useYamlValidation(
         );
       }
 
-      const { markers, decorations } = createMarkersAndDecorations(validationResults);
+      const { markers, decorations } = createMarkersAndDecorations(results);
 
       if (decorationsCollection.current) {
         decorationsCollection.current.clear();
       }
       decorationsCollection.current = editor.createDecorationsCollection(decorations);
 
+      setValidationResults(results);
       setIsLoading(false);
-      // Set markers on the model for the problems panel
       CUSTOM_YAML_VALIDATION_MARKER_OWNERS.forEach((owner) => {
         monaco.editor.setModelMarkers(
           model,
@@ -172,11 +185,13 @@ export function useYamlValidation(
     isWorkflowTab,
     connectors?.connectorTypes,
     workflowLookup,
+    workflows,
   ]);
 
   return {
     error,
     isLoading,
+    validationResults,
   };
 }
 
@@ -287,6 +302,23 @@ function createMarkersAndDecorations(validationResults: YamlValidationResult[]):
         range: createRange(validationResult),
         options: createSelectionDecoration(validationResult),
       });
+    } else if (validationResult.owner === 'workflow-output-validation') {
+      markers.push({
+        ...marker,
+        severity: SEVERITY_MAP[validationResult.severity],
+        message: validationResult.message,
+        source: 'workflow-output-validation',
+      });
+      decorations.push({
+        range: createRange(validationResult),
+        options: {
+          inlineClassName: `workflow-output-validation-${validationResult.severity}`,
+          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+          hoverMessage: validationResult.hoverMessage
+            ? createMarkdownContent(validationResult.hoverMessage)
+            : null,
+        },
+      });
     } else {
       if (validationResult.severity !== null) {
         markers.push({
@@ -301,6 +333,9 @@ function createMarkersAndDecorations(validationResults: YamlValidationResult[]):
         options: {
           inlineClassName: `${validationResult.owner}-${validationResult.severity ?? 'valid'}`,
           stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+          hoverMessage: validationResult.hoverMessage
+            ? createMarkdownContent(validationResult.hoverMessage)
+            : null,
           after: validationResult.afterMessage
             ? {
                 content: validationResult.afterMessage,

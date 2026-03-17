@@ -93,7 +93,7 @@ export function ErrorGroupList({
 
   const { core } = useApmPluginContext();
 
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(apmEnableTableSearchBar, true);
+  const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(apmEnableTableSearchBar, true);
 
   const { offset, rangeFrom, rangeTo } = query;
 

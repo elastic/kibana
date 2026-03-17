@@ -47,15 +47,6 @@ export const StepIcon = React.memo(
     if (stepType.startsWith('trigger_')) {
       iconType = getTriggerTypeIconType(stepType);
     } else {
-      const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
-      if (actionTypeIcon) {
-        return (
-          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-            <EuiIcon type={actionTypeIcon} size="m" aria-hidden={true} />
-          </Suspense>
-        );
-      }
-
       const stepDefinition = workflowsExtensions.getStepDefinition(stepType);
       if (stepDefinition?.icon) {
         return (
@@ -65,10 +56,41 @@ export const StepIcon = React.memo(
         );
       }
 
+      const actionTypeIcon = getActionTypeIcon(stepType, actionTypeRegistry);
+      if (actionTypeIcon) {
+        return (
+          <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+            <EuiIcon type={actionTypeIcon} size="m" aria-hidden={true} />
+          </Suspense>
+        );
+      }
+
       iconType = getStepIconType(stepType);
     }
 
-    if (iconType.startsWith('token')) {
+    if (typeof iconType === 'string' && iconType.startsWith('data:')) {
+      const statusColor = shouldApplyColorToIcon
+        ? getExecutionStatusColors(euiTheme, executionStatus).color
+        : undefined;
+      return (
+        <span
+          css={css`
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            mask-image: url('${iconType}');
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+            background-color: ${statusColor ?? euiTheme.colors.textParagraph};
+          `}
+          onClick={onClick}
+          aria-hidden={true}
+        />
+      );
+    }
+
+    if (typeof iconType === 'string' && iconType.startsWith('token')) {
       return (
         <EuiToken
           iconType={iconType}

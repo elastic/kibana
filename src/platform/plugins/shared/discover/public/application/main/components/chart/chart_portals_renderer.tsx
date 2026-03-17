@@ -29,10 +29,9 @@ import {
   useInternalStateDispatch,
   useCurrentTabAction,
   internalStateActions,
+  useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
@@ -99,7 +98,7 @@ const UnifiedHistogramGuard = ({
   const isSelected = useInternalStateSelector((state) => state.tabs.unsafeCurrentId === tabId);
   const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const currentCustomizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
-  const currentStateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
+  const currentDataStateContainer = useRuntimeState(currentTabRuntimeState.dataStateContainer$);
   const currentScopedProfilesManager = useRuntimeState(
     currentTabRuntimeState.scopedProfilesManager$
   );
@@ -111,7 +110,7 @@ const UnifiedHistogramGuard = ({
   if (
     (!isSelected && !isInitialized.current) ||
     !currentCustomizationService ||
-    !currentStateContainer ||
+    !currentDataStateContainer ||
     !currentDataView
   ) {
     return null;
@@ -122,27 +121,25 @@ const UnifiedHistogramGuard = ({
   return (
     <CurrentTabProvider currentTabId={tabId}>
       <DiscoverCustomizationProvider value={currentCustomizationService}>
-        <DiscoverMainProvider value={currentStateContainer}>
-          <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-            <ScopedServicesProvider
-              scopedProfilesManager={currentScopedProfilesManager}
-              scopedEBTManager={currentScopedEbtManager}
-            >
-              <ChartsWrapper stateContainer={currentStateContainer} panelsToggle={panelsToggle} />
-            </ScopedServicesProvider>
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
+        <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+          <ScopedServicesProvider
+            scopedProfilesManager={currentScopedProfilesManager}
+            scopedEBTManager={currentScopedEbtManager}
+          >
+            <ChartsWrapper panelsToggle={panelsToggle} />
+          </ScopedServicesProvider>
+        </RuntimeStateProvider>
       </DiscoverCustomizationProvider>
     </CurrentTabProvider>
   );
 };
 
-type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle'> & {
-  stateContainer: DiscoverStateContainer;
-};
+type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle'>;
 
-const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
+const ChartsWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) => {
   const dispatch = useInternalStateDispatch();
+  const runtimeStateManager = useRuntimeStateManager();
+  const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const getChartConfigAccessor = useProfileAccessor('getChartSectionConfiguration');
 
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
@@ -178,8 +175,8 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
 
   useEffect(() => {
     const histogramConfig$ = selectTabRuntimeState(
-      stateContainer.runtimeStateManager,
-      stateContainer.getCurrentTab().id
+      runtimeStateManager,
+      currentTabId
     ).unifiedHistogramConfig$;
 
     histogramConfig$.next({
@@ -188,21 +185,20 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
         ? chartSectionConfig.localStorageKeyPrefix
         : undefined,
     });
-  }, [chartSectionConfig, stateContainer]);
+  }, [chartSectionConfig, runtimeStateManager, currentTabId]);
 
   return chartSectionConfig.replaceDefaultChart ? (
     <CustomChartSectionWrapper
-      stateContainer={stateContainer}
       panelsToggle={panelsToggle}
       chartSectionConfig={chartSectionConfig}
     />
   ) : (
-    <UnifiedHistogramWrapper stateContainer={stateContainer} panelsToggle={panelsToggle} />
+    <UnifiedHistogramWrapper panelsToggle={panelsToggle} />
   );
 };
 
-const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
-  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(stateContainer);
+const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) => {
+  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState();
 
   const { setUnifiedHistogramApi } = unifiedHistogramProps;
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
@@ -214,7 +210,6 @@ const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistog
   const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps: unifiedHistogram.layoutProps,
-    stateContainer,
     panelsToggle,
   });
 
@@ -231,7 +226,6 @@ const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistog
 };
 
 const CustomChartSectionWrapper = ({
-  stateContainer,
   panelsToggle,
   chartSectionConfig,
 }: UnifiedHistogramChartProps & {
@@ -239,7 +233,6 @@ const CustomChartSectionWrapper = ({
 }) => {
   const dispatch = useInternalStateDispatch();
   const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState(
-    stateContainer,
     chartSectionConfig.localStorageKeyPrefix
   );
   const localStorageKeyPrefix =
@@ -284,7 +277,6 @@ const CustomChartSectionWrapper = ({
   const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps,
-    stateContainer,
     panelsToggle,
     localStorageKeyPrefix,
   });

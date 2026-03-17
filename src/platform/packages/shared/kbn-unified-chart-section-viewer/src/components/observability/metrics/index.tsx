@@ -13,14 +13,11 @@ import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { withRestorableState } from '../../../restorable_state';
 import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
 import type { UnifiedMetricsGridProps } from '../../../types';
-import { MetricsExperienceFieldsCapsProvider } from './context/metrics_experience_fields_provider';
 
 const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) => {
   return (
     <PerformanceContextProvider>
-      <MetricsExperienceFieldsCapsProvider fetchParams={props.fetchParams}>
-        <MetricsExperienceGrid {...props} />
-      </MetricsExperienceFieldsCapsProvider>
+      <MetricsExperienceGrid {...props} />
     </PerformanceContextProvider>
   );
 };
