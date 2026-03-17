@@ -349,7 +349,7 @@ rules:
   #   When an entry belongs to multiple products, the applicable rule is resolved using
   #   intersection + alphabetical first-match. See docs/contribute/changelog.md for details.
   #
-  # bundle:
+  bundle:
   #   # match_products: any
   #   exclude_products: "cloud-enterprise"
   #   # Or include only certain products:
@@ -361,21 +361,50 @@ rules:
   #   # exclude_areas:
   #   #   - "Internal"
   #   # Per-product overrides:
-    #   # products:
-  #   #   'elasticsearch, kibana':
-  #   #     exclude_types:
-  #   #       - docs
-  #   #   'cloud-serverless':
-  #   #     # match_areas: any
-  #   #     include_areas:
-  #   #       - "Search"
-  #   #       - "Monitoring"
+      products:
+        'cloud-serverless':
+          # match_areas: any
+          include_areas:
+            - "Search"
+            - "Monitoring"
+        'kibana':
+          exclude_types:
+            - docs
+          match_areas: all
+          exclude_areas:
+          - "AI for security"
+          - "Cloud security"
+          - "Detection rules and alerts"
+          - "Endpoint security"
+          - "Entity analytics"
+          - "Elastic Observability solution"
+          - "Elastic Security solution"
+          - "Investigations"
+        'observability':
+          exclude_types:
+            - docs
+          # Include changelogs that have (at least) the following areas:
+          match_areas: any
+          include_areas:
+            - "Elastic Observability solution"
+        'security':
+          exclude_types:
+            - docs
+          match_areas: any
+          include_areas:
+            - "AI for security"
+            - "Cloud security"
+            - "Detection rules and alerts"
+            - "Endpoint security"
+            - "Elastic Security solution"   
+            - "Entity analytics"
+            - "Investigations"
 
   # Publish — DEPRECATED. Use rules.bundle instead.
   # The rules.publish section is still supported for backward compatibility but will be removed
   # in a future release. Move filtering to rules.bundle so it applies at bundle time.
   #
-  publish:
+  # publish:
   #   # match_areas: any
   #   exclude_types: "deprecation, known-issue"
   #   # Or equivalently:
@@ -384,44 +413,6 @@ rules:
   #   #   - known-issue
   #   exclude_areas:
   #     - "Internal"
-    products:
-      'cloud-serverless':
-        exclude_types:
-          - docs
-      'kibana':
-        exclude_types:
-          - docs
-        # Exclude changelogs that have only one or more of the following areas:
-        match_areas: all
-        exclude_areas:
-         - "AI for security"
-         - "Cloud security"
-         - "Detection rules and alerts"
-         - "Endpoint security"
-         - "Entity analytics"
-         - "Elastic Observability solution"
-         - "Elastic Security solution"
-         - "Investigations"
-      'observability':
-        exclude_types:
-          - docs
-        # Include changelogs that have (at least) the following areas:
-        match_areas: any
-        include_areas:
-          - "Elastic Observability solution"
-      'security':
-        exclude_types:
-          - docs
-        # Include changelogs that have (at least) the following areas:
-        match_areas: any
-        include_areas:
-          - "AI for security"
-          - "Cloud security"
-          - "Detection rules and alerts"
-          - "Endpoint security"
-          - "Elastic Security solution"   
-          - "Entity analytics"
-          - "Investigations"
 
 # Bundle configuration (profiles and defaults)
 bundle:
