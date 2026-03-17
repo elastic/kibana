@@ -113,7 +113,7 @@ export const bulkOverwriteTransformedDocuments =
           if (errors.every(isUnavailableShardsException)) {
             return Either.left({
               type: 'unavailable_shards_exception' as const,
-              message: `Not enough active copies to meet shard count for index [${index}]. Will retry.`,
+              message: `[${index}] Not enough active copies to meet shard count of [ALL]`,
             });
           }
           throw new Error(JSON.stringify(errors));
