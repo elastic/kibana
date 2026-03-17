@@ -71,11 +71,11 @@ export const useScriptLibraryUrlParams = (): ScriptLibraryUrlParams &
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
 
-  const getUrlScriptsLibraryFilters = useCallback(
+  const getUrlScriptLibraryFilters = useCallback(
     () => scriptLibraryFiltersFromUrlParams(urlParams),
     [urlParams]
   );
-  const [scriptLibraryFilters, setScriptsLibraryFilters] = useState(getUrlScriptsLibraryFilters);
+  const [scriptLibraryFilters, setScriptLibraryFilters] = useState(getUrlScriptLibraryFilters);
 
   const setUrlKueryParam = useCallback(
     (kuery: string) => {
@@ -114,13 +114,13 @@ export const useScriptLibraryUrlParams = (): ScriptLibraryUrlParams &
   );
 
   useEffect(() => {
-    setScriptsLibraryFilters((prevState) => {
+    setScriptLibraryFilters((prevState) => {
       return {
         ...prevState,
         ...scriptLibraryFiltersFromUrlParams(urlParams),
       };
     });
-  }, [setScriptsLibraryFilters, urlParams]);
+  }, [setScriptLibraryFilters, urlParams]);
 
   return {
     ...scriptLibraryFilters,

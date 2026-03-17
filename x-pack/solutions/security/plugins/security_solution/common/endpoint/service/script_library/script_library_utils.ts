@@ -31,15 +31,15 @@ export const KUERY_FIELD_TO_SO_FIELD_MAP = Object.freeze({
   fileType: 'file_type',
 });
 
-interface ScriptsLibraryKqlFilterValidationResult {
+interface ScriptLibraryKqlFilterValidationResult {
   isValid: boolean;
   error?: string;
 }
 
 export const isScriptLibraryKqlFilterValid = (
   kuery: string
-): ScriptsLibraryKqlFilterValidationResult => {
-  const response: ScriptsLibraryKqlFilterValidationResult = { isValid: true, error: undefined };
+): ScriptLibraryKqlFilterValidationResult => {
+  const response: ScriptLibraryKqlFilterValidationResult = { isValid: true, error: undefined };
 
   if (!kuery.trim()) {
     return response;
