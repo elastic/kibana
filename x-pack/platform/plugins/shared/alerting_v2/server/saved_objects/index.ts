@@ -76,6 +76,12 @@ export function registerSavedObjects({
   });
 
   encryptedSavedObjects.registerType({
+    type: API_KEY_PENDING_INVALIDATION_TYPE,
+    attributesToEncrypt: new Set(['apiKeyId', 'uiamApiKey']),
+    attributesToIncludeInAAD: new Set(['createdAt']),
+  });
+
+  encryptedSavedObjects.registerType({
     type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
     enforceRandomId: false,
     attributesToEncrypt: new Set(NotificationPolicyAttributesToEncrypt),

@@ -10,6 +10,9 @@ import type { TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  invalidateApiKeysTask: schema.object({
+    interval: schema.string({ defaultValue: '5m' }),
+  }),
 });
 
 export type PluginConfig = TypeOf<typeof configSchema>;
