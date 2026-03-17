@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-24T05:10:36.252Z",
-  "sha1": "da7c58a0b626e980eca208ca1571bc1485c2be20",
+  "sha1": "4d22942e29a32fdf09ebf737f2d6f735c0f8a496",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -2292,22 +2291,6 @@
       }
     },
     {
-      "id": "92d7bc6cddf5121-615e268c0f49a9b",
-      "title": "Stream data routing - creating routing rules should show validation errors for invalid stream names verified on the server",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 122,
-        "column": 9
-      }
-    },
-    {
       "id": "92d7bc6cddf5121-fd9312e87fee662",
       "title": "Stream data routing - creating routing rules should handle insufficient privileges gracefully",
       "expectedStatus": "passed",
@@ -2319,7 +2302,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 144,
+        "line": 122,
         "column": 9
       }
     },
@@ -2335,7 +2318,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 158,
+        "line": 136,
         "column": 9
       }
     },
@@ -2351,7 +2334,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 171,
+        "line": 149,
         "column": 9
       }
     },
@@ -2367,7 +2350,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 196,
+        "line": 174,
         "column": 9
       }
     },
@@ -2383,7 +2366,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 221,
+        "line": 199,
         "column": 9
       }
     },
