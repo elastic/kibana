@@ -40,7 +40,10 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
     setWatchlist(defaultWatchlist);
   }, [defaultWatchlist, hasUserEdits]);
 
-  const { trimmedName, isNameInvalid } = getWatchlistNameValidation(watchlist.name, true);
+  const { trimmedName, isNameInvalid } = getWatchlistNameValidation(
+    watchlist.name,
+    watchlist.name.length > 0
+  );
   const isDisabled = isNameInvalid || !trimmedName;
 
   return {
