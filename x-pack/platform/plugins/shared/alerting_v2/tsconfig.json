@@ -64,14 +64,10 @@
     "@kbn/core-http-server-utils",
     "@kbn/eval-kql",
     "@kbn/react-query",
-<<<<<<< chore/adjust-rule-v2-flyout-export
     "@kbn/react-hooks",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-notifications-browser-mocks"
-=======
-    "@kbn/es-query",
-    "@kbn/react-hooks"
->>>>>>> alerting_v2
+     "@kbn/es-query"
   ],
   "exclude": ["target/**/*"]
 }
