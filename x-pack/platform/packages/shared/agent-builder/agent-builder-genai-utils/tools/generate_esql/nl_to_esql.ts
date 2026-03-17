@@ -6,6 +6,7 @@
  */
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
+import type { TimeRange } from '@kbn/agent-builder-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -75,6 +76,12 @@ export interface GenerateEsqlOptions {
    * Maximum row limit to use in generated ES|QL queries.
    */
   rowLimit?: number;
+  /**
+   * Time range used to supply named parameters (?_tstart, ?_tend)
+   * when executing the generated query for validation.
+   * Defaults to last 24 hours if not provided.
+   */
+  timeRange?: TimeRange;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -87,10 +94,12 @@ export const generateEsql = async ({
   additionalContext,
   maxRetries = 3,
   rowLimit,
+  timeRange: inputTimeRange,
   model,
   esClient,
   logger,
 }: GenerateEsqlParams): Promise<GenerateEsqlResponse> => {
+  const timeRange = inputTimeRange ?? { from: 'now-24h', to: 'now' };
   const docBase = await EsqlDocumentBase.load();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
 
@@ -141,6 +150,7 @@ export const generateEsql = async ({
             additionalInstructions,
             additionalContext,
             rowLimit,
+            timeRange,
           },
           {
             recursionLimit: 25,
