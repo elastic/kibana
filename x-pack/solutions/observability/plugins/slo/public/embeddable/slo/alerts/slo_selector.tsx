@@ -66,13 +66,6 @@ function getNameLookupFromCache(
   return map;
 }
 
-function getSloId(slo: SloItem | SLOWithSummaryResponse): string {
-  return (slo as SloItem).slo_id ?? (slo as SLOWithSummaryResponse).id ?? '';
-}
-function getSloInstanceId(slo: SloItem | SLOWithSummaryResponse): string {
-  return (slo as SloItem).slo_instance_id ?? (slo as SLOWithSummaryResponse).instanceId ?? '';
-}
-
 function toOptionValue(sloId: string, instanceId: string): string {
   return `${sloId}${VALUE_SEP}${instanceId}`;
 }
@@ -82,28 +75,25 @@ function parseOptionValue(value: string): [string, string] {
 }
 
 function mapSlosToOptions(
-  slos: SloItem[] | SLOWithSummaryResponse[] | undefined,
+  slos: SloItem[] | undefined,
   nameLookup?: Map<string, { name: string; groupBy?: string[] }>
 ) {
   return (
     slos?.map((slo) => {
-      const id = getSloId(slo);
-      const instanceId = getSloInstanceId(slo);
-      const value = toOptionValue(id, instanceId);
-      const fromApi = (slo as SLOWithSummaryResponse).name;
-      const fromLookup = nameLookup?.get(value);
-      const name = fromApi ?? fromLookup?.name;
-      const groupBy = (slo as SLOWithSummaryResponse).groupBy ?? fromLookup?.groupBy;
+      const value = toOptionValue(slo.slo_id, slo.slo_instance_id);
+      const entry = nameLookup?.get(value);
+      const name = entry?.name;
       let label: string;
       if (name) {
         label =
-          instanceId !== ALL_VALUE
-            ? `${name} (${instanceId})`
-            : hasSloGroupBy(groupBy)
+          slo.slo_instance_id !== ALL_VALUE
+            ? `${name} (${slo.slo_instance_id})`
+            : hasSloGroupBy(entry?.groupBy)
             ? `${name} (${ALL_INSTANCES_LABEL})`
             : name;
       } else {
-        label = instanceId !== ALL_VALUE ? `${id} (${instanceId})` : id;
+        label =
+          slo.slo_instance_id !== ALL_VALUE ? `${slo.slo_id} (${slo.slo_instance_id})` : slo.slo_id;
       }
       return { label, value };
     }) ?? []
@@ -219,13 +209,10 @@ function normalizeSelection(
 }
 
 export function SloSelector({ initialSlos, onSelected, hasError, singleSelection }: Props) {
-  const needsNameResolution = (initialSlos?.length ?? 0) > 0;
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     () => {
-      if (!initialSlos?.length) return mapSlosToOptions(initialSlos);
-      const cached = getNameLookupFromCache(initialSlos);
-      if (cached) return mapSlosToOptions(initialSlos, cached);
-      return []; // no cache: wait for name-resolution fetch to avoid ID flash
+      const cached = initialSlos?.length ? getNameLookupFromCache(initialSlos) : null;
+      return mapSlosToOptions(initialSlos, cached ?? undefined);
     }
   );
   const [searchValue, setSearchValue] = useState<string>('');
@@ -241,39 +228,31 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
     [initialSloIds]
   );
 
-  const { isLoading: isResolvingNames, data: initialSlosData } = useFetchSloList({
+  const { data: initialSlosData } = useFetchSloList({
     kqlQuery: initialKql,
     perPage: Math.max(100, initialSloIds.length * 2),
     disabled: initialSloIds.length === 0,
   });
 
   const nameLookup = useMemo(() => {
-    if (initialSlosData?.results?.length) {
-      populateNameCache(initialSlosData.results);
-      const map = new Map<string, { name: string; groupBy?: string[] }>();
-      const groupBy = (s: SLOWithSummaryResponse) => [s.groupBy].flat().filter(Boolean) as string[];
-      for (const slo of initialSlosData.results) {
-        const key = toOptionValue(slo.id, slo.instanceId);
-        if (!map.has(key)) map.set(key, { name: slo.name, groupBy: groupBy(slo) });
-        const starKey = toOptionValue(slo.id, ALL_VALUE);
-        if (!map.has(starKey)) map.set(starKey, { name: slo.name, groupBy: groupBy(slo) });
-      }
-      return map;
+    if (!initialSlosData?.results?.length) return null;
+    const map = new Map<string, { name: string; groupBy?: string[] }>();
+    const getGroupBy = (s: SLOWithSummaryResponse) =>
+      [s.groupBy].flat().filter(Boolean) as string[];
+    for (const slo of initialSlosData.results) {
+      const key = toOptionValue(slo.id, slo.instanceId);
+      if (!map.has(key)) map.set(key, { name: slo.name, groupBy: getGroupBy(slo) });
+      const starKey = toOptionValue(slo.id, ALL_VALUE);
+      if (!map.has(starKey)) map.set(starKey, { name: slo.name, groupBy: getGroupBy(slo) });
     }
-    if (initialSlos?.length) {
-      return getNameLookupFromCache(initialSlos) ?? new Map();
-    }
-    return new Map();
-  }, [initialSlosData, initialSlos]);
+    populateNameCache(initialSlosData.results);
+    return map;
+  }, [initialSlosData]);
 
   useEffect(() => {
-    if (!initialSlos?.length) return;
-    if (nameLookup.size > 0) {
-      setSelectedOptions(mapSlosToOptions(initialSlos, nameLookup));
-    } else if (!isResolvingNames) {
-      setSelectedOptions(mapSlosToOptions(initialSlos));
-    }
-  }, [initialSlos, nameLookup, isResolvingNames]);
+    if (!initialSlos?.length || !nameLookup) return;
+    setSelectedOptions(mapSlosToOptions(initialSlos, nameLookup));
+  }, [initialSlos, nameLookup]);
 
   const { isLoading, data: sloList } = useFetchSloList({
     kqlQuery: `slo.name: (${query}) or slo.instanceId.text: (${query})`,
@@ -343,9 +322,7 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
         selectedOptions={selectedOptions}
         async
         isLoading={
-          optionsRef.current.length === 0 &&
-          ((dropdownOpened && !sloList?.results && isLoading) ||
-            (needsNameResolution && isResolvingNames))
+          optionsRef.current.length === 0 && dropdownOpened && !sloList?.results && isLoading
         }
         onChange={onChange}
         fullWidth
