@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export * from './create';
-export * from './delete';
-export * from './get';
-export * from './list';
-
-export * from './update';
+export { useDeleteWatchlist } from './use_delete_watchlist';
+export { useWatchlistsTableData } from './use_watchlists_table_data';
