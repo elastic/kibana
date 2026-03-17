@@ -90,6 +90,7 @@ const emptyConfig: ConnectorTypeConfigType = {
   authType: AuthType.Basic,
   hasAuth: true,
   hasProxyAuth: false,
+  proxyUrl: null,
 };
 
 beforeEach(() => {
