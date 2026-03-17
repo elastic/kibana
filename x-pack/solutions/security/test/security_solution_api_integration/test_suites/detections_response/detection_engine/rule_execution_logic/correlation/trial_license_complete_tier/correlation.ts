@@ -11,6 +11,7 @@ import type {
   QueryRuleCreateProps,
   CorrelationRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,
@@ -47,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
     query: string;
     from: string;
     enabled?: boolean;
-  }): Promise<QueryRuleCreateProps & { id: string }> => {
+  }): Promise<RuleResponse> => {
     const rule: QueryRuleCreateProps = {
       description: `Source query rule: ${ruleId}`,
       name: `Source rule ${ruleId}`,
@@ -63,8 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
       enabled,
     };
 
-    const created = await createRule(supertest, log, rule);
-    return { ...rule, id: created.id };
+    return createRule(supertest, log, rule);
   };
 
   /**
