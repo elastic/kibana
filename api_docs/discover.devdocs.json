@@ -2350,24 +2350,157 @@
         "type": "Interface",
         "tags": [],
         "label": "ExtendedDiscoverStateContainer",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "discover",
-            "scope": "public",
-            "docId": "kibDiscoverPluginApi",
-            "section": "def-public.ExtendedDiscoverStateContainer",
-            "text": "ExtendedDiscoverStateContainer"
-          },
-          " extends ",
-          "DiscoverStateContainer"
+        "description": [
+          "\nPublic interface exposed to external consumers (e.g. Security Timeline) via the customization framework.\nProperties are selected based on actual usage by external consumers."
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-        "lineNumber": 20,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.ExtendedDiscoverStateContainer.internalState",
+            "type": "Object",
+            "tags": [],
+            "label": "internalState",
+            "description": [
+              "\nInternal Redux state store for dispatching actions"
+            ],
+            "signature": [
+              "ToolkitStore",
+              "<",
+              "DiscoverInternalState",
+              ", ",
+              "AnyAction",
+              ", ",
+              "MiddlewareArray",
+              "<[",
+              "ListenerMiddleware",
+              "<unknown, ",
+              "ThunkDispatch",
+              "<unknown, unknown, ",
+              "AnyAction",
+              ">, ",
+              "InternalStateDependencies",
+              ">, ",
+              "ThunkMiddleware",
+              "<",
+              "DiscoverInternalState",
+              ", ",
+              "AnyAction",
+              ", ",
+              "InternalStateDependencies",
+              ">]>>"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.ExtendedDiscoverStateContainer.injectCurrentTab",
+            "type": "Function",
+            "tags": [],
+            "label": "injectCurrentTab",
+            "description": [
+              "\nInjects the current tab ID into Redux actions"
+            ],
+            "signature": [
+              "<TPayload extends { tabId: string; }, TReturn>(actionCreator: (params: TPayload) => TReturn) => (payload: VoidIfEmpty<WithoutTabId<TPayload>>) => TReturn"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "discover",
+                "id": "def-public.ExtendedDiscoverStateContainer.injectCurrentTab.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "actionCreator",
+                "description": [],
+                "signature": [
+                  "(params: TPayload) => TReturn"
+                ],
+                "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/utils.ts",
+                "lineNumber": 57,
+                "columnNumber": 48,
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "discover",
+                    "id": "def-public.ExtendedDiscoverStateContainer.injectCurrentTab.$1.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "params",
+                    "description": [],
+                    "signature": [
+                      "TPayload"
+                    ],
+                    "path": "src/platform/plugins/shared/discover/public/application/main/state_management/redux/utils.ts",
+                    "lineNumber": 57,
+                    "columnNumber": 64,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.ExtendedDiscoverStateContainer.getCurrentTab",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentTab",
+            "description": [
+              "\nGets the state of the current tab"
+            ],
+            "signature": [
+              "() => ",
+              "TabState"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.ExtendedDiscoverStateContainer.stateStorage",
+            "type": "Object",
+            "tags": [],
+            "label": "stateStorage",
+            "description": [
+              "\nState of URL, allows updating and subscribing to URL changes"
+            ],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "public",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-public.IKbnUrlStateStorage",
+                "text": "IKbnUrlStateStorage"
+              }
+            ],
+            "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "discover",
             "id": "def-public.ExtendedDiscoverStateContainer.createAppStateObservable",
@@ -2391,7 +2524,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-            "lineNumber": 21,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2412,10 +2545,10 @@
               "Observable",
               "<Pick<",
               "TabState",
-              ", \"attributes\" | \"appState\" | \"globalState\">>"
+              ", \"attributes\" | \"globalState\" | \"appState\">>"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2450,7 +2583,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-            "lineNumber": 33,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2472,7 +2605,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-                "lineNumber": 36,
+                "lineNumber": 57,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2502,7 +2635,37 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.ExtendedDiscoverStateContainer.getCurrentTabDataView$",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentTabDataView$",
+            "description": [
+              "\nReturns an observable for the current tab's data view (read-only)"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined>"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2516,14 +2679,30 @@
             "tags": [],
             "label": "internalActions",
             "description": [
-              "\nA selection of prodived Redux actions from the internal state"
+              "\nA selection of provided Redux actions from the internal state"
             ],
             "signature": [
-              "{ fetchData: ",
-              "InternalStateThunkActionCreator",
-              "<[",
+              "{ setAppState: ",
+              "ActionCreatorWithPayload",
+              "<",
               "TabActionPayload",
-              "<{ initial?: boolean | undefined; }>], void>; openDiscoverSession: ",
+              "<Pick<",
+              "TabState",
+              ", \"appState\">>, \"internalState/setAppState\">; updateGlobalState: ",
+              "InternalStateThunkActionCreator",
+              "<[GlobalStatePayload], void>; updateAppStateAndReplaceUrl: ",
+              "InternalStateThunkActionCreator",
+              "<[AppStatePayload], Promise<void>>; resetAppState: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<Pick<",
+              "TabState",
+              ", \"appState\">>, \"internalState/resetAppState\">; initializeAndSync: ",
+              "InternalStateThunkActionCreator",
+              "<[{ tabId: string; }], void>; stopSyncing: ",
+              "InternalStateThunkActionCreator",
+              "<[{ tabId: string; }], void>; openDiscoverSession: ",
               "AsyncThunk",
               "<void, { discoverSessionId: string; }, { state: ",
               "DiscoverInternalState",
@@ -2545,10 +2724,14 @@
               "AnyAction",
               ">; extra: ",
               "InternalStateDependencies",
-              "; rejectValue?: unknown; serializedErrorType?: unknown; pendingMeta?: unknown; fulfilledMeta?: unknown; rejectedMeta?: unknown; }>; }"
+              "; rejectValue?: unknown; serializedErrorType?: unknown; pendingMeta?: unknown; fulfilledMeta?: unknown; rejectedMeta?: unknown; }>; fetchData: ",
+              "InternalStateThunkActionCreator",
+              "<[",
+              "TabActionPayload",
+              "<{ initial?: boolean | undefined; }>], void>; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-            "lineNumber": 43,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3169,7 +3352,7 @@
           ") => void | (() => void) | Promise<void | (() => void)>"
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-        "lineNumber": 57,
+        "lineNumber": 86,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3186,7 +3369,7 @@
               "CustomizationCallbackContext"
             ],
             "path": "src/platform/plugins/shared/discover/public/customizations/types.ts",
-            "lineNumber": 58,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
