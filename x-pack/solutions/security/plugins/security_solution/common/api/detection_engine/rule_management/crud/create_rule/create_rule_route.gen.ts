@@ -16,7 +16,7 @@
 
 import type { z } from '@kbn/zod/v4';
 
-import { RuleCreateProps, RuleResponse } from '../../../model/rule_schema/rule_schemas.gen';
+import { RuleCreateProps, RuleResponse } from '../../../model/rule_schema/rule_schemas_correlation';
 
 export type CreateRuleRequestBody = z.infer<typeof CreateRuleRequestBody>;
 export const CreateRuleRequestBody = RuleCreateProps;

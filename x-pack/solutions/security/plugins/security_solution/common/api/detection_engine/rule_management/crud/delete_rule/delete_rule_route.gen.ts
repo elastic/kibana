@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod/v4';
 
 import { RuleObjectId, RuleSignatureId } from '../../../model/rule_schema/common_attributes.gen';
-import { RuleResponse } from '../../../model/rule_schema/rule_schemas.gen';
+import { RuleResponse } from '../../../model/rule_schema/rule_schemas_correlation';
 
 export type DeleteRuleRequestQuery = z.infer<typeof DeleteRuleRequestQuery>;
 export const DeleteRuleRequestQuery = z.object({

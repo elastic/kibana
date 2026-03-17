@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
-import { RuleResponse } from './rule_schemas.gen';
+import { RuleResponse } from './rule_schemas_correlation';
 import {
   getRulesSchemaMock,
   getRulesMlSchemaMock,

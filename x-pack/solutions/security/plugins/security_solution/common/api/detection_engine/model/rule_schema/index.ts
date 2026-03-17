@@ -7,6 +7,25 @@
 
 export * from './common_attributes.gen';
 export * from './rule_schemas.gen';
+export * from './rule_schemas_correlation';
+
+export {
+  TypeSpecificCreatePropsInternal,
+  TypeSpecificCreateProps,
+  TypeSpecificPatchPropsInternal,
+  TypeSpecificPatchProps,
+  TypeSpecificResponseInternal,
+  TypeSpecificResponse,
+  RuleCreatePropsInternal,
+  RuleCreateProps,
+  RuleUpdatePropsInternal,
+  RuleUpdateProps,
+  RulePatchPropsInternal,
+  RulePatchProps,
+  RuleResponseInternal,
+  RuleResponse,
+} from './rule_schemas_correlation';
+
 export * from './utils';
 
 export * from './specific_attributes/eql_attributes.gen';

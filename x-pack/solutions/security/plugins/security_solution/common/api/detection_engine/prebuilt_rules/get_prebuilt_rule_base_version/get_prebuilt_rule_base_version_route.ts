@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
+import type { RuleResponse } from '../../model/rule_schema/rule_schemas_correlation';
 import type { PartialThreeWayRuleDiff } from '../model';
 
 export type GetPrebuiltRuleBaseVersionRequest = z.infer<typeof GetPrebuiltRuleBaseVersionRequest>;

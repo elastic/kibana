@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { mapValues } from 'lodash';
-import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
+import { RuleResponse } from '../../model/rule_schema/rule_schemas_correlation';
 import { AggregatedPrebuiltRuleError, DiffableAllFields, ThreeWayDiffConflict } from '../model';
 import { RuleSignatureId, RuleVersion } from '../../model';
 import { PrebuiltRulesFilter } from '../common/prebuilt_rules_filter';

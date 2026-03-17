@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from './rule_schemas.gen';
+import type { RuleResponse } from './rule_schemas_correlation';
 
 export function isCustomizedPrebuiltRule(rule: RuleResponse): boolean {
   return rule.rule_source?.type === 'external' && rule.rule_source.is_customized;

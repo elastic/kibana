@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
+import { RuleResponse } from '../../model/rule_schema/rule_schemas_correlation';
 import { NormalizedRuleError } from '../../rule_management';
 
 export type RevertPrebuiltRulesRequest = z.infer<typeof RevertPrebuiltRulesRequest>;

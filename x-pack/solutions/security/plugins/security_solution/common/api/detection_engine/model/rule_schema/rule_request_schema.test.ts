@@ -19,7 +19,7 @@ import {
   getCreateThresholdRulesSchemaMock,
 } from './rule_request_schema.mock';
 import type { SavedQueryRuleCreateProps } from './rule_schemas.gen';
-import { RuleCreateProps } from './rule_schemas.gen';
+import { RuleCreateProps } from './rule_schemas_correlation';
 
 describe('rules schema', () => {
   test('empty objects do not validate', () => {

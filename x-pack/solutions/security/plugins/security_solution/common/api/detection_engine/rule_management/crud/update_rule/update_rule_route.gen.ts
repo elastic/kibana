@@ -16,7 +16,7 @@
 
 import type { z } from '@kbn/zod/v4';
 
-import { RuleUpdateProps, RuleResponse } from '../../../model/rule_schema/rule_schemas.gen';
+import { RuleUpdateProps, RuleResponse } from '../../../model/rule_schema/rule_schemas_correlation';
 
 export type UpdateRuleRequestBody = z.infer<typeof UpdateRuleRequestBody>;
 export const UpdateRuleRequestBody = RuleUpdateProps;

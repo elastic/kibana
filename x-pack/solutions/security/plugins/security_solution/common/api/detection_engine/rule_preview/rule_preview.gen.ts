@@ -27,6 +27,7 @@ import {
   NewTermsRuleCreateProps,
   EsqlRuleCreateProps,
 } from '../model/rule_schema/rule_schemas.gen';
+import { CorrelationRuleCreateProps } from '../model/rule_schema/rule_schemas_correlation';
 import { NonEmptyString } from '../../model/primitives.gen';
 
 export type RulePreviewParams = z.infer<typeof RulePreviewParams>;
@@ -74,6 +75,7 @@ export const RulePreviewRequestBody = z.discriminatedUnion('type', [
   MachineLearningRuleCreateProps.merge(RulePreviewParams),
   NewTermsRuleCreateProps.merge(RulePreviewParams),
   EsqlRuleCreateProps.merge(RulePreviewParams),
+  CorrelationRuleCreateProps.merge(RulePreviewParams),
 ]);
 export type RulePreviewRequestBodyInput = z.input<typeof RulePreviewRequestBody>;
 

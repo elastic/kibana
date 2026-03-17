@@ -19,7 +19,7 @@ import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { SortOrder } from '../../model/sorting.gen';
 import { GapFillStatus } from '../../model/rule_schema/common_attributes.gen';
-import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
+import { RuleResponse } from '../../model/rule_schema/rule_schemas_correlation';
 import { WarningSchema } from '../../model/warning_schema.gen';
 
 export type FindRulesSortField = z.infer<typeof FindRulesSortField>;
