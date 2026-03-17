@@ -25,9 +25,15 @@ const openEditing = () => {
   return screen.getByTestId('dateRangePickerInput');
 };
 
+/** Flush EuiPopover's internal 250ms close-transition setTimeout. */
+const waitForPopoverClose = () =>
+  waitFor(() => {
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
 describe('DateRangePickerControl', () => {
   describe('editing mode', () => {
-    it('enters editing mode on control button click', () => {
+    it('enters editing mode on control button click', async () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={() => {}} />);
 
       expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
@@ -37,9 +43,12 @@ describe('DateRangePickerControl', () => {
 
       expect(input).toHaveFocus();
       expect(screen.queryByTestId('dateRangePickerControlButton')).not.toBeInTheDocument();
+
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await waitForPopoverClose();
     });
 
-    it('submits on Enter and returns to idle mode', () => {
+    it('submits on Enter and returns to idle mode', async () => {
       const onChange = jest.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);
 
@@ -50,9 +59,10 @@ describe('DateRangePickerControl', () => {
       expect(onChange).toHaveBeenCalledTimes(1);
       expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
+      await waitForPopoverClose();
     });
 
-    it('cancels on Escape and returns to idle mode', () => {
+    it('cancels on Escape and returns to idle mode', async () => {
       const onChange = jest.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);
 
@@ -63,9 +73,10 @@ describe('DateRangePickerControl', () => {
       expect(onChange).not.toHaveBeenCalled();
       expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
+      await waitForPopoverClose();
     });
 
-    it('restores previous text on Escape after typing', () => {
+    it('restores previous text on Escape after typing', async () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
 
       const input = openEditing();
@@ -75,9 +86,10 @@ describe('DateRangePickerControl', () => {
 
       const button = screen.getByTestId('dateRangePickerControlButton');
       expect(button).toHaveTextContent('Last 20 minutes');
+      await waitForPopoverClose();
     });
 
-    it('calls onInputChange when typing and clearing input', () => {
+    it('calls onInputChange when typing and clearing input', async () => {
       const onInputChange = jest.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onInputChange={onInputChange} />);
 
@@ -88,9 +100,12 @@ describe('DateRangePickerControl', () => {
 
       fireEvent.click(screen.getByLabelText('Clear input'));
       expect(onInputChange).toHaveBeenCalledWith('');
+
+      fireEvent.keyDown(screen.getByTestId('dateRangePickerInput'), { key: 'Escape' });
+      await waitForPopoverClose();
     });
 
-    it('closes on outside click and returns to idle mode', () => {
+    it('closes on outside click and returns to idle mode', async () => {
       const onChange = jest.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);
 
@@ -102,9 +117,10 @@ describe('DateRangePickerControl', () => {
       expect(onChange).not.toHaveBeenCalled();
       expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
+      await waitForPopoverClose();
     });
 
-    it('exits editing and restores text on Shift+Tab from the first tabbable', () => {
+    it('exits editing and restores text on Shift+Tab from the first tabbable', async () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
 
       const input = openEditing();
@@ -115,9 +131,10 @@ describe('DateRangePickerControl', () => {
         'Last 20 minutes'
       );
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
+      await waitForPopoverClose();
     });
 
-    it('exits editing and restores text on Tab from the last tabbable', () => {
+    it('exits editing and restores text on Tab from the last tabbable', async () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
 
       const input = openEditing();
@@ -131,11 +148,12 @@ describe('DateRangePickerControl', () => {
         'Last 20 minutes'
       );
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
+      await waitForPopoverClose();
     });
 
     it.each(['ArrowDown', 'ArrowUp'] as const)(
       'moves focus into the dialog on %s and back to button on Escape',
-      (arrowKey) => {
+      async (arrowKey) => {
         renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
 
         const input = openEditing();
@@ -147,10 +165,11 @@ describe('DateRangePickerControl', () => {
         fireEvent.keyDown(dialog, { key: 'Escape' });
 
         expect(screen.getByTestId('dateRangePickerControlButton')).toHaveFocus();
+        await waitForPopoverClose();
       }
     );
 
-    it('traps focus within the dialog panel on Tab', () => {
+    it('traps focus within the dialog panel on Tab', async () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
 
       const input = openEditing();
@@ -169,6 +188,9 @@ describe('DateRangePickerControl', () => {
 
       fireEvent.keyDown(first, { key: 'Tab', shiftKey: true });
       expect(last).toHaveFocus();
+
+      fireEvent.keyDown(dialog, { key: 'Escape' });
+      await waitForPopoverClose();
     });
 
     it('opens popover when entering editing mode and closes it when exiting', async () => {
@@ -258,6 +280,9 @@ describe('DateRangePickerControl', () => {
       await waitFor(() => {
         expect(input).toHaveValue('last 5 minutes');
       });
+
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await waitForPopoverClose();
     });
 
     it('restores to latest value on cancel after external value change during editing', async () => {
@@ -269,9 +294,10 @@ describe('DateRangePickerControl', () => {
       fireEvent.keyDown(input, { key: 'Escape' });
 
       expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent('Last 1 hour');
+      await waitForPopoverClose();
     });
 
-    it('calls onChange on Enter in controlled mode', () => {
+    it('calls onChange on Enter in controlled mode', async () => {
       const onChange = jest.fn();
       renderPicker({ value: 'last 20 minutes', onChange });
 
@@ -280,6 +306,7 @@ describe('DateRangePickerControl', () => {
 
       expect(onChange).toHaveBeenCalledTimes(1);
       expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
+      await waitForPopoverClose();
     });
 
     it('preserves text when controlled value is removed', () => {
