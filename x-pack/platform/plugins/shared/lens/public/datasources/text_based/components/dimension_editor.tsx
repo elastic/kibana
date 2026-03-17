@@ -172,6 +172,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                           }
 
                           const isNewColumnNumeric = column?.meta?.type === 'number';
+                          const shouldKeepCustomLabel = Boolean(col.customLabel);
 
                           return {
                             ...col,
@@ -180,6 +181,13 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                             variable: column?.variable,
                             // If the new column is not numeric, remove the format selector params
                             ...(!isNewColumnNumeric && col.params ? { params: undefined } : {}),
+                            // If the previous column has a custom label, keep it
+                            ...(shouldKeepCustomLabel
+                              ? {}
+                              : {
+                                  label: choice.field,
+                                  customLabel: false,
+                                }),
                           };
                         }),
                       },
