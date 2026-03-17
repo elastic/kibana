@@ -168,7 +168,7 @@ describe('ScriptLibrary', () => {
       expect(getByTestId('test-header')).toBeInTheDocument();
       expect(getByTestId('header-page-title').textContent).toEqual('Script Library');
       expect(getByTestId('header-panel-subtitle').textContent).toEqual(
-        'View and manage scripts to upload and execute on Elastic Defend agents.'
+        'Upload and manage scripts to use with the runscript response action on endpoints protected by Elastic Defend.'
       );
     });
   });
