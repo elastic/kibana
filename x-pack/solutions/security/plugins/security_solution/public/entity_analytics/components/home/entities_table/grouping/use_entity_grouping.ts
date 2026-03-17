@@ -176,7 +176,15 @@ export const useEntityGrouping = ({
         },
       },
     }),
-    [currentSelectedGroup, uniqueValue, additionalFilters, query, pageIndex, pageSize, globalFilterQuery]
+    [
+      currentSelectedGroup,
+      uniqueValue,
+      additionalFilters,
+      query,
+      pageIndex,
+      pageSize,
+      globalFilterQuery,
+    ]
   );
 
   const { data, isFetching } = useFetchGroupedData({
