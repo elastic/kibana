@@ -77846,6 +77846,19 @@ components:
       description: A word or phrase that categorizes the case.
       maxLength: 50
       type: string
+    Cases_case_close_sync_reason:
+      description: |
+        The close reason to sync to attached alerts when closing the case. Can be one of following predefined reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user.
+      oneOf:
+        - enum:
+            - false_positive
+            - duplicate
+            - true_positive
+            - benign_positive
+            - automated_closure
+            - other
+          type: string
+        - type: string
     Cases_case_description:
       description: The description for the case.
       maxLength: 30000
@@ -79324,6 +79337,8 @@ components:
                 $ref: '#/components/schemas/Cases_assignees'
               category:
                 $ref: '#/components/schemas/Cases_case_category'
+              closeReason:
+                $ref: '#/components/schemas/Cases_case_close_sync_reason'
               connector:
                 oneOf:
                   - $ref: '#/components/schemas/Cases_connector_properties_none'
