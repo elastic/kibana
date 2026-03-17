@@ -9,6 +9,7 @@ export { useCommandMenu } from './use_command_menu';
 export type {
   ActiveCommand,
   AnchorPosition,
+  CommandBadgeData,
   CommandMatchResult,
   CommandMenuComponentProps,
   CommandMenuHandle,

@@ -9,12 +9,17 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiPopover, EuiScreenReaderLive } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CommandMatchResult, AnchorPosition, CommandMenuHandle } from './types';
+import type {
+  CommandMatchResult,
+  AnchorPosition,
+  CommandMenuHandle,
+  CommandBadgeData,
+} from './types';
 
 interface CommandMenuPopoverProps {
   commandMatch: CommandMatchResult;
   anchorPosition: AnchorPosition | null;
-  onSelect: (text: string) => void;
+  onSelect: (selection: CommandBadgeData) => void;
   commandMenuRef: React.RefObject<CommandMenuHandle>;
   'data-test-subj'?: string;
 }

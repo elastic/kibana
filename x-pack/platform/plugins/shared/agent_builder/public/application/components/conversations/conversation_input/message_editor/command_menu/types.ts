@@ -6,6 +6,9 @@
  */
 
 import type React from 'react';
+import type { CommandBadgeData } from '../command_badge/types';
+
+export type { CommandBadgeData };
 
 export enum CommandId {
   Attachment = 'attachment',
@@ -17,7 +20,7 @@ export enum CommandId {
  */
 export interface CommandMenuComponentProps {
   readonly query: string;
-  readonly onSelect: (selectedText: string) => void;
+  readonly onSelect: (selection: CommandBadgeData) => void;
 }
 
 /**

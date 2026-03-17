@@ -52,7 +52,7 @@ describe('CommandMenuList', () => {
 
     fireEvent.click(screen.getByText('Alpha'));
 
-    expect(onSelect).toHaveBeenCalledWith('Alpha');
+    expect(onSelect).toHaveBeenCalledWith({ key: '1', label: 'Alpha' });
   });
 
   it('calls onSelect when a non-first option is clicked', () => {
@@ -63,7 +63,7 @@ describe('CommandMenuList', () => {
 
     fireEvent.click(screen.getByText('Beta'));
 
-    expect(onSelect).toHaveBeenCalledWith('Beta');
+    expect(onSelect).toHaveBeenCalledWith({ key: '2', label: 'Beta' });
   });
 
   describe('keyboard navigation', () => {
@@ -78,7 +78,7 @@ describe('CommandMenuList', () => {
         ref.current!.handleKeyDown({ key: 'Enter' } as React.KeyboardEvent);
       });
 
-      expect(onSelect).toHaveBeenCalledWith('Alpha');
+      expect(onSelect).toHaveBeenCalledWith({ key: '1', label: 'Alpha' });
     });
 
     it('navigates down and selects with Enter', () => {
@@ -95,7 +95,7 @@ describe('CommandMenuList', () => {
         ref.current!.handleKeyDown({ key: 'Enter' } as React.KeyboardEvent);
       });
 
-      expect(onSelect).toHaveBeenCalledWith('Beta');
+      expect(onSelect).toHaveBeenCalledWith({ key: '2', label: 'Beta' });
     });
 
     it('navigates up from second item', () => {
@@ -115,7 +115,7 @@ describe('CommandMenuList', () => {
         ref.current!.handleKeyDown({ key: 'Enter' } as React.KeyboardEvent);
       });
 
-      expect(onSelect).toHaveBeenCalledWith('Alpha');
+      expect(onSelect).toHaveBeenCalledWith({ key: '1', label: 'Alpha' });
     });
 
     it('clamps at end of list', () => {
@@ -135,7 +135,7 @@ describe('CommandMenuList', () => {
         ref.current!.handleKeyDown({ key: 'Enter' } as React.KeyboardEvent);
       });
 
-      expect(onSelect).toHaveBeenCalledWith('Gamma');
+      expect(onSelect).toHaveBeenCalledWith({ key: '3', label: 'Gamma' });
     });
 
     it('clamps at start of list', () => {
@@ -152,7 +152,7 @@ describe('CommandMenuList', () => {
         ref.current!.handleKeyDown({ key: 'Enter' } as React.KeyboardEvent);
       });
 
-      expect(onSelect).toHaveBeenCalledWith('Alpha');
+      expect(onSelect).toHaveBeenCalledWith({ key: '1', label: 'Alpha' });
     });
 
     it('selects with Tab', () => {
@@ -166,7 +166,7 @@ describe('CommandMenuList', () => {
         ref.current!.handleKeyDown({ key: 'Tab' } as React.KeyboardEvent);
       });
 
-      expect(onSelect).toHaveBeenCalledWith('Alpha');
+      expect(onSelect).toHaveBeenCalledWith({ key: '1', label: 'Alpha' });
     });
 
     it('reports handled keys via isKeyDownEventHandled', () => {

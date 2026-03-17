@@ -9,56 +9,56 @@ import { matchCommand } from './command_matcher';
 
 describe('matchCommand', () => {
   describe('single-character commands', () => {
-    it('matches "@" at start of input', () => {
-      const result = matchCommand('@');
+    it('matches "/" at start of input', () => {
+      const result = matchCommand('/');
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.command.id).toBe('attachment');
+      expect(result.activeCommand?.command.id).toBe('skill');
       expect(result.activeCommand?.query).toBe('');
       expect(result.activeCommand?.commandStartOffset).toBe(0);
     });
 
-    it('matches "@" after whitespace', () => {
-      const result = matchCommand('hello @');
+    it('matches "/" after whitespace', () => {
+      const result = matchCommand('hello /');
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.command.id).toBe('attachment');
+      expect(result.activeCommand?.command.id).toBe('skill');
       expect(result.activeCommand?.query).toBe('');
     });
 
-    it('does not match "@" mid-word', () => {
-      const result = matchCommand('email@example');
+    it('does not match "/" mid-word', () => {
+      const result = matchCommand('path/to');
       expect(result.isActive).toBe(false);
     });
 
     it('captures query text after command', () => {
-      const result = matchCommand('@joh');
+      const result = matchCommand('/sum');
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.query).toBe('joh');
+      expect(result.activeCommand?.query).toBe('sum');
     });
 
     it('includes trailing space in query', () => {
-      const result = matchCommand('@john ');
+      const result = matchCommand('/summarize ');
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.query).toBe('john ');
+      expect(result.activeCommand?.query).toBe('summarize ');
     });
 
     it('includes spaces within query', () => {
-      const result = matchCommand('@john doe');
+      const result = matchCommand('/summarize text');
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.query).toBe('john doe');
+      expect(result.activeCommand?.query).toBe('summarize text');
     });
   });
 
   describe('multiple command instances in text', () => {
     it('matches the last occurrence', () => {
-      const result = matchCommand('hello @alice hey @bob');
+      const result = matchCommand('hello /summarize hey /translate');
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.query).toBe('bob');
+      expect(result.activeCommand?.query).toBe('translate');
     });
 
     it('matches last command when earlier one was deactivated by space', () => {
-      const result = matchCommand('@alice hello @bob');
+      const result = matchCommand('/summarize hello /translate');
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.query).toBe('bob');
+      expect(result.activeCommand?.query).toBe('translate');
     });
   });
 
@@ -74,15 +74,15 @@ describe('matchCommand', () => {
     });
 
     it('matches command after newline', () => {
-      const result = matchCommand('hello\n@bob');
+      const result = matchCommand('hello\n/sum');
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.query).toBe('bob');
+      expect(result.activeCommand?.query).toBe('sum');
     });
 
     it('matches command after tab', () => {
-      const result = matchCommand('hello\t@bob');
+      const result = matchCommand('hello\t/sum');
       expect(result.isActive).toBe(true);
-      expect(result.activeCommand?.query).toBe('bob');
+      expect(result.activeCommand?.query).toBe('sum');
     });
   });
 });

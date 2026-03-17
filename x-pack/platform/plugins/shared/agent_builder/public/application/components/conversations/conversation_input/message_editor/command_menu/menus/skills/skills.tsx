@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef, useCallback, useMemo } from 'react';
 import type { CommandMenuComponentProps, CommandMenuHandle } from '../../types';
+import { CommandId } from '../../types';
 import { CommandMenuList } from '../components/command_menu_list';
 import type { CommandMenuListOption } from '../components/command_menu_list';
 import { useSkills } from './use_skills';
@@ -22,12 +23,23 @@ export const Skills = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
         .map((skill) => ({ key: skill.id, label: skill.name }));
     }, [skills, query]);
 
+    const handleSelect = useCallback(
+      (option: CommandMenuListOption) => {
+        onSelect({
+          commandId: CommandId.Skill,
+          label: option.label,
+          metadata: { 'skill-id': option.key },
+        });
+      },
+      [onSelect]
+    );
+
     return (
       <CommandMenuList
         ref={ref}
         options={options}
         isLoading={isLoading}
-        onSelect={onSelect}
+        onSelect={handleSelect}
         data-test-subj="skillsMenu"
       />
     );

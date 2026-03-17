@@ -27,7 +27,7 @@ describe('useCommandMenuCommand', () => {
   });
 
   it('detects command on handleInput', () => {
-    mockGetTextBeforeCursor.mockReturnValue('@');
+    mockGetTextBeforeCursor.mockReturnValue('/');
 
     const { result } = renderHook(() => useCommandMenu());
 
@@ -36,12 +36,12 @@ describe('useCommandMenuCommand', () => {
     });
 
     expect(result.current.match.isActive).toBe(true);
-    expect(result.current.match.activeCommand?.command.id).toBe('attachment');
+    expect(result.current.match.activeCommand?.command.id).toBe('skill');
     expect(result.current.match.activeCommand?.query).toBe('');
   });
 
   it('updates query as user types after command', () => {
-    mockGetTextBeforeCursor.mockReturnValue('@joh');
+    mockGetTextBeforeCursor.mockReturnValue('/sum');
 
     const { result } = renderHook(() => useCommandMenu());
 
@@ -50,28 +50,28 @@ describe('useCommandMenuCommand', () => {
     });
 
     expect(result.current.match.isActive).toBe(true);
-    expect(result.current.match.activeCommand?.query).toBe('joh');
+    expect(result.current.match.activeCommand?.query).toBe('sum');
   });
 
   it('keeps command active when query contains whitespace', () => {
     const { result } = renderHook(() => useCommandMenu());
 
-    mockGetTextBeforeCursor.mockReturnValue('@john');
+    mockGetTextBeforeCursor.mockReturnValue('/summarize');
     act(() => {
       result.current.checkInputForCommand(mockElement);
     });
     expect(result.current.match.isActive).toBe(true);
 
-    mockGetTextBeforeCursor.mockReturnValue('@john ');
+    mockGetTextBeforeCursor.mockReturnValue('/summarize ');
     act(() => {
       result.current.checkInputForCommand(mockElement);
     });
     expect(result.current.match.isActive).toBe(true);
-    expect(result.current.match.activeCommand?.query).toBe('john ');
+    expect(result.current.match.activeCommand?.query).toBe('summarize ');
   });
 
   it('dismiss() deactivates the current command', () => {
-    mockGetTextBeforeCursor.mockReturnValue('@john');
+    mockGetTextBeforeCursor.mockReturnValue('/summarize');
 
     const { result } = renderHook(() => useCommandMenu());
 
@@ -89,7 +89,7 @@ describe('useCommandMenuCommand', () => {
   it('dismissed command re-activates on next input', () => {
     const { result } = renderHook(() => useCommandMenu());
 
-    mockGetTextBeforeCursor.mockReturnValue('@john');
+    mockGetTextBeforeCursor.mockReturnValue('/summarize');
     act(() => {
       result.current.checkInputForCommand(mockElement);
     });
@@ -100,16 +100,16 @@ describe('useCommandMenuCommand', () => {
     expect(result.current.match.isActive).toBe(false);
 
     // User continues typing — command re-activates
-    mockGetTextBeforeCursor.mockReturnValue('@johnny');
+    mockGetTextBeforeCursor.mockReturnValue('/summarize t');
     act(() => {
       result.current.checkInputForCommand(mockElement);
     });
     expect(result.current.match.isActive).toBe(true);
-    expect(result.current.match.activeCommand?.query).toBe('johnny');
+    expect(result.current.match.activeCommand?.query).toBe('summarize t');
   });
 
   it('disabled option prevents command detection', () => {
-    mockGetTextBeforeCursor.mockReturnValue('@john');
+    mockGetTextBeforeCursor.mockReturnValue('/summarize');
 
     const { result } = renderHook(() => useCommandMenu({ enabled: false }));
 

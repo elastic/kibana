@@ -7,7 +7,7 @@
 
 import React, { useRef } from 'react';
 import { css } from '@emotion/react';
-import type { CommandMatchResult, CommandMenuHandle } from './types';
+import type { CommandMatchResult, CommandMenuHandle, CommandBadgeData } from './types';
 import { CommandMenuPopover } from './command_menu_popover';
 import { useCommandMenuAnchor } from './use_command_menu_anchor';
 import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
@@ -21,7 +21,7 @@ const containerStyles = css`
 interface CommandMenuContainerProps {
   commandMatch: CommandMatchResult;
   editorRef: React.RefObject<HTMLDivElement>;
-  onSelect: (text: string) => void;
+  onSelect: (selection: CommandBadgeData) => void;
   commandMenuRef: React.RefObject<CommandMenuHandle>;
   children: React.ReactNode;
   'data-test-subj'?: string;

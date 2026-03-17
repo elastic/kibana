@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type { RefObject } from 'react';
 import { useRef, useMemo, useState, useCallback } from 'react';
-import type { CommandMatchResult } from './command_menu';
+import type { CommandMatchResult, CommandBadgeData } from './command_menu';
 import { useCommandMenu } from './command_menu';
 import { useCommandMenuPrefetch } from './command_menu/use_command_menu_prefetch';
+import { createCommandBadgeElement, deserializeCommandBadge } from './command_badge';
+import { serializeEditorContent } from './serialize';
+import { createCommandRange, insertSpaceAfter, placeCursorAfter, placeCursorAtEnd } from './utils';
 
 export interface MessageEditorInstance {
   ref: React.RefObject<HTMLDivElement>;
@@ -18,7 +22,7 @@ export interface MessageEditorInstance {
   /** Dismiss the active action menu */
   dismissActionMenu: () => void;
   /** Handle selection of an item from the command menu */
-  handleCommandSelect: (selectedText: string) => void;
+  handleCommandSelect: (selection: CommandBadgeData) => void;
 }
 
 export interface MessageEditorController {
@@ -28,6 +32,139 @@ export interface MessageEditorController {
   clear: () => void;
   isEmpty: boolean;
 }
+
+/**
+ * Reactive bindings for the MessageEditor component.
+ *
+ * Provides event handlers (onChange, onFocus), the current command menu match state,
+ * and `handleCommandSelect` which replaces the in-progress command text (e.g. "/summ")
+ * with a styled badge element.
+ */
+const useMessageEditorInstance = ({
+  ref,
+  syncIsEmpty,
+}: {
+  ref: RefObject<HTMLDivElement>;
+  syncIsEmpty: () => void;
+}): MessageEditorInstance => {
+  const {
+    match: commandMatch,
+    dismiss: dismissCommandMenu,
+    checkInputForCommand,
+  } = useCommandMenu();
+  const prefetchCommandMenus = useCommandMenuPrefetch();
+
+  const messageEditor = useMemo(
+    () => ({
+      ref,
+      // Sync empty state and re-evaluate command menu on every input change
+      onChange: () => {
+        syncIsEmpty();
+        if (ref.current) {
+          checkInputForCommand(ref.current);
+        }
+      },
+      // Eagerly load command menu data and check for active commands once the cursor is ready
+      onFocus: () => {
+        prefetchCommandMenus();
+        // Must request animation frame as some browsers have not instantiated the user's cursor selection when the focus event fires
+        requestAnimationFrame(() => {
+          if (ref.current) {
+            checkInputForCommand(ref.current);
+          }
+        });
+      },
+      commandMatch,
+      dismissActionMenu: dismissCommandMenu,
+      // Replace the command text (e.g. "/summ") with a badge element:
+      handleCommandSelect: (selection: CommandBadgeData) => {
+        if (!ref.current || !commandMatch.activeCommand) {
+          return;
+        }
+
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) {
+          return;
+        }
+
+        const commandRange = createCommandRange(ref.current, commandMatch.activeCommand);
+        commandRange.deleteContents();
+
+        const badge = createCommandBadgeElement(selection);
+        commandRange.insertNode(badge);
+
+        const space = insertSpaceAfter(badge, ref.current);
+        placeCursorAfter(space, sel);
+
+        syncIsEmpty();
+        dismissCommandMenu();
+      },
+    }),
+    [ref, syncIsEmpty, checkInputForCommand, prefetchCommandMenus, commandMatch, dismissCommandMenu]
+  );
+  return messageEditor;
+};
+
+/**
+ * Imperative API for the consumer to read, write, and clear the editor content.
+ *
+ * - `getContent` serializes the editor DOM (including badges) to a string with
+ *   badge markdown-links, e.g. `[/Summarize](skill://skill-1)`.
+ * - `setContent` deserializes that format back into DOM nodes (text + badges).
+ * - `clear` resets the editor to empty.
+ */
+const useMessageEditorController = ({
+  ref,
+  syncIsEmpty,
+  isEmpty,
+  setIsEmpty,
+}: {
+  ref: RefObject<HTMLDivElement>;
+  syncIsEmpty: () => void;
+  isEmpty: boolean;
+  setIsEmpty: (next: boolean) => void;
+}) => {
+  const controller = useMemo(
+    () => ({
+      focus: () => {
+        ref.current?.focus();
+      },
+      getContent: () => {
+        if (!ref.current) {
+          return '';
+        }
+        return serializeEditorContent(ref.current);
+      },
+      setContent: (text: string) => {
+        if (!ref.current) {
+          return;
+        }
+        const segments = deserializeCommandBadge(text);
+        ref.current.innerHTML = '';
+
+        for (const segment of segments) {
+          if (segment.type === 'text') {
+            ref.current.appendChild(document.createTextNode(segment.value));
+          } else if (segment.type === 'badge') {
+            ref.current.appendChild(createCommandBadgeElement(segment.data));
+          }
+        }
+
+        syncIsEmpty();
+        placeCursorAtEnd(ref.current);
+      },
+      clear: () => {
+        if (ref.current) {
+          ref.current.innerHTML = '';
+          setIsEmpty(true);
+        }
+      },
+      isEmpty,
+    }),
+    [ref, isEmpty, setIsEmpty, syncIsEmpty]
+  );
+  return controller;
+};
 
 /**
  * Creates reactive and imperative handles for controlling MessageEditor.
@@ -49,12 +186,6 @@ export const useMessageEditor = (): {
   messageEditor: MessageEditorInstance;
   controller: MessageEditorController;
 } => {
-  const {
-    match: commandMatch,
-    dismiss: dismissCommandMenu,
-    checkInputForCommand,
-  } = useCommandMenu();
-  const prefetchCommandMenus = useCommandMenuPrefetch();
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
 
@@ -71,78 +202,15 @@ export const useMessageEditor = (): {
     setIsEmpty(nextIsEmpty);
   }, []);
 
+  const instance = useMessageEditorInstance({ ref, syncIsEmpty });
+  const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty, setIsEmpty });
   const messageEditor = useMemo(
     () => ({
-      ref,
-      onChange: () => {
-        syncIsEmpty();
-        if (ref.current) {
-          checkInputForCommand(ref.current);
-        }
-      },
-      onFocus: () => {
-        prefetchCommandMenus();
-        // Must request animation frame as some browsers have not instantiated the user's cursor selection when the focus event fires
-        requestAnimationFrame(() => {
-          if (ref.current) {
-            checkInputForCommand(ref.current);
-          }
-        });
-      },
-      commandMatch,
-      dismissActionMenu: dismissCommandMenu,
-      handleCommandSelect: (selectedText: string) => {
-        if (!ref.current || !commandMatch.activeCommand) {
-          return;
-        }
-        const text = ref.current.textContent ?? '';
-        const { commandStartOffset, query, command } = commandMatch.activeCommand;
-        const cursorPos = commandStartOffset + command.sequence.length + query.length;
-        const newText =
-          text.slice(0, commandStartOffset) + selectedText + ' ' + text.slice(cursorPos);
-        ref.current.textContent = newText;
-        syncIsEmpty();
-        // Position cursor after inserted text + space
-        const selection = window.getSelection();
-        if (selection && ref.current.firstChild) {
-          const newCursorPos = commandStartOffset + selectedText.length + 1;
-          selection.setPosition(ref.current.firstChild, newCursorPos);
-        }
-        dismissCommandMenu();
-      },
+      messageEditor: instance,
+      controller,
     }),
-    [syncIsEmpty, checkInputForCommand, prefetchCommandMenus, commandMatch, dismissCommandMenu]
+    [instance, controller]
   );
 
-  const controller = useMemo(
-    () => ({
-      focus: () => {
-        ref.current?.focus();
-      },
-      getContent: () => {
-        return ref.current?.textContent ?? '';
-      },
-      setContent: (text: string) => {
-        if (ref.current) {
-          ref.current.textContent = text;
-          syncIsEmpty();
-          // Set caret position at the end of the text
-          const selection = window.getSelection();
-          if (selection && ref.current.firstChild) {
-            selection.setPosition(ref.current.firstChild, text.length);
-          }
-        }
-      },
-      clear: () => {
-        if (ref.current) {
-          ref.current.textContent = '';
-          setIsEmpty(true);
-        }
-      },
-      isEmpty,
-    }),
-    [isEmpty, syncIsEmpty]
-  );
-
-  return { messageEditor, controller };
+  return messageEditor;
 };

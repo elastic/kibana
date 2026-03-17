@@ -40,7 +40,7 @@ export interface CommandMenuListOption {
 interface CommandMenuListProps {
   readonly options: readonly CommandMenuListOption[];
   readonly isLoading: boolean;
-  readonly onSelect: (label: string) => void;
+  readonly onSelect: (option: CommandMenuListOption) => void;
   readonly 'data-test-subj'?: string;
 }
 
@@ -74,7 +74,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           setActiveIndex((prev) => Math.max(prev - 1, 0));
         } else if (event.key === keys.ENTER || event.key === keys.TAB) {
           if (options.length > 0) {
-            onSelect(options[activeIndex].label);
+            onSelect(options[activeIndex]);
           }
         }
       },
@@ -129,7 +129,10 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           }}
           onChange={(_newOptions, _event, changedOption) => {
             if (changedOption) {
-              onSelect(changedOption.label);
+              const matchingOption = options.find((o) => o.key === changedOption.key);
+              if (matchingOption) {
+                onSelect(matchingOption);
+              }
             }
           }}
           emptyMessage={noMatchesLabel}

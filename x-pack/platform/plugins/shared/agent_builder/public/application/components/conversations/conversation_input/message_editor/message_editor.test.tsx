@@ -10,7 +10,11 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { MessageEditor } from './message_editor';
 import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
 import { CommandId } from './command_menu';
-import type { CommandMenuComponentProps, CommandMenuHandle } from './command_menu';
+import type {
+  CommandMenuComponentProps,
+  CommandMenuHandle,
+  CommandBadgeData,
+} from './command_menu';
 
 // TODO: Remove once the inline actions feature is no longer behind the experimental feature flag
 jest.mock('../../../../hooks/use_experimental_features', () => ({
@@ -35,10 +39,16 @@ const MockMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuCompone
   (_props, _ref) => <div />
 );
 
+const mockBadgeData: CommandBadgeData = {
+  commandId: CommandId.Skill,
+  label: 'Summarize',
+  metadata: { 'skill-id': 'skill-1' },
+};
+
 const ClickableMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
   ({ onSelect }, _ref) => (
     <div>
-      <button data-test-subj="menuOption" onClick={() => onSelect('Summarize')}>
+      <button data-test-subj="menuOption" onClick={() => onSelect(mockBadgeData)}>
         Summarize
       </button>
     </div>
@@ -301,6 +311,6 @@ describe('MessageEditor', () => {
 
     fireEvent.click(screen.getByTestId('menuOption'));
 
-    expect(messageEditor.handleCommandSelect).toHaveBeenCalledWith('Summarize');
+    expect(messageEditor.handleCommandSelect).toHaveBeenCalledWith(mockBadgeData);
   });
 });
