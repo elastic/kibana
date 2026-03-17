@@ -8,12 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
-import {
-  apiTest,
-  COMMON_HEADERS,
-  DASHBOARD_API_PATH,
-  SLO_ALERTS_EMBEDDABLE_ID,
-} from '../fixtures';
+import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, SLO_ALERTS_EMBEDDABLE_ID } from '../fixtures';
 
 apiTest.describe(
   'SLO Alerts Embeddable',
