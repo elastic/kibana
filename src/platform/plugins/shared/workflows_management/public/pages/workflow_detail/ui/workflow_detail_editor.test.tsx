@@ -78,34 +78,13 @@ jest.mock('../../../features/debug_graph/execution_graph', () => ({
   ),
 }));
 
-jest.mock('../../../features/run_workflow/ui/test_step_modal', () => ({
-  TestStepModal: ({ initialcontextOverride, onSubmit, onClose }: any) => (
-    <div data-test-subj="test-step-modal">
-      <button
-        type="button"
-        data-test-subj="workflowSubmitStepRun"
-        onClick={() => onSubmit({ stepInputs: {} })}
-      >
-        {'Submit'}
-      </button>
-      <button type="button" data-test-subj="close-step-modal" onClick={onClose}>
-        {'Close'}
-      </button>
-      <div data-test-subj="context-override">{JSON.stringify(initialcontextOverride)}</div>
-    </div>
-  ),
+const mockUseContextOverrideData = jest.fn((stepId: string) => ({
+  stepContext: { mockKey: 'mockValue' },
+  schema: {},
 }));
-
 jest.mock('./use_context_override_data', () => ({
-  useContextOverrideData: jest.fn(() => (stepId: string) => ({
-    stepContext: { mockKey: 'mockValue' },
-    schema: {},
-  })),
+  useContextOverrideData: () => mockUseContextOverrideData,
 }));
-
-const mockUseContextOverrideData = jest.mocked(
-  require('./use_context_override_data').useContextOverrideData
-);
 
 describe('WorkflowDetailEditor', () => {
   const mockYaml =
@@ -239,7 +218,7 @@ describe('WorkflowDetailEditor', () => {
     });
 
     it('should show toast error when immediate step run (no modal) fails', async () => {
-      mockUseContextOverrideData.mockReturnValue(() => ({ stepContext: {}, schema: {} } as any));
+      mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
 
       const mockMutateAsync = jest.fn().mockRejectedValue(new Error('Failed to run step'));
       mockUseWorkflowActions.mockReturnValue({

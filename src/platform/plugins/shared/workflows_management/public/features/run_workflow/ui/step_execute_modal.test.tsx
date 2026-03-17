@@ -24,11 +24,19 @@ jest.mock('./step_execute_manual_form', () => ({
     <div data-test-subj="mockManualForm">
       <span data-test-subj="manualFormValue">{value}</span>
       {errors && <span data-test-subj="manualFormErrors">{errors}</span>}
-      <button data-test-subj="manualFormChange" onClick={() => onChange('{"updated":"value"}')}>
-        change
+      <button
+        data-test-subj="manualFormChange"
+        onClick={() => onChange('{"updated":"value"}')}
+        type="button"
+      >
+        {'change'}
       </button>
-      <button data-test-subj="manualFormInvalidChange" onClick={() => onChange('invalid-json')}>
-        invalid change
+      <button
+        data-test-subj="manualFormInvalidChange"
+        onClick={() => onChange('invalid-json')}
+        type="button"
+      >
+        {'invalid change'}
       </button>
     </div>
   ),
@@ -43,17 +51,23 @@ jest.mock('./step_execute_historical_form', () => ({
       <button
         data-test-subj="historicalFormChange"
         onClick={() => setValue('{"historical":"input"}')}
+        type="button"
       >
-        load execution
+        {'load execution'}
       </button>
       <button
         data-test-subj="historicalFormSetNotReady"
         onClick={() => setErrors('__step_historical_not_ready__')}
+        type="button"
       >
-        set not ready
+        {'set not ready'}
       </button>
-      <button data-test-subj="historicalFormSetError" onClick={() => setErrors('Some error')}>
-        set error
+      <button
+        data-test-subj="historicalFormSetError"
+        onClick={() => setErrors('Some error')}
+        type="button"
+      >
+        {'set error'}
       </button>
     </div>
   ),
