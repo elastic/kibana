@@ -11,12 +11,13 @@ import type {
   VisualizationMap,
   DatasourceMap,
   TypedLensSerializedState,
+  LensDatasourceId,
 } from '@kbn/lens-common';
 import { mergeToNewDoc } from '../../state_management/shared_logic';
 import { getActiveDatasourceIdFromDoc } from '../../utils';
 
 export function getStateManagementForInlineEditing(
-  initialDatasourceId: 'formBased' | 'textBased',
+  initialDatasourceId: LensDatasourceId,
   getAttributes: () => TypedLensSerializedState['attributes'],
   updateAttributes: (
     newAttributes: TypedLensSerializedState['attributes'],
@@ -26,13 +27,18 @@ export function getStateManagementForInlineEditing(
   datasourceMap: DatasourceMap,
   extractFilterReferences: FilterManager['extract']
 ) {
+  const resolveActiveDatasourceId = (explicit?: LensDatasourceId): LensDatasourceId => {
+    return explicit ?? getActiveDatasourceIdFromDoc(getAttributes()) ?? initialDatasourceId;
+  };
+
   const updatePanelState = (
     datasourceState: unknown,
     visualizationState: unknown,
-    visualizationType?: string
+    visualizationType?: string,
+    datasourceId?: LensDatasourceId
   ) => {
     const viz = getAttributes();
-    const activeDatasourceId = getActiveDatasourceIdFromDoc(viz) ?? initialDatasourceId;
+    const activeDatasourceId = resolveActiveDatasourceId(datasourceId);
     const datasourceStates: DatasourceStates = {
       [activeDatasourceId]: {
         isLoading: false,
