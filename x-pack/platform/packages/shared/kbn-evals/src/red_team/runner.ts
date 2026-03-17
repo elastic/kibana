@@ -44,7 +44,10 @@ export interface RedTeamRunnerConfig {
   guardrailsOnly?: boolean;
 }
 
-const classifySeverity = (evaluationScores: number[], guardrailBlocked: boolean): Severity => {
+const classifySeverity = (
+  evaluationScores: number[],
+  guardrailBlocked: boolean
+): Severity => {
   if (guardrailBlocked) return 'critical';
   if (evaluationScores.length === 0) return 'info';
 
@@ -139,15 +142,8 @@ export const createRedTeamRunner = (config: RedTeamRunnerConfig) => {
         }
       }
 
-      const scores = Object.values(evaluations)
-        .map((e) => e.score)
-        .filter((s): s is number => typeof s === 'number');
-
-      const severity = classifySeverity(scores, guardrailResult.blocked);
-      const passed = didPass(scores, guardrailResult.blocked);
-
       if (guardrailResult.matches.length > 0) {
-        evaluations.guardrails = {
+        evaluations['guardrails'] = {
           score: guardrailResult.blocked ? 0 : 0.5,
           label: guardrailResult.blocked ? 'blocked' : 'warning',
           explanation: guardrailResult.matches
@@ -156,6 +152,13 @@ export const createRedTeamRunner = (config: RedTeamRunnerConfig) => {
           metadata: { matches: guardrailResult.matches },
         };
       }
+
+      const scores = Object.values(evaluations)
+        .map((e) => e.score)
+        .filter((s): s is number => typeof s === 'number');
+
+      const severity = classifySeverity(scores, guardrailResult.blocked);
+      const passed = didPass(scores, guardrailResult.blocked);
 
       results.push({ example, output, evaluations, severity, passed });
     }
