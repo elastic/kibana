@@ -21,28 +21,28 @@ import {
   switchMap,
 } from 'rxjs';
 
+import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type {
   OptionsListESQLControlState,
   OptionsListSearchTechnique,
   OptionsListSelection,
 } from '@kbn/controls-schemas';
+import type { TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
-import { getESQLQueryVariables } from '@kbn/esql-utils';
+import { getESQLQueryVariables, hasStartEndParams } from '@kbn/esql-utils';
 import {
-  fetch$,
   apiHasSections,
+  fetch$,
   type PublishingSubject,
   type StateComparators,
 } from '@kbn/presentation-publishing';
-import { hasStartEndParams } from '@kbn/esql-utils';
 
-import type { TimeRange } from '@kbn/es-query';
 import type { OptionsListSuggestions } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
-import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
 import { castESQLValue } from './utils/esql_type_utils';
+import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -87,7 +87,6 @@ export function initializeESQLControlManager(
   setDataLoading: (loading: boolean) => void
 ) {
   const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
-
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.available_options ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selected_options);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
@@ -327,7 +326,7 @@ export function initializeESQLControlManager(
           ? { available_options: availableOptions$.getValue() ?? [] }
           : {}),
         variable_name: variableName$.getValue() ?? '',
-        single_select: singleSelect$.getValue() ?? true,
+        single_select: singleSelect$.getValue() ?? DEFAULT_ESQL_OPTIONS_LIST_STATE.single_select,
         variable_type: variableType$.getValue() ?? ESQLVariableType.VALUES,
         control_type: controlType$.getValue(),
         esql_query: esqlQuery$.getValue() ?? '',

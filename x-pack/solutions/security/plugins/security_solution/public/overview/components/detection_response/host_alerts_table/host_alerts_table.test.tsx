@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { fireEvent, render } from '@testing-library/react';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 import { TestProviders } from '../../../../common/mock';
 import { parsedVulnerableHostsAlertsResult } from './mock_data';
@@ -136,7 +137,12 @@ describe('HostAlertsTable', () => {
     fireEvent.click(getByTestId('hostSeverityAlertsTable-totalAlertsLink'));
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
-      { field_name: 'host.name', selected_options: ['Host-342m5gl1g2'], title: 'Host name' },
+      {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+        field_name: 'host.name',
+        selected_options: ['Host-342m5gl1g2'],
+        title: 'Host name',
+      },
     ]);
   });
 
@@ -148,11 +154,13 @@ describe('HostAlertsTable', () => {
 
     expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
       {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         field_name: 'host.name',
         selected_options: ['Host-342m5gl1g2'],
         title: 'Host name',
       },
       {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         field_name: 'kibana.alert.severity',
         selected_options: ['critical'],
         title: 'Severity',

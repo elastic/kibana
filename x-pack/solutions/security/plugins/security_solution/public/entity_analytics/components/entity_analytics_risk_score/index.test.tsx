@@ -16,6 +16,7 @@ import { createTelemetryServiceMock } from '../../../common/lib/telemetry/teleme
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { capitalize } from 'lodash/fp';
 
@@ -280,6 +281,7 @@ describe.each([EntityType.host, EntityType.user, EntityType.service])(
       await waitFor(() => {
         expect(mockOpenAlertsPageWithFilters.mock.calls[0][0]).toEqual([
           {
+            ...DEFAULT_DSL_OPTIONS_LIST_STATE,
             title: capitalize(riskEntity),
             field_name: EntityTypeToIdentifierField[riskEntity],
             selected_options: [name],

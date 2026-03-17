@@ -8,7 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+import {
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_ESQL_OPTIONS_LIST_STATE,
+} from '@kbn/controls-constants';
 import { controlSchema, dataControlSchema } from './control_schema';
 
 export const optionsListDisplaySettingsSchema = schema.object({
@@ -36,7 +39,6 @@ export const optionsListSelectionSchema = schema.oneOf([schema.string(), schema.
 
 const optionsListControlBaseParameters = {
   display_settings: schema.maybe(optionsListDisplaySettingsSchema),
-  single_select: schema.boolean({ defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.single_select }),
 };
 
 export const optionsListDSLControlSchema = dataControlSchema
@@ -53,6 +55,7 @@ export const optionsListDSLControlSchema = dataControlSchema
     selected_options: schema.arrayOf(optionsListSelectionSchema, {
       defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options,
     }),
+    single_select: schema.boolean({ defaultValue: DEFAULT_DSL_OPTIONS_LIST_STATE.single_select }),
     sort: optionsListSortSchema,
   });
 
@@ -60,6 +63,7 @@ export const optionsListESQLControlSchema = controlSchema
   .extends(optionsListControlBaseParameters)
   .extends({
     selected_options: schema.arrayOf(schema.string()),
+    single_select: schema.boolean({ defaultValue: DEFAULT_ESQL_OPTIONS_LIST_STATE.single_select }),
     variable_name: schema.string(),
     variable_type: schema.oneOf([
       schema.literal('fields'),

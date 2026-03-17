@@ -11,10 +11,7 @@ import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { Filter } from '@kbn/es-query';
 import { ALERT_DURATION, ALERT_RULE_NAME, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
-import {
-  DEFAULT_DSL_OPTIONS_LIST_STATE,
-  DEFAULT_PINNED_CONTROL_STATE,
-} from '@kbn/controls-constants';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 
 export interface ControlGroupOutput {
   loading: boolean;
@@ -47,7 +44,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
   initialChildControlState: {
     '0': {
       type: 'options_list_control',
-      ...DEFAULT_PINNED_CONTROL_STATE,
+      grow: true,
       order: 0,
       width: 'small',
       ...DEFAULT_DSL_OPTIONS_LIST_STATE,
@@ -62,7 +59,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
     },
     '1': {
       type: 'options_list_control',
-      ...DEFAULT_PINNED_CONTROL_STATE,
+      grow: true,
       order: 1,
       width: 'small',
       ...DEFAULT_DSL_OPTIONS_LIST_STATE,
@@ -77,7 +74,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
     },
     '2': {
       type: 'options_list_control',
-      ...DEFAULT_PINNED_CONTROL_STATE,
+      grow: true,
       order: 2,
       width: 'small',
       ...DEFAULT_DSL_OPTIONS_LIST_STATE,
@@ -93,7 +90,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
     },
     '3': {
       type: 'options_list_control',
-      ...DEFAULT_PINNED_CONTROL_STATE,
+      grow: true,
       order: 3,
       width: 'small',
       ...DEFAULT_DSL_OPTIONS_LIST_STATE,
@@ -108,7 +105,7 @@ export const initialInputData: ControlGroupRuntimeState<OptionsListDSLControlSta
     },
     '4': {
       type: 'options_list_control',
-      ...DEFAULT_PINNED_CONTROL_STATE,
+      grow: true,
       order: 4,
       width: 'small',
       ...DEFAULT_DSL_OPTIONS_LIST_STATE,

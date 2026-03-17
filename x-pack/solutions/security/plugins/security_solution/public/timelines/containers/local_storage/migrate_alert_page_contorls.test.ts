@@ -180,7 +180,6 @@ const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanel
       dataViewId: 'security_solution_alerts_dv',
       title: 'Severity',
       fieldName: 'kibana.alert.severity',
-      selectedOptions: [],
       persist: false,
     },
     '2': {
@@ -198,8 +197,6 @@ const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanel
       dataViewId: 'security_solution_alerts_dv',
       title: 'User',
       fieldName: 'user.name',
-      selectedOptions: [],
-
       persist: false,
     },
     '3': {
@@ -217,7 +214,6 @@ const NEW_FORMAT: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanel
       dataViewId: 'security_solution_alerts_dv',
       title: 'Host',
       fieldName: 'host.name',
-      selectedOptions: [],
       persist: false,
     },
   },
