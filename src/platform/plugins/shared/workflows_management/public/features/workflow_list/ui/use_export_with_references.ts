@@ -8,8 +8,8 @@
  */
 
 import { useCallback, useState } from 'react';
-import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { isNotNullable } from '../../../../common/lib/utils';
 import {
@@ -28,17 +28,14 @@ export interface ExportModalState {
 
 interface UseExportWithReferencesParams {
   allWorkflowsMap: Map<string, WorkflowListItemDto>;
-  http: HttpStart | undefined;
-  notifications: NotificationsStart | undefined;
   onComplete?: () => void;
 }
 
 export const useExportWithReferences = ({
   allWorkflowsMap,
-  http,
-  notifications,
   onComplete,
 }: UseExportWithReferencesParams) => {
+  const { http, notifications } = useKibana().services;
   const [exportModalState, setExportModalState] = useState<ExportModalState | null>(null);
 
   const performExport = useCallback(

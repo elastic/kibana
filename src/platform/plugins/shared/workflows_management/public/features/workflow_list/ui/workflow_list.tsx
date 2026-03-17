@@ -51,7 +51,7 @@ interface WorkflowListProps {
 }
 
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
-  const { application, http, notifications } = useKibana().services;
+  const { application, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
   const [workflowToDelete, setWorkflowToDelete] = useState<WorkflowListItemDto | null>(null);
   const modalTitleId = useGeneratedHtmlId();
@@ -70,7 +70,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
     handleAddDirect: handleSingleExportAddDirect,
     handleAddAll: handleSingleExportAddAll,
     handleCancel: handleSingleExportCancel,
-  } = useExportWithReferences({ allWorkflowsMap, http, notifications });
+  } = useExportWithReferences(allWorkflowsMap);
 
   // Report list viewed telemetry when workflows are loaded
   React.useEffect(() => {

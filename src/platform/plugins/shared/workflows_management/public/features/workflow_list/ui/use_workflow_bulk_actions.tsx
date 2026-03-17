@@ -42,7 +42,7 @@ export const useWorkflowBulkActions = ({
   onActionSuccess,
   deselectWorkflows,
 }: UseWorkflowBulkActionsProps): UseWorkflowBulkActionsReturn => {
-  const { application, http, notifications } = useKibana().services;
+  const { application, notifications } = useKibana().services;
   const { deleteWorkflows, updateWorkflow } = useWorkflowActions();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
@@ -61,8 +61,6 @@ export const useWorkflowBulkActions = ({
     handleCancel: handleExportCancel,
   } = useExportWithReferences({
     allWorkflowsMap,
-    http,
-    notifications,
     onComplete: deselectWorkflows,
   });
 
