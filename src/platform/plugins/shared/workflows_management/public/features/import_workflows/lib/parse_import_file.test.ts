@@ -14,7 +14,7 @@ import { parseImportFile } from './parse_import_file';
 jest.mock('../../../../common/lib/yaml/parse_workflow_yaml_to_json_without_validation', () => ({
   parseYamlToJSONWithoutValidation: (yamlString: string) => {
     try {
-      const json = require('yaml').parse(yamlString) as Record<string, unknown>;
+      const json = jest.requireActual('yaml').parse(yamlString) as Record<string, unknown>;
       return { success: true, json, document: {} };
     } catch {
       return { success: false, error: new Error('parse failed'), document: {} };
