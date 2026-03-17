@@ -259,15 +259,34 @@ export const WorkflowYAMLEditor = ({
     ];
   }, [workflowJsonSchemaStrict, workflowSchemaUriStrict]);
 
-  const { error: errorValidating, isLoading: isLoadingValidation } = useYamlValidation(
-    editorRef.current
-  );
+  const {
+    error: errorValidating,
+    isLoading: isLoadingValidation,
+    validationResults: customValidationResults,
+  } = useYamlValidation(editorRef.current);
 
-  const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
-    useMonacoMarkersChangedInterceptor({
-      yamlDocumentRef,
-      workflowYamlSchema: workflowYamlSchema as z.ZodSchema,
-    });
+  const {
+    validationErrors: interceptorValidationErrors,
+    transformMonacoMarkers,
+    handleMarkersChanged,
+  } = useMonacoMarkersChangedInterceptor({
+    yamlDocumentRef,
+    workflowYamlSchema: workflowYamlSchema as z.ZodSchema,
+  });
+
+  const transformMonacoMarkersRef = useRef(transformMonacoMarkers);
+  transformMonacoMarkersRef.current = transformMonacoMarkers;
+  const handleMarkersChangedRef = useRef(handleMarkersChanged);
+  handleMarkersChangedRef.current = handleMarkersChanged;
+
+  // Custom validations from the hook are the source of truth; add Monaco YAML schema errors from the interceptor
+  const validationErrors = useMemo(
+    () => [
+      ...customValidationResults,
+      ...(interceptorValidationErrors?.filter((e) => e.owner === 'yaml') ?? []),
+    ],
+    [customValidationResults, interceptorValidationErrors]
+  );
 
   // Sync validation error state to Redux so sibling components (e.g. header toggle) can react
   useEffect(() => {
@@ -553,28 +572,25 @@ export const WorkflowYAMLEditor = ({
   }, [isExecutionYaml]);
 
   useEffect(() => {
-    // Monkey patching
-    // 1. to set the initial markers https://github.com/suren-atoyan/monaco-react/issues/70#issuecomment-760389748
-    // 2. to intercept and format markers validation messages – this prevents Monaco from ever seeing the problematic numeric enum messages
+    // Patch setModelMarkers to set initial markers (monaco-react#70) and to intercept/format
+    // validation messages. Effect has empty deps and uses refs for callbacks so it never
+    // re-runs; re-running would briefly restore the original and drop validation markers.
     const setModelMarkers = monaco.editor.setModelMarkers;
     monaco.editor.setModelMarkers = function (model, owner, markers) {
-      // as we intercepted the setModelMarkers method, we need to check if the call is from the current editor to avoid setting markers which could come from other editors
       const editorUri = editorRef.current?.getModel()?.uri;
       if (model.uri.path !== editorUri?.path) {
-        // skip setting markers for other editors
         setModelMarkers.call(monaco.editor, model, owner, markers);
         return;
       }
-      const transformedMarkers = transformMonacoMarkers(model, owner, markers);
+      const transformedMarkers = transformMonacoMarkersRef.current(model, owner, markers);
       setModelMarkers.call(monaco.editor, model, owner, transformedMarkers);
-      handleMarkersChanged(model, owner, transformedMarkers);
+      handleMarkersChangedRef.current(model, owner, transformedMarkers);
     };
 
     return () => {
-      // Reset the monaco.editor.setModelMarkers to the original function
       monaco.editor.setModelMarkers = setModelMarkers;
     };
-  }, [handleMarkersChanged, transformMonacoMarkers]);
+  }, []);
 
   // Debug
   const downloadSchema = useCallback(() => {

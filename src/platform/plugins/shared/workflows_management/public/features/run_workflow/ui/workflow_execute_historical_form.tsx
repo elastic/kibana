@@ -22,11 +22,11 @@ import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import type { z } from '@kbn/zod/v4';
 import { InputValidationCallout } from './input_validation_callout';
 import { TRIGGER_TABS_LABELS } from './translations';
-import { buildInputsZodValidator } from '../../../../common/lib/json_schema_to_zod';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/use_workflow_executions';
 import { formatDuration } from '../../../shared/lib/format_duration';
@@ -57,7 +57,7 @@ export interface WorkflowExecuteHistoricalFormProps {
 export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistoricalFormProps>(
   ({ workflowId, initialExecutionId, value, setValue, errors, setErrors, inputs }) => {
     const { euiTheme } = useEuiTheme();
-    const inputsValidator = useMemo(() => buildInputsZodValidator(inputs), [inputs]);
+    const inputsValidator = useMemo(() => buildFieldsZodValidator(inputs), [inputs]);
 
     const [selectedExecutionId, setSelectedExecutionId] = useState<string | null>(
       initialExecutionId ?? null

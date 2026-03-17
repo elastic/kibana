@@ -283,6 +283,7 @@ function TraceTree() {
                 deferredMeasurementCache={rowHeightCache.current}
                 rowHeight={rowHeightCache.current.rowHeight}
                 rowRenderer={rowRenderer}
+                containerRole="rowgroup"
               />
             </div>
           )}
@@ -312,14 +313,16 @@ function VirtualRow({
 }: VirtualRowProps) {
   return (
     <CellMeasurer cache={rowHeightCache} parent={parent} rowIndex={index}>
-      <div style={style}>
-        <TraceItemRow
-          key={item.id}
-          item={item}
-          childrenCount={childrenCount}
-          state={accordionState}
-          onToggle={onToggle}
-        />
+      <div style={style} role="row">
+        <div role="gridcell">
+          <TraceItemRow
+            key={item.id}
+            item={item}
+            childrenCount={childrenCount}
+            state={accordionState}
+            onToggle={onToggle}
+          />
+        </div>
       </div>
     </CellMeasurer>
   );

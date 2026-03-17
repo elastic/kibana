@@ -12,23 +12,15 @@ import type { JSONSchema7 } from 'json-schema';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { applyInputDefaults } from '@kbn/workflows/spec/lib/input_conversion';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import { applyInputDefaults } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import type { z } from '@kbn/zod/v4';
 import { InputValidationCallout } from './input_validation_callout';
 import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
-import { buildInputsZodValidator } from '../../../../common/lib/json_schema_to_zod';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 const SCHEMA_URI = `inmemory://schemas/workflow-manual-json-editor-schema`;
-
-interface WorkflowExecuteManualFormProps {
-  value: string;
-  inputs?: JsonModelSchemaType; // normalized inputs
-  setValue: (data: string) => void;
-  errors: string | null;
-  setErrors: (errors: string | null) => void;
-}
 
 const getDefaultWorkflowInput = (inputs?: JsonModelSchemaType): Record<string, unknown> => {
   if (!inputs?.properties) {
@@ -50,6 +42,13 @@ const getDefaultWorkflowInput = (inputs?: JsonModelSchemaType): Record<string, u
   return defaults;
 };
 
+interface WorkflowExecuteManualFormProps {
+  value: string;
+  inputs?: JsonModelSchemaType; // normalized inputs
+  setValue: (data: string) => void;
+  errors: string | null;
+  setErrors: (errors: string | null) => void;
+}
 export const WorkflowExecuteManualForm = ({
   value,
   inputs,
@@ -57,7 +56,7 @@ export const WorkflowExecuteManualForm = ({
   errors,
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
-  const inputsValidator = useMemo(() => buildInputsZodValidator(inputs), [inputs]);
+  const inputsValidator = useMemo(() => buildFieldsZodValidator(inputs), [inputs]);
 
   // Set defaults if value is empty or only contains empty object
   useEffect(() => {
