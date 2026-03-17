@@ -10,10 +10,10 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import {
   AutoSizer,
-  WindowScroller,
   List,
   CellMeasurerCache,
   CellMeasurer,
+  WindowScroller,
 } from 'react-virtualized';
 import type { ListRowRenderer, ListRowProps } from 'react-virtualized';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
@@ -23,18 +23,22 @@ import type { TraceItem } from '../../../../common/waterfall/unified_trace_item'
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_row';
 import { CriticalPathToggle } from './critical_path';
-import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
+import type {
+  OnErrorClick,
+  OnNodeClick,
+  TraceWaterfallScrollStrategy,
+} from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { TraceWarning } from './trace_warning';
 import { WaterfallLegends } from './waterfall_legends';
 import { WaterfallAccordionButton } from './waterfall_accordion_button';
 
-export interface Props {
+/** Base props shared by all TraceWaterfall variants */
+interface BaseTraceWaterfallProps {
   traceItems: TraceItem[];
   errors?: Error[];
   showAccordion?: boolean;
-  highlightedTraceId?: string;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
   scrollElement?: Element;
@@ -52,32 +56,41 @@ export interface Props {
   entryTransactionId?: string;
 }
 
-export function TraceWaterfall({
-  traceItems,
-  errors,
-  showAccordion = true,
-  highlightedTraceId,
-  onClick,
-  onErrorClick,
-  scrollElement,
-  getRelatedErrorsHref,
-  isEmbeddable = false,
-  showLegend = false,
-  serviceName,
-  isFiltered,
-  agentMarks,
-  showCriticalPathControl = false,
-  showCriticalPath,
-  defaultShowCriticalPath,
-  onShowCriticalPathChange,
-  children,
-  entryTransactionId,
-}: Props) {
+/** Default: 'window' (page scroll). Use 'parent' for flyout (enables scroll-to-span for highlightedSpanId). */
+export interface TraceWaterfallProps extends BaseTraceWaterfallProps {
+  scrollStrategy?: TraceWaterfallScrollStrategy;
+  highlightedSpanId?: string;
+}
+
+export function TraceWaterfall(props: TraceWaterfallProps) {
+  const {
+    traceItems,
+    errors,
+    showAccordion = true,
+    onClick,
+    onErrorClick,
+    scrollElement,
+    getRelatedErrorsHref,
+    isEmbeddable = false,
+    showLegend = false,
+    serviceName,
+    isFiltered,
+    agentMarks,
+    showCriticalPathControl = false,
+    showCriticalPath,
+    defaultShowCriticalPath,
+    onShowCriticalPathChange,
+    children,
+    entryTransactionId,
+  } = props;
+  const highlightedSpanId = props.highlightedSpanId;
+
   return (
     <TraceWaterfallContextProvider
       traceItems={traceItems}
       showAccordion={showAccordion}
-      highlightedTraceId={highlightedTraceId}
+      highlightedSpanId={highlightedSpanId}
+      scrollStrategy={props.scrollStrategy ?? 'window'}
       onClick={onClick}
       onErrorClick={onErrorClick}
       scrollElement={scrollElement}
@@ -131,18 +144,37 @@ function TraceWaterfallComponent() {
     : 'var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))';
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      css={css`
+        flex: 1;
+        min-height: 0;
+      `}
+    >
       {showCriticalPathControl && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <CriticalPathToggle checked={showCriticalPath} onChange={setShowCriticalPath} />
         </EuiFlexItem>
       )}
-      <EuiFlexItem>
-        <div style={{ position: 'relative' }}>
+      <EuiFlexItem
+        css={css`
+          min-height: 0;
+        `}
+      >
+        <div
+          css={css`
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+          `}
+        >
           <EuiFlexGroup
             direction="column"
             gutterSize="m"
             css={css`
+              flex-shrink: 0;
+              flex-grow: 0;
               position: sticky;
               top: ${stickyTop};
               z-index: ${euiTheme.levels.menu};
@@ -206,6 +238,8 @@ function TraceWaterfallComponent() {
           <div
             css={css`
               position: relative;
+              flex: 1;
+              min-height: 0;
             `}
           >
             <TraceTree />
@@ -216,13 +250,19 @@ function TraceWaterfallComponent() {
   );
 }
 
+const SCROLL_CONTAINER =
+  typeof document !== 'undefined'
+    ? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined
+    : undefined;
+
 function TraceTree() {
   const {
     traceWaterfallMap,
     traceWaterfall,
-    scrollElement,
     accordionStatesMap,
     toggleAccordionState,
+    highlightedSpanId,
+    scrollStrategy = 'window',
   } = useTraceWaterfallContext();
 
   const listRef = useRef<List>(null);
@@ -238,6 +278,12 @@ function TraceTree() {
     () => convertTreeToList(traceWaterfallMap, accordionStatesMap, traceWaterfall[0]),
     [accordionStatesMap, traceWaterfall, traceWaterfallMap]
   );
+
+  const scrollToIndex = useMemo(() => {
+    if (scrollStrategy === 'window' || !highlightedSpanId) return undefined;
+    const index = visibleList.findIndex((item) => item.id === highlightedSpanId);
+    return index >= 0 ? index : undefined;
+  }, [highlightedSpanId, visibleList, scrollStrategy]);
 
   const rowRenderer: ListRowRenderer = useCallback(
     ({ index, style, key, parent }) => {
@@ -261,35 +307,48 @@ function TraceTree() {
     [visibleList, traceWaterfallMap, accordionStatesMap, toggleAccordionState]
   );
 
+  const listProps = {
+    ref: listRef,
+    rowCount: visibleList.length,
+    deferredMeasurementCache: rowHeightCache.current,
+    rowHeight: rowHeightCache.current.rowHeight,
+    rowRenderer,
+    scrollToAlignment: 'center' as const,
+    containerRole: 'rowgroup' as const,
+  };
+
+  if (scrollStrategy === 'window') {
+    return (
+      <WindowScroller scrollElement={SCROLL_CONTAINER}>
+        {({ height, registerChild, isScrolling, onChildScroll, scrollTop }) => (
+          <AutoSizer disableHeight>
+            {({ width }) => (
+              <div ref={registerChild} data-test-subj="waterfall">
+                <List
+                  {...listProps}
+                  autoHeight
+                  height={height}
+                  width={width}
+                  isScrolling={isScrolling}
+                  onScroll={onChildScroll}
+                  scrollTop={scrollTop}
+                />
+              </div>
+            )}
+          </AutoSizer>
+        )}
+      </WindowScroller>
+    );
+  }
+
   return (
-    <WindowScroller
-      scrollElement={
-        scrollElement ?? document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? undefined
-      }
-    >
-      {({ height, isScrolling, onChildScroll, scrollTop, registerChild }) => (
-        <AutoSizer disableHeight>
-          {({ width }) => (
-            <div data-test-subj="waterfall" ref={registerChild}>
-              <List
-                ref={listRef}
-                autoHeight
-                height={height}
-                isScrolling={isScrolling}
-                onScroll={onChildScroll}
-                scrollTop={scrollTop}
-                width={width}
-                rowCount={visibleList.length}
-                deferredMeasurementCache={rowHeightCache.current}
-                rowHeight={rowHeightCache.current.rowHeight}
-                rowRenderer={rowRenderer}
-                containerRole="rowgroup"
-              />
-            </div>
-          )}
-        </AutoSizer>
+    <AutoSizer>
+      {({ width, height }) => (
+        <div data-test-subj="waterfall">
+          <List {...listProps} scrollToIndex={scrollToIndex} height={height} width={width} />
+        </div>
       )}
-    </WindowScroller>
+    </AutoSizer>
   );
 }
 

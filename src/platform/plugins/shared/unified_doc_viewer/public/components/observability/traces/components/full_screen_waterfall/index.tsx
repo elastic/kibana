@@ -19,7 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { css } from '@emotion/react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DocumentDetailFlyout, type DocumentType } from './waterfall_flyout/document_detail_flyout';
@@ -32,6 +33,7 @@ export interface FullScreenWaterfallProps {
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
   serviceName?: string;
+  highlightedSpanId?: string;
   docId: string | null;
   docIndex?: string;
   activeFlyoutType: DocumentType | null;
@@ -49,6 +51,7 @@ export const FullScreenWaterfall = ({
   rangeTo,
   dataView,
   serviceName,
+  highlightedSpanId,
   docId,
   docIndex,
   activeFlyoutType,
@@ -130,11 +133,6 @@ export const FullScreenWaterfall = ({
     };
   }, []);
 
-  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
-  const scrollContainerRef = useCallback((node: HTMLDivElement | null) => {
-    setScrollElement(node);
-  }, []);
-
   // TODO: Remove this deferred-mount workaround once EUI exposes a prop to
   // disable the flyout open animation at mount time.
   // Tracking issue: https://github.com/elastic/kibana/issues/256531
@@ -191,17 +189,39 @@ export const FullScreenWaterfall = ({
           <h2 id={traceWaterfallTitleId}>{traceWaterfallTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody scrollContainerRef={scrollContainerRef}>
-        {isWaterfallReady && scrollElement ? (
-          <FullTraceWaterfall
-            traceId={traceId}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            serviceName={serviceName}
-            scrollElement={scrollElement}
-            onNodeClick={onNodeClick}
-            onErrorClick={onErrorClick}
-          />
+      <EuiFlyoutBody
+        css={css`
+          .euiFlyoutBody__overflow,
+          .euiFlyoutBody__overflowContent {
+            height: 100%;
+          }
+          .euiFlyoutBody__overflow {
+            overflow: hidden;
+          }
+          .euiFlyoutBody__overflowContent {
+            padding: 0;
+          }
+        `}
+      >
+        {isWaterfallReady ? (
+          <div
+            css={css`
+              display: flex;
+              flex-direction: column;
+              height: 100%;
+            `}
+          >
+            <FullTraceWaterfall
+              traceId={traceId}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              serviceName={serviceName}
+              highlightedSpanId={highlightedSpanId}
+              scrollStrategy="parent"
+              onNodeClick={onNodeClick}
+              onErrorClick={onErrorClick}
+            />
+          </div>
         ) : (
           <EuiSkeletonText lines={4} />
         )}

@@ -9,7 +9,9 @@ export interface FullTraceWaterfallProps {
   rangeFrom: string;
   rangeTo: string;
   serviceName?: string;
+  highlightedSpanId?: string;
   scrollElement?: Element;
+  scrollStrategy?: 'parent' | 'window';
   onNodeClick?: (nodeSpanId: string) => void;
   onErrorClick?: FullTraceWaterfallOnErrorClick;
 }
