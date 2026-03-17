@@ -427,6 +427,9 @@
   "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
+    "dependencies",
+    "dependencies.name",
+    "dependencies.version",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
@@ -976,6 +979,7 @@
   "osquery-pack": [
     "created_at",
     "created_by",
+    "created_by_profile_uid",
     "description",
     "enabled",
     "name",
@@ -990,6 +994,7 @@
     "shards",
     "updated_at",
     "updated_by",
+    "updated_by_profile_uid",
     "version"
   ],
   "osquery-pack-asset": [
@@ -1009,6 +1014,7 @@
   "osquery-saved-query": [
     "created_at",
     "created_by",
+    "created_by_profile_uid",
     "description",
     "ecs_mapping",
     "id",
@@ -1018,6 +1024,7 @@
     "timeout",
     "updated_at",
     "updated_by",
+    "updated_by_profile_uid",
     "version"
   ],
   "policy-settings-protection-updates-note": [
@@ -1261,6 +1268,7 @@
   ],
   "spaces-usage-stats": [],
   "stream-prompts": [],
+  "streams-significant-events-settings": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
