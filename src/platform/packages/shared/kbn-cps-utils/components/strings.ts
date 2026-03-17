@@ -39,19 +39,6 @@ export const strings = {
     i18n.translate('cpsUtils.projectPicker.thisProjectLabel', {
       defaultMessage: 'This project',
     }),
-  getProjectPickerTourTitle: () =>
-    i18n.translate('cpsUtils.projectPicker.tour.title', {
-      defaultMessage: 'Cross-project search (CPS) is now available',
-    }),
-  getProjectPickerTourContent: () =>
-    i18n.translate('cpsUtils.projectPicker.tour.content', {
-      defaultMessage:
-        'Your searches now include data from this project and any linked projects by default. Use this selector to adjust the scope of your searches, or set a different default scope from your space settings.',
-    }),
-  getProjectPickerTourCloseButton: () =>
-    i18n.translate('cpsUtils.projectPicker.tour.closeButton', {
-      defaultMessage: 'Got it',
-    }),
   getProjectPickerDisabledTooltip: () =>
     i18n.translate('cpsUtils.projectPicker.disabledTooltip', {
       defaultMessage:
