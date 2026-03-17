@@ -118,7 +118,7 @@ describe('NotificationPolicyFormFlyout', () => {
       description: 'Routes critical alerts',
       enabled: true,
       matcher: 'data.severity : "critical"',
-      group_by: ['host.name', 'service.name'],
+      groupBy: ['host.name', 'service.name'],
       throttle: { interval: '5m' },
       snoozedUntil: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
@@ -152,7 +152,7 @@ describe('NotificationPolicyFormFlyout', () => {
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
       matcher: 'data.severity : "critical"',
-      group_by: ['host.name', 'service.name'],
+      groupBy: ['host.name', 'service.name'],
       throttle: { interval: '5m' },
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
     });

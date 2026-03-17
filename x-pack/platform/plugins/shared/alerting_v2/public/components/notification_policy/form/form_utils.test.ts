@@ -31,7 +31,7 @@ describe('notification policy form utils', () => {
       name: 'Policy',
       description: 'Description',
       matcher: null,
-      group_by: null,
+      groupBy: null,
       throttle: null,
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
     });
@@ -53,7 +53,7 @@ describe('notification policy form utils', () => {
       name: 'Policy',
       description: 'Description',
       matcher: 'event.severity: critical',
-      group_by: ['host.name'],
+      groupBy: ['host.name'],
       throttle: { interval: '5m' },
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
     });

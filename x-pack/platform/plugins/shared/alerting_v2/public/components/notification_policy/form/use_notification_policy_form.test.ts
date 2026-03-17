@@ -17,7 +17,7 @@ const EXISTING_POLICY: NotificationPolicyResponse = {
   description: 'Routes critical alerts',
   enabled: true,
   matcher: 'data.severity : "critical"',
-  group_by: ['host.name', 'service.name'],
+  groupBy: ['host.name', 'service.name'],
   throttle: { interval: '5m' },
   snoozedUntil: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
@@ -103,7 +103,7 @@ describe('useNotificationPolicyForm', () => {
 
       const payload = onSubmitCreate.mock.calls[0][0];
       expect(payload).not.toHaveProperty('matcher');
-      expect(payload).not.toHaveProperty('group_by');
+      expect(payload).not.toHaveProperty('groupBy');
       expect(payload).not.toHaveProperty('throttle');
     });
   });
@@ -176,7 +176,7 @@ describe('useNotificationPolicyForm', () => {
         name: 'Critical production alerts',
         description: 'Routes critical alerts',
         matcher: 'data.severity : "critical"',
-        group_by: ['host.name', 'service.name'],
+        groupBy: ['host.name', 'service.name'],
         throttle: { interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
       });

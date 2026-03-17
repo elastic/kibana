@@ -49,7 +49,7 @@ export const NotificationPolicyFormFlyout = ({
   const onSubmitCreate = (data: CreateNotificationPolicyData) => onSave?.(data);
   const onSubmitUpdate = (id: string, data: UpdateNotificationPolicyBody) => onUpdate?.(id, data);
 
-  const { methods, isEditMode, handleSubmit } = useNotificationPolicyForm({
+  const { methods, isEditMode, isSubmitEnabled, handleSubmit } = useNotificationPolicyForm({
     initialValues,
     onSubmitCreate: onSave ? onSubmitCreate : noop,
     onSubmitUpdate: onUpdate ? onSubmitUpdate : noop,
@@ -94,7 +94,7 @@ export const NotificationPolicyFormFlyout = ({
               fill
               onClick={handleSubmit}
               isLoading={isLoading}
-              disabled={!methods.formState.isValid}
+              disabled={!isSubmitEnabled}
               data-test-subj="submitButton"
             >
               {isEditMode ? (

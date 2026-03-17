@@ -28,7 +28,7 @@ describe('FetchPoliciesStep', () => {
           description: 'Test',
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
           matcher: null,
-          group_by: null,
+          groupBy: null,
           throttle: null,
           auth: { apiKey: 'decrypted-key', owner: 'elastic', createdByUser: false },
           createdBy: null,

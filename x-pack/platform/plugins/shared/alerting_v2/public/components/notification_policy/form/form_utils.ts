@@ -17,7 +17,7 @@ export const toFormState = (response: NotificationPolicyResponse): NotificationP
     name: response.name,
     description: response.description,
     matcher: response.matcher ?? '',
-    groupBy: response.group_by ?? [],
+    groupBy: response.groupBy ?? [],
     frequency: response.throttle
       ? { type: 'throttle', interval: response.throttle.interval }
       : { type: 'immediate' },
@@ -32,7 +32,7 @@ export const toCreatePayload = (
     name: state.name,
     description: state.description,
     ...(state.matcher ? { matcher: state.matcher } : {}),
-    ...(state.groupBy.length > 0 ? { group_by: state.groupBy } : {}),
+    ...(state.groupBy.length > 0 ? { groupBy: state.groupBy } : {}),
     ...(state.frequency.type === 'throttle'
       ? { throttle: { interval: state.frequency.interval } }
       : {}),
@@ -49,7 +49,7 @@ export const toUpdatePayload = (
     name: state.name,
     description: state.description,
     matcher: state.matcher || null,
-    group_by: state.groupBy.length > 0 ? state.groupBy : null,
+    groupBy: state.groupBy.length > 0 ? state.groupBy : null,
     throttle: state.frequency.type === 'throttle' ? { interval: state.frequency.interval } : null,
     destinations: state.destinations.map((d) => ({ type: d.type, id: d.id })),
   };

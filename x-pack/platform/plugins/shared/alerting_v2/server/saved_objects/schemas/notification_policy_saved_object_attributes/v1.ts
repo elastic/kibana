@@ -23,7 +23,7 @@ export const notificationPolicySavedObjectAttributesSchema = schema.object({
   enabled: schema.boolean(),
   destinations: schema.arrayOf(notificationPolicyDestinationSchema),
   matcher: schema.maybe(schema.nullable(schema.string())),
-  group_by: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
+  groupBy: schema.maybe(schema.nullable(schema.arrayOf(schema.string()))),
   throttle: schema.maybe(
     schema.nullable(
       schema.object({

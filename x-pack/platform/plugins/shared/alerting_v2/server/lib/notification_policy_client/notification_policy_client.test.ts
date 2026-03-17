@@ -132,7 +132,7 @@ describe('NotificationPolicyClient', () => {
           enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           matcher: null,
-          group_by: null,
+          groupBy: null,
           throttle: null,
           snoozedUntil: null,
           auth: {
@@ -285,7 +285,7 @@ describe('NotificationPolicyClient', () => {
         undefined
       );
       expect(res.matcher).toBeNull();
-      expect(res.group_by).toBeNull();
+      expect(res.groupBy).toBeNull();
       expect(res.throttle).toBeNull();
       expect(res.snoozedUntil).toBeNull();
       expect(res.auth).toEqual({ owner: 'test-user', createdByUser: false });
@@ -546,7 +546,7 @@ describe('NotificationPolicyClient', () => {
 
       expect(res.items).toHaveLength(1);
       expect(res.items[0].matcher).toBeNull();
-      expect(res.items[0].group_by).toBeNull();
+      expect(res.items[0].groupBy).toBeNull();
       expect(res.items[0].throttle).toBeNull();
       expect(res.items[0].snoozedUntil).toBeNull();
       expect(res.items[0].auth).toEqual({ owner: 'find-user', createdByUser: false });
@@ -717,7 +717,7 @@ describe('NotificationPolicyClient', () => {
         enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         matcher: 'event.severity: critical',
-        group_by: ['host.name'],
+        groupBy: ['host.name'],
         throttle: { interval: '1h' },
         auth: {
           apiKey: 'old-api-key',
@@ -747,7 +747,7 @@ describe('NotificationPolicyClient', () => {
       const res = await client.updateNotificationPolicy({
         data: {
           matcher: null,
-          group_by: null,
+          groupBy: null,
           throttle: null,
         },
         options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
@@ -762,13 +762,13 @@ describe('NotificationPolicyClient', () => {
           description: 'original-policy description',
           destinations: [{ type: 'workflow', id: 'original-workflow' }],
           matcher: null,
-          group_by: null,
+          groupBy: null,
           throttle: null,
         }),
         { version: 'WzEsMV0=' }
       );
       expect(res.matcher).toBeNull();
-      expect(res.group_by).toBeNull();
+      expect(res.groupBy).toBeNull();
       expect(res.throttle).toBeNull();
       expect(res.snoozedUntil).toBeNull();
     });
@@ -1305,7 +1305,7 @@ describe('NotificationPolicyClient', () => {
         actions: [
           { id: 'policy-1', action: 'enable' },
           { id: 'policy-2', action: 'disable' },
-          { id: 'policy-3', action: 'snooze', snoozed_until: '2025-06-01T12:00:00.000Z' },
+          { id: 'policy-3', action: 'snooze', snoozedUntil: '2025-06-01T12:00:00.000Z' },
           { id: 'policy-4', action: 'unsnooze' },
         ],
       });

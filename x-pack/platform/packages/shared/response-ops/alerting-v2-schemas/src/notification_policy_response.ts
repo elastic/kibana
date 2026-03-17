@@ -15,7 +15,7 @@ export interface NotificationPolicyResponse {
   enabled: boolean;
   destinations: NotificationPolicyDestination[];
   matcher: string | null;
-  group_by: string[] | null;
+  groupBy: string[] | null;
   throttle: { interval: string } | null;
   snoozedUntil: string | null;
   auth: {

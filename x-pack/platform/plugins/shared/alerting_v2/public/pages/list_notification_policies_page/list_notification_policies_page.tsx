@@ -86,13 +86,13 @@ export const ListNotificationPoliciesPage = () => {
   };
 
   const clonePolicy = (policy: NotificationPolicyResponse) => {
-    const { name, description, destinations, matcher, group_by, throttle } = policy;
+    const { name, description, destinations, matcher, groupBy, throttle } = policy;
     const data: CreateNotificationPolicyData = {
       name: `${name} [clone]`,
       description,
       destinations,
       ...(matcher != null && { matcher }),
-      ...(group_by != null && { group_by }),
+      ...(groupBy != null && { groupBy }),
       ...(throttle != null && { throttle }),
     };
     createNotificationPolicy(data);
