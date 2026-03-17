@@ -78,6 +78,11 @@ export const createNavigationTree = (
       icon: 'editorChecklist',
       link: securityLink(SecurityPageName.assetInventory),
     },
+    {
+      id: SecurityPageName.vulnerabilityPosture,
+      icon: 'bug',
+      link: securityLink(SecurityPageName.vulnerabilityPosture),
+    },
     defaultNavigationTree.assets(services),
     defaultNavigationTree.ml(),
   ],

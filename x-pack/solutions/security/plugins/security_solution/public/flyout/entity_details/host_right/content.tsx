@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { ObservedDataSection } from './components/observed_data_section';
+import { VulnerabilityPostureInsight } from './components/vulnerability_posture_insight';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { FlyoutBody } from '../../shared/components/flyout_body';
@@ -78,6 +79,7 @@ export const HostPanelContent = ({
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
       />
+      <VulnerabilityPostureInsight hostName={hostName} />
       <ObservedDataSection
         hostName={hostName}
         observedHost={observedHost}

@@ -105,6 +105,9 @@ import {
   USER_PREVIEW_PANEL_ARIA_LABEL,
   VULNERABILITY_FINDINGS_PANEL_ARIA_LABEL,
   VULNERABILITY_FINDINGS_PREVIEW_PANEL_ARIA_LABEL,
+  VULNERABILITY_DETAIL_RIGHT_PANEL_ARIA_LABEL,
+  VULNERABILITY_DETAIL_LEFT_PANEL_ARIA_LABEL,
+  VULNERABILITY_DETAIL_PREVIEW_PANEL_ARIA_LABEL,
 } from './panel_aria_labels';
 import {
   MisconfigurationFindingsPanelKey,
@@ -129,6 +132,18 @@ import type { IOCDetailsProps } from './ioc_details/types';
 import { IOCDetailsProvider } from './ioc_details/context';
 import { IOCPanel } from './ioc_details';
 import { IOCRightPanelKey } from './ioc_details/constants/panel_keys';
+import type {
+  VulnerabilityDetailRightPanelProps,
+  VulnerabilityDetailLeftPanelProps,
+} from './vulnerability_details/types';
+import { VulnerabilityDetailProvider } from './vulnerability_details/context';
+import { VulnerabilityRightPanel } from './vulnerability_details/right';
+import { VulnerabilityLeftPanel } from './vulnerability_details/left';
+import {
+  VulnerabilityDetailRightPanelKey,
+  VulnerabilityDetailLeftPanelKey,
+  VulnerabilityDetailPreviewPanelKey,
+} from './vulnerability_details/constants';
 
 const GraphGroupedNodePreviewPanel = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -371,6 +386,33 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
       </IOCDetailsProvider>
     ),
     'aria-label': IOC_RIGHT_PANEL_ARIA_LABEL,
+  },
+  {
+    key: VulnerabilityDetailRightPanelKey,
+    component: (props) => (
+      <VulnerabilityDetailProvider {...(props as VulnerabilityDetailRightPanelProps).params}>
+        <VulnerabilityRightPanel />
+      </VulnerabilityDetailProvider>
+    ),
+    'aria-label': VULNERABILITY_DETAIL_RIGHT_PANEL_ARIA_LABEL,
+  },
+  {
+    key: VulnerabilityDetailLeftPanelKey,
+    component: (props) => (
+      <VulnerabilityDetailProvider {...(props as VulnerabilityDetailLeftPanelProps).params}>
+        <VulnerabilityLeftPanel />
+      </VulnerabilityDetailProvider>
+    ),
+    'aria-label': VULNERABILITY_DETAIL_LEFT_PANEL_ARIA_LABEL,
+  },
+  {
+    key: VulnerabilityDetailPreviewPanelKey,
+    component: (props) => (
+      <VulnerabilityDetailProvider {...(props as VulnerabilityDetailRightPanelProps).params}>
+        <VulnerabilityRightPanel />
+      </VulnerabilityDetailProvider>
+    ),
+    'aria-label': VULNERABILITY_DETAIL_PREVIEW_PANEL_ARIA_LABEL,
   },
 ];
 
