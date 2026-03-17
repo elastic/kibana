@@ -242,7 +242,7 @@ describe('XY', () => {
                     mapping: [
                       {
                         values: ['Clothing'],
-                        color: { type: 'colorCode', value: '#ff0000' },
+                        color: { type: 'color_code', value: '#ff0000' },
                       },
                     ],
                   },
