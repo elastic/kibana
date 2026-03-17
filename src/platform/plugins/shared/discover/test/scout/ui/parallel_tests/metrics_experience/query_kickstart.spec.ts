@@ -36,7 +36,7 @@ spaceTest.describe(
       const { discover } = pageObjects;
 
       await spaceTest.step('submit a TS query to enable extensions fetch', async () => {
-        await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+        await discover.writeAndSubmitEsqlQuery(`${testData.ESQL_QUERIES.TS} | LIMIT 100`);
       });
 
       await spaceTest.step('verify Search all metrics is available and apply it', async () => {
