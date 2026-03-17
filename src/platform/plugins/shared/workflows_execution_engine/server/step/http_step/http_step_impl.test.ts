@@ -509,6 +509,7 @@ describe('HttpStepImpl', () => {
         url: 'https://api.example.com/data',
         method: 'GET',
         headers: {},
+        timeout: '30s',
       };
       httpStep = new HttpStepImpl(
         mockStep,
@@ -540,6 +541,7 @@ describe('HttpStepImpl', () => {
         url: 'https://any-host.com/data',
         method: 'GET',
         headers: {},
+        timeout: '30s',
       };
       httpStep = new HttpStepImpl(
         mockStep,
