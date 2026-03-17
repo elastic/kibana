@@ -103,15 +103,8 @@ export const mosaicStateSchemaNoESQL = schema.object(
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
-    metrics: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        partitionStatePrimaryMetricOptionsSchema
-      ),
-      {
-        minSize: 1,
-        maxSize: 1,
-        meta: { description: 'Array of metric configurations (only 1 allowed)' },
-      }
+    metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+      partitionStatePrimaryMetricOptionsSchema
     ),
     group_by: schema.maybe(
       schema.arrayOf(
@@ -160,19 +153,12 @@ export const mosaicStateSchemaESQL = schema.object(
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
-    metrics: schema.arrayOf(
-      esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema, {
-        meta: {
-          description:
-            'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
-        },
-      }),
-      {
-        minSize: 1,
-        maxSize: 1,
-        meta: { description: 'Array of metric configurations (only 1 allowed)' },
-      }
-    ),
+    metric: esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema, {
+      meta: {
+        description:
+          'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
+      },
+    }),
     /**
      * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
      */
