@@ -644,7 +644,6 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
   /* File */
   'file.name',
   'file.path',
-  'file.Ext.original.path',
   'file.hash.sha256',
 
   /* Groups */

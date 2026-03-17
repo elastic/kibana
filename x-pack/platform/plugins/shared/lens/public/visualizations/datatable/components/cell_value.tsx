@@ -49,7 +49,8 @@ export const createGridCell = (
 
     useEffect(() => {
       let colorSet = false;
-      if (colorMode !== 'none' && (palette || colorMapping)) {
+      // Apply coloring when colorMode is set -> getCellColor will apply defaults if no config provided
+      if (colorMode !== 'none') {
         const color = getCellColor(columnId, palette, colorMapping)(rawValue);
 
         if (color) {

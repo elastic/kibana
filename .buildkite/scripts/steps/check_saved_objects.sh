@@ -6,6 +6,16 @@ source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 
+# Get the parent commit SHA for a given SHA.
+# Tries local git first, then falls back to the GitHub API.
+# The fallback is needed for commits from emergency release (deploy-fix) branches
+# that are not present in the local git clone.
+getParentSha() {
+  local sha="${1}"
+  git rev-parse "${sha}^" 2>/dev/null || \
+    gh api "repos/elastic/kibana/commits/${sha}" --jq '.parents[0].sha'
+}
+
 # Function to find a valid commit SHA, aka a SHA for which a snapshot exists
 findExistingSnapshotSha() {
   # The merge base commit, to start looking for existing snapshots.
@@ -29,8 +39,13 @@ findExistingSnapshotSha() {
     else
       if [[ "$http_status" == "404"* ]]; then
         echo "Snapshot '$url' NOT FOUND, fetching parent commit snapshot (attempt $attempts of $max_attempts)..." >&2
-        # Obtain the parent SHA
-        sha=$(git rev-parse "$sha"^)
+        # Obtain the parent SHA, falling back to the GitHub API for commits not in the local clone
+        local parent_sha
+        if ! parent_sha="$(getParentSha "$sha")" || [[ -z "$parent_sha" || "$parent_sha" == "null" ]]; then
+          echo "❌ Failed to resolve parent SHA for '$sha' while searching for a baseline snapshot." >&2
+          return 1
+        fi
+        sha="$parent_sha"
       else
         echo "Error fetching snapshot '$url' (attempt $attempts of $max_attempts)..." >&2
       fi
@@ -81,7 +96,11 @@ if is_pr; then
   SERVERLESS_BASELINE_FLAG=()
   if [[ "$GITHUB_PR_TARGET_BRANCH" == "main" ]]; then
     GITHUB_SERVERLESS_RELEASE_SHA="$(resolveCurrentServerlessReleaseSha)"
-    SERVERLESS_BASELINE_FLAG=(--serverless-baseline "$GITHUB_SERVERLESS_RELEASE_SHA")
+    if ! GITHUB_SERVERLESS_BASELINE_SHA="$(findExistingSnapshotSha "$GITHUB_SERVERLESS_RELEASE_SHA")"; then
+      echo "❌ Could not find a GCS snapshot for the current Serverless release or any of its ancestors." >&2
+      exit 1
+    fi
+    SERVERLESS_BASELINE_FLAG=(--serverless-baseline "$GITHUB_SERVERLESS_BASELINE_SHA")
   fi
 
   if ! is_auto_commit_disabled; then
@@ -96,7 +115,11 @@ else
   # and ONLY if we are in the main branch (older versions most likely won't be compatible)
   if [[ "$GITHUB_PR_TARGET_BRANCH" == "main" ]]; then
     GITHUB_SERVERLESS_RELEASE_SHA="$(resolveCurrentServerlessReleaseSha)"
+    if ! GITHUB_SERVERLESS_BASELINE_SHA="$(findExistingSnapshotSha "$GITHUB_SERVERLESS_RELEASE_SHA")"; then
+      echo "❌ Could not find a GCS snapshot for the current Serverless release or any of its ancestors." >&2
+      exit 1
+    fi
     # Perform the check against current serverless release
-    node scripts/check_saved_objects --baseline "$GITHUB_SERVERLESS_RELEASE_SHA"
+    node scripts/check_saved_objects --baseline "$GITHUB_SERVERLESS_BASELINE_SHA"
   fi
 fi
