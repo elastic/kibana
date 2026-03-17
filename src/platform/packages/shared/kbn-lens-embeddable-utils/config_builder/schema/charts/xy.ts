@@ -339,6 +339,11 @@ const xySharedSettings = {
           schema.object(
             {
               ...sharedAxisSchema,
+              scale: schema.maybe(
+                schema.oneOf([schema.literal('ordinal'), schema.literal('temporal')], {
+                  meta: { description: 'X-axis scale type' },
+                })
+              ),
               extent: schema.maybe(
                 schema.oneOf([
                   schema.object(

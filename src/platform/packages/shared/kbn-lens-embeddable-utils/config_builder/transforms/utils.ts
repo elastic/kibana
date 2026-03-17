@@ -287,16 +287,22 @@ function buildDatasourceStatesLayer(
     i: number,
     index: { index: string; timeFieldName: string | undefined }
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
-  getValueColumns: (layer: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
+  getValueColumns: (
+    layer: unknown,
+    i: number,
+    xAxisScale?: 'temporal' | 'ordinal'
+  ) => TextBasedLayerColumn[], // ValueBasedLayerColumn[]
+  fullConfig: LensApiState
 ): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
   function buildValueLayer(
     config: unknown,
     ds: NarrowByType<DatasetType, 'table'>
   ): TextBasedPersistedState['layers'][0] {
     const table = ds.table as LensDatatableDataset;
+    const xAxisScale = 'axis' in fullConfig ? fullConfig.axis?.x?.scale : undefined;
     const newLayer = {
       table,
-      columns: getValueColumns(config, i),
+      columns: getValueColumns(config, i, xAxisScale),
       allColumns: table.columns.map(
         (column): TextBasedLayerColumn => ({
           fieldName: column.name,
@@ -315,7 +321,8 @@ function buildDatasourceStatesLayer(
     config: unknown,
     ds: NarrowByType<DatasetType, 'esql'>
   ): TextBasedPersistedState['layers'][0] {
-    const columns = getValueColumns(config, i);
+    const xAxisScale = 'axis' in fullConfig ? fullConfig.axis?.x?.scale : undefined;
+    const columns = getValueColumns(config, i, xAxisScale);
 
     return {
       index: datasetIndex.index,
@@ -383,7 +390,8 @@ export const buildDatasourceStates = (
       dataset,
       index!,
       buildDataLayers,
-      getValueColumns
+      getValueColumns,
+      config
     );
     if (layerConfig) {
       layers = {
