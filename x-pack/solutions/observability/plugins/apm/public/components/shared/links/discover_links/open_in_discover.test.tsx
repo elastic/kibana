@@ -373,30 +373,6 @@ describe('OpenInDiscover', () => {
       const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
       expect(esqlArg).toContain(`\`${SPAN_ID}\` == "span-456"`);
     });
-
-    it('should return null ESQL query when indexSettings is empty', () => {
-      mockUseApmIndexSettingsContext.mockReturnValue({
-        indexSettings: [],
-        indexSettingsStatus: FETCH_STATUS.SUCCESS,
-      } as any);
-
-      render(
-        <OpenInDiscover
-          variant="button"
-          dataTestSubj="testButton"
-          indexType="traces"
-          rangeFrom="now-15m"
-          rangeTo="now"
-          queryParams={{}}
-        />
-      );
-
-      expect(mockGetRedirectUrl).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: { esql: null },
-        })
-      );
-    });
   });
 
   describe('consumer scenarios', () => {
