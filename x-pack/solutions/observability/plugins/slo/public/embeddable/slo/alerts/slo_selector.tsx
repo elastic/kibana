@@ -16,6 +16,11 @@ import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { hasSloGroupBy } from '../overview/slo_overview_panel_content';
 import type { SloItem } from './types';
 
+/** Option with optional indent flag for renderOption */
+interface SloComboBoxOption extends EuiComboBoxOptionOption<string> {
+  isIndented?: boolean;
+}
+
 interface Props {
   initialSlos?: SloItem[];
   onSelected: (slos: SLOWithSummaryResponse[] | SLOWithSummaryResponse | undefined) => void;
@@ -32,6 +37,9 @@ const ALL_INSTANCES_LABEL = i18n.translate('xpack.slo.sloEmbeddable.config.allIn
 });
 
 const VALUE_SEP = '\u001F';
+
+/** Indent for grouped instance options (2em) - use padding so hover underline doesn't cover it */
+const INSTANCE_INDENT_EM = 2;
 
 function getSloId(slo: SloItem | SLOWithSummaryResponse): string {
   return (slo as SloItem).slo_id ?? (slo as SLOWithSummaryResponse).id ?? '';
@@ -73,10 +81,8 @@ function mapSlosToOptions(slos: SloItem[] | SLOWithSummaryResponse[] | undefined
 }
 
 /** Build options from API results, adding "All instances" per grouped SLO. */
-function buildOptionsFromResults(
-  results: SLOWithSummaryResponse[]
-): Array<EuiComboBoxOptionOption<string>> {
-  const options: Array<EuiComboBoxOptionOption<string>> = [];
+function buildOptionsFromResults(results: SLOWithSummaryResponse[]): SloComboBoxOption[] {
+  const options: SloComboBoxOption[] = [];
   const seen = new Set<string>();
 
   const byId = new Map<string, SLOWithSummaryResponse[]>();
@@ -106,10 +112,10 @@ function buildOptionsFromResults(
       const value = toOptionValue(id, slo.instanceId);
       if (!seen.has(value)) {
         seen.add(value);
-        options.push({
-          label: slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.instanceId})` : slo.name,
-          value,
-        });
+        const baseLabel =
+          slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.instanceId})` : slo.name;
+        const isIndented = isGrouped && slo.instanceId !== ALL_VALUE;
+        options.push({ label: baseLabel, value, isIndented });
       }
     }
   }
@@ -184,6 +190,13 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
     []
   );
 
+  const renderOption = (option: SloComboBoxOption) => {
+    if (option.isIndented && typeof option.label === 'string') {
+      return <span style={{ paddingLeft: `${INSTANCE_INDENT_EM}em` }}>{option.label}</span>;
+    }
+    return option.label;
+  };
+
   return (
     <EuiFormRow
       fullWidth
@@ -210,6 +223,7 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
         onSearchChange={onSearchChange}
         isInvalid={hasError}
         singleSelection={singleSelection ? { asPlainText: true } : undefined}
+        renderOption={renderOption}
       />
     </EuiFormRow>
   );
