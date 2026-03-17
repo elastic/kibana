@@ -40,7 +40,7 @@ export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX = new RegExp(
     `\/(?:(platform|core)|solutions\/(\\w+))` + // 1: platform or core, 2: solution
     `\/(plugins|packages)` + // 3: plugin or package
     `\/?(shared|private|)` + // 4: artifact visibility
-    `\/([\\w|-]*)` + // 5: plugin/package name
+    `\/([\\w|-]+(?:\\/[\\w|-]+)*)` + // 5: plugin/package name (may contain slashes, e.g. vis_types/timelion)
     `\/test\/scout(?:_([^\\/]*))?` // 6: custom target config set name
 );
 export const SCOUT_CONFIG_PATH_GLOB =
