@@ -74,7 +74,7 @@ export const NoDataCard = ({
       icon={cardIcon}
       body={<p>{canAccessFleet ? description || defaultDescription : noPermissionDescription}</p>}
       actions={
-        canAccessFleet && href ? (
+        canAccessFleet && (href || onClick) ? (
           isButtonDisabled ? (
             disabledButtonTooltipText ? (
               <EuiToolTip position="right" content={disabledButtonTooltipText}>
@@ -87,7 +87,7 @@ export const NoDataCard = ({
                 {buttonText || defaultButtonText}
               </EuiButton>
             )
-          ) : (
+          ) : href ? (
             // eslint-disable-next-line @elastic/eui/href-or-on-click
             <EuiButton
               color="primary"
@@ -95,6 +95,15 @@ export const NoDataCard = ({
               href={href}
               data-test-subj="noDataDefaultActionButton"
               onClick={onClick}
+            >
+              {buttonText || defaultButtonText}
+            </EuiButton>
+          ) : (
+            <EuiButton
+              color="primary"
+              fill
+              data-test-subj="noDataDefaultActionButton"
+              onClick={onClick as unknown as React.MouseEventHandler<HTMLButtonElement>}
             >
               {buttonText || defaultButtonText}
             </EuiButton>

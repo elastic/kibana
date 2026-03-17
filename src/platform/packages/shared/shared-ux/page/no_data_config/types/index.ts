@@ -27,10 +27,6 @@ export type NoDataConfigPageProps = EuiPageTemplateProps & {
    */
   noDataConfig?: NoDataConfig;
   /**
-   * Optional content to render below the no-data cards (e.g. "Or try ES|QL" action).
-   */
-  noDataConfigPageFooter?: ReactNode;
-  /**
    * BWC Props from old EUI template
    */
   pageSideBar?: ReactNode;

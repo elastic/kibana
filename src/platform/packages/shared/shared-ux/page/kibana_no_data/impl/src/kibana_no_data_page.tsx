@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
-import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
+import { EsqlIllustration, NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
 import type { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
 
 import { useServices } from './services';
@@ -48,6 +48,36 @@ export const KibanaNoDataPage = ({
     });
   }, [hasESData, hasUserDataView]);
 
+  const noDataConfigWithEsql = useMemo(() => {
+    if (!onTryESQL || !noDataConfig) {
+      return noDataConfig;
+    }
+
+    return {
+      ...noDataConfig,
+      action: {
+        ...noDataConfig.action,
+        esql: {
+          title: i18n.translate('sharedUXPackages.kibanaNoDataPage.esqlCard.title', {
+            defaultMessage: 'Query with ES|QL',
+          }),
+          description: i18n.translate('sharedUXPackages.kibanaNoDataPage.esqlCard.description', {
+            defaultMessage:
+              'Use ES|QL to query data from external sources without local integrations.',
+          }),
+          buttonText: i18n.translate('sharedUXPackages.kibanaNoDataPage.esqlCard.buttonLabel', {
+            defaultMessage: 'Try ES|QL',
+          }),
+          icon: <EsqlIllustration />,
+          onClick: onTryESQL,
+          canAccessFleet: true,
+          'data-test-subj': 'kbnNoDataPageTryEsql',
+          docsLink: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/esql.html',
+        },
+      },
+    };
+  }, [noDataConfig, onTryESQL]);
+
   if (isLoading) {
     return showPlainSpinner ? (
       <EuiLoadingSpinner css={{ margin: 'auto' }} size="xxl" />
@@ -68,27 +98,7 @@ export const KibanaNoDataPage = ({
   }
 
   if (!dataExists) {
-    return (
-      <NoDataConfigPage
-        noDataConfig={noDataConfig}
-        noDataConfigPageFooter={
-          onTryESQL
-            ? (
-                <EuiButton
-                  color="primary"
-                  fill
-                  data-test-subj="tryESQLLink"
-                  onClick={onTryESQL}
-                >
-                  {i18n.translate('sharedUXPackages.kibanaNoDataPage.orTryESQLButtonLabel', {
-                    defaultMessage: 'Or try ES|QL',
-                  })}
-                </EuiButton>
-              )
-            : undefined
-        }
-      />
-    );
+    return <NoDataConfigPage noDataConfig={noDataConfigWithEsql} />;
   }
 
   return null;
