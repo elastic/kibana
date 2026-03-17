@@ -36,6 +36,7 @@ import type {
   LensDocument,
 } from '@kbn/lens-common';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
+import { hydrateState } from '../../runtime_state';
 
 import { buildExpression } from './expression_helpers';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
@@ -279,15 +280,22 @@ export async function initializeSources(
     references,
   });
 
+  const hydratedDatasourceStates = hydrateState(
+    visualizationState.activeId,
+    visualizationState.state,
+    initializedDatasourceStates,
+    indexPatterns
+  );
+
   return {
     indexPatterns,
     indexPatternRefs,
     annotationGroups,
-    datasourceStates: initializedDatasourceStates,
+    datasourceStates: hydratedDatasourceStates,
     visualizationState: initializeVisualization({
       visualizationMap,
       visualizationState,
-      datasourceStates,
+      datasourceStates: hydratedDatasourceStates,
       references,
       initialContext,
       annotationGroups,
@@ -418,13 +426,20 @@ export async function persistedStateToExpression(
     },
     { isFullEditor: false }
   );
-  const datasourceStates = initializeDatasources({
+  const initializedDatasourceStates = initializeDatasources({
     datasourceMap,
     datasourceStates: datasourceStatesFromSO,
     references: [...references, ...(internalReferences || [])],
     indexPatterns,
     indexPatternRefs,
   });
+
+  const datasourceStates = hydrateState(
+    visualizationType,
+    persistedVisualizationState,
+    initializedDatasourceStates,
+    indexPatterns
+  );
 
   const activeVisualizationState = initializeVisualization({
     visualizationMap: visualizations,

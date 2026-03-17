@@ -65,8 +65,6 @@ type MetricApiCompareType = Extract<Required<SecondaryMetricType>, { compare: an
 type WritableMetricStateWithoutDataset = DeepWriteable<Omit<MetricState, 'dataset'>>;
 
 const ACCESSOR = 'metric_accessor';
-const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
-const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT: KbnPaletteId = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
 
@@ -191,19 +189,18 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
 
     ...(primaryMetric.background_chart?.type === 'trend'
       ? {
-          trendlineLayerId: `${DEFAULT_LAYER_ID}_trendline`,
+          trendlineLayerId: `trendline_layer`,
           trendlineLayerType: 'metricTrendline',
-          trendlineMetricAccessor: `${ACCESSOR}_trendline`,
-          trendlineTimeAccessor: HISTOGRAM_COLUMN_NAME,
-          ...(secondaryMetric
-            ? {
-                trendlineSecondaryMetricAccessor: `${ACCESSOR}_secondary_trendline`,
-              }
-            : {}),
-
+          trendlineMetricAccessor: `trendline_y`,
+          trendlineTimeAccessor: 'trendline_x',
           ...(layer.breakdown_by
             ? {
-                trendlineBreakdownByAccessor: `${ACCESSOR}_breakdown_trendline`,
+                trendlineBreakdownByAccessor: `trendline_by`,
+              }
+            : {}),
+          ...(secondaryMetric
+            ? {
+                trendlineSecondaryMetricAccessor: `trendline_secondary`,
               }
             : {}),
         }
@@ -499,23 +496,11 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
 
   const layers: Record<string, PersistedIndexPatternLayer> = {
     ...generateLayer(DEFAULT_LAYER_ID, layer),
-    ...(primaryMetric.background_chart?.type === 'trend'
-      ? generateLayer(TRENDLINE_LAYER_ID, layer)
-      : {}),
   };
 
   const defaultLayer = layers[DEFAULT_LAYER_ID];
-  const trendLineLayer = layers[TRENDLINE_LAYER_ID];
-
-  if (trendLineLayer) {
-    trendLineLayer.linkToLayers = [DEFAULT_LAYER_ID];
-  }
 
   addLayerColumn(defaultLayer, getAccessorName('metric'), newPrimaryColumns);
-  if (trendLineLayer) {
-    addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, newPrimaryColumns);
-    addLayerColumn(trendLineLayer, HISTOGRAM_COLUMN_NAME, newPrimaryColumns);
-  }
 
   if (layer.breakdown_by) {
     const columnName = getAccessorName('breakdown');
@@ -530,18 +515,11 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
       ]
     );
     addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
-
-    if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, breakdownColumn, true);
-    }
   }
 
   if (newSecondaryColumns?.length) {
     const columnName = getAccessorName('secondary');
     addLayerColumn(defaultLayer, columnName, newSecondaryColumns);
-    if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, newSecondaryColumns, false, 'X0');
-    }
   }
 
   if (primaryMetric.background_chart?.type === 'bar') {
@@ -549,9 +527,6 @@ function buildFormBasedLayer(layer: MetricStateNoESQL): FormBasedPersistedState[
     const newColumn = fromMetricAPItoLensState(primaryMetric.background_chart.max_value);
 
     addLayerColumn(defaultLayer, columnName, newColumn);
-    if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, newColumn, false, 'X0');
-    }
   }
 
   return layers;
