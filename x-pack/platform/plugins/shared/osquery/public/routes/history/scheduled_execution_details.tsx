@@ -23,6 +23,7 @@ import moment from 'moment-timezone';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { pagePathGetters } from '../../common/page_paths';
+import { useGoBack } from '../../common/use_go_back';
 import { WithHeaderLayout } from '../../components/layouts';
 import {
   useScheduledExecutionDetails,
@@ -49,7 +50,8 @@ const ScheduledExecutionDetailsPageComponent = () => {
   });
 
   const historyPath = pagePathGetters.history();
-  const historyNavProps = useRouterNavigate(historyPath);
+  const handleGoBack = useGoBack(historyPath);
+  const historyNavProps = useRouterNavigate(historyPath, handleGoBack);
 
   const { data, isLoading, isError } = useScheduledExecutionDetails({
     scheduleId,
