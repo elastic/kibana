@@ -277,11 +277,17 @@ export class DashboardExpectService extends FtrService {
   }
 
   async savedSearchRowsExist() {
-    await this.testSubjects.existOrFail('docTableExpandToggleColumn');
+    this.log.debug(`DashboardExpect.savedSearchRowsExist`);
+    const savedSearchTable = await this.testSubjects.find('embeddedSavedSearchDocTable');
+    const resultStr = await savedSearchTable.getVisibleText();
+    expect(resultStr).not.to.be('No results found');
   }
 
   async savedSearchRowsMissing() {
-    await this.testSubjects.missingOrFail('docTableExpandToggleColumn');
+    this.log.debug(`DashboardExpect.savedSearchRowsMissing`);
+    const savedSearchTable = await this.testSubjects.find('embeddedSavedSearchDocTable');
+    const resultStr = await savedSearchTable.getVisibleText();
+    expect(resultStr).to.be('No results found');
   }
 
   async dataTableRowCount(expectedCount: number) {
