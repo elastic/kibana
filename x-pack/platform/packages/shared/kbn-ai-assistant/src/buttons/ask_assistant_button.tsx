@@ -32,7 +32,7 @@ export type AskAssistantButtonProps = (
 ) & {
   onClick: () => void;
 };
-
+// Where is this button used?
 export function AskAssistantButton({
   fill,
   flush,

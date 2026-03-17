@@ -98,6 +98,7 @@ const gradientLabelCss = (cssGradient: string, hoverGradient?: string) => css`
 `;
 
 const plainLabelCss = (color: string) => css`
+  padding: 0 4px;
   background: none !important;
   background-clip: initial !important;
   -webkit-background-clip: initial !important;
