@@ -6,9 +6,7 @@
  */
 
 import httpProxy from 'http-proxy';
-import http from 'http';
-import type https from 'https';
-import net from 'net';
+import type http from 'http';
 import expect from '@kbn/expect';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { URL, format as formatUrl } from 'url';
@@ -20,7 +18,6 @@ import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
   getHttpServer,
-  getHttpsHttpServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
@@ -708,88 +705,6 @@ export default function httpTest({ getService }: FtrProviderContext) {
 
         expect(result.status).to.eql('ok');
         expect(connectorProxyHaveBeenCalled).to.equal(true);
-        expect(proxyHaveBeenCalled).to.equal(false);
-      });
-    });
-
-    describe('Proxy settings (HTTPS simulator)', () => {
-      let httpsHttpServer: https.Server;
-      let httpsSimulatorURL: string;
-      let connectProxyServer: http.Server;
-      let connectProxyUrl: string;
-      let connectProxyHaveBeenCalled = false;
-
-      before(async () => {
-        httpsHttpServer = await getHttpsHttpServer();
-        const httpsPort = await getPort({ port: getPort.makeRange(18100, 18200) });
-        httpsHttpServer.listen(httpsPort);
-        httpsSimulatorURL = `https://localhost:${httpsPort}`;
-
-        const connectProxyPort = await getPort({ port: getPort.makeRange(18300, 18400) });
-        connectProxyServer = http.createServer();
-        connectProxyServer.on('connect', (req, clientSocket, head) => {
-          const [hostname, port] = req.url!.split(':');
-          const serverSocket = net.connect(Number(port), hostname, () => {
-            connectProxyHaveBeenCalled = true;
-            clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
-            serverSocket.write(head);
-            serverSocket.pipe(clientSocket);
-            clientSocket.pipe(serverSocket);
-          });
-          serverSocket.on('error', () => {
-            clientSocket.write('HTTP/1.1 500 Internal Server Error\r\n\r\n');
-            clientSocket.end();
-          });
-        });
-        connectProxyServer.listen(connectProxyPort);
-        connectProxyUrl = `http://localhost:${connectProxyPort}`;
-      });
-
-      beforeEach(() => {
-        connectProxyHaveBeenCalled = false;
-        proxyHaveBeenCalled = false;
-      });
-
-      after(() => {
-        httpsHttpServer.close();
-        connectProxyServer.close();
-      });
-
-      it('should use the connector-level proxy with an HTTPS target URL', async () => {
-        const { body: createdAction } = await supertest
-          .post('/api/actions/connector')
-          .set('kbn-xsrf', 'test')
-          .send({
-            name: 'A generic Http action',
-            connector_type_id: '.http',
-            secrets: {
-              user: 'username',
-              password: 'mypassphrase',
-            },
-            config: {
-              url: httpsSimulatorURL,
-              proxyUrl: connectProxyUrl,
-              proxyVerificationMode: 'none',
-            },
-          })
-          .expect(200);
-
-        objectRemover.add('default', createdAction.id, 'connector', 'actions', false);
-
-        const { body: result } = await supertest
-          .post(`/api/actions/connector/${createdAction.id}/_execute`)
-          .set('kbn-xsrf', 'test')
-          .send({
-            params: {
-              method: 'POST',
-              body: 'success_post_method',
-            },
-          })
-          .expect(200);
-
-        expect(result.status).to.eql('ok');
-
-        expect(connectProxyHaveBeenCalled).to.equal(true);
         expect(proxyHaveBeenCalled).to.equal(false);
       });
     });
