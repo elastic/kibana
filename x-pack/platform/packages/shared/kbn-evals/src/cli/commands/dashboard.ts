@@ -7,12 +7,7 @@
 
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  generateDashboardBody,
-  generateDataViewBody,
-  DASHBOARD_ID,
-  DATA_VIEW_ID,
-} from '../../dashboard/saved_objects';
+import { generateDashboardBody, generateDataViewBody, DASHBOARD_ID, DATA_VIEW_ID } from '../../dashboard';
 
 const DEFAULT_KBN_URL = 'http://elastic:changeme@localhost:5620';
 
@@ -164,14 +159,17 @@ const createOrUpdateDashboard = async ({
 
   if (!response.ok) {
     const body = await response.text();
-    throw new Error(
-      `Failed to create/update dashboard: ${response.status} ${response.statusText}\n${body}`
-    );
+    throw new Error(`Failed to create/update dashboard: ${response.status} ${response.statusText}\n${body}`);
   }
 
   const result = (await response.json()) as { id: string };
   log.info(`Dashboard created/updated: ${result.id}`);
   log.info(`View at: ${baseUrl}/app/dashboards#/view/${result.id}`);
+  log.info('');
+  log.info(
+    'TIP: Import this dashboard into the golden cluster Kibana instance for team-wide visibility.' +
+      ' See vision Section 4.3 (golden cluster) for details.'
+  );
 };
 
 const deleteDashboard = async ({
@@ -185,14 +183,11 @@ const deleteDashboard = async ({
 }): Promise<void> => {
   log.info(`Deleting dashboard ${DASHBOARD_ID}...`);
 
-  const dashResponse = await fetch(
-    `${baseUrl}/internal/dashboards/app/${DASHBOARD_ID}?apiVersion=1`,
-    {
-      method: 'DELETE',
-      headers: { ...headers, 'elastic-api-version': '1' },
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    }
-  );
+  const dashResponse = await fetch(`${baseUrl}/internal/dashboards/app/${DASHBOARD_ID}?apiVersion=1`, {
+    method: 'DELETE',
+    headers: { ...headers, 'elastic-api-version': '1' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
 
   if (dashResponse.ok) {
     log.info('Dashboard deleted.');

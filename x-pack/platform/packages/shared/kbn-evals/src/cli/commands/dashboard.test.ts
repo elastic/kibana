@@ -6,7 +6,7 @@
  */
 
 import { dashboardCmd } from './dashboard';
-import { DASHBOARD_ID, DATA_VIEW_ID } from '../../dashboard/saved_objects';
+import { DASHBOARD_ID, DATA_VIEW_ID } from '../../dashboard';
 
 const createMockLog = () => ({
   info: jest.fn(),
@@ -45,7 +45,8 @@ const jsonResponse = (body: unknown, status = 200) =>
     headers: { 'content-type': 'application/json' },
   });
 
-const textResponse = (body: string, status: number) => new Response(body, { status });
+const textResponse = (body: string, status: number) =>
+  new Response(body, { status });
 
 describe('dashboardCmd', () => {
   const originalFetch = global.fetch;
