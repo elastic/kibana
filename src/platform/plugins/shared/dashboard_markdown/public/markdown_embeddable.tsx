@@ -224,8 +224,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                 if (libraryId) {
                   await markdownClient.update(libraryId, {
                     content: value,
-                    title: titleManager.api.title$.getValue(),
-                    description: titleManager.api.description$.getValue(),
+                    title: titleManager.api.title$.getValue() ?? initialLibraryState.title,
+                    description:
+                      titleManager.api.description$.getValue() ?? initialLibraryState.description,
                   });
                 }
                 if (isNewPanel$.getValue()) {
