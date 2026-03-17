@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { type UseEuiTheme, useEuiShadow, euiFontSize } from '@elastic/eui';
+import { EuiPanel, EuiText, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
   ControlType,
@@ -82,15 +82,7 @@ const ControlPanelComponent = ({
   };
 
   return (
-    <div
-      id="sidebar"
-      css={[
-        css`
-          ${useEuiShadow('m')};
-        `,
-        styles.gphSidebar,
-      ]}
-    >
+    <EuiPanel id="sidebar" paddingSize="s" css={styles.gphSidebar}>
       <ControlPanelToolBar
         workspace={workspace}
         liveResponseFields={liveResponseFields}
@@ -106,11 +98,13 @@ const ControlPanelComponent = ({
         <SelectionToolBar workspace={workspace} onSetControl={onSetControl} />
         <div css={styles.gphSelectionList}>
           {workspace.selectedNodes.length === 0 && (
-            <p className="help-block">
-              {i18n.translate('xpack.graph.sidebar.selections.noSelectionsHelpText', {
-                defaultMessage: 'No selections. Click on vertices to add.',
-              })}
-            </p>
+            <EuiText color="subdued" size="s">
+              <p>
+                {i18n.translate('xpack.graph.sidebar.selections.noSelectionsHelpText', {
+                  defaultMessage: 'No selections. Click on vertices to add.',
+                })}
+              </p>
+            </EuiText>
           )}
 
           {workspace.selectedNodes.map((node) => (
@@ -145,7 +139,7 @@ const ControlPanelComponent = ({
           onSetControl={onSetControl}
         />
       )}
-    </div>
+    </EuiPanel>
   );
 };
 
@@ -157,16 +151,7 @@ const styles = {
       top: euiThemeContext.euiTheme.size.s,
       width: `calc(${euiThemeContext.euiTheme.size.xl} * 10)`,
       zIndex: euiThemeContext.euiTheme.levels.flyout, // https://eui.elastic.co/#/theming/more-tokens#levels
-      backgroundColor: euiThemeContext.euiTheme.colors.emptyShade,
-      border: euiThemeContext.euiTheme.border.thin,
-      padding: euiThemeContext.euiTheme.size.xs,
-      borderRadius: euiThemeContext.euiTheme.border.radius.medium,
-      opacity: 0.9,
-
-      '.help-block': {
-        fontSize: euiFontSize(euiThemeContext, 'xs', { unit: 'px' }).fontSize,
-        color: euiThemeContext.euiTheme.colors.text,
-      },
+      opacity: 0.94,
     }),
 
   gphSelectionList: ({ euiTheme }: UseEuiTheme) =>
@@ -175,6 +160,8 @@ const styles = {
       backgroundColor: euiTheme.colors.lightestShade,
       overflow: 'auto',
       marginBottom: 0,
+      borderRadius: euiTheme.border.radius.small,
+      padding: euiTheme.size.s,
     }),
 };
 

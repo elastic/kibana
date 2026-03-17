@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFieldText, EuiFormRow, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Workspace, WorkspaceNode } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
-import { gphFormGroupSmallStyles } from './control_plane.styles';
+import { gphSidebarSectionSpacingStyles } from './control_plane.styles';
 
 interface SelectedNodeEditorProps {
   workspace: Workspace;
@@ -68,29 +68,25 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
         </EuiToolTip>
       )}
 
-      <form className="form-horizontal">
-        <div className="form-group form-group-sm" css={gphFormGroupSmallStyles}>
-          <label htmlFor="labelEdit" className="col-sm-3 control-label">
-            {i18n.translate('xpack.graph.sidebar.displayLabelLabel', {
-              defaultMessage: 'Display label',
-            })}
-          </label>
-          <div className="col-sm-9">
-            <input
-              ref={(element) => element && (element.value = selectedNode.label)}
-              type="text"
-              id="labelEdit"
-              className="form-control input-sm"
-              onChange={onChangeSelectedVertexLabel}
-            />
-            <div className="help-block">
-              {i18n.translate('xpack.graph.sidebar.displayLabelHelpText', {
-                defaultMessage: 'Change the label for this vertex.',
-              })}
-            </div>
-          </div>
-        </div>
-      </form>
+      <EuiFormRow
+        css={gphSidebarSectionSpacingStyles}
+        label={i18n.translate('xpack.graph.sidebar.displayLabelLabel', {
+          defaultMessage: 'Display label',
+        })}
+        helpText={i18n.translate('xpack.graph.sidebar.displayLabelHelpText', {
+          defaultMessage: 'Change the label for this vertex.',
+        })}
+        display="columnCompressed"
+        fullWidth
+      >
+        <EuiFieldText
+          compressed
+          fullWidth
+          id="labelEdit"
+          value={selectedNode.label}
+          onChange={onChangeSelectedVertexLabel}
+        />
+      </EuiFormRow>
     </div>
   );
 };
