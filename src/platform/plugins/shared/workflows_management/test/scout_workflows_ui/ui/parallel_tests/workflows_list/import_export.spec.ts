@@ -103,7 +103,6 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
   test('should show conflict resolution UI when re-importing existing workflows', async ({
     pageObjects,
     apiServices,
-    scoutSpace,
   }) => {
     const workflowYaml = getListTestWorkflowYaml({
       name: 'ImportConflict Existing',
@@ -154,7 +153,6 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
   test('should overwrite existing workflow when choosing "overwrite"', async ({
     pageObjects,
     apiServices,
-    scoutSpace,
   }) => {
     const workflowYaml = getListTestWorkflowYaml({
       name: 'ImportOverwrite Existing',
@@ -199,7 +197,6 @@ test.describe('WorkflowsList/ImportExport', { tag: [...tags.stateful.classic] },
   test('should export selected workflows via bulk action', async ({
     pageObjects,
     apiServices,
-    scoutSpace,
     page,
   }) => {
     const yaml1 = getListTestWorkflowYaml({
