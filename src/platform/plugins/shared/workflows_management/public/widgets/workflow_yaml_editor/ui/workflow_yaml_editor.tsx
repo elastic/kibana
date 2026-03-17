@@ -62,6 +62,7 @@ import {
   selectIsSavingYaml,
   selectStepExecutions,
   selectWorkflow,
+  selectWorkflowDefinition,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
   HIGHLIGHTED_STEP_TRIGGER,
@@ -218,6 +219,7 @@ export const WorkflowYAMLEditor = ({
   // Refs / Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
   const workflowYamlSchema = useSelector(selectSchema);
+  const workflowDefinition = useSelector(selectWorkflowDefinition);
   // The current yaml document in the editor (could be unsaved)
   const yamlDocument = useSelector(selectEditorYamlDocument);
   const yamlDocumentRef = useRef<YAML.Document | null>(yamlDocument ?? null);
@@ -291,7 +293,7 @@ export const WorkflowYAMLEditor = ({
     editorRef,
     isEditorMounted,
     workflowId: workflow?.id,
-    workflowName: workflow?.name,
+    workflowName: workflow?.name ?? workflowDefinition?.name,
     validationErrors,
   });
 

@@ -40,6 +40,16 @@ const workflowEditAvailability = {
   cacheMode: 'space' as const,
 };
 
+const baseWorkflowEditSchema = z.object({
+  attachmentId: z
+    .string()
+    .optional()
+    .describe(
+      'The workflow.yaml attachment ID to modify. IMPORTANT: always use the most recent workflow.yaml attachment from the conversation — the user may have navigated to a different workflow since the last edit.'
+    ),
+  description: z.string().optional().describe('Human-readable description of what the change does'),
+});
+
 const stepDefinitionSchema = z.object({
   name: z.string(),
   type: z.string(),
@@ -52,10 +62,15 @@ const stepDefinitionSchema = z.object({
 });
 
 const findWorkflowYamlAttachment = (
-  context: ToolHandlerContext
+  context: ToolHandlerContext,
+  targetAttachmentId?: string
 ): { yaml: string; attachmentId: string; workflowId?: string; name?: string } | null => {
   const activeAttachments = context.attachments.getActive();
-  const yamlAttachment = activeAttachments.find((a) => a.type === WORKFLOW_YAML_ATTACHMENT_TYPE);
+  const yamlAttachment = targetAttachmentId
+    ? activeAttachments.find(
+        (a) => a.id === targetAttachmentId && a.type === WORKFLOW_YAML_ATTACHMENT_TYPE
+      )
+    : activeAttachments.findLast((a) => a.type === WORKFLOW_YAML_ATTACHMENT_TYPE);
 
   if (!yamlAttachment) return null;
 
@@ -215,16 +230,13 @@ export function registerWorkflowEditTools(
     description:
       'Insert a new step at the end of the workflow steps list. Provide the step as a structured object. Returns diffAttachmentId, attachmentId, and attachmentVersion. Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.',
     schema: z.object({
+      ...baseWorkflowEditSchema.shape,
       step: stepDefinitionSchema as z.ZodType<StepDefinition>,
-      description: z
-        .string()
-        .optional()
-        .describe('Human-readable description of what the change does'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
     availability: workflowEditAvailability,
-    handler: async ({ step, description }, context) => {
-      const attachment = findWorkflowYamlAttachment(context);
+    handler: async ({ attachmentId: targetAttachmentId, step, description }, context) => {
+      const attachment = findWorkflowYamlAttachment(context, targetAttachmentId);
       if (!attachment) return noAttachmentError();
 
       const result = insertStep(attachment.yaml, step);
@@ -248,17 +260,17 @@ export function registerWorkflowEditTools(
     description:
       'Replace an entire step by name with a new step definition. The step is identified by its name. Returns diffAttachmentId, attachmentId, and attachmentVersion. Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.',
     schema: z.object({
+      ...baseWorkflowEditSchema.shape,
       stepName: z.string().describe('The name of the step to replace'),
       updatedStep: stepDefinitionSchema as z.ZodType<StepDefinition>,
-      description: z
-        .string()
-        .optional()
-        .describe('Human-readable description of what the change does'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
     availability: workflowEditAvailability,
-    handler: async ({ stepName, updatedStep, description }, context) => {
-      const attachment = findWorkflowYamlAttachment(context);
+    handler: async (
+      { attachmentId: targetAttachmentId, stepName, updatedStep, description },
+      context
+    ) => {
+      const attachment = findWorkflowYamlAttachment(context, targetAttachmentId);
       if (!attachment) return noAttachmentError();
 
       const result = modifyStep(attachment.yaml, stepName, updatedStep);
@@ -282,18 +294,18 @@ export function registerWorkflowEditTools(
     description:
       'Modify a single property of a step identified by name. Provide the property key and new value. Returns diffAttachmentId, attachmentId, and attachmentVersion. Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.',
     schema: z.object({
+      ...baseWorkflowEditSchema.shape,
       stepName: z.string().describe('The name of the step to modify'),
       property: z.string().describe('The property key to modify (e.g., "with", "type")'),
       value: z.unknown().describe('The new value for the property'),
-      description: z
-        .string()
-        .optional()
-        .describe('Human-readable description of what the change does'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
     availability: workflowEditAvailability,
-    handler: async ({ stepName, property, value, description }, context) => {
-      const attachment = findWorkflowYamlAttachment(context);
+    handler: async (
+      { attachmentId: targetAttachmentId, stepName, property, value, description },
+      context
+    ) => {
+      const attachment = findWorkflowYamlAttachment(context, targetAttachmentId);
       if (!attachment) return noAttachmentError();
 
       const result = modifyStepProperty(attachment.yaml, stepName, property, value);
@@ -317,19 +329,19 @@ export function registerWorkflowEditTools(
     description:
       'Modify a top-level workflow property (e.g. name, description, trigger). Provide the property key and new value. Returns diffAttachmentId, attachmentId, and attachmentVersion. Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.',
     schema: z.object({
+      ...baseWorkflowEditSchema.shape,
       property: z
         .string()
         .describe('The top-level property key to modify (e.g., "name", "description", "trigger")'),
       value: z.unknown().describe('The new value for the property'),
-      description: z
-        .string()
-        .optional()
-        .describe('Human-readable description of what the change does'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
     availability: workflowEditAvailability,
-    handler: async ({ property, value, description }, context) => {
-      const attachment = findWorkflowYamlAttachment(context);
+    handler: async (
+      { attachmentId: targetAttachmentId, property, value, description },
+      context
+    ) => {
+      const attachment = findWorkflowYamlAttachment(context, targetAttachmentId);
       if (!attachment) return noAttachmentError();
 
       const result = modifyWorkflowProperty(attachment.yaml, property, value);
@@ -353,16 +365,13 @@ export function registerWorkflowEditTools(
     description:
       'Delete a step from the workflow by its name. Returns diffAttachmentId, attachmentId, and attachmentVersion. Render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>.',
     schema: z.object({
+      ...baseWorkflowEditSchema.shape,
       stepName: z.string().describe('The name of the step to delete'),
-      description: z
-        .string()
-        .optional()
-        .describe('Human-readable description of what the change does'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
     availability: workflowEditAvailability,
-    handler: async ({ stepName, description }, context) => {
-      const attachment = findWorkflowYamlAttachment(context);
+    handler: async ({ attachmentId: targetAttachmentId, stepName, description }, context) => {
+      const attachment = findWorkflowYamlAttachment(context, targetAttachmentId);
       if (!attachment) return noAttachmentError();
 
       const result = deleteStep(attachment.yaml, stepName);
@@ -385,16 +394,13 @@ export function registerWorkflowEditTools(
     type: ToolType.builtin,
     description: `Replace the entire workflow YAML content, or create a new workflow from scratch when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists yet. For large-scale changes or when multiple properties and steps need to change at once. When an attachment exists, returns diffAttachmentId, attachmentId, and attachmentVersion — render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>. When creating new, returns an attachmentId — render it with <render_attachment id="{attachmentId}"/>.`,
     schema: z.object({
+      ...baseWorkflowEditSchema.shape,
       yaml: z.string().describe('The complete new workflow YAML content'),
-      description: z
-        .string()
-        .optional()
-        .describe('Human-readable description of what the change does'),
     }),
     tags: ['workflows', 'yaml', 'edit'],
     availability: workflowEditAvailability,
-    handler: async ({ yaml, description }, context) => {
-      const attachment = findWorkflowYamlAttachment(context);
+    handler: async ({ attachmentId: targetAttachmentId, yaml, description }, context) => {
+      const attachment = findWorkflowYamlAttachment(context, targetAttachmentId);
       const proposalId = v4();
 
       // When no workflow.yaml attachment exists (e.g. full-screen chat, creating

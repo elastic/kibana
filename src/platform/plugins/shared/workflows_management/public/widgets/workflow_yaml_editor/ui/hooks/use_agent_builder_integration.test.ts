@@ -13,6 +13,7 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../../common/agent_build
 import { useKibana } from '../../../../hooks/use_kibana';
 
 jest.mock('../../../../hooks/use_kibana');
+jest.mock('uuid', () => ({ v4: () => 'mock-uuid-1234' }));
 jest.mock('../../../../features/ai_integration', () => ({
   AttachmentBridge: jest.fn().mockImplementation(() => ({
     start: jest.fn(),
@@ -83,8 +84,10 @@ const setupKibanaMock = (agentBuilder?: ReturnType<typeof createMockAgentBuilder
 
 const INITIAL_YAML = 'name: test-workflow';
 
+const MOCK_UUID = 'mock-uuid-1234';
+
 const expectedAttachment = (yaml: string, overrides?: { workflowId?: string; name?: string }) => ({
-  id: overrides?.workflowId ?? 'new-workflow',
+  id: overrides?.workflowId ?? MOCK_UUID,
   type: WORKFLOW_YAML_ATTACHMENT_TYPE,
   data: {
     yaml,
@@ -189,7 +192,44 @@ describe('useAgentBuilderIntegration', () => {
       expect(agentBuilder.setChatConfig).toHaveBeenCalledWith({ attachments: [expected] });
     });
 
-    it('uses "new-workflow" as attachment id when workflowId is undefined', () => {
+    it('does not tear down the effect when workflowName changes', () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const editorRef = { current: editor } as any;
+
+      const { rerender } = renderHook((props) => useAgentBuilderIntegration(props), {
+        initialProps: {
+          editorRef,
+          isEditorMounted: true,
+          workflowName: 'Original Name',
+        },
+      });
+
+      agentBuilder.clearChatConfig.mockClear();
+      agentBuilder.setChatConfig.mockClear();
+      agentBuilder.addAttachment.mockClear();
+
+      rerender({
+        editorRef,
+        isEditorMounted: true,
+        workflowName: 'Updated Name',
+      });
+
+      expect(agentBuilder.clearChatConfig).not.toHaveBeenCalled();
+
+      mockModel.simulateContentChange('name: changed');
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith({
+        attachments: [expectedAttachment('name: changed', { name: 'Updated Name' })],
+      });
+    });
+
+    it('uses a generated UUID as attachment id when workflowId is undefined', () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -202,7 +242,7 @@ describe('useAgentBuilderIntegration', () => {
       );
 
       expect(agentBuilder.setChatConfig).toHaveBeenCalledWith({
-        attachments: [expect.objectContaining({ id: 'new-workflow' })],
+        attachments: [expect.objectContaining({ id: MOCK_UUID })],
       });
     });
   });
@@ -341,7 +381,7 @@ describe('useAgentBuilderIntegration', () => {
       });
 
       expect(agentBuilder.openChat).toHaveBeenCalledWith({
-        sessionTag: 'workflow-editor',
+        sessionTag: 'workflow-editor:wf-456',
         initialMessage: undefined,
         autoSendInitialMessage: undefined,
         attachments: [

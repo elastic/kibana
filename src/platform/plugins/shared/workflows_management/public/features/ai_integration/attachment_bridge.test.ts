@@ -7,7 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { baseProposalId, changeFingerprint, computeChanges } from './attachment_bridge';
+import { Subject } from 'rxjs';
+import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
+import { ChatEventType } from '@kbn/agent-builder-common';
+import {
+  AttachmentBridge,
+  baseProposalId,
+  changeFingerprint,
+  computeChanges,
+} from './attachment_bridge';
+import { ProposalTracker } from './proposal_tracker';
+import type { ProposalManager, ProposedChange } from './proposed_changes';
+import { WORKFLOW_YAML_CHANGED_EVENT } from '../../../common/agent_builder/constants';
 import { modifyWorkflowProperty } from '../../../server/agent_builder/tools/yaml_edit_utils';
 
 describe('changeFingerprint', () => {
@@ -662,5 +673,151 @@ describe('real payload regression: trailing newline mismatch', () => {
 
     const changes = computeChanges(editorContent, afterWithDoubleNewline, 'no-op');
     expect(changes).toHaveLength(0);
+  });
+});
+
+describe('AttachmentBridge: workflow navigation', () => {
+  const WORKFLOW_A_YAML = [
+    "version: '1'",
+    'name: Workflow A',
+    'description: First workflow',
+    '',
+    'steps:',
+    '  - name: step1',
+    '    type: console',
+    '    with:',
+    '      message: hello from A',
+  ].join('\n');
+
+  const WORKFLOW_B_YAML = [
+    "version: '1'",
+    'name: Workflow B',
+    'description: Second workflow',
+    '',
+    'steps:',
+    '  - name: stepX',
+    '    type: http',
+    '    with:',
+    '      url: https://example.com',
+  ].join('\n');
+
+  const makeYamlChangedEvent = (payload: Record<string, unknown>): BrowserChatEvent =>
+    ({
+      type: ChatEventType.toolUi,
+      data: {
+        tool_id: 'some-tool',
+        tool_call_id: 'call-1',
+        custom_event: WORKFLOW_YAML_CHANGED_EVENT,
+        data: payload,
+      },
+    } as unknown as BrowserChatEvent);
+
+  const createMockEditor = (initialValue: string) => {
+    let content = initialValue;
+    return {
+      getModel: () => ({
+        getValue: () => content,
+        _setValue: (v: string) => {
+          content = v;
+        },
+      }),
+    } as unknown as import('@kbn/monaco').monaco.editor.IStandaloneCodeEditor;
+  };
+
+  const createMockProposalManager = () => {
+    const proposed: ProposedChange[] = [];
+    const manager = {
+      proposeChange: jest.fn((change: ProposedChange) => {
+        proposed.push(change);
+      }),
+      acceptOverlapping: jest.fn(),
+    } as unknown as ProposalManager;
+    return { manager, proposed };
+  };
+
+  it('event for previous workflow arriving after navigation should not corrupt the current editor', () => {
+    const chat$ = new Subject<BrowserChatEvent>();
+
+    const editedWorkflowAYaml = WORKFLOW_A_YAML.replace(
+      'description: First workflow',
+      'description: EDITED first workflow'
+    );
+
+    const editorA = createMockEditor(WORKFLOW_A_YAML);
+    const editorRefA = { current: editorA };
+    const trackerA = new ProposalTracker();
+    const { manager: managerA } = createMockProposalManager();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, managerA, editorRefA, trackerA, { workflowId: 'workflow-a' });
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'proposal-a',
+        beforeYaml: WORKFLOW_A_YAML,
+        afterYaml: editedWorkflowAYaml,
+        workflowId: 'workflow-a',
+      })
+    );
+
+    expect(managerA.proposeChange).toHaveBeenCalled();
+
+    bridge.stop();
+
+    const editedWorkflowBYaml = WORKFLOW_B_YAML.replace(
+      'description: Second workflow',
+      'description: EDITED second workflow'
+    );
+
+    const editorB = createMockEditor(WORKFLOW_B_YAML);
+    const editorRefB = { current: editorB };
+    const trackerB = new ProposalTracker();
+    const { manager: managerB, proposed: proposedChanges } = createMockProposalManager();
+
+    bridge.start(chat$, managerB, editorRefB, trackerB, { workflowId: 'workflow-b' });
+
+    // A stale event for workflow A arrives on the shared chat$ stream
+    // after the bridge was restarted for workflow B (e.g. agent was still
+    // processing). The bridge should ignore it because it targets a
+    // different workflow.
+    const secondEditOnA = WORKFLOW_A_YAML.replace(
+      'description: First workflow',
+      'description: Another edit on A'
+    );
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'proposal-a-late',
+        beforeYaml: editedWorkflowAYaml,
+        afterYaml: secondEditOnA,
+        workflowId: 'workflow-a',
+      })
+    );
+
+    // Now the real event for workflow B arrives
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'proposal-b',
+        beforeYaml: WORKFLOW_B_YAML,
+        afterYaml: editedWorkflowBYaml,
+        workflowId: 'workflow-b',
+      })
+    );
+
+    for (const change of proposedChanges) {
+      expect(change.newText).not.toContain('Workflow A');
+      expect(change.newText).not.toContain('first workflow');
+      expect(change.newText).not.toContain('Another edit on A');
+      expect(change.newText).not.toContain('hello from A');
+    }
+
+    const workflowBChanges = proposedChanges.filter((c: ProposedChange) =>
+      c.proposalId.startsWith('proposal-b')
+    );
+    expect(workflowBChanges.length).toBeGreaterThan(0);
+    expect(
+      workflowBChanges.some((c: ProposedChange) => c.newText.includes('EDITED second workflow'))
+    ).toBe(true);
+
+    bridge.stop();
   });
 });

@@ -159,18 +159,20 @@ export class AttachmentBridge {
     null;
   private processedProposals = new Set<string>();
   private onError: (err: unknown) => void = () => {};
+  private workflowId: string | undefined;
 
   start(
     chat$: Observable<BrowserChatEvent>,
     proposalManager: ProposalManager,
     editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>,
     tracker: ProposalTracker,
-    options?: { onError?: (err: unknown) => void }
+    options?: { onError?: (err: unknown) => void; workflowId?: string }
   ): void {
     this.proposalManager = proposalManager;
     this.editorRef = editorRef;
     this.tracker = tracker;
     this.onError = options?.onError ?? (() => {});
+    this.workflowId = options?.workflowId;
 
     this.subscription = chat$.subscribe((event) => {
       if (isToolUiEvent(event, WORKFLOW_YAML_CHANGED_EVENT)) {
@@ -190,6 +192,7 @@ export class AttachmentBridge {
     this.tracker = null;
     this.editorRef = null;
     this.processedProposals.clear();
+    this.workflowId = undefined;
   }
 
   private handleYamlChanged(payload: WorkflowYamlChangedPayload): void {
@@ -200,7 +203,9 @@ export class AttachmentBridge {
     const model = editor.getModel();
     if (!model) return;
 
-    const { proposalId, beforeYaml, afterYaml, attachmentVersion } = payload;
+    const { proposalId, beforeYaml, afterYaml, attachmentVersion, workflowId } = payload;
+
+    if (this.workflowId && workflowId && workflowId !== this.workflowId) return;
 
     if (this.processedProposals.has(proposalId)) return;
     if (this.processedProposals.size >= AttachmentBridge.PROCESSED_PROPOSALS_CAP) {

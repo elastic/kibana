@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
+import { v4 } from 'uuid';
 import type { monaco } from '@kbn/monaco';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../../common/agent_builder/constants';
 import {
@@ -54,6 +55,12 @@ export const useAgentBuilderIntegration = ({
   const trackerRef = useRef<ProposalTracker | null>(null);
   const validationErrorsRef = useRef(validationErrors);
   validationErrorsRef.current = validationErrors;
+  const chatRefHandle = useRef<{ close: () => void } | null>(null);
+  const unsavedWorkflowIdRef = useRef<string>(v4());
+  const workflowNameRef = useRef(workflowName);
+  workflowNameRef.current = workflowName;
+
+  const attachmentId = workflowId ?? unsavedWorkflowIdRef.current;
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -84,14 +91,17 @@ export const useAgentBuilderIntegration = ({
     proposalManagerRef.current = manager;
 
     const bridge = new AttachmentBridge();
-    bridge.start(agentBuilder.events.chat$, manager, editorRef, tracker);
+    bridge.start(agentBuilder.events.chat$, manager, editorRef, tracker, {
+      workflowId: attachmentId,
+    });
     attachmentBridgeRef.current = bridge;
 
     const buildAttachment = (yaml: string) =>
       buildWorkflowAttachment({
         yaml,
+        attachmentId,
         workflowId,
-        workflowName,
+        workflowName: workflowNameRef.current,
         diagnostics: serializeClientDiagnostics(validationErrorsRef.current),
       });
 
@@ -127,6 +137,7 @@ export const useAgentBuilderIntegration = ({
         clearTimeout(debounceTimer);
       }
       modelListener?.dispose();
+      chatRefHandle.current = null;
       agentBuilder.clearChatConfig();
       bridge.stop();
       attachmentBridgeRef.current = null;
@@ -136,7 +147,7 @@ export const useAgentBuilderIntegration = ({
       tracker.clearAll();
       trackerRef.current = null;
     };
-  }, [isEditorMounted, editorRef, agentBuilder, workflowId, workflowName]);
+  }, [isEditorMounted, editorRef, agentBuilder, attachmentId, workflowId]);
 
   const openAgentChat = useCallback(
     (options?: OpenAgentChatOptions) => {
@@ -146,21 +157,23 @@ export const useAgentBuilderIntegration = ({
 
       const currentYaml = editorRef.current?.getModel()?.getValue() ?? '';
 
-      agentBuilder.openChat({
-        sessionTag: 'workflow-editor',
+      const { chatRef } = agentBuilder.openChat({
+        sessionTag: `workflow-editor:${attachmentId}`,
         initialMessage: options?.initialMessage,
         autoSendInitialMessage: options?.autoSendInitialMessage,
         attachments: [
           buildWorkflowAttachment({
             yaml: currentYaml,
+            attachmentId,
             workflowId,
             workflowName,
             diagnostics: serializeClientDiagnostics(validationErrors),
           }),
         ],
       });
+      chatRefHandle.current = chatRef;
     },
-    [agentBuilder, editorRef, workflowId, workflowName, validationErrors]
+    [agentBuilder, editorRef, attachmentId, workflowId, workflowName, validationErrors]
   );
 
   return {
@@ -188,16 +201,18 @@ const serializeClientDiagnostics = (
 
 const buildWorkflowAttachment = ({
   yaml,
+  attachmentId,
   workflowId,
   workflowName,
   diagnostics,
 }: {
   yaml: string;
+  attachmentId: string;
   workflowId?: string;
   workflowName?: string;
   diagnostics: ReturnType<typeof serializeClientDiagnostics>;
 }) => ({
-  id: workflowId ?? 'new-workflow',
+  id: attachmentId,
   type: WORKFLOW_YAML_ATTACHMENT_TYPE,
   data: {
     yaml,
