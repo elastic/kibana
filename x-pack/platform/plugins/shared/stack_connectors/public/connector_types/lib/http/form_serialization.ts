@@ -57,10 +57,24 @@ const buildHeaderRecords = (
     }, {});
 };
 
+const buildParamRecords = (
+  params: Array<{ key: string; value: string }>
+): Record<string, string> => {
+  return params
+    .filter((param) => param.key && param.key.trim() && param.value)
+    .reduce<Record<string, string>>((acc, { key, value }) => {
+      acc[key] = value;
+      return acc;
+    }, {});
+};
+
 export const formSerializer = (formData: InternalConnectorForm): ConnectorFormSchema => {
   const headers = formData?.__internal__?.headers ?? [];
   const configHeaders = buildHeaderRecords(headers, 'config');
   const secretHeaders = buildHeaderRecords(headers, 'secret');
+
+  const queryParams = formData?.__internal__?.queryParams ?? [];
+  const secretQueryParams = buildParamRecords(queryParams);
 
   return {
     ...formData,
@@ -71,6 +85,7 @@ export const formSerializer = (formData: InternalConnectorForm): ConnectorFormSc
     secrets: {
       ...formData.secrets,
       secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
+      secretQueryParams: isEmpty(secretQueryParams) ? undefined : secretQueryParams,
     },
   };
 };
