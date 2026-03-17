@@ -16,6 +16,7 @@ import {
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   buildSpaceOwnerIdTag,
   hasArtifactOwnerSpaceId,
@@ -268,31 +269,37 @@ const deleteExistingItemsForOverwrite = async ({
     filter = filterForNonGlobalItemsOwnedByCurrentSpace;
   }
 
-  const findResult = await exceptionListClient.findExceptionListItem({
+  let itemIdsToDelete: string[] = [];
+  const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
+    const responseIds = response.data.map((exceptionListItem) => exceptionListItem.id);
+    itemIdsToDelete = [...itemIdsToDelete, ...responseIds];
+  };
+  await exceptionListClient.findExceptionListItemPointInTimeFinder({
+    executeFunctionOnStream,
     listId: importedListId,
     namespaceType: 'agnostic',
     filter,
-    page: 1,
     perPage: 1_000,
+    maxSize: undefined,
     sortField: undefined,
     sortOrder: undefined,
   });
 
-  if (findResult?.total && findResult.total > 0) {
+  if (itemIdsToDelete.length > 0) {
     await exceptionListClient.bulkDeleteExceptionListItems({
-      ids: findResult.data.map((item) => item.id) ?? [],
+      ids: itemIdsToDelete,
       namespaceType: 'agnostic',
     });
 
-    logger.debug(
+    logger.info(
       `Deleted ${
-        findResult.data.length
+        itemIdsToDelete.length
       } items from list [${importedListId}] in space [${spaceId}] to prepare for import with overwrite${
         canManageGlobalArtifacts ? ', including global artifacts' : ''
       }.`
     );
   } else {
-    logger.debug('No exception list items found to delete on import with overwrite.');
+    logger.info('No exception list items found to delete on import with overwrite.');
   }
 };
 
