@@ -207,6 +207,7 @@ const expectedQueriesResponse = {
     {
       id: '12345',
       title: 'Test',
+      description: '',
       esql: {
         query: `FROM ${TEST_STREAM_NAME},${TEST_STREAM_NAME}.* METADATA _id, _source | WHERE KQL("atest")`,
       },
