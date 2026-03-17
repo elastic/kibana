@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 import {
@@ -14,7 +15,7 @@ import {
 
 test.describe(
   'Wired Streams - Elastic Agent Kubernetes Flow',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
       await setupWiredStreamsOnce({ apiServices });

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { spaceTest } from '../fixtures';
 
-spaceTest.describe('GenAI Settings - AI Assistant Visibility', { tag: ['@ess'] }, () => {
+spaceTest.describe('GenAI Settings - AI Assistant Visibility', { tag: [...tags.stateful.classic] }, () => {
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.genAiSettings.navigateTo();

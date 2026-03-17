@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { getImpactLevel, type Insight, type SaveInsightBody } from '@kbn/streams-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
-apiTest.describe('Insights CRUD API', { tag: ['@ess', '@svlOblt'] }, () => {
+apiTest.describe('Insights CRUD API', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   function createTestInsight(overrides: Partial<Insight> = {}): Insight {
     return {
       id: uuidv4(),

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-search';
 import { expect } from '@kbn/scout-search/ui';
 import { test } from '../fixtures';
 
-test.describe('Getting Started - Admin', { tag: ['@ess', '@svlSearch'] }, () => {
+test.describe('Getting Started - Admin', { tag: [...tags.stateful.classic, ...tags.serverless.search] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.gettingStarted.goto();

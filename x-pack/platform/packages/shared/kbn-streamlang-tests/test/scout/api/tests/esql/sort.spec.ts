@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { SortProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
-apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: ['@ess', '@svlOblt'] }, () => {
+apiTest.describe('Streamlang to ES|QL - Sort Processor', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   apiTest(
     'should sort an array field in ascending order with EVAL MV_SORT() (in-place)',
     async ({ testBed, esql }) => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
@@ -15,7 +16,7 @@ import { AIAssistantType } from '../fixtures/constants';
 
 spaceTest.describe(
   'GenAI Settings - AI Assistant Visibility without AI Assistants Privileges',
-  { tag: ['@ess', '@svlOblt', '@svlSecurity'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
       // Set AI Assistant, because the AI Assistant nav button will be visible for default value

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { SplitProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
-apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: ['@ess', '@svlOblt'] }, () => {
+apiTest.describe('Streamlang to ES|QL - Split Processor', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   apiTest(
     'should split a string field into an array with EVAL SPLIT() (in-place)',
     async ({ testBed, esql }) => {

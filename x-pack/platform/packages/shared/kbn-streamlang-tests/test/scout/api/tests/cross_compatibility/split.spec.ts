@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { SplitProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
-apiTest.describe('Cross-compatibility - Split Processor', { tag: ['@ess', '@svlOblt'] }, () => {
+apiTest.describe('Cross-compatibility - Split Processor', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   // *** Compatible Cases ***
   apiTest(
     'should correctly split a string into an array using a simple delimiter',
