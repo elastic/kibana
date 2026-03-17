@@ -53,7 +53,8 @@ const DEFAULT_GUARDRAIL_RULES: GuardrailRule[] = [
   },
   {
     name: 'private-ip-exposure',
-    pattern: /(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})/,
+    pattern:
+      /(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})/,
     action: 'warn',
     description: 'Detects references to private/internal IP addresses.',
   },
