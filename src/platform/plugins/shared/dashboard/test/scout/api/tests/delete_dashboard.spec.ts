@@ -18,11 +18,12 @@ import {
   TEST_DASHBOARD_ID,
 } from '../fixtures';
 
-apiTest.describe('dashboards - delete', { tag: tags.stateful.classic }, () => {
+apiTest.describe('dashboards - delete', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
-    editorCredentials = await requestAuth.getApiKey('editor');
+    // returns editor role in most deployment project and deployment types
+    editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
   });
 
