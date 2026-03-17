@@ -20,7 +20,7 @@ import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
 import { internalStateActions } from '../../../state_management/redux';
 
 // Mock the DynamicRuleFormFlyout since we're testing the wrapper behavior
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
+jest.mock('@kbn/alerting-v2-plugin/public', () => ({
   DynamicRuleFormFlyout: ({ query, onClose }: { query: string; onClose: () => void }) => (
     <div data-test-subj="mockDynamicRuleFormFlyout">
       <span data-test-subj="flyoutQuery">{query}</span>

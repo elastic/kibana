@@ -6,14 +6,20 @@
  */
 
 import { ContainerModule } from 'inversify';
-import { OnSetup, PluginSetup } from '@kbn/core-di';
+import { OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreSetup } from '@kbn/core-di-browser';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { mountAlertingV2App } from './main';
 import { ALERTING_V2_APP_ID } from './constants';
 import { NotificationPoliciesApi } from './services/notification_policies_api';
 import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';
+import { setKibanaServices } from './kibana_services';
+
+export { DynamicRuleFormFlyout } from './create_rule_form_flyout';
+export type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
@@ -21,6 +27,18 @@ export const module = new ContainerModule(({ bind }) => {
   bind(WorkflowsApi).toSelf().inSingletonScope();
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
+
+    // Populate services for exported stateful components
+    getStartServices().then(([coreStart]) => {
+      const diContainer = coreStart.injection.getContainer();
+      setKibanaServices({
+        http: coreStart.http,
+        notifications: coreStart.notifications,
+        application: coreStart.application,
+        data: diContainer.get(PluginStart('data')) as DataPublicPluginStart,
+        dataViews: diContainer.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
+      });
+    });
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
     management.sections.section.insightsAndAlerting.registerApp({
