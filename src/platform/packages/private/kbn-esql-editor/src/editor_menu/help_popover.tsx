@@ -142,7 +142,7 @@ export const HelpPopover: React.FC<{
   useEffect(() => {
     let cancelled = false;
     const getESQLExtensions = async () => {
-      if (!activeSolutionId || !queryForRecommendedQueries) {
+      if (!activeSolutionId) {
         return;
       }
 
