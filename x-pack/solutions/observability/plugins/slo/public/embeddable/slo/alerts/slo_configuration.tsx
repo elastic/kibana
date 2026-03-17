@@ -66,13 +66,8 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
               singleSelection={false}
               onSelected={(slos) => {
                 setHasError(slos === undefined);
-                if (Array.isArray(slos)) {
-                  setSelectedSlos(
-                    slos?.map((slo) => ({
-                      slo_id: slo?.id ?? '',
-                      slo_instance_id: slo?.instanceId ?? '',
-                    })) as SloItem[]
-                  );
+                if (slos) {
+                  setSelectedSlos(slos);
                 }
               }}
             />

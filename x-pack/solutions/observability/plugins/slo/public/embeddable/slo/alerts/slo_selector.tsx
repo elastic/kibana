@@ -24,7 +24,7 @@ interface SloComboBoxOption extends EuiComboBoxOptionOption<string> {
 
 interface Props {
   initialSlos?: SloItem[];
-  onSelected: (slos: SLOWithSummaryResponse[] | SLOWithSummaryResponse | undefined) => void;
+  onSelected: (slos: SloItem[] | undefined) => void;
   hasError?: boolean;
   singleSelection?: boolean;
 }
@@ -218,35 +218,6 @@ function normalizeSelection(
   return result;
 }
 
-/** Minimal SLO shape when dropdown options aren't loaded yet (e.g. user removes a pill before opening). */
-function toMinimalSlo(sloId: string, instanceId: string): SLOWithSummaryResponse {
-  return {
-    id: sloId,
-    instanceId,
-    name: '',
-    groupBy: [],
-    summary: {
-      status: 'NO_DATA',
-      sliValue: 0,
-      errorBudget: { initial: 0, consumed: 0, remaining: 1 },
-    },
-    groupings: {},
-  } as unknown as SLOWithSummaryResponse;
-}
-
-/** Create synthetic SLO for "All instances" selection (API does not return id-* for grouped SLOs). */
-function toSloWithSummary(
-  sloId: string,
-  instanceId: string,
-  results: SLOWithSummaryResponse[]
-): SLOWithSummaryResponse {
-  const match = results.find((s) => s.id === sloId);
-  if (match) {
-    return { ...match, instanceId };
-  }
-  return toMinimalSlo(sloId, instanceId);
-}
-
 export function SloSelector({ initialSlos, onSelected, hasError, singleSelection }: Props) {
   const needsNameResolution = (initialSlos?.length ?? 0) > 0;
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
@@ -329,17 +300,11 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
       onSelected(undefined);
       return;
     }
-    const results = sloList?.results;
-    const selectedSlos = normalized.map((opt) => {
+    const selectedSlos: SloItem[] = normalized.map((opt) => {
       const [sloId, instanceId] = parseOptionValue(opt.value!);
-      if (results) {
-        const match = results.find((s) => toOptionValue(s.id, s.instanceId) === opt.value);
-        if (match) return match;
-        return toSloWithSummary(sloId, instanceId, results);
-      }
-      return toMinimalSlo(sloId, instanceId);
+      return { slo_id: sloId, slo_instance_id: instanceId };
     });
-    onSelected(singleSelection ? selectedSlos[0] : selectedSlos);
+    onSelected(selectedSlos);
   };
 
   const onSearchChange = useMemo(
