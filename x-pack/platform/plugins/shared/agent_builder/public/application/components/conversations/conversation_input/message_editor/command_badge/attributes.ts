@@ -7,4 +7,4 @@
 
 export const COMMAND_BADGE_ATTRIBUTE = 'data-command-badge';
 export const COMMAND_ID_ATTRIBUTE = 'data-command-id';
-export const isDataAttribute = (attribute: string) => attribute.startsWith('data-');
+export const COMMAND_METADATA_ATTRIBUTE = 'data-command-metadata';

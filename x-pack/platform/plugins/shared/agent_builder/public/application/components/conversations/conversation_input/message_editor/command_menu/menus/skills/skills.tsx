@@ -28,7 +28,8 @@ export const Skills = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
         onSelect({
           commandId: CommandId.Skill,
           label: option.label,
-          metadata: { 'skill-id': option.key },
+          id: option.key,
+          metadata: {},
         });
       },
       [onSelect]

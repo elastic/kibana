@@ -42,7 +42,8 @@ const MockMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuCompone
 const mockBadgeData: CommandBadgeData = {
   commandId: CommandId.Skill,
   label: 'Summarize',
-  metadata: { 'skill-id': 'skill-1' },
+  id: 'skill-1',
+  metadata: {},
 };
 
 const ClickableMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuComponentProps>(

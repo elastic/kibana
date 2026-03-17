@@ -7,14 +7,19 @@
 
 import { createCommandBadgeElement } from './create_badge_element';
 import { CommandId } from '../command_menu/types';
-import { COMMAND_BADGE_ATTRIBUTE, COMMAND_ID_ATTRIBUTE } from './attributes';
+import {
+  COMMAND_BADGE_ATTRIBUTE,
+  COMMAND_ID_ATTRIBUTE,
+  COMMAND_METADATA_ATTRIBUTE,
+} from './attributes';
 
 describe('createBadgeElement', () => {
   it('creates a span element', () => {
     const badge = createCommandBadgeElement({
       commandId: CommandId.Skill,
       label: 'Summarize',
-      metadata: { 'skill-id': 'skill-1' },
+      id: 'skill-1',
+      metadata: {},
     });
 
     expect(badge.tagName).toBe('SPAN');
@@ -24,7 +29,8 @@ describe('createBadgeElement', () => {
     const badge = createCommandBadgeElement({
       commandId: CommandId.Skill,
       label: 'Summarize',
-      metadata: { 'skill-id': 'skill-1' },
+      id: 'skill-1',
+      metadata: {},
     });
 
     expect(badge.contentEditable).toBe('false');
@@ -34,7 +40,8 @@ describe('createBadgeElement', () => {
     const badge = createCommandBadgeElement({
       commandId: CommandId.Skill,
       label: 'Summarize',
-      metadata: { 'skill-id': 'skill-1' },
+      id: 'skill-1',
+      metadata: {},
     });
 
     expect(badge.getAttribute(COMMAND_BADGE_ATTRIBUTE)).toBe('true');
@@ -44,27 +51,31 @@ describe('createBadgeElement', () => {
     const badge = createCommandBadgeElement({
       commandId: CommandId.Skill,
       label: 'Summarize',
-      metadata: { 'skill-id': 'skill-1' },
+      id: 'skill-1',
+      metadata: {},
     });
 
     expect(badge.getAttribute(COMMAND_ID_ATTRIBUTE)).toBe('skill');
   });
 
-  it('sets metadata as data attributes', () => {
+  it('sets data-command-metadata as JSON with id', () => {
     const badge = createCommandBadgeElement({
       commandId: CommandId.Skill,
       label: 'Summarize',
-      metadata: { 'skill-id': 'skill-1' },
+      id: 'skill-1',
+      metadata: {},
     });
 
-    expect(badge.getAttribute('data-skill-id')).toBe('skill-1');
+    const parsed = JSON.parse(badge.getAttribute(COMMAND_METADATA_ATTRIBUTE)!);
+    expect(parsed).toEqual({ id: 'skill-1' });
   });
 
   it('sets text content to label', () => {
     const badge = createCommandBadgeElement({
       commandId: CommandId.Skill,
       label: 'Summarize',
-      metadata: { 'skill-id': 'skill-1' },
+      id: 'skill-1',
+      metadata: {},
     });
 
     expect(badge.textContent).toBe('Summarize');
@@ -74,10 +85,11 @@ describe('createBadgeElement', () => {
     const badge = createCommandBadgeElement({
       commandId: CommandId.Skill,
       label: 'Test',
-      metadata: { 'skill-id': 'skill-1', version: '2' },
+      id: 'skill-1',
+      metadata: { version: '2' },
     });
 
-    expect(badge.getAttribute('data-skill-id')).toBe('skill-1');
-    expect(badge.getAttribute('data-version')).toBe('2');
+    const parsed = JSON.parse(badge.getAttribute(COMMAND_METADATA_ATTRIBUTE)!);
+    expect(parsed).toEqual({ id: 'skill-1', version: '2' });
   });
 });

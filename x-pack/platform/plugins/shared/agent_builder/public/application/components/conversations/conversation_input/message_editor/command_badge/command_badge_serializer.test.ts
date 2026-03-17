@@ -23,7 +23,8 @@ describe('serializeEditorContent', () => {
     const badge = createCommandBadgeElement({
       commandId: CommandId.Skill,
       label: 'Summarize',
-      metadata: { 'skill-id': 'skill-1' },
+      id: 'skill-1',
+      metadata: {},
     });
     div.appendChild(badge);
 
@@ -37,7 +38,8 @@ describe('serializeEditorContent', () => {
       createCommandBadgeElement({
         commandId: CommandId.Skill,
         label: 'Summarize',
-        metadata: { 'skill-id': 'skill-1' },
+        id: 'skill-1',
+        metadata: {},
       })
     );
     div.appendChild(document.createTextNode(' to do this'));
@@ -51,7 +53,8 @@ describe('serializeEditorContent', () => {
       createCommandBadgeElement({
         commandId: CommandId.Skill,
         label: 'Summarize',
-        metadata: { 'skill-id': 'skill-1' },
+        id: 'skill-1',
+        metadata: {},
       })
     );
     div.appendChild(document.createTextNode(' and '));
@@ -59,13 +62,28 @@ describe('serializeEditorContent', () => {
       createCommandBadgeElement({
         commandId: CommandId.Skill,
         label: 'Translate',
-        metadata: { 'skill-id': 'skill-2' },
+        id: 'skill-2',
+        metadata: {},
       })
     );
 
     expect(serializeEditorContent(div)).toBe(
       '[/Summarize](skill://skill-1) and [/Translate](skill://skill-2)'
     );
+  });
+
+  it('serializes badge with additional metadata as query params', () => {
+    const div = document.createElement('div');
+    div.appendChild(
+      createCommandBadgeElement({
+        commandId: CommandId.Skill,
+        label: 'Test',
+        id: 'skill-1',
+        metadata: { type: 'security' },
+      })
+    );
+
+    expect(serializeEditorContent(div)).toBe('[/Test](skill://skill-1?type=security)');
   });
 });
 
@@ -85,7 +103,8 @@ describe('deserializeBadgeContent', () => {
         data: {
           commandId: CommandId.Skill,
           label: 'Summarize',
-          metadata: { 'skill-id': 'skill-1' },
+          id: 'skill-1',
+          metadata: {},
         },
       },
     ]);
@@ -101,7 +120,8 @@ describe('deserializeBadgeContent', () => {
         data: {
           commandId: CommandId.Skill,
           label: 'Summarize',
-          metadata: { 'skill-id': 'skill-1' },
+          id: 'skill-1',
+          metadata: {},
         },
       },
       { type: 'text', value: ' to do this' },
@@ -117,6 +137,40 @@ describe('deserializeBadgeContent', () => {
 
     expect(segments).toEqual([{ type: 'text', value: '[/Unknown](unknown://id-1)' }]);
   });
+
+  it('parses badge with query params as metadata', () => {
+    const segments = deserializeCommandBadge(
+      '[/Dashboard](skill://dash-1?type=security&view=grid)'
+    );
+
+    expect(segments).toEqual([
+      {
+        type: 'badge',
+        data: {
+          commandId: CommandId.Skill,
+          label: 'Dashboard',
+          id: 'dash-1',
+          metadata: { type: 'security', view: 'grid' },
+        },
+      },
+    ]);
+  });
+
+  it('handles id containing slash characters', () => {
+    const segments = deserializeCommandBadge('[/My Skill](skill://folder/skill-1)');
+
+    expect(segments).toEqual([
+      {
+        type: 'badge',
+        data: {
+          commandId: CommandId.Skill,
+          label: 'My Skill',
+          id: 'folder/skill-1',
+          metadata: {},
+        },
+      },
+    ]);
+  });
 });
 
 describe('round-trip serialization', () => {
@@ -125,6 +179,22 @@ describe('round-trip serialization', () => {
     const segments = deserializeCommandBadge(original);
 
     // Rebuild DOM from segments
+    const div = document.createElement('div');
+    for (const segment of segments) {
+      if (segment.type === 'text') {
+        div.appendChild(document.createTextNode(segment.value));
+      } else {
+        div.appendChild(createCommandBadgeElement(segment.data));
+      }
+    }
+
+    expect(serializeEditorContent(div)).toBe(original);
+  });
+
+  it('round-trips badge with additional metadata', () => {
+    const original = '[/Test](skill://skill-1?type=security)';
+    const segments = deserializeCommandBadge(original);
+
     const div = document.createElement('div');
     for (const segment of segments) {
       if (segment.type === 'text') {

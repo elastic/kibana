@@ -10,5 +10,7 @@ import type { CommandId } from '../command_menu/types';
 export interface CommandBadgeData {
   readonly commandId: CommandId;
   readonly label: string;
-  readonly metadata: Record<string, string>;
+  readonly id: string;
+  // Metadata must not include `id` property
+  readonly metadata: Record<string, string> & { id?: never };
 }

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { COMMAND_BADGE_ATTRIBUTE, COMMAND_ID_ATTRIBUTE } from './attributes';
+import {
+  COMMAND_BADGE_ATTRIBUTE,
+  COMMAND_ID_ATTRIBUTE,
+  COMMAND_METADATA_ATTRIBUTE,
+} from './attributes';
 import type { CommandBadgeData } from './types';
 
 /**
@@ -16,10 +20,7 @@ export const createCommandBadgeElement = (data: CommandBadgeData): HTMLSpanEleme
   span.contentEditable = 'false';
   span.setAttribute(COMMAND_BADGE_ATTRIBUTE, 'true');
   span.setAttribute(COMMAND_ID_ATTRIBUTE, data.commandId);
-
-  for (const [key, value] of Object.entries(data.metadata)) {
-    span.setAttribute(`data-${key}`, value);
-  }
+  span.setAttribute(COMMAND_METADATA_ATTRIBUTE, JSON.stringify({ id: data.id, ...data.metadata }));
 
   span.textContent = data.label;
   return span;
