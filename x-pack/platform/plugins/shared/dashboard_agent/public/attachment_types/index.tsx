@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
+import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type {
@@ -18,10 +20,10 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';
-import { getStateFromAttachment } from './attachment_to_dashboard_state';
+import { handlePreviewInDashboard } from './handle_preview_in_dashboard';
 
 export const registerDashboardAttachmentUiDefinition = ({
-  agentBuilder: { attachments },
+  agentBuilder: { attachments, updateAttachmentOrigin },
   dashboardLocator,
   unifiedSearch,
   dashboardPlugin,
@@ -52,11 +54,35 @@ export const registerDashboardAttachmentUiDefinition = ({
       );
     },
     getIcon: () => 'productDashboard',
+    onAttachmentAdd: ({
+      attachment,
+      conversationId,
+    }: AttachmentLifecycleParams<DashboardAttachment>) => {
+      let savedObjectIdSubscription: Subscription | undefined;
+      const subscription = dashboardPlugin.dashboardAppClientApi$.subscribe((api) => {
+        if (!api) return;
+        savedObjectIdSubscription = api.savedObjectId$.subscribe((savedObjectId) => {
+          if (savedObjectId && savedObjectId !== attachment.origin) {
+            updateAttachmentOrigin(conversationId, attachment.id, savedObjectId);
+          }
+        });
+
+        return () => {
+          savedObjectIdSubscription?.unsubscribe();
+          savedObjectIdSubscription = undefined;
+        };
+      });
+
+      return () => {
+        subscription.unsubscribe();
+        savedObjectIdSubscription?.unsubscribe();
+        savedObjectIdSubscription = undefined;
+      };
+    },
     renderCanvasContent: (props, callbacks) => (
       <DashboardCanvasContent
         {...props}
-        registerActionButtons={callbacks.registerActionButtons}
-        updateOrigin={callbacks.updateOrigin}
+        {...callbacks}
         dashboardLocator={dashboardLocator}
         searchBarComponent={unifiedSearch.ui.SearchBar}
         checkSavedDashboardExist={checkSavedDashboardExist}
@@ -79,8 +105,11 @@ export const registerDashboardAttachmentUiDefinition = ({
               return;
             }
 
-            dashboardApi.setViewMode('edit');
-            dashboardApi.setState(getStateFromAttachment(attachment));
+            handlePreviewInDashboard({
+              attachment,
+              dashboardApi,
+              checkSavedDashboardExist,
+            });
           },
         },
       ];
