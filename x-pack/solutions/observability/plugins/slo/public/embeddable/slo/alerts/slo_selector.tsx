@@ -138,7 +138,7 @@ function toSloWithSummary(
       errorBudget: { initial: 0, consumed: 0, remaining: 1 },
     },
     groupings: {},
-  } as SLOWithSummaryResponse;
+  } as unknown as SLOWithSummaryResponse;
 }
 
 export function SloSelector({ initialSlos, onSelected, hasError, singleSelection }: Props) {

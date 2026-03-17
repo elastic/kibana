@@ -50,7 +50,7 @@ describe('transformAlertsOut', () => {
             group_by: ['host.name'],
           },
         ],
-      })
+      } as unknown as AlertsEmbeddableState)
     ).toEqual({
       slos: [
         {
@@ -75,7 +75,7 @@ describe('transformAlertsOut', () => {
             group_by: ['url.domain'],
           },
         ],
-      })
+      } as unknown as AlertsEmbeddableState)
     ).toEqual({
       slos: [
         {
@@ -216,7 +216,7 @@ describe('transformAlertsOut', () => {
             group_by: ['host.name'],
           },
         ],
-      })
+      } as unknown as AlertsEmbeddableState)
     ).toEqual({
       slos: [
         {
