@@ -51,6 +51,7 @@ export const Playground: Story = {
       { start: 'now-3M', end: 'now', label: 'Last 3 months' },
       { start: 'now-1y', end: 'now', label: 'Last 1 year' },
     ],
+    timeZone: 'Europe/Amsterdam',
   },
   render: (args) => <StatefulDateRangePicker {...args} />,
 };
@@ -63,6 +64,7 @@ export const Presets: Story = {
       { start: 'now-1h', end: 'now', label: 'Last 1 hour' },
       { start: 'now/d', end: 'now/d', label: 'Today' },
     ],
+    timeZone: 'Europe/Amsterdam',
     onPresetSave: action('onPresetSave'),
     onPresetDelete: action('onPresetDelete'),
   },

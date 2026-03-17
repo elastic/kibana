@@ -9,7 +9,15 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { EuiButton, EuiButtonIcon, EuiTab, EuiTabs, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiTab,
+  EuiTabs,
+  EuiToolTip,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import type { TimeRangeBoundsOption } from '../types';
 import {
@@ -28,6 +36,7 @@ import { mainPanelStyles } from './main_panel.styles';
 import { getOptionDisplayLabel, getOptionShorthand, getOptionInputText } from '../utils';
 import { mainPanelTexts } from '../translations';
 import { panelDividerStyles } from '../date_range_picker_panel_ui.styles';
+import { useTimeZoneDisplay } from '../hooks/use_time_zone_display';
 
 interface OptionsListProps {
   /** Options to render as list items. */
@@ -153,8 +162,9 @@ const DocumentationButton = () => {
 };
 
 export function MainPanel() {
-  const { onPresetSave, timeRange, applyRange } = useDateRangePickerContext();
+  const { onPresetSave, timeRange, applyRange, timeZone } = useDateRangePickerContext();
   const { navigateTo } = useDateRangePickerPanelNavigation();
+  const timeZoneDisplay = useTimeZoneDisplay(timeZone, timeRange.startDate);
   const euiThemeContext = useEuiTheme();
 
   const handlePresetSave = useCallback(() => {
@@ -206,6 +216,11 @@ export function MainPanel() {
           size="s"
           onClick={() => navigateTo(SettingsPanel.PANEL_ID)}
         />
+        {timeZoneDisplay && (
+          <EuiText color="subdued" size="xs" component="span">
+            {timeZoneDisplay}
+          </EuiText>
+        )}
       </PanelFooter>
     </PanelContainer>
   );
