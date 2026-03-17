@@ -78,6 +78,15 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
         ...unflattenObject(secrets?.providerSecrets ?? {}),
       };
 
+      const adaptiveAllocations = providerConfig?.adaptive_allocations;
+      const numAllocations = providerConfig?.num_allocations;
+      let allocationSettings = {};
+      if (adaptiveAllocations) {
+        allocationSettings = { adaptive_allocations: adaptiveAllocations };
+      } else if (numAllocations) {
+        allocationSettings = { num_allocations: numAllocations };
+      }
+
       let inferenceExists = false;
       try {
         await esClient?.inference.get({
@@ -96,13 +105,15 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       }
 
       if (isUpdate && inferenceExists && config && config.provider) {
-        // test num_allocations
         await esClient?.inference.update({
           inference_id: config?.inferenceId,
           task_type: config?.taskType as InferenceTaskType,
           // @ts-ignore The InferenceInferenceEndpoint type is out of date and has 'service' as a required property but this call will error if service is included
           inference_config: {
-            service_settings: serviceSettings,
+            service_settings: {
+              ...serviceSettings,
+              ...allocationSettings,
+            },
             ...(Object.keys(taskTypeConfig ?? {}).length ? { task_settings: taskTypeConfig } : {}),
           },
         });

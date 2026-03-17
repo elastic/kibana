@@ -42,25 +42,21 @@ const formDeserializer = (data: InferenceEndpoint) => {
     ...restProviderConfig
   } = providerConfig || {};
 
-  if (restProviderConfig) {
-    return {
-      ...data,
-      config: {
-        ...restConfig,
-        providerConfig: {
-          ...restProviderConfig,
-          ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
-        },
-        taskTypeConfig: {
-          ...(taskTypeConfig ?? {}),
-          ...(headers ? { headers } : {}),
-          ...(max_tokens ? { max_tokens } : {}),
-        },
+  return {
+    ...data,
+    config: {
+      ...restConfig,
+      providerConfig: {
+        ...restProviderConfig,
+        ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
       },
-    };
-  }
-
-  return data;
+      taskTypeConfig: {
+        ...(taskTypeConfig ?? {}),
+        ...(headers ? { headers } : {}),
+        ...(max_tokens ? { max_tokens } : {}),
+      },
+    },
+  };
 };
 
 // This serializer is used to transform the form data before sending it to the server

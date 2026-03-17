@@ -29,7 +29,7 @@ export const formSerializer = (data: ConnectorFormSchema) => {
                 adaptive_allocations: {
                   enabled: true,
                   min_number_of_allocations: MIN_ALLOCATIONS,
-                  ...(max_number_of_allocations ? { max_number_of_allocations } : {}),
+                  ...{ max_number_of_allocations },
                 },
                 // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
                 num_threads: DEFAULT_NUM_THREADS,
