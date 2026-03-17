@@ -73,7 +73,10 @@ const createMockReport = (overrides: Partial<CoverageReport> = {}): CoverageRepo
   ],
   overallToolCoveragePercent: 50.0,
   overallEvaluatorCoveragePercent: 50.0,
-  gaps: ['Tool "filter" has no covering eval suite', 'Evaluator "relevance" is not used in any suite'],
+  gaps: [
+    'Tool "filter" has no covering eval suite',
+    'Evaluator "relevance" is not used in any suite',
+  ],
   ...overrides,
 });
 
@@ -235,8 +238,7 @@ describe('coverageCmd', () => {
       await coverageCmd.run({ log, flagsReader } as any);
 
       const coverageLog = log.info.mock.calls.find(
-        (call: string[]) =>
-          typeof call[0] === 'string' && call[0].includes('Tool coverage: 50.0%')
+        (call: string[]) => typeof call[0] === 'string' && call[0].includes('Tool coverage: 50.0%')
       );
       expect(coverageLog).toBeDefined();
     });

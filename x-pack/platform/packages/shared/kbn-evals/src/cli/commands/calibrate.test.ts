@@ -323,8 +323,7 @@ describe('calibrateCmd', () => {
       await calibrateCmd.run({ log, flagsReader } as any);
 
       const changesLog = log.info.mock.calls.find(
-        (call: string[]) =>
-          typeof call[0] === 'string' && call[0].includes('Changes (2)')
+        (call: string[]) => typeof call[0] === 'string' && call[0].includes('Changes (2)')
       );
       expect(changesLog).toBeDefined();
     });
@@ -368,8 +367,7 @@ describe('calibrateCmd', () => {
       await calibrateCmd.run({ log, flagsReader } as any);
 
       const changeLog = log.info.mock.calls.find(
-        (call: string[]) =>
-          typeof call[0] === 'string' && call[0].includes('was 0.8')
+        (call: string[]) => typeof call[0] === 'string' && call[0].includes('was 0.8')
       );
       expect(changeLog).toBeDefined();
     });
