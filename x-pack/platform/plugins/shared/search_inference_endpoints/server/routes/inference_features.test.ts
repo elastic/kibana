@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { ROUTE_VERSIONS } from '../../common/constants';
+import type { InferenceFeaturesResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
 import { MockRouter } from '../../__mocks__/router.mock';
 import { InferenceFeatureRegistry } from '../inference_feature_registry';
@@ -96,12 +97,10 @@ describe('Inference Features API', () => {
 
       await mockRouter.callRoute({});
 
-      const response = mockRouter.response.ok.mock.calls[0][0];
-      expect(response.body.features).toHaveLength(2);
-      expect(response.body.features[0]).toEqual(
-        expect.objectContaining({ featureId: 'agent_builder' })
-      );
-      expect(response.body.features[1]).toEqual(
+      const body = mockRouter.response.ok.mock.calls[0][0]!.body as InferenceFeaturesResponse;
+      expect(body.features).toHaveLength(2);
+      expect(body.features[0]).toEqual(expect.objectContaining({ featureId: 'agent_builder' }));
+      expect(body.features[1]).toEqual(
         expect.objectContaining({
           featureId: 'agent_builder_small',
           parentFeatureId: 'agent_builder',
