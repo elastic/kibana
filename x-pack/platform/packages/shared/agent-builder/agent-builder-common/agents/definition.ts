@@ -6,7 +6,8 @@
  */
 
 import type { ToolSelection } from '../tools';
-import type { SkillSelection } from '../skills';
+import type { UserIdAndName } from '../base/users';
+import type { AgentVisibility } from './visibility';
 
 /**
  * The type of an agent.
@@ -46,6 +47,14 @@ export interface AgentDefinition {
    * Built-in agents are readonly, user-created agent are not.
    */
   readonly: boolean;
+  /**
+   * Visibility controls who can read and write this agent.
+   */
+  visibility?: AgentVisibility;
+  /**
+   * Agent owner metadata.
+   */
+  created_by?: UserIdAndName;
   /**
    * Optional labels used to organize or filter agents
    */
@@ -89,11 +98,15 @@ export interface AgentConfiguration {
   tools: ToolSelection[];
 
   /**
-   * List of skills exposed to the agent.
-   * When undefined or empty, the agent has no skills assigned.
-   * Use `[{ skill_ids: ['*'] }]` to assign all built-in skills.
+   * Optional list of skill IDs exposed to the agent.
+   * When undefined, all skills are available (backward compatibility).
    */
-  skills?: SkillSelection[];
+  skill_ids?: string[];
+
+  /**
+   * When true, enables built-in Elastic capabilities for the agent.
+   */
+  enable_elastic_capabilities?: boolean;
 
   /**
    * Optional list of workflow IDs. When set, these workflows run before the agent is executed.

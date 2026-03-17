@@ -110,7 +110,7 @@ export const functions = {
   ### COUNT DISTINCT
   Returns the approximate number of distinct values.
 
-  Note: [Counts are approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-agg-count-distinct-approximate).
+  Note: [Counts are approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/count_distinct#esql-agg-count-distinct-approximate).
 
   \`\`\`esql
   FROM hosts
@@ -237,9 +237,9 @@ export const functions = {
         markdownContent: i18n.translate('languageDocumentation.documentationESQL.median.markdown', {
           defaultMessage: `
   ### MEDIAN
-  The value that is greater than half of all values and less than half of all values, also known as the 50% [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile).
+  The value that is greater than half of all values and less than half of all values, also known as the 50% [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/percentile).
 
-  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile), \`MEDIAN\` is [usually approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile-approximate).
+  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/percentile), \`MEDIAN\` is [usually approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/percentile#esql-percentile-approximate).
 
   \`\`\`esql
   FROM employees
@@ -269,7 +269,7 @@ export const functions = {
 
   It is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable \`X\`, the median absolute deviation is \`median(|median(X) - X|)\`.
 
-  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile), \`MEDIAN_ABSOLUTE_DEVIATION\` is [usually approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-percentile-approximate).
+  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/percentile), \`MEDIAN_ABSOLUTE_DEVIATION\` is [usually approximate](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/percentile#esql-percentile-approximate).
 
   \`\`\`esql
   FROM employees
@@ -549,7 +549,7 @@ export const functions = {
   ### VALUES
   Returns unique values as a multivalued field. The order of the returned values isn’t guaranteed.
   If you need the values returned in order use
-  [\`MV_SORT\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/mv-functions#esql-mv_sort).
+  [\`MV_SORT\`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/mv-functions/mv_sort).
 
   \`\`\`esql
   FROM employees

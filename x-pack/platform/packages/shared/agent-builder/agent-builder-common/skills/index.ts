@@ -15,6 +15,7 @@ export {
 } from './skill_selection';
 export {
   type PublicSkillDefinition,
+  type PublicSkillSummary,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
   type SkillReferencedContent,
@@ -24,5 +25,8 @@ export {
   skillUpdateRequestSchema,
   validateSkillId,
   skillIdMaxLength,
+  skillNameMaxLength,
   skillIdRegexp,
+  skillNameRegexp,
+  maxToolsPerSkill,
 } from './validation';

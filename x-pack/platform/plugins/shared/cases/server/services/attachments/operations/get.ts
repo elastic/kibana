@@ -18,8 +18,8 @@ import type {
   AttachmentPersistedAttributes,
   AttachmentTransformedAttributes,
   AttachmentSavedObjectTransformed,
-} from '../../../common/types/attachments';
-import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments';
+} from '../../../common/types/attachments_v1';
+import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments_v1';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,

@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { skillCreateRequestSchema, skillUpdateRequestSchema } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -18,8 +19,9 @@ import type {
   CreateSkillResponse,
   UpdateSkillResponse,
 } from '../../common/http_api/skills';
-import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
+import { internalToPublicDefinition, internalToPublicSummary } from '../services/skills/utils';
+import { AGENT_BUILDER_READ_SECURITY, SKILLS_WRITE_SECURITY } from './route_security';
 
 const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
   schema.object({
@@ -32,28 +34,42 @@ const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
     content: schema.string({
       meta: { description: 'Content of the reference.' },
     }),
-  })
+  }),
+  { maxSize: 100 }
 );
+
+const SKILL_ID_PARAMS_SCHEMA = schema.object({
+  skillId: schema.string({
+    meta: { description: 'The unique identifier of the skill.' },
+  }),
+});
 
 const featureFlagConfig = {
   featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
 };
 
-export function registerSkillsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
+export function registerSkillsRoutes({
+  router,
+  getInternalServices,
+  logger,
+  analyticsService,
+}: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   // list skills API
   router.versioned
     .get({
       path: `${publicApiPath}/skills`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'List skills',
       description: 'List all available skills (built-in and user-created).',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.4.0',
+        },
       },
     })
     .addVersion(
@@ -64,11 +80,10 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
       wrapHandler(async (ctx, request, response) => {
         const { skills: skillService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
-        const skills = await registry.list();
+        const skills = await registry.list({ summaryOnly: true });
+        const results = await Promise.all(skills.map(internalToPublicSummary));
         return response.ok<ListSkillsResponse>({
-          body: {
-            results: skills,
-          },
+          body: { results },
         });
       }, featureFlagConfig)
     );
@@ -77,14 +92,16 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
   router.versioned
     .get({
       path: `${publicApiPath}/skills/{skillId}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Get a skill by id',
       description: 'Get a specific skill by ID.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.4.0',
+        },
       },
     })
     .addVersion(
@@ -92,11 +109,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         version: '2023-10-31',
         validate: {
           request: {
-            params: schema.object({
-              skillId: schema.string({
-                meta: { description: 'The unique identifier of the skill to retrieve.' },
-              }),
-            }),
+            params: SKILL_ID_PARAMS_SCHEMA,
           },
         },
       },
@@ -111,23 +124,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
           });
         }
 
-        // Convert SkillDefinition to PublicSkillDefinition if needed
-        const publicSkill: GetSkillResponse =
-          'readonly' in skill
-            ? (skill as GetSkillResponse)
-            : {
-                id: skill.id,
-                name: skill.name,
-                description: skill.description,
-                content: skill.content,
-                referenced_content: skill.referencedContent?.map((rc) => ({
-                  name: rc.name,
-                  relativePath: rc.relativePath,
-                  content: rc.content,
-                })),
-                readonly: true,
-              };
-
+        const publicSkill = await internalToPublicDefinition(skill);
         return response.ok<GetSkillResponse>({
           body: publicSkill,
         });
@@ -138,14 +135,16 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
   router.versioned
     .post({
       path: `${publicApiPath}/skills`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: SKILLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Create a skill',
       description: 'Create a new user-defined skill.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.4.0',
+        },
       },
     })
     .addVersion(
@@ -173,6 +172,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
                 }),
                 {
                   defaultValue: [],
+                  maxSize: 100,
                   meta: {
                     description: 'Tool IDs from the tool registry that this skill references.',
                   },
@@ -183,12 +183,21 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { skills: skillService } = getInternalServices();
-        const createRequest: CreateSkillPayload = request.body;
+        const parseResult = skillCreateRequestSchema.safeParse(request.body);
+        if (!parseResult.success) {
+          return response.badRequest({
+            body: { message: parseResult.error.issues.map((e) => e.message).join('; ') },
+          });
+        }
+        const createRequest: CreateSkillPayload = parseResult.data;
+        const { skills: skillService, auditLogService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.create(createRequest);
+        analyticsService?.reportSkillCreated({ skillId: skill.id });
+        auditLogService.logSkillCreated(request, { skillId: skill.id });
+        const publicSkill = await internalToPublicDefinition(skill);
         return response.ok<CreateSkillResponse>({
-          body: skill,
+          body: publicSkill,
         });
       }, featureFlagConfig)
     );
@@ -197,14 +206,16 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
   router.versioned
     .put({
       path: `${publicApiPath}/skills/{skillId}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: SKILLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Update a skill',
       description: 'Update an existing user-created skill.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.4.0',
+        },
       },
     })
     .addVersion(
@@ -212,11 +223,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         version: '2023-10-31',
         validate: {
           request: {
-            params: schema.object({
-              skillId: schema.string({
-                meta: { description: 'The unique identifier of the skill to update.' },
-              }),
-            }),
+            params: SKILL_ID_PARAMS_SCHEMA,
             body: schema.object({
               name: schema.maybe(
                 schema.string({
@@ -240,6 +247,7 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
                     meta: { description: 'Updated tool ID.' },
                   }),
                   {
+                    maxSize: 100,
                     meta: { description: 'Updated tool IDs from the tool registry.' },
                   }
                 )
@@ -249,13 +257,22 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { skills: skillService } = getInternalServices();
+        const parseResult = skillUpdateRequestSchema.safeParse(request.body);
+        if (!parseResult.success) {
+          return response.badRequest({
+            body: { message: parseResult.error.issues.map((e) => e.message).join('; ') },
+          });
+        }
+        const { skills: skillService, auditLogService } = getInternalServices();
         const { skillId } = request.params;
-        const update: UpdateSkillPayload = request.body;
+        const update: UpdateSkillPayload = parseResult.data;
         const registry = await skillService.getRegistry({ request });
         const skill = await registry.update(skillId, update);
+        analyticsService?.reportSkillUpdated({ skillId: skill.id });
+        auditLogService.logSkillUpdated(request, { skillId: skill.id });
+        const publicSkill = await internalToPublicDefinition(skill);
         return response.ok<UpdateSkillResponse>({
-          body: skill,
+          body: publicSkill,
         });
       }, featureFlagConfig)
     );
@@ -264,14 +281,16 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
   router.versioned
     .delete({
       path: `${publicApiPath}/skills/{skillId}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: SKILLS_WRITE_SECURITY,
       access: 'public',
       summary: 'Delete a skill',
       description: 'Delete a user-created skill by ID. This action cannot be undone.',
       options: {
         tags: ['skills', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.4.0',
+        },
       },
     })
     .addVersion(
@@ -279,19 +298,19 @@ export function registerSkillsRoutes({ router, getInternalServices, logger }: Ro
         version: '2023-10-31',
         validate: {
           request: {
-            params: schema.object({
-              skillId: schema.string({
-                meta: { description: 'The unique identifier of the skill to delete.' },
-              }),
-            }),
+            params: SKILL_ID_PARAMS_SCHEMA,
           },
         },
       },
       wrapHandler(async (ctx, request, response) => {
         const { skillId } = request.params;
-        const { skills: skillService } = getInternalServices();
+        const { skills: skillService, auditLogService } = getInternalServices();
         const registry = await skillService.getRegistry({ request });
         const success = await registry.delete(skillId);
+        if (success) {
+          analyticsService?.reportSkillDeleted({ skillId });
+          auditLogService.logSkillDeleted(request, { skillId });
+        }
         return response.ok<DeleteSkillResponse>({
           body: { success },
         });

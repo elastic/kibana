@@ -90,7 +90,7 @@ function buildDataLayer(layer: DataLayerType, i: number): XYDataLayerConfig {
       ? { collapseFn: layer.breakdown_by.collapse_by }
       : {}),
     ...(layer.breakdown_by && 'color' in layer.breakdown_by
-      ? { colorMapping: fromColorMappingAPIToLensState(layer.breakdown_by.color) }
+      ? { ...fromColorMappingAPIToLensState(layer.breakdown_by.color) }
       : {}),
   };
 }
@@ -231,7 +231,7 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
 
   if (isAPIDataLayer(layer)) {
     // convert metrics in buckets, do not flat yet
-    const yColumnsConverted = layer.y.map(fromMetricAPItoLensState);
+    const yColumnsConverted = layer.y.map((col) => fromMetricAPItoLensState(col));
     const yColumnsWithIds = processMetricColumnsWithReferences(
       yColumnsConverted,
       (index) => getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),

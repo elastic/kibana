@@ -46,7 +46,7 @@ export interface PipelineSuggestionGroundTruth {
 
 export interface PipelineSuggestionEvaluationExample {
   input: {
-    stream_name: string; // e.g., 'logs.apache'
+    stream_name: string; // e.g., 'logs.otel.apache' (child of logs.otel when using fork)
     system: string; // LogHub system to index
     // Two modes supported:
     // 1. Inline mode: Provide sample_documents array (will create child stream with routing)
@@ -79,7 +79,7 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
       // 🔧 NEW DATASETS GO HERE - Added by create_dataset_from_clipboard.ts
       {
         input: {
-          stream_name: 'logs.structured',
+          stream_name: 'logs.otel.structured',
           system: 'structured',
           // Already-structured data with proper OTel fields - no parsing needed
           sample_documents: [
@@ -142,7 +142,7 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
       // 🔧 NEW DATASETS GO HERE - Added by create_dataset_from_clipboard.ts
       {
         input: {
-          stream_name: 'logs.apache',
+          stream_name: 'logs.otel.apache',
           system: 'Apache',
           sample_document_count: 100,
         },
@@ -200,7 +200,7 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
     examples: [
       {
         input: {
-          stream_name: 'logs.openssh',
+          stream_name: 'logs.otel.openssh',
           system: 'OpenSSH',
           sample_document_count: 100,
         },
@@ -271,7 +271,7 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
     examples: [
       {
         input: {
-          stream_name: 'logs.zookeeper',
+          stream_name: 'logs.otel.zookeeper',
           system: 'Zookeeper',
           sample_document_count: 100,
         },
@@ -329,7 +329,7 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
     examples: [
       {
         input: {
-          stream_name: 'logs.hdfs',
+          stream_name: 'logs.otel.hdfs',
           system: 'HDFS',
           sample_document_count: 100,
         },
@@ -387,7 +387,7 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
     examples: [
       {
         input: {
-          stream_name: 'logs.spark',
+          stream_name: 'logs.otel.spark',
           system: 'Spark',
           sample_document_count: 100,
         },

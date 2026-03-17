@@ -19,7 +19,12 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type {
+  EmitEventFn,
+  EmitEventParams,
   ServerTriggerDefinition,
+  TriggerEventHandlerParams,
+  WorkflowsClient,
+  WorkflowsRouteHandlerContext,
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
   WorkflowsExtensionsServerPluginSetupDeps,
@@ -31,6 +36,7 @@ export type {
   StepHandler,
   StepHandlerContext,
   StepHandlerResult,
+  OnCancelHandler,
 } from './step_registry/types';
 
 export { createServerStepDefinition } from './step_registry/types';

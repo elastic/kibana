@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { ConnectorTypeFields } from '../../../common/types/domain';
-import { ConnectorTypes } from '../../../common/types/domain';
+import type { CaseConnector, ConnectorTypeFields } from '../../../common/types/domain';
 import type {
   ConnectorMappingSource,
   ConnectorMappingActionType,
   ConnectorMappingTarget,
-  CaseConnector,
   CaseConnectorMapping,
 } from '../../containers/configure/types';
 import type { CaseActionConnector } from '../types';
@@ -48,16 +46,9 @@ export const setThirdPartyToMapping = (
     return item;
   });
 
-export const getNoneConnector = (): CaseConnector => ({
-  id: 'none',
-  name: 'none',
-  type: ConnectorTypes.none as const,
-  fields: null,
-});
-
 export const normalizeActionConnector = (
   actionConnector: CaseActionConnector,
-  fields: CaseConnector['fields'] = null
+  fields: ConnectorTypeFields['fields'] = null
 ): CaseConnector => {
   const caseConnectorFieldsType = {
     type: actionConnector.actionTypeId,

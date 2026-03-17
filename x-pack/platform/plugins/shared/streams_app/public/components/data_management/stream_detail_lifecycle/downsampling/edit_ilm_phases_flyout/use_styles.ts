@@ -31,6 +31,16 @@ export const useStyles = () => {
       }
     `;
 
-    return { sectionStyles, headerStyles, footerStyles, tabsErrorSelectedUnderlineStyles };
+    const phaseDescriptionStyles = css`
+      padding: ${euiTheme.size.m} ${euiTheme.size.l} 0 ${euiTheme.size.l};
+    `;
+
+    return {
+      sectionStyles,
+      headerStyles,
+      footerStyles,
+      tabsErrorSelectedUnderlineStyles,
+      phaseDescriptionStyles,
+    };
   }, [euiTheme.colors.danger, euiTheme.size.l, euiTheme.size.m]);
 };

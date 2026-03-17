@@ -6,10 +6,16 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolSelection } from '@kbn/agent-builder-common';
-import { filterToolsBySelection } from '@kbn/agent-builder-common';
-import type { ToolProvider, ExecutableTool, ScopedRunner } from '@kbn/agent-builder-server';
-import type { AgentConfiguration } from '@kbn/agent-builder-common';
+import { defaultAgentToolIds } from '@kbn/agent-builder-common';
+import { ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
+import type {
+  ToolProvider,
+  ExecutableTool,
+  ScopedRunner,
+  BuiltinToolDefinition,
+} from '@kbn/agent-builder-server';
+import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
@@ -20,11 +26,11 @@ import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
 import { getStoreTools } from '../../../runner/store';
 import type { ProcessedConversation } from './prepare_conversation';
-import { builtinToolToExecutable } from './builtin_tool_to_executable';
 
 export const selectTools = async ({
   conversation,
   previousDynamicToolIds,
+  filteredSkills,
   skills,
   request,
   toolProvider,
@@ -37,6 +43,7 @@ export const selectTools = async ({
 }: {
   conversation: ProcessedConversation;
   previousDynamicToolIds: string[];
+  filteredSkills: InternalSkillDefinition[];
   skills: SkillsService;
   request: KibanaRequest;
   toolProvider: ToolProvider;
@@ -76,7 +83,13 @@ export const selectTools = async ({
 
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
-    selection: [attachmentToolSelection, ...agentConfiguration.tools],
+    selection: [
+      attachmentToolSelection,
+      ...agentConfiguration.tools,
+      ...(agentConfiguration.enable_elastic_capabilities
+        ? [{ tool_ids: defaultAgentToolIds }]
+        : []),
+    ],
     toolProvider,
     request,
   });
@@ -101,10 +114,9 @@ export const selectTools = async ({
     request,
   });
 
-  const allSkills = await skills.list();
   const dynamicInlineTools = (
     await Promise.all(
-      allSkills
+      filteredSkills
         .filter((skill) => skill.getInlineTools !== undefined)
         .map((skill) => skill.getInlineTools!())
     )
@@ -140,6 +152,45 @@ const createVersionedAttachmentTools = ({
     formatContext,
   });
   return builtinTools.map((tool) => builtinToolToExecutable({ tool, runner }));
+};
+
+/**
+ * Converts a builtin attachment tool to an executable tool that runs through the runner.
+ */
+const builtinToolToExecutable = ({
+  tool,
+  runner,
+}: {
+  tool: BuiltinToolDefinition;
+  runner: ScopedRunner;
+}): ExecutableTool => {
+  return {
+    id: tool.id,
+    type: ToolType.builtin,
+    description: tool.description,
+    tags: tool.tags,
+    configuration: {},
+    readonly: true,
+    getSchema: () => tool.schema,
+    summarizeToolReturn: tool.summarizeToolReturn,
+    execute: async (params) => {
+      return runner.runInternalTool({
+        ...params,
+        tool: {
+          id: tool.id,
+          type: ToolType.builtin,
+          description: tool.description,
+          tags: tool.tags,
+          configuration: {},
+          readonly: true,
+          confirmation: { askUser: 'never' },
+          isAvailable: async () => ({ status: 'available' as const }),
+          getSchema: () => tool.schema,
+          getHandler: () => tool.handler,
+        },
+      });
+    },
+  };
 };
 
 const getVersionedAttachmentBoundTools = async ({

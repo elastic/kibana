@@ -30,7 +30,7 @@ const FORM_MAX_WIDTH = 850;
 
 interface Props {
   isLoading: boolean;
-  cluster: Cluster;
+  cluster: Cluster | undefined;
   startEditingCluster: (clusterName: string) => void;
   stopEditingCluster: () => void;
   editCluster: (cluster: ClusterPayload) => void;

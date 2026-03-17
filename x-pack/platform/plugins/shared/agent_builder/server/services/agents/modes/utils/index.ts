@@ -10,12 +10,14 @@ export { builtinToolToExecutable } from './builtin_tool_to_executable';
 export { extractRound } from './extract_round';
 export { convertPreviousRounds } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';
+export { selectSkills } from './select_skills';
 export { selectTools } from './select_tools';
 export { getPendingRound } from './prompts';
 export { evictInternalEvents } from './evict_internal_events';
 export {
   prepareAttachmentPresentation,
-  getAttachmentSystemPrompt,
+  getConversationAttachmentsSection,
+  getConversationAttachmentsSystemMessages,
   type AttachmentPresentation,
   type AttachmentPresentationMode,
   type AttachmentPresentationConfig,

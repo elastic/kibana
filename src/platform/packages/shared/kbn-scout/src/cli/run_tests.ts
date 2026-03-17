@@ -49,6 +49,9 @@ export const runTestsCmd: Command<void> = {
 
     On Elastic Cloud projects (MKI):
     node scripts/scout run-tests --location cloud --arch serverless --domain search --config <playwright_config_path>
+
+    Local flakiness validation (run each test N times):
+    node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path> --repeatEach 5
   `,
   flags: TEST_FLAG_OPTIONS,
   run: async ({ flagsReader, log }) => {

@@ -5,33 +5,9 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { useKibana } from './use_kibana';
 
-export interface ClientExperimentalFeatures {
-  /** Whether the planning mode feature is enabled */
-  planning: boolean;
-  /** Whether the filestore feature is enabled */
-  filestore: boolean;
-}
-
-/**
- * Hook to read the agent builder experimental features UI setting.
- * Returns a stable object with individual feature flags.
- */
-export const useExperimentalFeatures = (): ClientExperimentalFeatures => {
-  const { services } = useKibana();
-
-  return useMemo(() => {
-    const enabled = services.uiSettings?.get<boolean>(
-      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-      false
-    );
-
-    return {
-      planning: !!enabled,
-      filestore: !!enabled,
-    };
-  }, [services.uiSettings]);
+export const useExperimentalFeatures = (): boolean => {
+  return useUiSetting<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
 };

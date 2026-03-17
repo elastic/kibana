@@ -14,6 +14,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type {
+  Attachment,
+  AttachmentInput,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
@@ -22,17 +27,16 @@ import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import {
+  useConversation,
   useAgentId,
   useHasActiveConversation,
   useIsAwaitingPrompt,
 } from '../../../hooks/use_conversation';
-import { MessageEditor, useMessageEditor, type MessageEditorInstance } from './message_editor';
+import { MessageEditor, useMessageEditor } from './message_editor';
 import { InputActions } from './input_actions';
 import { borderRadiusXlStyles } from '../../../../common.styles';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { AttachmentPillsRow } from './attachment_pills_row';
-import { AgentModeSelector } from './agent_mode_selector';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 
 const INPUT_MIN_HEIGHT = '150px';
 const useInputBorderStyles = () => {
@@ -104,7 +108,6 @@ const InputContainer: React.FC<
 
 interface ConversationInputProps {
   onSubmit?: () => void;
-  messageEditorRef?: React.MutableRefObject<MessageEditorInstance | null>;
 }
 
 const disabledPlaceholder = (agentId?: string) =>
@@ -121,27 +124,53 @@ const enabledPlaceholder = i18n.translate(
   }
 );
 
-export const ConversationInput: React.FC<ConversationInputProps> = ({
-  onSubmit,
-  messageEditorRef,
-}) => {
+interface GetVisibleAttachmentsForInputParams {
+  attachments?: AttachmentInput[];
+  shouldHideAttachments: boolean;
+  conversationAttachments?: VersionedAttachment[];
+}
+
+export const getVisibleAttachmentsForInput = ({
+  attachments,
+  shouldHideAttachments,
+  conversationAttachments,
+}: GetVisibleAttachmentsForInputParams): Attachment[] => {
+  if (!attachments || shouldHideAttachments) {
+    return [];
+  }
+
+  const persistedAttachmentIds = new Set(
+    (conversationAttachments ?? []).map((attachment) => attachment.id)
+  );
+
+  return attachments
+    .filter((attachment) => {
+      if (attachment.hidden) {
+        return false;
+      }
+      if (!attachment.id) {
+        return true;
+      }
+      // Hide attachments already in the conversation: input attachments with matching IDs
+      // are treated as updates to existing content, not new pills to display.
+      return !persistedAttachmentIds.has(attachment.id);
+    })
+    .map((attachment, index) => ({
+      ...attachment,
+      id: attachment.id ?? `attachment-${index}`,
+    }));
+};
+
+export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
-  const { sendMessage, pendingMessage, error, isResuming, agentMode, setAgentMode, plan } =
-    useSendMessage();
-  const experimentalFeatures = useExperimentalFeatures();
+  const { sendMessage, pendingMessage, error, isResuming } = useSendMessage();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
   const messageEditor = useMessageEditor();
-
-  // Expose the message editor instance to the parent via ref
-  useEffect(() => {
-    if (messageEditorRef) {
-      messageEditorRef.current = messageEditor;
-    }
-  }, [messageEditor, messageEditorRef]);
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
+  const { conversation } = useConversation();
   const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
     useConversationContext();
 
@@ -165,15 +194,15 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   const shouldCollapseInput = isSendingMessage || hasActiveConversation;
 
-  const visibleAttachments = useMemo(() => {
-    if (!attachments || shouldHideAttachments) return [];
-    return attachments
-      .filter((attachment) => !attachment.hidden)
-      .map((attachment, idx) => ({
-        ...attachment,
-        id: attachment.id ?? `attachment-${idx}`,
-      }));
-  }, [attachments, shouldHideAttachments]);
+  const visibleAttachments = useMemo(
+    () =>
+      getVisibleAttachmentsForInput({
+        attachments,
+        shouldHideAttachments,
+        conversationAttachments: conversation?.attachments,
+      }),
+    [attachments, shouldHideAttachments, conversation?.attachments]
+  );
 
   const isNewConversation = !conversationId;
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
@@ -238,26 +267,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
             }
           }}
           agentId={agentId}
-          modeSelector={
-            experimentalFeatures.planning ? (
-              <AgentModeSelector
-                agentMode={agentMode}
-                onModeChange={(newMode) => {
-                  setAgentMode(newMode);
-                  // Pre-fill when switching to agent mode with a ready user-initiated plan
-                  if (
-                    newMode === 'agent' &&
-                    plan?.status === 'ready' &&
-                    plan?.source === 'planning'
-                  ) {
-                    messageEditor.setContent('Execute the plan.');
-                    messageEditor.focus();
-                  }
-                }}
-                disabled={isSendingMessage}
-              />
-            ) : undefined
-          }
         />
       )}
     </InputContainer>

@@ -1,3 +1,5 @@
+name: Alert on failed test comment
+
 on:
   issue_comment:
     types: [created]

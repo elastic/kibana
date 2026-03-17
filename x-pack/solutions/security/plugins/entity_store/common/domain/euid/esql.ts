@@ -5,16 +5,29 @@
  * 2.0.
  */
 
-import type { EntityType } from '../definitions/entity_schema';
+import { conditionToESQL } from '@kbn/streamlang';
+import type {
+  EntityDefinitionWithoutId,
+  FieldEvaluation,
+  EntityType,
+} from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
 import {
   getDocument,
+  getFieldValue,
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
+  getSourceFieldNames,
   isEuidField,
   isEuidSeparator,
 } from './commons';
+import {
+  applyFieldEvaluations,
+  getSourceMatchSpec,
+  type SourceMatchSpec,
+} from './field_evaluations';
 
 /**
  * Constructs an ESQL filter for the provided entity type and document.
@@ -36,26 +49,157 @@ import {
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
  * @returns An ESQL filter string, or undefined if the document does not contain enough identifying information.
  */
-export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: any) {
+export function getEuidEsqlFilterBasedOnDocument(
+  entityType: EntityType,
+  doc: any
+): string | undefined {
   if (!doc) {
     return undefined;
   }
 
   doc = getDocument(doc);
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+
+  if (isSingleFieldIdentity(identityField)) {
+    const value = getFieldValue(doc, identityField.singleField);
+    if (value === undefined) {
+      return undefined;
+    }
+    return `(${identityField.singleField} == "${escapeEsqlString(value)}")`;
+  }
+
+  if (identityField.fieldEvaluations?.length) {
+    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+    doc = { ...doc, ...evaluated };
+  }
   const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, identityField.euidFields);
   if (fieldsToBeFilteredOn.rankingPosition === -1) {
     return undefined;
   }
 
-  const onExpressions = Object.entries(fieldsToBeFilteredOn.values).map(
-    ([field, value]) => `(${field} == "${value}")`
+  const evaluatedDestinations = new Set(
+    identityField.fieldEvaluations?.map((e) => e.destination) ?? []
   );
 
-  const toBeFilteredOut = getFieldsToBeFilteredOut(identityField.euidFields, fieldsToBeFilteredOn);
+  const onExpressions = Object.entries(fieldsToBeFilteredOn.values)
+    .filter(([field]) => !evaluatedDestinations.has(field))
+    .map(([field, value]) => `(${field} == "${escapeEsqlString(value)}")`);
+
+  const toBeFilteredOut = getFieldsToBeFilteredOut(
+    identityField.euidFields,
+    fieldsToBeFilteredOn
+  ).filter((field) => !evaluatedDestinations.has(field));
   const outExpressions = toBeFilteredOut.map((field) => `${esqlIsNullOrEmpty(field)}`);
 
-  return `(${[...onExpressions, ...outExpressions].join(' AND ')})`;
+  const allParts: string[] = [...onExpressions, ...outExpressions];
+
+  if (identityField.fieldEvaluations?.length) {
+    for (const evaluation of identityField.fieldEvaluations) {
+      const spec = getSourceMatchSpec(doc, evaluation);
+      allParts.push(buildSourceClauseEsql(evaluation, spec));
+    }
+  }
+
+  return `(${allParts.join(' AND ')})`;
+}
+
+function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): string {
+  if ('field' in source) {
+    return `MV_FIRST(${source.field})`;
+  }
+  return `MV_FIRST(SPLIT(MV_FIRST(${source.firstChunkOfField}), "${escapeEsqlString(
+    source.splitBy
+  )}"))`;
+}
+
+/**
+ * Builds the ESQL EVAL expression for a single field evaluation (e.g. mapping event.module / data_stream.dataset to entity.namespace).
+ *
+ * - Source values: each source is read with MV_FIRST so multi-value fields are supported; firstChunkOfField sources use SPLIT then MV_FIRST.
+ * - Multiple sources: each is assigned to a variable (_src_<dest>0, _src_<dest>1, ...), then an effective source is the first non-null, non-empty variable (CASE).
+ * - Destination: effective source is then mapped with CASE: if null/empty → fallbackValue; else if it matches a whenClause → clause's then; else → effective source as-is.
+ *
+ * Returns a comma-separated list of EVAL assignments (one or more lines).
+ */
+function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
+  const { destination, sources, fallbackValue, whenClauses } = evaluation;
+  const sourceExpressions = sources.map(sourceToEsqlExpression);
+  const sourceVariablesBaseName = `_src_${destination.replace(/\./g, '_')}`;
+  const effectiveSourceName = sourceVariablesBaseName;
+  const destinationCaseParts: string[] = [
+    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), "${escapeEsqlString(
+      fallbackValue
+    )}"`,
+  ];
+  for (const clause of whenClauses) {
+    const conditions = clause.sourceMatchesAny
+      .map((v) => `${effectiveSourceName} == "${escapeEsqlString(v)}"`)
+      .join(' OR ');
+    destinationCaseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
+  }
+  destinationCaseParts.push(effectiveSourceName);
+
+  const assignments: string[] = [];
+
+  if (sourceExpressions.length === 1) {
+    assignments.push(`${effectiveSourceName} = ${sourceExpressions[0]}`);
+  } else {
+    for (let i = 0; i < sourceExpressions.length; i++) {
+      assignments.push(`${sourceVariablesBaseName}${i} = ${sourceExpressions[i]}`);
+    }
+    const sourceVarCaseParts = sourceExpressions.flatMap((_, i) => {
+      const v = `${sourceVariablesBaseName}${i}`;
+      return [`(${v} IS NOT NULL AND ${v} != "")`, v];
+    });
+    sourceVarCaseParts.push('NULL');
+    assignments.push(`${effectiveSourceName} = CASE(${sourceVarCaseParts.join(', ')})`);
+  }
+
+  assignments.push(`${destination} = CASE(${destinationCaseParts.join(', ')})`);
+  return assignments.join(',\n ');
+}
+
+function escapeEsqlString(s: string): string {
+  return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpec): string {
+  const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
+  const allSourceFields = [...exactMatchFields, ...prefixMatchFields];
+
+  if (spec.type === 'unknown') {
+    return `(${allSourceFields.map((f) => esqlIsNullOrEmpty(f)).join(' AND ')})`;
+  }
+
+  const disjuncts = spec.values.map((v) => {
+    const escaped = escapeEsqlString(v);
+    const exactConds = exactMatchFields.map((f) => `(${f} == "${escaped}")`);
+    const prefixConds = prefixMatchFields.map((f) => `STARTS_WITH(${f}, "${escaped}")`);
+    const parts = [...exactConds, ...prefixConds];
+    return parts.length === 1 ? parts[0] : `(${parts.join(' OR ')})`;
+  });
+  return disjuncts.length === 1 ? disjuncts[0] : `(${disjuncts.join(' OR ')})`;
+}
+
+export function getFieldEvaluationsEsql(entityType: EntityType): string | undefined {
+  return getFieldEvaluationsEsqlFromDefinition(getEntityDefinitionWithoutId(entityType));
+}
+
+/**
+ * Returns an ESQL EVAL fragment for all field evaluations of the given entity type.
+ * Use in a pipeline as | EVAL <result>. Returns undefined when there are no field evaluations.
+ */
+export function getFieldEvaluationsEsqlFromDefinition({
+  identityField,
+}: EntityDefinitionWithoutId): string | undefined {
+  if (isSingleFieldIdentity(identityField)) {
+    return undefined;
+  }
+  const evaluations = identityField.fieldEvaluations;
+  if (!evaluations || evaluations.length === 0) {
+    return undefined;
+  }
+  return evaluations.map(buildOneFieldEvaluationEsql).join(',\n ');
 }
 
 /**
@@ -77,9 +221,12 @@ export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: an
  */
 export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
-  return identityField.requiresOneOfFields
-    .map((field) => `(${esqlIsNotNullOrEmpty(field)})`)
-    .join(' OR ');
+
+  if (isSingleFieldIdentity(identityField)) {
+    return `(${esqlIsNotNullOrEmpty(identityField.singleField)})`;
+  }
+
+  return conditionToESQL(identityField.documentsFilter);
 }
 
 /**
@@ -110,31 +257,37 @@ export function getEuidEsqlEvaluation(
   { withTypeId = true }: { withTypeId?: boolean } = {}
 ) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
+
+  if (isSingleFieldIdentity(identityField)) {
+    return appendTypeIdIfNeeded(entityType, identityField.singleField, mustPrependTypeId);
+  }
 
   if (identityField.euidFields.length === 0) {
     throw new Error('No euid fields found, invalid euid logic definition');
   }
 
-  // If only one field is defined, it must exist, no CASE logic is needed
+  // If only one instruction with single field, no CASE logic is needed
   if (identityField.euidFields.length === 1) {
-    const firstField = identityField.euidFields[0][0];
-    if (isEuidSeparator(firstField)) {
+    const comp = identityField.euidFields[0];
+    const firstAttr = comp[0];
+    if (isEuidSeparator(firstAttr)) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
-
-    return appendTypeIdIfNeeded(entityType, firstField.field, withTypeId);
+    if (comp.length === 1 && isEuidField(firstAttr)) {
+      return appendTypeIdIfNeeded(entityType, firstAttr.field, mustPrependTypeId);
+    }
+    // single instruction but composed: fall through to multi-branch CASE
   }
 
   const euidLogic = identityField.euidFields.map((composedField) => {
-    if (composedField.length === 1) {
-      if (isEuidSeparator(composedField[0])) {
-        throw new Error('Separator found in single field, invalid euid logic definition');
-      }
+    if (composedField.length === 1 && isEuidSeparator(composedField[0])) {
+      throw new Error('Separator found in single field, invalid euid logic definition');
     }
 
-    const caseBooleanOp = composedField
+    const compositionConditions = composedField
       .filter(isEuidField)
-      .map((field) => `${esqlIsNotNullOrEmpty(field.field)}`)
+      .map((f) => `${esqlIsNotNullOrEmpty(f.field)}`)
       .join(' AND ');
 
     if (isEuidSeparator(composedField[0])) {
@@ -142,24 +295,28 @@ export function getEuidEsqlEvaluation(
     }
 
     if (composedField.length === 1) {
-      return `(${caseBooleanOp}), ${composedField[0].field}`;
+      return `(${compositionConditions}), ${(composedField[0] as { field: string }).field}`;
     }
 
     const evaluations = composedField
-      .map((field) => (isEuidField(field) ? field.field : `"${field.separator}"`))
+      .map((attr) => (isEuidField(attr) ? attr.field : `"${escapeEsqlString(attr.sep)}"`))
       .join(', ');
 
     const concatLogic = `CONCAT(${evaluations})`;
 
-    return `(${caseBooleanOp}), ${concatLogic}`;
+    return `(${compositionConditions}), ${concatLogic}`;
   });
 
   const idLogic = `CASE(${euidLogic.join(',\n')}, NULL)`;
-  return appendTypeIdIfNeeded(entityType, idLogic, withTypeId);
+  return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
 }
 
-function appendTypeIdIfNeeded(entityType: EntityType, euidLogic: string, withTypeId: boolean) {
-  if (withTypeId) {
+function appendTypeIdIfNeeded(
+  entityType: EntityType,
+  euidLogic: string,
+  mustPrependTypeId: boolean
+) {
+  if (mustPrependTypeId) {
     return `CONCAT("${entityType}:", ${euidLogic})`;
   }
   return euidLogic;

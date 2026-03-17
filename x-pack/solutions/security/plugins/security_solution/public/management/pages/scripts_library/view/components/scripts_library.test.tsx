@@ -10,19 +10,23 @@ import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import {
-  createAppRootMockRenderer,
   type AppContextTestRender,
+  createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
 import { EndpointScriptsGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
 import { SCRIPTS_LIBRARY_PATH } from '../../../../../../common/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { useToasts } from '../../../../../common/lib/kibana';
-import { ScriptsLibrary } from './scripts_library';
+import { SCRIPTS_LIBRARY_PAGE_STORAGE_KEY, ScriptsLibrary } from './scripts_library';
 import { useGetEndpointScriptsList } from '../../../../hooks/script_library';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
 
-jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => ({
+  ...jest.requireActual('../../../../../common/lib/kibana'),
+  useToasts: jest.fn(),
+  useStorage: jest.fn(),
+}));
 jest.mock('../../../../hooks/script_library/use_get_scripts_list');
 jest.mock('../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
@@ -33,9 +37,13 @@ describe('ScriptsLibrary', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
+  let storage: AppContextTestRender['startServices']['storage'];
   let mockedContext: AppContextTestRender;
   let scriptsGenerator: EndpointScriptsGenerator;
   let defaultMockGetScriptsResponse: ReturnType<typeof useGetEndpointScriptsListMock>;
+  let mockStorageGet: jest.Mock;
+  let mockStorageSet: jest.Mock;
+  let mockAddDanger: jest.Mock;
 
   const getScriptsListMock = (scriptsList: EndpointScript[]) => {
     (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
@@ -60,10 +68,19 @@ describe('ScriptsLibrary', () => {
       endpointPrivileges: getEndpointAuthzInitialStateMock(),
     });
     mockedContext = createAppRootMockRenderer();
-    ({ history } = mockedContext);
+    ({
+      history,
+      startServices: { storage },
+    } = mockedContext);
 
+    mockStorageGet = jest.fn().mockReturnValue(true);
+    mockStorageSet = jest.fn();
+    storage.get = mockStorageGet;
+    storage.set = mockStorageSet;
+
+    mockAddDanger = jest.fn();
     (useToastsMock as jest.Mock).mockReturnValue({
-      addDanger: jest.fn(),
+      addDanger: mockAddDanger,
     });
 
     defaultMockGetScriptsResponse = {
@@ -96,23 +113,6 @@ describe('ScriptsLibrary', () => {
   });
 
   describe('Page elements', () => {
-    it('renders the Scripts Library page', () => {
-      render();
-
-      expect(renderResult.getByTestId('test')).toBeInTheDocument();
-    });
-
-    it('should show the page header', () => {
-      render();
-      const { getByTestId } = renderResult;
-
-      expect(getByTestId('test-header')).toBeInTheDocument();
-      expect(getByTestId('header-page-title').textContent).toEqual('Scripts Library');
-      expect(getByTestId('header-panel-subtitle').textContent).toEqual(
-        'View and manage scripts to upload and execute on Elastic Defend agents.'
-      );
-    });
-
     it('should not show the upload button when user does not have `canWriteScriptsLibrary` privileges', () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: {
@@ -123,24 +123,126 @@ describe('ScriptsLibrary', () => {
 
       render();
       const { queryByTestId } = renderResult;
-      const uploadButton = queryByTestId('test-uploadScriptButton');
+      const uploadButton = queryByTestId('test-upload-script-button');
 
       expect(uploadButton).not.toBeInTheDocument();
     });
 
-    it('should show an empty table when there are no scripts', () => {
+    it('should show an empty state prompt with upload button when no data', () => {
       render();
       const { getByText, getByTestId } = renderResult;
 
-      expect(getByTestId('test-table')).toBeInTheDocument();
-      expect(getByTestId('test-table-record-range-label').textContent).toEqual(
-        'Showing 1-10 of 0 scripts'
+      expect(getByTestId('test-no-data-empty-prompt')).toBeInTheDocument();
+      expect(getByText('Add your first script')).toBeInTheDocument();
+      expect(getByTestId('test-no-data-empty-prompt-upload-button')).toBeInTheDocument();
+    });
+
+    it('should not show upload button when no data and no `canWriteScriptsLibrary` privilege on the empty prompt', () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: {
+          ...getEndpointAuthzInitialStateMock(),
+          canWriteScriptsLibrary: false,
+        },
+      });
+
+      render();
+      const { getByTestId } = renderResult;
+
+      expect(getByTestId('test-no-data-empty-prompt-title-no-entries')).toBeInTheDocument();
+    });
+
+    it('renders the Scripts Library page', () => {
+      render();
+
+      expect(renderResult.getByTestId('test')).toBeInTheDocument();
+    });
+
+    it('should show the page header when data is available and fetched', () => {
+      const scriptId = 'script-1';
+      const script = scriptsGenerator.generate({ id: scriptId });
+      getScriptsListMock([script]);
+
+      render();
+      const { getByTestId } = renderResult;
+
+      expect(getByTestId('test-header')).toBeInTheDocument();
+      expect(getByTestId('header-page-title').textContent).toEqual('Scripts Library');
+      expect(getByTestId('header-panel-subtitle').textContent).toEqual(
+        'View and manage scripts to upload and execute on Elastic Defend agents.'
       );
-      expect(getByText('No scripts found')).toBeInTheDocument();
+    });
+  });
+
+  describe('Page banner', () => {
+    it('should show new page banner', () => {
+      render();
+      const { getByTestId, getByText } = renderResult;
+      const banner = getByTestId('test-new-page-banner');
+      expect(banner).toBeInTheDocument();
+
+      expect(getByText('New: Script library')).toBeInTheDocument();
+      expect(
+        getByText(
+          'Upload and manage reusable scripts to run on endpoints protected by Elastic Defend.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should show a `learn more` link within the banner', () => {
+      render();
+      const { getByTestId } = renderResult;
+      const banner = getByTestId('test-new-page-banner');
+      expect(banner).toBeInTheDocument();
+
+      const learnMoreLink = banner.querySelector('a');
+      expect(learnMoreLink).toBeInTheDocument();
+      expect(learnMoreLink?.getAttribute('href')).toContain('scripts-library');
+    });
+
+    it('should not show new page banner after it is dismissed', async () => {
+      render();
+      const { getByTestId, queryByTestId } = renderResult;
+      const banner = getByTestId('test-new-page-banner');
+      expect(banner).toBeInTheDocument();
+
+      const dismissButton = getByTestId('euiDismissCalloutButton');
+      await userEvent.click(dismissButton);
+
+      await waitFor(() => {
+        expect(queryByTestId('test-new-page-banner')).not.toBeInTheDocument();
+      });
+
+      // Verify that the dismiss was recorded in storage
+      expect(mockStorageSet).toHaveBeenCalledWith(SCRIPTS_LIBRARY_PAGE_STORAGE_KEY, false);
+    });
+
+    it('should not show the banner when storage value is set to false (dismissed)', () => {
+      mockStorageGet.mockReturnValue(false);
+
+      render();
+      const { queryByTestId } = renderResult;
+      const banner = queryByTestId('test-new-page-banner');
+      expect(banner).not.toBeInTheDocument();
+    });
+
+    it('should show the banner when storage value is cleared', () => {
+      mockStorageSet.mockReturnValue(undefined);
+
+      render();
+      const { getByTestId } = renderResult;
+      const banner = getByTestId('test-new-page-banner');
+      expect(banner).toBeInTheDocument();
     });
   });
 
   describe('Interactions (with data)', () => {
+    const scriptId = 'script-1';
+
+    beforeEach(() => {
+      const script = scriptsGenerator.generate({ id: scriptId });
+      getScriptsListMock([script]);
+    });
+
     it('should show an error message when there is an error with fetching scripts', () => {
       (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
@@ -156,16 +258,12 @@ describe('ScriptsLibrary', () => {
       });
 
       render();
-      expect(useToastsMock().addDanger).toHaveBeenCalledWith(
+      expect(mockAddDanger).toHaveBeenCalledWith(
         'There was an error fetching the scripts list: fetch failed!'
       );
     });
 
     it('should show details flyout when clicked on row action `View details` item', () => {
-      const scriptId = 'script-1';
-      const script = scriptsGenerator.generate({ id: scriptId });
-      getScriptsListMock([script]);
-
       render();
 
       const { getByTestId } = renderResult;
@@ -187,11 +285,20 @@ describe('ScriptsLibrary', () => {
       });
     });
 
-    it('should show edit flyout when clicked on row action `Edit` item', () => {
-      const scriptId = 'script-1';
-      const script = scriptsGenerator.generate({ id: scriptId });
-      getScriptsListMock([script]);
+    it('should show create flyout when upload button is clicked from page header', () => {
+      render();
 
+      const { getByTestId } = renderResult;
+      const uploadButton = getByTestId('test-upload-script-button');
+      userEvent.click(uploadButton);
+
+      waitFor(() => {
+        expect(getByTestId('test-endpointScriptFlyout-create')).toBeInTheDocument();
+        expect(history.location.search).toContain('show=create');
+      });
+    });
+
+    it('should show edit flyout when clicked on row action `Edit` item', () => {
       render();
 
       const { getByTestId } = renderResult;
@@ -221,10 +328,6 @@ describe('ScriptsLibrary', () => {
         },
       });
 
-      const scriptId = 'script-1';
-      const script = scriptsGenerator.generate({ id: scriptId });
-      getScriptsListMock([script]);
-
       act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?show=edit&selectedScriptId=${scriptId}`));
       render();
 
@@ -234,19 +337,20 @@ describe('ScriptsLibrary', () => {
   });
 
   describe('Upload button and create flyout', () => {
-    beforeEach(() => {});
-    it('should show create flyout when upload button is clicked', () => {
+    beforeEach(() => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: {
           ...getEndpointAuthzInitialStateMock(),
           canWriteScriptsLibrary: true,
         },
       });
+    });
 
+    it('should show create flyout when upload button is clicked from empty state', () => {
       render();
 
       const { getByTestId } = renderResult;
-      const uploadButton = getByTestId('test-uploadScriptButton');
+      const uploadButton = getByTestId('test-no-data-empty-prompt-upload-button');
       userEvent.click(uploadButton);
 
       waitFor(() => {
@@ -256,13 +360,6 @@ describe('ScriptsLibrary', () => {
     });
 
     it('should show create flyout when navigating to URL with show=create', () => {
-      useUserPrivilegesMock.mockReturnValue({
-        endpointPrivileges: {
-          ...getEndpointAuthzInitialStateMock(),
-          canWriteScriptsLibrary: true,
-        },
-      });
-
       act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?show=create`));
       render();
 
@@ -540,8 +637,18 @@ describe('ScriptsLibrary', () => {
     });
 
     it('should render table with loading state when isFetching is true', () => {
+      const script = scriptsGenerator.generate();
+      getScriptsListMock([script]);
       (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
         ...defaultMockGetScriptsResponse,
+        data: {
+          data: [script],
+          page: 1,
+          pageSize: 10,
+          sortDirection: 'asc',
+          sortField: 'name',
+          total: 1,
+        },
         isFetching: true,
         isFetched: true,
       });

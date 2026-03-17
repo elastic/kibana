@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/lens-embeddable-utils'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/lens-embeddable-utils'
+  title: '@kbn/lens-embeddable-utils'
   description: Moon project for @kbn/lens-embeddable-utils
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-lens-embeddable-utils
+  sourceRoot: src/platform/packages/shared/kbn-lens-embeddable-utils
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-views-plugin'
@@ -33,6 +32,7 @@ dependsOn:
   - '@kbn/expression-xy-plugin'
   - '@kbn/utility-types'
   - '@kbn/transpose-utils'
+  - '@kbn/palettes'
 tags:
   - shared-common
   - package
@@ -46,14 +46,24 @@ fileGroups:
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

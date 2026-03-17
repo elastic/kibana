@@ -10,49 +10,14 @@ import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { GroupedResourcesNode } from './grouped_resources_node';
 import type { GroupedNodeData } from '../../../../common/service_map';
-import { MOCK_EUI_THEME } from './constants';
+import { MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
-// Mock EUI theme
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({
-      euiTheme: {
-        colors: {
-          emptyShade: MOCK_EUI_THEME.colors.emptyShade,
-          mediumShade: MOCK_EUI_THEME.colors.mediumShade,
-          primary: MOCK_EUI_THEME.colors.primary,
-          primaryText: MOCK_EUI_THEME.colors.primaryText,
-          textPrimary: MOCK_EUI_THEME.colors.textPrimary,
-          textParagraph: MOCK_EUI_THEME.colors.textParagraph,
-          text: MOCK_EUI_THEME.colors.text,
-          backgroundBasePlain: MOCK_EUI_THEME.colors.backgroundBasePlain,
-        },
-        size: {
-          xs: '4px',
-          s: '8px',
-          m: '12px',
-        },
-        border: {
-          radius: {
-            small: '4px',
-          },
-          width: {
-            thin: '1px',
-            thick: '2px',
-          },
-        },
-        font: {
-          family: '"Inter", sans-serif',
-        },
-        levels: {
-          header: 1000,
-        },
-        animation: {
-          fast: '150ms',
-        },
-      },
+      euiTheme: MOCK_EUI_THEME_FOR_USE_THEME,
       colorMode: 'LIGHT',
     }),
   };

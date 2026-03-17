@@ -21,7 +21,7 @@ const groupSeparator = ':::';
 
 function getMessage(insightType: DefendInsightType): string {
   switch (insightType) {
-    case DefendInsightType.Enum.policy_response_failure:
+    case DefendInsightType.enum.policy_response_failure:
       return 'Policy response failure detected';
     default:
       return 'Potential issue detected';

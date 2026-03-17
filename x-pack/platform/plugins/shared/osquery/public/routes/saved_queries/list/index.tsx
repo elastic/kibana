@@ -29,6 +29,7 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
+import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../../../common/use_persisted_page_size';
 import { SavedQueryRowActions } from './saved_query_row_actions';
 
 export interface SavedQuerySO {
@@ -149,7 +150,7 @@ const SavedQueriesPageComponent = () => {
   useBreadcrumbs('saved_queries');
   const newQueryLinkProps = useRouterNavigate('saved_queries/new');
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = usePersistedPageSize();
   const [sortField, setSortField] = useState('updated_at');
   const [sortDirection, setSortDirection] = useState<Direction>(Direction.desc);
 
@@ -249,19 +250,22 @@ const SavedQueriesPageComponent = () => {
     ]
   );
 
-  const onTableChange = useCallback(({ page = {}, sort = {} }: any) => {
-    setPageIndex(page.index);
-    setPageSize(page.size);
-    setSortField(sort.field);
-    setSortDirection(sort.direction);
-  }, []);
+  const onTableChange = useCallback(
+    ({ page = {}, sort = {} }: any) => {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+      setSortField(sort.field);
+      setSortDirection(sort.direction);
+    },
+    [setPageSize]
+  );
 
   const pagination = useMemo(
     () => ({
       pageIndex,
       pageSize,
       totalItemCount: data?.total ?? 0,
-      pageSizeOptions: [10, 20, 50, 100],
+      pageSizeOptions: [...PAGE_SIZE_OPTIONS],
     }),
     [pageIndex, pageSize, data?.total]
   );

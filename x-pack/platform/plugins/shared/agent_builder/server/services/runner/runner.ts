@@ -27,6 +27,7 @@ import type {
   ModelProvider,
   HooksServiceStart,
 } from '@kbn/agent-builder-server';
+import type { WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 import type {
   ScopedRunnerRunToolsParams,
   ScopedRunnerRunInternalToolParams,
@@ -41,13 +42,13 @@ import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { AttachmentServiceStart } from '../attachments';
 import type { ModelProviderFactoryFn } from './model_provider';
-import type { TrackingService } from '../../telemetry';
+import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { createEmptyRunContext, createConversationStateManager, createToolManager } from './utils';
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
 import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
 import { createStore } from './store';
-import type { SkillServiceStart, SkillRegistry } from '../skills';
+import type { SkillServiceStart } from '../skills';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -66,6 +67,7 @@ export interface CreateScopedRunnerDeps {
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
   trackingService?: TrackingService;
+  analyticsService?: AnalyticsService;
   hooks: HooksServiceStart;
   // other deps
   logger: Logger;
@@ -78,8 +80,9 @@ export interface CreateScopedRunnerDeps {
   abortSignal?: AbortSignal;
   // context-aware deps
   resultStore: WritableToolResultStore;
+  skillsStore: WritableSkillsStore;
   attachmentStateManager: AttachmentStateManager;
-  skillRegistry: SkillRegistry;
+  skillServiceStart: SkillServiceStart;
   toolManager: ToolManager;
   filestore: IFileStore;
 }
@@ -89,16 +92,15 @@ export type CreateRunnerDeps = Omit<
   | 'request'
   | 'defaultConnectorId'
   | 'resultStore'
+  | 'skillsStore'
   | 'attachmentStateManager'
   | 'modelProvider'
   | 'promptManager'
   | 'stateManager'
   | 'filestore'
   | 'toolManager'
-  | 'skillRegistry'
 > & {
   modelProviderFactory: ModelProviderFactoryFn;
-  skillServiceStart: SkillServiceStart;
 };
 
 export class RunnerManager {
@@ -164,7 +166,7 @@ export const createScopedRunner = (deps: CreateScopedRunnerDeps): ScopedRunner =
 };
 
 export const createRunner = (deps: CreateRunnerDeps): Runner => {
-  const { modelProviderFactory, skillServiceStart, ...runnerDeps } = deps;
+  const { modelProviderFactory, ...runnerDeps } = deps;
 
   const createScopedRunnerWithDeps = async ({
     request,
@@ -181,11 +183,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
   }): Promise<ScopedRunner> => {
-    const skillRegistry = await skillServiceStart.getRegistry({ request });
-    const { resultStore, skillsStore, filestore } = await createStore({
-      conversation,
-      skillRegistry,
-    });
+    const { resultStore, filestore, skillsStore } = createStore({ conversation });
 
     const attachmentStateManager = createAttachmentStateManager(conversation?.attachments ?? [], {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
@@ -203,8 +201,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       defaultConnectorId,
       abortSignal,
       resultStore,
+      skillsStore,
       attachmentStateManager,
-      skillRegistry,
       stateManager,
       promptManager,
       filestore,
