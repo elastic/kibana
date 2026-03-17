@@ -41,10 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       .get(NOTIFICATION_POLICY_API_PATH)
       .set(roleAuthc.apiKeyHeader)
       .set(samlAuth.getInternalRequestHeader());
-    if (query) {
-      req.query(query);
-    }
-    return req;
+    return query ? req.query(query) : req;
   }
 
   describe('List Notification Policies API', function () {
