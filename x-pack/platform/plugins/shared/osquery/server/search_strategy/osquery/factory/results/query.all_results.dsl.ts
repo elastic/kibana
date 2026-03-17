@@ -60,14 +60,7 @@ export const buildResultsQuery = ({
 
   const kqlFilterClause = getQueryFilter({ filter: baseFilter });
 
-  let parsedEsFilters: Filter[] = [];
-  if (esFilters) {
-    try {
-      parsedEsFilters = JSON.parse(esFilters) as Filter[];
-    } catch {
-      parsedEsFilters = [];
-    }
-  }
+  const parsedEsFilters: Filter[] = esFilters ? (JSON.parse(esFilters) as Filter[]) : [];
 
   const esFilterClauses =
     parsedEsFilters.length > 0 ? buildQueryFromFilters(parsedEsFilters, undefined).filter : [];

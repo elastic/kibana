@@ -24,7 +24,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Replaces the legacy EuiDataGrid results table with UnifiedDataTable,
    * adding KQL search, document flyout, per-row actions, and column curation.
    */
-  osqueryUnifiedDataTable: false,
+  unifiedDataTable: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

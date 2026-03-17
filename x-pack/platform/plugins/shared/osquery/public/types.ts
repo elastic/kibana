@@ -94,8 +94,8 @@ export interface StartPlugins {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
   timelines?: OsqueryTimelinesStart;
-  uiActions: UiActionsStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  uiActions?: UiActionsStart;
+  unifiedSearch?: UnifiedSearchPublicPluginStart;
   appName?: string;
 }
 

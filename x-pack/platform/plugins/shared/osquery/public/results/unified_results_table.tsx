@@ -22,6 +22,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedDataTableSettings } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useAllResults } from './use_all_results';
 import { Direction } from '../../common/search_strategy';
@@ -118,10 +119,15 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     data: dataService,
     analytics,
     i18n: i18nStart,
-    uiActions,
-    unifiedSearch,
+    uiActions: uiActionsService,
+    unifiedSearch: unifiedSearchService,
     chrome,
   } = useKibana().services;
+
+  // These are guaranteed to exist — the parent ResultsTable switch component
+  // only renders UnifiedResultsTable when both services are available.
+  const uiActions = uiActionsService!;
+  const unifiedSearch = unifiedSearchService!;
 
   const startServices = useMemo(
     () => ({ analytics, i18n: i18nStart, theme }),
@@ -194,10 +200,15 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const handleFilterForGrid = useCallback(
     (mapping: unknown, value: unknown, mode: '+' | '-') => {
-      if (mapping && typeof mapping === 'object' && 'name' in mapping) {
-        handleFilter(mapping as any, value, mode);
-      } else if (typeof mapping === 'string') {
-        handleFilter({ name: mapping } as any, value, mode);
+      const fieldName =
+        mapping && typeof mapping === 'object' && 'name' in mapping
+          ? (mapping as { name: string }).name
+          : typeof mapping === 'string'
+          ? mapping
+          : undefined;
+
+      if (fieldName) {
+        handleFilter({ name: fieldName } as DataViewField, value, mode);
       }
     },
     [handleFilter]
@@ -219,6 +230,24 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     scheduleId,
     executionCount,
   });
+
+  // Register missing columns as runtime fields on the data view so that
+  // UnifiedDataTable can resolve their field type tokens (icons in column headers).
+  // osquery.* fields may not exist in the data view if the index mapping hasn't
+  // been refreshed, and ECS-mapped fields never exist in the index mapping.
+  const resultColumns = allResultsData?.columns;
+  useEffect(() => {
+    if (!dataView) return;
+
+    const columnsToRegister = [...ecsMappingColumns, ...(resultColumns ?? []), 'agent.name'];
+
+    for (const col of columnsToRegister) {
+      if (!dataView.getFieldByName(col)) {
+        const isNumber = col.endsWith('.number');
+        dataView.addRuntimeField(col, { type: isNumber ? 'long' : 'keyword' });
+      }
+    }
+  }, [dataView, ecsMappingColumns, resultColumns]);
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
   const [hasUserSetColumns, setHasUserSetColumns] = useState(false);
@@ -321,8 +350,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       }
     }
 
-    const capped = cols.slice(0, 10);
-    setVisibleColumns((prev) => (isEqual(prev, capped) ? prev : capped));
+    setVisibleColumns((prev) => (isEqual(prev, cols) ? prev : cols));
   }, [allResultsData?.columns, ecsMappingColumns, hasUserSetColumns]);
 
   // Strip "osquery." prefix from column headers via settings.columns[col].display.
