@@ -6,54 +6,56 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { MetricField } from '../../../types';
+import type { ParsedMetricItem } from '../../../types';
 import { createESQLQuery, createM4DownsampledESQLQuery } from './create_esql_query';
 import { M4_VALUE_COLUMN } from './create_aggregation';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
-const mockMetric: MetricField = {
-  name: 'cpu.usage',
-  type: ES_FIELD_TYPES.DOUBLE,
-  index: 'metrics-*',
-  dimensions: [
-    { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
-    { name: 'container.id', type: ES_FIELD_TYPES.KEYWORD },
-    { name: 'host.ip', type: ES_FIELD_TYPES.IP },
-    { name: 'cpu.cores', type: ES_FIELD_TYPES.LONG },
-    { name: 'region', type: ES_FIELD_TYPES.KEYWORD },
+const mockMetric: ParsedMetricItem = {
+  metricName: 'cpu.usage',
+  fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+  dataStream: 'metrics-*',
+  units: ['ms'],
+  metricTypes: ['histogram'],
+  dimensionFields: [
+    { name: 'host.name' },
+    { name: 'container.id' },
+    { name: 'host.ip' },
+    { name: 'cpu.cores' },
+    { name: 'region' },
   ],
 };
 
-const mockCounterMetric: MetricField = {
+const mockCounterMetric: ParsedMetricItem = {
   ...mockMetric,
-  name: 'requests.count',
-  instrument: 'counter',
+  metricName: 'requests.count',
+  metricTypes: ['counter'],
 };
 
-const mockTdigestMetric: MetricField = {
+const mockTdigestMetric: ParsedMetricItem = {
   ...mockMetric,
-  name: 'http.request.duration',
-  type: ES_FIELD_TYPES.TDIGEST,
-  instrument: 'histogram',
+  metricName: 'http.request.duration',
+  fieldTypes: [ES_FIELD_TYPES.TDIGEST],
+  metricTypes: ['histogram'],
 };
 
-const mockExponentialHistogramMetric: MetricField = {
+const mockExponentialHistogramMetric: ParsedMetricItem = {
   ...mockMetric,
-  name: 'http.request.duration',
-  type: ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
-  instrument: 'histogram',
+  metricName: 'http.request.duration',
+  fieldTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
+  metricTypes: ['histogram'],
 };
 
-const mockLegacyHistogramMetric: MetricField = {
+const mockLegacyHistogramMetric: ParsedMetricItem = {
   ...mockMetric,
-  name: 'histogram.legacy',
-  type: ES_FIELD_TYPES.HISTOGRAM,
-  instrument: 'histogram',
+  metricName: 'histogram.legacy',
+  fieldTypes: [ES_FIELD_TYPES.HISTOGRAM],
+  metricTypes: ['histogram'],
 };
 
 describe('createESQLQuery', () => {
   it('should generate a basic AVG query for a metric field', () => {
-    const query = createESQLQuery({ metric: mockMetric });
+    const query = createESQLQuery({ metricItem: mockMetric });
     expect(query).toBe(
       `
 TS metrics-*
@@ -64,7 +66,7 @@ TS metrics-*
 
   it('should generate a SUM query for counter instrument', () => {
     const query = createESQLQuery({
-      metric: mockCounterMetric,
+      metricItem: mockCounterMetric,
     });
     expect(query).toBe(
       `
@@ -76,7 +78,7 @@ TS metrics-*
 
   it('should generate a PERCENTILE query for histogram instrument with exponential_histogram type', () => {
     const query = createESQLQuery({
-      metric: mockExponentialHistogramMetric,
+      metricItem: mockExponentialHistogramMetric,
     });
     expect(query).toBe(
       `
@@ -88,7 +90,7 @@ TS metrics-*
 
   it('should generate a PERCENTILE query for histogram instrument with tdigest type', () => {
     const query = createESQLQuery({
-      metric: mockTdigestMetric,
+      metricItem: mockTdigestMetric,
     });
     expect(query).toBe(
       `
@@ -100,7 +102,7 @@ TS metrics-*
 
   it('should generate a PERCENTILE query for legacy histogram', () => {
     const query = createESQLQuery({
-      metric: mockLegacyHistogramMetric,
+      metricItem: mockLegacyHistogramMetric,
     });
     expect(query).toBe(
       `
@@ -112,7 +114,7 @@ TS metrics-*
 
   it('should generate a PERCENTILE query for legacy histogram with multiple dimensions', () => {
     const query = createESQLQuery({
-      metric: mockLegacyHistogramMetric,
+      metricItem: mockLegacyHistogramMetric,
       splitAccessors: ['service.name', 'host.name'],
     });
     expect(query).toBe(
@@ -125,7 +127,7 @@ TS metrics-*
 
   it('should generate exponential histogram query with single dimension', () => {
     const query = createESQLQuery({
-      metric: mockExponentialHistogramMetric,
+      metricItem: mockExponentialHistogramMetric,
       splitAccessors: ['service.name'],
     });
     expect(query).toBe(
@@ -138,7 +140,7 @@ TS metrics-*
 
   it('should generate exponential histogram query with multiple dimensions', () => {
     const query = createESQLQuery({
-      metric: mockExponentialHistogramMetric,
+      metricItem: mockExponentialHistogramMetric,
       splitAccessors: ['service.name', 'host.name'],
     });
     expect(query).toBe(
@@ -151,7 +153,7 @@ TS metrics-*
 
   it('should generate tdigest histogram query with single dimension', () => {
     const query = createESQLQuery({
-      metric: mockTdigestMetric,
+      metricItem: mockTdigestMetric,
       splitAccessors: ['service.name'],
     });
     expect(query).toBe(
@@ -164,7 +166,7 @@ TS metrics-*
 
   it('should generate tdigest histogram query with multiple dimensions', () => {
     const query = createESQLQuery({
-      metric: mockTdigestMetric,
+      metricItem: mockTdigestMetric,
       splitAccessors: ['service.name', 'host.name'],
     });
     expect(query).toBe(
@@ -177,7 +179,7 @@ TS metrics-*
 
   it('should handle single dimension', () => {
     const query = createESQLQuery({
-      metric: mockMetric,
+      metricItem: mockMetric,
       splitAccessors: ['host.name'],
     });
     expect(query).toBe(
@@ -190,7 +192,7 @@ TS metrics-*
 
   it('should handle multiple dimensions', () => {
     const query = createESQLQuery({
-      metric: mockMetric,
+      metricItem: mockMetric,
       splitAccessors: ['host.name', 'container.id'],
     });
     expect(query).toBe(
@@ -203,7 +205,7 @@ TS metrics-*
 
   it('should handle multiple dimensions with IP field', () => {
     const query = createESQLQuery({
-      metric: mockMetric,
+      metricItem: mockMetric,
       splitAccessors: ['host.ip', 'host.name'],
     });
     expect(query).toBe(
@@ -216,7 +218,7 @@ TS metrics-*
 
   it('should handle multiple dimensions with numeric field', () => {
     const query = createESQLQuery({
-      metric: mockMetric,
+      metricItem: mockMetric,
       splitAccessors: ['cpu.cores', 'host.name'],
     });
     expect(query).toBe(
@@ -229,7 +231,7 @@ TS metrics-*
 
   it('should handle multiple dimensions with mixed field types', () => {
     const query = createESQLQuery({
-      metric: mockMetric,
+      metricItem: mockMetric,
       splitAccessors: ['host.ip', 'host.name', 'cpu.cores'],
     });
     expect(query).toBe(
@@ -242,7 +244,7 @@ TS metrics-*
 
   it('should override index if provided in metric', () => {
     const query = createESQLQuery({
-      metric: { ...mockMetric, index: 'custom-metrics-*' },
+      metricItem: { ...mockMetric, dataStream: 'custom-metrics-*' },
     });
     expect(query).toBe(
       `
@@ -254,7 +256,7 @@ TS custom-metrics-*
 
   it('should handle undefined splitAccessors without throwing error', () => {
     const query = createESQLQuery({
-      metric: mockMetric,
+      metricItem: mockMetric,
       splitAccessors: undefined,
     });
 
@@ -268,7 +270,7 @@ TS metrics-*
 
   it('should prepend WHERE commands before STATS', () => {
     const query = createESQLQuery({
-      metric: mockMetric,
+      metricItem: mockMetric,
       whereStatements: ['host.name == "host-01" AND system.cpu.user.pct IS NOT NULL'],
     });
 
@@ -283,7 +285,7 @@ TS metrics-*
 
   it('should ignore empty WHERE statements', () => {
     const query = createESQLQuery({
-      metric: mockMetric,
+      metricItem: mockMetric,
       whereStatements: ['  ', '', '\n\t'],
     });
 
@@ -296,7 +298,7 @@ TS metrics-*
   });
   it('should handle empty splitAccessors array', () => {
     const query = createESQLQuery({
-      metric: mockMetric,
+      metricItem: mockMetric,
       splitAccessors: [],
     });
 
@@ -309,20 +311,18 @@ TS metrics-*
   });
 
   describe('special character escaping', () => {
-    const mockMetricWithSpecialChars: MetricField = {
-      name: 'cpu.usage',
-      type: ES_FIELD_TYPES.LONG,
-      index: 'metrics-*',
-      dimensions: [
-        { name: 'service-name', type: ES_FIELD_TYPES.KEYWORD },
-        { name: 'container-id', type: ES_FIELD_TYPES.KEYWORD },
-        { name: 'host-ip', type: ES_FIELD_TYPES.IP },
-      ],
+    const mockMetricWithSpecialChars: ParsedMetricItem = {
+      metricName: 'cpu.usage',
+      fieldTypes: [ES_FIELD_TYPES.LONG],
+      dataStream: 'metrics-*',
+      units: ['ms'],
+      metricTypes: ['histogram'],
+      dimensionFields: [{ name: 'service-name' }, { name: 'container-id' }, { name: 'host-ip' }],
     };
 
     it('should escape field names with hyphens in single dimension', () => {
       const query = createESQLQuery({
-        metric: mockMetricWithSpecialChars,
+        metricItem: mockMetricWithSpecialChars,
         splitAccessors: ['service-name'],
       });
       expect(query).toBe(
@@ -335,7 +335,7 @@ TS metrics-*
 
     it('should escape field names with hyphens in multiple dimensions', () => {
       const query = createESQLQuery({
-        metric: mockMetric,
+        metricItem: mockMetric,
         splitAccessors: ['service-name', 'container-id'],
       });
       expect(query).toBe(
@@ -348,7 +348,7 @@ TS metrics-*
 
     it('should escape field names with hyphens in multiple dimensions with IP field', () => {
       const query = createESQLQuery({
-        metric: mockMetric,
+        metricItem: mockMetric,
         splitAccessors: ['host-ip', 'service-name'],
       });
       expect(query).toBe(
@@ -360,15 +360,17 @@ TS metrics-*
     });
 
     it('should escape field names with backticks by doubling them', () => {
-      const mockMetricWithBackticks: MetricField = {
-        name: 'cpu.usage',
-        type: ES_FIELD_TYPES.DOUBLE,
-        index: 'metrics-*',
-        dimensions: [{ name: 'field`with`ticks', type: ES_FIELD_TYPES.KEYWORD }],
+      const mockMetricWithBackticks: ParsedMetricItem = {
+        metricName: 'cpu.usage',
+        fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+        dataStream: 'metrics-*',
+        units: ['ms'],
+        metricTypes: ['histogram'],
+        dimensionFields: [{ name: 'field`with`ticks' }],
       };
 
       const query = createESQLQuery({
-        metric: mockMetricWithBackticks,
+        metricItem: mockMetricWithBackticks,
         splitAccessors: ['field`with`ticks'],
       });
       expect(query).toBe(
@@ -384,7 +386,7 @@ TS metrics-*
 describe('createM4DownsampledESQLQuery', () => {
   it('should generate a two-stage pipeline: AVG aggregation followed by M4 downsampling', () => {
     const query = createM4DownsampledESQLQuery({
-      metric: mockMetric,
+      metricItem: mockMetric,
       sourceBuckets: 1000,
       targetBuckets: 100,
     });

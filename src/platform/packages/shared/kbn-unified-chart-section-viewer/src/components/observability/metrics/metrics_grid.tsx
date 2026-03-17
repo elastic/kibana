@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
-import type { MetricField, Dimension, UnifiedMetricsGridProps } from '../../../types';
+import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
 import { MetricInsightsFlyout } from '../../flyout/metrics_insights_flyout';
@@ -30,6 +30,7 @@ import { FieldsMetadataProvider } from '../../../context/fields_metadata';
 import {
   createESQLQuery,
   createM4DownsampledESQLQuery,
+  firstNonNullable,
   getLensMetricFormat,
   M4_VALUE_COLUMN,
 } from '../../../common/utils';
@@ -47,17 +48,17 @@ export type MetricsGridProps = Pick<
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
-  fields: MetricField[];
+  metricItems: ParsedMetricItem[];
   whereStatements?: string[];
-  getUserMessages?: (metric: MetricField) => EmbeddableComponentProps['userMessages'];
+  getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
   useM4Downsampling?: boolean;
 };
 
-const getItemKey = (metric: MetricField, index: number) => {
-  return `${metric.name}-${index}`;
+const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
+  return `${metricItem.metricName}-${index}`;
 };
 export const MetricsGrid = ({
-  fields,
+  metricItems,
   onBrushEnd,
   onFilter,
   actions,
@@ -77,26 +78,29 @@ export const MetricsGrid = ({
   const [expandedMetric, setExpandedMetric] = useState<
     | {
         index: number;
-        metric: MetricField;
+        metricItem: ParsedMetricItem;
         esqlQuery: string;
       }
     | undefined
   >();
 
   const gridColumns = columns || 1;
-  const gridRows = Math.ceil(fields.length / gridColumns);
+  const gridRows = Math.ceil(metricItems.length / gridColumns);
 
   const { focusedCell, handleKeyDown, getRowColFromIndex, handleFocusCell, focusCell } =
     useGridNavigation({
       gridColumns,
       gridRows,
-      totalRows: fields.length,
+      totalRows: metricItems.length,
       gridRef,
     });
 
-  const handleViewDetails = useCallback((index: number, esqlQuery: string, metric: MetricField) => {
-    setExpandedMetric({ index, metric, esqlQuery });
-  }, []);
+  const handleViewDetails = useCallback(
+    (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
+      setExpandedMetric({ index, metricItem, esqlQuery });
+    },
+    []
+  );
 
   const handleCloseFlyout = useCallback(() => {
     if (!expandedMetric) {
@@ -111,12 +115,12 @@ export const MetricsGrid = ({
     });
   }, [expandedMetric, focusCell, getRowColFromIndex]);
 
-  if (fields.length === 0) {
+  if (metricItems.length === 0) {
     return <EmptyState />;
   }
 
   return (
-    <FieldsMetadataProvider fields={fields} services={services}>
+    <FieldsMetadataProvider fields={metricItems} services={services}>
       <A11yGridWrapper
         ref={gridRef}
         aria-label={i18n.translate('metricsExperience.gridAriaLabel', {
@@ -148,8 +152,8 @@ export const MetricsGrid = ({
                 `
           }
         >
-          {fields.map((metric, index) => {
-            const id = getItemKey(metric, index);
+          {metricItems.map((metricItem, index) => {
+            const id = getItemKey(metricItem, index);
             const { rowIndex, colIndex } = getRowColFromIndex(index);
             const isFocused =
               focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
@@ -159,7 +163,7 @@ export const MetricsGrid = ({
                 <ChartItem
                   id={id}
                   index={index}
-                  metric={metric}
+                  metricItem={metricItem}
                   size="s"
                   dimensions={dimensions}
                   services={services}
@@ -175,7 +179,7 @@ export const MetricsGrid = ({
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
                   whereStatements={whereStatements}
-                  userMessages={getUserMessages ? getUserMessages(metric) : undefined}
+                  userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
                   useM4Downsampling={useM4Downsampling}
                 />
               </EuiFlexItem>
@@ -185,7 +189,7 @@ export const MetricsGrid = ({
       </A11yGridWrapper>
       {expandedMetric && (
         <MetricInsightsFlyout
-          metric={expandedMetric.metric}
+          metricItem={expandedMetric.metricItem}
           esqlQuery={expandedMetric.esqlQuery}
           onClose={handleCloseFlyout}
         />
@@ -200,7 +204,7 @@ interface ChartItemProps
     'services' | 'onBrushEnd' | 'onFilter' | 'fetchParams' | 'actions'
   > {
   id: string;
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   index: number;
   size: ChartSize;
   dimensions: Dimension[];
@@ -210,7 +214,7 @@ interface ChartItemProps
   isFocused: boolean;
   searchTerm?: string;
   onFocusCell: (rowIndex: number, colIndex: number) => void;
-  onViewDetails: (index: number, esqlQuery: string, metric: MetricField) => void;
+  onViewDetails: (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => void;
   whereStatements?: string[];
   userMessages?: EmbeddableComponentProps['userMessages'];
   useM4Downsampling?: boolean;
@@ -219,7 +223,7 @@ interface ChartItemProps
 const ChartItem = React.memo(
   ({
     id,
-    metric,
+    metricItem,
     index,
     size,
     dimensions,
@@ -245,40 +249,45 @@ const ChartItem = React.memo(
       [euiTheme.colors.vis]
     );
 
+    const instrument = firstNonNullable(metricItem.metricTypes);
+    const fieldType = firstNonNullable(metricItem.fieldTypes);
     const isM4Compatible =
-      useM4Downsampling && metric.instrument !== 'counter' && metric.instrument !== 'histogram';
+      useM4Downsampling &&
+      instrument !== 'counter' &&
+      instrument !== 'histogram';
 
     const standardQuery = useMemo(() => {
-      const isSupported = metric.type !== 'unsigned_long';
+      const isSupported = fieldType !== 'unsigned_long';
       if (!isSupported) return '';
 
       return createESQLQuery({
-        metric,
+        metricItem,
         splitAccessors: dimensions.map((dim) => dim.name),
         whereStatements,
         useFrom: isM4Compatible,
         targetBuckets: isM4Compatible ? AVG_TARGET_BUCKETS : undefined,
       });
-    }, [metric, dimensions, whereStatements, isM4Compatible]);
+    }, [metricItem, dimensions, whereStatements, isM4Compatible]);
 
     const m4Query = useMemo(() => {
       if (!isM4Compatible) return '';
-      const isSupported = metric.type !== 'unsigned_long';
+      const isSupported = fieldType !== 'unsigned_long';
       if (!isSupported) return '';
 
       return createM4DownsampledESQLQuery({
-        metric,
+        metricItem,
         whereStatements,
         splitAccessors: dimensions.map((dim) => dim.name),
         sourceBuckets: AVG_TARGET_BUCKETS,
         targetBuckets: M4_TARGET_BUCKETS,
       });
-    }, [metric, whereStatements, dimensions, isM4Compatible]);
+    }, [metricItem, whereStatements, dimensions, isM4Compatible]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
+    const metricUnit = firstNonNullable(metricItem.units);
     const standardChartLayers = useChartLayers({
       dimensions,
-      metric,
+      metricItem,
       color,
       seriesType: isM4Compatible ? 'line' : undefined,
       targetBuckets: isM4Compatible ? AVG_TARGET_BUCKETS : undefined,
@@ -293,23 +302,23 @@ const ChartItem = React.memo(
           yAxis: [
             {
               value: M4_VALUE_COLUMN,
-              label: metric.name,
+              label: metricItem.metricName,
               compactValues: true,
               seriesColor: color,
-              ...(metric.unit ? getLensMetricFormat(metric.unit) : {}),
+              ...(metricUnit ? getLensMetricFormat(metricUnit) : {}),
             },
           ],
           breakdown:
             dimensions.length > 0 ? dimensions.map((dim) => dim.name) : undefined,
         },
       ],
-      [metric.name, metric.unit, color, dimensions]
+      [metricItem.metricName, metricUnit, color, dimensions]
     );
 
     const activeQuery = isM4Compatible ? m4Query : standardQuery;
     const handleViewDetailsCallback = useCallback(
-      () => onViewDetails(index, activeQuery, metric),
-      [index, activeQuery, metric, onViewDetails]
+      () => onViewDetails(index, activeQuery, metricItem),
+      [index, activeQuery, metricItem, onViewDetails]
     );
 
     const sharedChartProps = {
@@ -336,7 +345,7 @@ const ChartItem = React.memo(
           <EuiFlexGroup gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                <strong>{metric.name}</strong>
+                <strong>{metricItem.metricName}</strong>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -353,7 +362,7 @@ const ChartItem = React.memo(
               <Chart
                 {...sharedChartProps}
                 esqlQuery={standardQuery}
-                title={`${metric.name} — Standard`}
+                title={`${metricItem.metricName} — Standard`}
                 chartLayers={standardChartLayers}
                 titleHighlight={searchTerm}
                 onViewDetails={handleViewDetailsCallback}
@@ -372,7 +381,7 @@ const ChartItem = React.memo(
               <Chart
                 {...sharedChartProps}
                 esqlQuery={m4Query}
-                title={`${metric.name} — M4`}
+                title={`${metricItem.metricName} — M4`}
                 chartLayers={m4ChartLayers}
                 titleHighlight={searchTerm}
                 onViewDetails={handleViewDetailsCallback}
@@ -396,7 +405,7 @@ const ChartItem = React.memo(
         <Chart
           {...sharedChartProps}
           esqlQuery={standardQuery}
-          title={metric.name}
+          title={metricItem.metricName}
           chartLayers={standardChartLayers}
           titleHighlight={searchTerm}
           onViewDetails={handleViewDetailsCallback}

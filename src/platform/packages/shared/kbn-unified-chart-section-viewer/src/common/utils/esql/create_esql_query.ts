@@ -9,15 +9,16 @@
 
 import { from, limit, stats, timeseries, where } from '@kbn/esql-composer';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import type { MetricField } from '../../../types';
+import type { ParsedMetricItem } from '../../../types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
   createM4Pipeline,
 } from './create_aggregation';
+import { firstNonNullable } from '../first_null_nullable';
 
 interface CreateESQLQueryParams {
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   splitAccessors?: string[];
   whereStatements?: string[];
   useFrom?: boolean;
@@ -37,13 +38,16 @@ interface CreateESQLQueryParams {
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({
-  metric,
+  metricItem,
   splitAccessors = [],
   whereStatements = [],
   useFrom = false,
   targetBuckets,
 }: CreateESQLQueryParams) {
-  const { name: metricField, instrument, index, type } = metric;
+  const { metricName, metricTypes, fieldTypes, dataStream } = metricItem;
+  const index = dataStream;
+  const type = firstNonNullable(fieldTypes);
+  const instrument = firstNonNullable(metricTypes);
   const source = useFrom ? from(index) : timeseries(index);
 
   const whereCommands = whereStatements.flatMap((statement) => {
@@ -57,14 +61,14 @@ export function createESQLQuery({
       `${createMetricAggregation({
         type,
         instrument,
-        placeholderName: 'metricField',
+        placeholderName: 'metricName',
       })} BY ${createTimeBucketAggregation({ targetBuckets })}${
         splitAccessors.length > 0
           ? `, ${splitAccessors.map((field) => sanitazeESQLInput(field)).join(',')}`
           : ''
       }`,
       {
-        metricField,
+        metricName,
       }
     ),
     ...(targetBuckets ? [limit(targetBuckets)] : []),
@@ -74,7 +78,7 @@ export function createESQLQuery({
 }
 
 interface CreateM4DownsampledESQLQueryParams {
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   whereStatements?: string[];
   splitAccessors?: string[];
   sourceBuckets?: number;
@@ -100,15 +104,17 @@ interface CreateM4DownsampledESQLQueryParams {
  * @returns A complete ES|QL query string.
  */
 export function createM4DownsampledESQLQuery({
-  metric,
+  metricItem,
   whereStatements = [],
   splitAccessors = [],
   sourceBuckets = 1000,
   targetBuckets = 100,
   timestampField = '@timestamp',
 }: CreateM4DownsampledESQLQueryParams): string {
-  const { name: metricField, instrument, index, type } = metric;
-  const source = from(index);
+  const { metricName: metricField, metricTypes, fieldTypes, dataStream } = metricItem;
+  const type = firstNonNullable(fieldTypes);
+  const instrument = firstNonNullable(metricTypes);
+  const source = from(dataStream);
 
   const whereCommands = whereStatements.flatMap((statement) => {
     const trimmed = statement.trim();
