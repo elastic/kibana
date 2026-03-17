@@ -12,6 +12,10 @@ const rows = [
 
 export const ILMPhases: FC = () => (
   <ContentSlide title="ILM Lifecycle Phases">
+    <p className="text-slide-body text-slide-secondary mb-4">
+      Without lifecycle management, indexes accumulate data indefinitely — consuming storage and slowing queries.
+      ILM phases automatically age and eventually delete old execution data with zero application logic.
+    </p>
     <SlideTable headers={headers} rows={rows} />
     <div className="grid grid-cols-2 gap-3 mt-2">
       <Card variant="info">

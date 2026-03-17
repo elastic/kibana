@@ -3,6 +3,10 @@ import { ContentSlide, Badge } from '../components';
 
 export const HowRollover: FC = () => (
   <ContentSlide title="How Rollover Aliases Work">
+    <p className="text-slide-body text-slide-secondary mb-4">
+      Without rollover, our indexes grow without bound — degrading query performance and preventing lifecycle management.
+      Rollover aliases let Elasticsearch automatically split data into manageable, time-bounded backing indexes.
+    </p>
     <div className="border-2 border-elastic-blue/30 rounded-xl p-6 bg-blue-50/30">
       <p className="text-sm font-medium text-slide-secondary mb-4">Alias: .workflows-executions</p>
       <div className="flex gap-4">

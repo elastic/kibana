@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { ContentSlide } from '../components';
 
 const items = [
-  'The motivation for change',
+  'The motivation for change — and what makes the workflow engine unique',
   'Options considered (and why they were abandoned)',
   'The chosen approach: rollover indexes with ILM',
   'Benefits and open questions',

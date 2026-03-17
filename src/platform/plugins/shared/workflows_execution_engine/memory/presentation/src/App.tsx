@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback, type FC, type ReactNode } from 'react';
+import { TableOfContents, FullscreenToggle, type SlideMeta } from './components';
 import {
   Title,
   Agenda,
   Ch1Title,
   CurrentState,
   ProblemsAtScale,
+  Challenge,
   Ch2Title,
   DataStreamsOption,
   EventSourcing,
@@ -32,6 +34,7 @@ const SLIDES: FC[] = [
   Ch1Title,
   CurrentState,
   ProblemsAtScale,
+  Challenge,
   Ch2Title,
   DataStreamsOption,
   EventSourcing,
@@ -53,7 +56,35 @@ const SLIDES: FC[] = [
   Discussion,
 ];
 
-const isTitleSlide = (idx: number) => [0, 2, 5, 12, 23].includes(idx);
+const isTitleSlide = (idx: number) => [0, 2, 6, 13, 24].includes(idx);
+
+const SLIDE_META: SlideMeta[] = [
+  { label: 'Title',                   chapter: 'Opening' },
+  { label: 'Agenda',                  chapter: 'Opening' },
+  { label: 'Why We Need to Change',   chapter: 'Ch 1 — Motivation' },
+  { label: 'Current State',           chapter: 'Ch 1 — Motivation' },
+  { label: 'Problems at Scale',       chapter: 'Ch 1 — Motivation' },
+  { label: 'The Challenge',           chapter: 'Ch 1 — Motivation' },
+  { label: 'Options We Evaluated',    chapter: 'Ch 2 — Options' },
+  { label: 'Data Streams',            chapter: 'Ch 2 — Options' },
+  { label: 'Event Sourcing',          chapter: 'Ch 2 — Options' },
+  { label: 'CQRS Overview',           chapter: 'Ch 2 — Options' },
+  { label: 'CQRS Query Complexity',   chapter: 'Ch 2 — Options' },
+  { label: 'CQRS Migration Overhead', chapter: 'Ch 2 — Options' },
+  { label: 'Why We Moved Past CQRS',  chapter: 'Ch 2 — Options' },
+  { label: 'Rollover Indexes + ILM',  chapter: 'Ch 3 — Chosen Approach' },
+  { label: 'Nothing Changes',         chapter: 'Ch 3 — Chosen Approach' },
+  { label: 'How Rollover Works',      chapter: 'Ch 3 — Chosen Approach' },
+  { label: 'Index Pinning',           chapter: 'Ch 3 — Chosen Approach' },
+  { label: 'Encoded IDs',             chapter: 'Ch 3 — Chosen Approach' },
+  { label: 'Reads During Execution',  chapter: 'Ch 3 — Chosen Approach' },
+  { label: 'Reads via UI',            chapter: 'Ch 3 — Chosen Approach' },
+  { label: 'ILM Lifecycle Phases',    chapter: 'Ch 3 — Chosen Approach' },
+  { label: 'Migration',               chapter: 'Ch 3 — Chosen Approach' },
+  { label: 'Benefits',                chapter: 'Ch 3 — Chosen Approach' },
+  { label: 'Open Questions',          chapter: 'Closing' },
+  { label: 'Discussion',              chapter: 'Closing' },
+];
 
 const SlideWrapper = ({ children, isTitle, active }: { children: ReactNode; isTitle: boolean; active: boolean }) => (
   <div
@@ -117,6 +148,8 @@ export const App = () => {
 
       <div className="nav-chrome">
         <ElasticWatermark />
+        <TableOfContents slides={SLIDE_META} current={current} onNavigate={go} />
+        <FullscreenToggle />
 
         <div
           className="fixed bottom-0 left-0 h-[3px] bg-elastic-blue z-50 transition-all duration-300"

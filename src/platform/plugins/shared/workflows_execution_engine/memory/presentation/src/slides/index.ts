@@ -3,6 +3,7 @@ export { Agenda } from './02_Agenda';
 export { Ch1Title } from './03_Ch1Title';
 export { CurrentState } from './04_CurrentState';
 export { ProblemsAtScale } from './05_ProblemsAtScale';
+export { Challenge } from './05b_Challenge';
 export { Ch2Title } from './06_Ch2Title';
 export { DataStreamsOption } from './07_DataStreams';
 export { EventSourcing } from './08_EventSourcing';

@@ -17,6 +17,10 @@ const readBullets = [
 
 export const ReadsDuringExecution: FC = () => (
   <ContentSlide title="Retrieve Documents During Execution">
+    <p className="text-slide-body text-slide-secondary mb-4">
+      The execution engine reads and writes on every step transition, so latency matters.
+      Direct index access via pinning and encoded IDs keeps the hot path fast and avoids search-refresh delays.
+    </p>
     <TwoColumns
       left={
         <div>

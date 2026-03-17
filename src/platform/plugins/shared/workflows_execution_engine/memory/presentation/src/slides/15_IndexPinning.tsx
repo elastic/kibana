@@ -18,6 +18,10 @@ const bullets = [
 
 export const IndexPinning: FC = () => (
   <ContentSlide title="Pin Executions to Backing Indexes">
+    <p className="text-slide-body text-slide-secondary mb-4">
+      When ILM rolls over mid-execution, documents for a single execution could scatter across multiple indexes.
+      Pinning keeps all documents for one execution together, enabling efficient bulk reads and consistent updates.
+    </p>
     <TwoColumns
       left={<FlowDiagram steps={flowSteps} />}
       right={<BulletList items={bullets} />}

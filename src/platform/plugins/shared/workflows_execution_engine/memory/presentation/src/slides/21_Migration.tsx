@@ -22,6 +22,10 @@ const bullets = [
 
 export const Migration: FC = () => (
   <ContentSlide title="Migration from Flat Indexes">
+    <p className="text-slide-body text-slide-secondary mb-4">
+      Existing deployments already have execution data in flat indexes. We need a one-time migration to move that data
+      into the new rollover aliases so all executions — past and future — benefit from ILM lifecycle management.
+    </p>
     <div className="space-y-3 mb-6">
       <FlowDiagram steps={workflowFlow} />
       <FlowDiagram steps={stepFlow} />

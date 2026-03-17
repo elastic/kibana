@@ -17,6 +17,10 @@ const searchBullets = [
 
 export const ReadsViaUI: FC = () => (
   <ContentSlide title="Retrieve Documents via UI">
+    <p className="text-slide-body text-slide-secondary mb-4">
+      The UI has different access patterns than the engine — it needs both real-time polling for active executions and historical search across all data.
+      Each pattern maps to a different read strategy optimized for its use case.
+    </p>
     <TwoColumns
       left={
         <div>

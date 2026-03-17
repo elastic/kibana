@@ -8,3 +8,6 @@ export { SlideTable } from './SlideTable';
 export { BulletList } from './BulletList';
 export { Badge } from './Badge';
 export { LogoRow } from './LogoRow';
+export { TableOfContents } from './TableOfContents';
+export { FullscreenToggle } from './FullscreenToggle';
+export type { SlideMeta } from './TableOfContents';

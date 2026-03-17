@@ -25,6 +25,10 @@ const bullets = [
 
 export const EncodedIDs: FC = () => (
   <ContentSlide title="Encoded Execution IDs">
+    <p className="text-slide-body text-slide-secondary mb-4">
+      With multiple backing indexes behind an alias, looking up a specific document requires a fan-out search across all of them.
+      Encoding the backing index suffix into the ID lets any caller resolve the exact index for an O(1) direct GET.
+    </p>
     <TwoColumns
       left={<CodeBlock code={codeLines.join('\n')} language="typescript" />}
       right={<BulletList items={bullets} />}
