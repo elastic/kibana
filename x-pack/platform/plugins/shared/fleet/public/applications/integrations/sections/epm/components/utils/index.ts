@@ -26,14 +26,14 @@ export const wrapTitleWithDeprecated = ({
   defaultTitle?: string;
 }) => {
   const titleToWrap = title || integrationInfo?.title || packageInfo?.title || defaultTitle;
-  const isDeprecated: boolean =
+  const isDeprecated =
     deprecated ||
     (!!packageInfo?.deprecated &&
       !isUpcomingDeprecation(packageInfo.version, packageInfo.deprecated)) ||
     !!packageInfo?.conditions?.deprecated ||
     (!!integrationInfo?.deprecated &&
-      !isUpcomingDeprecation(packageInfo?.version ?? '', integrationInfo.deprecated)) ||
-    false;
+      !isUpcomingDeprecation(packageInfo?.version ?? '', integrationInfo.deprecated));
+
   return isDeprecated &&
     !titleToWrap.match(/ \(deprecated\)$/) &&
     !titleToWrap.match(/ \(Deprecated\)$/)
