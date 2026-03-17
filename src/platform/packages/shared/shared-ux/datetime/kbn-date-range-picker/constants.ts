@@ -43,6 +43,23 @@ export const UNIT_SHORT_TO_FULL_MAP: Record<string, string> = {
   y: 'year',
 };
 
+/**
+ * Maps each date-math offset unit to the unit used for rounding (`/X` suffix).
+ *
+ * Sub-day units promote one step up (`ms→s`, `s→m`, `m→h`), except `h→h`
+ * which keeps the hour boundary. Day-and-above units all normalise to `/d`.
+ */
+export const ROUND_UNIT_MAP: Record<string, string> = {
+  ms: 's',
+  s: 'm',
+  m: 'h',
+  h: 'h',
+  d: 'd',
+  w: 'd',
+  M: 'd',
+  y: 'd',
+};
+
 /** Selector for focusable elements */
 export const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';

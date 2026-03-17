@@ -385,6 +385,142 @@ describe('textToTimeRange', () => {
     });
   });
 
+  describe('roundRelativeTime', () => {
+    const opts = (round: boolean) => ({ roundRelativeTime: round });
+
+    describe('true — adds rounding', () => {
+      it.each([
+        ['last 7 days', 'now-7d/d', 'now'],
+        ['last 2 weeks', 'now-2w/d', 'now'],
+        ['last 3 months', 'now-3M/d', 'now'],
+        ['last 1 year', 'now-1y/d', 'now'],
+      ])('natural duration (day+) "%s" → start=%s', (text, start, end) => {
+        const range = textToTimeRange(text, opts(true));
+
+        expect(range.start).toBe(start);
+        expect(range.end).toBe(end);
+        expect(range.value).toBe(text);
+      });
+
+      it.each([
+        ['last 30 minutes', 'now-30m/h', 'now'],
+        ['last 3 hours', 'now-3h/h', 'now'],
+        ['last 10 seconds', 'now-10s/m', 'now'],
+        ['last 500 milliseconds', 'now-500ms/s', 'now'],
+      ])('natural duration (sub-day) "%s" → start=%s', (text, start, end) => {
+        const range = textToTimeRange(text, opts(true));
+
+        expect(range.start).toBe(start);
+        expect(range.end).toBe(end);
+        expect(range.value).toBe(text);
+      });
+
+      it.each([
+        ['-7d', 'now-7d/d'],
+        ['7d', 'now-7d/d'],
+        ['30m', 'now-30m/h'],
+        ['3h', 'now-3h/h'],
+        ['500ms', 'now-500ms/s'],
+      ])('shorthand "%s" → start=%s', (text, start) => {
+        const range = textToTimeRange(text, opts(true));
+
+        expect(range.start).toBe(start);
+        expect(range.end).toBe('now');
+        expect(range.value).toBe(text);
+      });
+
+      it.each([
+        ['now-30m to now', 'now-30m/h', 'now'],
+        ['-7d to now', 'now-7d/d', 'now'],
+        ['now-3h to now-1h', 'now-3h/h', 'now-1h'],
+      ])('delimiter-split "%s" → start=%s end=%s', (text, start, end) => {
+        const range = textToTimeRange(text, opts(true));
+
+        expect(range.start).toBe(start);
+        expect(range.end).toBe(end);
+        expect(range.value).toBe(text);
+      });
+
+      it.each([
+        ['-3w/w', 'now-3w/w'],
+        ['-60s/h', 'now-60s/h'],
+        ['-7d/M', 'now-7d/M'],
+      ])('preserves existing rounding "%s" even when it differs from inferred', (text, start) => {
+        const range = textToTimeRange(text, opts(true));
+
+        expect(range.start).toBe(start);
+      });
+
+      it('rounds future start in delimiter-split path', () => {
+        const range = textToTimeRange('now+3d to now+7d', opts(true));
+
+        expect(range.start).toBe('now+3d/d');
+        expect(range.end).toBe('now+7d');
+      });
+    });
+
+    describe('true — no-op cases', () => {
+      it('does not round bare "now" as start', () => {
+        const range = textToTimeRange('+7d', opts(true));
+
+        expect(range.start).toBe('now');
+        expect(range.end).toBe('now+7d');
+      });
+
+      it('does not round future natural duration start', () => {
+        const range = textToTimeRange('next 7 days', opts(true));
+
+        expect(range.start).toBe('now');
+        expect(range.end).toBe('now+7d');
+      });
+
+      it('does not affect named ranges', () => {
+        const range = textToTimeRange('today', opts(true));
+
+        expect(range.start).toBe('now/d');
+        expect(range.end).toBe('now/d');
+      });
+
+      it('does not affect preset matches', () => {
+        const presets = [{ label: 'Last 15 Minutes', start: 'now-15m', end: 'now' }];
+        const range = textToTimeRange('Last 15 Minutes', { presets, roundRelativeTime: true });
+
+        expect(range.start).toBe('now-15m');
+        expect(range.end).toBe('now');
+      });
+
+      it('never modifies end', () => {
+        const range = textToTimeRange('now-7d to now-1d', opts(true));
+
+        expect(range.end).toBe('now-1d');
+      });
+    });
+
+    describe('false — strips rounding', () => {
+      it('removes existing rounding suffix', () => {
+        const range = textToTimeRange('-7d/d', opts(false));
+
+        expect(range.start).toBe('now-7d');
+      });
+
+      it('is a no-op when no rounding is present', () => {
+        const range = textToTimeRange('-7d', opts(false));
+
+        expect(range.start).toBe('now-7d');
+      });
+    });
+
+    describe('undefined (default) — no transformation', () => {
+      it('leaves start as-is', () => {
+        const withRound = textToTimeRange('-7d/d');
+        expect(withRound.start).toBe('now-7d/d');
+
+        const withoutRound = textToTimeRange('-7d');
+        expect(withoutRound.start).toBe('now-7d');
+      });
+    });
+  });
+
   describe('round-trip through getOptionInputText', () => {
     it.each([
       ['relative to now', 'now-15m', 'now'],
