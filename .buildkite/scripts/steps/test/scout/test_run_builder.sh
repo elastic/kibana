@@ -62,8 +62,16 @@ else
     .buildkite/pipeline-utils/affected-packages/list_affected \
       --strategy git --deep --merge-base "$GITHUB_PR_MERGE_BASE" --json \
       > "$AFFECTED_MODULES_FILE"
-    # TODO: remove this temp exclusion after selective testing is validated
-    node -e "const f='$AFFECTED_MODULES_FILE'; const d=JSON.parse(require('fs').readFileSync(f,'utf8')); require('fs').writeFileSync(f, JSON.stringify(d.filter(id => !id.startsWith('@kbn/scout'))))"
+    # Temporarily ignore kbn-scout (and kbn-scout-release-testing) in the affected list so that
+    # pipeline only runs scout configs for other affected modules (e.g. SLO plugin and dependents).
+    # TODO: remove this temp exclusion after selective testing is validated.
+    node -e "
+      const f = '$AFFECTED_MODULES_FILE';
+      const data = JSON.parse(require('fs').readFileSync(f, 'utf8'));
+      const list = Array.isArray(data) ? data : [];
+      const filtered = list.filter(id => typeof id === 'string' && !id.startsWith('@kbn/scout'));
+      require('fs').writeFileSync(f, JSON.stringify(filtered));
+    "
     AFFECTED_MODULES_FLAG="--affected-modules $AFFECTED_MODULES_FILE"
   fi
 
