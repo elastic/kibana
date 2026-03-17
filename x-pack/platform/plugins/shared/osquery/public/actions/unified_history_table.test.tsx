@@ -224,7 +224,8 @@ describe('UnifiedHistoryTable', () => {
 
     renderWithProviders(<UnifiedHistoryTable />);
 
-    expect(screen.getByText('\u2014')).toBeInTheDocument();
+    const dashes = screen.getAllByText('\u2014');
+    expect(dashes.length).toBeGreaterThanOrEqual(1);
   });
 
   it('source column renders Live for live row', () => {
@@ -376,7 +377,8 @@ describe('UnifiedHistoryTable', () => {
 
       renderWithProviders(<UnifiedHistoryTable />);
 
-      expect(screen.getByText('\u2014')).toBeInTheDocument();
+      const dashes = screen.getAllByText('\u2014');
+      expect(dashes.length).toBeGreaterThanOrEqual(1);
     });
 
     it('play button is not available for scheduled rows', () => {

@@ -245,6 +245,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
+
+  /**
+   * Uses entity store v2 for entity analytics skill
+   */
+  entityAnalyticsEntityStoreV2: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

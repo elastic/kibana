@@ -91,6 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         {
           id: v4(),
           title: 'OutOfMemoryError',
+          description: '',
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'OutOfMemoryError'")`,
           },
@@ -98,6 +99,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         {
           id: v4(),
           title: 'cluster_block_exception',
+          description: '',
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'cluster_block_exception'")`,
           },
@@ -130,6 +132,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const query = {
           id: v4(),
           title: 'initial title',
+          description: '',
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'initial query'")`,
           },
@@ -160,6 +163,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const query = {
           id: 'first',
           title: 'initial title',
+          description: '',
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
           },
@@ -191,6 +195,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: query.id,
             title: query.title,
+            description: '',
             esql: { query: updatedEsql },
           },
         ]);
@@ -205,6 +210,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const query = {
           id: 'first',
           title: 'initial title',
+          description: '',
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
           },
@@ -235,6 +241,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: query.id,
             title: 'updated title',
+            description: '',
             esql: { query: query.esql.query },
           },
         ]);
@@ -255,6 +262,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: queryId,
             title: 'Significant Query',
+            description: '',
             esql: {
               query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'query'")`,
             },
@@ -290,6 +298,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const firstQuery = {
         id: 'first',
         title: 'first query',
+        description: '',
         esql: {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 1")`,
         },
@@ -297,6 +306,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const secondQuery = {
         id: 'second',
         title: 'second query',
+        description: '',
         esql: {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 2")`,
         },
@@ -304,6 +314,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const thirdQuery = {
         id: 'third',
         title: 'third query',
+        description: '',
         esql: {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3")`,
         },
@@ -318,6 +329,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const newQuery = {
         id: 'fourth',
         title: 'fourth query',
+        description: '',
         esql: {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 4")`,
         },
@@ -325,6 +337,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const updateThirdQuery = {
         id: 'third',
         title: 'third query',
+        description: '',
         esql: {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3 updated")`,
         },

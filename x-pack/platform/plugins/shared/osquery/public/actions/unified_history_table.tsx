@@ -40,11 +40,13 @@ import { pagePathGetters } from '../common/page_paths';
 import { usePacks } from '../packs/use_packs';
 import { RunByColumn } from './components/run_by_column';
 import { SourceBadge } from './components/source_column';
-import { HistoryFilters } from './components/history_filters';
+import { TagsColumn } from './components/tags_column';
+import { HistoryFilters, DEFAULT_START_DATE, DEFAULT_END_DATE } from './components/history_filters';
 import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
 import { useHistoryUrlParams } from './use_history_url_params';
 
 const EMPTY_ARRAY: UnifiedHistoryRow[] = [];
+const EMPTY_TAGS: string[] = [];
 const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
 
 const PACKS_CONFIG = { isLive: false } as const;
@@ -120,6 +122,7 @@ const UnifiedHistoryTableComponent = () => {
       start: startDate,
       end: endDate,
       pageSize: urlPageSize,
+      tags: selectedTags
     },
     setFilter,
     setFilters,
@@ -141,6 +144,7 @@ const UnifiedHistoryTableComponent = () => {
     kuery: searchValue || undefined,
     sourceFilters: selectedSources.length > 0 ? selectedSources : undefined,
     userIds: selectedUserIds.length > 0 ? selectedUserIds : undefined,
+    tags: selectedTags.length > 0 ? selectedTags : undefined,
     startDate,
     endDate,
   });
@@ -173,6 +177,14 @@ const UnifiedHistoryTableComponent = () => {
       resetPagination();
     },
     [setFilter, resetPagination]
+  );
+
+  const handleSelectedTagsChanged = useCallback(
+    (newTags: string[]) => {
+      setSelectedTags(newTags);
+      resetPagination();
+    },
+    [resetPagination]
   );
 
   const handleTimeChange = useCallback(
@@ -302,6 +314,14 @@ const UnifiedHistoryTableComponent = () => {
     (_: unknown, row: UnifiedHistoryRow) => <>{formatDate(row.timestamp)}</>,
     []
   );
+
+  const renderTagsColumn = useCallback((_: unknown, row: UnifiedHistoryRow) => {
+    if (!isLiveRow(row)) {
+      return <>{'\u2014'}</>;
+    }
+
+    return <TagsColumn tags={row.tags ?? EMPTY_TAGS} />;
+  }, []);
 
   const renderRunByColumn = useCallback(
     (_: unknown, row: UnifiedHistoryRow) => {
@@ -434,6 +454,14 @@ const UnifiedHistoryTableComponent = () => {
         render: renderResultsColumn,
       },
       {
+        field: 'tags',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.tagsColumnTitle', {
+          defaultMessage: 'Tags',
+        }),
+        width: '100px',
+        render: renderTagsColumn,
+      },
+      {
         field: 'source',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumnTitle', {
           defaultMessage: 'Source',
@@ -490,6 +518,7 @@ const UnifiedHistoryTableComponent = () => {
       renderResultsColumn,
       renderRunByColumn,
       renderSourceColumn,
+      renderTagsColumn,
       renderTimestampColumn,
     ]
   );
@@ -527,6 +556,8 @@ const UnifiedHistoryTableComponent = () => {
       <HistoryFilters
         searchValue={searchValue}
         onSearchSubmit={handleSearchSubmit}
+        selectedTags={selectedTags}
+        onSelectedTagsChanged={handleSelectedTagsChanged}
         selectedSources={selectedSources}
         onSelectedSourcesChanged={handleSelectedSourcesChanged}
         selectedUserIds={selectedUserIds}
