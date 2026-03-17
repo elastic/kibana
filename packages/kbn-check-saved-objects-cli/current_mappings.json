@@ -301,6 +301,20 @@
       }
     }
   },
+  "alerting_api_key_pending_invalidation": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
+      }
+    }
+  },
   "alerting_notification_policy": {
     "dynamic": false,
     "properties": {
@@ -1589,6 +1603,17 @@
       "additional_spaces_installed_kibana": {
         "index": false,
         "type": "flattened"
+      },
+      "dependencies": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
       },
       "es_index_patterns": {
         "dynamic": false,
@@ -4280,6 +4305,10 @@
     "properties": {}
   },
   "stream-prompts": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "streams-significant-events-settings": {
     "dynamic": false,
     "properties": {}
   },

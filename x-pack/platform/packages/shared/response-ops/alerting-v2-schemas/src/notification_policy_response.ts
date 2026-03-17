@@ -12,10 +12,12 @@ export interface NotificationPolicyResponse {
   version?: string;
   name: string;
   description: string;
+  enabled: boolean;
   destinations: NotificationPolicyDestination[];
   matcher?: string;
   group_by?: string[];
   throttle?: { interval: string };
+  snoozedUntil?: string;
   rule_labels?: string[];
   auth: {
     owner: string;

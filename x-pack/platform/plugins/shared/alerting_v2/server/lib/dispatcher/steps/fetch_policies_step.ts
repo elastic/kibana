@@ -38,10 +38,12 @@ export class FetchPoliciesStep implements DispatcherStep {
       policies.set(doc.id, {
         id: doc.id,
         name: doc.attributes.name,
+        enabled: doc.attributes.enabled,
         destinations: doc.attributes.destinations ?? [],
         matcher: doc.attributes.matcher,
         groupBy: doc.attributes.group_by ?? [],
         throttle: doc.attributes.throttle,
+        snoozedUntil: doc.attributes.snoozedUntil,
         ruleLabels: doc.attributes.rule_labels ?? [],
         apiKey: doc.attributes.auth.apiKey,
       });
