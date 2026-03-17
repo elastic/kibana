@@ -44,10 +44,7 @@ export interface RedTeamRunnerConfig {
   guardrailsOnly?: boolean;
 }
 
-const classifySeverity = (
-  evaluationScores: number[],
-  guardrailBlocked: boolean
-): Severity => {
+const classifySeverity = (evaluationScores: number[], guardrailBlocked: boolean): Severity => {
   if (guardrailBlocked) return 'critical';
   if (evaluationScores.length === 0) return 'info';
 
@@ -143,7 +140,7 @@ export const createRedTeamRunner = (config: RedTeamRunnerConfig) => {
       }
 
       if (guardrailResult.matches.length > 0) {
-        evaluations['guardrails'] = {
+        evaluations.guardrails = {
           score: guardrailResult.blocked ? 0 : 0.5,
           label: guardrailResult.blocked ? 'blocked' : 'warning',
           explanation: guardrailResult.matches
