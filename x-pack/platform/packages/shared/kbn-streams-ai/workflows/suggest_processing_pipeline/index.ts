@@ -81,6 +81,7 @@ export async function suggestProcessingPipeline({
     fields_schema: isOtel
       ? `OpenTelemetry (OTel) semantic convention for log records`
       : 'Elastic Common Schema (ECS)',
+    content_field: isOtel ? 'body.text' : 'message',
     pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(pipelineDefinitionSchema)),
     initial_dataset_analysis: JSON.stringify(simulationMetrics),
     parsing_processor: parsingProcessor ? JSON.stringify(parsingProcessor) : undefined,

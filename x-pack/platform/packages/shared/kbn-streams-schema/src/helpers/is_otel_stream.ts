@@ -6,12 +6,13 @@
  */
 
 import { Streams } from '../models/streams';
+import { getRoot, LOGS_ECS_STREAM_NAME } from '../shared/hierarchy';
 
 /**
  * Determines whether a stream should conform to OpenTelemetry (OTel) naming convention or not.
  *
  * A stream should conform to OTel in the following cases:
- * - If it is a wired stream (Streams.WiredStream.Definition)
+ * - If it is a wired stream whose root is NOT `logs.ecs` (ECS wired streams use ECS naming)
  * - If its name matches the pattern `logs-*.otel-*`
  *
  * @param stream - The stream definition to check
@@ -19,5 +20,6 @@ import { Streams } from '../models/streams';
  */
 export function isOtelStream(stream: Streams.all.Definition) {
   const isWiredStream = Streams.WiredStream.Definition.is(stream);
-  return isWiredStream || stream.name.match(/^logs-.*\.otel-/) !== null;
+  const isEcsStream = getRoot(stream.name) === LOGS_ECS_STREAM_NAME;
+  return (isWiredStream && !isEcsStream) || stream.name.match(/^logs-.*\.otel-/) !== null;
 }

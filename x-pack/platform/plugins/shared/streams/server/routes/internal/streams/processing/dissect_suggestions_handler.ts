@@ -26,6 +26,7 @@ export interface ProcessingDissectSuggestionsParams {
   };
   body: {
     connector_id: string;
+    field_name: string;
     sample_messages: string[];
     review_fields: Record<
       string,
@@ -51,6 +52,7 @@ export const processingDissectSuggestionsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
     connector_id: z.string(),
+    field_name: z.string(),
     sample_messages: z.array(z.string()),
     review_fields: z.record(
       z.string(),
@@ -76,6 +78,9 @@ export const handleProcessingDissectSuggestions = async ({
 }: ProcessingDissectSuggestionsHandlerDeps) => {
   // Determine if we should use OTEL field names
   const useOtelFieldNames = await determineOtelFieldNameUsage(streamsClient, params.path.name);
+  // For OTel streams the source field is e.g. "body.text", but the LLM should output ECS names
+  // so that normalizeFieldName can translate them correctly.
+  const defaultFieldName = useOtelFieldNames ? 'message' : params.body.field_name;
 
   // Call LLM inference to review fields
   const reviewResult = await callInferenceWithPrompt(
@@ -84,7 +89,9 @@ export const handleProcessingDissectSuggestions = async ({
     ReviewDissectFieldsPrompt,
     params.body.sample_messages,
     params.body.review_fields,
-    signal
+    signal,
+    params.body.field_name,
+    defaultFieldName
   );
 
   // Fetch field metadata for ECS/OTEL field name resolution

@@ -87,6 +87,7 @@ export function useDissectPatternSuggestion(
                 path: { name: params.streamName },
                 body: {
                   connector_id: params.connectorId,
+                  field_name: params.fieldName,
                   sample_messages: largestGroup.messages.slice(0, 10),
                   review_fields: getReviewFields(dissectPattern, 10),
                 },

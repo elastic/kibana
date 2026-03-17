@@ -8,7 +8,7 @@ You are a specialized assistant for parsing and mapping semi-structured log mess
 
 You are given:
 
-* A set of raw log messages
+* A set of raw log messages extracted from the `{{{field_name}}}` field
 * A table of extracted fields (e.g., `field_1`, `field_2`, …) in **original order of appearance**
 * Example values for each field
 
@@ -32,8 +32,9 @@ For every field in the log:
 
 3. For **each final field** (combined or uncombined):
 
-   * Assign the **most appropriate ECS field name** (e.g., `@timestamp`, `log.level`, `log.logger`, `message`).  
-     * **Important**: Avoid being overly specific with field names. When in doubt about what a field represents, map it to `message`. Try to make a choice for all the fields.
+   * Assign the **most appropriate ECS field name** (e.g., `@timestamp`, `log.level`, `log.logger`, `{{{default_field_name}}}`).
+     * The remaining content field that captures the main log message body should be mapped to `{{{default_field_name}}}`.
+     * **Important**: Avoid being overly specific with field names. When in doubt about what a field represents, map it to `{{{default_field_name}}}`. Try to make a choice for all the fields.
 
 4. **Infer the log source**  
    * Set `log_source` to the most likely origin system (e.g., `System log`, `Nginx access log`).  
@@ -73,7 +74,7 @@ Return a JSON object in the following format:
             ]
         },
         {
-            "ecs_field": "message",
+            "ecs_field": "{{{default_field_name}}}",
             "columns": [
                 "field_6"
             ]

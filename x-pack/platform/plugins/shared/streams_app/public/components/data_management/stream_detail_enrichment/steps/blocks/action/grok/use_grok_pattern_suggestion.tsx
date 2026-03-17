@@ -98,6 +98,7 @@ export function useGrokPatternSuggestion(abortController: ReturnType<typeof useA
                 path: { name: params.streamName },
                 body: {
                   connector_id: params.connectorId,
+                  field_name: params.fieldName,
                   sample_messages: group.messages.slice(0, 10),
                   review_fields: getReviewFields(grokPatternNodes, 10),
                 },

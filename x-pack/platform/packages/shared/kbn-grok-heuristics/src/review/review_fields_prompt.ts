@@ -14,6 +14,17 @@ export const ReviewFieldsPrompt = createPrompt({
   description: 'Review and map structured fields to ECS-compliant fields',
   input: z.object({
     /**
+     * The name of the source field these messages were extracted from (e.g., "message", "error.message", "body.text").
+     * Provides context to the LLM about where the log data originates.
+     */
+    field_name: z.string(),
+    /**
+     * The ECS-equivalent field name to use as the default/catch-all mapping in the output
+     * (e.g., "message", "error.message"). On OTel streams this differs from field_name
+     * because the source field is "body.text" but the LLM should output ECS names.
+     */
+    default_field_name: z.string(),
+    /**
      * Raw log messages to pass to LLM
      */
     sample_messages: z.array(z.string()),

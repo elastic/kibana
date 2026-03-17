@@ -26,6 +26,7 @@ export interface ProcessingGrokSuggestionsParams {
   };
   body: {
     connector_id: string;
+    field_name: string;
     sample_messages: string[];
     review_fields: Record<
       string,
@@ -51,6 +52,7 @@ export const processingGrokSuggestionsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
     connector_id: z.string(),
+    field_name: z.string(),
     sample_messages: z.array(z.string()),
     review_fields: z.record(
       z.string(),
@@ -75,6 +77,10 @@ export const handleProcessingGrokSuggestions = async ({
   logger,
 }: ProcessingGrokSuggestionsHandlerDeps) => {
   const stream = await streamsClient.getStream(params.path.name);
+  const useOtelFieldNames = isOtelStream(stream);
+  // For OTel streams the source field is e.g. "body.text", but the LLM should output ECS names
+  // so that normalizeFieldName can translate them correctly.
+  const defaultFieldName = useOtelFieldNames ? 'message' : params.body.field_name;
 
   // Call LLM inference to review fields
   const reviewResult = await callInferenceWithPrompt(
@@ -83,7 +89,9 @@ export const handleProcessingGrokSuggestions = async ({
     ReviewFieldsPrompt,
     params.body.sample_messages,
     params.body.review_fields,
-    signal
+    signal,
+    params.body.field_name,
+    defaultFieldName
   );
 
   // Fetch field metadata for ECS/OTEL field name resolution
@@ -94,7 +102,7 @@ export const handleProcessingGrokSuggestions = async ({
 
   return {
     log_source: reviewResult.log_source,
-    fields: mapFields(reviewResult.fields, fieldMetadata, isOtelStream(stream)),
+    fields: mapFields(reviewResult.fields, fieldMetadata, useOtelFieldNames),
   };
 };
 
