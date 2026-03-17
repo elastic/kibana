@@ -140,7 +140,7 @@ export const typeSpecificCamelToSnake = (
         correlation_timespan: params.correlationTimespan,
         group_by: params.groupBy,
         min_cvss_score: params.minCvssScore,
-      };
+      } as unknown as RequiredOptional<TypeSpecificResponse>;
     }
     default: {
       return assertUnreachable(params);

@@ -179,17 +179,6 @@ const normalizeTypeSpecificFields = (rule: RuleResponse): TypeSpecificResponse =
         alert_suppression: rule.alert_suppression,
       };
     }
-    case 'vulnerability_check': {
-      return {
-        type: rule.type,
-        agent_policy_ids: rule.agent_policy_ids,
-        osquery_pack_name: rule.osquery_pack_name,
-        cve_index_pattern: rule.cve_index_pattern,
-        correlation_timespan: rule.correlation_timespan,
-        group_by: rule.group_by,
-        min_cvss_score: rule.min_cvss_score,
-      };
-    }
     default: {
       return assertUnreachable(rule);
     }

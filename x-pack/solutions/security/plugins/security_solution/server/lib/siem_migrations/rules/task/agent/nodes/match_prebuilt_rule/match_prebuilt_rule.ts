@@ -63,10 +63,7 @@ export const getMatchPrebuiltRuleNode = ({
       return {
         name: rule.name,
         description: rule.description,
-        query:
-          rule.target?.type !== 'machine_learning' && rule.target?.type !== 'vulnerability_check'
-            ? rule.target?.query
-            : '',
+        query: rule.target?.type !== 'machine_learning' ? rule.target?.query : '',
       };
     });
 

@@ -331,17 +331,6 @@ export const patchTypeSpecificParams = (
       }
       return patchNewTermsParams(result.data, existingRule);
     }
-    case 'vulnerability_check': {
-      return {
-        type: existingRule.type,
-        agent_policy_ids: existingRule.agent_policy_ids,
-        osquery_pack_name: existingRule.osquery_pack_name,
-        cve_index_pattern: existingRule.cve_index_pattern,
-        correlation_timespan: existingRule.correlation_timespan,
-        group_by: existingRule.group_by,
-        min_cvss_score: existingRule.min_cvss_score,
-      };
-    }
     default: {
       return assertUnreachable(existingRule);
     }
