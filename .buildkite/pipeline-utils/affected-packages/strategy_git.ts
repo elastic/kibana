@@ -124,7 +124,9 @@ export function getAffectedPackagesGit(mergeBase: string, includeDownstream: boo
   const changedFiles = output
     .split('\n')
     .map((line) => line.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    // Ignore Scout test manifest updates (e.g. from update-test-config-manifests); only real code changes should affect packages
+    .filter((file) => !file.includes('test/scout/.meta'));
 
   // Map files to packages
   const directlyAffectedPackages = new Set<string>();
