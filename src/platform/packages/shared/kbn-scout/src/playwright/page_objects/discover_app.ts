@@ -383,7 +383,7 @@ export class DiscoverApp {
     // two resolveIndex calls). In serverless CI this chain regularly exceeds
     // the default 10 s action timeout.
     const recommendedQueriesButton = this.page.testSubj.locator('esql-recommended-queries');
-    await expect(recommendedQueriesButton).toBeVisible({ timeout: 30_000 });
+    await expect(recommendedQueriesButton).toBeVisible();
     await recommendedQueriesButton.click();
     await panelTitleButton.waitFor({ state: 'visible' });
   }
@@ -396,10 +396,7 @@ export class DiscoverApp {
       name: queryLabel,
     });
 
-    // Solution-specific queries (e.g. "Search all metrics") are populated by
-    // the extensions endpoint which can lag behind the static template queries
-    // that render first. Allow extra time for the button to appear.
-    await expect(queryOption).toBeVisible({ timeout: 30_000 });
+    await expect(queryOption).toBeVisible();
     await queryOption.click();
     await this.waitUntilSearchingHasFinished();
   }
