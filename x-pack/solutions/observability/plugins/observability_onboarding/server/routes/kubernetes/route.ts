@@ -151,6 +151,20 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         },
       };
 
+      // Logs Essentials + Wired Streams: logs.otel uses a passthrough mapping for
+      // resource.attributes, storing fields in _source without indexing them. The
+      // runtime field extracts the value at query time. On classic indexed streams
+      // the indexed mapping takes precedence and the runtime field is ignored.
+      const runtimeMappings: estypes.MappingRuntimeFields = {
+        'resource.attributes.onboarding.id': {
+          type: 'keyword',
+          script: {
+            source:
+              "def v = params._source?.resource?.attributes?.get('onboarding.id'); if (v != null) emit(v.toString())",
+          },
+        },
+      };
+
       const [logsResult, metricsResult] = await Promise.all([
         elasticsearch.client.asCurrentUser.search({
           index: ['logs-*', 'logs', 'logs.*'],
@@ -158,6 +172,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
           allow_partial_search_results: true,
           size: 0,
           terminate_after: 1,
+          runtime_mappings: runtimeMappings,
           query,
         }),
         elasticsearch.client.asCurrentUser.search({
@@ -166,6 +181,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
           allow_partial_search_results: true,
           size: 0,
           terminate_after: 1,
+          runtime_mappings: runtimeMappings,
           query,
         }),
       ]);
