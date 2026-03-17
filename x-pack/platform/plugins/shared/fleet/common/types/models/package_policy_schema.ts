@@ -278,7 +278,7 @@ export const NewPackagePolicySchema = schema.object({
 export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
   {
     enabled: schema.maybe(schema.boolean()),
-    inputs: schema.maybe(schema.arrayOf(schema.any())),
+    inputs: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
     package: schema.maybe(schema.any()),
   },
   { unknowns: 'ignore' }
