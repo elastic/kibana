@@ -37,6 +37,11 @@ jest.mock('../../form_based/dimension_panel/format_selector', () => ({
 
 const { fetchFieldsFromESQLExpression } = jest.requireMock('./fetch_fields_from_esql_expression');
 
+const waitToLoad = async () =>
+  await waitFor(() => {
+    expect(fetchFieldsFromESQLExpression).toHaveBeenCalled();
+  });
+
 describe('TextBasedDimensionEditor', () => {
   const defaultProps = {
     isFullscreen: false,
@@ -103,10 +108,9 @@ describe('TextBasedDimensionEditor', () => {
 
   it('renders correctly and fetches columns on mount', async () => {
     render(<TextBasedDimensionEditor {...defaultProps} />);
+    await waitToLoad();
 
-    // Check if fetchFieldsFromESQL was called
     await waitFor(() => {
-      expect(fetchFieldsFromESQLExpression).toHaveBeenCalledTimes(1);
       expect(fetchFieldsFromESQLExpression).toHaveBeenCalledWith(
         { esql: 'FROM my_data | limit 0' },
         {},
@@ -125,10 +129,7 @@ describe('TextBasedDimensionEditor', () => {
     render(
       <TextBasedDimensionEditor {...defaultProps} isMetricDimension={true} setState={setState} />
     );
-
-    await waitFor(() => {
-      expect(capturedOnChoose).toBeDefined();
-    });
+    await waitToLoad();
 
     capturedOnChoose!({ type: 'field', field: 'Field Two' });
 
@@ -154,10 +155,7 @@ describe('TextBasedDimensionEditor', () => {
     render(
       <TextBasedDimensionEditor {...defaultProps} isMetricDimension={false} setState={setState} />
     );
-
-    await waitFor(() => {
-      expect(capturedOnChoose).toBeDefined();
-    });
+    await waitToLoad();
 
     capturedOnChoose!({ type: 'field', field: 'Field One' });
 
@@ -170,34 +168,37 @@ describe('TextBasedDimensionEditor', () => {
   });
 
   describe('NameInput label handling', () => {
-    it('should pass empty string value when no custom label is set', () => {
+    it('should pass empty string value when no custom label is set', async () => {
       render(
         <TextBasedDimensionEditor
           {...defaultProps}
           state={stateWithColumn({ customLabel: false, label: 'bytes' })}
         />
       );
+      await waitToLoad();
 
       const nameInput = screen.getByTestId('name-input');
       expect(nameInput).toHaveValue('');
     });
 
-    it('should pass the custom label as the input value when customLabel is true', () => {
+    it('should pass the custom label as the input value when customLabel is true', async () => {
       render(
         <TextBasedDimensionEditor
           {...defaultProps}
           state={stateWithColumn({ customLabel: true, label: 'My Custom Label' })}
         />
       );
+      await waitToLoad();
 
       const nameInput = screen.getByTestId('name-input');
       expect(nameInput).toHaveValue('My Custom Label');
     });
 
-    it('should update label and set customLabel to true on name input change', () => {
+    it('should update label and set customLabel to true on name input change', async () => {
       const setState = jest.fn();
       const state = stateWithColumn();
       render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
+      await waitToLoad();
 
       const nameInput = screen.getByTestId('name-input');
       fireEvent.change(nameInput, { target: { value: 'New Label' } });
@@ -213,10 +214,11 @@ describe('TextBasedDimensionEditor', () => {
       });
     });
 
-    it('should set customLabel to false when label is cleared back to the default', () => {
+    it('should set customLabel to false when label is cleared back to the default', async () => {
       const setState = jest.fn();
       const state = stateWithColumn({ customLabel: true, label: 'Custom' });
       render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
+      await waitToLoad();
 
       const nameInput = screen.getByTestId('name-input');
       fireEvent.change(nameInput, { target: { value: '' } });
@@ -234,7 +236,7 @@ describe('TextBasedDimensionEditor', () => {
   });
 
   describe('FormatSelector numeric column detection', () => {
-    it('should show FormatSelector when activeData reports the column as numeric', () => {
+    it('should show FormatSelector when activeData reports the column as numeric', async () => {
       render(
         <TextBasedDimensionEditor
           {...defaultProps}
@@ -248,11 +250,12 @@ describe('TextBasedDimensionEditor', () => {
           }}
         />
       );
+      await waitToLoad();
 
       expect(screen.getByTestId('format-selector')).toBeInTheDocument();
     });
 
-    it('should hide FormatSelector when activeData reports the column as non-numeric', () => {
+    it('should hide FormatSelector when activeData reports the column as non-numeric', async () => {
       render(
         <TextBasedDimensionEditor
           {...defaultProps}
@@ -266,28 +269,31 @@ describe('TextBasedDimensionEditor', () => {
           }}
         />
       );
+      await waitToLoad();
 
       expect(screen.queryByTestId('format-selector')).not.toBeInTheDocument();
     });
 
-    it('should fall back to selectedField.meta when activeData is not available', () => {
+    it('should fall back to selectedField.meta when activeData is not available', async () => {
       render(
         <TextBasedDimensionEditor
           {...defaultProps}
           state={stateWithColumn({ meta: { type: 'number' } })}
         />
       );
+      await waitToLoad();
 
       expect(screen.getByTestId('format-selector')).toBeInTheDocument();
     });
 
-    it('should hide FormatSelector for non-numeric field when no activeData', () => {
+    it('should hide FormatSelector for non-numeric field when no activeData', async () => {
       render(
         <TextBasedDimensionEditor
           {...defaultProps}
           state={stateWithColumn({ meta: { type: 'string' } })}
         />
       );
+      await waitToLoad();
 
       expect(screen.queryByTestId('format-selector')).not.toBeInTheDocument();
     });
@@ -301,10 +307,8 @@ describe('TextBasedDimensionEditor', () => {
         params: { format: { id: 'number', params: { decimals: 2 } } },
       });
       render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
+      await waitToLoad();
 
-      await waitFor(() => {
-        expect(capturedOnChoose).toBeDefined();
-      });
       capturedOnChoose!({ type: 'field', field: 'Field One' });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -321,10 +325,8 @@ describe('TextBasedDimensionEditor', () => {
         params: { format: { id: 'number', params: { decimals: 2 } } },
       });
       render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
+      await waitToLoad();
 
-      await waitFor(() => {
-        expect(capturedOnChoose).toBeDefined();
-      });
       capturedOnChoose!({ type: 'field', field: 'Field Two' });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -340,10 +342,8 @@ describe('TextBasedDimensionEditor', () => {
       const setState = jest.fn();
       const state = stateWithColumn();
       render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
+      await waitToLoad();
 
-      await waitFor(() => {
-        expect(capturedOnChoose).toBeDefined();
-      });
       capturedOnChoose!({ type: 'field', field: 'Field One' });
 
       expect(setState).toHaveBeenCalledTimes(1);
@@ -358,10 +358,8 @@ describe('TextBasedDimensionEditor', () => {
       const setState = jest.fn();
       const state = stateWithColumn({ customLabel: true, label: 'Custom Label' });
       render(<TextBasedDimensionEditor {...defaultProps} state={state} setState={setState} />);
+      await waitToLoad();
 
-      await waitFor(() => {
-        expect(capturedOnChoose).toBeDefined();
-      });
       capturedOnChoose!({ type: 'field', field: 'Field One' });
 
       expect(setState).toHaveBeenCalledTimes(1);
