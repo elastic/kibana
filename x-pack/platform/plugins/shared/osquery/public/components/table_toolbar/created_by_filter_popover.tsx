@@ -46,9 +46,7 @@ const toSelectableOption = (
   isSelected: boolean,
   profilesMap: Map<string, UserProfileWithAvatar>
 ): EuiSelectableOption => {
-  const profile = Array.from(profilesMap.values()).find(
-    (p) => p.user.username === username
-  );
+  const profile = Array.from(profilesMap.values()).find((p) => p.user.username === username);
   const user = profile?.user ?? { username };
   const displayName = profile?.user.full_name || username;
 

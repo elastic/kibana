@@ -7,12 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiFieldSearch,
-  EuiFilterGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiFieldSearch, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CreatedByFilterPopover } from './created_by_filter_popover';
 import { EnabledFilterButtons } from './enabled_filter_buttons';

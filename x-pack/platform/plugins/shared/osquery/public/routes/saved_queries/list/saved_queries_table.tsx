@@ -6,10 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type {
-  CriteriaWithPagination,
-  EuiBasicTableColumn,
-} from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButton,
@@ -23,8 +20,8 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
-import { QUERY_TIMEOUT } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { QUERY_TIMEOUT } from '../../../../common/constants';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../../../common/use_persisted_page_size';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
@@ -354,6 +351,7 @@ const SavedQueriesTableComponent = () => {
           handlePageSizeChange(page.size);
         }
       }
+
       if (sort) {
         setSortField(sort.field as string);
         setSortDirection(sort.direction);

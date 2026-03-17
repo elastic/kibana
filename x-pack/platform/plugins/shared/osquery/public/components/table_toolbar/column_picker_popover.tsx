@@ -7,12 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import {
-  EuiButtonEmpty,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const POPOVER_WIDTH = 250;
@@ -54,9 +49,7 @@ const ColumnPickerPopoverComponent: React.FC<ColumnPickerPopoverProps> = ({
 
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
-      const newVisible = newOptions
-        .filter((opt) => opt.checked === 'on')
-        .map((opt) => opt.key!);
+      const newVisible = newOptions.filter((opt) => opt.checked === 'on').map((opt) => opt.key!);
       onVisibleColumnsChange(newVisible);
     },
     [onVisibleColumnsChange]

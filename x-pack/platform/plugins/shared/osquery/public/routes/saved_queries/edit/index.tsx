@@ -213,8 +213,7 @@ const EditSavedQueryPageComponent = () => {
     </EuiConfirmModal>
   ) : null;
 
-  const showActionButtons =
-    permissions.writeSavedQueries && (queryHistoryRework || !viewMode);
+  const showActionButtons = permissions.writeSavedQueries && (queryHistoryRework || !viewMode);
 
   const formContent = !isLoading &&
     !isEmpty(savedQueryDetails) &&

@@ -67,9 +67,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           }
 
           if (request.query.search) {
-            const searchTerm = request.query.search
-              .replace(/[\\{}()|"<>]/g, '')
-              .trim();
+            const searchTerm = request.query.search.replace(/[\\{}()|"<>]/g, '').trim();
             if (searchTerm) {
               const searchFilter = [
                 `${savedQuerySavedObjectType}.attributes.id: ${searchTerm}*`,

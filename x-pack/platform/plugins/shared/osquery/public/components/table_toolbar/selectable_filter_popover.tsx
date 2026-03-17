@@ -49,9 +49,7 @@ const SelectableFilterPopoverComponent: React.FC<SelectableFilterPopoverProps> =
     (_: EuiSelectableOption[], __: unknown, changedOption: EuiSelectableOption) => {
       const key = changedOption.key!;
       const isRemoving = selectedKeys.includes(key);
-      const updated = isRemoving
-        ? selectedKeys.filter((k) => k !== key)
-        : [...selectedKeys, key];
+      const updated = isRemoving ? selectedKeys.filter((k) => k !== key) : [...selectedKeys, key];
       onSelectionChange(updated);
     },
     [selectedKeys, onSelectionChange]
@@ -84,9 +82,7 @@ const SelectableFilterPopoverComponent: React.FC<SelectableFilterPopoverProps> =
       closePopover={closePopover}
       panelPaddingSize="none"
       repositionOnScroll
-      panelProps={
-        dataTestSubj ? { 'data-test-subj': `${dataTestSubj}-popover` } : undefined
-      }
+      panelProps={dataTestSubj ? { 'data-test-subj': `${dataTestSubj}-popover` } : undefined}
     >
       <EuiSelectable aria-label={label} options={selectableOptions} onChange={handleChange}>
         {(list) => <div style={POPOVER_CONTENT_STYLE}>{list}</div>}

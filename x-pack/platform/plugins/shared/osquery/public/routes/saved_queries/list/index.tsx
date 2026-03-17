@@ -333,7 +333,11 @@ const SavedQueriesPageComponent = () => {
   );
 
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={addSavedQueryButton} rightColumnGrow={false}>
+    <WithHeaderLayout
+      leftColumn={LeftColumn}
+      rightColumn={addSavedQueryButton}
+      rightColumnGrow={false}
+    >
       {data?.data && (
         <EuiInMemoryTable
           items={data?.data}
