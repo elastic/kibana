@@ -44,6 +44,7 @@
       "security",
       "workflowsManagement",
       "usageCollection",
+      "usageApi",
       "home",
     ],
     "extraPublicDirs": []
