@@ -147,6 +147,10 @@ export const createManagementFooterItemsTree = (
                     breadcrumbStatus: 'hidden',
                   },
                   {
+                    link: 'management:evals',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
                     link: 'management:securityAiAssistantManagement',
                     breadcrumbStatus: 'hidden',
                   },
@@ -154,6 +158,10 @@ export const createManagementFooterItemsTree = (
               : [
                   {
                     link: 'management:genAiSettings',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:evals',
                     breadcrumbStatus: 'hidden',
                   },
                 ],

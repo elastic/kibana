@@ -20,6 +20,15 @@ export async function handleExecutionDelay(
 ) {
   const workflowExecution = params.workflowRuntime.getWorkflowExecution();
 
+  if (stepExecutionRuntime.stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT) {
+    // Propagate WAITING_FOR_INPUT to the workflow level so the execution loop exits.
+    // Resumption is triggered externally by the resume API; no task is scheduled here.
+    params.workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+    });
+    return;
+  }
+
   if (
     !stepExecutionRuntime.stepExecution ||
     stepExecutionRuntime.stepExecution.status !== ExecutionStatus.WAITING

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { get } from 'lodash';
+
 export const MAX_AGGREGATE_ITEMS = 100_000;
 
 // Null character cannot appear in JSON.stringify output, making it collision-safe
@@ -34,21 +36,7 @@ interface BucketConfig {
  * e.g. getFieldValue({ user: { name: 'Bob' } }, 'user.name') => 'Bob'
  */
 export function getFieldValue(item: unknown, field: string): unknown {
-  if (typeof item !== 'object' || item === null) {
-    return undefined;
-  }
-
-  const parts = field.split('.');
-  let current: unknown = item;
-
-  for (const part of parts) {
-    if (typeof current !== 'object' || current === null) {
-      return undefined;
-    }
-    current = (current as Record<string, unknown>)[part];
-  }
-
-  return current;
+  return get(item, field);
 }
 
 export function computeMetric(items: unknown[], metric: Metric): number | null {
