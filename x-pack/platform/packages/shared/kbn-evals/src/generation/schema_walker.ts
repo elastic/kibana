@@ -65,11 +65,12 @@ const generateNumber = (schema: JSONSchema, difficulty: Difficulty): number => {
   switch (difficulty) {
     case 'simple':
       return randomInt(Math.max(0, Math.ceil(min)), Math.min(100, Math.floor(max)));
-    case 'moderate':
-      // Include boundary values
-      if (Math.random() < 0.3 && schema.minimum !== undefined) return schema.minimum;
-      if (Math.random() < 0.3 && schema.maximum !== undefined) return schema.maximum;
+    case 'moderate': {
+      const r = Math.random();
+      if (r < 0.3 && schema.minimum !== undefined) return schema.minimum;
+      if (r < 0.6 && schema.maximum !== undefined) return schema.maximum;
       return randomInt(Math.ceil(min), Math.floor(max));
+    }
     case 'complex':
       // Include negative, zero, extreme values
       if (Math.random() < 0.2) return 0;
@@ -87,6 +88,9 @@ const generateBoolean = (_schema: JSONSchema, difficulty: Difficulty): boolean =
  * Recursively generate a value conforming to the given JSON Schema.
  */
 const generateValue = (schema: JSONSchema, difficulty: Difficulty, depth: number = 0): unknown => {
+  if (!schema || typeof schema !== 'object') return null;
+  if (depth > 10) return null;
+
   if (schema.const !== undefined) return schema.const;
 
   if (schema.enum && schema.enum.length > 0) {
@@ -95,12 +99,12 @@ const generateValue = (schema: JSONSchema, difficulty: Difficulty, depth: number
 
   if (schema.oneOf && schema.oneOf.length > 0) {
     const variant = schema.oneOf[randomInt(0, schema.oneOf.length - 1)];
-    return generateValue(variant, difficulty, depth);
+    return generateValue(variant, difficulty, depth + 1);
   }
 
   if (schema.anyOf && schema.anyOf.length > 0) {
     const variant = schema.anyOf[randomInt(0, schema.anyOf.length - 1)];
-    return generateValue(variant, difficulty, depth);
+    return generateValue(variant, difficulty, depth + 1);
   }
 
   const type = resolveType(schema);

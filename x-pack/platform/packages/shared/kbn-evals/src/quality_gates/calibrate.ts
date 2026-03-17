@@ -63,6 +63,13 @@ export const calibrateThresholds = async (
     const { evaluatorName, stats: evalStats } = evalStat;
     const { mean, stdDev } = evalStats;
 
+    if (!Number.isFinite(mean) || !Number.isFinite(stdDev)) {
+      log.warning(
+        `Evaluator "${evaluatorName}" has non-finite stats (mean=${mean}, stdDev=${stdDev}), skipping`
+      );
+      continue;
+    }
+
     globalScoreSum += mean;
     globalScoreCount++;
 
@@ -76,10 +83,7 @@ export const calibrateThresholds = async (
       changes.push({
         evaluator: evaluatorName,
         recommended,
-        reason: `Bootstrap: mean=${roundTo(mean, 3)}, stdDev=${roundTo(
-          stdDev,
-          3
-        )}, floor=${recommendedMin}`,
+        reason: `Bootstrap: mean=${roundTo(mean, 3)}, stdDev=${roundTo(stdDev, 3)}, floor=${recommendedMin}`,
       });
     } else {
       const existing = existingConfig?.evaluators?.[evaluatorName];
@@ -94,10 +98,9 @@ export const calibrateThresholds = async (
           evaluator: evaluatorName,
           previous: currentAvg,
           recommended,
-          reason:
-            currentAvg === undefined
-              ? `New evaluator threshold: mean=${roundTo(mean, 3)}`
-              : `Tightened: actual mean (${roundTo(mean, 3)}) exceeds current (${currentAvg})`,
+          reason: currentAvg === undefined
+            ? `New evaluator threshold: mean=${roundTo(mean, 3)}`
+            : `Tightened: actual mean (${roundTo(mean, 3)}) exceeds current (${currentAvg})`,
         });
       } else {
         evaluatorThresholds[evaluatorName] = { ...existing };
@@ -110,8 +113,8 @@ export const calibrateThresholds = async (
     mode === 'bootstrap'
       ? { avg: globalAvg }
       : existingConfig?.score && globalAvg > existingConfig.score.avg
-      ? { avg: globalAvg }
-      : existingConfig?.score ?? { avg: globalAvg };
+        ? { avg: globalAvg }
+        : existingConfig?.score ?? { avg: globalAvg };
 
   const config: GateConfig = {
     score: scoreThreshold,

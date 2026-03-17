@@ -72,30 +72,34 @@ export const simulateConversations = async (
   const examples: Example[] = [];
 
   for (let i = 0; i < config.conversationCount; i++) {
-    const conversation = await generateSingleConversation(
-      persona,
-      inferenceClient,
-      config.topic,
-      config.turnsPerConversation
-    );
+    try {
+      const conversation = await generateSingleConversation(
+        persona,
+        inferenceClient,
+        config.topic,
+        config.turnsPerConversation
+      );
 
-    const transcript = conversation
-      .map((turn) => `${turn.role === 'user' ? 'User' : 'Assistant'}: ${turn.content}`)
-      .join('\n');
+      const transcript = conversation
+        .map((turn) => `${turn.role === 'user' ? 'User' : 'Assistant'}: ${turn.content}`)
+        .join('\n');
 
-    examples.push({
-      input: {
-        conversation: transcript,
-        persona: persona.name,
-        topic: config.topic,
-        turns: conversation,
-      },
-      metadata: {
-        persona: persona.name,
-        turn_count: conversation.length,
-        generated: true,
-      },
-    });
+      examples.push({
+        input: {
+          conversation: transcript,
+          persona: persona.name,
+          topic: config.topic,
+          turns: conversation,
+        },
+        metadata: {
+          persona: persona.name,
+          turn_count: conversation.length,
+          generated: true,
+        },
+      });
+    } catch (_err) {
+      // Partial results are better than none — continue generating
+    }
   }
 
   return {
@@ -114,11 +118,9 @@ const generateSingleConversation = async (
   const response = await inferenceClient.output({
     id: 'conversation_sim',
     system: buildSystemPrompt(persona, topic),
-    input: `Generate a conversation with exactly ${turnsPerConversation} turns (each turn = 1 user message + 1 assistant response, so ${
-      turnsPerConversation * 2
-    } messages total).`,
+    input: `Generate a conversation with exactly ${turnsPerConversation} turns (each turn = 1 user message + 1 assistant response, so ${turnsPerConversation * 2} messages total).`,
     schema: conversationSchema,
   });
 
-  return (response.output.turns as ConversationTurn[]) ?? [];
+  return (response.output?.turns as ConversationTurn[]) ?? [];
 };

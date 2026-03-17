@@ -57,6 +57,9 @@ export const calibrateCmd: Command<void> = {
     }
 
     const esUrl = process.env.EVALUATIONS_ES_URL ?? process.env.ES_URL ?? 'http://localhost:9200';
+    if (!esUrl.trim()) {
+      throw createFlagError('ES_URL or EVALUATIONS_ES_URL must be a non-empty URL');
+    }
     const esApiKey = process.env.EVALUATIONS_ES_API_KEY ?? process.env.ES_API_KEY;
 
     const esClient = new EsClient({
@@ -68,34 +71,36 @@ export const calibrateCmd: Command<void> = {
 
     log.info(`Calibrating thresholds from run "${runId}" (mode=${mode}, margin=${margin})`);
 
-    const result = await calibrateThresholds(repository, log, {
-      runId,
-      existingConfig,
-      mode: mode as 'bootstrap' | 'tighten',
-      margin,
-      taskModelId: flagsReader.string('model'),
-      suiteId: flagsReader.string('suite'),
-    });
+    try {
+      const result = await calibrateThresholds(repository, log, {
+        runId,
+        existingConfig,
+        mode: mode as 'bootstrap' | 'tighten',
+        margin,
+        taskModelId: flagsReader.string('model'),
+        suiteId: flagsReader.string('suite'),
+      });
 
-    const outputPath = flagsReader.string('output');
-    if (outputPath) {
-      const resolved = Path.resolve(process.cwd(), outputPath);
-      Fs.writeFileSync(resolved, serializeGateConfig(result.config), 'utf-8');
-      log.info(`Wrote calibrated config to ${resolved}`);
-    } else {
-      process.stdout.write(`${serializeGateConfig(result.config)}\n`);
-    }
-
-    if (result.changes.length > 0) {
-      log.info(`Changes (${result.changes.length}):`);
-      for (const change of result.changes) {
-        const prev = change.previous !== undefined ? ` (was ${change.previous})` : '';
-        log.info(`  ${change.evaluator}: ${change.recommended}${prev} — ${change.reason}`);
+      const outputPath = flagsReader.string('output');
+      if (outputPath) {
+        const resolved = Path.resolve(process.cwd(), outputPath);
+        Fs.writeFileSync(resolved, serializeGateConfig(result.config), 'utf-8');
+        log.info(`Wrote calibrated config to ${resolved}`);
+      } else {
+        process.stdout.write(`${serializeGateConfig(result.config)}\n`);
       }
-    } else {
-      log.info('No threshold changes needed.');
-    }
 
-    await esClient.close();
+      if (result.changes.length > 0) {
+        log.info(`Changes (${result.changes.length}):`);
+        for (const change of result.changes) {
+          const prev = change.previous !== undefined ? ` (was ${change.previous})` : '';
+          log.info(`  ${change.evaluator}: ${change.recommended}${prev} — ${change.reason}`);
+        }
+      } else {
+        log.info('No threshold changes needed.');
+      }
+    } finally {
+      await esClient.close();
+    }
   },
 };

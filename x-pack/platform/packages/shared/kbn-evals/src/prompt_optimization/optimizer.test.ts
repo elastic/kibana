@@ -9,7 +9,9 @@ import { optimizePrompt } from './optimizer';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EvalsExecutorClient, EvaluationDataset, Evaluator, RanExperiment } from '../types';
 
-const createMockInferenceClient = (improvedPrompts: string[]): BoundInferenceClient => {
+const createMockInferenceClient = (
+  improvedPrompts: string[]
+): BoundInferenceClient => {
   let callIdx = 0;
   const outputFn = jest.fn().mockImplementation(async () => {
     const prompt = improvedPrompts[callIdx] ?? improvedPrompts[improvedPrompts.length - 1];
@@ -157,10 +159,10 @@ describe('optimizePrompt', () => {
       config: { maxIterations: 2 },
     });
 
-    // baselineScore = iterations[0].score = 0.6
+    // initialScore = 0.5 (first scorePrompt call before loop)
     // bestScore = 0.9
-    // improvement = (0.9 - 0.6) / 0.6 * 100 = 50
-    expect(result.improvement).toBeCloseTo(50, 1);
+    // improvement = (0.9 - 0.5) / 0.5 * 100 = 80
+    expect(result.improvement).toBeCloseTo(80, 1);
     expect(result.bestScore).toBe(0.9);
   });
 

@@ -83,18 +83,38 @@ export const optimizePrompt = async (options: {
   executorClient: EvalsExecutorClient;
   inferenceClient: BoundInferenceClient;
   config: OptimizationConfig;
+  createTaskWithPrompt?: (prompt: string) => ExperimentTask<Example, TaskOutput>;
 }): Promise<OptimizationResult> => {
-  const { basePrompt, dataset, task, evaluators, executorClient, inferenceClient, config } =
-    options;
+  const {
+    basePrompt,
+    dataset,
+    task,
+    evaluators,
+    executorClient,
+    inferenceClient,
+    config,
+    createTaskWithPrompt,
+  } = options;
 
   let bestPrompt = basePrompt;
-  let bestScore = await scorePrompt(executorClient, dataset, task, evaluators);
+  const initialScore = await scorePrompt(executorClient, dataset, task, evaluators);
+  let bestScore = initialScore;
   const iterations: IterationResult[] = [];
+  let staleCount = 0;
+  const maxStale = 3;
 
   for (let i = 0; i < config.maxIterations; i++) {
-    const candidatePrompt = await mutatePrompt(inferenceClient, bestPrompt, bestScore, i);
+    const candidatePrompt = await mutatePrompt(
+      inferenceClient,
+      bestPrompt,
+      bestScore,
+      i
+    );
 
-    const candidateScore = await scorePrompt(executorClient, dataset, task, evaluators);
+    const candidateTask = createTaskWithPrompt
+      ? createTaskWithPrompt(candidatePrompt)
+      : task;
+    const candidateScore = await scorePrompt(executorClient, dataset, candidateTask, evaluators);
 
     const improved = candidateScore > bestScore;
     iterations.push({
@@ -106,11 +126,15 @@ export const optimizePrompt = async (options: {
     if (improved) {
       bestPrompt = candidatePrompt;
       bestScore = candidateScore;
+      staleCount = 0;
+    } else {
+      staleCount++;
+      if (staleCount >= maxStale) break;
     }
   }
 
-  const baselineScore = iterations.length > 0 ? iterations[0].score : bestScore;
-  const improvement = baselineScore > 0 ? ((bestScore - baselineScore) / baselineScore) * 100 : 0;
+  const improvement =
+    initialScore > 0 ? ((bestScore - initialScore) / initialScore) * 100 : 0;
 
   return {
     bestPrompt,
@@ -133,7 +157,7 @@ const mutatePrompt = async (
     schema: mutationSchema,
   });
 
-  return response.output.improved_prompt || currentPrompt;
+  return response.output?.improved_prompt || currentPrompt;
 };
 
 const scorePrompt = async (

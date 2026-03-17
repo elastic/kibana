@@ -101,20 +101,31 @@ export const generateSmartExamples = async (
   inferenceClient: BoundInferenceClient,
   config: SmartGenConfig
 ): Promise<Example[]> => {
-  const response = await inferenceClient.output({
-    id: 'smart_gen',
-    system: SYSTEM_PROMPT,
-    input: buildUserPrompt(toolSchema, existingDataset.examples, config.count),
-    schema: outputSchema,
-  });
+  let parsed: SmartGenOutput;
+  try {
+    const response = await inferenceClient.output({
+      id: 'smart_gen',
+      system: SYSTEM_PROMPT,
+      input: buildUserPrompt(toolSchema, existingDataset.examples, config.count),
+      schema: outputSchema,
+    });
 
-  const { gaps, examples } = response.output as unknown as SmartGenOutput;
+    const output = response.output as unknown as SmartGenOutput;
+    if (!Array.isArray(output?.gaps) || !Array.isArray(output?.examples)) {
+      throw new Error('LLM returned unexpected output shape');
+    }
+    parsed = output;
+  } catch (err) {
+    throw new Error(
+      `Smart generation failed: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
 
-  return examples.slice(0, config.count).map((ex: SmartGenOutput['examples'][number]) => ({
+  return parsed.examples.slice(0, config.count).map((ex: SmartGenOutput['examples'][number]) => ({
     input: ex.input,
     metadata: {
       generated_by: 'smart_gen',
-      gaps_addressed: gaps.map((g: SmartGenOutput['gaps'][number]) => g.category),
+      gaps_addressed: parsed.gaps.map((g: SmartGenOutput['gaps'][number]) => g.category),
     },
   }));
 };
