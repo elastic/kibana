@@ -119,6 +119,8 @@ const syncProfileStateSnapshot = (
   const snapshotAppState = nextAppState ?? tab.appState;
 
   for (const field of DEFAULT_PROFILE_STATE_FIELDS) {
+    // If no nextAppState was passed, we're syncing the current app state (e.g. on profile init).
+    // If nextAppState was passed, we're syncing only the changed fields (e.g. on user action).
     if (!nextAppState || !isEqual(tab.appState[field], nextAppState[field])) {
       setProfileStateSnapshotField(profileStateSnapshot, field, snapshotAppState[field]);
     }

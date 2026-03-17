@@ -375,6 +375,7 @@ export function getDataStateContainer({
 
           let shouldApplyDefaultProfileState = true;
 
+          // If the data source profile changed, we may need to restore previous profile state
           if (didProfileChange) {
             const profileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
             const profileStateSnapshot =
@@ -386,6 +387,7 @@ export function getDataStateContainer({
             const hasProfileStateUpdate =
               profileStateUpdate && Object.keys(profileStateUpdate).length > 0;
 
+            // Only apply the default profile state if we have no profile state to restore
             shouldApplyDefaultProfileState = !hasProfileStateUpdate;
 
             if (hasProfileStateUpdate) {
@@ -397,6 +399,8 @@ export function getDataStateContainer({
                 )
               );
             } else {
+              // If there is no profile state yet, sync a snapshot of the current
+              // state so it can be restored when switching back to this profile
               internalState.dispatch(
                 injectCurrentTab(internalStateActions.syncProfileStateSnapshot)({})
               );
