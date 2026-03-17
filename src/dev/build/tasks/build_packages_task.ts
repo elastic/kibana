@@ -212,6 +212,16 @@ export const BuildPackages: Task = {
                   };
                 }
 
+                case '.yaml':
+                case '.yml': {
+                  const yamlSource = await Fsp.readFile(rec.source.abs, 'utf8');
+                  return {
+                    ...rec,
+                    dest: rec.dest.withName(rec.dest.name + '.js'),
+                    content: `module.exports = ${JSON.stringify(yamlSource)};\n`,
+                  };
+                }
+
                 case '.ts':
                 case '.tsx':
                 case '.js':
