@@ -78,8 +78,8 @@ describe('Automated Response actions - Runscript OS type config component', () =
   it('should display arguments and timeout fields disabled if no script selected', () => {
     const { getByTestId } = render();
 
-    expect(getByTestId('test-scriptParams')).toBeDisabled();
-    expect(getByTestId('test-timeout')).toBeDisabled();
+    expect(getByTestId('runscript-config-field-linux-scriptParams')).toBeDisabled();
+    expect(getByTestId('runscript-config-field-linux-timeout')).toBeDisabled();
 
     expect(getByTestId('runscript-config-field-macos-scriptParams')).toBeDisabled();
     expect(getByTestId('runscript-config-field-macos-timeout')).toBeDisabled();
