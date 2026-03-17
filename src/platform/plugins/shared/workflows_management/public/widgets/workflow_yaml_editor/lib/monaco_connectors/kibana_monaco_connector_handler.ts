@@ -83,11 +83,11 @@ export class KibanaMonacoConnectorHandler extends BaseMonacoConnectorHandler {
       // Generate request example
       const requestExample = this.generateRequestExample(apiInfo, withParams);
 
-      // Create enhanced hover content with enhanced formatting and shadowed icons
       const content = [
         `**Endpoint**: \`${apiInfo.method} ${apiInfo.path}\``,
         '',
         apiInfo.description || `Execute ${apiInfo.method} request to ${apiInfo.path}`,
+        this.getStabilityNote(connector.stability),
         '',
         documentationUrl
           ? `<span style="text-shadow: 0 0 6px rgba(255,165,0,0.6); opacity: 0.8;">📖</span> **Documentation** \n\n [${documentationUrl}](${documentationUrl}) (Opens in new tab)`

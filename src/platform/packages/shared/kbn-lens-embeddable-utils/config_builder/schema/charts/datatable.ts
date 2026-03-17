@@ -183,6 +183,12 @@ const datatableStateSharedOptionsSchema = {
    * Sorting configuration
    */
   sort_by: schema.maybe(sortingSchema),
+  /**
+   * Whether to show row numbers
+   */
+  show_row_numbers: schema.maybe(
+    schema.boolean({ meta: { description: 'Whether to show row numbers' } })
+  ),
 };
 
 const datatableStateCommonOptionsSchema = {
@@ -355,7 +361,7 @@ function validateSortBy({
 
 export const datatableStateSchemaNoESQL = schema.object(
   {
-    type: schema.literal('datatable'),
+    type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
@@ -400,6 +406,7 @@ export const datatableStateSchemaNoESQL = schema.object(
     validate: validateSortBy,
     meta: {
       id: 'datatableNoESQL',
+      title: 'Datatable (DSL)',
       description: 'Datatable state configuration for standard queries',
     },
   }
@@ -407,7 +414,7 @@ export const datatableStateSchemaNoESQL = schema.object(
 
 export const datatableStateSchemaESQL = schema.object(
   {
-    type: schema.literal('datatable'),
+    type: schema.literal('data_table'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
@@ -418,7 +425,7 @@ export const datatableStateSchemaESQL = schema.object(
     metrics: schema.maybe(
       schema.arrayOf(
         esqlColumnOperationWithLabelAndFormatSchema.extends(datatableStateMetricsOptionsSchema, {
-          meta: { id: 'datatableESQLMetric' },
+          meta: { id: 'datatableESQLMetric', title: 'Datatable Metric (ES|QL)' },
         }),
         {
           minSize: 1,
@@ -463,6 +470,7 @@ export const datatableStateSchemaESQL = schema.object(
     },
     meta: {
       id: 'datatableESQL',
+      title: 'Datatable (ES|QL)',
       description: 'Datatable state configuration for ES|QL queries',
     },
   }
@@ -472,8 +480,9 @@ export const datatableStateSchema = schema.oneOf(
   [datatableStateSchemaNoESQL, datatableStateSchemaESQL],
   {
     meta: {
+      id: 'datatableChart',
+      title: 'Datatable',
       description: 'Datatable chart configuration: DSL or ES|QL query based',
-      id: 'datatableChartSchema',
     },
   }
 );

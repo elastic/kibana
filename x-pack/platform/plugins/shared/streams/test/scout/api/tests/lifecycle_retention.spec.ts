@@ -647,5 +647,52 @@ apiTest.describe(
       expect(childResult.stream!.stream.ingest.lifecycle.inherit).toBeDefined();
       expect(childResult.stream!.effective_lifecycle.from).toBe(parentStream);
     });
+
+    // Test: Update stream with DSL retention of 30 days and downsampling steps
+    apiTest(
+      'should update stream with DSL retention of 30 days and downsampling steps',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const testStream = `${streamNamePrefix}-dsl-30d-downsample`;
+
+        const createResult = await createTestStream(apiClient, cookieHeader, testStream, {
+          field: 'service.name',
+          eq: 'retention-30d',
+        });
+        expect(createResult.success, createResult.error).toBe(true);
+
+        const getResult = await getStream(apiClient, cookieHeader, testStream);
+        expect(getResult.success, getResult.error).toBe(true);
+
+        const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest: {
+              ...getWriteableIngest(getResult.stream!),
+              lifecycle: {
+                dsl: {
+                  data_retention: '30d',
+                  downsample: [
+                    { after: '0d', fixed_interval: '1d' },
+                    { after: '10d', fixed_interval: '10d' },
+                  ],
+                },
+              },
+            },
+          },
+          responseType: 'json',
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+
+        const verifyResult = await getStream(apiClient, cookieHeader, testStream);
+        expect(verifyResult.success, verifyResult.error).toBe(true);
+        expect(verifyResult.stream!.stream.ingest.lifecycle.dsl.data_retention).toBe('30d');
+        expect(verifyResult.stream!.stream.ingest.lifecycle.dsl.downsample).toStrictEqual([
+          { after: '0d', fixed_interval: '1d' },
+          { after: '10d', fixed_interval: '10d' },
+        ]);
+      }
+    );
   }
 );

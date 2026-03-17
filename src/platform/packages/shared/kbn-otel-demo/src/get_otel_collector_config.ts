@@ -9,8 +9,9 @@
 
 /**
  * Generates the OTel Collector configuration for Kubernetes deployment.
- * Collects container logs from Kubernetes nodes and forwards them to Elasticsearch.
- * OTLP traces and metrics are accepted but only exported to debug (not Elasticsearch).
+ * Collects container logs, Kubernetes metrics, and host metrics from Kubernetes nodes.
+ * OTLP traces are exported to Elasticsearch and used to generate span metrics.
+ * OTLP metrics are accepted but only exported to debug (not Elasticsearch).
  * Uses k8sattributes processor for proper pod/container metadata enrichment.
  */
 export function getFullOtelCollectorConfig({
@@ -34,6 +35,98 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+
+  # Kubernetes cluster metrics receiver - collects cluster-level metrics
+  k8s_cluster:
+    collection_interval: 60s
+    auth_type: serviceAccount
+    node_conditions_to_report:
+      - Ready
+      - MemoryPressure
+      - DiskPressure
+      - PIDPressure
+    allocatable_types_to_report:
+      - cpu
+      - memory
+      - storage
+    metadata_collection_interval: 5m
+    metrics:
+      k8s.pod.status_reason:
+        enabled: true
+
+  # Kubelet stats receiver - collects node, pod, and container metrics
+  kubeletstats:
+    collection_interval: 60s
+    auth_type: serviceAccount
+    endpoint: "\${env:OTEL_K8S_NODE_NAME}:10250"
+    node: "\${env:OTEL_K8S_NODE_NAME}"
+    insecure_skip_verify: true
+    extra_metadata_labels:
+      - container.id
+      - k8s.volume.type
+    k8s_api_config:
+      auth_type: serviceAccount
+    metrics:
+      k8s.pod.cpu.node.utilization:
+        enabled: true
+      k8s.pod.cpu_limit_utilization:
+        enabled: true
+      k8s.pod.cpu_request_utilization:
+        enabled: true
+      k8s.pod.memory_limit_utilization:
+        enabled: true
+      k8s.pod.memory_request_utilization:
+        enabled: true
+      k8s.container.cpu_limit_utilization:
+        enabled: true
+      k8s.container.cpu_request_utilization:
+        enabled: true
+      k8s.container.memory_limit_utilization:
+        enabled: true
+      k8s.container.memory_request_utilization:
+        enabled: true
+
+  # Host metrics receiver - collects host system metrics
+  hostmetrics:
+    collection_interval: 60s
+    root_path: /hostfs
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+          system.cpu.logical.count:
+            enabled: true
+          system.cpu.physical.count:
+            enabled: true
+      memory:
+        metrics:
+          system.memory.utilization:
+            enabled: true
+          system.linux.memory.available:
+            enabled: true
+      network:
+      processes:
+        metrics:
+          system.processes.count:
+            enabled: true
+          system.processes.created:
+            enabled: true
+      load:
+      disk:
+      filesystem:
+        metrics:
+          system.filesystem.utilization:
+            enabled: true
+
+  # Kubernetes objects receiver - collects k8s events as logs
+  k8sobjects:
+    auth_type: serviceAccount
+    objects:
+      - name: events
+        mode: watch
+        group: events.k8s.io
+        namespaces: [${namespace}]
 
   # Filelog receiver for Kubernetes container logs
   filelog/k8s:
@@ -223,6 +316,9 @@ processors:
         value: local-minikube
         action: upsert
 
+  # Convert cumulative histograms to delta (required by Elasticsearch exporter)
+  cumulativetodelta:
+
   # Filter to drop all OTLP logs (we only want filelog container logs)
   filter/drop_otlp_logs:
     error_mode: ignore
@@ -239,6 +335,7 @@ exporters:
     user: USERNAME_PLACEHOLDER
     password: PASSWORD_PLACEHOLDER
     logs_index: LOGS_INDEX_PLACEHOLDER
+    traces_index: traces-generic.otel-default
     mapping:
       mode: otel
     tls:
@@ -251,6 +348,22 @@ exporters:
       enabled: true
       initial_interval: 100ms
       max_interval: 30s
+
+connectors:
+  # Generates metrics from trace spans (latency, call counts, error rates)
+  spanmetrics:
+    histogram:
+      explicit:
+        buckets: [5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2.5s, 5s, 10s]
+    dimensions:
+      - name: service.namespace
+      - name: deployment.environment
+      - name: k8s.namespace.name
+      - name: k8s.deployment.name
+    exemplars:
+      enabled: true
+    metrics_flush_interval: 15s
+    aggregation_temporality: AGGREGATION_TEMPORALITY_DELTA
 
 extensions:
   health_check:
@@ -269,16 +382,26 @@ service:
       receivers: [filelog/k8s]
       processors: [k8sattributes, resourcedetection, resource, batch]
       exporters: [elasticsearch, debug]
-    # Accept traces but only export to debug (not Elasticsearch)
+    # Collect Kubernetes events as logs
+    logs/k8s_events:
+      receivers: [k8sobjects]
+      processors: [resourcedetection, resource, batch]
+      exporters: [elasticsearch, debug]
+    # Export traces to Elasticsearch and generate span metrics
     traces:
       receivers: [otlp]
       processors: [k8sattributes, resourcedetection, resource, batch]
-      exporters: [debug]
-    # Accept metrics but only export to debug (not Elasticsearch)
+      exporters: [elasticsearch, spanmetrics, debug]
+    # Accept metrics from OTLP and span metrics connector
     metrics:
-      receivers: [otlp]
-      processors: [k8sattributes, resourcedetection, resource, batch]
-      exporters: [debug]
+      receivers: [otlp, spanmetrics]
+      processors: [k8sattributes, resourcedetection, resource, cumulativetodelta, batch]
+      exporters: [elasticsearch, debug]
+    # Collect Kubernetes metrics (cluster, kubelet, host)
+    metrics/k8s:
+      receivers: [k8s_cluster, kubeletstats, hostmetrics]
+      processors: [resourcedetection, resource, cumulativetodelta, batch]
+      exporters: [elasticsearch, debug]
 `;
 
   return configYaml

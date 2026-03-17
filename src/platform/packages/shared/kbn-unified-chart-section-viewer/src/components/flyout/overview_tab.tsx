@@ -13,19 +13,20 @@ import {
   EuiSpacer,
   EuiListGroup,
   EuiTablePagination,
-  EuiToken,
   useEuiTheme,
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import React, { useMemo, useState, useCallback } from 'react';
+import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import type { MetricField, Dimension } from '../../types';
 import { getUnitLabel } from '../../common/utils';
 import { TabTitleAndDescription } from './tab_title_and_description';
+import { MetricTypeBadge } from './metric_type_badge';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
 
 interface OverviewTabProps {
@@ -57,22 +58,6 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   const paginatedDimensions = sortedDimensions.slice(
     activePage * pageSize,
     (activePage + 1) * pageSize
-  );
-
-  // Map icon types for dimension field types
-  const iconMap = useMemo(
-    () =>
-      new Map<string, string>([
-        ['boolean', 'tokenBoolean'],
-        ['ip', 'tokenIP'],
-        ['keyword', 'tokenKeyword'],
-        ['long', 'tokenNumber'],
-        ['integer', 'tokenNumber'],
-        ['short', 'tokenNumber'],
-        ['byte', 'tokenNumber'],
-        ['unsigned_long', 'tokenNumber'],
-      ]),
-    []
   );
 
   // Helper function to create description list items
@@ -133,9 +118,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
               i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
                 defaultMessage: 'Metric type',
               }),
-              <div>
-                <EuiBadge>{metric.instrument}</EuiBadge>
-              </div>,
+              <MetricTypeBadge instrument={metric.instrument} />,
               'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
             ),
           ]
@@ -154,28 +137,12 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
   const dimensionListItems = useMemo(
     () =>
       paginatedDimensions.map((dimension: Dimension) => {
-        const hasIcon = iconMap.has(dimension.type);
         return {
-          label: (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              {hasIcon && (
-                <EuiFlexItem grow={false}>
-                  <EuiToken iconType={iconMap.get(dimension.type) ?? ''} size="s" />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">{dimension.name}</EuiText>
-              </EuiFlexItem>
-              {!hasIcon && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">{dimension.type}</EuiBadge>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          ),
+          'data-test-subj': `metricsExperienceFlyoutOverviewTabDimensionItem-${dimension.name}`,
+          label: <FieldNameWithIcon name={dimension.name} type={dimension.type} />,
         };
       }),
-    [paginatedDimensions, iconMap]
+    [paginatedDimensions]
   );
 
   return (

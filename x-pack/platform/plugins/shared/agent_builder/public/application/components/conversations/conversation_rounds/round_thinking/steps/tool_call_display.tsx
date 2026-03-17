@@ -6,9 +6,10 @@
  */
 
 import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText, EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../../../hooks/use_navigation';
@@ -44,7 +45,9 @@ export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, te
             id="xpack.agentBuilder.thinking.toolCallThinkingItem"
             defaultMessage="Calling tool {tool}"
             values={{
-              tool: (
+              tool: isInternalTool(toolId) ? (
+                <EuiCode>{toolId}</EuiCode>
+              ) : (
                 <code>
                   <EuiLink
                     href={toolHref}

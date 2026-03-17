@@ -818,7 +818,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getLegendItemsContent(): Promise<string[]> {
-    const legendList = await this.find.byCssSelector('.echLegendList');
+    const legendList = await this.find.byCssSelector('.echLegendGridList');
     const $ = await legendList.parseDomContent();
 
     return $('li')

@@ -6,6 +6,7 @@
  */
 
 import { validateQuery } from '@kbn/esql-language';
+import { z as z4 } from '@kbn/zod/v4';
 import type { EsqlAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
@@ -24,7 +25,14 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
     validate: async (input) => {
       const parseResult = esqlAttachmentDataSchema.safeParse(input);
       if (!parseResult.success) {
-        return { valid: false, error: parseResult.error.message };
+        const { $schema, ...schema } = z4.toJSONSchema(esqlAttachmentDataSchema as z4.ZodType, {
+          unrepresentable: 'any',
+          io: 'input',
+        }) as Record<string, unknown>;
+        return {
+          valid: false,
+          error: `message: ${parseResult.error.message}, schema: ${JSON.stringify(schema)}`,
+        };
       }
 
       const validationResult = await validateQuery(parseResult.data.query);

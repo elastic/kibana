@@ -20,7 +20,7 @@ export function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatComplet
     delta = {
       role: msg.role,
       content: msg.content,
-      tool_calls: msg.tool_calls?.map((tc) => ({ ...tc, index: 0 })),
+      tool_calls: msg.tool_calls?.map((tc, i) => ({ ...tc, index: i })),
     };
   }
 

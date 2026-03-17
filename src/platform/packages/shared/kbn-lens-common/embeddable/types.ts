@@ -31,6 +31,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type {
   PublishesDataViews,
   PublishingSubject,
+  SerializedTimeRange,
   SerializedTitles,
   ViewMode,
 } from '@kbn/presentation-publishing';
@@ -205,10 +206,9 @@ export interface LensPublicCallbacks extends LensApiProps {
  */
 export type LensApiCallbacks = Simplify<ViewInDiscoverCallbacks & IntegrationCallbacks>;
 
-export interface LensUnifiedSearchContext {
+export interface LensUnifiedSearchContext extends SerializedTimeRange {
   filters?: Filter[];
   query?: Query | AggregateQuery;
-  timeRange?: TimeRange;
   timeslice?: [number, number];
   searchSessionId?: string;
   lastReloadRequestTime?: number;
@@ -332,8 +332,9 @@ type ComponentProps = LensComponentProps & LensPublicCallbacks;
 type ComponentSerializedProps = TypedLensSerializedState;
 
 type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
-export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title'> & {
+export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title' | 'time_range'> & {
   hidePanelTitles?: boolean;
+  timeRange?: TimeRange;
 };
 
 /**
@@ -432,6 +433,7 @@ export interface ExpressionWrapperProps {
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
+  paddingTop?: boolean;
   abortController?: AbortController;
 }
 

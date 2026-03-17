@@ -191,22 +191,6 @@ test.describe(
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
     });
 
-    test('should handle insufficient privileges gracefully', async ({
-      page,
-      browserAuth,
-      pageObjects,
-    }) => {
-      // Login as user with limited privileges
-      await browserAuth.loginAsViewer();
-      await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-
-      // Create buttons should be hidden for users without edit privileges
-      const createProcessorButton = page.getByTestId(
-        'streamsAppStreamDetailEnrichmentCreateProcessorButton'
-      );
-      await expect(createProcessorButton).toBeHidden();
-    });
-
     test('should duplicate a processor', async ({ pageObjects }) => {
       await pageObjects.streams.clickAddProcessor();
       await pageObjects.streams.fillProcessorFieldInput('message');

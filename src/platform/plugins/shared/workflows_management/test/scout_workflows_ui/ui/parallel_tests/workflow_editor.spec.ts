@@ -16,6 +16,7 @@ import {
   getDummyWorkflowYaml,
   getIncompleteStepTypeYaml,
   getInvalidWorkflowYaml,
+  getWorkflowWithCommentedVariablesYaml,
 } from '../fixtures/workflows';
 
 test.describe(
@@ -130,6 +131,19 @@ test.describe(
       await page.keyboard.type('ind');
 
       await expect(suggestWidget.getByRole('option', { name: 'index' })).toBeVisible();
+    });
+
+    test('should not show validation errors for YAML comment lines with liquid variables', async ({
+      pageObjects,
+    }) => {
+      await pageObjects.workflowEditor.gotoNewWorkflow();
+      const workflowName = 'Commented Variables Workflow';
+      await pageObjects.workflowEditor.setYamlEditorValue(
+        getWorkflowWithCommentedVariablesYaml(workflowName)
+      );
+
+      const validationAccordion = pageObjects.workflowEditor.validationErrorsAccordion;
+      await expect(validationAccordion).toContainText('No validation errors');
     });
   }
 );

@@ -12,10 +12,7 @@ import { collectValues as collect, newestValue, oldestValue } from './field_rete
 export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   type: 'service',
   name: `Security 'service' Entity Store Definition`,
-  identityField: {
-    requiresOneOfFields: ['service.entity.id', 'service.name'],
-    euidFields: [[{ field: 'service.entity.id' }], [{ field: 'service.name' }]],
-  },
+  identityField: { singleField: 'service.name' },
   indexPatterns: [],
   entityTypeFallback: 'Service',
   fields: [
@@ -35,24 +32,5 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'service.version' }),
     ...getCommonFieldDescriptions('service'),
     ...getEntityFieldsDescriptions('service'),
-
-    collect({
-      source: `service.entity.relationships.communicates_with`,
-      destination: 'entity.relationships.communicates_with',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `service.entity.relationships.depends_on`,
-      destination: 'entity.relationships.depends_on',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `service.entity.relationships.dependent_of`,
-      destination: 'entity.relationships.dependent_of',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

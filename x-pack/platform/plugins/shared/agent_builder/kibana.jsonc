@@ -39,9 +39,11 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "evals",
       "licenseManagement",
       "workflowsManagement",
       "usageCollection",
+      "usageApi",
       "home",
     ],
     "extraPublicDirs": []
