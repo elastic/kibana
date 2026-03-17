@@ -55,7 +55,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }, [openCanvasContext, attachment, isSidebar, version]);
 
   const updateOrigin = useCallback(
-    async (origin: unknown) => {
+    async (origin: string) => {
       const result = await attachmentsService.updateOrigin(conversationId, attachment.id, origin);
       conversationActions.invalidateConversation();
       return result;
