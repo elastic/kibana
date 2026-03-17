@@ -600,6 +600,58 @@ export const EsqlRuleUpdateProps = SharedUpdateProps.merge(EsqlRuleCreateFields)
 export type EsqlRulePatchProps = z.infer<typeof EsqlRulePatchProps>;
 export const EsqlRulePatchProps = SharedPatchProps.merge(EsqlRulePatchFields.partial());
 
+// Correlation rule type
+export type CorrelationRequiredFields = z.infer<typeof CorrelationRequiredFields>;
+export const CorrelationRequiredFields = z.object({
+  type: z.literal('correlation'),
+  language: z.literal('esql'),
+  query: RuleQuery,
+  correlation: z.object({
+    rules: z.array(z.string()).min(1),
+    type: z.enum(['temporal', 'temporal_ordered', 'event_count', 'value_count']),
+    group_by: z.array(z.string()).min(1),
+    timespan: z.string(),
+    condition: z
+      .object({
+        operator: z.enum(['eq', 'neq', 'gt', 'gte', 'lt', 'lte']),
+        value: z.number(),
+        field: z.string().optional(),
+      })
+      .optional(),
+    aliases: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+  }),
+});
+
+export type CorrelationOptionalFields = z.infer<typeof CorrelationOptionalFields>;
+export const CorrelationOptionalFields = z.object({
+  alert_suppression: AlertSuppression.optional(),
+});
+
+export type CorrelationRulePatchFields = z.infer<typeof CorrelationRulePatchFields>;
+export const CorrelationRulePatchFields = CorrelationOptionalFields.merge(
+  CorrelationRequiredFields.partial()
+);
+
+export type CorrelationRuleResponseFields = z.infer<typeof CorrelationRuleResponseFields>;
+export const CorrelationRuleResponseFields =
+  CorrelationOptionalFields.merge(CorrelationRequiredFields);
+
+export type CorrelationRuleCreateFields = z.infer<typeof CorrelationRuleCreateFields>;
+export const CorrelationRuleCreateFields =
+  CorrelationOptionalFields.merge(CorrelationRequiredFields);
+
+export type CorrelationRule = z.infer<typeof CorrelationRule>;
+export const CorrelationRule = SharedResponseProps.merge(CorrelationRuleResponseFields);
+
+export type CorrelationRuleCreateProps = z.infer<typeof CorrelationRuleCreateProps>;
+export const CorrelationRuleCreateProps = SharedCreateProps.merge(CorrelationRuleCreateFields);
+
+export type CorrelationRuleUpdateProps = z.infer<typeof CorrelationRuleUpdateProps>;
+export const CorrelationRuleUpdateProps = SharedUpdateProps.merge(CorrelationRuleCreateFields);
+
+export type CorrelationRulePatchProps = z.infer<typeof CorrelationRulePatchProps>;
+export const CorrelationRulePatchProps = SharedPatchProps.merge(CorrelationRulePatchFields);
+
 export const TypeSpecificCreatePropsInternal = z.discriminatedUnion('type', [
   EqlRuleCreateFields,
   QueryRuleCreateFields,
@@ -609,6 +661,7 @@ export const TypeSpecificCreatePropsInternal = z.discriminatedUnion('type', [
   MachineLearningRuleCreateFields,
   NewTermsRuleCreateFields,
   EsqlRuleCreateFields,
+  CorrelationRuleCreateFields,
 ]);
 
 export type TypeSpecificCreateProps = z.infer<typeof TypeSpecificCreatePropsInternal>;
@@ -624,6 +677,7 @@ export const TypeSpecificPatchPropsInternal = z.union([
   MachineLearningRulePatchFields,
   NewTermsRulePatchFields,
   EsqlRulePatchFields,
+  CorrelationRulePatchFields,
 ]);
 
 export type TypeSpecificPatchProps = z.infer<typeof TypeSpecificPatchPropsInternal>;
@@ -639,6 +693,7 @@ export const TypeSpecificResponseInternal = z.discriminatedUnion('type', [
   MachineLearningRuleResponseFields,
   NewTermsRuleResponseFields,
   EsqlRuleResponseFields,
+  CorrelationRuleResponseFields,
 ]);
 
 export type TypeSpecificResponse = z.infer<typeof TypeSpecificResponseInternal>;
@@ -653,6 +708,7 @@ export const RuleCreatePropsInternal = z.discriminatedUnion('type', [
   MachineLearningRuleCreateProps,
   NewTermsRuleCreateProps,
   EsqlRuleCreateProps,
+  CorrelationRuleCreateProps,
 ]);
 
 export type RuleCreateProps = z.infer<typeof RuleCreatePropsInternal>;
@@ -667,6 +723,7 @@ export const RuleUpdatePropsInternal = z.discriminatedUnion('type', [
   MachineLearningRuleUpdateProps,
   NewTermsRuleUpdateProps,
   EsqlRuleUpdateProps,
+  CorrelationRuleUpdateProps,
 ]);
 
 export type RuleUpdateProps = z.infer<typeof RuleUpdatePropsInternal>;
@@ -681,6 +738,7 @@ export const RulePatchPropsInternal = z.union([
   MachineLearningRulePatchProps,
   NewTermsRulePatchProps,
   EsqlRulePatchProps,
+  CorrelationRulePatchProps,
 ]);
 
 export type RulePatchProps = z.infer<typeof RulePatchPropsInternal>;
@@ -695,6 +753,7 @@ export const RuleResponseInternal = z.discriminatedUnion('type', [
   MachineLearningRule,
   NewTermsRule,
   EsqlRule,
+  CorrelationRule,
 ]);
 
 export type RuleResponse = z.infer<typeof RuleResponseInternal>;

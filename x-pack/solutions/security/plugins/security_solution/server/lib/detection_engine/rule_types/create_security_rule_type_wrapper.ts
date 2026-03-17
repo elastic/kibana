@@ -176,12 +176,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
           const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
             params;
-          const {
-            savedObjectsClient,
-            scopedClusterClient,
-            ruleMonitoringService,
-            ruleResultService,
-          } = services;
+          const { savedObjectsClient, ruleMonitoringService, ruleResultService } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({

@@ -53,7 +53,7 @@ describe('createCorrelationAlertType', () => {
     expect(typeof alertType.validate?.params?.validate).toBe('function');
   });
 
-  it('executor forwards licensing and scheduleNotificationResponseActionsService from sharedParams', () => {
+  it('executor forwards licensing and scheduleNotificationResponseActionsService from sharedParams', async () => {
     const mockLicensing = { isAvailable: true };
     const mockScheduleService = jest.fn();
     const mockParams = {
@@ -64,7 +64,7 @@ describe('createCorrelationAlertType', () => {
       someOtherParam: 'value',
     } as unknown as Parameters<typeof alertType.executor>[0];
 
-    alertType.executor(mockParams);
+    await alertType.executor(mockParams);
 
     expect(correlationExecutorMock).toHaveBeenCalledWith({
       ...mockParams,

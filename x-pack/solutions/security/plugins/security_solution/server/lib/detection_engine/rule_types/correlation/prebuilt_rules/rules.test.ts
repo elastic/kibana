@@ -11,7 +11,7 @@ import { PREBUILT_CORRELATION_RULES } from './rules';
 const CorrelationConfigSchema = z.object({
   rules: z.array(z.string()),
   type: z.enum(['temporal', 'temporal_ordered', 'event_count', 'value_count']),
-  groupBy: z.array(z.string()),
+  group_by: z.array(z.string()),
   timespan: z.string().regex(/^\d+[smhd]$/),
   condition: z
     .object({
@@ -95,19 +95,19 @@ describe('Prebuilt correlation rules', () => {
 
       it('should have a non-empty correlation.rules array', () => {
         expect(rule).toHaveProperty('correlation');
-        const { correlation } = rule as { correlation: { rules: string[] } };
+        const { correlation } = rule as unknown as { correlation: { rules: string[] } };
         expect(Array.isArray(correlation.rules)).toBe(true);
         expect(correlation.rules.length).toBeGreaterThan(0);
       });
 
       it('should have a non-empty correlation.groupBy array', () => {
-        const { correlation } = rule as { correlation: { groupBy: string[] } };
-        expect(Array.isArray(correlation.groupBy)).toBe(true);
-        expect(correlation.groupBy.length).toBeGreaterThan(0);
+        const { correlation } = rule as unknown as { correlation: { group_by: string[] } };
+        expect(Array.isArray(correlation.group_by)).toBe(true);
+        expect(correlation.group_by.length).toBeGreaterThan(0);
       });
 
       it('should have a timespan matching the expected format', () => {
-        const { correlation } = rule as { correlation: { timespan: string } };
+        const { correlation } = rule as unknown as { correlation: { timespan: string } };
         expect(correlation.timespan).toMatch(TIMESPAN_PATTERN);
       });
 
