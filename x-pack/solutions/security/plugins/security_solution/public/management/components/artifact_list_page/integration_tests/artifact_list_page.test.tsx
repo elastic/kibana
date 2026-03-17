@@ -20,6 +20,7 @@ import {
 import { getDeferred } from '../../../mocks/utils';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 jest.mock('../../../services/policies/hooks', () => ({
   useGetEndpointSpecificPolicies: jest.fn(),
@@ -231,7 +232,7 @@ describe('When using the ArtifactListPage component', () => {
         await userEvent.click(importExportUi.getMenuButton());
         await userEvent.click(importExportUi.getImportButton());
 
-        await importFlyoutUi.uploadFile();
+        await importFlyoutUi.uploadFile([ENDPOINT_ARTIFACT_LISTS.trustedApps.id]);
         const currentApiCallCount = mockedApi.responseProvider.trustedAppsList.mock.calls.length;
 
         await userEvent.click(importFlyoutUi.getImportButton());
