@@ -5,7 +5,7 @@
  * 2.0.
  */
 import Path from 'path';
-import JSON5 from 'json5';
+import { parse } from 'hjson';
 import Fs from 'fs/promises';
 import { isEqualWith } from 'lodash';
 import type { Ecs, KibanaExecutionContext } from '@kbn/core/server';
@@ -60,7 +60,7 @@ export async function readLogFile(): Promise<Ecs[]> {
   return logFileContent
     .split('\n')
     .filter(Boolean)
-    .map<Ecs>((str) => JSON5.parse(str));
+    .map<Ecs>((str) => parse(str));
 }
 
 /**

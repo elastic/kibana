@@ -95,7 +95,7 @@ const locatorObjectSchema = z.object({
   params: z.record(z.any()).optional(),
 });
 
-const locatorParamsSchema = z.array(locatorObjectSchema).max(1).or(locatorObjectSchema);
+const locatorParamsSchema = z.array(locatorObjectSchema).max(100).or(locatorObjectSchema);
 
 const relativeUrlSchema = z.string().max(4096);
 const relativeUrlsSchema = z.array(relativeUrlSchema).max(100);

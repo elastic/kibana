@@ -61,6 +61,8 @@ dependsOn:
   - '@kbn/core-injected-metadata-browser-internal'
   - '@kbn/node-libs-browser-webpack-plugin'
   - '@kbn/esql-types'
+  - '@kbn/core-application-common'
+  - '@kbn/core-chrome-layout-constants'
 tags:
   - plugin
   - prod
