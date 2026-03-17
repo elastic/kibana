@@ -18,6 +18,7 @@ import { AgentBuilderPlugin } from './plugin';
 export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
+  ConversationsStart,
   ToolsSetup,
   ToolsStart,
 } from './types';

@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/knowledge-mining-plugin",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "knowledgeMining",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "knowledgeMining"
+    ],
+    "requiredPlugins": [
+      "agentBuilder",
+      "inference",
+      "workflowsExtensions"
+    ],
+    "optionalPlugins": [
+      "spaces"
+    ],
+    "extraPublicDirs": []
+  }
+}

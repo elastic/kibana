@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/llm-gateway-plugin",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "llmGateway",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "xpack",
+      "llmGateway"
+    ],
+    "requiredPlugins": [
+      "inference",
+      "actions",
+      "agentBuilder"
+    ],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/core-http-server",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-security-server",
+    "@kbn/storage-adapter",
+    "@kbn/zod",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/inference-plugin",
+    "@kbn/inference-common",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows",
+    "@kbn/spaces-plugin",
+    "@kbn/spaces-utils",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/kibana-react-plugin",
+    "@kbn/react-kibana-context-theme"
+  ]
+}

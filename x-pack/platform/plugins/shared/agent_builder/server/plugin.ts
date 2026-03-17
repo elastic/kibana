@@ -189,7 +189,7 @@ export class AgentBuilderPlugin
       analyticsService: this.analyticsService,
     });
 
-    const { tools, agents, skills, runnerFactory, execution } = startServices;
+    const { tools, agents, skills, runnerFactory, execution, conversations } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -224,6 +224,9 @@ export class AgentBuilderPlugin
       },
       runtime: {
         createModelProvider: modelProviderFactory,
+      },
+      conversations: {
+        getScopedClient: conversations.getScopedClient.bind(conversations),
       },
     };
   }

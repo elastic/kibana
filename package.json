@@ -1520,7 +1520,8 @@
     "yauzl": "3.2.1",
     "yazl": "3.3.1",
     "zod": "3.25.76",
-    "zod-to-json-schema": "3.25.0"
+    "zod-to-json-schema": "3.25.0",
+    "@kbn/llm-gateway-plugin": "link:x-pack/platform/plugins/shared/llm_gateway"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "12.1.0",

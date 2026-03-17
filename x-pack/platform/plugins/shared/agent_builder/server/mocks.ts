@@ -60,6 +60,9 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     runtime: {
       createModelProvider: jest.fn(),
     },
+    conversations: {
+      getScopedClient: jest.fn(),
+    },
   };
 };
 

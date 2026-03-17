@@ -35,6 +35,7 @@ import type { SkillServiceSetup } from './services/skills';
 import type { SkillRegistry } from './services/skills/skill_registry';
 import type { AgentExecutionService } from './services/execution';
 import type { ModelProviderFactoryFn } from './services/runner/model_provider';
+import type { ConversationService } from './services/conversation';
 
 export interface AgentBuilderSetupDependencies {
   cloud?: CloudSetup;
@@ -184,6 +185,16 @@ export interface AgentBuilderPluginSetup {
 }
 
 /**
+ * AgentBuilder conversations service's start contract.
+ */
+export interface ConversationsStart {
+  /**
+   * Returns a conversation client scoped to the current user and space.
+   */
+  getScopedClient: ConversationService['getScopedClient'];
+}
+
+/**
  * AgentBuilder runtime service's start contract.
  */
 export interface RuntimeStart {
@@ -220,4 +231,8 @@ export interface AgentBuilderPluginStart {
    * outside of the agent builder's built-in tool/agent execution flow.
    */
   runtime: RuntimeStart;
+  /**
+   * Conversations service, to create and manage conversations.
+   */
+  conversations: ConversationsStart;
 }
