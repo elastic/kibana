@@ -124,8 +124,6 @@ export default function ({ getService }: FtrProviderContext) {
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
         dataQuality: 0,
-        alerting_v2_alerts: 0,
-        alerting_v2_rules: 0,
       });
     });
 

@@ -19,6 +19,50 @@ export const notificationPolicyDestinationSchema = z.discriminatedUnion('type', 
 
 export type NotificationPolicyDestination = z.infer<typeof notificationPolicyDestinationSchema>;
 
+export const snoozeNotificationPolicyBodySchema = z.object({
+  snoozed_until: z.string().datetime(),
+});
+
+export type SnoozeNotificationPolicyBody = z.infer<typeof snoozeNotificationPolicyBodySchema>;
+
+const bulkEnableActionSchema = z.object({
+  id: z.string(),
+  action: z.literal('enable'),
+});
+
+const bulkDisableActionSchema = z.object({
+  id: z.string(),
+  action: z.literal('disable'),
+});
+
+const bulkSnoozeActionSchema = z.object({
+  id: z.string(),
+  action: z.literal('snooze'),
+  snoozed_until: z.string().datetime(),
+});
+
+const bulkUnsnoozeActionSchema = z.object({
+  id: z.string(),
+  action: z.literal('unsnooze'),
+});
+
+export const notificationPolicyBulkActionSchema = z.discriminatedUnion('action', [
+  bulkEnableActionSchema,
+  bulkDisableActionSchema,
+  bulkSnoozeActionSchema,
+  bulkUnsnoozeActionSchema,
+]);
+
+export type NotificationPolicyBulkAction = z.infer<typeof notificationPolicyBulkActionSchema>;
+
+export const bulkActionNotificationPoliciesBodySchema = z.object({
+  actions: z.array(notificationPolicyBulkActionSchema).min(1, 'At least one action is required'),
+});
+
+export type BulkActionNotificationPoliciesBody = z.infer<
+  typeof bulkActionNotificationPoliciesBodySchema
+>;
+
 export const createNotificationPolicyDataSchema = z.object({
   name: z.string(),
   description: z.string(),
@@ -28,7 +72,6 @@ export const createNotificationPolicyDataSchema = z.object({
   matcher: z.string().optional(),
   group_by: z.array(z.string()).optional(),
   throttle: z.object({ interval: durationSchema }).optional(),
-  rule_labels: z.array(z.string().max(64)).max(100).optional(),
 });
 
 export type CreateNotificationPolicyData = z.infer<typeof createNotificationPolicyDataSchema>;
@@ -43,7 +86,6 @@ export const updateNotificationPolicyDataSchema = z.object({
   matcher: z.string().optional(),
   group_by: z.array(z.string()).optional(),
   throttle: z.object({ interval: durationSchema }).optional(),
-  rule_labels: z.array(z.string().max(64)).max(100).optional(),
 });
 
 export type UpdateNotificationPolicyData = z.infer<typeof updateNotificationPolicyDataSchema>;

@@ -7,3 +7,4 @@
 
 export { ruleModelVersions } from './rule_model_versions';
 export { notificationPolicyModelVersions } from './notification_policy_model_versions';
+export { apiKeyPendingInvalidationModelVersions } from './api_key_pending_invalidation_model_versions';

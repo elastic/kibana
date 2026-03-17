@@ -13,10 +13,12 @@ import { mountAlertingV2App } from './main';
 import { ALERTING_V2_APP_ID } from './constants';
 import { NotificationPoliciesApi } from './services/notification_policies_api';
 import { RulesApi } from './services/rules_api';
+import { WorkflowsApi } from './services/workflows_api';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(NotificationPoliciesApi).toSelf().inSingletonScope();
+  bind(WorkflowsApi).toSelf().inSingletonScope();
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
 

@@ -6,28 +6,58 @@
  */
 
 import Boom from '@hapi/boom';
-import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  NotificationPolicyBulkAction,
+  NotificationPolicyResponse,
+} from '@kbn/alerting-v2-schemas';
 import {
   createNotificationPolicyDataSchema,
   updateNotificationPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { inject, injectable } from 'inversify';
 import { omit } from 'lodash';
-import { type NotificationPolicySavedObjectAttributes } from '../../saved_objects';
+import {
+  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+  type NotificationPolicySavedObjectAttributes,
+} from '../../saved_objects';
+import { EncryptedSavedObjectsClientToken } from '../dispatcher/steps/dispatch_step_tokens';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
 import type { NotificationPolicySavedObjectServiceContract } from '../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { NotificationPolicySavedObjectServiceScopedToken } from '../services/notification_policy_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import { NotificationPolicyNamespaceToken } from './tokens';
 import type {
+  BulkActionNotificationPoliciesParams,
+  BulkActionNotificationPoliciesResponse,
   CreateNotificationPolicyParams,
   FindNotificationPoliciesParams,
   FindNotificationPoliciesResponse,
+  SnoozeNotificationPolicyParams,
   UpdateNotificationPolicyParams,
 } from './types';
+import { validateDateString } from './utils';
+
+const resolveActionAttrs = (
+  action: NotificationPolicyBulkAction
+): Partial<NotificationPolicySavedObjectAttributes> => {
+  switch (action.action) {
+    case 'enable':
+      return { enabled: true };
+    case 'disable':
+      return { enabled: false };
+    case 'snooze':
+      return { snoozedUntil: action.snoozed_until };
+    case 'unsnooze':
+      return { snoozedUntil: null };
+  }
+};
 
 const toAuthResponse = (
   auth: NotificationPolicySavedObjectAttributes['auth']
@@ -36,13 +66,20 @@ const toAuthResponse = (
   return rest;
 };
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_PER_PAGE = 20;
+
 @injectable()
 export class NotificationPolicyClient {
   constructor(
     @inject(NotificationPolicySavedObjectServiceScopedToken)
     private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
-    @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract
+    @inject(ApiKeyService) private readonly apiKeyService: ApiKeyServiceContract,
+    @inject(EncryptedSavedObjectsClientToken)
+    private readonly esoClient: EncryptedSavedObjectsClient,
+    @inject(NotificationPolicyNamespaceToken)
+    private readonly namespace: string | undefined
   ) {}
 
   public async createNotificationPolicy(
@@ -62,6 +99,7 @@ export class NotificationPolicyClient {
 
     const attributes: NotificationPolicySavedObjectAttributes = {
       ...parsed.data,
+      enabled: true,
       auth: apiKeyAttrs,
       createdBy: userProfileUid,
       createdAt: now,
@@ -77,6 +115,7 @@ export class NotificationPolicyClient {
 
       return { id, version, ...omit(attributes, ['auth']), auth: toAuthResponse(attributes.auth) };
     } catch (e) {
+      this.markApiKeysForInvalidation(attributes.auth?.apiKey, false);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(`Notification policy with id "${conflictId}" already exists`);
@@ -146,6 +185,8 @@ export class NotificationPolicyClient {
       id: params.options.id,
     });
 
+    const oldAuth = await this.getDecryptedAuth(params.options.id);
+
     const policyName = parsed.data.name ?? existingPolicy.name;
     const apiKeyAttrs = await this.apiKeyService.create(`Notification Policy: ${policyName}`);
 
@@ -157,20 +198,16 @@ export class NotificationPolicyClient {
       updatedAt: now,
     };
 
+    let updated: { id: string; version?: string };
     try {
-      const updated = await this.notificationPolicySavedObjectService.update({
+      updated = await this.notificationPolicySavedObjectService.update({
         id: params.options.id,
         attrs: nextAttrs,
         version: params.options.version,
       });
-
-      return {
-        id: params.options.id,
-        version: updated.version,
-        ...omit(nextAttrs, ['auth']),
-        auth: toAuthResponse(nextAttrs.auth),
-      };
     } catch (e) {
+      // If update fails we explicitly mark the new API key for invalidation
+      this.markApiKeysForInvalidation(nextAttrs.auth?.apiKey, false);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(
           `Notification policy with id "${params.options.id}" has already been updated by another user`
@@ -178,21 +215,41 @@ export class NotificationPolicyClient {
       }
       throw e;
     }
+
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+
+    return {
+      id: params.options.id,
+      version: updated.version,
+      ...omit(nextAttrs, ['auth']),
+      auth: toAuthResponse(nextAttrs.auth),
+    };
   }
 
   public async findNotificationPolicies(
     params: FindNotificationPoliciesParams = {}
   ): Promise<FindNotificationPoliciesResponse> {
-    const page = params.page ?? 1;
-    const perPage = params.perPage ?? 20;
+    const page = params.page ?? DEFAULT_PAGE;
+    const perPage = params.perPage ?? DEFAULT_PER_PAGE;
 
-    const res = await this.notificationPolicySavedObjectService.find({ page, perPage });
+    const filter = this.buildFindFilter(params);
+    const sortField = this.mapSortField(params.sortField);
+
+    const res = await this.notificationPolicySavedObjectService.find({
+      page,
+      perPage,
+      search: params.search,
+      filter,
+      sortField,
+      sortOrder: params.sortOrder,
+    });
 
     return {
       items: res.saved_objects.map((so) => ({
         id: so.id,
         version: so.version,
-        ...so.attributes,
+        ...omit(so.attributes, ['auth']),
+        auth: toAuthResponse(so.attributes.auth),
       })),
       total: res.total,
       page,
@@ -200,9 +257,160 @@ export class NotificationPolicyClient {
     };
   }
 
+  public async enableNotificationPolicy({
+    id,
+  }: {
+    id: string;
+  }): Promise<NotificationPolicyResponse> {
+    return this.updatePolicyState(id, { enabled: true });
+  }
+
+  public async disableNotificationPolicy({
+    id,
+  }: {
+    id: string;
+  }): Promise<NotificationPolicyResponse> {
+    return this.updatePolicyState(id, { enabled: false });
+  }
+
+  public async snoozeNotificationPolicy({
+    id,
+    snoozedUntil,
+  }: SnoozeNotificationPolicyParams): Promise<NotificationPolicyResponse> {
+    return this.updatePolicyState(id, { snoozedUntil });
+  }
+
+  public async unsnoozeNotificationPolicy({
+    id,
+  }: {
+    id: string;
+  }): Promise<NotificationPolicyResponse> {
+    return this.updatePolicyState(id, { snoozedUntil: null });
+  }
+
+  public async bulkActionNotificationPolicies({
+    actions,
+  }: BulkActionNotificationPoliciesParams): Promise<BulkActionNotificationPoliciesResponse> {
+    const userProfileUid = await this.getUserProfileUid();
+    const now = new Date().toISOString();
+
+    const objects = actions.map((action) => ({
+      id: action.id,
+      attrs: {
+        ...resolveActionAttrs(action),
+        updatedBy: userProfileUid,
+        updatedAt: now,
+      },
+    }));
+
+    const results = await this.notificationPolicySavedObjectService.bulkUpdate({ objects });
+
+    const errors: Array<{ id: string; message: string }> = [];
+    let processed = 0;
+
+    for (const result of results) {
+      if ('error' in result) {
+        errors.push({ id: result.id, message: result.error.message });
+      } else {
+        processed++;
+      }
+    }
+
+    return { processed, total: actions.length, errors };
+  }
+
+  private buildFindFilter(params: FindNotificationPoliciesParams): KueryNode | undefined {
+    const conditions: KueryNode[] = [];
+    const attrPrefix = `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.attributes`;
+
+    if (params.destinationType) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.destinations.type`, params.destinationType));
+    }
+
+    if (params.createdBy) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.createdBy`, params.createdBy));
+    }
+
+    if (params.enabled !== undefined) {
+      conditions.push(nodeBuilder.is(`${attrPrefix}.enabled`, params.enabled ? 'true' : 'false'));
+    }
+
+    if (conditions.length === 0) {
+      return undefined;
+    }
+
+    return conditions.length === 1 ? conditions[0] : nodeBuilder.and(conditions);
+  }
+
+  private mapSortField(sortField?: string): string | undefined {
+    if (!sortField) {
+      return undefined;
+    }
+
+    const sortFieldMap: Record<string, string> = {
+      name: 'name.keyword',
+      createdAt: 'createdAt',
+      createdBy: 'createdBy',
+      updatedAt: 'updatedAt',
+    };
+
+    return sortFieldMap[sortField];
+  }
+
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {
     await this.getNotificationPolicy({ id });
+    const auth = await this.getDecryptedAuth(id);
     await this.notificationPolicySavedObjectService.delete({ id });
+    this.markApiKeysForInvalidation(auth?.apiKey, auth?.createdByUser);
+  }
+
+  private markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {
+    if (!apiKey || createdByUser) {
+      return;
+    }
+
+    // the apiKeyService already handles and logs errors, so we can swallow them here
+    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch(() => {});
+  }
+
+  private async getDecryptedAuth(
+    id: string
+  ): Promise<{ apiKey: string; createdByUser: boolean } | null> {
+    try {
+      const doc =
+        await this.esoClient.getDecryptedAsInternalUser<NotificationPolicySavedObjectAttributes>(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id,
+          this.namespace ? { namespace: this.namespace } : undefined
+        );
+      const auth = doc.attributes?.auth;
+      if (!auth?.apiKey) return null;
+      return {
+        apiKey: auth.apiKey,
+        createdByUser: auth.createdByUser,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  private async updatePolicyState(
+    id: string,
+    stateUpdate: { enabled?: boolean; snoozedUntil?: string | null }
+  ): Promise<NotificationPolicyResponse> {
+    if (stateUpdate.snoozedUntil) {
+      validateDateString(stateUpdate.snoozedUntil);
+    }
+
+    const userProfileUid = await this.getUserProfileUid();
+    const now = new Date().toISOString();
+
+    await this.notificationPolicySavedObjectService.update({
+      id,
+      attrs: { ...stateUpdate, updatedBy: userProfileUid, updatedAt: now },
+    });
+
+    return this.getNotificationPolicy({ id });
   }
 
   private async getUserProfileUid(): Promise<string | null> {

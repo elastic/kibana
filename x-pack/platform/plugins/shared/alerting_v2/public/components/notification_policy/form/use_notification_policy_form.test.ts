@@ -15,7 +15,7 @@ const EXISTING_POLICY: NotificationPolicyResponse = {
   version: 'WzEsMV0=',
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
-  rule_labels: ['team-observability'],
+  enabled: true,
   matcher: 'data.severity : "critical"',
   group_by: ['host.name', 'service.name'],
   throttle: { interval: '5m' },
@@ -76,7 +76,7 @@ describe('useNotificationPolicyForm', () => {
       expect(onSubmitCreate).toHaveBeenCalledWith({
         name: 'My policy',
         description: 'A description',
-        destinations: [{ type: 'workflow', id: 'workflow-1' }],
+        destinations: [],
       });
     });
 
@@ -136,7 +136,6 @@ describe('useNotificationPolicyForm', () => {
         groupBy: ['host.name', 'service.name'],
         frequency: { type: 'throttle', interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
-        ruleLabels: ['team-observability'],
       });
     });
 
@@ -178,7 +177,6 @@ describe('useNotificationPolicyForm', () => {
         matcher: 'data.severity : "critical"',
         group_by: ['host.name', 'service.name'],
         throttle: { interval: '5m' },
-        rule_labels: ['team-observability'],
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
       });
     });

@@ -301,9 +301,37 @@
       }
     }
   },
+  "alerting_api_key_pending_invalidation": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
+      }
+    }
+  },
   "alerting_notification_policy": {
     "dynamic": false,
     "properties": {
+      "auth": {
+        "properties": {
+          "apiKey": {
+            "type": "binary"
+          },
+          "createdByUser": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
       "createdAt": {
         "type": "date"
       },
@@ -319,6 +347,20 @@
         },
         "type": "text"
       },
+      "destinations": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -328,38 +370,13 @@
         },
         "type": "text"
       },
+      "snoozedUntil": {
+        "type": "date"
+      },
       "updatedAt": {
         "type": "date"
       },
       "updatedBy": {
-        "type": "keyword"
-      },
-      "destinations": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "keyword"
-          },
-          "id": {
-            "type": "keyword"
-          }
-        }
-      },
-      "auth": {
-        "type": "object",
-        "properties": {
-          "apiKey": {
-            "type": "binary"
-          },
-          "createdByUser": {
-            "type": "boolean"
-          },
-          "owner": {
-            "type": "keyword"
-          }
-        }
-      },
-      "rule_labels": {
         "type": "keyword"
       }
     }
@@ -1586,6 +1603,17 @@
       "additional_spaces_installed_kibana": {
         "index": false,
         "type": "flattened"
+      },
+      "dependencies": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
       },
       "es_index_patterns": {
         "dynamic": false,
@@ -3395,6 +3423,9 @@
       "created_by": {
         "type": "keyword"
       },
+      "created_by_profile_uid": {
+        "type": "keyword"
+      },
       "description": {
         "type": "text"
       },
@@ -3439,6 +3470,9 @@
         "type": "date"
       },
       "updated_by": {
+        "type": "keyword"
+      },
+      "updated_by_profile_uid": {
         "type": "keyword"
       },
       "version": {
@@ -3500,6 +3534,9 @@
       "created_by": {
         "type": "text"
       },
+      "created_by_profile_uid": {
+        "type": "keyword"
+      },
       "description": {
         "type": "text"
       },
@@ -3527,6 +3564,9 @@
       },
       "updated_by": {
         "type": "text"
+      },
+      "updated_by_profile_uid": {
+        "type": "keyword"
       },
       "version": {
         "type": "keyword"
@@ -4277,6 +4317,10 @@
     "properties": {}
   },
   "stream-prompts": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "streams-significant-events-settings": {
     "dynamic": false,
     "properties": {}
   },

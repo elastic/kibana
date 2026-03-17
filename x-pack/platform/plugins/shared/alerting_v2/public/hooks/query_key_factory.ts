@@ -16,13 +16,30 @@ export const ruleKeys = {
   delete: () => [...ruleKeys.all, 'delete'] as const,
 };
 
+export const workflowKeys = {
+  all: ['workflow'] as const,
+  searches: () => [...workflowKeys.all, 'search'] as const,
+  search: (params: { query: string }) => [...workflowKeys.searches(), params] as const,
+};
+
 export const notificationPolicyKeys = {
   all: ['notificationPolicy'] as const,
   create: () => [...notificationPolicyKeys.all, 'create'] as const,
   update: () => [...notificationPolicyKeys.all, 'update'] as const,
   delete: () => [...notificationPolicyKeys.all, 'delete'] as const,
+  enable: () => [...notificationPolicyKeys.all, 'enable'] as const,
+  disable: () => [...notificationPolicyKeys.all, 'disable'] as const,
+  snooze: () => [...notificationPolicyKeys.all, 'snooze'] as const,
+  unsnooze: () => [...notificationPolicyKeys.all, 'unsnooze'] as const,
   detail: (id: string) => [...notificationPolicyKeys.all, 'detail', id] as const,
   lists: () => [...notificationPolicyKeys.all, 'list'] as const,
-  list: (filters: { page: number; perPage: number }) =>
-    [...notificationPolicyKeys.lists(), filters] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    destinationType?: string;
+    enabled?: boolean;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) => [...notificationPolicyKeys.lists(), filters] as const,
 };

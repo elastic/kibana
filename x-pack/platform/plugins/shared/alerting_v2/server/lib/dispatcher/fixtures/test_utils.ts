@@ -79,9 +79,9 @@ export function createNotificationPolicy(
   return {
     id: 'policy-1',
     name: 'Test policy',
+    enabled: true,
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
-    ruleLabels: [],
     ...overrides,
   };
 }

@@ -148,25 +148,27 @@ export default function ({ getService }: FtrProviderContext) {
               ],
             },
           },
+          sort: [{ '@timestamp': 'asc' }],
         });
         expect(response.hits.hits.length).to.eql(2);
 
-        // Should log a cancelled event and a success event indicating that the task was not cancelled without an error
-        const cancelledEvent = response.hits.hits[0]._source as Record<string, any>;
-        expect(cancelledEvent.event.action).to.eql('task-cancel');
-        expect(cancelledEvent.event.provider).to.eql('taskManager');
-        expect(cancelledEvent.message).to.eql(
+        const events = response.hits.hits.map((h) => h._source as Record<string, any>);
+        const cancelledEvent = events.find((e) => e.event.action === 'task-cancel');
+        const runEvent = events.find((e) => e.event.action === 'task-run');
+
+        expect(cancelledEvent).to.be.ok();
+        expect(cancelledEvent!.event.provider).to.eql('taskManager');
+        expect(cancelledEvent!.message).to.eql(
           `Task sampleRecurringTaskTimingOut "${scheduledTask.id}" has been cancelled.`
         );
-        expect(cancelledEvent.kibana.task.id).to.eql(scheduledTask.id);
-        expect(cancelledEvent.kibana.task.type).to.eql('sampleRecurringTaskTimingOut');
+        expect(cancelledEvent!.kibana.task.id).to.eql(scheduledTask.id);
+        expect(cancelledEvent!.kibana.task.type).to.eql('sampleRecurringTaskTimingOut');
 
-        const event = response.hits.hits[1]._source as Record<string, any>;
-        expect(event.event.action).to.eql('task-run');
-        expect(event.event.provider).to.eql('taskManager');
-        expect(event.event.outcome).to.eql('success');
-        expect(event.kibana.task.id).to.eql(scheduledTask.id);
-        expect(event.kibana.task.type).to.eql('sampleRecurringTaskTimingOut');
+        expect(runEvent).to.be.ok();
+        expect(runEvent!.event.provider).to.eql('taskManager');
+        expect(runEvent!.event.outcome).to.eql('success');
+        expect(runEvent!.kibana.task.id).to.eql(scheduledTask.id);
+        expect(runEvent!.kibana.task.type).to.eql('sampleRecurringTaskTimingOut');
       });
     });
 
@@ -189,26 +191,28 @@ export default function ({ getService }: FtrProviderContext) {
               ],
             },
           },
+          sort: [{ '@timestamp': 'asc' }],
         });
         expect(response.hits.hits.length).to.eql(2);
 
-        // Should log a cancelled event and a failure event indicating that the task was cancelled with an error
-        const cancelledEvent = response.hits.hits[0]._source as Record<string, any>;
-        expect(cancelledEvent.event.action).to.eql('task-cancel');
-        expect(cancelledEvent.event.provider).to.eql('taskManager');
-        expect(cancelledEvent.message).to.eql(
+        const events = response.hits.hits.map((h) => h._source as Record<string, any>);
+        const cancelledEvent = events.find((e) => e.event.action === 'task-cancel');
+        const runEvent = events.find((e) => e.event.action === 'task-run');
+
+        expect(cancelledEvent).to.be.ok();
+        expect(cancelledEvent!.event.provider).to.eql('taskManager');
+        expect(cancelledEvent!.message).to.eql(
           `Task sampleRecurringTaskTimingOutWithError "${scheduledTask.id}" has been cancelled.`
         );
-        expect(cancelledEvent.kibana.task.id).to.eql(scheduledTask.id);
-        expect(cancelledEvent.kibana.task.type).to.eql('sampleRecurringTaskTimingOutWithError');
+        expect(cancelledEvent!.kibana.task.id).to.eql(scheduledTask.id);
+        expect(cancelledEvent!.kibana.task.type).to.eql('sampleRecurringTaskTimingOutWithError');
 
-        const event = response.hits.hits[1]._source as Record<string, any>;
-        expect(event.event.action).to.eql('task-run');
-        expect(event.event.provider).to.eql('taskManager');
-        expect(event.event.outcome).to.eql('failure');
-        expect(event.event.reason).to.eql(`Task "${scheduledTask.id}" was cancelled.`);
-        expect(event.kibana.task.id).to.eql(scheduledTask.id);
-        expect(event.kibana.task.type).to.eql('sampleRecurringTaskTimingOutWithError');
+        expect(runEvent).to.be.ok();
+        expect(runEvent!.event.provider).to.eql('taskManager');
+        expect(runEvent!.event.outcome).to.eql('failure');
+        expect(runEvent!.event.reason).to.eql(`Task "${scheduledTask.id}" was cancelled.`);
+        expect(runEvent!.kibana.task.id).to.eql(scheduledTask.id);
+        expect(runEvent!.kibana.task.type).to.eql('sampleRecurringTaskTimingOutWithError');
       });
     });
   });
