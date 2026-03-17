@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { SolutionView } from '@kbn/spaces-plugin/common';
 import {
   getFieldValidityAndErrorMessage,
@@ -113,6 +114,8 @@ interface InferenceServicesProps {
     reenterSecretsOnEdit?: boolean;
     allowTemperature?: boolean;
     enableEisPromoTour?: boolean;
+    /** When set, only these task types will be available for selection in the form. */
+    allowedTaskTypes?: InferenceTaskType[];
   };
   http: HttpSetup;
   toasts: IToasts;
@@ -130,6 +133,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     currentSolution,
     reenterSecretsOnEdit,
     enableEisPromoTour,
+    allowedTaskTypes,
   },
 }) => {
   const {
@@ -313,9 +317,12 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     (provider?: string) => {
       const newProvider = updatedProviders?.find((p) => p.service === provider);
 
-      setTaskTypeOptions(getTaskTypeOptions(newProvider?.task_types ?? []));
-      if (newProvider?.task_types && newProvider?.task_types.length > 0) {
-        onTaskTypeOptionsSelect(newProvider?.task_types[0], provider);
+      const availableTaskTypes = allowedTaskTypes
+        ? (newProvider?.task_types ?? []).filter((t) => (allowedTaskTypes as string[]).includes(t))
+        : newProvider?.task_types ?? [];
+      setTaskTypeOptions(getTaskTypeOptions(availableTaskTypes));
+      if (availableTaskTypes.length > 0) {
+        onTaskTypeOptionsSelect(availableTaskTypes[0], provider);
       }
 
       const defaultProviderConfig: Record<string, unknown> = {};
@@ -360,7 +367,14 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [config, onTaskTypeOptionsSelect, updateFieldValues, updatedProviders, getOverrides]
+    [
+      config,
+      onTaskTypeOptionsSelect,
+      updateFieldValues,
+      updatedProviders,
+      getOverrides,
+      allowedTaskTypes,
+    ]
   );
 
   // Separate into providerConfig and taskTypeConfig depending on location
@@ -446,9 +460,15 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   const getUpdatedProviders = useCallback(
     (filterBySolution?: SolutionView) => {
       if (providers) {
-        const filteredProviders = filterBySolution
+        let filteredProviders = filterBySolution
           ? providers.filter(isProviderForSolutions.bind(this, filterBySolution))
           : providers;
+
+        if (allowedTaskTypes) {
+          filteredProviders = filteredProviders.filter((provider) =>
+            provider.task_types.some((t) => (allowedTaskTypes as string[]).includes(t))
+          );
+        }
 
         // Ensure the Elastic Inference Service (EIS) appears at the top of the providers list
         const elasticServiceIndex = filteredProviders.findIndex(
@@ -466,7 +486,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         }
       }
     },
-    [providers]
+    [providers, allowedTaskTypes]
   );
 
   useEffect(() => {
