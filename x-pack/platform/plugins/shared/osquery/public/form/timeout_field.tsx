@@ -35,7 +35,7 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
 
         if (currentValue > QUERY_TIMEOUT.MAX) {
           return i18n.translate('xpack.osquery.pack.queryFlyoutForm.timeoutFieldMaxNumberError', {
-            defaultMessage: 'The timeout value must be {timeoutInSeconds} seconds or or lower. ',
+            defaultMessage: 'The timeout value must be {timeoutInSeconds} seconds or lower.',
             values: { timeoutInSeconds: QUERY_TIMEOUT.MAX },
           });
         }
@@ -63,7 +63,8 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
             <EuiIconTip
               content={i18n.translate('xpack.osquery.liveQuery.timeoutHint', {
                 defaultMessage:
-                  'The default and minimum timeout period is 60 seconds. Increase this value if your query needs more time to run.',
+                  'Default and minimum: 60 seconds. Maximum: {maxSeconds} seconds. Increase this value if your query needs more time to run.',
+                values: { maxSeconds: QUERY_TIMEOUT.MAX },
               })}
             />
           </EuiFlexItem>
