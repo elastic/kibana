@@ -11,8 +11,44 @@ import {
   isInProtectedNamespace,
   hasNamespaceName,
 } from '@kbn/agent-builder-common/base/namespaces';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { isValidAgentAvatarColor } from '../../../utils/color';
+
+const isEmoji = (str: string): boolean =>
+  /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(str);
+
+const getGraphemes = (str: string): string[] => {
+  if (typeof Intl.Segmenter === 'function') {
+    const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+    return [...segmenter.segment(str)].map((s) => s.segment);
+  }
+  return str.split('');
+};
+
+/**
+ * Validates an avatar symbol value.
+ * Allows: 1 emoji, 1 letter, or 2 letters.
+ * Disallows: 2+ emojis, emoji + letter combinations, 3+ characters.
+ */
+export const isValidAvatarSymbol = (value: string): boolean => {
+  const graphemes = getGraphemes(value);
+  if (graphemes.length === 0) return true;
+  if (graphemes.length === 1) return true;
+  if (graphemes.length === 2) return !isEmoji(graphemes[0]) && !isEmoji(graphemes[1]);
+  return false;
+};
+
+/**
+ * Truncates an avatar symbol value to valid length.
+ * If first character is emoji, keeps only that emoji.
+ * Otherwise, keeps up to 2 characters.
+ */
+export const truncateAvatarSymbol = (value: string): string => {
+  const graphemes = getGraphemes(value);
+  if (graphemes.length <= 1) return value;
+  if (isEmoji(graphemes[0])) return graphemes[0];
+  return graphemes.slice(0, 2).join('');
+};
 
 export const agentFormSchema = z.object({
   id: z
@@ -33,15 +69,19 @@ export const agentFormSchema = z.object({
           'Agent ID must start and end with a letter or number, and can only contain lowercase letters, numbers, hyphens, and underscores.',
       }),
     })
-    .refine(
-      (name) => !isInProtectedNamespace(name) && !hasNamespaceName(name),
-      (name) => ({
-        message: i18n.translate('xpack.agentBuilder.agents.form.id.protectedNamespaceError', {
-          defaultMessage: 'Agent ID "{name}" uses a protected namespace.',
-          values: { name },
-        }),
-      })
-    ),
+    .check((ctx) => {
+      const name = ctx.value as string;
+      if (isInProtectedNamespace(name) || hasNamespaceName(name)) {
+        ctx.issues.push({
+          code: 'custom',
+          message: i18n.translate('xpack.agentBuilder.agents.form.id.protectedNamespaceError', {
+            defaultMessage: 'Agent ID "{name}" uses a protected namespace.',
+            values: { name },
+          }),
+          input: name,
+        });
+      }
+    }),
   name: z.string().min(1, {
     message: i18n.translate('xpack.agentBuilder.agents.form.nameRequired', {
       defaultMessage: 'Agent name is required.',
@@ -52,6 +92,7 @@ export const agentFormSchema = z.object({
       defaultMessage: 'Agent description is required.',
     }),
   }),
+  visibility: z.enum(['private', 'public', 'shared']),
   labels: z.array(z.string()).optional(),
   avatar_color: z
     .string()
@@ -70,12 +111,12 @@ export const agentFormSchema = z.object({
     ),
   avatar_symbol: z
     .string()
-    .max(2, {
+    .optional()
+    .refine((value) => !value || isValidAvatarSymbol(value), {
       message: i18n.translate('xpack.agentBuilder.agents.form.avatarSymbolMaxLengthError', {
-        defaultMessage: 'Avatar symbol must be 2 characters or less.',
+        defaultMessage: 'Avatar symbol must be a single emoji or up to 2 letters.',
       }),
-    })
-    .optional(),
+    }),
   configuration: z.object({
     instructions: z.string().optional(),
     tools: z.array(
@@ -83,6 +124,8 @@ export const agentFormSchema = z.object({
         tool_ids: z.array(z.string()),
       })
     ),
+    skill_ids: z.array(z.string()).optional(),
+    enable_elastic_capabilities: z.boolean().optional(),
     workflow_ids: z.array(z.string()).optional(),
   }),
 });

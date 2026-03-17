@@ -168,6 +168,7 @@ export const StreamDetailGeneralData = ({
         bottomCard={
           <StorageSizeCard
             hasMonitorPrivileges={definition.privileges?.monitor}
+            isTimeSeriesMode={definition.index_mode === 'time_series'}
             stats={data.stats?.ds.stats}
             statsError={data.error}
           />

@@ -33,8 +33,11 @@ import {
   orderSpecFilesForLoadBalance,
   parseTestFileConfig,
   retrieveIntegrations,
+  retrieveIntegrationsConfigAware,
   setDefaultToolingLoggingLevel,
 } from './utils';
+import type { LoadBalancerConfig } from './utils';
+import { resolveLoadBalancerConfig } from './lb_config_registry';
 import { prefixedOutputLogger } from '../endpoint/common/utils';
 
 import type { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
@@ -427,8 +430,16 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         ? grepSpecPattern // use the returned concrete file paths
         : globby.sync(specPattern); // convert the glob pattern to concrete file paths
 
-      const orderedFilePaths = orderSpecFilesForLoadBalance(concreteFilePaths);
-      const files = retrieveIntegrations(orderedFilePaths);
+      const shareStacks = process.env.CYPRESS_SHARE_STACKS === 'true';
+      const lbConfig: LoadBalancerConfig | undefined = resolveLoadBalancerConfig();
+
+      let files: string[];
+      if (shareStacks && lbConfig) {
+        files = retrieveIntegrationsConfigAware(concreteFilePaths, lbConfig);
+      } else {
+        const orderedFilePaths = orderSpecFilesForLoadBalance(concreteFilePaths, lbConfig);
+        files = retrieveIntegrations(orderedFilePaths, lbConfig);
+      }
 
       log.info('Resolved spec files after retrieveIntegrations:', files);
 

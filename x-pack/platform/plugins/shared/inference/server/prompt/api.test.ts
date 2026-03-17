@@ -13,15 +13,14 @@ import { createRegexWorkerServiceMock } from '../test_utils';
 import type { Message } from '@kbn/inference-common';
 import {
   MessageRole,
+  ModelFamily,
+  ModelProvider,
   type PromptAPI,
   type PromptOptions,
-  getConnectorFamily,
-  getConnectorProvider,
-  getConnectorModel,
   createPrompt,
   ChatCompletionEventType,
 } from '@kbn/inference-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import type {
   ChatCompleteApiWithCallback,
@@ -30,7 +29,7 @@ import type {
 import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
 import { promptToMessageOptions } from '../../common/prompt/prompt_to_message_options';
 import { createPromptApi } from './api';
-import { createInferenceExecutorMock, createInferenceConnectorMock } from '../test_utils';
+import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 jest.mock('../chat_complete/callback_api');
 jest.mock('../../common/prompt/prompt_to_message_options', () => {
@@ -46,6 +45,9 @@ jest.mock('../../common/prompt/prompt_to_message_options', () => {
 const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),
+  },
+  inference: {
+    get: jest.fn().mockResolvedValue({ endpoints: [] }),
   },
 } as any;
 
@@ -83,11 +85,13 @@ describe('createPromptApi', () => {
 
     const callbackApi = createChatCompleteCallbackApi({
       request,
+      namespace: 'default',
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),
       regexWorker,
       esClient: mockEsClient,
+      endpointIdCache: new InferenceEndpointIdCache(),
     });
     promptApi = createPromptApi({
       callbackApi,
@@ -101,11 +105,13 @@ describe('createPromptApi', () => {
   it('initializes createChatCompleteCallbackApi with correct options', () => {
     expect(mockCreateChatCompleteCallbackApi).toHaveBeenCalledWith({
       request,
+      namespace: 'default',
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),
       regexWorker,
       esClient: mockEsClient,
+      endpointIdCache: expect.any(InferenceEndpointIdCache),
     });
   });
 
@@ -127,40 +133,43 @@ describe('createPromptApi', () => {
     );
   });
 
-  it('calls promptToMessageOptions with correct arguments derived from connector', async () => {
-    const mockConnector = createInferenceConnectorMock({
-      connectorId: 'test-connector-openai',
-      type: 'openai' as any, // Using 'as any' if InferenceConnectorType.OpenAI is not directly available or for simplicity
-      name: 'My OpenAI Connector',
-      config: { model_id: 'gpt-4o-test' },
-    });
-    const mockExecutor = createInferenceExecutorMock({ connector: mockConnector });
+  it('calls promptToMessageOptions with model info from callback context', async () => {
+    const modelInfo = { family: ModelFamily.GPT, provider: ModelProvider.OpenAI, id: 'gpt-4o' };
 
-    // Let the actual callback function execute with our mockExecutor
     mockCallbackApi.mockImplementationOnce((_opts, cb) => {
-      cb(mockExecutor);
+      cb({ model: modelInfo });
       return Promise.resolve({ content: '', toolCalls: [] });
     });
 
     const promptOptions: PromptOptions = {
       prompt: mockPrompt,
       input: mockInput,
-      connectorId: 'test-connector-openai', // Ensure this matches the mockConnector
+      connectorId: 'test-connector-openai',
     };
 
     await promptApi(promptOptions);
 
-    // Assert that promptToMessageOptions is called with the prompt, input,
-    // and the family, provider, id derived from mockConnector
-    expect(mockPromptToMessageOptions).toHaveBeenCalledWith(mockPrompt, mockInput, {
-      family: getConnectorFamily(mockConnector), // Use actual function
-      provider: getConnectorProvider(mockConnector), // Use actual function
-      id: getConnectorModel(mockConnector), // Use actual function
-    });
+    expect(mockPromptToMessageOptions).toHaveBeenCalledWith(mockPrompt, mockInput, modelInfo);
+  });
+
+  it('forwards connectorId (which may be an inference endpoint ID) to the callback API init options', async () => {
+    const promptOptions: PromptOptions = {
+      prompt: mockPrompt,
+      input: mockInput,
+      connectorId: 'my-inference-endpoint',
+      stream: false,
+    };
+    await promptApi(promptOptions);
+
+    expect(mockCallbackApi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'my-inference-endpoint',
+      }),
+      expect.any(Function)
+    );
   });
 
   it('constructs messages correctly, including prevMessages', async () => {
-    const mockExecutor = createInferenceExecutorMock({});
     let callbackFn: any;
     mockCallbackApi.mockImplementationOnce((_opts, callback) => {
       callbackFn = callback;
@@ -176,7 +185,7 @@ describe('createPromptApi', () => {
     };
 
     await promptApi(promptOptions);
-    const resultOptions = callbackFn(mockExecutor);
+    const resultOptions = callbackFn({ model: {} });
 
     expect(resultOptions.messages).toEqual([
       { role: MessageRole.User, content: 'Hello world' },
@@ -185,7 +194,6 @@ describe('createPromptApi', () => {
   });
 
   it('generates correct metadata', async () => {
-    const mockExecutor = createInferenceExecutorMock({});
     let callbackFn: ChatCompleteApiWithCallbackCallback | undefined;
 
     mockCallbackApi.mockImplementationOnce((_opts, callback) => {
@@ -201,7 +209,7 @@ describe('createPromptApi', () => {
     };
 
     await promptApi(promptOptions);
-    const resultOptions = callbackFn!(mockExecutor);
+    const resultOptions = callbackFn!({ model: {} });
 
     expect(resultOptions.metadata).toEqual({
       attributes: {
@@ -262,7 +270,6 @@ describe('createPromptApi', () => {
   });
 
   it('passes through other options like temperature', async () => {
-    const mockExecutor = createInferenceExecutorMock({});
     let callbackFn: any;
     mockCallbackApi.mockImplementationOnce((_opts, callback) => {
       callbackFn = callback;
@@ -277,7 +284,7 @@ describe('createPromptApi', () => {
     };
 
     await promptApi(promptOptions);
-    const resultOptions = callbackFn(mockExecutor);
+    const resultOptions = callbackFn({ model: {} });
 
     expect(resultOptions.temperature).toBe(0.5);
   });

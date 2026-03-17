@@ -256,9 +256,6 @@ export const buildServices = ({
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
     cps: plugins.cps,
-    embeddableEditor: new EmbeddableEditorService(
-      core.application,
-      plugins.embeddable.getStateTransfer()
-    ),
+    embeddableEditor: new EmbeddableEditorService(plugins.embeddable.getStateTransfer()),
   };
 };
