@@ -115,9 +115,7 @@ export const createSmlAttachTool = ({
             {
               type: convertedAttachment.type,
               data: convertedAttachment.data,
-              origin: convertedAttachment.origin ?? {
-                saved_object_id: smlDoc.item_id,
-              },
+              origin: convertedAttachment.origin ?? smlDoc.origin_id,
             },
             ATTACHMENT_REF_ACTOR.agent
           );

@@ -87,7 +87,7 @@ export interface SmlTypeDefinition {
   /**
    * Return normalized data to index for a specific item.
    */
-  getSmlData: (itemId: string, context: SmlContext) => Promise<SmlData | undefined>;
+  getSmlData: (originId: string, context: SmlContext) => Promise<SmlData | undefined>;
 
   /**
    * Convert an SML document into a conversation attachment.
@@ -114,8 +114,8 @@ export interface SmlDocument {
   type: string;
   /** Display title */
   title: string;
-  /** Unique id of the source item (e.g., saved object ID) */
-  item_id: string;
+  /** Origin ID (e.g., saved object ID) */
+  origin_id: string;
   /** Searchable content */
   content: string;
   /** Timestamp when first created */
@@ -140,8 +140,8 @@ export type SmlSearchResult = SmlDocument & {
  * Crawler state document stored in the crawler state index.
  */
 export interface SmlCrawlerStateDocument {
-  /** Source item ID (e.g., saved object ID) */
-  item_id: string;
+  /** Origin ID (e.g., saved object ID) */
+  origin_id: string;
   /** SML type definition ID (e.g., 'visualization') */
   type_id: string;
   /** Space IDs this item belongs to (from the source saved object) */
@@ -164,7 +164,7 @@ export type SmlIndexAction = 'create' | 'update' | 'delete';
  */
 export interface SmlIndexAttachmentParams {
   request: KibanaRequest;
-  itemId: string;
+  originId: string;
   attachmentType: string;
   action: SmlIndexAction;
   spaceId?: string;
@@ -211,7 +211,7 @@ export interface SmlService {
 
   /** Index a single attachment (event-driven) */
   indexAttachment: (params: {
-    itemId: string;
+    originId: string;
     attachmentType: string;
     action: SmlIndexAction;
     spaces: string[];

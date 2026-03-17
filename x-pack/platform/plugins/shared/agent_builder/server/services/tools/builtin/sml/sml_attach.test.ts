@@ -45,7 +45,7 @@ const createSmlDoc = (overrides: Partial<SmlDocument> = {}): SmlDocument => ({
   id: 'chunk-1',
   type: 'visualization',
   title: 'Test Viz',
-  item_id: 'ref-1',
+  origin_id: 'ref-1',
   content: 'content',
   created_at: '2024-01-01',
   updated_at: '2024-01-02',
@@ -183,7 +183,7 @@ describe('createSmlAttachTool', () => {
       {
         type: 'visualization',
         data: { layers: [] },
-        origin: { saved_object_id: 'ref-1' },
+        origin: 'ref-1',
       },
       expect.any(String)
     );

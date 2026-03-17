@@ -125,9 +125,9 @@ describe('SmlCrawlerImpl', () => {
       );
       expect(createOp).toBeDefined();
       const createOpDoc = (
-        createOp as { index?: { document?: { item_id?: string; spaces?: string[] } } }
+        createOp as { index?: { document?: { origin_id?: string; spaces?: string[] } } }
       ).index?.document;
-      expect(createOpDoc?.item_id).toBe('a');
+      expect(createOpDoc?.origin_id).toBe('a');
       expect(createOpDoc?.spaces).toEqual(['default']);
     });
   });
@@ -147,7 +147,7 @@ describe('SmlCrawlerImpl', () => {
             hits: [
               {
                 _source: {
-                  item_id: 'a',
+                  origin_id: 'a',
                   type_id: 'test-type',
                   spaces: ['default'],
                   created_at: '2024-01-01',
@@ -194,7 +194,7 @@ describe('SmlCrawlerImpl', () => {
                 _id: 'test-type:deleted-item',
                 sort: ['deleted-item'],
                 _source: {
-                  item_id: 'deleted-item',
+                  origin_id: 'deleted-item',
                   type_id: 'test-type',
                   spaces: ['default'],
                   created_at: '2024-01-01',
@@ -230,9 +230,9 @@ describe('SmlCrawlerImpl', () => {
           op.index?.document?.update_action === 'delete'
       );
       expect(deleteOp).toBeDefined();
-      const deleteOpDoc = (deleteOp as { index?: { document?: { item_id?: string } } }).index
+      const deleteOpDoc = (deleteOp as { index?: { document?: { origin_id?: string } } }).index
         ?.document;
-      expect(deleteOpDoc?.item_id).toBe('deleted-item');
+      expect(deleteOpDoc?.origin_id).toBe('deleted-item');
     });
   });
 
@@ -251,7 +251,7 @@ describe('SmlCrawlerImpl', () => {
             hits: [
               {
                 _source: {
-                  item_id: 'a',
+                  origin_id: 'a',
                   type_id: 'test-type',
                   spaces: ['default'],
                   created_at: '2024-01-01',
@@ -299,7 +299,7 @@ describe('SmlCrawlerImpl', () => {
             hits: [
               {
                 _source: {
-                  item_id: 'a',
+                  origin_id: 'a',
                   type_id: 'test-type',
                   spaces: ['default'],
                   created_at: '2024-01-01',
@@ -352,7 +352,7 @@ describe('SmlCrawlerImpl', () => {
                 _id: 'test-type:a',
                 sort: ['a'],
                 _source: {
-                  item_id: 'a',
+                  origin_id: 'a',
                   type_id: 'test-type',
                   spaces: ['default'],
                   created_at: '2024-01-01',
@@ -371,7 +371,7 @@ describe('SmlCrawlerImpl', () => {
 
       expect(mockIndexer.indexAttachment).toHaveBeenCalledWith(
         expect.objectContaining({
-          itemId: 'a',
+          originId: 'a',
           attachmentType: 'test-type',
           action: 'create',
           spaces: ['default'],
@@ -406,7 +406,7 @@ describe('SmlCrawlerImpl', () => {
                 _id: undefined,
                 sort: ['no-id'],
                 _source: {
-                  item_id: 'no-id',
+                  origin_id: 'no-id',
                   type_id: 'test-type',
                   spaces: ['default'],
                   update_action: 'create',
@@ -511,10 +511,10 @@ describe('SmlCrawlerImpl', () => {
       // Should have written two separate bulk calls (one per page)
       const stateWriteCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
         (
-          c[0] as { operations?: Array<{ index?: { document?: { item_id?: string } } }> }
+          c[0] as { operations?: Array<{ index?: { document?: { origin_id?: string } } }> }
         ).operations?.some(
-          (op: { index?: { document?: { item_id?: string } } }) =>
-            op.index?.document?.item_id !== undefined
+          (op: { index?: { document?: { origin_id?: string } } }) =>
+            op.index?.document?.origin_id !== undefined
         )
       );
       expect(stateWriteCalls.length).toBe(2);

@@ -285,7 +285,7 @@ export class AgentBuilderPlugin
           const spaceId =
             params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
           return smlService.indexAttachment({
-            itemId: params.itemId,
+            originId: params.originId,
             attachmentType: params.attachmentType,
             action: params.action,
             spaces: [spaceId],

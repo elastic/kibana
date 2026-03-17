@@ -17,7 +17,7 @@ const storageSettings = {
   name: smlCrawlerStateIndexName,
   schema: {
     properties: {
-      item_id: types.keyword({}),
+      origin_id: types.keyword({}),
       type_id: types.keyword({}),
       spaces: types.keyword({}),
       created_at: types.date({}),

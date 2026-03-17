@@ -96,7 +96,7 @@ export const createSmlSearchTool = ({
             total: searchResult.total,
             items: searchResult.results.map((hit) => ({
               chunk_id: hit.id,
-              attachment_id: hit.item_id,
+              attachment_id: hit.origin_id,
               attachment_type: hit.type,
               type: hit.type,
               title: hit.title,

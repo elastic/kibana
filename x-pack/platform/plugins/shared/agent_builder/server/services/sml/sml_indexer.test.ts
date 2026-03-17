@@ -59,7 +59,7 @@ const createMockRegistry = (definition?: SmlTypeDefinition) => ({
 
 const createIndexerParams = (
   overrides: Partial<{
-    itemId: string;
+    originId: string;
     attachmentType: string;
     action: 'create' | 'update' | 'delete';
     spaces: string[];
@@ -67,7 +67,7 @@ const createIndexerParams = (
     logger: ReturnType<typeof createMockLogger>;
   }> = {}
 ) => ({
-  itemId: 'att-123',
+  originId: 'att-123',
   attachmentType: 'lens',
   action: 'create' as const,
   spaces: ['default'],
@@ -88,7 +88,7 @@ describe('createSmlIndexer', () => {
 
       await indexer.indexAttachment(
         createIndexerParams({
-          itemId: 'att-1',
+          originId: 'att-1',
           attachmentType: 'lens',
           action: 'delete',
           esClient,
@@ -101,7 +101,7 @@ describe('createSmlIndexer', () => {
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
-        query: { term: { item_id: 'att-1' } },
+        query: { term: { origin_id: 'att-1' } },
         refresh: false,
       });
       expect(getSmlData).not.toHaveBeenCalled();
@@ -124,7 +124,7 @@ describe('createSmlIndexer', () => {
 
       await indexer.indexAttachment(
         createIndexerParams({
-          itemId: 'att-2',
+          originId: 'att-2',
           attachmentType: 'lens',
           action: 'create',
           spaces: ['default', 'space-2'],
@@ -144,7 +144,7 @@ describe('createSmlIndexer', () => {
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
-        query: { term: { item_id: 'att-2' } },
+        query: { term: { origin_id: 'att-2' } },
         refresh: false,
       });
       expect(bulkMock).toHaveBeenCalledTimes(1);
@@ -156,7 +156,7 @@ describe('createSmlIndexer', () => {
         id: 'lens:att-2:mock-uuid',
         type: 'lens',
         title: 'My Viz',
-        item_id: 'att-2',
+        origin_id: 'att-2',
         content: 'content',
         created_at: expect.any(String),
         updated_at: expect.any(String),
@@ -181,7 +181,7 @@ describe('createSmlIndexer', () => {
 
       await indexer.indexAttachment(
         createIndexerParams({
-          itemId: 'att-3',
+          originId: 'att-3',
           attachmentType: 'lens',
           action: 'update',
           esClient,
@@ -202,7 +202,7 @@ describe('createSmlIndexer', () => {
 
       await indexer.indexAttachment(
         createIndexerParams({
-          itemId: 'att-4',
+          originId: 'att-4',
           attachmentType: 'unknown-type',
           action: 'create',
           esClient,
@@ -229,7 +229,7 @@ describe('createSmlIndexer', () => {
 
       await indexer.indexAttachment(
         createIndexerParams({
-          itemId: 'att-5',
+          originId: 'att-5',
           attachmentType: 'lens',
           action: 'create',
           esClient,
@@ -254,7 +254,7 @@ describe('createSmlIndexer', () => {
 
       await indexer.indexAttachment(
         createIndexerParams({
-          itemId: 'att-6',
+          originId: 'att-6',
           attachmentType: 'lens',
           action: 'create',
           esClient,
@@ -281,7 +281,7 @@ describe('createSmlIndexer', () => {
 
       await indexer.indexAttachment(
         createIndexerParams({
-          itemId: 'att-7',
+          originId: 'att-7',
           attachmentType: 'lens',
           action: 'delete',
           esClient,
@@ -306,7 +306,7 @@ describe('createSmlIndexer', () => {
 
       await indexer.indexAttachment(
         createIndexerParams({
-          itemId: 'att-8',
+          originId: 'att-8',
           attachmentType: 'lens',
           action: 'delete',
           esClient,
@@ -337,7 +337,7 @@ describe('createSmlIndexer', () => {
 
       await indexer.indexAttachment(
         createIndexerParams({
-          itemId: 'att-9',
+          originId: 'att-9',
           attachmentType: 'lens',
           action: 'create',
           esClient,
@@ -365,7 +365,7 @@ describe('createSmlIndexer', () => {
       await expect(
         indexer.indexAttachment(
           createIndexerParams({
-            itemId: 'att-10',
+            originId: 'att-10',
             attachmentType: 'lens',
             action: 'create',
             esClient,
@@ -395,7 +395,7 @@ describe('createSmlIndexer', () => {
 
       await indexer.indexAttachment(
         createIndexerParams({
-          itemId: 'att-11',
+          originId: 'att-11',
           attachmentType: 'lens',
           action: 'create',
           esClient,

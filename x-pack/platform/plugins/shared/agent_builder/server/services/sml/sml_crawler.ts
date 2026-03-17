@@ -210,7 +210,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
       operations.push({
         id: `${attachmentType}:${item.id}`,
         document: {
-          item_id: item.id,
+          origin_id: item.id,
           type_id: attachmentType,
           spaces: item.spaces,
           created_at: existing?.created_at ?? crawlStartTime,
@@ -263,7 +263,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
           },
         },
         size: pageSize,
-        sort: [{ item_id: 'asc' }],
+        sort: [{ origin_id: 'asc' }],
         ...(searchAfter ? { search_after: searchAfter } : {}),
       });
 
@@ -307,11 +307,11 @@ export class SmlCrawlerImpl implements SmlCrawler {
           return limit(async () => {
             try {
               this.logger.info(
-                `SML crawler: processing '${action}' for item '${doc.item_id}' (type: ${doc.type_id})`
+                `SML crawler: processing '${action}' for origin '${doc.origin_id}' (type: ${doc.type_id})`
               );
 
               await this.indexer.indexAttachment({
-                itemId: doc.item_id,
+                originId: doc.origin_id,
                 attachmentType: doc.type_id,
                 action,
                 spaces: doc.spaces,
@@ -334,7 +334,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
             } catch (error) {
               errorCount++;
               this.logger.error(
-                `SML crawler: failed to process action '${action}' for '${doc.item_id}': ${
+                `SML crawler: failed to process action '${action}' for '${doc.origin_id}': ${
                   (error as Error).message
                 }`
               );
@@ -415,7 +415,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
 
   /**
    * Batch-lookup state documents by their IDs using mget-style terms query.
-   * Returns a map of item_id → state document.
+   * Returns a map of origin_id → state document.
    */
   private async batchLookupState({
     stateClient,
@@ -440,7 +440,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
 
       for (const hit of response.hits.hits) {
         if (hit._source) {
-          result.set(hit._source.item_id, hit._source);
+          result.set(hit._source.origin_id, hit._source);
         }
       }
     } catch (error) {
@@ -523,7 +523,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
           },
         },
         size: pageSize,
-        sort: [{ item_id: 'asc' }],
+        sort: [{ origin_id: 'asc' }],
         ...(searchAfter ? { search_after: searchAfter } : {}),
       });
 
