@@ -12,7 +12,8 @@ export const sharepointServerDataSource: DataSource = {
   id: 'sharepoint-server',
   name: 'SharePoint Server',
   description: i18n.translate('xpack.dataSources.sharepointServer.description', {
-    defaultMessage: 'Connect to SharePoint Server (on-premises) to search and retrieve content.',
+    defaultMessage:
+      'Connect to SharePoint Server (on-premises) to search and retrieve site content.',
   }),
 
   iconType: '.sharepoint-server',

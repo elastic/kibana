@@ -36,7 +36,8 @@ export const SharepointServer: ConnectorSpec = {
     id: '.sharepoint-server',
     displayName: 'SharePoint Server',
     description: i18n.translate('core.kibanaConnectorSpecs.sharepointServer.metadata.description', {
-      defaultMessage: 'Kibana Stack Connector for SharePoint Server (on-premises).',
+      defaultMessage:
+        'Connect to SharePoint Server (on-premises) to search and retrieve site content.',
     }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
@@ -255,12 +256,12 @@ export const SharepointServer: ConnectorSpec = {
     callRestApi: {
       isTool: true,
       description:
-        "Call a SharePoint Server REST API endpoint by path only (e.g., _api/web/title). Path must start with '_api/'.",
+        "Call a SharePoint Server REST API endpoint by path only (for example, _api/web/title). Path must start with '_api/'.",
       input: z.object({
         method: z.enum(['GET', 'POST']).describe('HTTP method'),
         path: z
           .string()
-          .describe("API path starting with '_api/' (e.g., '_api/web/title')")
+          .describe("API path starting with '_api/' (for example, '_api/web/title')")
           .refine((value) => value.startsWith('_api/'), {
             message: "Path must start with '_api/'",
           }),
@@ -294,7 +295,7 @@ export const SharepointServer: ConnectorSpec = {
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.sharepointServer.test.description', {
-      defaultMessage: 'Verifies SharePoint Server connection by fetching the site title',
+      defaultMessage: 'Verifies SharePoint Server connection by fetching the site title.',
     }),
     handler: async (ctx) => {
       ctx.log.debug('SharePoint Server test handler');

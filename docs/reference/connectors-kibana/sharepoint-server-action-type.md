@@ -7,11 +7,11 @@ applies_to:
 
 # SharePoint Server connector [sharepoint-server-action-type]
 
-The SharePoint Server connector communicates with SharePoint Server (on-premises) via its native REST API (`/_api/`).
+The SharePoint Server connector communicates with SharePoint Server (on-premises) through its native REST API (`/_api/`).
 
 ## Create connectors in {{kib}} [define-sharepoint-server-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [sharepoint-server-connector-configuration]
 
@@ -50,7 +50,7 @@ Get Folder Contents
     - **Path** (required): Server-relative URL of the folder (for example, `/sites/mysite/Shared Documents`).
 
 Download File
-:   Downloads the raw content of a file as UTF-8 text. For binary files (PDF, .docx), use the download workflow which pipes through the Elasticsearch attachment ingest pipeline.
+:   Downloads the raw content of a file as UTF-8 text. For binary files (PDF, .docx), use the download workflow, which runs files through the Elasticsearch attachment ingest pipeline.
     - **Path** (required): Server-relative URL of the file (for example, `/sites/mysite/Shared Documents/report.txt`).
 
 Get Site Page Contents
@@ -78,6 +78,6 @@ To use the SharePoint Server connector, you need:
 
 2. **HTTPS enabled**: Ensure the SharePoint web application is configured to use HTTPS. Basic authentication over plain HTTP is insecure and not recommended.
 
-3. **Basic authentication enabled**: In SharePoint Central Administration, navigate to **Application Management > Manage web applications**, select your web application, click **Authentication Providers**, and verify that **Basic authentication** is enabled for the zone. If it is not enabled, contact your SharePoint administrator.
+3. **Basic authentication enabled**: In SharePoint Central Administration, navigate to **Application Management > Manage web applications**, select your web application, select **Authentication Providers**, and verify that **Basic authentication** is enabled for the zone. If it is not enabled, contact your SharePoint administrator.
 
 4. **Network access**: The Kibana server must be able to reach the SharePoint Server host on port 443 (HTTPS). Verify firewall rules allow this traffic.
