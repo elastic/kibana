@@ -18,6 +18,16 @@ jest.mock('react-router-dom', () => ({
   useHistory: () => ({ push: mockHistoryPush }),
 }));
 
+jest.mock('@kbn/core-di-browser', () => ({
+  useService: (token: unknown) => {
+    if (token === 'http') {
+      return { basePath: { prepend: (p: string) => p } };
+    }
+    return {};
+  },
+  CoreStart: (key: string) => key,
+}));
+
 const mockUseBreadcrumbs = jest.fn();
 jest.mock('../../hooks/use_breadcrumbs', () => ({
   useBreadcrumbs: (...args: unknown[]) => mockUseBreadcrumbs(...args),
@@ -104,10 +114,12 @@ describe('RuleDetailPage', () => {
     expect(screen.getByTestId('openEditRuleFlyoutButton')).toBeInTheDocument();
   });
 
-  it('navigates to edit page when edit button is clicked', () => {
+  it('renders edit button with correct href', () => {
     renderPage(baseRule);
-    fireEvent.click(screen.getByTestId('openEditRuleFlyoutButton'));
-    expect(mockHistoryPush).toHaveBeenCalledWith('/edit/rule-1');
+    expect(screen.getByTestId('openEditRuleFlyoutButton')).toHaveAttribute(
+      'href',
+      '/app/management/insightsAndAlerting/alerting_v2/edit/rule-1'
+    );
   });
 
   it('opens delete confirmation from actions menu', () => {

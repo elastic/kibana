@@ -223,9 +223,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByTestId('createRuleButton'));
-
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(
+    expect(screen.getByTestId('createRuleButton')).toHaveAttribute(
+      'href',
       '/app/management/insightsAndAlerting/alerting_v2/create'
     );
   });
