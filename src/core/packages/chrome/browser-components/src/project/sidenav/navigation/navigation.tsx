@@ -12,10 +12,10 @@ import { map } from 'rxjs';
 import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
-import type { IBasePath as BasePath } from '@kbn/core-http-browser';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { useBasePath } from '../../../shared/chrome_hooks';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
@@ -23,12 +23,11 @@ import { PanelStateManager } from './panel_state_manager';
 export interface ChromeNavigationProps {
   isCollapsed: boolean;
   setWidth: (width: number) => void;
-  basePath: BasePath;
   onToggleCollapsed: (isCollapsed: boolean) => void;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
-  const state = useNavigationItems(props.basePath);
+  const state = useNavigationItems();
 
   if (!state) {
     return null;
@@ -55,10 +54,9 @@ export const Navigation = (props: ChromeNavigationProps) => {
 // eslint-disable-next-line import/no-default-export
 export default Navigation;
 
-const useNavigationItems = (
-  basePath: BasePath
-): (NavigationItems & { solutionId: SolutionId }) | null => {
+const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
   const chrome = useChromeService();
+  const basePath = useBasePath();
 
   const items$ = useMemo(() => {
     const panelStateManager = new PanelStateManager(basePath.get());
