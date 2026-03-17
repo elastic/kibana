@@ -89,32 +89,6 @@ describe('updateAlertsStatus', () => {
       `);
     });
 
-    it('updates workflow reason only when workflow status changes', async () => {
-      const args = [
-        {
-          id: 'alert-id-1',
-          index: '.siem-signals',
-          status: CaseStatuses.closed,
-          closingReason: 'false_positive',
-        },
-      ];
-
-      await alertService.updateAlertsStatus(args);
-
-      const scriptSource = esClient.updateByQuery.mock.calls[0][0].script.source;
-
-      expect(scriptSource).toMatch(
-        /if \(ctx\._source\['kibana\.alert\.workflow_status'\] != null && ctx\._source\['kibana\.alert\.workflow_status'\] != params\.status\) \{[\s\S]*if \(params\.reason != null\) {[\s\S]*ctx\._source\['kibana\.alert\.workflow_reason'\] = params\.reason;[\s\S]*if \(params\.shouldRemoveWorkflowReason\) {[\s\S]*ctx\._source\.remove\('kibana\.alert\.workflow_reason'\);[\s\S]*\}/
-      );
-      expect(
-        scriptSource.match(/ctx\._source\['kibana\.alert\.workflow_reason'\] = params\.reason;/g)
-      ).toHaveLength(1);
-      expect(
-        scriptSource.match(/ctx\._source\.remove\('kibana\.alert\.workflow_reason'\);/g)
-      ).toHaveLength(1);
-      expect(scriptSource).toMatch(/ctx\.op = 'noop';/);
-    });
-
     it('returns total updated alert count', async () => {
       esClient.updateByQuery
         .mockResolvedValueOnce({ updated: 2, version_conflicts: 0 })

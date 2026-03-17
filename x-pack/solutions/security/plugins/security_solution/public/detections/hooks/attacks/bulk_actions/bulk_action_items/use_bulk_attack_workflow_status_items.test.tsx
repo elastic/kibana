@@ -48,9 +48,16 @@ describe('useBulkAttackWorkflowStatusItems', () => {
       item: {
         label: 'Close',
         key: 'closed-attack-status',
-        disableOnQuery: true,
+        'data-test-subj': 'closed-attack-status',
+        panel: ALERT_CLOSING_REASON_PANEL_ID,
       },
-      panels: [{ id: ALERT_CLOSING_REASON_PANEL_ID, title: 'Close selected alerts' }],
+      panels: [
+        {
+          id: ALERT_CLOSING_REASON_PANEL_ID,
+          title: 'Close selected alerts',
+          renderContent: () => React.createElement('div'),
+        },
+      ],
       getPanels: jest.fn().mockReturnValue([]),
     });
 

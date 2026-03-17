@@ -6,6 +6,7 @@
  */
 
 import type { JSX } from 'react';
+import type { TimelineItem } from '@kbn/response-ops-alerts-table/types';
 
 interface PanelConfig {
   id: string | number;
@@ -14,7 +15,7 @@ interface PanelConfig {
 }
 
 export interface RenderContentPanelProps {
-  alertItems: unknown[];
+  alertItems: TimelineItem[];
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   isAllSelected?: boolean;
   clearSelection?: () => void;
