@@ -34,16 +34,31 @@ jobs:
         with:
           script: |
             const DRY_RUN = '${{ inputs.dry_run }}' !== 'false';
-            const LIMIT = parseInt('${{ inputs.limit }}', 10) || 0;
-            const CLOSED_PR_MAX_AGE_DAYS = parseInt('${{ inputs.closed_pr_max_age_days }}', 10) || 30;
-            const NO_PR_MAX_AGE_DAYS = parseInt('${{ inputs.no_pr_max_age_days }}', 10) || 365;
+            const parseNonNeg = (raw, fallback) => {
+              const n = parseInt(raw, 10);
+              return Number.isNaN(n) || n < 0 ? fallback : n;
+            };
+            const LIMIT = parseNonNeg('${{ inputs.limit }}', 0);
+            const CLOSED_PR_MAX_AGE_DAYS = parseNonNeg('${{ inputs.closed_pr_max_age_days }}', 30);
+            const NO_PR_MAX_AGE_DAYS = parseNonNeg('${{ inputs.no_pr_max_age_days }}', 365);
             const CLOSED_PR_CUTOFF_MS = Date.now() - (CLOSED_PR_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
             const NO_PR_CUTOFF_MS = Date.now() - (NO_PR_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
             console.log(`Dry run: ${DRY_RUN}`);
             console.log(`Closed PR cutoff: ${new Date(CLOSED_PR_CUTOFF_MS).toISOString()}`);
             console.log(`No PR cutoff: ${new Date(NO_PR_CUTOFF_MS).toISOString()}`);
 
-            let deleted = 0, skipped = 0, tooRecent = 0;
+            // Fetch default branch name to always protect it
+            const { repository: { defaultBranchRef } } = await github.graphql(`
+              query($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                  defaultBranchRef { name }
+                }
+              }
+            `, { owner: context.repo.owner, repo: context.repo.repo });
+            const defaultBranch = defaultBranchRef.name;
+            console.log(`Default branch: ${defaultBranch}`);
+
+            let deleted = 0, skipped = 0, failed = 0, tooRecent = 0;
             let cursor = null;
             let hasMore = true;
 
@@ -87,7 +102,9 @@ jobs:
               cursor = refs.pageInfo.endCursor;
 
               for (const ref of refs.nodes) {
+                if (ref.name === defaultBranch) continue;
                 if (ref.branchProtectionRule) continue;
+                if (/^\d+\.\d+$/.test(ref.name)) continue; // Release branches (e.g. 8.18, 9.0)
                 if (!ref.target?.committedDate) continue;
 
                 const commitDate = new Date(ref.target.committedDate);
@@ -110,6 +127,7 @@ jobs:
                 const reason = hasAnyPr ? 'closed PR' : 'no PR';
                 if (DRY_RUN) {
                   console.log(`WOULD DELETE: ${ref.name} (${reason}, last commit: ${commitDate.toISOString()})`);
+                  deleted++;
                 } else {
                   console.log(`DELETE: ${ref.name} (${reason}, last commit: ${commitDate.toISOString()})`);
                   try {
@@ -118,15 +136,17 @@ jobs:
                       repo: context.repo.repo,
                       ref: `heads/${ref.name}`,
                     });
+                    deleted++;
                   } catch (e) {
                     console.log(`  Failed: ${e.message}`);
+                    failed++;
                   }
                 }
-                deleted++;
               }
             }
 
             console.log(`\n=== Summary ===`);
             console.log(`${DRY_RUN ? 'Would delete' : 'Deleted'}: ${deleted}`);
+            console.log(`Failed: ${failed}`);
             console.log(`Skipped (open PR): ${skipped}`);
             console.log(`Skipped (too recent): ${tooRecent}`);
