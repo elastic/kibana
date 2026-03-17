@@ -6,11 +6,13 @@ This file provides guidance to agents when working with code in this folder.
 
 This is a UI component. It's a date range picker with a "smart input".
 
-- **Only dependencies**: `@elastic/eui`, `@elastic/datemath`, `@kbn/i18n` and `moment`
+- **Only dependencies**: `@elastic/eui`, `@elastic/datemath`, `@kbn/i18n`, `moment` and `react-day-picker`
 
 ## Commands
 
 Run from Kibana root directory.
+Before running `node`/`yarn` commands in agent shells, load nvm in the same command:
+- `[ -s "$HOME/.nvm/nvm.sh" ] && source "$HOME/.nvm/nvm.sh" && nvm use --silent`
 
 ```bash
 # Unit tests

@@ -7,7 +7,7 @@
 
 import type { EuiCallOutProps } from '@elastic/eui';
 import {
-  EuiBadge,
+  EuiSpacer,
   EuiButtonEmpty,
   EuiCallOut,
   EuiTextBlockTruncate,
@@ -90,16 +90,35 @@ export const ProcessorMetricBadges = ({
         <EuiFlexItem>
           <EuiToolTip
             position="top"
-            content={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.parsedRate', {
-              defaultMessage:
-                '{parsedRate} of the sampled documents were successfully parsed by this processor',
-              values: { parsedRate },
-            })}
+            content={
+              <>
+                <p>
+                  {i18n.translate('xpack.streams.processorMetricBadges.euiBadge.parsedRate', {
+                    defaultMessage:
+                      '{parsedRate} of the sampled documents were successfully parsed by this processor',
+                    values: { parsedRate },
+                  })}
+                </p>
+                <EuiSpacer size="s" />
+                {detectedFieldsCount > 0 && (
+                  <p>
+                    {i18n.translate('xpack.streams.processorMetricBadges.euiBadge.detectedFields', {
+                      defaultMessage:
+                        '{detectedFieldsCount, plural, one {# field was parsed on the sampled documents: } other {# fields were parsed on the sampled documents:\n}}{detectedFields}',
+                      values: {
+                        detectedFieldsCount,
+                        detectedFields: detected_fields.join('\n'),
+                      },
+                    })}
+                  </p>
+                )}
+              </>
+            }
           >
             <EuiTextColor color="success">
               <EuiFlexGroup gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="check" />
+                  <EuiIcon type="check" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>{parsedRate}</EuiFlexItem>
               </EuiFlexGroup>
@@ -121,30 +140,13 @@ export const ProcessorMetricBadges = ({
               <EuiTextColor color="danger">
                 <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="cross" />
+                    <EuiIcon type="cross" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>{failedRate}</EuiFlexItem>
                 </EuiFlexGroup>
               </EuiTextColor>
             </span>
           </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      {detectedFieldsCount > 0 && (
-        <EuiFlexItem>
-          <EuiBadge
-            color="hollow"
-            title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.detectedFields', {
-              defaultMessage:
-                '{detectedFieldsCount, plural, one {# field was parsed on the sampled documents: } other {# fields were parsed on the sampled documents:\n}}{detectedFields}',
-              values: { detectedFieldsCount, detectedFields: detected_fields.join('\n') },
-            })}
-          >
-            {i18n.translate('xpack.streams.processorMetricBadges.fieldsBadgeLabel', {
-              defaultMessage: '{detectedFieldsCount, plural, one {# field } other {# fields}}',
-              values: { detectedFieldsCount },
-            })}
-          </EuiBadge>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

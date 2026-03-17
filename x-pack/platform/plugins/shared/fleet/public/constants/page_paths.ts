@@ -109,6 +109,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integrations_installed: '/installed/:category?',
   integrations_installed_updates_available: '/installed/updates_available/:category?',
   integrations_create: '/create',
+  integrations_upload: '/upload',
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',

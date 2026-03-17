@@ -79,7 +79,8 @@
     "@kbn/lens-common",
     "@kbn/visualization-listing-components",
     "@kbn/cps",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/cps-utils"
   ],
   "exclude": ["target/**/*"]
 }

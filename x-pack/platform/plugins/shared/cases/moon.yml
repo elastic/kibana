@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cases-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-cases'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/cases-plugin'
+  title: '@kbn/cases-plugin'
   description: Moon project for @kbn/cases-plugin
   channel: ''
   owner: '@elastic/kibana-cases'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/cases
+  sourceRoot: x-pack/platform/plugins/shared/cases
 dependsOn:
   - '@kbn/core'
   - '@kbn/lens-plugin'
@@ -106,6 +105,11 @@ dependsOn:
   - '@kbn/securitysolution-es-utils'
   - '@kbn/response-ops-retry-service'
   - '@kbn/openapi-generator'
+  - '@kbn/workflows-extensions'
+  - '@kbn/workflows'
+  - '@kbn/lens-embeddable-utils'
+  - '@kbn/resizable-layout'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod
@@ -118,18 +122,27 @@ fileGroups:
     - public/**/*
     - server/**/*
     - scripts/**/*
-    - docs/openapi/**/*.gen.ts
     - '!target/**/*'
 tasks:
   jest:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'
   jestCI:
+    command: node
     args:
+      - '--no-experimental-require-module'
+      - $workspaceRoot/scripts/jest
       - '--config'
       - $projectRoot/jest.config.js
+    options:
+      runFromWorkspaceRoot: true
     inputs:
       - '@group(src)'

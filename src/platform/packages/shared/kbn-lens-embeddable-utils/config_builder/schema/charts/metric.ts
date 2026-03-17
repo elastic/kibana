@@ -18,12 +18,7 @@ import {
   esqlColumnSchema,
   esqlColumnOperationWithLabelAndFormatSchema,
 } from '../metric_ops';
-import {
-  colorByValueAbsolute,
-  staticColorSchema,
-  applyColorToSchema,
-  colorByValueSchema,
-} from '../color';
+import { staticColorSchema, applyColorToSchema, colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   collapseBySchema,
@@ -37,6 +32,7 @@ import {
 } from './shared';
 import {
   horizontalAlignmentSchema,
+  verticalAlignmentSchema,
   leftRightAlignmentSchema,
   beforeAfterAlignmentSchema,
 } from '../alignments';
@@ -49,7 +45,7 @@ const compareToSchemaShared = schema.object(
       schema.boolean({ meta: { description: 'Show value' }, defaultValue: true })
     ),
   },
-  { meta: { id: 'metricChartCompareToShared' } }
+  { meta: { id: 'metricChartCompareToShared', title: 'Compare To Shared' } }
 );
 
 const barBackgroundChartSchema = schema.object({
@@ -82,7 +78,7 @@ export const complementaryVizSchemaESQL = barBackgroundChartSchema.extends(
      */
     max_value: esqlColumnSchema,
   },
-  { meta: { id: 'metricComplementaryBar' } }
+  { meta: { id: 'metricComplementaryBar', title: 'Complementary Bar' } }
 );
 
 const metricStateBackgroundChartSchemaNoESQL = {
@@ -140,7 +136,7 @@ const metricStatePrimaryMetricOptionsSchema = {
         labels: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
         value: LENS_METRIC_STATE_DEFAULTS.primaryAlign,
       },
-      meta: { id: 'metricPrimaryMetricAlignments' },
+      meta: { id: 'metricPrimaryMetricAlignments', title: 'Primary Metric Alignments' },
     }
   ),
   /**
@@ -167,7 +163,13 @@ const metricStatePrimaryMetricOptionsSchema = {
           defaultValue: LENS_METRIC_STATE_DEFAULTS.iconAlign,
         }),
       },
-      { meta: { id: 'metricIconConfig', description: 'Icon configuration for primary metric' } }
+      {
+        meta: {
+          id: 'metricIconConfig',
+          title: 'Icon Configuration',
+          description: 'Icon configuration for primary metric',
+        },
+      }
     )
   ),
   /**
@@ -178,6 +180,26 @@ const metricStatePrimaryMetricOptionsSchema = {
    * Where to apply the color (background or value)
    */
   apply_color_to: schema.maybe(applyColorToSchema),
+  /**
+   * Position of the primary metric value. Possible values:
+   * - 'top': Value appears above the labels
+   * - 'bottom': Value appears below the labels
+   */
+  position: schema.maybe(
+    verticalAlignmentSchema({
+      meta: { description: 'Position of the primary metric value (top or bottom)' },
+    })
+  ),
+  /**
+   * Font weight for title and subtitle. Possible values:
+   * - 'bold': Bold font weight
+   * - 'normal': Normal font weight
+   */
+  title_weight: schema.maybe(
+    schema.oneOf([schema.literal('bold'), schema.literal('normal')], {
+      meta: { description: 'Font weight for title and subtitle' },
+    })
+  ),
 };
 
 const metricStateSecondaryMetricOptionsSchema = {
@@ -208,20 +230,40 @@ const metricStateSecondaryMetricOptionsSchema = {
           to: schema.literal('baseline'),
           baseline: schema.number({ meta: { description: 'Baseline value' }, defaultValue: 0 }),
         },
-        { meta: { id: 'metricCompareToBaseline' } }
+        { meta: { id: 'metricCompareToBaseline', title: 'Compare To Baseline' } }
       ),
       compareToSchemaShared.extends(
         {
           to: schema.literal('primary'),
         },
-        { meta: { id: 'metricCompareToPrimary' } }
+        { meta: { id: 'metricCompareToPrimary', title: 'Compare To Primary' } }
       ),
     ])
   ),
   /**
+   * Alignments for the secondary metric value.
+   */
+  alignments: schema.maybe(
+    schema.object(
+      {
+        /**
+         * Alignment for secondary value. Possible values:
+         * - 'left': Align value to the left
+         * - 'center': Align value to the center
+         * - 'right': Align value to the right
+         */
+        value: horizontalAlignmentSchema({
+          meta: { description: 'Alignment for secondary value' },
+          defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryAlign,
+        }),
+      },
+      { meta: { id: 'metricSecondaryMetricAlignments' } }
+    )
+  ),
+  /**
    * Color configuration
    */
-  color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
+  color: schema.maybe(staticColorSchema),
 };
 
 const metricStateBreakdownByOptionsSchema = {
@@ -331,7 +373,7 @@ export const esqlMetricState = schema.object({
 });
 
 export const metricStateSchema = schema.oneOf([metricStateSchemaNoESQL, esqlMetricState], {
-  meta: { id: 'metricChartSchema' },
+  meta: { id: 'metricChart', title: 'Metric Chart' },
   validate: ({ metrics, breakdown_by }) => {
     const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { addExcludeFrozenToQuery } from './add_exclude_frozen_to_query';
 
 describe('addExcludeFrozenToQuery', () => {
@@ -19,7 +20,7 @@ describe('addExcludeFrozenToQuery', () => {
             },
           ],
         },
-      })
+      } as unknown as QueryDslQueryContainer)
     ).toMatchObject({
       bool: {
         must: [{ match_all: {} }],
@@ -39,7 +40,7 @@ describe('addExcludeFrozenToQuery', () => {
             },
           },
         },
-      })
+      } as unknown as QueryDslQueryContainer)
     ).toMatchObject({
       bool: {
         must: [],
@@ -56,7 +57,7 @@ describe('addExcludeFrozenToQuery', () => {
           must: [],
           must_not: [{ term: { category: { value: 'clothing' } } }],
         },
-      })
+      } as unknown as QueryDslQueryContainer)
     ).toMatchObject({
       bool: {
         must: [],

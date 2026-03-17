@@ -36,6 +36,7 @@
       "{index}/_settings"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-settings",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-put-settings",
     "availability": {
       "stack": true,
       "serverless": true

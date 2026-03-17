@@ -106,6 +106,8 @@ export interface AttachmentStateManager {
   permanentDelete(id: string): boolean;
   /** Update description without creating new version */
   rename(id: string, description: string, actor?: AttachmentRefActor): boolean;
+  /** Update the origin reference for an attachment */
+  updateOrigin(id: string, origin: string, actor?: AttachmentRefActor): Promise<boolean>;
 
   /** Get all attachment version refs that were accessed during this round */
   getAccessedRefs(): AttachmentVersionRef[];
@@ -287,22 +289,13 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
         throw new Error(`Attachment type "${input.type}" does not support resolving from origin`);
       }
 
-      let validatedOrigin: unknown = input.origin;
-      if (typeDefinition.validateOrigin) {
-        const originResult = await typeDefinition.validateOrigin(input.origin);
-        if (!originResult.valid) {
-          throw new Error(`Invalid origin data for type "${input.type}": ${originResult.error}`);
-        }
-        validatedOrigin = originResult.data;
-      }
-
       if (!resolveContext) {
         throw new Error(
           `Resolve context is required to add attachment of type "${input.type}" with origin`
         );
       }
 
-      const resolved = await typeDefinition.resolve(validatedOrigin, resolveContext);
+      const resolved = await typeDefinition.resolve(input.origin, resolveContext);
       if (resolved === undefined) {
         throw new Error(
           `Failed to resolve content from origin for attachment type "${input.type}"`
@@ -457,6 +450,22 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     attachment.description = description;
+    this.dirty = true;
+    this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
+    return true;
+  }
+
+  async updateOrigin(id: string, origin: string, actor?: AttachmentRefActor): Promise<boolean> {
+    const attachment = this.attachments.get(id);
+    if (!attachment) {
+      return false;
+    }
+
+    if (attachment.active === false) {
+      return false;
+    }
+
+    attachment.origin = origin;
     this.dirty = true;
     this.recordAccess(id, attachment.current_version, ATTACHMENT_REF_OPERATION.updated, actor);
     return true;

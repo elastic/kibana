@@ -201,7 +201,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"apiUrl\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at apiUrl`,
             });
           });
       });
@@ -225,7 +225,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"appId\": Required`,
+              message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at appId`,
             });
           });
       });
@@ -248,7 +248,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type secrets: Field \"apiToken\": Required`,
+              message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at apiToken`,
             });
           });
       });
@@ -292,7 +292,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating connector type config: Field \"connectorType\": Invalid enum value. Expected 'all' | 'alerts' | 'cases', received 'not-supported'`,
+              message: `error validating connector type config: ✖ Invalid option: expected one of "all"|"alerts"|"cases"\n  → at connectorType`,
             });
           });
       });
@@ -349,7 +349,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'pushToService'`,
+                message: `error validating action params: ✖ Invalid input\n  → at subAction`,
               });
             });
         });
@@ -374,7 +374,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subActionParams\": Expected object, received null`,
+                message: `error validating action params: ✖ Invalid input: expected object, received null\n  → at subActionParams`,
               });
             });
         });
@@ -398,7 +398,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subActionParams.comments.0.commentId\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].commentId`,
               });
             });
         });
@@ -422,7 +422,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: Field \"subActionParams.comments.0.comment\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].comment`,
               });
             });
         });

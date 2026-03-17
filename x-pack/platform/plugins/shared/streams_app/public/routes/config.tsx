@@ -35,7 +35,6 @@ const managementQueryParams = t.partial({
   rangeTo: t.string,
   // Significant events flyout params
   openFlyout: t.string,
-  selectedSystems: t.string,
   // Data quality page state
   pageState: t.string,
 });

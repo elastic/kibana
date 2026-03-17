@@ -55,6 +55,7 @@ describe('collectStats', () => {
       plugins: [mockPlugin],
       pathsByPlugin: new Map([[mockPlugin, ['src/plugins/test/public/index.ts']]]),
       project: {} as any,
+      allPlugins: [mockPlugin],
     };
 
     apiMapResult = {
@@ -70,6 +71,7 @@ describe('collectStats', () => {
       referencedDeprecations: {},
       unreferencedDeprecations: {},
       adoptionTrackedAPIs: {},
+      unnamedExports: {},
     };
 
     (collectApiStatsForPlugin as jest.Mock).mockReturnValue({
@@ -79,12 +81,14 @@ describe('collectStats', () => {
       noReferences: [],
       paramDocMismatches: [],
       missingComplexTypeInfo: [],
+      missingReturns: [],
       missingExports: 0,
       deprecatedAPIsReferencedCount: 0,
       unreferencedDeprecatedApisCount: 0,
       adoptionTrackedAPIs: [],
       adoptionTrackedAPIsCount: 0,
       adoptionTrackedAPIsUnreferencedCount: 0,
+      unnamedExports: [],
     });
 
     (countEslintDisableLines as jest.Mock).mockResolvedValue({

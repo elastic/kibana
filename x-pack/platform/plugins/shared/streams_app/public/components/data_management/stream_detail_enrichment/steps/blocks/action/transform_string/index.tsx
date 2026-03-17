@@ -13,21 +13,13 @@ import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { TransformStringTargetField } from './transform_string_optional_fields';
 
-interface TransformStringProcessorFormProps {
-  fieldSelectorHelpText: string;
-  targetFieldHelpText: string;
-}
-
-export const TransformStringProcessorForm = ({
-  fieldSelectorHelpText,
-  targetFieldHelpText,
-}: TransformStringProcessorFormProps) => {
+export const TransformStringProcessorForm = () => {
   return (
     <>
-      <ProcessorFieldSelector fieldKey="from" helpText={fieldSelectorHelpText} />
+      <ProcessorFieldSelector fieldKey="from" helpText="" />
       <EuiSpacer size="m" />
       <FieldsAccordion>
-        <TransformStringTargetField targetFieldHelpText={targetFieldHelpText} />
+        <TransformStringTargetField />
         <ProcessorConditionEditor />
       </FieldsAccordion>
       <EuiSpacer size="m" />

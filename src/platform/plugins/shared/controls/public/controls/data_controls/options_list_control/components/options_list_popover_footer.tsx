@@ -13,12 +13,10 @@ import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiPopoverFooter,
   EuiProgress,
   useEuiBackgroundColor,
   useEuiPaddingSize,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -40,13 +38,11 @@ const aggregationToggleButtons = [
 ];
 
 export const OptionsListPopoverFooter = () => {
-  const { euiTheme } = useEuiTheme();
   const { componentApi } = useOptionsListContext();
 
-  const [exclude, loading, allowExpensiveQueries] = useBatchedPublishingSubjects(
+  const [exclude, loading] = useBatchedPublishingSubjects(
     componentApi.exclude$,
-    componentApi.dataLoading$,
-    componentApi.allowExpensiveQueries$
+    componentApi.dataLoading$
   );
 
   return (
@@ -88,16 +84,6 @@ export const OptionsListPopoverFooter = () => {
               data-test-subj="optionsList__includeExcludeButtonGroup"
             />
           </EuiFlexItem>
-          {!allowExpensiveQueries && (
-            <EuiFlexItem data-test-subj="optionsList-allow-expensive-queries-warning" grow={false}>
-              <EuiIconTip
-                type="warning"
-                color={euiTheme.colors.textWarning}
-                content={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
-                aria-label={OptionsListStrings.popover.getAllowExpensiveQueriesWarning()}
-              />
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       </EuiPopoverFooter>
     </>

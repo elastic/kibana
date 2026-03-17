@@ -13,6 +13,7 @@ import { catchError } from './catch_error';
 import { handleExecutionDelay } from './handle_execution_delay';
 import { runStackMonitor } from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
+import { isCancellableNode } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 /**
@@ -101,6 +102,21 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     }
 
     await Promise.race([runMonitorPromise, runStepPromise]);
+
+    if (
+      stepExecutionRuntime.abortController.signal.aborted &&
+      isCancellableNode(nodeImplementation)
+    ) {
+      try {
+        await nodeImplementation.onCancel();
+      } catch (onCancelError) {
+        params.workflowLogger.logError(
+          'Failed to execute onCancel hook - continuing execution',
+          onCancelError instanceof Error ? onCancelError : new Error(String(onCancelError))
+        );
+      }
+    }
+
     params.workflowRuntime.enterScope();
     nodeSpan?.setOutcome('success');
   } catch (error) {

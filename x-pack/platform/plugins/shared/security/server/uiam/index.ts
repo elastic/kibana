@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { UiamService, type UiamServicePublic } from './uiam_service';
+export {
+  UiamService,
+  type UiamServicePublic,
+  type ConvertUiamApiKeyRequestEntry,
+  type ConvertUiamApiKeysResponse,
+} from './uiam_service';

@@ -34,6 +34,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     createIncidentUrl: 'https://coolsite.net/rest/api/2/issue',
     getIncidentResponseExternalTitleKey: 'key',
     hasAuth: true,
+    authType: 'webhook-authentication-basic',
     headers: { ['content-type']: 'application/json', ['kbn-xsrf']: 'abcd' },
     viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
     getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
@@ -206,7 +207,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 expect(resp.body).to.eql({
                   statusCode: 400,
                   error: 'Bad Request',
-                  message: `error validating connector type config: Field \"${field}\": Required`,
+                  message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at ${field}`,
                 });
               });
           });
@@ -322,7 +323,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subAction\": Invalid discriminator value. Expected 'pushToService'`,
+                message: `error validating action params: ✖ Invalid input\n  → at subAction`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -340,7 +341,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subActionParams\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected object, received undefined\n  → at subActionParams`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -366,7 +367,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subActionParams.incident.title\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.incident.title`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -394,7 +395,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subActionParams.comments.0.commentId\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].commentId`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -421,7 +422,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: Field \"subActionParams.comments.0.comment\": Required`,
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].comment`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -991,9 +992,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'test')
           .expect(400);
 
-        expect(result.message).to.match(
-          /Connector must be one of the following types: \.webhook, \.cases-webhook, \.mcp/
-        );
+        expect(result.message).to.match(/Connector must be one of the following types/);
       });
 
       after(() => {

@@ -38,7 +38,7 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-        "lineNumber": 35,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -60,7 +60,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 39,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -76,7 +76,7 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 41,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -93,7 +93,7 @@
                   "<object>"
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-                "lineNumber": 41,
+                "lineNumber": 38,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -131,7 +131,7 @@
               ") => void"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 45,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -156,7 +156,7 @@
                   ", unknown>"
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-                "lineNumber": 46,
+                "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -179,7 +179,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-                "lineNumber": 47,
+                "lineNumber": 44,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -209,7 +209,7 @@
               ") => void"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 77,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -225,7 +225,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-                "lineNumber": 77,
+                "lineNumber": 70,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -248,7 +248,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-                "lineNumber": 77,
+                "lineNumber": 70,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -268,7 +268,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 79,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -549,7 +549,7 @@
         "label": "DiscoverEnhancedSetupDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-        "lineNumber": 21,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -571,7 +571,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 22,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -593,7 +593,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 23,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -616,7 +616,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 24,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -672,7 +672,7 @@
               "<any, {}>>) => void; }"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 25,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -688,7 +688,7 @@
         "label": "DiscoverEnhancedStartDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-        "lineNumber": 28,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -710,7 +710,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 29,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -732,7 +732,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 30,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -755,7 +755,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 31,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -853,7 +853,7 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts",
-            "lineNumber": 32,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

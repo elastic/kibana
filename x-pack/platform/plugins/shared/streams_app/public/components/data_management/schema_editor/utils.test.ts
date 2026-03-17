@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { getGeoPointSuggestion, buildSchemaSavePayload } from './utils';
-import type { SchemaEditorField, SchemaField } from './types';
+import {
+  getGeoPointSuggestion,
+  buildSchemaSavePayload,
+  convertToFieldDefinitionConfig,
+} from './utils';
+import type { MappedSchemaField, SchemaEditorField, SchemaField } from './types';
 import type { Streams } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 
@@ -88,6 +92,204 @@ describe('buildSchemaSavePayload', () => {
       },
     });
   });
+
+  it('includes description in payload when provided', () => {
+    const mockDefinition = buildWiredDefinition();
+    const schemaFields: SchemaField[] = [
+      {
+        name: 'message',
+        parent: '',
+        status: 'mapped',
+        type: 'keyword',
+        description: 'The log message content',
+      },
+      {
+        name: '@timestamp',
+        parent: '',
+        status: 'mapped',
+        type: 'date',
+        format: 'strict_date_optional_time',
+        description: 'Event timestamp',
+      },
+    ];
+
+    const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
+
+    expect(payload).toEqual({
+      ingest: {
+        ...mockDefinition.stream.ingest,
+        processing: omit(mockDefinition.stream.ingest.processing, 'updated_at'),
+        wired: {
+          ...mockDefinition.stream.ingest.wired,
+          fields: {
+            message: { type: 'keyword', description: 'The log message content' },
+            '@timestamp': {
+              type: 'date',
+              format: 'strict_date_optional_time',
+              description: 'Event timestamp',
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it('builds payload for unmapped fields with description only', () => {
+    const mockDefinition = buildWiredDefinition();
+    const schemaFields: SchemaField[] = [
+      {
+        name: 'documented_field',
+        parent: '',
+        status: 'unmapped',
+        description: 'This field is documented but not mapped to ES',
+      },
+      {
+        name: 'regular_field',
+        parent: '',
+        status: 'mapped',
+        type: 'keyword',
+      },
+    ];
+
+    const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
+
+    expect(payload).toEqual({
+      ingest: {
+        ...mockDefinition.stream.ingest,
+        processing: omit(mockDefinition.stream.ingest.processing, 'updated_at'),
+        wired: {
+          ...mockDefinition.stream.ingest.wired,
+          fields: {
+            documented_field: {
+              description: 'This field is documented but not mapped to ES',
+            },
+            regular_field: { type: 'keyword' },
+          },
+        },
+      },
+    });
+  });
+
+  it('does not include empty description in payload', () => {
+    const mockDefinition = buildWiredDefinition();
+    const schemaFields: SchemaField[] = [
+      {
+        name: 'message',
+        parent: '',
+        status: 'mapped',
+        type: 'keyword',
+        description: '',
+      },
+    ];
+
+    const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
+
+    expect(payload).toEqual({
+      ingest: {
+        ...mockDefinition.stream.ingest,
+        processing: omit(mockDefinition.stream.ingest.processing, 'updated_at'),
+        wired: {
+          ...mockDefinition.stream.ingest.wired,
+          fields: {
+            message: { type: 'keyword' },
+          },
+        },
+      },
+    });
+  });
+
+  it('preserves description overrides on inherited fields', () => {
+    const mockDefinition = buildWiredDefinition({
+      inherited_fields: {
+        trace_id: {
+          type: 'keyword',
+          from: 'logs',
+          // No description in the inherited field
+        },
+      },
+    });
+    const schemaFields: SchemaField[] = [
+      {
+        name: 'trace_id',
+        parent: 'logs',
+        status: 'inherited',
+        type: 'keyword',
+        description: 'Description override on child stream',
+      },
+      {
+        name: 'new_field',
+        parent: 'logs.child',
+        status: 'mapped',
+        type: 'keyword',
+        description: 'A newly mapped field',
+      },
+    ];
+
+    const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
+
+    expect('wired' in payload.ingest && payload.ingest.wired.fields).toEqual({
+      trace_id: { description: 'Description override on child stream' },
+      new_field: { type: 'keyword', description: 'A newly mapped field' },
+    });
+  });
+
+  it('does not persist inherited field description if it matches inherited description', () => {
+    const mockDefinition = buildWiredDefinition({
+      inherited_fields: {
+        trace_id: {
+          type: 'keyword',
+          from: 'logs',
+          description: 'Same description',
+        },
+      },
+    });
+    const schemaFields: SchemaField[] = [
+      {
+        name: 'trace_id',
+        parent: 'logs',
+        status: 'inherited',
+        type: 'keyword',
+        description: 'Same description',
+      },
+    ];
+
+    const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
+
+    // Should not include trace_id since description matches inherited
+    expect('wired' in payload.ingest && payload.ingest.wired.fields).toEqual({});
+  });
+});
+
+describe('convertToFieldDefinitionConfig', () => {
+  it('throws for system-managed field type', () => {
+    const field = {
+      name: '@timestamp',
+      parent: 'logs',
+      status: 'mapped',
+      type: 'system',
+    } as MappedSchemaField;
+
+    expect(() => convertToFieldDefinitionConfig(field)).toThrow(
+      'Cannot convert system-managed field type to FieldDefinitionConfig'
+    );
+  });
+
+  it('converts a valid mapped field', () => {
+    const field = {
+      name: 'message',
+      parent: 'logs',
+      status: 'mapped',
+      type: 'keyword',
+      description: 'The log message',
+    } as MappedSchemaField;
+
+    const config = convertToFieldDefinitionConfig(field);
+
+    expect(config).toEqual({
+      type: 'keyword',
+      description: 'The log message',
+    });
+  });
 });
 
 const privileges = {
@@ -99,9 +301,12 @@ const privileges = {
   text_structure: true,
   read_failure_store: true,
   manage_failure_store: true,
+  create_snapshot_repository: true,
 };
 
-const buildWiredDefinition = (): Streams.WiredStream.GetResponse => ({
+const buildWiredDefinition = (
+  overrides?: Partial<Streams.WiredStream.GetResponse>
+): Streams.WiredStream.GetResponse => ({
   stream: {
     name: 'logs',
     description: 'Wired stream',
@@ -123,8 +328,10 @@ const buildWiredDefinition = (): Streams.WiredStream.GetResponse => ({
   inherited_fields: {},
   effective_lifecycle: { dsl: { data_retention: '1d' }, from: 'parent' },
   effective_settings: {},
+  data_stream_exists: true,
   privileges: { ...privileges },
   effective_failure_store: { disabled: {}, from: 'parent' },
+  ...overrides,
 });
 
 const buildClassicDefinition = (): Streams.ClassicStream.GetResponse => ({

@@ -415,6 +415,8 @@ export type CompletionFn = () => Promise<
   Array<{ label: string; value: string; detail?: string; documentation?: string }>
 >;
 
+export type StepStabilityLevel = 'stable' | 'beta' | 'tech_preview';
+
 export interface BaseConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
@@ -425,6 +427,8 @@ export interface BaseConnectorContract {
   description: string | null;
   /** Documentation URL for this API endpoint */
   documentation?: string | null;
+  /** API stability level derived from the OpenAPI `x-state` field */
+  stability?: StepStabilityLevel;
   examples?: ConnectorExamples;
   // Rich property handlers for completions, validation and decorations
   editorHandlers?: {

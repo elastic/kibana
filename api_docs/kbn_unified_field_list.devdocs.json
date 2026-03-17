@@ -3197,7 +3197,7 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_list_filters/field_type_filter.tsx",
-                "lineNumber": 88,
+                "lineNumber": 77,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false

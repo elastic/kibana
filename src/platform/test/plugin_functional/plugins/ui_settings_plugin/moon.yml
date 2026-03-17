@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ui-settings-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/ui-settings-plugin'
+  title: '@kbn/ui-settings-plugin'
   description: Moon project for @kbn/ui-settings-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/ui_settings_plugin
+  sourceRoot: src/platform/test/plugin_functional/plugins/ui_settings_plugin
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'

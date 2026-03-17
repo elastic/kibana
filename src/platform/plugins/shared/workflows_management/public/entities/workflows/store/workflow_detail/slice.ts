@@ -14,6 +14,19 @@ import { addLoadingStateReducers, initialLoadingState } from './utils/loading_st
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
 import { triggerSchemas } from '../../../../trigger_schemas';
+import type { WorkflowsResponse } from '../../model/types';
+
+/**
+ * Sentinel value dispatched as `highlightedStepId` to scroll the editor to the
+ * triggers section.  Shared between the execution-detail component (producer)
+ * and the YAML editor (consumer).
+ */
+export const HIGHLIGHTED_STEP_TRIGGER = '__trigger';
+
+export const initialWorkflowsState: WorkflowsResponse = {
+  workflows: {},
+  totalWorkflows: 0,
+};
 
 // Initial state
 const initialState: WorkflowDetailState = {
@@ -25,11 +38,13 @@ const initialState: WorkflowDetailState = {
   computedExecution: undefined,
   activeTab: undefined,
   connectors: undefined,
+  workflows: initialWorkflowsState,
   schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds()),
   cursorPosition: undefined,
   focusedStepId: undefined,
   highlightedStepId: undefined,
   isTestModalOpen: false,
+  replayExecutionId: null,
   loading: initialLoadingState,
   hasYamlSchemaValidationErrors: false,
   connectorFlyout: {
@@ -70,14 +85,20 @@ const workflowDetailSlice = createSlice({
         state.computed.workflowLookup
       );
     },
-    setHighlightedStepId: (state, action: { payload: { stepId: string } }) => {
+    setHighlightedStepId: (state, action: { payload: { stepId: string | undefined } }) => {
       state.highlightedStepId = action.payload.stepId;
     },
     setIsTestModalOpen: (state, action: { payload: boolean }) => {
       state.isTestModalOpen = action.payload;
     },
+    setReplayExecutionId: (state, action: { payload: string | null }) => {
+      state.replayExecutionId = action.payload;
+    },
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
+    },
+    setWorkflows: (state, action: { payload: WorkflowDetailState['workflows'] }) => {
+      state.workflows = action.payload;
     },
     setExecution: (state, action: { payload: WorkflowExecutionDto | undefined }) => {
       state.execution = action.payload;
@@ -152,7 +173,9 @@ export const {
   setCursorPosition,
   setHighlightedStepId,
   setIsTestModalOpen,
+  setReplayExecutionId,
   setConnectors,
+  setWorkflows,
   setExecution,
   clearExecution,
   setActiveTab,
