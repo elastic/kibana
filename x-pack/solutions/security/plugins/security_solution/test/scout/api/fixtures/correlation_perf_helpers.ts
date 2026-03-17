@@ -6,11 +6,8 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
-import {
-  DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_RULES_BULK_ACTION_URL,
-  ALERTS_INDEX,
-} from './correlation_perf_constants';
+import { v4 as uuidv4 } from 'uuid';
+import { DETECTION_ENGINE_RULES_BULK_ACTION_URL, ALERTS_INDEX } from './correlation_perf_constants';
 
 const BATCH_SIZE = 500;
 
@@ -34,104 +31,46 @@ export interface ApiClient {
   ): Promise<{ statusCode: number; body: Record<string, unknown> }>;
 }
 
-export const seedTestDocuments = async (
+export const seedSyntheticAlerts = async (
   esClient: EsClient,
-  index: string,
-  count: number,
-  hostCount: number
+  alertCount: number,
+  hostCount: number,
+  sourceRuleIds: string[]
 ): Promise<void> => {
   const now = Date.now();
   const fiveMinutesMs = 5 * 60 * 1000;
 
-  for (let offset = 0; offset < count; offset += BATCH_SIZE) {
-    const batchEnd = Math.min(offset + BATCH_SIZE, count);
+  for (let offset = 0; offset < alertCount; offset += BATCH_SIZE) {
+    const batchEnd = Math.min(offset + BATCH_SIZE, alertCount);
     const operations: Array<Record<string, unknown>> = [];
 
     for (let i = offset; i < batchEnd; i++) {
       const timestamp = new Date(now - Math.floor(Math.random() * fiveMinutesMs)).toISOString();
-      operations.push({ index: { _index: index } });
+      const ruleId = sourceRuleIds[i % sourceRuleIds.length];
+      const alertUuid = uuidv4();
+
+      operations.push({ index: { _index: ALERTS_INDEX, _id: alertUuid } });
       operations.push({
         '@timestamp': timestamp,
-        host: { name: `host-${i % hostCount}` },
-        event: { kind: 'signal', category: ['process'], action: 'process_started' },
-        process: { name: `proc-${i}`, pid: 1000 + i },
-        message: `Correlation perf test document ${i}`,
+        'kibana.alert.uuid': alertUuid,
+        'kibana.alert.rule.uuid': ruleId,
+        'kibana.alert.rule.name': `Perf source rule ${ruleId}`,
+        'kibana.alert.rule.type': 'query',
+        'kibana.alert.severity': 'low',
+        'kibana.alert.risk_score': 10,
+        'kibana.alert.status': 'active',
+        'kibana.alert.workflow_status': 'open',
+        'kibana.space_ids': ['default'],
+        'host.name': `host-${i % hostCount}`,
+        'event.kind': 'signal',
+        'event.action': 'process_started',
       });
     }
 
     await esClient.bulk({ operations, refresh: false });
   }
 
-  await esClient.indices.refresh({ index });
-};
-
-export const createSourceQueryRule = async (
-  apiClient: ApiClient,
-  headers: Record<string, string>,
-  ruleId: string,
-  index: string
-): Promise<string> => {
-  const response = await apiClient.post(DETECTION_ENGINE_RULES_URL, {
-    headers,
-    responseType: 'json',
-    body: {
-      rule_id: ruleId,
-      name: `Perf source rule ${ruleId}`,
-      description: 'Source query rule for correlation performance testing',
-      type: 'query',
-      query: '*:*',
-      index: [index],
-      severity: 'low',
-      risk_score: 10,
-      interval: '1m',
-      from: 'now-10m',
-      enabled: true,
-    },
-  });
-
-  if (response.statusCode !== 200) {
-    throw new Error(
-      `Failed to create rule ${ruleId}: ${response.statusCode} – ${JSON.stringify(response.body)}`
-    );
-  }
-
-  return response.body.id as string;
-};
-
-export const waitForAlerts = async (
-  esClient: EsClient,
-  minCount: number,
-  timeoutMs: number = 120_000,
-  ruleIdPrefix?: string
-): Promise<number> => {
-  const start = Date.now();
-
-  while (Date.now() - start < timeoutMs) {
-    try {
-      const query = ruleIdPrefix
-        ? {
-            bool: {
-              filter: [{ prefix: { 'kibana.alert.rule.parameters.rule_id': ruleIdPrefix } }],
-            },
-          }
-        : { match_all: {} };
-      const result = await esClient.count({ index: ALERTS_INDEX, query });
-      if (result.count >= minCount) {
-        return result.count;
-      }
-    } catch (e) {
-      if (!(e instanceof Error && e.message.includes('index_not_found'))) {
-        throw e;
-      }
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  }
-
-  const finalCount = await esClient.count({ index: ALERTS_INDEX }).catch(() => ({ count: 0 }));
-  throw new Error(
-    `Timed out waiting for ${minCount} alerts after ${timeoutMs}ms. Got ${finalCount.count}.`
-  );
+  await esClient.indices.refresh({ index: ALERTS_INDEX });
 };
 
 export const buildCorrelationRule = (params: {
@@ -162,10 +101,8 @@ export const buildCorrelationRule = (params: {
 export const cleanupAll = async (
   apiClient: ApiClient,
   esClient: EsClient,
-  headers: Record<string, string>,
-  testIndex: string
+  headers: Record<string, string>
 ): Promise<void> => {
-  // Delete all detection rules via bulk action
   try {
     await apiClient.post(DETECTION_ENGINE_RULES_BULK_ACTION_URL, {
       headers,
@@ -180,15 +117,6 @@ export const cleanupAll = async (
     console.warn('Rule cleanup failed:', (e as Error).message);
   }
 
-  // Delete test documents index
-  try {
-    await esClient.indices.delete({ index: testIndex, ignore_unavailable: true });
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.warn('Index cleanup failed:', (e as Error).message);
-  }
-
-  // Delete generated alerts
   try {
     await esClient.deleteByQuery({
       index: ALERTS_INDEX,

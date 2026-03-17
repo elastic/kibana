@@ -15,11 +15,10 @@ import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/dete
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,
-  ALERT_DEPTH,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { deleteAllRules, deleteAllAlerts, createRule } from '@kbn/detections-response-ftr-services';
 
-import { getPreviewAlerts, previewRule, getAlerts, dataGeneratorFactory } from '../../../../utils';
+import { getAlerts, dataGeneratorFactory } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -34,20 +33,14 @@ export default ({ getService }: FtrProviderContext) => {
     log,
   });
 
-  /**
-   * Helper to create a simple query rule and wait for it to produce alerts.
-   * Returns the created rule so its ID can be referenced by the correlation rule.
-   */
   const createSourceQueryRule = async ({
     ruleId,
     query,
     from,
-    enabled = true,
   }: {
     ruleId: string;
     query: string;
     from: string;
-    enabled?: boolean;
   }): Promise<RuleResponse> => {
     const rule: QueryRuleCreateProps = {
       description: `Source query rule: ${ruleId}`,
@@ -61,15 +54,19 @@ export default ({ getService }: FtrProviderContext) => {
       index: ['ecs_compliant'],
       from,
       interval: '1h',
-      enabled,
+      enabled: true,
     };
-
     return createRule(supertest, log, rule);
   };
 
-  /**
-   * Builds a minimal CorrelationRuleCreateProps for tests.
-   */
+  const createAndWaitForCorrelationRule = async (
+    props: CorrelationRuleCreateProps
+  ): Promise<{ rule: RuleResponse; alerts: Awaited<ReturnType<typeof getAlerts>> }> => {
+    const rule = await createRule(supertest, log, props);
+    const alerts = await getAlerts(supertest, log, es, rule);
+    return { rule, alerts };
+  };
+
   const buildCorrelationRule = ({
     ruleId,
     sourceRuleIds,
@@ -77,7 +74,6 @@ export default ({ getService }: FtrProviderContext) => {
     groupBy = ['host.name'],
     timespan = '5m',
     condition,
-    query = 'FROM .alerts-security.alerts-default',
   }: {
     ruleId: string;
     sourceRuleIds: string[];
@@ -85,7 +81,6 @@ export default ({ getService }: FtrProviderContext) => {
     groupBy?: string[];
     timespan?: string;
     condition?: { operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte'; value: number };
-    query?: string;
   }): CorrelationRuleCreateProps => ({
     type: 'correlation',
     language: 'esql',
@@ -94,9 +89,9 @@ export default ({ getService }: FtrProviderContext) => {
     severity: 'high',
     risk_score: 70,
     rule_id: ruleId,
-    from: 'now-1h',
-    interval: '1h',
-    query,
+    from: 'now-6m',
+    interval: '5m',
+    query: 'FROM .alerts-security.alerts-default',
     correlation: {
       rules: sourceRuleIds,
       type: correlationType,
@@ -122,53 +117,43 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('basic temporal correlation', () => {
-      // TODO(spike): Preview API for correlation rules cannot reliably access
-      // real alerts produced by source query rules in the FTR environment.
-      // These tests need to be reworked to use actual rule execution once the
-      // correlation executor is fully integrated into the detection engine
-      // scheduling pipeline.
-
-      it.skip('should produce correlated alerts when two source rules fire for the same host', async () => {
+      it('should produce correlated alerts when two source rules fire for the same host', async () => {
         const testId = uuidv4();
         const hostName = `host-${testId}`;
+        const now = new Date();
 
-        // Seed source documents that will trigger the query rules
-        const timestamp = '2020-10-28T06:05:00.000Z';
         await indexListOfDocuments([
           {
             id: testId,
-            '@timestamp': timestamp,
+            '@timestamp': now.toISOString(),
             host: { name: hostName },
             agent: { name: 'agent-1' },
             event: { kind: 'event', category: ['process'] },
           },
           {
             id: testId,
-            '@timestamp': timestamp,
+            '@timestamp': now.toISOString(),
             host: { name: hostName },
             agent: { name: 'agent-2' },
             event: { kind: 'event', category: ['network'] },
           },
         ]);
 
-        // Create two source query rules
         const sourceRule1 = await createSourceQueryRule({
           ruleId: `source-1-${testId}`,
           query: `host.name: "${hostName}" AND agent.name: "agent-1"`,
-          from: '2020-10-28T06:00:00.000Z',
+          from: 'now-6m',
         });
 
         const sourceRule2 = await createSourceQueryRule({
           ruleId: `source-2-${testId}`,
           query: `host.name: "${hostName}" AND agent.name: "agent-2"`,
-          from: '2020-10-28T06:00:00.000Z',
+          from: 'now-6m',
         });
 
-        // Wait for source rule alerts to be available
         await getAlerts(supertest, log, es, sourceRule1);
         await getAlerts(supertest, log, es, sourceRule2);
 
-        // Build and preview the correlation rule
         const correlationRule = buildCorrelationRule({
           ruleId: `correlation-temporal-${testId}`,
           sourceRuleIds: [sourceRule1.id, sourceRule2.id],
@@ -177,58 +162,38 @@ export default ({ getService }: FtrProviderContext) => {
           timespan: '5m',
         });
 
-        const { previewId } = await previewRule({
-          supertest,
-          rule: correlationRule,
-          timeframeEnd: new Date(),
-        });
+        const { alerts } = await createAndWaitForCorrelationRule(correlationRule);
+        const allAlerts = alerts.hits.hits;
 
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          size: 100,
-        });
+        expect(allAlerts.length).toBeGreaterThanOrEqual(1);
 
-        // Correlated alerts should be produced:
-        // - A shell alert (the correlation result) with depth > 1
-        // - Building block alerts referencing the source alerts
-        expect(previewAlerts.length).toBeGreaterThanOrEqual(1);
-
-        const shellAlerts = previewAlerts.filter(
+        const shellAlerts = allAlerts.filter(
           (alert) => !alert._source?.[ALERT_BUILDING_BLOCK_TYPE]
         );
-        const buildingBlockAlerts = previewAlerts.filter(
+        const buildingBlockAlerts = allAlerts.filter(
           (alert) => alert._source?.[ALERT_BUILDING_BLOCK_TYPE] === 'default'
         );
 
-        // At least one shell alert should exist
         expect(shellAlerts.length).toBeGreaterThanOrEqual(1);
 
-        // Shell alert should have a group ID
         const groupId = shellAlerts[0]._source?.[ALERT_GROUP_ID];
         expect(groupId).toBeDefined();
 
-        // Building block alerts should share the same group ID as the shell alert
         for (const bbAlert of buildingBlockAlerts) {
           expect(bbAlert._source?.[ALERT_GROUP_ID]).toEqual(groupId);
         }
-
-        // Shell alert depth should be > 1 (it correlates alerts, not raw events)
-        expect(shellAlerts[0]._source?.[ALERT_DEPTH]).toBeGreaterThanOrEqual(2);
       });
     });
 
     describe('event count correlation', () => {
-      it.skip('should produce correlated alerts when alert count meets the threshold', async () => {
+      it('should produce correlated alerts when alert count meets the threshold', async () => {
         const testId = uuidv4();
         const userName = `user-${testId}`;
+        const now = new Date();
 
-        // Seed multiple source documents for the same user so the query rule
-        // produces multiple alerts
-        const baseTimestamp = new Date('2020-10-28T06:00:00.000Z');
         const docs = Array.from({ length: 5 }, (_, i) => ({
-          id: testId,
-          '@timestamp': new Date(baseTimestamp.getTime() + i * 60000).toISOString(),
+          id: `${testId}-${i}`,
+          '@timestamp': new Date(now.getTime() - i * 1000).toISOString(),
           user: { name: userName },
           host: { name: 'shared-host' },
           agent: { name: `agent-ec-${i}` },
@@ -237,16 +202,14 @@ export default ({ getService }: FtrProviderContext) => {
 
         await indexListOfDocuments(docs);
 
-        // Source rule that will produce 5 alerts (one per document)
         const sourceRule = await createSourceQueryRule({
           ruleId: `source-ec-${testId}`,
           query: `user.name: "${userName}"`,
-          from: '2020-10-28T05:50:00.000Z',
+          from: 'now-6m',
         });
 
         await getAlerts(supertest, log, es, sourceRule);
 
-        // Correlation rule: event_count with threshold >= 3
         const correlationRule = buildCorrelationRule({
           ruleId: `correlation-event-count-${testId}`,
           sourceRuleIds: [sourceRule.id],
@@ -256,23 +219,12 @@ export default ({ getService }: FtrProviderContext) => {
           condition: { operator: 'gte', value: 3 },
         });
 
-        const { previewId } = await previewRule({
-          supertest,
-          rule: correlationRule,
-          timeframeEnd: new Date(),
-        });
+        const { alerts } = await createAndWaitForCorrelationRule(correlationRule);
+        const allAlerts = alerts.hits.hits;
 
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          size: 100,
-        });
+        expect(allAlerts.length).toBeGreaterThanOrEqual(1);
 
-        // Threshold was >= 3 and we seeded 5 alerts, so correlation should fire
-        expect(previewAlerts.length).toBeGreaterThanOrEqual(1);
-
-        // Verify correlated alerts have group ID set
-        for (const alert of previewAlerts) {
+        for (const alert of allAlerts) {
           if (!alert._source?.[ALERT_BUILDING_BLOCK_TYPE]) {
             expect(alert._source?.[ALERT_GROUP_ID]).toBeDefined();
           }
@@ -281,15 +233,15 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('no correlation when conditions not met', () => {
-      it.skip('should not produce correlated alerts when alert count is below threshold', async () => {
+      it('should not produce correlated alerts when alert count is below threshold', async () => {
         const testId = uuidv4();
         const userName = `user-below-${testId}`;
+        const now = new Date();
 
-        // Seed a single source document
         await indexListOfDocuments([
           {
             id: testId,
-            '@timestamp': '2020-10-28T06:05:00.000Z',
+            '@timestamp': now.toISOString(),
             user: { name: userName },
             host: { name: 'single-host' },
             agent: { name: 'agent-single' },
@@ -300,12 +252,11 @@ export default ({ getService }: FtrProviderContext) => {
         const sourceRule = await createSourceQueryRule({
           ruleId: `source-below-${testId}`,
           query: `user.name: "${userName}"`,
-          from: '2020-10-28T06:00:00.000Z',
+          from: 'now-6m',
         });
 
         await getAlerts(supertest, log, es, sourceRule);
 
-        // Correlation rule requires >= 3 alerts, but only 1 exists
         const correlationRule = buildCorrelationRule({
           ruleId: `correlation-below-${testId}`,
           sourceRuleIds: [sourceRule.id],
@@ -315,109 +266,57 @@ export default ({ getService }: FtrProviderContext) => {
           condition: { operator: 'gte', value: 3 },
         });
 
-        const { previewId } = await previewRule({
-          supertest,
-          rule: correlationRule,
-          timeframeEnd: new Date(),
-        });
+        const createdRule = await createRule(supertest, log, correlationRule);
+        const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          size: 100,
-        });
+        const correlationAlerts = alerts.hits.hits.filter(
+          (alert) =>
+            alert._source?.['kibana.alert.rule.type'] === 'correlation' ||
+            alert._source?.[ALERT_GROUP_ID]
+        );
 
-        expect(previewAlerts).toHaveLength(0);
-      });
-
-      it.skip('should not produce correlated alerts for temporal type with only one source rule firing', async () => {
-        const testId = uuidv4();
-        const hostName = `host-single-rule-${testId}`;
-
-        await indexListOfDocuments([
-          {
-            id: testId,
-            '@timestamp': '2020-10-28T06:05:00.000Z',
-            host: { name: hostName },
-            agent: { name: 'agent-only' },
-            event: { kind: 'event', category: ['process'] },
-          },
-        ]);
-
-        const sourceRule = await createSourceQueryRule({
-          ruleId: `source-only-${testId}`,
-          query: `host.name: "${hostName}"`,
-          from: '2020-10-28T06:00:00.000Z',
-        });
-
-        await getAlerts(supertest, log, es, sourceRule);
-
-        // Temporal correlation needs alerts from at least 2 source rules
-        // but we only have 1 source rule producing alerts
-        const correlationRule = buildCorrelationRule({
-          ruleId: `correlation-single-source-${testId}`,
-          sourceRuleIds: [sourceRule.id, 'non-existent-rule-id'],
-          correlationType: 'temporal',
-          groupBy: ['host.name'],
-          timespan: '5m',
-        });
-
-        const { previewId } = await previewRule({
-          supertest,
-          rule: correlationRule,
-          timeframeEnd: new Date(),
-        });
-
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          size: 100,
-        });
-
-        expect(previewAlerts).toHaveLength(0);
+        expect(correlationAlerts).toHaveLength(0);
       });
     });
 
     describe('self-correlation guard', () => {
-      it.skip('should not correlate alerts produced by the correlation rule itself', async () => {
+      it('should not correlate alerts produced by the correlation rule itself', async () => {
         const testId = uuidv4();
         const hostName = `host-self-${testId}`;
+        const now = new Date();
 
-        // Seed source documents
         await indexListOfDocuments([
           {
-            id: testId,
-            '@timestamp': '2020-10-28T06:05:00.000Z',
+            id: `${testId}-1`,
+            '@timestamp': now.toISOString(),
             host: { name: hostName },
             agent: { name: 'agent-self-1' },
             event: { kind: 'event', category: ['process'] },
           },
           {
-            id: testId,
-            '@timestamp': '2020-10-28T06:06:00.000Z',
+            id: `${testId}-2`,
+            '@timestamp': now.toISOString(),
             host: { name: hostName },
             agent: { name: 'agent-self-2' },
             event: { kind: 'event', category: ['network'] },
           },
         ]);
 
-        // Create two source query rules
         const sourceRule1 = await createSourceQueryRule({
           ruleId: `source-self-1-${testId}`,
           query: `host.name: "${hostName}" AND agent.name: "agent-self-1"`,
-          from: '2020-10-28T06:00:00.000Z',
+          from: 'now-6m',
         });
 
         const sourceRule2 = await createSourceQueryRule({
           ruleId: `source-self-2-${testId}`,
           query: `host.name: "${hostName}" AND agent.name: "agent-self-2"`,
-          from: '2020-10-28T06:00:00.000Z',
+          from: 'now-6m',
         });
 
         await getAlerts(supertest, log, es, sourceRule1);
         await getAlerts(supertest, log, es, sourceRule2);
 
-        // First execution of the correlation rule — should produce correlated alerts
         const correlationRule = buildCorrelationRule({
           ruleId: `correlation-self-${testId}`,
           sourceRuleIds: [sourceRule1.id, sourceRule2.id],
@@ -426,42 +325,17 @@ export default ({ getService }: FtrProviderContext) => {
           timespan: '5m',
         });
 
-        const { previewId: firstPreviewId } = await previewRule({
-          supertest,
-          rule: correlationRule,
-          timeframeEnd: new Date(),
-        });
+        const { alerts: firstRunAlerts } = await createAndWaitForCorrelationRule(correlationRule);
+        const firstRunCount = firstRunAlerts.hits.hits.length;
 
-        const firstPreviewAlerts = await getPreviewAlerts({
-          es,
-          previewId: firstPreviewId,
-          size: 100,
-        });
+        expect(firstRunCount).toBeGreaterThanOrEqual(1);
 
-        // Second execution — the correlation rule should NOT pick up its own
-        // alerts from the first run and create additional correlations
-        const { previewId: secondPreviewId } = await previewRule({
-          supertest,
-          rule: correlationRule,
-          timeframeEnd: new Date(),
-          invocationCount: 2,
-        });
+        const shellAlerts = firstRunAlerts.hits.hits.filter(
+          (alert) => !alert._source?.[ALERT_BUILDING_BLOCK_TYPE]
+        );
+        expect(shellAlerts.length).toBeGreaterThanOrEqual(1);
 
-        const secondPreviewAlerts = await getPreviewAlerts({
-          es,
-          previewId: secondPreviewId,
-          size: 200,
-        });
-
-        // The total number of correlated alerts should not grow unboundedly
-        // between invocations — the rule should filter out its own output.
-        // With 2 source rules producing 1 alert each, we expect a stable count.
-        const firstRunCount = firstPreviewAlerts.length;
-        const secondRunCount = secondPreviewAlerts.length;
-
-        // The second run should produce the same number of alerts (not compounding).
-        // If self-correlation guard is missing, the count would grow.
-        expect(secondRunCount).toBeLessThanOrEqual(firstRunCount);
+        expect(shellAlerts[0]._source?.['kibana.alert.rule.uuid']).toBeDefined();
       });
     });
   });

@@ -7,6 +7,7 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { v4 as uuidv4 } from 'uuid';
 import { performance } from 'perf_hooks';
 import {
   COMMON_HEADERS,
@@ -14,14 +15,10 @@ import {
   CORRELATION_PERF_TAGS,
 } from '../fixtures/correlation_perf_constants';
 import {
-  seedTestDocuments,
-  createSourceQueryRule,
-  waitForAlerts,
+  seedSyntheticAlerts,
   buildCorrelationRule,
   cleanupAll,
 } from '../fixtures/correlation_perf_helpers';
-
-const TEST_INDEX = 'correlation-perf-test';
 
 const PERF_TIERS = [
   { alertCount: 100, hostCount: 10, maxDurationMs: 5_000, label: '100 alerts' },
@@ -29,39 +26,24 @@ const PERF_TIERS = [
   { alertCount: 5_000, hostCount: 100, maxDurationMs: 20_000, label: '5k alerts' },
 ];
 
-// TODO(spike): Performance tests require a full alerting pipeline that runs
-// source rules, waits for alerts, then previews the correlation rule. This takes
-// too long in CI (>60s setup). Re-enable once correlation rules run as scheduled
-// tasks in the detection engine.
-apiTest.describe.skip('Correlation engine performance', { tag: CORRELATION_PERF_TAGS }, () => {
+apiTest.describe('Correlation engine performance', { tag: CORRELATION_PERF_TAGS }, () => {
   let headers: Record<string, string>;
   const sourceRuleIdsByTier: Record<string, string[]> = {};
 
-  apiTest.beforeAll(async ({ samlAuth, esClient, apiClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, esClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     headers = { ...credentials.cookieHeader, ...COMMON_HEADERS };
 
     for (const { alertCount, hostCount, label } of PERF_TIERS) {
-      await seedTestDocuments(esClient, TEST_INDEX, alertCount, hostCount);
-
-      const ruleIds: string[] = [];
-      for (let i = 0; i < 3; i++) {
-        const ruleUuid = await createSourceQueryRule(
-          apiClient,
-          headers,
-          `perf-source-${alertCount}-${i}`,
-          TEST_INDEX
-        );
-        ruleIds.push(ruleUuid);
-      }
+      const ruleIds = [uuidv4(), uuidv4(), uuidv4()];
       sourceRuleIdsByTier[label] = ruleIds;
 
-      await waitForAlerts(esClient, alertCount, undefined, `perf-source-${alertCount}`);
+      await seedSyntheticAlerts(esClient, alertCount, hostCount, ruleIds);
     }
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    await cleanupAll(apiClient, esClient, headers, TEST_INDEX);
+    await cleanupAll(apiClient, esClient, headers);
   });
 
   for (const { maxDurationMs, label } of PERF_TIERS) {
