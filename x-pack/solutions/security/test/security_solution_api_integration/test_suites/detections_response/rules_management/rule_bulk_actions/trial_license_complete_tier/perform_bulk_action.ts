@@ -2687,6 +2687,122 @@ export default ({ getService }: FtrProviderContext): void => {
           skipped: [],
         });
       });
+
+      describe('@skipInServerless RBAC', () => {
+        describe('with rules_read_manual_run_all user role', () => {
+          const roleWithManualRun = ROLES.rules_read_manual_run_all
+
+          beforeEach(async () => {
+            await createUserAndRole(getService, roleWithManualRun);
+          });
+
+          afterEach(async () => {
+            await deleteUserAndRole(getService, roleWithManualRun);
+          });
+
+          it('should return all existing and enabled rules as succeeded', async () => {
+            const intervalInMinutes = 25;
+            const interval = `${intervalInMinutes}m`;
+            await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({
+                rule_id: 'rule-1',
+                enabled: true,
+                interval,
+              })
+            );
+            await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({
+                rule_id: 'rule-2',
+                enabled: true,
+                interval,
+              })
+            );
+
+            const endDate = moment();
+            const startDate = endDate.clone().subtract(1, 'h');
+
+            const { body } = await detectionsApi
+              .performRulesBulkAction({
+                query: {},
+                body: {
+                  query: '',
+                  action: BulkActionTypeEnum.run,
+                  [BulkActionTypeEnum.run]: {
+                    start_date: startDate.toISOString(),
+                    end_date: endDate.toISOString(),
+                  },
+                },
+              })
+              .expect(200);
+
+            expect(body.attributes.summary).toEqual({
+              failed: 0,
+              skipped: 0,
+              succeeded: 2,
+              total: 2,
+            });
+            expect(body.attributes.errors).toBeUndefined();
+          });
+        })
+
+        describe('with rules_all_manual_run_none user role', () => {
+          const roleWithoutManualRun = ROLES.rules_all_manual_run_none
+
+          beforeEach(async () => {
+            await createUserAndRole(getService, roleWithoutManualRun);
+          });
+
+          afterEach(async () => {
+            await deleteUserAndRole(getService, roleWithoutManualRun);
+          });
+          it('should fail triggering manual runs', async () => {
+            const intervalInMinutes = 25;
+            const interval = `${intervalInMinutes}m`;
+            await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({
+                rule_id: 'rule-1',
+                enabled: true,
+                interval,
+              })
+            );
+            await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({
+                rule_id: 'rule-2',
+                enabled: true,
+                interval,
+              })
+            );
+
+            const endDate = moment();
+            const startDate = endDate.clone().subtract(1, 'h');
+
+            const restrictedUser = { username: roleWithoutManualRun, password: 'changeme' };
+            const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+            await restrictedApis
+              .performRulesBulkAction({
+                query: {},
+                body: {
+                  query: '',
+                  action: BulkActionTypeEnum.run,
+                  [BulkActionTypeEnum.run]: {
+                    start_date: startDate.toISOString(),
+                    end_date: endDate.toISOString(),
+                  },
+                },
+              })
+              .expect(500);
+          });
+        })
+      })
     });
 
     describe('@skipInServerlessMKI fill gaps run action', () => {
@@ -2708,6 +2824,37 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllGaps(es);
         await deleteAllRules(supertest, log);
       };
+
+      const initializeTestGapEvents = async () => {
+        generatedGapEvents = {};
+          for (const rule of createdRules) {
+            const { gapEvents } = await generateGapsForRule(es, rule, 100);
+            generatedGapEvents[rule.id] = {
+              rule,
+              gapEvents: gapEvents.map((gapEvent) => {
+                if (!gapEvent._id) {
+                  throw new Error('generated gap event id cannot be undefined');
+                }
+                return { ...gapEvent.kibana.alert.rule.gap, _id: gapEvent._id };
+              }),
+            };
+          }
+
+          let earliest = Date.now();
+          let latest = 0;
+
+          Object.values(generatedGapEvents).forEach(({ gapEvents }) => {
+            gapEvents
+              .flatMap((event) => event.unfilled_intervals)
+              .forEach(({ gte, lte }) => {
+                earliest = Math.min(earliest, new Date(gte).getTime());
+                latest = Math.max(latest, new Date(lte).getTime());
+              });
+          });
+
+          backfillEnd = new Date(latest);
+          backfillStart = new Date(earliest);
+      }
 
       afterEach(resetEverything);
 
@@ -2737,34 +2884,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('scheduling gap fills for rules', () => {
         beforeEach(async () => {
-          generatedGapEvents = {};
-          for (const rule of createdRules) {
-            const { gapEvents } = await generateGapsForRule(es, rule, 100);
-            generatedGapEvents[rule.id] = {
-              rule,
-              gapEvents: gapEvents.map((gapEvent) => {
-                if (!gapEvent._id) {
-                  throw new Error('generated gap event id cannot be undefined');
-                }
-                return { ...gapEvent.kibana.alert.rule.gap, _id: gapEvent._id };
-              }),
-            };
-          }
-
-          let earliest = Date.now();
-          let latest = 0;
-
-          Object.values(generatedGapEvents).forEach(({ gapEvents }) => {
-            gapEvents
-              .flatMap((event) => event.unfilled_intervals)
-              .forEach(({ gte, lte }) => {
-                earliest = Math.min(earliest, new Date(gte).getTime());
-                latest = Math.max(latest, new Date(lte).getTime());
-              });
-          });
-
-          backfillEnd = new Date(latest);
-          backfillStart = new Date(earliest);
+          await initializeTestGapEvents()
         });
 
         it('should trigger the scheduling of gap fills for the rules in the request', async () => {
@@ -3012,6 +3132,87 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.message).toContain('Backfill cannot look back more than 90 days');
       });
+
+      describe('@skipInServerless RBAC', () => {
+        describe('with rules_read_manual_run_all user role', () => {
+          const roleWithManualRun = ROLES.rules_read_manual_run_all
+
+          beforeEach(async () => {
+            await initializeTestGapEvents()
+            await createUserAndRole(getService, roleWithManualRun);
+          });
+
+          afterEach(async () => {
+            await deleteUserAndRole(getService, roleWithManualRun);
+          });
+
+          it('should trigger the scheduling of gap fills for the rules in the request', async () => {
+          // Only backfill the first 2 rules
+          const ruleIdsToBackfill = Object.keys(generatedGapEvents).slice(0, 2);
+
+          const restrictedUser = { username: roleWithManualRun, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          // Trigger the backfill for the selected rules
+          const { body } = await restrictedApis
+            .performRulesBulkAction({
+              query: {},
+              body: {
+                ids: ruleIdsToBackfill,
+                action: BulkActionTypeEnum.fill_gaps,
+                [BulkActionTypeEnum.fill_gaps]: {
+                  start_date: backfillStart.toISOString(),
+                  end_date: backfillEnd.toISOString(),
+                },
+              },
+            })
+            .expect(200);
+
+          expect(body.success).toEqual(true);
+          expect(body.attributes.summary).toEqual({
+            failed: 0,
+            succeeded: 2,
+            skipped: 0,
+            total: 2,
+          });
+        });
+        })
+
+        describe('@skipInServerless with rules_all_manual_run_none user role', () => {
+          const roleWithoutManualRun = ROLES.rules_all_manual_run_none
+
+          beforeEach(async () => {
+            await createUserAndRole(getService, roleWithoutManualRun);
+          });
+
+          afterEach(async () => {
+            await deleteUserAndRole(getService, roleWithoutManualRun);
+          });
+
+          it('should fail triggering fill gaps', async () => {
+            // Only backfill the first 2 rules
+          const ruleIdsToBackfill = Object.keys(generatedGapEvents).slice(0, 2);
+
+          const restrictedUser = { username: roleWithoutManualRun, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          // Trigger the backfill for the selected rules
+          await restrictedApis
+            .performRulesBulkAction({
+              query: {},
+              body: {
+                ids: ruleIdsToBackfill,
+                action: BulkActionTypeEnum.fill_gaps,
+                [BulkActionTypeEnum.fill_gaps]: {
+                  start_date: backfillStart.toISOString(),
+                  end_date: backfillEnd.toISOString(),
+                },
+              },
+            })
+            .expect(500);
+          });
+        })
+      })
     });
 
     describe('overwrite_data_views', () => {

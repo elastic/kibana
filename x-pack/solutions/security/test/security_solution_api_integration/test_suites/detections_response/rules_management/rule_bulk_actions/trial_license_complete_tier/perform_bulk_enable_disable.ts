@@ -138,7 +138,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('@skipInServerless without enableDisableRules subfeature permission', () => {
-        const role = ROLES.rules_read_investigation_guide_all;
+        const role = ROLES.rules_all_enable_disable_none;
 
         beforeEach(async () => {
           await createUserAndRole(getService, role);
