@@ -10,6 +10,7 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import { isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { z } from '@kbn/zod/v4';
 import { flattenOptions, getActionOptions } from './get_action_options';
 import { getAllConnectors } from '../../../../common/schema';
@@ -54,14 +55,7 @@ describe('getActionOptions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockWorkflowsExtensions = {
-      getStepDefinition: jest.fn(),
-      getAllStepDefinitions: jest.fn(),
-      hasStepDefinition: jest.fn(),
-      getAllTriggerDefinitions: jest.fn(() => []),
-      getTriggerDefinition: jest.fn(),
-      hasTriggerDefinition: jest.fn(),
-    };
+    mockWorkflowsExtensions = workflowsExtensionsMock.createStart();
 
     (getAllConnectors as jest.Mock).mockReturnValue([]);
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
@@ -101,8 +95,15 @@ describe('getActionOptions', () => {
 
     expect(flowControlGroup).toBeDefined();
     if (flowControlGroup && 'options' in flowControlGroup) {
-      expect(flowControlGroup.options).toHaveLength(3);
-      expect(flowControlGroup.options.map((opt) => opt.id)).toEqual(['if', 'foreach', 'wait']);
+      expect(flowControlGroup.options).toHaveLength(6);
+      expect(flowControlGroup.options.map((opt) => opt.id)).toEqual([
+        'if',
+        'foreach',
+        'while',
+        'wait',
+        'workflow.execute',
+        'workflow.executeAsync',
+      ]);
     }
   });
 

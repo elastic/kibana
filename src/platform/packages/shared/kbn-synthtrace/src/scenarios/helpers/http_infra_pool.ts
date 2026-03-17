@@ -16,6 +16,7 @@
  */
 
 import { CLOUD_PROVIDERS, CONTAINER_RUNTIMES, SERVICE_VERSIONS } from './http_field_generators';
+import { random } from './http_random';
 
 interface CloudConfig {
   name: string;
@@ -202,7 +203,7 @@ export function getInfraPool(scale: number = 1, providerIndex: number = 0): Infr
  * Pick a random host from the infrastructure pool.
  */
 export function getRandomHost(pool: InfraPool): HostIdentity {
-  return pool.hosts[Math.floor(Math.random() * pool.hosts.length)];
+  return pool.hosts[Math.floor(random() * pool.hosts.length)];
 }
 
 /**

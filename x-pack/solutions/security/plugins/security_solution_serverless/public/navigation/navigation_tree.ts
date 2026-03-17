@@ -26,7 +26,8 @@ const SOLUTION_NAME = i18n.translate(
 
 export const createNavigationTree = async (
   services: Services,
-  chatExperience: AIChatExperience = AIChatExperience.Classic
+  chatExperience: AIChatExperience = AIChatExperience.Classic,
+  templatesEnabled: boolean = false
 ): Promise<NavigationTreeDefinition> => ({
   body: [
     {
@@ -70,7 +71,7 @@ export const createNavigationTree = async (
       icon: 'bullseye',
       link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
     },
-    defaultNavigationTree.cases(),
+    defaultNavigationTree.cases(templatesEnabled),
     defaultNavigationTree.entityAnalytics(),
     defaultNavigationTree.explore(),
     defaultNavigationTree.investigations(),

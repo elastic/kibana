@@ -22,6 +22,12 @@ export interface Attachment<
   data: DataType;
   /** should the attachment be hidden from the user - e.g. for screen context */
   hidden?: boolean;
+  /**
+   * Origin/reference info for attachments created from external sources.
+   * For saved-object-backed types this is the saved object ID.
+   * Undefined for by-value attachments.
+   */
+  origin?: string;
 }
 
 /**

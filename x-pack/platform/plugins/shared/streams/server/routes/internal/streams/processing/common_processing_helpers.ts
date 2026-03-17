@@ -9,6 +9,7 @@ import type {
   CustomToolChoice,
   InferenceClient,
   Prompt,
+  PromptOptions,
   PromptVersion,
   ToolCallOfToolDefinitions,
 } from '@kbn/inference-common';
@@ -68,7 +69,7 @@ export async function callInferenceWithPrompt<
     input: {
       sample_messages: sampleMessages,
       review_fields: JSON.stringify(reviewFields),
-    },
+    } as PromptOptions<TPrompt>['input'],
     abortSignal: signal,
   });
 

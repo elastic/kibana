@@ -10,9 +10,11 @@ import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
 } from '../../common/constants';
 import { registerAttachmentUiDefinitions } from '.';
 
@@ -26,10 +28,10 @@ describe('registerAttachmentUiDefinitions', () => {
     jest.clearAllMocks();
   });
 
-  it('registers all six attachment types', () => {
+  it('registers all eight attachment types', () => {
     registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
-    expect(mockAddAttachmentType).toHaveBeenCalledTimes(6);
+    expect(mockAddAttachmentType).toHaveBeenCalledTimes(8);
   });
 
   it('registers AI Insight attachment type with correct config', () => {
@@ -156,5 +158,31 @@ describe('registerAttachmentUiDefinitions', () => {
     const config = serviceCall![1];
     expect(config.getIcon()).toBe('gear');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Service');
+  });
+
+  it('registers host attachment type with correct config', () => {
+    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+
+    const hostCall = mockAddAttachmentType.mock.calls.find(
+      (call) => call[0] === OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID
+    );
+    expect(hostCall).toBeDefined();
+
+    const config = hostCall![1];
+    expect(config.getIcon()).toBe('storage');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Host');
+  });
+
+  it('registers transaction attachment type with correct config', () => {
+    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+
+    const transactionCall = mockAddAttachmentType.mock.calls.find(
+      (call) => call[0] === OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID
+    );
+    expect(transactionCall).toBeDefined();
+
+    const config = transactionCall![1];
+    expect(config.getIcon()).toBe('merge');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Transaction');
   });
 });

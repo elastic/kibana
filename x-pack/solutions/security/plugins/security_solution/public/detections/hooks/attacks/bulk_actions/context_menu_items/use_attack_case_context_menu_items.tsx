@@ -6,12 +6,13 @@
  */
 
 import { useMemo } from 'react';
+
 import { useBulkAttackCaseItems } from '../bulk_action_items/use_bulk_attack_case_items';
+import { transformBulkActionsToContextMenuItems } from '../utils/transform_bulk_actions_to_context_menu_items';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT,
 } from '../constants';
-import { transformBulkActionsToContextMenuItems } from '../utils/transform_bulk_actions_to_context_menu_items';
 import type {
   AttackWithCase,
   BaseAttackContextMenuItemsProps,
@@ -32,10 +33,12 @@ export const useAttackCaseContextMenuItems = ({
   clearSelection,
   setIsLoading,
   refresh,
+  telemetrySource,
 }: UseAttackCaseContextMenuItemsProps): BulkAttackContextMenuItems => {
   const bulkActionItems = useBulkAttackCaseItems({
     title,
     closePopover,
+    telemetrySource,
   });
 
   const alertItems = useMemo(
