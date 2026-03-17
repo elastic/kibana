@@ -14,17 +14,8 @@
  *   version: 2023-10-31
  */
 
-import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import {
-  requiredOptional,
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
-
-import { PlatformErrorResponse, SiemErrorResponse } from '../../../model/error_responses.gen';
+import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 export type AlertsReindexOptions = z.infer<typeof AlertsReindexOptions>;
 export const AlertsReindexOptions = z.object({

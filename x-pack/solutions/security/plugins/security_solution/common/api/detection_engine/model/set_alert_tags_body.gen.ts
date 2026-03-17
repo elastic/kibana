@@ -14,15 +14,7 @@
  *   version: 1.0.0
  */
 
-import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import {
-  requiredOptional,
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
 
 import { AlertIds, AlertTags } from '../../model/alert.gen';
 

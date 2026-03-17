@@ -14,15 +14,7 @@
  *   version: not applicable
  */
 
-import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import {
-  requiredOptional,
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
 
 /**
   * Custom execution status of Security rules that is different from the status used in the Alerting Framework. We merge our custom status with the Framework's status to determine the resulting status of a rule.

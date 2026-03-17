@@ -14,18 +14,9 @@
  *   version: 1
  */
 
-import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import {
-  requiredOptional,
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
 
 import { QueryAlertsBodyParams } from '../../signals/query_signals/query_signals_route.gen';
-import { PlatformErrorResponse, SiemErrorResponse } from '../../../model/error_responses.gen';
 
 /**
  * Elasticsearch query and aggregation request

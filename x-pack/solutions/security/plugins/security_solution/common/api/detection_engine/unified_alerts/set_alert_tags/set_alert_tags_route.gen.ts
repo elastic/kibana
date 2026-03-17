@@ -14,18 +14,9 @@
  *   version: 1
  */
 
-import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import {
-  requiredOptional,
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
 
 import { SetAlertTagsBody } from '../../model/set_alert_tags_body.gen';
-import { PlatformErrorResponse, SiemErrorResponse } from '../../../model/error_responses.gen';
 
 export type SetUnifiedAlertsTagsRequestBody = z.infer<typeof SetUnifiedAlertsTagsRequestBody>;
 export const SetUnifiedAlertsTagsRequestBody = SetAlertTagsBody;

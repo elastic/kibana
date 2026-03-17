@@ -14,15 +14,7 @@
  *   version: 2023-10-31
  */
 
-import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import {
-  requiredOptional,
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
 
 import {
   Page,
@@ -31,9 +23,8 @@ import {
   HostStatuses,
   SortField,
   SortDirection,
-  SuccessResponse,
 } from '../model/schema/common.gen';
-import { MetadataListResponse, EndpointMetadataResponse } from './list_metadata.gen';
+import { MetadataListResponse } from './list_metadata.gen';
 
 export type GetEndpointMetadataListRequestQuery = z.infer<
   typeof GetEndpointMetadataListRequestQuery

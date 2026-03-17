@@ -14,15 +14,8 @@
  *   version: 2023-10-31
  */
 
-import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import {
-  requiredOptional,
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import {
   EqlRuleCreateProps,
@@ -35,7 +28,6 @@ import {
   EsqlRuleCreateProps,
 } from '../model/rule_schema/rule_schemas.gen';
 import { NonEmptyString } from '../../model/primitives.gen';
-import { PlatformErrorResponse, SiemErrorResponse } from '../../model/error_responses.gen';
 
 export type RulePreviewParams = z.infer<typeof RulePreviewParams>;
 export const RulePreviewParams = z.object({

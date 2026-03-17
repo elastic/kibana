@@ -14,15 +14,8 @@
  *   version: 1
  */
 
-import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import {
-  requiredOptional,
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { RuleExecutionStatus } from '../../model/execution_status.gen';
 import { RuleRunType } from '../../model/execution_run_type.gen';

@@ -14,15 +14,8 @@
  *   version: 2023-10-31
  */
 
-import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import {
-  requiredOptional,
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 export type MonitoringEntitySourceType = z.infer<typeof MonitoringEntitySourceType>;
 export const MonitoringEntitySourceType = z.enum(['index', 'entity_analytics_integration']);

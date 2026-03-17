@@ -14,15 +14,7 @@
  *   version: not applicable
  */
 
-import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-import {
-  requiredOptional,
-  isValidDateMath,
-  isNonEmptyString,
-  ArrayFromString,
-  BooleanFromString,
-} from '@kbn/zod-helpers/v4';
 
 /**
  * Rule execution result is an aggregate that groups plain rule execution events by execution UUID. It contains such information as execution UUID, date, status and metrics.
