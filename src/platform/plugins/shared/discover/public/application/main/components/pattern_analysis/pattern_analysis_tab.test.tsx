@@ -13,7 +13,7 @@ import type { Filter } from '@kbn/es-query';
 import { PatternAnalysisTab } from './pattern_analysis_tab';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
-import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 
 const dataView = dataViewWithTimefieldMock;
@@ -38,17 +38,9 @@ describe('PatternAnalysisTab', () => {
     jest.clearAllMocks();
   });
 
-  const getStateContainer = (toolkit: ReturnType<typeof getDiscoverInternalStateMock>) => {
-    return selectTabRuntimeState(
-      toolkit.runtimeStateManager,
-      toolkit.getCurrentTab().id
-    ).stateContainer$.getValue()!;
-  };
-
   const getComponent = (toolkit: ReturnType<typeof getDiscoverInternalStateMock>) => {
     const props = {
       dataView,
-      stateContainer: getStateContainer(toolkit),
       switchToDocumentView: jest.fn(),
       trackUiMetric: jest.fn(),
       renderViewModeToggle: jest.fn(() => <div data-test-subj="viewModeToggle">Toggle</div>),
@@ -71,7 +63,7 @@ describe('PatternAnalysisTab', () => {
     const toolkit = getDiscoverInternalStateMock();
 
     await toolkit.initializeTabs();
-    const { stateContainer } = await toolkit.initializeSingleTab({
+    await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
     });
 
@@ -88,7 +80,7 @@ describe('PatternAnalysisTab', () => {
 
     const result = render(getComponent(toolkit));
 
-    return { ...result, toolkit, stateContainer };
+    return { ...result, toolkit };
   };
 
   const getSearchSourceData = () => {
