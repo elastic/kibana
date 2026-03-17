@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { Ast } from '@kbn/interpreter';
 import { buildExpression } from '@kbn/expressions-plugin/public';
 import type { DatasourceMock } from '../../mocks';
@@ -13,19 +16,29 @@ import { getDatatableVisualization } from './visualization';
 import {
   type Operation,
   type DataType,
+  type OperationDescriptor,
   type FramePublicAPI,
   type TableSuggestionColumn,
   type VisualizationDimensionGroupConfig,
   type VisualizationConfigProps,
   type DatatableVisualizationState,
+  type StateSetter,
   LENS_DATAGRID_DENSITY,
   LENS_ROW_HEIGHT_MODE,
 } from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { CUSTOM_PALETTE } from '@kbn/coloring';
+import type {
+  ColorMapping,
+  CustomPaletteParams,
+  PaletteDefinition,
+  PaletteOutput,
+  SeriesLayer,
+} from '@kbn/coloring';
+import { CUSTOM_PALETTE, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import { DATATABLE_COLOR_MISMATCH } from '../../user_messages_ids';
 import type {
   ColumnState,
   DatatableColumnFn,
@@ -40,6 +53,10 @@ jest.mock('../../shared_components/coloring', () => {
     getPaletteDisplayColors: jest.fn().mockReturnValue([]),
   };
 });
+
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(component, { wrapper: I18nProvider });
+};
 
 function mockFrame(): FramePublicAPI {
   return {
@@ -764,7 +781,6 @@ describe('Datatable Visualization', () => {
       expect(columnArgs[0].arguments).toEqual(
         expect.objectContaining({
           columnId: ['c'],
-          palette: [expect.any(Object)],
           transposable: [true],
           colorMode: ['none'],
         })
@@ -772,7 +788,6 @@ describe('Datatable Visualization', () => {
       expect(columnArgs[1].arguments).toEqual(
         expect.objectContaining({
           columnId: ['b'],
-          palette: [expect.objectContaining({})],
           transposable: [true],
           colorMode: ['none'],
         })
@@ -1027,11 +1042,10 @@ describe('Datatable Visualization', () => {
             { dataType: 'string' },
             { dataType: 'number' },
             { dataType: 'boolean' },
-            // disallowed types
-            { dataType: 'date', disallowed: true },
+            { dataType: 'date' },
           ])(
             'should apply correct palette, colorMapping & colorMode for $dataType',
-            ({ dataType, disallowed = false }) => {
+            ({ dataType }) => {
               datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
                 dataType,
                 isBucketed: false,
@@ -1052,15 +1066,9 @@ describe('Datatable Visualization', () => {
                   'lens_datatable_column'
                 )[0].arguments;
 
-              if (disallowed) {
-                expect(columnArgs.colorMode).toEqual(['none']);
-                expect(columnArgs.palette).toBeUndefined();
-                expect(columnArgs.colorMapping).toBeUndefined();
-              } else {
-                expect(columnArgs.colorMode).toEqual([colorMode ?? 'none']);
-                expect(columnArgs.palette).toEqual([expect.any(Object)]);
-                expect(columnArgs.colorMapping).toEqual([expect.any(String)]);
-              }
+              expect(columnArgs.colorMode).toEqual([colorMode ?? 'none']);
+              expect(columnArgs.palette).toEqual([expect.any(Object)]);
+              expect(columnArgs.colorMapping).toEqual([expect.any(String)]);
             }
           );
         }
@@ -1138,6 +1146,501 @@ describe('Datatable Visualization', () => {
       ).toEqual({
         ...currentState,
         paging: { enabled: true, size: 30 },
+      });
+    });
+  });
+
+  describe('color configuration handling', () => {
+    let datasource: DatasourceMock;
+    let frame: FramePublicAPI;
+
+    const baseState: DatatableVisualizationState = {
+      layerId: 'layer1',
+      layerType: LayerTypes.DATA,
+      columns: [],
+    };
+
+    const valuePalette: PaletteOutput<CustomPaletteParams> = {
+      type: 'palette',
+      name: 'default',
+      params: { stops: [{ color: 'red', stop: 50 }] },
+    };
+
+    const defaultColorMapping: ColorMapping.Config = {
+      paletteId: 'default',
+      colorMode: { type: 'categorical' },
+      assignments: [],
+      specialAssignments: [],
+    };
+
+    beforeEach(() => {
+      datasource = createMockDatasource('test');
+      frame = {
+        ...mockFrame(),
+        datasourceLayers: { layer1: datasource.publicAPIMock },
+      };
+    });
+
+    function mockOperation(overrides: Partial<OperationDescriptor>) {
+      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'number',
+        isBucketed: false,
+        label: 'label',
+        hasTimeShift: false,
+        hasReducedTimeRange: false,
+        ...overrides,
+      } satisfies OperationDescriptor);
+    }
+
+    describe('#onDatasourceUpdate', () => {
+      function callOnDatasourceUpdate(state: DatatableVisualizationState) {
+        return datatableVisualization.onDatasourceUpdate!(state, frame);
+      }
+
+      it('returns columns unchanged when they have no color config', () => {
+        mockOperation({ dataType: 'number', isBucketed: false, label: 'Count' });
+
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [{ columnId: 'col1' }],
+        };
+
+        const result = callOnDatasourceUpdate(state);
+        expect(result.columns[0]).toEqual({ columnId: 'col1' });
+      });
+
+      it('returns columns unchanged when column is not colorable', () => {
+        mockOperation({
+          dataType: 'number',
+          isBucketed: false,
+          label: 'Array metric',
+          hasArraySupport: true,
+        });
+
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              palette: valuePalette,
+            },
+          ],
+        };
+
+        const result = callOnDatasourceUpdate(state);
+        expect(result.columns[0]).toEqual({ columnId: 'col1', palette: valuePalette });
+      });
+
+      it('strips palette and falls back to DEFAULT_COLOR_MAPPING_CONFIG for categorical column with value-based palette', () => {
+        mockOperation({ dataType: 'string', isBucketed: true, label: 'Category' });
+
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              palette: valuePalette,
+            },
+          ],
+        };
+
+        const result = callOnDatasourceUpdate(state);
+        expect(result.columns[0].palette).toBeUndefined();
+        expect(result.columns[0].colorMapping).toEqual(DEFAULT_COLOR_MAPPING_CONFIG);
+      });
+
+      it('strips palette but preserves existing colorMapping for categorical column with both', () => {
+        mockOperation({ dataType: 'string', isBucketed: true, label: 'Category' });
+
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              palette: valuePalette,
+              colorMapping: defaultColorMapping,
+            },
+          ],
+        };
+
+        const result = callOnDatasourceUpdate(state);
+        expect(result.columns[0].palette).toBeUndefined();
+        expect(result.columns[0].colorMapping).toEqual(defaultColorMapping);
+      });
+
+      it('strips colorMapping and computes value-based palette for numeric column with colorMapping but no palette', () => {
+        mockOperation({ dataType: 'number', isBucketed: false, label: 'Metric' });
+
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              colorMapping: defaultColorMapping,
+            },
+          ],
+        };
+
+        const { palette, colorMapping } = callOnDatasourceUpdate(state).columns[0];
+        expect(colorMapping).toBeUndefined();
+        expect(palette).toBeDefined();
+        expect(palette?.name).toBe('positive');
+        expect(palette?.params?.stops).toBeDefined();
+        expect(palette?.params?.stops?.length).toBeGreaterThan(0);
+      });
+
+      it('strips colorMapping but keeps existing palette for numeric column with both', () => {
+        mockOperation({ dataType: 'number', isBucketed: false, label: 'Metric' });
+
+        const paletteWithStops: PaletteOutput<CustomPaletteParams> = {
+          type: 'palette',
+          name: 'custom',
+          params: { stops: [{ color: 'green', stop: 50 }] },
+        };
+
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              colorMapping: defaultColorMapping,
+              palette: paletteWithStops,
+            },
+          ],
+        };
+
+        const { palette, colorMapping } = callOnDatasourceUpdate(state).columns[0];
+        expect(colorMapping).toBeUndefined();
+        expect(palette).toBeDefined();
+        expect(palette?.name).toBe('custom');
+        expect(palette?.params?.stops).toEqual(paletteWithStops.params?.stops);
+      });
+
+      it('replaces categorical-only palette with value-based palette for numeric column', () => {
+        mockOperation({ dataType: 'number', isBucketed: false, label: 'Metric' });
+
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              palette: { type: 'palette', name: 'mocked' }, // no canDynamicColoring
+            },
+          ],
+        };
+
+        const { palette } = callOnDatasourceUpdate(state).columns[0];
+        expect(palette).toBeDefined();
+        expect(palette?.name).toBe('positive');
+        expect(palette?.params?.stops?.length).toBeGreaterThan(0);
+      });
+
+      it('computes stops while preserving palette name for numeric column with valid palette with canDynamicColoring but no stops', () => {
+        const temperaturePalette: jest.Mocked<PaletteDefinition> = {
+          id: 'temperature',
+          title: 'Temperature',
+          canDynamicColoring: true,
+          getCategoricalColor: jest.fn((_: SeriesLayer[]) => 'orange'),
+          getCategoricalColors: jest.fn((_: number) => ['orange', 'red']),
+          toExpression: jest.fn(() => ({
+            type: 'expression',
+            chain: [
+              {
+                type: 'function',
+                function: 'system_palette',
+                arguments: { name: ['temperature'] },
+              },
+            ],
+          })),
+        };
+
+        mockServices.paletteService.getAll.mockReturnValue([
+          ...mockServices.paletteService.getAll(),
+          temperaturePalette,
+        ]);
+
+        mockOperation({ dataType: 'number', isBucketed: false, label: 'Metric' });
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              palette: { type: 'palette', name: 'temperature' },
+            },
+          ],
+        };
+        const { palette } = callOnDatasourceUpdate(state).columns[0];
+        expect(palette?.name).toBe('temperature');
+        expect(palette?.params?.stops).toBeDefined();
+        expect(palette?.params?.stops?.length).toBeGreaterThan(0);
+      });
+    });
+
+    describe('#getUserMessages', () => {
+      const currentData: Datatable = {
+        type: 'datatable',
+        columns: [
+          { id: 'col1', name: 'col1', meta: { type: 'number' } },
+          { id: 'col2', name: 'col2', meta: { type: 'string' } },
+        ],
+        rows: [{ col1: 10, col2: 'a' }],
+      };
+
+      beforeEach(() => {
+        frame = { ...frame, activeData: { layer1: currentData } };
+      });
+
+      function callGetUserMessages(
+        state: DatatableVisualizationState,
+        setState?: StateSetter<DatatableVisualizationState>
+      ) {
+        return datatableVisualization.getUserMessages!(state, {
+          frame,
+          setState,
+        });
+      }
+
+      it('returns empty array when datasource is missing', () => {
+        frame.datasourceLayers = {};
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [{ columnId: 'col1', colorMode: 'cell' }],
+        };
+        expect(callGetUserMessages(state)).toEqual([]);
+      });
+
+      it('returns empty array when activeData is missing', () => {
+        frame.activeData = undefined;
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [{ columnId: 'col1', colorMode: 'cell' }],
+        };
+        expect(callGetUserMessages(state)).toEqual([]);
+      });
+
+      it('returns empty array when columns are empty', () => {
+        expect(callGetUserMessages(baseState)).toEqual([]);
+      });
+
+      it('returns empty array when no column has coloring enabled', () => {
+        mockOperation({ dataType: 'number', isBucketed: false, label: 'Count' });
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [{ columnId: 'col1' }],
+        };
+        expect(callGetUserMessages(state)).toEqual([]);
+      });
+
+      it('returns empty array when colorMode is none', () => {
+        mockOperation({ dataType: 'number', isBucketed: false, label: 'Count' });
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [{ columnId: 'col1', colorMode: 'none' }],
+        };
+        expect(callGetUserMessages(state)).toEqual([]);
+      });
+
+      it('does not produce a warning for compatible categorical column with colorMapping', () => {
+        mockOperation({ dataType: 'string', isBucketed: true, label: 'Category' });
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col2',
+              colorMode: 'cell',
+              colorMapping: defaultColorMapping,
+            },
+          ],
+        };
+
+        expect(callGetUserMessages(state)).toEqual([]);
+      });
+
+      it('does not produce a warning for compatible numeric column with value palette', () => {
+        mockOperation({ dataType: 'number', isBucketed: false, label: 'Count' });
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              colorMode: 'cell',
+              palette: valuePalette,
+            },
+          ],
+        };
+
+        expect(callGetUserMessages(state)).toEqual([]);
+      });
+
+      it('returns a warning when numeric column has colorMapping', () => {
+        mockOperation({ dataType: 'number', isBucketed: false, label: 'My Metric' });
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              colorMode: 'cell',
+              colorMapping: defaultColorMapping,
+            },
+          ],
+        };
+
+        const messages = callGetUserMessages(state);
+        expect(messages).toHaveLength(1);
+        expect(messages[0]).toMatchObject({
+          uniqueId: DATATABLE_COLOR_MISMATCH,
+          severity: 'warning',
+          shortMessage: 'Incompatible colors in one column',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+        });
+      });
+
+      it('returns a warning when categorical column has value-based palette without colorMapping', () => {
+        mockOperation({ dataType: 'string', isBucketed: true, label: 'Category' });
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col2',
+              colorMode: 'cell',
+              palette: valuePalette,
+            },
+          ],
+        };
+
+        const messages = callGetUserMessages(state);
+        expect(messages).toHaveLength(1);
+        expect(messages[0]).toMatchObject({
+          uniqueId: DATATABLE_COLOR_MISMATCH,
+          severity: 'warning',
+          shortMessage: 'Incompatible colors in one column',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+        });
+      });
+
+      it('does not produce a warning when categorical column has value-based palette and colorMapping for backwards compatibility', () => {
+        mockOperation({ dataType: 'string', isBucketed: true, label: 'Category' });
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col2',
+              colorMode: 'cell',
+              palette: valuePalette,
+              colorMapping: defaultColorMapping,
+            },
+          ],
+        };
+
+        const messages = callGetUserMessages(state);
+        expect(messages).toEqual([]);
+      });
+
+      it('reports multiple mismatched columns in a single warning', () => {
+        datasource.publicAPIMock.getOperationForColumnId.mockImplementation((id: string) => {
+          if (id === 'col1') {
+            return {
+              dataType: 'number',
+              isBucketed: false,
+              label: 'Metric A',
+              hasTimeShift: false,
+              hasReducedTimeRange: false,
+            } satisfies OperationDescriptor;
+          }
+          return {
+            dataType: 'string',
+            isBucketed: true,
+            label: 'Category B',
+            hasTimeShift: false,
+            hasReducedTimeRange: false,
+          } satisfies OperationDescriptor;
+        });
+
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              colorMode: 'cell',
+              colorMapping: defaultColorMapping,
+            },
+            {
+              columnId: 'col2',
+              colorMode: 'text',
+              palette: valuePalette,
+            },
+          ],
+        };
+
+        const messages = callGetUserMessages(state);
+        expect(messages).toHaveLength(1);
+        expect(messages[0]).toMatchObject({
+          uniqueId: DATATABLE_COLOR_MISMATCH,
+          severity: 'warning',
+          shortMessage: 'Incompatible colors in 2 columns',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+        });
+      });
+
+      it('provides a fix action via setState that replaces incompatible color config with defaults', () => {
+        mockOperation({ dataType: 'number', isBucketed: false, label: 'My Metric' });
+        const setState = jest.fn();
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              colorMode: 'cell',
+              colorMapping: defaultColorMapping,
+            },
+          ],
+        };
+
+        const [message] = callGetUserMessages(state, setState);
+        const { longMessage } = message;
+        const rendered = typeof longMessage === 'function' ? longMessage() : longMessage;
+        const { getByTestId } = renderWithIntl(<>{rendered}</>);
+        fireEvent.click(getByTestId('lensFixColorMismatchAction'));
+
+        expect(setState).toHaveBeenCalledWith(
+          expect.objectContaining({
+            columns: [
+              {
+                columnId: 'col1',
+                colorMode: 'cell',
+                palette: expect.objectContaining({
+                  name: 'positive',
+                  params: expect.objectContaining({
+                    stops: expect.arrayContaining([expect.anything()]),
+                  }),
+                }),
+              },
+            ],
+          })
+        );
+      });
+
+      it('does not include fix link when setState is not provided', () => {
+        mockOperation({ dataType: 'number', isBucketed: false, label: 'My Metric' });
+        const state: DatatableVisualizationState = {
+          ...baseState,
+          columns: [
+            {
+              columnId: 'col1',
+              colorMode: 'cell',
+              colorMapping: defaultColorMapping,
+            },
+          ],
+        };
+
+        const [message] = callGetUserMessages(state);
+        const { longMessage } = message;
+        const rendered = typeof longMessage === 'function' ? longMessage() : longMessage;
+        const { queryByTestId } = renderWithIntl(<>{rendered}</>);
+        expect(queryByTestId('lensFixColorMismatchAction')).not.toBeInTheDocument();
       });
     });
   });

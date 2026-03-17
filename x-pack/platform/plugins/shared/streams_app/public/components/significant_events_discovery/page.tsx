@@ -21,8 +21,15 @@ import { FeaturesTable } from './components/features_table/features_table';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { InsightsTab } from './components/insights/tab';
+import { SettingsTab } from './components/settings/tab';
 
-const discoveryTabs = ['streams', 'features', 'queries', 'significant_events'] as const;
+const discoveryTabs = [
+  'streams',
+  'knowledge_indicators',
+  'queries',
+  'significant_events',
+  'settings',
+] as const;
 type DiscoveryTab = (typeof discoveryTabs)[number];
 
 function isValidDiscoveryTab(value: string): value is DiscoveryTab {
@@ -76,12 +83,12 @@ export function SignificantEventsDiscoveryPage() {
       isSelected: tab === 'streams',
     },
     {
-      id: 'features',
-      label: i18n.translate('xpack.streams.significantEventsDiscovery.featuresTab', {
-        defaultMessage: 'Features',
+      id: 'knowledge_indicators',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTab', {
+        defaultMessage: 'Knowledge Indicators',
       }),
-      href: router.link('/_discovery/{tab}', { path: { tab: 'features' } }),
-      isSelected: tab === 'features',
+      href: router.link('/_discovery/{tab}', { path: { tab: 'knowledge_indicators' } }),
+      isSelected: tab === 'knowledge_indicators',
     },
     {
       id: 'queries',
@@ -109,6 +116,14 @@ export function SignificantEventsDiscoveryPage() {
       }),
       href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
       isSelected: tab === 'significant_events',
+    },
+    {
+      id: 'settings',
+      label: i18n.translate('xpack.streams.significantEventsDiscovery.settingsTab', {
+        defaultMessage: 'Settings',
+      }),
+      href: router.link('/_discovery/{tab}', { path: { tab: 'settings' } }),
+      isSelected: tab === 'settings',
     },
   ];
 
@@ -140,9 +155,10 @@ export function SignificantEventsDiscoveryPage() {
       />
       <StreamsAppPageTemplate.Body grow>
         {tab === 'streams' && <StreamsView refreshUnbackedQueriesCount={refetch} />}
-        {tab === 'features' && <FeaturesTable />}
+        {tab === 'knowledge_indicators' && <FeaturesTable />}
         {tab === 'queries' && <QueriesTable />}
         {tab === 'significant_events' && <InsightsTab />}
+        {tab === 'settings' && <SettingsTab />}
       </StreamsAppPageTemplate.Body>
     </>
   );
