@@ -74,7 +74,7 @@ export const EndpointScriptDeleteModal = memo<EndpointScriptDeleteModalProps>(
         <EuiModalBody data-test-subj={getTestId('body')}>
           <EuiText>
             <FormattedMessage
-              id="xpack.securitySolution.scriptsLibrary.table.actions.deleteConfirmationText"
+              id="xpack.securitySolution.scriptLibrary.table.actions.deleteConfirmationText"
               defaultMessage='Do you really want to delete "{scriptName}"? This action cannot be undone. The script and all its metadata will be permanently removed from the library.'
               values={{
                 scriptName: <strong>{scriptName}</strong>,

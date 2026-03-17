@@ -284,7 +284,7 @@ export const ScriptsLibraryTable = memo<ScriptsLibraryTableProps>(
       () => (
         <EuiText color="default" size="xs" data-test-subj={getTestId('record-range-label')}>
           <FormattedMessage
-            id="xpack.securitySolution.scriptsLibrary.list.recordRange"
+            id="xpack.securitySolution.scriptLibrary.list.recordRange"
             defaultMessage="Showing {range} of {total} {recordsLabel}"
             values={{
               range: (

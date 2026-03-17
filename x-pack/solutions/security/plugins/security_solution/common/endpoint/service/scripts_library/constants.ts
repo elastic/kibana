@@ -13,39 +13,39 @@ import type { SortableScriptLibraryFields } from '../../types';
  */
 export const SCRIPT_TAGS = Object.freeze({
   remediationAction: i18n.translate(
-    'xpack.securitySolution.scriptsLibrary.tags.remediationAction',
+    'xpack.securitySolution.scriptLibrary.tags.remediationAction',
     { defaultMessage: 'Remediation Action' }
   ),
-  dataCollection: i18n.translate('xpack.securitySolution.scriptsLibrary.tags.dataCollection', {
+  dataCollection: i18n.translate('xpack.securitySolution.scriptLibrary.tags.dataCollection', {
     defaultMessage: 'Data Collection',
   }),
   networkDiagnostics: i18n.translate(
-    'xpack.securitySolution.scriptsLibrary.tags.networkDiagnostics',
+    'xpack.securitySolution.scriptLibrary.tags.networkDiagnostics',
     { defaultMessage: 'Network Diagnostics' }
   ),
-  networkAction: i18n.translate('xpack.securitySolution.scriptsLibrary.tags.networkAction', {
+  networkAction: i18n.translate('xpack.securitySolution.scriptLibrary.tags.networkAction', {
     defaultMessage: 'Network Action',
   }),
-  systemInventory: i18n.translate('xpack.securitySolution.scriptsLibrary.tags.systemInventory', {
+  systemInventory: i18n.translate('xpack.securitySolution.scriptLibrary.tags.systemInventory', {
     defaultMessage: 'System Inventory',
   }),
   forensicCollection: i18n.translate(
-    'xpack.securitySolution.scriptsLibrary.tags.forensicCollection',
+    'xpack.securitySolution.scriptLibrary.tags.forensicCollection',
     { defaultMessage: 'Forensic Collection' }
   ),
-  threatHunting: i18n.translate('xpack.securitySolution.scriptsLibrary.tags.threatHunting', {
+  threatHunting: i18n.translate('xpack.securitySolution.scriptLibrary.tags.threatHunting', {
     defaultMessage: 'Threat Hunting',
   }),
-  discovery: i18n.translate('xpack.securitySolution.scriptsLibrary.tags.discovery', {
+  discovery: i18n.translate('xpack.securitySolution.scriptLibrary.tags.discovery', {
     defaultMessage: 'Discovery',
   }),
-  systemManagement: i18n.translate('xpack.securitySolution.scriptsLibrary.tags.systemManagement', {
+  systemManagement: i18n.translate('xpack.securitySolution.scriptLibrary.tags.systemManagement', {
     defaultMessage: 'System Management',
   }),
-  userManagement: i18n.translate('xpack.securitySolution.scriptsLibrary.tags.userManagement', {
+  userManagement: i18n.translate('xpack.securitySolution.scriptLibrary.tags.userManagement', {
     defaultMessage: 'User Management',
   }),
-  troubleshooting: i18n.translate('xpack.securitySolution.scriptsLibrary.tags.troubleshooting', {
+  troubleshooting: i18n.translate('xpack.securitySolution.scriptLibrary.tags.troubleshooting', {
     defaultMessage: 'Troubleshooting',
   }),
 });

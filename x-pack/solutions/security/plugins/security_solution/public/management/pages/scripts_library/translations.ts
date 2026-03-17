@@ -9,17 +9,17 @@ import { i18n } from '@kbn/i18n';
 
 export const SCRIPT_LIBRARY_LABELS = Object.freeze({
   // page labels
-  pageTitle: i18n.translate('xpack.securitySolution.scriptsLibrary.pageTitle', {
+  pageTitle: i18n.translate('xpack.securitySolution.scriptLibrary.pageTitle', {
     defaultMessage: 'Scripts Library',
   }),
-  pageAboutInfo: i18n.translate('xpack.securitySolution.scriptsLibrary.pageAboutInfo', {
+  pageAboutInfo: i18n.translate('xpack.securitySolution.scriptLibrary.pageAboutInfo', {
     defaultMessage: 'View and manage scripts to upload and execute on Elastic Defend agents.',
   }),
-  pageAddButtonTitle: i18n.translate('xpack.securitySolution.scriptsLibrary.pageAddButtonTitle', {
+  pageAddButtonTitle: i18n.translate('xpack.securitySolution.scriptLibrary.pageAddButtonTitle', {
     defaultMessage: 'Upload script',
   }),
   fetchListErrorMessage: (errorMessage: string) =>
-    i18n.translate('xpack.securitySolution.scriptsLibrary.fetchListErrorMessage', {
+    i18n.translate('xpack.securitySolution.scriptLibrary.fetchListErrorMessage', {
       defaultMessage: 'There was an error fetching the scripts list: {errorMessage}',
       values: {
         errorMessage,
@@ -28,74 +28,73 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
 
   // empty state labels
   noPrivilegeEmptyTitle: i18n.translate(
-    'xpack.securitySolution.scriptsLibrary.noPrivilegeEmptyTitle',
+    'xpack.securitySolution.scriptLibrary.noPrivilegeEmptyTitle',
     { defaultMessage: 'There are no scripts to display.' }
   ),
-  emptyStateTitle: i18n.translate('xpack.securitySolution.scriptsLibrary.emptyStateTitle', {
+  emptyStateTitle: i18n.translate('xpack.securitySolution.scriptLibrary.emptyStateTitle', {
     defaultMessage: 'Add your first script',
   }),
-  emptyStateInfo: i18n.translate('xpack.securitySolution.scriptsLibrary.emptyStateInfo', {
+  emptyStateInfo: i18n.translate('xpack.securitySolution.scriptLibrary.emptyStateInfo', {
     defaultMessage: 'View and manage scripts to upload and execute on Elastic Defend agents.',
   }),
   emptyStatePrimaryButtonLabel: i18n.translate(
-    'xpack.securitySolution.scriptsLibrary.emptyStatePrimaryButtonLabel',
+    'xpack.securitySolution.scriptLibrary.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Upload script' }
   ),
 
   // table labels
   table: {
-    noItemsMessage: i18n.translate('xpack.securitySolution.scriptsLibrary.table.noItemsMessage', {
+    noItemsMessage: i18n.translate('xpack.securitySolution.scriptLibrary.table.noItemsMessage', {
       defaultMessage: 'No scripts found',
     }),
     columns: {
-      name: i18n.translate('xpack.securitySolution.scriptsLibrary.table.nameColumnTitle', {
+      name: i18n.translate('xpack.securitySolution.scriptLibrary.table.nameColumnTitle', {
         defaultMessage: 'Name',
       }),
-      platform: i18n.translate('xpack.securitySolution.scriptsLibrary.table.platformColumnTitle', {
+      platform: i18n.translate('xpack.securitySolution.scriptLibrary.table.platformColumnTitle', {
         defaultMessage: 'Operating systems',
       }),
-      tags: i18n.translate('xpack.securitySolution.scriptsLibrary.table.tagsColumnTitle', {
+      tags: i18n.translate('xpack.securitySolution.scriptLibrary.table.tagsColumnTitle', {
         defaultMessage: 'Types',
       }),
       updatedBy: i18n.translate(
-        'xpack.securitySolution.scriptsLibrary.table.modifiedByColumnTitle',
+        'xpack.securitySolution.scriptLibrary.table.modifiedByColumnTitle',
         {
           defaultMessage: 'Updated by',
         }
       ),
       updatedAt: i18n.translate(
-        'xpack.securitySolution.scriptsLibrary.table.lastModifiedColumnTitle',
+        'xpack.securitySolution.scriptLibrary.table.lastModifiedColumnTitle',
         {
           defaultMessage: 'Last updated',
         }
       ),
-      size: i18n.translate('xpack.securitySolution.scriptsLibrary.table.sizeColumnTitle', {
+      size: i18n.translate('xpack.securitySolution.scriptLibrary.table.sizeColumnTitle', {
         defaultMessage: 'Size',
       }),
-      actions: i18n.translate('xpack.securitySolution.scriptsLibrary.table.actionsColumnTitle', {
+      actions: i18n.translate('xpack.securitySolution.scriptLibrary.table.actionsColumnTitle', {
         defaultMessage: 'Actions',
       }),
-      actionsAriaLabel: i18n.translate('xpack.securitySolution.scriptsLibrary.table.actionmenu', {
+      actionsAriaLabel: i18n.translate('xpack.securitySolution.scriptLibrary.table.actionmenu', {
         defaultMessage: 'Open',
       }),
     },
     actions: {
-      details: i18n.translate('xpack.securitySolution.scriptsLibrary.table.actions.detailsLabel', {
+      details: i18n.translate('xpack.securitySolution.scriptLibrary.table.actions.detailsLabel', {
         defaultMessage: 'View details',
       }),
-      edit: i18n.translate('xpack.securitySolution.scriptsLibrary.table.actions.editLabel', {
+      edit: i18n.translate('xpack.securitySolution.scriptLibrary.table.actions.editLabel', {
         defaultMessage: 'Edit script',
       }),
-      delete: i18n.translate('xpack.securitySolution.scriptsLibrary.table.actions.deleteLabel', {
+      delete: i18n.translate('xpack.securitySolution.scriptLibrary.table.actions.deleteLabel', {
         defaultMessage: 'Delete script',
       }),
-      download: i18n.translate(
-        'xpack.securitySolution.scriptsLibrary.table.actions.downloadLabel',
-        { defaultMessage: 'Download script' }
-      ),
+      download: i18n.translate('xpack.securitySolution.scriptLibrary.table.actions.downloadLabel', {
+        defaultMessage: 'Download script',
+      }),
     },
     recordsPerPage: (totalScriptCount: number) =>
-      i18n.translate('xpack.securitySolution.scriptsLibrary.list.recordRangeLabel', {
+      i18n.translate('xpack.securitySolution.scriptLibrary.list.recordRangeLabel', {
         defaultMessage: '{records, plural, one {script} other {scripts}}',
         values: {
           records: totalScriptCount,
@@ -103,29 +102,29 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
       }),
   },
   deleteModal: {
-    title: i18n.translate('xpack.securitySolution.scriptsLibrary.deleteModal.actions.deleteLabel', {
+    title: i18n.translate('xpack.securitySolution.scriptLibrary.deleteModal.actions.deleteLabel', {
       defaultMessage: 'Delete script?',
     }),
     deleteButtonLabel: i18n.translate(
-      'xpack.securitySolution.scriptsLibrary.deleteModal.actions.deleteConfirmButtonLabel',
+      'xpack.securitySolution.scriptLibrary.deleteModal.actions.deleteConfirmButtonLabel',
       {
         defaultMessage: 'Delete',
       }
     ),
     cancelButtonLabel: i18n.translate(
-      'xpack.securitySolution.scriptsLibrary.deleteModal.actions.deleteCancelButtonLabel',
+      'xpack.securitySolution.scriptLibrary.deleteModal.actions.deleteCancelButtonLabel',
       {
         defaultMessage: 'Cancel',
       }
     ),
     successToastTitle: i18n.translate(
-      'xpack.securitySolution.scriptsLibrary.deleteModal.actions.deleteSuccessTitle',
+      'xpack.securitySolution.scriptLibrary.deleteModal.actions.deleteSuccessTitle',
       {
         defaultMessage: 'Script deleted successfully',
       }
     ),
     errorToastTitle: i18n.translate(
-      'xpack.securitySolution.scriptsLibrary.deleteModal.actions.deleteErrorTitle',
+      'xpack.securitySolution.scriptLibrary.deleteModal.actions.deleteErrorTitle',
       {
         defaultMessage: 'Failed to delete script',
       }
@@ -135,25 +134,25 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
   discardChangesModal: {
     edit: {
       title: i18n.translate(
-        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.title',
+        'xpack.securitySolution.scriptLibrary.table.discardChangesModal.title',
         {
           defaultMessage: 'Discard script changes?',
         }
       ),
       body: i18n.translate(
-        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.bodyText',
+        'xpack.securitySolution.scriptLibrary.table.discardChangesModal.bodyText',
         {
           defaultMessage: 'You will lose all unsaved changes made to this script.',
         }
       ),
       discardButtonLabel: i18n.translate(
-        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.discardButtonLabel',
+        'xpack.securitySolution.scriptLibrary.table.discardChangesModal.discardButtonLabel',
         {
           defaultMessage: 'Discard changes',
         }
       ),
       cancelButtonLabel: i18n.translate(
-        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.cancelButtonLabel',
+        'xpack.securitySolution.scriptLibrary.table.discardChangesModal.cancelButtonLabel',
         {
           defaultMessage: 'Keep editing',
         }
@@ -161,26 +160,26 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
     },
     upload: {
       title: i18n.translate(
-        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.uploadTitle',
+        'xpack.securitySolution.scriptLibrary.table.discardChangesModal.uploadTitle',
         {
           defaultMessage: 'Discard script upload?',
         }
       ),
       body: i18n.translate(
-        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.uploadBodyText',
+        'xpack.securitySolution.scriptLibrary.table.discardChangesModal.uploadBodyText',
         {
           defaultMessage:
             'You will lose all information entered and the selected file will not be uploaded.',
         }
       ),
       discardButtonLabel: i18n.translate(
-        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.uploadDiscardButtonLabel',
+        'xpack.securitySolution.scriptLibrary.table.discardChangesModal.uploadDiscardButtonLabel',
         {
           defaultMessage: 'Discard upload',
         }
       ),
       cancelButtonLabel: i18n.translate(
-        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.uploadCancelButtonLabel',
+        'xpack.securitySolution.scriptLibrary.table.discardChangesModal.uploadCancelButtonLabel',
         {
           defaultMessage: 'Keep uploading',
         }
@@ -189,33 +188,33 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
   },
 
   flyout: {
-    editHeader: i18n.translate('xpack.securitySolution.scriptsLibrary.table.flyout.headerTitle', {
+    editHeader: i18n.translate('xpack.securitySolution.scriptLibrary.table.flyout.headerTitle', {
       defaultMessage: 'Edit script',
     }),
     createHeader: i18n.translate(
-      'xpack.securitySolution.scriptsLibrary.table.flyout.createHeaderTitle',
+      'xpack.securitySolution.scriptLibrary.table.flyout.createHeaderTitle',
       {
         defaultMessage: 'Upload script',
       }
     ),
     flyoutViewItemFetchError: (errorMessage: string) =>
-      i18n.translate('xpack.securitySolution.scriptsLibrary.table.flyout.view.loadFailureMessage', {
+      i18n.translate('xpack.securitySolution.scriptLibrary.table.flyout.view.loadFailureMessage', {
         defaultMessage: 'Could not load script details. {errorMessage}',
         values: { errorMessage },
       }),
     flyoutEditItemFetchError: (errorMessage: string) =>
-      i18n.translate('xpack.securitySolution.scriptsLibrary.table.flyout.edit.loadFailureMessage', {
+      i18n.translate('xpack.securitySolution.scriptLibrary.table.flyout.edit.loadFailureMessage', {
         defaultMessage: 'Could not load script for editing. {errorMessage}',
         values: { errorMessage },
       }),
     flyoutEditSubmitSuccess: i18n.translate(
-      'xpack.securitySolution.scriptsLibrary.table.flyout.edit.submitSuccessMessage',
+      'xpack.securitySolution.scriptLibrary.table.flyout.edit.submitSuccessMessage',
       {
         defaultMessage: 'Script saved successfully',
       }
     ),
     flyoutCreateSubmitSuccess: i18n.translate(
-      'xpack.securitySolution.scriptsLibrary.table.flyout.create.submitSuccessMessage',
+      'xpack.securitySolution.scriptLibrary.table.flyout.create.submitSuccessMessage',
       {
         defaultMessage: 'Script uploaded successfully',
       }
@@ -224,51 +223,51 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
       edit: {
         filePickerPrompt: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.filePickerLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.filePickerLabel',
             {
               defaultMessage: 'Select or drag and drop a file',
             }
           ),
           validationErrorMessage: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.filePickerPrompt.validationErrorMessage',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.filePickerPrompt.validationErrorMessage',
             {
               defaultMessage: 'A script file is required.',
             }
           ),
         },
         removeFileButtonLabel: i18n.translate(
-          'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.removeFileButtonLabel',
+          'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.removeFileButtonLabel',
           {
             defaultMessage: 'Remove',
           }
         ),
         fileType: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileTypeLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.fileTypeLabel',
             {
               defaultMessage: 'File type',
             }
           ),
           placeholder: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileType.selectPlaceholder',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.fileType.selectPlaceholder',
             {
               defaultMessage: 'Select file type',
             }
           ),
           archive: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileType.archiveOptionLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.fileType.archiveOptionLabel',
             {
               defaultMessage: 'Archive (.zip, .rar, .gz, etc.)',
             }
           ),
           script: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileType.scriptOptionLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.fileType.scriptOptionLabel',
             {
               defaultMessage: 'Script file (.py, .sh, .ps1, etc.)',
             }
           ),
           validationErrorMessage: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.fileType.validationErrorMessage',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.fileType.validationErrorMessage',
             {
               defaultMessage: 'File type selection is required.',
             }
@@ -276,13 +275,13 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         name: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.nameLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.nameLabel',
             {
               defaultMessage: 'Name',
             }
           ),
           validationErrorMessage: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.name.validationErrorMessage',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.name.validationErrorMessage',
             {
               defaultMessage: 'Name is required.',
             }
@@ -290,13 +289,13 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         platforms: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.platformsLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.platformsLabel',
             {
               defaultMessage: 'Operating systems',
             }
           ),
           validationErrorMessage: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.platforms.validationErrorMessage',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.platforms.validationErrorMessage',
             {
               defaultMessage: 'At least one operating system must be selected.',
             }
@@ -304,13 +303,13 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         requiresInput: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.requiresInputLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.requiresInputLabel',
             {
               defaultMessage: 'This script requires user input.',
             }
           ),
           tooltip: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.requiresInputTooltip',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.requiresInputTooltip',
             {
               defaultMessage:
                 'Check this box if your script prompts for or requires additional input when executed.',
@@ -319,41 +318,41 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         pathToExecutable: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.pathToExecutableLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.pathToExecutableLabel',
             {
               defaultMessage: 'Path to executable file (only for archive files)',
             }
           ),
           tooltip: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.pathToExecutableTooltip',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.pathToExecutableTooltip',
             {
               defaultMessage:
                 'Enter the relative path to the main script inside the archive (zip/rar). Example: ./src/main.py',
             }
           ),
           helpText: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.pathToExecutable.helpText',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.pathToExecutable.helpText',
             {
               defaultMessage:
                 'Specify the path to the main script within the archive file for proper execution.',
             }
           ),
           validationErrorMessage: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.pathToExecutable.validationErrorMessage',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.pathToExecutable.validationErrorMessage',
             {
               defaultMessage: 'Path to executable is required for archive files.',
             }
           ),
         },
         optionalFieldLabel: i18n.translate(
-          'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.optionalFieldLabel',
+          'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.optionalFieldLabel',
           {
             defaultMessage: 'optional',
           }
         ),
         description: {
           helpText: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.description.helpText',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.description.helpText',
             {
               defaultMessage: "Provide a brief description of the script's functionality.",
             }
@@ -361,7 +360,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         instructions: {
           helpText: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.instructions.helpText',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.instructions.helpText',
             {
               defaultMessage:
                 'Provide step-by-step instructions on how to use or execute the script.',
@@ -370,7 +369,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         example: {
           helpText: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.edit.example.helpText',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.example.helpText',
             {
               defaultMessage: 'Provide examples of how to use the script.',
             }
@@ -381,13 +380,13 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
       details: {
         requiresInput: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.requiresInputLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.requiresInputLabel',
             {
               defaultMessage: 'Requires user input',
             }
           ),
           tooltip: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.requiresInputTooltip',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.requiresInputTooltip',
             {
               defaultMessage: 'Indicates if the script requires input parameters to run.',
             }
@@ -395,7 +394,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         tags: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.tagsLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.tagsLabel',
             {
               defaultMessage: 'Types',
             }
@@ -403,7 +402,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         description: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.descriptionLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.descriptionLabel',
             {
               defaultMessage: 'Description',
             }
@@ -411,7 +410,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         instructions: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.instructionsLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.instructionsLabel',
             {
               defaultMessage: 'Instructions',
             }
@@ -419,7 +418,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         example: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.examplesLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.examplesLabel',
             {
               defaultMessage: 'Examples',
             }
@@ -427,7 +426,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         fileName: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.fileNameLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.fileNameLabel',
             {
               defaultMessage: 'File name',
             }
@@ -435,13 +434,13 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         pathToExecutable: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.pathToExecutableLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.pathToExecutableLabel',
             {
               defaultMessage: 'Path to executable file (only for archive files)',
             }
           ),
           tooltip: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.pathToExecutableTooltip',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.pathToExecutableTooltip',
             {
               defaultMessage:
                 'The relative path to the main script inside the archive (zip/rar). Example: ./src/main.py',
@@ -450,7 +449,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         fileSize: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.fileSizeLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.fileSizeLabel',
             {
               defaultMessage: 'File size',
             }
@@ -458,7 +457,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         fileHash: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.fileHashLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.fileHashLabel',
             {
               defaultMessage: 'SHA256',
             }
@@ -466,7 +465,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
         },
         updatedBy: {
           label: i18n.translate(
-            'xpack.securitySolution.scriptsLibrary.table.flyout.body.updatedByLabel',
+            'xpack.securitySolution.scriptLibrary.table.flyout.body.updatedByLabel',
             {
               defaultMessage: 'Updated by',
             }
@@ -476,26 +475,26 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
     },
     footer: {
       cancelButtonLabel: i18n.translate(
-        'xpack.securitySolution.scriptsLibrary.table.flyout.footer.edit.cancelButtonLabel',
+        'xpack.securitySolution.scriptLibrary.table.flyout.footer.edit.cancelButtonLabel',
         {
           defaultMessage: 'Cancel',
         }
       ),
       edit: {
         saveButtonLabel: i18n.translate(
-          'xpack.securitySolution.scriptsLibrary.table.flyout.footer.edit.saveButtonLabel',
+          'xpack.securitySolution.scriptLibrary.table.flyout.footer.edit.saveButtonLabel',
           {
             defaultMessage: 'Save',
           }
         ),
         saveSuccessToastTitle: i18n.translate(
-          'xpack.securitySolution.scriptsLibrary.table.flyout.footer.edit.saveSuccessToastTitle',
+          'xpack.securitySolution.scriptLibrary.table.flyout.footer.edit.saveSuccessToastTitle',
           {
             defaultMessage: 'Script updated successfully',
           }
         ),
         saveErrorToastTitle: i18n.translate(
-          'xpack.securitySolution.scriptsLibrary.table.flyout.footer.edit.saveErrorToastTitle',
+          'xpack.securitySolution.scriptLibrary.table.flyout.footer.edit.saveErrorToastTitle',
           {
             defaultMessage: 'Failed to update script',
           }
@@ -503,19 +502,19 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
       },
       upload: {
         uploadButtonLabel: i18n.translate(
-          'xpack.securitySolution.scriptsLibrary.table.flyout.footer.upload.uploadButtonLabel',
+          'xpack.securitySolution.scriptLibrary.table.flyout.footer.upload.uploadButtonLabel',
           {
             defaultMessage: 'Upload',
           }
         ),
         uploadSuccessToastTitle: i18n.translate(
-          'xpack.securitySolution.scriptsLibrary.table.flyout.footer.upload.uploadSuccessToastTitle',
+          'xpack.securitySolution.scriptLibrary.table.flyout.footer.upload.uploadSuccessToastTitle',
           {
             defaultMessage: 'Script uploaded successfully',
           }
         ),
         uploadErrorToastTitle: i18n.translate(
-          'xpack.securitySolution.scriptsLibrary.table.flyout.footer.upload.uploadErrorToastTitle',
+          'xpack.securitySolution.scriptLibrary.table.flyout.footer.upload.uploadErrorToastTitle',
           {
             defaultMessage: 'Failed to upload script',
           }

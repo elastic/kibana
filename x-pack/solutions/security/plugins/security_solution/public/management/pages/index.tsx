@@ -23,7 +23,7 @@ import {
   MANAGEMENT_ROUTING_NOTES_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
-  MANAGEMENT_ROUTING_SCRIPTS_LIBRARY_PATH,
+  MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH,
 } from '../common/constants';
@@ -101,10 +101,10 @@ const ResponseActionsTelemetry = () => (
   </TrackApplicationView>
 );
 
-const ScriptsLibraryTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.scriptsLibrary}>
+const ScriptLibraryTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.scriptLibrary}>
     <ScriptsLibraryContainer />
-    <SpyRoute pageName={SecurityPageName.scriptsLibrary} />
+    <SpyRoute pageName={SecurityPageName.scriptLibrary} />
   </TrackApplicationView>
 );
 
@@ -212,8 +212,8 @@ export const ManagementContainer = memo(() => {
 
       {showScriptsLibrary && (
         <PrivilegedRoute
-          path={MANAGEMENT_ROUTING_SCRIPTS_LIBRARY_PATH}
-          component={ScriptsLibraryTelemetry}
+          path={MANAGEMENT_ROUTING_SCRIPT_LIBRARY_PATH}
+          component={ScriptLibraryTelemetry}
           hasPrivilege={canReadScriptsLibrary}
         />
       )}

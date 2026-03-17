@@ -97,7 +97,7 @@ describe('links', () => {
         SecurityPageName.trustedApps,
         SecurityPageName.trustedDevices,
         SecurityPageName.cloudDefendPolicies,
-        SecurityPageName.scriptsLibrary
+        SecurityPageName.scriptLibrary
       )
     );
   });
@@ -267,7 +267,7 @@ describe('links', () => {
 
       const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins());
 
-      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.scriptsLibrary));
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.scriptLibrary));
     });
   });
 

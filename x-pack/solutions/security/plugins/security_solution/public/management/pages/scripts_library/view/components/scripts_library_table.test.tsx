@@ -9,15 +9,15 @@ import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import {
-  createAppRootMockRenderer,
   type AppContextTestRender,
+  createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
 import { ScriptsLibraryTable, type ScriptsLibraryTableProps } from './scripts_library_table';
 import {
   SCRIPT_TAGS,
   SORTED_SCRIPT_TAGS_KEYS,
 } from '../../../../../../common/endpoint/service/scripts_library/constants';
-import { SCRIPTS_LIBRARY_PATH } from '../../../../../../common/constants';
+import { SCRIPT_LIBRARY_PATH } from '../../../../../../common/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { EndpointScriptsGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
@@ -69,8 +69,8 @@ describe('ScriptsLibraryTable', () => {
       'data-test-subj': 'test',
     };
 
-    // navigate to scripts lib. page before each test
-    history.push(SCRIPTS_LIBRARY_PATH);
+    // navigate to script lib. page before each test
+    history.push(SCRIPT_LIBRARY_PATH);
 
     render = (props?: ScriptsLibraryTableProps) => {
       renderResult = mockedContext.render(<ScriptsLibraryTable {...(props ?? defaultProps)} />);

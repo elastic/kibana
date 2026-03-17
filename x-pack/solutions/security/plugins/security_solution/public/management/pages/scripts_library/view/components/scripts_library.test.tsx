@@ -14,11 +14,11 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
 import { EndpointScriptsGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
-import { SCRIPTS_LIBRARY_PATH } from '../../../../../../common/constants';
+import { SCRIPT_LIBRARY_PATH } from '../../../../../../common/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { useToasts } from '../../../../../common/lib/kibana';
-import { SCRIPTS_LIBRARY_PAGE_STORAGE_KEY, ScriptsLibrary } from './scripts_library';
+import { SCRIPT_LIBRARY_PAGE_STORAGE_KEY, ScriptsLibrary } from './scripts_library';
 import { useGetEndpointScriptsList } from '../../../../hooks/script_library';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
 
@@ -100,7 +100,7 @@ describe('ScriptsLibrary', () => {
     (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue(defaultMockGetScriptsResponse);
 
     // navigate to scripts lib. page before each test
-    history.push(SCRIPTS_LIBRARY_PATH);
+    history.push(SCRIPT_LIBRARY_PATH);
 
     render = () => {
       renderResult = mockedContext.render(<ScriptsLibrary data-test-subj="test" />);
@@ -213,7 +213,7 @@ describe('ScriptsLibrary', () => {
       });
 
       // Verify that the dismiss was recorded in storage
-      expect(mockStorageSet).toHaveBeenCalledWith(SCRIPTS_LIBRARY_PAGE_STORAGE_KEY, false);
+      expect(mockStorageSet).toHaveBeenCalledWith(SCRIPT_LIBRARY_PAGE_STORAGE_KEY, false);
     });
 
     it('should not show the banner when storage value is set to false (dismissed)', () => {
@@ -328,7 +328,7 @@ describe('ScriptsLibrary', () => {
         },
       });
 
-      act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?show=edit&selectedScriptId=${scriptId}`));
+      act(() => history.push(`${SCRIPT_LIBRARY_PATH}?show=edit&selectedScriptId=${scriptId}`));
       render();
 
       const { queryByTestId } = renderResult;
@@ -360,7 +360,7 @@ describe('ScriptsLibrary', () => {
     });
 
     it('should show create flyout when navigating to URL with show=create', () => {
-      act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?show=create`));
+      act(() => history.push(`${SCRIPT_LIBRARY_PATH}?show=create`));
       render();
 
       const { getByTestId } = renderResult;
@@ -375,7 +375,7 @@ describe('ScriptsLibrary', () => {
         },
       });
 
-      act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?show=create`));
+      act(() => history.push(`${SCRIPT_LIBRARY_PATH}?show=create`));
       render();
 
       const { queryByTestId } = renderResult;
@@ -389,7 +389,7 @@ describe('ScriptsLibrary', () => {
       const script = scriptsGenerator.generate({ id: scriptId });
       getScriptsListMock([script]);
 
-      act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?show=details&selectedScriptId=${scriptId}`));
+      act(() => history.push(`${SCRIPT_LIBRARY_PATH}?show=details&selectedScriptId=${scriptId}`));
       render();
 
       const { getByTestId } = renderResult;
@@ -408,7 +408,7 @@ describe('ScriptsLibrary', () => {
       const script = scriptsGenerator.generate({ id: scriptId });
       getScriptsListMock([script]);
 
-      act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?show=details&selectedScriptId=${scriptId}`));
+      act(() => history.push(`${SCRIPT_LIBRARY_PATH}?show=details&selectedScriptId=${scriptId}`));
       render();
 
       const { getByTestId } = renderResult;
@@ -566,7 +566,7 @@ describe('ScriptsLibrary', () => {
 
   describe('Safe paging validation', () => {
     it('should ignore negative page and pageSize values', () => {
-      act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?page=-1&pageSize=-10`));
+      act(() => history.push(`${SCRIPT_LIBRARY_PATH}?page=-1&pageSize=-10`));
       render();
 
       // Should use page 1 instead of -1
@@ -580,7 +580,7 @@ describe('ScriptsLibrary', () => {
     });
 
     it('should ignore paging values greater than range', () => {
-      act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?page=1500&pageSize=1100`));
+      act(() => history.push(`${SCRIPT_LIBRARY_PATH}?page=1500&pageSize=1100`));
       render();
 
       // Should use page 1 instead of 1500
@@ -600,7 +600,7 @@ describe('ScriptsLibrary', () => {
       const script = scriptsGenerator.generate({ id: scriptId, name: 'Matching Script' });
       getScriptsListMock([script]);
 
-      act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?show=details&selectedScriptId=${scriptId}`));
+      act(() => history.push(`${SCRIPT_LIBRARY_PATH}?show=details&selectedScriptId=${scriptId}`));
       render();
 
       const { getByTestId } = renderResult;
@@ -612,7 +612,7 @@ describe('ScriptsLibrary', () => {
       getScriptsListMock([script]);
 
       act(() =>
-        history.push(`${SCRIPTS_LIBRARY_PATH}?show=details&selectedScriptId=non-existent-id`)
+        history.push(`${SCRIPT_LIBRARY_PATH}?show=details&selectedScriptId=non-existent-id`)
       );
       render();
 
@@ -710,7 +710,7 @@ describe('ScriptsLibrary', () => {
           canWriteScriptsLibrary: true,
         },
       });
-      act(() => history.push(`${SCRIPTS_LIBRARY_PATH}?show=create`));
+      act(() => history.push(`${SCRIPT_LIBRARY_PATH}?show=create`));
       render();
     });
 

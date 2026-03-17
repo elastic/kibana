@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiButton } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
@@ -30,8 +30,8 @@ import { DiscardChangesModal } from './discard_changes_modal';
 import { NoDataEmptyPrompt } from './no_data_empty_prompt';
 import { NewPageBanner } from './new_page_banner/new_page_banner';
 
-export const SCRIPTS_LIBRARY_PAGE_STORAGE_KEY =
-  'securitySolution.endpointManagement.scriptsLibrary.showNewPageBanner';
+export const SCRIPT_LIBRARY_PAGE_STORAGE_KEY =
+  'securitySolution.endpointManagement.scriptLibrary.showNewPageBanner';
 
 interface ScriptsLibraryProps {
   'data-test-subj'?: string;
@@ -44,7 +44,7 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
   const { storage } = useKibana().services;
 
   const [showNewPageBanner, setShowNewPageBanner] = useState(
-    storage.get(SCRIPTS_LIBRARY_PAGE_STORAGE_KEY) ?? true
+    storage.get(SCRIPT_LIBRARY_PAGE_STORAGE_KEY) ?? true
   );
 
   const { pagination: paginationFromUrlParams } = useUrlPagination();
@@ -68,7 +68,7 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
 
   const onBannerDismiss = useCallback(() => {
     setShowNewPageBanner(false);
-    storage.set(SCRIPTS_LIBRARY_PAGE_STORAGE_KEY, false);
+    storage.set(SCRIPT_LIBRARY_PAGE_STORAGE_KEY, false);
   }, [storage]);
 
   const [selectedItemForFlyout, setSelectedItemForFlyout] = useState<undefined | EndpointScript>(
