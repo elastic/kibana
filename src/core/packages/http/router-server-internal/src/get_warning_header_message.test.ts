@@ -19,9 +19,9 @@ describe('getWarningHeaderMessageFromRouteDeprecation', () => {
       severity: 'warning',
       documentationUrl: 'fakeurl.com',
     };
-    expect(getWarningHeaderMessageFromRouteDeprecation(deprecationObject, kibanaVersion)).toEqual(
-      `299 Kibana-${kibanaVersion} "This%20endpoint%20is%20deprecated"`
-    );
+    expect(
+      getWarningHeaderMessageFromRouteDeprecation(deprecationObject, kibanaVersion)
+    ).toMatchInlineSnapshot(`"299 Kibana-12.31.45 \\"This%20endpoint%20is%20deprecated\\""`);
   });
 
   it('creates the warning with the deprecation object message', () => {
@@ -32,8 +32,10 @@ describe('getWarningHeaderMessageFromRouteDeprecation', () => {
       documentationUrl: 'fakeurl.com',
       message: msg,
     };
-    expect(getWarningHeaderMessageFromRouteDeprecation(deprecationObject, kibanaVersion)).toEqual(
-      `299 Kibana-${kibanaVersion} "${encodeURIComponent(msg)}"`
+    expect(
+      getWarningHeaderMessageFromRouteDeprecation(deprecationObject, kibanaVersion)
+    ).toMatchInlineSnapshot(
+      `"299 Kibana-12.31.45 \\"Custom%20deprecation%20message%20for%20this%20object\\""`
     );
   });
 
@@ -45,8 +47,8 @@ describe('getWarningHeaderMessageFromRouteDeprecation', () => {
       message: 'このAPIは非推奨です',
     };
     const result = getWarningHeaderMessageFromRouteDeprecation(deprecationObject, kibanaVersion);
-    expect(result).toEqual(
-      `299 Kibana-${kibanaVersion} "${encodeURIComponent('このAPIは非推奨です')}"`
+    expect(result).toMatchInlineSnapshot(
+      `"299 Kibana-12.31.45 \\"%E3%81%93%E3%81%AEAPI%E3%81%AF%E9%9D%9E%E6%8E%A8%E5%A5%A8%E3%81%A7%E3%81%99\\""`
     );
     expect(result).not.toMatch(/[^\x20-\x7E]/);
   });
