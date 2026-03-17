@@ -17,7 +17,7 @@ import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { SkillStorage } from './storage';
 import { createStorage, skillIndexName } from './storage';
 import { fromEs, createAttributes, updateDocument } from './converters';
-import type { SkillDocument, SkillPersistedDefinition } from './types';
+import type { SkillDocument, SkillPersistedDefinition, SkillListOptions } from './types';
 
 const MAX_SKILLS_PER_SPACE = 1000;
 
@@ -26,7 +26,7 @@ const MAX_SKILLS_PER_SPACE = 1000;
  */
 export interface SkillClient {
   get(skillId: string): Promise<SkillPersistedDefinition>;
-  list(): Promise<SkillPersistedDefinition[]>;
+  list(options?: SkillListOptions): Promise<SkillPersistedDefinition[]>;
   create(request: PersistedSkillCreateRequest): Promise<SkillPersistedDefinition>;
   update(skillId: string, updates: PersistedSkillUpdateRequest): Promise<SkillPersistedDefinition>;
   /**
@@ -43,6 +43,11 @@ export interface SkillClient {
    * Deletes all skills associated with the given plugin.
    */
   deleteByPluginId(pluginId: string): Promise<void>;
+  /**
+   * Fetches multiple skills by ID in a single ES query.
+   * Silently omits skills that are not found.
+   */
+  bulkGet(ids: string[]): Promise<SkillPersistedDefinition[]>;
   has(skillId: string): Promise<boolean>;
 }
 
@@ -90,13 +95,26 @@ class SkillClientImpl implements SkillClient {
     return fromEs(document);
   }
 
-  async list(): Promise<SkillPersistedDefinition[]> {
+  async list(options?: SkillListOptions): Promise<SkillPersistedDefinition[]> {
     const response = await this.storage.getClient().search({
       query: {
         bool: {
           filter: [createSpaceDslFilter(this.space)],
         },
       },
+      ...(options?.summaryOnly && {
+        _source: { excludes: ['content', 'referenced_content'] },
+        runtime_mappings: {
+          referenced_content_count: {
+            type: 'long' as const,
+            script: {
+              source:
+                'emit(params._source.referenced_content == null ? 0 : params._source.referenced_content.size())',
+            },
+          },
+        },
+        fields: ['referenced_content_count'],
+      }),
       size: MAX_SKILLS_PER_SPACE,
       track_total_hits: true,
     });
@@ -162,6 +180,7 @@ class SkillClientImpl implements SkillClient {
       plugin_id: attributes.plugin_id,
       created_at: attributes.created_at,
       updated_at: attributes.updated_at,
+      referenced_content_count: attributes.referenced_content?.length ?? 0,
     }));
   }
 
@@ -222,6 +241,22 @@ class SkillClientImpl implements SkillClient {
         },
       },
     });
+  }
+
+  async bulkGet(ids: string[]): Promise<SkillPersistedDefinition[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    const response = await this.storage.getClient().search({
+      query: {
+        bool: {
+          filter: [createSpaceDslFilter(this.space), { terms: { id: ids } }],
+        },
+      },
+      size: ids.length,
+      track_total_hits: false,
+    });
+    return response.hits.hits.map((hit) => fromEs(hit as SkillDocument));
   }
 
   async has(id: string): Promise<boolean> {

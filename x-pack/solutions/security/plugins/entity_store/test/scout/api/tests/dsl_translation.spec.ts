@@ -174,6 +174,51 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   );
 
   apiTest(
+    'user: DSL from doc with data_stream.dataset only returns expected document',
+    async ({ esClient }) => {
+      const docSource = {
+        user: { name: 'cloudtrail.user' },
+        data_stream: { dataset: 'aws.cloudtrail' },
+      };
+      const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX,
+        query: { ...dsl },
+        size: 10,
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        user: { name: 'cloudtrail.user' },
+      });
+    }
+  );
+
+  apiTest(
+    'user: DSL from doc with no event.module or data_stream.dataset (unknown fallback) returns expected document',
+    async ({ esClient }) => {
+      const docSource = { user: { name: 'no.module.user' } };
+      const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
+      expect(dsl).toBeDefined();
+
+      const result = await esClient.search({
+        index: UPDATES_INDEX,
+        query: { ...dsl },
+        size: 10,
+      });
+
+      const total = getTotal(result.hits);
+      expect(total).toBe(1);
+      expect(result.hits.hits[0]._source).toMatchObject({
+        user: { name: 'no.module.user' },
+      });
+    }
+  );
+
+  apiTest(
     'service: DSL from doc with service.name returns exactly that document',
     async ({ esClient }) => {
       const docSource = { service: { name: 'mailchimp' } };

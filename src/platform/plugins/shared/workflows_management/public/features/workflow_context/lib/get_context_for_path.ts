@@ -11,9 +11,11 @@ import _ from 'lodash';
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema, WhileContextSchema } from '@kbn/workflows';
-import { isEnterForeach, isEnterWhile, type WorkflowGraph } from '@kbn/workflows/graph';
+import { isAtomic, isEnterForeach, isEnterWhile, type WorkflowGraph } from '@kbn/workflows/graph';
+import { DataMapStepTypeId } from '@kbn/workflows-extensions/common';
 import type { z } from '@kbn/zod/v4';
 import { getContextSchemaWithTemplateLocals } from './extend_context_with_template_locals';
+import { getDataMapContextSchema } from './get_data_map_context_schema';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getNearestStepPath } from './get_nearest_step_path';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
@@ -94,7 +96,7 @@ function getStepContextSchemaEnrichmentEntries(
   workflowExecutionGraph: WorkflowGraph,
   stepId: string
 ) {
-  const enrichments: { key: 'foreach' | 'while'; value: z.ZodType }[] = [];
+  const enrichments: { key: 'foreach' | 'while' | 'item' | 'index'; value: z.ZodType }[] = [];
   const stack = workflowExecutionGraph.getNodeStack(stepId);
 
   for (const nodeId of stack) {
@@ -124,6 +126,15 @@ function getStepContextSchemaEnrichmentEntries(
   if (selfNode) {
     if (isEnterWhile(selfNode) && !enrichments.some((e) => e.key === 'while')) {
       enrichments.push({ key: 'while', value: WhileContextSchema });
+    }
+
+    if (selfNode.stepType === DataMapStepTypeId && isAtomic(selfNode)) {
+      const { item, index } = getDataMapContextSchema(
+        stepContextSchema,
+        selfNode.configuration?.items
+      );
+      enrichments.push({ key: 'item', value: item });
+      enrichments.push({ key: 'index', value: index });
     }
   }
 
