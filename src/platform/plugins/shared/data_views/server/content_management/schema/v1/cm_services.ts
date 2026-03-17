@@ -31,10 +31,11 @@ const dataViewAttributesSchema = schema.object(
         schema.object({
           value: schema.string(),
           clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-        })
+        }),
+        { maxSize: 100 }
       )
     ),
-    fields: schema.maybe(schema.arrayOf(fieldSpecSchema)),
+    fields: schema.maybe(schema.arrayOf(fieldSpecSchema, { maxSize: 50_000 })),
     typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
     fieldAttrs: schema.maybe(
