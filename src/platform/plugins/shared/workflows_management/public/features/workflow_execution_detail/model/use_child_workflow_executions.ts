@@ -28,72 +28,39 @@ export interface ChildWorkflowExecutionInfo {
 
 export type ChildWorkflowExecutionsMap = Map<string, ChildWorkflowExecutionInfo>;
 
-interface WorkflowExecuteStepRef {
-  stepExecutionId: string;
-  childExecutionId: string;
-}
+const WORKFLOW_EXECUTE_STEP_TYPE = 'workflow.execute';
 
-/**
- * Fetches child workflow execution data for all `workflow.execute` steps.
- *
- * The child executionId is available in the step's `state` field (set by the
- * workflow.execute runner), so no extra per-step fetch is needed.
- *
- * Returns a map of parentStepExecutionId -> child execution info.
- */
 export function useChildWorkflowExecutions(
   parentExecution: WorkflowExecutionDto | undefined | null
 ): { childExecutions: ChildWorkflowExecutionsMap; isLoading: boolean } {
   const { http } = useKibana().services;
 
-  const workflowExecuteStepRefs = useMemo((): WorkflowExecuteStepRef[] => {
-    if (!parentExecution?.stepExecutions) return [];
+  // Derive a key that changes when workflow.execute steps reach terminal status,
+  // so react-query invalidates cached results and fetches newly available children.
+  const terminalChildKey = useMemo(() => {
+    if (!parentExecution?.stepExecutions) return '';
     return parentExecution.stepExecutions
-      .filter((step) => step.stepType === 'workflow.execute' && isTerminalStatus(step.status))
-      .map((step) => {
-        const state = step.state as Record<string, unknown> | undefined;
-        const childExecutionId = state?.executionId;
-        if (typeof childExecutionId !== 'string') return null;
-        return { stepExecutionId: step.id, childExecutionId };
-      })
-      .filter((ref): ref is WorkflowExecuteStepRef => ref !== null);
+      .filter(
+        (step) => step.stepType === WORKFLOW_EXECUTE_STEP_TYPE && isTerminalStatus(step.status)
+      )
+      .map((step) => step.id)
+      .join(',');
   }, [parentExecution?.stepExecutions]);
 
-  const stableKey = useMemo(
-    () => workflowExecuteStepRefs.map((r) => r.childExecutionId).join(','),
-    [workflowExecuteStepRefs]
-  );
-
   const { data, isLoading } = useQuery({
-    queryKey: ['childWorkflowExecutions', parentExecution?.id, stableKey],
+    queryKey: ['childWorkflowExecutions', parentExecution?.id, terminalChildKey],
     queryFn: async (): Promise<ChildWorkflowExecutionsMap> => {
-      const results: ChildWorkflowExecutionsMap = new Map();
-
-      const childExecutions = await Promise.all(
-        workflowExecuteStepRefs.map(async (ref) => {
-          const childExecution = await http.get<WorkflowExecutionDto>(
-            `/api/workflowExecutions/${ref.childExecutionId}`,
-            { query: { includeInput: false, includeOutput: false } }
-          );
-          return { parentStepExecutionId: ref.stepExecutionId, childExecution };
-        })
+      const executionId = parentExecution?.id ?? '';
+      const items = await http.get<ChildWorkflowExecutionInfo[]>(
+        `/api/workflowExecutions/${executionId}/childExecutions`
       );
-
-      for (const { parentStepExecutionId, childExecution } of childExecutions) {
-        const name = childExecution.workflowName ?? childExecution.workflowDefinition?.name ?? '';
-        results.set(parentStepExecutionId, {
-          parentStepExecutionId,
-          workflowId: childExecution.workflowId ?? '',
-          workflowName: name,
-          executionId: childExecution.id,
-          status: childExecution.status,
-          stepExecutions: childExecution.stepExecutions,
-        });
+      const map: ChildWorkflowExecutionsMap = new Map();
+      for (const item of items) {
+        map.set(item.parentStepExecutionId, item);
       }
-
-      return results;
+      return map;
     },
-    enabled: workflowExecuteStepRefs.length > 0,
+    enabled: !!parentExecution?.id,
     staleTime: parentExecution && isTerminalStatus(parentExecution.status) ? Infinity : 5000,
     refetchInterval: parentExecution && isTerminalStatus(parentExecution.status) ? false : 5000,
   });

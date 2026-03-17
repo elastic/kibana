@@ -113,15 +113,15 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
         };
       }
 
-      for (const childExec of childExecutions.values()) {
-        const childStep = childExec.stepExecutions.find(
+      for (const childWorkflowExecution of childExecutions.values()) {
+        const childStep = childWorkflowExecution.stepExecutions.find(
           (step) => step.id === selectedStepExecutionId
         );
         if (childStep) {
           return {
             lightweightStep: childStep,
-            stepExecutionId: childExec.executionId,
-            parentWorkflowExecution: childExec,
+            stepExecutionId: childWorkflowExecution.executionId,
+            parentWorkflowExecution: childWorkflowExecution,
           };
         }
       }
@@ -146,7 +146,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       lightweightStep?.status
     );
 
-    // Find child execution info if selected step is a workflow.execute step
     const selectedStepChildExecution = useMemo(() => {
       if (!selectedStepExecutionId || isPseudoStep) return undefined;
       return childExecutions.get(selectedStepExecutionId);
@@ -203,7 +202,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               stepExecution={selectedStepExecution}
               workflowExecutionDuration={workflowExecution?.duration ?? undefined}
               isLoadingStepData={isLoadingStepData && !isPseudoStep}
-              workflowExecution={selectedStepChildExecution}
+              childWorkflowExecution={selectedStepChildExecution}
               parentWorkflowExecution={parentWorkflowExecution}
             />
           }

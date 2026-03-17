@@ -11,7 +11,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
@@ -40,7 +39,7 @@ interface WorkflowStepExecutionDetailsProps {
   workflowExecutionDuration?: number;
   isLoadingStepData?: boolean;
   /** When the step is workflow.execute, the child workflow execution (to link to) */
-  workflowExecution?: ChildWorkflowExecutionInfo;
+  childWorkflowExecution?: ChildWorkflowExecutionInfo;
   /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
   parentWorkflowExecution?: WorkflowExecutionLinkInfo;
 }
@@ -51,15 +50,15 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     stepExecution,
     workflowExecutionDuration,
     isLoadingStepData,
-    workflowExecution,
+    childWorkflowExecution,
     parentWorkflowExecution,
   }) => {
     const { euiTheme } = useEuiTheme();
     const workflowNav = useNavigateToExecution(
-      workflowExecution
+      childWorkflowExecution
         ? {
-            workflowId: workflowExecution.workflowId,
-            executionId: workflowExecution.executionId,
+            workflowId: childWorkflowExecution.workflowId,
+            executionId: childWorkflowExecution.executionId,
           }
         : { workflowId: '' }
     );
@@ -85,12 +84,12 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     const handleWorkflowLinkClick = useCallback(
       (e: React.MouseEvent) => {
-        if (workflowExecution) {
+        if (childWorkflowExecution) {
           e.preventDefault();
           workflowNav.navigate();
         }
       },
-      [workflowExecution, workflowNav]
+      [childWorkflowExecution, workflowNav]
     );
 
     const handleParentWorkflowLinkClick = useCallback(
@@ -175,34 +174,21 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
-          {isWorkflowExecuteStep && workflowExecution && (
+          {isWorkflowExecuteStep && childWorkflowExecution && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  {getExecutionStatusIcon(euiTheme, workflowExecution.status)}
+                  {getExecutionStatusIcon(euiTheme, childWorkflowExecution.status)}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
                     <h3>
                       {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                       <EuiLink href={workflowNav.href} onClick={handleWorkflowLinkClick}>
-                        {`${stepExecution?.stepType}: ${workflowExecution.workflowName}`}
+                        {`${stepExecution?.stepType}: ${childWorkflowExecution.workflowName}`}
                       </EuiLink>
                     </h3>
                   </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                  <EuiLink
-                    href={workflowNav.href}
-                    onClick={handleWorkflowLinkClick}
-                    aria-label={i18n.translate(
-                      'workflowsManagement.stepExecutionDetails.openWorkflowExecution',
-                      { defaultMessage: 'Open workflow execution' }
-                    )}
-                  >
-                    <EuiIcon type="popout" size="s" color="primary" aria-hidden={true} />
-                  </EuiLink>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -225,19 +211,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                       </EuiLink>
                     </h3>
                   </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                  <EuiLink
-                    href={parentWorkflowNav.href}
-                    onClick={handleParentWorkflowLinkClick}
-                    aria-label={i18n.translate(
-                      'workflowsManagement.stepExecutionDetails.openParentWorkflowExecution',
-                      { defaultMessage: 'Open parent workflow execution' }
-                    )}
-                  >
-                    <EuiIcon type="popout" size="s" color="primary" aria-hidden={true} />
-                  </EuiLink>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

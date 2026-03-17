@@ -214,7 +214,6 @@ export function buildStepExecutionsTree(
 /**
  * Injects child workflow execution steps into the tree as children of `workflow.execute` nodes.
  * For steps where child data is still loading, adds a loading placeholder to show the expand arrow.
- * Returns the modified tree and any new step executions that were added to support selection.
  */
 export function injectChildWorkflowSteps(
   tree: StepExecutionTreeItem[],
@@ -236,7 +235,7 @@ export function injectChildWorkflowSteps(
     if (childExecutionsMap.has(node.stepExecutionId!)) {
       const childExecution = childExecutionsMap.get(node.stepExecutionId!)!;
       const childItems: StepExecutionTreeItem[] = childExecution.stepExecutions
-        .filter((step) => step.stepType !== 'workflow_level_timeout')
+        .filter((step) => isVisibleStepType(step.stepType ?? ''))
         .map((step) => {
           childStepExecutions.push(step);
           return {

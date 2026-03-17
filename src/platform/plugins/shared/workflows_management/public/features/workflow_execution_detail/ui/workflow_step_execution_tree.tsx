@@ -257,16 +257,14 @@ export const WorkflowStepExecutionTree = ({
       execution.status
     );
 
-    {
-      const { tree: treeWithChildren, childStepExecutions } = injectChildWorkflowSteps(
-        stepExecutionsTree,
-        childExecutionsMap ?? new Map(),
-        isLoadingChildExecutions ?? false
-      );
-      stepExecutionsTree = treeWithChildren;
-      for (const childStep of childStepExecutions) {
-        stepExecutionMap.set(childStep.id, childStep);
-      }
+    const { tree: treeWithChildren, childStepExecutions } = injectChildWorkflowSteps(
+      stepExecutionsTree,
+      childExecutionsMap ?? new Map(),
+      isLoadingChildExecutions ?? false
+    );
+    stepExecutionsTree = treeWithChildren;
+    for (const childStep of childStepExecutions) {
+      stepExecutionMap.set(childStep.id, childStep);
     }
 
     const overviewPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__overview');
