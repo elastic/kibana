@@ -9,10 +9,7 @@ export { promptInjectionModule } from './modules/prompt_injection';
 export { privilegeEscalationModule } from './modules/privilege_escalation';
 export { infoExtractionModule } from './modules/info_extraction';
 export { jailbreakingModule } from './modules/jailbreaking';
-export {
-  createGuardrailsEngine,
-  DEFAULT_GUARDRAIL_RULES,
-} from './guardrails';
+export { createGuardrailsEngine, DEFAULT_GUARDRAIL_RULES } from './guardrails';
 export { createRedTeamRunner, ALL_MODULES, MODULES_BY_NAME } from './runner';
 export type { RedTeamRunnerConfig, TaskResult } from './runner';
 export type {
@@ -24,4 +21,9 @@ export type {
   AttackResult,
   RedTeamRunSummary,
 } from './types';
-export type { GuardrailRule, GuardrailAction, GuardrailMatch, GuardrailCheckResult } from './guardrails';
+export type {
+  GuardrailRule,
+  GuardrailAction,
+  GuardrailMatch,
+  GuardrailCheckResult,
+} from './guardrails';
