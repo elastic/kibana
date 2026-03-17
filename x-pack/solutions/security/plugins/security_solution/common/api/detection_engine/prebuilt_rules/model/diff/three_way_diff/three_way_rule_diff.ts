@@ -16,6 +16,7 @@ import type {
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
   DiffableThresholdFields,
+  DiffableVulnerabilityCheckFields,
 } from '../diffable_rule/diffable_rule';
 
 import type { ThreeWayFieldsDiff } from './three_way_fields_diff';
@@ -30,6 +31,8 @@ export type ThreatMatchThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableThreatMat
 export type ThresholdThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableThresholdFields>;
 export type MachineLearningThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableMachineLearningFields>;
 export type NewTermsThreeWayFieldsDiff = ThreeWayFieldsDiff<DiffableNewTermsFields>;
+export type VulnerabilityCheckThreeWayFieldsDiff =
+  ThreeWayFieldsDiff<DiffableVulnerabilityCheckFields>;
 
 /**
  * It's an object which keys are the same as keys of DiffableRule, but values are
@@ -52,6 +55,7 @@ export type ThreeWayRuleFieldsDiff = CommonThreeWayFieldsDiff &
     | ThresholdThreeWayFieldsDiff
     | MachineLearningThreeWayFieldsDiff
     | NewTermsThreeWayFieldsDiff
+    | VulnerabilityCheckThreeWayFieldsDiff
   );
 
 interface ThreeWayBaseRuleDiff {

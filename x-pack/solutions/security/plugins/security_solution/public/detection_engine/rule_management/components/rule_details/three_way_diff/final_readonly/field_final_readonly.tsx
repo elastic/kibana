@@ -100,6 +100,8 @@ export function FieldFinalReadOnly(): JSX.Element {
           finalDiffableRule={finalDiffableRule}
         />
       );
+    case 'vulnerability_check':
+      return <></>;
     default:
       return assertUnreachable(finalDiffableRule);
   }

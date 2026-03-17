@@ -157,6 +157,10 @@ const applyBulkActionEditToRuleParams = (
         ruleParams.type !== 'esql',
         "Index patterns can't be added. ES|QL rule doesn't have index patterns property"
       );
+      invariant(
+        ruleParams.type !== 'vulnerability_check',
+        "Index patterns can't be added. Vulnerability check rule doesn't have index patterns property"
+      );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {
         isActionSkipped = true;
@@ -178,6 +182,10 @@ const applyBulkActionEditToRuleParams = (
       invariant(
         ruleParams.type !== 'esql',
         "Index patterns can't be deleted. ES|QL rule doesn't have index patterns property"
+      );
+      invariant(
+        ruleParams.type !== 'vulnerability_check',
+        "Index patterns can't be deleted. Vulnerability check rule doesn't have index patterns property"
       );
 
       if (
@@ -205,6 +213,10 @@ const applyBulkActionEditToRuleParams = (
       invariant(
         ruleParams.type !== 'esql',
         "Index patterns can't be overwritten. ES|QL rule doesn't have index patterns property"
+      );
+      invariant(
+        ruleParams.type !== 'vulnerability_check',
+        "Index patterns can't be overwritten. Vulnerability check rule doesn't have index patterns property"
       );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {
@@ -269,7 +281,7 @@ const applyBulkActionEditToRuleParams = (
     }
     // alert suppression actions
     case BulkActionEditTypeEnum.delete_alert_suppression: {
-      if (!ruleParams?.alertSuppression) {
+      if (ruleParams.type === 'vulnerability_check' || !ruleParams?.alertSuppression) {
         isActionSkipped = true;
         break;
       }
@@ -281,6 +293,10 @@ const applyBulkActionEditToRuleParams = (
       invariant(
         ruleParams.type !== 'threshold',
         "Threshold rule doesn't support this action. Use 'set_alert_suppression_for_threshold' action instead"
+      );
+      invariant(
+        ruleParams.type !== 'vulnerability_check',
+        "Vulnerability check rule doesn't support alert suppression"
       );
 
       if (shouldSkipAddAlertSuppressionBulkAction(ruleParams?.alertSuppression, action)) {

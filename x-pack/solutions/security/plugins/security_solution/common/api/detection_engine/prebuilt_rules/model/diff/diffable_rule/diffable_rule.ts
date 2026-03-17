@@ -160,6 +160,11 @@ export const DiffableNewTermsFields = z.object({
   alert_suppression: AlertSuppression.optional(),
 });
 
+export type DiffableVulnerabilityCheckFields = z.infer<typeof DiffableVulnerabilityCheckFields>;
+export const DiffableVulnerabilityCheckFields = z.object({
+  type: z.literal('vulnerability_check'),
+});
+
 export const DiffableFieldsByTypeUnion = z.discriminatedUnion('type', [
   DiffableCustomQueryFields,
   DiffableSavedQueryFields,
@@ -169,6 +174,7 @@ export const DiffableFieldsByTypeUnion = z.discriminatedUnion('type', [
   DiffableThresholdFields,
   DiffableMachineLearningFields,
   DiffableNewTermsFields,
+  DiffableVulnerabilityCheckFields,
 ]);
 
 /**
@@ -213,6 +219,7 @@ export const DiffableRuleTypes = z.union([
   DiffableThresholdFields.shape.type,
   DiffableMachineLearningFields.shape.type,
   DiffableNewTermsFields.shape.type,
+  DiffableVulnerabilityCheckFields.shape.type,
 ]);
 
 /**
@@ -230,6 +237,7 @@ export const DiffableAllFields = DiffableCommonFields.merge(
   .merge(DiffableThresholdFields.omit({ type: true }))
   .merge(DiffableMachineLearningFields.omit({ type: true }))
   .merge(DiffableNewTermsFields.omit({ type: true }))
+  .merge(DiffableVulnerabilityCheckFields.omit({ type: true }))
   .merge(z.object({ type: DiffableRuleTypes }));
 
 const getRuleTypeFields = (schema: z.ZodObject<z.ZodRawShape>): string[] =>
@@ -249,4 +257,5 @@ export const DIFFABLE_RULE_TYPE_FIELDS_MAP = new Map<DiffableRuleTypes, string[]
   ['threshold', createDiffableFieldsPerRuleType(DiffableThresholdFields)],
   ['machine_learning', createDiffableFieldsPerRuleType(DiffableMachineLearningFields)],
   ['new_terms', createDiffableFieldsPerRuleType(DiffableNewTermsFields)],
+  ['vulnerability_check', createDiffableFieldsPerRuleType(DiffableVulnerabilityCheckFields)],
 ]);

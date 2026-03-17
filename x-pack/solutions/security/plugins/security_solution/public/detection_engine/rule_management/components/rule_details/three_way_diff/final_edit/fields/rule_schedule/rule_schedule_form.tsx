@@ -15,7 +15,12 @@ import { FullRuleScheduleForm } from './full_rule_schedule_form';
 export function RuleScheduleForm(): JSX.Element {
   const { fieldName, finalDiffableRule } = useFieldUpgradeContext();
   const canBeSimplified = useMemo(
-    () => Boolean(toSimpleRuleSchedule(finalDiffableRule[fieldName] as RuleSchedule)),
+    () =>
+      Boolean(
+        toSimpleRuleSchedule(
+          (finalDiffableRule as Record<string, unknown>)[fieldName] as RuleSchedule
+        )
+      ),
     [fieldName, finalDiffableRule]
   );
 

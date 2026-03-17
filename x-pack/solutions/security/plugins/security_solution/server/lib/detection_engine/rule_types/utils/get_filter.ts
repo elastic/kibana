@@ -173,6 +173,11 @@ export const getFilter = async ({
     case 'esql': {
       throw new BadRequestError('Unsupported Rule of type "esql" supplied to getFilter');
     }
+    case 'vulnerability_check': {
+      throw new BadRequestError(
+        'Unsupported Rule of type "vulnerability_check" supplied to getFilter'
+      );
+    }
     default: {
       return assertUnreachable(type);
     }

@@ -486,6 +486,14 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
         },
       ];
     }
+    case 'vulnerability_check': {
+      return [
+        {
+          title: label,
+          description: 'Vulnerability Check',
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }

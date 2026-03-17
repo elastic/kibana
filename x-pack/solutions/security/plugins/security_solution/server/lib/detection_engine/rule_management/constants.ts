@@ -105,6 +105,13 @@ export const FUNCTIONAL_FIELD_MAP: Record<AllKeys<RuleResponse>, boolean> = {
   updated_by: false,
   created_at: false,
   created_by: false,
+  // Vulnerability check rule type fields
+  agent_policy_ids: true,
+  osquery_pack_name: false,
+  cve_index_pattern: false,
+  correlation_timespan: true,
+  group_by: true,
+  min_cvss_score: true,
 };
 
 // This constant is used in rule tags aggregations. It limits the maximum number of tags that can be returned by a "terms" aggregation.

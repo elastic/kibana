@@ -28,6 +28,7 @@ const ruleTypeValues = [
   'machine_learning',
   'new_terms',
   'esql',
+  'vulnerability_check',
 ] as const;
 type PartialRuleToImportInputForTest = Partial<RuleToImportInput> &
   Partial<{
@@ -37,6 +38,7 @@ type PartialRuleToImportInputForTest = Partial<RuleToImportInput> &
     language: string;
     filters: unknown;
     data_view_id: string;
+    agent_policy_ids: string[];
   }>;
 type RuleToImportInputForTest = RuleToImportInput &
   Partial<{
@@ -46,6 +48,7 @@ type RuleToImportInputForTest = RuleToImportInput &
     language: string;
     filters: unknown;
     data_view_id: string;
+    agent_policy_ids: string[];
   }>;
 
 describe('RuleToImport', () => {

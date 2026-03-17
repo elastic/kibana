@@ -58,6 +58,8 @@ export function FieldFinalEdit(): JSX.Element {
       );
     case 'new_terms':
       return <NewTermsRuleFieldEdit fieldName={fieldName as UpgradeableNewTermsFields} />;
+    case 'vulnerability_check':
+      return <></>;
     default:
       return assertUnreachable(ruleType);
   }

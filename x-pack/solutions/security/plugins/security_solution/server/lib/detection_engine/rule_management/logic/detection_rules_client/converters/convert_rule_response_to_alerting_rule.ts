@@ -227,6 +227,17 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
           : undefined,
       };
     }
+    case 'vulnerability_check': {
+      return {
+        type: params.type,
+        agentPolicyIds: params.agent_policy_ids,
+        osqueryPackName: params.osquery_pack_name,
+        cveIndexPattern: params.cve_index_pattern ?? '.security-vulnerability-cve-*',
+        correlationTimespan: params.correlation_timespan ?? '24h',
+        groupBy: params.group_by ?? ['host.name'],
+        minCvssScore: params.min_cvss_score ?? 0,
+      };
+    }
     default: {
       return assertUnreachable(params);
     }

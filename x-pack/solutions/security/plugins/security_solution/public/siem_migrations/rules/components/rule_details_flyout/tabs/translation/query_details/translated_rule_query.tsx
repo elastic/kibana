@@ -58,7 +58,7 @@ export const TranslatedRuleQuery: React.FC<TranslatedRuleQueryProps> = React.mem
           title = i18n.MACHINE_LEARNING_RULE_TITLE;
           titleTooltip = i18n.MACHINE_LEARNING_RULE_TOOLTIP;
           queryPlaceholder = i18n.MACHINE_LEARNING_RULE_QUERY_PLACEHOLDER;
-        } else {
+        } else if (matchedPrebuiltRule.type !== 'vulnerability_check') {
           title = i18n.PREBUILT_RULE_TITLE(transformQueryLanguage(matchedPrebuiltRule.language));
           query = matchedPrebuiltRule.query ?? '';
           language = matchedPrebuiltRule.language;

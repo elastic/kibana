@@ -16,6 +16,7 @@ export const type = t.keyof({
   threat_match: null,
   new_terms: null,
   esql: null,
+  vulnerability_check: null,
 });
 export type Type = t.TypeOf<typeof type>;
 

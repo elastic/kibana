@@ -51,7 +51,11 @@ export const extractReferences = <TParams extends RuleParams>({
 
   // if statement is needed here because dataViewId is not on the base rule params
   // much like how the index property is not on the base rule params either
-  if (!isMachineLearningParams(params) && !isEsqlParams(params)) {
+  if (
+    !isMachineLearningParams(params) &&
+    !isEsqlParams(params) &&
+    params.type !== 'vulnerability_check'
+  ) {
     returnReferences = [
       ...returnReferences,
       ...extractDataView({

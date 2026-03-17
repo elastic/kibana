@@ -21,12 +21,14 @@ import type {
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
   DiffableThresholdFields,
+  DiffableVulnerabilityCheckFields,
   CommonThreeWayFieldsDiff,
   CustomQueryThreeWayFieldsDiff,
   EqlThreeWayFieldsDiff,
   EsqlThreeWayFieldsDiff,
   MachineLearningThreeWayFieldsDiff,
   NewTermsThreeWayFieldsDiff,
+  VulnerabilityCheckThreeWayFieldsDiff,
   ThreeWayRuleFieldsDiff,
   SavedQueryThreeWayFieldsDiff,
   ThreatMatchThreeWayFieldsDiff,
@@ -191,6 +193,19 @@ export const calculateThreeWayRuleFieldsDiff = (
       return {
         ...commonFieldsDiff,
         ...calculateEsqlFieldsDiff(
+          { base_version, current_version, target_version },
+          isRuleCustomized
+        ),
+      };
+    }
+    case 'vulnerability_check': {
+      if (hasBaseVersion) {
+        invariant(base_version.type === 'vulnerability_check', BASE_TYPE_ERROR);
+      }
+      invariant(target_version.type === 'vulnerability_check', TARGET_TYPE_ERROR);
+      return {
+        ...commonFieldsDiff,
+        ...calculateVulnerabilityCheckFieldsDiff(
           { base_version, current_version, target_version },
           isRuleCustomized
         ),
@@ -371,6 +386,22 @@ const newTermsFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableNewT
   history_window_start: singleLineStringDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
 };
+
+const calculateVulnerabilityCheckFieldsDiff = (
+  ruleVersions: ThreeVersionsOf<DiffableVulnerabilityCheckFields>,
+  isRuleCustomized: boolean
+): VulnerabilityCheckThreeWayFieldsDiff => {
+  return calculateFieldsDiffFor(
+    ruleVersions,
+    vulnerabilityCheckFieldsDiffAlgorithms,
+    isRuleCustomized
+  );
+};
+
+const vulnerabilityCheckFieldsDiffAlgorithms: ThreeWayFieldsDiffAlgorithmsFor<DiffableVulnerabilityCheckFields> =
+  {
+    type: ruleTypeDiffAlgorithm,
+  };
 
 const calculateAllFieldsDiff = (
   ruleVersions: ThreeVersionsOf<DiffableAllFields>,

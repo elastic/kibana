@@ -600,6 +600,62 @@ export const EsqlRuleUpdateProps = SharedUpdateProps.merge(EsqlRuleCreateFields)
 export type EsqlRulePatchProps = z.infer<typeof EsqlRulePatchProps>;
 export const EsqlRulePatchProps = SharedPatchProps.merge(EsqlRulePatchFields.partial());
 
+export type VulnerabilityCheckRuleRequiredFields = z.infer<
+  typeof VulnerabilityCheckRuleRequiredFields
+>;
+export const VulnerabilityCheckRuleRequiredFields = z.object({
+  type: z.literal('vulnerability_check'),
+  agent_policy_ids: z.array(z.string()).min(1),
+});
+
+export type VulnerabilityCheckRuleOptionalFields = z.infer<
+  typeof VulnerabilityCheckRuleOptionalFields
+>;
+export const VulnerabilityCheckRuleOptionalFields = z.object({
+  osquery_pack_name: z.string().optional(),
+  cve_index_pattern: z.string().optional(),
+  correlation_timespan: z.string().optional(),
+  group_by: z.array(z.string()).optional(),
+  min_cvss_score: z.number().optional(),
+});
+
+export type VulnerabilityCheckRulePatchFields = z.infer<typeof VulnerabilityCheckRulePatchFields>;
+export const VulnerabilityCheckRulePatchFields = VulnerabilityCheckRuleOptionalFields.merge(
+  VulnerabilityCheckRuleRequiredFields.partial()
+);
+
+export type VulnerabilityCheckRuleResponseFields = z.infer<
+  typeof VulnerabilityCheckRuleResponseFields
+>;
+export const VulnerabilityCheckRuleResponseFields = VulnerabilityCheckRuleOptionalFields.merge(
+  VulnerabilityCheckRuleRequiredFields
+);
+
+export type VulnerabilityCheckRuleCreateFields = z.infer<typeof VulnerabilityCheckRuleCreateFields>;
+export const VulnerabilityCheckRuleCreateFields = VulnerabilityCheckRuleOptionalFields.merge(
+  VulnerabilityCheckRuleRequiredFields
+);
+
+export type VulnerabilityCheckRule = z.infer<typeof VulnerabilityCheckRule>;
+export const VulnerabilityCheckRule = SharedResponseProps.merge(
+  VulnerabilityCheckRuleResponseFields
+);
+
+export type VulnerabilityCheckRuleCreateProps = z.infer<typeof VulnerabilityCheckRuleCreateProps>;
+export const VulnerabilityCheckRuleCreateProps = SharedCreateProps.merge(
+  VulnerabilityCheckRuleCreateFields
+);
+
+export type VulnerabilityCheckRuleUpdateProps = z.infer<typeof VulnerabilityCheckRuleUpdateProps>;
+export const VulnerabilityCheckRuleUpdateProps = SharedUpdateProps.merge(
+  VulnerabilityCheckRuleCreateFields
+);
+
+export type VulnerabilityCheckRulePatchProps = z.infer<typeof VulnerabilityCheckRulePatchProps>;
+export const VulnerabilityCheckRulePatchProps = SharedPatchProps.merge(
+  VulnerabilityCheckRulePatchFields.partial()
+);
+
 export const TypeSpecificCreatePropsInternal = z.discriminatedUnion('type', [
   EqlRuleCreateFields,
   QueryRuleCreateFields,
@@ -609,6 +665,7 @@ export const TypeSpecificCreatePropsInternal = z.discriminatedUnion('type', [
   MachineLearningRuleCreateFields,
   NewTermsRuleCreateFields,
   EsqlRuleCreateFields,
+  VulnerabilityCheckRuleCreateFields,
 ]);
 
 export type TypeSpecificCreateProps = z.infer<typeof TypeSpecificCreatePropsInternal>;
@@ -624,6 +681,7 @@ export const TypeSpecificPatchPropsInternal = z.union([
   MachineLearningRulePatchFields,
   NewTermsRulePatchFields,
   EsqlRulePatchFields,
+  VulnerabilityCheckRulePatchFields,
 ]);
 
 export type TypeSpecificPatchProps = z.infer<typeof TypeSpecificPatchPropsInternal>;
@@ -639,6 +697,7 @@ export const TypeSpecificResponseInternal = z.discriminatedUnion('type', [
   MachineLearningRuleResponseFields,
   NewTermsRuleResponseFields,
   EsqlRuleResponseFields,
+  VulnerabilityCheckRuleResponseFields,
 ]);
 
 export type TypeSpecificResponse = z.infer<typeof TypeSpecificResponseInternal>;
@@ -653,6 +712,7 @@ export const RuleCreatePropsInternal = z.discriminatedUnion('type', [
   MachineLearningRuleCreateProps,
   NewTermsRuleCreateProps,
   EsqlRuleCreateProps,
+  VulnerabilityCheckRuleCreateProps,
 ]);
 
 export type RuleCreateProps = z.infer<typeof RuleCreatePropsInternal>;
@@ -667,6 +727,7 @@ export const RuleUpdatePropsInternal = z.discriminatedUnion('type', [
   MachineLearningRuleUpdateProps,
   NewTermsRuleUpdateProps,
   EsqlRuleUpdateProps,
+  VulnerabilityCheckRuleUpdateProps,
 ]);
 
 export type RuleUpdateProps = z.infer<typeof RuleUpdatePropsInternal>;
@@ -681,6 +742,7 @@ export const RulePatchPropsInternal = z.union([
   MachineLearningRulePatchProps,
   NewTermsRulePatchProps,
   EsqlRulePatchProps,
+  VulnerabilityCheckRulePatchProps,
 ]);
 
 export type RulePatchProps = z.infer<typeof RulePatchPropsInternal>;
@@ -695,6 +757,7 @@ export const RuleResponseInternal = z.discriminatedUnion('type', [
   MachineLearningRule,
   NewTermsRule,
   EsqlRule,
+  VulnerabilityCheckRule,
 ]);
 
 export type RuleResponse = z.infer<typeof RuleResponseInternal>;

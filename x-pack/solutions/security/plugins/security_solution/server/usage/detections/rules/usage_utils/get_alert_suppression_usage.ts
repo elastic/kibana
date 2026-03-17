@@ -15,7 +15,10 @@ export const getAlertSuppressionUsage = (
   hasAlertSuppressionMissingFieldsStrategyDoNotSuppress: boolean;
   alertSuppressionFieldsCount: number;
 } => {
-  if (ruleAttributes.params.alertSuppression == null) {
+  if (
+    ruleAttributes.params.type === 'vulnerability_check' ||
+    ruleAttributes.params.alertSuppression == null
+  ) {
     return {
       hasAlertSuppressionPerRuleExecution: false,
       hasAlertSuppressionPerTimePeriod: false,
