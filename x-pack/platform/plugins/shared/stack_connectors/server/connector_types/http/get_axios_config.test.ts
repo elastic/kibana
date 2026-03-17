@@ -62,6 +62,7 @@ describe('getAxiosConfig', () => {
       url: 'https://http.example.com',
       hasAuth: true,
       hasProxyAuth: false,
+      proxyUrl: null,
     },
     secrets: {
       clientSecret: 'test-client-secret',

@@ -232,7 +232,7 @@ export async function executor(
 
   // Connector-level proxy overrides
   const proxyOverrides = getProxySettings({
-    url: config.proxyUrl,
+    url: config.proxyUrl ?? undefined,
     hasAuth: config.hasProxyAuth,
     username: execOptions.secrets.proxyUsername ?? undefined,
     password: execOptions.secrets.proxyPassword ?? undefined,
