@@ -14,7 +14,7 @@ export const METRICS_TEST_INDEX_NAME = 'test-metrics-experience';
 export const METRICS_TEST_INDEX_PATTERN = 'test-metrics-*';
 
 // The Security serverless viewer role only grants read access to `metrics-endpoint.metadata_current_*`.
-// Our test index doesn't match that pattern. Instead of renaming the index to fit, we prefer a custom role that explicitly grants read access.
+// Our test index doesn't match that pattern. Instead of renaming the index to fit, we prefer a custom role that explicitly grants read access
 const METRICS_ES_INDEX_PRIVILEGES = [
   {
     names: [METRICS_TEST_INDEX_NAME, METRICS_TEST_INDEX_PATTERN],
