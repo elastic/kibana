@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('metric value shows no data', async () => {
-        await dashboardExpect.metricValuesExist(['-']);
+        await dashboardExpect.metricValuesExist(['(null)']);
       });
 
       it('tag cloud values are filtered', async () => {
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('metric value shows no data', async () => {
-        await dashboardExpect.metricValuesExist(['-']);
+        await dashboardExpect.metricValuesExist(['(null)']);
       });
 
       it('tag cloud values are filtered', async () => {
