@@ -10,8 +10,7 @@
     "outDir": "target/types",
     "types": [
       "cypress",
-      "node",
-      "@cypress/grep"
+      "node"
     ],
   },
   "kbn_references": [

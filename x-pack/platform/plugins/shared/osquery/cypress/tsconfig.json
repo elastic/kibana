@@ -13,8 +13,7 @@
     "outDir": "target/types",
     "types": [
       "cypress",
-      "node",
-      "@cypress/grep"
+      "node"
     ],
     "resolveJsonModule": true,
   },
