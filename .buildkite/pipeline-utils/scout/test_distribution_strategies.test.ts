@@ -16,11 +16,13 @@ let mockKibanaDir: string;
 
 const mockUploadSteps = jest.fn();
 const mockUploadArtifacts = jest.fn();
+const mockSetMetadata = jest.fn();
 
 jest.mock('../buildkite', () => ({
   BuildkiteClient: jest.fn().mockImplementation(() => ({
     uploadSteps: mockUploadSteps,
     uploadArtifacts: mockUploadArtifacts,
+    setMetadata: mockSetMetadata,
   })),
 }));
 
@@ -244,6 +246,26 @@ describe('scoutTestDistributionStrategies', () => {
 
       const uploadedGroup = mockUploadSteps.mock.calls[0][0][0];
       expect(uploadedGroup.depends_on).toEqual([]);
+    });
+
+    it('registers each lane step for cancel-on-gate-failure before uploading', async () => {
+      const track = createMockTrack('local', 'stateful', 'classic', 'default', [
+        createMockLane(1, 'n2-4-spot', ['config-a.ts']),
+        createMockLane(2, 'n2-4-spot', ['config-b.ts']),
+      ]);
+
+      mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
+      mockDefinitionsLoadFromPath.mockReturnValue(createMockTrackDefinition([track]));
+
+      await scoutTestDistributionStrategies.lanes();
+
+      expect(mockSetMetadata.mock.calls).toEqual([
+        ['cancel_on_gate_failure:scout_test_lane_1', 'true'],
+        ['cancel_on_gate_failure:scout_test_lane_2', 'true'],
+      ]);
+      expect(mockSetMetadata.mock.invocationCallOrder[1]).toBeLessThan(
+        mockUploadSteps.mock.invocationCallOrder[0]
+      );
     });
   });
 });
