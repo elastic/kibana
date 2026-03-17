@@ -14,6 +14,7 @@ export const apiTest = mergeTests(baseApiTest, sloDataFixture);
 export {
   COMMON_HEADERS,
   DASHBOARD_API_PATH,
+  SLO_ALERTS_EMBEDDABLE_ID,
   SLO_BURN_RATE_EMBEDDABLE_ID,
   SLO_ERROR_BUDGET_ID,
   SLO_OVERVIEW_EMBEDDABLE_ID,
