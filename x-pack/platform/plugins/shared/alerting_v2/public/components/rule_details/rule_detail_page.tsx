@@ -8,6 +8,7 @@
 import { EuiButtonEmpty, EuiHorizontalRule, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import type { RuleApiResponse } from '../../services/rules_api';
@@ -18,6 +19,7 @@ import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_moda
 import { RuleHeaderDescription, RuleTitleWithBadges } from './rule_header_description';
 import { RuleConditions } from './rule_conditions';
 import { RuleMetadata } from './rule_metadata';
+import { paths } from '../../constants';
 
 export interface RuleDetailPageProps {
   rule: RuleApiResponse;
@@ -25,6 +27,7 @@ export interface RuleDetailPageProps {
 
 export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ rule }) => {
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
+  const { basePath } = useService(CoreStart('http'));
 
   const history = useHistory();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
@@ -34,7 +37,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
     setShowDeleteConfirmation(true);
   };
 
-  const handleRuleDelete = async () => {
+  const handleRuleDelete = () => {
     setShowDeleteConfirmation(false);
     deleteRule(rule.id, {
       onSuccess: () => {
@@ -64,9 +67,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
             data-test-subj="openEditRuleFlyoutButton"
             iconType="pencil"
             name="edit"
-            onClick={() => {
-              history.push(`/edit/${rule.id}`);
-            }}
+            href={basePath.prepend(paths.ruleEdit(rule.id))}
           >
             <FormattedMessage
               id="xpack.alertingV2.sections.ruleDetails.editRuleButtonLabel"

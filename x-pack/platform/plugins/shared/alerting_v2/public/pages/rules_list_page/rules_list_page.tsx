@@ -178,7 +178,7 @@ export const RulesListPage = () => {
       truncateText: true,
       render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
         <EuiLink
-          onClick={() => navigateToUrl(basePath.prepend(paths.ruleDetails(rule.id)))}
+          href={basePath.prepend(paths.ruleDetails(rule.id))}
           data-test-subj={`ruleDetailsLink-${rule.id}`}
         >
           {metadata?.name ?? rule.id}
@@ -303,7 +303,7 @@ export const RulesListPage = () => {
         rightSideItems={[
           <EuiButton
             key="create-rule"
-            onClick={() => navigateToUrl(basePath.prepend(paths.ruleCreate))}
+            href={basePath.prepend(paths.ruleCreate)}
             data-test-subj="createRuleButton"
           >
             <FormattedMessage
