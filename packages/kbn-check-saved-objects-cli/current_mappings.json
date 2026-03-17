@@ -2046,8 +2046,8 @@
         "type": "flattened"
       },
       "package_agent_version_conditions": {
-        "index": false,
-        "type": "flattened"
+        "dynamic": false,
+        "properties": {}
       },
       "required_versions": {
         "index": false,
@@ -2498,8 +2498,8 @@
         "type": "flattened"
       },
       "package_agent_version_conditions": {
-        "index": false,
-        "type": "flattened"
+        "dynamic": false,
+        "properties": {}
       },
       "required_versions": {
         "index": false,

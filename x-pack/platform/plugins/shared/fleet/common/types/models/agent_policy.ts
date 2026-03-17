@@ -116,7 +116,6 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   version?: string;
   min_agent_version?: string | null;
   package_agent_version_conditions?: AgentPolicyAgentVersionCondition[] | null;
-  package_agent_version_conditions_v2?: AgentPolicyAgentVersionCondition[] | null;
 }
 
 export interface FullAgentPolicyInputStream {
