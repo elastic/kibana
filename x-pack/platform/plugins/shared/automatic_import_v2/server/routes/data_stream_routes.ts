@@ -13,12 +13,12 @@ import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import { buildAutomaticImportResponse } from './utils';
 import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
 import {
-  UploadSamplesToDataStreamRequestBody,
   UploadSamplesToDataStreamRequestParams,
   DeleteDataStreamRequestParams,
   ReanalyzeDataStreamRequestParams,
   ReanalyzeDataStreamRequestBody,
 } from '../../common';
+import { OriginalSource, LangSmithOptions } from '../../common/model/common_attributes.gen';
 
 const isSecurityExceptionError = (err: unknown): boolean => {
   if (!(err instanceof Error)) {
@@ -52,6 +52,19 @@ const UpdateDataStreamPipelineRequestBody = z
   })
   .strict();
 
+/** Extended upload body: either samples (file upload) or sourceIndex (index-based sampling) */
+const UploadSamplesRequestBody = z
+  .object({
+    samples: z.array(z.string()).optional(),
+    sourceIndex: z.string().min(1).optional(),
+    originalSource: OriginalSource,
+    langSmithOptions: LangSmithOptions.optional(),
+  })
+  .strict()
+  .refine((data) => (data.samples && data.samples.length > 0) || !!data.sourceIndex, {
+    message: 'Either samples or sourceIndex must be provided',
+  });
+
 const uploadSamplesRoute = (
   router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
   logger: Logger
@@ -72,7 +85,7 @@ const uploadSamplesRoute = (
         validate: {
           request: {
             params: buildRouteValidationWithZod(UploadSamplesToDataStreamRequestParams),
-            body: buildRouteValidationWithZod(UploadSamplesToDataStreamRequestBody),
+            body: buildRouteValidationWithZod(UploadSamplesRequestBody),
           },
         },
       },
@@ -83,11 +96,45 @@ const uploadSamplesRoute = (
           const currentUser = await automaticImportv2.getCurrentUser();
           const esClient = automaticImportv2.esClient;
           const { integration_id: integrationId, data_stream_id: dataStreamId } = request.params;
-          const { samples, originalSource } = request.body;
+          const { samples, sourceIndex, originalSource } = request.body;
+
+          let rawSamples: string[];
+          if (sourceIndex) {
+            const searchResult = await esClient.search({
+              index: sourceIndex,
+              size: 1000,
+              _source: ['event.original'],
+              query: {
+                function_score: {
+                  query: { exists: { field: 'event.original' } },
+                  random_score: {},
+                },
+              },
+            });
+            rawSamples = (searchResult.hits.hits ?? [])
+              .map((hit) => {
+                const src = hit._source as { event?: { original?: string } } | undefined;
+                return src?.event?.original;
+              })
+              .filter((val): val is string => typeof val === 'string' && val.length > 0);
+
+            if (rawSamples.length === 0) {
+              return response.badRequest({
+                body: 'No documents with event.original found in the specified index.',
+              });
+            }
+          } else if (samples && samples.length > 0) {
+            rawSamples = samples;
+          } else {
+            return response.badRequest({
+              body: 'Either samples or sourceIndex must be provided.',
+            });
+          }
+
           const result = await automaticImportService.addSamplesToDataStream({
             integrationId,
             dataStreamId,
-            rawSamples: samples,
+            rawSamples,
             originalSource,
             authenticatedUser: currentUser,
             esClient,
