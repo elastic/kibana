@@ -50,6 +50,13 @@ export const MainNavigation = () => {
 
     return isHistoryEnabled && firstSegment === 'new' ? Section.History : firstSegment;
   }, [location.pathname, isHistoryEnabled]);
+
+  const isListView = useMemo(() => {
+    const segments = location.pathname.split('/').filter(Boolean);
+    const lastSegment = segments[segments.length - 1];
+
+    return lastSegment === 'history' || lastSegment === 'packs' || lastSegment === 'saved_queries';
+  }, [location.pathname]);
   const feedbackButtonLabel = i18n.translate('xpack.osquery.appNavigation.giveFeedbackButton', {
     defaultMessage: 'Give feedback',
   });
@@ -91,57 +98,52 @@ export const MainNavigation = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
-        <div css={navCss}>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup gutterSize="l" alignItems="center">
-            <EuiFlexItem>
-              <EuiText>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.osquery.appNavigation.title"
-                    defaultMessage="Osquery"
-                  />
-                </h1>
-              </EuiText>
-            </EuiFlexItem>
-            {section === Section.History && (
+        {isListView && (
+          <div css={navCss}>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup gutterSize="l" alignItems="center">
+              <EuiFlexItem>
+                <EuiText>
+                  <h1>
+                    <FormattedMessage
+                      id="xpack.osquery.appNavigation.title"
+                      defaultMessage="Osquery"
+                    />
+                  </h1>
+                </EuiText>
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  {...newQueryNavProps}
-                  iconType="plusInCircle"
-                  isDisabled={!canRunQuery}
-                >
+                <EuiButton fill {...newQueryNavProps} isDisabled={!canRunQuery}>
                   <FormattedMessage
                     id="xpack.osquery.history.newLiveQueryButtonLabel"
                     defaultMessage="Run query"
                   />
                 </EuiButton>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiTabs bottomBorder={false}>
-            <EuiTab isSelected={section === historySection} {...historyNavProps}>
-              <FormattedMessage
-                id="xpack.osquery.appNavigation.historyLinkText"
-                defaultMessage="History"
-              />
-            </EuiTab>
-            <EuiTab isSelected={section === Section.Packs} {...packsNavProps}>
-              <FormattedMessage
-                id="xpack.osquery.appNavigation.packsLinkText"
-                defaultMessage="Packs"
-              />
-            </EuiTab>
-            <EuiTab isSelected={section === Section.SavedQueries} {...savedQueriesNavProps}>
-              <FormattedMessage
-                id="xpack.osquery.appNavigation.queriesLinkText"
-                defaultMessage="Queries"
-              />
-            </EuiTab>
-          </EuiTabs>
-        </div>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <EuiTabs bottomBorder={false}>
+              <EuiTab isSelected={section === historySection} {...historyNavProps}>
+                <FormattedMessage
+                  id="xpack.osquery.appNavigation.historyLinkText"
+                  defaultMessage="History"
+                />
+              </EuiTab>
+              <EuiTab isSelected={section === Section.Packs} {...packsNavProps}>
+                <FormattedMessage
+                  id="xpack.osquery.appNavigation.packsLinkText"
+                  defaultMessage="Packs"
+                />
+              </EuiTab>
+              <EuiTab isSelected={section === Section.SavedQueries} {...savedQueriesNavProps}>
+                <FormattedMessage
+                  id="xpack.osquery.appNavigation.queriesLinkText"
+                  defaultMessage="Queries"
+                />
+              </EuiTab>
+            </EuiTabs>
+          </div>
+        )}
       </>
     );
   }

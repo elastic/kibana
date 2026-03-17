@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useMemo } from 'react';
+import React, { lazy, Suspense } from 'react';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import ServicesWrapper from './services_wrapper';
 import type { ServicesWrapperProps } from './services_wrapper';
@@ -25,22 +25,17 @@ export const getLazyOsqueryAction =
   // eslint-disable-next-line react/display-name
   (props: OsqueryActionProps & { ecsData?: Ecs }) => {
     const { ecsData, ...restProps } = props;
-    const renderAction = useMemo(() => {
-      if (ecsData && ecsData?._id) {
-        return (
-          <AlertAttachmentContext.Provider value={ecsData}>
-            <OsqueryAction {...restProps} />
-          </AlertAttachmentContext.Provider>
-        );
-      }
-
-      return <OsqueryAction {...restProps} />;
-    }, [ecsData, restProps]);
 
     return (
       <Suspense fallback={null}>
         <ServicesWrapper services={services} experimentalFeatures={experimentalFeatures}>
-          {renderAction}
+          {ecsData?._id ? (
+            <AlertAttachmentContext.Provider value={ecsData}>
+              <OsqueryAction {...restProps} />
+            </AlertAttachmentContext.Provider>
+          ) : (
+            <OsqueryAction {...restProps} />
+          )}
         </ServicesWrapper>
       </Suspense>
     );

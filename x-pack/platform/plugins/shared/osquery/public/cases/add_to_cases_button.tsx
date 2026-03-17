@@ -7,7 +7,13 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
-import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { JsonValue } from '@kbn/utility-types';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
@@ -30,6 +36,12 @@ export interface AddToCaseButtonProps {
   iconProps?: Record<string, string>;
   scheduleId?: string;
   executionCount?: number;
+  /** When true, render as EuiContextMenuItem for use inside a context menu */
+  displayAsMenuItem?: boolean;
+  /** Callback invoked when the menu item is clicked (e.g. to close the kebab popover) */
+  onMenuItemClick?: () => void;
+  /** Button size when rendered as EuiButtonEmpty (default: 'xs') */
+  size?: 'xs' | 's' | 'm';
 }
 
 export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
@@ -41,6 +53,9 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   iconProps,
   scheduleId,
   executionCount,
+  displayAsMenuItem = false,
+  onMenuItemClick,
+  size = 'xs',
 }) => {
   const { cases } = useKibana().services;
   const ecsData = useContext(AlertAttachmentContext);
@@ -103,6 +118,21 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
     selectCaseModal,
   ]);
 
+  if (displayAsMenuItem) {
+    return (
+      <EuiContextMenuItem
+        icon="casesApp"
+        disabled={isDisabled || !hasCasesPermissions}
+        onClick={() => {
+          onMenuItemClick?.();
+          handleClick();
+        }}
+      >
+        {ADD_TO_CASE}
+      </EuiContextMenuItem>
+    );
+  }
+
   if (isIcon) {
     return (
       <EuiToolTip content={<EuiFlexItem>{ADD_TO_CASE}</EuiFlexItem>}>
@@ -119,7 +149,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
 
   return (
     <EuiButtonEmpty
-      size="xs"
+      size={size}
       iconType="casesApp"
       onClick={handleClick}
       isDisabled={isDisabled || !hasCasesPermissions}

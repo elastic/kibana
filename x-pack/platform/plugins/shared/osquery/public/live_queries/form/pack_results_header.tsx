@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
@@ -41,6 +41,10 @@ const iconsListCss = {
   paddingLeft: '10px',
 };
 
+const actionsGroupCss = {
+  alignItems: 'center',
+};
+
 export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
   ({ actionId, agentIds, queryIds, addToTimeline }) => {
     const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' } as const), []);
@@ -58,6 +62,73 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
     const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
     const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
+    if (isHistoryEnabled) {
+      return (
+        <>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="m"
+            justifyContent="spaceBetween"
+            alignItems="center"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h1>
+                  <FormattedMessage
+                    id="xpack.osquery.liveQueryActionResults.results"
+                    defaultMessage="Query results"
+                  />
+                </h1>
+              </EuiText>
+            </EuiFlexItem>
+            {actionId && (
+              <EuiFlexItem grow={false} css={actionsGroupCss}>
+                <EuiFlexGroup gutterSize="m" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <AddToCaseWrapper
+                      actionId={actionId}
+                      agentIds={agentIds}
+                      isIcon={false}
+                      size="m"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <AddToTimelineButton
+                      field="action_id"
+                      value={queryIds}
+                      addToTimeline={addToTimeline}
+                      size="m"
+                    />
+                  </EuiFlexItem>
+                  {showAddTags && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="m"
+                        iconType="tag"
+                        color="primary"
+                        onClick={handleOpenFlyout}
+                        data-test-subj="add-tags-button"
+                      >
+                        {ADD_TAGS_LABEL}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer size={'l'} />
+          {isFlyoutOpen && actionId && (
+            <AddTagsFlyout
+              actionId={actionId}
+              currentTags={liveQueryDetails?.tags ?? EMPTY_TAGS}
+              onClose={handleCloseFlyout}
+            />
+          )}
+        </>
+      );
+    }
+
     return (
       <>
         <EuiSpacer size={'l'} />
@@ -66,7 +137,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
             <EuiText>
               <h2>
                 <FormattedMessage
-                  id="xpack.osquery.liveQueryActionResults.results"
+                  id="xpack.osquery.liveQueryActionResults.resultsLegacy"
                   defaultMessage="Results"
                 />
               </h2>
@@ -93,32 +164,12 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                       addToTimeline={addToTimeline}
                     />
                   </EuiFlexItem>
-                  {showAddTags && (
-                    <EuiFlexItem>
-                      <EuiButtonIcon
-                        iconType="tag"
-                        color="text"
-                        iconSize="l"
-                        size="xs"
-                        aria-label={ADD_TAGS_LABEL}
-                        onClick={handleOpenFlyout}
-                        data-test-subj="add-tags-button"
-                      />
-                    </EuiFlexItem>
-                  )}
                 </EuiFlexGroup>
               )}
             </span>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size={'l'} />
-        {isFlyoutOpen && actionId && (
-          <AddTagsFlyout
-            actionId={actionId}
-            currentTags={liveQueryDetails?.tags ?? EMPTY_TAGS}
-            onClose={handleCloseFlyout}
-          />
-        )}
       </>
     );
   }

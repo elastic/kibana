@@ -11,6 +11,9 @@ import {
   EuiBasicTable,
   EuiCodeBlock,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
   EuiToolTip,
   EuiLoadingSpinner,
   EuiFlexGroup,
@@ -21,6 +24,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment-timezone';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryDetailsFlyout } from './query_details_flyout';
 import { PackResultsHeader } from './pack_results_header';
@@ -32,7 +36,111 @@ import { PackViewInLensAction } from '../../lens/pack_view_in_lens';
 import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
+import { TagsColumn } from '../../actions/components/tags_column';
+import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
 import type { AddToTimelineHandler } from '../../types';
+
+interface RowKebabMenuProps {
+  row: { action_id: string; id?: string };
+  actionId: string | undefined;
+  agentIds?: string[];
+  addToTimeline?: AddToTimelineHandler;
+  scheduleId?: string;
+  executionCount?: number;
+  onViewQuery: () => void;
+}
+
+const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
+  ({ row, actionId, agentIds, addToTimeline, scheduleId, executionCount, onViewQuery }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const close = useCallback(() => setIsOpen(false), []);
+    const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
+
+    const kebabLabel = i18n.translate(
+      'xpack.osquery.pack.queriesTable.viewResultsMoreActionsAriaLabel',
+      { defaultMessage: 'More actions' }
+    );
+    const viewQueryLabel = i18n.translate(
+      'xpack.osquery.pack.queriesTable.viewQueryMenuLabel',
+      { defaultMessage: 'View query' }
+    );
+
+    const menuItems = useMemo(
+      () => [
+        ...(row.action_id
+          ? [
+              <AddToTimelineButton
+                key="timeline"
+                field="action_id"
+                value={row.action_id}
+                addToTimeline={addToTimeline}
+                displayAsMenuItem
+                onMenuItemClick={close}
+              />,
+            ]
+          : []),
+        ...(actionId
+          ? [
+              <AddToCaseWrapper
+                key="case"
+                actionId={actionId}
+                agentIds={agentIds}
+                queryId={row.action_id}
+                isIcon={false}
+                isDisabled={!row.action_id}
+                scheduleId={scheduleId}
+                executionCount={executionCount}
+                displayAsMenuItem
+                onMenuItemClick={close}
+              />,
+            ]
+          : []),
+        <EuiContextMenuItem
+          key="viewQuery"
+          icon="expand"
+          onClick={() => {
+            close();
+            onViewQuery();
+          }}
+        >
+          {viewQueryLabel}
+        </EuiContextMenuItem>,
+      ],
+      [
+        row.action_id,
+        actionId,
+        agentIds,
+        addToTimeline,
+        scheduleId,
+        executionCount,
+        close,
+        onViewQuery,
+        viewQueryLabel,
+      ]
+    );
+
+    return (
+      <EuiPopover
+        button={
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            aria-label={kebabLabel}
+            onClick={toggle}
+            data-test-subj={`packQueriesTableKebab-${row.id ?? row.action_id}`}
+          />
+        }
+        isOpen={isOpen}
+        closePopover={close}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <EuiContextMenuPanel size="s" items={menuItems} />
+      </EuiPopover>
+    );
+  }
+);
+
+RowKebabMenu.displayName = 'RowKebabMenu';
 
 const truncateTooltipTextCss = {
   width: '100%',
@@ -148,6 +256,8 @@ interface PackQueriesStatusTableProps {
   addToTimeline?: AddToTimelineHandler;
   scheduleId?: string;
   executionCount?: number;
+  packName?: string;
+  tags?: string[];
 }
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
@@ -161,12 +271,14 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   addToTimeline,
   scheduleId,
   executionCount,
+  packName,
+  tags,
 }) => {
+  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
     id: string;
     query: string;
   } | null>(null);
-
   const handleQueryFlyoutOpen = useCallback(
     (item: any) => () => {
       setQueryDetailsFlyoutOpen(item);
@@ -194,15 +306,38 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       const singleLine = removeMultilines(query);
       const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
 
+      const queryContent = (
+        <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+          {content}
+        </EuiCodeBlock>
+      );
+
+      if (scheduleId && packName) {
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} justifyContent="spaceBetween">
+            <EuiFlexItem
+              grow={true}
+              css={{ minWidth: 0, ...euiFlexItemCss }}
+              onClick={handleQueryFlyoutOpen(item)}
+            >
+              {queryContent}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge iconType="package" color="hollow">
+                {packName}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
+
       return (
         <EuiFlexItem css={euiFlexItemCss} onClick={handleQueryFlyoutOpen(item)}>
-          <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-            {content}
-          </EuiCodeBlock>
+          {queryContent}
         </EuiFlexItem>
       );
     },
-    [handleQueryFlyoutOpen]
+    [handleQueryFlyoutOpen, scheduleId, packName]
   );
 
   const renderDocsColumn = useCallback((item: PackQueryStatusItem) => {
@@ -223,6 +358,26 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       />
     );
   }, []);
+
+  // These renderers intentionally ignore the row item — the value is the same
+  // for all rows since it comes from the parent execution context, not per-query data.
+  const renderRunAtColumn = useCallback(
+    () => (startDate ? <EuiText size="s">{moment(startDate).format('lll')}</EuiText> : null),
+    [startDate]
+  );
+
+  const renderExecutionCountColumn = useCallback(
+    () =>
+      scheduleId && executionCount != null ? (
+        <EuiText size="s">{executionCount}</EuiText>
+      ) : null,
+    [scheduleId, executionCount]
+  );
+
+  const renderTagsColumn = useCallback(
+    () => (tags && tags.length > 0 ? <TagsColumn tags={tags} /> : <>{'\u2014'}</>),
+    [tags]
+  );
 
   const renderDiscoverResultsAction = useCallback(
     (item: any) => (
@@ -302,14 +457,31 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const getItemId = useCallback((item: PackItem) => get(item, 'id'), []) as unknown as string;
 
   const renderResultActions = useCallback(
-    (row: { action_id: string }) => {
+    (row: { action_id: string; id?: string }) => {
+      if (isHistoryEnabled) {
+        return (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{renderDiscoverResultsAction(row)}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{renderLensResultsAction(row)}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <RowKebabMenu
+                row={row}
+                actionId={actionId}
+                agentIds={agentIds}
+                addToTimeline={addToTimeline}
+                scheduleId={scheduleId}
+                executionCount={executionCount}
+                onViewQuery={handleQueryFlyoutOpen(row)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
+
+      // Legacy layout: inline action buttons without kebab menu
       const resultActions = [
-        {
-          render: renderDiscoverResultsAction,
-        },
-        {
-          render: renderLensResultsAction,
-        },
+        { render: renderDiscoverResultsAction },
+        { render: renderLensResultsAction },
         {
           render: (item: { action_id: string }) =>
             item.action_id && (
@@ -351,6 +523,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       return resultActions.map((action) => action.render(row));
     },
     [
+      isHistoryEnabled,
       actionId,
       addToTimeline,
       agentIds,
@@ -361,6 +534,21 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       scheduleId,
     ]
   );
+
+  const renderActionsColumn = useCallback(
+    (row: PackQueryStatusItem) => (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        {data && data.length > 1 && (
+          <EuiFlexItem grow={false}>{renderToggleResultsAction(row)}</EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          {renderResultActions(row as { action_id: string; id?: string })}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [data, renderResultActions, renderToggleResultsAction]
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -379,6 +567,18 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         render: renderQueryColumn,
         width: '40%',
       },
+      ...(isHistoryEnabled && !scheduleId && tags
+        ? [
+            {
+              field: '',
+              name: i18n.translate('xpack.osquery.pack.queriesTable.tagsColumnTitle', {
+                defaultMessage: 'Tags',
+              }),
+              width: '100px',
+              render: renderTagsColumn,
+            },
+          ]
+        : []),
       {
         field: '',
         name: i18n.translate('xpack.osquery.pack.queriesTable.docsResultsColumnTitle', {
@@ -395,34 +595,80 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         width: '160px',
         render: renderAgentsColumn,
       },
-      {
-        field: '',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.viewResultsColumnTitle', {
-          defaultMessage: 'View results',
-        }),
-        width: '120px',
-        render: renderResultActions,
-      },
-      {
-        field: '',
-        id: 'actions',
-        width: '45px',
-        isVisuallyHiddenLabel: true,
-        alignment: RIGHT_ALIGNMENT,
-        actions: [
-          {
-            render: renderToggleResultsAction,
-          },
-        ],
-      },
+      ...(isHistoryEnabled && startDate
+        ? [
+            {
+              field: '',
+              name: i18n.translate('xpack.osquery.pack.queriesTable.runAtColumnTitle', {
+                defaultMessage: 'Run at',
+              }),
+              width: '180px',
+              render: renderRunAtColumn,
+            },
+          ]
+        : []),
+      ...(isHistoryEnabled && scheduleId && executionCount != null
+        ? [
+            {
+              field: '',
+              name: i18n.translate('xpack.osquery.pack.queriesTable.executionCountColumnTitle', {
+                defaultMessage: 'Execution count',
+              }),
+              width: '120px',
+              render: renderExecutionCountColumn,
+            },
+          ]
+        : []),
+      ...(isHistoryEnabled
+        ? [
+            {
+              field: '',
+              name: i18n.translate('xpack.osquery.pack.queriesTable.actionsColumnTitle', {
+                defaultMessage: 'Actions',
+              }),
+              width: '120px',
+              render: renderActionsColumn,
+            },
+          ]
+        : [
+            {
+              field: '',
+              name: i18n.translate('xpack.osquery.pack.queriesTable.viewResultsColumnTitle', {
+                defaultMessage: 'View results',
+              }),
+              width: '120px',
+              render: renderResultActions,
+            },
+            {
+              field: '',
+              id: 'actions',
+              width: '45px',
+              isVisuallyHiddenLabel: true,
+              alignment: RIGHT_ALIGNMENT,
+              actions: [
+                {
+                  render: renderToggleResultsAction,
+                },
+              ],
+            },
+          ]),
     ],
     [
+      isHistoryEnabled,
       renderIDColumn,
       renderQueryColumn,
       renderDocsColumn,
       renderAgentsColumn,
+      renderRunAtColumn,
+      renderExecutionCountColumn,
+      renderTagsColumn,
+      renderActionsColumn,
       renderResultActions,
       renderToggleResultsAction,
+      startDate,
+      scheduleId,
+      executionCount,
+      tags,
     ]
   );
   const sorting = useMemo(

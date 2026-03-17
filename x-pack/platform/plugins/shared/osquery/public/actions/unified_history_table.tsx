@@ -212,54 +212,28 @@ const UnifiedHistoryTableComponent = () => {
 
   const { data: packsData } = usePacks(PACKS_CONFIG);
 
-  const handlePackBadgeClick = useCallback(
-    (packId: string) => (e: React.MouseEvent) => {
-      e.stopPropagation();
-      push(pagePathGetters.pack_details({ packId }));
-    },
-    [push]
-  );
+  // No deps needed — callback only reads from the row argument, not from component state
+  const renderQueryColumn = useCallback((_: unknown, row: UnifiedHistoryRow) => {
+    // Scheduled rows: show query name only (pack name appears on details page only)
+    if (isScheduledRow(row) && (row.queryName || row.packName)) {
+      return <>{row.queryName ?? row.packName}</>;
+    }
 
-  const renderQueryColumn = useCallback(
-    (_: unknown, row: UnifiedHistoryRow) => {
-      // Scheduled rows: show query name (if available) with pack badge
-      if (isScheduledRow(row) && (row.queryName || row.packName)) {
-        return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false}>
-            <EuiFlexItem grow={false}>{row.queryName ?? row.packName}</EuiFlexItem>
-            {row.packName && row.packId && row.queryName && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge
-                  iconType="package"
-                  color="hollow"
-                  onClick={handlePackBadgeClick(row.packId)}
-                  onClickAriaLabel={`View pack ${row.packName}`}
-                >
-                  {row.packName}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        );
-      }
+    // Live pack rows: show pack name
+    if (isLiveRow(row) && row.packName) {
+      return <>{row.packName}</>;
+    }
 
-      // Live pack rows: show pack name
-      if (isLiveRow(row) && row.packName) {
-        return <>{row.packName}</>;
-      }
+    // Single query rows: show truncated SQL
+    const singleLine = removeMultilines(row.queryText);
+    const content = singleLine.length > 90 ? `${singleLine.substring(0, 90)}...` : singleLine;
 
-      // Single query rows: show truncated SQL
-      const singleLine = removeMultilines(row.queryText);
-      const content = singleLine.length > 90 ? `${singleLine.substring(0, 90)}...` : singleLine;
-
-      return (
-        <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-          {content}
-        </EuiCodeBlock>
-      );
-    },
-    [handlePackBadgeClick]
-  );
+    return (
+      <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+        {content}
+      </EuiCodeBlock>
+    );
+  }, []);
 
   const renderSourceColumn = useCallback(
     (_: unknown, row: UnifiedHistoryRow) => <SourceBadge source={row.source} />,
@@ -341,11 +315,6 @@ const UnifiedHistoryTableComponent = () => {
     [profilesMap, isLoadingProfiles]
   );
 
-  const renderDetailsAction = useCallback(
-    (row: UnifiedHistoryRow) => <HistoryDetailsButton row={row} />,
-    []
-  );
-
   const newQueryPath = '/new';
 
   const handlePlayClick = useCallback(
@@ -414,24 +383,32 @@ const UnifiedHistoryTableComponent = () => {
     [permissions, existingPackIds]
   );
 
-  const renderPlayButton = useCallback(
-    (row: UnifiedHistoryRow, enabled: boolean) => {
+  const renderActionsColumn = useCallback(
+    (row: UnifiedHistoryRow) => {
       const playText = i18n.translate('xpack.osquery.liveQueryActions.table.runActionAriaLabel', {
         defaultMessage: 'Run query',
       });
 
       return (
-        <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="play"
-            onClick={handlePlayClick(row)}
-            isDisabled={!enabled}
-            aria-label={playText}
-          />
-        </EuiToolTip>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          {isPlayButtonAvailable(row) && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="play"
+                  onClick={handlePlayClick(row)}
+                  aria-label={playText}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <HistoryDetailsButton row={row} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     },
-    [handlePlayClick]
+    [handlePlayClick, isPlayButtonAvailable]
   );
 
   const columns = useMemo(
@@ -440,16 +417,9 @@ const UnifiedHistoryTableComponent = () => {
         name: i18n.translate('xpack.osquery.liveQueryActions.table.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
-        width: '120px',
-        actions: [
-          {
-            available: isPlayButtonAvailable,
-            render: renderPlayButton,
-          },
-          {
-            render: renderDetailsAction,
-          },
-        ],
+        width: '80px',
+        render: renderActionsColumn,
+        css: { '.euiTableCellContent': { paddingRight: 0 } },
       },
       {
         field: 'queryText',
@@ -510,10 +480,8 @@ const UnifiedHistoryTableComponent = () => {
       },
     ],
     [
-      isPlayButtonAvailable,
-      renderDetailsAction,
+      renderActionsColumn,
       renderAgentsColumn,
-      renderPlayButton,
       renderQueryColumn,
       renderResultsColumn,
       renderRunByColumn,
