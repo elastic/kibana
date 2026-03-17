@@ -38,3 +38,6 @@ export enum QUERY_TIMEOUT {
   DEFAULT = 60, // 60 seconds
   MAX = 60 * 60 * 24, // 24 hours
 }
+
+export const MAX_TAGS_PER_ACTION = 20;
+export const MAX_TAG_LENGTH = 256;
