@@ -19,7 +19,6 @@ import {
   ReanalyzeDataStreamRequestBody,
   UploadSamplesToDataStreamRequestBody,
 } from '../../common';
-import { OriginalSource, LangSmithOptions } from '../../common/model/common_attributes.gen';
 
 const isSecurityExceptionError = (err: unknown): boolean => {
   if (!(err instanceof Error)) {
@@ -53,19 +52,6 @@ const UpdateDataStreamPipelineRequestBody = z
   })
   .strict();
 
-/** Extended upload body: either samples (file upload) or sourceIndex (index-based sampling) */
-const UploadSamplesRequestBody = z
-  .object({
-    samples: z.array(z.string()).optional(),
-    sourceIndex: z.string().min(1).optional(),
-    originalSource: OriginalSource,
-    langSmithOptions: LangSmithOptions.optional(),
-  })
-  .strict()
-  .refine((data) => (data.samples && data.samples.length > 0) || !!data.sourceIndex, {
-    message: 'Either samples or sourceIndex must be provided',
-  });
-
 const uploadSamplesRoute = (
   router: IRouter<AutomaticImportV2PluginRequestHandlerContext>,
   logger: Logger
@@ -86,7 +72,7 @@ const uploadSamplesRoute = (
         validate: {
           request: {
             params: buildRouteValidationWithZod(UploadSamplesToDataStreamRequestParams),
-            body: buildRouteValidationWithZod(UploadSamplesRequestBody),
+            body: buildRouteValidationWithZod(UploadSamplesToDataStreamRequestBody),
           },
         },
       },
