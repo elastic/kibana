@@ -39,6 +39,9 @@ export function buildInstallStackCommand({
     agentVersion,
   });
 
+  // The base kube-stack Helm values file defines processors[0..7] for the
+  // logs/node and metrics/node/otel pipelines. Custom processors
+  // (onboarding_id, wired_streams) are appended starting at index 8.
   let nextLogProcessorIndex = 8;
   let nextMetricProcessorIndex = 8;
 

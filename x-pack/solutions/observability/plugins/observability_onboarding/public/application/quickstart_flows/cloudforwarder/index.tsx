@@ -26,18 +26,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityOnboardingAppServices } from '../../..';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
+import { useTimeWindowDataDetection } from '../shared/use_time_window_data_detection';
 import { ProgressIndicator } from '../shared/progress_indicator';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { useCloudForwarderFlow } from './use_cloudforwarder_flow';
 import { EmptyPrompt } from '../shared/empty_prompt';
-import {
-  OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT,
-  OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT,
-} from '../../../../common/telemetry_events';
+import { OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 import { type LogType } from '../../../../common/aws_cloudforwarder';
 import { isValidS3BucketName, buildS3BucketArn, buildCloudFormationUrl } from './utils';
 
@@ -75,7 +73,6 @@ export function CloudForwarderPanel() {
 
   const [sessionStartTime, setSessionStartTime] = useState<string | null>(null);
   const [monitoringLogType, setMonitoringLogType] = useState<LogType | null>(null);
-  const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
   const [launchStackClicked, setLaunchStackClicked] = useState(false);
 
   const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
@@ -84,61 +81,17 @@ export function CloudForwarderPanel() {
     onboardingId: data?.onboardingId,
   });
 
-  const [checkDataStartTime, setCheckDataStartTime] = useState<number | null>(null);
-  useEffect(() => {
-    if (isMonitoringStepActive && checkDataStartTime === null) {
-      setCheckDataStartTime(Date.now());
-    }
-  }, [isMonitoringStepActive, checkDataStartTime]);
-
-  const {
-    data: hasDataResponse,
-    status: hasDataStatus,
-    refetch: refetchHasData,
-  } = useFetcher(
-    (callApi) => {
-      if (!isMonitoringStepActive || !monitoringLogType || !sessionStartTime) return;
-      return callApi('GET /internal/observability_onboarding/cloudforwarder/has-data', {
-        params: {
-          query: {
-            logType: monitoringLogType,
-            start: sessionStartTime,
-          },
-        },
-      });
-    },
-    [isMonitoringStepActive, monitoringLogType, sessionStartTime],
-    { showToastOnError: false }
-  );
-
-  useEffect(() => {
-    const pendingStatusList = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
-    if (pendingStatusList.includes(hasDataStatus) || hasDataResponse?.hasData === true) {
-      return;
-    }
-    const timeout = setTimeout(() => {
-      refetchHasData();
-    }, FETCH_INTERVAL);
-    return () => clearTimeout(timeout);
-  }, [hasDataResponse?.hasData, refetchHasData, hasDataStatus]);
-
-  useEffect(() => {
-    if (hasDataResponse?.hasData === true && !dataReceivedTelemetrySent) {
-      setDataReceivedTelemetrySent(true);
-      analytics?.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
-        flow_type: 'cloudforwarder',
-        flow_id: data?.onboardingId ?? '',
-        step: 'logs-ingest',
-        step_status: 'complete',
-      });
-    }
-  }, [analytics, hasDataResponse?.hasData, dataReceivedTelemetrySent, data?.onboardingId]);
-
-  const isTroubleshootingVisible =
-    isMonitoringStepActive &&
-    hasDataResponse?.hasData === false &&
-    checkDataStartTime !== null &&
-    Date.now() - checkDataStartTime > SHOW_TROUBLESHOOTING_DELAY;
+  const { hasData, isTroubleshootingVisible } = useTimeWindowDataDetection({
+    isMonitoringActive:
+      isMonitoringStepActive && monitoringLogType !== null && sessionStartTime !== null,
+    sessionStartTime: sessionStartTime ?? '',
+    fetchInterval: FETCH_INTERVAL,
+    troubleshootingDelay: SHOW_TROUBLESHOOTING_DELAY,
+    flowType: 'cloudforwarder',
+    onboardingId: data?.onboardingId ?? '',
+    endpoint: '/internal/observability_onboarding/cloudforwarder/has-data',
+    extraQueryParams: monitoringLogType ? { logType: monitoringLogType } : undefined,
+  });
 
   useEffect(() => {
     if (data) {
@@ -406,7 +359,7 @@ export function CloudForwarderPanel() {
           defaultMessage: 'Visualize your data',
         }
       ),
-      status: (hasDataResponse?.hasData
+      status: (hasData
         ? 'complete'
         : isMonitoringStepActive
         ? 'current'
@@ -415,7 +368,7 @@ export function CloudForwarderPanel() {
         <>
           <ProgressIndicator
             title={
-              hasDataResponse?.hasData
+              hasData
                 ? i18n.translate(
                     'xpack.observability_onboarding.cloudforwarderPanel.dataReceived',
                     { defaultMessage: 'We are receiving your AWS logs' }
@@ -426,7 +379,7 @@ export function CloudForwarderPanel() {
                   )
             }
             iconType="checkInCircleFilled"
-            isLoading={!hasDataResponse?.hasData}
+            isLoading={!hasData}
             css={css`
               max-width: 40%;
             `}
@@ -460,7 +413,7 @@ export function CloudForwarderPanel() {
             </>
           )}
 
-          {hasDataResponse?.hasData === true && (
+          {hasData === true && (
             <>
               <EuiSpacer />
               <GetStartedPanel

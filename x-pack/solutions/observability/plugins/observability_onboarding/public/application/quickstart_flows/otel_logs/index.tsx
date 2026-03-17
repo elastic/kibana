@@ -29,11 +29,11 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import type { ObservabilityOnboardingAppServices } from '../../..';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
+import { useTimeWindowDataDetection } from '../shared/use_time_window_data_detection';
 import { ProgressIndicator } from '../shared/progress_indicator';
 import { GetStartedPanel } from '../shared/get_started_panel';
 import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
@@ -70,7 +70,7 @@ export const OtelLogsPanel: React.FC = () => {
   });
   const { onPageReady } = usePerformanceContext();
   const {
-    services: { share, docLinks, analytics },
+    services: { share, docLinks },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const {
@@ -96,7 +96,6 @@ export const OtelLogsPanel: React.FC = () => {
   }, [onPageReady, setupData]);
 
   const [sessionStartTime] = useState(() => new Date().toISOString());
-  const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
 
   const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
     isActive: !!setupData,
@@ -104,58 +103,15 @@ export const OtelLogsPanel: React.FC = () => {
     onboardingId: setupData?.onboardingId,
   });
 
-  const [checkDataStartTime, setCheckDataStartTime] = useState<number | null>(null);
-  useEffect(() => {
-    if (isMonitoringStepActive && checkDataStartTime === null) {
-      setCheckDataStartTime(Date.now());
-    }
-  }, [isMonitoringStepActive, checkDataStartTime]);
-
-  const {
-    data: hasDataResponse,
-    status: hasDataStatus,
-    refetch: refetchHasData,
-  } = useFetcher(
-    (callApi) => {
-      if (!isMonitoringStepActive) return;
-      return callApi('GET /internal/observability_onboarding/otel_host/has-data', {
-        params: {
-          query: { start: sessionStartTime },
-        },
-      });
-    },
-    [isMonitoringStepActive, sessionStartTime],
-    { showToastOnError: false }
-  );
-
-  useEffect(() => {
-    const pendingStatusList = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
-    if (pendingStatusList.includes(hasDataStatus) || hasDataResponse?.hasData === true) {
-      return;
-    }
-    const timeout = setTimeout(() => {
-      refetchHasData();
-    }, FETCH_INTERVAL);
-    return () => clearTimeout(timeout);
-  }, [hasDataResponse?.hasData, refetchHasData, hasDataStatus]);
-
-  useEffect(() => {
-    if (hasDataResponse?.hasData === true && !dataReceivedTelemetrySent) {
-      setDataReceivedTelemetrySent(true);
-      analytics?.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
-        flow_type: 'otel_logs',
-        flow_id: setupData?.onboardingId ?? '',
-        step: 'logs-ingest',
-        step_status: 'complete',
-      });
-    }
-  }, [analytics, hasDataResponse?.hasData, dataReceivedTelemetrySent, setupData?.onboardingId]);
-
-  const isTroubleshootingVisible =
-    isMonitoringStepActive &&
-    hasDataResponse?.hasData === false &&
-    checkDataStartTime !== null &&
-    Date.now() - checkDataStartTime > SHOW_TROUBLESHOOTING_DELAY;
+  const { hasData, isTroubleshootingVisible } = useTimeWindowDataDetection({
+    isMonitoringActive: isMonitoringStepActive,
+    sessionStartTime,
+    fetchInterval: FETCH_INTERVAL,
+    troubleshootingDelay: SHOW_TROUBLESHOOTING_DELAY,
+    flowType: 'otel_logs',
+    onboardingId: setupData?.onboardingId ?? '',
+    endpoint: '/internal/observability_onboarding/otel_host/has-data',
+  });
 
   const isMetricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
@@ -190,41 +146,36 @@ export const OtelLogsPanel: React.FC = () => {
   }, [getDeeplinks]);
 
   const visualizeActionLinks = useMemo(
-    () =>
-      [
-        ...(deeplinks?.logs
-          ? [
-              {
-                id: 'logs',
-                title: i18n.translate(
-                  'xpack.observability_onboarding.otelLogsPanel.logsTitle',
-                  { defaultMessage: 'View and analyze your logs' }
-                ),
-                label: i18n.translate(
-                  'xpack.observability_onboarding.otelLogsPanel.logsLabel',
-                  { defaultMessage: 'Explore logs' }
-                ),
-                href: deeplinks.logs,
-              },
-            ]
-          : []),
-        ...(isMetricsOnboardingEnabled && deeplinks?.metrics
-          ? [
-              {
-                id: 'metrics',
-                title: i18n.translate(
-                  'xpack.observability_onboarding.otelLogsPanel.metricsTitle',
-                  { defaultMessage: 'View and analyze your metrics' }
-                ),
-                label: i18n.translate(
-                  'xpack.observability_onboarding.otelLogsPanel.metricsLabel',
-                  { defaultMessage: 'Open Hosts' }
-                ),
-                href: deeplinks.metrics,
-              },
-            ]
-          : []),
-      ],
+    () => [
+      ...(deeplinks?.logs
+        ? [
+            {
+              id: 'logs',
+              title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.logsTitle', {
+                defaultMessage: 'View and analyze your logs',
+              }),
+              label: i18n.translate('xpack.observability_onboarding.otelLogsPanel.logsLabel', {
+                defaultMessage: 'Explore logs',
+              }),
+              href: deeplinks.logs,
+            },
+          ]
+        : []),
+      ...(isMetricsOnboardingEnabled && deeplinks?.metrics
+        ? [
+            {
+              id: 'metrics',
+              title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.metricsTitle', {
+                defaultMessage: 'View and analyze your metrics',
+              }),
+              label: i18n.translate('xpack.observability_onboarding.otelLogsPanel.metricsLabel', {
+                defaultMessage: 'Open Hosts',
+              }),
+              href: deeplinks.metrics,
+            },
+          ]
+        : []),
+    ],
     [deeplinks, isMetricsOnboardingEnabled]
   );
 
@@ -468,16 +419,16 @@ export const OtelLogsPanel: React.FC = () => {
                   defaultMessage: 'Visualize your data',
                 }
               ),
-              status: (hasDataResponse?.hasData
+              status: (hasData
                 ? 'complete'
                 : isMonitoringStepActive
-                  ? 'current'
-                  : 'incomplete') as EuiStepStatus,
+                ? 'current'
+                : 'incomplete') as EuiStepStatus,
               children: isMonitoringStepActive ? (
                 <>
                   <ProgressIndicator
                     title={
-                      hasDataResponse?.hasData
+                      hasData
                         ? i18n.translate(
                             'xpack.observability_onboarding.otelLogsPanel.monitoringHost',
                             { defaultMessage: 'We are monitoring your host' }
@@ -488,7 +439,7 @@ export const OtelLogsPanel: React.FC = () => {
                           )
                     }
                     iconType="checkInCircleFilled"
-                    isLoading={!hasDataResponse?.hasData}
+                    isLoading={!hasData}
                     css={css`
                       max-width: 40%;
                     `}
@@ -522,7 +473,7 @@ export const OtelLogsPanel: React.FC = () => {
                     </>
                   )}
 
-                  {hasDataResponse?.hasData === true && visualizeActionLinks.length > 0 && (
+                  {hasData === true && visualizeActionLinks.length > 0 && (
                     <>
                       <EuiSpacer />
                       <GetStartedPanel

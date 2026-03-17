@@ -13,7 +13,11 @@ import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
-import { CLOUDFORWARDER_INDEX_PATTERNS, type LogType } from '../../../common/aws_cloudforwarder';
+import { CLOUDFORWARDER_INDEX_PATTERNS } from '../../../common/aws_cloudforwarder';
+import {
+  isNoShardsAvailableError,
+  throwHasDataSearchError,
+} from '../../lib/handle_has_data_search_error';
 
 export interface CreateCloudForwarderOnboardingFlowRouteResponse {
   onboardingId: string;
@@ -65,7 +69,7 @@ const hasCloudForwarderDataRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/cloudforwarder/has-data',
   params: t.type({
     query: t.type({
-      logType: t.string,
+      logType: t.keyof({ vpcflow: null, elbaccess: null, cloudtrail: null }),
       start: t.string,
     }),
   }),
@@ -79,10 +83,7 @@ const hasCloudForwarderDataRoute = createObservabilityOnboardingServerRoute({
     const { logType, start } = resources.params.query;
     const { elasticsearch } = await resources.context.core;
 
-    const indexPattern = CLOUDFORWARDER_INDEX_PATTERNS[logType as LogType];
-    if (!indexPattern) {
-      throw Boom.badRequest(`Unknown logType: ${logType}`);
-    }
+    const indexPattern = CLOUDFORWARDER_INDEX_PATTERNS[logType];
 
     try {
       const result = await elasticsearch.client.asCurrentUser.search({
@@ -101,17 +102,11 @@ const hasCloudForwarderDataRoute = createObservabilityOnboardingServerRoute({
       const hasData = (result.hits.total as estypes.SearchTotalHits).value > 0;
       return { hasData };
     } catch (error) {
-      const errorType = error?.meta?.body?.error?.type;
-      const rootCauseType = error?.meta?.body?.error?.root_cause?.[0]?.type;
-
-      if (
-        errorType === 'search_phase_execution_exception' &&
-        rootCauseType === 'no_shard_available_action_exception'
-      ) {
+      if (isNoShardsAvailableError(error)) {
         return { hasData: false };
       }
 
-      throw Boom.internal(`Elasticsearch responded with an error. ${error.message}`);
+      throwHasDataSearchError(error);
     }
   },
 });

@@ -27,10 +27,10 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ValuesType } from 'utility-types';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 import type { ObservabilityOnboardingAppServices } from '../../..';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
+import { useTimeWindowDataDetection } from '../shared/use_time_window_data_detection';
 import { ProgressIndicator } from '../shared/progress_indicator';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { FeedbackButtons } from '../shared/feedback_buttons';
@@ -49,7 +49,7 @@ export function OtelApmQuickstartFlow() {
     }),
   });
   const {
-    services: { share, analytics },
+    services: { share },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const { data, status, error, refetch } = useOtelApmFlow();
   const { onPageReady } = usePerformanceContext();
@@ -65,7 +65,6 @@ export function OtelApmQuickstartFlow() {
   }, [data, onPageReady]);
 
   const [sessionStartTime] = useState(() => new Date().toISOString());
-  const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
 
   const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
     isActive: status === FETCH_STATUS.SUCCESS,
@@ -73,58 +72,15 @@ export function OtelApmQuickstartFlow() {
     onboardingId: data?.onboardingId,
   });
 
-  const [checkDataStartTime, setCheckDataStartTime] = useState<number | null>(null);
-  useEffect(() => {
-    if (isMonitoringStepActive && checkDataStartTime === null) {
-      setCheckDataStartTime(Date.now());
-    }
-  }, [isMonitoringStepActive, checkDataStartTime]);
-
-  const {
-    data: hasDataResponse,
-    status: hasDataStatus,
-    refetch: refetchHasData,
-  } = useFetcher(
-    (callApi) => {
-      if (!isMonitoringStepActive) return;
-      return callApi('GET /internal/observability_onboarding/otel_apm/has-data', {
-        params: {
-          query: { start: sessionStartTime },
-        },
-      });
-    },
-    [isMonitoringStepActive, sessionStartTime],
-    { showToastOnError: false }
-  );
-
-  useEffect(() => {
-    const pendingStatusList = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
-    if (pendingStatusList.includes(hasDataStatus) || hasDataResponse?.hasData === true) {
-      return;
-    }
-    const timeout = setTimeout(() => {
-      refetchHasData();
-    }, FETCH_INTERVAL);
-    return () => clearTimeout(timeout);
-  }, [hasDataResponse?.hasData, refetchHasData, hasDataStatus]);
-
-  useEffect(() => {
-    if (hasDataResponse?.hasData === true && !dataReceivedTelemetrySent) {
-      setDataReceivedTelemetrySent(true);
-      analytics?.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
-        flow_type: 'otel_apm',
-        flow_id: data?.onboardingId ?? '',
-        step: 'logs-ingest',
-        step_status: 'complete',
-      });
-    }
-  }, [analytics, hasDataResponse?.hasData, dataReceivedTelemetrySent, data?.onboardingId]);
-
-  const isTroubleshootingVisible =
-    isMonitoringStepActive &&
-    hasDataResponse?.hasData === false &&
-    checkDataStartTime !== null &&
-    Date.now() - checkDataStartTime > SHOW_TROUBLESHOOTING_DELAY;
+  const { hasData, isTroubleshootingVisible } = useTimeWindowDataDetection({
+    isMonitoringActive: isMonitoringStepActive,
+    sessionStartTime,
+    fetchInterval: FETCH_INTERVAL,
+    troubleshootingDelay: SHOW_TROUBLESHOOTING_DELAY,
+    flowType: 'otel_apm',
+    onboardingId: data?.onboardingId ?? '',
+    endpoint: '/internal/observability_onboarding/otel_apm/has-data',
+  });
 
   if (error !== undefined) {
     return <EmptyPrompt onboardingFlowType="otel_apm" error={error} onRetryClick={refetch} />;
@@ -176,7 +132,7 @@ export function OtelApmQuickstartFlow() {
             title: i18n.translate('xpack.observability_onboarding.otelApm.monitorStepTitle', {
               defaultMessage: 'Visualize your data',
             }),
-            status: (hasDataResponse?.hasData
+            status: (hasData
               ? 'complete'
               : isMonitoringStepActive
               ? 'current'
@@ -185,7 +141,7 @@ export function OtelApmQuickstartFlow() {
               <>
                 <ProgressIndicator
                   title={
-                    hasDataResponse?.hasData
+                    hasData
                       ? i18n.translate('xpack.observability_onboarding.otelApm.monitoringApp', {
                           defaultMessage: 'We are receiving your application data',
                         })
@@ -194,7 +150,7 @@ export function OtelApmQuickstartFlow() {
                         })
                   }
                   iconType="checkInCircleFilled"
-                  isLoading={!hasDataResponse?.hasData}
+                  isLoading={!hasData}
                   css={css`
                     max-width: 40%;
                   `}
@@ -228,7 +184,7 @@ export function OtelApmQuickstartFlow() {
                   </>
                 )}
 
-                {hasDataResponse?.hasData === true && (
+                {hasData === true && (
                   <>
                     <EuiSpacer />
                     <GetStartedPanel

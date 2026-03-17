@@ -13,6 +13,10 @@ import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
+import {
+  isNoShardsAvailableError,
+  throwHasDataSearchError,
+} from '../../lib/handle_has_data_search_error';
 
 const createOtelApmOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/otel_apm/flow',
@@ -77,6 +81,9 @@ const hasOtelApmDataRoute = createObservabilityOnboardingServerRoute({
         },
       };
 
+      // Time-window detection: matches any APM data arriving after session start.
+      // May produce false positives if other services are already active.
+      // Correlation ID fallback (labels.onboarding_id) is available if needed.
       const result = await elasticsearch.client.asCurrentUser.search({
         index: [
           'traces-apm*',
@@ -97,17 +104,11 @@ const hasOtelApmDataRoute = createObservabilityOnboardingServerRoute({
       const hasData = (result.hits.total as estypes.SearchTotalHits).value > 0;
       return { hasData };
     } catch (error) {
-      const errorType = error?.meta?.body?.error?.type;
-      const rootCauseType = error?.meta?.body?.error?.root_cause?.[0]?.type;
-
-      if (
-        errorType === 'search_phase_execution_exception' &&
-        rootCauseType === 'no_shard_available_action_exception'
-      ) {
+      if (isNoShardsAvailableError(error)) {
         return { hasData: false };
       }
 
-      throw Boom.internal(`Elasticsearch responded with an error. ${error.message}`);
+      throwHasDataSearchError(error);
     }
   },
 });

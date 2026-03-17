@@ -12,6 +12,10 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
+import {
+  isNoShardsAvailableError,
+  throwHasDataSearchError,
+} from '../../lib/handle_has_data_search_error';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
@@ -126,17 +130,11 @@ const hasOtelHostDataRoute = createObservabilityOnboardingServerRoute({
 
       return { hasData: hasLogs || hasMetrics };
     } catch (error) {
-      const errorType = error?.meta?.body?.error?.type;
-      const rootCauseType = error?.meta?.body?.error?.root_cause?.[0]?.type;
-
-      if (
-        errorType === 'search_phase_execution_exception' &&
-        rootCauseType === 'no_shard_available_action_exception'
-      ) {
+      if (isNoShardsAvailableError(error)) {
         return { hasData: false };
       }
 
-      throw Boom.internal(`Elasticsearch responded with an error. ${error.message}`);
+      throwHasDataSearchError(error);
     }
   },
 });

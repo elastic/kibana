@@ -28,6 +28,8 @@ import { WIRED_ECS_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 import type { ObservabilityOnboardingContextValue } from '../../../plugin';
 import type { ActionLink } from './data_ingest_status';
 
+const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c';
+
 export const KubernetesPanel: React.FC = () => {
   useFlowBreadcrumb({
     text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8s', {
@@ -68,7 +70,6 @@ export const KubernetesPanel: React.FC = () => {
     return <EmptyPrompt onboardingFlowType="kubernetes" error={error} onRetryClick={refetch} />;
   }
 
-  const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c';
   const kubernetesActionLinks: ActionLink[] = [
     ...(metricsOnboardingEnabled
       ? [

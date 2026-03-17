@@ -10,6 +10,10 @@ import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
+import {
+  isNoShardsAvailableError,
+  throwHasDataSearchError,
+} from '../../lib/handle_has_data_search_error';
 import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
@@ -167,7 +171,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
 
       const [logsResult, metricsResult] = await Promise.all([
         elasticsearch.client.asCurrentUser.search({
-          index: ['logs-*', 'logs', 'logs.*'],
+          index: ['logs-*', 'logs.*'],
           ignore_unavailable: true,
           allow_partial_search_results: true,
           size: 0,
@@ -176,7 +180,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
           query,
         }),
         elasticsearch.client.asCurrentUser.search({
-          index: ['metrics-*', 'metrics', 'metrics.*'],
+          index: ['metrics-*', 'metrics.*'],
           ignore_unavailable: true,
           allow_partial_search_results: true,
           size: 0,
@@ -195,13 +199,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         hasMetrics,
       };
     } catch (error) {
-      const errorType = error?.meta?.body?.error?.type;
-      const rootCauseType = error?.meta?.body?.error?.root_cause?.[0]?.type;
-
-      if (
-        errorType === 'search_phase_execution_exception' &&
-        rootCauseType === 'no_shard_available_action_exception'
-      ) {
+      if (isNoShardsAvailableError(error)) {
         return {
           hasData: false,
           hasLogs: false,
@@ -209,7 +207,7 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         };
       }
 
-      throw Boom.internal(`Elasticsearch responses with an error. ${error.message}`);
+      throwHasDataSearchError(error);
     }
   },
 });
