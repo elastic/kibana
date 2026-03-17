@@ -66,8 +66,8 @@
     "@kbn/react-query",
     "@kbn/react-hooks",
     "@kbn/core-http-browser-mocks",
-    "@kbn/core-notifications-browser-mocks"
-     "@kbn/es-query"
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/es-query"
   ],
   "exclude": ["target/**/*"]
 }
