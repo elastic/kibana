@@ -1118,14 +1118,7 @@ export const getSavedObjectTypes = (
           ],
           schemas: {
             forwardCompatibility: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
-            create: PackagePolicySchemaV22.extends(
-              {
-                enabled: schema.maybe(schema.boolean()),
-                inputs: schema.maybe(schema.arrayOf(schema.any())),
-                package: schema.maybe(schema.any()),
-              },
-              { unknowns: 'ignore' }
-            ),
+            create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
@@ -1278,14 +1271,7 @@ export const getSavedObjectTypes = (
           ],
           schemas: {
             forwardCompatibility: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
-            create: PackagePolicySchemaV22.extends(
-              {
-                enabled: schema.maybe(schema.boolean()),
-                inputs: schema.maybe(schema.arrayOf(schema.any())),
-                package: schema.maybe(schema.any()),
-              },
-              { unknowns: 'ignore' }
-            ),
+            create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
           },
         },
       },

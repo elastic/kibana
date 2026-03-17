@@ -271,10 +271,18 @@ export const NewPackagePolicySchema = schema.object({
 
 /**
  * Snapshot of the package policy SO schema as of model version 10.22.0.
- * If NewPackagePolicySchema gains new fields, create PackagePolicySchemaV{next}
- * that extends this one rather than modifying this schema.
+ * Permissive on enabled, inputs, and package so the SO layer can store internal
+ * shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema gains
+ * new fields, create PackagePolicySchemaV{next} that extends this one.
  */
-export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends({});
+export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
+  {
+    enabled: schema.maybe(schema.boolean()),
+    inputs: schema.maybe(schema.arrayOf(schema.any())),
+    package: schema.maybe(schema.any()),
+  },
+  { unknowns: 'ignore' }
+);
 
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
