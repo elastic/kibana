@@ -29,7 +29,7 @@ const openAttachmentsSection = async () => {
     !!screen.queryByLabelText('Delete Runbook');
 
   if (!isContentVisible) {
-    await userEvent.click(screen.getByRole('button', { name: 'Toggle attachments' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Toggle Attachments' }));
   }
 };
 
