@@ -118,7 +118,9 @@ const generateSingleConversation = async (
   const response = await inferenceClient.output({
     id: 'conversation_sim',
     system: buildSystemPrompt(persona, topic),
-    input: `Generate a conversation with exactly ${turnsPerConversation} turns (each turn = 1 user message + 1 assistant response, so ${turnsPerConversation * 2} messages total).`,
+    input: `Generate a conversation with exactly ${turnsPerConversation} turns (each turn = 1 user message + 1 assistant response, so ${
+      turnsPerConversation * 2
+    } messages total).`,
     schema: conversationSchema,
   });
 

@@ -116,9 +116,7 @@ export const generateSmartExamples = async (
     }
     parsed = output;
   } catch (err) {
-    throw new Error(
-      `Smart generation failed: ${err instanceof Error ? err.message : String(err)}`
-    );
+    throw new Error(`Smart generation failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   return parsed.examples.slice(0, config.count).map((ex: SmartGenOutput['examples'][number]) => ({
