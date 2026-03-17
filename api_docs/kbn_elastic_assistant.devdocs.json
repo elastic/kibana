@@ -151,7 +151,7 @@
           "React.NamedExoticComponent<unknown> & { readonly type: () => React.JSX.Element | null; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/assistant_overlay/index.tsx",
-        "lineNumber": 24,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -189,7 +189,7 @@
           "; }) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/index.tsx",
-        "lineNumber": 421,
+        "lineNumber": 427,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -207,7 +207,7 @@
               "; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/index.tsx",
-            "lineNumber": 424,
+            "lineNumber": 430,
             "columnNumber": 7,
             "deprecated": false,
             "trackAdoption": false,
@@ -1049,7 +1049,7 @@
           "UseAssistantContext"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/index.tsx",
-        "lineNumber": 167,
+        "lineNumber": 169,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
