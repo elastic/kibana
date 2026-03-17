@@ -7,7 +7,6 @@
 
 import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
@@ -38,12 +37,8 @@ const security: jest.Mocked<SecurityPluginStart> = {
   },
 } as unknown as jest.Mocked<SecurityPluginStart>;
 
-const encryptedSavedObjects: jest.Mocked<EncryptedSavedObjectsPluginStart> = {
-  getClient: jest.fn().mockReturnValue({ getDecryptedAsInternalUser: jest.fn() }),
-} as unknown as jest.Mocked<EncryptedSavedObjectsPluginStart>;
-
 const config = {
-  get: jest.fn().mockReturnValue({ invalidateApiKeysTask: { interval: '5m' } }),
+  get: jest.fn().mockReturnValue({ invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' } }),
 } as unknown as PluginInitializerContext<PluginConfig>['config'];
 
 describe('ApiKeyInvalidationTaskRunner', () => {
@@ -55,17 +50,10 @@ describe('ApiKeyInvalidationTaskRunner', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    runner = new ApiKeyInvalidationTaskRunner(
-      logger,
-      savedObjects,
-      securityCore,
-      encryptedSavedObjects,
-      security,
-      config
-    );
+    runner = new ApiKeyInvalidationTaskRunner(logger, savedObjects, securityCore, security, config);
   });
 
-  it('calls runInvalidate with correct parameters', async () => {
+  it('calls runInvalidate with correct parameters and no encryptedSavedObjectsClient', async () => {
     const result = await runner.run({
       taskInstance: { state: { runs: 0, total_invalidated: 0 } } as never,
       abortController: new AbortController(),
@@ -74,9 +62,6 @@ describe('ApiKeyInvalidationTaskRunner', () => {
     expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([
       API_KEY_PENDING_INVALIDATION_TYPE,
     ]);
-    expect(encryptedSavedObjects.getClient).toHaveBeenCalledWith({
-      includedHiddenTypes: [API_KEY_PENDING_INVALIDATION_TYPE],
-    });
     expect(runInvalidate).toHaveBeenCalledWith(
       expect.objectContaining({
         savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,
@@ -85,6 +70,11 @@ describe('ApiKeyInvalidationTaskRunner', () => {
         logger,
         invalidateApiKeyFn: security.authc.apiKeys.invalidateAsInternalUser,
         invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
+      })
+    );
+    expect(runInvalidate).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        encryptedSavedObjectsClient: expect.anything(),
       })
     );
 
