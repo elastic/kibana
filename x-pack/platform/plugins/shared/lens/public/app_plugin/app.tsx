@@ -288,9 +288,21 @@ export function App({
         isByValueMode,
         currentDocTitle,
         redirectToOrigin,
-        originatingApp: incomingState?.originatingApp,
-        originatingPath: incomingState?.originatingPath,
-        breadcrumbTitle: incomingState?.breadcrumbTitle,
+        originatingApp:
+          incomingState?.originatingApp ??
+          (initialContext && 'originatingApp' in initialContext
+            ? initialContext.originatingApp
+            : undefined),
+        originatingPath:
+          incomingState?.originatingPath ??
+          (initialContext && 'originatingPath' in initialContext
+            ? initialContext.originatingPath
+            : undefined),
+        breadcrumbTitle:
+          incomingState?.breadcrumbTitle ??
+          (initialContext && 'breadcrumbTitle' in initialContext
+            ? initialContext.breadcrumbTitle
+            : undefined),
         isFromLegacyEditor: Boolean(isLinkedToOriginatingApp || legacyEditorAppName),
         originatingAppName: getOriginatingAppName(),
       }
@@ -370,10 +382,9 @@ export function App({
             onAppLeave,
             redirectTo,
             switchDatasource,
-            originatingApp:
-              isComingFromContainerView(incomingState) || initialContextIsEmbedded
-                ? incomingState?.originatingApp ?? initialContext?.originatingApp
-                : undefined,
+            originatingApp: isComingFromContainerView(incomingState)
+              ? incomingState?.originatingApp ?? initialContext?.originatingApp
+              : undefined,
             textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
             ...lensAppServices,
           },
@@ -404,7 +415,6 @@ export function App({
       redirectTo,
       switchDatasource,
       incomingState,
-      initialContextIsEmbedded,
       initialContext?.originatingApp,
       shouldCloseAndSaveTextBasedQuery,
       lensAppServices,
@@ -541,7 +551,7 @@ export function App({
         <SaveModalContainer
           lensServices={lensAppServices}
           originatingApp={
-            isComingFromContainerView(incomingState) || initialContextIsEmbedded
+            isComingFromContainerView(incomingState)
               ? incomingState?.originatingApp ?? initialContext?.originatingApp
               : undefined
           }

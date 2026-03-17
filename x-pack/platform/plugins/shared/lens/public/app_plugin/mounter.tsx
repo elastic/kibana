@@ -214,6 +214,11 @@ export async function mountApp(
       initialContext && 'originatingApp' in initialContext ? initialContext.originatingApp : null;
     const mergedOriginatingApp =
       embeddableEditorIncomingState?.originatingApp ?? contextOriginatingApp;
+    const mergedOriginatingPath =
+      embeddableEditorIncomingState?.originatingPath ??
+      (initialContext && 'originatingPath' in initialContext
+        ? initialContext.originatingPath
+        : undefined);
     if (!mergedOriginatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
     }
@@ -226,7 +231,7 @@ export async function mountApp(
       stateTransfer.navigateToWithEmbeddablePackages<LensSerializedAPIConfig>(
         mergedOriginatingApp,
         {
-          path: embeddableEditorIncomingState?.originatingPath,
+          path: mergedOriginatingPath,
           state: [
             {
               embeddableId: isCopied ? undefined : embeddableId,
@@ -239,7 +244,7 @@ export async function mountApp(
       );
     } else {
       coreStart.application.navigateToApp(mergedOriginatingApp, {
-        path: embeddableEditorIncomingState?.originatingPath,
+        path: mergedOriginatingPath,
       });
     }
   };

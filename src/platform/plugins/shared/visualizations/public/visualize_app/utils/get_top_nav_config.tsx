@@ -426,6 +426,8 @@ export const getTopNavConfig = (
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
                 legacyEditorOriginatingApp: VisualizeConstants.APP_ID,
                 originatingApp,
+                originatingPath,
+                breadcrumbTitle,
                 title: visInstance?.panelTitle || vis.title,
                 visTypeTitle: vis.type.title,
                 description: visInstance?.panelDescription || vis.description,

@@ -634,6 +634,8 @@ export type VisualizeEditorContext<T extends LensConfiguration = LensConfigurati
   vizEditorOriginatingAppUrl?: string;
   legacyEditorOriginatingApp?: string;
   originatingApp?: string;
+  originatingPath?: string;
+  breadcrumbTitle?: string;
   isVisualizeAction: boolean;
   searchQuery?: Query;
   searchFilters?: Filter[];
