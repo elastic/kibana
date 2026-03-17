@@ -21,7 +21,7 @@ import {
   EuiToolTip,
   formatDate,
 } from '@elastic/eui';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { QUERY_TIMEOUT } from '../../common/constants';
@@ -40,10 +40,13 @@ import { pagePathGetters } from '../common/page_paths';
 import { usePacks } from '../packs/use_packs';
 import { RunByColumn } from './components/run_by_column';
 import { SourceBadge } from './components/source_column';
-import { HistoryFilters, DEFAULT_START_DATE, DEFAULT_END_DATE } from './components/history_filters';
+import { TagsColumn } from './components/tags_column';
+import { HistoryFilters } from './components/history_filters';
 import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
+import { useHistoryUrlParams } from './use_history_url_params';
 
 const EMPTY_ARRAY: UnifiedHistoryRow[] = [];
+const EMPTY_TAGS: string[] = [];
 const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
 
 const PACKS_CONFIG = { isLive: false } as const;
@@ -58,6 +61,8 @@ interface HistoryDetailsButtonProps {
 }
 
 const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
+  const { push } = useHistory();
+
   const path = useMemo(() => {
     if (isScheduledRow(row)) {
       return pagePathGetters.history_scheduled_details({
@@ -73,7 +78,17 @@ const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
     return undefined;
   }, [row]);
 
-  const navProps = useRouterNavigate(path ?? '');
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      if (path) {
+        push(path, { fromHistory: true });
+      }
+    },
+    [push, path]
+  );
+
+  const navProps = useRouterNavigate(path ?? '', handleClick);
 
   const detailsText = i18n.translate(
     'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',
@@ -98,12 +113,22 @@ const UnifiedHistoryTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const { push } = useHistory();
 
-  const [pageSize, setPageSize] = usePersistedPageSize();
-  const [searchValue, setSearchValue] = useState('');
-  const [selectedSources, setSelectedSources] = useState<SourceFilter[]>([]);
-  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState(DEFAULT_START_DATE);
-  const [endDate, setEndDate] = useState(DEFAULT_END_DATE);
+  const [persistedPageSize, setPersistedPageSize] = usePersistedPageSize();
+  const {
+    filters: {
+      q: searchValue,
+      sources: selectedSources,
+      runBy: selectedUserIds,
+      start: startDate,
+      end: endDate,
+      pageSize: urlPageSize,
+      tags: selectedTags,
+    },
+    setFilter,
+    setFilters,
+  } = useHistoryUrlParams();
+
+  const pageSize = urlPageSize ?? persistedPageSize;
 
   const { currentCursor, pageIndex, goToNextPage, goToPage, resetPagination } =
     useCursorPagination();
@@ -119,6 +144,7 @@ const UnifiedHistoryTableComponent = () => {
     kuery: searchValue || undefined,
     sourceFilters: selectedSources.length > 0 ? selectedSources : undefined,
     userIds: selectedUserIds.length > 0 ? selectedUserIds : undefined,
+    tags: selectedTags.length > 0 ? selectedTags : undefined,
     startDate,
     endDate,
   });
@@ -131,43 +157,51 @@ const UnifiedHistoryTableComponent = () => {
 
   const handleSearchSubmit = useCallback(
     (value: string) => {
-      setSearchValue(value);
+      setFilter('q', value);
       resetPagination();
     },
-    [resetPagination]
+    [setFilter, resetPagination]
   );
 
   const handleSelectedSourcesChanged = useCallback(
     (sources: SourceFilter[]) => {
-      setSelectedSources(sources);
+      setFilter('sources', sources);
       resetPagination();
     },
-    [resetPagination]
+    [setFilter, resetPagination]
   );
 
   const handleSelectedUsersChanged = useCallback(
     (userIds: string[]) => {
-      setSelectedUserIds(userIds);
+      setFilter('runBy', userIds);
       resetPagination();
     },
-    [resetPagination]
+    [setFilter, resetPagination]
+  );
+
+  const handleSelectedTagsChanged = useCallback(
+    (newTags: string[]) => {
+      setFilter('tags', newTags);
+      resetPagination();
+    },
+    [setFilter, resetPagination]
   );
 
   const handleTimeChange = useCallback(
     (start: string, end: string) => {
-      setStartDate(start);
-      setEndDate(end);
+      setFilters({ start, end });
       resetPagination();
     },
-    [resetPagination]
+    [setFilters, resetPagination]
   );
 
   const handlePageSizeChange = useCallback(
     (size: number) => {
-      setPageSize(size);
+      setPersistedPageSize(size);
+      setFilter('pageSize', size);
       resetPagination();
     },
-    [setPageSize, resetPagination]
+    [setPersistedPageSize, setFilter, resetPagination]
   );
 
   const handleNextPage = useCallback(() => {
@@ -281,6 +315,14 @@ const UnifiedHistoryTableComponent = () => {
     []
   );
 
+  const renderTagsColumn = useCallback((_: unknown, row: UnifiedHistoryRow) => {
+    if (!isLiveRow(row)) {
+      return <>{'\u2014'}</>;
+    }
+
+    return <TagsColumn tags={row.tags ?? EMPTY_TAGS} />;
+  }, []);
+
   const renderRunByColumn = useCallback(
     (_: unknown, row: UnifiedHistoryRow) => {
       if (!isLiveRow(row)) {
@@ -312,6 +354,7 @@ const UnifiedHistoryTableComponent = () => {
 
       if (row.packId) {
         return push(newQueryPath, {
+          fromHistory: true,
           form: pickBy(
             {
               packId: row.packId,
@@ -328,6 +371,7 @@ const UnifiedHistoryTableComponent = () => {
       }
 
       push(newQueryPath, {
+        fromHistory: true,
         form: pickBy(
           {
             query: row.queryText,
@@ -410,6 +454,14 @@ const UnifiedHistoryTableComponent = () => {
         render: renderResultsColumn,
       },
       {
+        field: 'tags',
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.tagsColumnTitle', {
+          defaultMessage: 'Tags',
+        }),
+        width: '100px',
+        render: renderTagsColumn,
+      },
+      {
         field: 'source',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.sourceColumnTitle', {
           defaultMessage: 'Source',
@@ -466,6 +518,7 @@ const UnifiedHistoryTableComponent = () => {
       renderResultsColumn,
       renderRunByColumn,
       renderSourceColumn,
+      renderTagsColumn,
       renderTimestampColumn,
     ]
   );
@@ -503,6 +556,8 @@ const UnifiedHistoryTableComponent = () => {
       <HistoryFilters
         searchValue={searchValue}
         onSearchSubmit={handleSearchSubmit}
+        selectedTags={selectedTags}
+        onSelectedTagsChanged={handleSelectedTagsChanged}
         selectedSources={selectedSources}
         onSelectedSourcesChanged={handleSelectedSourcesChanged}
         selectedUserIds={selectedUserIds}
