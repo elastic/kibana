@@ -244,7 +244,7 @@ export class TaskStore {
 
       docs.forEach((taskInstance) => {
         const { apiKey, uiamApiKey, userScope } = taskInstance;
-        if ((apiKey || uiamApiKey) && userScope && !userScope.apiKeyCreatedByUser) {
+        if ((apiKey || uiamApiKey) && userScope) {
           docsWithApiKeys.push(taskInstance);
           if (apiKey && userScope.apiKeyId) {
             apiKeyIdsToRemoveMap.set(taskInstance.id, {

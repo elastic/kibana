@@ -41,7 +41,8 @@ import {
   TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
 } from './task_runner';
 import { schema } from '@kbn/config-schema';
-import { CLAIM_STRATEGY_MGET, CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
+import { ApiKeyType, CLAIM_STRATEGY_MGET, CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
+import type { TaskManagerConfig } from '../config';
 import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
 
@@ -3030,12 +3031,121 @@ describe('TaskManagerRunner', () => {
     });
   });
 
+  describe('getFakeKibanaRequest', () => {
+    const esApiKey = Buffer.from('esKeyId:esKeySecret').toString('base64');
+    const uiamApiKey = Buffer.from('uiamKeyId:uiamKeySecret').toString('base64');
+
+    test('returns undefined when task has no apiKey and no uiamApiKey', async () => {
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: mockInstance(),
+        definitions: {
+          bar: { title: 'Bar!', createTaskRunner: createTaskRunnerFn },
+        },
+      });
+      await runner.run();
+      expect(createTaskRunnerFn.mock.calls[0][0].fakeRequest).toBeUndefined();
+    });
+
+    test('uses ES apiKey when api_key_type is ES (default)', async () => {
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: mockInstance({
+          apiKey: esApiKey,
+          userScope: { apiKeyId: 'esKeyId', spaceId: 'my-space', apiKeyCreatedByUser: false },
+        }),
+        definitions: {
+          bar: { title: 'Bar!', createTaskRunner: createTaskRunnerFn },
+        },
+      });
+      await runner.run();
+      const { fakeRequest } = createTaskRunnerFn.mock.calls[0][0];
+      expect(fakeRequest).toBeDefined();
+      expect(fakeRequest.headers.authorization).toBe(`ApiKey ${esApiKey}`);
+    });
+
+    test('uses uiamApiKey when api_key_type is UIAM and task has uiamApiKey', async () => {
+      const createTaskRunnerFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: mockInstance({
+          apiKey: esApiKey,
+          uiamApiKey,
+          userScope: {
+            apiKeyId: 'esKeyId',
+            uiamApiKeyId: 'uiamKeyId',
+            spaceId: 'default',
+            apiKeyCreatedByUser: false,
+          },
+        }),
+        definitions: {
+          bar: { title: 'Bar!', createTaskRunner: createTaskRunnerFn },
+        },
+        config: { api_key_type: ApiKeyType.UIAM },
+      });
+      await runner.run();
+      const { fakeRequest } = createTaskRunnerFn.mock.calls[0][0];
+      expect(fakeRequest).toBeDefined();
+      expect(fakeRequest.headers.authorization).toBe(`ApiKey ${uiamApiKey}`);
+    });
+
+    test('falls back to ES apiKey with warning when api_key_type is UIAM but task has no uiamApiKey', async () => {
+      const createTaskRunnerFn = jest.fn();
+      const { runner, logger } = await readyToRunStageSetup({
+        instance: mockInstance({
+          apiKey: esApiKey,
+          userScope: { apiKeyId: 'esKeyId', spaceId: 'default', apiKeyCreatedByUser: false },
+        }),
+        definitions: {
+          bar: { title: 'Bar!', createTaskRunner: createTaskRunnerFn },
+        },
+        config: { api_key_type: ApiKeyType.UIAM },
+      });
+      await runner.run();
+      const { fakeRequest } = createTaskRunnerFn.mock.calls[0][0];
+      expect(fakeRequest).toBeDefined();
+      expect(fakeRequest.headers.authorization).toBe(`ApiKey ${esApiKey}`);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('is configured to use UIAM API key but has no uiamApiKey')
+      );
+    });
+
+    test('sets basePath using userScope.spaceId', async () => {
+      const createTaskRunnerFn = jest.fn();
+      const { runner, basePathService } = await readyToRunStageSetup({
+        instance: mockInstance({
+          apiKey: esApiKey,
+          userScope: { apiKeyId: 'esKeyId', spaceId: 'custom-space', apiKeyCreatedByUser: false },
+        }),
+        definitions: {
+          bar: { title: 'Bar!', createTaskRunner: createTaskRunnerFn },
+        },
+      });
+      await runner.run();
+      expect(basePathService.set).toHaveBeenCalledWith(expect.anything(), '/s/custom-space');
+    });
+
+    test('defaults spaceId to "default" when userScope is missing', async () => {
+      const createTaskRunnerFn = jest.fn();
+      const { runner, basePathService } = await readyToRunStageSetup({
+        instance: mockInstance({
+          apiKey: esApiKey,
+        }),
+        definitions: {
+          bar: { title: 'Bar!', createTaskRunner: createTaskRunnerFn },
+        },
+      });
+      await runner.run();
+      expect(basePathService.set).toHaveBeenCalledWith(expect.anything(), '/');
+    });
+  });
+
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
     definitions?: TaskDefinitionRegistry;
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
     strategy?: string;
+    config?: Partial<TaskManagerConfig>;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -3095,8 +3205,9 @@ describe('TaskManagerRunner', () => {
       definitions.registerTaskDefinitions(opts.definitions);
     }
 
+    const basePathService = httpServiceMock.createBasePath();
     const runner = new TaskManagerRunner({
-      basePathService: httpServiceMock.createBasePath(),
+      basePathService,
       defaultMaxAttempts: 5,
       beforeRun: (context) => Promise.resolve(context),
       beforeMarkRunning: (context) => Promise.resolve(context),
@@ -3112,6 +3223,7 @@ describe('TaskManagerRunner', () => {
           monitor: true,
           warn_threshold: 5000,
         },
+        ...opts.config,
       }),
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
       strategy: opts.strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY,
@@ -3133,6 +3245,7 @@ describe('TaskManagerRunner', () => {
       store,
       instance,
       usageCounter,
+      basePathService,
     };
   }
 });

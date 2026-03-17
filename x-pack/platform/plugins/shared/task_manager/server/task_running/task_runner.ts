@@ -944,7 +944,7 @@ export class TaskManagerRunner implements TaskRunner {
         : taskInstance.apiKey;
 
     if (apiKeyType === ApiKeyType.UIAM && taskInstance.apiKey && !taskInstance.uiamApiKey) {
-      this.logger.error(
+      this.logger.warn(
         `Task ${taskInstance.id} (${this.taskType}) is configured to use UIAM API key but has no uiamApiKey; falling back to ES API key`
       );
     }
