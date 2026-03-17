@@ -10,7 +10,12 @@
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
 
-import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
+import {
+  DATE_TYPE_ABSOLUTE,
+  DATE_TYPE_NOW,
+  DATE_TYPE_RELATIVE,
+  ROUND_UNIT_MAP,
+} from '../constants';
 import type {
   DateType,
   DateString,
@@ -217,7 +222,7 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
 
   const config = DEFAULT_CONFIG;
   const compiled = getCompiledConfig(config);
-  const { presets = [], delimiter, dateFormat } = options ?? {};
+  const { presets = [], delimiter, dateFormat, roundRelativeTime } = options ?? {};
   const formats = dateFormat ? [dateFormat, ...compiled.absoluteFormats] : compiled.absoluteFormats;
 
   // (1) Preset label match
@@ -235,7 +240,8 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   // (3) Natural duration ("last 7 minutes", "next 3 days")
   const duration = matchNaturalDuration(trimmed, config, compiled);
   if (duration) {
-    return buildRange(text, duration.start, duration.end, formats, true);
+    const roundedStart = applyStartBoundRounding(duration.start, roundRelativeTime);
+    return buildRange(text, roundedStart, duration.end, formats, true);
   }
 
   // (4) Try splitting on delimiters (config + universal dash + extra)
@@ -244,7 +250,8 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
     const startDateString = instantToDateString(parts[0], config, compiled, formats);
     const endDateString = instantToDateString(parts[1], config, compiled, formats);
     if (startDateString && endDateString) {
-      return buildRange(text, startDateString, endDateString, formats, false);
+      const roundedStart = applyStartBoundRounding(startDateString, roundRelativeTime);
+      return buildRange(text, roundedStart, endDateString, formats, false);
     }
     return buildInvalidRange(text);
   }
@@ -256,7 +263,8 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   if (dateString.startsWith('now+')) {
     return buildRange(text, 'now', dateString, formats, false);
   }
-  return buildRange(text, dateString, 'now', formats, false);
+  const roundedStart = applyStartBoundRounding(dateString, roundRelativeTime);
+  return buildRange(text, roundedStart, 'now', formats, false);
 }
 
 // ---------------------------------------------------------------------------
@@ -291,6 +299,38 @@ function dateStringToOffset(dateString: DateString): DateOffset | null {
     unit: unit as TimeUnit,
     ...(roundUnit ? { roundTo: roundUnit as TimeUnit } : {}),
   };
+}
+
+/**
+ * Applies or strips the rounding suffix on a relative datemath `start` string.
+ *
+ * - `true` — keeps existing rounding; when absent, appends `/{roundUnit}`
+ *   inferred from the offset unit via {@link ROUND_UNIT_MAP}.
+ * - `false` — removes any trailing rounding suffix.
+ * - `undefined` — returns the string unchanged.
+ *
+ * Bare `'now'` and non-relative strings are always returned as-is.
+ */
+function applyStartBoundRounding(
+  start: DateString,
+  roundRelativeTime: boolean | undefined
+): DateString {
+  if (roundRelativeTime === undefined) return start;
+  if (start === 'now' || !start.includes('now')) return start;
+
+  const offset = dateStringToOffset(start);
+  if (!offset) return start;
+
+  if (roundRelativeTime === false) {
+    return start.replace(/\/[smhdwMy]$/, '');
+  }
+
+  if (offset.roundTo) return start;
+
+  const roundUnit = ROUND_UNIT_MAP[offset.unit];
+  if (!roundUnit) return start;
+
+  return `${start}/${roundUnit}`;
 }
 
 /**

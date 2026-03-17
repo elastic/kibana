@@ -64,6 +64,17 @@ export interface TimeRangeTransformOptions {
    * Prepended to built-in formats so custom-formatted dates round-trip correctly.
    */
   dateFormat?: string;
+  /**
+   * Controls rounding of the start bound for relative time ranges.
+   * Only affects relative `start` bounds (strings containing `now`);
+   * future ranges where start is bare `now` are unaffected.
+   * - `true`: keep existing rounding; if absent, infer it from the offset
+   *   unit (`/d` for day-and-above, next-unit-up for sub-day units).
+   * - `false`: strip any rounding suffix.
+   * - `undefined`: leave the start string as-is.
+   * @default undefined
+   */
+  roundRelativeTime?: boolean;
 }
 
 export interface TimeRange {
