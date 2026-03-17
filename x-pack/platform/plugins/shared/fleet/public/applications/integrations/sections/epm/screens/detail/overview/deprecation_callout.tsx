@@ -62,7 +62,7 @@ export const DeprecationCallout: React.FC<{
                     values: { version: deprecated.since },
                   })
                 : isUpcoming
-                ? i18n.translate('xpack.fleet.epm.upcomingDeprecatedIntegrationTitle', {
+                ? i18n.translate('xpack.fleet.epm.futureDeprecatedIntegrationTitle', {
                     defaultMessage: 'This integration will be deprecated in a future version',
                   })
                 : i18n.translate('xpack.fleet.epm.deprecatedIntegrationTitle', {
