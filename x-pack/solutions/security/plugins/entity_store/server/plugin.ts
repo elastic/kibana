@@ -82,6 +82,7 @@ export class EntityStorePlugin
       logger: this.logger,
       config: automatedResolutionMaintainerConfig,
       core,
+      analytics: createReportEvent(core.analytics),
     });
 
     return {

@@ -175,7 +175,7 @@ export const assertNotResolved = async (
  * The route calls `taskManager.runSoon()` — it does NOT wait for completion.
  */
 export const triggerMaintainerRun = async (
-  apiClient: { post: Function },
+  apiClient: ForceLogExtractionApiClient,
   headers: Record<string, string>,
   maintainerId = 'automated-resolution'
 ) => {
