@@ -68,7 +68,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     filestore: experimentalFeaturesEnabled,
     skills: experimentalFeaturesEnabled,
   };
-  const anonymizationEnabled = inference?.isAnonymizationEnabled() ?? false;
+  const anonymizationEnabled = inference.isAnonymizationEnabled();
 
   return {
     request,

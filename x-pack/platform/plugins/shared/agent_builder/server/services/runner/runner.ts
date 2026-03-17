@@ -61,7 +61,7 @@ export interface CreateScopedRunnerDeps {
   // external plugin deps
   spaces: SpacesPluginStart | undefined;
   actions: ActionsPluginStart;
-  inference?: InferenceServerStart;
+  inference: InferenceServerStart;
   // internal service deps
   modelProvider: ModelProvider;
   toolsService: ToolsServiceStart;
