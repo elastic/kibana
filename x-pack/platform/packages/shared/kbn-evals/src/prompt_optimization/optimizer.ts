@@ -104,16 +104,9 @@ export const optimizePrompt = async (options: {
   const maxStale = 3;
 
   for (let i = 0; i < config.maxIterations; i++) {
-    const candidatePrompt = await mutatePrompt(
-      inferenceClient,
-      bestPrompt,
-      bestScore,
-      i
-    );
+    const candidatePrompt = await mutatePrompt(inferenceClient, bestPrompt, bestScore, i);
 
-    const candidateTask = createTaskWithPrompt
-      ? createTaskWithPrompt(candidatePrompt)
-      : task;
+    const candidateTask = createTaskWithPrompt ? createTaskWithPrompt(candidatePrompt) : task;
     const candidateScore = await scorePrompt(executorClient, dataset, candidateTask, evaluators);
 
     const improved = candidateScore > bestScore;
@@ -133,8 +126,7 @@ export const optimizePrompt = async (options: {
     }
   }
 
-  const improvement =
-    initialScore > 0 ? ((bestScore - initialScore) / initialScore) * 100 : 0;
+  const improvement = initialScore > 0 ? ((bestScore - initialScore) / initialScore) * 100 : 0;
 
   return {
     bestPrompt,
