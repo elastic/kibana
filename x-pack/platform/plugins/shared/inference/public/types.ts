@@ -20,8 +20,6 @@ export interface InferencePublicSetup {}
 export interface InferencePublicStart {
   chatComplete: ChatCompleteAPI;
   output: OutputAPI;
-  getConnectors: () => Promise<{
-    connectors: InferenceConnector[];
-    anonymizationEnabled: boolean;
-  }>;
+  getConnectors: () => Promise<InferenceConnector[]>;
+  isAnonymizationEnabled: () => Promise<boolean>;
 }

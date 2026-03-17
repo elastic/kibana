@@ -41,7 +41,10 @@ export class AgentBuilderAccessChecker {
   }
 
   private async getInferenceAccess() {
-    const { connectors, anonymizationEnabled } = await this.inference.getConnectors();
+    const [connectors, anonymizationEnabled] = await Promise.all([
+      this.inference.getConnectors(),
+      this.inference.isAnonymizationEnabled(),
+    ]);
     return {
       hasLlmConnector: connectors.length > 0,
       hasAnonymizationEnabled: anonymizationEnabled,

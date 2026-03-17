@@ -33,10 +33,8 @@ describe('AgentBuilderAccessChecker', () => {
     anonymizationEnabled?: boolean;
   }): InferencePublicStart =>
     ({
-      getConnectors: jest.fn().mockResolvedValue({
-        connectors,
-        anonymizationEnabled,
-      }),
+      getConnectors: jest.fn().mockResolvedValue(connectors),
+      isAnonymizationEnabled: jest.fn().mockResolvedValue(anonymizationEnabled),
     } as unknown as InferencePublicStart);
 
   it('derives connector and anonymization flags from connectors payload', async () => {
@@ -55,6 +53,7 @@ describe('AgentBuilderAccessChecker', () => {
       hasAnonymizationEnabled: true,
     });
     expect(inference.getConnectors).toHaveBeenCalledTimes(1);
+    expect(inference.isAnonymizationEnabled).toHaveBeenCalledTimes(1);
   });
 
   it('handles disabled anonymization and missing connectors', async () => {
@@ -78,6 +77,7 @@ describe('AgentBuilderAccessChecker', () => {
     const licensing = createLicensing({ isActive: true, hasAtLeast: true });
     const inference = {
       getConnectors: jest.fn().mockRejectedValue(new Error('connectors failed')),
+      isAnonymizationEnabled: jest.fn().mockResolvedValue(false),
     } as unknown as InferencePublicStart;
     const checker = new AgentBuilderAccessChecker({ licensing, inference });
 

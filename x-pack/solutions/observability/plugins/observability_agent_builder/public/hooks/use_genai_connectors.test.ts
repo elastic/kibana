@@ -52,10 +52,7 @@ describe('useGenAIConnectors', () => {
   });
 
   it('should fetch connectors and set hasConnectors to true when connectors exist', async () => {
-    mockGetConnectors.mockResolvedValue({
-      connectors: mockConnectors,
-      anonymizationEnabled: false,
-    });
+    mockGetConnectors.mockResolvedValue(mockConnectors);
     const { result, unmount } = renderHook(() => useGenAIConnectors());
 
     await waitFor(() => {
@@ -69,7 +66,7 @@ describe('useGenAIConnectors', () => {
   });
 
   it('should set hasConnectors to false when no connectors exist', async () => {
-    mockGetConnectors.mockResolvedValue({ connectors: [], anonymizationEnabled: false });
+    mockGetConnectors.mockResolvedValue([]);
     const { result, unmount } = renderHook(() => useGenAIConnectors());
 
     await waitFor(() => {

@@ -8,7 +8,10 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { createOutputApi } from '../common/output';
-import type { GetConnectorsResponseBody } from '../common/http_apis';
+import type {
+  GetConnectorsResponseBody,
+  GetAnonymizationEnabledResponseBody,
+} from '../common/http_apis';
 import type {
   ConfigSchema,
   InferencePublicSetup,
@@ -47,7 +50,21 @@ export class InferencePlugin
       chatComplete,
       output,
       getConnectors: async () => {
-        return coreStart.http.get<GetConnectorsResponseBody>('/internal/inference/connectors');
+        const { connectors } = await coreStart.http.get<GetConnectorsResponseBody>(
+          '/internal/inference/connectors'
+        );
+        return connectors;
+      },
+      isAnonymizationEnabled: async () => {
+        try {
+          const { anonymizationEnabled } =
+            await coreStart.http.get<GetAnonymizationEnabledResponseBody>(
+              '/internal/inference/anonymization_enabled'
+            );
+          return anonymizationEnabled;
+        } catch {
+          return false;
+        }
       },
     };
   }
