@@ -30,7 +30,9 @@ components:
               created_at: '2023-10-31T00:00:00Z'
               updated_at: '2023-10-31T00:00:00Z'
               created_by: 'elastic'
+              created_by_profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0'
               updated_by: 'elastic'
+              updated_by_profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0'
               description: 'My pack description'
         policy_ids: []
     FindPackResponse:

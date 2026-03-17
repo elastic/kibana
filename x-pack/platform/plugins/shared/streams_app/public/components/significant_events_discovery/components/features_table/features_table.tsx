@@ -108,7 +108,7 @@ export function FeaturesTable() {
           data-test-subj="featuresDiscoveryDetailsButton"
           iconType="expand"
           aria-label={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.featuresTable.detailsButtonAriaLabel',
+            'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.detailsButtonAriaLabel',
             { defaultMessage: 'View details' }
           )}
           onClick={() => handleSelectFeature(feature)}
@@ -117,9 +117,13 @@ export function FeaturesTable() {
     },
     {
       field: 'name',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.featuresTable.featureColumn', {
-        defaultMessage: 'Feature',
-      }),
+      name: i18n.translate(
+        'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.knowledgeIndicatorColumn',
+        {
+          defaultMessage: 'Knowledge Indicator',
+        }
+      ),
+      sortable: (feature: Feature) => (feature.title ?? feature.id).toLowerCase(),
       truncateText: true,
       render: (_name: string, feature: Feature) => {
         const displayTitle = feature.title ?? feature.id;
@@ -145,20 +149,25 @@ export function FeaturesTable() {
     },
     {
       field: 'type',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.featuresTable.typeColumn', {
-        defaultMessage: 'Type',
-      }),
+      name: i18n.translate(
+        'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.typeColumn',
+        {
+          defaultMessage: 'Type',
+        }
+      ),
+      sortable: true,
       width: '15%',
       render: (type: string) => <EuiBadge color="hollow">{upperFirst(type ?? '–')}</EuiBadge>,
     },
     {
       field: 'confidence',
       name: i18n.translate(
-        'xpack.streams.significantEventsDiscovery.featuresTable.confidenceColumn',
+        'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.confidenceColumn',
         {
           defaultMessage: 'Confidence',
         }
       ),
+      sortable: true,
       width: '12%',
       render: (confidence: number) => (
         <EuiHealth color={getConfidenceColor(confidence ?? 0)}>{confidence ?? '–'}</EuiHealth>
@@ -166,9 +175,13 @@ export function FeaturesTable() {
     },
     {
       field: 'stream_name',
-      name: i18n.translate('xpack.streams.significantEventsDiscovery.featuresTable.streamColumn', {
-        defaultMessage: 'Stream',
-      }),
+      name: i18n.translate(
+        'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.streamColumn',
+        {
+          defaultMessage: 'Stream',
+        }
+      ),
+      sortable: true,
       width: '15%',
       render: (_streamName: string, feature: Feature) => (
         <EuiBadge color="hollow">{feature.stream_name || '--'}</EuiBadge>
@@ -183,9 +196,10 @@ export function FeaturesTable() {
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               {i18n.translate(
-                'xpack.streams.significantEventsDiscovery.featuresTable.featuresCount',
+                'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.knowledgeIndicatorsCount',
                 {
-                  defaultMessage: '{count} Features',
+                  defaultMessage:
+                    '{count} {count, plural, one {Knowledge Indicator} other {Knowledge Indicators}}',
                   values: { count: data?.features.length ?? 0 },
                 }
               )}
@@ -232,8 +246,8 @@ export function FeaturesTable() {
       <EuiFlexItem grow={false}>
         <EuiInMemoryTable
           tableCaption={i18n.translate(
-            'xpack.streams.significantEventsDiscovery.featuresTable.tableCaption',
-            { defaultMessage: 'Features table' }
+            'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.tableCaption',
+            { defaultMessage: 'Knowledge Indicators table' }
           )}
           columns={columns}
           itemId="uuid"
@@ -244,12 +258,18 @@ export function FeaturesTable() {
             onSelectionChange: setSelectedFeatures,
             selected: selectedFeatures,
           }}
+          sorting={{
+            sort: {
+              field: 'name',
+              direction: 'asc',
+            },
+          }}
           search={{
             box: {
               incremental: true,
               placeholder: i18n.translate(
-                'xpack.streams.significantEventsDiscovery.featuresTable.searchPlaceholder',
-                { defaultMessage: 'Search features' }
+                'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.searchPlaceholder',
+                { defaultMessage: 'Search knowledge indicators' }
               ),
             },
             filters: [],
@@ -258,9 +278,9 @@ export function FeaturesTable() {
           noItemsMessage={
             !loading
               ? i18n.translate(
-                  'xpack.streams.significantEventsDiscovery.featuresTable.noItemsMessage',
+                  'xpack.streams.significantEventsDiscovery.knowledgeIndicatorsTable.noItemsMessage',
                   {
-                    defaultMessage: 'No features found',
+                    defaultMessage: 'No knowledge indicators found',
                   }
                 )
               : ''
