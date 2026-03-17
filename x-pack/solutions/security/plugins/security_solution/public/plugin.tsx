@@ -434,6 +434,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         siemReadiness: new subPluginClasses.SiemReadiness(),
         configurations: new subPluginClasses.Configurations(),
         reports: new subPluginClasses.Reports(),
+        vulnerabilityPosture: new subPluginClasses.VulnerabilityPosture(),
       };
     }
     return this._subPlugins;
@@ -468,6 +469,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       siemReadiness: subPlugins.siemReadiness.start(),
       configurations: subPlugins.configurations.start(),
       reports: subPlugins.reports.start(),
+      vulnerabilityPosture: subPlugins.vulnerabilityPosture.start(),
     };
   }
 

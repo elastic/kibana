@@ -36,6 +36,7 @@ export const getNavCategories = (
         SecurityPageName.timelines,
         SecurityPageName.threatIntelligence,
         SecurityPageName.assetInventory,
+        SecurityPageName.vulnerabilityPosture,
       ],
     },
     {
