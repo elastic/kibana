@@ -31,6 +31,11 @@ export {
   ReanalyzeDataStreamRequestBody,
 } from './model/api/data_streams/data_stream.gen';
 
+export {
+  ResolveIndicesRequestQuery,
+  ResolveIndicesResponse,
+} from './model/api/indices/resolve_indices.gen';
+
 export type {
   Integration,
   DataStream,

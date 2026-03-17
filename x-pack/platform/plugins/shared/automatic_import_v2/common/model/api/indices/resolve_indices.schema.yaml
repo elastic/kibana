@@ -1,0 +1,64 @@
+openapi: 3.0.3
+info:
+  title: Automatic Import Indices API
+  version: "1"
+paths:
+  /internal/automatic_import_v2/indices/resolve:
+    get:
+      summary: Resolves index and data stream names matching a pattern.
+      operationId: ResolveIndices
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Returns non-hidden indices and data streams matching the given pattern (current user scope).
+        Uses Elasticsearch resolve_index with expand_wildcards open.
+      tags:
+        - Automatic Import Indices
+      parameters:
+        - name: name
+          in: query
+          required: false
+          description: Index or data stream pattern (e.g. * or logs*). Defaults to * if omitted.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Resolved indices, data streams, and aliases.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - indices
+                  - data_streams
+                  - aliases
+                properties:
+                  indices:
+                    type: array
+                    items:
+                      type: object
+                      required: [name]
+                      properties:
+                        name:
+                          type: string
+                  data_streams:
+                    type: array
+                    items:
+                      type: object
+                      required: [name]
+                      properties:
+                        name:
+                          type: string
+                  aliases:
+                    type: array
+                    items:
+                      type: object
+                      required: [name]
+                      properties:
+                        name:
+                          type: string
+        404:
+          description: Index or cluster not found.
+        500:
+          description: An internal server error occurred.
