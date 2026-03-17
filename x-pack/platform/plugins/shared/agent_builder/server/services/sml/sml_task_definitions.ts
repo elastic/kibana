@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { TaskManagerSetupContract, TaskManagerStartContract} from '@kbn/task-manager-plugin/server';
-import { TaskPriority, } from '@kbn/task-manager-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
-import type { SmlCrawler, SmlService } from './types';
+import type { SmlService } from './types';
 
 /**
  * Security model:
@@ -74,8 +77,7 @@ export const registerSmlCrawlerTaskDefinition = ({
               return { state: {} };
             }
 
-            const { smlService, elasticsearch, savedObjects, logger } =
-              await getCrawlerDeps();
+            const { smlService, elasticsearch, savedObjects, logger } = await getCrawlerDeps();
 
             logger.info(`SML crawler task starting for type '${attachmentType}'`);
 

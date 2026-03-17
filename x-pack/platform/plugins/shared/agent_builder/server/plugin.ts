@@ -207,12 +207,7 @@ export class AgentBuilderPlugin
 
   start(
     coreStart: CoreStart,
-    {
-      inference,
-      spaces,
-      actions,
-      taskManager,
-    }: AgentBuilderStartDependencies
+    { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
   ): AgentBuilderPluginStart {
     const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;

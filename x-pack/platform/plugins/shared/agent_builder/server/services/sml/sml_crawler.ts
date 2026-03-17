@@ -255,10 +255,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
         track_total_hits: false,
         query: {
           bool: {
-            filter: [
-              { term: { type_id: attachmentType } },
-              { exists: { field: 'update_action' } },
-            ],
+            filter: [{ term: { type_id: attachmentType } }, { exists: { field: 'update_action' } }],
             must_not: [{ term: { update_action: '' } }],
           },
         },
@@ -477,7 +474,9 @@ export class SmlCrawlerImpl implements SmlCrawler {
       if (bulkResponse.errors) {
         const failedOps = bulkResponse.items.filter((item) => item.index?.error);
         this.logger.warn(
-          `SML crawler: ${failedOps.length} state write(s) failed for type '${attachmentType}': ${JSON.stringify(
+          `SML crawler: ${
+            failedOps.length
+          } state write(s) failed for type '${attachmentType}': ${JSON.stringify(
             failedOps.slice(0, 3)
           )}`
         );
