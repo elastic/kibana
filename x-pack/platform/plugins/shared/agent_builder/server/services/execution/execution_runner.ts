@@ -33,6 +33,7 @@ import {
   createConversation$,
   resolveServices,
   convertErrors,
+  createDeanonymizeTitleFn,
   type ConversationWithOperation,
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
@@ -141,7 +142,7 @@ export const handleAgentExecution = async ({
   const deanonymizeTitle = createDeanonymizeTitleFn({
     anonymizationEnabled,
     conversation,
-    deps,
+    deps: { inference: deps.inference, savedObjects: deps.savedObjects },
     request,
     logger,
   });
@@ -232,50 +233,6 @@ export const handleAgentExecution = async ({
       })
     )
   );
-};
-
-// Exact token format: <ENTITY_CLASS>_<32 lowercase hex chars>, e.g. HOST_NAME_ae687f3b1c2d...
-// Using exactly 32 hex chars avoids false positives on shorter hex-suffixed identifiers.
-const ANONYMIZATION_TOKEN_PATTERN = /\b[A-Z][A-Z_]*_[0-9a-f]{32}\b/;
-
-/**
- * Returns a deanonymizeTitle callback when anonymization is enabled and the conversation has a
- * replacementsId, or undefined otherwise. The callback deanonymizes the generated title and
- * guards against persisting raw tokens as the conversation title (which would be a PII leak
- * into an unencrypted field).
- */
-const createDeanonymizeTitleFn = ({
-  anonymizationEnabled,
-  conversation,
-  deps,
-  request,
-  logger,
-}: {
-  anonymizationEnabled: boolean;
-  conversation: ConversationWithOperation;
-  deps: AgentExecutionDeps;
-  request: KibanaRequest;
-  logger: Logger;
-}): ((title: string) => Promise<string>) | undefined => {
-  if (!anonymizationEnabled || !conversation.replacements_id) {
-    return undefined;
-  }
-
-  return async (title: string) => {
-    const namespace = deps.savedObjects.getScopedClient(request).getCurrentNamespace() ?? 'default';
-    const result = await deps.inference.deanonymizeText(
-      namespace,
-      conversation.replacements_id!,
-      title
-    );
-    if (ANONYMIZATION_TOKEN_PATTERN.test(result)) {
-      logger.warn(
-        `[agent_builder.anonymization.title_guard] token_pattern_detected=true replacements_id=${conversation.replacements_id} — falling back to default title`
-      );
-      return 'New conversation';
-    }
-    return result;
-  };
 };
 
 /**

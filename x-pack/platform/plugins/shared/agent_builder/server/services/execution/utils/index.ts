@@ -7,6 +7,7 @@
 
 export { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 export { generateTitle } from './generate_title';
+export { createDeanonymizeTitleFn } from './deanonymize_title';
 export { handleCancellation } from './handle_cancellation';
 export { executeAgent$ } from './execute_agent';
 export {
