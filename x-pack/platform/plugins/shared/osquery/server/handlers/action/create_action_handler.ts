@@ -115,6 +115,7 @@ export const createActionHandler = async (
     pack_prebuilt: params.pack_id
       ? some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
+    tags: [],
     space_id: options.space?.id ?? DEFAULT_SPACE_ID,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {

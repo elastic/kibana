@@ -69,6 +69,7 @@ export function toUnifiedPayloadCommentAttachment(
     return {
       type: COMMENT_ATTACHMENT_TYPE,
       data: { content: legacyRequest.comment },
+      owner: legacyRequest.owner,
     };
   }
   throw new Error('Invalid legacy payload comment attachment');
@@ -128,6 +129,7 @@ export const commentAttachmentTransformer: AttachmentTypeTransformer<
       return {
         type: COMMENT_ATTACHMENT_TYPE,
         data: { content: oldAttrs.comment ?? '' },
+        owner: oldAttrs.owner,
         created_at: oldAttrs.created_at,
         created_by: oldAttrs.created_by,
         pushed_at: oldAttrs.pushed_at ?? null,
