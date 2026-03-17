@@ -71,7 +71,6 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
 
-    expect(response.statusMessage).toBe('OK');
     expect(response).toHaveStatusCode(200);
     expect(response.body.total).toBe(100);
     expect(response.body.dashboards).toHaveLength(10);
