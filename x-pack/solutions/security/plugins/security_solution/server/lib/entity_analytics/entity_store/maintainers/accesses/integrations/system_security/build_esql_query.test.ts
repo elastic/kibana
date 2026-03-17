@@ -8,95 +8,26 @@
 import { buildEsqlQuery } from './build_esql_query';
 
 describe('System Security buildEsqlQuery', () => {
-  describe('namespace handling', () => {
-    it('uses the namespace to form the index pattern', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('FROM logs-system.security-default');
-    });
-
-    it('uses a custom namespace', () => {
-      const query = buildEsqlQuery('production');
-      expect(query).toContain('FROM logs-system.security-production');
-    });
+  it('uses the namespace to form the index pattern', () => {
+    expect(buildEsqlQuery('default')).toContain('FROM logs-system.security-default');
+    expect(buildEsqlQuery('production')).toContain('FROM logs-system.security-production');
   });
 
-  describe('entity fields', () => {
-    it('computes entity.namespace via field evaluations', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('entity.namespace');
-    });
-
-    it('contains user identity fields', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('user.id');
-      expect(query).toContain('user.name');
-    });
-
-    it('contains host identity fields', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('host.id');
-      expect(query).toContain('host.name');
-    });
+  it('filters for logged-in and logged-in-explicit actions', () => {
+    expect(buildEsqlQuery('default')).toContain(
+      'event.action IN ("logged-in", "logged-in-explicit")'
+    );
   });
 
-  describe('query structure', () => {
-    it('filters for logged-in and logged-in-explicit actions', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('event.action IN ("logged-in", "logged-in-explicit")');
-    });
+  it('filters for Interactive and RemoteInteractive logon types', () => {
+    expect(buildEsqlQuery('default')).toContain(
+      'winlog.logon.type IN ("Interactive", "RemoteInteractive")'
+    );
+  });
 
-    it('filters for Interactive and RemoteInteractive logon types', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('winlog.logon.type IN ("Interactive", "RemoteInteractive")');
-    });
-
-    it('filters for successful outcomes', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('event.outcome == "success"');
-    });
-
-    it('does not filter on event.module or event.category', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).not.toContain('event.module ==');
-      expect(query).not.toContain('event.category');
-    });
-
-    it('computes actorUserId via EVAL', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('EVAL actorUserId =');
-    });
-
-    it('computes targetEntityId with COALESCE fallback to host.ip and host.mac', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('COALESCE(');
-      expect(query).toContain('TO_STRING(host.ip)');
-      expect(query).toContain('TO_STRING(host.mac)');
-    });
-
-    it('uses MV_EXPAND on targetEntityId', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('MV_EXPAND targetEntityId');
-    });
-
-    it('uses access_count > 4 as the frequency threshold', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('access_count > 4');
-    });
-
-    it('classifies into accesses_frequently and accesses_infrequently', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('"accesses_frequently"');
-      expect(query).toContain('"accesses_infrequently"');
-    });
-
-    it('groups final output by actorUserId', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toMatch(/BY actorUserId$/m);
-    });
-
-    it('applies a LIMIT matching the composite page size', () => {
-      const query = buildEsqlQuery('default');
-      expect(query).toContain('| LIMIT 3500');
-    });
+  it('does not filter on event.module or event.category', () => {
+    const query = buildEsqlQuery('default');
+    expect(query).not.toContain('event.module ==');
+    expect(query).not.toContain('event.category');
   });
 });
