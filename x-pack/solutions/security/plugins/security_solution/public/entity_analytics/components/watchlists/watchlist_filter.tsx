@@ -11,23 +11,18 @@ import { EuiIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 
 import { useNavigation } from '../../../common/lib/kibana';
+import { useGetWatchlists } from '../../api/hooks/use_get_watchlists';
 import {
   ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
 } from '../../../../common/constants';
 import {
-  WATCHLIST_CUSTOM_C_LEVEL_USERS_LABEL,
-  WATCHLIST_CUSTOM_HIGH_RISK_USERS_LABEL,
-  WATCHLIST_CUSTOM_WATCHLIST_3_LABEL,
   WATCHLIST_FILTER_LABEL,
   WATCHLIST_FILTER_PLACEHOLDER,
   WATCHLIST_GROUP_CUSTOM_LABEL,
   WATCHLIST_GROUP_PREBUILT_LABEL,
   WATCHLIST_ICON_GEAR_ARIA_LABEL,
   WATCHLIST_ICON_PIN_ARIA_LABEL,
-  WATCHLIST_PREBUILT_DEPARTING_EMPLOYEES_LABEL,
-  WATCHLIST_PREBUILT_PRIVILEGED_USERS_LABEL,
-  WATCHLIST_PREBUILT_UNAUTHORIZED_LLM_ACCESS_LABEL,
 } from './translations';
 import type { WatchlistItem, WatchlistOption } from './types';
 
@@ -35,33 +30,7 @@ interface WatchlistFilterProps {
   onChangeSelectedId?: (id: string) => void;
 }
 
-// TODO: demo purposes, replace with management API data https://github.com/elastic/security-team/issues/15463?issue=elastic%7Csecurity-team%7C15981
-const WATCHLIST_OPTIONS: WatchlistOption[] = [
-  {
-    prepend: (
-      <EuiIcon type="pin" aria-label={WATCHLIST_ICON_PIN_ARIA_LABEL} style={{ marginRight: 8 }} />
-    ),
-    id: 'group-prebuilt',
-    label: WATCHLIST_GROUP_PREBUILT_LABEL,
-    isGroupLabelOption: true,
-  },
-  { id: 'prebuilt-priv', label: WATCHLIST_PREBUILT_PRIVILEGED_USERS_LABEL },
-  { id: 'prebuilt-llm', label: WATCHLIST_PREBUILT_UNAUTHORIZED_LLM_ACCESS_LABEL },
-  { id: 'prebuilt-depart', label: WATCHLIST_PREBUILT_DEPARTING_EMPLOYEES_LABEL },
-
-  {
-    prepend: (
-      <EuiIcon type="gear" aria-label={WATCHLIST_ICON_GEAR_ARIA_LABEL} style={{ marginRight: 8 }} />
-    ),
-    id: 'group-custom',
-    label: WATCHLIST_GROUP_CUSTOM_LABEL,
-    isGroupLabelOption: true,
-  },
-  { id: 'custom-clevel', label: WATCHLIST_CUSTOM_C_LEVEL_USERS_LABEL },
-  { id: 'custom-highrisk', label: WATCHLIST_CUSTOM_HIGH_RISK_USERS_LABEL },
-  { id: 'custom-3', label: WATCHLIST_CUSTOM_WATCHLIST_3_LABEL },
-];
-
+// TODO: remove this when backend route available for mapping specific prebuilt watchlists to routes
 const WATCHLIST_ROUTE_MAP: Record<string, string> = {
   'prebuilt-priv': ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
 };
@@ -71,8 +40,61 @@ const ROUTE_TO_WATCHLIST_MAP: Record<string, string> = Object.fromEntries(
 ) as Record<string, string>;
 
 export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) => {
-  // TODO: replace data with watchlist management API https://github.com/elastic/security-team/issues/15463?issue=elastic%7Csecurity-team%7C15981
-  const options = WATCHLIST_OPTIONS;
+  const { data: watchlists, isLoading } = useGetWatchlists();
+
+  const options = useMemo<WatchlistOption[]>(() => {
+    if (!watchlists) return [];
+
+    const prebuilt: WatchlistOption[] = [
+      {
+        prepend: (
+          <EuiIcon
+            type="pin"
+            aria-label={WATCHLIST_ICON_PIN_ARIA_LABEL}
+            style={{ marginRight: 8 }}
+          />
+        ),
+        id: 'group-prebuilt',
+        label: WATCHLIST_GROUP_PREBUILT_LABEL,
+        isGroupLabelOption: true,
+      },
+    ];
+
+    const custom: WatchlistOption[] = [
+      {
+        prepend: (
+          <EuiIcon
+            type="gear"
+            aria-label={WATCHLIST_ICON_GEAR_ARIA_LABEL}
+            style={{ marginRight: 8 }}
+          />
+        ),
+        id: 'group-custom',
+        label: WATCHLIST_GROUP_CUSTOM_LABEL,
+        isGroupLabelOption: true,
+      },
+    ];
+
+    watchlists.forEach((watchlist) => {
+      const option: WatchlistItem = {
+        id: watchlist.name, // Changed to match by name
+        label: watchlist.name,
+      };
+
+      if (watchlist.managed) {
+        prebuilt.push(option);
+      } else {
+        custom.push(option);
+      }
+    });
+
+    // Only show groups if they have items
+    const result: WatchlistOption[] = [];
+    if (prebuilt.length > 1) result.push(...prebuilt);
+    if (custom.length > 1) result.push(...custom);
+
+    return result;
+  }, [watchlists]);
 
   const { pathname } = useLocation();
 
@@ -101,6 +123,7 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
 
       navigateTo({
         path: nextPath,
+        state: { retainFilters: true }, // Add this to preserve global filters/time range on navigation
       });
     },
     [navigateTo]
@@ -114,8 +137,20 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
 
       if (newlySelected?.id) {
         onChangeSelectedId?.(newlySelected.id);
+
+        const mappedPath = WATCHLIST_ROUTE_MAP[newlySelected.id];
+        // eslint-disable-next-line no-console
+        console.log(
+          `[Watchlist Filter] Selected ID: "${newlySelected.id}". ` +
+            `Available mappings: ${JSON.stringify(WATCHLIST_ROUTE_MAP)}. ` +
+            `Would map to Privileged User Monitoring? ${
+              mappedPath === ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH ? 'YES' : 'NO'
+            }`
+        );
+
         navigateToWatchlist(newlySelected.id);
       } else {
+        onChangeSelectedId?.('');
         navigateToWatchlist(undefined);
       }
     },
@@ -135,6 +170,7 @@ export const WatchlistFilter = ({ onChangeSelectedId }: WatchlistFilterProps) =>
           selectedOptions={selected ? [selected] : []}
           onChange={onChangeComboBox}
           isClearable={true}
+          isLoading={isLoading}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
