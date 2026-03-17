@@ -128,6 +128,7 @@ dependsOn:
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/scout-oblt'
+  - '@kbn/core-saved-objects-utils-server'
 tags:
   - plugin
   - prod
