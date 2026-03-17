@@ -16,13 +16,8 @@ const DEFAULT_DATASET_DESCRIPTION =
   'Attack Discovery evaluation dataset loaded from eval_dataset_attack_discovery_all_scenarios.jsonl';
 
 const resolveJsonlPath = (): string => {
-  // This suite lives at:
-  //   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery
-  //
-  // Dataset is checked in under the package itself:
-  //   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/data/...
-  //
   // __dirname is: .../src/dataset
+  // Dataset is NOT checked in; developers place it locally at data/*.jsonl
   return Path.resolve(__dirname, '../../data/eval_dataset_attack_discovery_all_scenarios.jsonl');
 };
 
@@ -61,7 +56,17 @@ export const loadAttackDiscoveryBundledAlertsJsonlDataset = async ({
   offset?: number;
   limit?: number;
 } = {}): Promise<EvaluationDataset<AttackDiscoveryDatasetExample>> => {
-  const text = await Fs.readFile(jsonlPath, 'utf-8');
+  let text: string;
+  try {
+    text = await Fs.readFile(jsonlPath, 'utf-8');
+  } catch (err) {
+    throw new Error(
+      `Could not read JSONL dataset at ${jsonlPath}. ` +
+        'The dataset is not checked in. Place it locally or use the golden cluster ' +
+        '(trustUpstreamDataset). See the suite README for details.',
+      { cause: err }
+    );
+  }
   const lines = text
     .split('\n')
     .map((l) => l.trim())

@@ -28,6 +28,7 @@ export type EvaluateAttackDiscoveryDataset = (options: {
     description: string;
     examples: AttackDiscoveryDatasetExample[];
   };
+  trustUpstreamDataset?: boolean;
 }) => Promise<void>;
 
 const configureExperiment = ({
@@ -81,12 +82,7 @@ export const createEvaluateAttackDiscoveryDataset = ({
 }): EvaluateAttackDiscoveryDataset => {
   const evaluateAttackDiscoveryDataset: EvaluateAttackDiscoveryDataset = async ({
     dataset: { name, description, examples },
-  }: {
-    dataset: {
-      name: string;
-      description: string;
-      examples: AttackDiscoveryDatasetExample[];
-    };
+    trustUpstreamDataset = false,
   }) => {
     const dataset = {
       name,
@@ -110,6 +106,7 @@ export const createEvaluateAttackDiscoveryDataset = ({
         dataset,
         task: async ({ input }) => task({ input }),
         concurrency: resolveConcurrency(),
+        trustUpstreamDataset,
       },
       evaluators
     );

@@ -570,6 +570,12 @@ If your datasets are curated in another Kibana instance, set `EVALUATIONS_KBN_UR
 When that remote Kibana should be accessed with an API key, set `EVALUATIONS_KBN_API_KEY` (or `--evaluations-kbn-api-key`).
 When `EVALUATIONS_KBN_API_KEY` is provided, requests use `Authorization: ApiKey ...`; otherwise URL-embedded credentials in `EVALUATIONS_KBN_URL` are used.
 
+##### Golden cluster Kibana API key for dataset operations
+
+The recommended approach is to run `node scripts/evals init config`, which creates a single unified API key covering both dataset operations and evaluation result export. See [Golden cluster API key privileges](#golden-cluster-api-key-privileges-required) for details.
+
+In CI, these values are automatically sourced from the vault config field `evaluationsKbn`.
+
 ## Customizing Report Display
 
 By default, evaluation results are displayed in the terminal as a formatted table. You can override this behavior to create custom reports (e.g., JSON files, dashboards, or custom formats).
@@ -620,41 +626,37 @@ The evaluation results are automatically exported to Elasticsearch in datastream
 
 ### Golden cluster API key privileges (required)
 
-When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, the exporter will **ensure the `kibana-evaluations` data stream exists**. This requires the ability to create the data stream (internally an `indices:admin/data_stream/create` action), which is granted by index privileges like `create_index` (or broader `manage`/`all`) on the `kibana-evaluations*` pattern.
+A single API key can cover **all** golden cluster operations: evaluation result export, trace storage, and dataset management. The key is created via the Kibana API (not the ES API) so it can bundle both Elasticsearch index privileges and Kibana feature privileges using `kibana_role_descriptors`.
 
-Use Kibana Dev Tools on the golden cluster to create an API key with the minimal required privileges:
+**Automatic setup (recommended):**
 
-```http
-POST /_security/api_key
-{
-  "name": "kbn-evals-golden-cluster-writer",
-  "expiration": "365d",
-  "role_descriptors": {
-    "kbn-evals-evaluations-writer": {
-      "cluster": ["manage_index_templates"],
-      "indices": [
-        {
-          "names": ["kibana-evaluations*"],
-          "privileges": [
-            "auto_configure",
-            "create_index",
-            "create_doc",
-            "read",
-            "view_index_metadata"
-          ]
-        }
-      ]
-    }
-  },
-  "metadata": {
-    "application": "kbn-evals",
-    "purpose": "export evaluation results",
-    "environment": "ci"
-  }
-}
+```bash
+node scripts/evals init config
 ```
 
-Then copy the returned `encoded` value into `evaluationsEs.apiKey` (Vault `kbn-evals` config) as `EVALUATIONS_ES_API_KEY`.
+This interactive wizard opens your browser to the golden cluster Dev Tools, copies the API key creation payload to your clipboard, and walks you through pasting the result back. The single `encoded` key is applied to all four config fields (`evaluationsEs.apiKey`, `tracingEs.apiKey`, `evaluationsKbn.apiKey`, and the tracing exporter `Authorization` header).
+
+**Manual setup:**
+
+In the golden cluster Kibana Dev Tools, run `POST kbn:/internal/security/api_key` with the privilege payload defined in [`src/api_key/golden_cluster_privileges.json`](src/api_key/golden_cluster_privileges.json). The `init config` wizard builds this request automatically, filling your email from `git config user.email`.
+
+For manual use, add a `"name"` (e.g. `"kbn-evals-<your-email>"`) and `"expiration"` (e.g. `"90d"`) alongside the `kibana_role_descriptors` and `metadata` from that JSON file.
+
+This grants:
+
+- **Evaluation results**: write/read `kibana-evaluations*` data stream (index privileges)
+- **Tracing**: write/read `traces-*` indices (for OTLP trace ingest and trace-based evaluators)
+- **Dataset storage**: write/read/delete `kibana-evaluation-dataset*` indices (backing storage for managed datasets)
+- **Dataset API access**: Kibana `evals` feature privilege (`all`) for `/internal/evals/datasets/*` routes
+
+Copy the returned `encoded` value and use it for all four secret fields in your vault config:
+
+| Config field | Env variable | Value |
+| --- | --- | --- |
+| `evaluationsEs.apiKey` | `EVALUATIONS_ES_API_KEY` | `<encoded>` |
+| `tracingEs.apiKey` | `TRACING_ES_API_KEY` | `<encoded>` |
+| `evaluationsKbn.apiKey` | `EVALUATIONS_KBN_API_KEY` | `<encoded>` |
+| `tracingExporters[0].http.headers.Authorization` | via `TRACING_EXPORTERS` | `ApiKey <encoded>` |
 
 ### Exporting to a separate Elasticsearch cluster
 

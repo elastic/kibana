@@ -319,7 +319,8 @@ function runFastHelp() {
   logInfo('For full command help/flags: node scripts/evals --full-help');
   logInfo('');
   logInfo('Commands:');
-  logInfo('  init                          Set up connectors for local evals');
+  logInfo('  init                          Set up config + connectors for local evals');
+  logInfo('  init config                   Only create/update vault config.json');
   logInfo('  start [--suite <id>] [...]    Start stack + run an eval suite');
   logInfo('  stop [--service <name>]       Stop backgrounded eval services');
   logInfo('  logs [--service <name>]       Tail logs from eval services');

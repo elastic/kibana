@@ -13,7 +13,8 @@
     "@kbn/elastic-assistant-common",
     "@kbn/inference-common",
     "@kbn/inference-prompt-utils",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/es-snapshot-loader"
   ]
 }
 

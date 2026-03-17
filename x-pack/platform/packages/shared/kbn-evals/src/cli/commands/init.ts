@@ -5,15 +5,364 @@
  * 2.0.
  */
 
-import { spawnSync } from 'child_process';
+import { execSync, spawnSync } from 'child_process';
 import Fs from 'fs';
+import Os from 'os';
 import Path from 'path';
 import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
 import { parseConnectorsFromEnv, parseConnectorsFromKibanaDevYml } from '../prompts';
 import { safeExec, VAULT_SECRET_PATH } from '../utils';
+import { buildApiKeyPayload } from '../../api_key/build_api_key_payload';
 
 const EIS_MODELS_PATH = 'target/eis_models.json';
+
+const CONFIG_DIR = 'x-pack/platform/packages/shared/kbn-evals/scripts/vault';
+const CONFIG_FILENAME = 'config.json';
+const CONFIG_EXAMPLE_FILENAME = 'config.example.json';
+
+const GOLDEN_CLUSTER_KBN_URL =
+  'https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud';
+const GOLDEN_CLUSTER_DEV_TOOLS_URL = `${GOLDEN_CLUSTER_KBN_URL}/app/dev_tools#/console`;
+
+const resolveUserIdentifier = (): string => {
+  try {
+    const email = execSync('git config user.email', { encoding: 'utf8' }).trim();
+    if (email) return email;
+  } catch {
+    // fall through
+  }
+  return Os.hostname();
+};
+
+const API_KEY_FIELDS = [
+  'evaluationsEs.apiKey',
+  'tracingEs.apiKey',
+  'evaluationsKbn.apiKey',
+] as const;
+
+const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
+  const arrayMatch = path.match(/^(.+)\[(\d+)\]\.(.+)$/);
+  if (arrayMatch) {
+    const [, arrayPath, indexStr, rest] = arrayMatch;
+    const arr = getNestedValue(obj, arrayPath) as unknown[];
+    if (!Array.isArray(arr)) return undefined;
+    return getNestedValue(arr[Number(indexStr)] as Record<string, unknown>, rest);
+  }
+  return path.split('.').reduce<unknown>((cur, key) => {
+    if (cur && typeof cur === 'object' && key in (cur as Record<string, unknown>)) {
+      return (cur as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, obj);
+};
+
+const setNestedValue = (obj: Record<string, unknown>, path: string, value: unknown): void => {
+  const arrayMatch = path.match(/^(.+)\[(\d+)\]\.(.+)$/);
+  if (arrayMatch) {
+    const [, arrayPath, indexStr, rest] = arrayMatch;
+    const arr = getNestedValue(obj, arrayPath) as unknown[];
+    if (Array.isArray(arr)) {
+      setNestedValue(arr[Number(indexStr)] as Record<string, unknown>, rest, value);
+    }
+    return;
+  }
+  const keys = path.split('.');
+  let cur: Record<string, unknown> = obj;
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (!(keys[i] in cur) || typeof cur[keys[i]] !== 'object') {
+      cur[keys[i]] = {};
+    }
+    cur = cur[keys[i]] as Record<string, unknown>;
+  }
+  cur[keys[keys.length - 1]] = value;
+};
+
+const openBrowser = (url: string): boolean => {
+  try {
+    if (process.platform === 'darwin') {
+      execSync(`open ${JSON.stringify(url)}`, { stdio: 'ignore' });
+    } else if (process.platform === 'linux') {
+      execSync(`xdg-open ${JSON.stringify(url)}`, { stdio: 'ignore' });
+    } else if (process.platform === 'win32') {
+      execSync(`start "" ${JSON.stringify(url)}`, { stdio: 'ignore' });
+    } else {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const copyToClipboard = (text: string): boolean => {
+  try {
+    if (process.platform === 'darwin') {
+      execSync('pbcopy', { input: text, stdio: ['pipe', 'ignore', 'ignore'] });
+    } else if (process.platform === 'linux') {
+      execSync('xclip -selection clipboard', {
+        input: text,
+        stdio: ['pipe', 'ignore', 'ignore'],
+      });
+    } else {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Walks the user through generating a unified API key via the golden
+ * cluster Dev Tools, then fills all relevant config fields from it.
+ * Returns the encoded key, or null if the user skipped.
+ */
+const runBrowserApiKeyFlow = async (
+  config: Record<string, unknown>,
+  log: { info: (msg: string) => void; warning: (msg: string) => void }
+): Promise<string | null> => {
+  const userIdentifier = resolveUserIdentifier();
+  const payload = buildApiKeyPayload(userIdentifier);
+
+  log.info('');
+  log.info(`API key will be named "kbn-evals-${userIdentifier}"`);
+  log.info('Opening the golden cluster Dev Tools in your browser...');
+  log.info(`  ${GOLDEN_CLUSTER_DEV_TOOLS_URL}`);
+  log.info('');
+
+  const browserOpened = openBrowser(GOLDEN_CLUSTER_DEV_TOOLS_URL);
+  if (!browserOpened) {
+    log.warning('Could not open browser automatically. Open this URL manually:');
+    log.info(`  ${GOLDEN_CLUSTER_DEV_TOOLS_URL}`);
+  }
+
+  const copied = copyToClipboard(payload);
+  if (copied) {
+    log.info('The API key creation request has been copied to your clipboard.');
+    log.info('Paste it into the Dev Tools console and click the play button.');
+  } else {
+    log.info('Paste the following request into the Dev Tools console:');
+    log.info('');
+    log.info(payload);
+  }
+
+  log.info('');
+  log.info('After running the request, copy the "encoded" value from the response.');
+  log.info('');
+
+  const { encodedKey } = await inquirer.prompt<{ encodedKey: string }>({
+    type: 'input',
+    name: 'encodedKey',
+    message: 'Paste the "encoded" API key value here (or press Enter to skip):',
+    default: '',
+  });
+
+  const trimmed = encodedKey.trim();
+  if (!trimmed) {
+    log.warning('No API key provided. You can fill in the keys manually in config.json.');
+    return null;
+  }
+
+  for (const field of API_KEY_FIELDS) {
+    setNestedValue(config, field, trimmed);
+  }
+
+  setNestedValue(config, 'tracingExporters[0].http.headers.Authorization', `ApiKey ${trimmed}`);
+
+  log.info('API key applied to evaluationsEs, tracingEs, evaluationsKbn, and tracingExporters.');
+  return trimmed;
+};
+
+/**
+ * Reads the existing config and returns the API key if all four secret
+ * fields are populated with matching non-placeholder values.
+ */
+const getExistingApiKey = (configPath: string): string | null => {
+  try {
+    const existing = JSON.parse(Fs.readFileSync(configPath, 'utf-8')) as Record<string, unknown>;
+    const evalKey = getNestedValue(existing, 'evaluationsEs.apiKey');
+    if (typeof evalKey !== 'string' || !evalKey || evalKey.includes('REPLACE_ME')) {
+      return null;
+    }
+    return evalKey;
+  } catch {
+    return null;
+  }
+};
+
+const runConfigInit = async (
+  repoRoot: string,
+  log: { info: (msg: string) => void; warning: (msg: string) => void }
+): Promise<boolean> => {
+  const configDir = Path.resolve(repoRoot, CONFIG_DIR);
+  const configPath = Path.join(configDir, CONFIG_FILENAME);
+  const examplePath = Path.join(configDir, CONFIG_EXAMPLE_FILENAME);
+  const userIdentifier = resolveUserIdentifier();
+
+  let existingApiKey: string | null = null;
+
+  if (Fs.existsSync(configPath)) {
+    existingApiKey = getExistingApiKey(configPath);
+    log.info(`Config already exists at ${CONFIG_DIR}/${CONFIG_FILENAME}`);
+    const { overwrite } = await inquirer.prompt<{ overwrite: boolean }>({
+      type: 'confirm',
+      name: 'overwrite',
+      message: 'Overwrite existing config.json?',
+      default: false,
+    });
+    if (!overwrite) {
+      log.info('Keeping existing config.');
+      return true;
+    }
+  }
+
+  if (!Fs.existsSync(examplePath)) {
+    log.warning(`Example config not found at ${examplePath}`);
+    return false;
+  }
+
+  const example = JSON.parse(Fs.readFileSync(examplePath, 'utf-8')) as Record<string, unknown>;
+
+  example.description = `kbn-evals local config for ${userIdentifier}`;
+  example.contact = userIdentifier;
+  example.owner = userIdentifier;
+
+  log.info('');
+  log.info('The config has sensible URL defaults. You only need to fill in secret values.');
+  log.info('');
+
+  // --- Golden cluster API key ---
+  let reusingKey = false;
+  if (existingApiKey) {
+    const { reuseKey } = await inquirer.prompt<{ reuseKey: boolean }>({
+      type: 'confirm',
+      name: 'reuseKey',
+      message: 'Existing API key found in previous config. Reuse it?',
+      default: true,
+    });
+    if (reuseKey) {
+      reusingKey = true;
+      for (const field of API_KEY_FIELDS) {
+        setNestedValue(example, field, existingApiKey);
+      }
+      setNestedValue(
+        example,
+        'tracingExporters[0].http.headers.Authorization',
+        `ApiKey ${existingApiKey}`
+      );
+      log.info('Reusing existing API key for all golden cluster fields.');
+    }
+  }
+
+  if (!reusingKey) {
+    const { useAutoKey } = await inquirer.prompt<{ useAutoKey: boolean }>({
+      type: 'confirm',
+      name: 'useAutoKey',
+      message: 'Create a golden cluster API key automatically via Dev Tools? (opens browser)',
+      default: true,
+    });
+
+    if (useAutoKey) {
+      await runBrowserApiKeyFlow(example, log);
+    } else {
+      log.info('');
+      log.info('Enter API keys manually. Press Enter to skip and fill in config.json later.');
+      log.info('');
+
+      const manualFields = [
+        { jsonPath: 'evaluationsEs.apiKey', label: 'Evaluations ES API key' },
+        { jsonPath: 'tracingEs.apiKey', label: 'Tracing ES API key (same cluster)' },
+        {
+          jsonPath: 'tracingExporters[0].http.headers.Authorization',
+          label: 'Tracing exporter Authorization header (e.g. ApiKey ...)',
+        },
+        {
+          jsonPath: 'evaluationsKbn.apiKey',
+          label: 'Golden cluster Kibana API key (for datasets)',
+        },
+      ];
+      for (const field of manualFields) {
+        const currentValue = getNestedValue(example, field.jsonPath);
+        if (typeof currentValue === 'string' && currentValue.includes('REPLACE_ME')) {
+          const { value } = await inquirer.prompt<{ value: string }>({
+            type: 'input',
+            name: 'value',
+            message: `${field.label}:`,
+            default: '',
+          });
+          if (value.trim()) {
+            setNestedValue(example, field.jsonPath, value.trim());
+          }
+        }
+      }
+    }
+  }
+
+  // --- LiteLLM ---
+  const litellmVirtualKey = getNestedValue(example, 'litellm.virtualKey');
+  if (typeof litellmVirtualKey === 'string' && litellmVirtualKey.includes('REPLACE_ME')) {
+    const { value } = await inquirer.prompt<{ value: string }>({
+      type: 'input',
+      name: 'value',
+      message: 'LiteLLM virtual key (sk-...):',
+      default: '',
+    });
+    if (value.trim()) {
+      setNestedValue(example, 'litellm.virtualKey', value.trim());
+    }
+  }
+
+  const litellmTeamId = getNestedValue(example, 'litellm.teamId');
+  if (typeof litellmTeamId === 'string' && litellmTeamId.includes('REPLACE_ME')) {
+    const { value } = await inquirer.prompt<{ value: string }>({
+      type: 'input',
+      name: 'value',
+      message: 'LiteLLM team ID (find yours at https://elastic.litellm-prod.ai/ui/?page=teams):',
+      default: '',
+    });
+    if (value.trim()) {
+      setNestedValue(example, 'litellm.teamId', value.trim());
+    }
+  }
+
+  // --- GCS credentials ---
+  const { wantGcs } = await inquirer.prompt<{ wantGcs: boolean }>({
+    type: 'confirm',
+    name: 'wantGcs',
+    message: 'Do you have GCS service account credentials for snapshot datasets?',
+    default: false,
+  });
+
+  if (!wantGcs) {
+    delete example.gcsDatasetAccessCredentials;
+  } else {
+    const { gcsPath } = await inquirer.prompt<{ gcsPath: string }>({
+      type: 'input',
+      name: 'gcsPath',
+      message: 'Path to GCS service account JSON file (leave empty to fill later):',
+      default: '',
+    });
+    if (gcsPath.trim() && Fs.existsSync(gcsPath.trim())) {
+      try {
+        const gcsCreds = JSON.parse(Fs.readFileSync(gcsPath.trim(), 'utf-8'));
+        example.gcsDatasetAccessCredentials = gcsCreds;
+        log.info('GCS credentials loaded from file.');
+      } catch {
+        log.warning('Failed to parse GCS credentials file. Fill in config.json manually.');
+      }
+    }
+  }
+
+  Fs.writeFileSync(configPath, JSON.stringify(example, null, 2) + '\n');
+  log.info('');
+  log.info(`Config written to ${CONFIG_DIR}/${CONFIG_FILENAME}`);
+  log.info('Edit it to fill in any remaining REPLACE_ME values.');
+  log.info('');
+  log.info('Start an eval (config is loaded automatically):');
+  log.info('  node scripts/evals start --suite <suite-id>');
+  return true;
+};
 
 const checkVaultAuth = (): boolean => {
   return safeExec('vault', ['token', 'lookup', '-format=json']) !== null;
@@ -83,13 +432,18 @@ const listConnectorIds = (base64Payload: string): Array<{ id: string; name: stri
 export const initCmd: Command<void> = {
   name: 'init',
   description: `
-  Set up connectors for running evals locally.
+  Set up local config and connectors for running evals.
 
-  Guides you through EIS (Cloud Connected Mode) connector discovery or
-  validates an existing KIBANA_TESTING_AI_CONNECTORS configuration.
+  Subcommands:
+    node scripts/evals init              Full setup (config + connectors)
+    node scripts/evals init config       Only create/update vault config.json
+
+  Guides you through vault config creation and EIS (Cloud Connected Mode)
+  connector discovery or validates an existing configuration.
 
   Examples:
     node scripts/evals init
+    node scripts/evals init config
     node scripts/evals init --skip-discovery
   `,
   flags: {
@@ -98,9 +452,18 @@ export const initCmd: Command<void> = {
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
+    const positionals = flagsReader.getPositionals();
+    const configOnly = positionals.includes('config');
 
     log.info('Welcome to kbn-evals setup!');
     log.info('');
+
+    // Step 0: Config init (always runs first)
+    await runConfigInit(repoRoot, log);
+
+    if (configOnly) {
+      return;
+    }
 
     const existingConnectors = parseConnectorsFromEnv();
     const hasExistingConnectors = existingConnectors.length > 0;
