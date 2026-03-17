@@ -40,6 +40,14 @@ export interface DataStreamTaskParams extends DataStreamParams {
    */
   connectorId: string;
   /**
+   * Integration name that this data stream belongs to.
+   */
+  integrationName: string;
+  /**
+   * Unique data stream name for this integration.
+   */
+  dataStreamName: string;
+  /**
    * Optional LangSmith tracing options to propagate to the agent invocation.
    */
   langSmithOptions?: LangSmithOptions;
@@ -192,8 +200,14 @@ export class TaskManagerService {
     );
 
     const { id: taskId, params } = taskInstance;
-    const { integrationId, dataStreamId, connectorId, langSmithOptions } =
-      params as DataStreamTaskParams;
+    const {
+      integrationId,
+      dataStreamId,
+      connectorId,
+      integrationName,
+      dataStreamName,
+      langSmithOptions,
+    } = params as DataStreamTaskParams;
 
     this.logger.debug(
       `Running task ${taskId} with ${JSON.stringify({ integrationId, dataStreamId, connectorId })}`
@@ -276,7 +290,9 @@ export class TaskManagerService {
       const durationMs = Date.now() - startTime;
       this.reportDataStreamCreationComplete({
         integrationId,
+        integrationName,
         dataStreamId,
+        dataStreamName,
         durationMs,
         success: true,
       });
@@ -298,7 +314,9 @@ export class TaskManagerService {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.reportDataStreamCreationComplete({
         integrationId,
+        integrationName,
         dataStreamId,
+        dataStreamName,
         durationMs,
         success: false,
         errorMessage,
@@ -310,7 +328,9 @@ export class TaskManagerService {
 
   private reportDataStreamCreationComplete(params: {
     integrationId: string;
+    integrationName: string;
     dataStreamId: string;
+    dataStreamName: string;
     durationMs: number;
     success: boolean;
     errorMessage?: string;
@@ -319,7 +339,9 @@ export class TaskManagerService {
       this.analytics.reportEvent(AIV2TelemetryEventType.DataStreamCreationComplete, {
         sessionId: 'server-task',
         integrationId: params.integrationId,
+        integrationName: params.integrationName,
         dataStreamId: params.dataStreamId,
+        dataStreamName: params.dataStreamName,
         durationMs: params.durationMs,
         success: params.success,
         ...(params.errorMessage ? { errorMessage: params.errorMessage } : {}),

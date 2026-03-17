@@ -31,9 +31,17 @@ export const telemetryEventsSchemas: Partial<
         type: 'keyword',
         _meta: { description: 'Integration ID', optional: false },
       },
+      integrationName: {
+        type: 'keyword',
+        _meta: { description: 'Integration name', optional: false },
+      },
       dataStreamId: {
         type: 'keyword',
         _meta: { description: 'Data stream ID', optional: false },
+      },
+      dataStreamName: {
+        type: 'keyword',
+        _meta: { description: 'Data stream name', optional: false },
       },
       durationMs: {
         type: 'long',
@@ -74,19 +82,18 @@ export const telemetryEventsSchemas: Partial<
       },
       dataStreamCount: {
         type: 'long',
-        _meta: { description: 'Number of data streams in the integration', optional: false },
+        _meta: { description: 'Total number of data streams in the integration', optional: false },
       },
-      dataStreamNames: {
-        type: 'array',
-        items: {
-          type: 'keyword',
-          _meta: { description: 'Data stream name (dataset)', optional: false },
-        },
-        _meta: { description: 'List of data stream names (datasets)', optional: false },
+      dataStreamName: {
+        type: 'keyword',
+        _meta: { description: 'Data stream name (dataset) for this event', optional: false },
       },
       processorCount: {
         type: 'long',
-        _meta: { description: 'Total number of processors across all pipelines', optional: false },
+        _meta: {
+          description: 'Number of processors in this data stream pipeline',
+          optional: false,
+        },
       },
       processorTypes: {
         type: 'array',
@@ -94,7 +101,10 @@ export const telemetryEventsSchemas: Partial<
           type: 'keyword',
           _meta: { description: 'Processor type', optional: false },
         },
-        _meta: { description: 'List of unique processor types used', optional: false },
+        _meta: {
+          description: 'Unique processor types used in this data stream pipeline',
+          optional: false,
+        },
       },
     },
   },

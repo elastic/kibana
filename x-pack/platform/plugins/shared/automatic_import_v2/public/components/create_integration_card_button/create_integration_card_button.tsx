@@ -19,7 +19,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { AIV2TelemetryEventType } from '../../../common';
 import { useKibana } from '../../common/hooks/use_kibana';
+import type { Services } from '../../services/types';
+import type { AutomaticImportV2PluginStart } from '../../types';
 import autoImportIntegrationsImage from '../../common/images/auto_import_integrations.svg';
+
+interface ServicesWithOptionalAIV2 extends Services {
+  automaticImportVTwo?: AutomaticImportV2PluginStart;
+}
 
 const useStyles = (euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => ({
   panel: css`
@@ -86,10 +92,9 @@ const useStyles = (euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => ({
 });
 
 export const CreateIntegrationSideCardButton = React.memo(() => {
-  const services = useKibana().services;
+  const services = useKibana().services as ServicesWithOptionalAIV2;
   const { getUrlForApp, navigateToUrl } = services.application;
-  // Component can be rendered in AIV2 context (telemetry) or Fleet context (automaticImportVTwo.telemetry)
-  const telemetry = (services as any).telemetry ?? (services as any).automaticImportVTwo?.telemetry;
+  const telemetry = services.automaticImportVTwo?.telemetry ?? services.telemetry;
   const { euiTheme } = useEuiTheme();
   const styles = useStyles(euiTheme);
 
@@ -106,10 +111,9 @@ export const CreateIntegrationSideCardButton = React.memo(() => {
   const navigateToCreate = useCallback(
     (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
-      telemetry?.reportEvent(AIV2TelemetryEventType.CreateIntegrationClicked, {});
       navigateToUrl(createHref);
     },
-    [createHref, navigateToUrl, telemetry]
+    [createHref, navigateToUrl]
   );
 
   const navigateToUpload = useCallback(

@@ -304,7 +304,13 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
         title: i18n.CREATE_DATA_STREAM_ERROR,
       });
     } finally {
-      reportAnalyzeLogsTriggered({ integrationId, dataStreamId, logsSource: logsSourceOption });
+      reportAnalyzeLogsTriggered({
+        integrationId,
+        integrationName: formData.title,
+        dataStreamId,
+        dataStreamName: formData.dataStreamTitle,
+        logsSource: logsSourceOption,
+      });
     }
   }, [
     formData,

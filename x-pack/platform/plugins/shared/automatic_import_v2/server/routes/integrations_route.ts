@@ -17,6 +17,7 @@ import type {
   IntegrationResponse,
 } from '../../common';
 import {
+  AIV2TelemetryEventType,
   ApproveAutoImportIntegrationRequestBody,
   ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
@@ -200,6 +201,7 @@ const createIntegrationRoute = (
                     esClient,
                     connectorId,
                     langSmithOptions,
+                    integrationName: title,
                   },
                   request
                 )
@@ -262,35 +264,30 @@ const approveIntegrationRoute = (
             categories,
           });
 
-          // Report telemetry after successful approval
           try {
             const integration = await automaticImportService.getIntegrationById(integrationId);
             const dataStreams = await automaticImportService.getAllDataStreams(integrationId);
 
-            const allProcessorTypes: string[] = [];
-            let totalProcessorCount = 0;
-
             dataStreams.forEach((ds) => {
-              if (ds.result?.ingest_pipeline?.processors) {
-                const processors = ds.result.ingest_pipeline.processors;
-                totalProcessorCount += processors.length;
-                processors.forEach((processor: Record<string, unknown>) => {
-                  const processorType = Object.keys(processor)[0];
-                  if (processorType && !allProcessorTypes.includes(processorType)) {
-                    allProcessorTypes.push(processorType);
-                  }
-                });
-              }
-            });
+              const processors = ds.result?.ingest_pipeline?.processors ?? [];
+              const processorCount = processors.length;
+              const processorTypes: string[] = [];
+              processors.forEach((processor: Record<string, unknown>) => {
+                const processorType = Object.keys(processor)[0];
+                if (processorType && !processorTypes.includes(processorType)) {
+                  processorTypes.push(processorType);
+                }
+              });
 
-            reportTelemetryEvent('aiv2_integration_installed', {
-              sessionId: request.headers['x-session-id'] || 'unknown',
-              integrationName: integration.title,
-              version,
-              dataStreamCount: dataStreams.length,
-              dataStreamNames: dataStreams.map((ds) => ds.title),
-              processorCount: totalProcessorCount,
-              processorTypes: allProcessorTypes,
+              reportTelemetryEvent(AIV2TelemetryEventType.IntegrationInstalled, {
+                sessionId: request.headers['x-session-id'] || 'unknown',
+                integrationName: integration.title,
+                version,
+                dataStreamCount: dataStreams.length,
+                dataStreamName: ds.title,
+                processorCount,
+                processorTypes,
+              });
             });
           } catch (telemetryError) {
             logger.warn(`Failed to report telemetry: ${telemetryError}`);

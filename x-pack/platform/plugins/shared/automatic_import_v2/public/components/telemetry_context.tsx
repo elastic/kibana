@@ -10,27 +10,57 @@ import { useKibana } from '../common/hooks/use_kibana';
 import { AIV2TelemetryEventType } from '../../common';
 
 export type LogsSource = 'upload' | 'index';
-type ReportDataStreamFlyoutOpened = (params: { integrationId?: string }) => void;
+type ReportDataStreamFlyoutOpened = (params: {
+  integrationId?: string;
+  integrationName?: string;
+  isFirstDataStream: boolean;
+}) => void;
 
 type ReportEditDataStreamFlyoutOpened = (params: {
   integrationId: string;
+  integrationName: string;
   dataStreamId: string;
+  dataStreamName: string;
 }) => void;
 
 type ReportAnalyzeLogsTriggered = (params: {
   integrationId: string;
+  integrationName: string;
   dataStreamId: string;
+  dataStreamName: string;
   logsSource: LogsSource;
 }) => void;
 
 type ReportEditPipelineTabOpened = (params: {
   integrationId: string;
+  integrationName: string;
   dataStreamId: string;
+  dataStreamName: string;
 }) => void;
 
 type ReportCodeEditorCopyClicked = (params: {
   integrationId: string;
+  integrationName: string;
   dataStreamId: string;
+  dataStreamName: string;
+}) => void;
+
+type ReportCancelButtonClicked = () => void;
+
+type ReportDoneButtonClicked = () => void;
+
+type ReportDataStreamDeleteConfirmed = () => void;
+
+type ReportDataStreamRefreshConfirmed = () => void;
+
+type ReportPipelineEdited = (params: {
+  integrationId: string;
+  integrationName: string;
+  dataStreamId: string;
+  dataStreamName: string;
+  linesAdded: number;
+  linesRemoved: number;
+  netLineChange: number;
 }) => void;
 
 interface TelemetryContextProps {
@@ -40,6 +70,11 @@ interface TelemetryContextProps {
   reportAnalyzeLogsTriggered: ReportAnalyzeLogsTriggered;
   reportEditPipelineTabOpened: ReportEditPipelineTabOpened;
   reportCodeEditorCopyClicked: ReportCodeEditorCopyClicked;
+  reportCancelButtonClicked: ReportCancelButtonClicked;
+  reportDoneButtonClicked: ReportDoneButtonClicked;
+  reportDataStreamDeleteConfirmed: ReportDataStreamDeleteConfirmed;
+  reportDataStreamRefreshConfirmed: ReportDataStreamRefreshConfirmed;
+  reportPipelineEdited: ReportPipelineEdited;
 }
 
 const defaultTelemetryContext: TelemetryContextProps = {
@@ -49,6 +84,11 @@ const defaultTelemetryContext: TelemetryContextProps = {
   reportAnalyzeLogsTriggered: () => {},
   reportEditPipelineTabOpened: () => {},
   reportCodeEditorCopyClicked: () => {},
+  reportCancelButtonClicked: () => {},
+  reportDoneButtonClicked: () => {},
+  reportDataStreamDeleteConfirmed: () => {},
+  reportDataStreamRefreshConfirmed: () => {},
+  reportPipelineEdited: () => {},
 };
 
 const TelemetryContext = React.createContext<TelemetryContextProps>(defaultTelemetryContext);
@@ -59,43 +99,53 @@ export const useTelemetry = () => {
 
 export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ children }) => {
   const sessionData = useRef({ sessionId: uuidV4() });
+  const pageLoadReported = useRef(false);
 
   const { telemetry } = useKibana().services;
 
   // Report page load event once when provider mounts
   useEffect(() => {
-    telemetry?.reportEvent(AIV2TelemetryEventType.CreateIntegrationPageLoaded, {
-      sessionId: sessionData.current.sessionId,
-    });
+    if (!pageLoadReported.current && telemetry) {
+      pageLoadReported.current = true;
+      telemetry.reportEvent(AIV2TelemetryEventType.CreateIntegrationPageLoaded, {
+        sessionId: sessionData.current.sessionId,
+      });
+    }
   }, [telemetry]);
 
   const reportDataStreamFlyoutOpened = useCallback<ReportDataStreamFlyoutOpened>(
-    ({ integrationId }) => {
+    ({ integrationId, integrationName, isFirstDataStream }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.DataStreamFlyoutOpened, {
         sessionId: sessionData.current.sessionId,
         integrationId,
+        integrationName,
+        isFirstDataStream,
       });
     },
     [telemetry]
   );
 
   const reportEditDataStreamFlyoutOpened = useCallback<ReportEditDataStreamFlyoutOpened>(
-    ({ integrationId, dataStreamId }) => {
+    ({ integrationId, integrationName, dataStreamId, dataStreamName }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.EditDataStreamFlyoutOpened, {
         sessionId: sessionData.current.sessionId,
         integrationId,
+        integrationName,
         dataStreamId,
+        dataStreamName,
       });
     },
     [telemetry]
   );
 
   const reportAnalyzeLogsTriggered = useCallback<ReportAnalyzeLogsTriggered>(
-    ({ integrationId, dataStreamId, logsSource }) => {
+    ({ integrationId, integrationName, dataStreamId, dataStreamName, logsSource }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.AnalyzeLogsTriggered, {
         sessionId: sessionData.current.sessionId,
         integrationId,
+        integrationName,
         dataStreamId,
+        dataStreamName,
         logsSource,
       });
     },
@@ -103,22 +153,69 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
   );
 
   const reportEditPipelineTabOpened = useCallback<ReportEditPipelineTabOpened>(
-    ({ integrationId, dataStreamId }) => {
+    ({ integrationId, integrationName, dataStreamId, dataStreamName }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.EditPipelineTabOpened, {
         sessionId: sessionData.current.sessionId,
         integrationId,
+        integrationName,
         dataStreamId,
+        dataStreamName,
       });
     },
     [telemetry]
   );
 
   const reportCodeEditorCopyClicked = useCallback<ReportCodeEditorCopyClicked>(
-    ({ integrationId, dataStreamId }) => {
+    ({ integrationId, integrationName, dataStreamId, dataStreamName }) => {
       telemetry?.reportEvent(AIV2TelemetryEventType.CodeEditorCopyClicked, {
         sessionId: sessionData.current.sessionId,
         integrationId,
+        integrationName,
         dataStreamId,
+        dataStreamName,
+      });
+    },
+    [telemetry]
+  );
+
+  const reportCancelButtonClicked = useCallback<ReportCancelButtonClicked>(() => {
+    telemetry?.reportEvent(AIV2TelemetryEventType.CancelButtonClicked, {
+      sessionId: sessionData.current.sessionId,
+    });
+  }, [telemetry]);
+
+  const reportDoneButtonClicked = useCallback<ReportDoneButtonClicked>(() => {
+    telemetry?.reportEvent(AIV2TelemetryEventType.DoneButtonClicked, {
+      sessionId: sessionData.current.sessionId,
+    });
+  }, [telemetry]);
+
+  const reportDataStreamDeleteConfirmed = useCallback<ReportDataStreamDeleteConfirmed>(() => {
+    telemetry?.reportEvent(AIV2TelemetryEventType.DataStreamDeleteConfirmed, {});
+  }, [telemetry]);
+
+  const reportDataStreamRefreshConfirmed = useCallback<ReportDataStreamRefreshConfirmed>(() => {
+    telemetry?.reportEvent(AIV2TelemetryEventType.DataStreamRefreshConfirmed, {});
+  }, [telemetry]);
+
+  const reportPipelineEdited = useCallback<ReportPipelineEdited>(
+    ({
+      integrationId,
+      integrationName,
+      dataStreamId,
+      dataStreamName,
+      linesAdded,
+      linesRemoved,
+      netLineChange,
+    }) => {
+      telemetry?.reportEvent(AIV2TelemetryEventType.PipelineEdited, {
+        integrationId,
+        integrationName,
+        dataStreamId,
+        dataStreamName,
+        linesAdded,
+        linesRemoved,
+        netLineChange,
       });
     },
     [telemetry]
@@ -132,6 +229,11 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
       reportAnalyzeLogsTriggered,
       reportEditPipelineTabOpened,
       reportCodeEditorCopyClicked,
+      reportCancelButtonClicked,
+      reportDoneButtonClicked,
+      reportDataStreamDeleteConfirmed,
+      reportDataStreamRefreshConfirmed,
+      reportPipelineEdited,
     }),
     [
       reportDataStreamFlyoutOpened,
@@ -139,6 +241,11 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
       reportAnalyzeLogsTriggered,
       reportEditPipelineTabOpened,
       reportCodeEditorCopyClicked,
+      reportCancelButtonClicked,
+      reportDoneButtonClicked,
+      reportDataStreamDeleteConfirmed,
+      reportDataStreamRefreshConfirmed,
+      reportPipelineEdited,
     ]
   );
 

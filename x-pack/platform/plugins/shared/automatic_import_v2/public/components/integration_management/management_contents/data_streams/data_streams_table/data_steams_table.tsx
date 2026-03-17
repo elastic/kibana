@@ -25,26 +25,37 @@ import { useTelemetry } from '../../../../telemetry_context';
 
 interface DataStreamsTableProps {
   integrationId: string;
+  integrationName: string;
   items: DataStreamResponse[];
 }
 
-export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps) => {
+export const DataStreamsTable = ({
+  integrationId,
+  integrationName,
+  items,
+}: DataStreamsTableProps) => {
   const { euiTheme } = useEuiTheme();
   const { deleteDataStreamMutation } = useDeleteDataStream();
   const { reanalyzeDataStreamMutation } = useReanalyzeDataStream();
   const { openEditPipelineFlyout } = useUIState();
   const { formData } = useIntegrationForm();
-  const { reportEditDataStreamFlyoutOpened } = useTelemetry();
+  const {
+    reportEditDataStreamFlyoutOpened,
+    reportDataStreamDeleteConfirmed,
+    reportDataStreamRefreshConfirmed,
+  } = useTelemetry();
 
   const handleOpenEditPipelineFlyout = useCallback(
     (item: DataStreamResponse) => {
       openEditPipelineFlyout(item);
       reportEditDataStreamFlyoutOpened({
         integrationId,
+        integrationName,
         dataStreamId: item.dataStreamId,
+        dataStreamName: item.title,
       });
     },
-    [integrationId, reportEditDataStreamFlyoutOpened, openEditPipelineFlyout]
+    [integrationId, integrationName, reportEditDataStreamFlyoutOpened, openEditPipelineFlyout]
   );
   const [dataStreamDeleteTarget, setDataStreamDeleteTarget] = useState<DataStreamResponse | null>(
     null
@@ -91,6 +102,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
   const handleReAnalyzeConfirm = () => {
     if (!formData?.connectorId || !dataStreamReanalyzeTarget) return;
 
+    reportDataStreamRefreshConfirmed();
     setDataStreamReanalyzeTarget(null);
     reanalyzeDataStreamMutation.mutate({
       integrationId,
@@ -105,6 +117,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
 
   const handleDeleteConfirm = () => {
     if (dataStreamDeleteTarget) {
+      reportDataStreamDeleteConfirmed();
       setDataStreamDeleteTarget(null);
       deleteDataStreamMutation.mutate({
         integrationId,

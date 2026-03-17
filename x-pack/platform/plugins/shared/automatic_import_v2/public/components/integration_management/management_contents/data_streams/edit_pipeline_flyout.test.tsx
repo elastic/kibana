@@ -74,6 +74,7 @@ jest.mock('../../contexts', () => ({
 }));
 
 const mockReportCodeEditorCopyClicked = jest.fn();
+const mockReportPipelineEdited = jest.fn();
 jest.mock('../../../telemetry_context', () => ({
   useTelemetry: () => ({
     sessionId: 'test-session-id',
@@ -82,6 +83,7 @@ jest.mock('../../../telemetry_context', () => ({
     reportAnalyzeLogsTriggered: jest.fn(),
     reportEditPipelineTabOpened: jest.fn(),
     reportCodeEditorCopyClicked: mockReportCodeEditorCopyClicked,
+    reportPipelineEdited: mockReportPipelineEdited,
   }),
 }));
 
@@ -130,6 +132,7 @@ const createMockResults = (
 describe('EditPipelineFlyout', () => {
   const defaultProps = {
     integrationId: 'integration-123',
+    integrationName: 'Test Integration',
     dataStream: createMockDataStream(),
     onClose: jest.fn(),
   };
@@ -347,6 +350,18 @@ describe('EditPipelineFlyout', () => {
       });
     });
 
+    it('should include integrationName in pipeline edited telemetry', async () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('code-editor-change'));
+      await userEvent.click(screen.getByTestId('editPipelineFlyoutSaveButton'));
+
+      expect(mockReportPipelineEdited).toHaveBeenCalledWith(
+        expect.objectContaining({ integrationName: 'Test Integration' })
+      );
+    });
+
     it('should report telemetry when copy button is clicked', async () => {
       mockUIState.selectedPipelineTab = 'pipeline';
       render(<EditPipelineFlyout {...defaultProps} />);
@@ -356,7 +371,9 @@ describe('EditPipelineFlyout', () => {
 
       expect(mockReportCodeEditorCopyClicked).toHaveBeenCalledWith({
         integrationId: 'integration-123',
+        integrationName: 'Test Integration',
         dataStreamId: 'ds-1',
+        dataStreamName: 'Test Data Stream',
       });
     });
   });

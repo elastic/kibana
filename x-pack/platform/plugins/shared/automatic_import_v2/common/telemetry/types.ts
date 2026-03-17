@@ -14,21 +14,29 @@ import type { LogsSource } from '../../public/components/telemetry_context';
  */
 export enum AIV2TelemetryEventType {
   CreateIntegrationPageLoaded = 'aiv2_create_integration_page_loaded',
-
   DataStreamFlyoutOpened = 'aiv2_data_stream_flyout_opened',
-  EditDataStreamFlyoutOpened = 'aiv2_edit_data_stream_flyout_opened',
   AnalyzeLogsTriggered = 'aiv2_analyze_logs_triggered',
-
+  EditDataStreamFlyoutOpened = 'aiv2_edit_data_stream_flyout_opened',
   EditPipelineTabOpened = 'aiv2_edit_pipeline_tab_opened',
+  PipelineEdited = 'aiv2_pipeline_edited',
   CodeEditorCopyClicked = 'aiv2_code_editor_copy_clicked',
+  DataStreamDeleteConfirmed = 'aiv2_data_stream_delete_confirmed',
+  DataStreamRefreshConfirmed = 'aiv2_data_stream_refresh_confirmed',
+  CancelButtonClicked = 'aiv2_cancel_button_clicked',
+  DoneButtonClicked = 'aiv2_done_button_clicked',
 
+  // Server events
   DataStreamCreationComplete = 'aiv2_data_stream_creation_complete',
-
   IntegrationInstalled = 'aiv2_integration_installed',
 
+  // Fleet Events
   ManageIntegrationsTableViewed = 'aiv2_manage_integrations_table_viewed',
-  CreateIntegrationClicked = 'aiv2_create_integration_clicked',
   UploadIntegrationClicked = 'aiv2_upload_integration_clicked',
+  IntegrationDeleteConfirmed = 'aiv2_integration_delete_confirmed',
+  ReviewApproveMenuClicked = 'aiv2_review_approve_menu_clicked',
+  IntegrationDownloadZipClicked = 'aiv2_integration_download_zip_clicked',
+  ApproveModalCancelClicked = 'aiv2_approve_modal_cancel_clicked',
+  ApproveModalApproveClicked = 'aiv2_approve_modal_approve_clicked',
 }
 
 export interface CreateIntegrationPageLoadedPayload {
@@ -38,37 +46,50 @@ export interface CreateIntegrationPageLoadedPayload {
 export interface DataStreamFlyoutOpenedPayload {
   sessionId: string;
   integrationId?: string;
+  integrationName?: string;
+  /** Boolean flag if this is the first data stream being created for a new integration */
+  isFirstDataStream: boolean;
 }
 
 export interface EditDataStreamFlyoutOpenedPayload {
   sessionId: string;
   integrationId: string;
+  integrationName: string;
   dataStreamId: string;
+  dataStreamName: string;
 }
 
 export interface AnalyzeLogsTriggeredPayload {
   sessionId: string;
   integrationId: string;
+  integrationName: string;
   dataStreamId: string;
+  dataStreamName: string;
   logsSource: LogsSource;
 }
 
 export interface EditPipelineTabOpenedPayload {
   sessionId: string;
   integrationId: string;
+  integrationName: string;
   dataStreamId: string;
+  dataStreamName: string;
 }
 
 export interface CodeEditorCopyClickedPayload {
   sessionId: string;
   integrationId: string;
+  integrationName: string;
   dataStreamId: string;
+  dataStreamName: string;
 }
 
 export interface DataStreamCreationCompletePayload {
   sessionId: string;
   integrationId: string;
+  integrationName: string;
   dataStreamId: string;
+  dataStreamName: string;
   durationMs: number;
   success: boolean;
   errorMessage?: string;
@@ -79,16 +100,39 @@ export interface IntegrationInstalledPayload {
   integrationName: string;
   version: string;
   dataStreamCount: number;
-  dataStreamNames: string[];
+  dataStreamName: string;
   processorCount: number;
   processorTypes: string[];
 }
 
 export type ManageIntegrationsTableViewedPayload = Record<string, never>;
-
-export type CreateIntegrationClickedPayload = Record<string, never>;
-
 export type UploadIntegrationClickedPayload = Record<string, never>;
+
+export interface CancelButtonClickedPayload {
+  sessionId: string;
+}
+
+export interface DoneButtonClickedPayload {
+  sessionId: string;
+}
+
+export type ReviewApproveMenuClickedPayload = Record<string, never>;
+export type IntegrationDownloadZipClickedPayload = Record<string, never>;
+export type ApproveModalCancelClickedPayload = Record<string, never>;
+export type ApproveModalApproveClickedPayload = Record<string, never>;
+export type IntegrationDeleteConfirmedPayload = Record<string, never>;
+export type DataStreamDeleteConfirmedPayload = Record<string, never>;
+export type DataStreamRefreshConfirmedPayload = Record<string, never>;
+
+export interface PipelineEditedPayload {
+  integrationId: string;
+  integrationName: string;
+  dataStreamId: string;
+  dataStreamName: string;
+  linesAdded: number;
+  linesRemoved: number;
+  netLineChange: number;
+}
 
 export type AIV2EventPayload<T extends AIV2TelemetryEventType> =
   T extends AIV2TelemetryEventType.CreateIntegrationPageLoaded
@@ -103,14 +147,32 @@ export type AIV2EventPayload<T extends AIV2TelemetryEventType> =
     ? EditPipelineTabOpenedPayload
     : T extends AIV2TelemetryEventType.CodeEditorCopyClicked
     ? CodeEditorCopyClickedPayload
+    : T extends AIV2TelemetryEventType.CancelButtonClicked
+    ? CancelButtonClickedPayload
+    : T extends AIV2TelemetryEventType.DoneButtonClicked
+    ? DoneButtonClickedPayload
     : T extends AIV2TelemetryEventType.DataStreamCreationComplete
     ? DataStreamCreationCompletePayload
     : T extends AIV2TelemetryEventType.IntegrationInstalled
     ? IntegrationInstalledPayload
     : T extends AIV2TelemetryEventType.ManageIntegrationsTableViewed
     ? ManageIntegrationsTableViewedPayload
-    : T extends AIV2TelemetryEventType.CreateIntegrationClicked
-    ? CreateIntegrationClickedPayload
     : T extends AIV2TelemetryEventType.UploadIntegrationClicked
     ? UploadIntegrationClickedPayload
+    : T extends AIV2TelemetryEventType.ReviewApproveMenuClicked
+    ? ReviewApproveMenuClickedPayload
+    : T extends AIV2TelemetryEventType.IntegrationDownloadZipClicked
+    ? IntegrationDownloadZipClickedPayload
+    : T extends AIV2TelemetryEventType.ApproveModalCancelClicked
+    ? ApproveModalCancelClickedPayload
+    : T extends AIV2TelemetryEventType.ApproveModalApproveClicked
+    ? ApproveModalApproveClickedPayload
+    : T extends AIV2TelemetryEventType.IntegrationDeleteConfirmed
+    ? IntegrationDeleteConfirmedPayload
+    : T extends AIV2TelemetryEventType.DataStreamDeleteConfirmed
+    ? DataStreamDeleteConfirmedPayload
+    : T extends AIV2TelemetryEventType.DataStreamRefreshConfirmed
+    ? DataStreamRefreshConfirmedPayload
+    : T extends AIV2TelemetryEventType.PipelineEdited
+    ? PipelineEditedPayload
     : never;

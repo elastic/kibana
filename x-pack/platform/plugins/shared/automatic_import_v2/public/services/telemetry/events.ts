@@ -12,9 +12,7 @@ import { AIV2TelemetryEventType } from '../../../common';
 /**
  * EBT schema definitions for browser-side telemetry events.
  * These schemas define the structure of event payloads for BigQuery.
- *
- * Note: IntegrationInstalled and DataStreamCreationComplete are server-only
- * and registered in server/telemetry/events.ts
+
  */
 export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, RootSchema<object>>> = {
   [AIV2TelemetryEventType.CreateIntegrationPageLoaded]: {
@@ -37,7 +35,18 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
     },
     integrationId: {
       type: 'keyword',
-      _meta: { description: 'Integration ID', optional: false },
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    integrationName: {
+      type: 'keyword',
+      _meta: { description: 'Integration name', optional: true },
+    },
+    isFirstDataStream: {
+      type: 'boolean',
+      _meta: {
+        description: 'True if this is the first data stream being created for a new integration',
+        optional: false,
+      },
     },
   },
 
@@ -53,9 +62,17 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
       type: 'keyword',
       _meta: { description: 'Integration ID', optional: false },
     },
+    integrationName: {
+      type: 'keyword',
+      _meta: { description: 'Integration name', optional: false },
+    },
     dataStreamId: {
       type: 'keyword',
       _meta: { description: 'Data stream ID being edited', optional: false },
+    },
+    dataStreamName: {
+      type: 'keyword',
+      _meta: { description: 'Data stream name', optional: false },
     },
   },
 
@@ -71,13 +88,24 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
       type: 'keyword',
       _meta: { description: 'Integration ID', optional: false },
     },
+    integrationName: {
+      type: 'keyword',
+      _meta: { description: 'Integration name', optional: false },
+    },
     dataStreamId: {
       type: 'keyword',
       _meta: { description: 'Data stream ID', optional: false },
     },
+    dataStreamName: {
+      type: 'keyword',
+      _meta: { description: 'Data stream name', optional: false },
+    },
+    logsSource: {
+      type: 'keyword',
+      _meta: { description: 'Source of logs: upload or index', optional: false },
+    },
   },
 
-  // Edit pipeline tab opened
   [AIV2TelemetryEventType.EditPipelineTabOpened]: {
     sessionId: {
       type: 'keyword',
@@ -90,9 +118,17 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
       type: 'keyword',
       _meta: { description: 'Integration ID', optional: false },
     },
+    integrationName: {
+      type: 'keyword',
+      _meta: { description: 'Integration name', optional: false },
+    },
     dataStreamId: {
       type: 'keyword',
       _meta: { description: 'Data stream ID', optional: false },
+    },
+    dataStreamName: {
+      type: 'keyword',
+      _meta: { description: 'Data stream name', optional: false },
     },
   },
 
@@ -109,16 +145,100 @@ export const telemetryEventsSchemas: Partial<Record<AIV2TelemetryEventType, Root
       type: 'keyword',
       _meta: { description: 'Integration ID', optional: false },
     },
+    integrationName: {
+      type: 'keyword',
+      _meta: { description: 'Integration name', optional: false },
+    },
     dataStreamId: {
       type: 'keyword',
       _meta: { description: 'Data stream ID', optional: false },
     },
+    dataStreamName: {
+      type: 'keyword',
+      _meta: { description: 'Data stream name', optional: false },
+    },
   },
 
-  // Fleet context events (empty payloads - just counting occurrences)
   [AIV2TelemetryEventType.ManageIntegrationsTableViewed]: {},
 
-  [AIV2TelemetryEventType.CreateIntegrationClicked]: {},
-
   [AIV2TelemetryEventType.UploadIntegrationClicked]: {},
+
+  [AIV2TelemetryEventType.CancelButtonClicked]: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID to identify all the events in the same session',
+        optional: false,
+      },
+    },
+  },
+
+  [AIV2TelemetryEventType.DoneButtonClicked]: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID to identify all the events in the same session',
+        optional: false,
+      },
+    },
+  },
+
+  [AIV2TelemetryEventType.ReviewApproveMenuClicked]: {},
+  [AIV2TelemetryEventType.IntegrationDownloadZipClicked]: {},
+  [AIV2TelemetryEventType.ApproveModalCancelClicked]: {},
+  [AIV2TelemetryEventType.ApproveModalApproveClicked]: {},
+  [AIV2TelemetryEventType.IntegrationDeleteConfirmed]: {},
+  [AIV2TelemetryEventType.DataStreamDeleteConfirmed]: {},
+  [AIV2TelemetryEventType.DataStreamRefreshConfirmed]: {},
+  [AIV2TelemetryEventType.PipelineEdited]: {
+    integrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Integration ID',
+        optional: false,
+      },
+    },
+    integrationName: {
+      type: 'keyword',
+      _meta: {
+        description: 'Integration name',
+        optional: false,
+      },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Data stream ID',
+        optional: false,
+      },
+    },
+    dataStreamName: {
+      type: 'keyword',
+      _meta: {
+        description: 'Data stream name',
+        optional: false,
+      },
+    },
+    linesAdded: {
+      type: 'long',
+      _meta: {
+        description: 'Number of lines added to the pipeline',
+        optional: false,
+      },
+    },
+    linesRemoved: {
+      type: 'long',
+      _meta: {
+        description: 'Number of lines removed from the pipeline',
+        optional: false,
+      },
+    },
+    netLineChange: {
+      type: 'long',
+      _meta: {
+        description: 'Net change in line count (added - removed)',
+        optional: false,
+      },
+    },
+  },
 };

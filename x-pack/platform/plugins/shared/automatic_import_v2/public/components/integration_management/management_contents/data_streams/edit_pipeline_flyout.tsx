@@ -34,10 +34,11 @@ import { useGetDataStreamResults, useUpdateDataStreamPipeline } from '../../../.
 import { useUIState } from '../../contexts';
 import { useTelemetry } from '../../../telemetry_context';
 import * as i18n from './translations';
-import { getIconFromType, flattenPipelineObject } from './utils';
+import { getIconFromType, flattenPipelineObject, diffPipelineLines } from './utils';
 
 interface EditPipelineFlyoutProps {
   integrationId: string;
+  integrationName: string;
   dataStream: DataStreamResponse;
   onClose: () => void;
 }
@@ -50,6 +51,7 @@ interface TableRow {
 
 export const EditPipelineFlyout = ({
   integrationId,
+  integrationName,
   dataStream,
   onClose,
 }: EditPipelineFlyoutProps) => {
@@ -58,7 +60,8 @@ export const EditPipelineFlyout = ({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
   const { selectedPipelineTab, selectPipelineTab } = useUIState();
-  const { reportCodeEditorCopyClicked, reportEditPipelineTabOpened } = useTelemetry();
+  const { reportCodeEditorCopyClicked, reportEditPipelineTabOpened, reportPipelineEdited } =
+    useTelemetry();
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, isError, error } = useGetDataStreamResults(
@@ -112,10 +115,34 @@ export const EditPipelineFlyout = ({
         dataStreamId: dataStream.dataStreamId,
         ingestPipeline: pipelineText,
       });
+
+      const { linesAdded, linesRemoved, netLineChange } = diffPipelineLines(
+        stringifiedPipeline,
+        pipelineText
+      );
+
+      reportPipelineEdited({
+        integrationId,
+        integrationName,
+        dataStreamId: dataStream.dataStreamId,
+        dataStreamName: dataStream.title,
+        linesAdded,
+        linesRemoved,
+        netLineChange,
+      });
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : i18n.EDIT_PIPELINE_FLYOUT.saveErrorMessage);
     }
-  }, [updateDataStreamPipelineMutation, integrationId, dataStream.dataStreamId, pipelineText]);
+  }, [
+    updateDataStreamPipelineMutation,
+    integrationId,
+    dataStream.dataStreamId,
+    dataStream.title,
+    pipelineText,
+    stringifiedPipeline,
+    integrationName,
+    reportPipelineEdited,
+  ]);
 
   const columns = [
     {
@@ -190,11 +217,19 @@ export const EditPipelineFlyout = ({
       ) {
         reportCodeEditorCopyClicked({
           integrationId,
+          integrationName,
           dataStreamId: dataStream.dataStreamId,
+          dataStreamName: dataStream.title,
         });
       }
     },
-    [reportCodeEditorCopyClicked, integrationId, dataStream.dataStreamId]
+    [
+      reportCodeEditorCopyClicked,
+      integrationId,
+      integrationName,
+      dataStream.dataStreamId,
+      dataStream.title,
+    ]
   );
 
   return (
@@ -250,7 +285,9 @@ export const EditPipelineFlyout = ({
             onClick={() => {
               reportEditPipelineTabOpened({
                 integrationId,
+                integrationName,
                 dataStreamId: dataStream.dataStreamId,
+                dataStreamName: dataStream.title,
               });
               selectPipelineTab('pipeline');
             }}

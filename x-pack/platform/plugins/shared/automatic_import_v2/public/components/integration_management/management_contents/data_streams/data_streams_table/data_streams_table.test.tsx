@@ -53,6 +53,15 @@ jest.mock('../../../../../common', () => ({
   }),
 }));
 
+const mockReportEditDataStreamFlyoutOpened = jest.fn();
+jest.mock('../../../../telemetry_context', () => ({
+  useTelemetry: () => ({
+    reportEditDataStreamFlyoutOpened: mockReportEditDataStreamFlyoutOpened,
+    reportDataStreamDeleteConfirmed: jest.fn(),
+    reportDataStreamRefreshConfirmed: jest.fn(),
+  }),
+}));
+
 // Mock useIntegrationForm hook
 jest.mock('../../../forms/integration_form', () => ({
   useIntegrationForm: () => ({
@@ -92,6 +101,7 @@ const renderWithProvider = (ui: React.ReactElement) => {
 describe('DataStreamsTable', () => {
   const defaultProps = {
     integrationId: 'integration-123',
+    integrationName: 'Test Integration',
     items: [createMockDataStream()],
   };
 
@@ -132,6 +142,17 @@ describe('DataStreamsTable', () => {
       renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       expect(screen.getByTestId('mock-status')).toBeInTheDocument();
+    });
+
+    it('should pass integrationName to telemetry when data stream is expanded', async () => {
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      const expandButton = screen.getByTestId('expandDataStreamButton');
+      await userEvent.click(expandButton);
+
+      expect(mockReportEditDataStreamFlyoutOpened).toHaveBeenCalledWith(
+        expect.objectContaining({ integrationName: 'Test Integration' })
+      );
     });
 
     it('should render empty table when no items', () => {
