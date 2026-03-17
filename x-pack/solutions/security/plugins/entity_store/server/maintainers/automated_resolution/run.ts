@@ -271,9 +271,11 @@ async function resolveMatchBuckets(
       }
 
       if (existingTargetIds.length === 1) {
-        // Extend existing group
+        // Extend existing group — filter out the target itself (it's unresolved too)
         const targetId = existingTargetIds[0];
-        const aliasIds = unresolvedEntities.map((e) => e.entityId);
+        const aliasIds = unresolvedEntities
+          .filter((e) => e.entityId !== targetId)
+          .map((e) => e.entityId);
         if (aliasIds.length === 0) continue;
 
         const result = await resolutionClient.linkEntities(targetId, aliasIds);
