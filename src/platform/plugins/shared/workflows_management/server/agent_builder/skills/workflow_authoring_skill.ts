@@ -161,6 +161,12 @@ Available connector types include: slack, jira, pagerduty, email, webhook, servi
 When asked to add Slack/Jira/etc integration, ALWAYS use connector steps first!
 Use \`${workflowTools.getConnectors}\` to find the connector IDs configured in the user's environment.
 
+### Verify Step Type IDs Before Editing
+
+**ALWAYS call \`${workflowTools.getStepDefinitions}\` to verify the exact step type ID before inserting a new step or changing a step's type.**
+Step types have specific IDs (e.g. \`kibana.createCase\`, not \`kibana\`; \`http\`, not \`http.request\`).
+Using an incorrect type ID will produce a validation error — verify the ID first to avoid invalid proposals.
+
 ### Liquid Templating
 
 Use Liquid syntax for dynamic values:
