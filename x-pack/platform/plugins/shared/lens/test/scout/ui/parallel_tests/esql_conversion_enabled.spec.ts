@@ -9,8 +9,7 @@ import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/257943
-spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
@@ -47,6 +46,8 @@ spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic
       const { dashboard, lens } = pageObjects;
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      await expect(lens.getInlineEditor()).toBeVisible();
+      await expect(lens.getConvertToEsqlButton()).toBeVisible();
 
       await lens.getConvertToEsqlButton().click();
 
@@ -65,7 +66,13 @@ spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
       await expect(editor).toBeVisible();
-      await expect(lens.getApplyFlyoutButton()).toBeDisabled();
+      // Wait for flyout to settle: Apply is disabled when there are no unsaved changes
+      await expect
+        .poll(async () => await lens.getApplyFlyoutButton().isDisabled(), {
+          timeout: 20000,
+          intervals: [200],
+        })
+        .toBe(true);
 
       // TODO: Add conversion assertions: https://github.com/elastic/kibana/issues/250385
     }
@@ -77,6 +84,8 @@ spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic
       const { dashboard, lens } = pageObjects;
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      await expect(lens.getInlineEditor()).toBeVisible();
+      await expect(lens.getConvertToEsqlButton()).toBeVisible();
 
       await lens.getConvertToEsqlButton().click();
 
@@ -87,8 +96,12 @@ spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic
 
       await expect(modal).toBeHidden();
 
-      await page.getByTestId('lnsMetric_primaryMetricDimensionPanel').click();
+      const metricDimensionPanel = page.getByTestId('lnsMetric_primaryMetricDimensionPanel');
+      await expect(metricDimensionPanel).toBeVisible({ timeout: 15000 });
+      await metricDimensionPanel.click();
       const nameInput = page.getByTestId('name-input');
+      // Dimension panel can open slowly; wait for name input to be ready before filling
+      await expect(nameInput).toBeVisible({ timeout: 20000 });
       await nameInput.fill('Converted metric');
       await expect(nameInput).toHaveValue('Converted metric');
 
@@ -96,12 +109,19 @@ spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic
       const panel = dashboard.getPanelByEmbeddableId(testData.INLINE_METRIC_PANEL_ID);
       await expect(panel).toContainText('Converted metric');
 
+      await expect(lens.getSecondaryFlyoutBackButton()).toBeVisible();
       await lens.getSecondaryFlyoutBackButton().click();
       await lens.getApplyFlyoutButton().click();
 
-      // The button is disabled after clicking on "Apply and close" button
+      // The button is disabled after clicking on "Apply and close" when there are no unsaved changes
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
-      await expect(lens.getApplyFlyoutButton()).toBeDisabled();
+      await expect(lens.getInlineEditor()).toBeVisible();
+      await expect
+        .poll(async () => await lens.getApplyFlyoutButton().isDisabled(), {
+          timeout: 20000,
+          intervals: [200],
+        })
+        .toBe(true);
     }
   );
 
@@ -111,7 +131,10 @@ spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic
       const { dashboard, lens } = pageObjects;
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
-      await expect(page.getByTestId('ESQLEditor')).toBeHidden();
+      await expect(lens.getInlineEditor()).toBeVisible();
+      await expect(lens.getConvertToEsqlButton()).toBeVisible();
+      // Wait for Lens form view: ES|QL editor is hidden until we convert
+      await expect(page.getByTestId('ESQLEditor')).toBeHidden({ timeout: 20000 });
 
       await lens.getConvertToEsqlButton().click();
       await lens.getConvertToEsqModalConfirmButton().click();
@@ -121,7 +144,9 @@ spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic
       await expect(lens.getInlineEditor()).toBeHidden();
 
       await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
-      await expect(page.getByTestId('ESQLEditor')).toBeHidden();
+      await expect(lens.getInlineEditor()).toBeVisible();
+      // After cancel, panel is back to Lens form view; ES|QL editor hidden
+      await expect(page.getByTestId('ESQLEditor')).toBeHidden({ timeout: 20000 });
     }
   );
 
@@ -131,6 +156,7 @@ spaceTest.describe.skip('Lens Convert to ES|QL', { tag: '@local-stateful-classic
       const { dashboard, lens } = pageObjects;
 
       await dashboard.openInlineEditor(testData.SAVED_METRIC_PANEL_ID);
+      await expect(lens.getInlineEditor()).toBeVisible();
 
       await expect(lens.getConvertToEsqlButton()).toBeDisabled();
     }
