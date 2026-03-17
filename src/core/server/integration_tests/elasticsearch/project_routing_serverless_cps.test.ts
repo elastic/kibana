@@ -280,10 +280,7 @@ describe('project_routing on serverless CPS', () => {
       const response = await client.search({
         index: TEST_INDEX,
         query: { match_all: {} },
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
@@ -293,10 +290,7 @@ describe('project_routing on serverless CPS', () => {
       const response = await client.search({
         index: TEST_INDEX,
         query: { match: { title: 'document' } },
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.hits.hits.length).toBe(DOCS_WITH_DOCUMENT_IN_TITLE);
@@ -306,10 +300,7 @@ describe('project_routing on serverless CPS', () => {
       const response = await client.search({
         index: TEST_INDEX,
         query: { term: { category: 'alpha' } },
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
@@ -324,10 +315,7 @@ describe('project_routing on serverless CPS', () => {
             filter: [{ term: { category: 'beta' } }],
           },
         },
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.hits.hits.length).toBe(BETA_CATEGORY_DOCS_COUNT);
@@ -345,10 +333,7 @@ describe('project_routing on serverless CPS', () => {
             avg: { field: 'count' },
           },
         },
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.aggregations).toBeDefined();
@@ -361,10 +346,7 @@ describe('project_routing on serverless CPS', () => {
         index: TEST_INDEX,
         query: { match_all: {} },
         sort: [{ count: 'desc' }],
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
@@ -380,10 +362,7 @@ describe('project_routing on serverless CPS', () => {
         from: 2,
         size: pageSize,
         sort: [{ count: 'asc' }],
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.hits.hits.length).toBe(pageSize);
@@ -394,10 +373,7 @@ describe('project_routing on serverless CPS', () => {
         index: TEST_INDEX,
         query: { match_all: {} },
         _source: ['title', 'category'],
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
@@ -414,10 +390,7 @@ describe('project_routing on serverless CPS', () => {
         highlight: {
           fields: { title: {} },
         },
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.hits.hits.length).toBe(FIRST_TITLE_DOCS_COUNT);
@@ -428,10 +401,7 @@ describe('project_routing on serverless CPS', () => {
       const response = await client.search({
         index: '.kibana_cps-routing-*',
         query: { match_all: {} },
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
@@ -442,10 +412,7 @@ describe('project_routing on serverless CPS', () => {
         index: 'nonexistent-index-*',
         query: { match_all: {} },
         allow_no_indices: true,
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       // Non-existent index returns no hits
@@ -536,10 +503,7 @@ describe('project_routing on serverless CPS', () => {
       const response = await client.count({
         index: TEST_INDEX,
         query: { match_all: {} },
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.count).toBe(TOTAL_DOCS_COUNT);
@@ -549,10 +513,7 @@ describe('project_routing on serverless CPS', () => {
       const response = await client.count({
         index: TEST_INDEX,
         query: { term: { category: 'alpha' } },
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.count).toBe(ALPHA_CATEGORY_DOCS_COUNT);
@@ -585,10 +546,7 @@ describe('project_routing on serverless CPS', () => {
     it('handles empty query with project_routing', async () => {
       const response = await client.search({
         index: TEST_INDEX,
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
@@ -599,10 +557,7 @@ describe('project_routing on serverless CPS', () => {
         index: TEST_INDEX,
         query: { match_all: {} },
         track_total_hits: true,
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect((response.hits.total as any).value).toBe(TOTAL_DOCS_COUNT);
@@ -613,10 +568,7 @@ describe('project_routing on serverless CPS', () => {
         index: TEST_INDEX,
         query: { match: { title: 'First' } },
         explain: true,
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.hits.hits.length).toBe(FIRST_TITLE_DOCS_COUNT);
@@ -628,10 +580,7 @@ describe('project_routing on serverless CPS', () => {
         index: TEST_INDEX,
         query: { match_all: {} },
         seq_no_primary_term: true,
-        body: {
-          // @ts-expect-error - project_routing is a valid body parameter
-          project_routing: LOCAL_PROJECT_ROUTING,
-        },
+        project_routing: LOCAL_PROJECT_ROUTING,
       });
 
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
@@ -646,10 +595,7 @@ describe('project_routing on serverless CPS', () => {
         {
           index: TEST_INDEX,
           query: { match_all: {} },
-          body: {
-            // @ts-expect-error - project_routing is a valid body parameter
-            project_routing: LOCAL_PROJECT_ROUTING,
-          },
+          project_routing: LOCAL_PROJECT_ROUTING,
         },
         {
           querystring: {
@@ -666,10 +612,7 @@ describe('project_routing on serverless CPS', () => {
         {
           index: TEST_INDEX,
           query: { match_all: {} },
-          body: {
-            // @ts-expect-error - project_routing is a valid body parameter
-            project_routing: LOCAL_PROJECT_ROUTING,
-          },
+          project_routing: LOCAL_PROJECT_ROUTING,
         },
         {
           querystring: {
@@ -686,10 +629,7 @@ describe('project_routing on serverless CPS', () => {
         {
           index: TEST_INDEX,
           query: { match_all: {} },
-          body: {
-            // @ts-expect-error - project_routing is a valid body parameter
-            project_routing: LOCAL_PROJECT_ROUTING,
-          },
+          project_routing: LOCAL_PROJECT_ROUTING,
         },
         {
           querystring: {
@@ -859,10 +799,7 @@ describe('project_routing on serverless CPS', () => {
         const response = await client.search({
           index: TEST_ALIAS,
           query: { match_all: {} },
-          body: {
-            // @ts-expect-error - project_routing is a valid body parameter
-            project_routing: `@${NPRE_ALIAS_STAR}`,
-          },
+          project_routing: `@${NPRE_ALIAS_STAR}`,
         });
 
         expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
@@ -872,10 +809,7 @@ describe('project_routing on serverless CPS', () => {
         const response = await client.search({
           index: TEST_ALIAS,
           query: { term: { category: 'alpha' } },
-          body: {
-            // @ts-expect-error - project_routing is a valid body parameter
-            project_routing: `@${NPRE_ALIAS_STAR}`,
-          },
+          project_routing: `@${NPRE_ALIAS_STAR}`,
         });
 
         expect(response.hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
@@ -885,10 +819,7 @@ describe('project_routing on serverless CPS', () => {
         const response = await client.count({
           index: TEST_ALIAS,
           query: { match_all: {} },
-          body: {
-            // @ts-expect-error - project_routing is a valid body parameter
-            project_routing: `@${NPRE_ALIAS_STAR}`,
-          },
+          project_routing: `@${NPRE_ALIAS_STAR}`,
         });
 
         expect(response.count).toBe(TOTAL_DOCS_COUNT);
@@ -900,10 +831,7 @@ describe('project_routing on serverless CPS', () => {
         const response = await client.search({
           index: TEST_INDEX,
           query: { match_all: {} },
-          body: {
-            // @ts-expect-error - project_routing is a valid body parameter
-            project_routing: `@${NPRE_ALIAS_ORIGIN}`,
-          },
+          project_routing: `@${NPRE_ALIAS_ORIGIN}`,
         });
 
         expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
@@ -913,10 +841,7 @@ describe('project_routing on serverless CPS', () => {
         const response = await client.search({
           index: TEST_INDEX,
           query: { term: { category: 'alpha' } },
-          body: {
-            // @ts-expect-error - project_routing is a valid body parameter
-            project_routing: `@${NPRE_ALIAS_ORIGIN}`,
-          },
+          project_routing: `@${NPRE_ALIAS_ORIGIN}`,
         });
 
         expect(response.hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
@@ -926,10 +851,7 @@ describe('project_routing on serverless CPS', () => {
         const response = await client.count({
           index: TEST_INDEX,
           query: { match_all: {} },
-          body: {
-            // @ts-expect-error - project_routing is a valid body parameter
-            project_routing: `@${NPRE_ALIAS_ORIGIN}`,
-          },
+          project_routing: `@${NPRE_ALIAS_ORIGIN}`,
         });
 
         expect(response.count).toBe(TOTAL_DOCS_COUNT);
@@ -947,10 +869,7 @@ describe('project_routing on serverless CPS', () => {
         const response = await client.search({
           index: TEST_INDEX,
           query: { match_all: {} },
-          body: {
-            // @ts-expect-error - project_routing is a valid body parameter
-            project_routing: '@cps-test-does-not-exist',
-          },
+          project_routing: '@cps-test-does-not-exist',
         });
 
         // ES falls back to no-op routing and returns results normally.
@@ -961,10 +880,7 @@ describe('project_routing on serverless CPS', () => {
         const response = await client.count({
           index: TEST_INDEX,
           query: { match_all: {} },
-          body: {
-            // @ts-expect-error - project_routing is a valid body parameter
-            project_routing: '@cps-test-does-not-exist',
-          },
+          project_routing: '@cps-test-does-not-exist',
         });
 
         expect(response.count).toBe(TOTAL_DOCS_COUNT);

@@ -10,11 +10,31 @@
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from './constants';
 import type { TimeRange } from './types';
 import {
+  toLocalPreciseString,
   isValidTimeRange,
   getOptionDisplayLabel,
   getOptionShorthand,
   getOptionInputText,
+  formatDateRange,
+  combineDateAndTime,
 } from './utils';
+
+describe('toLocalPreciseString', () => {
+  it('formats a date using local time components (no Z)', () => {
+    const d = new Date(2026, 1, 10, 14, 12, 59, 531); // local 14:12:59.531
+    expect(toLocalPreciseString(d)).toBe('2026-02-10T14:12:59.531');
+  });
+
+  it('zero-pads all fields', () => {
+    const d = new Date(2026, 0, 5, 9, 3, 7, 42); // Jan 5, 09:03:07.042
+    expect(toLocalPreciseString(d)).toBe('2026-01-05T09:03:07.042');
+  });
+
+  it('does not produce a Z suffix (output is local, not UTC)', () => {
+    const d = new Date(2026, 1, 10, 14, 0, 0, 0);
+    expect(toLocalPreciseString(d)).not.toMatch(/Z$/);
+  });
+});
 
 describe('isValidTimeRange', () => {
   const baseRange = (): TimeRange => ({
@@ -141,5 +161,72 @@ describe('getOptionInputText', () => {
 
   it('returns now when both bounds are now', () => {
     expect(getOptionInputText({ start: 'now', end: 'now' })).toBe('now');
+  });
+});
+
+describe('formatDateRange', () => {
+  it('formats two dates with the standard delimiter', () => {
+    const start = new Date(2026, 1, 10, 10, 15, 30, 500);
+    const end = new Date(2026, 1, 11, 23, 30, 0, 0);
+    expect(formatDateRange(start, end)).toBe('2026-02-10T10:15:30.500 to 2026-02-11T23:30:00.000');
+  });
+
+  it('uses local time (no Z suffix)', () => {
+    const start = new Date(2026, 0, 1, 0, 0, 0, 0);
+    const end = new Date(2026, 0, 2, 0, 0, 0, 0);
+    const result = formatDateRange(start, end);
+    expect(result).not.toMatch(/Z/);
+  });
+
+  it('handles same-day ranges', () => {
+    const start = new Date(2026, 2, 5, 9, 0, 0, 0);
+    const end = new Date(2026, 2, 5, 17, 0, 0, 0);
+    expect(formatDateRange(start, end)).toBe('2026-03-05T09:00:00.000 to 2026-03-05T17:00:00.000');
+  });
+});
+
+describe('combineDateAndTime', () => {
+  it('combines date from first arg with time from second arg', () => {
+    const date = new Date(2026, 1, 10, 0, 0, 0, 0); // Feb 10
+    const time = new Date(2026, 5, 15, 14, 30, 45, 123); // different date, 14:30:45.123
+    const result = combineDateAndTime(date, time);
+
+    expect(result.getFullYear()).toBe(2026);
+    expect(result.getMonth()).toBe(1); // Feb
+    expect(result.getDate()).toBe(10);
+    expect(result.getHours()).toBe(14);
+    expect(result.getMinutes()).toBe(30);
+    expect(result.getSeconds()).toBe(45);
+    expect(result.getMilliseconds()).toBe(123);
+  });
+
+  it('uses defaultTime when timeSource is null', () => {
+    const date = new Date(2026, 1, 10, 12, 0, 0, 0);
+    const result = combineDateAndTime(date, null, '23:59:59.999');
+
+    expect(result.getDate()).toBe(10);
+    expect(result.getHours()).toBe(23);
+    expect(result.getMinutes()).toBe(59);
+    expect(result.getSeconds()).toBe(59);
+    expect(result.getMilliseconds()).toBe(999);
+  });
+
+  it('uses 00:00:00.000 when defaultTime is not specified', () => {
+    const date = new Date(2026, 1, 10, 12, 0, 0, 0);
+    const result = combineDateAndTime(date, null);
+
+    expect(result.getHours()).toBe(0);
+    expect(result.getMinutes()).toBe(0);
+    expect(result.getSeconds()).toBe(0);
+    expect(result.getMilliseconds()).toBe(0);
+  });
+
+  it('preserves seconds and milliseconds from timeSource', () => {
+    const date = new Date(2026, 1, 10, 0, 0, 0, 0);
+    const time = new Date(2026, 1, 10, 10, 15, 59, 999);
+    const result = combineDateAndTime(date, time);
+
+    expect(result.getSeconds()).toBe(59);
+    expect(result.getMilliseconds()).toBe(999);
   });
 });
