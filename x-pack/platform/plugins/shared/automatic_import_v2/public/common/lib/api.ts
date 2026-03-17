@@ -110,7 +110,10 @@ export const getAllIntegrations = async ({
 export interface UploadSamplesRequest {
   integrationId: string;
   dataStreamId: string;
-  samples: string[];
+  /** Provided when uploading from a file */
+  samples?: string[];
+  /** Provided when uploading from an existing index (backend fetches event.original) */
+  sourceIndex?: string;
   originalSource: OriginalSource;
 }
 
@@ -120,6 +123,7 @@ export const uploadSamplesToDataStream = async ({
   integrationId,
   dataStreamId,
   samples,
+  sourceIndex,
   originalSource,
 }: RequestDeps & UploadSamplesRequest): Promise<UploadSamplesToDataStreamResponse> =>
   http.post<UploadSamplesToDataStreamResponse>(
@@ -128,7 +132,11 @@ export const uploadSamplesToDataStream = async ({
     )}/data_streams/${encodeURIComponent(dataStreamId)}/upload`,
     {
       version: '1',
-      body: JSON.stringify({ samples, originalSource }),
+      body: JSON.stringify({
+        ...(samples ? { samples } : {}),
+        ...(sourceIndex ? { sourceIndex } : {}),
+        originalSource,
+      }),
       signal: abortSignal,
     }
   );
