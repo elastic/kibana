@@ -177,14 +177,6 @@ export const suggestProcessingPipelineRoute = createServerRoute({
                 fieldsMetadataClient,
                 signal: abortController.signal,
                 logger,
-              }).catch((error) => {
-                if (isNoLLMSuggestionsError(error)) {
-                  logger.debug(
-                    `[${stream.name}][suggest_pipeline] No LLM suggestions available for grok (connectorId=${params.body.connector_id})`
-                  );
-                  return null;
-                }
-                throw error;
               })
             );
           }
@@ -205,28 +197,35 @@ export const suggestProcessingPipelineRoute = createServerRoute({
                 fieldsMetadataClient,
                 signal: abortController.signal,
                 logger,
-              }).catch((error) => {
-                if (isNoLLMSuggestionsError(error)) {
-                  logger.debug(
-                    `[${stream.name}][suggest_pipeline] No LLM suggestions available for dissect (connectorId=${params.body.connector_id})`
-                  );
-                  return null;
-                }
-                throw error;
               })
             );
           }
 
-          const results = await Promise.all(candidatePromises);
-          const candidates = results.filter(
-            (
-              r
-            ): r is {
-              type: 'grok' | 'dissect';
-              processor: GrokProcessor | DissectProcessor;
-              parsedRate: number;
-            } => r !== null
-          );
+          const settled = await Promise.allSettled(candidatePromises);
+          const candidates: Array<{
+            type: 'grok' | 'dissect';
+            processor: GrokProcessor | DissectProcessor;
+            parsedRate: number;
+          }> = [];
+
+          for (const result of settled) {
+            if (result.status === 'fulfilled' && result.value !== null) {
+              candidates.push(result.value);
+            } else if (result.status === 'rejected') {
+              const { reason } = result;
+              if (isNoLLMSuggestionsError(reason)) {
+                logger.debug(
+                  `[${stream.name}][suggest_pipeline] No LLM suggestions available (connectorId=${params.body.connector_id})`
+                );
+              } else {
+                const meta = formatInferenceErrorMeta(reason);
+                logger.error(
+                  `[${stream.name}][suggest_pipeline] Candidate failed` +
+                    ` (connectorId=${params.body.connector_id}${meta}): ${getErrorMessage(reason)}`
+                );
+              }
+            }
+          }
           candidates.forEach((c, index) =>
             logger.debug(
               `[${stream.name}][suggest_pipeline] Candidate ${index + 1}/${

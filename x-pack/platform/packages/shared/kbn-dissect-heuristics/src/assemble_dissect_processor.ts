@@ -18,6 +18,7 @@ export type DissectReviewFn = (
 ) => Promise<NormalizedReviewResult>;
 
 const MAX_REVIEW_MESSAGES = 10;
+const NUM_REVIEW_EXAMPLES = 10;
 
 export interface AssembleDissectProcessorParams {
   from: string;
@@ -51,7 +52,7 @@ export const assembleDissectProcessor = async ({
   const dissectPattern = extractDissectPattern(largestGroup.messages);
   if (!dissectPattern.ast.nodes.length) return null;
 
-  const reviewFields = getReviewFields(dissectPattern);
+  const reviewFields = getReviewFields(dissectPattern, NUM_REVIEW_EXAMPLES);
   const reviewResult = await reviewFn(
     reviewFields,
     largestGroup.messages.slice(0, MAX_REVIEW_MESSAGES)

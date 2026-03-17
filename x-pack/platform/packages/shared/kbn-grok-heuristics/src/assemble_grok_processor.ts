@@ -19,6 +19,7 @@ export type GrokReviewFn = (
 ) => Promise<NormalizedReviewResult>;
 
 const MAX_REVIEW_MESSAGES = 10;
+const NUM_REVIEW_EXAMPLES = 10;
 
 export interface AssembleGrokProcessorParams {
   from: string;
@@ -49,7 +50,7 @@ export const assembleGrokProcessor = async ({
 }: AssembleGrokProcessorParams): Promise<GrokProcessor | null> => {
   const results = await Promise.allSettled(
     patternGroups.map(async (group) => {
-      const reviewFields = getReviewFields(group.nodes);
+      const reviewFields = getReviewFields(group.nodes, NUM_REVIEW_EXAMPLES);
       const reviewResult = await reviewFn(
         reviewFields,
         group.messages.slice(0, MAX_REVIEW_MESSAGES)
