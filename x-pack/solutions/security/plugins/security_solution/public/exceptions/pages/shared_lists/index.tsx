@@ -210,7 +210,16 @@ export const SharedLists = React.memo(() => {
       (blob: Blob): void => {
         const message = i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(name);
         addSuccess(message);
-        setScreenReaderMessage(message);
+        // If the same list is exported twice in a row, React won't re-render
+        // since state hasn't changed, so the live region won't re-announce.
+        // Clearing to '' first ensures VoiceOver sees a new change on the next frame.
+        setScreenReaderMessage((current) => {
+          if (current === message) {
+            requestAnimationFrame(() => setScreenReaderMessage(message));
+            return '';
+          }
+          return message;
+        });
         setExportDownload({ name: listId, blob });
       },
     [addSuccess]
@@ -472,7 +481,9 @@ export const SharedLists = React.memo(() => {
 
   return (
     <>
-      <EuiScreenReaderLive>{screenReaderMessage}</EuiScreenReaderLive>
+      <EuiScreenReaderLive aria-live="assertive" aria-atomic="true" focusRegionOnTextChange>
+        {screenReaderMessage}
+      </EuiScreenReaderLive>
       <MissingDetectionsPrivilegesCallOut />
       <EuiPageHeader
         pageTitle={i18n.ALL_EXCEPTIONS}
