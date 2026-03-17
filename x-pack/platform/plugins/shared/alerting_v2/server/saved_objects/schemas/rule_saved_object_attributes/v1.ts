@@ -21,6 +21,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
 
   metadata: schema.object({
     name: schema.string(),
+    description: schema.maybe(schema.string()),
     owner: schema.maybe(schema.string()),
     labels: schema.maybe(schema.arrayOf(schema.string())),
   }),
@@ -78,13 +79,6 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     })
   ),
 
-  notification_policies: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        ref: schema.string(),
-      })
-    )
-  ),
   artifacts: schema.maybe(
     schema.arrayOf(
       schema.object({

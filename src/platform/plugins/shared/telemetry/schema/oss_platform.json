@@ -10635,7 +10635,13 @@
         "securitySolution:excludeColdAndFrozenTiersInAnalyzer": {
           "type": "boolean",
           "_meta": {
-            "description": "Non-default value of setting."
+            "description": "Allows users to enable/disable querying cold and frozen data tiers in analyzer."
+          }
+        },
+        "securitySolution:excludeColdAndFrozenTiersInPrevalence": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Allows users to enable/disable querying cold and frozen data tiers in alert prevalence."
           }
         },
         "securitySolution:enableVisualizationsInFlyout": {

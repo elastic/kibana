@@ -49,7 +49,7 @@ const mockRules = [
     id: 'rule-1',
     kind: 'alert',
     enabled: true,
-    metadata: { name: 'Rule One', labels: ['prod'] },
+    metadata: { name: 'Rule One', description: 'Monitors log errors', labels: ['prod'] },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
   },
@@ -118,6 +118,34 @@ describe('RulesListPage', () => {
 
     expect(screen.getByText('Rule One')).toBeInTheDocument();
     expect(screen.getByText('Rule Two')).toBeInTheDocument();
+  });
+
+  it('renders description under the rule name when present', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByText('Monitors log errors')).toBeInTheDocument();
+  });
+
+  it('does not render description when not present', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    // Rule Two has no description — should only show the name
+    const ruleTwoName = screen.getByText('Rule Two');
+    expect(ruleTwoName.closest('div')?.querySelectorAll('.euiText--extraSmall')).toHaveLength(0);
   });
 
   it('renders the Source column with extracted data source', () => {

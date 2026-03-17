@@ -19,11 +19,13 @@ import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { bindClient } from '../../common/inference_client/bind_client';
 import { getConnectorById } from '../util/get_connector_by_id';
+import { getConnectorList } from '../util/get_connector_list';
 import { createPromptApi } from '../prompt';
 import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import { createCallbackManager } from './callback_manager';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
+import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 export function createInferenceClient({
   request,
@@ -34,6 +36,7 @@ export function createInferenceClient({
   regexWorker,
   esClient,
   replacementsEsClient,
+  endpointIdCache,
   callbacks,
   anonymization,
 }: {
@@ -45,6 +48,7 @@ export function createInferenceClient({
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
   replacementsEsClient?: ElasticsearchClient;
+  endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
   anonymization?: InferenceAnonymizationOptions;
 }): InferenceClient {
@@ -58,6 +62,7 @@ export function createInferenceClient({
     anonymizationRulesPromise,
     regexWorker,
     esClient,
+    endpointIdCache,
     callbackManager,
     anonymization: {
       ...anonymization,
@@ -83,8 +88,11 @@ export function createInferenceClient({
     chatComplete,
     output,
     prompt,
+    listConnectors: async () => {
+      return await getConnectorList({ actions, request, esClient, logger });
+    },
     getConnectorById: async (connectorId: string) => {
-      return await getConnectorById({ connectorId, actions, request });
+      return await getConnectorById({ connectorId, actions, request, esClient, logger });
     },
     bindTo: (options: BoundOptions) => {
       return bindClient(client, options);

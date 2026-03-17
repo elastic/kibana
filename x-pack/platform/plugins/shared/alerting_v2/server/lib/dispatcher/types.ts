@@ -49,7 +49,7 @@ export interface Rule {
   id: RuleId;
   name: string;
   description: string;
-  notificationPolicyIds: NotificationPolicyId[];
+  labels: string[];
   enabled: boolean;
   createdAt: string;
   updatedAt: string;
@@ -58,6 +58,7 @@ export interface Rule {
 export interface NotificationPolicy {
   id: NotificationPolicyId;
   name: string;
+  enabled: boolean;
   /** KQL expression evaluated against the alert episode context.
    *  An empty matcher matches all episodes (catch-all). */
   matcher?: string; // e.g. 'data.severity == "critical" AND data.env != "dev"'
@@ -67,8 +68,10 @@ export interface NotificationPolicy {
   throttle?: {
     interval?: string; // e.g. '1h', '30m', '5m'
   };
+  snoozedUntil?: string | null;
   /** Target destinations to dispatch matched episodes to */
   destinations: NotificationPolicyDestination[];
+
   /** Decrypted base64-encoded API key (id:key) for authenticated workflow dispatch */
   apiKey?: string;
 }

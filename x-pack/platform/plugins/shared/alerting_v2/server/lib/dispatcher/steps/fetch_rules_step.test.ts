@@ -29,8 +29,7 @@ describe('FetchRulesStep', () => {
           id: 'r1',
           type: RULE_SAVED_OBJECT_TYPE,
           attributes: createRuleSoAttributes({
-            metadata: { name: 'Rule 1' },
-            notification_policies: [{ ref: 'p1' }],
+            metadata: { name: 'Rule 1', labels: ['production'] },
           }),
           references: [],
         },

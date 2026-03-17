@@ -59,6 +59,7 @@ export {
   isAgentBuilderError,
   isAgentNotFoundError,
   isConversationNotFoundError,
+  isPluginNotFoundError,
   isBadRequestError,
   isRequestAbortedError,
   isWorkflowAbortedError,
@@ -71,6 +72,7 @@ export {
   createSkillNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
+  createPluginNotFoundError,
   createBadRequestError,
   createRequestAbortedError,
   createWorkflowAbortedError,
@@ -81,6 +83,7 @@ export {
   type AgentBuilderSkillNotFoundError,
   type AgentBuilderAgentNotFoundError,
   type AgentBuilderConversationNotFoundError,
+  type AgentBuilderPluginNotFoundError,
   type AgentBuilderBadRequestError,
   type AgentBuilderRequestAbortedError,
   type AgentBuilderWorkflowAbortedError,
@@ -94,11 +97,18 @@ export {
 export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
 export { type UserIdAndName } from './base/users';
 export { EsResourceType } from './base/resources';
+export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
   AgentType,
   AgentVisibility,
+  VISIBILITY_ICON,
+  VISIBILITY_BADGE_COLOR,
   AgentExecutionErrorCode,
+  isAgentOwner,
+  canChangeAgentVisibility,
+  hasAgentReadAccess,
+  hasAgentWriteAccess,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
@@ -174,15 +184,10 @@ export {
 } from './chat';
 export {
   type PublicSkillDefinition,
+  type PublicSkillSummary,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
   type SkillReferencedContent,
-  type SkillSelection,
-  allSkillsSelectionWildcard,
-  allBuiltInSkillsSelection,
-  skillMatchSelection,
-  hasSkillSelectionWildcard,
-  getExplicitSkillIds,
   skillCreateRequestSchema,
   skillUpdateRequestSchema,
   validateSkillId,
@@ -198,3 +203,14 @@ export {
   type VersionedAttachment,
   type UpdateOriginResponse,
 } from './attachments';
+export {
+  type PluginManifestAuthor,
+  type PluginManifest,
+  type ParsedSkillMeta,
+  type ParsedSkillFile,
+  type ParsedSkillReferencedFile,
+  type UnmanagedPluginAssets,
+  type ParsedPluginArchive,
+  type PluginManifestMetadata,
+  type PluginDefinition,
+} from './plugins';

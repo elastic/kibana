@@ -90,6 +90,11 @@
     "updatedAt",
     "updatedBy"
   ],
+  "alerting_api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt",
+    "uiamApiKey"
+  ],
   "alerting_notification_policy": [
     "auth",
     "auth.apiKey",
@@ -101,7 +106,9 @@
     "destinations",
     "destinations.id",
     "destinations.type",
+    "enabled",
     "name",
+    "snoozedUntil",
     "updatedAt",
     "updatedBy"
   ],
@@ -121,11 +128,11 @@
     "grouping.fields",
     "kind",
     "metadata",
+    "metadata.description",
     "metadata.labels",
     "metadata.name",
     "metadata.owner",
     "no_data",
-    "notification_policies",
     "recovery_policy",
     "schedule",
     "schedule.every",
@@ -472,6 +479,9 @@
   "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
+    "dependencies",
+    "dependencies.name",
+    "dependencies.version",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
@@ -496,6 +506,7 @@
     "latest_install_failed_attempts",
     "name",
     "package_assets",
+    "pending_upgrade_review",
     "previous_version",
     "verification_key_id",
     "verification_status",
@@ -753,6 +764,7 @@
     "title",
     "type"
   ],
+  "inference-settings": [],
   "infra-custom-dashboards": [
     "assetType",
     "dashboardFilterAssetIdEnabled",
@@ -1019,6 +1031,7 @@
   "osquery-pack": [
     "created_at",
     "created_by",
+    "created_by_profile_uid",
     "description",
     "enabled",
     "name",
@@ -1033,6 +1046,7 @@
     "shards",
     "updated_at",
     "updated_by",
+    "updated_by_profile_uid",
     "version"
   ],
   "osquery-pack-asset": [
@@ -1052,6 +1066,7 @@
   "osquery-saved-query": [
     "created_at",
     "created_by",
+    "created_by_profile_uid",
     "description",
     "ecs_mapping",
     "id",
@@ -1061,6 +1076,7 @@
     "timeout",
     "updated_at",
     "updated_by",
+    "updated_by_profile_uid",
     "version"
   ],
   "policy-settings-protection-updates-note": [
@@ -1304,6 +1320,7 @@
   ],
   "spaces-usage-stats": [],
   "stream-prompts": [],
+  "streams-significant-events-settings": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
@@ -1371,6 +1388,7 @@
   ],
   "task": [
     "attempts",
+    "cost",
     "enabled",
     "ownerId",
     "partition",

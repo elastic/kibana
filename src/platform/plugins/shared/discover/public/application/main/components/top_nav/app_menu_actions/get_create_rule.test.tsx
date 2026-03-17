@@ -53,6 +53,9 @@ const getCreateRuleMenu = (
     })
   );
 
+  const tabId = stateContainer.getCurrentTab().id;
+  const getState = () => stateContainer.internalState.getState();
+
   const discoverParamsMock: AppMenuExtensionParams = {
     dataView,
     adHocDataViews: [],
@@ -66,7 +69,8 @@ const getCreateRuleMenu = (
   return getCreateRuleMenuItem({
     discoverParams: discoverParamsMock,
     services: discoverServiceMock,
-    stateContainer,
+    tabId,
+    getState,
   });
 };
 
@@ -180,6 +184,8 @@ describe('CreateESQLRuleFlyout', () => {
 
   it('should NOT close flyout when query parameters change but pathname stays the same', () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const tabId = stateContainer.getCurrentTab().id;
+    const getState = () => stateContainer.internalState.getState();
     const onClose = jest.fn();
 
     render(
@@ -192,7 +198,8 @@ describe('CreateESQLRuleFlyout', () => {
           actions: { updateAdHocDataViews: jest.fn() },
         }}
         services={discoverServiceMock}
-        stateContainer={stateContainer}
+        tabId={tabId}
+        getState={getState}
         onClose={onClose}
       />
     );
@@ -208,6 +215,8 @@ describe('CreateESQLRuleFlyout', () => {
 
   it('should close flyout when pathname changes (actual navigation)', () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const tabId = stateContainer.getCurrentTab().id;
+    const getState = () => stateContainer.internalState.getState();
     const onClose = jest.fn();
 
     render(
@@ -220,7 +229,8 @@ describe('CreateESQLRuleFlyout', () => {
           actions: { updateAdHocDataViews: jest.fn() },
         }}
         services={discoverServiceMock}
-        stateContainer={stateContainer}
+        tabId={tabId}
+        getState={getState}
         onClose={onClose}
       />
     );

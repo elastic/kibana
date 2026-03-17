@@ -301,9 +301,37 @@
       }
     }
   },
+  "alerting_api_key_pending_invalidation": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
+      }
+    }
+  },
   "alerting_notification_policy": {
     "dynamic": false,
     "properties": {
+      "auth": {
+        "properties": {
+          "apiKey": {
+            "type": "binary"
+          },
+          "createdByUser": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
       "auth": {
         "properties": {
           "apiKey": {
@@ -344,6 +372,9 @@
         },
         "type": "object"
       },
+      "enabled": {
+        "type": "boolean"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -352,6 +383,9 @@
           }
         },
         "type": "text"
+      },
+      "snoozedUntil": {
+        "type": "date"
       },
       "updatedAt": {
         "type": "date"
@@ -413,6 +447,9 @@
       },
       "metadata": {
         "properties": {
+          "description": {
+            "type": "text"
+          },
           "labels": {
             "type": "keyword"
           },
@@ -425,10 +462,6 @@
         }
       },
       "no_data": {
-        "enabled": false,
-        "type": "object"
-      },
-      "notification_policies": {
         "enabled": false,
         "type": "object"
       },
@@ -1593,8 +1626,7 @@
   },
   "entity-store-global-state": {
     "dynamic": false,
-    "properties": {
-    }
+    "properties": {}
   },
   "epm-packages": {
     "dynamic": false,
@@ -1602,6 +1634,17 @@
       "additional_spaces_installed_kibana": {
         "index": false,
         "type": "flattened"
+      },
+      "dependencies": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
       },
       "es_index_patterns": {
         "dynamic": false,
@@ -1685,6 +1728,10 @@
         "type": "keyword"
       },
       "package_assets": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "pending_upgrade_review": {
         "dynamic": false,
         "properties": {}
       },
@@ -2509,6 +2556,10 @@
         "type": "keyword"
       }
     }
+  },
+  "inference-settings": {
+    "dynamic": false,
+    "properties": {}
   },
   "infra-custom-dashboards": {
     "dynamic": false,
@@ -3403,6 +3454,9 @@
       "created_by": {
         "type": "keyword"
       },
+      "created_by_profile_uid": {
+        "type": "keyword"
+      },
       "description": {
         "type": "text"
       },
@@ -3447,6 +3501,9 @@
         "type": "date"
       },
       "updated_by": {
+        "type": "keyword"
+      },
+      "updated_by_profile_uid": {
         "type": "keyword"
       },
       "version": {
@@ -3508,6 +3565,9 @@
       "created_by": {
         "type": "text"
       },
+      "created_by_profile_uid": {
+        "type": "keyword"
+      },
       "description": {
         "type": "text"
       },
@@ -3535,6 +3595,9 @@
       },
       "updated_by": {
         "type": "text"
+      },
+      "updated_by_profile_uid": {
+        "type": "keyword"
       },
       "version": {
         "type": "keyword"
@@ -4288,6 +4351,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "streams-significant-events-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
@@ -4582,6 +4649,9 @@
     "properties": {
       "attempts": {
         "type": "integer"
+      },
+      "cost": {
+        "type": "keyword"
       },
       "enabled": {
         "type": "boolean"

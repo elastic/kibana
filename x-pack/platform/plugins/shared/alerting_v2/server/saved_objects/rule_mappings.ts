@@ -17,6 +17,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
     metadata: {
       properties: {
         name: { type: 'text' },
+        description: { type: 'text' },
         owner: { type: 'keyword' },
         labels: { type: 'keyword' },
       },
@@ -47,7 +48,6 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
       },
     },
     no_data: { type: 'object', enabled: false },
-    notification_policies: { type: 'object', enabled: false },
     artifacts: {
       type: 'nested',
       properties: {

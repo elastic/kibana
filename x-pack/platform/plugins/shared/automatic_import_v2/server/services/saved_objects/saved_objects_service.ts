@@ -31,11 +31,18 @@ import {
 import type { IntegrationParams, DataStreamParams } from '../../routes/types';
 import { IntegrationAlreadyExistsError } from '../../errors';
 
+export interface FieldMappingEntry {
+  name: string;
+  type: string;
+  is_ecs: boolean;
+}
+
 export interface UpdateDataStreamParams {
   integrationId: string;
   dataStreamId: string;
-  ingestPipeline: Pipeline;
+  ingestPipeline?: Pipeline;
   pipelineDocs?: Array<NonNullable<estypes.IngestSimulateDocumentResult['doc']>['_source']>;
+  fieldMapping?: FieldMappingEntry[];
   status: keyof typeof TASK_STATUSES;
 }
 
@@ -72,7 +79,7 @@ export class AutomaticImportSavedObjectService {
           description: integrationParams.description,
           logo: integrationParams.logo,
           created_at: new Date().toISOString(),
-          version: '0.0.0',
+          version: '0.1.0',
         },
       };
 
@@ -578,7 +585,7 @@ export class AutomaticImportSavedObjectService {
   public async updateDataStreamSavedObjectAttributes(
     updateDataStreamParams: UpdateDataStreamParams
   ): Promise<void> {
-    const { integrationId, dataStreamId, ingestPipeline, pipelineDocs, status } =
+    const { integrationId, dataStreamId, ingestPipeline, pipelineDocs, fieldMapping, status } =
       updateDataStreamParams;
 
     if (!integrationId) {
@@ -599,12 +606,17 @@ export class AutomaticImportSavedObjectService {
         `Updating data stream ${dataStreamId} with pipeline docs: ${JSON.stringify(pipelineDocs)}`
       );
 
+      const updatedResult = ingestPipeline
+        ? {
+            ingest_pipeline: ingestPipeline,
+            ...(pipelineDocs ? { pipeline_docs: pipelineDocs } : {}),
+            ...(fieldMapping ? { field_mapping: fieldMapping } : {}),
+          }
+        : dataStream.attributes.result;
+
       const updatedDataStreamData: DataStreamAttributes = {
         ...dataStream.attributes,
-        result: {
-          ingest_pipeline: ingestPipeline,
-          ...(pipelineDocs ? { pipeline_docs: pipelineDocs } : {}),
-        },
+        result: updatedResult,
         job_info: {
           ...dataStream.attributes.job_info,
           status,

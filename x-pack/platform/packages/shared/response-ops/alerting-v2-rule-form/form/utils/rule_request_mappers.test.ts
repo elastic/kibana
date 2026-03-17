@@ -271,7 +271,7 @@ describe('rule_request_mappers', () => {
       });
     });
 
-    it('strips enabled and description from metadata (API does not accept them)', () => {
+    it('strips enabled from metadata (server-managed) but includes description', () => {
       const formValues: FormValues = {
         ...baseFormValues,
         metadata: {
@@ -285,9 +285,13 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToRuleRequest(formValues);
 
-      expect(result.metadata).toEqual({ name: 'My Rule', owner: 'owner', labels: [] });
+      expect(result.metadata).toEqual({
+        name: 'My Rule',
+        description: 'A description',
+        owner: 'owner',
+        labels: [],
+      });
       expect(result.metadata).not.toHaveProperty('enabled');
-      expect(result.metadata).not.toHaveProperty('description');
     });
 
     it('passes artifacts through to API request', () => {
@@ -405,6 +409,20 @@ describe('rule_request_mappers', () => {
         labels: ['tag1', 'tag2'],
       });
       expect(result.time_field).toBe('@timestamp');
+    });
+
+    it('includes description in the create request when provided', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        metadata: {
+          ...baseFormValues.metadata,
+          description: 'Create rule description',
+        },
+      };
+
+      const result = mapFormValuesToCreateRequest(formValues);
+
+      expect(result.metadata.description).toBe('Create rule description');
     });
 
     it('produces a superset of mapFormValuesToRuleRequest', () => {
@@ -527,6 +545,23 @@ describe('rule_request_mappers', () => {
         owner: 'test-owner',
         labels: ['tag1'],
       });
+    });
+
+    it('maps description from the API response', () => {
+      const rule = {
+        ...baseRuleResponse,
+        metadata: { ...baseRuleResponse.metadata, description: 'A rule description' },
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.metadata?.description).toBe('A rule description');
+    });
+
+    it('leaves description undefined when not present in the API response', () => {
+      const result = mapRuleResponseToFormValues(baseRuleResponse);
+
+      expect(result.metadata?.description).toBeUndefined();
     });
 
     it('maps schedule with existing lookback', () => {
@@ -703,6 +738,7 @@ describe('rule_request_mappers', () => {
     it('roundtrips: create request from mapped response matches original API payload', () => {
       const fullRule = {
         ...baseRuleResponse,
+        metadata: { ...baseRuleResponse.metadata, description: 'Roundtrip description' },
         grouping: { fields: ['host.name'] },
         recovery_policy: {
           type: 'query',
@@ -729,6 +765,7 @@ describe('rule_request_mappers', () => {
       const createPayload = mapFormValuesToCreateRequest(completeFormValues);
 
       expect(createPayload.kind).toBe('alert');
+      expect(createPayload.metadata.description).toBe('Roundtrip description');
       expect(createPayload.evaluation.query.base).toBe('FROM logs-* | STATS count() BY host');
       expect(createPayload.evaluation.query.condition).toBe('WHERE count > 100');
       expect(createPayload.grouping).toEqual({ fields: ['host.name'] });

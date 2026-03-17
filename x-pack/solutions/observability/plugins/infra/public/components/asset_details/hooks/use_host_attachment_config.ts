@@ -32,7 +32,7 @@ export const useHostAttachmentConfig = () => {
       return;
     }
 
-    agentBuilder.setConversationFlyoutActiveConfig({
+    agentBuilder.setChatConfig({
       agentId: OBSERVABILITY_AGENT_ID,
       attachments: [
         {
@@ -51,7 +51,7 @@ export const useHostAttachmentConfig = () => {
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearChatConfig();
     };
   }, [agentBuilder, entity.name, entity.type, getParsedDateRange, loading]);
 };

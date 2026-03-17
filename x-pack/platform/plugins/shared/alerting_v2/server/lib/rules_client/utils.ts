@@ -50,6 +50,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     kind: data.kind,
     metadata: {
       name: data.metadata.name,
+      description: data.metadata.description,
       owner: data.metadata.owner,
       labels: data.metadata.labels,
     },
@@ -68,7 +69,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     state_transition: data.state_transition,
     grouping: data.grouping,
     no_data: data.no_data,
-    notification_policies: data.notification_policies,
     artifacts: data.artifacts,
     ...serverFields,
   };
@@ -106,10 +106,6 @@ export function buildUpdateRuleAttributes(
     state_transition: nullToUndefined(updateData.state_transition, existingAttrs.state_transition),
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
     no_data: nullToUndefined(updateData.no_data, existingAttrs.no_data),
-    notification_policies: nullToEmptyArray(
-      updateData.notification_policies,
-      existingAttrs.notification_policies
-    ),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
     enabled: updateData.enabled ?? existingAttrs.enabled,
     // Server-managed fields — preserved as-is except timestamps and user.
@@ -131,6 +127,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     kind: attrs.kind,
     metadata: {
       name: attrs.metadata.name,
+      description: attrs.metadata.description,
       owner: attrs.metadata.owner,
       labels: attrs.metadata.labels,
     },
@@ -149,7 +146,6 @@ export function transformRuleSoAttributesToRuleApiResponse(
     state_transition: attrs.state_transition,
     grouping: attrs.grouping,
     no_data: attrs.no_data,
-    notification_policies: attrs.notification_policies,
     artifacts: attrs.artifacts,
     enabled: attrs.enabled,
     createdBy: attrs.createdBy,
