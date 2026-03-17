@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/v8-profiler-examples-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/v8-profiler-examples-plugin'
+  title: '@kbn/v8-profiler-examples-plugin'
   description: Moon project for @kbn/v8-profiler-examples-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: examples/v8_profiler_examples
+  sourceRoot: examples/v8_profiler_examples
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
