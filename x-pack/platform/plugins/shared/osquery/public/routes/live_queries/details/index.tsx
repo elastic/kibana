@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { useGoBack } from '../../../common/use_go_back';
-import { fullWidthContentCss, WithHeaderLayout, WithoutHeaderLayout } from '../../../components/layouts';
+import {
+  fullWidthContentCss,
+  WithHeaderLayout,
+  WithoutHeaderLayout,
+} from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';

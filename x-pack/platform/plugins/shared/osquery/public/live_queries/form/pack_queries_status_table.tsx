@@ -60,10 +60,9 @@ const RowKebabMenu: React.FC<RowKebabMenuProps> = React.memo(
       'xpack.osquery.pack.queriesTable.viewResultsMoreActionsAriaLabel',
       { defaultMessage: 'More actions' }
     );
-    const viewQueryLabel = i18n.translate(
-      'xpack.osquery.pack.queriesTable.viewQueryMenuLabel',
-      { defaultMessage: 'View query' }
-    );
+    const viewQueryLabel = i18n.translate('xpack.osquery.pack.queriesTable.viewQueryMenuLabel', {
+      defaultMessage: 'View query',
+    });
 
     const menuItems = useMemo(
       () => [
@@ -314,7 +313,12 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
       if (scheduleId && packName) {
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} justifyContent="spaceBetween">
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            wrap={false}
+            justifyContent="spaceBetween"
+          >
             <EuiFlexItem
               grow={true}
               css={{ minWidth: 0, ...euiFlexItemCss }}
@@ -368,9 +372,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   const renderExecutionCountColumn = useCallback(
     () =>
-      scheduleId && executionCount != null ? (
-        <EuiText size="s">{executionCount}</EuiText>
-      ) : null,
+      scheduleId && executionCount != null ? <EuiText size="s">{executionCount}</EuiText> : null,
     [scheduleId, executionCount]
   );
 

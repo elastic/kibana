@@ -20,7 +20,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { pagePathGetters } from '../../common/page_paths';
-import { fullWidthContentCss, WithHeaderLayout, WithoutHeaderLayout } from '../../components/layouts';
+import {
+  fullWidthContentCss,
+  WithHeaderLayout,
+  WithoutHeaderLayout,
+} from '../../components/layouts';
 import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
 import { useGoBack } from '../../common/use_go_back';
 import {
