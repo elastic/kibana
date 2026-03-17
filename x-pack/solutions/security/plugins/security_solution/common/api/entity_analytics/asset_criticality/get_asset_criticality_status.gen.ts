@@ -14,7 +14,15 @@
  *   version: 1
  */
 
+import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 export type GetAssetCriticalityStatusResponse = z.infer<typeof GetAssetCriticalityStatusResponse>;
 export const GetAssetCriticalityStatusResponse = z.object({

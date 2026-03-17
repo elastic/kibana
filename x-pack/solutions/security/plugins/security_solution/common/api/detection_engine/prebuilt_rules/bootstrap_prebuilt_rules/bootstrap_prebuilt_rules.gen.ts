@@ -14,7 +14,15 @@
  *   version: 1
  */
 
+import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 export type PackageInstallStatus = z.infer<typeof PackageInstallStatus>;
 export const PackageInstallStatus = z.object({

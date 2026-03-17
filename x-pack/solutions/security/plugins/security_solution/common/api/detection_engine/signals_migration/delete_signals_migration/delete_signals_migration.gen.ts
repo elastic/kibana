@@ -14,7 +14,17 @@
  *   version: 2023-10-31
  */
 
+import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
+
+import { PlatformErrorResponse, SiemErrorResponse } from '../../../model/error_responses.gen';
 
 export type MigrationCleanupResult = z.infer<typeof MigrationCleanupResult>;
 export const MigrationCleanupResult = z.object({

@@ -81,6 +81,13 @@ export const FUNCTIONAL_FIELD_MAP: Record<AllKeys<RuleResponse>, boolean> = {
   // New terms rule type fields
   new_terms_fields: true,
   history_window_start: true,
+  // Vulnerability check rule type fields
+  agent_policy_ids: true,
+  osquery_pack_name: false,
+  cve_index_pattern: false,
+  correlation_timespan: false,
+  group_by: false,
+  min_cvss_score: true,
   // Response fields - We don't use these fields for diffing purposes, setting the values to false
   id: false,
   rule_id: false,

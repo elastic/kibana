@@ -14,7 +14,14 @@
  *   version: 1
  */
 
-import type { z } from '@kbn/zod/v4';
+import type { ZodTypeDef, z } from '@kbn/zod/v4';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 import { EntityAnalyticsPrivileges } from '../../common/common.gen';
 

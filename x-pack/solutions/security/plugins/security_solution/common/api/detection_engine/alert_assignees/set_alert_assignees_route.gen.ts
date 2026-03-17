@@ -14,7 +14,14 @@
  *   version: 2023-10-31
  */
 
-import type { z } from '@kbn/zod/v4';
+import type { ZodTypeDef, z } from '@kbn/zod/v4';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 import { SetAlertAssigneesBody } from '../model/set_alert_assignees_body.gen';
 

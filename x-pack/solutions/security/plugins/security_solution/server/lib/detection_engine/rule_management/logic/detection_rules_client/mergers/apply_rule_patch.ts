@@ -27,6 +27,8 @@ import type {
   ThresholdRule,
   ThresholdRuleResponseFields,
   TypeSpecificResponse,
+  VulnerabilityCheckRule,
+  VulnerabilityCheckRuleResponseFields,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import {
   EqlRulePatchFields,
@@ -37,6 +39,7 @@ import {
   SavedQueryRulePatchFields,
   ThreatMatchRulePatchFields,
   ThresholdRulePatchFields,
+  VulnerabilityCheckRulePatchFields,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { PatchRuleRequestBody } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -265,6 +268,21 @@ const patchNewTermsParams = (
   };
 };
 
+const patchVulnerabilityCheckParams = (
+  params: VulnerabilityCheckRulePatchFields,
+  existingRule: VulnerabilityCheckRule
+): VulnerabilityCheckRuleResponseFields => {
+  return {
+    type: existingRule.type,
+    agent_policy_ids: params.agent_policy_ids ?? existingRule.agent_policy_ids,
+    osquery_pack_name: params.osquery_pack_name ?? existingRule.osquery_pack_name,
+    cve_index_pattern: params.cve_index_pattern ?? existingRule.cve_index_pattern,
+    correlation_timespan: params.correlation_timespan ?? existingRule.correlation_timespan,
+    group_by: params.group_by ?? existingRule.group_by,
+    min_cvss_score: params.min_cvss_score ?? existingRule.min_cvss_score,
+  };
+};
+
 export const patchTypeSpecificParams = (
   params: PatchRuleRequestBody,
   existingRule: RuleResponse
@@ -330,6 +348,13 @@ export const patchTypeSpecificParams = (
         throw new BadRequestError(stringifyZodError(result.error));
       }
       return patchNewTermsParams(result.data, existingRule);
+    }
+    case 'vulnerability_check': {
+      const result = VulnerabilityCheckRulePatchFields.safeParse(params);
+      if (!result.success) {
+        throw new BadRequestError(stringifyZodError(result.error));
+      }
+      return patchVulnerabilityCheckParams(result.data, existingRule);
     }
     default: {
       return assertUnreachable(existingRule);

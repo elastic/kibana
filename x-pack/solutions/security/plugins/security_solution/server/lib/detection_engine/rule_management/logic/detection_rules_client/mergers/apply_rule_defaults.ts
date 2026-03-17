@@ -175,6 +175,17 @@ export const setTypeSpecificDefaults = (props: TypeSpecificCreateProps) => {
         alert_suppression: props.alert_suppression,
       };
     }
+    case 'vulnerability_check': {
+      return {
+        type: props.type,
+        agent_policy_ids: props.agent_policy_ids,
+        osquery_pack_name: props.osquery_pack_name,
+        cve_index_pattern: props.cve_index_pattern,
+        correlation_timespan: props.correlation_timespan,
+        group_by: props.group_by,
+        min_cvss_score: props.min_cvss_score,
+      };
+    }
     default: {
       return assertUnreachable(props);
     }

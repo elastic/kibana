@@ -14,7 +14,15 @@
  *   version: not applicable
  */
 
+import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 /**
  * Anomaly score threshold above which the rule creates an alert. Valid values are from 0 to 100.

@@ -14,7 +14,15 @@
  *   version: 2023-10-31
  */
 
+import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 import { RuleObjectId, RuleSignatureId } from '../../../model/rule_schema/common_attributes.gen';
 import { RuleResponse } from '../../../model/rule_schema/rule_schemas.gen';

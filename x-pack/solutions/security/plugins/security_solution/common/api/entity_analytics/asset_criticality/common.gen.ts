@@ -14,7 +14,15 @@
  *   version: 1
  */
 
+import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 export type IdField = z.infer<typeof IdField>;
 export const IdField = z.enum(['host.name', 'user.name', 'service.name', 'entity.id']);

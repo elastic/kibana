@@ -14,7 +14,15 @@
  *   version: not applicable
  */
 
+import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
+import {
+  requiredOptional,
+  isValidDateMath,
+  isNonEmptyString,
+  ArrayFromString,
+  BooleanFromString,
+} from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { Threat } from '../../api/detection_engine/model/rule_schema/common_attributes.gen';
