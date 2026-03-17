@@ -51,24 +51,28 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
 
   const isInsideHistogram = renderedFor === 'histogram';
   const isInsideDiscoverContent = !isInsideHistogram;
+  const showChartButton = isInsideHistogram || Boolean(isChartAvailable);
+
+  if (isInsideDiscoverContent && !isChartHidden && isChartAvailable) {
+    return null;
+  }
 
   const buttons = [
-    ...((isInsideHistogram && isSidebarCollapsed) ||
-    (isInsideDiscoverContent && isSidebarCollapsed && (isChartHidden || !isChartAvailable))
-      ? [
-          {
-            label: i18n.translate('discover.panelsToggle.showSidebarButton', {
-              defaultMessage: 'Show sidebar',
-            }),
-            iconType: 'transitionLeftIn',
-            'data-test-subj': 'dscShowSidebarButton',
-            'aria-expanded': !isSidebarCollapsed,
-            'aria-controls': 'discover-sidebar',
-            onClick: () => sidebarToggleState?.toggle?.(false),
-          },
-        ]
-      : []),
-    ...(isInsideHistogram || (isInsideDiscoverContent && isChartAvailable && isChartHidden)
+    {
+      label: isSidebarCollapsed
+        ? i18n.translate('discover.panelsToggle.showSidebarButton', {
+            defaultMessage: 'Show sidebar',
+          })
+        : i18n.translate('discover.panelsToggle.hideSidebarButton', {
+            defaultMessage: 'Hide sidebar',
+          }),
+      iconType: isSidebarCollapsed ? 'transitionLeftIn' : 'transitionLeftOut',
+      'data-test-subj': isSidebarCollapsed ? 'dscShowSidebarButton' : 'dscHideSidebarButton',
+      'aria-expanded': !isSidebarCollapsed,
+      'aria-controls': 'discover-sidebar',
+      onClick: () => sidebarToggleState?.toggle?.(!isSidebarCollapsed),
+    },
+    ...(showChartButton
       ? [
           {
             label: isChartHidden
@@ -87,10 +91,6 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
         ]
       : []),
   ];
-
-  if (!buttons.length) {
-    return null;
-  }
 
   return (
     <IconButtonGroup
