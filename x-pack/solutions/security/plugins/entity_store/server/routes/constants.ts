@@ -41,9 +41,18 @@ export const LogExtractionUpdateParams = z.object({
   filter: z.string().optional(),
   fieldHistoryLength: z.number().int().optional(),
   additionalIndexPatterns: z.array(z.string()).optional(),
-  lookbackPeriod: z.string().regex(/[smdh]$/).optional(),
-  frequency: z.string().regex(/[smdh]$/).optional(),
-  delay: z.string().regex(/[smdh]$/).optional(),
+  lookbackPeriod: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional(),
+  frequency: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional(),
+  delay: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional(),
   docsLimit: z.number().int().positive().optional(),
 });
 
