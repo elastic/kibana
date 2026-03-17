@@ -109,11 +109,7 @@ export const updateAppStateAndReplaceUrl: InternalStateThunkActionCreator<
       return dispatch(updateAppState(payload));
     }
 
-    const { mergedAppState, hasStateChanges } = mergeAppState(currentState, payload);
-
-    if (!hasStateChanges) {
-      return;
-    }
+    const { mergedAppState } = mergeAppState(currentState, payload);
 
     if (!payload.isSystemTriggered) {
       dispatch(

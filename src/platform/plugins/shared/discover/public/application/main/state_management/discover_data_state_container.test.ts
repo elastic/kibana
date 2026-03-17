@@ -264,11 +264,20 @@ describe('test getDataStateContainer', () => {
       const scopedProfilesManager = scopedProfilesManager$.getValue();
       const initialContexts = scopedProfilesManager.getContexts();
       const incomingProfileId = 'incoming-profile-id';
+      const incomingContexts = {
+        ...initialContexts,
+        dataSourceContext: {
+          ...initialContexts.dataSourceContext,
+          profileId: incomingProfileId,
+        },
+      };
       const getContextsSpy = jest.spyOn(scopedProfilesManager, 'getContexts');
 
-      jest
-        .spyOn(scopedProfilesManager, 'resolveDataSourceProfile')
-        .mockResolvedValue({ didProfileChange: true });
+      jest.spyOn(scopedProfilesManager, 'resolveDataSourceProfile').mockImplementation(async () => {
+        getContextsSpy.mockReturnValue(incomingContexts);
+
+        return { didProfileChange: true };
+      });
 
       toolkit.internalState.dispatch(
         internalStateActions.assignNextDataView({
@@ -293,13 +302,7 @@ describe('test getDataStateContainer', () => {
           fieldsToReset: ['columns', 'rowHeight', 'breakdownField', 'hideChart'],
         })
       );
-      getContextsSpy.mockReturnValue({
-        ...initialContexts,
-        dataSourceContext: {
-          ...initialContexts.dataSourceContext,
-          profileId: incomingProfileId,
-        },
-      });
+      getContextsSpy.mockReturnValue(incomingContexts);
       toolkit.internalState.dispatch(
         internalStateActions.setAppState({
           tabId: toolkit.getCurrentTab().id,
@@ -325,14 +328,7 @@ describe('test getDataStateContainer', () => {
         })
       );
 
-      getContextsSpy.mockReturnValueOnce(initialContexts).mockReturnValue({
-        ...initialContexts,
-        dataSourceContext: {
-          ...initialContexts.dataSourceContext,
-          profileId: incomingProfileId,
-        },
-      });
-
+      getContextsSpy.mockReturnValue(incomingContexts);
       await waitFor(() => {
         expect(toolkit.getCurrentTab().appState.columns).toEqual(['restored_column']);
         expect(toolkit.getCurrentTab().appState.rowHeight).toBe(2);

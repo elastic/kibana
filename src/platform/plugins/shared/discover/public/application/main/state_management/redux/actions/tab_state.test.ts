@@ -221,6 +221,21 @@ describe('tab_state actions', () => {
     });
   });
 
+  describe('pushCurrentTabStateToUrl', () => {
+    it('should write the current app state to the URL even when app state is unchanged', async () => {
+      const { internalState, stateStorageContainer, tabId } = await setup();
+      const setSpy = jest.spyOn(stateStorageContainer, 'set');
+
+      await internalState.dispatch(internalStateActions.pushCurrentTabStateToUrl({ tabId }));
+
+      expect(setSpy).toHaveBeenCalledWith(
+        APP_STATE_URL_KEY,
+        selectTab(internalState.getState(), tabId).appState,
+        { replace: true }
+      );
+    });
+  });
+
   describe('transitionFromESQLToDataView', () => {
     it('should transition from ES|QL mode to Data View mode', async () => {
       const { internalState, tabId } = await setup();
