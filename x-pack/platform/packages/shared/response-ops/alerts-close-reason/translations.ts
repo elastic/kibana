@@ -24,7 +24,7 @@ export const CLOSING_REASON_MENU_TITLE = i18n.translate(
 export const CLOSING_REASON_BUTTON_MESSAGE = i18n.translate(
   'xpack.responseOps.alertsTable.bulkActions.closingReason.buttonMessage',
   {
-    defaultMessage: 'Close',
+    defaultMessage: 'Close alert',
   }
 );
 
