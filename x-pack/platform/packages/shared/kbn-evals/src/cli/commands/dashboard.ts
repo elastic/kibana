@@ -7,7 +7,7 @@
 
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { generateNdjson, getAllManagedIds, SAVED_OBJECT_IDS } from '../../dashboard/saved_objects';
+import { generateDashboardBody, generateDataViewBody, DASHBOARD_ID, DATA_VIEW_ID } from '../../dashboard/saved_objects';
 
 const DEFAULT_KBN_URL = 'http://elastic:changeme@localhost:5620';
 
@@ -17,6 +17,7 @@ const resolveKibanaUrl = (): string =>
 const createAuthHeaders = (url: string): Record<string, string> => {
   const headers: Record<string, string> = {
     'kbn-xsrf': 'true',
+    'Content-Type': 'application/json',
   };
 
   const apiKey = process.env.EVALUATIONS_KBN_API_KEY;
@@ -29,8 +30,6 @@ const createAuthHeaders = (url: string): Record<string, string> => {
   if (parsed.username) {
     const credentials = Buffer.from(`${parsed.username}:${parsed.password}`).toString('base64');
     headers.Authorization = `Basic ${credentials}`;
-    parsed.username = '';
-    parsed.password = '';
   }
 
   return headers;
@@ -46,33 +45,55 @@ const stripCredentials = (url: string): string => {
 export const dashboardCmd: Command<void> = {
   name: 'dashboard',
   description: `
-  Create or update Kibana Lens dashboard for evaluation scores.
+  Create or update Kibana Lens dashboard for evaluation scores using the Dashboard REST API.
 
   Examples:
     node scripts/evals dashboard                     # Create/update dashboard
-    node scripts/evals dashboard --delete             # Remove all managed objects
+    node scripts/evals dashboard --delete             # Remove dashboard and data view
     node scripts/evals dashboard --kibana-url http://localhost:5601
+    node scripts/evals dashboard --dry-run            # Print request bodies without sending
   `,
   flags: {
-    boolean: ['delete'],
+    boolean: ['delete', 'dry-run'],
     string: ['kibana-url'],
-    default: { delete: false },
+    default: { delete: false, 'dry-run': false },
   },
   run: async ({ log, flagsReader }) => {
     const isDelete = flagsReader.boolean('delete');
+    const isDryRun = flagsReader.boolean('dry-run');
     const kbnUrlRaw = flagsReader.string('kibana-url') ?? resolveKibanaUrl();
     const baseUrl = stripCredentials(kbnUrlRaw);
     const headers = createAuthHeaders(kbnUrlRaw);
 
+    if (isDryRun) {
+      await dryRun({ log });
+      return;
+    }
+
     if (isDelete) {
-      await deleteSavedObjects({ baseUrl, headers, log });
+      await deleteDashboard({ baseUrl, headers, log });
     } else {
-      await importSavedObjects({ baseUrl, headers, log });
+      await createOrUpdateDashboard({ baseUrl, headers, log });
     }
   },
 };
 
-const importSavedObjects = async ({
+const dryRun = async ({ log }: { log: ToolingLog }): Promise<void> => {
+  const dataViewBody = generateDataViewBody();
+  const dashboardBody = generateDashboardBody();
+
+  log.info('=== Data View (POST /api/data_views/data_view) ===');
+  log.info(JSON.stringify(dataViewBody, null, 2));
+  log.info('');
+  log.info(`=== Dashboard (POST /api/dashboards/${DASHBOARD_ID}) ===`);
+  log.info(JSON.stringify(dashboardBody, null, 2));
+  log.info('');
+  log.info(`Total panels: ${dashboardBody.panels.length}`);
+  log.info(`Dashboard ID: ${DASHBOARD_ID}`);
+  log.info(`Data View ID: ${DATA_VIEW_ID}`);
+};
+
+const createOrUpdateDashboard = async ({
   baseUrl,
   headers,
   log,
@@ -81,45 +102,55 @@ const importSavedObjects = async ({
   headers: Record<string, string>;
   log: ToolingLog;
 }): Promise<void> => {
-  const ndjson = generateNdjson();
-  const blob = new Blob([ndjson], { type: 'application/x-ndjson' });
-  const formData = new FormData();
-  formData.append('file', blob, 'evals-dashboard.ndjson');
+  const dataViewBody = generateDataViewBody();
+  log.info(`Creating data view "${dataViewBody.data_view.name}"...`);
 
-  const url = `${baseUrl}/api/saved_objects/_import?overwrite=true`;
-  log.info(`Importing saved objects to ${baseUrl}...`);
-
-  const response = await fetch(url, {
+  const dvResponse = await fetch(`${baseUrl}/api/data_views/data_view`, {
     method: 'POST',
-    headers: { ...headers },
-    body: formData,
+    headers,
+    body: JSON.stringify(dataViewBody),
   });
+
+  if (dvResponse.ok) {
+    log.info('Data view created.');
+  } else if (dvResponse.status === 409) {
+    log.info('Data view already exists, skipping.');
+  } else {
+    const body = await dvResponse.text();
+    log.warning(`Data view creation returned ${dvResponse.status}: ${body}`);
+  }
+
+  const dashboardBody = generateDashboardBody();
+  const dashboardUrl = `${baseUrl}/api/dashboards/${DASHBOARD_ID}?apiVersion=1`;
+
+  log.info(`Creating dashboard "${dashboardBody.title}" via Dashboard API...`);
+
+  let response = await fetch(dashboardUrl, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(dashboardBody),
+  });
+
+  if (response.status === 409) {
+    log.info('Dashboard already exists, updating...');
+    response = await fetch(dashboardUrl, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(dashboardBody),
+    });
+  }
 
   if (!response.ok) {
     const body = await response.text();
-    throw new Error(
-      `Failed to import saved objects: ${response.status} ${response.statusText}\n${body}`
-    );
+    throw new Error(`Failed to create/update dashboard: ${response.status} ${response.statusText}\n${body}`);
   }
 
-  const result = (await response.json()) as {
-    success: boolean;
-    successCount?: number;
-    errors?: Array<{ id: string; type: string; error: { type: string; message?: string } }>;
-  };
-
-  if (!result.success) {
-    const errorMessages = (result.errors ?? [])
-      .map((e) => `  ${e.type}/${e.id}: ${e.error.type} - ${e.error.message ?? 'unknown'}`)
-      .join('\n');
-    throw new Error(`Import reported errors:\n${errorMessages}`);
-  }
-
-  log.info(`Successfully imported ${result.successCount ?? 0} saved objects.`);
-  log.info(`Dashboard: ${baseUrl}/app/dashboards#/view/${SAVED_OBJECT_IDS.dashboard}`);
+  const result = (await response.json()) as { id: string };
+  log.info(`Dashboard created/updated: ${result.id}`);
+  log.info(`View at: ${baseUrl}/app/dashboards#/view/${result.id}`);
 };
 
-const deleteSavedObjects = async ({
+const deleteDashboard = async ({
   baseUrl,
   headers,
   log,
@@ -128,29 +159,35 @@ const deleteSavedObjects = async ({
   headers: Record<string, string>;
   log: ToolingLog;
 }): Promise<void> => {
-  const managedIds = getAllManagedIds();
-  log.info(`Deleting ${managedIds.length} managed saved objects from ${baseUrl}...`);
+  log.info(`Deleting dashboard ${DASHBOARD_ID}...`);
 
-  let deletedCount = 0;
-  let notFoundCount = 0;
+  const dashResponse = await fetch(`${baseUrl}/api/dashboards/${DASHBOARD_ID}?apiVersion=1`, {
+    method: 'DELETE',
+    headers,
+  });
 
-  for (const { type, id } of managedIds) {
-    const url = `${baseUrl}/api/saved_objects/${encodeURIComponent(type)}/${encodeURIComponent(
-      id
-    )}`;
-    const response = await fetch(url, { method: 'DELETE', headers });
-
-    if (response.ok) {
-      deletedCount++;
-    } else if (response.status === 404) {
-      notFoundCount++;
-    } else {
-      const body = await response.text();
-      log.error(
-        `Failed to delete ${type}/${id}: ${response.status} ${response.statusText} — ${body}`
-      );
-    }
+  if (dashResponse.ok) {
+    log.info('Dashboard deleted.');
+  } else if (dashResponse.status === 404) {
+    log.info('Dashboard not found, already deleted.');
+  } else {
+    const body = await dashResponse.text();
+    log.warning(`Dashboard delete returned ${dashResponse.status}: ${body}`);
   }
 
-  log.info(`Deleted ${deletedCount} objects (${notFoundCount} already absent).`);
+  log.info(`Deleting data view ${DATA_VIEW_ID}...`);
+
+  const dvResponse = await fetch(`${baseUrl}/api/data_views/data_view/${DATA_VIEW_ID}`, {
+    method: 'DELETE',
+    headers,
+  });
+
+  if (dvResponse.ok) {
+    log.info('Data view deleted.');
+  } else if (dvResponse.status === 404) {
+    log.info('Data view not found, already deleted.');
+  } else {
+    const body = await dvResponse.text();
+    log.warning(`Data view delete returned ${dvResponse.status}: ${body}`);
+  }
 };
