@@ -16,7 +16,10 @@ import {
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  FoundExceptionListItemSchema,
+  ImportExceptionListItemSchemaDecoded,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   buildSpaceOwnerIdTag,
   hasArtifactOwnerSpaceId,
@@ -131,9 +134,14 @@ export const getExceptionsPreImportHandler = (
     }
 
     // --- Below are operations to prepare the imported data ---
-    await addOwnerSpaceIdTagToItems(data, endpointAppContext, request);
-    addImportedCommentToItems(data);
-    addImportedTagToItems(data);
+    const spaceId = getSpaceId(endpointAppContext, request);
+    for (const item of data.items) {
+      if (!(item instanceof Error)) {
+        addOwnerSpaceIdTagToItem(item, spaceId);
+        addImportedCommentToItem(item);
+        addImportedTagToItem(item);
+      }
+    }
 
     if (!overwrite) {
       return { data, overwrite };
@@ -303,34 +311,34 @@ const deleteExistingItemsForOverwrite = async ({
   }
 };
 
-const addImportedCommentToItems = (data: PromiseFromStreams): void => {
-  for (const item of data.items) {
-    if (!(item instanceof Error)) {
-      item.comments = [
-        ...(item.comments ?? []),
-        {
-          comment: `Imported artifact.\nOriginally created by "${
-            item.created_by ?? 'unknown'
-          }" at "${item.created_at ?? 'unknown'}".`,
-        },
-      ];
-    }
+const addImportedCommentToItem = (item: ImportExceptionListItemSchemaDecoded): void => {
+  item.comments = [
+    ...(item.comments ?? []),
+    {
+      comment: `Imported artifact.\nOriginally created by "${item.created_by ?? 'unknown'}" at "${
+        item.created_at ?? 'unknown'
+      }".`,
+    },
+  ];
+};
+
+const addImportedTagToItem = (item: ImportExceptionListItemSchemaDecoded): void => {
+  item.tags = [...(item.tags ?? []), IMPORTED_ARTIFACT_TAG];
+};
+
+const addOwnerSpaceIdTagToItem = (
+  item: ImportExceptionListItemSchemaDecoded,
+  spaceId: string
+): void => {
+  if (!hasArtifactOwnerSpaceId(item)) {
+    item.tags = [...(item.tags ?? []), buildSpaceOwnerIdTag(spaceId)];
   }
 };
 
-const addImportedTagToItems = (data: PromiseFromStreams): void => {
-  for (const item of data.items) {
-    if (!(item instanceof Error)) {
-      item.tags = [...(item.tags ?? []), IMPORTED_ARTIFACT_TAG];
-    }
-  }
-};
-
-const addOwnerSpaceIdTagToItems = async (
-  data: PromiseFromStreams,
+const getSpaceId = (
   endpointAppContext: EndpointAppContextService,
   request: KibanaRequest | undefined
-): Promise<void> => {
+) => {
   if (!request) {
     throw new EndpointArtifactExceptionValidationError(
       'Unable to determine space id. Missing HTTP Request object',
@@ -338,13 +346,5 @@ const addOwnerSpaceIdTagToItems = async (
     );
   }
 
-  const spaceId = endpointAppContext.getActiveSpaceId(request);
-
-  for (const item of data.items) {
-    if (!(item instanceof Error)) {
-      if (!hasArtifactOwnerSpaceId(item)) {
-        item.tags = [...(item.tags ?? []), buildSpaceOwnerIdTag(spaceId)];
-      }
-    }
-  }
+  return endpointAppContext.getActiveSpaceId(request);
 };
