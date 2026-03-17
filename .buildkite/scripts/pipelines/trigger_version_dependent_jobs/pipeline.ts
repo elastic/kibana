@@ -11,8 +11,6 @@
 import type { BuildkiteTriggerStep } from '#pipeline-utils';
 import { getVersionsFile } from '#pipeline-utils';
 
-// TODO learn about this file
-
 const pipelineSets = {
   'es-forward-9-dot-2': 'kibana-es-forward-compatibility-testing-9-dot-2',
   'artifacts-snapshot': 'kibana-artifacts-snapshot',
