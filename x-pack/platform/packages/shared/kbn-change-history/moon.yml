@@ -4,10 +4,10 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/change-history'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-detection-rule-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
