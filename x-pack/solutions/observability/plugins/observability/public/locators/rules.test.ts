@@ -6,25 +6,11 @@
  */
 
 import { RulesLocatorDefinition } from './rules';
-import { getIsExperimentalFeatureEnabled } from '@kbn/triggers-actions-ui-plugin/public';
-
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
-  getIsExperimentalFeatureEnabled: jest.fn(),
-}));
 
 describe('RulesLocator', () => {
   const locator = new RulesLocatorDefinition();
-  const mockGetIsExperimentalFeatureEnabled = getIsExperimentalFeatureEnabled as jest.Mock;
-
-  beforeEach(() => {
-    mockGetIsExperimentalFeatureEnabled.mockClear();
-  });
 
   describe('observability links to unified rules', () => {
-    beforeEach(() => {
-      mockGetIsExperimentalFeatureEnabled.mockReturnValue(true);
-    });
-
     it('should return correct app and url when empty params are provided', async () => {
       const location = await locator.getLocation({});
       expect(location.app).toEqual('rules');

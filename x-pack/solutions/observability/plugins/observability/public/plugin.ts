@@ -86,6 +86,7 @@ import {
   CASES_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
+  RULES_PATH,
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
@@ -268,22 +269,20 @@ export class Plugin
     const mount = async (params: AppMountParameters<unknown>) => {
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
-      if (getIsExperimentalFeatureEnabled('unifiedRulesPage')) {
-        const { pathname, search } = params.history.location;
+      const { pathname, search } = params.history.location;
 
-        if (pathname.startsWith(RULES_PATH)) {
-          let suffix = pathname.slice(RULES_PATH.length) || '/';
-          const isTopLevelRoute =
-            suffix === '/' || suffix === '/logs' || suffix.startsWith('/create');
-          if (!isTopLevelRoute) {
-            suffix = `/rule${suffix}`;
-          }
-          await coreStart.application.navigateToApp('rules', {
-            path: suffix + search,
-            replace: true,
-          });
-          return () => {};
+      if (pathname.startsWith(RULES_PATH)) {
+        let suffix = pathname.slice(RULES_PATH.length) || '/';
+        const isTopLevelRoute =
+          suffix === '/' || suffix === '/logs' || suffix.startsWith('/create');
+        if (!isTopLevelRoute) {
+          suffix = `/rule${suffix}`;
         }
+        await coreStart.application.navigateToApp('rules', {
+          path: suffix + search,
+          replace: true,
+        });
+        return () => {};
       }
 
       const { renderApp } = await import('./application');
