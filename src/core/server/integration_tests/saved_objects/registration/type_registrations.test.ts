@@ -16,7 +16,6 @@ const previouslyRegisteredTypes = [
   'action_task_params',
   'ad_hoc_run_params',
   'alert',
-  'alerting_rule',
   'alerting_rule_template',
   'api_key_pending_invalidation',
   'api_key_to_invalidate',
@@ -189,8 +188,7 @@ const previouslyRegisteredTypes = [
   'workplace_search_telemetry',
   'gap_auto_fill_scheduler',
   'trial-companion-nba-milestone',
-  'alerting_notification_policy',
-  'alerting_api_key_pending_invalidation',
+  'streams-significant-events-settings',
 ].sort();
 
 describe('SO type registrations', () => {

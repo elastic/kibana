@@ -106,8 +106,10 @@
     "destinations",
     "destinations.id",
     "destinations.type",
+    "enabled",
     "name",
     "rule_labels",
+    "snoozedUntil",
     "updatedAt",
     "updatedBy"
   ],
@@ -473,6 +475,9 @@
   "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
+    "dependencies",
+    "dependencies.name",
+    "dependencies.version",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
@@ -1307,6 +1312,7 @@
   ],
   "spaces-usage-stats": [],
   "stream-prompts": [],
+  "streams-significant-events-settings": [],
   "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",

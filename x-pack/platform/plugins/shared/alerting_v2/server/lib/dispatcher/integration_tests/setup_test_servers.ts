@@ -24,6 +24,7 @@ export async function setupTestServers(settings = {}) {
     const root = createRootWithCorePlugins(
       {
         xpack: {
+          alerting_v2: { enabled: true },
           task_manager: { unsafe: { exclude_task_types: ['alerting_v2:dispatcher'] } },
         },
         ...settings,

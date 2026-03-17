@@ -88,6 +88,7 @@ describe('NotificationPolicyFormFlyout', () => {
       version: 'WzEsMV0=',
       name: 'Critical production alerts',
       description: 'Routes critical alerts',
+      enabled: true,
       matcher: 'data.severity : "critical"',
       group_by: ['host.name', 'service.name'],
       throttle: { interval: '5m' },

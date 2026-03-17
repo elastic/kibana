@@ -6,7 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  NotificationPolicyBulkAction,
+  NotificationPolicyResponse,
+} from '@kbn/alerting-v2-schemas';
 import {
   createNotificationPolicyDataSchema,
   updateNotificationPolicyDataSchema,
@@ -28,12 +31,29 @@ import { NotificationPolicySavedObjectServiceScopedToken } from '../services/not
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type {
+  BulkActionNotificationPoliciesParams,
+  BulkActionNotificationPoliciesResponse,
   CreateNotificationPolicyParams,
   FindNotificationPoliciesParams,
   FindNotificationPoliciesResponse,
+  SnoozeNotificationPolicyParams,
   UpdateNotificationPolicyParams,
 } from './types';
 import { NotificationPolicyNamespaceToken } from './tokens';
+import { validateDateString } from './utils';
+
+const resolveActionAttrs = (
+  action: NotificationPolicyBulkAction
+): Partial<NotificationPolicySavedObjectAttributes> => {
+  switch (action.action) {
+    case 'enable':
+      return { enabled: true, snoozedUntil: undefined };
+    case 'disable':
+      return { enabled: false, snoozedUntil: undefined };
+    case 'snooze':
+      return { snoozedUntil: action.snoozed_until };
+  }
+};
 
 const toAuthResponse = (
   auth: NotificationPolicySavedObjectAttributes['auth']
@@ -72,6 +92,7 @@ export class NotificationPolicyClient {
 
     const attributes: NotificationPolicySavedObjectAttributes = {
       ...parsed.data,
+      enabled: true,
       auth: apiKeyAttrs,
       createdBy: userProfileUid,
       createdAt: now,
@@ -218,6 +239,60 @@ export class NotificationPolicyClient {
     };
   }
 
+  public async enableNotificationPolicy({
+    id,
+  }: {
+    id: string;
+  }): Promise<NotificationPolicyResponse> {
+    return this.updatePolicyState(id, { enabled: true, snoozedUntil: undefined });
+  }
+
+  public async disableNotificationPolicy({
+    id,
+  }: {
+    id: string;
+  }): Promise<NotificationPolicyResponse> {
+    return this.updatePolicyState(id, { enabled: false, snoozedUntil: undefined });
+  }
+
+  public async snoozeNotificationPolicy({
+    id,
+    snoozedUntil,
+  }: SnoozeNotificationPolicyParams): Promise<NotificationPolicyResponse> {
+    return this.updatePolicyState(id, { snoozedUntil });
+  }
+
+  public async bulkActionNotificationPolicies({
+    actions,
+  }: BulkActionNotificationPoliciesParams): Promise<BulkActionNotificationPoliciesResponse> {
+    const userProfileUid = await this.getUserProfileUid();
+    const now = new Date().toISOString();
+
+    const objects = actions.map((action) => ({
+      id: action.id,
+      attrs: {
+        ...resolveActionAttrs(action),
+        updatedBy: userProfileUid,
+        updatedAt: now,
+      },
+    }));
+
+    const results = await this.notificationPolicySavedObjectService.bulkUpdate({ objects });
+
+    const errors: Array<{ id: string; message: string }> = [];
+    let processed = 0;
+
+    for (const result of results) {
+      if ('error' in result) {
+        errors.push({ id: result.id, message: result.error.message });
+      } else {
+        processed++;
+      }
+    }
+
+    return { processed, total: actions.length, errors };
+  }
+
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {
     await this.getNotificationPolicy({ id });
     const auth = await this.getDecryptedAuth(id);
@@ -253,6 +328,25 @@ export class NotificationPolicyClient {
     } catch {
       return null;
     }
+  }
+
+  private async updatePolicyState(
+    id: string,
+    stateUpdate: { enabled?: boolean; snoozedUntil?: string | undefined }
+  ): Promise<NotificationPolicyResponse> {
+    if (stateUpdate.snoozedUntil) {
+      validateDateString(stateUpdate.snoozedUntil);
+    }
+
+    const userProfileUid = await this.getUserProfileUid();
+    const now = new Date().toISOString();
+
+    await this.notificationPolicySavedObjectService.update({
+      id,
+      attrs: { ...stateUpdate, updatedBy: userProfileUid, updatedAt: now },
+    });
+
+    return this.getNotificationPolicy({ id });
   }
 
   private async getUserProfileUid(): Promise<string | null> {
